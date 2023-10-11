@@ -1,5 +1,5 @@
 import Logger from "shared/Logger";
-import BuildingManager from "./building/BuildingManager";
+import ClientBuildingController from "./building/ClientBuildingController";
 
 Logger.info("Hello world!");
-BuildingManager.startBuilding();
+ClientBuildingController.startBuilding();

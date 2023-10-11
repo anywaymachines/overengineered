@@ -11,7 +11,7 @@ const Mouse: Mouse = LocalPlayer.GetMouse();
 
 const defaultModel = BuildingModels.getBuildingModel("TestBlock");
 
-export default class BuildingManager {
+export default class ClientBuildingController {
 	private static lastPlaceable: String | undefined;
 	private static renderingObject: Model | undefined;
 	private static renderingObjectRotation: CFrame = new CFrame();
@@ -35,35 +35,32 @@ export default class BuildingManager {
 
 		// Events
 		this.mouseMoveCallback = Mouse.Move.Connect(() => this.updatePosition());
-		this.mouseClickCallback = Mouse.Button1Down.Connect(() => this.placeBlock());
+		this.mouseClickCallback = Mouse.Button1Down.Connect(async () => await this.placeBlock());
 
 		Logger.info("Building started with " + this.renderingObject.Name);
 	}
 
-	static placeBlock() {
+	static async placeBlock() {
 		if (this.renderingObject === undefined) {
 			error("No render object to update");
-			return;
 		}
 
 		// If game developer made a mistake
 		if (this.renderingObject.PrimaryPart === undefined) {
 			error("PrimaryPart is undefined");
-			return;
 		}
 
-		Remotes.Client.Get("PlayerPlaceBlock")
-			.CallServerAsync({
-				block: this.renderingObject.Name,
-				location: this.renderingObject.PrimaryPart.CFrame,
-			})
-			.then((response) => {
-				if (response.success) {
-					// TODO: Play sound of success message
-				} else {
-					// TODO: Play sound of failure message
-				}
-			});
+		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerPlaceBlock").CallServerAsync({
+			block: this.renderingObject.Name,
+			location: this.renderingObject.PrimaryPart.CFrame,
+		});
+
+		if (response.success) {
+			// TODO: Play sound of success message
+		} else {
+			Logger.info("Block placement failed");
+			// TODO: Play sound of failure message
+		}
 	}
 
 	static stopBuilding() {

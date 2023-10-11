@@ -1,9 +1,12 @@
-import Net, { Definitions } from "@rbxts/net";
+import Net from "@rbxts/net";
 
-const Remotes = Net.CreateDefinitions({
+const Remotes = Net.Definitions.Create({
 	// Definitions for the actual remotes will go here
 	//PlayerPlaceBlock: Definitions.ClientToServerEvent<[blockId: string, location: CFrame]>(),
-	PlayerPlaceBlock: Definitions.ServerAsyncFunction<(arg0: PlayerPlaceBlockRequest) => PlayerPlaceBlockResponse>(),
+	Building: Net.Definitions.Namespace({
+		PlayerPlaceBlock:
+			Net.Definitions.ServerAsyncFunction<(data: PlayerPlaceBlockRequest) => PlayerPlaceBlockResponse>(),
+	}),
 });
 
-export = Remotes;
+export default Remotes;
