@@ -8,6 +8,7 @@ export default class ServerBuildingController {
 		// Block place network event
 		Remotes.Server.GetNamespace("Building").OnFunction("PlayerPlaceBlock", (player, data) => {
 			if (!BuildingModels.isModelExists(data.block)) {
+				Logger.info("(ERR) Could not find building model " + data.block);
 				return {
 					success: false,
 					message: "Could not find building model " + data.block,
@@ -18,6 +19,7 @@ export default class ServerBuildingController {
 			const model = BuildingModels.getBuildingModel(data.block).Clone();
 
 			if (model.PrimaryPart === undefined) {
+				Logger.info("(ERR) PrimaryPart is undefined in " + data.block);
 				return {
 					success: false,
 					message: "Could not find primary part of " + data.block,

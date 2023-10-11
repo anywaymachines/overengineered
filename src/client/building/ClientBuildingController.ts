@@ -1,4 +1,4 @@
-import { Players, Workspace } from "@rbxts/services";
+import { GuiService, Players, Workspace } from "@rbxts/services";
 import Logger from "shared/Logger";
 import Remotes from "shared/definitions/Remotes";
 import BuildingModels from "shared/building/BuildingModels";
@@ -56,6 +56,8 @@ export default class ClientBuildingController {
 		});
 
 		if (response.success) {
+			task.wait();
+			this.updatePosition();
 			// TODO: Play sound of success message
 		} else {
 			Logger.info("Block placement failed");
@@ -76,13 +78,20 @@ export default class ClientBuildingController {
 	private static updatePosition() {
 		// If there is no render object, then assert error
 		if (this.renderingObject === undefined) {
-			error("No render object to update");
+			Logger.info("(ERR) No render object to update");
+			this.stopBuilding();
 			return;
 		}
 
 		// If game developer made a mistake
 		if (this.renderingObject.PrimaryPart === undefined) {
-			error("PrimaryPart is undefined");
+			Logger.info("(ERR) PrimaryPart is undefined");
+			this.stopBuilding();
+			return;
+		}
+
+		// If ESC menu is open - freeze movement
+		if (GuiService.MenuIsOpen) {
 			return;
 		}
 
