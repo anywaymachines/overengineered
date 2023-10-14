@@ -1,4 +1,5 @@
 import BlockModels from "shared/building/BlockModels";
+import CategoriesBehavior from "shared/building/CategoriesBehavior";
 
 export default class GameDefinitions {
 	static DefaultAuthor: string = "MGC Creators";
@@ -17,7 +18,7 @@ export default class GameDefinitions {
 		{
 			name: "testblock",
 			description: undefined,
-			category: undefined,
+			category: CategoriesBehavior.getCategoryByID("blocks"),
 			author: GameDefinitions.DefaultAuthor,
 			image: "rbxasset://textures/icon.png", // TODO: Add icon
 			uri: BlockModels.__getNativeBlockModelByID("TestBlock") as Model,
