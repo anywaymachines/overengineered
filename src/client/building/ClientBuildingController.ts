@@ -1,33 +1,42 @@
 import { GuiService, Players, Workspace } from "@rbxts/services";
 import Logger from "shared/Logger";
 import Remotes from "shared/definitions/Remotes";
-import BuildingModels from "shared/building/BuildingModels";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import PartUtils from "shared/utils/PartUtils";
+import BlocksBehavior from "shared/building/BlocksBehavior";
+import VectorUtils from "shared/utils/VectorUtils";
 
 const LocalPlayer: Player = Players.LocalPlayer;
-const PlayerGui: PlayerGui = LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
+//const PlayerGui: PlayerGui = LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
 const Mouse: Mouse = LocalPlayer.GetMouse();
 
-const defaultModel = BuildingModels.getBuildingModel("TestBlock");
-
+/** A class for **client-side** construction management from blocks */
 export default class ClientBuildingController {
-	private static lastPlaceable: String | undefined;
+	private static lastPlaceable: Block | undefined;
 	private static renderingObject: Model | undefined;
 	private static renderingObjectRotation: CFrame = new CFrame();
 
 	private static mouseMoveCallback: RBXScriptConnection | undefined;
 	private static mouseClickCallback: RBXScriptConnection | undefined;
 
+	private static defaultModel: Block;
+
+	static initialize(): void {
+		this.defaultModel = BlocksBehavior.getBlockByName("testblock") as Block;
+	}
+
+	/** Checking to see if **client** is currently building anything */
 	static isBuilding() {
 		return this.renderingObject !== undefined && PlayerUtils.isAlive(LocalPlayer);
 	}
 
+	/** **Visually** enables building mode from blocks, use ```ClientBuildingController.selectBlock(block: Block)``` to select a block. */
 	static startBuilding() {
-		this.renderingObject =
-			this.lastPlaceable !== undefined && BuildingModels.isModelExists(this.lastPlaceable as string)
-				? BuildingModels.getBuildingModel(this.lastPlaceable as string).Clone()
-				: defaultModel.Clone();
+		if (this.lastPlaceable === undefined) {
+			this.lastPlaceable = this.defaultModel;
+		}
+
+		this.renderingObject = this.lastPlaceable.uri.Clone();
 
 		this.renderingObject.Parent = Workspace;
 
@@ -40,7 +49,19 @@ export default class ClientBuildingController {
 		Logger.info("Building started with " + this.renderingObject.Name);
 	}
 
+	// TODO: Use
+	static selectBlock(block: Block) {
+		this.stopBuilding();
+		this.lastPlaceable = block;
+		this.startBuilding();
+	}
+
+	// A method that sends information about the block to the server to set it up
 	static async placeBlock() {
+		if (this.lastPlaceable === undefined) {
+			error("Block is not selected");
+		}
+
 		if (this.renderingObject === undefined) {
 			error("No render object to update");
 		}
@@ -51,7 +72,7 @@ export default class ClientBuildingController {
 		}
 
 		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerPlaceBlock").CallServerAsync({
-			block: this.renderingObject.Name,
+			block: this.lastPlaceable.name,
 			location: this.renderingObject.PrimaryPart.CFrame,
 		});
 
@@ -60,11 +81,12 @@ export default class ClientBuildingController {
 			this.updatePosition();
 			// TODO: Play sound of success message
 		} else {
-			Logger.info("Block placement failed");
+			Logger.info("Block placement failed: " + response.message);
 			// TODO: Play sound of failure message
 		}
 	}
 
+	/** Stops block construction */
 	static stopBuilding() {
 		if (!this.isBuilding()) {
 			return;
@@ -75,6 +97,7 @@ export default class ClientBuildingController {
 		this.mouseClickCallback?.Disconnect();
 	}
 
+	/** **System** function that updates the location of the visual preview at the block */
 	private static updatePosition() {
 		// If there is no render object, then assert error
 		if (this.renderingObject === undefined) {
@@ -107,7 +130,7 @@ export default class ClientBuildingController {
 
 		// Positioning Stage 1
 		const rotationRelative = mouseTarget.CFrame.sub(mouseTarget.Position).Inverse();
-		const normalPositioning = normalIdToNormalVector(mouseSurface, mouseTarget);
+		const normalPositioning = VectorUtils.normalIdToNormalVector(mouseSurface, mouseTarget);
 		const positioning = mouseTarget.CFrame.mul(
 			new CFrame(normalPositioning.vector.mul(normalPositioning.size / 2)),
 		);
@@ -129,7 +152,7 @@ export default class ClientBuildingController {
 		// Positioning Stage 3
 		const mouseHitObjectSpace = mouseTarget.CFrame.PointToObjectSpace(mouseHit.Position);
 		const moveRange = 1; // TODO: Make this configurable
-		const offset = roundVectorToBase(
+		const offset = VectorUtils.roundVectorToBase(
 			mouseHitObjectSpace.sub(
 				new Vector3(
 					math.abs(normalPositioning.vector.X),
@@ -155,28 +178,5 @@ export default class ClientBuildingController {
 				.mul(rotationRelative)
 				.mul(this.renderingObjectRotation),
 		);
-	}
-}
-
-function roundVectorToBase(vector: Vector3, base: number): Vector3 {
-	const scale = base / 2;
-	const x = math.floor(vector.X / base + 0.5) * base;
-	const y = math.floor(vector.Y / base + 0.5) * base;
-	const z = math.floor(vector.Z / base + 0.5) * base;
-	return new Vector3(x, y, z);
-}
-
-function normalIdToNormalVector(mouse_surface: Enum.NormalId, part: BasePart): { vector: Vector3; size: number } {
-	switch (mouse_surface) {
-		case Enum.NormalId.Top:
-		case Enum.NormalId.Bottom:
-			return { vector: Vector3.FromNormalId(mouse_surface), size: part.Size.Y };
-		case Enum.NormalId.Front:
-		case Enum.NormalId.Back:
-			return { vector: Vector3.FromNormalId(mouse_surface), size: part.Size.Z };
-		case Enum.NormalId.Right:
-		case Enum.NormalId.Left:
-		default:
-			return { vector: Vector3.FromNormalId(mouse_surface), size: part.Size.X };
 	}
 }

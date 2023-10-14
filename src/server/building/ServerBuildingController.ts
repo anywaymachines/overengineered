@@ -1,28 +1,31 @@
 import { Workspace } from "@rbxts/services";
 import Remotes from "shared/definitions/Remotes";
-import BuildingModels from "shared/building/BuildingModels";
 import Logger from "shared/Logger";
+import BlocksBehavior from "shared/building/BlocksBehavior";
+import { ErrorMessages } from "shared/Messages";
 
+/** Class for **server-based** construction management from blocks, e.g. block installation/painting/removal */
 export default class ServerBuildingController {
 	static initialize(): void {
+		Logger.info("Loading Building controller..");
+
 		// Block place network event
 		Remotes.Server.GetNamespace("Building").OnFunction("PlayerPlaceBlock", (player, data) => {
-			if (!BuildingModels.isModelExists(data.block)) {
-				Logger.info("(ERR) Could not find building model " + data.block);
+			if (!BlocksBehavior.blockExists(data.block)) {
 				return {
 					success: false,
-					message: "Could not find building model " + data.block,
+					message: ErrorMessages.INVALID_BLOCK.message,
 				};
 			}
 
 			// Create a new instance of the building model
-			const model = BuildingModels.getBuildingModel(data.block).Clone();
+			const model = (BlocksBehavior.getBlockByName(data.block) as Block).uri.Clone();
 
 			if (model.PrimaryPart === undefined) {
-				Logger.info("(ERR) PrimaryPart is undefined in " + data.block);
+				Logger.info("ERROR: " + ErrorMessages.INVALID_PRIMARY_PART.message + ": " + data.block);
 				return {
 					success: false,
-					message: "Could not find primary part of " + data.block,
+					message: ErrorMessages.INVALID_PRIMARY_PART.message + ": " + data.block,
 				};
 			}
 
