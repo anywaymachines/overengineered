@@ -13,4 +13,8 @@ export default class TestBlock extends Block {
 	public getModel(): Model {
 		return ReplicatedStorage.Blocks.FindFirstChild("TestBlock") as Model;
 	}
+
+	public getAssetID(): number {
+		return 0; // TODO
+	}
 }
