@@ -3,8 +3,9 @@ import Logger from "shared/Logger";
 import Remotes from "shared/definitions/Remotes";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import PartUtils from "shared/utils/PartUtils";
-import BlocksBehavior from "shared/building/BlocksBehavior";
 import VectorUtils from "shared/utils/VectorUtils";
+import Block from "shared/abstract/Block";
+import BlockRegistry from "shared/building/BlocksRegistry";
 
 const LocalPlayer: Player = Players.LocalPlayer;
 //const PlayerGui: PlayerGui = LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
@@ -19,11 +20,7 @@ export default class ClientBuildingController {
 	private static mouseMoveCallback: RBXScriptConnection | undefined;
 	private static mouseClickCallback: RBXScriptConnection | undefined;
 
-	private static defaultModel: Block;
-
-	static initialize(): void {
-		this.defaultModel = BlocksBehavior.getBlockByName("testblock") as Block;
-	}
+	private static defaultBlock = BlockRegistry.TEST_BLOCK;
 
 	/** Checking to see if **client** is currently building anything */
 	static isBuilding() {
@@ -33,10 +30,10 @@ export default class ClientBuildingController {
 	/** **Visually** enables building mode from blocks, use ```ClientBuildingController.selectBlock(block: Block)``` to select a block. */
 	static startBuilding() {
 		if (this.lastPlaceable === undefined) {
-			this.lastPlaceable = this.defaultModel;
+			this.lastPlaceable = this.defaultBlock;
 		}
 
-		this.renderingObject = this.lastPlaceable.uri.Clone();
+		this.renderingObject = this.lastPlaceable.getModel().Clone();
 
 		this.renderingObject.Parent = Workspace;
 
@@ -72,7 +69,7 @@ export default class ClientBuildingController {
 		}
 
 		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerPlaceBlock").CallServerAsync({
-			block: this.lastPlaceable.name,
+			block: this.lastPlaceable.id,
 			location: this.renderingObject.PrimaryPart.CFrame,
 		});
 

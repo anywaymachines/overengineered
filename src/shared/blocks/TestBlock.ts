@@ -1,0 +1,16 @@
+import { ReplicatedStorage } from "@rbxts/services";
+import Block from "shared/abstract/Block";
+
+export default class TestBlock extends Block {
+	constructor() {
+		super("testblock");
+	}
+
+	public getDisplayName(): string {
+		return "TestBlock";
+	}
+
+	public getModel(): Model {
+		return ReplicatedStorage.Blocks.FindFirstChild("TestBlock") as Model;
+	}
+}

@@ -5,7 +5,6 @@ import SharedManager from "shared/SharedManager";
 SharedManager.initialize();
 
 // Initializing client-side components
-ClientBuildingController.initialize();
 
 // Test function
 ClientBuildingController.startBuilding();
