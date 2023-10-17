@@ -23,6 +23,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@rbxts/crypto": "^1.2.1",
     "@rbxts/net": "^3.0.7",
     "@rbxts/services": "^1.5.1"
   }
