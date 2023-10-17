@@ -1,9 +1,8 @@
-import Logger from "shared/Logger";
-import ServerBuildingController from "./building/ServerBuildingController";
-import SharedManager from "shared/SharedManager";
+import BuildEvent from "./building/BuilldEvent";
+import SharedLoader from "shared/Loader";
 
 // Initializing shared components
-SharedManager.initialize();
+SharedLoader.load();
 
 // Initializing client-side components
-ServerBuildingController.initialize();
+BuildEvent.initialize();

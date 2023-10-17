@@ -1,21 +1,20 @@
 import { Workspace } from "@rbxts/services";
-import Block from "shared/abstract/Block";
-import BlockRegistry from "shared/building/BlocksRegistry";
-import Remotes from "shared/definitions/Remotes";
+import Block from "shared/registry/Block";
+import BlockRegistry from "shared/registry/BlocksRegistry";
+import Remotes from "shared/network/Remotes";
 import Logger from "shared/Logger";
-import { ErrorMessages } from "shared/Messages";
+import DiscordWebhook from "../network/DiscordWebhook";
 
 /** Class for **server-based** construction management from blocks, e.g. block installation/painting/removal */
-export default class ServerBuildingController {
+export default class BuildEvent {
 	static initialize(): void {
-		Logger.info("Loading Building controller..");
+		Logger.info("Loading Build event listener...");
 
-		// Block place network event
 		Remotes.Server.GetNamespace("Building").OnFunction("PlayerPlaceBlock", (player, data) => {
 			if (!BlockRegistry.Blocks.has(data.block)) {
 				return {
 					success: false,
-					message: ErrorMessages.INVALID_BLOCK.message,
+					message: "Block not found",
 				};
 			}
 
@@ -24,10 +23,20 @@ export default class ServerBuildingController {
 			const model = block.getModel().Clone();
 
 			if (model.PrimaryPart === undefined) {
-				Logger.info("ERROR: " + ErrorMessages.INVALID_PRIMARY_PART.message + ": " + data.block);
+				DiscordWebhook.send(
+					"**ERROR**: PrimaryPart is undefined for block **" +
+						data.block +
+						"**\nCalled by: **" +
+						player.Name +
+						"**",
+				);
+
+				// Delete block from game database (prevent discord spamming)
+				BlockRegistry.Blocks.delete(data.block);
+
 				return {
 					success: false,
-					message: ErrorMessages.INVALID_PRIMARY_PART.message + ": " + data.block,
+					message: "Block is corrupted. Contact game developer",
 				};
 			}
 

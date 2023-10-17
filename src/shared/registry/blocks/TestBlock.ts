@@ -1,5 +1,5 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import Block from "shared/abstract/Block";
+import Block from "shared/registry/Block";
 
 export default class TestBlock extends Block {
 	constructor() {

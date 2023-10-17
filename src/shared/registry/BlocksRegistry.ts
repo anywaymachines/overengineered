@@ -1,5 +1,5 @@
-import TestBlock from "shared/blocks/TestBlock";
-import Block from "../abstract/Block";
+import TestBlock from "shared/registry/blocks/TestBlock";
+import Block from "./Block";
 
 export default class BlockRegistry {
 	public static Blocks: Map<string, Block> = new Map<string, Block>();

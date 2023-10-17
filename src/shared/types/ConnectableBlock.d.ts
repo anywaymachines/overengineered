@@ -1,4 +1,4 @@
-import ScriptedBlock from "shared/abstract/ScriptedBlock";
+import ScriptedBlock from "shared/registry/ScriptedBlock";
 
 interface ConnectableBlock {
 	/**

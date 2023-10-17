@@ -1,11 +1,11 @@
 import { GuiService, Players, Workspace } from "@rbxts/services";
 import Logger from "shared/Logger";
-import Remotes from "shared/definitions/Remotes";
+import Remotes from "shared/network/Remotes";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
-import Block from "shared/abstract/Block";
-import BlockRegistry from "shared/building/BlocksRegistry";
+import Block from "shared/registry/Block";
+import BlockRegistry from "shared/registry/BlocksRegistry";
 
 const LocalPlayer: Player = Players.LocalPlayer;
 //const PlayerGui: PlayerGui = LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;

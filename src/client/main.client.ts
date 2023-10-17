@@ -1,10 +1,8 @@
 import ClientBuildingController from "./building/ClientBuildingController";
-import SharedManager from "shared/SharedManager";
+import SharedLoader from "shared/Loader";
 
 // Initializing shared components
-SharedManager.initialize();
-
-// Initializing client-side components
+SharedLoader.load();
 
 // Test function
 ClientBuildingController.startBuilding();
