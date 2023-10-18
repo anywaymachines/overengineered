@@ -32,7 +32,7 @@ export default class PlotManager {
 	public static getPlotByPosition(position: Vector3): Model | undefined {
 		for (let i = 0; i < PlotManager.plots.size(); i++) {
 			const plot = this.plots[i];
-			if (VectorUtils.isInRegion3(this.getPlotBuildingRegion(plot as Model), position)) {
+			if (VectorUtils.isInRegion3(this.getPlotBuildingRegion(plot as Model), position) === true) {
 				return plot as Model;
 			}
 		}
@@ -46,7 +46,6 @@ export default class PlotManager {
 
 	private static getPlotBuildingRegion(plot: Model) {
 		const buildingPlane = plot.PrimaryPart as BasePart;
-		// TODO: Fix region server, client missmatch
 		const region = new Region3(
 			new Vector3(
 				buildingPlane.Position.X - buildingPlane.Size.X / 2 + 1 - (RunService.IsServer() ? 0.5 : 0),

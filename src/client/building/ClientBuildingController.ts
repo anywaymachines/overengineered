@@ -84,7 +84,7 @@ export default class ClientBuildingController {
 
 		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerPlaceBlock").CallServerAsync({
 			block: this.lastPlaceable.id,
-			location: this.renderingObject.GetPivot(),
+			location: this.renderingObject.PrimaryPart.CFrame,
 		});
 
 		if (response.success) {
