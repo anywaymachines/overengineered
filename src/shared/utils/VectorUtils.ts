@@ -6,6 +6,13 @@ export default class VectorUtils {
 		return new Vector3(x, y, z);
 	}
 
+	static roundVectorToNearestHalf(vector: Vector3): Vector3 {
+		const x = math.round(vector.X * 2) / 2;
+		const y = math.round(vector.Y * 2) / 2;
+		const z = math.round(vector.Z * 2) / 2;
+		return new Vector3(x, y, z);
+	}
+
 	static normalIdToNormalVector(mouse_surface: Enum.NormalId, part: BasePart): { vector: Vector3; size: number } {
 		switch (mouse_surface) {
 			case Enum.NormalId.Top:

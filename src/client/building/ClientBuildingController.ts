@@ -190,6 +190,13 @@ export default class ClientBuildingController {
 				.mul(this.renderingObjectRotation),
 		);
 
+		// Rounding
+		this.renderingObject.PivotTo(
+			new CFrame(VectorUtils.roundVectorToNearestHalf(this.renderingObject.GetPivot().Position)).mul(
+				this.renderingObject.GetPivot().Rotation,
+			),
+		);
+
 		// Colorizing
 		const highlight = this.renderingObject.FindFirstChildOfClass("Highlight") as Highlight;
 
