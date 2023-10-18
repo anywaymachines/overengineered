@@ -20,4 +20,16 @@ export default class VectorUtils {
 				return { vector: Vector3.FromNormalId(mouse_surface), size: part.Size.X };
 		}
 	}
+
+	static isInRegion3(region: Region3, point: Vector3): boolean {
+		const relative = point.sub(region.CFrame.Position).div(region.Size);
+		return (
+			-0.5 <= relative.X &&
+			relative.X <= 0.5 &&
+			-0.5 <= relative.Y &&
+			relative.Y <= 0.5 &&
+			-0.5 <= relative.Z &&
+			relative.Z <= 0.5
+		);
+	}
 }

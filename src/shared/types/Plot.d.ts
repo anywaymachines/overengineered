@@ -1,5 +1,9 @@
+interface Workspace {
+	Plots: Folder;
+}
+
 interface Plot {
 	ownerID: number;
-	whitelistedPlayers: Player[];
-	blacklistedPlayers: Player[];
+	whitelistedPlayerIDs: number[];
+	blacklistedPlayerIDs: number[];
 }

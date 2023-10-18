@@ -6,6 +6,7 @@ import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
 import Block from "shared/registry/Block";
 import BlockRegistry from "shared/registry/BlocksRegistry";
+import PlotManager from "shared/plots/PlotManager";
 
 const LocalPlayer: Player = Players.LocalPlayer;
 //const PlayerGui: PlayerGui = LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
@@ -19,6 +20,9 @@ export default class ClientBuildingController {
 
 	private static mouseMoveCallback: RBXScriptConnection | undefined;
 	private static mouseClickCallback: RBXScriptConnection | undefined;
+
+	private static placeAllowedColor: Color3 = Color3.fromRGB(194, 217, 255);
+	private static placeNotAllowedColor: Color3 = Color3.fromRGB(255, 189, 189);
 
 	private static defaultBlock = BlockRegistry.TEST_BLOCK;
 
@@ -34,9 +38,17 @@ export default class ClientBuildingController {
 		}
 
 		this.renderingObject = this.lastPlaceable.getModel().Clone();
-
 		this.renderingObject.Parent = Workspace;
 
+		// Highlight
+		const blockHighlight = new Instance("Highlight");
+		blockHighlight.Name = "BlockHighlight";
+		blockHighlight.Parent = this.renderingObject;
+		blockHighlight.FillTransparency = 0.4;
+		blockHighlight.OutlineTransparency = 0.5;
+		blockHighlight.Adornee = this.renderingObject;
+
+		// Display better
 		PartUtils.ghostModel(this.renderingObject);
 
 		// Events
@@ -55,6 +67,8 @@ export default class ClientBuildingController {
 
 	// A method that sends information about the block to the server to set it up
 	static async placeBlock() {
+		//if (!this.buildingAllowed()) return; TODO: return back
+
 		if (this.lastPlaceable === undefined) {
 			error("Block is not selected");
 		}
@@ -70,7 +84,7 @@ export default class ClientBuildingController {
 
 		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerPlaceBlock").CallServerAsync({
 			block: this.lastPlaceable.id,
-			location: this.renderingObject.PrimaryPart.CFrame,
+			location: this.renderingObject.GetPivot(),
 		});
 
 		if (response.success) {
@@ -175,5 +189,14 @@ export default class ClientBuildingController {
 				.mul(rotationRelative)
 				.mul(this.renderingObjectRotation),
 		);
+
+		// Colorizing
+		const highlight = this.renderingObject.FindFirstChildOfClass("Highlight") as Highlight;
+
+		if (PlotManager.vectorAbleToPlayer(this.renderingObject.PrimaryPart.Position, LocalPlayer)) {
+			highlight.FillColor = this.placeAllowedColor;
+		} else {
+			highlight.FillColor = this.placeNotAllowedColor;
+		}
 	}
 }

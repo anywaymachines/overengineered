@@ -6,7 +6,6 @@ export default class PartUtils {
 				element.CanCollide = false;
 				element.CanQuery = false;
 				element.CanTouch = false;
-				element.Transparency = 0.5;
 			}
 		});
 	}
