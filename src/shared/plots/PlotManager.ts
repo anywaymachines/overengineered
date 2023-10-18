@@ -63,14 +63,14 @@ export default class PlotManager {
 		const buildingPlane = plot.PrimaryPart as BasePart;
 		const region = new Region3(
 			new Vector3(
-				buildingPlane.Position.X - buildingPlane.Size.X / 2 + 1 - (RunService.IsServer() ? 0.5 : 0),
+				buildingPlane.Position.X - buildingPlane.Size.X / 2 + 1,
 				buildingPlane.Position.Y,
-				buildingPlane.Position.Z - buildingPlane.Size.Z / 2 + 1 - (RunService.IsServer() ? 0.5 : 0),
+				buildingPlane.Position.Z - buildingPlane.Size.Z / 2 + 1,
 			),
 			new Vector3(
-				buildingPlane.Position.X + buildingPlane.Size.X / 2 - 1 + (RunService.IsServer() ? 0.5 : 0),
+				buildingPlane.Position.X + buildingPlane.Size.X / 2 - 1,
 				buildingPlane.Position.Y + 100,
-				buildingPlane.Position.Z + buildingPlane.Size.Z / 2 - 1 + (RunService.IsServer() ? 0.5 : 0),
+				buildingPlane.Position.Z + buildingPlane.Size.Z / 2 - 1,
 			),
 		);
 
