@@ -16,6 +16,10 @@ export default class ServerPlotsController {
 		blacklistedPlayerIDs: [],
 	};
 
+	/** Function for writing and encoding Plot data to `Model`
+	 * @param plot The Plot model
+	 * @param plotData The Plot data to write
+	 */
 	public static writePlotData(plot: Model, plotData: Plot) {
 		const encryptedPlotData = Base64.Encode(
 			AES.Encrypt(HttpService.JSONEncode(plotData), AESKeyGenerator.RANDOM_KEY),
@@ -23,12 +27,14 @@ export default class ServerPlotsController {
 		plot.SetAttribute("data", encryptedPlotData);
 	}
 
+	/** Initialization part */
 	private static initializePlots(): void {
 		PlotManager.plots.forEach((plot) => {
 			this.writePlotData(plot as Model, this.defaultPlotData);
 		});
 	}
 
+	/** Initialization part */
 	private static initializeEvents(): void {
 		Players.PlayerAdded.Connect((player) => this.claimPlot(player));
 		Players.PlayerRemoving.Connect((player) => this.unclaimPlot(player));
