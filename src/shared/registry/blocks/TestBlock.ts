@@ -15,6 +15,6 @@ export default class TestBlock extends Block {
 	}
 
 	public getAssetID(): number {
-		return 0; // TODO
+		return 0; // TODO: Add asset ID
 	}
 }

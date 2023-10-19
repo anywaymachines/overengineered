@@ -35,10 +35,12 @@ export default class ClientBuildingController {
 
 	/** **Visually** enables building mode from blocks, use ```ClientBuildingController.selectBlock(block: Block)``` to select a block. */
 	static startBuilding() {
+		// Selecting a block
 		if (this.lastPlaceable === undefined) {
 			this.lastPlaceable = this.defaultBlock;
 		}
 
+		// Spawning a new block
 		this.renderingObject = this.lastPlaceable.getModel().Clone();
 		this.renderingObject.Parent = Workspace;
 
@@ -91,17 +93,15 @@ export default class ClientBuildingController {
 		// TODO: Touch rotation
 	}
 
-	// TODO: Use
+	// TODO: Use it in block selection menu
 	static selectBlock(block: Block) {
 		this.stopBuilding();
 		this.lastPlaceable = block;
 		this.startBuilding();
 	}
 
-	// A method that sends information about the block to the server to set it up
+	/** Place block request without arguments */
 	static async placeBlock() {
-		//if (!this.buildingAllowed()) return; TODO: return back
-
 		if (this.lastPlaceable === undefined) {
 			error("Block is not selected");
 		}
@@ -146,14 +146,14 @@ export default class ClientBuildingController {
 	private static updatePosition() {
 		// If there is no render object, then assert error
 		if (this.renderingObject === undefined) {
-			Logger.info("(ERR) No render object to update");
+			Logger.info("No render object to update");
 			this.stopBuilding();
 			return;
 		}
 
-		// If game developer made a mistake
+		// If game developer made a mistake (common problem)
 		if (this.renderingObject.PrimaryPart === undefined) {
-			Logger.info("(ERR) PrimaryPart is undefined");
+			Logger.info("PrimaryPart is undefined");
 			this.stopBuilding();
 			return;
 		}
@@ -196,7 +196,7 @@ export default class ClientBuildingController {
 
 		// Positioning Stage 3
 		const mouseHitObjectSpace = mouseTarget.CFrame.PointToObjectSpace(mouseHit.Position);
-		const moveRange = 1; // TODO: Make this configurable
+		const moveRangeStuds = 1; // TODO: Make this configurable (probably)
 		const offset = VectorUtils.roundVectorToBase(
 			mouseHitObjectSpace.sub(
 				new Vector3(
@@ -205,7 +205,7 @@ export default class ClientBuildingController {
 					math.abs(normalPositioning.vector.Z),
 				).mul(mouseHitObjectSpace),
 			),
-			moveRange,
+			moveRangeStuds,
 		);
 
 		this.renderingObject.PivotTo(
@@ -224,7 +224,7 @@ export default class ClientBuildingController {
 				.mul(this.renderingObjectRotation),
 		);
 
-		// Rounding
+		// Rounding vectors
 		this.renderingObject.PivotTo(
 			new CFrame(VectorUtils.roundVectorToNearestHalf(this.renderingObject.GetPivot().Position)).mul(
 				this.renderingObject.GetPivot().Rotation,

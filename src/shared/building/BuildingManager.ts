@@ -11,6 +11,9 @@ export default class BuildingManager {
 		return data.ownerID === player.UserId || data.whitelistedPlayerIDs.includes(player.UserId);
 	}
 
+	/** Returns the block or nothing that is set on (or near) the given vector
+	 * @param vector The vector to check
+	 */
 	public static getBlockByPosition(vector: Vector3): Model | undefined {
 		const plot = PlotManager.getPlotByPosition(vector);
 		if (!plot) {
