@@ -1,4 +1,3 @@
-import { Workspace } from "@rbxts/services";
 import Block from "shared/registry/Block";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import Remotes from "shared/network/Remotes";
