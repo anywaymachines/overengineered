@@ -6,7 +6,6 @@ import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
 import Block from "shared/registry/Block";
 import BlockRegistry from "shared/registry/BlocksRegistry";
-import PlotManager from "shared/plots/PlotManager";
 import BuildingManager from "shared/building/BuildingManager";
 
 const LocalPlayer: Player = Players.LocalPlayer;
