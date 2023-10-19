@@ -22,10 +22,10 @@ export default class ClientBuildingController {
 	private static mouseClickCallback: RBXScriptConnection | undefined;
 	private static buttonClickCallback: RBXScriptConnection | undefined;
 
-	private static placeAllowedColor: Color3 = Color3.fromRGB(194, 217, 255);
-	private static placeNotAllowedColor: Color3 = Color3.fromRGB(255, 189, 189);
+	private static readonly placeAllowedColor: Color3 = Color3.fromRGB(194, 217, 255);
+	private static readonly placeNotAllowedColor: Color3 = Color3.fromRGB(255, 189, 189);
 
-	private static defaultBlock = BlockRegistry.TEST_BLOCK;
+	private static readonly defaultBlock = BlockRegistry.TEST_BLOCK;
 
 	/** Checking to see if **client** is currently building anything */
 	static isBuilding() {
