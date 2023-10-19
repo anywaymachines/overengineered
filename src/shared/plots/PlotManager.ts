@@ -4,7 +4,7 @@ import AESKeyGenerator from "shared/data/AESKeyGenerator";
 import VectorUtils from "shared/utils/VectorUtils";
 
 export default class PlotManager {
-	public static plots = Workspace.Plots.GetChildren();
+	public static readonly plots = Workspace.Plots.GetChildren();
 
 	/** Function for reading encoded Plot data inside `Model`
 	 * @param plot The Plot model to read

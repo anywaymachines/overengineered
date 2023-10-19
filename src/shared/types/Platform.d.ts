@@ -1,0 +1,3 @@
+interface ControlType {
+	id: number;
+}

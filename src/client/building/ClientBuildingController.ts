@@ -7,6 +7,7 @@ import VectorUtils from "shared/utils/VectorUtils";
 import Block from "shared/registry/Block";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import BuildingManager from "shared/building/BuildingManager";
+import GameControls from "client/GameControls";
 
 const LocalPlayer: Player = Players.LocalPlayer;
 //const PlayerGui: PlayerGui = LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
@@ -71,25 +72,37 @@ export default class ClientBuildingController {
 		if (input.UserInputType === Enum.UserInputType.Keyboard) {
 			// Keyboard rotation
 			if (input.KeyCode === Enum.KeyCode.R) {
-				this.renderingObjectRotation = CFrame.fromEulerAnglesXYZ(0, math.pi / 2, 0).mul(
-					this.renderingObjectRotation,
-				);
-				this.updatePosition();
+				this.rotate(GameControls.shiftPressed(), "r");
 			} else if (input.KeyCode === Enum.KeyCode.T) {
-				this.renderingObjectRotation = CFrame.fromEulerAnglesXYZ(math.pi / 2, 0, 0).mul(
-					this.renderingObjectRotation,
-				);
-				this.updatePosition();
+				this.rotate(GameControls.shiftPressed(), "t");
 			} else if (input.KeyCode === Enum.KeyCode.Y) {
-				this.renderingObjectRotation = CFrame.fromEulerAnglesXYZ(0, 0, math.pi / 2).mul(
-					this.renderingObjectRotation,
-				);
-				this.updatePosition();
+				this.rotate(GameControls.shiftPressed(), "y");
 			}
 		} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
 			// TODO: Gamepad rotation
 		}
 		// TODO: Touch rotation
+	}
+
+	static rotate(forward: boolean, axis: "r" | "t" | "y") {
+		let rotation: Vector3;
+		if (axis === "r") {
+			rotation = new Vector3(0, forward ? math.pi / 2 : math.pi / -2, 0);
+		} else if (axis === "t") {
+			rotation = new Vector3(forward ? math.pi / 2 : math.pi / -2, 0, 0);
+		} else if (axis === "y") {
+			rotation = new Vector3(0, 0, forward ? math.pi / 2 : math.pi / -2);
+		} else {
+			return;
+		}
+
+		this.renderingObjectRotation = CFrame.fromEulerAnglesXYZ(rotation.X, rotation.Y, rotation.Z).mul(
+			this.renderingObjectRotation,
+		);
+
+		// TODO: Rotation sound
+
+		this.updatePosition();
 	}
 
 	// TODO: Use it in block selection menu
@@ -158,7 +171,7 @@ export default class ClientBuildingController {
 		}
 
 		// If ESC menu is open - freeze movement
-		if (GuiService.MenuIsOpen) {
+		if (GameControls.isPaused()) {
 			return;
 		}
 
@@ -171,6 +184,7 @@ export default class ClientBuildingController {
 
 		const mouseHit = Mouse.Hit;
 		const mouseSurface = Mouse.TargetSurface;
+		const highlight = this.renderingObject.FindFirstChildOfClass("Highlight") as Highlight;
 
 		// Positioning Stage 1
 		const rotationRelative = mouseTarget.CFrame.sub(mouseTarget.Position).Inverse();
@@ -231,8 +245,6 @@ export default class ClientBuildingController {
 		);
 
 		// Colorizing
-		const highlight = this.renderingObject.FindFirstChildOfClass("Highlight") as Highlight;
-
 		if (BuildingManager.vectorAbleToPlayer(this.renderingObject.PrimaryPart.Position, LocalPlayer)) {
 			highlight.FillColor = this.placeAllowedColor;
 		} else {
