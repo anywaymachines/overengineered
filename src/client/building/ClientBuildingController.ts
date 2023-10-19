@@ -1,4 +1,4 @@
-import { GuiService, Players, Workspace } from "@rbxts/services";
+import { GuiService, Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
 import Logger from "shared/Logger";
 import Remotes from "shared/network/Remotes";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -7,6 +7,7 @@ import VectorUtils from "shared/utils/VectorUtils";
 import Block from "shared/registry/Block";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import PlotManager from "shared/plots/PlotManager";
+import BuildingManager from "shared/building/BuildingManager";
 
 const LocalPlayer: Player = Players.LocalPlayer;
 //const PlayerGui: PlayerGui = LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
@@ -20,6 +21,7 @@ export default class ClientBuildingController {
 
 	private static mouseMoveCallback: RBXScriptConnection | undefined;
 	private static mouseClickCallback: RBXScriptConnection | undefined;
+	private static buttonClickCallback: RBXScriptConnection | undefined;
 
 	private static placeAllowedColor: Color3 = Color3.fromRGB(194, 217, 255);
 	private static placeNotAllowedColor: Color3 = Color3.fromRGB(255, 189, 189);
@@ -40,6 +42,11 @@ export default class ClientBuildingController {
 		this.renderingObject = this.lastPlaceable.getModel().Clone();
 		this.renderingObject.Parent = Workspace;
 
+		// Axes
+		const axes = ReplicatedStorage.Assets.Axes.Clone();
+		axes.PivotTo(this.renderingObject.GetPivot());
+		axes.Parent = this.renderingObject;
+
 		// Highlight
 		const blockHighlight = new Instance("Highlight");
 		blockHighlight.Name = "BlockHighlight";
@@ -54,8 +61,34 @@ export default class ClientBuildingController {
 		// Events
 		this.mouseMoveCallback = Mouse.Move.Connect(() => this.updatePosition());
 		this.mouseClickCallback = Mouse.Button1Down.Connect(async () => await this.placeBlock());
+		this.buttonClickCallback = UserInputService.InputBegan.Connect((input) => this.onUserInput(input));
 
 		Logger.info("Building started with " + this.renderingObject.Name);
+	}
+
+	static onUserInput(input: InputObject) {
+		if (input.UserInputType === Enum.UserInputType.Keyboard) {
+			// Keyboard rotation
+			if (input.KeyCode === Enum.KeyCode.R) {
+				this.renderingObjectRotation = CFrame.fromEulerAnglesXYZ(0, math.pi / 2, 0).mul(
+					this.renderingObjectRotation,
+				);
+				this.updatePosition();
+			} else if (input.KeyCode === Enum.KeyCode.T) {
+				this.renderingObjectRotation = CFrame.fromEulerAnglesXYZ(math.pi / 2, 0, 0).mul(
+					this.renderingObjectRotation,
+				);
+				this.updatePosition();
+			} else if (input.KeyCode === Enum.KeyCode.Y) {
+				this.renderingObjectRotation = CFrame.fromEulerAnglesXYZ(0, 0, math.pi / 2).mul(
+					this.renderingObjectRotation,
+				);
+				this.updatePosition();
+			}
+		} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
+			// TODO: Gamepad rotation
+		}
+		// TODO: Touch rotation
 	}
 
 	// TODO: Use
@@ -106,6 +139,7 @@ export default class ClientBuildingController {
 		this.renderingObject?.Destroy();
 		this.mouseMoveCallback?.Disconnect();
 		this.mouseClickCallback?.Disconnect();
+		this.buttonClickCallback?.Disconnect();
 	}
 
 	/** **System** function that updates the location of the visual preview at the block */
@@ -200,7 +234,7 @@ export default class ClientBuildingController {
 		// Colorizing
 		const highlight = this.renderingObject.FindFirstChildOfClass("Highlight") as Highlight;
 
-		if (PlotManager.vectorAbleToPlayer(this.renderingObject.PrimaryPart.Position, LocalPlayer)) {
+		if (BuildingManager.vectorAbleToPlayer(this.renderingObject.PrimaryPart.Position, LocalPlayer)) {
 			highlight.FillColor = this.placeAllowedColor;
 		} else {
 			highlight.FillColor = this.placeNotAllowedColor;

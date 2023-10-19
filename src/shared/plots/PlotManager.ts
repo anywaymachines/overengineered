@@ -25,15 +25,6 @@ export default class PlotManager {
 		}) as Model;
 	}
 
-	/** Checks that building for a player on a given Plot is allowed
-	 * @param plot The Plot to check
-	 * @param player The player to check
-	 */
-	public static isBuildingAllowed(plot: Model, player: Player) {
-		const data = this.readPlotData(plot);
-		return data.ownerID === player.UserId || data.whitelistedPlayerIDs.includes(player.UserId);
-	}
-
 	/** Gets the `Model` of **Plot** at the given position that intersects with it
 	 * @param position The position to check
 	 */
@@ -47,15 +38,6 @@ export default class PlotManager {
 		return undefined;
 	}
 
-	/** Check that the position for a given player is a permitted position
-	 * @param position The position to check
-	 * @param player The player to check
-	 */
-	public static vectorAbleToPlayer(position: Vector3, player: Player): boolean {
-		const plot = PlotManager.getPlotByPosition(position);
-		return plot !== undefined && PlotManager.isBuildingAllowed(plot, player);
-	}
-
 	/** Returns the `Region3` of the **construction area** for blocks
 	 * @param plot The plot to get the region of
 	 */
@@ -64,7 +46,7 @@ export default class PlotManager {
 		const region = new Region3(
 			new Vector3(
 				buildingPlane.Position.X - buildingPlane.Size.X / 2 + 1,
-				buildingPlane.Position.Y,
+				buildingPlane.Position.Y + buildingPlane.Size.Y / 2 + 1,
 				buildingPlane.Position.Z - buildingPlane.Size.Z / 2 + 1,
 			),
 			new Vector3(

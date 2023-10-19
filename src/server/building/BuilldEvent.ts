@@ -4,6 +4,7 @@ import Remotes from "shared/network/Remotes";
 import Logger from "shared/Logger";
 import DiscordWebhook from "../network/DiscordWebhook";
 import PlotManager from "shared/plots/PlotManager";
+import BuildingManager from "shared/building/BuildingManager";
 
 /** Class for **server-based** construction management from blocks, e.g. block installation/painting/removal */
 export default class BuildEvent {
@@ -18,7 +19,7 @@ export default class BuildEvent {
 				};
 			}
 
-			if (!PlotManager.vectorAbleToPlayer(data.location.Position, player)) {
+			if (!BuildingManager.vectorAbleToPlayer(data.location.Position, player)) {
 				return {
 					success: false,
 					message: "You are not allowed to place blocks here",
@@ -48,7 +49,7 @@ export default class BuildEvent {
 			}
 
 			const plot = PlotManager.getPlotByPosition(data.location.Position) as Model;
-			model.PrimaryPart.PivotTo(data.location);
+			model.PivotTo(data.location);
 			model.Parent = plot.FindFirstChild("Blocks");
 
 			return { success: true, message: undefined };
