@@ -1,4 +1,4 @@
-import { GuiService, Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
+import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
 import Logger from "shared/Logger";
 import Remotes from "shared/network/Remotes";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -10,7 +10,6 @@ import BuildingManager from "shared/building/BuildingManager";
 import GameControls from "client/GameControls";
 
 const LocalPlayer: Player = Players.LocalPlayer;
-//const PlayerGui: PlayerGui = LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
 const Mouse: Mouse = LocalPlayer.GetMouse();
 
 /** A class for **client-side** construction management from blocks */
@@ -149,6 +148,8 @@ export default class ClientBuildingController {
 		}
 
 		this.renderingObject?.Destroy();
+
+		// Kill events
 		this.mouseMoveCallback?.Disconnect();
 		this.mouseClickCallback?.Disconnect();
 		this.buttonClickCallback?.Disconnect();

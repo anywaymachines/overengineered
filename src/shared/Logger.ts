@@ -1,10 +1,11 @@
-import { RunService } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
+import GameDefinitions from "./GameDefinitions";
 
 export default class Logger {
 	static info(msg: String) {
 		if (RunService.IsClient() === true) {
-			// Slient mode if non-studio server run
-			if (RunService.IsStudio() !== true) {
+			// Show logs only to maintainers
+			if (!GameDefinitions.DEVELOPERS.includes(Players.LocalPlayer.UserId)) {
 				return;
 			}
 
