@@ -1,8 +1,8 @@
 import TestBlock from "shared/registry/blocks/TestBlock";
-import Block from "./Block";
+import AbstractBlock from "./AbstractBlock";
 
 export default class BlockRegistry {
-	public static Blocks: Map<string, Block> = new Map<string, Block>();
+	public static Blocks: Map<string, AbstractBlock> = new Map<string, AbstractBlock>();
 
 	public static readonly TEST_BLOCK = new TestBlock();
 

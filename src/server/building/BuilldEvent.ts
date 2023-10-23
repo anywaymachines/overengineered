@@ -1,9 +1,9 @@
-import Block from "shared/registry/Block";
+import AbstractBlock from "shared/registry/AbstractBlock";
 import BlockRegistry from "shared/registry/BlocksRegistry";
-import Remotes from "shared/network/Remotes";
+import Remotes from "shared/NetworkDefinitions";
 import Logger from "shared/Logger";
 import DiscordWebhook from "../network/DiscordWebhook";
-import PlotManager from "shared/plots/PlotManager";
+import SharedPlots from "shared/building/SharedPlots";
 import BuildingManager from "shared/building/BuildingManager";
 import CollisionMaker from "./CollisionMaker";
 
@@ -33,7 +33,7 @@ export default class BuildEvent {
 		}
 
 		// Create a new instance of the building model
-		const block = BlockRegistry.Blocks.get(data.block) as Block;
+		const block = BlockRegistry.Blocks.get(data.block) as AbstractBlock;
 		const model = block.getModel().Clone();
 
 		if (model.PrimaryPart === undefined) {
@@ -54,7 +54,7 @@ export default class BuildEvent {
 			};
 		}
 
-		const plot = PlotManager.getPlotByPosition(data.location.Position) as Model;
+		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;
 		model.PivotTo(data.location);
 		model.SetAttribute("isBlock", true);
 		model.Parent = plot.FindFirstChild("Blocks");

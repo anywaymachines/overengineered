@@ -1,10 +1,8 @@
-import { AES, Base64 } from "@rbxts/crypto";
 import { HttpService, Players } from "@rbxts/services";
-import AESKeyGenerator from "shared/data/AESKeyGenerator";
-import PlotManager from "shared/plots/PlotManager";
+import SharedPlots from "shared/building/SharedPlots";
 
 /** A class that is designed to manage **Plots** where players can build */
-export default class ServerPlotsController {
+export default class ServerPlots {
 	public static initialize(): void {
 		this.initializePlots();
 		this.initializeEvents();
@@ -21,26 +19,23 @@ export default class ServerPlotsController {
 	 * @param plotData The Plot data to write
 	 */
 	public static writePlotData(plot: Model, plotData: Plot) {
-		const encryptedPlotData = Base64.Encode(
-			AES.Encrypt(HttpService.JSONEncode(plotData), AESKeyGenerator.RANDOM_KEY),
-		);
-		plot.SetAttribute("data", encryptedPlotData);
+		plot.SetAttribute("data", HttpService.JSONEncode(plotData));
 	}
 
 	/** Initialization part */
 	private static initializePlots(): void {
-		PlotManager.plots.forEach((plot) => {
+		SharedPlots.plots.forEach((plot) => {
 			this.writePlotData(plot as Model, this.defaultPlotData);
 		});
 	}
 
 	/** Initialization part */
 	private static initializeEvents(): void {
-		Players.PlayerAdded.Connect((player) => this.claimPlot(player));
-		Players.PlayerRemoving.Connect((player) => this.unclaimPlot(player));
+		Players.PlayerAdded.Connect((player) => this.assignPlotTo(player));
+		Players.PlayerRemoving.Connect((player) => this.resetPlotOf(player));
 	}
 
-	private static claimPlot(player: Player): void {
+	private static assignPlotTo(player: Player): void {
 		const plot = this.getFreePlot();
 		const data = this.defaultPlotData;
 		data.ownerID = player.UserId;
@@ -48,13 +43,13 @@ export default class ServerPlotsController {
 	}
 
 	public static getFreePlot(): Model {
-		return PlotManager.plots.find((plot) => {
-			return PlotManager.readPlotData(plot as Model).ownerID === 0;
+		return SharedPlots.plots.find((plot) => {
+			return SharedPlots.readPlotData(plot as Model).ownerID === 0;
 		}) as Model;
 	}
 
-	private static unclaimPlot(player: Player): void {
-		const plot = PlotManager.getPlotByOwnerID(player.UserId);
+	private static resetPlotOf(player: Player): void {
+		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 		this.writePlotData(plot, this.defaultPlotData);
 	}
 }

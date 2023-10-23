@@ -1,7 +1,7 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import Block from "shared/registry/Block";
+import AbstractBlock from "shared/registry/AbstractBlock";
 
-export default class TestBlock extends Block {
+export default class TestBlock extends AbstractBlock {
 	constructor() {
 		super("testblock");
 	}
@@ -12,9 +12,5 @@ export default class TestBlock extends Block {
 
 	public getModel(): Model {
 		return ReplicatedStorage.Assets.Blocks.FindFirstChild("TestBlock") as Model;
-	}
-
-	public getAssetID(): number {
-		return 0; // TODO: Add asset ID
 	}
 }

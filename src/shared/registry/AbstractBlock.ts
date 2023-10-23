@@ -1,4 +1,4 @@
-export default abstract class Block {
+export default abstract class AbstractBlock {
 	id: string;
 
 	/**
@@ -10,9 +10,6 @@ export default abstract class Block {
 
 	/** Must return the **displayed** name of the block */
 	public abstract getDisplayName(): string;
-
-	/** Should return a **number** of the block image */
-	public abstract getAssetID(): number;
 
 	/** Must return the **block model** object that will be used for construction */
 	public abstract getModel(): Model;

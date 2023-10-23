@@ -1,4 +1,5 @@
 interface GameUI {
+	Sounds: Folder & GuiSounds;
 	Tools: Frame & GameToolsGui;
 }
 
@@ -10,6 +11,15 @@ interface GameToolsGui {
 		Move: Frame & ToolsGuiButton;
 		Paint: Frame & ToolsGuiButton;
 	};
+}
+
+interface GuiSounds {
+	Building: Folder & {
+		BlockPlace: Sound;
+		BlockPlaceError: Sound;
+		BlockRotate: Sound;
+	};
+	GuiClick: Sound;
 }
 
 interface ToolsGuiButton {

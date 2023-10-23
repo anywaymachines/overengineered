@@ -1,12 +1,12 @@
-import ServerPlotsController from "./ServerPlotsController";
+import ServerPlots from "./building/ServerPlots";
 import BuildEvent from "./building/BuilldEvent";
-import SharedLoader from "shared/Loader";
+import SharedLoader from "shared/SharedLoader";
 
 // Initializing shared components
 SharedLoader.load();
 
 // Plots
-ServerPlotsController.initialize();
+ServerPlots.initialize();
 
 // Initializing client-side components
 BuildEvent.initialize();

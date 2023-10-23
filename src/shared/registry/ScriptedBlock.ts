@@ -1,6 +1,6 @@
-import Block from "./Block";
+import AbstractBlock from "./AbstractBlock";
 
-export default abstract class ScriptedBlock extends Block {
+export default abstract class ScriptedBlock extends AbstractBlock {
 	/** Returns a boolean that enables/disables the call to the `ScriptedBlock.tick()` method */
 	public abstract isTicking(): boolean;
 

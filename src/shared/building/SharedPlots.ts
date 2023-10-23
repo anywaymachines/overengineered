@@ -1,19 +1,14 @@
-import { AES, Base64 } from "@rbxts/crypto";
 import { HttpService, Workspace } from "@rbxts/services";
-import AESKeyGenerator from "shared/data/AESKeyGenerator";
 import VectorUtils from "shared/utils/VectorUtils";
 
-export default class PlotManager {
+export default class SharedPlots {
 	public static readonly plots = Workspace.Plots.GetChildren();
 
 	/** Function for reading encoded Plot data inside `Model`
 	 * @param plot The Plot model to read
 	 */
 	public static readPlotData(plot: Model): Plot {
-		const encryptedPlotData = plot.GetAttribute("data") as string;
-		const decryptedData = AES.Decrypt(Base64.Decode(encryptedPlotData), AESKeyGenerator.RANDOM_KEY);
-		const data = HttpService.JSONDecode(decryptedData) as Plot;
-		return data;
+		return HttpService.JSONDecode(plot.GetAttribute("data") as string) as Plot;
 	}
 
 	/** Returns the `Model` of Plot where the given `UserId` is the owner
@@ -29,7 +24,7 @@ export default class PlotManager {
 	 * @param position The position to check
 	 */
 	public static getPlotByPosition(position: Vector3): Model | undefined {
-		for (let i = 0; i < PlotManager.plots.size(); i++) {
+		for (let i = 0; i < SharedPlots.plots.size(); i++) {
 			const plot = this.plots[i];
 			if (VectorUtils.isInRegion3(this.getPlotBuildingRegion(plot as Model), position) === true) {
 				return plot as Model;

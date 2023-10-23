@@ -1,4 +1,4 @@
-import PlotManager from "shared/plots/PlotManager";
+import SharedPlots from "shared/building/SharedPlots";
 import VectorUtils from "shared/utils/VectorUtils";
 
 export default class BuildingManager {
@@ -7,7 +7,7 @@ export default class BuildingManager {
 	 * @param player The player to check
 	 */
 	public static isBuildingAllowed(plot: Model, player: Player) {
-		const data = PlotManager.readPlotData(plot);
+		const data = SharedPlots.readPlotData(plot);
 		return data.ownerID === player.UserId || data.whitelistedPlayerIDs.includes(player.UserId);
 	}
 
@@ -15,7 +15,7 @@ export default class BuildingManager {
 	 * @param vector The vector to check
 	 */
 	public static getBlockByPosition(vector: Vector3): Model | undefined {
-		const plot = PlotManager.getPlotByPosition(vector);
+		const plot = SharedPlots.getPlotByPosition(vector);
 		if (!plot) {
 			return undefined;
 		}
@@ -38,7 +38,7 @@ export default class BuildingManager {
 	 */
 	public static vectorAbleToPlayer(position: Vector3, player: Player): boolean {
 		// Checking the plot
-		const plot = PlotManager.getPlotByPosition(position);
+		const plot = SharedPlots.getPlotByPosition(position);
 		if (plot === undefined || !this.isBuildingAllowed(plot, player)) {
 			return false;
 		}
