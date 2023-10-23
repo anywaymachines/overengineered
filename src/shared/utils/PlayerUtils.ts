@@ -3,7 +3,7 @@ export default class PlayerUtils {
 		return (
 			player.Character !== undefined &&
 			player.Character.FindFirstChild("Humanoid") !== undefined &&
-			(player.Character.FindFirstAncestor("Humanoid") as Humanoid).Health > 0
+			(player.Character.FindFirstChild("Humanoid") as Humanoid).Health > 0
 		);
 	}
 }

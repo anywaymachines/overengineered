@@ -64,6 +64,9 @@ export default class ClientBuildingController {
 		this.mouseClickCallback = Mouse.Button1Down.Connect(async () => await this.placeBlock());
 		this.buttonClickCallback = UserInputService.InputBegan.Connect((input) => this.onUserInput(input));
 
+		// Update position first time
+		this.updatePosition();
+
 		Logger.info("Building started with " + this.renderingObject.Name);
 	}
 
@@ -136,7 +139,7 @@ export default class ClientBuildingController {
 			this.updatePosition();
 			// TODO: Play sound of success message
 		} else {
-			Logger.info("Block placement failed: " + response.message);
+			Logger.info("[BUILDING] Block placement failed: " + response.message);
 			// TODO: Play sound of failure message
 		}
 	}
@@ -144,6 +147,7 @@ export default class ClientBuildingController {
 	/** Stops block construction */
 	static stopBuilding() {
 		if (!this.isBuilding()) {
+			Logger.info("[BUILDING] Building not stopped (it is not started)");
 			return;
 		}
 
@@ -159,14 +163,14 @@ export default class ClientBuildingController {
 	private static updatePosition() {
 		// If there is no render object, then assert error
 		if (this.renderingObject === undefined) {
-			Logger.info("No render object to update");
+			Logger.info("[BUILDING] No render object to update");
 			this.stopBuilding();
 			return;
 		}
 
 		// If game developer made a mistake (common problem)
 		if (this.renderingObject.PrimaryPart === undefined) {
-			Logger.info("PrimaryPart is undefined");
+			Logger.info("[BUILDING] PrimaryPart is undefined");
 			this.stopBuilding();
 			return;
 		}
