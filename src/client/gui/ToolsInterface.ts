@@ -1,7 +1,8 @@
 import Logger from "shared/Logger";
 import AbstractInterface from "./AbstractInterface";
-import TweenUtils from "../../shared/utils/TweenUtils";
+import GuiAnimations from "./GuiAnimations";
 import ClientBuilding from "client/building/ClientBuilding";
+import GameLocalization from "../GameLocalization";
 
 export default class ToolsInterface extends AbstractInterface {
 	private gameUI: GameUI;
@@ -107,20 +108,30 @@ export default class ToolsInterface extends AbstractInterface {
 		const animationDuration = 0.2;
 
 		this.equippedTool === "build"
-			? TweenUtils.tweenTransparency(this.gameUI.Tools.Buttons.Build, 0, animationDuration)
-			: TweenUtils.tweenTransparency(this.gameUI.Tools.Buttons.Build, 1, animationDuration);
+			? GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Build, 0, animationDuration)
+			: GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Build, 1, animationDuration);
 		this.equippedTool === "configure"
-			? TweenUtils.tweenTransparency(this.gameUI.Tools.Buttons.Configure, 0, animationDuration)
-			: TweenUtils.tweenTransparency(this.gameUI.Tools.Buttons.Configure, 1, animationDuration);
+			? GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Configure, 0, animationDuration)
+			: GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Configure, 1, animationDuration);
 		this.equippedTool === "delete"
-			? TweenUtils.tweenTransparency(this.gameUI.Tools.Buttons.Delete, 0, animationDuration)
-			: TweenUtils.tweenTransparency(this.gameUI.Tools.Buttons.Delete, 1, animationDuration);
+			? GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Delete, 0, animationDuration)
+			: GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Delete, 1, animationDuration);
 		this.equippedTool === "move"
-			? TweenUtils.tweenTransparency(this.gameUI.Tools.Buttons.Move, 0, animationDuration)
-			: TweenUtils.tweenTransparency(this.gameUI.Tools.Buttons.Move, 1, animationDuration);
+			? GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Move, 0, animationDuration)
+			: GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Move, 1, animationDuration);
 		this.equippedTool === "paint"
-			? TweenUtils.tweenTransparency(this.gameUI.Tools.Buttons.Paint, 0, animationDuration)
-			: TweenUtils.tweenTransparency(this.gameUI.Tools.Buttons.Paint, 1, animationDuration);
+			? GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Paint, 0, animationDuration)
+			: GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Paint, 1, animationDuration);
+
+		// ModeLabel redraw
+		if (this.equippedTool !== undefined) {
+			const text = string.upper(this.equippedTool.sub(0, 1)) + this.equippedTool.sub(2);
+			this.gameUI.ModeLabel.Text = text;
+			this.gameUI.ModeLabel.Text = GameLocalization.getLocalizedString(this.gameUI.ModeLabel, text);
+		} else {
+			this.gameUI.ModeLabel.Text = "";
+		}
+		GuiAnimations.fade(this.gameUI.ModeLabel, 0.1, "down");
 	}
 
 	// override

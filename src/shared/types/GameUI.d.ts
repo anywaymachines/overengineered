@@ -1,6 +1,7 @@
 interface GameUI {
 	Sounds: Folder & GuiSounds;
 	Tools: Frame & GameToolsGui;
+	ModeLabel: TextLabel;
 }
 
 interface GameToolsGui {
