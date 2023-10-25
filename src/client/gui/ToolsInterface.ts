@@ -126,7 +126,6 @@ export default class ToolsInterface extends AbstractInterface {
 		// ModeLabel redraw
 		if (this.equippedTool !== undefined) {
 			const text = string.upper(this.equippedTool.sub(0, 1)) + this.equippedTool.sub(2);
-			this.gameUI.ModeLabel.Text = text;
 			this.gameUI.ModeLabel.Text = GameLocalization.getLocalizedString(this.gameUI.ModeLabel, text);
 		} else {
 			this.gameUI.ModeLabel.Text = "";
