@@ -7,13 +7,22 @@ export default class ToolsInterface extends AbstractInterface {
 	private gameUI: GameUI;
 
 	// Variables
-	public equippedTool: "build" | "configure" | "delete" | "move" | "paint" | undefined;
+	public equippedTool: "build" | "configure" | "delete" | "move" | "paint" | "connect" | undefined;
 	public readonly toolDisplayNames = {
 		build: "Building Mode",
+		connect: "Connecting Mode",
 		configure: "Configuring Mode",
 		delete: "Deleting Mode",
 		move: "Moving Mode",
 		paint: "Painting Mode",
+	};
+	public readonly toolNumbers = {
+		1: "build",
+		2: "connect",
+		3: "move",
+		4: "paint",
+		5: "delete",
+		6: "configure",
 	};
 
 	// Tools API
@@ -21,6 +30,7 @@ export default class ToolsInterface extends AbstractInterface {
 
 	// Events
 	private buildButton: RBXScriptConnection;
+	private connectButton: RBXScriptConnection;
 	private configureButton: RBXScriptConnection;
 	private deleteButton: RBXScriptConnection;
 	private moveButton: RBXScriptConnection;
@@ -35,6 +45,9 @@ export default class ToolsInterface extends AbstractInterface {
 		// Physical click on tool
 		this.buildButton = this.gameUI.Tools.Buttons.Build.ImageButton.MouseButton1Click.Connect(() =>
 			this.equipTool("build"),
+		);
+		this.connectButton = this.gameUI.Tools.Buttons.Build.ImageButton.MouseButton1Click.Connect(() =>
+			this.equipTool("connect"),
 		);
 		this.configureButton = this.gameUI.Tools.Buttons.Configure.ImageButton.MouseButton1Click.Connect(() =>
 			this.equipTool("configure"),
@@ -61,23 +74,27 @@ export default class ToolsInterface extends AbstractInterface {
 			// PC Tool Selection
 			switch (input.KeyCode) {
 				case Enum.KeyCode.One:
-					this.equipTool("build");
+					this.equipTool(this.toolNumbers[1] as typeof this.equippedTool);
 					break;
 
 				case Enum.KeyCode.Two:
-					this.equipTool("move");
+					this.equipTool(this.toolNumbers[2] as typeof this.equippedTool);
 					break;
 
 				case Enum.KeyCode.Three:
-					this.equipTool("delete");
+					this.equipTool(this.toolNumbers[3] as typeof this.equippedTool);
 					break;
 
 				case Enum.KeyCode.Four:
-					this.equipTool("paint");
+					this.equipTool(this.toolNumbers[4] as typeof this.equippedTool);
 					break;
 
 				case Enum.KeyCode.Five:
-					this.equipTool("configure");
+					this.equipTool(this.toolNumbers[5] as typeof this.equippedTool);
+					break;
+
+				case Enum.KeyCode.Six:
+					this.equipTool(this.toolNumbers[6] as typeof this.equippedTool);
 					break;
 
 				default:
@@ -128,6 +145,9 @@ export default class ToolsInterface extends AbstractInterface {
 		this.equippedTool === "paint"
 			? GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Paint, 0, animationDuration)
 			: GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Paint, 1, animationDuration);
+		this.equippedTool === "connect"
+			? GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Connect, 0, animationDuration)
+			: GuiAnimations.tweenTransparency(this.gameUI.Tools.Buttons.Connect, 1, animationDuration);
 
 		// ModeLabel redraw
 		if (this.equippedTool !== undefined) {
@@ -144,6 +164,7 @@ export default class ToolsInterface extends AbstractInterface {
 
 		// Terminate custom events
 		this.buildButton.Disconnect();
+		this.connectButton.Disconnect();
 		this.configureButton.Disconnect();
 		this.deleteButton.Disconnect();
 		this.moveButton.Disconnect();

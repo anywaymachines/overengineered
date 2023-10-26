@@ -7,6 +7,7 @@ interface GameUI {
 interface GameToolsGui {
 	Buttons: Frame & {
 		Build: Frame & ToolsGuiButton;
+		Connect: Frame & ToolsGuiButton;
 		Configure: Frame & ToolsGuiButton;
 		Delete: Frame & ToolsGuiButton;
 		Move: Frame & ToolsGuiButton;
