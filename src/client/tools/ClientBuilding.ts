@@ -42,7 +42,7 @@ export default class ClientBuilding {
 
 	/** Checking to see if **client** is currently building anything */
 	isBuilding() {
-		return this.previewBlock !== undefined && PlayerUtils.isAlive(this.LocalPlayer);
+		return this.previewBlock !== undefined;
 	}
 
 	/** **Visually** enables building mode from blocks, use ```ClientBuildingController.selectBlock(block: Block)``` to select a block. */
@@ -143,6 +143,11 @@ export default class ClientBuilding {
 			error("PrimaryPart is undefined");
 		}
 
+		// Non-alive players bypass
+		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
+			return;
+		}
+
 		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerPlaceBlock").CallServerAsync({
 			block: this.lastBlock.id,
 			location: this.previewBlock.PrimaryPart.CFrame,
@@ -195,6 +200,11 @@ export default class ClientBuilding {
 
 		// If ESC menu is open - freeze movement
 		if (GameControls.isPaused()) {
+			return;
+		}
+
+		// Non-alive players bypass
+		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
 			return;
 		}
 

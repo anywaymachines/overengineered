@@ -1,5 +1,5 @@
 import GuiUtils from "client/utils/GuiUtils";
-import ToolsInterface from "./ToolsInterface";
+import ToolsInterface from "./tool/ToolsInterface";
 
 export default class GuiController {
 	public static TOOLS_GUI: ToolsInterface;
