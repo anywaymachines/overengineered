@@ -2,13 +2,19 @@ import Logger from "shared/Logger";
 import AbstractInterface from "./AbstractInterface";
 import GuiAnimations from "./GuiAnimations";
 import ClientBuilding from "client/building/ClientBuilding";
-import GameLocalization from "../GameLocalization";
 
 export default class ToolsInterface extends AbstractInterface {
 	private gameUI: GameUI;
 
 	// Variables
 	public equippedTool: "build" | "configure" | "delete" | "move" | "paint" | undefined;
+	public readonly toolDisplayNames = {
+		build: "Building Mode",
+		configure: "Configuring Mode",
+		delete: "Deleting Mode",
+		move: "Moving Mode",
+		paint: "Painting Mode",
+	};
 
 	// Tools API
 	public clientBuilding: ClientBuilding;
@@ -125,8 +131,7 @@ export default class ToolsInterface extends AbstractInterface {
 
 		// ModeLabel redraw
 		if (this.equippedTool !== undefined) {
-			const text = string.upper(this.equippedTool.sub(0, 1)) + this.equippedTool.sub(2);
-			this.gameUI.ModeLabel.Text = GameLocalization.getLocalizedString(this.gameUI.ModeLabel, text);
+			this.gameUI.ModeLabel.Text = this.toolDisplayNames[this.equippedTool];
 		} else {
 			this.gameUI.ModeLabel.Text = "";
 		}
