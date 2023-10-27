@@ -96,7 +96,6 @@ export default class BuildToolAPI {
 		} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
 			// TODO: Gamepad rotation
 		}
-		// TODO: Touch rotation
 	}
 
 	rotate(forward: boolean, axis: "r" | "t" | "y") {
@@ -205,6 +204,12 @@ export default class BuildToolAPI {
 
 		// Non-alive players bypass
 		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
+			return;
+		}
+
+		// Fix buttons positions (TODO: Check is gui on cursor)
+		const screenPart = this.Mouse.ViewSizeX / 100;
+		if (!(this.Mouse.X > screenPart * 8 && this.Mouse.X < screenPart * 92)) {
 			return;
 		}
 

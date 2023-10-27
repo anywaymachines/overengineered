@@ -1,7 +1,12 @@
 import { TweenService } from "@rbxts/services";
 
 export default class GuiAnimations {
-	public static fade(frame: GuiObject, duration: number, direction: "right" | "left" | "top" | "down" | undefined) {
+	public static fade(
+		frame: GuiObject,
+		duration: number,
+		direction: "right" | "left" | "top" | "down" | undefined,
+		noTransparency: boolean = false,
+	) {
 		const defaultPosition = frame.Position;
 		let offsetPosition;
 
@@ -26,6 +31,10 @@ export default class GuiAnimations {
 
 		frame.Position = offsetPosition;
 		frame.TweenPosition(defaultPosition, Enum.EasingDirection.In, Enum.EasingStyle.Linear, duration);
+
+		if (noTransparency === true) {
+			return;
+		}
 
 		const insideContent = frame.GetDescendants();
 		insideContent.push(frame);
