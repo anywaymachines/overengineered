@@ -5,6 +5,7 @@ import GuiAnimations from "../GuiAnimations";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import Logger from "shared/Logger";
 import GuiDeleteTool from "./GuiDeleteTool";
+import ControlUtils from "client/utils/ControlUtils";
 
 export default class ToolsInterface {
 	private gameUI: GameUI;
@@ -23,6 +24,15 @@ export default class ToolsInterface {
 	constructor(gameUI: GameUI) {
 		// Define tools gui
 		this.gameUI = gameUI;
+
+		// Hide useless buttons for mobile
+		if (ControlUtils.isMobile()) {
+			this.gameUI.Tools.Buttons.GetChildren().forEach((child) => {
+				if (child.IsA("Frame")) {
+					(child as Frame & ToolsGuiButton).KeyboardButtonTooltip.Destroy();
+				}
+			});
+		}
 
 		// Tools API
 		this.buildTool = new GuiBuildTool(gameUI, this);

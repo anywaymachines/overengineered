@@ -2,7 +2,6 @@ interface GameUI {
 	Sounds: Folder & GuiSounds;
 	Tools: Frame & GameToolsGui;
 	ModeLabel: TextLabel;
-	DeleteToolSelection: Frame;
 }
 
 interface GameToolsGui {
@@ -27,5 +26,5 @@ interface GuiSounds {
 
 interface ToolsGuiButton {
 	ImageButton: ImageButton;
-	TextLabel: TextLabel;
+	KeyboardButtonTooltip: TextLabel;
 }
