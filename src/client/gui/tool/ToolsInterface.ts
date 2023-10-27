@@ -25,18 +25,11 @@ export default class ToolsInterface {
 		// Define tools gui
 		this.gameUI = gameUI;
 
-		// Hide useless buttons for mobile
-		if (ControlUtils.isMobile()) {
-			this.gameUI.Tools.Buttons.GetChildren().forEach((child) => {
-				if (child.IsA("Frame")) {
-					(child as Frame & ToolsGuiButton).KeyboardButtonTooltip.Destroy();
-				}
-			});
-		}
-
 		// Tools API
 		this.buildTool = new GuiBuildTool(gameUI, this);
 		this.deleteTool = new GuiDeleteTool(gameUI, this);
+		this.buildTool.onUnequip();
+		this.deleteTool.onUnequip();
 		this.tools.push(this.buildTool);
 		this.tools.push(this.deleteTool);
 
@@ -44,7 +37,6 @@ export default class ToolsInterface {
 		this.inputEvent = UserInputService.InputBegan.Connect((input, _) => this.onInput(input));
 
 		// Initialization
-		this.equippedTool = this.buildTool;
 		this.equipTool(undefined, true);
 
 		// GUI Terminate when unused
@@ -72,16 +64,34 @@ export default class ToolsInterface {
 
 		// State GUI change
 		if (this.equippedTool !== undefined) {
-			GuiAnimations.fade(this.gameUI.ModeLabel, 0.1, "top");
-			this.gameUI.ModeLabel.Text = this.equippedTool.getDisplayName();
+			GuiAnimations.fade(this.gameUI.CurrentToolLabel, 0.2, "down");
+			GuiAnimations.fade(this.gameUI.CurrentToolDescriptionLabel, 0.2, "down");
+			this.gameUI.CurrentToolLabel.Text = this.equippedTool.getDisplayName();
+			this.gameUI.CurrentToolDescriptionLabel.Text = this.equippedTool.getShortDescription();
 		} else {
-			this.gameUI.ModeLabel.Text = "";
+			this.gameUI.CurrentToolLabel.Text = "";
+			this.gameUI.CurrentToolDescriptionLabel.Text = "";
 		}
 
 		// Play sound
 		if (!isSilent) {
 			this.gameUI.Sounds.GuiClick.Play();
 		}
+	}
+
+	public onControlChanged() {
+		// Update tools
+		this.tools.forEach((value) => {
+			value.onControlChanged();
+		});
+
+		// Hide useless buttons for mobile
+		this.gameUI.Tools.Buttons.GetChildren().forEach((child) => {
+			if (child.IsA("Frame")) {
+				(child as Frame & ToolsGuiButton).KeyboardButtonTooltip.Visible =
+					!ControlUtils.isMobile() && !ControlUtils.isGamepad();
+			}
+		});
 	}
 
 	public onInput(input: InputObject) {

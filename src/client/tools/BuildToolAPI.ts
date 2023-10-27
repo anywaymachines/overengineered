@@ -1,52 +1,51 @@
 import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
+import GameControls from "client/GameControls";
+import ControlUtils from "client/utils/ControlUtils";
+import GuiUtils from "client/utils/GuiUtils";
 import Logger from "shared/Logger";
 import Remotes from "shared/NetworkDefinitions";
-import PlayerUtils from "shared/utils/PlayerUtils";
-import PartUtils from "shared/utils/PartUtils";
-import VectorUtils from "shared/utils/VectorUtils";
+import BuildingManager from "shared/building/BuildingManager";
 import AbstractBlock from "shared/registry/AbstractBlock";
 import BlockRegistry from "shared/registry/BlocksRegistry";
-import BuildingManager from "shared/building/BuildingManager";
-import GameControls from "client/GameControls";
+import PartUtils from "shared/utils/PartUtils";
+import PlayerUtils from "shared/utils/PlayerUtils";
+import VectorUtils from "shared/utils/VectorUtils";
 
-/** A class for **client-side** construction management from blocks */
 export default class BuildToolAPI {
 	private gameUI: GameUI;
 
-	// Player
-	private LocalPlayer: Player;
-	private Mouse: Mouse;
-
-	// Variables
-	private lastBlock: AbstractBlock | undefined;
-	private previewBlock: Model | undefined;
-	private previewBlockRotation: CFrame;
+	// Mouse
+	private mouse: Mouse;
+	private lastMouseHit: CFrame | undefined;
+	private lastMouseTarget: BasePart | undefined;
+	private lastMouseSurface: Enum.NormalId | undefined;
 
 	// Events
-	private MouseMoveCallback: RBXScriptConnection | undefined;
-	private MouseClickCallback: RBXScriptConnection | undefined;
-	private buttonClickCallback: RBXScriptConnection | undefined;
+	private updateEvent: RBXScriptConnection | undefined;
+	private placeEvent: RBXScriptConnection | undefined;
+	private inputEvent: RBXScriptConnection | undefined;
+
+	// Block
+	private lastBlock: AbstractBlock | undefined;
+	private previewBlock: Model | undefined;
+	private previewBlockRotation: CFrame = new CFrame();
 
 	// Const
-	private readonly placeAllowedColor: Color3 = Color3.fromRGB(194, 217, 255);
-	private readonly placeNotAllowedColor: Color3 = Color3.fromRGB(255, 189, 189);
+	private readonly allowedColor: Color3 = Color3.fromRGB(194, 217, 255);
+	private readonly forbiddenColor: Color3 = Color3.fromRGB(255, 189, 189);
 	private readonly defaultBlock = BlockRegistry.TEST_BLOCK;
 
 	constructor(gameUI: GameUI) {
 		this.gameUI = gameUI;
 
-		this.LocalPlayer = Players.LocalPlayer;
-		this.Mouse = this.LocalPlayer.GetMouse();
-		this.previewBlockRotation = new CFrame();
+		this.mouse = Players.LocalPlayer.GetMouse();
 	}
 
-	/** Checking to see if **client** is currently building anything */
-	isBuilding() {
+	public isBuilding() {
 		return this.previewBlock !== undefined;
 	}
 
-	/** **Visually** enables building mode from blocks, use ```ClientBuildingController.selectBlock(block: Block)``` to select a block. */
-	startBuilding() {
+	public startBuilding() {
 		// Selecting a block
 		if (this.lastBlock === undefined) {
 			this.lastBlock = this.defaultBlock;
@@ -73,9 +72,15 @@ export default class BuildToolAPI {
 		PartUtils.ghostModel(this.previewBlock);
 
 		// Events
-		this.MouseMoveCallback = this.Mouse.Move.Connect(() => this.updatePosition());
-		this.MouseClickCallback = this.Mouse.Button1Down.Connect(async () => await this.placeBlock());
-		this.buttonClickCallback = UserInputService.InputBegan.Connect((input) => this.onUserInput(input));
+		this.inputEvent = UserInputService.InputBegan.Connect((input) => this.onUserInput(input));
+		if (!ControlUtils.isMobile()) {
+			// PC Controls
+			this.updateEvent = this.mouse.Move.Connect(() => this.updatePosition());
+			this.placeEvent = this.mouse.Button1Down.Connect(async () => await this.placeBlock());
+		} else {
+			// Mobile controls
+			this.updateEvent = UserInputService.TouchStarted.Connect((_) => this.updatePosition());
+		}
 
 		// Update position first time
 		this.updatePosition();
@@ -83,7 +88,7 @@ export default class BuildToolAPI {
 		Logger.info("Building started with " + this.previewBlock.Name);
 	}
 
-	onUserInput(input: InputObject) {
+	public onUserInput(input: InputObject) {
 		if (input.UserInputType === Enum.UserInputType.Keyboard) {
 			// Keyboard rotation
 			if (input.KeyCode === Enum.KeyCode.R) {
@@ -95,10 +100,12 @@ export default class BuildToolAPI {
 			}
 		} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
 			// TODO: Gamepad rotation
+		} else if (input.UserInputType === Enum.UserInputType.Touch) {
+			this.updatePosition();
 		}
 	}
 
-	rotate(forward: boolean, axis: "r" | "t" | "y") {
+	public rotate(forward: boolean, axis: "r" | "t" | "y") {
 		let rotation: Vector3;
 		if (axis === "r") {
 			rotation = new Vector3(0, forward ? math.pi / 2 : math.pi / -2, 0);
@@ -117,18 +124,18 @@ export default class BuildToolAPI {
 		this.gameUI.Sounds.Building.BlockRotate.PlaybackSpeed = math.random(8, 12) / 10; // Give some randomness
 		this.gameUI.Sounds.Building.BlockRotate.Play();
 
-		this.updatePosition();
+		this.updatePosition(true);
 	}
 
 	// TODO: Use it in block selection menu
-	selectBlock(block: AbstractBlock) {
+	public selectBlock(block: AbstractBlock) {
 		this.stopBuilding();
 		this.lastBlock = block;
 		this.startBuilding();
 	}
 
 	/** Place block request without arguments */
-	async placeBlock() {
+	public async placeBlock() {
 		if (this.lastBlock === undefined) {
 			error("Block is not selected");
 		}
@@ -152,9 +159,9 @@ export default class BuildToolAPI {
 			location: this.previewBlock.PrimaryPart.CFrame,
 		});
 
-		if (response.success) {
+		if (response.success === true) {
 			task.wait();
-			this.updatePosition();
+			this.updatePosition(true);
 
 			// Play sound
 			this.gameUI.Sounds.Building.BlockPlace.PlaybackSpeed = math.random(8, 12) / 10; // Give some randomness
@@ -167,7 +174,7 @@ export default class BuildToolAPI {
 	}
 
 	/** Stops block construction */
-	stopBuilding() {
+	public stopBuilding() {
 		if (!this.isBuilding()) {
 			Logger.info("[BUILDING] Building not stopped (it is not started)");
 			return;
@@ -176,26 +183,15 @@ export default class BuildToolAPI {
 		this.previewBlock?.Destroy();
 
 		// Kill events
-		this.MouseMoveCallback?.Disconnect();
-		this.MouseClickCallback?.Disconnect();
-		this.buttonClickCallback?.Disconnect();
+		this.updateEvent?.Disconnect();
+		this.placeEvent?.Disconnect();
+		this.inputEvent?.Disconnect();
 	}
 
 	/** **System** function that updates the location of the visual preview at the block */
-	updatePosition() {
-		// If there is no render object, then assert error
-		if (this.previewBlock === undefined) {
-			Logger.info("[BUILDING] No render object to update");
-			this.stopBuilding();
-			return;
-		}
-
-		// If game developer made a mistake (common problem)
-		if (this.previewBlock.PrimaryPart === undefined) {
-			Logger.info("[BUILDING] PrimaryPart is undefined");
-			this.stopBuilding();
-			return;
-		}
+	public updatePosition(savePosition: boolean = false) {
+		assert(this.previewBlock);
+		assert(this.previewBlock.PrimaryPart);
 
 		// If ESC menu is open - freeze movement
 		if (GameControls.isPaused()) {
@@ -207,33 +203,34 @@ export default class BuildToolAPI {
 			return;
 		}
 
-		// Fix buttons positions (TODO: Check is gui on cursor)
-		const screenPart = this.Mouse.ViewSizeX / 100;
-		if (!(this.Mouse.X > screenPart * 8 && this.Mouse.X < screenPart * 92)) {
+		// Fix buttons positions
+		if (GuiUtils.isCursorOnVisibleGui() && !savePosition) {
 			return;
 		}
 
-		const MouseTarget: BasePart | undefined = this.Mouse.Target;
+		const mouseTarget: BasePart | undefined =
+			savePosition && this.lastMouseTarget !== undefined ? this.lastMouseTarget : this.mouse.Target;
 
-		// If the this.Mouse isn't over anything, stop rendering
-		if (MouseTarget === undefined) {
+		// If the this.mouse isn't over anything, stop rendering
+		if (mouseTarget === undefined) {
 			return;
 		}
 
-		const MouseHit = this.Mouse.Hit;
-		const MouseSurface = this.Mouse.TargetSurface;
+		const mouseHit = savePosition && this.lastMouseHit !== undefined ? this.lastMouseHit : this.mouse.Hit;
+		const mouseSurface =
+			savePosition && this.lastMouseSurface !== undefined ? this.lastMouseSurface : this.mouse.TargetSurface;
 		const highlight = this.previewBlock.FindFirstChildOfClass("Highlight") as Highlight;
 
 		// Positioning Stage 1
-		const rotationRelative = MouseTarget.CFrame.sub(MouseTarget.Position).Inverse();
-		const normalPositioning = VectorUtils.normalIdToNormalVector(MouseSurface, MouseTarget);
-		const positioning = MouseTarget.CFrame.mul(
+		const rotationRelative = mouseTarget.CFrame.sub(mouseTarget.Position).Inverse();
+		const normalPositioning = VectorUtils.normalIdToNormalVector(mouseSurface, mouseTarget);
+		const positioning = mouseTarget.CFrame.mul(
 			new CFrame(normalPositioning.vector.mul(normalPositioning.size / 2)),
 		);
 		this.previewBlock.PivotTo(positioning.mul(rotationRelative).mul(this.previewBlockRotation));
 
 		// Positioning Stage 2
-		const convertedPosition = MouseTarget.CFrame.sub(MouseTarget.Position).PointToWorldSpace(
+		const convertedPosition = mouseTarget.CFrame.sub(mouseTarget.Position).PointToWorldSpace(
 			normalPositioning.vector,
 		);
 
@@ -244,7 +241,7 @@ export default class BuildToolAPI {
 		this.previewBlock.PivotTo(positioning.mul(rotationRelative.Inverse()).mul(this.previewBlockRotation.Inverse()));
 
 		// Positioning Stage 3
-		const MouseHitObjectSpace = MouseTarget.CFrame.PointToObjectSpace(MouseHit.Position);
+		const MouseHitObjectSpace = mouseTarget.CFrame.PointToObjectSpace(mouseHit.Position);
 		const moveRangeStuds = 1; // TODO: Make this configurable (probably)
 		const offset = VectorUtils.roundVectorToBase(
 			MouseHitObjectSpace.sub(
@@ -281,10 +278,17 @@ export default class BuildToolAPI {
 		);
 
 		// Colorizing
-		if (BuildingManager.vectorAbleToPlayer(this.previewBlock.PrimaryPart.Position, this.LocalPlayer)) {
-			highlight.FillColor = this.placeAllowedColor;
+		if (BuildingManager.vectorAbleToPlayer(this.previewBlock.PrimaryPart.Position, Players.LocalPlayer)) {
+			highlight.FillColor = this.allowedColor;
 		} else {
-			highlight.FillColor = this.placeNotAllowedColor;
+			highlight.FillColor = this.forbiddenColor;
+		}
+
+		// Saving a new values
+		if (!savePosition) {
+			this.lastMouseTarget = mouseTarget;
+			this.lastMouseHit = mouseHit;
+			this.lastMouseSurface = mouseSurface;
 		}
 	}
 }

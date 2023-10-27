@@ -1,13 +1,15 @@
 interface GameUI {
 	Sounds: Folder & GuiSounds;
 	Tools: Frame & GameToolsGui;
-	MobileBuilding: Frame & {
+	BuildingGuiMobile: Frame & {
 		PlaceButton: TextButton;
 		RotateRButton: TextButton;
 		RotateTButton: TextButton;
 		RotateYButton: TextButton;
 	};
-	ModeLabel: TextLabel;
+	DeleteAllButton: TextButton;
+	CurrentToolLabel: TextLabel;
+	CurrentToolDescriptionLabel: TextLabel;
 }
 
 interface GameToolsGui {

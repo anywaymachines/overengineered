@@ -13,21 +13,23 @@ export default class GuiAnimations {
 		switch (direction) {
 			case "right":
 				offsetPosition = new UDim2(frame.Size.X.Scale * 0.5, frame.Size.X.Offset * 0.5, 0, 0);
+				offsetPosition = defaultPosition.add(offsetPosition);
 				break;
 			case "left":
 				offsetPosition = new UDim2(frame.Size.X.Scale * 0.5, frame.Size.X.Offset * 0.5, 0, 0);
+				offsetPosition = defaultPosition.sub(offsetPosition);
 				break;
 			case "top":
 				offsetPosition = new UDim2(0, 0, frame.Size.Y.Scale * 0.5, frame.Size.Y.Offset * 0.5);
+				offsetPosition = defaultPosition.sub(offsetPosition);
 				break;
 			case "down":
 				offsetPosition = new UDim2(0, 0, frame.Size.Y.Scale * 0.5, frame.Size.Y.Offset * 0.5);
+				offsetPosition = defaultPosition.add(offsetPosition);
 				break;
 			default:
 				return;
 		}
-
-		offsetPosition = defaultPosition.add(offsetPosition);
 
 		frame.Position = offsetPosition;
 		frame.TweenPosition(defaultPosition, Enum.EasingDirection.In, Enum.EasingStyle.Linear, duration);

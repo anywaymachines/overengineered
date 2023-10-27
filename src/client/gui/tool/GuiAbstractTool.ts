@@ -26,7 +26,11 @@ export default abstract class GuiAbstractTool {
 		GuiAnimations.tweenTransparency(this.getButton(), 1, 0.2);
 	}
 
+	public abstract onControlChanged(): void;
+
 	public abstract getDisplayName(): string;
+
+	public abstract getShortDescription(): string;
 
 	public abstract getEquipButton(): Enum.KeyCode;
 
