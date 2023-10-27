@@ -1,4 +1,3 @@
-import { UserInputService } from "@rbxts/services";
 import GuiAnimations from "../GuiAnimations";
 import ToolsInterface from "./ToolsInterface";
 

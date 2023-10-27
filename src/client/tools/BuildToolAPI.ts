@@ -10,7 +10,7 @@ import BuildingManager from "shared/building/BuildingManager";
 import GameControls from "client/GameControls";
 
 /** A class for **client-side** construction management from blocks */
-export default class ClientBuilding {
+export default class BuildToolAPI {
 	private gameUI: GameUI;
 
 	// Player

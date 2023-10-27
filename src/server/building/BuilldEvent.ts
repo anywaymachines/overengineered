@@ -17,7 +17,7 @@ export default class BuildEvent {
 		);
 	}
 
-	private static playerPlaceBlock(player: Player, data: PlayerPlaceBlockRequest): PlayerPlaceBlockResponse {
+	private static playerPlaceBlock(player: Player, data: PlayerPlaceBlockRequest): BuildResponse {
 		if (!BlockRegistry.Blocks.has(data.block)) {
 			return {
 				success: false,

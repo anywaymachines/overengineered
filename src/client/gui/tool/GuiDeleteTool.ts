@@ -1,38 +1,38 @@
-import BuildToolAPI from "client/tools/BuildToolAPI";
 import GuiAbstractTool from "./GuiAbstractTool";
 import ToolsInterface from "./ToolsInterface";
+import DeleteToolAPI from "client/tools/DeleteToolAPI";
 
-export default class GuiBuildTool extends GuiAbstractTool {
-	private toolAPI: BuildToolAPI;
+export default class GuiDeleteTool extends GuiAbstractTool {
+	private toolAPI: DeleteToolAPI;
 
 	constructor(gameUI: GameUI, toolsInterface: ToolsInterface) {
 		super(gameUI, toolsInterface);
 
-		this.toolAPI = new BuildToolAPI(gameUI);
+		this.toolAPI = new DeleteToolAPI(gameUI);
 	}
 
 	public getDisplayName(): string {
-		return "Building Mode";
+		return "Deleting Mode";
 	}
 
 	public getEquipButton(): Enum.KeyCode {
 		// Gamepad controls implementated in GuiAbstractTool
-		return Enum.KeyCode.One;
+		return Enum.KeyCode.Four;
 	}
 
 	public getButton(): Frame & ToolsGuiButton {
-		return this.gameUI.Tools.Buttons.Build;
+		return this.gameUI.Tools.Buttons.Delete;
 	}
 
 	public onEquip(): void {
 		super.onEquip();
 
-		this.toolAPI.startBuilding();
+		this.toolAPI.equip();
 	}
 
 	public onUnequip(): void {
 		super.onUnequip();
 
-		this.toolAPI.stopBuilding();
+		this.toolAPI.unequip();
 	}
 }

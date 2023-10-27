@@ -4,6 +4,7 @@ import GuiBuildTool from "./GuiBuildTool";
 import GuiAnimations from "../GuiAnimations";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import Logger from "shared/Logger";
+import GuiDeleteTool from "./GuiDeleteTool";
 
 export default class ToolsInterface {
 	private gameUI: GameUI;
@@ -14,6 +15,7 @@ export default class ToolsInterface {
 	// Tools
 	public tools: GuiAbstractTool[] = [];
 	public buildTool: GuiBuildTool;
+	public deleteTool: GuiDeleteTool;
 
 	// Events
 	public inputEvent: RBXScriptConnection;
@@ -24,7 +26,9 @@ export default class ToolsInterface {
 
 		// Tools API
 		this.buildTool = new GuiBuildTool(gameUI, this);
+		this.deleteTool = new GuiDeleteTool(gameUI, this);
 		this.tools.push(this.buildTool);
+		this.tools.push(this.deleteTool);
 
 		// Events
 		this.inputEvent = UserInputService.InputBegan.Connect((input, _) => this.onInput(input));
@@ -33,7 +37,7 @@ export default class ToolsInterface {
 		this.equippedTool = this.buildTool;
 		this.equipTool(undefined, true);
 
-		// GUI Terminator
+		// GUI Terminate when unused
 		Players.LocalPlayer.CharacterRemoving.Once((_) => this.terminate());
 	}
 

@@ -33,6 +33,18 @@ export default class SharedPlots {
 		return undefined;
 	}
 
+	/** Gets the `Model` of **Plot** by the given block `Model` */
+	public static getPlotByBlock(block: Model): Model | undefined {
+		for (let i = 0; i < this.plots.size(); i++) {
+			const plot = this.plots[i] as Model;
+
+			if (block.IsDescendantOf(plot)) {
+				return plot;
+			}
+		}
+		return undefined;
+	}
+
 	/** Returns the `Region3` of the **construction area** for blocks
 	 * @param plot The plot to get the region of
 	 */
