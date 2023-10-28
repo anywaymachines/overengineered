@@ -1,19 +1,21 @@
+import AliveEventsHandler from "client/AliveEventsHandler";
 import GuiAnimations from "../GuiAnimations";
-import ToolsInterface from "./ToolsInterface";
+import ToolsGui from "./ToolsGui";
+import { UserInputService } from "@rbxts/services";
 
 export default abstract class GuiAbstractTool {
 	// GUIs
 	public gameUI: GameUI;
-	public toolsInterface: ToolsInterface;
+	public toolsInterface: ToolsGui;
 
-	// Events
-	private buttonEvent: RBXScriptConnection;
-
-	constructor(gameUI: GameUI, toolsInterface: ToolsInterface) {
+	constructor(gameUI: GameUI, toolsInterface: ToolsGui) {
 		this.gameUI = gameUI;
 		this.toolsInterface = toolsInterface;
 
-		this.buttonEvent = this.getButton().ImageButton.MouseButton1Click.Connect(() => toolsInterface.equipTool(this));
+		AliveEventsHandler.registerAliveEvent(this.getButton().ImageButton.MouseButton1Click, () =>
+			toolsInterface.equipTool(this),
+		);
+		AliveEventsHandler.registerAliveEvent(UserInputService.InputBegan, (input: InputObject) => this.onInput(input));
 	}
 
 	public onEquip(): void {
@@ -26,7 +28,9 @@ export default abstract class GuiAbstractTool {
 		GuiAnimations.tweenTransparency(this.getButton(), 1, 0.2);
 	}
 
-	public abstract onControlChanged(): void;
+	public abstract onInput(input: InputObject): void;
+
+	public abstract onPlatformChanged(): void;
 
 	public abstract getDisplayName(): string;
 
@@ -37,7 +41,6 @@ export default abstract class GuiAbstractTool {
 	public abstract getButton(): Frame & ToolsGuiButton;
 
 	public terminate(): void {
-		this.buttonEvent.Disconnect();
 		script.Destroy();
 	}
 }

@@ -3,32 +3,20 @@ import Logger from "shared/Logger";
 import Remotes from "shared/NetworkDefinitions";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
+import AbstractToolAPI from "./AbstractToolAPI";
 
-export default class DeleteToolAPI {
-	private gameUI: GameUI;
-
-	// Player
-	private LocalPlayer: Player;
-	private Mouse: Mouse;
-
-	// Event
-	private mouseClickEvent: RBXScriptConnection | undefined;
-	private mouseMoveEvent: RBXScriptConnection | undefined;
-
+export default class DeleteToolAPI extends AbstractToolAPI {
 	// Variables
 	private blockHighlight: Highlight | undefined;
 
 	constructor(gameUI: GameUI) {
-		this.gameUI = gameUI;
-
-		this.LocalPlayer = Players.LocalPlayer;
-		this.Mouse = this.LocalPlayer.GetMouse();
+		super(gameUI);
 	}
 
 	public equip() {
 		// Events
-		this.mouseClickEvent = this.Mouse.Button1Down.Connect(async () => this.onMouseClick());
-		this.mouseMoveEvent = this.Mouse.Move.Connect(() => this.onMouseMove());
+		this.eventHandler.registerEvent(this.mouse.Button1Down, () => this.onMouseClick());
+		this.eventHandler.registerEvent(this.mouse.Move, () => this.onMouseMove());
 	}
 
 	public async onMouseClick() {
@@ -50,8 +38,15 @@ export default class DeleteToolAPI {
 		}
 	}
 
+	public onUserInput(input: InputObject): void {
+		// TODO: Implement
+	}
+	public onPlatformChanged(): void {
+		// TODO: Implement
+	}
+
 	public onMouseMove() {
-		const target = this.Mouse.Target;
+		const target = this.mouse.Target;
 
 		if (this.blockHighlight !== undefined) {
 			this.blockHighlight.Destroy();
@@ -75,7 +70,7 @@ export default class DeleteToolAPI {
 		}
 
 		// Plot is forbidden
-		if (!BuildingManager.isBuildingAllowed(parentPlot, this.LocalPlayer)) {
+		if (!BuildingManager.isBuildingAllowed(parentPlot, Players.LocalPlayer)) {
 			return;
 		}
 
@@ -88,8 +83,5 @@ export default class DeleteToolAPI {
 		if (this.blockHighlight !== undefined) {
 			this.blockHighlight.Destroy();
 		}
-
-		this.mouseClickEvent?.Disconnect();
-		this.mouseMoveEvent?.Disconnect();
 	}
 }

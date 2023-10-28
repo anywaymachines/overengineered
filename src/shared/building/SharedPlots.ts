@@ -35,6 +35,10 @@ export default class SharedPlots {
 
 	/** Gets the `Model` of **Plot** by the given block `Model` */
 	public static getPlotByBlock(block: Model): Model | undefined {
+		if (block === undefined) {
+			return undefined;
+		}
+
 		for (let i = 0; i < this.plots.size(); i++) {
 			const plot = this.plots[i] as Model;
 

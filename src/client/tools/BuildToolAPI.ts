@@ -1,32 +1,24 @@
-import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
-import GameControls from "client/GameControls";
-import ControlUtils from "client/utils/ControlUtils";
-import GuiUtils from "client/utils/GuiUtils";
-import Logger from "shared/Logger";
-import Remotes from "shared/NetworkDefinitions";
-import BuildingManager from "shared/building/BuildingManager";
-import AbstractBlock from "shared/registry/AbstractBlock";
 import BlockRegistry from "shared/registry/BlocksRegistry";
+import AbstractToolAPI from "./AbstractToolAPI";
+import AbstractBlock from "shared/registry/AbstractBlock";
+import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
 import PartUtils from "shared/utils/PartUtils";
+import GameControls from "client/GameControls";
 import PlayerUtils from "shared/utils/PlayerUtils";
+import Remotes from "shared/NetworkDefinitions";
+import Logger from "shared/Logger";
+import BuildingManager from "shared/building/BuildingManager";
 import VectorUtils from "shared/utils/VectorUtils";
+import GuiUtils from "client/utils/GuiUtils";
 
-export default class BuildToolAPI {
-	private gameUI: GameUI;
-
+export default class BuildToolAPI extends AbstractToolAPI {
 	// Mouse
-	private mouse: Mouse;
 	private lastMouseHit: CFrame | undefined;
 	private lastMouseTarget: BasePart | undefined;
 	private lastMouseSurface: Enum.NormalId | undefined;
 
-	// Events
-	private updateEvent: RBXScriptConnection | undefined;
-	private placeEvent: RBXScriptConnection | undefined;
-	private inputEvent: RBXScriptConnection | undefined;
-
 	// Block
-	private lastBlock: AbstractBlock | undefined;
+	private equippedBlock: AbstractBlock;
 	private previewBlock: Model | undefined;
 	private previewBlockRotation: CFrame = new CFrame();
 
@@ -36,73 +28,26 @@ export default class BuildToolAPI {
 	private readonly defaultBlock = BlockRegistry.TEST_BLOCK;
 
 	constructor(gameUI: GameUI) {
-		this.gameUI = gameUI;
+		super(gameUI);
 
-		this.mouse = Players.LocalPlayer.GetMouse();
+		this.equippedBlock = BlockRegistry.TEST_BLOCK;
 	}
 
-	public isBuilding() {
-		return this.previewBlock !== undefined;
-	}
-
-	public startBuilding() {
-		// Selecting a block
-		if (this.lastBlock === undefined) {
-			this.lastBlock = this.defaultBlock;
-		}
-
-		// Spawning a new block
-		this.previewBlock = this.lastBlock.getModel().Clone();
-		this.previewBlock.Parent = Workspace;
-
-		// Axes
-		const axes = ReplicatedStorage.Assets.Axes.Clone();
-		axes.PivotTo(this.previewBlock.GetPivot());
-		axes.Parent = this.previewBlock;
-
-		// Highlight
+	private addHighlight() {
 		const blockHighlight = new Instance("Highlight");
 		blockHighlight.Name = "BlockHighlight";
 		blockHighlight.Parent = this.previewBlock;
 		blockHighlight.FillTransparency = 0.4;
 		blockHighlight.OutlineTransparency = 0.5;
 		blockHighlight.Adornee = this.previewBlock;
-
-		// Display better
-		PartUtils.ghostModel(this.previewBlock);
-
-		// Events
-		this.inputEvent = UserInputService.InputBegan.Connect((input) => this.onUserInput(input));
-		if (!ControlUtils.isMobile()) {
-			// PC Controls
-			this.updateEvent = this.mouse.Move.Connect(() => this.updatePosition());
-			this.placeEvent = this.mouse.Button1Down.Connect(async () => await this.placeBlock());
-		} else {
-			// Mobile controls
-			this.updateEvent = UserInputService.TouchStarted.Connect((_) => this.updatePosition());
-		}
-
-		// Update position first time
-		this.updatePosition();
-
-		Logger.info("Building started with " + this.previewBlock.Name);
 	}
 
-	public onUserInput(input: InputObject) {
-		if (input.UserInputType === Enum.UserInputType.Keyboard) {
-			// Keyboard rotation
-			if (input.KeyCode === Enum.KeyCode.R) {
-				this.rotate(GameControls.isShiftPressed(), "r");
-			} else if (input.KeyCode === Enum.KeyCode.T) {
-				this.rotate(GameControls.isShiftPressed(), "t");
-			} else if (input.KeyCode === Enum.KeyCode.Y) {
-				this.rotate(GameControls.isShiftPressed(), "y");
-			}
-		} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
-			// TODO: Gamepad rotation
-		} else if (input.UserInputType === Enum.UserInputType.Touch) {
-			this.updatePosition();
-		}
+	private addAxes() {
+		assert(this.previewBlock);
+
+		const axes = ReplicatedStorage.Assets.Axes.Clone();
+		axes.PivotTo(this.previewBlock.GetPivot());
+		axes.Parent = this.previewBlock;
 	}
 
 	public rotate(forward: boolean, axis: "r" | "t" | "y") {
@@ -128,26 +73,16 @@ export default class BuildToolAPI {
 	}
 
 	// TODO: Use it in block selection menu
-	public selectBlock(block: AbstractBlock) {
-		this.stopBuilding();
-		this.lastBlock = block;
-		this.startBuilding();
+	public selectBlock(block: AbstractBlock): void {
+		this.unequip();
+		this.equippedBlock = block;
+		this.equip();
 	}
 
-	/** Place block request without arguments */
 	public async placeBlock() {
-		if (this.lastBlock === undefined) {
-			error("Block is not selected");
-		}
-
-		if (this.previewBlock === undefined) {
-			error("No render object to update");
-		}
-
-		// If game developer made a mistake
-		if (this.previewBlock.PrimaryPart === undefined) {
-			error("PrimaryPart is undefined");
-		}
+		assert(this.equippedBlock);
+		assert(this.previewBlock);
+		assert(this.previewBlock.PrimaryPart);
 
 		// Non-alive players bypass
 		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
@@ -155,7 +90,7 @@ export default class BuildToolAPI {
 		}
 
 		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerPlaceBlock").CallServerAsync({
-			block: this.lastBlock.id,
+			block: this.equippedBlock.id,
 			location: this.previewBlock.PrimaryPart.CFrame,
 		});
 
@@ -173,22 +108,71 @@ export default class BuildToolAPI {
 		}
 	}
 
-	/** Stops block construction */
-	public stopBuilding() {
-		if (!this.isBuilding()) {
-			Logger.info("[BUILDING] Building not stopped (it is not started)");
-			return;
+	public equip(): void {
+		super.equip();
+
+		// Selecting a block
+		if (this.equippedBlock === undefined) {
+			this.equippedBlock = this.defaultBlock;
 		}
 
-		this.previewBlock?.Destroy();
+		// Spawning a new block
+		this.previewBlock = this.equippedBlock.getModel().Clone();
+		this.previewBlock.Parent = Workspace;
 
-		// Kill events
-		this.updateEvent?.Disconnect();
-		this.placeEvent?.Disconnect();
-		this.inputEvent?.Disconnect();
+		this.addAxes();
+		this.addHighlight();
+		PartUtils.ghostModel(this.previewBlock);
+
+		// Events
+		this.eventHandler.registerEvent(UserInputService.InputBegan, (input) => this.onUserInput(input));
 	}
 
-	/** **System** function that updates the location of the visual preview at the block */
+	public unequip(): void {
+		super.unequip();
+
+		this.previewBlock?.Destroy();
+	}
+
+	public onUserInput(input: InputObject): void {
+		if (input.UserInputType === Enum.UserInputType.Keyboard) {
+			// Keyboard rotation
+			if (input.KeyCode === Enum.KeyCode.R) {
+				this.rotate(GameControls.isShiftPressed(), "r");
+			} else if (input.KeyCode === Enum.KeyCode.T) {
+				this.rotate(GameControls.isShiftPressed(), "t");
+			} else if (input.KeyCode === Enum.KeyCode.Y) {
+				this.rotate(GameControls.isShiftPressed(), "y");
+			}
+		} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
+			// TODO: Gamepad rotation
+		} else if (input.UserInputType === Enum.UserInputType.Touch) {
+			this.updatePosition();
+		}
+	}
+
+	public onPlatformChanged(): void {
+		this.eventHandler.killAll();
+
+		switch (GameControls.getPlatform()) {
+			case "Desktop":
+				this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
+				this.eventHandler.registerEvent(this.mouse.Button1Down, async () => await this.placeBlock());
+				break;
+			case "Console":
+				this.eventHandler.registerEvent(
+					(Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame"),
+					() => this.updatePosition(),
+				);
+				break;
+			case "Mobile":
+				this.eventHandler.registerEvent(UserInputService.TouchStarted, (_) => this.updatePosition());
+				break;
+			default:
+				break;
+		}
+	}
+
 	public updatePosition(savePosition: boolean = false) {
 		assert(this.previewBlock);
 		assert(this.previewBlock.PrimaryPart);

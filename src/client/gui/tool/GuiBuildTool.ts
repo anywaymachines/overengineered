@@ -1,36 +1,31 @@
 import BuildToolAPI from "client/tools/BuildToolAPI";
 import GuiAbstractTool from "./GuiAbstractTool";
-import ToolsInterface from "./ToolsInterface";
-import ControlUtils from "client/utils/ControlUtils";
+import ToolsGui from "./ToolsGui";
 import GuiAnimations from "../GuiAnimations";
+import AliveEventsHandler from "client/AliveEventsHandler";
+import GameControls from "client/GameControls";
 
 export default class GuiBuildTool extends GuiAbstractTool {
 	private toolAPI: BuildToolAPI;
 
-	// Events
-	private mobilePlaceButtonEvent: RBXScriptConnection | undefined;
-	private mobileRotateRButtonEvent: RBXScriptConnection | undefined;
-	private mobileRotateTButtonEvent: RBXScriptConnection | undefined;
-	private mobileRotateYButtonEvent: RBXScriptConnection | undefined;
-
-	constructor(gameUI: GameUI, toolsInterface: ToolsInterface) {
+	constructor(gameUI: GameUI, toolsInterface: ToolsGui) {
 		super(gameUI, toolsInterface);
 
 		this.toolAPI = new BuildToolAPI(gameUI);
 
-		// Init mobile controls
-		this.mobilePlaceButtonEvent = this.gameUI.BuildingGuiMobile.PlaceButton.MouseButton1Click.Connect(() => {
-			this.toolAPI.placeBlock();
-		});
-		this.mobileRotateRButtonEvent = this.gameUI.BuildingGuiMobile.RotateRButton.MouseButton1Click.Connect(() => {
-			this.toolAPI.rotate(true, "r");
-		});
-		this.mobileRotateTButtonEvent = this.gameUI.BuildingGuiMobile.RotateTButton.MouseButton1Click.Connect(() => {
-			this.toolAPI.rotate(true, "t");
-		});
-		this.mobileRotateYButtonEvent = this.gameUI.BuildingGuiMobile.RotateYButton.MouseButton1Click.Connect(() => {
-			this.toolAPI.rotate(true, "y");
-		});
+		// Register touchscreen controls
+		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildingGuiMobile.PlaceButton.MouseButton1Click, () =>
+			this.toolAPI.placeBlock(),
+		);
+		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildingGuiMobile.RotateRButton.MouseButton1Click, () =>
+			this.toolAPI.rotate(true, "r"),
+		);
+		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildingGuiMobile.RotateTButton.MouseButton1Click, () =>
+			this.toolAPI.rotate(true, "t"),
+		);
+		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildingGuiMobile.RotateYButton.MouseButton1Click, () =>
+			this.toolAPI.rotate(true, "y"),
+		);
 	}
 
 	public getDisplayName(): string {
@@ -50,19 +45,27 @@ export default class GuiBuildTool extends GuiAbstractTool {
 		return this.gameUI.Tools.Buttons.Build;
 	}
 
-	public onControlChanged(): void {
+	public onPlatformChanged(): void {
+		if (!this.toolAPI.isEquipped()) {
+			return;
+		}
+
 		// Show building mobile controls
-		if (ControlUtils.isMobile()) {
+		if (GameControls.getPlatform() === "Mobile") {
 			this.gameUI.BuildingGuiMobile.Visible = true;
 			GuiAnimations.fade(this.gameUI.BuildingGuiMobile, 0.1, "right", true);
+		} else {
+			this.gameUI.BuildingGuiMobile.Visible = false;
 		}
+
+		this.toolAPI.onPlatformChanged();
 	}
 
 	public onEquip(): void {
 		super.onEquip();
 
-		this.toolAPI.startBuilding();
-		this.onControlChanged();
+		this.toolAPI.equip();
+		this.onPlatformChanged();
 	}
 
 	public onUnequip(): void {
@@ -70,16 +73,13 @@ export default class GuiBuildTool extends GuiAbstractTool {
 
 		// Hide mobile controls
 		this.gameUI.BuildingGuiMobile.Visible = false;
-		this.toolAPI.stopBuilding();
+		this.toolAPI.unequip();
 	}
 
-	public terminate(): void {
-		super.terminate();
-
-		// Terminate events
-		this.mobilePlaceButtonEvent?.Disconnect();
-		this.mobileRotateRButtonEvent?.Disconnect();
-		this.mobileRotateTButtonEvent?.Disconnect();
-		this.mobileRotateYButtonEvent?.Disconnect();
+	public onInput(input: InputObject): void {
+		// Place with gamepad button X
+		if (input.KeyCode === Enum.KeyCode.ButtonX) {
+			this.toolAPI.placeBlock();
+		}
 	}
 }

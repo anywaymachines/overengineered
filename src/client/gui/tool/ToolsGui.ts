@@ -5,10 +5,11 @@ import GuiAnimations from "../GuiAnimations";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import Logger from "shared/Logger";
 import GuiDeleteTool from "./GuiDeleteTool";
-import ControlUtils from "client/utils/ControlUtils";
+import AliveEventsHandler from "client/AliveEventsHandler";
+import GameControls from "client/GameControls";
 
-export default class ToolsInterface {
-	private gameUI: GameUI;
+export default class ToolsGui {
+	public gameUI: GameUI;
 
 	// Variables
 	public equippedTool: GuiAbstractTool | undefined;
@@ -17,9 +18,6 @@ export default class ToolsInterface {
 	public tools: GuiAbstractTool[] = [];
 	public buildTool: GuiBuildTool;
 	public deleteTool: GuiDeleteTool;
-
-	// Events
-	public inputEvent: RBXScriptConnection;
 
 	constructor(gameUI: GameUI) {
 		// Define tools gui
@@ -34,13 +32,17 @@ export default class ToolsInterface {
 		this.tools.push(this.deleteTool);
 
 		// Events
-		this.inputEvent = UserInputService.InputBegan.Connect((input, _) => this.onInput(input));
+		AliveEventsHandler.registerAliveEvent(UserInputService.InputBegan, (input: InputObject, _: boolean) =>
+			this.onInput(input),
+		);
 
 		// Initialization
 		this.equipTool(undefined, true);
 
 		// GUI Terminate when unused
 		Players.LocalPlayer.CharacterRemoving.Once((_) => this.terminate());
+
+		this.onPlatformChanged();
 	}
 
 	/** Function for tool switching */
@@ -79,17 +81,17 @@ export default class ToolsInterface {
 		}
 	}
 
-	public onControlChanged() {
+	public onPlatformChanged() {
 		// Update tools
 		this.tools.forEach((value) => {
-			value.onControlChanged();
+			value.onPlatformChanged();
 		});
 
-		// Hide useless buttons for mobile
+		// Update buttons
 		this.gameUI.Tools.Buttons.GetChildren().forEach((child) => {
 			if (child.IsA("Frame")) {
 				(child as Frame & ToolsGuiButton).KeyboardButtonTooltip.Visible =
-					!ControlUtils.isMobile() && !ControlUtils.isGamepad();
+					GameControls.getPlatform() === "Desktop";
 			}
 		});
 	}
@@ -139,8 +141,6 @@ export default class ToolsInterface {
 		Logger.info("Terminating ToolsInterface");
 
 		this.equipTool(undefined, true);
-
-		this.inputEvent.Disconnect();
 
 		// Terminate all tools
 		for (let i = 0; i < this.tools.size(); i++) {

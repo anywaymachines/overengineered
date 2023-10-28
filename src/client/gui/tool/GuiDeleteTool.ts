@@ -1,12 +1,12 @@
 import GuiAnimations from "../GuiAnimations";
 import GuiAbstractTool from "./GuiAbstractTool";
-import ToolsInterface from "./ToolsInterface";
+import ToolsGui from "./ToolsGui";
 import DeleteToolAPI from "client/tools/DeleteToolAPI";
 
 export default class GuiDeleteTool extends GuiAbstractTool {
 	private toolAPI: DeleteToolAPI;
 
-	constructor(gameUI: GameUI, toolsInterface: ToolsInterface) {
+	constructor(gameUI: GameUI, toolsInterface: ToolsGui) {
 		super(gameUI, toolsInterface);
 
 		this.toolAPI = new DeleteToolAPI(gameUI);
@@ -20,7 +20,7 @@ export default class GuiDeleteTool extends GuiAbstractTool {
 		return "Removes unnecessary blocks";
 	}
 
-	public onControlChanged(): void {}
+	public onPlatformChanged(): void {}
 
 	public getEquipButton(): Enum.KeyCode {
 		// Gamepad controls implementated in GuiAbstractTool
@@ -45,4 +45,6 @@ export default class GuiDeleteTool extends GuiAbstractTool {
 		this.gameUI.DeleteAllButton.Visible = false;
 		this.toolAPI.unequip();
 	}
+
+	public onInput(input: InputObject): void {}
 }
