@@ -1,29 +1,50 @@
-interface GameUI {
-	Sounds: Folder & GuiSounds;
-	Tools: Frame & GameToolsGui;
+interface MyGui {
+	Sounds: Folder & MyGuiSounds;
+	Tools: Frame & MyToolsGui;
 	BuildingGuiMobile: Frame & {
 		PlaceButton: TextButton;
 		RotateRButton: TextButton;
 		RotateTButton: TextButton;
 		RotateYButton: TextButton;
 	};
+	Blocks: Frame & MyBlocksGui;
+	BlocksCategories: Frame & MyBlocksCategoriesGui;
 	DeleteAllButton: TextButton;
 	CurrentToolLabel: TextLabel;
 	CurrentToolDescriptionLabel: TextLabel;
 }
 
-interface GameToolsGui {
-	Buttons: Frame & {
-		Build: Frame & ToolsGuiButton;
-		Connect: Frame & ToolsGuiButton;
-		Configure: Frame & ToolsGuiButton;
-		Delete: Frame & ToolsGuiButton;
-		Move: Frame & ToolsGuiButton;
-		Paint: Frame & ToolsGuiButton;
+interface MyBlocksCategoriesGui {
+	Buttons: ScrollingFrame & {
+		UIListLayout: UIListLayout;
+		Template: TextButton;
 	};
 }
 
-interface GuiSounds {
+interface MyBlocksGui {
+	Buttons: ScrollingFrame & {
+		UIListLayout: UIListLayout;
+		Template: TextButton & MyBlocksGuiButton;
+	};
+}
+
+interface MyBlocksGuiButton {
+	ViewportFrame: ViewportFrame;
+	NameLabel: TextLabel;
+}
+
+interface MyToolsGui {
+	Buttons: Frame & {
+		Build: Frame & MyToolsGuiButton;
+		Connect: Frame & MyToolsGuiButton;
+		Configure: Frame & MyToolsGuiButton;
+		Delete: Frame & MyToolsGuiButton;
+		Move: Frame & MyToolsGuiButton;
+		Paint: Frame & MyToolsGuiButton;
+	};
+}
+
+interface MyGuiSounds {
 	Building: Folder & {
 		BlockPlace: Sound;
 		BlockPlaceError: Sound;
@@ -32,7 +53,7 @@ interface GuiSounds {
 	GuiClick: Sound;
 }
 
-interface ToolsGuiButton {
+interface MyToolsGuiButton {
 	ImageButton: ImageButton;
 	KeyboardButtonTooltip: TextLabel;
 }

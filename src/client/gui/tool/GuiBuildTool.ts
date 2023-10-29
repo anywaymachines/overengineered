@@ -8,7 +8,7 @@ import GameControls from "client/GameControls";
 export default class GuiBuildTool extends GuiAbstractTool {
 	private toolAPI: BuildToolAPI;
 
-	constructor(gameUI: GameUI, toolsInterface: ToolsGui) {
+	constructor(gameUI: MyGui, toolsInterface: ToolsGui) {
 		super(gameUI, toolsInterface);
 
 		this.toolAPI = new BuildToolAPI(gameUI);
@@ -36,12 +36,12 @@ export default class GuiBuildTool extends GuiAbstractTool {
 		return "Puts blocks in the world";
 	}
 
-	public getEquipButton(): Enum.KeyCode {
+	public getKeybind(): Enum.KeyCode {
 		// Gamepad controls implementated in GuiAbstractTool
 		return Enum.KeyCode.One;
 	}
 
-	public getButton(): Frame & ToolsGuiButton {
+	public getButton(): Frame & MyToolsGuiButton {
 		return this.gameUI.Tools.Buttons.Build;
 	}
 

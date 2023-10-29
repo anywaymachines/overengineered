@@ -1,5 +1,7 @@
+import AbstractCategory from "./AbstractCategory";
+
 export default abstract class AbstractBlock {
-	id: string;
+	public readonly id: string;
 
 	/**
 	 * @param id The id of the block `ExampleBlock`
@@ -13,4 +15,7 @@ export default abstract class AbstractBlock {
 
 	/** Must return the **block model** object that will be used for construction */
 	public abstract getModel(): Model;
+
+	/** Must return the **category* */
+	public abstract getCategory(): AbstractCategory | undefined;
 }

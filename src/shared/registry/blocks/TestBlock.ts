@@ -1,5 +1,7 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import AbstractBlock from "shared/registry/AbstractBlock";
+import AbstractCategory from "../AbstractCategory";
+import CategoriesRegistry from "../CategoriesRegistry";
 
 export default class TestBlock extends AbstractBlock {
 	constructor() {
@@ -12,5 +14,9 @@ export default class TestBlock extends AbstractBlock {
 
 	public getModel(): Model {
 		return ReplicatedStorage.Assets.Blocks.FindFirstChild("TestBlock") as Model;
+	}
+
+	public getCategory(): AbstractCategory {
+		return CategoriesRegistry.BLOCKS_CATEGORY;
 	}
 }

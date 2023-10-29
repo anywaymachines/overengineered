@@ -16,6 +16,7 @@ export default class AliveEventsHandler {
 		this.events.push(signal.Connect((_) => callback(_)));
 	}
 
+	/** Deletes and disables all events */
 	private static terminate() {
 		for (let i = 0; i < this.events.size(); i++) {
 			const event = this.events[i];

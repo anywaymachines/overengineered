@@ -9,7 +9,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 	// Variables
 	private blockHighlight: Highlight | undefined;
 
-	constructor(gameUI: GameUI) {
+	constructor(gameUI: MyGui) {
 		super(gameUI);
 	}
 

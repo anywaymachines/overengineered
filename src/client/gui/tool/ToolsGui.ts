@@ -9,7 +9,7 @@ import AliveEventsHandler from "client/AliveEventsHandler";
 import GameControls from "client/GameControls";
 
 export default class ToolsGui {
-	public gameUI: GameUI;
+	public gameUI: MyGui;
 
 	// Variables
 	public equippedTool: GuiAbstractTool | undefined;
@@ -19,7 +19,7 @@ export default class ToolsGui {
 	public buildTool: GuiBuildTool;
 	public deleteTool: GuiDeleteTool;
 
-	constructor(gameUI: GameUI) {
+	constructor(gameUI: MyGui) {
 		// Define tools gui
 		this.gameUI = gameUI;
 
@@ -90,7 +90,7 @@ export default class ToolsGui {
 		// Update buttons
 		this.gameUI.Tools.Buttons.GetChildren().forEach((child) => {
 			if (child.IsA("Frame")) {
-				(child as Frame & ToolsGuiButton).KeyboardButtonTooltip.Visible =
+				(child as Frame & MyToolsGuiButton).KeyboardButtonTooltip.Visible =
 					GameControls.getPlatform() === "Desktop";
 			}
 		});
@@ -104,7 +104,7 @@ export default class ToolsGui {
 
 		// PC
 		if (input.UserInputType === Enum.UserInputType.Keyboard) {
-			const tool = this.tools.find((value) => value.getEquipButton() === input.KeyCode);
+			const tool = this.tools.find((value) => value.getKeybind() === input.KeyCode);
 			if (tool) {
 				this.equipTool(tool);
 				return;
@@ -124,7 +124,7 @@ export default class ToolsGui {
 				const increment = isRight ? 1 : -1;
 				const tool = this.tools.find((tool) => {
 					assert(this.equippedTool, "");
-					return tool.getEquipButton().Value === this.equippedTool.getEquipButton().Value + increment;
+					return tool.getKeybind().Value === this.equippedTool.getKeybind().Value + increment;
 				});
 				if (tool) {
 					this.equipTool(tool);

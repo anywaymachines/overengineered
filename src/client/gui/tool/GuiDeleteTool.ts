@@ -6,7 +6,7 @@ import DeleteToolAPI from "client/tools/DeleteToolAPI";
 export default class GuiDeleteTool extends GuiAbstractTool {
 	private toolAPI: DeleteToolAPI;
 
-	constructor(gameUI: GameUI, toolsInterface: ToolsGui) {
+	constructor(gameUI: MyGui, toolsInterface: ToolsGui) {
 		super(gameUI, toolsInterface);
 
 		this.toolAPI = new DeleteToolAPI(gameUI);
@@ -22,12 +22,12 @@ export default class GuiDeleteTool extends GuiAbstractTool {
 
 	public onPlatformChanged(): void {}
 
-	public getEquipButton(): Enum.KeyCode {
+	public getKeybind(): Enum.KeyCode {
 		// Gamepad controls implementated in GuiAbstractTool
 		return Enum.KeyCode.Four;
 	}
 
-	public getButton(): Frame & ToolsGuiButton {
+	public getButton(): Frame & MyToolsGuiButton {
 		return this.gameUI.Tools.Buttons.Delete;
 	}
 

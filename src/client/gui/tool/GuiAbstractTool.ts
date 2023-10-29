@@ -5,10 +5,10 @@ import { UserInputService } from "@rbxts/services";
 
 export default abstract class GuiAbstractTool {
 	// GUIs
-	public gameUI: GameUI;
+	public gameUI: MyGui;
 	public toolsInterface: ToolsGui;
 
-	constructor(gameUI: GameUI, toolsInterface: ToolsGui) {
+	constructor(gameUI: MyGui, toolsInterface: ToolsGui) {
 		this.gameUI = gameUI;
 		this.toolsInterface = toolsInterface;
 
@@ -36,9 +36,9 @@ export default abstract class GuiAbstractTool {
 
 	public abstract getShortDescription(): string;
 
-	public abstract getEquipButton(): Enum.KeyCode;
+	public abstract getKeybind(): Enum.KeyCode;
 
-	public abstract getButton(): Frame & ToolsGuiButton;
+	public abstract getButton(): Frame & MyToolsGuiButton;
 
 	public terminate(): void {
 		script.Destroy();

@@ -1,3 +1,4 @@
+/** Killable EventHandler for roblox connections */
 export default class EventHandler {
 	private events: RBXScriptConnection[] = [];
 
@@ -9,6 +10,7 @@ export default class EventHandler {
 		this.events.push(signal.Connect((_) => callback(_)));
 	}
 
+	/** Deletes and disables all events */
 	public killAll() {
 		for (let i = 0; i < this.events.size(); i++) {
 			const event = this.events[i];

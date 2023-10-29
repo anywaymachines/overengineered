@@ -5,8 +5,8 @@ export default class GuiUtils {
 		return Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
 	}
 
-	public static getGameUI(): GameUI {
-		return this.getPlayerGui().WaitForChild("GameUI") as unknown as GameUI;
+	public static getGameUI(): MyGui {
+		return this.getPlayerGui().WaitForChild("GameUI") as unknown as MyGui;
 	}
 
 	public static isCursorOnVisibleGui(): boolean {

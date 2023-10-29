@@ -18,7 +18,7 @@ export default class BuildEvent {
 	}
 
 	private static playerPlaceBlock(player: Player, data: PlayerPlaceBlockRequest): BuildResponse {
-		if (!BlockRegistry.Blocks.has(data.block)) {
+		if (BlockRegistry.Blocks.has(data.block) === false) {
 			return {
 				success: false,
 				message: "Block not found",
