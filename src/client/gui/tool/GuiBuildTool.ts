@@ -14,16 +14,16 @@ export default class GuiBuildTool extends GuiAbstractTool {
 		this.toolAPI = new BuildToolAPI(gameUI);
 
 		// Register touchscreen controls
-		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildingGuiMobile.PlaceButton.MouseButton1Click, () =>
+		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildToolMobile.PlaceButton.MouseButton1Click, () =>
 			this.toolAPI.placeBlock(),
 		);
-		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildingGuiMobile.RotateRButton.MouseButton1Click, () =>
+		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildToolMobile.RotateRButton.MouseButton1Click, () =>
 			this.toolAPI.rotate(true, "r"),
 		);
-		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildingGuiMobile.RotateTButton.MouseButton1Click, () =>
+		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildToolMobile.RotateTButton.MouseButton1Click, () =>
 			this.toolAPI.rotate(true, "t"),
 		);
-		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildingGuiMobile.RotateYButton.MouseButton1Click, () =>
+		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildToolMobile.RotateYButton.MouseButton1Click, () =>
 			this.toolAPI.rotate(true, "y"),
 		);
 	}
@@ -33,7 +33,7 @@ export default class GuiBuildTool extends GuiAbstractTool {
 	}
 
 	public getShortDescription(): string {
-		return "Puts blocks in the world";
+		return "Put blocks in the world";
 	}
 
 	public getKeybind(): Enum.KeyCode {
@@ -42,7 +42,7 @@ export default class GuiBuildTool extends GuiAbstractTool {
 	}
 
 	public getButton(): Frame & MyToolsGuiButton {
-		return this.gameUI.Tools.Buttons.Build;
+		return this.gameUI.Tools.Build;
 	}
 
 	public onPlatformChanged(): void {
@@ -52,10 +52,10 @@ export default class GuiBuildTool extends GuiAbstractTool {
 
 		// Show building mobile controls
 		if (GameControls.getPlatform() === "Mobile") {
-			this.gameUI.BuildingGuiMobile.Visible = true;
-			GuiAnimations.fade(this.gameUI.BuildingGuiMobile, 0.1, "right", true);
+			this.gameUI.BuildToolMobile.Visible = true;
+			GuiAnimations.fade(this.gameUI.BuildToolMobile, 0.1, "right", true);
 		} else {
-			this.gameUI.BuildingGuiMobile.Visible = false;
+			this.gameUI.BuildToolMobile.Visible = false;
 		}
 
 		this.toolAPI.onPlatformChanged();
@@ -72,7 +72,7 @@ export default class GuiBuildTool extends GuiAbstractTool {
 		super.onUnequip();
 
 		// Hide mobile controls
-		this.gameUI.BuildingGuiMobile.Visible = false;
+		this.gameUI.BuildToolMobile.Visible = false;
 		this.toolAPI.unequip();
 	}
 

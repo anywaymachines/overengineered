@@ -19,17 +19,35 @@ export default class PlayerGameUI {
 		//this.BlocksSelectionGui = new BlocksSelectionGui(this.gameUI);
 
 		AliveEventsHandler.registerAliveEvent(UserInputService.InputChanged, () => this.onPlatformChanged());
+		this.updatePlatformGuis();
 	}
 
 	public static onPlatformChanged() {
 		// TODO: call platform changed using interfaces
 		const newPlatform = GameControls.getPlatform();
 		if (this.currentControlType !== newPlatform) {
-			this.currentControlType = GameControls.getPlatform();
-			this.ToolsGUI.onPlatformChanged();
-			Logger.info("[PlayerGameUI] Input type changed to " + newPlatform);
+			this.currentControlType = newPlatform;
+			this.updatePlatformGuis();
 
-			// TODO: Send notification about changing platform
+			Logger.info("[PlayerGameUI] Input type changed to " + this.currentControlType);
 		}
+	}
+
+	private static updatePlatformGuis() {
+		// Display gamepad tooltips
+		this.gameUI.GamepadTooltips.GetChildren().forEach((gui) => {
+			if (!gui.IsA("GuiObject")) {
+				return;
+			}
+			if (this.currentControlType === "Console") {
+				gui.Visible = true;
+			} else {
+				gui.Visible = false;
+			}
+		});
+
+		this.ToolsGUI.onPlatformChanged();
+
+		// TODO: Send notification about changing platform
 	}
 }

@@ -1,7 +1,15 @@
 interface MyGui {
+	GamepadTooltips: Folder;
 	Sounds: Folder & MyGuiSounds;
-	Tools: Frame & MyToolsGui;
-	BuildingGuiMobile: Frame & {
+	Tools: Frame & {
+		Build: Frame & MyToolsGuiButton;
+		Connect: Frame & MyToolsGuiButton;
+		Configure: Frame & MyToolsGuiButton;
+		Delete: Frame & MyToolsGuiButton;
+		Move: Frame & MyToolsGuiButton;
+		Paint: Frame & MyToolsGuiButton;
+	};
+	BuildToolMobile: Frame & {
 		PlaceButton: TextButton;
 		RotateRButton: TextButton;
 		RotateTButton: TextButton;
@@ -9,7 +17,6 @@ interface MyGui {
 	};
 	Blocks: Frame & MyBlocksGui;
 	BlocksCategories: Frame & MyBlocksCategoriesGui;
-	DeleteAllButton: TextButton;
 	CurrentToolLabel: TextLabel;
 	CurrentToolDescriptionLabel: TextLabel;
 }
@@ -31,17 +38,6 @@ interface MyBlocksGui {
 interface MyBlocksGuiButton {
 	ViewportFrame: ViewportFrame;
 	NameLabel: TextLabel;
-}
-
-interface MyToolsGui {
-	Buttons: Frame & {
-		Build: Frame & MyToolsGuiButton;
-		Connect: Frame & MyToolsGuiButton;
-		Configure: Frame & MyToolsGuiButton;
-		Delete: Frame & MyToolsGuiButton;
-		Move: Frame & MyToolsGuiButton;
-		Paint: Frame & MyToolsGuiButton;
-	};
 }
 
 interface MyGuiSounds {

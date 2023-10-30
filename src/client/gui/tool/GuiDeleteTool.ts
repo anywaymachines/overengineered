@@ -28,21 +28,18 @@ export default class GuiDeleteTool extends GuiAbstractTool {
 	}
 
 	public getButton(): Frame & MyToolsGuiButton {
-		return this.gameUI.Tools.Buttons.Delete;
+		return this.gameUI.Tools.Delete;
 	}
 
 	public onEquip(): void {
 		super.onEquip();
 
-		this.gameUI.DeleteAllButton.Visible = true;
-		GuiAnimations.fade(this.gameUI.DeleteAllButton, 0.1, "top");
 		this.toolAPI.equip();
 	}
 
 	public onUnequip(): void {
 		super.onUnequip();
 
-		this.gameUI.DeleteAllButton.Visible = false;
 		this.toolAPI.unequip();
 	}
 

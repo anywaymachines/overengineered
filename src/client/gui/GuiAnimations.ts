@@ -59,4 +59,10 @@ export default class GuiAnimations {
 		const tween = TweenService.Create(gui, new TweenInfo(time), info);
 		tween.Play();
 	}
+
+	public static tweenColor(gui: GuiObject, color: Color3, time: number) {
+		const info = { BackgroundColor3: color } as Partial<ExtractMembers<GuiBase, Tweenable>>;
+		const tween = TweenService.Create(gui, new TweenInfo(time), info);
+		tween.Play();
+	}
 }
