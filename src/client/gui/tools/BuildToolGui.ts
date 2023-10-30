@@ -1,31 +1,16 @@
 import BuildToolAPI from "client/tools/BuildToolAPI";
-import GuiAbstractTool from "./GuiAbstractTool";
-import ToolsGui from "./ToolsGui";
+import AbstractToolGui from "../abstract/AbstractToolGui";
+import ToolsGui from "../ToolsGui";
 import GuiAnimations from "../GuiAnimations";
-import AliveEventsHandler from "client/AliveEventsHandler";
 import GameControls from "client/GameControls";
 
-export default class GuiBuildTool extends GuiAbstractTool {
+export default class BuildToolGui extends AbstractToolGui {
 	private toolAPI: BuildToolAPI;
 
 	constructor(gameUI: MyGui, toolsInterface: ToolsGui) {
 		super(gameUI, toolsInterface);
 
 		this.toolAPI = new BuildToolAPI(gameUI);
-
-		// Register touchscreen controls
-		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildToolMobile.PlaceButton.MouseButton1Click, () =>
-			this.toolAPI.placeBlock(),
-		);
-		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildToolMobile.RotateRButton.MouseButton1Click, () =>
-			this.toolAPI.rotate(true, "r"),
-		);
-		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildToolMobile.RotateTButton.MouseButton1Click, () =>
-			this.toolAPI.rotate(true, "t"),
-		);
-		AliveEventsHandler.registerAliveEvent(this.gameUI.BuildToolMobile.RotateYButton.MouseButton1Click, () =>
-			this.toolAPI.rotate(true, "y"),
-		);
 	}
 
 	public getDisplayName(): string {
@@ -34,6 +19,13 @@ export default class GuiBuildTool extends GuiAbstractTool {
 
 	public getShortDescription(): string {
 		return "Put blocks in the world";
+	}
+
+	public getGamepadTooltips() {
+		return {
+			ButtonX: "Place",
+			ButtonB: "Unequip",
+		};
 	}
 
 	public getKeybind(): Enum.KeyCode {
@@ -53,11 +45,12 @@ export default class GuiBuildTool extends GuiAbstractTool {
 		// Show building mobile controls
 		if (GameControls.getPlatform() === "Mobile") {
 			this.gameUI.BuildToolMobile.Visible = true;
-			GuiAnimations.fade(this.gameUI.BuildToolMobile, 0.1, "right", true);
+			GuiAnimations.fade(this.gameUI.BuildToolMobile, 0.1, "right");
 		} else {
 			this.gameUI.BuildToolMobile.Visible = false;
 		}
 
+		// Call platform change on tool API
 		this.toolAPI.onPlatformChanged();
 	}
 
@@ -74,12 +67,5 @@ export default class GuiBuildTool extends GuiAbstractTool {
 		// Hide mobile controls
 		this.gameUI.BuildToolMobile.Visible = false;
 		this.toolAPI.unequip();
-	}
-
-	public onInput(input: InputObject): void {
-		// Place with gamepad button X
-		if (input.KeyCode === Enum.KeyCode.ButtonX) {
-			this.toolAPI.placeBlock();
-		}
 	}
 }

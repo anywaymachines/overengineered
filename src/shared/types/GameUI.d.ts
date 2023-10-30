@@ -1,5 +1,8 @@
 interface MyGui {
-	GamepadTooltips: Folder;
+	GamepadImageTooltips: Folder;
+	GamepadTextTooltips: Frame & {
+		Template: Frame & GamepadTextTooltipFrame;
+	};
 	Sounds: Folder & MyGuiSounds;
 	Tools: Frame & {
 		Build: Frame & MyToolsGuiButton;
@@ -19,6 +22,14 @@ interface MyGui {
 	BlocksCategories: Frame & MyBlocksCategoriesGui;
 	CurrentToolLabel: TextLabel;
 	CurrentToolDescriptionLabel: TextLabel;
+}
+
+type GamepadTextTooltipKeys = "ButtonA" | "ButtonB" | "ButtonY" | "ButtonX";
+type GamepadTextTooltip = Partial<Record<GamepadTextTooltipKeys, string | undefined>>;
+
+interface GamepadTextTooltipFrame {
+	ImageLabel: ImageLabel;
+	TextLabel: TextLabel;
 }
 
 interface MyBlocksCategoriesGui {

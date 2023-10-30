@@ -1,9 +1,8 @@
-import GuiAnimations from "../GuiAnimations";
-import GuiAbstractTool from "./GuiAbstractTool";
-import ToolsGui from "./ToolsGui";
+import AbstractToolGui from "../abstract/AbstractToolGui";
+import ToolsGui from "../ToolsGui";
 import DeleteToolAPI from "client/tools/DeleteToolAPI";
 
-export default class GuiDeleteTool extends GuiAbstractTool {
+export default class DeleteToolGui extends AbstractToolGui {
 	private toolAPI: DeleteToolAPI;
 
 	constructor(gameUI: MyGui, toolsInterface: ToolsGui) {
@@ -18,6 +17,10 @@ export default class GuiDeleteTool extends GuiAbstractTool {
 
 	public getShortDescription(): string {
 		return "Removes unnecessary blocks";
+	}
+
+	public getGamepadTooltips() {
+		return {};
 	}
 
 	public onPlatformChanged(): void {}

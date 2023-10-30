@@ -1,7 +1,6 @@
-import AliveEventsHandler from "client/AliveEventsHandler";
+import AliveEventsHandler from "client/event/AliveEventsHandler";
 import GuiAnimations from "../GuiAnimations";
-import ToolsGui from "./ToolsGui";
-import { UserInputService } from "@rbxts/services";
+import ToolsGui from "../ToolsGui";
 
 export default abstract class GuiAbstractTool {
 	// GUIs
@@ -18,7 +17,6 @@ export default abstract class GuiAbstractTool {
 		AliveEventsHandler.registerAliveEvent(this.getButton().ImageButton.MouseButton1Click, () =>
 			toolsInterface.equipTool(this),
 		);
-		AliveEventsHandler.registerAliveEvent(UserInputService.InputBegan, (input: InputObject) => this.onInput(input));
 	}
 
 	public onEquip(): void {
@@ -31,8 +29,6 @@ export default abstract class GuiAbstractTool {
 		GuiAnimations.tweenColor(this.getButton(), this.unequippedColor, 0.1);
 	}
 
-	public abstract onInput(input: InputObject): void;
-
 	public abstract onPlatformChanged(): void;
 
 	public abstract getDisplayName(): string;
@@ -40,6 +36,8 @@ export default abstract class GuiAbstractTool {
 	public abstract getShortDescription(): string;
 
 	public abstract getKeybind(): Enum.KeyCode;
+
+	public abstract getGamepadTooltips(): GamepadTextTooltip;
 
 	public abstract getButton(): Frame & MyToolsGuiButton;
 

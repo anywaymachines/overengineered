@@ -25,6 +25,7 @@
   "dependencies": {
     "@rbxts/crypto": "^1.2.1",
     "@rbxts/net": "^3.0.7",
-    "@rbxts/services": "^1.5.1"
+    "@rbxts/services": "^1.5.1",
+    "@rbxts/signal": "^1.1.1"
   }
 }

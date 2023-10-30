@@ -1,5 +1,5 @@
 import BlockRegistry from "shared/registry/BlocksRegistry";
-import AbstractToolAPI from "./AbstractToolAPI";
+import AbstractToolAPI from "../gui/abstract/AbstractToolAPI";
 import AbstractBlock from "shared/registry/AbstractBlock";
 import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
 import PartUtils from "shared/utils/PartUtils";
@@ -123,9 +123,6 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		this.addAxes();
 		this.addHighlight();
 		PartUtils.ghostModel(this.previewBlock);
-
-		// Events
-		this.eventHandler.registerEvent(UserInputService.InputBegan, (input) => this.onUserInput(input));
 	}
 
 	public unequip(): void {
@@ -145,6 +142,9 @@ export default class BuildToolAPI extends AbstractToolAPI {
 				this.rotate(GameControls.isShiftPressed(), "y");
 			}
 		} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
+			if (input.KeyCode === Enum.KeyCode.ButtonX) {
+				this.placeBlock();
+			}
 			// TODO: Gamepad rotation
 		} else if (input.UserInputType === Enum.UserInputType.Touch) {
 			this.updatePosition();
@@ -152,21 +152,37 @@ export default class BuildToolAPI extends AbstractToolAPI {
 	}
 
 	public onPlatformChanged(): void {
-		this.eventHandler.killAll();
+		Logger.info("[BuildToolAPI] Setting up events");
+		super.onPlatformChanged();
+
+		// Touchscreen controls
+		this.eventHandler.registerEvent(
+			this.gameUI.BuildToolMobile.PlaceButton.MouseButton1Click.Connect(() => this.placeBlock()),
+		);
+		this.eventHandler.registerEvent(
+			this.gameUI.BuildToolMobile.RotateRButton.MouseButton1Click.Connect(() => this.rotate(true, "r")),
+		);
+		this.eventHandler.registerEvent(
+			this.gameUI.BuildToolMobile.RotateTButton.MouseButton1Click.Connect(() => this.rotate(true, "t")),
+		);
+		this.eventHandler.registerEvent(
+			this.gameUI.BuildToolMobile.RotateYButton.MouseButton1Click.Connect(() => this.rotate(true, "y")),
+		);
 
 		switch (GameControls.getPlatform()) {
 			case "Desktop":
-				this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
-				this.eventHandler.registerEvent(this.mouse.Button1Down, async () => await this.placeBlock());
+				this.eventHandler.registerEvent(this.mouse.Move.Connect(() => this.updatePosition()));
+				this.eventHandler.registerEvent(this.mouse.Button1Down.Connect(async () => await this.placeBlock()));
 				break;
 			case "Console":
 				this.eventHandler.registerEvent(
-					(Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame"),
-					() => this.updatePosition(),
+					(Workspace.CurrentCamera as Camera)
+						.GetPropertyChangedSignal("CFrame")
+						.Connect(() => this.updatePosition()),
 				);
 				break;
 			case "Mobile":
-				this.eventHandler.registerEvent(UserInputService.TouchStarted, (_) => this.updatePosition());
+				this.eventHandler.registerEvent(UserInputService.TouchStarted.Connect((_) => this.updatePosition()));
 				break;
 			default:
 				break;

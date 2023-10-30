@@ -1,12 +1,13 @@
 import { Players, UserInputService } from "@rbxts/services";
-import GuiAbstractTool from "./GuiAbstractTool";
-import GuiBuildTool from "./GuiBuildTool";
-import GuiAnimations from "../GuiAnimations";
+import GuiAbstractTool from "./abstract/AbstractToolGui";
+import BuildToolGui from "./tools/BuildToolGui";
+import GuiAnimations from "./GuiAnimations";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import Logger from "shared/Logger";
-import GuiDeleteTool from "./GuiDeleteTool";
-import AliveEventsHandler from "client/AliveEventsHandler";
+import DeleteToolGui from "./tools/DeleteToolGui";
+import AliveEventsHandler from "client/event/AliveEventsHandler";
 import GameControls from "client/GameControls";
+import ClientSignals from "client/ClientSignals";
 
 export default class ToolsGui {
 	public gameUI: MyGui;
@@ -16,16 +17,16 @@ export default class ToolsGui {
 
 	// Tools
 	public tools: GuiAbstractTool[] = [];
-	public buildTool: GuiBuildTool;
-	public deleteTool: GuiDeleteTool;
+	public buildTool: BuildToolGui;
+	public deleteTool: DeleteToolGui;
 
 	constructor(gameUI: MyGui) {
 		// Define tools gui
 		this.gameUI = gameUI;
 
 		// Tools API
-		this.buildTool = new GuiBuildTool(gameUI, this);
-		this.deleteTool = new GuiDeleteTool(gameUI, this);
+		this.buildTool = new BuildToolGui(gameUI, this);
+		this.deleteTool = new DeleteToolGui(gameUI, this);
 		this.buildTool.onUnequip();
 		this.deleteTool.onUnequip();
 		this.tools.push(this.buildTool);
@@ -54,6 +55,7 @@ export default class ToolsGui {
 
 		// Call unequip of current tool
 		if (this.equippedTool !== undefined) {
+			ClientSignals.TOOL_UNEQUIPED.Fire(this.equippedTool);
 			this.equippedTool.onUnequip();
 		}
 
@@ -61,18 +63,22 @@ export default class ToolsGui {
 
 		// Call equip of a new tool
 		if (this.equippedTool !== undefined) {
+			ClientSignals.TOOL_EQUIPED.Fire(this.equippedTool);
 			this.equippedTool.onEquip();
 		}
 
 		// State GUI change
 		if (this.equippedTool !== undefined) {
-			GuiAnimations.fade(this.gameUI.CurrentToolLabel, 0.2, "down");
-			GuiAnimations.fade(this.gameUI.CurrentToolDescriptionLabel, 0.2, "down");
+			GuiAnimations.fade(this.gameUI.CurrentToolLabel, 0.2, "up");
+			GuiAnimations.fade(this.gameUI.CurrentToolDescriptionLabel, 0.2, "up");
+			GuiAnimations.tweenTransparency(this.gameUI.CurrentToolLabel, 0, 0.2);
+			GuiAnimations.tweenTransparency(this.gameUI.CurrentToolDescriptionLabel, 0, 0.2);
+
 			this.gameUI.CurrentToolLabel.Text = this.equippedTool.getDisplayName();
 			this.gameUI.CurrentToolDescriptionLabel.Text = this.equippedTool.getShortDescription();
 		} else {
-			this.gameUI.CurrentToolLabel.Text = "";
-			this.gameUI.CurrentToolDescriptionLabel.Text = "";
+			GuiAnimations.tweenTransparency(this.gameUI.CurrentToolLabel, 1, 0.1);
+			GuiAnimations.tweenTransparency(this.gameUI.CurrentToolDescriptionLabel, 1, 0.1);
 		}
 
 		// Play sound
@@ -90,8 +96,14 @@ export default class ToolsGui {
 		// Update buttons
 		this.gameUI.Tools.GetChildren().forEach((child) => {
 			if (child.IsA("Frame")) {
-				(child as Frame & MyToolsGuiButton).KeyboardButtonTooltip.Visible =
-					GameControls.getPlatform() === "Desktop";
+				const tooltip = (child as Frame & MyToolsGuiButton).KeyboardButtonTooltip;
+				if (GameControls.getPlatform() === "Desktop") {
+					GuiAnimations.fade(tooltip, 0.1, "down");
+					GuiAnimations.tweenTransparency(tooltip, 0, 0.1);
+				} else {
+					GuiAnimations.tweenTransparency(tooltip, 1, 0.1);
+					//tooltip.Visible = false;
+				}
 			}
 		});
 	}

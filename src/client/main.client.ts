@@ -1,7 +1,7 @@
 import { Players } from "@rbxts/services";
 import SharedLoader from "shared/SharedLoader";
 import PlayerGameUI from "./gui/PlayerGameUI";
-import AliveEventsHandler from "./AliveEventsHandler";
+import AliveEventsHandler from "./event/AliveEventsHandler";
 
 function initialize() {
 	// Initializing shared components

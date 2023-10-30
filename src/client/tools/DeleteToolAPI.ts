@@ -3,7 +3,7 @@ import Logger from "shared/Logger";
 import Remotes from "shared/NetworkDefinitions";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
-import AbstractToolAPI from "./AbstractToolAPI";
+import AbstractToolAPI from "../gui/abstract/AbstractToolAPI";
 
 export default class DeleteToolAPI extends AbstractToolAPI {
 	// Variables
@@ -15,8 +15,8 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 	public equip() {
 		// Events
-		this.eventHandler.registerEvent(this.mouse.Button1Down, () => this.onMouseClick());
-		this.eventHandler.registerEvent(this.mouse.Move, () => this.onMouseMove());
+		this.eventHandler.registerEvent(this.mouse.Button1Down.Connect(() => this.onMouseClick()));
+		this.eventHandler.registerEvent(this.mouse.Move.Connect(() => this.onMouseMove()));
 	}
 
 	public async onMouseClick() {

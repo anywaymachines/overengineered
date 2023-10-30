@@ -1,5 +1,6 @@
 import { Players, UserInputService } from "@rbxts/services";
-import EventHandler from "client/EventHandler";
+import EventHandler from "client/event/EventHandler";
+import Logger from "shared/Logger";
 
 /** A class for implementing the API for tools */
 export default abstract class AbstractToolAPI {
@@ -24,16 +25,20 @@ export default abstract class AbstractToolAPI {
 	public abstract onUserInput(input: InputObject): void;
 
 	/** Callback when the platform has changed, for example `PC -> Console` or `Mobile -> Console` */
-	public abstract onPlatformChanged(): void;
+	public onPlatformChanged(): void {
+		this.eventHandler.killAll();
+		this.eventHandler.registerEvent(UserInputService.InputBegan.Connect((input) => this.onUserInput(input)));
+	}
 
 	/** Activating the tool */
 	public equip(): void {
+		Logger.info("Tool equipped");
 		this.equipped = true;
-		this.eventHandler.registerEvent(UserInputService.InputBegan, (input) => this.onUserInput(input));
 	}
 
 	/** Deactivating the tool */
 	public unequip(): void {
+		Logger.info("Tool unequipped");
 		this.equipped = false;
 		this.eventHandler.killAll();
 	}
