@@ -50,7 +50,7 @@ export default class GamepadTooltips {
 		});
 	}
 
-	public onControlChanged() {
+	public onPlatformChanged() {
 		if (GameControls.getPlatform() === "Console") {
 			this.showImages();
 		} else {

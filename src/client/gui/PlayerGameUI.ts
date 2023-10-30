@@ -36,7 +36,7 @@ export default class PlayerGameUI {
 	private static updatePlatformGuis() {
 		// Display gamepad tooltips
 		this.ToolsGUI.onPlatformChanged();
-		this.gamepadTooltips.onControlChanged();
+		this.gamepadTooltips.onPlatformChanged();
 
 		// TODO: Send notification about changing platform
 	}

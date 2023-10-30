@@ -156,33 +156,32 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		super.onPlatformChanged();
 
 		// Touchscreen controls
-		this.eventHandler.registerEvent(
-			this.gameUI.BuildToolMobile.PlaceButton.MouseButton1Click.Connect(() => this.placeBlock()),
+		this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.PlaceButton.MouseButton1Click, () =>
+			this.placeBlock(),
 		);
-		this.eventHandler.registerEvent(
-			this.gameUI.BuildToolMobile.RotateRButton.MouseButton1Click.Connect(() => this.rotate(true, "r")),
+		this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.RotateRButton.MouseButton1Click, () =>
+			this.rotate(true, "r"),
 		);
-		this.eventHandler.registerEvent(
-			this.gameUI.BuildToolMobile.RotateTButton.MouseButton1Click.Connect(() => this.rotate(true, "t")),
+		this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.RotateTButton.MouseButton1Click, () =>
+			this.rotate(true, "t"),
 		);
-		this.eventHandler.registerEvent(
-			this.gameUI.BuildToolMobile.RotateYButton.MouseButton1Click.Connect(() => this.rotate(true, "y")),
+		this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.RotateYButton.MouseButton1Click, () =>
+			this.rotate(true, "y"),
 		);
 
 		switch (GameControls.getPlatform()) {
 			case "Desktop":
-				this.eventHandler.registerEvent(this.mouse.Move.Connect(() => this.updatePosition()));
-				this.eventHandler.registerEvent(this.mouse.Button1Down.Connect(async () => await this.placeBlock()));
+				this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
+				this.eventHandler.registerEvent(this.mouse.Button1Down, async () => await this.placeBlock());
 				break;
 			case "Console":
 				this.eventHandler.registerEvent(
-					(Workspace.CurrentCamera as Camera)
-						.GetPropertyChangedSignal("CFrame")
-						.Connect(() => this.updatePosition()),
+					(Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame"),
+					() => this.updatePosition(),
 				);
 				break;
 			case "Mobile":
-				this.eventHandler.registerEvent(UserInputService.TouchStarted.Connect((_) => this.updatePosition()));
+				this.eventHandler.registerEvent(UserInputService.TouchStarted, (_) => this.updatePosition());
 				break;
 			default:
 				break;

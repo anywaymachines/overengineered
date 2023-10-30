@@ -15,8 +15,8 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 	public equip() {
 		// Events
-		this.eventHandler.registerEvent(this.mouse.Button1Down.Connect(() => this.onMouseClick()));
-		this.eventHandler.registerEvent(this.mouse.Move.Connect(() => this.onMouseMove()));
+		this.eventHandler.registerEvent(this.mouse.Button1Down, () => this.onMouseClick());
+		this.eventHandler.registerEvent(this.mouse.Move, () => this.onMouseMove());
 	}
 
 	public async onMouseClick() {
