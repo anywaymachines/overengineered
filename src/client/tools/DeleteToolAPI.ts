@@ -1,98 +1,75 @@
-import { Players, Workspace } from "@rbxts/services";
-import Logger from "shared/Logger";
-import Remotes from "shared/NetworkDefinitions";
-import BuildingManager from "shared/building/BuildingManager";
-import SharedPlots from "shared/building/SharedPlots";
-import AbstractToolAPI from "../gui/abstract/AbstractToolAPI";
 import GameControls from "client/GameControls";
+import AbstractToolAPI from "../gui/abstract/AbstractToolAPI";
+import ClientSignals from "client/ClientSignals";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import GuiUtils from "client/utils/GuiUtils";
-import GuiAnimations from "client/gui/GuiAnimations";
+import { Players, Workspace } from "@rbxts/services";
+import SharedPlots from "shared/building/SharedPlots";
+import BuildingManager from "shared/building/BuildingManager";
+import Remotes from "shared/NetworkDefinitions";
 import SoundUtils from "shared/utils/SoundUtils";
+import Logger from "shared/Logger";
+import GuiAnimations from "client/gui/GuiAnimations";
 
 export default class DeleteToolAPI extends AbstractToolAPI {
-	// Variables
-	public blockHighlight: Highlight | undefined;
+	public highlight?: Highlight;
 
-	constructor(gameUI: MyGui) {
-		super(gameUI);
+	public hideAllGUIs() {
+		this.gameUI.ToolsGui.DeleteAllButton.Visible = false;
+		this.gameUI.TouchControls.DeleteTool.Visible = false;
 	}
 
-	public equip() {
-		super.equip();
+	public updateGui(firstTime: boolean = false) {
+		const platform = GameControls.getPlatform();
 
-		this.updateMobileButtons();
-	}
+		// Prepare GUIs
+		this.hideAllGUIs();
 
-	public async deleteBlock() {
-		// ERROR: No block selected
-		if (this.blockHighlight === undefined) {
-			return;
+		if (platform === "Touch" && this.highlight !== undefined) {
+			this.gameUI.TouchControls.DeleteTool.Visible = true;
+			GuiAnimations.fade(this.gameUI.TouchControls.DeleteTool, 0.1, "left");
 		}
 
-		// Send block removing packet
-		const response = await Remotes.Client.GetNamespace("Building")
-			.Get("PlayerDeleteBlock")
-			.CallServerAsync({
-				block: this.blockHighlight.Parent as Model,
-			});
-
-		// Parsing response
-		if (response.success) {
-			// Block removed
-			task.wait();
-
-			this.gameUI.Sounds.Building.BlockDelete.PlaybackSpeed = SoundUtils.randomSoundSpeed();
-			this.gameUI.Sounds.Building.BlockDelete.Play();
-
-			this.blockHighlight = undefined;
-
-			this.updateMobileButtons();
-		} else {
-			// Block not removed
-			Logger.info("[DELETING] Block deleting failed: " + response.message);
-		}
-	}
-
-	public onUserInput(input: InputObject): void {
-		if (input.UserInputType === Enum.UserInputType.Gamepad1) {
-			if (input.KeyCode === Enum.KeyCode.ButtonX) {
-				// ButtonX to Remove
-				this.deleteBlock();
+		// Hide delete all button for console (used ButtonY)
+		if (platform !== "Console") {
+			this.gameUI.ToolsGui.DeleteAllButton.Visible = true;
+			if (firstTime) {
+				GuiAnimations.fade(this.gameUI.ToolsGui.DeleteAllButton, 0.1, "down");
 			}
-		} else if (input.UserInputType === Enum.UserInputType.Touch) {
-			// Touch to update position
-			this.updatePosition();
 		}
 	}
 
 	public onPlatformChanged(): void {
 		super.onPlatformChanged();
 
-		// The best way at the moment
-		this.removeHighlight();
-
-		this.setupEvents();
-	}
-
-	public setupEvents() {
-		Logger.info("[DeleteToolAPI] Setting up events");
+		this.updateGui(true);
 
 		const platform = GameControls.getPlatform();
-		if (platform === "Mobile") {
-			this.eventHandler.registerEvent(this.gameUI.DeleteToolMobile.DeleteButton.MouseButton1Click, () =>
-				this.deleteBlock(),
-			);
-		} else {
-			if (platform === "Desktop") {
-				this.eventHandler.registerEvent(this.mouse.Button1Down, () => this.deleteBlock());
-				this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
-			} else if (platform === "Console") {
+
+		// Initialize events
+		switch (platform) {
+			case "Touch":
+				// Prepare touch events
 				this.eventHandler.registerEvent(
-					(Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame"),
-					() => this.updatePosition(),
+					this.gameUI.TouchControls.DeleteTool.DeleteButton.MouseButton1Click,
+					() => this.use(),
 				);
-			}
+				break;
+
+			case "Console":
+				// Prepare console events
+				this.eventHandler.registerEvent(ClientSignals.CAMERA_MOVED, () => this.updatePosition());
+				break;
+
+			case "Desktop":
+				// Prepare desktop events
+				this.eventHandler.registerEvent(this.mouse.Button1Down, () => this.use());
+				this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
+				break;
+
+			default:
+				// Unsupported
+				break;
 		}
 	}
 
@@ -114,11 +91,9 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 		const target = this.mouse.Target;
 
-		if (this.blockHighlight !== undefined) {
-			this.blockHighlight.Destroy();
-
-			this.updateMobileButtons();
-		}
+		this.highlight?.Destroy();
+		this.highlight = undefined;
+		this.updateGui();
 
 		// ERROR: Mouse is in space
 		if (target === undefined) {
@@ -142,32 +117,64 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 			return;
 		}
 
-		this.blockHighlight = new Instance("Highlight");
-		this.blockHighlight.Parent = target.Parent;
-		this.blockHighlight.Adornee = target.Parent;
-		this.updateMobileButtons();
+		this.highlight = new Instance("Highlight");
+		this.highlight.Parent = target.Parent;
+		this.highlight.Adornee = target.Parent;
+		this.updateGui();
 	}
 
-	public updateMobileButtons() {
-		// Show building mobile controls
-		if (GameControls.getPlatform() === "Mobile" && this.blockHighlight !== undefined && this.isEquipped()) {
-			this.gameUI.DeleteToolMobile.Visible = true;
-			GuiAnimations.fade(this.gameUI.DeleteToolMobile, 0.1, "right");
+	public async use() {
+		// ERROR: No block selected
+		if (this.highlight === undefined) {
+			return;
+		}
+
+		// Send block removing packet
+		const response = await Remotes.Client.GetNamespace("Building")
+			.Get("PlayerDeleteBlock")
+			.CallServerAsync({
+				block: this.highlight.Parent as Model,
+			});
+
+		// Parsing response
+		if (response.success) {
+			// Block removed
+			task.wait();
+
+			this.gameUI.Sounds.Building.BlockDelete.PlaybackSpeed = SoundUtils.randomSoundSpeed();
+			this.gameUI.Sounds.Building.BlockDelete.Play();
+
+			this.highlight = undefined;
+
+			this.updateGui();
 		} else {
-			this.gameUI.DeleteToolMobile.Visible = false;
+			// Block not removed
+			Logger.info("[DELETING] Block deleting failed: " + response.message);
 		}
 	}
 
-	public removeHighlight() {
-		if (this.blockHighlight !== undefined) {
-			this.blockHighlight.Destroy();
+	public onUserInput(input: InputObject): void {
+		if (input.UserInputType === Enum.UserInputType.Gamepad1) {
+			if (input.KeyCode === Enum.KeyCode.ButtonX) {
+				// ButtonX to Remove
+				this.use();
+			}
+		} else if (input.UserInputType === Enum.UserInputType.Touch) {
+			// Touch to update position
+			this.updatePosition();
 		}
 	}
 
-	public unequip() {
+	public equip(): void {
+		super.equip();
+
+		this.updatePosition();
+	}
+
+	public unequip(): void {
 		super.unequip();
 
-		this.removeHighlight();
-		this.updateMobileButtons();
+		this.hideAllGUIs();
+		this.highlight?.Destroy();
 	}
 }

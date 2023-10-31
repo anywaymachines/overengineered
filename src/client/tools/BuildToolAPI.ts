@@ -125,13 +125,15 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		this.addAxes();
 		this.addHighlight();
 		PartUtils.ghostModel(this.previewBlock);
+
+		this.updatePosition();
 	}
 
 	public unequip(): void {
 		super.unequip();
 
 		// Hide mobile controls
-		this.gameUI.BuildToolMobile.Visible = false;
+		this.gameUI.TouchControls.BuildTool.Visible = false;
 
 		this.previewBlock?.Destroy();
 	}
@@ -160,11 +162,11 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		super.onPlatformChanged();
 
 		// Show building mobile controls
-		if (GameControls.getPlatform() === "Mobile") {
-			this.gameUI.BuildToolMobile.Visible = true;
-			GuiAnimations.fade(this.gameUI.BuildToolMobile, 0.1, "right");
+		if (GameControls.getPlatform() === "Touch") {
+			this.gameUI.TouchControls.BuildTool.Visible = true;
+			GuiAnimations.fade(this.gameUI.TouchControls.BuildTool, 0.1, "right");
 		} else {
-			this.gameUI.BuildToolMobile.Visible = false;
+			this.gameUI.TouchControls.BuildTool.Visible = false;
 		}
 
 		this.setupEvents();
@@ -183,19 +185,22 @@ export default class BuildToolAPI extends AbstractToolAPI {
 					() => this.updatePosition(),
 				);
 				break;
-			case "Mobile":
+			case "Touch":
 				// Touchscreen controls
-				this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.PlaceButton.MouseButton1Click, () =>
+				this.eventHandler.registerEvent(this.gameUI.TouchControls.BuildTool.PlaceButton.MouseButton1Click, () =>
 					this.placeBlock(),
 				);
-				this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.RotateRButton.MouseButton1Click, () =>
-					this.rotate(true, "r"),
+				this.eventHandler.registerEvent(
+					this.gameUI.TouchControls.BuildTool.RotateRButton.MouseButton1Click,
+					() => this.rotate(true, "r"),
 				);
-				this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.RotateTButton.MouseButton1Click, () =>
-					this.rotate(true, "t"),
+				this.eventHandler.registerEvent(
+					this.gameUI.TouchControls.BuildTool.RotateTButton.MouseButton1Click,
+					() => this.rotate(true, "t"),
 				);
-				this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.RotateYButton.MouseButton1Click, () =>
-					this.rotate(true, "y"),
+				this.eventHandler.registerEvent(
+					this.gameUI.TouchControls.BuildTool.RotateYButton.MouseButton1Click,
+					() => this.rotate(true, "y"),
 				);
 				this.eventHandler.registerEvent(UserInputService.TouchStarted, (_) => this.updatePosition());
 				break;

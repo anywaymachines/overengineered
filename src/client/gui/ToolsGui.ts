@@ -1,10 +1,10 @@
 import { Players, UserInputService } from "@rbxts/services";
 import AbstractToolMeta from "./abstract/AbstractToolMeta";
-import BuildToolMeta from "./tools/BuildToolMeta";
+import BuildToolMeta from "../tools/BuildToolMeta";
 import GuiAnimations from "./GuiAnimations";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import Logger from "shared/Logger";
-import DeleteToolGui from "./tools/DeleteToolMeta";
+import DeleteToolGui from "../tools/DeleteToolMeta";
 import AliveEventsHandler from "client/event/AliveEventsHandler";
 import GameControls from "client/GameControls";
 import ClientSignals from "client/ClientSignals";

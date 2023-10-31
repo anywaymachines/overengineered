@@ -1,5 +1,5 @@
-import AbstractToolMeta from "../abstract/AbstractToolMeta";
-import ToolsGui from "../ToolsGui";
+import AbstractToolMeta from "../gui/abstract/AbstractToolMeta";
+import ToolsGui from "../gui/ToolsGui";
 import DeleteToolAPI from "client/tools/DeleteToolAPI";
 
 export default class DeleteToolGui extends AbstractToolMeta {
@@ -19,6 +19,7 @@ export default class DeleteToolGui extends AbstractToolMeta {
 
 	public getGamepadTooltips() {
 		return {
+			ButtonY: "Clear all",
 			ButtonX: "Delete",
 			ButtonB: "Unequip",
 		};

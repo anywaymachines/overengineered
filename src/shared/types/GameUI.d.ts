@@ -1,9 +1,31 @@
 interface MyGui {
 	GamepadImageTooltips: Folder;
+	Sounds: Folder & MyGuiSounds;
+	TouchControls: Folder & {
+		BuildTool: Frame & {
+			PlaceButton: TextButton;
+			RotateRButton: TextButton;
+			RotateTButton: TextButton;
+			RotateYButton: TextButton;
+		};
+		DeleteTool: Frame & {
+			DeleteButton: TextButton;
+		};
+	};
+	ToolsGui: Folder & {
+		DeleteAllButton: TextButton;
+	};
 	GamepadTextTooltips: Frame & {
 		Template: Frame & GamepadTextTooltipFrame;
 	};
-	Sounds: Folder & MyGuiSounds;
+	ConfirmationWindow: Frame & {
+		Answers: Frame & {
+			YesButton: TextButton;
+			NoButton: TextButton;
+		};
+		HeadingLabel: TextLabel;
+		DescriptionLabel: TextLabel;
+	};
 	Tools: Frame & {
 		Build: Frame & MyToolsGuiButton;
 		Connect: Frame & MyToolsGuiButton;
@@ -12,17 +34,6 @@ interface MyGui {
 		Move: Frame & MyToolsGuiButton;
 		Paint: Frame & MyToolsGuiButton;
 	};
-	BuildToolMobile: Frame & {
-		PlaceButton: TextButton;
-		RotateRButton: TextButton;
-		RotateTButton: TextButton;
-		RotateYButton: TextButton;
-	};
-	DeleteToolMobile: Frame & {
-		DeleteButton: TextButton;
-	};
-	Blocks: Frame & MyBlocksGui;
-	BlocksCategories: Frame & MyBlocksCategoriesGui;
 	CurrentToolLabel: TextLabel;
 	CurrentToolDescriptionLabel: TextLabel;
 }
@@ -33,25 +44,6 @@ type GamepadTextTooltip = Partial<Record<GamepadTextTooltipKeys, string | undefi
 interface GamepadTextTooltipFrame {
 	ImageLabel: ImageLabel;
 	TextLabel: TextLabel;
-}
-
-interface MyBlocksCategoriesGui {
-	Buttons: ScrollingFrame & {
-		UIListLayout: UIListLayout;
-		Template: TextButton;
-	};
-}
-
-interface MyBlocksGui {
-	Buttons: ScrollingFrame & {
-		UIListLayout: UIListLayout;
-		Template: TextButton & MyBlocksGuiButton;
-	};
-}
-
-interface MyBlocksGuiButton {
-	ViewportFrame: ViewportFrame;
-	NameLabel: TextLabel;
 }
 
 interface MyGuiSounds {

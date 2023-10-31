@@ -12,7 +12,7 @@ export default class GamepadTooltips {
 	private assetIDs = {
 		ButtonA: "15216507754",
 		ButtonB: "15216552197",
-		ButtonY: "15216504693",
+		ButtonY: "15216504649",
 		ButtonX: "15216505617",
 	};
 

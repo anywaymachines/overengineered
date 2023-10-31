@@ -1,6 +1,6 @@
 import BuildToolAPI from "client/tools/BuildToolAPI";
-import ToolsGui from "../ToolsGui";
-import AbstractToolMeta from "../abstract/AbstractToolMeta";
+import ToolsGui from "../gui/ToolsGui";
+import AbstractToolMeta from "../gui/abstract/AbstractToolMeta";
 
 export default class BuildToolMeta extends AbstractToolMeta {
 	constructor(gameUI: MyGui, toolsInterface: ToolsGui) {
