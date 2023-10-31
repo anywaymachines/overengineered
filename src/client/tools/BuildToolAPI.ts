@@ -152,23 +152,13 @@ export default class BuildToolAPI extends AbstractToolAPI {
 	}
 
 	public onPlatformChanged(): void {
-		Logger.info("[BuildToolAPI] Setting up events");
 		super.onPlatformChanged();
 
-		// Touchscreen controls
-		this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.PlaceButton.MouseButton1Click, () =>
-			this.placeBlock(),
-		);
-		this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.RotateRButton.MouseButton1Click, () =>
-			this.rotate(true, "r"),
-		);
-		this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.RotateTButton.MouseButton1Click, () =>
-			this.rotate(true, "t"),
-		);
-		this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.RotateYButton.MouseButton1Click, () =>
-			this.rotate(true, "y"),
-		);
+		this.setupEvents();
+	}
 
+	public setupEvents() {
+		Logger.info("[BuildToolAPI] Setting up events");
 		switch (GameControls.getPlatform()) {
 			case "Desktop":
 				this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
@@ -181,6 +171,19 @@ export default class BuildToolAPI extends AbstractToolAPI {
 				);
 				break;
 			case "Mobile":
+				// Touchscreen controls
+				this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.PlaceButton.MouseButton1Click, () =>
+					this.placeBlock(),
+				);
+				this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.RotateRButton.MouseButton1Click, () =>
+					this.rotate(true, "r"),
+				);
+				this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.RotateTButton.MouseButton1Click, () =>
+					this.rotate(true, "t"),
+				);
+				this.eventHandler.registerEvent(this.gameUI.BuildToolMobile.RotateYButton.MouseButton1Click, () =>
+					this.rotate(true, "y"),
+				);
 				this.eventHandler.registerEvent(UserInputService.TouchStarted, (_) => this.updatePosition());
 				break;
 			default:

@@ -20,13 +20,22 @@ export default class DeleteToolGui extends AbstractToolGui {
 	}
 
 	public getGamepadTooltips() {
-		return {};
+		return {
+			ButtonX: "Delete",
+			ButtonB: "Unequip",
+		};
 	}
 
-	public onPlatformChanged(): void {}
+	public onPlatformChanged(): void {
+		if (!this.toolAPI.isEquipped()) {
+			return;
+		}
+
+		// Call platform change on tool API
+		this.toolAPI.onPlatformChanged();
+	}
 
 	public getKeybind(): Enum.KeyCode {
-		// Gamepad controls implementated in GuiAbstractTool
 		return Enum.KeyCode.Four;
 	}
 
@@ -38,6 +47,7 @@ export default class DeleteToolGui extends AbstractToolGui {
 		super.onEquip();
 
 		this.toolAPI.equip();
+		this.onPlatformChanged();
 	}
 
 	public onUnequip(): void {
@@ -45,6 +55,4 @@ export default class DeleteToolGui extends AbstractToolGui {
 
 		this.toolAPI.unequip();
 	}
-
-	public onInput(input: InputObject): void {}
 }

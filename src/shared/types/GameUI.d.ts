@@ -18,6 +18,9 @@ interface MyGui {
 		RotateTButton: TextButton;
 		RotateYButton: TextButton;
 	};
+	DeleteToolMobile: Frame & {
+		DeleteButton: TextButton;
+	};
 	Blocks: Frame & MyBlocksGui;
 	BlocksCategories: Frame & MyBlocksCategoriesGui;
 	CurrentToolLabel: TextLabel;
@@ -56,6 +59,7 @@ interface MyGuiSounds {
 		BlockPlace: Sound;
 		BlockPlaceError: Sound;
 		BlockRotate: Sound;
+		BlockDelete: Sound;
 	};
 	GuiClick: Sound;
 }

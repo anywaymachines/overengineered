@@ -29,7 +29,6 @@ export default class BuildToolGui extends AbstractToolGui {
 	}
 
 	public getKeybind(): Enum.KeyCode {
-		// Gamepad controls implementated in GuiAbstractTool
 		return Enum.KeyCode.One;
 	}
 

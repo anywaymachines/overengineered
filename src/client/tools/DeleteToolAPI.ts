@@ -4,22 +4,26 @@ import Remotes from "shared/NetworkDefinitions";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import AbstractToolAPI from "../gui/abstract/AbstractToolAPI";
+import GameControls from "client/GameControls";
+import PlayerUtils from "shared/utils/PlayerUtils";
+import GuiUtils from "client/utils/GuiUtils";
+import GuiAnimations from "client/gui/GuiAnimations";
 
 export default class DeleteToolAPI extends AbstractToolAPI {
 	// Variables
-	private blockHighlight: Highlight | undefined;
+	public blockHighlight: Highlight | undefined;
 
 	constructor(gameUI: MyGui) {
 		super(gameUI);
 	}
 
 	public equip() {
-		// Events
-		this.eventHandler.registerEvent(this.mouse.Button1Down, () => this.onMouseClick());
-		this.eventHandler.registerEvent(this.mouse.Move, () => this.onMouseMove());
+		super.equip();
+
+		this.updateMobileButtons();
 	}
 
-	public async onMouseClick() {
+	public async deleteBlock() {
 		// No block selected
 		if (this.blockHighlight === undefined) {
 			return;
@@ -33,23 +37,80 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 		if (response.success) {
 			task.wait();
+
+			this.gameUI.Sounds.Building.BlockDelete.PlaybackSpeed = math.random(8, 12) / 10; // Give some randomness
+			this.gameUI.Sounds.Building.BlockDelete.Play();
+
+			this.blockHighlight = undefined;
+
+			this.updateMobileButtons();
 		} else {
 			Logger.info("[DELETING] Block deleting failed: " + response.message);
 		}
 	}
 
 	public onUserInput(input: InputObject): void {
-		// TODO: Implement
-	}
-	public onPlatformChanged(): void {
-		// TODO: Implement
+		if (input.UserInputType === Enum.UserInputType.Gamepad1) {
+			if (input.KeyCode === Enum.KeyCode.ButtonX) {
+				this.deleteBlock();
+			}
+		} else if (input.UserInputType === Enum.UserInputType.Touch) {
+			this.updatePosition();
+		}
 	}
 
-	public onMouseMove() {
+	public onPlatformChanged(): void {
+		super.onPlatformChanged();
+
+		// The best way at the moment
+		this.removeHighlight();
+
+		this.setupEvents();
+	}
+
+	public setupEvents() {
+		Logger.info("[DeleteToolAPI] Setting up events");
+
+		const platform = GameControls.getPlatform();
+		if (platform === "Mobile") {
+			this.eventHandler.registerEvent(this.gameUI.DeleteToolMobile.DeleteButton.MouseButton1Click, () =>
+				this.deleteBlock(),
+			);
+		} else {
+			if (platform === "Desktop") {
+				this.eventHandler.registerEvent(this.mouse.Button1Down, () => this.deleteBlock());
+				this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
+			} else if (platform === "Console") {
+				this.eventHandler.registerEvent(
+					(Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame"),
+					() => this.updatePosition(),
+				);
+			}
+		}
+	}
+
+	public updatePosition() {
+		// If ESC menu is open - freeze movement
+		if (GameControls.isPaused()) {
+			return;
+		}
+
+		// Non-alive players bypass
+		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
+			return;
+		}
+
+		// Fix buttons positions
+		if (GuiUtils.isCursorOnVisibleGui()) {
+			return;
+		}
+
 		const target = this.mouse.Target;
 
 		if (this.blockHighlight !== undefined) {
 			this.blockHighlight.Destroy();
+
+			this.updateMobileButtons();
 		}
 
 		// Mouse is in space
@@ -77,11 +138,29 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		this.blockHighlight = new Instance("Highlight");
 		this.blockHighlight.Parent = target.Parent;
 		this.blockHighlight.Adornee = target.Parent;
+		this.updateMobileButtons();
 	}
 
-	public unequip() {
+	public updateMobileButtons() {
+		// Show building mobile controls
+		if (GameControls.getPlatform() === "Mobile" && this.blockHighlight !== undefined && this.isEquipped()) {
+			this.gameUI.DeleteToolMobile.Visible = true;
+			GuiAnimations.fade(this.gameUI.DeleteToolMobile, 0.1, "right");
+		} else {
+			this.gameUI.DeleteToolMobile.Visible = false;
+		}
+	}
+
+	public removeHighlight() {
 		if (this.blockHighlight !== undefined) {
 			this.blockHighlight.Destroy();
 		}
+	}
+
+	public unequip() {
+		super.unequip();
+
+		this.removeHighlight();
+		this.updateMobileButtons();
 	}
 }
