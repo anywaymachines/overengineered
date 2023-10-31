@@ -8,6 +8,7 @@ import GameControls from "client/GameControls";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import GuiUtils from "client/utils/GuiUtils";
 import GuiAnimations from "client/gui/GuiAnimations";
+import SoundUtils from "shared/utils/SoundUtils";
 
 export default class DeleteToolAPI extends AbstractToolAPI {
 	// Variables
@@ -24,27 +25,31 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 	}
 
 	public async deleteBlock() {
-		// No block selected
+		// ERROR: No block selected
 		if (this.blockHighlight === undefined) {
 			return;
 		}
 
+		// Send block removing packet
 		const response = await Remotes.Client.GetNamespace("Building")
 			.Get("PlayerDeleteBlock")
 			.CallServerAsync({
 				block: this.blockHighlight.Parent as Model,
 			});
 
+		// Parsing response
 		if (response.success) {
+			// Block removed
 			task.wait();
 
-			this.gameUI.Sounds.Building.BlockDelete.PlaybackSpeed = math.random(8, 12) / 10; // Give some randomness
+			this.gameUI.Sounds.Building.BlockDelete.PlaybackSpeed = SoundUtils.randomSoundSpeed();
 			this.gameUI.Sounds.Building.BlockDelete.Play();
 
 			this.blockHighlight = undefined;
 
 			this.updateMobileButtons();
 		} else {
+			// Block not removed
 			Logger.info("[DELETING] Block deleting failed: " + response.message);
 		}
 	}
@@ -52,9 +57,11 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 	public onUserInput(input: InputObject): void {
 		if (input.UserInputType === Enum.UserInputType.Gamepad1) {
 			if (input.KeyCode === Enum.KeyCode.ButtonX) {
+				// ButtonX to Remove
 				this.deleteBlock();
 			}
 		} else if (input.UserInputType === Enum.UserInputType.Touch) {
+			// Touch to update position
 			this.updatePosition();
 		}
 	}
@@ -90,17 +97,17 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 	}
 
 	public updatePosition() {
-		// If ESC menu is open - freeze movement
+		// ERROR: If ESC menu is open - freeze movement
 		if (GameControls.isPaused()) {
 			return;
 		}
 
-		// Non-alive players bypass
+		// ERROR: Non-alive players bypass
 		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
 			return;
 		}
 
-		// Fix buttons positions
+		// ERROR: Fix buttons positions
 		if (GuiUtils.isCursorOnVisibleGui()) {
 			return;
 		}
@@ -113,24 +120,24 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 			this.updateMobileButtons();
 		}
 
-		// Mouse is in space
+		// ERROR: Mouse is in space
 		if (target === undefined) {
 			return;
 		}
 
-		// Skip useless parts
+		// ERROR: Useless parts
 		if (target.Parent === undefined || !target.IsDescendantOf(Workspace.Plots)) {
 			return;
 		}
 
 		const parentPlot = SharedPlots.getPlotByBlock(target.Parent as Model);
 
-		// No plot?
+		// ERROR: No plot?
 		if (parentPlot === undefined) {
 			return;
 		}
 
-		// Plot is forbidden
+		// ERROR: Plot is forbidden
 		if (!BuildingManager.isBuildingAllowed(parentPlot, Players.LocalPlayer)) {
 			return;
 		}

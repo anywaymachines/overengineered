@@ -11,6 +11,7 @@ import BuildingManager from "shared/building/BuildingManager";
 import VectorUtils from "shared/utils/VectorUtils";
 import GuiUtils from "client/utils/GuiUtils";
 import GuiAnimations from "client/gui/GuiAnimations";
+import SoundUtils from "shared/utils/SoundUtils";
 
 export default class BuildToolAPI extends AbstractToolAPI {
 	// Mouse
@@ -67,7 +68,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 			this.previewBlockRotation,
 		);
 
-		this.gameUI.Sounds.Building.BlockRotate.PlaybackSpeed = math.random(8, 12) / 10; // Give some randomness
+		this.gameUI.Sounds.Building.BlockRotate.PlaybackSpeed = SoundUtils.randomSoundSpeed();
 		this.gameUI.Sounds.Building.BlockRotate.Play();
 
 		this.updatePosition(true);
@@ -100,11 +101,11 @@ export default class BuildToolAPI extends AbstractToolAPI {
 			this.updatePosition(true);
 
 			// Play sound
-			this.gameUI.Sounds.Building.BlockPlace.PlaybackSpeed = math.random(8, 12) / 10; // Give some randomness
+			this.gameUI.Sounds.Building.BlockPlace.PlaybackSpeed = SoundUtils.randomSoundSpeed();
 			this.gameUI.Sounds.Building.BlockPlace.Play();
 		} else {
 			Logger.info("[BUILDING] Block placement failed: " + response.message);
-			this.gameUI.Sounds.Building.BlockPlaceError.PlaybackSpeed = math.random(8, 12) / 10; // Give some randomness
+			this.gameUI.Sounds.Building.BlockPlaceError.PlaybackSpeed = SoundUtils.randomSoundSpeed();
 			this.gameUI.Sounds.Building.BlockPlaceError.Play();
 		}
 	}
@@ -207,17 +208,17 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		assert(this.previewBlock);
 		assert(this.previewBlock.PrimaryPart);
 
-		// If ESC menu is open - freeze movement
+		// ERROR: If ESC menu is open - freeze movement
 		if (GameControls.isPaused()) {
 			return;
 		}
 
-		// Non-alive players bypass
+		// ERROR: Non-alive players bypass
 		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
 			return;
 		}
 
-		// Fix buttons positions
+		// ERROR: Fix buttons positions
 		if (GuiUtils.isCursorOnVisibleGui() && !savePosition) {
 			return;
 		}
@@ -225,7 +226,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		const mouseTarget: BasePart | undefined =
 			savePosition && this.lastMouseTarget !== undefined ? this.lastMouseTarget : this.mouse.Target;
 
-		// If the this.mouse isn't over anything, stop rendering
+		// ERROR: If the this.mouse isn't over anything, stop rendering
 		if (mouseTarget === undefined) {
 			return;
 		}
