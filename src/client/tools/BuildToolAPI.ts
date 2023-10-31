@@ -10,6 +10,7 @@ import Logger from "shared/Logger";
 import BuildingManager from "shared/building/BuildingManager";
 import VectorUtils from "shared/utils/VectorUtils";
 import GuiUtils from "client/utils/GuiUtils";
+import GuiAnimations from "client/gui/GuiAnimations";
 
 export default class BuildToolAPI extends AbstractToolAPI {
 	// Mouse
@@ -128,6 +129,9 @@ export default class BuildToolAPI extends AbstractToolAPI {
 	public unequip(): void {
 		super.unequip();
 
+		// Hide mobile controls
+		this.gameUI.BuildToolMobile.Visible = false;
+
 		this.previewBlock?.Destroy();
 	}
 
@@ -153,6 +157,14 @@ export default class BuildToolAPI extends AbstractToolAPI {
 
 	public onPlatformChanged(): void {
 		super.onPlatformChanged();
+
+		// Show building mobile controls
+		if (GameControls.getPlatform() === "Mobile") {
+			this.gameUI.BuildToolMobile.Visible = true;
+			GuiAnimations.fade(this.gameUI.BuildToolMobile, 0.1, "right");
+		} else {
+			this.gameUI.BuildToolMobile.Visible = false;
+		}
 
 		this.setupEvents();
 	}

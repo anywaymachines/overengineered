@@ -1,10 +1,10 @@
 import { Players, UserInputService } from "@rbxts/services";
-import GuiAbstractTool from "./abstract/AbstractToolGui";
-import BuildToolGui from "./tools/BuildToolGui";
+import AbstractToolMeta from "./abstract/AbstractToolMeta";
+import BuildToolMeta from "./tools/BuildToolMeta";
 import GuiAnimations from "./GuiAnimations";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import Logger from "shared/Logger";
-import DeleteToolGui from "./tools/DeleteToolGui";
+import DeleteToolGui from "./tools/DeleteToolMeta";
 import AliveEventsHandler from "client/event/AliveEventsHandler";
 import GameControls from "client/GameControls";
 import ClientSignals from "client/ClientSignals";
@@ -13,11 +13,11 @@ export default class ToolsGui {
 	public gameUI: MyGui;
 
 	// Variables
-	public equippedTool: GuiAbstractTool | undefined;
+	public equippedTool: AbstractToolMeta | undefined;
 
 	// Tools
-	public tools: GuiAbstractTool[] = [];
-	public buildTool: BuildToolGui;
+	public tools: AbstractToolMeta[] = [];
+	public buildTool: BuildToolMeta;
 	public deleteTool: DeleteToolGui;
 
 	constructor(gameUI: MyGui) {
@@ -25,7 +25,7 @@ export default class ToolsGui {
 		this.gameUI = gameUI;
 
 		// Tools API
-		this.buildTool = new BuildToolGui(gameUI, this);
+		this.buildTool = new BuildToolMeta(gameUI, this);
 		this.deleteTool = new DeleteToolGui(gameUI, this);
 		this.buildTool.onUnequip();
 		this.deleteTool.onUnequip();
@@ -47,7 +47,7 @@ export default class ToolsGui {
 	}
 
 	/** Function for tool switching */
-	public equipTool(tool: GuiAbstractTool | undefined, isSilent: boolean = false): void {
+	public equipTool(tool: AbstractToolMeta | undefined, isSilent: boolean = false): void {
 		if (this.equippedTool === tool && this.equippedTool !== undefined) {
 			this.equipTool(undefined);
 			return;

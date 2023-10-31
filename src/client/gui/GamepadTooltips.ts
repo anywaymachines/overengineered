@@ -1,7 +1,7 @@
 import ClientSignals from "client/ClientSignals";
 import GuiAnimations from "./GuiAnimations";
 import AliveEventsHandler from "client/event/AliveEventsHandler";
-import GuiAbstractTool from "./abstract/AbstractToolGui";
+import AbstractToolMeta from "./abstract/AbstractToolMeta";
 import GameControls from "client/GameControls";
 
 export default class GamepadTooltips {
@@ -22,11 +22,11 @@ export default class GamepadTooltips {
 		this.textTemplate = gameUI.GamepadTextTooltips.Template.Clone();
 		gameUI.GamepadTextTooltips.Template.Destroy();
 
-		AliveEventsHandler.registerAliveEvent(ClientSignals.TOOL_EQUIPED, (tool: GuiAbstractTool) => {
+		AliveEventsHandler.registerAliveEvent(ClientSignals.TOOL_EQUIPED, (tool: AbstractToolMeta) => {
 			this.manageTooltips(tool.getGamepadTooltips(), this.assetIDs);
 		});
 
-		AliveEventsHandler.registerAliveEvent(ClientSignals.TOOL_UNEQUIPED, (tool: GuiAbstractTool) => {
+		AliveEventsHandler.registerAliveEvent(ClientSignals.TOOL_UNEQUIPED, (tool: AbstractToolMeta) => {
 			this.manageTooltips({}, this.assetIDs);
 		});
 	}

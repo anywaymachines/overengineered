@@ -1,11 +1,14 @@
 import AliveEventsHandler from "client/event/AliveEventsHandler";
 import GuiAnimations from "../GuiAnimations";
 import ToolsGui from "../ToolsGui";
+import AbstractToolAPI from "./AbstractToolAPI";
 
-export default abstract class GuiAbstractTool {
+export default abstract class AbstractToolMeta {
 	// GUIs
 	public gameUI: MyGui;
 	public toolsInterface: ToolsGui;
+
+	public toolAPI!: AbstractToolAPI;
 
 	private unequippedColor = Color3.fromRGB(47, 47, 47);
 	private equippedColor = Color3.fromRGB(85, 85, 85);
@@ -20,16 +23,28 @@ export default abstract class GuiAbstractTool {
 	}
 
 	public onEquip(): void {
+		this.toolAPI.equip();
+		this.onPlatformChanged();
+
 		// Default tools GUI animation
 		GuiAnimations.tweenColor(this.getButton(), this.equippedColor, 0.1);
 	}
 
 	public onUnequip(): void {
+		this.toolAPI.unequip();
+
 		// Default tools GUI animation
 		GuiAnimations.tweenColor(this.getButton(), this.unequippedColor, 0.1);
 	}
 
-	public abstract onPlatformChanged(): void;
+	public onPlatformChanged(): void {
+		if (!this.toolAPI.isEquipped()) {
+			return;
+		}
+
+		// Call platform change on tool API
+		this.toolAPI.onPlatformChanged();
+	}
 
 	public abstract getDisplayName(): string;
 
