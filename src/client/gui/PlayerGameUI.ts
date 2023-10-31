@@ -11,7 +11,7 @@ export default class PlayerGameUI {
 
 	public static ToolsGUI: ToolsGui;
 	public static gamepadTooltips: GamepadTooltips;
-	public static currentControlType = GameControls.getPlatform();
+	public static currentControlType = GameControls.getActualPlatform();
 
 	public static initialize() {
 		this.gameUI = GuiUtils.getGameUI();
@@ -25,7 +25,7 @@ export default class PlayerGameUI {
 	}
 
 	public static onPlatformChanged() {
-		const newPlatform = GameControls.getPlatform();
+		const newPlatform = GameControls.getActualPlatform();
 		if (this.currentControlType !== newPlatform) {
 			this.currentControlType = newPlatform;
 			this.updatePlatformGuis();

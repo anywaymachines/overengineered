@@ -97,7 +97,7 @@ export default class ToolsGui {
 		this.gameUI.Tools.GetChildren().forEach((child) => {
 			if (child.IsA("Frame")) {
 				const tooltip = (child as Frame & MyToolsGuiButton).KeyboardButtonTooltip;
-				if (GameControls.getPlatform() === "Desktop") {
+				if (GameControls.getActualPlatform() === "Desktop") {
 					GuiAnimations.fade(tooltip, 0.1, "down");
 					GuiAnimations.tweenTransparency(tooltip, 0, 0.1);
 				} else {

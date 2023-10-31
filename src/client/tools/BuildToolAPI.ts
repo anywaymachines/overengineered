@@ -162,7 +162,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		super.onPlatformChanged();
 
 		// Show building mobile controls
-		if (GameControls.getPlatform() === "Touch") {
+		if (GameControls.getActualPlatform() === "Touch") {
 			this.gameUI.TouchControls.BuildTool.Visible = true;
 			GuiAnimations.fade(this.gameUI.TouchControls.BuildTool, 0.1, "right");
 		} else {
@@ -174,7 +174,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 
 	public setupEvents() {
 		Logger.info("[BuildToolAPI] Setting up events");
-		switch (GameControls.getPlatform()) {
+		switch (GameControls.getActualPlatform()) {
 			case "Desktop":
 				this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
 				this.eventHandler.registerEvent(this.mouse.Button1Down, async () => await this.placeBlock());

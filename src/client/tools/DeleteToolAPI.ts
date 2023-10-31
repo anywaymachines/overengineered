@@ -20,7 +20,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 	}
 
 	public updateGui(firstTime: boolean = false) {
-		const platform = GameControls.getPlatform();
+		const platform = GameControls.getActualPlatform();
 
 		// Prepare GUIs
 		this.hideAllGUIs();
@@ -44,7 +44,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 		this.updateGui(true);
 
-		const platform = GameControls.getPlatform();
+		const platform = GameControls.getActualPlatform();
 
 		// Initialize events
 		switch (platform) {

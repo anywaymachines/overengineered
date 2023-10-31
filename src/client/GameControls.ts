@@ -1,7 +1,7 @@
 import { GuiService, UserInputService } from "@rbxts/services";
 
 export default class GameControls {
-	static getPlatform(): "Console" | "Touch" | "Desktop" {
+	static getActualPlatform(): "Console" | "Touch" | "Desktop" {
 		const userInputType = UserInputService.GetLastInputType();
 
 		if (userInputType === Enum.UserInputType.Gamepad1) {
@@ -12,6 +12,9 @@ export default class GameControls {
 			return "Desktop";
 		}
 	}
+
+	// TODO: Use in main gui class on load
+	private static getPhysicalPlatform() {}
 
 	static isShiftPressed(): boolean {
 		return (

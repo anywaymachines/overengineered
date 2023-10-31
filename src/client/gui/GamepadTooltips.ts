@@ -51,7 +51,7 @@ export default class GamepadTooltips {
 	}
 
 	public onPlatformChanged() {
-		if (GameControls.getPlatform() === "Console") {
+		if (GameControls.getActualPlatform() === "Console") {
 			this.showImages();
 		} else {
 			this.hideImages();
@@ -61,7 +61,7 @@ export default class GamepadTooltips {
 	}
 
 	public updateTextTooltips() {
-		const platform = GameControls.getPlatform();
+		const platform = GameControls.getActualPlatform();
 		this.textTooltips.forEach((value) => {
 			const tooltip = value as Frame & GamepadTextTooltipFrame;
 			if (platform === "Console") {
