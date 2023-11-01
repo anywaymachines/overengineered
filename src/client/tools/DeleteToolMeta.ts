@@ -18,11 +18,13 @@ export default class DeleteToolGui extends AbstractToolMeta {
 	}
 
 	public getGamepadTooltips() {
-		return {
-			ButtonY: "Clear all",
-			ButtonX: "Delete",
-			ButtonB: "Unequip",
-		};
+		const keys = new Map<Enum.KeyCode, string>();
+
+		keys.set(Enum.KeyCode.ButtonY, "Clear all");
+		keys.set(Enum.KeyCode.ButtonX, "Delete");
+		keys.set(Enum.KeyCode.ButtonB, "Unequip");
+
+		return keys;
 	}
 
 	public getKeybind(): Enum.KeyCode {
@@ -30,6 +32,6 @@ export default class DeleteToolGui extends AbstractToolMeta {
 	}
 
 	public getButton(): Frame & MyToolsGuiButton {
-		return this.gameUI.Tools.Delete;
+		return this.gameUI.Tools.Buttons.Delete;
 	}
 }

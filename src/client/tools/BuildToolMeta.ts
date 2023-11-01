@@ -18,10 +18,12 @@ export default class BuildToolMeta extends AbstractToolMeta {
 	}
 
 	public getGamepadTooltips() {
-		return {
-			ButtonX: "Place",
-			ButtonB: "Unequip",
-		};
+		const keys = new Map<Enum.KeyCode, string>();
+
+		keys.set(Enum.KeyCode.ButtonX, "Place");
+		keys.set(Enum.KeyCode.ButtonB, "Unequip");
+
+		return keys;
 	}
 
 	public getKeybind(): Enum.KeyCode {
@@ -29,6 +31,6 @@ export default class BuildToolMeta extends AbstractToolMeta {
 	}
 
 	public getButton(): Frame & MyToolsGuiButton {
-		return this.gameUI.Tools.Build;
+		return this.gameUI.Tools.Buttons.Build;
 	}
 }

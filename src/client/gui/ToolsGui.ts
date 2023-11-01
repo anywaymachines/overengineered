@@ -94,7 +94,7 @@ export default class ToolsGui {
 		});
 
 		// Update buttons
-		this.gameUI.Tools.GetChildren().forEach((child) => {
+		this.gameUI.Tools.Buttons.GetChildren().forEach((child) => {
 			if (child.IsA("Frame")) {
 				const tooltip = (child as Frame & MyToolsGuiButton).KeyboardButtonTooltip;
 				if (GameControls.getActualPlatform() === "Desktop") {

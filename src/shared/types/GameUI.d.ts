@@ -1,5 +1,4 @@
 interface MyGui {
-	GamepadImageTooltips: Folder;
 	Sounds: Folder & MyGuiSounds;
 	TouchControls: Folder & {
 		BuildTool: Frame & {
@@ -27,12 +26,16 @@ interface MyGui {
 		DescriptionLabel: TextLabel;
 	};
 	Tools: Frame & {
-		Build: Frame & MyToolsGuiButton;
-		Connect: Frame & MyToolsGuiButton;
-		Configure: Frame & MyToolsGuiButton;
-		Delete: Frame & MyToolsGuiButton;
-		Move: Frame & MyToolsGuiButton;
-		Paint: Frame & MyToolsGuiButton;
+		GamepadNext: ImageLabel;
+		GamepadBack: ImageLabel;
+		Buttons: Frame & {
+			Build: Frame & MyToolsGuiButton;
+			Connect: Frame & MyToolsGuiButton;
+			Configure: Frame & MyToolsGuiButton;
+			Delete: Frame & MyToolsGuiButton;
+			Move: Frame & MyToolsGuiButton;
+			Paint: Frame & MyToolsGuiButton;
+		};
 	};
 	CurrentToolLabel: TextLabel;
 	CurrentToolDescriptionLabel: TextLabel;

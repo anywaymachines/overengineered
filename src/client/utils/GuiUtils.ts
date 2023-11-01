@@ -9,10 +9,6 @@ export default class GuiUtils {
 		return this.getPlayerGui().WaitForChild("GameUI") as unknown as MyGui;
 	}
 
-	public static getPopupGameUI(): PopupMyGui {
-		return this.getPlayerGui().WaitForChild("PopupGameUI") as unknown as PopupMyGui;
-	}
-
 	public static isCursorOnVisibleGui(): boolean {
 		const playerGUI = GuiUtils.getPlayerGui();
 		const gameUI = this.getGameUI();

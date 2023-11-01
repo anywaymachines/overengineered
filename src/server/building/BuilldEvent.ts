@@ -7,7 +7,7 @@ import SharedPlots from "shared/building/SharedPlots";
 import BuildingManager from "shared/building/BuildingManager";
 import CollisionMaker from "./CollisionMaker";
 
-/** Class for **server-based** construction management from blocks, e.g. block installation/painting/removal */
+/** Class for **server-based** construction management from blocks */
 export default class BuildEvent {
 	static initialize(): void {
 		Logger.info("Loading Build event listener...");

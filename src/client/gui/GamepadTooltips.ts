@@ -3,18 +3,15 @@ import GuiAnimations from "./GuiAnimations";
 import AliveEventsHandler from "client/event/AliveEventsHandler";
 import AbstractToolMeta from "./abstract/AbstractToolMeta";
 import GameControls from "client/GameControls";
+import { UserInputService } from "@rbxts/services";
 
 export default class GamepadTooltips {
 	private gameUI: MyGui;
 
 	private textTooltips: Frame[] = [];
 	private textTemplate: Frame & GamepadTextTooltipFrame;
-	private assetIDs = {
-		ButtonA: "15216507754",
-		ButtonB: "15216552197",
-		ButtonY: "15216504649",
-		ButtonX: "15216505617",
-	};
+
+	private imageTooltips: Map<Enum.KeyCode, ImageLabel> = new Map<Enum.KeyCode, ImageLabel>();
 
 	constructor(gameUI: MyGui) {
 		this.gameUI = gameUI;
@@ -23,16 +20,23 @@ export default class GamepadTooltips {
 		gameUI.GamepadTextTooltips.Template.Destroy();
 
 		AliveEventsHandler.registerAliveEvent(ClientSignals.TOOL_EQUIPED, (tool: AbstractToolMeta) => {
-			this.manageTooltips(tool.getGamepadTooltips(), this.assetIDs);
+			this.manageTooltips(tool.getGamepadTooltips());
 		});
 
 		AliveEventsHandler.registerAliveEvent(ClientSignals.TOOL_UNEQUIPED, (tool: AbstractToolMeta) => {
-			this.manageTooltips({}, this.assetIDs);
+			this.manageTooltips(undefined);
+		});
+
+		// Init image tooltips
+		this.imageTooltips.set(Enum.KeyCode.ButtonR1, this.gameUI.Tools.GamepadNext);
+		this.imageTooltips.set(Enum.KeyCode.ButtonL1, this.gameUI.Tools.GamepadBack);
+		this.imageTooltips.forEach((value, key) => {
+			value.Image = UserInputService.GetImageForKeyCode(key);
 		});
 	}
 
 	public showImages() {
-		this.gameUI.GamepadImageTooltips.GetChildren().forEach((gui) => {
+		this.imageTooltips.forEach((gui) => {
 			if (!gui.IsA("GuiObject")) {
 				return;
 			}
@@ -42,7 +46,7 @@ export default class GamepadTooltips {
 	}
 
 	public hideImages() {
-		this.gameUI.GamepadImageTooltips.GetChildren().forEach((gui) => {
+		this.imageTooltips.forEach((gui) => {
 			if (!gui.IsA("GuiObject")) {
 				return;
 			}
@@ -76,16 +80,17 @@ export default class GamepadTooltips {
 		});
 	}
 
-	public manageTooltips(
-		tooltip: GamepadTextTooltip,
-		assetId: { ButtonA: string; ButtonB: string; ButtonY: string; ButtonX: string },
-	) {
+	public manageTooltips(tooltips?: Map<Enum.KeyCode, string>) {
 		this.terminateTooltips();
 
-		this.createTooltipRow(tooltip, "ButtonA", assetId.ButtonA);
-		this.createTooltipRow(tooltip, "ButtonB", assetId.ButtonB);
-		this.createTooltipRow(tooltip, "ButtonY", assetId.ButtonY);
-		this.createTooltipRow(tooltip, "ButtonX", assetId.ButtonX);
+		// No tooltips -> terminate
+		if (!tooltips) {
+			return;
+		}
+
+		tooltips.forEach((value, key) => {
+			this.createTooltipRow(key, value);
+		});
 	}
 
 	private terminateTooltips() {
@@ -96,18 +101,16 @@ export default class GamepadTooltips {
 		this.textTooltips.clear();
 	}
 
-	private createTooltipRow(tooltip: GamepadTextTooltip, button: GamepadTextTooltipKeys, assetId: string) {
-		if (tooltip[button] !== undefined) {
-			const obj = this.textTemplate.Clone();
-			obj.ImageLabel.Image = `http://www.roblox.com/asset/?id=${assetId}`;
-			obj.TextLabel.Text = tooltip[button] as string;
-			obj.Parent = this.gameUI.GamepadTextTooltips;
+	private createTooltipRow(button: Enum.KeyCode, tooltip: string) {
+		const obj = this.textTemplate.Clone();
+		obj.ImageLabel.Image = UserInputService.GetImageForKeyCode(button);
+		obj.TextLabel.Text = tooltip;
+		obj.Parent = this.gameUI.GamepadTextTooltips;
 
-			obj.TextLabel.TextTransparency = 1;
-			obj.ImageLabel.ImageTransparency = 1;
+		obj.TextLabel.TextTransparency = 1;
+		obj.ImageLabel.ImageTransparency = 1;
 
-			this.textTooltips.push(obj);
-		}
+		this.textTooltips.push(obj);
 		this.updateTextTooltips();
 	}
 }
