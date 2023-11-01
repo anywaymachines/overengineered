@@ -61,6 +61,6 @@ export default class BuildEvent {
 
 		CollisionMaker.makeJoints(model);
 
-		return { success: true, message: undefined };
+		return { success: true };
 	}
 }

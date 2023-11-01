@@ -1,7 +1,7 @@
 import { TweenService } from "@rbxts/services";
 
 export default class GuiAnimations {
-	public static fade(frame: GuiObject, duration: number, direction: "right" | "left" | "up" | "down" | undefined) {
+	public static fade(frame: GuiObject, duration: number, direction?: "right" | "left" | "up" | "down") {
 		const defaultPosition = frame.Position;
 		let offsetPosition;
 

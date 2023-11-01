@@ -13,7 +13,7 @@ export default class ToolsGui {
 	public gameUI: MyGui;
 
 	// Variables
-	public equippedTool: AbstractToolMeta | undefined;
+	public equippedTool?: AbstractToolMeta;
 
 	// Tools
 	public tools: AbstractToolMeta[] = [];
@@ -47,7 +47,7 @@ export default class ToolsGui {
 	}
 
 	/** Function for tool switching */
-	public equipTool(tool: AbstractToolMeta | undefined, isSilent: boolean = false): void {
+	public equipTool(tool?: AbstractToolMeta, isSilent: boolean = false): void {
 		if (this.equippedTool === tool && this.equippedTool !== undefined) {
 			this.equipTool(undefined);
 			return;

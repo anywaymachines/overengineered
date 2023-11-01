@@ -35,7 +35,6 @@ export default class DeleteEvent {
 
 		return {
 			success: true,
-			message: undefined,
 		};
 	}
 }
