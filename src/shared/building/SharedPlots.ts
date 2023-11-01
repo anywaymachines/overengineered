@@ -1,4 +1,5 @@
 import { HttpService, Workspace } from "@rbxts/services";
+import GameDefinitions from "shared/GameDefinitions";
 import VectorUtils from "shared/utils/VectorUtils";
 
 export default class SharedPlots {
@@ -35,6 +36,7 @@ export default class SharedPlots {
 
 	/** Gets the `Model` of **Plot** by the given block `Model` */
 	public static getPlotByBlock(block: Model): Model | undefined {
+		// No block => No plot
 		if (block === undefined) {
 			return undefined;
 		}
@@ -46,6 +48,7 @@ export default class SharedPlots {
 				return plot;
 			}
 		}
+
 		return undefined;
 	}
 
@@ -62,7 +65,7 @@ export default class SharedPlots {
 			),
 			new Vector3(
 				buildingPlane.Position.X + buildingPlane.Size.X / 2 - 1,
-				buildingPlane.Position.Y + 100,
+				buildingPlane.Position.Y + GameDefinitions.BUILD_HEIGHT_LIMIT,
 				buildingPlane.Position.Z + buildingPlane.Size.Z / 2 - 1,
 			),
 		);

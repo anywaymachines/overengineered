@@ -1,12 +1,8 @@
 import { Players } from "@rbxts/services";
-import SharedLoader from "shared/SharedLoader";
 import PlayerGameUI from "./gui/PlayerGameUI";
 import AliveEventsHandler from "./event/AliveEventsHandler";
 
 function initialize() {
-	// Initializing shared components
-	SharedLoader.load();
-
 	Players.LocalPlayer.CharacterAdded.Connect((_) => {
 		AliveEventsHandler.initialize();
 

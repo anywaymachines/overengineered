@@ -15,13 +15,13 @@ import SoundUtils from "shared/utils/SoundUtils";
 
 export default class BuildToolAPI extends AbstractToolAPI {
 	// Mouse
-	private lastMouseHit: CFrame | undefined;
-	private lastMouseTarget: BasePart | undefined;
-	private lastMouseSurface: Enum.NormalId | undefined;
+	private lastMouseHit?: CFrame;
+	private lastMouseTarget?: BasePart;
+	private lastMouseSurface?: Enum.NormalId;
 
 	// Block
 	private equippedBlock: AbstractBlock;
-	private previewBlock: Model | undefined;
+	private previewBlock?: Model;
 	private previewBlockRotation: CFrame = new CFrame();
 
 	// Const

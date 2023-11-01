@@ -117,9 +117,11 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 			return;
 		}
 
+		// Create highlight
 		this.highlight = new Instance("Highlight");
 		this.highlight.Parent = target.Parent;
 		this.highlight.Adornee = target.Parent;
+
 		this.updateGui();
 	}
 

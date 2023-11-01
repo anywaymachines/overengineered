@@ -1,6 +1,7 @@
 import SharedPlots from "shared/building/SharedPlots";
 import VectorUtils from "shared/utils/VectorUtils";
 
+// Looks good
 export default class BuildingManager {
 	/** Checks that building for a player on a given Plot is allowed
 	 * @param plot The Plot to check
@@ -17,8 +18,10 @@ export default class BuildingManager {
 	public static getBlockByPosition(vector: Vector3): Model | undefined {
 		const plot = SharedPlots.getPlotByPosition(vector);
 		if (!plot) {
+			// No plot => No block
 			return undefined;
 		}
+
 		const blocks = (plot.FindFirstChild("Blocks") as Folder).GetChildren();
 		for (let i = 0; i < blocks.size(); i++) {
 			const block = blocks[i] as Model;
@@ -29,6 +32,7 @@ export default class BuildingManager {
 				return block;
 			}
 		}
+
 		return undefined;
 	}
 
@@ -40,15 +44,18 @@ export default class BuildingManager {
 		// Checking the plot
 		const plot = SharedPlots.getPlotByPosition(position);
 		if (plot === undefined || !this.isBuildingAllowed(plot, player)) {
+			// No plot / Building forbidden
 			return false;
 		}
 
 		// Check is given coordinate occupied by another block
 		const collideBlock = this.getBlockByPosition(position);
 		if (collideBlock !== undefined) {
+			// Occupied coordinates
 			return false;
 		}
 
+		// OK
 		return true;
 	}
 }

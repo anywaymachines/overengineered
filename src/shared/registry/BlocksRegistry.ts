@@ -6,11 +6,12 @@ export default class BlockRegistry {
 	public static Blocks: Map<string, AbstractBlock> = new Map<string, AbstractBlock>();
 	public static RegisteredBlocks: AbstractBlock[] = [];
 
-	public static readonly TEST_BLOCK = new TestBlock();
+	public static readonly TEST_BLOCK = this.registerBlock(new TestBlock());
 
-	public static initialize() {
-		this.Blocks.set(this.TEST_BLOCK.id, this.TEST_BLOCK);
-		this.RegisteredBlocks.push(this.TEST_BLOCK);
+	private static registerBlock(block: AbstractBlock): AbstractBlock {
+		this.Blocks.set(block.id, block);
+		this.RegisteredBlocks.push(block);
+		return block;
 	}
 
 	public static getBlocksInCategory(category: AbstractCategory): AbstractBlock[] {
