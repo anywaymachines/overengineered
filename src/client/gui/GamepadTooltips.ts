@@ -9,9 +9,11 @@ export default class GamepadTooltips {
 	private gameUI: MyGui;
 
 	private textTooltips: Frame[] = [];
+	private imageTooltips: Map<Enum.KeyCode, ImageLabel> = new Map<Enum.KeyCode, ImageLabel>();
+
 	private textTemplate: Frame & GamepadTextTooltipFrame;
 
-	private imageTooltips: Map<Enum.KeyCode, ImageLabel> = new Map<Enum.KeyCode, ImageLabel>();
+	private readonly tooltipColor = Color3.fromRGB(207, 207, 207);
 
 	constructor(gameUI: MyGui) {
 		this.gameUI = gameUI;
@@ -32,6 +34,7 @@ export default class GamepadTooltips {
 		this.imageTooltips.set(Enum.KeyCode.ButtonL1, this.gameUI.Tools.GamepadBack);
 		this.imageTooltips.forEach((value, key) => {
 			value.Image = UserInputService.GetImageForKeyCode(key);
+			value.ImageColor3 = this.tooltipColor;
 		});
 	}
 
@@ -104,6 +107,7 @@ export default class GamepadTooltips {
 	private createTooltipRow(button: Enum.KeyCode, tooltip: string) {
 		const obj = this.textTemplate.Clone();
 		obj.ImageLabel.Image = UserInputService.GetImageForKeyCode(button);
+		obj.ImageLabel.ImageColor3 = this.tooltipColor;
 		obj.TextLabel.Text = tooltip;
 		obj.Parent = this.gameUI.GamepadTextTooltips;
 
