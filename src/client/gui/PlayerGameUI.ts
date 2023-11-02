@@ -11,7 +11,7 @@ export default class PlayerGameUI {
 
 	public static ToolsGUI: ToolsGui;
 	public static gamepadTooltips: GamepadTooltips;
-	public static currentControlType = GameControls.getActualPlatform();
+	public static currentControlType = GameControls.getPhysicalPlatform();
 
 	public static initialize() {
 		this.gameUI = GuiUtils.getGameUI();

@@ -13,8 +13,15 @@ export default class GameControls {
 		}
 	}
 
-	// TODO: Use in main gui class on load
-	private static getPhysicalPlatform() {}
+	static getPhysicalPlatform(): "Console" | "Touch" | "Desktop" {
+		if (GuiService.IsTenFootInterface()) {
+			return "Console";
+		} else if (UserInputService.TouchEnabled && !UserInputService.MouseEnabled) {
+			return "Touch";
+		} else {
+			return "Desktop";
+		}
+	}
 
 	static isShiftPressed(): boolean {
 		return (

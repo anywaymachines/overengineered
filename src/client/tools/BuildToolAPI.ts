@@ -77,9 +77,9 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		const { r, t, y } = this.equippedBlock.getAvailableRotationAxis();
 
 		if (axis === "r" && r) {
-			this.rotateBlock(new Vector3(0, forward ? math.pi / 2 : math.pi / -2, 0));
-		} else if (axis === "t" && t) {
 			this.rotateBlock(new Vector3(forward ? math.pi / 2 : math.pi / -2, 0, 0));
+		} else if (axis === "t" && t) {
+			this.rotateBlock(new Vector3(0, forward ? math.pi / 2 : math.pi / -2, 0));
 		} else if (axis === "y" && y) {
 			this.rotateBlock(new Vector3(0, 0, forward ? math.pi / 2 : math.pi / -2));
 		} else {
