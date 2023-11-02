@@ -64,35 +64,28 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		}
 	}
 
-	public rotate(forward: boolean, axis: "r" | "t" | "y") {
-		let rotation: Vector3;
-		if (axis === "r") {
-			if (this.equippedBlock.getAvailableRotationAxis().r === false) {
-				return;
-			}
-			rotation = new Vector3(0, forward ? math.pi / 2 : math.pi / -2, 0);
-		} else if (axis === "t") {
-			if (this.equippedBlock.getAvailableRotationAxis().t === false) {
-				return;
-			}
-			rotation = new Vector3(forward ? math.pi / 2 : math.pi / -2, 0, 0);
-		} else if (axis === "y") {
-			if (this.equippedBlock.getAvailableRotationAxis().y === false) {
-				return;
-			}
-			rotation = new Vector3(0, 0, forward ? math.pi / 2 : math.pi / -2);
-		} else {
-			return;
-		}
-
-		this.previewBlockRotation = CFrame.fromEulerAnglesXYZ(rotation.X, rotation.Y, rotation.Z).mul(
+	private rotateBlock(rotationVector: Vector3) {
+		this.previewBlockRotation = CFrame.fromEulerAnglesXYZ(rotationVector.X, rotationVector.Y, rotationVector.Z).mul(
 			this.previewBlockRotation,
 		);
-
 		this.gameUI.Sounds.Building.BlockRotate.PlaybackSpeed = SoundUtils.randomSoundSpeed();
 		this.gameUI.Sounds.Building.BlockRotate.Play();
-
 		this.updatePosition(true);
+	}
+
+	public rotate(forward: boolean, axis: "r" | "t" | "y") {
+		const { r, t, y } = this.equippedBlock.getAvailableRotationAxis();
+
+		if (axis === "r" && r) {
+			this.rotateBlock(new Vector3(0, forward ? math.pi / 2 : math.pi / -2, 0));
+		} else if (axis === "t" && t) {
+			this.rotateBlock(new Vector3(forward ? math.pi / 2 : math.pi / -2, 0, 0));
+		} else if (axis === "y" && y) {
+			this.rotateBlock(new Vector3(0, 0, forward ? math.pi / 2 : math.pi / -2));
+		} else {
+			this.gameUI.Sounds.Building.BlockPlaceError.PlaybackSpeed = SoundUtils.randomSoundSpeed();
+			this.gameUI.Sounds.Building.BlockPlaceError.Play();
+		}
 	}
 
 	// TODO: Use it in block selection menu

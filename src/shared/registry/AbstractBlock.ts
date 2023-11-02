@@ -19,7 +19,7 @@ export default abstract class AbstractBlock {
 	/** Must return the **category* */
 	public abstract getCategory(): AbstractCategory | undefined;
 
-	/** Must return the **category* */
+	/** Enables locking of rotary axes */
 	public getAvailableRotationAxis(): {
 		r: boolean;
 		t: boolean;
