@@ -6,7 +6,7 @@ import GameControls from "client/GameControls";
 import GuiAnimations from "./GuiAnimations";
 
 export default class ControlTooltips {
-	private gameUI: MyGui;
+	private gameUI: GameUI;
 
 	// Cache
 	private gamepadTooltipsCache: Map<Enum.KeyCode, string> = new Map<Enum.KeyCode, string>();
@@ -23,7 +23,7 @@ export default class ControlTooltips {
 
 	private readonly tooltipColor = Color3.fromRGB(205, 217, 221);
 
-	constructor(gameUI: MyGui) {
+	constructor(gameUI: GameUI) {
 		this.gameUI = gameUI;
 
 		// Prepare templates

@@ -1,4 +1,4 @@
-interface MyGui {
+interface GameUI {
 	Sounds: Folder & MyGuiSounds;
 	TouchControls: Folder & {
 		BuildTool: Frame & {

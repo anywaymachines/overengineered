@@ -3,7 +3,7 @@ import ToolsGui from "../gui/ToolsGui";
 import DeleteToolAPI from "client/tools/DeleteToolAPI";
 
 export default class DeleteToolGui extends AbstractToolMeta {
-	constructor(gameUI: MyGui, toolsInterface: ToolsGui) {
+	constructor(gameUI: GameUI, toolsInterface: ToolsGui) {
 		super(gameUI, toolsInterface);
 
 		this.toolAPI = new DeleteToolAPI(gameUI);

@@ -10,7 +10,7 @@ import GameControls from "client/GameControls";
 import ClientSignals from "client/ClientSignals";
 
 export default class ToolsGui {
-	public gameUI: MyGui;
+	public gameUI: GameUI;
 
 	// Variables
 	public equippedTool?: AbstractToolMeta;
@@ -20,7 +20,7 @@ export default class ToolsGui {
 	public buildTool: BuildToolMeta;
 	public deleteTool: DeleteToolGui;
 
-	constructor(gameUI: MyGui) {
+	constructor(gameUI: GameUI) {
 		// Define tools gui
 		this.gameUI = gameUI;
 

@@ -6,7 +6,7 @@ import GameControls from "client/GameControls";
 
 export default abstract class AbstractToolMeta {
 	// GUIs
-	public gameUI: MyGui;
+	public gameUI: GameUI;
 	public toolsInterface: ToolsGui;
 
 	public toolAPI!: AbstractToolAPI;
@@ -14,7 +14,7 @@ export default abstract class AbstractToolMeta {
 	private unequippedColor = Color3.fromRGB(47, 47, 47);
 	private equippedColor = Color3.fromRGB(85, 85, 85);
 
-	constructor(gameUI: MyGui, toolsInterface: ToolsGui) {
+	constructor(gameUI: GameUI, toolsInterface: ToolsGui) {
 		this.gameUI = gameUI;
 		this.toolsInterface = toolsInterface;
 

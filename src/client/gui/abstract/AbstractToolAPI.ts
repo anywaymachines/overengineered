@@ -4,12 +4,12 @@ import Logger from "shared/Logger";
 
 /** A class for implementing the API for tools */
 export default abstract class AbstractToolAPI {
-	public gameUI: MyGui;
+	public gameUI: GameUI;
 	public mouse: Mouse;
 	public eventHandler: EventHandler;
 	private equipped = false;
 
-	constructor(gameUI: MyGui) {
+	constructor(gameUI: GameUI) {
 		this.gameUI = gameUI;
 
 		this.mouse = Players.LocalPlayer.GetMouse();

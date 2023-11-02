@@ -3,7 +3,7 @@ import ToolsGui from "../gui/ToolsGui";
 import AbstractToolMeta from "../gui/abstract/AbstractToolMeta";
 
 export default class BuildToolMeta extends AbstractToolMeta {
-	constructor(gameUI: MyGui, toolsInterface: ToolsGui) {
+	constructor(gameUI: GameUI, toolsInterface: ToolsGui) {
 		super(gameUI, toolsInterface);
 
 		this.toolAPI = new BuildToolAPI(gameUI);

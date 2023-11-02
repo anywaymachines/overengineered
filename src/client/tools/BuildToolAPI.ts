@@ -29,7 +29,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 	private readonly forbiddenColor: Color3 = Color3.fromRGB(255, 189, 189);
 	private readonly defaultBlock = BlockRegistry.TEST_BLOCK;
 
-	constructor(gameUI: MyGui) {
+	constructor(gameUI: GameUI) {
 		super(gameUI);
 
 		this.equippedBlock = BlockRegistry.TEST_BLOCK;

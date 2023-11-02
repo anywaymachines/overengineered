@@ -1,7 +1,7 @@
 import GuiUtils from "client/utils/GuiUtils";
 
 export default class ConfirmationWindow {
-	private static gameUI: ScreenGui & MyGui = GuiUtils.getGameUI() as ScreenGui & MyGui;
+	private static gameUI: ScreenGui & GameUI = GuiUtils.getGameUI() as ScreenGui & GameUI;
 
 	static showConfirmationWindow(heading: string, text: string, callback: Callback) {
 		// Hide all guis

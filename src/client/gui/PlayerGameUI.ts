@@ -7,7 +7,7 @@ import AliveEventsHandler from "client/event/AliveEventsHandler";
 import ControlTooltips from "./ControlTooltips";
 
 export default class PlayerGameUI {
-	public static gameUI: MyGui;
+	public static gameUI: GameUI;
 
 	public static ToolsGUI: ToolsGui;
 	public static gamepadTooltips: ControlTooltips;
