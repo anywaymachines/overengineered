@@ -18,4 +18,13 @@ export default abstract class AbstractBlock {
 
 	/** Must return the **category* */
 	public abstract getCategory(): AbstractCategory | undefined;
+
+	/** Must return the **category* */
+	public getAvailableRotationAxis(): {
+		r: boolean;
+		t: boolean;
+		y: boolean;
+	} {
+		return { r: true, t: true, y: true };
+	}
 }

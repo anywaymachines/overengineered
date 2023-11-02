@@ -44,21 +44,42 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		blockHighlight.Adornee = this.previewBlock;
 	}
 
-	private addAxes() {
+	private addAxisModel() {
 		assert(this.previewBlock);
 
-		const axes = ReplicatedStorage.Assets.Axes.Clone();
-		axes.PivotTo(this.previewBlock.GetPivot());
-		axes.Parent = this.previewBlock;
+		const axis = ReplicatedStorage.Assets.Axis.Clone();
+		axis.PivotTo(this.previewBlock.GetPivot());
+		axis.Parent = this.previewBlock;
+
+		if (this.equippedBlock.getAvailableRotationAxis().r === false) {
+			axis.R.Destroy();
+		}
+
+		if (this.equippedBlock.getAvailableRotationAxis().t === false) {
+			axis.T.Destroy();
+		}
+
+		if (this.equippedBlock.getAvailableRotationAxis().y === false) {
+			axis.Y.Destroy();
+		}
 	}
 
 	public rotate(forward: boolean, axis: "r" | "t" | "y") {
 		let rotation: Vector3;
 		if (axis === "r") {
+			if (this.equippedBlock.getAvailableRotationAxis().r === false) {
+				return;
+			}
 			rotation = new Vector3(0, forward ? math.pi / 2 : math.pi / -2, 0);
 		} else if (axis === "t") {
+			if (this.equippedBlock.getAvailableRotationAxis().t === false) {
+				return;
+			}
 			rotation = new Vector3(forward ? math.pi / 2 : math.pi / -2, 0, 0);
 		} else if (axis === "y") {
+			if (this.equippedBlock.getAvailableRotationAxis().y === false) {
+				return;
+			}
 			rotation = new Vector3(0, 0, forward ? math.pi / 2 : math.pi / -2);
 		} else {
 			return;
@@ -122,7 +143,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		this.previewBlock = this.equippedBlock.getModel().Clone();
 		this.previewBlock.Parent = Workspace;
 
-		this.addAxes();
+		this.addAxisModel();
 		this.addHighlight();
 		PartUtils.ghostModel(this.previewBlock);
 
@@ -211,35 +232,51 @@ export default class BuildToolAPI extends AbstractToolAPI {
 
 	public updatePosition(savePosition: boolean = false) {
 		assert(this.previewBlock);
+
+		if (this.shouldReturnEarly(savePosition)) {
+			return;
+		}
+
+		const { mouseTarget, mouseHit, mouseSurface } = this.getMouseProperties(savePosition);
+		const highlight = this.previewBlock.FindFirstChildOfClass("Highlight") as Highlight;
+
+		this.performPositioning(mouseTarget, mouseSurface, mouseHit);
+		this.colorizePreviewBlock(highlight);
+
+		if (!savePosition) {
+			this.lastMouseTarget = mouseTarget;
+			this.lastMouseHit = mouseHit;
+			this.lastMouseSurface = mouseSurface;
+		}
+	}
+
+	private shouldReturnEarly(savePosition: boolean): boolean {
+		return (
+			!this.previewBlock ||
+			!this.previewBlock.PrimaryPart ||
+			GameControls.isPaused() ||
+			!PlayerUtils.isAlive(Players.LocalPlayer) ||
+			(GuiUtils.isCursorOnVisibleGui() && !savePosition)
+		);
+	}
+
+	private getMouseProperties(savePosition: boolean) {
+		return {
+			mouseTarget: savePosition && this.lastMouseTarget !== undefined ? this.lastMouseTarget : this.mouse.Target,
+			mouseHit: savePosition && this.lastMouseHit !== undefined ? this.lastMouseHit : this.mouse.Hit,
+			mouseSurface:
+				savePosition && this.lastMouseSurface !== undefined ? this.lastMouseSurface : this.mouse.TargetSurface,
+		};
+	}
+
+	private performPositioning(mouseTarget: BasePart | undefined, mouseSurface: Enum.NormalId, mouseHit: CFrame) {
+		assert(this.previewBlock);
 		assert(this.previewBlock.PrimaryPart);
 
-		// ERROR: If ESC menu is open - freeze movement
-		if (GameControls.isPaused()) {
+		// No target block
+		if (!mouseTarget) {
 			return;
 		}
-
-		// ERROR: Non-alive players bypass
-		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
-			return;
-		}
-
-		// ERROR: Fix buttons positions
-		if (GuiUtils.isCursorOnVisibleGui() && !savePosition) {
-			return;
-		}
-
-		const mouseTarget: BasePart | undefined =
-			savePosition && this.lastMouseTarget !== undefined ? this.lastMouseTarget : this.mouse.Target;
-
-		// ERROR: If the this.mouse isn't over anything, stop rendering
-		if (mouseTarget === undefined) {
-			return;
-		}
-
-		const mouseHit = savePosition && this.lastMouseHit !== undefined ? this.lastMouseHit : this.mouse.Hit;
-		const mouseSurface =
-			savePosition && this.lastMouseSurface !== undefined ? this.lastMouseSurface : this.mouse.TargetSurface;
-		const highlight = this.previewBlock.FindFirstChildOfClass("Highlight") as Highlight;
 
 		// Positioning Stage 1
 		const rotationRelative = mouseTarget.CFrame.sub(mouseTarget.Position).Inverse();
@@ -296,19 +333,17 @@ export default class BuildToolAPI extends AbstractToolAPI {
 				this.previewBlock.GetPivot().Rotation,
 			),
 		);
+	}
+
+	private colorizePreviewBlock(highlight: Highlight) {
+		assert(this.previewBlock);
+		assert(this.previewBlock.PrimaryPart);
 
 		// Colorizing
 		if (BuildingManager.vectorAbleToPlayer(this.previewBlock.PrimaryPart.Position, Players.LocalPlayer)) {
 			highlight.FillColor = this.allowedColor;
 		} else {
 			highlight.FillColor = this.forbiddenColor;
-		}
-
-		// Saving a new values
-		if (!savePosition) {
-			this.lastMouseTarget = mouseTarget;
-			this.lastMouseHit = mouseHit;
-			this.lastMouseSurface = mouseSurface;
 		}
 	}
 }
