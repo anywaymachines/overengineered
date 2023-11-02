@@ -18,14 +18,6 @@ interface GameUI {
 		GamepadTemplate: Frame & GamepadTooltipFrame;
 		KeyboardTemplate: Frame & KeyboardTooltipFrame;
 	};
-	ConfirmationWindow: Frame & {
-		Answers: Frame & {
-			YesButton: TextButton;
-			NoButton: TextButton;
-		};
-		HeadingLabel: TextLabel;
-		DescriptionLabel: TextLabel;
-	};
 	Tools: Frame & {
 		GamepadNext: ImageLabel;
 		GamepadBack: ImageLabel;
@@ -40,6 +32,18 @@ interface GameUI {
 	};
 	CurrentToolLabel: TextLabel;
 	CurrentToolDescriptionLabel: TextLabel;
+}
+
+interface GameDialog {
+	ConfirmationWindow: Frame & {
+		CloseButton: TextButton;
+		Answers: Frame & {
+			YesButton: TextButton;
+			NoButton: TextButton;
+		};
+		HeadingLabel: TextLabel;
+		DescriptionLabel: TextLabel;
+	};
 }
 
 type GamepadTextTooltipKeys = "ButtonA" | "ButtonB" | "ButtonY" | "ButtonX";

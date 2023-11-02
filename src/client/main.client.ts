@@ -10,6 +10,10 @@ function initialize() {
 		PlayerGameUI.initialize();
 	});
 }
+// TODO: CHANGE SROCHNO
+AliveEventsHandler.initialize();
+
+PlayerGameUI.initialize();
 
 // Start all scripts
 initialize();

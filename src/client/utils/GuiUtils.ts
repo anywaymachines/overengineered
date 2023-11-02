@@ -9,6 +9,10 @@ export default class GuiUtils {
 		return this.getPlayerGui().WaitForChild("GameUI") as unknown as GameUI;
 	}
 
+	public static getGameDialog(): GameDialog {
+		return this.getPlayerGui().WaitForChild("GameDialog") as unknown as GameDialog;
+	}
+
 	public static isCursorOnVisibleGui(): boolean {
 		const playerGUI = GuiUtils.getPlayerGui();
 		const gameUI = this.getGameUI();

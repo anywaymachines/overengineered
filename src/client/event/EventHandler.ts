@@ -10,6 +10,10 @@ export default class EventHandler {
 		this.events.push(signal.Connect((_) => callback(_)));
 	}
 
+	public registerOnce(signal: RBXScriptSignal, callback: Callback): void {
+		this.events.push(signal.Once((_) => callback(_)));
+	}
+
 	/** Deletes and disables all events */
 	public killAll() {
 		for (let i = 0; i < this.events.size(); i++) {

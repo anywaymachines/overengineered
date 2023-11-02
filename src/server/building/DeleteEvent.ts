@@ -10,6 +10,8 @@ export default class DeleteEvent {
 		Remotes.Server.GetNamespace("Building").OnFunction("PlayerDeleteBlock", (player, data) =>
 			this.playerDeleteBlock(player, data),
 		);
+
+		Remotes.Server.GetNamespace("Building").OnFunction("PlayerClearAll", (player) => this.playerClearAll(player));
 	}
 
 	private static playerDeleteBlock(player: Player, data: PlayerDeleteBlockRequest): BuildResponse {
@@ -32,6 +34,25 @@ export default class DeleteEvent {
 		}
 
 		data.block.Destroy();
+
+		return {
+			success: true,
+		};
+	}
+
+	private static playerClearAll(player: Player) {
+		const parentPlot = SharedPlots.getPlotByOwnerID(player.UserId);
+
+		const folder = parentPlot.FindFirstChild("Blocks");
+
+		if (folder === undefined) {
+			return {
+				success: false,
+				message: "Unable to find plot's blocks",
+			};
+		}
+
+		folder.ClearAllChildren();
 
 		return {
 			success: true,

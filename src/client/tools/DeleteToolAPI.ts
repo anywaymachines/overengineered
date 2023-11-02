@@ -10,6 +10,7 @@ import Remotes from "shared/NetworkDefinitions";
 import SoundUtils from "shared/utils/SoundUtils";
 import Logger from "shared/Logger";
 import GuiAnimations from "client/gui/GuiAnimations";
+import ConfirmationWindow from "client/gui/ConfirmationWindow";
 
 export default class DeleteToolAPI extends AbstractToolAPI {
 	public highlight?: Highlight;
@@ -43,6 +44,14 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		super.onPlatformChanged(platform);
 
 		this.updateGui(true);
+
+		if (platform !== "Console") {
+			this.eventHandler.registerEvent(this.gameUI.ToolsGui.DeleteAllButton.MouseButton1Click, () => {
+				ConfirmationWindow.showConfirmationWindow("Confirmation", "Are you sure to clear all blocks?", () =>
+					this.clearAll(),
+				);
+			});
+		}
 
 		// Initialize events
 		switch (platform) {
@@ -123,6 +132,27 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		this.updateGui();
 	}
 
+	public async clearAll() {
+		// Send block removing packet
+		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerClearAll").CallServerAsync();
+
+		// Parsing response
+		if (response.success) {
+			// Block removed
+			task.wait();
+
+			this.gameUI.Sounds.Building.BlockDelete.PlaybackSpeed = SoundUtils.randomSoundSpeed();
+			this.gameUI.Sounds.Building.BlockDelete.Play();
+
+			this.highlight = undefined;
+
+			this.updateGui();
+		} else {
+			// Block not removed
+			Logger.info("[DELETING] Clearing all blocks failed: " + response.message);
+		}
+	}
+
 	public async use() {
 		// ERROR: No block selected
 		if (this.highlight === undefined) {
@@ -158,6 +188,11 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 			if (input.KeyCode === Enum.KeyCode.ButtonX) {
 				// ButtonX to Remove
 				this.use();
+			} else if (input.KeyCode === Enum.KeyCode.ButtonY) {
+				// ButtonX to clear all
+				ConfirmationWindow.showConfirmationWindow("Confirmation", "Are you sure to clear all blocks?", () =>
+					this.clearAll(),
+				);
 			}
 		} else if (input.UserInputType === Enum.UserInputType.Touch) {
 			// Touch to update position
