@@ -123,6 +123,12 @@ export default class ToolsGui {
 			}
 		}
 
+		// Keyboard backspace for tool unequipping
+		if (input.KeyCode === Enum.KeyCode.Backspace) {
+			this.equipTool(undefined);
+			return;
+		}
+
 		// Gamepad ButtonB for tool unequipping
 		if (input.KeyCode === Enum.KeyCode.ButtonB) {
 			this.equipTool(undefined);
