@@ -14,6 +14,10 @@ export default class EventHandler {
 		this.events.push(signal.Once((_) => callback(_)));
 	}
 
+	public size(): number {
+		return this.events.size();
+	}
+
 	/** Deletes and disables all events */
 	public killAll() {
 		for (let i = 0; i < this.events.size(); i++) {

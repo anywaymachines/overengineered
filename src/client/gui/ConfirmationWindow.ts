@@ -9,6 +9,10 @@ export default class ConfirmationWindow {
 	private static eventHandler: EventHandler = new EventHandler();
 
 	static showConfirmationWindow(heading: string, text: string, callback: Callback) {
+		if (this.eventHandler.size() > 0) {
+			return;
+		}
+
 		this.gameDialog.ConfirmationWindow.HeadingLabel.Text = heading;
 		this.gameDialog.ConfirmationWindow.DescriptionLabel.Text = text;
 		this.gameDialog.ConfirmationWindow.Visible = true;
