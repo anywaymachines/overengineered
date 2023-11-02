@@ -23,6 +23,18 @@ export default class BuildToolMeta extends AbstractToolMeta {
 		keys.set(Enum.KeyCode.ButtonX, "Place");
 		keys.set(Enum.KeyCode.ButtonB, "Unequip");
 
+		// TODO: Rotate
+
+		return keys;
+	}
+
+	public getKeyboardTooltips(): Map<string, string> {
+		const keys = new Map<string, string>();
+
+		keys.set("R", "Rotate by X");
+		keys.set("T", "Rotate by Y");
+		keys.set("Y", "Rotate by Z");
+
 		return keys;
 	}
 

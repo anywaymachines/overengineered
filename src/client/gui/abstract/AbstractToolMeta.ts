@@ -2,6 +2,7 @@ import AliveEventsHandler from "client/event/AliveEventsHandler";
 import GuiAnimations from "../GuiAnimations";
 import ToolsGui from "../ToolsGui";
 import AbstractToolAPI from "./AbstractToolAPI";
+import GameControls from "client/GameControls";
 
 export default abstract class AbstractToolMeta {
 	// GUIs
@@ -24,7 +25,7 @@ export default abstract class AbstractToolMeta {
 
 	public onEquip(): void {
 		this.toolAPI.equip();
-		this.onPlatformChanged();
+		this.onPlatformChanged(GameControls.getActualPlatform());
 
 		// Default tools GUI animation
 		GuiAnimations.tweenColor(this.getButton(), this.equippedColor, 0.1);
@@ -37,13 +38,13 @@ export default abstract class AbstractToolMeta {
 		GuiAnimations.tweenColor(this.getButton(), this.unequippedColor, 0.1);
 	}
 
-	public onPlatformChanged(): void {
+	public onPlatformChanged(platform: string): void {
 		if (!this.toolAPI.isEquipped()) {
 			return;
 		}
 
 		// Call platform change on tool API
-		this.toolAPI.onPlatformChanged();
+		this.toolAPI.onPlatformChanged(platform);
 	}
 
 	public abstract getDisplayName(): string;
@@ -53,6 +54,8 @@ export default abstract class AbstractToolMeta {
 	public abstract getKeybind(): Enum.KeyCode;
 
 	public abstract getGamepadTooltips(): Map<Enum.KeyCode, string>;
+
+	public abstract getKeyboardTooltips(): Map<string, string>;
 
 	public abstract getButton(): Frame & MyToolsGuiButton;
 

@@ -43,7 +43,7 @@ export default class ToolsGui {
 		// GUI Terminate when unused
 		Players.LocalPlayer.CharacterRemoving.Once((_) => this.terminate());
 
-		this.onPlatformChanged();
+		this.onPlatformChanged(GameControls.getActualPlatform());
 	}
 
 	/** Function for tool switching */
@@ -87,17 +87,17 @@ export default class ToolsGui {
 		}
 	}
 
-	public onPlatformChanged() {
+	public onPlatformChanged(platform: string) {
 		// Update tools
 		this.tools.forEach((value) => {
-			value.onPlatformChanged();
+			value.onPlatformChanged(platform);
 		});
 
 		// Update buttons
 		this.gameUI.Tools.Buttons.GetChildren().forEach((child) => {
 			if (child.IsA("Frame")) {
 				const tooltip = (child as Frame & MyToolsGuiButton).KeyboardButtonTooltip;
-				if (GameControls.getActualPlatform() === "Desktop") {
+				if (platform === "Desktop") {
 					GuiAnimations.fade(tooltip, 0.1, "down");
 					GuiAnimations.tweenTransparency(tooltip, 0, 0.1);
 				} else {

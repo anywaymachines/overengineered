@@ -4,13 +4,13 @@ import { UserInputService } from "@rbxts/services";
 import GameControls from "client/GameControls";
 import Logger from "shared/Logger";
 import AliveEventsHandler from "client/event/AliveEventsHandler";
-import GamepadTooltips from "./GamepadTooltips";
+import ControlTooltips from "./ControlTooltips";
 
 export default class PlayerGameUI {
 	public static gameUI: MyGui;
 
 	public static ToolsGUI: ToolsGui;
-	public static gamepadTooltips: GamepadTooltips;
+	public static gamepadTooltips: ControlTooltips;
 	public static currentControlType = GameControls.getPhysicalPlatform();
 
 	public static initialize() {
@@ -18,25 +18,25 @@ export default class PlayerGameUI {
 
 		// Windows
 		this.ToolsGUI = new ToolsGui(this.gameUI);
-		this.gamepadTooltips = new GamepadTooltips(this.gameUI);
+		this.gamepadTooltips = new ControlTooltips(this.gameUI);
 
 		AliveEventsHandler.registerAliveEvent(UserInputService.InputChanged, () => this.onPlatformChanged());
-		this.updatePlatformGuis();
+		this.updatePlatformGuis(this.currentControlType);
 	}
 
 	public static onPlatformChanged() {
 		const newPlatform = GameControls.getActualPlatform();
 		if (this.currentControlType !== newPlatform) {
 			this.currentControlType = newPlatform;
-			this.updatePlatformGuis();
+			this.updatePlatformGuis(newPlatform);
 			Logger.info("[PlayerGameUI] Input type changed to " + this.currentControlType);
 		}
 	}
 
-	private static updatePlatformGuis() {
+	private static updatePlatformGuis(platform: string) {
 		// Display gamepad tooltips
-		this.ToolsGUI.onPlatformChanged();
-		this.gamepadTooltips.onPlatformChanged();
+		this.ToolsGUI.onPlatformChanged(platform);
+		this.gamepadTooltips.onPlatformChanged(platform);
 
 		// TODO: Send notification about changing platform
 	}

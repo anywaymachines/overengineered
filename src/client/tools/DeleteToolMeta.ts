@@ -27,6 +27,12 @@ export default class DeleteToolGui extends AbstractToolMeta {
 		return keys;
 	}
 
+	public getKeyboardTooltips(): Map<string, string> {
+		const keys = new Map<string, string>();
+
+		return keys;
+	}
+
 	public getKeybind(): Enum.KeyCode {
 		return Enum.KeyCode.Four;
 	}

@@ -25,7 +25,7 @@ export default abstract class AbstractToolAPI {
 	public abstract onUserInput(input: InputObject): void;
 
 	/** Callback when the platform has changed, for example `PC -> Console` or `Mobile -> Console` */
-	public onPlatformChanged(): void {
+	public onPlatformChanged(platform: string): void {
 		this.eventHandler.killAll();
 		this.eventHandler.registerEvent(UserInputService.InputBegan, (input) => this.onUserInput(input));
 	}

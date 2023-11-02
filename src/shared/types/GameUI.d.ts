@@ -14,8 +14,9 @@ interface MyGui {
 	ToolsGui: Folder & {
 		DeleteAllButton: TextButton;
 	};
-	GamepadTextTooltips: Frame & {
-		Template: Frame & GamepadTextTooltipFrame;
+	ControlTooltips: Frame & {
+		GamepadTemplate: Frame & GamepadTooltipFrame;
+		KeyboardTemplate: Frame & KeyboardTooltipFrame;
 	};
 	ConfirmationWindow: Frame & {
 		Answers: Frame & {
@@ -42,10 +43,17 @@ interface MyGui {
 }
 
 type GamepadTextTooltipKeys = "ButtonA" | "ButtonB" | "ButtonY" | "ButtonX";
-type GamepadTextTooltip = Partial<Record<GamepadTextTooltipKeys, string | undefined>>;
+type GamepadTextTooltip = Partial<Record<GamepadTextTooltipKeys, string>>;
 
-interface GamepadTextTooltipFrame {
+interface GamepadTooltipFrame {
 	ImageLabel: ImageLabel;
+	TextLabel: TextLabel;
+}
+
+interface KeyboardTooltipFrame {
+	ImageLabel: ImageLabel & {
+		KeyLabel: TextLabel;
+	};
 	TextLabel: TextLabel;
 }
 

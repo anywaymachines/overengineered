@@ -39,12 +39,10 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		}
 	}
 
-	public onPlatformChanged(): void {
-		super.onPlatformChanged();
+	public onPlatformChanged(platform: string): void {
+		super.onPlatformChanged(platform);
 
 		this.updateGui(true);
-
-		const platform = GameControls.getActualPlatform();
 
 		// Initialize events
 		switch (platform) {

@@ -172,8 +172,8 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		}
 	}
 
-	public onPlatformChanged(): void {
-		super.onPlatformChanged();
+	public onPlatformChanged(platform: string): void {
+		super.onPlatformChanged(platform);
 
 		// Show building mobile controls
 		if (GameControls.getActualPlatform() === "Touch") {
