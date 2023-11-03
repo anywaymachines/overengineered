@@ -278,22 +278,15 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
 			if (input.KeyCode === Enum.KeyCode.ButtonX) {
 				this.placeBlock();
-			} else if (
-				input.KeyCode === Enum.KeyCode.DPadDown ||
-				input.KeyCode === Enum.KeyCode.DPadLeft ||
-				input.KeyCode === Enum.KeyCode.DPadRight ||
-				input.KeyCode === Enum.KeyCode.DPadUp
-			) {
-				if (this.selectionButtons.size() === 0) {
-					return;
-				}
-				if (GuiService.SelectedObject === undefined) {
-					GuiService.SelectedObject = this.selectionButtons[0];
-				} else {
-					GuiService.SelectedObject = undefined;
-				}
+			} else if (input.KeyCode === Enum.KeyCode.DPadLeft) {
+				this.rotate(false, "r");
+			} else if (input.KeyCode === Enum.KeyCode.DPadUp) {
+				this.rotate(false, "t");
+			} else if (input.KeyCode === Enum.KeyCode.DPadDown) {
+				this.rotate(true, "t");
+			} else if (input.KeyCode === Enum.KeyCode.DPadRight) {
+				this.rotate(false, "y");
 			}
-			// TODO: Gamepad rotation
 		} else if (input.UserInputType === Enum.UserInputType.Touch) {
 			this.updatePosition();
 		}

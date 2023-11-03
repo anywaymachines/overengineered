@@ -22,10 +22,11 @@ export default class BuildToolMeta extends AbstractToolMeta {
 		const keys = new Map<string, string>();
 
 		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonX), "Place");
-		keys.set("http://www.roblox.com/asset/?id=15253229024", "Select block");
+		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonSelect), "Select block");
+		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadLeft), "Rotate by X");
+		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadUp), "Rotate by Y");
+		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadRight), "Rotate by Z");
 		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonB), "Unequip");
-
-		// TODO: Rotate
 
 		return keys;
 	}
