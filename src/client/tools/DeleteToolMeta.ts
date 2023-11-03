@@ -1,11 +1,11 @@
 import { UserInputService } from "@rbxts/services";
 import AbstractToolMeta from "../gui/abstract/AbstractToolMeta";
-import ToolsGui from "../gui/ToolsGui";
+import HotbarGUI from "../gui/HotbarGUI";
 import DeleteToolAPI from "client/tools/DeleteToolAPI";
 
 export default class DeleteToolGui extends AbstractToolMeta {
-	constructor(gameUI: GameUI, toolsInterface: ToolsGui) {
-		super(gameUI, toolsInterface);
+	constructor(gameUI: GameUI, horbarGUI: HotbarGUI) {
+		super(gameUI, horbarGUI);
 
 		this.toolAPI = new DeleteToolAPI(gameUI);
 	}

@@ -1,17 +1,14 @@
-import { Players, UserInputService } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import AbstractToolMeta from "./abstract/AbstractToolMeta";
 import BuildToolMeta from "../tools/BuildToolMeta";
 import GuiAnimations from "./GuiAnimations";
 import PlayerUtils from "shared/utils/PlayerUtils";
-import Logger from "shared/Logger";
 import DeleteToolMeta from "../tools/DeleteToolMeta";
-import AliveEventsHandler from "client/event/AliveEventsHandler";
-import GameControls from "client/GameControls";
 import ClientSignals from "client/ClientSignals";
+import AbstractGUI from "./abstract/AbstractGUI";
+import GameInput from "client/GameControls";
 
-export default class ToolsGui {
-	public gameUI: GameUI;
-
+export default class HotbarGUI extends AbstractGUI {
 	// Variables
 	public equippedTool?: AbstractToolMeta;
 
@@ -21,29 +18,22 @@ export default class ToolsGui {
 	public deleteTool: DeleteToolMeta;
 
 	constructor(gameUI: GameUI) {
-		// Define tools gui
-		this.gameUI = gameUI;
+		super(gameUI);
 
 		// Tools API
 		this.buildTool = new BuildToolMeta(gameUI, this);
 		this.deleteTool = new DeleteToolMeta(gameUI, this);
-		this.buildTool.onUnequip();
-		this.deleteTool.onUnequip();
 		this.tools.push(this.buildTool);
 		this.tools.push(this.deleteTool);
 
-		// Events
-		AliveEventsHandler.registerAliveEvent(UserInputService.InputBegan, (input: InputObject, _: boolean) =>
-			this.onInput(input),
-		);
-
-		// Initialization
+		// Equip nothing
 		this.equipTool(undefined, true);
+	}
 
-		// GUI Terminate when unused
-		Players.LocalPlayer.CharacterRemoving.Once((_) => this.terminate());
-
-		this.onPlatformChanged(GameControls.getActualPlatform());
+	public displayDefaultGUI(isVisible: boolean): void {
+		this.gameUI.Tools.Visible = isVisible;
+		this.gameUI.CurrentToolLabel.Visible = isVisible;
+		this.gameUI.CurrentToolDescriptionLabel.Visible = isVisible;
 	}
 
 	/** Function for tool switching */
@@ -87,12 +77,7 @@ export default class ToolsGui {
 		}
 	}
 
-	public onPlatformChanged(platform: string) {
-		// Update tools
-		this.tools.forEach((value) => {
-			value.onPlatformChanged(platform);
-		});
-
+	public onPlatformChanged(platform: typeof GameInput.currentPlatform) {
 		// Update buttons
 		this.gameUI.Tools.Buttons.GetChildren().forEach((child) => {
 			if (child.IsA("Frame")) {
@@ -102,7 +87,6 @@ export default class ToolsGui {
 					GuiAnimations.tweenTransparency(tooltip, 0, 0.1);
 				} else {
 					GuiAnimations.tweenTransparency(tooltip, 1, 0.1);
-					//tooltip.Visible = false;
 				}
 			}
 		});
@@ -156,17 +140,15 @@ export default class ToolsGui {
 	}
 
 	public terminate() {
-		Logger.info("Terminating ToolsInterface");
-
+		// Unequip tools
 		this.equipTool(undefined, true);
 
-		// Terminate all tools
+		// Terminate tools
 		for (let i = 0; i < this.tools.size(); i++) {
 			const element = this.tools[i];
-			element.onUnequip();
 			element.terminate();
 		}
 
-		script.Destroy();
+		super.terminate();
 	}
 }

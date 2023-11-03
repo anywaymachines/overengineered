@@ -2,7 +2,7 @@ import EventHandler from "client/event/EventHandler";
 import GuiUtils from "client/utils/GuiUtils";
 import GuiAnimations from "./GuiAnimations";
 import { GuiService } from "@rbxts/services";
-import GameControls from "client/GameControls";
+import GameInput from "client/GameControls";
 
 export default class ConfirmationWindow {
 	private static gameDialog: ScreenGui & GameDialog = GuiUtils.getGameDialog() as ScreenGui & GameDialog;
@@ -34,7 +34,7 @@ export default class ConfirmationWindow {
 			this.eventHandler.killAll();
 		});
 
-		if (GameControls.getActualPlatform() === "Console") {
+		if (GameInput.currentPlatform === "Console") {
 			GuiService.SelectedObject = this.gameDialog.ConfirmationWindow.Answers.NoButton;
 		}
 	}

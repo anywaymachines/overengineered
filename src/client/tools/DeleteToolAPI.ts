@@ -1,4 +1,4 @@
-import GameControls from "client/GameControls";
+import GameInput from "client/GameControls";
 import AbstractToolAPI from "../gui/abstract/AbstractToolAPI";
 import ClientSignals from "client/ClientSignals";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -16,7 +16,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 	public highlight: ObjectValue = new Instance("ObjectValue");
 
 	public displayGUI(noAnimations?: boolean): void {
-		const platform = GameControls.getActualPlatform();
+		const platform = GameInput.currentPlatform;
 		if (platform !== "Console") {
 			this.gameUI.ToolsGui.DeleteAllButton.Visible = true;
 			if (!noAnimations) {
@@ -38,10 +38,8 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		this.gameUI.TouchControls.DeleteTool.Visible = false;
 	}
 
-	public preparePlatformEvents(): void {
-		super.preparePlatformEvents();
-
-		const platform = GameControls.getActualPlatform();
+	public prepareEvents(platform: typeof GameInput.currentPlatform): void {
+		super.prepareEvents(platform);
 
 		if (platform !== "Console") {
 			this.eventHandler.registerEvent(this.gameUI.ToolsGui.DeleteAllButton.MouseButton1Click, () => {
@@ -57,7 +55,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 				// Prepare touch events
 				this.eventHandler.registerEvent(
 					this.gameUI.TouchControls.DeleteTool.DeleteButton.MouseButton1Click,
-					() => this.use(),
+					() => this.deleteBlock(),
 				);
 				break;
 
@@ -68,7 +66,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 			case "Desktop":
 				// Prepare desktop events
-				this.eventHandler.registerEvent(this.mouse.Button1Down, () => this.use());
+				this.eventHandler.registerEvent(this.mouse.Button1Down, () => this.deleteBlock());
 				this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
 				break;
 
@@ -80,7 +78,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 	public updatePosition() {
 		// ERROR: If ESC menu is open - freeze movement
-		if (GameControls.isPaused()) {
+		if (GameInput.isPaused()) {
 			return;
 		}
 
@@ -148,7 +146,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		}
 	}
 
-	public async use() {
+	public async deleteBlock() {
 		// ERROR: No block selected
 		if (this.highlight.Value === undefined) {
 			return;
@@ -181,7 +179,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		if (input.UserInputType === Enum.UserInputType.Gamepad1) {
 			if (input.KeyCode === Enum.KeyCode.ButtonX) {
 				// ButtonX to Remove
-				this.use();
+				this.deleteBlock();
 			} else if (input.KeyCode === Enum.KeyCode.ButtonY) {
 				// ButtonX to clear all
 				ConfirmationWindow.showConfirmationWindow("Confirmation", "Are you sure to clear all blocks?", () =>

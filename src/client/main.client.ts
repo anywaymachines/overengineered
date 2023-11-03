@@ -1,9 +1,7 @@
 import { Players } from "@rbxts/services";
 import PlayerGameUI from "./gui/PlayerGameUI";
-import AliveEventsHandler from "./event/AliveEventsHandler";
 
 function initializeGUI() {
-	AliveEventsHandler.initialize();
 	PlayerGameUI.initialize();
 }
 

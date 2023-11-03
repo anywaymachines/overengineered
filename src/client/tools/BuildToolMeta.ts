@@ -1,11 +1,11 @@
 import BuildToolAPI from "client/tools/BuildToolAPI";
-import ToolsGui from "../gui/ToolsGui";
+import HotbarGUI from "../gui/HotbarGUI";
 import AbstractToolMeta from "../gui/abstract/AbstractToolMeta";
-import { GuiService, UserInputService } from "@rbxts/services";
+import { UserInputService } from "@rbxts/services";
 
 export default class BuildToolMeta extends AbstractToolMeta {
-	constructor(gameUI: GameUI, toolsInterface: ToolsGui) {
-		super(gameUI, toolsInterface);
+	constructor(gameUI: GameUI, hotbarGUI: HotbarGUI) {
+		super(gameUI, hotbarGUI);
 
 		this.toolAPI = new BuildToolAPI(gameUI);
 	}

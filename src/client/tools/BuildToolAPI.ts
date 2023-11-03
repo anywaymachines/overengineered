@@ -1,9 +1,9 @@
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import AbstractToolAPI from "../gui/abstract/AbstractToolAPI";
 import AbstractBlock from "shared/registry/AbstractBlock";
-import { GuiService, Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
+import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
 import PartUtils from "shared/utils/PartUtils";
-import GameControls from "client/GameControls";
+import GameInput from "client/GameControls";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import Remotes from "shared/NetworkDefinitions";
 import Logger from "shared/Logger";
@@ -53,7 +53,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		this.gameUI.ToolsGui.BuildToolSelection.Visible = true;
 
 		// Show building mobile controls
-		if (GameControls.getActualPlatform() === "Touch") {
+		if (GameInput.currentPlatform === "Touch") {
 			this.gameUI.TouchControls.BuildTool.Visible = true;
 			if (!noAnimations) {
 				GuiAnimations.fade(this.gameUI.TouchControls.BuildTool, 0.1, "right");
@@ -269,11 +269,11 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		if (input.UserInputType === Enum.UserInputType.Keyboard) {
 			// Keyboard rotation
 			if (input.KeyCode === Enum.KeyCode.R) {
-				this.rotate(GameControls.isShiftPressed(), "r");
+				this.rotate(GameInput.isShiftPressed(), "r");
 			} else if (input.KeyCode === Enum.KeyCode.T) {
-				this.rotate(GameControls.isShiftPressed(), "t");
+				this.rotate(GameInput.isShiftPressed(), "t");
 			} else if (input.KeyCode === Enum.KeyCode.Y) {
-				this.rotate(GameControls.isShiftPressed(), "y");
+				this.rotate(GameInput.isShiftPressed(), "y");
 			}
 		} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
 			if (input.KeyCode === Enum.KeyCode.ButtonX) {
@@ -292,10 +292,10 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		}
 	}
 
-	public preparePlatformEvents() {
-		super.preparePlatformEvents();
+	public prepareEvents(platform: typeof GameInput.currentPlatform) {
+		super.prepareEvents(platform);
 
-		switch (GameControls.getActualPlatform()) {
+		switch (platform) {
 			case "Desktop":
 				this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
 				this.eventHandler.registerEvent(this.mouse.Button1Down, async () => await this.placeBlock());
@@ -356,7 +356,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		return (
 			!this.previewBlock ||
 			!this.previewBlock.PrimaryPart ||
-			GameControls.isPaused() ||
+			GameInput.isPaused() ||
 			!PlayerUtils.isAlive(Players.LocalPlayer) ||
 			(GuiUtils.isCursorOnVisibleGui() && !savePosition)
 		);
