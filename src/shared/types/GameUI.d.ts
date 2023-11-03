@@ -12,6 +12,23 @@ interface GameUI {
 		};
 	};
 	ToolsGui: Folder & {
+		BuildToolSelection: Frame & {
+			Buttons: ScrollingFrame & {
+				UIListLayout: UIListLayout;
+				BlockTemplate: TextButton & {
+					Frame: Frame & {
+						LimitLabel: TextLabel;
+					};
+					TextLabel: TextLabel;
+				};
+				CategoryTemplate: TextButton & {
+					Frame: Frame & {
+						ImageLabel: ImageLabel;
+					};
+					TextLabel: TextLabel;
+				};
+			};
+		};
 		DeleteAllButton: TextButton;
 	};
 	ControlTooltips: Frame & {

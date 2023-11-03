@@ -4,7 +4,7 @@ import BuildToolMeta from "../tools/BuildToolMeta";
 import GuiAnimations from "./GuiAnimations";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import Logger from "shared/Logger";
-import DeleteToolGui from "../tools/DeleteToolMeta";
+import DeleteToolMeta from "../tools/DeleteToolMeta";
 import AliveEventsHandler from "client/event/AliveEventsHandler";
 import GameControls from "client/GameControls";
 import ClientSignals from "client/ClientSignals";
@@ -18,7 +18,7 @@ export default class ToolsGui {
 	// Tools
 	public tools: AbstractToolMeta[] = [];
 	public buildTool: BuildToolMeta;
-	public deleteTool: DeleteToolGui;
+	public deleteTool: DeleteToolMeta;
 
 	constructor(gameUI: GameUI) {
 		// Define tools gui
@@ -26,7 +26,7 @@ export default class ToolsGui {
 
 		// Tools API
 		this.buildTool = new BuildToolMeta(gameUI, this);
-		this.deleteTool = new DeleteToolGui(gameUI, this);
+		this.deleteTool = new DeleteToolMeta(gameUI, this);
 		this.buildTool.onUnequip();
 		this.deleteTool.onUnequip();
 		this.tools.push(this.buildTool);

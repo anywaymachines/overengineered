@@ -9,7 +9,7 @@ export default class ControlTooltips {
 	private gameUI: GameUI;
 
 	// Cache
-	private gamepadTooltipsCache: Map<Enum.KeyCode, string> = new Map<Enum.KeyCode, string>();
+	private gamepadTooltipsCache: Map<string, string> = new Map<string, string>();
 	private keyboardTooltipsCache: Map<string, string> = new Map<string, string>();
 
 	// Templates
@@ -74,7 +74,7 @@ export default class ControlTooltips {
 				GuiAnimations.tweenTransparency(element, 0, 0.1);
 			});
 			this.gamepadTooltipsCache.forEach((value, key) => {
-				const image = UserInputService.GetImageForKeyCode(key);
+				const image = key;
 
 				const obj = this.gamepadTooltipTemplate.Clone();
 				obj.ImageLabel.Image = image;

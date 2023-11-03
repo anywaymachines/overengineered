@@ -1,3 +1,4 @@
+import { UserInputService } from "@rbxts/services";
 import AbstractToolMeta from "../gui/abstract/AbstractToolMeta";
 import ToolsGui from "../gui/ToolsGui";
 import DeleteToolAPI from "client/tools/DeleteToolAPI";
@@ -18,11 +19,11 @@ export default class DeleteToolGui extends AbstractToolMeta {
 	}
 
 	public getGamepadTooltips() {
-		const keys = new Map<Enum.KeyCode, string>();
+		const keys = new Map<string, string>();
 
-		keys.set(Enum.KeyCode.ButtonY, "Clear all");
-		keys.set(Enum.KeyCode.ButtonX, "Delete");
-		keys.set(Enum.KeyCode.ButtonB, "Unequip");
+		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonY), "Clear all");
+		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonX), "Delete");
+		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonB), "Unequip");
 
 		return keys;
 	}

@@ -1,6 +1,7 @@
 import BuildToolAPI from "client/tools/BuildToolAPI";
 import ToolsGui from "../gui/ToolsGui";
 import AbstractToolMeta from "../gui/abstract/AbstractToolMeta";
+import { GuiService, UserInputService } from "@rbxts/services";
 
 export default class BuildToolMeta extends AbstractToolMeta {
 	constructor(gameUI: GameUI, toolsInterface: ToolsGui) {
@@ -18,10 +19,11 @@ export default class BuildToolMeta extends AbstractToolMeta {
 	}
 
 	public getGamepadTooltips() {
-		const keys = new Map<Enum.KeyCode, string>();
+		const keys = new Map<string, string>();
 
-		keys.set(Enum.KeyCode.ButtonX, "Place");
-		keys.set(Enum.KeyCode.ButtonB, "Unequip");
+		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonX), "Place");
+		keys.set("http://www.roblox.com/asset/?id=15253229024", "Select block");
+		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonB), "Unequip");
 
 		// TODO: Rotate
 

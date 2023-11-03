@@ -53,7 +53,7 @@ export default abstract class AbstractToolMeta {
 
 	public abstract getKeybind(): Enum.KeyCode;
 
-	public abstract getGamepadTooltips(): Map<Enum.KeyCode, string>;
+	public abstract getGamepadTooltips(): Map<string, string>;
 
 	public abstract getKeyboardTooltips(): Map<string, string>;
 

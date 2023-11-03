@@ -15,35 +15,27 @@ import ConfirmationWindow from "client/gui/ConfirmationWindow";
 export default class DeleteToolAPI extends AbstractToolAPI {
 	public highlight?: Highlight;
 
-	public hideAllGUIs() {
-		this.gameUI.ToolsGui.DeleteAllButton.Visible = false;
-		this.gameUI.TouchControls.DeleteTool.Visible = false;
-	}
-
-	public updateGui(firstTime: boolean = false) {
+	public displayGUI(): void {
 		const platform = GameControls.getActualPlatform();
-
-		// Prepare GUIs
-		this.hideAllGUIs();
-
+		if (platform !== "Console") {
+			this.gameUI.ToolsGui.DeleteAllButton.Visible = true;
+			GuiAnimations.fade(this.gameUI.ToolsGui.DeleteAllButton, 0.1, "down");
+		}
 		if (platform === "Touch" && this.highlight !== undefined) {
 			this.gameUI.TouchControls.DeleteTool.Visible = true;
 			GuiAnimations.fade(this.gameUI.TouchControls.DeleteTool, 0.1, "left");
 		}
+	}
 
-		// Hide delete all button for console (used ButtonY)
-		if (platform !== "Console") {
-			this.gameUI.ToolsGui.DeleteAllButton.Visible = true;
-			if (firstTime) {
-				GuiAnimations.fade(this.gameUI.ToolsGui.DeleteAllButton, 0.1, "down");
-			}
-		}
+	public updateGUI() {}
+
+	public hideGUI(): void {
+		this.gameUI.ToolsGui.DeleteAllButton.Visible = false;
+		this.gameUI.TouchControls.DeleteTool.Visible = false;
 	}
 
 	public onPlatformChanged(platform: string): void {
 		super.onPlatformChanged(platform);
-
-		this.updateGui(true);
 
 		if (platform !== "Console") {
 			this.eventHandler.registerEvent(this.gameUI.ToolsGui.DeleteAllButton.MouseButton1Click, () => {
@@ -100,7 +92,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 		this.highlight?.Destroy();
 		this.highlight = undefined;
-		this.updateGui();
+		this.updateGUI();
 
 		// ERROR: Mouse is in space
 		if (target === undefined) {
@@ -129,7 +121,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		this.highlight.Parent = target.Parent;
 		this.highlight.Adornee = target.Parent;
 
-		this.updateGui();
+		this.updateGUI();
 	}
 
 	public async clearAll() {
@@ -146,7 +138,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 			this.highlight = undefined;
 
-			this.updateGui();
+			this.updateGUI();
 		} else {
 			// Block not removed
 			Logger.info("[DELETING] Clearing all blocks failed: " + response.message);
@@ -176,7 +168,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 			this.highlight = undefined;
 
-			this.updateGui();
+			this.updateGUI();
 		} else {
 			// Block not removed
 			Logger.info("[DELETING] Block deleting failed: " + response.message);
@@ -209,7 +201,6 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 	public unequip(): void {
 		super.unequip();
 
-		this.hideAllGUIs();
 		this.highlight?.Destroy();
 	}
 }

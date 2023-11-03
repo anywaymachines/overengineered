@@ -8,4 +8,8 @@ export default class BlocksCategory extends AbstractCategory {
 	public getDisplayName(): string {
 		return "Blocks";
 	}
+
+	public getImageAssetID(): number {
+		return 15246712629;
+	}
 }

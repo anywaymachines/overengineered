@@ -1,7 +1,7 @@
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import AbstractToolAPI from "../gui/abstract/AbstractToolAPI";
 import AbstractBlock from "shared/registry/AbstractBlock";
-import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
+import { GuiService, Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
 import PartUtils from "shared/utils/PartUtils";
 import GameControls from "client/GameControls";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -12,6 +12,8 @@ import VectorUtils from "shared/utils/VectorUtils";
 import GuiUtils from "client/utils/GuiUtils";
 import GuiAnimations from "client/gui/GuiAnimations";
 import SoundUtils from "shared/utils/SoundUtils";
+import AbstractCategory from "shared/registry/AbstractCategory";
+import CategoriesRegistry from "shared/registry/CategoriesRegistry";
 
 export default class BuildToolAPI extends AbstractToolAPI {
 	// Mouse
@@ -20,19 +22,115 @@ export default class BuildToolAPI extends AbstractToolAPI {
 	private lastMouseSurface?: Enum.NormalId;
 
 	// Block
-	private equippedBlock: AbstractBlock;
+	private selectedBlock?: AbstractBlock;
 	private previewBlock?: Model;
 	private previewBlockRotation: CFrame = new CFrame();
+
+	// Templates
+	private guiCategoryTemplate: TextButton & { Frame: Frame & { ImageLabel: ImageLabel }; TextLabel: TextLabel };
+	private guiBlockTemplate: TextButton & { Frame: Frame & { LimitLabel: TextLabel }; TextLabel: TextLabel };
+
+	// Menu selection
+	private selectionButtons: Array<TextButton> = new Array<TextButton>();
+	private selectedCategory?: AbstractCategory;
 
 	// Const
 	private readonly allowedColor: Color3 = Color3.fromRGB(194, 217, 255);
 	private readonly forbiddenColor: Color3 = Color3.fromRGB(255, 189, 189);
-	private readonly defaultBlock = BlockRegistry.TEST_BLOCK;
 
 	constructor(gameUI: GameUI) {
 		super(gameUI);
 
-		this.equippedBlock = BlockRegistry.TEST_BLOCK;
+		// Prepare templates
+		this.guiCategoryTemplate = this.gameUI.ToolsGui.BuildToolSelection.Buttons.CategoryTemplate.Clone();
+		this.guiBlockTemplate = this.gameUI.ToolsGui.BuildToolSelection.Buttons.BlockTemplate.Clone();
+		this.gameUI.ToolsGui.BuildToolSelection.Buttons.CategoryTemplate.Destroy();
+		this.gameUI.ToolsGui.BuildToolSelection.Buttons.BlockTemplate.Destroy();
+	}
+
+	public displayGUI(noAnimations?: boolean): void {
+		// Display GUI
+		this.gameUI.ToolsGui.BuildToolSelection.Visible = true;
+
+		// Show building mobile controls
+		if (GameControls.getActualPlatform() === "Touch") {
+			this.gameUI.TouchControls.BuildTool.Visible = true;
+			if (!noAnimations) {
+				GuiAnimations.fade(this.gameUI.TouchControls.BuildTool, 0.1, "right");
+			}
+		} else {
+			this.gameUI.TouchControls.BuildTool.Visible = false;
+		}
+
+		this.updateSelectionMenu(noAnimations);
+	}
+
+	public updateSelectionMenu(noAnimations?: boolean) {
+		if (!noAnimations) {
+			GuiAnimations.fade(this.gameUI.ToolsGui.BuildToolSelection, 0.1, "right");
+		}
+
+		// Remove old buttons
+		this.selectionButtons.forEach((button) => {
+			button.Destroy();
+		});
+		this.selectionButtons.clear();
+
+		if (this.selectedCategory === undefined) {
+			// Display categories
+			CategoriesRegistry.categories.forEach((registeredCategory) => {
+				const obj = this.guiCategoryTemplate.Clone();
+				obj.TextLabel.Text = registeredCategory.getDisplayName();
+				obj.Frame.ImageLabel.Image = `rbxassetid://${registeredCategory.getImageAssetID()}`;
+				obj.Parent = this.gameUI.ToolsGui.BuildToolSelection.Buttons;
+				this.eventHandler.registerOnce(obj.MouseButton1Click, () => {
+					this.selectedCategory = registeredCategory;
+					this.updateSelectionMenu();
+				});
+				this.selectionButtons.push(obj);
+			});
+		} else {
+			const blocks = BlockRegistry.getBlocksInCategory(this.selectedCategory);
+
+			const backButton = this.guiCategoryTemplate.Clone();
+			backButton.TextLabel.Text = "Back";
+			backButton.Frame.ImageLabel.Image = "http://www.roblox.com/asset/?id=15252518021";
+			backButton.Parent = this.gameUI.ToolsGui.BuildToolSelection.Buttons;
+			this.eventHandler.registerOnce(backButton.MouseButton1Click, () => {
+				this.selectedCategory = undefined;
+				this.selectBlock(undefined);
+				this.updateSelectionMenu();
+			});
+			this.selectionButtons.push(backButton);
+
+			blocks.forEach((block) => {
+				const obj = this.guiBlockTemplate.Clone();
+				obj.Name = block.getDisplayName();
+				obj.TextLabel.Text = block.getDisplayName();
+				if (this.selectedBlock === block) {
+					obj.BackgroundColor3 = Color3.fromRGB(106, 106, 106);
+				}
+				obj.Frame.LimitLabel.Text = "inf";
+				obj.Parent = this.gameUI.ToolsGui.BuildToolSelection.Buttons;
+				this.eventHandler.registerEvent(obj.MouseButton1Click, () => {
+					this.selectBlock(block);
+					this.updateSelectionMenu(true);
+				});
+				this.selectionButtons.push(obj);
+			});
+		}
+
+		const scrollingframe = this.gameUI.ToolsGui.BuildToolSelection.Buttons;
+
+		scrollingframe.CanvasSize = new UDim2(0, 0, 0, scrollingframe.UIListLayout.AbsoluteContentSize.Y);
+	}
+
+	public hideGUI(): void {
+		// Hide mobile controls
+		this.gameUI.TouchControls.BuildTool.Visible = false;
+
+		// Hide block selection
+		this.gameUI.ToolsGui.BuildToolSelection.Visible = false;
 	}
 
 	private addHighlight() {
@@ -46,25 +144,26 @@ export default class BuildToolAPI extends AbstractToolAPI {
 
 	private addAxisModel() {
 		assert(this.previewBlock);
+		assert(this.selectedBlock);
 
 		const axis = ReplicatedStorage.Assets.Axis.Clone();
 		axis.PivotTo(this.previewBlock.GetPivot());
 		axis.Parent = this.previewBlock;
 
-		if (this.equippedBlock.getAvailableRotationAxis().r === false) {
+		if (this.selectedBlock.getAvailableRotationAxis().r === false) {
 			axis.R.Destroy();
 		}
 
-		if (this.equippedBlock.getAvailableRotationAxis().t === false) {
+		if (this.selectedBlock.getAvailableRotationAxis().t === false) {
 			axis.T.Destroy();
 		}
 
-		if (this.equippedBlock.getAvailableRotationAxis().y === false) {
+		if (this.selectedBlock.getAvailableRotationAxis().y === false) {
 			axis.Y.Destroy();
 		}
 	}
 
-	private rotateBlock(rotationVector: Vector3) {
+	private rotateFineTune(rotationVector: Vector3) {
 		this.previewBlockRotation = CFrame.fromEulerAnglesXYZ(rotationVector.X, rotationVector.Y, rotationVector.Z).mul(
 			this.previewBlockRotation,
 		);
@@ -74,14 +173,18 @@ export default class BuildToolAPI extends AbstractToolAPI {
 	}
 
 	public rotate(forward: boolean, axis: "r" | "t" | "y") {
-		const { r, t, y } = this.equippedBlock.getAvailableRotationAxis();
+		if (this.selectedBlock === undefined) {
+			return;
+		}
+
+		const { r, t, y } = this.selectedBlock.getAvailableRotationAxis();
 
 		if (axis === "r" && r) {
-			this.rotateBlock(new Vector3(forward ? math.pi / 2 : math.pi / -2, 0, 0));
+			this.rotateFineTune(new Vector3(forward ? math.pi / 2 : math.pi / -2, 0, 0));
 		} else if (axis === "t" && t) {
-			this.rotateBlock(new Vector3(0, forward ? math.pi / 2 : math.pi / -2, 0));
+			this.rotateFineTune(new Vector3(0, forward ? math.pi / 2 : math.pi / -2, 0));
 		} else if (axis === "y" && y) {
-			this.rotateBlock(new Vector3(0, 0, forward ? math.pi / 2 : math.pi / -2));
+			this.rotateFineTune(new Vector3(0, 0, forward ? math.pi / 2 : math.pi / -2));
 		} else {
 			this.gameUI.Sounds.Building.BlockPlaceError.PlaybackSpeed = SoundUtils.randomSoundSpeed();
 			this.gameUI.Sounds.Building.BlockPlaceError.Play();
@@ -89,16 +192,39 @@ export default class BuildToolAPI extends AbstractToolAPI {
 	}
 
 	// TODO: Use it in block selection menu
-	public selectBlock(block: AbstractBlock): void {
-		this.unequip();
-		this.equippedBlock = block;
-		this.equip();
+	public selectBlock(block?: AbstractBlock): void {
+		// Remove old block preview
+		this.previewBlock?.Destroy();
+
+		this.selectedBlock = block;
+
+		if (this.selectedBlock === undefined) {
+			return;
+		}
+
+		// Spawning a new block
+		this.previewBlock = this.selectedBlock.getModel().Clone();
+		this.previewBlock.Parent = Workspace;
+
+		// Customizing
+		this.addAxisModel();
+		this.addHighlight();
+		PartUtils.ghostModel(this.previewBlock);
+
+		// First update
+		this.updatePosition();
 	}
 
 	public async placeBlock() {
-		assert(this.equippedBlock);
-		assert(this.previewBlock);
-		assert(this.previewBlock.PrimaryPart);
+		// ERROR: Nothing to place
+		if (!this.previewBlock || !this.previewBlock.PrimaryPart) {
+			return;
+		}
+
+		// ERROR: Block is not selected
+		if (this.selectedBlock === undefined) {
+			return;
+		}
 
 		// Non-alive players bypass
 		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
@@ -106,7 +232,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		}
 
 		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerPlaceBlock").CallServerAsync({
-			block: this.equippedBlock.id,
+			block: this.selectedBlock.id,
 			location: this.previewBlock.PrimaryPart.CFrame,
 		});
 
@@ -128,26 +254,11 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		super.equip();
 
 		// Selecting a block
-		if (this.equippedBlock === undefined) {
-			this.equippedBlock = this.defaultBlock;
-		}
-
-		// Spawning a new block
-		this.previewBlock = this.equippedBlock.getModel().Clone();
-		this.previewBlock.Parent = Workspace;
-
-		this.addAxisModel();
-		this.addHighlight();
-		PartUtils.ghostModel(this.previewBlock);
-
-		this.updatePosition();
+		this.selectBlock(this.selectedBlock);
 	}
 
 	public unequip(): void {
 		super.unequip();
-
-		// Hide mobile controls
-		this.gameUI.TouchControls.BuildTool.Visible = false;
 
 		this.previewBlock?.Destroy();
 	}
@@ -165,6 +276,20 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
 			if (input.KeyCode === Enum.KeyCode.ButtonX) {
 				this.placeBlock();
+			} else if (
+				input.KeyCode === Enum.KeyCode.DPadDown ||
+				input.KeyCode === Enum.KeyCode.DPadLeft ||
+				input.KeyCode === Enum.KeyCode.DPadRight ||
+				input.KeyCode === Enum.KeyCode.DPadUp
+			) {
+				if (this.selectionButtons.size() === 0) {
+					return;
+				}
+				if (GuiService.SelectedObject === undefined) {
+					GuiService.SelectedObject = this.selectionButtons[0];
+				} else {
+					GuiService.SelectedObject = undefined;
+				}
 			}
 			// TODO: Gamepad rotation
 		} else if (input.UserInputType === Enum.UserInputType.Touch) {
@@ -172,22 +297,9 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		}
 	}
 
-	public onPlatformChanged(platform: string): void {
-		super.onPlatformChanged(platform);
+	public preparePlatformEvents() {
+		super.preparePlatformEvents();
 
-		// Show building mobile controls
-		if (GameControls.getActualPlatform() === "Touch") {
-			this.gameUI.TouchControls.BuildTool.Visible = true;
-			GuiAnimations.fade(this.gameUI.TouchControls.BuildTool, 0.1, "right");
-		} else {
-			this.gameUI.TouchControls.BuildTool.Visible = false;
-		}
-
-		this.setupEvents();
-	}
-
-	public setupEvents() {
-		Logger.info("[BuildToolAPI] Setting up events");
 		switch (GameControls.getActualPlatform()) {
 			case "Desktop":
 				this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
@@ -224,7 +336,9 @@ export default class BuildToolAPI extends AbstractToolAPI {
 	}
 
 	public updatePosition(savePosition: boolean = false) {
-		assert(this.previewBlock);
+		if (!this.selectedBlock || !this.previewBlock) {
+			return;
+		}
 
 		if (this.shouldReturnEarly(savePosition)) {
 			return;
