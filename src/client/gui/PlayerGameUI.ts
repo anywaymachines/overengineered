@@ -1,7 +1,6 @@
 import GuiUtils from "client/utils/GuiUtils";
 import HotbarGUI from "./HotbarGUI";
 import ControlTooltips from "./ControlTooltips";
-import EventHandler from "client/event/EventHandler";
 
 export default class PlayerGameUI {
 	public static gameUI: GameUI;
@@ -9,8 +8,6 @@ export default class PlayerGameUI {
 	// Interfaces
 	public static hotbarGUI: HotbarGUI;
 	public static gamepadTooltips: ControlTooltips;
-
-	public static eventHandler: EventHandler = new EventHandler();
 
 	public static initialize() {
 		this.gameUI = GuiUtils.getGameUI();

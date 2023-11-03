@@ -201,6 +201,6 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 	public unequip(): void {
 		super.unequip();
 
-		this.highlight?.Destroy();
+		this.highlight.Value?.Destroy();
 	}
 }
