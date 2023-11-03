@@ -31,7 +31,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 	private guiBlockTemplate: TextButton & { Frame: Frame & { LimitLabel: TextLabel }; TextLabel: TextLabel };
 
 	// Menu selection
-	private selectionButtons: Array<TextButton> = new Array<TextButton>();
+	private selectionButtons: TextButton[] = [];
 	private selectedCategory?: AbstractCategory;
 
 	// Const
@@ -84,6 +84,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 				obj.Frame.ImageLabel.Image = `rbxassetid://${registeredCategory.getImageAssetID()}`;
 				obj.Parent = this.gameUI.ToolsGui.BuildToolSelection.Buttons;
 				this.eventHandler.registerOnce(obj.MouseButton1Click, () => {
+					this.gameUI.Sounds.GuiClick.Play();
 					this.selectedCategory = registeredCategory;
 					this.updateSelectionMenu();
 				});
@@ -97,6 +98,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 			backButton.Frame.ImageLabel.Image = "http://www.roblox.com/asset/?id=15252518021";
 			backButton.Parent = this.gameUI.ToolsGui.BuildToolSelection.Buttons;
 			this.eventHandler.registerOnce(backButton.MouseButton1Click, () => {
+				this.gameUI.Sounds.GuiClick.Play();
 				this.selectedCategory = undefined;
 				this.selectBlock(undefined);
 				this.updateSelectionMenu();
@@ -113,6 +115,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 				obj.Frame.LimitLabel.Text = "inf";
 				obj.Parent = this.gameUI.ToolsGui.BuildToolSelection.Buttons;
 				this.eventHandler.registerEvent(obj.MouseButton1Click, () => {
+					this.gameUI.Sounds.GuiClick.Play();
 					this.selectBlock(block);
 					this.updateSelectionMenu(true);
 				});
@@ -191,7 +194,6 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		}
 	}
 
-	// TODO: Use it in block selection menu
 	public selectBlock(block?: AbstractBlock): void {
 		// Remove old block preview
 		this.previewBlock?.Destroy();

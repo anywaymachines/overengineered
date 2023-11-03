@@ -13,29 +13,35 @@ import GuiAnimations from "client/gui/GuiAnimations";
 import ConfirmationWindow from "client/gui/ConfirmationWindow";
 
 export default class DeleteToolAPI extends AbstractToolAPI {
-	public highlight?: Highlight;
+	public highlight: ObjectValue = new Instance("ObjectValue");
 
-	public displayGUI(): void {
+	public displayGUI(noAnimations?: boolean): void {
 		const platform = GameControls.getActualPlatform();
 		if (platform !== "Console") {
 			this.gameUI.ToolsGui.DeleteAllButton.Visible = true;
-			GuiAnimations.fade(this.gameUI.ToolsGui.DeleteAllButton, 0.1, "down");
+			if (!noAnimations) {
+				GuiAnimations.fade(this.gameUI.ToolsGui.DeleteAllButton, 0.1, "down");
+			}
 		}
-		if (platform === "Touch" && this.highlight !== undefined) {
-			this.gameUI.TouchControls.DeleteTool.Visible = true;
-			GuiAnimations.fade(this.gameUI.TouchControls.DeleteTool, 0.1, "left");
-		}
+		this.eventHandler.registerEvent(this.highlight.Changed, () => {
+			if (platform === "Touch" && this.highlight.Value !== undefined) {
+				this.gameUI.TouchControls.DeleteTool.Visible = true;
+				GuiAnimations.fade(this.gameUI.TouchControls.DeleteTool, 0.1, "left");
+			} else {
+				this.gameUI.TouchControls.DeleteTool.Visible = false;
+			}
+		});
 	}
-
-	public updateGUI() {}
 
 	public hideGUI(): void {
 		this.gameUI.ToolsGui.DeleteAllButton.Visible = false;
 		this.gameUI.TouchControls.DeleteTool.Visible = false;
 	}
 
-	public onPlatformChanged(platform: string): void {
-		super.onPlatformChanged(platform);
+	public preparePlatformEvents(): void {
+		super.preparePlatformEvents();
+
+		const platform = GameControls.getActualPlatform();
 
 		if (platform !== "Console") {
 			this.eventHandler.registerEvent(this.gameUI.ToolsGui.DeleteAllButton.MouseButton1Click, () => {
@@ -90,9 +96,8 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 		const target = this.mouse.Target;
 
-		this.highlight?.Destroy();
-		this.highlight = undefined;
-		this.updateGUI();
+		this.highlight.Value?.Destroy();
+		this.highlight.Value = undefined;
 
 		// ERROR: Mouse is in space
 		if (target === undefined) {
@@ -117,11 +122,10 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		}
 
 		// Create highlight
-		this.highlight = new Instance("Highlight");
-		this.highlight.Parent = target.Parent;
-		this.highlight.Adornee = target.Parent;
-
-		this.updateGUI();
+		const instance = new Instance("Highlight");
+		instance.Parent = target.Parent;
+		instance.Adornee = target.Parent;
+		this.highlight.Value = instance;
 	}
 
 	public async clearAll() {
@@ -136,9 +140,8 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 			this.gameUI.Sounds.Building.BlockDelete.PlaybackSpeed = SoundUtils.randomSoundSpeed();
 			this.gameUI.Sounds.Building.BlockDelete.Play();
 
-			this.highlight = undefined;
-
-			this.updateGUI();
+			this.highlight.Value?.Destroy();
+			this.highlight.Value = undefined;
 		} else {
 			// Block not removed
 			Logger.info("[DELETING] Clearing all blocks failed: " + response.message);
@@ -147,7 +150,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 	public async use() {
 		// ERROR: No block selected
-		if (this.highlight === undefined) {
+		if (this.highlight.Value === undefined) {
 			return;
 		}
 
@@ -155,7 +158,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		const response = await Remotes.Client.GetNamespace("Building")
 			.Get("PlayerDeleteBlock")
 			.CallServerAsync({
-				block: this.highlight.Parent as Model,
+				block: this.highlight.Value.Parent as Model,
 			});
 
 		// Parsing response
@@ -166,9 +169,8 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 			this.gameUI.Sounds.Building.BlockDelete.PlaybackSpeed = SoundUtils.randomSoundSpeed();
 			this.gameUI.Sounds.Building.BlockDelete.Play();
 
-			this.highlight = undefined;
-
-			this.updateGUI();
+			this.highlight.Value?.Destroy();
+			this.highlight.Value = undefined;
 		} else {
 			// Block not removed
 			Logger.info("[DELETING] Block deleting failed: " + response.message);

@@ -1,4 +1,4 @@
-import { Players, RunService } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import PlayerGameUI from "./gui/PlayerGameUI";
 import AliveEventsHandler from "./event/AliveEventsHandler";
 
