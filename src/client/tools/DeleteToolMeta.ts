@@ -18,20 +18,18 @@ export default class DeleteToolGui extends AbstractToolMeta {
 		return "Removes unnecessary blocks";
 	}
 
-	public getGamepadTooltips() {
-		const keys = new Map<string, string>();
+	public getGamepadTooltips(): { image: string; text: string }[] {
+		const keys: { image: string; text: string }[] = [];
 
-		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonY), "Clear all");
-		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonX), "Delete");
-		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonB), "Unequip");
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonY), text: "Clear all" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonX), text: "Delete" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonB), text: "Unequip" });
 
 		return keys;
 	}
 
-	public getKeyboardTooltips(): Map<string, string> {
-		const keys = new Map<string, string>();
-
-		return keys;
+	public getKeyboardTooltips(): { key: string; text: string }[] {
+		return [];
 	}
 
 	public getKeybind(): Enum.KeyCode {

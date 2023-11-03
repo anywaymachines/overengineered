@@ -7,8 +7,8 @@ import AbstractGUI from "./abstract/AbstractGUI";
 
 export default class ControlTooltips extends AbstractGUI {
 	// Cache
-	private gamepadTooltipsCache: Map<string, string> = new Map<string, string>();
-	private keyboardTooltipsCache: Map<string, string> = new Map<string, string>();
+	private gamepadTooltipsCache: { image: string; text: string }[] = [];
+	private keyboardTooltipsCache: { key: string; text: string }[] = [];
 
 	// Templates
 	private gamepadTooltipTemplate: Frame & GamepadTooltipFrame;
@@ -77,22 +77,20 @@ export default class ControlTooltips extends AbstractGUI {
 			this.gamepadSimpleTooltips.forEach((element) => {
 				GuiAnimations.tweenTransparency(element, 0, 0.1);
 			});
-			this.gamepadTooltipsCache.forEach((value, key) => {
-				const image = key;
-
+			this.gamepadTooltipsCache.forEach((tooltip) => {
 				const obj = this.gamepadTooltipTemplate.Clone();
-				obj.ImageLabel.Image = image;
+				obj.ImageLabel.Image = tooltip.image;
 				obj.ImageLabel.ImageColor3 = this.tooltipColor;
-				obj.TextLabel.Text = value;
+				obj.TextLabel.Text = tooltip.text;
 				obj.Parent = this.gameUI.ControlTooltips;
 
 				this.gamepadTooltips.push(obj);
 			});
 		} else if (platform === "Desktop") {
-			this.keyboardTooltipsCache.forEach((value, key) => {
+			this.keyboardTooltipsCache.forEach((tooltip) => {
 				const obj = this.keyboardTooltipTemplate.Clone();
-				obj.ImageLabel.KeyLabel.Text = key;
-				obj.TextLabel.Text = value;
+				obj.ImageLabel.KeyLabel.Text = tooltip.key;
+				obj.TextLabel.Text = tooltip.text;
 				obj.Parent = this.gameUI.ControlTooltips;
 
 				this.keyboardTooltips.push(obj);

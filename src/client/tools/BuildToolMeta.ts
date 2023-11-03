@@ -18,25 +18,25 @@ export default class BuildToolMeta extends AbstractToolMeta {
 		return "Put blocks in the world";
 	}
 
-	public getGamepadTooltips() {
-		const keys = new Map<string, string>();
+	public getGamepadTooltips(): { image: string; text: string }[] {
+		const keys: { image: string; text: string }[] = [];
 
-		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonX), "Place");
-		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonSelect), "Select block");
-		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadLeft), "Rotate by X");
-		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadUp), "Rotate by Y");
-		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadRight), "Rotate by Z");
-		keys.set(UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonB), "Unequip");
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonX), text: "Place" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonB), text: "Unequip" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonSelect), text: "Select block" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadLeft), text: "Rotate by X" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadUp), text: "Rotate by Y" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadRight), text: "Rotate by Z" });
 
 		return keys;
 	}
 
-	public getKeyboardTooltips(): Map<string, string> {
-		const keys = new Map<string, string>();
+	public getKeyboardTooltips(): { key: string; text: string }[] {
+		const keys: { key: string; text: string }[] = [];
 
-		keys.set("R", "Rotate by X");
-		keys.set("T", "Rotate by Y");
-		keys.set("Y", "Rotate by Z");
+		keys.push({ key: "R", text: "Rotate by X" });
+		keys.push({ key: "T", text: "Rotate by Y" });
+		keys.push({ key: "Y", text: "Rotate by Z" });
 
 		return keys;
 	}

@@ -44,9 +44,9 @@ export default abstract class AbstractToolMeta {
 
 	public abstract getKeybind(): Enum.KeyCode;
 
-	public abstract getGamepadTooltips(): Map<string, string>;
+	public abstract getGamepadTooltips(): { image: string; text: string }[];
 
-	public abstract getKeyboardTooltips(): Map<string, string>;
+	public abstract getKeyboardTooltips(): { key: string; text: string }[];
 
 	public abstract getButton(): Frame & MyToolsGuiButton;
 
