@@ -1,8 +1,12 @@
-import { GuiService, UserInputService } from "@rbxts/services";
+import { GuiService, Players, UserInputService } from "@rbxts/services";
 import ClientSignals from "./ClientSignals";
 
 export default class GameInput {
 	public static currentPlatform: "Console" | "Touch" | "Desktop" = GameInput.getPhysicalPlatform();
+
+	private static playerModule = require(
+		Players.LocalPlayer.WaitForChild("PlayerScripts").WaitForChild("PlayerModule") as ModuleScript,
+	);
 
 	static {
 		ClientSignals.PLATFORM_CHANGED.Fire(this.currentPlatform);
@@ -13,6 +17,14 @@ export default class GameInput {
 				ClientSignals.PLATFORM_CHANGED.Fire(newPlatform);
 			}
 		});
+	}
+
+	public static switchControls(state: boolean) {
+		if (state) {
+			(this.playerModule as { Enable: () => void }).Enable();
+		} else {
+			(this.playerModule as { Disable: () => void }).Disable();
+		}
 	}
 
 	private static getPlatformByLastInput(): typeof this.currentPlatform {
