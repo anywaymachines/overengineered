@@ -11,6 +11,15 @@ interface GameUI {
 			DeleteButton: TextButton;
 		};
 	};
+	ActionBar: Frame & {
+		Buttons: Frame & {
+			UIListLayout: UIListLayout;
+			Save: TextButton;
+			Settings: TextButton;
+			Run: TextButton;
+		};
+		GamepadSelect: ImageLabel;
+	};
 	ToolsGui: Folder & {
 		BuildToolSelection: Frame & {
 			Buttons: ScrollingFrame & {

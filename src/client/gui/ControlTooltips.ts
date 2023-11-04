@@ -48,6 +48,7 @@ export default class ControlTooltips extends AbstractGUI {
 		// Prepare simple gamepad tooltips
 		this.gamepadSimpleTooltips.set(Enum.KeyCode.ButtonR1, this.gameUI.Tools.GamepadNext);
 		this.gamepadSimpleTooltips.set(Enum.KeyCode.ButtonL1, this.gameUI.Tools.GamepadBack);
+		this.gamepadSimpleTooltips.set(Enum.KeyCode.ButtonSelect, this.gameUI.ActionBar.GamepadSelect);
 		this.gamepadSimpleTooltips.forEach((value, key) => {
 			value.Image = UserInputService.GetImageForKeyCode(key);
 			value.ImageColor3 = this.tooltipColor;
