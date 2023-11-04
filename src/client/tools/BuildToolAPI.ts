@@ -14,6 +14,7 @@ import GuiAnimations from "client/gui/GuiAnimations";
 import SoundUtils from "shared/utils/SoundUtils";
 import AbstractCategory from "shared/registry/AbstractCategory";
 import CategoriesRegistry from "shared/registry/CategoriesRegistry";
+import CollisionMaker from "client/CollisionMaker";
 
 export default class BuildToolAPI extends AbstractToolAPI {
 	// Mouse
@@ -241,6 +242,9 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		if (response.success === true) {
 			task.wait();
 			this.updatePosition(true);
+
+			// Create welds
+			CollisionMaker.makeJoints(response.model as Model);
 
 			// Play sound
 			this.gameUI.Sounds.Building.BlockPlace.PlaybackSpeed = SoundUtils.randomSoundSpeed();

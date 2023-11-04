@@ -94,6 +94,9 @@ interface MyGuiSounds {
 		BlockRotate: Sound;
 		BlockDelete: Sound;
 	};
+	Ride: Folder & {
+		RideStart: Sound;
+	};
 	GuiClick: Sound;
 }
 

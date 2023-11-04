@@ -5,7 +5,6 @@ import Logger from "shared/Logger";
 import DiscordWebhook from "../network/DiscordWebhook";
 import SharedPlots from "shared/building/SharedPlots";
 import BuildingManager from "shared/building/BuildingManager";
-import CollisionMaker from "./CollisionMaker";
 
 /** Class for **server-based** construction management from blocks */
 export default class BuildEvent {
@@ -59,8 +58,6 @@ export default class BuildEvent {
 		model.SetAttribute("isBlock", true);
 		model.Parent = plot.FindFirstChild("Blocks");
 
-		CollisionMaker.makeJoints(model);
-
-		return { success: true };
+		return { success: true, model: model };
 	}
 }

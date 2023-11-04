@@ -10,11 +10,20 @@ export default class PartUtils {
 		});
 	}
 
-	static setAnchorForModel(model: Model, isAnchored: boolean) {
+	static switchDescendantsAnchor(model: Instance, isAnchored: boolean) {
 		const children = model.GetDescendants();
 		children.forEach((element) => {
 			if (element.IsA("BasePart")) {
 				element.Anchored = isAnchored;
+			}
+		});
+	}
+
+	static switchDescendantsNetworkOwner(model: Instance, owner: Player) {
+		const children = model.GetDescendants();
+		children.forEach((element) => {
+			if (element.IsA("BasePart")) {
+				element.SetNetworkOwner(owner);
 			}
 		});
 	}

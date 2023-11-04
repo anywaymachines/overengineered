@@ -1,6 +1,7 @@
 import ClientSignals from "client/ClientSignals";
 import AbstractGUI from "./abstract/AbstractGUI";
 import GuiAnimations from "./GuiAnimations";
+import RideMode from "client/RideMode";
 
 export default class ActionBarGUI extends AbstractGUI {
 	constructor(gameUI: GameUI) {
@@ -16,6 +17,10 @@ export default class ActionBarGUI extends AbstractGUI {
 
 		this.eventHandler.registerEvent(ClientSignals.TOOL_UNEQUIPED, () => {
 			this.updateGUI(true);
+		});
+
+		this.eventHandler.registerEvent(this.gameUI.ActionBar.Buttons.Run.MouseButton1Click, () => {
+			ClientSignals.RIDE_REQUEST.Fire();
 		});
 	}
 

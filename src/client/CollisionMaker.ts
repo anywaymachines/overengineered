@@ -1,6 +1,5 @@
 import { Workspace } from "@rbxts/services";
 
-// TODO: Move to client when building starts
 export default class CollisionMaker {
 	static getClosestParts(model: Model): BasePart[] {
 		const results: BasePart[] = [];

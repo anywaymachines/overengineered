@@ -6,6 +6,9 @@ const Remotes = Net.Definitions.Create({
 		PlayerDeleteBlock: Net.Definitions.ServerAsyncFunction<(data: PlayerDeleteBlockRequest) => BuildResponse>(),
 		PlayerClearAll: Net.Definitions.ServerAsyncFunction<() => BuildResponse>(),
 	}),
+	Ride: Net.Definitions.Namespace({
+		RideStart: Net.Definitions.ServerAsyncFunction<() => void>(),
+	}),
 });
 
 export default Remotes;

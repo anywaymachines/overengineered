@@ -5,7 +5,7 @@ import SharedPlots from "shared/building/SharedPlots";
 
 export default class DeleteEvent {
 	static initialize(): void {
-		Logger.info("Loading Build event listener...");
+		Logger.info("Loading Delete event listener...");
 
 		Remotes.Server.GetNamespace("Building").OnFunction("PlayerDeleteBlock", (player, data) =>
 			this.playerDeleteBlock(player, data),

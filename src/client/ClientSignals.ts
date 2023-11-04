@@ -10,4 +10,6 @@ export default class ClientSignals {
 	public static CAMERA_MOVED = (Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame");
 
 	public static PLATFORM_CHANGED = new Signal<(platform: typeof GameInput.currentPlatform) => void>();
+
+	public static RIDE_REQUEST = new Signal<() => void>();
 }
