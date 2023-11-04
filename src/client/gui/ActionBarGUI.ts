@@ -20,7 +20,7 @@ export default class ActionBarGUI extends AbstractGUI {
 	}
 
 	public displayDefaultGUI(isVisible: boolean): void {
-		this.gameUI.ActionBar.Visible = true;
+		this.gameUI.ActionBar.Visible = isVisible;
 	}
 
 	public updateGUI(isVisible: boolean) {
