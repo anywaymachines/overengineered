@@ -1,6 +1,6 @@
 import EventHandler from "shared/event/EventHandler";
-import GuiAnimations from "../../utils/GuiAnimations";
-import HotbarGUI from "../HotbarGUI";
+import GuiAnimations from "../utils/GuiAnimations";
+import HotbarGUI from "../../gui/HotbarGUI";
 import AbstractToolAPI from "./AbstractToolAPI";
 
 export default abstract class AbstractToolMeta {

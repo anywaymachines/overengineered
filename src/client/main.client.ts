@@ -1,6 +1,6 @@
 import { Players } from "@rbxts/services";
 import MainGUI from "./gui/MainGUI";
-import RideMode from "./RideMode";
+import RideMode from "./core/RideMode";
 import InputController from "./core/InputController";
 
 function initializeGUI() {

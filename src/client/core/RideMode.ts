@@ -1,7 +1,8 @@
 import Remotes from "shared/NetworkDefinitions";
-import Signals from "./core/network/Signals";
-import MainGUI from "./gui/MainGUI";
+import Signals from "./network/Signals";
+import MainGUI from "../gui/MainGUI";
 
+// TODO
 export default class RideMode {
 	static initialize() {
 		Signals.RIDE_REQUEST.Connect(async () => {

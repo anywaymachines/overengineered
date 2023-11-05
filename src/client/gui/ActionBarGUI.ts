@@ -1,6 +1,6 @@
 import Signals from "client/core/network/Signals";
-import AbstractGUI from "./abstract/AbstractGUI";
-import GuiAnimations from "../utils/GuiAnimations";
+import AbstractGUI from "../core/abstract/AbstractGUI";
+import GuiAnimations from "../core/utils/GuiAnimations";
 
 export default class ActionBarGUI extends AbstractGUI {
 	constructor(gameUI: GameUI) {

@@ -1,9 +1,9 @@
 import Signals from "client/core/network/Signals";
-import AbstractToolMeta from "./abstract/AbstractToolMeta";
+import AbstractToolMeta from "../core/abstract/AbstractToolMeta";
 import { Players, UserInputService } from "@rbxts/services";
 import InputController from "client/core/InputController";
-import GuiAnimations from "../utils/GuiAnimations";
-import AbstractGUI from "./abstract/AbstractGUI";
+import GuiAnimations from "../core/utils/GuiAnimations";
+import AbstractGUI from "../core/abstract/AbstractGUI";
 
 export default class InputTooltipsGUI extends AbstractGUI {
 	// Cache

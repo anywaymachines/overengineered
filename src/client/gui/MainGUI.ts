@@ -1,4 +1,4 @@
-import GuiUtils from "client/utils/GuiUtils";
+import GuiUtils from "client/core/utils/GuiUtils";
 import HotbarGUI from "./HotbarGUI";
 import InputTooltipsGUI from "./InputTooltipsGUI";
 import ActionBarGUI from "./ActionBarGUI";

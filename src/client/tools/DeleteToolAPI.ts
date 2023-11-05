@@ -1,15 +1,15 @@
 import InputController from "client/core/InputController";
-import AbstractToolAPI from "../gui/abstract/AbstractToolAPI";
+import AbstractToolAPI from "../core/abstract/AbstractToolAPI";
 import Signals from "client/core/network/Signals";
 import PlayerUtils from "shared/utils/PlayerUtils";
-import GuiUtils from "client/utils/GuiUtils";
+import GuiUtils from "client/core/utils/GuiUtils";
 import { Players, Workspace } from "@rbxts/services";
 import SharedPlots from "shared/building/SharedPlots";
 import BuildingManager from "shared/building/BuildingManager";
 import Remotes from "shared/NetworkDefinitions";
 import SoundUtils from "shared/utils/SoundUtils";
 import Logger from "shared/Logger";
-import GuiAnimations from "client/utils/GuiAnimations";
+import GuiAnimations from "client/core/utils/GuiAnimations";
 import ConfirmPopupGUI from "client/gui/ConfirmPopupGUI";
 
 export default class DeleteToolAPI extends AbstractToolAPI {

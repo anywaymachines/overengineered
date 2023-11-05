@@ -1,5 +1,5 @@
 import { UserInputService } from "@rbxts/services";
-import AbstractToolMeta from "../gui/abstract/AbstractToolMeta";
+import AbstractToolMeta from "../core/abstract/AbstractToolMeta";
 import HotbarGUI from "../gui/HotbarGUI";
 import DeleteToolAPI from "client/tools/DeleteToolAPI";
 

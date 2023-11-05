@@ -1,5 +1,5 @@
 import Signal from "@rbxts/signal";
-import AbstractToolMeta from "../../gui/abstract/AbstractToolMeta";
+import AbstractToolMeta from "../abstract/AbstractToolMeta";
 import { Workspace } from "@rbxts/services";
 import InputController from "../InputController";
 

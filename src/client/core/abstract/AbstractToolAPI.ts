@@ -37,9 +37,7 @@ export default abstract class AbstractToolAPI {
 	public prepareEvents(platform: typeof InputController.currentPlatform): void {
 		this.eventHandler.killAll();
 		this.eventHandler.registerEvent(UserInputService.InputBegan, (input) => this.onUserInput(input));
-		this.eventHandler.registerEvent(Signals.PLATFORM_CHANGED, (newPlatform) =>
-			this.onPlatformChanged(newPlatform),
-		);
+		this.eventHandler.registerEvent(Signals.PLATFORM_CHANGED, (newPlatform) => this.onPlatformChanged(newPlatform));
 	}
 
 	public abstract displayGUI(noAnimations?: boolean): void;

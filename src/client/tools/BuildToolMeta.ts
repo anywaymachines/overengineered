@@ -1,6 +1,6 @@
 import BuildToolAPI from "client/tools/BuildToolAPI";
 import HotbarGUI from "../gui/HotbarGUI";
-import AbstractToolMeta from "../gui/abstract/AbstractToolMeta";
+import AbstractToolMeta from "../core/abstract/AbstractToolMeta";
 import { UserInputService } from "@rbxts/services";
 
 export default class BuildToolMeta extends AbstractToolMeta {
