@@ -1,6 +1,6 @@
 import TestBlock from "shared/registry/blocks/TestBlock";
-import AbstractBlock from "./AbstractBlock";
-import AbstractCategory from "./AbstractCategory";
+import AbstractBlock from "./abstract/AbstractBlock";
+import AbstractCategory from "./abstract/AbstractCategory";
 
 export default class BlockRegistry {
 	public static Blocks: Map<string, AbstractBlock> = new Map<string, AbstractBlock>();

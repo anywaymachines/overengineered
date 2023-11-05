@@ -1,20 +1,20 @@
 import Remotes from "shared/NetworkDefinitions";
-import ClientSignals from "./ClientSignals";
-import PlayerGameUI from "./gui/PlayerGameUI";
+import Signals from "./core/network/Signals";
+import MainGUI from "./gui/MainGUI";
 
 export default class RideMode {
 	static initialize() {
-		ClientSignals.RIDE_REQUEST.Connect(async () => {
+		Signals.RIDE_REQUEST.Connect(async () => {
 			await this.start();
 		});
 	}
 
 	static async start() {
-		PlayerGameUI.gameUI.Sounds.Ride.RideStart.Play();
+		MainGUI.gameUI.Sounds.Ride.RideStart.Play();
 
 		// Terminate GUIs
-		PlayerGameUI.actionBarGUI.terminate();
-		PlayerGameUI.hotbarGUI.terminate();
+		MainGUI.actionBarGUI.terminate();
+		MainGUI.hotbarGUI.terminate();
 
 		Remotes.Client.GetNamespace("Ride").Get("RideStart").CallServerAsync();
 	}

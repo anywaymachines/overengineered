@@ -1,12 +1,12 @@
 import { Players } from "@rbxts/services";
 import AbstractToolMeta from "./abstract/AbstractToolMeta";
 import BuildToolMeta from "../tools/BuildToolMeta";
-import GuiAnimations from "./GuiAnimations";
+import GuiAnimations from "../utils/GuiAnimations";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import DeleteToolMeta from "../tools/DeleteToolMeta";
-import ClientSignals from "client/ClientSignals";
+import Signals from "client/core/network/Signals";
 import AbstractGUI from "./abstract/AbstractGUI";
-import GameInput from "client/GameControls";
+import InputController from "client/core/InputController";
 
 export default class HotbarGUI extends AbstractGUI {
 	// Variables
@@ -45,7 +45,7 @@ export default class HotbarGUI extends AbstractGUI {
 
 		// Call unequip of current tool
 		if (this.equippedTool !== undefined) {
-			ClientSignals.TOOL_UNEQUIPED.Fire(this.equippedTool);
+			Signals.TOOL.UNEQUIPPED.Fire(this.equippedTool);
 			this.equippedTool.onUnequip();
 		}
 
@@ -53,7 +53,7 @@ export default class HotbarGUI extends AbstractGUI {
 
 		// Call equip of a new tool
 		if (this.equippedTool !== undefined) {
-			ClientSignals.TOOL_EQUIPED.Fire(this.equippedTool);
+			Signals.TOOL.EQUIPPED.Fire(this.equippedTool);
 			this.equippedTool.onEquip();
 		}
 
@@ -77,7 +77,7 @@ export default class HotbarGUI extends AbstractGUI {
 		}
 	}
 
-	public onPlatformChanged(platform: typeof GameInput.currentPlatform) {
+	public onPlatformChanged(platform: typeof InputController.currentPlatform) {
 		// Update buttons
 		this.gameUI.Tools.Buttons.GetChildren().forEach((child) => {
 			if (child.IsA("Frame")) {

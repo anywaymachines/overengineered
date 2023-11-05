@@ -1,7 +1,6 @@
-import ClientSignals from "client/ClientSignals";
+import Signals from "client/core/network/Signals";
 import AbstractGUI from "./abstract/AbstractGUI";
-import GuiAnimations from "./GuiAnimations";
-import RideMode from "client/RideMode";
+import GuiAnimations from "../utils/GuiAnimations";
 
 export default class ActionBarGUI extends AbstractGUI {
 	constructor(gameUI: GameUI) {
@@ -11,16 +10,16 @@ export default class ActionBarGUI extends AbstractGUI {
 	}
 
 	public prepareEvents() {
-		this.eventHandler.registerEvent(ClientSignals.TOOL_EQUIPED, () => {
+		this.eventHandler.registerEvent(Signals.TOOL.EQUIPPED, () => {
 			this.updateGUI(false);
 		});
 
-		this.eventHandler.registerEvent(ClientSignals.TOOL_UNEQUIPED, () => {
+		this.eventHandler.registerEvent(Signals.TOOL.UNEQUIPPED, () => {
 			this.updateGUI(true);
 		});
 
 		this.eventHandler.registerEvent(this.gameUI.ActionBar.Buttons.Run.MouseButton1Click, () => {
-			ClientSignals.RIDE_REQUEST.Fire();
+			Signals.RIDE_REQUEST.Fire();
 		});
 	}
 

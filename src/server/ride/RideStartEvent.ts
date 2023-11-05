@@ -5,7 +5,7 @@ import PartUtils from "shared/utils/PartUtils";
 
 export default class RideStartEvent {
 	static initialize(): void {
-		Logger.info("Loading Delete event listener...");
+		Logger.info("Loading RideStart event listener...");
 
 		Remotes.Server.GetNamespace("Ride").OnFunction("RideStart", (player) => this.startRide(player));
 	}

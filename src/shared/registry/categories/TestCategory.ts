@@ -1,4 +1,4 @@
-import AbstractCategory from "../AbstractCategory";
+import AbstractCategory from "../abstract/AbstractCategory";
 
 export default class TestCategory extends AbstractCategory {
 	public getImageAssetID(): number {

@@ -1,4 +1,4 @@
-import AbstractCategory from "../AbstractCategory";
+import AbstractCategory from "../abstract/AbstractCategory";
 
 export default class BlocksCategory extends AbstractCategory {
 	constructor() {

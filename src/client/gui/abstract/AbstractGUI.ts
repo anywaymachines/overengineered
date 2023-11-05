@@ -1,7 +1,7 @@
 import { Players, UserInputService } from "@rbxts/services";
-import ClientSignals from "client/ClientSignals";
-import GameInput from "client/GameControls";
-import EventHandler from "client/event/EventHandler";
+import Signals from "client/core/network/Signals";
+import InputController from "client/core/InputController";
+import EventHandler from "shared/event/EventHandler";
 
 export default abstract class AbstractGUI {
 	public gameUI: GameUI;
@@ -18,7 +18,7 @@ export default abstract class AbstractGUI {
 		this.eventHandler.registerEvent(UserInputService.InputBegan, (input: InputObject, _: boolean) =>
 			this.onInput(input),
 		);
-		this.eventHandler.registerEvent(ClientSignals.PLATFORM_CHANGED, (newPlatform) =>
+		this.eventHandler.registerEvent(Signals.PLATFORM_CHANGED, (newPlatform) =>
 			this.onPlatformChanged(newPlatform),
 		);
 
@@ -34,7 +34,7 @@ export default abstract class AbstractGUI {
 	/** Called when the input device is changed
 	 * @param newPlatform device type
 	 */
-	public abstract onPlatformChanged(newPlatform: typeof GameInput.currentPlatform): void;
+	public abstract onPlatformChanged(newPlatform: typeof InputController.currentPlatform): void;
 
 	/** Sets the visibility of all GUIs at startup. Runs once per player's lifetime. */
 	public terminate() {

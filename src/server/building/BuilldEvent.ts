@@ -1,8 +1,7 @@
-import AbstractBlock from "shared/registry/AbstractBlock";
+import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import Remotes from "shared/NetworkDefinitions";
 import Logger from "shared/Logger";
-import DiscordWebhook from "../network/DiscordWebhook";
 import SharedPlots from "shared/building/SharedPlots";
 import BuildingManager from "shared/building/BuildingManager";
 
@@ -36,14 +35,6 @@ export default class BuildEvent {
 		const model = block.getModel().Clone();
 
 		if (model.PrimaryPart === undefined) {
-			DiscordWebhook.send(
-				"**ERROR**: PrimaryPart is undefined for block **" +
-					data.block +
-					"**\nCalled by: **" +
-					player.Name +
-					"**",
-			);
-
 			// Delete block from game database (prevent discord spamming)
 			BlockRegistry.Blocks.delete(data.block);
 

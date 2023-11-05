@@ -1,6 +1,6 @@
-import GameInput from "client/GameControls";
+import InputController from "client/core/InputController";
 import AbstractToolAPI from "../gui/abstract/AbstractToolAPI";
-import ClientSignals from "client/ClientSignals";
+import Signals from "client/core/network/Signals";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import GuiUtils from "client/utils/GuiUtils";
 import { Players, Workspace } from "@rbxts/services";
@@ -9,14 +9,14 @@ import BuildingManager from "shared/building/BuildingManager";
 import Remotes from "shared/NetworkDefinitions";
 import SoundUtils from "shared/utils/SoundUtils";
 import Logger from "shared/Logger";
-import GuiAnimations from "client/gui/GuiAnimations";
-import ConfirmationWindow from "client/gui/ConfirmationWindow";
+import GuiAnimations from "client/utils/GuiAnimations";
+import ConfirmPopupGUI from "client/gui/ConfirmPopupGUI";
 
 export default class DeleteToolAPI extends AbstractToolAPI {
 	public highlight: ObjectValue = new Instance("ObjectValue");
 
 	public displayGUI(noAnimations?: boolean): void {
-		const platform = GameInput.currentPlatform;
+		const platform = InputController.currentPlatform;
 		if (platform !== "Console") {
 			this.gameUI.ToolsGui.DeleteAllButton.Visible = true;
 			if (!noAnimations) {
@@ -38,12 +38,12 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		this.gameUI.TouchControls.DeleteTool.Visible = false;
 	}
 
-	public prepareEvents(platform: typeof GameInput.currentPlatform): void {
+	public prepareEvents(platform: typeof InputController.currentPlatform): void {
 		super.prepareEvents(platform);
 
 		if (platform !== "Console") {
 			this.eventHandler.registerEvent(this.gameUI.ToolsGui.DeleteAllButton.MouseButton1Click, () => {
-				ConfirmationWindow.showConfirmationWindow("Confirmation", "Are you sure to clear all blocks?", () =>
+				ConfirmPopupGUI.showConfirmationWindow("Confirmation", "Are you sure to clear all blocks?", () =>
 					this.clearAll(),
 				);
 			});
@@ -61,7 +61,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 			case "Console":
 				// Prepare console events
-				this.eventHandler.registerEvent(ClientSignals.CAMERA_MOVED, () => this.updatePosition());
+				this.eventHandler.registerEvent(Signals.CAMERA_MOVED, () => this.updatePosition());
 				break;
 
 			case "Desktop":
@@ -78,7 +78,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 	public updatePosition() {
 		// ERROR: If ESC menu is open - freeze movement
-		if (GameInput.isPaused()) {
+		if (InputController.isPaused()) {
 			return;
 		}
 
@@ -182,7 +182,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 				this.deleteBlock();
 			} else if (input.KeyCode === Enum.KeyCode.ButtonY) {
 				// ButtonX to clear all
-				ConfirmationWindow.showConfirmationWindow("Confirmation", "Are you sure to clear all blocks?", () =>
+				ConfirmPopupGUI.showConfirmationWindow("Confirmation", "Are you sure to clear all blocks?", () =>
 					this.clearAll(),
 				);
 			}

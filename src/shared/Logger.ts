@@ -5,7 +5,7 @@ export default class Logger {
 	static info(msg: String) {
 		if (RunService.IsClient() === true) {
 			// Show logs only to maintainers
-			if (!GameDefinitions.DEVELOPERS.includes(Players.LocalPlayer.UserId) && !GameDefinitions.IS_TESTING) {
+			if (!GameDefinitions.DEVELOPERS.includes(Players.LocalPlayer.UserId)) {
 				return;
 			}
 

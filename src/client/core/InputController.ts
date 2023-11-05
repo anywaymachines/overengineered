@@ -1,20 +1,37 @@
 import { GuiService, Players, UserInputService } from "@rbxts/services";
-import ClientSignals from "./ClientSignals";
+import Signals from "./network/Signals";
 
-export default class GameInput {
-	public static currentPlatform: "Console" | "Touch" | "Desktop" = GameInput.getPhysicalPlatform();
+export default class InputController {
+	public static currentPlatform: "Console" | "Touch" | "Desktop" = this.getPhysicalPlatform();
 
 	private static playerModule = require(
 		Players.LocalPlayer.WaitForChild("PlayerScripts").WaitForChild("PlayerModule") as ModuleScript,
 	);
 
-	static {
-		ClientSignals.PLATFORM_CHANGED.Fire(this.currentPlatform);
+	public static initialize() {
+		Signals.PLATFORM_CHANGED.Fire(this.currentPlatform);
+
 		UserInputService.InputChanged.Connect(() => {
-			const newPlatform = GameInput.getPlatformByLastInput();
+			const newPlatform = InputController.getPlatformByLastInput();
 			if (this.currentPlatform !== newPlatform) {
 				this.currentPlatform = newPlatform;
-				ClientSignals.PLATFORM_CHANGED.Fire(newPlatform);
+				Signals.PLATFORM_CHANGED.Fire(newPlatform);
+			}
+		});
+
+		UserInputService.InputBegan.Connect((input, _) => {
+			if (input.UserInputType === Enum.UserInputType.Keyboard) {
+				Signals.KEYBOARD.KEYBOARD_KEY_DOWN.Fire(input.KeyCode);
+			} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
+				Signals.GAMEPAD.GAMEPAD_KEY_DOWN.Fire(input.KeyCode);
+			}
+		});
+
+		UserInputService.InputEnded.Connect((input, _) => {
+			if (input.UserInputType === Enum.UserInputType.Keyboard) {
+				Signals.KEYBOARD.KEYBOARD_KEY_UP.Fire(input.KeyCode);
+			} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
+				Signals.GAMEPAD.GAMEPAD_KEY_UP.Fire(input.KeyCode);
 			}
 		});
 	}

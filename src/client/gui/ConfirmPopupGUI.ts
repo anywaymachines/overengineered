@@ -1,10 +1,10 @@
-import EventHandler from "client/event/EventHandler";
+import EventHandler from "shared/event/EventHandler";
 import GuiUtils from "client/utils/GuiUtils";
-import GuiAnimations from "./GuiAnimations";
+import GuiAnimations from "../utils/GuiAnimations";
 import { GuiService } from "@rbxts/services";
-import GameInput from "client/GameControls";
+import InputController from "client/core/InputController";
 
-export default class ConfirmationWindow {
+export default class ConfirmPopupGUI {
 	private static gameDialog: ScreenGui & GameDialog = GuiUtils.getGameDialog() as ScreenGui & GameDialog;
 	private static eventHandler: EventHandler = new EventHandler();
 
@@ -13,10 +13,12 @@ export default class ConfirmationWindow {
 			return;
 		}
 
+		// Update heading and description
 		this.gameDialog.ConfirmationWindow.HeadingLabel.Text = heading;
 		this.gameDialog.ConfirmationWindow.DescriptionLabel.Text = text;
-		this.gameDialog.ConfirmationWindow.Visible = true;
 
+		// Display with animation
+		this.gameDialog.ConfirmationWindow.Visible = true;
 		GuiAnimations.fade(this.gameDialog.ConfirmationWindow, 0.1, "up");
 
 		// Events
@@ -34,7 +36,8 @@ export default class ConfirmationWindow {
 			this.eventHandler.killAll();
 		});
 
-		if (GameInput.currentPlatform === "Console") {
+		// Autoselect button on gamepad
+		if (InputController.currentPlatform === "Console") {
 			GuiService.SelectedObject = this.gameDialog.ConfirmationWindow.Answers.NoButton;
 		}
 	}

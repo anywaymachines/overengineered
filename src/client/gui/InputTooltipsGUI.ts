@@ -1,11 +1,11 @@
-import ClientSignals from "client/ClientSignals";
+import Signals from "client/core/network/Signals";
 import AbstractToolMeta from "./abstract/AbstractToolMeta";
 import { Players, UserInputService } from "@rbxts/services";
-import GameInput from "client/GameControls";
-import GuiAnimations from "./GuiAnimations";
+import InputController from "client/core/InputController";
+import GuiAnimations from "../utils/GuiAnimations";
 import AbstractGUI from "./abstract/AbstractGUI";
 
-export default class ControlTooltips extends AbstractGUI {
+export default class InputTooltipsGUI extends AbstractGUI {
 	// Cache
 	private gamepadTooltipsCache: { image: string; text: string }[] = [];
 	private keyboardTooltipsCache: { key: string; text: string }[] = [];
@@ -27,22 +27,22 @@ export default class ControlTooltips extends AbstractGUI {
 		// Prepare templates
 		this.gamepadTooltipTemplate = gameUI.ControlTooltips.GamepadTemplate.Clone();
 		this.keyboardTooltipTemplate = gameUI.ControlTooltips.KeyboardTemplate.Clone();
-		gameUI.ControlTooltips.GamepadTemplate.Destroy();
-		gameUI.ControlTooltips.KeyboardTemplate.Destroy();
+		this.gameUI.ControlTooltips.GamepadTemplate.Destroy();
+		this.gameUI.ControlTooltips.KeyboardTemplate.Destroy();
 
 		// Prepare events
-		this.eventHandler.registerEvent(ClientSignals.TOOL_EQUIPED, (tool: AbstractToolMeta) => {
+		this.eventHandler.registerEvent(Signals.TOOL.EQUIPPED, (tool: AbstractToolMeta) => {
 			this.gamepadTooltipsCache = tool.getGamepadTooltips();
 			this.keyboardTooltipsCache = tool.getKeyboardTooltips();
 
-			this.updateTooltips(GameInput.currentPlatform);
+			this.updateTooltips(InputController.currentPlatform);
 		});
 
-		this.eventHandler.registerEvent(ClientSignals.TOOL_UNEQUIPED, (_) => {
+		this.eventHandler.registerEvent(Signals.TOOL.UNEQUIPPED, (_) => {
 			this.gamepadTooltipsCache.clear();
 			this.keyboardTooltipsCache.clear();
 
-			this.updateTooltips(GameInput.currentPlatform);
+			this.updateTooltips(InputController.currentPlatform);
 		});
 
 		// Prepare simple gamepad tooltips
@@ -58,7 +58,7 @@ export default class ControlTooltips extends AbstractGUI {
 		Players.LocalPlayer.CharacterRemoving.Once((_) => this.terminate());
 
 		// Update first time
-		this.updateTooltips(GameInput.currentPlatform);
+		this.updateTooltips(InputController.currentPlatform);
 	}
 
 	public updateTooltips(platform: string) {

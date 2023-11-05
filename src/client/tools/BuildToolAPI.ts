@@ -1,20 +1,20 @@
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import AbstractToolAPI from "../gui/abstract/AbstractToolAPI";
-import AbstractBlock from "shared/registry/AbstractBlock";
+import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
 import PartUtils from "shared/utils/PartUtils";
-import GameInput from "client/GameControls";
+import InputController from "client/core/InputController";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import Remotes from "shared/NetworkDefinitions";
 import Logger from "shared/Logger";
 import BuildingManager from "shared/building/BuildingManager";
 import VectorUtils from "shared/utils/VectorUtils";
 import GuiUtils from "client/utils/GuiUtils";
-import GuiAnimations from "client/gui/GuiAnimations";
+import GuiAnimations from "client/utils/GuiAnimations";
 import SoundUtils from "shared/utils/SoundUtils";
-import AbstractCategory from "shared/registry/AbstractCategory";
+import AbstractCategory from "shared/registry/abstract/AbstractCategory";
 import CategoriesRegistry from "shared/registry/CategoriesRegistry";
-import CollisionMaker from "client/CollisionMaker";
+import ContraptionWelder from "client/ContraptionWelder";
 
 export default class BuildToolAPI extends AbstractToolAPI {
 	// Mouse
@@ -54,7 +54,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		this.gameUI.ToolsGui.BuildToolSelection.Visible = true;
 
 		// Show building mobile controls
-		if (GameInput.currentPlatform === "Touch") {
+		if (InputController.currentPlatform === "Touch") {
 			this.gameUI.TouchControls.BuildTool.Visible = true;
 			if (!noAnimations) {
 				GuiAnimations.fade(this.gameUI.TouchControls.BuildTool, 0.1, "right");
@@ -244,7 +244,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 			this.updatePosition(true);
 
 			// Create welds
-			CollisionMaker.makeJoints(response.model as Model);
+			ContraptionWelder.makeJoints(response.model as Model);
 
 			// Play sound
 			this.gameUI.Sounds.Building.BlockPlace.PlaybackSpeed = SoundUtils.randomSoundSpeed();
@@ -273,11 +273,11 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		if (input.UserInputType === Enum.UserInputType.Keyboard) {
 			// Keyboard rotation
 			if (input.KeyCode === Enum.KeyCode.R) {
-				this.rotate(GameInput.isShiftPressed(), "r");
+				this.rotate(InputController.isShiftPressed(), "r");
 			} else if (input.KeyCode === Enum.KeyCode.T) {
-				this.rotate(GameInput.isShiftPressed(), "t");
+				this.rotate(InputController.isShiftPressed(), "t");
 			} else if (input.KeyCode === Enum.KeyCode.Y) {
-				this.rotate(GameInput.isShiftPressed(), "y");
+				this.rotate(InputController.isShiftPressed(), "y");
 			}
 		} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
 			if (input.KeyCode === Enum.KeyCode.ButtonX) {
@@ -296,7 +296,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		}
 	}
 
-	public prepareEvents(platform: typeof GameInput.currentPlatform) {
+	public prepareEvents(platform: typeof InputController.currentPlatform) {
 		super.prepareEvents(platform);
 
 		switch (platform) {
@@ -360,7 +360,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		return (
 			!this.previewBlock ||
 			!this.previewBlock.PrimaryPart ||
-			GameInput.isPaused() ||
+			InputController.isPaused() ||
 			!PlayerUtils.isAlive(Players.LocalPlayer) ||
 			(GuiUtils.isCursorOnVisibleGui() && !savePosition)
 		);

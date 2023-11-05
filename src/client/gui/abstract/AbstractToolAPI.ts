@@ -1,7 +1,7 @@
 import { Players, UserInputService } from "@rbxts/services";
-import ClientSignals from "client/ClientSignals";
-import GameInput from "client/GameControls";
-import EventHandler from "client/event/EventHandler";
+import Signals from "client/core/network/Signals";
+import InputController from "client/core/InputController";
+import EventHandler from "shared/event/EventHandler";
 
 /** A class for implementing the API for tools */
 export default abstract class AbstractToolAPI {
@@ -26,7 +26,7 @@ export default abstract class AbstractToolAPI {
 	public abstract onUserInput(input: InputObject): void;
 
 	/** Callback when the platform has changed, for example `PC -> Console` or `Mobile -> Console` */
-	public onPlatformChanged(platform: typeof GameInput.currentPlatform): void {
+	public onPlatformChanged(platform: typeof InputController.currentPlatform): void {
 		this.prepareEvents(platform);
 
 		// Reload GUIs
@@ -34,10 +34,10 @@ export default abstract class AbstractToolAPI {
 		this.displayGUI(true);
 	}
 
-	public prepareEvents(platform: typeof GameInput.currentPlatform): void {
+	public prepareEvents(platform: typeof InputController.currentPlatform): void {
 		this.eventHandler.killAll();
 		this.eventHandler.registerEvent(UserInputService.InputBegan, (input) => this.onUserInput(input));
-		this.eventHandler.registerEvent(ClientSignals.PLATFORM_CHANGED, (newPlatform) =>
+		this.eventHandler.registerEvent(Signals.PLATFORM_CHANGED, (newPlatform) =>
 			this.onPlatformChanged(newPlatform),
 		);
 	}
@@ -49,7 +49,7 @@ export default abstract class AbstractToolAPI {
 	/** Activating the tool */
 	public equip(): void {
 		this.equipped = true;
-		this.prepareEvents(GameInput.currentPlatform);
+		this.prepareEvents(InputController.currentPlatform);
 		this.displayGUI();
 	}
 

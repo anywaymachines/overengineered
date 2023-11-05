@@ -1,6 +1,6 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import AbstractBlock from "shared/registry/AbstractBlock";
-import AbstractCategory from "../AbstractCategory";
+import AbstractBlock from "shared/registry/abstract/AbstractBlock";
+import AbstractCategory from "../abstract/AbstractCategory";
 import CategoriesRegistry from "../CategoriesRegistry";
 
 export default class TestBlock extends AbstractBlock {

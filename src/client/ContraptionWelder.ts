@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
 
-export default class CollisionMaker {
+export default class ContraptionWelder {
 	static getClosestParts(model: Model): BasePart[] {
 		const results: BasePart[] = [];
 

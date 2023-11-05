@@ -1,4 +1,4 @@
-import AbstractCategory from "./AbstractCategory";
+import AbstractCategory from "./abstract/AbstractCategory";
 import BlocksCategory from "./categories/BlocksCategory";
 import TestCategory from "./categories/TestCategory";
 

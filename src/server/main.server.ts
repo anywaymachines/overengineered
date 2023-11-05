@@ -6,7 +6,7 @@ import RideStartEvent from "./ride/RideStartEvent";
 // Plots
 ServerPlots.initialize();
 
-// Initializing client-side components
+// Initializing event workders
 BuildEvent.initialize();
 DeleteEvent.initialize();
 RideStartEvent.initialize();
