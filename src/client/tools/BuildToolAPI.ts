@@ -154,11 +154,11 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		axis.PivotTo(this.previewBlock.GetPivot());
 		axis.Parent = this.previewBlock;
 
-		if (this.selectedBlock.getAvailableRotationAxis().r === false) {
+		if (this.selectedBlock.getAvailableRotationAxis().x === false) {
 			axis.R.Destroy();
 		}
 
-		if (this.selectedBlock.getAvailableRotationAxis().t === false) {
+		if (this.selectedBlock.getAvailableRotationAxis().y === false) {
 			axis.T.Destroy();
 		}
 
@@ -176,19 +176,19 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		this.updatePosition(true);
 	}
 
-	public rotate(forward: boolean, axis: "r" | "t" | "y") {
+	public rotate(axis: "x" | "y" | "z", isInverted: boolean = InputController.isShiftPressed()) {
 		if (this.selectedBlock === undefined) {
 			return;
 		}
 
-		const { r, t, y } = this.selectedBlock.getAvailableRotationAxis();
+		const { x, y, z } = this.selectedBlock.getAvailableRotationAxis();
 
-		if (axis === "r" && r) {
-			this.rotateFineTune(new Vector3(forward ? math.pi / 2 : math.pi / -2, 0, 0));
-		} else if (axis === "t" && t) {
-			this.rotateFineTune(new Vector3(0, forward ? math.pi / 2 : math.pi / -2, 0));
+		if (axis === "x" && x) {
+			this.rotateFineTune(new Vector3(isInverted ? math.pi / 2 : math.pi / -2, 0, 0));
 		} else if (axis === "y" && y) {
-			this.rotateFineTune(new Vector3(0, 0, forward ? math.pi / 2 : math.pi / -2));
+			this.rotateFineTune(new Vector3(0, isInverted ? math.pi / 2 : math.pi / -2, 0));
+		} else if (axis === "z" && z) {
+			this.rotateFineTune(new Vector3(0, 0, isInverted ? math.pi / 2 : math.pi / -2));
 		} else {
 			this.gameUI.Sounds.Building.BlockPlaceError.PlaybackSpeed = SoundUtils.randomSoundSpeed();
 			this.gameUI.Sounds.Building.BlockPlaceError.Play();
@@ -201,6 +201,10 @@ export default class BuildToolAPI extends AbstractToolAPI {
 
 		this.selectedBlock = block;
 
+		this.prepareVisual();
+	}
+
+	public prepareVisual() {
 		if (this.selectedBlock === undefined) {
 			return;
 		}
@@ -260,7 +264,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		super.equip();
 
 		// Selecting a block
-		this.selectBlock(this.selectedBlock);
+		this.prepareVisual();
 	}
 
 	public unequip(): void {
@@ -269,69 +273,49 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		this.previewBlock?.Destroy();
 	}
 
-	public onUserInput(input: InputObject): void {
-		if (input.UserInputType === Enum.UserInputType.Keyboard) {
-			// Keyboard rotation
-			if (input.KeyCode === Enum.KeyCode.R) {
-				this.rotate(InputController.isShiftPressed(), "r");
-			} else if (input.KeyCode === Enum.KeyCode.T) {
-				this.rotate(InputController.isShiftPressed(), "t");
-			} else if (input.KeyCode === Enum.KeyCode.Y) {
-				this.rotate(InputController.isShiftPressed(), "y");
-			}
-		} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
-			if (input.KeyCode === Enum.KeyCode.ButtonX) {
-				this.placeBlock();
-			} else if (input.KeyCode === Enum.KeyCode.DPadLeft) {
-				this.rotate(false, "r");
-			} else if (input.KeyCode === Enum.KeyCode.DPadUp) {
-				this.rotate(false, "t");
-			} else if (input.KeyCode === Enum.KeyCode.DPadDown) {
-				this.rotate(true, "t");
-			} else if (input.KeyCode === Enum.KeyCode.DPadRight) {
-				this.rotate(false, "y");
-			}
-		} else if (input.UserInputType === Enum.UserInputType.Touch) {
-			this.updatePosition();
-		}
+	public registerDesktopEvents() {
+		// Keyboard controls
+		this.inputHandler.onKeyPressed(Enum.KeyCode.R, () => this.rotate("x"));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.T, () => this.rotate("y"));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.Y, () => this.rotate("z"));
+
+		this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
+		this.eventHandler.registerEvent(this.mouse.Button1Down, async () => await this.placeBlock());
 	}
 
-	public prepareEvents(platform: typeof InputController.currentPlatform) {
-		super.prepareEvents(platform);
+	public registerConsoleEvents() {
+		// Gamepad button controls
+		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonX, () => this.placeBlock());
 
-		switch (platform) {
-			case "Desktop":
-				this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
-				this.eventHandler.registerEvent(this.mouse.Button1Down, async () => await this.placeBlock());
-				break;
-			case "Console":
-				this.eventHandler.registerEvent(
-					(Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame"),
-					() => this.updatePosition(),
-				);
-				break;
-			case "Touch":
-				// Touchscreen controls
-				this.eventHandler.registerEvent(this.gameUI.TouchControls.BuildTool.PlaceButton.MouseButton1Click, () =>
-					this.placeBlock(),
-				);
-				this.eventHandler.registerEvent(
-					this.gameUI.TouchControls.BuildTool.RotateRButton.MouseButton1Click,
-					() => this.rotate(true, "r"),
-				);
-				this.eventHandler.registerEvent(
-					this.gameUI.TouchControls.BuildTool.RotateTButton.MouseButton1Click,
-					() => this.rotate(true, "t"),
-				);
-				this.eventHandler.registerEvent(
-					this.gameUI.TouchControls.BuildTool.RotateYButton.MouseButton1Click,
-					() => this.rotate(true, "y"),
-				);
-				this.eventHandler.registerEvent(UserInputService.TouchStarted, (_) => this.updatePosition());
-				break;
-			default:
-				break;
-		}
+		// Gamepad DPAD controls
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadLeft, () => this.rotate("x", false));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadUp, () => this.rotate("y", false));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadDown, () => this.rotate("y", false));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadRight, () => this.rotate("z", false));
+
+		this.eventHandler.registerEvent((Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame"), () =>
+			this.updatePosition(),
+		);
+	}
+
+	public registerTouchEvents() {
+		// Touch controls
+		this.inputHandler.onTouchTap(() => this.updatePosition());
+
+		// Touchscreen controls
+		this.eventHandler.registerEvent(this.gameUI.TouchControls.BuildTool.PlaceButton.MouseButton1Click, () =>
+			this.placeBlock(),
+		);
+		this.eventHandler.registerEvent(this.gameUI.TouchControls.BuildTool.RotateRButton.MouseButton1Click, () =>
+			this.rotate("x", true),
+		);
+		this.eventHandler.registerEvent(this.gameUI.TouchControls.BuildTool.RotateTButton.MouseButton1Click, () =>
+			this.rotate("y", true),
+		);
+		this.eventHandler.registerEvent(this.gameUI.TouchControls.BuildTool.RotateYButton.MouseButton1Click, () =>
+			this.rotate("z", true),
+		);
+		this.eventHandler.registerEvent(UserInputService.TouchStarted, (_) => this.updatePosition());
 	}
 
 	public updatePosition(savePosition: boolean = false) {

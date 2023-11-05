@@ -1,4 +1,4 @@
-import EventHandler from "shared/event/EventHandler";
+import EventHandler from "client/core/event/EventHandler";
 import GuiUtils from "client/core/utils/GuiUtils";
 import GuiAnimations from "../core/utils/GuiAnimations";
 import { GuiService } from "@rbxts/services";

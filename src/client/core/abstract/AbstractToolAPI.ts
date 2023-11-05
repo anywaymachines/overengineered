@@ -1,13 +1,15 @@
 import { Players, UserInputService } from "@rbxts/services";
 import Signals from "client/core/network/Signals";
 import InputController from "client/core/InputController";
-import EventHandler from "shared/event/EventHandler";
+import EventHandler from "client/core/event/EventHandler";
+import InputHandler from "../event/InputHandler";
 
 /** A class for implementing the API for tools */
 export default abstract class AbstractToolAPI {
 	public gameUI: GameUI;
 	public mouse: Mouse;
 	public eventHandler: EventHandler;
+	public inputHandler: InputHandler;
 	private equipped = false;
 
 	constructor(gameUI: GameUI) {
@@ -15,15 +17,13 @@ export default abstract class AbstractToolAPI {
 
 		this.mouse = Players.LocalPlayer.GetMouse();
 		this.eventHandler = new EventHandler();
+		this.inputHandler = new InputHandler();
 	}
 
 	/** Checking that the tool is being used */
 	public isEquipped(): boolean {
 		return this.equipped;
 	}
-
-	/** The `UserInputService.InputBegan` callback */
-	public abstract onUserInput(input: InputObject): void;
 
 	/** Callback when the platform has changed, for example `PC -> Console` or `Mobile -> Console` */
 	public onPlatformChanged(platform: typeof InputController.currentPlatform): void {
@@ -36,9 +36,21 @@ export default abstract class AbstractToolAPI {
 
 	public prepareEvents(platform: typeof InputController.currentPlatform): void {
 		this.eventHandler.killAll();
-		this.eventHandler.registerEvent(UserInputService.InputBegan, (input) => this.onUserInput(input));
 		this.eventHandler.registerEvent(Signals.PLATFORM_CHANGED, (newPlatform) => this.onPlatformChanged(newPlatform));
+
+		const platformEvents = {
+			Desktop: () => this.registerDesktopEvents(),
+			Console: () => this.registerConsoleEvents(),
+			Touch: () => this.registerTouchEvents(),
+		};
+
+		// Invoke the function associated with the current platform
+		platformEvents[platform]();
 	}
+
+	public abstract registerDesktopEvents(): void;
+	public abstract registerConsoleEvents(): void;
+	public abstract registerTouchEvents(): void;
 
 	public abstract displayGUI(noAnimations?: boolean): void;
 
@@ -56,5 +68,6 @@ export default abstract class AbstractToolAPI {
 		this.equipped = false;
 		this.hideGUI();
 		this.eventHandler.killAll();
+		this.inputHandler.killAll();
 	}
 }

@@ -1,7 +1,7 @@
 import { Players, UserInputService } from "@rbxts/services";
 import Signals from "client/core/network/Signals";
 import InputController from "client/core/InputController";
-import EventHandler from "shared/event/EventHandler";
+import EventHandler from "client/core/event/EventHandler";
 
 export default abstract class AbstractGUI {
 	public gameUI: GameUI;

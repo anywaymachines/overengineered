@@ -6,16 +6,21 @@ export default class EventHandler {
 	 * @param signal A signal. Example: `UserInputService.InputChanged`
 	 * @param callback Callback
 	 */
-	public registerEvent(signal: RBXScriptSignal, callback: Callback): void {
-		this.events.push(signal.Connect((_) => callback(_)));
+	public registerEvent(signal: RBXScriptSignal, callback: Callback): number {
+		return this.events.push(signal.Connect((_) => callback(_)));
 	}
 
-	public registerOnce(signal: RBXScriptSignal, callback: Callback): void {
-		this.events.push(signal.Once((_) => callback(_)));
+	public registerOnce(signal: RBXScriptSignal, callback: Callback): number {
+		return this.events.push(signal.Once((_) => callback(_)));
 	}
 
 	public size(): number {
 		return this.events.size();
+	}
+
+	public kill(index: number) {
+		this.events[index].Disconnect();
+		this.events.remove(index);
 	}
 
 	/** Deletes and disables all events */

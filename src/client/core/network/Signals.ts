@@ -13,15 +13,5 @@ export default class Signals {
 
 	public static PLATFORM_CHANGED = new Signal<(platform: typeof InputController.currentPlatform) => void>();
 
-	public static KEYBOARD = {
-		KEYBOARD_KEY_DOWN: new Signal<(keyCode: Enum.KeyCode) => void>(),
-		KEYBOARD_KEY_UP: new Signal<(keyCode: Enum.KeyCode) => void>(),
-	};
-
-	public static GAMEPAD = {
-		GAMEPAD_KEY_DOWN: new Signal<(keyCode: Enum.KeyCode) => void>(),
-		GAMEPAD_KEY_UP: new Signal<(keyCode: Enum.KeyCode) => void>(),
-	};
-
 	public static RIDE_REQUEST = new Signal<() => void>();
 }

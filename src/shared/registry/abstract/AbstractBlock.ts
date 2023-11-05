@@ -21,10 +21,10 @@ export default abstract class AbstractBlock {
 
 	/** Enables locking of rotary axes */
 	public getAvailableRotationAxis(): {
-		r: boolean;
-		t: boolean;
+		x: boolean;
 		y: boolean;
+		z: boolean;
 	} {
-		return { r: true, t: true, y: true };
+		return { x: true, y: true, z: true };
 	}
 }

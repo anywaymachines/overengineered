@@ -1,4 +1,4 @@
-import EventHandler from "shared/event/EventHandler";
+import EventHandler from "client/core/event/EventHandler";
 import GuiAnimations from "../utils/GuiAnimations";
 import HotbarGUI from "../../gui/HotbarGUI";
 import AbstractToolAPI from "./AbstractToolAPI";

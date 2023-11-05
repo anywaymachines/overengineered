@@ -18,22 +18,6 @@ export default class InputController {
 				Signals.PLATFORM_CHANGED.Fire(newPlatform);
 			}
 		});
-
-		UserInputService.InputBegan.Connect((input, _) => {
-			if (input.UserInputType === Enum.UserInputType.Keyboard) {
-				Signals.KEYBOARD.KEYBOARD_KEY_DOWN.Fire(input.KeyCode);
-			} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
-				Signals.GAMEPAD.GAMEPAD_KEY_DOWN.Fire(input.KeyCode);
-			}
-		});
-
-		UserInputService.InputEnded.Connect((input, _) => {
-			if (input.UserInputType === Enum.UserInputType.Keyboard) {
-				Signals.KEYBOARD.KEYBOARD_KEY_UP.Fire(input.KeyCode);
-			} else if (input.UserInputType === Enum.UserInputType.Gamepad1) {
-				Signals.GAMEPAD.GAMEPAD_KEY_UP.Fire(input.KeyCode);
-			}
-		});
 	}
 
 	public static switchControls(state: boolean) {

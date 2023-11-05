@@ -23,57 +23,11 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 				GuiAnimations.fade(this.gameUI.ToolsGui.DeleteAllButton, 0.1, "down");
 			}
 		}
-		this.eventHandler.registerEvent(this.highlight.Changed, () => {
-			if (platform === "Touch" && this.highlight.Value !== undefined) {
-				this.gameUI.TouchControls.DeleteTool.Visible = true;
-				GuiAnimations.fade(this.gameUI.TouchControls.DeleteTool, 0.1, "left");
-			} else {
-				this.gameUI.TouchControls.DeleteTool.Visible = false;
-			}
-		});
 	}
 
 	public hideGUI(): void {
 		this.gameUI.ToolsGui.DeleteAllButton.Visible = false;
 		this.gameUI.TouchControls.DeleteTool.Visible = false;
-	}
-
-	public prepareEvents(platform: typeof InputController.currentPlatform): void {
-		super.prepareEvents(platform);
-
-		if (platform !== "Console") {
-			this.eventHandler.registerEvent(this.gameUI.ToolsGui.DeleteAllButton.MouseButton1Click, () => {
-				ConfirmPopupGUI.showConfirmationWindow("Confirmation", "Are you sure to clear all blocks?", () =>
-					this.clearAll(),
-				);
-			});
-		}
-
-		// Initialize events
-		switch (platform) {
-			case "Touch":
-				// Prepare touch events
-				this.eventHandler.registerEvent(
-					this.gameUI.TouchControls.DeleteTool.DeleteButton.MouseButton1Click,
-					() => this.deleteBlock(),
-				);
-				break;
-
-			case "Console":
-				// Prepare console events
-				this.eventHandler.registerEvent(Signals.CAMERA_MOVED, () => this.updatePosition());
-				break;
-
-			case "Desktop":
-				// Prepare desktop events
-				this.eventHandler.registerEvent(this.mouse.Button1Down, () => this.deleteBlock());
-				this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
-				break;
-
-			default:
-				// Unsupported
-				break;
-		}
 	}
 
 	public updatePosition() {
@@ -126,6 +80,14 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		this.highlight.Value = instance;
 	}
 
+	public suggestClearAll() {
+		ConfirmPopupGUI.showConfirmationWindow(
+			"Confirmation",
+			"Are you sure to clear all blocks?",
+			async () => await this.clearAll(),
+		);
+	}
+
 	public async clearAll() {
 		// Send block removing packet
 		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerClearAll").CallServerAsync();
@@ -175,21 +137,42 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		}
 	}
 
-	public onUserInput(input: InputObject): void {
-		if (input.UserInputType === Enum.UserInputType.Gamepad1) {
-			if (input.KeyCode === Enum.KeyCode.ButtonX) {
-				// ButtonX to Remove
-				this.deleteBlock();
-			} else if (input.KeyCode === Enum.KeyCode.ButtonY) {
-				// ButtonX to clear all
-				ConfirmPopupGUI.showConfirmationWindow("Confirmation", "Are you sure to clear all blocks?", () =>
-					this.clearAll(),
-				);
+	public registerDesktopEvents(): void {
+		// Prepare desktop events
+		this.eventHandler.registerEvent(this.mouse.Button1Down, () => this.deleteBlock());
+		this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
+		this.eventHandler.registerEvent(this.gameUI.ToolsGui.DeleteAllButton.MouseButton1Click, () =>
+			this.suggestClearAll(),
+		);
+	}
+
+	public registerConsoleEvents(): void {
+		// Gamepad buttons controls
+		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonX, () => this.deleteBlock());
+		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonY, () => this.suggestClearAll());
+
+		// Prepare console events
+		this.eventHandler.registerEvent(Signals.CAMERA_MOVED, () => this.updatePosition());
+	}
+
+	public registerTouchEvents(): void {
+		// Touch controls
+		this.inputHandler.onTouchTap(() => this.updatePosition());
+
+		// Prepare touch events
+		this.eventHandler.registerEvent(this.gameUI.TouchControls.DeleteTool.DeleteButton.MouseButton1Click, () =>
+			this.deleteBlock(),
+		);
+
+		// Delete button
+		this.eventHandler.registerEvent(this.highlight.Changed, () => {
+			if (this.highlight.Value !== undefined) {
+				this.gameUI.TouchControls.DeleteTool.Visible = true;
+				GuiAnimations.fade(this.gameUI.TouchControls.DeleteTool, 0.1, "left");
+			} else {
+				this.gameUI.TouchControls.DeleteTool.Visible = false;
 			}
-		} else if (input.UserInputType === Enum.UserInputType.Touch) {
-			// Touch to update position
-			this.updatePosition();
-		}
+		});
 	}
 
 	public equip(): void {
