@@ -191,8 +191,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		} else if (axis === "z" && z) {
 			this.rotateFineTune(new Vector3(0, 0, isInverted ? math.pi / 2 : math.pi / -2));
 		} else {
-			this.gameUI.Sounds.Building.BlockPlaceError.PlaybackSpeed = SoundUtils.randomSoundSpeed();
-			this.gameUI.Sounds.Building.BlockPlaceError.Play();
+			return;
 		}
 	}
 
