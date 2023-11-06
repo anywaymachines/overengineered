@@ -124,10 +124,6 @@ export default class BuildToolAPI extends AbstractToolAPI {
 				this.selectionButtons.push(obj);
 			});
 		}
-
-		const scrollingframe = this.gameUI.ToolsGui.BuildToolSelection.Buttons;
-
-		scrollingframe.CanvasSize = new UDim2(0, 0, 0, scrollingframe.UIListLayout.AbsoluteContentSize.Y);
 	}
 
 	public hideGUI(): void {
