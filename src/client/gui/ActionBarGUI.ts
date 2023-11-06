@@ -19,6 +19,7 @@ export default class ActionBarGUI extends AbstractGUI {
 		});
 
 		this.eventHandler.registerEvent(this.gameUI.ActionBar.Buttons.Run.MouseButton1Click, () => {
+			return; // TODO
 			Signals.RIDE_REQUEST.Fire();
 		});
 	}

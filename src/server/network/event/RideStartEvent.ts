@@ -11,7 +11,6 @@ export default class RideStartEvent {
 	}
 
 	private static startRide(player: Player): void {
-		return; // TODO
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 
 		const blocks = plot.WaitForChild("Blocks");
