@@ -1,7 +1,7 @@
 import { Players } from "@rbxts/services";
 import AbstractToolMeta from "../core/abstract/AbstractToolMeta";
 import BuildToolMeta from "../tools/BuildToolMeta";
-import GuiAnimations from "../core/utils/GuiAnimations";
+import GuiAnimations from "../utils/GuiAnimations";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import DeleteToolMeta from "../tools/DeleteToolMeta";
 import Signals from "client/core/network/Signals";

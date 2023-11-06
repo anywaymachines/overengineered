@@ -2,9 +2,9 @@ interface ReplicatedStorage {
 	Assets: {
 		Blocks: Folder;
 		Axis: Model & {
-			R: BasePart;
-			T: BasePart;
+			X: BasePart;
 			Y: BasePart;
+			Z: BasePart;
 		};
 	};
 }

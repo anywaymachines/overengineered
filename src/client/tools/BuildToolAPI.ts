@@ -9,8 +9,8 @@ import Remotes from "shared/NetworkDefinitions";
 import Logger from "shared/Logger";
 import BuildingManager from "shared/building/BuildingManager";
 import VectorUtils from "shared/utils/VectorUtils";
-import GuiUtils from "client/core/utils/GuiUtils";
-import GuiAnimations from "client/core/utils/GuiAnimations";
+import GuiUtils from "client/utils/GuiUtils";
+import GuiAnimations from "client/utils/GuiAnimations";
 import SoundUtils from "shared/utils/SoundUtils";
 import AbstractCategory from "shared/registry/abstract/AbstractCategory";
 import CategoriesRegistry from "shared/registry/CategoriesRegistry";
@@ -155,15 +155,15 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		axis.Parent = this.previewBlock;
 
 		if (this.selectedBlock.getAvailableRotationAxis().x === false) {
-			axis.R.Destroy();
-		}
-
-		if (this.selectedBlock.getAvailableRotationAxis().y === false) {
-			axis.T.Destroy();
+			axis.X.Destroy();
 		}
 
 		if (this.selectedBlock.getAvailableRotationAxis().y === false) {
 			axis.Y.Destroy();
+		}
+
+		if (this.selectedBlock.getAvailableRotationAxis().y === false) {
+			axis.Z.Destroy();
 		}
 	}
 

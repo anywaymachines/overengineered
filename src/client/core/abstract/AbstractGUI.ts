@@ -18,9 +18,7 @@ export default abstract class AbstractGUI {
 		this.eventHandler.registerEvent(UserInputService.InputBegan, (input: InputObject, _: boolean) =>
 			this.onInput(input),
 		);
-		this.eventHandler.registerEvent(Signals.PLATFORM_CHANGED, (newPlatform) =>
-			this.onPlatformChanged(newPlatform),
-		);
+		this.eventHandler.registerEvent(Signals.PLATFORM_CHANGED, (newPlatform) => this.onPlatformChanged(newPlatform));
 
 		Players.LocalPlayer.CharacterRemoving.Once((_) => this.terminate());
 	}
