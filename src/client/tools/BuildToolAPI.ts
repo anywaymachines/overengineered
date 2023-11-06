@@ -15,6 +15,7 @@ import SoundUtils from "shared/utils/SoundUtils";
 import AbstractCategory from "shared/registry/abstract/AbstractCategory";
 import CategoriesRegistry from "shared/registry/CategoriesRegistry";
 import ContraptionWelder from "client/core/contraption/ContraptionWelder";
+import Signals from "client/core/network/Signals";
 
 export default class BuildToolAPI extends AbstractToolAPI {
 	// Mouse
@@ -293,9 +294,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadDown, () => this.rotate("y", false));
 		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadRight, () => this.rotate("z", false));
 
-		this.eventHandler.registerEvent((Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame"), () =>
-			this.updatePosition(),
-		);
+		this.eventHandler.registerEvent(Signals.CAMERA_MOVED, () => this.updatePosition());
 	}
 
 	public registerTouchEvents() {
