@@ -46,15 +46,15 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		super(gameUI);
 
 		// Prepare templates
-		this.guiCategoryTemplate = this.gameUI.ToolsGui.BuildToolSelection.Buttons.CategoryTemplate.Clone();
-		this.guiBlockTemplate = this.gameUI.ToolsGui.BuildToolSelection.Buttons.BlockTemplate.Clone();
-		this.gameUI.ToolsGui.BuildToolSelection.Buttons.CategoryTemplate.Destroy();
-		this.gameUI.ToolsGui.BuildToolSelection.Buttons.BlockTemplate.Destroy();
+		this.guiCategoryTemplate = this.gameUI.ToolsGui.BuildTool.Selection.Buttons.CategoryTemplate.Clone();
+		this.guiBlockTemplate = this.gameUI.ToolsGui.BuildTool.Selection.Buttons.BlockTemplate.Clone();
+		this.gameUI.ToolsGui.BuildTool.Selection.Buttons.CategoryTemplate.Destroy();
+		this.gameUI.ToolsGui.BuildTool.Selection.Buttons.BlockTemplate.Destroy();
 	}
 
 	public displayGUI(noAnimations?: boolean): void {
 		// Display GUI
-		this.gameUI.ToolsGui.BuildToolSelection.Visible = true;
+		this.gameUI.ToolsGui.BuildTool.Visible = true;
 
 		// Show building mobile controls
 		if (InputController.currentPlatform === "Touch") {
@@ -71,7 +71,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 
 	public updateSelectionMenu(noAnimations?: boolean) {
 		if (!noAnimations) {
-			GuiAnimations.fade(this.gameUI.ToolsGui.BuildToolSelection, 0.1, "right");
+			GuiAnimations.fade(this.gameUI.ToolsGui.BuildTool.Selection, 0.1, "right");
 		}
 
 		// Remove old buttons
@@ -86,7 +86,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 				const obj = this.guiCategoryTemplate.Clone();
 				obj.TextLabel.Text = registeredCategory.getDisplayName();
 				obj.Frame.ImageLabel.Image = `rbxassetid://${registeredCategory.getImageAssetID()}`;
-				obj.Parent = this.gameUI.ToolsGui.BuildToolSelection.Buttons;
+				obj.Parent = this.gameUI.ToolsGui.BuildTool.Selection.Buttons;
 				this.eventHandler.registerOnce(obj.MouseButton1Click, () => {
 					this.gameUI.Sounds.GuiClick.Play();
 					this.selectedCategory = registeredCategory;
@@ -100,7 +100,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 			const backButton = this.guiCategoryTemplate.Clone();
 			backButton.TextLabel.Text = "Back";
 			backButton.Frame.ImageLabel.Image = "http://www.roblox.com/asset/?id=15252518021";
-			backButton.Parent = this.gameUI.ToolsGui.BuildToolSelection.Buttons;
+			backButton.Parent = this.gameUI.ToolsGui.BuildTool.Selection.Buttons;
 			this.eventHandler.registerOnce(backButton.MouseButton1Click, () => {
 				this.gameUI.Sounds.GuiClick.Play();
 				this.selectedCategory = undefined;
@@ -117,7 +117,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 					obj.BackgroundColor3 = Color3.fromRGB(106, 106, 106);
 				}
 				obj.Frame.LimitLabel.Text = "inf";
-				obj.Parent = this.gameUI.ToolsGui.BuildToolSelection.Buttons;
+				obj.Parent = this.gameUI.ToolsGui.BuildTool.Selection.Buttons;
 				this.eventHandler.registerEvent(obj.MouseButton1Click, () => {
 					this.gameUI.Sounds.GuiClick.Play();
 					this.selectBlock(block);
@@ -127,7 +127,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 			});
 		}
 
-		this.gameUI.ToolsGui.BuildToolSelection.MaterialLabel.Text = this.selectedMaterial.Name;
+		this.gameUI.ToolsGui.BuildTool.Selection.MaterialLabel.Text = this.selectedMaterial.Name;
 	}
 
 	public hideGUI(): void {
@@ -135,7 +135,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		this.gameUI.TouchControls.BuildTool.Visible = false;
 
 		// Hide block selection
-		this.gameUI.ToolsGui.BuildToolSelection.Visible = false;
+		this.gameUI.ToolsGui.BuildTool.Visible = false;
 	}
 
 	private addHighlight() {
@@ -280,7 +280,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 
 		// Public
 		this.eventHandler.registerEvent(
-			this.gameUI.ToolsGui.BuildToolSelection.SelectMaterialButton.MouseButton1Click,
+			this.gameUI.ToolsGui.BuildTool.Selection.SelectMaterialButton.MouseButton1Click,
 			() => {
 				MaterialSelectGUI.showSelectWindow((material: Enum.Material) => this.onMaterialChanged(material));
 			},
@@ -289,7 +289,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 
 	public onMaterialChanged(material: Enum.Material) {
 		this.selectedMaterial = material;
-		this.gameUI.ToolsGui.BuildToolSelection.MaterialLabel.Text = this.selectedMaterial.Name;
+		this.gameUI.ToolsGui.BuildTool.Selection.MaterialLabel.Text = this.selectedMaterial.Name;
 		this.prepareVisual();
 	}
 

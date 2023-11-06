@@ -21,24 +21,26 @@ interface GameUI {
 		GamepadSelect: ImageLabel;
 	};
 	ToolsGui: Folder & {
-		BuildToolSelection: Frame & {
-			Buttons: ScrollingFrame & {
-				UIListLayout: UIListLayout;
-				BlockTemplate: TextButton & {
-					Frame: Frame & {
-						LimitLabel: TextLabel;
+		BuildTool: Frame & {
+			Selection: Frame & {
+				Buttons: ScrollingFrame & {
+					UIListLayout: UIListLayout;
+					BlockTemplate: TextButton & {
+						Frame: Frame & {
+							LimitLabel: TextLabel;
+						};
+						TextLabel: TextLabel;
 					};
-					TextLabel: TextLabel;
-				};
-				CategoryTemplate: TextButton & {
-					Frame: Frame & {
-						ImageLabel: ImageLabel;
+					CategoryTemplate: TextButton & {
+						Frame: Frame & {
+							ImageLabel: ImageLabel;
+						};
+						TextLabel: TextLabel;
 					};
-					TextLabel: TextLabel;
 				};
+				SelectMaterialButton: TextButton;
+				MaterialLabel: TextLabel;
 			};
-			SelectMaterialButton: TextButton;
-			MaterialLabel: TextLabel;
 		};
 		DeleteAllButton: TextButton;
 	};

@@ -59,10 +59,10 @@ export default class HotbarGUI extends AbstractGUI {
 
 		// State GUI change
 		if (this.equippedTool !== undefined) {
-			GuiAnimations.fade(this.gameUI.CurrentToolLabel, 0.2, "up");
-			GuiAnimations.fade(this.gameUI.CurrentToolDescriptionLabel, 0.2, "up");
-			GuiAnimations.tweenTransparency(this.gameUI.CurrentToolLabel, 0, 0.2);
-			GuiAnimations.tweenTransparency(this.gameUI.CurrentToolDescriptionLabel, 0, 0.2);
+			GuiAnimations.fade(this.gameUI.CurrentToolLabel, 0.1, "up");
+			GuiAnimations.fade(this.gameUI.CurrentToolDescriptionLabel, 0.1, "up");
+			GuiAnimations.tweenTransparency(this.gameUI.CurrentToolLabel, 0, 0.1);
+			GuiAnimations.tweenTransparency(this.gameUI.CurrentToolDescriptionLabel, 0, 0.1);
 
 			this.gameUI.CurrentToolLabel.Text = this.equippedTool.getDisplayName();
 			this.gameUI.CurrentToolDescriptionLabel.Text = this.equippedTool.getShortDescription();
