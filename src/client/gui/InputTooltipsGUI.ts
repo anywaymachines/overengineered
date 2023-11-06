@@ -30,21 +30,6 @@ export default class InputTooltipsGUI extends AbstractGUI {
 		this.gameUI.ControlTooltips.GamepadTemplate.Destroy();
 		this.gameUI.ControlTooltips.KeyboardTemplate.Destroy();
 
-		// Prepare events
-		this.eventHandler.registerEvent(Signals.TOOL.EQUIPPED, (tool: AbstractToolMeta) => {
-			this.gamepadTooltipsCache = tool.getGamepadTooltips();
-			this.keyboardTooltipsCache = tool.getKeyboardTooltips();
-
-			this.updateTooltips(InputController.currentPlatform);
-		});
-
-		this.eventHandler.registerEvent(Signals.TOOL.UNEQUIPPED, (_) => {
-			this.gamepadTooltipsCache.clear();
-			this.keyboardTooltipsCache.clear();
-
-			this.updateTooltips(InputController.currentPlatform);
-		});
-
 		// Prepare simple gamepad tooltips
 		this.gamepadSimpleTooltips.set(Enum.KeyCode.ButtonR1, this.gameUI.Tools.GamepadNext);
 		this.gamepadSimpleTooltips.set(Enum.KeyCode.ButtonL1, this.gameUI.Tools.GamepadBack);
@@ -59,6 +44,7 @@ export default class InputTooltipsGUI extends AbstractGUI {
 
 		// Update first time
 		this.updateTooltips(InputController.currentPlatform);
+		this.prepareEvents(InputController.currentPlatform);
 	}
 
 	public updateTooltips(platform: string) {
@@ -101,14 +87,29 @@ export default class InputTooltipsGUI extends AbstractGUI {
 		GuiAnimations.fade(this.gameUI.ControlTooltips, 0.1, "up");
 	}
 
-	public onPlatformChanged(platform: string) {
+	public registerSharedEvents(): void {
+		this.eventHandler.registerEvent(Signals.TOOL.EQUIPPED, (tool: AbstractToolMeta) => {
+			this.gamepadTooltipsCache = tool.getGamepadTooltips();
+			this.keyboardTooltipsCache = tool.getKeyboardTooltips();
+
+			this.updateTooltips(InputController.currentPlatform);
+		});
+
+		this.eventHandler.registerEvent(Signals.TOOL.UNEQUIPPED, (_) => {
+			this.gamepadTooltipsCache.clear();
+			this.keyboardTooltipsCache.clear();
+
+			this.updateTooltips(InputController.currentPlatform);
+		});
+	}
+
+	public onPlatformChanged(platform: typeof InputController.currentPlatform) {
+		super.onPlatformChanged(platform);
+
 		this.updateTooltips(platform);
 	}
 
 	public displayDefaultGUI(isVisible: boolean): void {
 		this.gameUI.ControlTooltips.Visible = isVisible;
-	}
-	public onInput(input: InputObject): void {
-		return;
 	}
 }

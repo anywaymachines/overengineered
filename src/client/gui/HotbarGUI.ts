@@ -1,8 +1,6 @@
-import { Players } from "@rbxts/services";
 import AbstractToolMeta from "../core/abstract/AbstractToolMeta";
 import BuildToolMeta from "../tools/BuildToolMeta";
 import GuiAnimations from "../utils/GuiAnimations";
-import PlayerUtils from "shared/utils/PlayerUtils";
 import DeleteToolMeta from "../tools/DeleteToolMeta";
 import Signals from "client/core/network/Signals";
 import AbstractGUI from "../core/abstract/AbstractGUI";
@@ -29,9 +27,7 @@ export default class HotbarGUI extends AbstractGUI {
 		// Equip nothing
 		this.equipTool(undefined, true);
 
-		this.tools.forEach((tool) => {
-			this.eventHandler.registerEvent(tool.getButton().ImageButton.MouseButton1Click, () => this.equipTool(tool));
-		});
+		this.prepareEvents(InputController.currentPlatform);
 	}
 
 	public displayDefaultGUI(isVisible: boolean): void {
@@ -82,6 +78,8 @@ export default class HotbarGUI extends AbstractGUI {
 	}
 
 	public onPlatformChanged(platform: typeof InputController.currentPlatform) {
+		super.onPlatformChanged(platform);
+
 		// Update buttons
 		this.gameUI.Tools.Buttons.GetChildren().forEach((child) => {
 			if (child.IsA("Frame")) {
@@ -96,50 +94,47 @@ export default class HotbarGUI extends AbstractGUI {
 		});
 	}
 
-	public onInput(input: InputObject) {
-		// Non-alive players bypass
-		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
-			return;
-		}
+	public registerSharedEvents(): void {
+		super.registerSharedEvents();
 
-		// PC
-		if (input.UserInputType === Enum.UserInputType.Keyboard) {
-			const tool = this.tools.find((value) => value.getKeybind() === input.KeyCode);
+		this.tools.forEach((tool) => {
+			this.eventHandler.registerEvent(tool.getButton().ImageButton.MouseButton1Click, () => this.equipTool(tool));
+		});
+	}
+
+	public registerDesktopEvents(): void {
+		super.registerDesktopEvents();
+
+		// Keyboard keybinds
+		this.tools.forEach((tool) => {
+			this.inputHandler.onKeyPressed(tool.getKeybind(), () => this.equipTool(tool));
+		});
+
+		this.inputHandler.onKeyPressed(Enum.KeyCode.Backspace, () => this.equipTool(undefined));
+	}
+
+	public registerConsoleEvents(): void {
+		super.registerConsoleEvents();
+
+		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonB, () => this.equipTool(undefined));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonR1, () => this.gamepadSelectTool(true));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonL1, () => this.gamepadSelectTool(false));
+	}
+
+	gamepadSelectTool(isRight: boolean) {
+		if (this.equippedTool) {
+			const increment = isRight ? 1 : -1;
+			const tool = this.tools.find((tool) => {
+				assert(this.equippedTool, "");
+				return tool.getKeybind().Value === this.equippedTool.getKeybind().Value + increment;
+			});
 			if (tool) {
 				this.equipTool(tool);
 				return;
 			}
-		}
-
-		// Keyboard backspace for tool unequipping
-		if (input.KeyCode === Enum.KeyCode.Backspace) {
-			this.equipTool(undefined);
+		} else {
+			this.equipTool(this.buildTool);
 			return;
-		}
-
-		// Gamepad ButtonB for tool unequipping
-		if (input.KeyCode === Enum.KeyCode.ButtonB) {
-			this.equipTool(undefined);
-			return;
-		}
-
-		// Gamepad ButtonR1, ButtonR2 for tool selection
-		if (input.KeyCode === Enum.KeyCode.ButtonR1 || input.KeyCode === Enum.KeyCode.ButtonR1) {
-			if (this.equippedTool) {
-				const isRight = input.KeyCode === Enum.KeyCode.ButtonR1;
-				const increment = isRight ? 1 : -1;
-				const tool = this.tools.find((tool) => {
-					assert(this.equippedTool, "");
-					return tool.getKeybind().Value === this.equippedTool.getKeybind().Value + increment;
-				});
-				if (tool) {
-					this.equipTool(tool);
-					return;
-				}
-			} else {
-				this.equipTool(this.buildTool);
-				return;
-			}
 		}
 	}
 

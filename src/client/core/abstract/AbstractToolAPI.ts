@@ -51,10 +51,18 @@ export default abstract class AbstractToolAPI {
 		this.registerSharedEvents();
 	}
 
-	public registerSharedEvents(): void {}
-	public registerDesktopEvents(): void {}
-	public registerConsoleEvents(): void {}
-	public registerTouchEvents(): void {}
+	public registerSharedEvents(): void {
+		return;
+	}
+	public registerDesktopEvents(): void {
+		return;
+	}
+	public registerConsoleEvents(): void {
+		return;
+	}
+	public registerTouchEvents(): void {
+		return;
+	}
 
 	public abstract displayGUI(noAnimations?: boolean): void;
 

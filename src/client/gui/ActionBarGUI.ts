@@ -1,15 +1,16 @@
 import Signals from "client/core/network/Signals";
 import AbstractGUI from "../core/abstract/AbstractGUI";
 import GuiAnimations from "../utils/GuiAnimations";
+import InputController from "client/core/InputController";
 
 export default class ActionBarGUI extends AbstractGUI {
 	constructor(gameUI: GameUI) {
 		super(gameUI);
 
-		this.prepareEvents();
+		this.prepareEvents(InputController.currentPlatform);
 	}
 
-	public prepareEvents() {
+	public registerSharedEvents(): void {
 		this.eventHandler.registerEvent(Signals.TOOL.EQUIPPED, () => {
 			this.updateGUI(false);
 		});
@@ -36,8 +37,4 @@ export default class ActionBarGUI extends AbstractGUI {
 			this.gameUI.ActionBar.Visible = false;
 		}
 	}
-
-	public onInput(input: InputObject): void {}
-
-	public onPlatformChanged(newPlatform: "Console" | "Touch" | "Desktop"): void {}
 }

@@ -31,8 +31,6 @@ export default class InputHandler {
 	}
 
 	public killAll() {
-		this.eventHandler.killAll();
-
 		this.keyCodeEvents.clear();
 		this.touchTapEvents.clear();
 	}
