@@ -4,9 +4,9 @@ import VectorUtils from "shared/utils/VectorUtils";
 // Looks good
 export default class BuildingManager {
 	public static AllowedMaterials = [
+		Enum.Material.Cardboard,
 		Enum.Material.Plastic,
 		Enum.Material.Glass,
-		Enum.Material.Glacier,
 		Enum.Material.Wood,
 		Enum.Material.WoodPlanks,
 		Enum.Material.Metal,
