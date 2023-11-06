@@ -275,22 +275,19 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		this.previewBlock?.Destroy();
 	}
 
-	public prepareEvents(platform: "Console" | "Touch" | "Desktop"): void {
-		super.prepareEvents(platform);
+	public onMaterialChanged(material: Enum.Material) {
+		this.selectedMaterial = material;
+		this.gameUI.ToolsGui.BuildTool.Selection.MaterialLabel.Text = this.selectedMaterial.Name;
+		this.prepareVisual();
+	}
 
-		// Public
+	public registerSharedEvents(): void {
 		this.eventHandler.registerEvent(
 			this.gameUI.ToolsGui.BuildTool.Selection.SelectMaterialButton.MouseButton1Click,
 			() => {
 				MaterialSelectGUI.showSelectWindow((material: Enum.Material) => this.onMaterialChanged(material));
 			},
 		);
-	}
-
-	public onMaterialChanged(material: Enum.Material) {
-		this.selectedMaterial = material;
-		this.gameUI.ToolsGui.BuildTool.Selection.MaterialLabel.Text = this.selectedMaterial.Name;
-		this.prepareVisual();
 	}
 
 	public registerDesktopEvents() {

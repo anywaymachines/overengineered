@@ -36,6 +36,8 @@ export default abstract class AbstractToolAPI {
 
 	public prepareEvents(platform: typeof InputController.currentPlatform): void {
 		this.eventHandler.killAll();
+		this.inputHandler.killAll();
+
 		this.eventHandler.registerEvent(Signals.PLATFORM_CHANGED, (newPlatform) => this.onPlatformChanged(newPlatform));
 
 		const platformEvents = {
@@ -46,11 +48,13 @@ export default abstract class AbstractToolAPI {
 
 		// Invoke the function associated with the current platform
 		platformEvents[platform]();
+		this.registerSharedEvents();
 	}
 
-	public abstract registerDesktopEvents(): void;
-	public abstract registerConsoleEvents(): void;
-	public abstract registerTouchEvents(): void;
+	public registerSharedEvents(): void {}
+	public registerDesktopEvents(): void {}
+	public registerConsoleEvents(): void {}
+	public registerTouchEvents(): void {}
 
 	public abstract displayGUI(noAnimations?: boolean): void;
 
