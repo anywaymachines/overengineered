@@ -30,6 +30,18 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		this.gameUI.TouchControls.DeleteTool.Visible = false;
 	}
 
+	public createHighlight(target: BasePart) {
+		const instance = new Instance("Highlight");
+		instance.Parent = target.Parent;
+		instance.Adornee = target.Parent;
+		this.highlight.Value = instance;
+	}
+
+	public destroyHighlight() {
+		this.highlight.Value?.Destroy();
+		this.highlight.Value = undefined;
+	}
+
 	public updatePosition() {
 		// ERROR: If ESC menu is open - freeze movement
 		if (InputController.isPaused()) {
@@ -48,8 +60,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 
 		const target = this.mouse.Target;
 
-		this.highlight.Value?.Destroy();
-		this.highlight.Value = undefined;
+		this.destroyHighlight();
 
 		// ERROR: Mouse is in space
 		if (target === undefined) {
@@ -74,10 +85,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 		}
 
 		// Create highlight
-		const instance = new Instance("Highlight");
-		instance.Parent = target.Parent;
-		instance.Adornee = target.Parent;
-		this.highlight.Value = instance;
+		this.createHighlight(target);
 	}
 
 	public suggestClearAll() {
@@ -100,8 +108,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 			this.gameUI.Sounds.Building.BlockDelete.PlaybackSpeed = SoundUtils.randomSoundSpeed();
 			this.gameUI.Sounds.Building.BlockDelete.Play();
 
-			this.highlight.Value?.Destroy();
-			this.highlight.Value = undefined;
+			this.destroyHighlight();
 		} else {
 			// Block not removed
 			Logger.info("[DELETING] Clearing all blocks failed: " + response.message);
@@ -129,8 +136,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 			this.gameUI.Sounds.Building.BlockDelete.PlaybackSpeed = SoundUtils.randomSoundSpeed();
 			this.gameUI.Sounds.Building.BlockDelete.Play();
 
-			this.highlight.Value?.Destroy();
-			this.highlight.Value = undefined;
+			this.destroyHighlight();
 		} else {
 			// Block not removed
 			Logger.info("[DELETING] Block deleting failed: " + response.message);
@@ -184,6 +190,6 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 	public unequip(): void {
 		super.unequip();
 
-		this.highlight.Value?.Destroy();
+		this.destroyHighlight();
 	}
 }
