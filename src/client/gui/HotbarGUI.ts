@@ -5,6 +5,7 @@ import DeleteToolMeta from "../tools/DeleteToolMeta";
 import Signals from "client/core/network/Signals";
 import AbstractGUI from "../core/abstract/AbstractGUI";
 import InputController from "client/core/InputController";
+import MoveToolMeta from "client/tools/MoveToolMeta";
 
 export default class HotbarGUI extends AbstractGUI {
 	// Variables
@@ -13,6 +14,7 @@ export default class HotbarGUI extends AbstractGUI {
 	// Tools
 	public tools: AbstractToolMeta[] = [];
 	public buildTool: BuildToolMeta;
+	public moveTool: MoveToolMeta;
 	public deleteTool: DeleteToolMeta;
 
 	constructor(gameUI: GameUI) {
@@ -21,8 +23,11 @@ export default class HotbarGUI extends AbstractGUI {
 		// Tools API
 		this.buildTool = new BuildToolMeta(gameUI);
 		this.deleteTool = new DeleteToolMeta(gameUI);
+		this.moveTool = new MoveToolMeta(gameUI);
+
 		this.tools.push(this.buildTool);
 		this.tools.push(this.deleteTool);
+		this.tools.push(this.moveTool);
 
 		// Equip nothing
 		this.equipTool(undefined, true);
