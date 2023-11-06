@@ -18,7 +18,14 @@ export default class GuiUtils {
 		const gameUI = this.getGameUI();
 		const mouse = Players.LocalPlayer.GetMouse();
 		const objects = playerGUI.GetGuiObjectsAtPosition(mouse.X, mouse.Y);
-		if (objects.some((value) => value.Visible === true && value.IsDescendantOf(gameUI as unknown as Instance))) {
+		if (
+			objects.some(
+				(value) =>
+					value.Visible === true &&
+					value.BackgroundTransparency < 1 &&
+					value.IsDescendantOf(gameUI as unknown as Instance),
+			)
+		) {
 			return true;
 		}
 		return false;
