@@ -1,7 +1,7 @@
-import ServerPlots from "./building/ServerPlots";
-import BuildEvent from "./building/BuilldEvent";
-import DeleteEvent from "./building/DeleteEvent";
-import RideStartEvent from "./ride/RideStartEvent";
+import ServerPlots from "./plots/ServerPlots";
+import BuildEvent from "./network/event/BuilldEvent";
+import DeleteEvent from "./network/event/DeleteEvent";
+import RideStartEvent from "./network/event/RideStartEvent";
 
 // Plots
 ServerPlots.initialize();
