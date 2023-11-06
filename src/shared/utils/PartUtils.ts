@@ -10,6 +10,15 @@ export default class PartUtils {
 		});
 	}
 
+	static switchDescendantsTransparency(model: Instance, transparency: number) {
+		const children = model.GetDescendants();
+		children.forEach((element) => {
+			if (element.IsA("BasePart")) {
+				element.Transparency = transparency;
+			}
+		});
+	}
+
 	static switchDescendantsAnchor(model: Instance, isAnchored: boolean) {
 		const children = model.GetDescendants();
 		children.forEach((element) => {

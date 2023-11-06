@@ -46,12 +46,19 @@ export default class BuildEvent {
 		}
 
 		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;
+
 		model.PivotTo(data.location);
 		model.SetAttribute("isBlock", true);
 		model.Parent = plot.FindFirstChild("Blocks");
 
+		// Set material
 		PartUtils.switchDescendantsMaterial(model, data.material);
 		model.SetAttribute("material", data.material.Name);
+
+		// Make transparent glass materials
+		if (data.material === Enum.Material.Glass || data.material === Enum.Material.Glacier) {
+			PartUtils.switchDescendantsTransparency(model, 0.3);
+		}
 
 		return { success: true, model: model };
 	}
