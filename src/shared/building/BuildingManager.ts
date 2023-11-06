@@ -3,6 +3,24 @@ import VectorUtils from "shared/utils/VectorUtils";
 
 // Looks good
 export default class BuildingManager {
+	public static AllowedMaterials = [
+		Enum.Material.Plastic,
+		Enum.Material.Glass,
+		Enum.Material.Glacier,
+		Enum.Material.Wood,
+		Enum.Material.WoodPlanks,
+		Enum.Material.Metal,
+		Enum.Material.Cobblestone,
+		Enum.Material.Grass,
+		Enum.Material.DiamondPlate,
+		Enum.Material.Fabric,
+		Enum.Material.Slate,
+		Enum.Material.CorrodedMetal,
+		Enum.Material.Foil,
+		Enum.Material.Ice,
+		Enum.Material.Sand,
+	];
+
 	/** Checks that building for a player on a given Plot is allowed
 	 * @param plot The Plot to check
 	 * @param player The player to check

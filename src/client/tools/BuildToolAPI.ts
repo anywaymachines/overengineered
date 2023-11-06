@@ -16,6 +16,7 @@ import AbstractCategory from "shared/registry/abstract/AbstractCategory";
 import CategoriesRegistry from "shared/registry/CategoriesRegistry";
 import ContraptionWelder from "client/core/contraption/ContraptionWelder";
 import Signals from "client/core/network/Signals";
+import MaterialSelectGUI from "client/gui/MaterialSelectGUI";
 
 export default class BuildToolAPI extends AbstractToolAPI {
 	// Mouse
@@ -35,6 +36,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 	// Menu selection
 	private selectionButtons: TextButton[] = [];
 	private selectedCategory?: AbstractCategory;
+	private selectedMaterial: Enum.Material = Enum.Material.Plastic;
 
 	// Const
 	private readonly allowedColor: Color3 = Color3.fromRGB(194, 217, 255);
@@ -124,6 +126,8 @@ export default class BuildToolAPI extends AbstractToolAPI {
 				this.selectionButtons.push(obj);
 			});
 		}
+
+		this.gameUI.ToolsGui.BuildToolSelection.MaterialLabel.Text = this.selectedMaterial.Name;
 	}
 
 	public hideGUI(): void {
@@ -192,15 +196,15 @@ export default class BuildToolAPI extends AbstractToolAPI {
 	}
 
 	public selectBlock(block?: AbstractBlock): void {
-		// Remove old block preview
-		this.previewBlock?.Destroy();
-
 		this.selectedBlock = block;
 
 		this.prepareVisual();
 	}
 
 	public prepareVisual() {
+		// Remove old block preview
+		this.previewBlock?.Destroy();
+
 		if (this.selectedBlock === undefined) {
 			return;
 		}
@@ -212,6 +216,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		// Customizing
 		this.addAxisModel();
 		this.addHighlight();
+		PartUtils.switchDescendantsMaterial(this.previewBlock, this.selectedMaterial);
 		PartUtils.ghostModel(this.previewBlock);
 
 		// First update
@@ -236,6 +241,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 
 		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerPlaceBlock").CallServerAsync({
 			block: this.selectedBlock.id,
+			material: this.selectedMaterial,
 			location: this.previewBlock.PrimaryPart.CFrame,
 		});
 
@@ -269,6 +275,24 @@ export default class BuildToolAPI extends AbstractToolAPI {
 		this.previewBlock?.Destroy();
 	}
 
+	public prepareEvents(platform: "Console" | "Touch" | "Desktop"): void {
+		super.prepareEvents(platform);
+
+		// Public
+		this.eventHandler.registerEvent(
+			this.gameUI.ToolsGui.BuildToolSelection.SelectMaterialButton.MouseButton1Click,
+			() => {
+				MaterialSelectGUI.showSelectWindow((material: Enum.Material) => this.onMaterialChanged(material));
+			},
+		);
+	}
+
+	public onMaterialChanged(material: Enum.Material) {
+		this.selectedMaterial = material;
+		this.gameUI.ToolsGui.BuildToolSelection.MaterialLabel.Text = this.selectedMaterial.Name;
+		this.prepareVisual();
+	}
+
 	public registerDesktopEvents() {
 		// Keyboard controls
 		this.inputHandler.onKeyPressed(Enum.KeyCode.R, () => this.rotate("x"));
@@ -277,6 +301,8 @@ export default class BuildToolAPI extends AbstractToolAPI {
 
 		this.eventHandler.registerEvent(this.mouse.Move, () => this.updatePosition());
 		this.eventHandler.registerEvent(this.mouse.Button1Down, async () => await this.placeBlock());
+
+		this.eventHandler.registerEvent(Signals.CAMERA_MOVED, () => this.updatePosition());
 	}
 
 	public registerConsoleEvents() {

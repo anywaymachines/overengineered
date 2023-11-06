@@ -37,6 +37,8 @@ interface GameUI {
 					TextLabel: TextLabel;
 				};
 			};
+			SelectMaterialButton: TextButton;
+			MaterialLabel: TextLabel;
 		};
 		DeleteAllButton: TextButton;
 	};
@@ -69,6 +71,14 @@ interface GameDialog {
 		};
 		HeadingLabel: TextLabel;
 		DescriptionLabel: TextLabel;
+	};
+	MaterialSelectWindow: Frame & {
+		CloseButton: TextButton;
+		Answers: Frame & {
+			Template: TextButton & {
+				TextLabel: TextLabel;
+			};
+		};
 	};
 }
 

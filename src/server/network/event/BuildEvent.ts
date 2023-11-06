@@ -4,6 +4,7 @@ import Remotes from "shared/NetworkDefinitions";
 import Logger from "shared/Logger";
 import SharedPlots from "shared/building/SharedPlots";
 import BuildingManager from "shared/building/BuildingManager";
+import PartUtils from "shared/utils/PartUtils";
 
 /** Class for **server-based** construction management from blocks */
 export default class BuildEvent {
@@ -48,6 +49,9 @@ export default class BuildEvent {
 		model.PivotTo(data.location);
 		model.SetAttribute("isBlock", true);
 		model.Parent = plot.FindFirstChild("Blocks");
+
+		PartUtils.switchDescendantsMaterial(model, data.material);
+		model.SetAttribute("material", data.material.Name);
 
 		return { success: true, model: model };
 	}

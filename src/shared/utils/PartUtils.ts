@@ -19,6 +19,15 @@ export default class PartUtils {
 		});
 	}
 
+	static switchDescendantsMaterial(model: Instance, material: Enum.Material) {
+		const children = model.GetDescendants();
+		children.forEach((element) => {
+			if (element.IsA("BasePart")) {
+				element.Material = material;
+			}
+		});
+	}
+
 	static switchDescendantsNetworkOwner(model: Instance, owner: Player) {
 		const children = model.GetDescendants();
 		children.forEach((element) => {
