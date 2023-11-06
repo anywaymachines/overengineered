@@ -32,7 +32,7 @@ export default class DeleteToolGui extends AbstractToolMeta {
 	}
 
 	public getKeybind(): Enum.KeyCode {
-		return Enum.KeyCode.Four;
+		return Enum.KeyCode.Five;
 	}
 
 	public getButton(): Frame & MyToolsGuiButton {
