@@ -6,5 +6,10 @@ interface ReplicatedStorage {
 			Y: BasePart;
 			Z: BasePart;
 		};
+		MoveHandles: BasePart & {
+			XHandles: Handles;
+			YHandles: Handles;
+			ZHandles: Handles;
+		};
 	};
 }
