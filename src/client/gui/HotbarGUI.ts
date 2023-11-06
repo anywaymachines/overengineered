@@ -21,13 +21,17 @@ export default class HotbarGUI extends AbstractGUI {
 		super(gameUI);
 
 		// Tools API
-		this.buildTool = new BuildToolMeta(gameUI, this);
-		this.deleteTool = new DeleteToolMeta(gameUI, this);
+		this.buildTool = new BuildToolMeta(gameUI);
+		this.deleteTool = new DeleteToolMeta(gameUI);
 		this.tools.push(this.buildTool);
 		this.tools.push(this.deleteTool);
 
 		// Equip nothing
 		this.equipTool(undefined, true);
+
+		this.tools.forEach((tool) => {
+			this.eventHandler.registerEvent(tool.getButton().ImageButton.MouseButton1Click, () => this.equipTool(tool));
+		});
 	}
 
 	public displayDefaultGUI(isVisible: boolean): void {

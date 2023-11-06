@@ -1,12 +1,10 @@
 import EventHandler from "client/core/event/EventHandler";
 import GuiAnimations from "../../utils/GuiAnimations";
-import HotbarGUI from "../../gui/HotbarGUI";
 import AbstractToolAPI from "./AbstractToolAPI";
 
 export default abstract class AbstractToolMeta {
 	// GUIs
 	public gameUI: GameUI;
-	public toolsInterface: HotbarGUI;
 
 	public toolAPI!: AbstractToolAPI;
 
@@ -15,13 +13,8 @@ export default abstract class AbstractToolMeta {
 	private unequippedColor = Color3.fromRGB(47, 47, 47);
 	private equippedColor = Color3.fromRGB(85, 85, 85);
 
-	constructor(gameUI: GameUI, toolsInterface: HotbarGUI) {
+	constructor(gameUI: GameUI) {
 		this.gameUI = gameUI;
-		this.toolsInterface = toolsInterface;
-
-		this.eventHandler.registerEvent(this.getButton().ImageButton.MouseButton1Click, () =>
-			toolsInterface.equipTool(this),
-		);
 	}
 
 	public onEquip(): void {

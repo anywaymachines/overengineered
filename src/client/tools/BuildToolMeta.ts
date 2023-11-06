@@ -4,8 +4,8 @@ import AbstractToolMeta from "../core/abstract/AbstractToolMeta";
 import { UserInputService } from "@rbxts/services";
 
 export default class BuildToolMeta extends AbstractToolMeta {
-	constructor(gameUI: GameUI, hotbarGUI: HotbarGUI) {
-		super(gameUI, hotbarGUI);
+	constructor(gameUI: GameUI) {
+		super(gameUI);
 
 		this.toolAPI = new BuildToolAPI(gameUI);
 	}
