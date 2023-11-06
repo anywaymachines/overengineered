@@ -179,6 +179,10 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 				this.gameUI.TouchControls.DeleteTool.Visible = false;
 			}
 		});
+
+		this.eventHandler.registerEvent(this.gameUI.ToolsGui.DeleteAllButton.MouseButton1Click, () =>
+			this.suggestClearAll(),
+		);
 	}
 
 	public equip(): void {
