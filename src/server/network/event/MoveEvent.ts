@@ -35,7 +35,7 @@ export default class MoveEvent {
 		if (!VectorUtils.isRegion3InRegion3(blocksRegion, SharedPlots.getPlotBuildingRegion(parentPlot))) {
 			return {
 				success: false,
-				message: "Out of bonds!",
+				message: "Out of bounds!",
 			};
 		}
 
