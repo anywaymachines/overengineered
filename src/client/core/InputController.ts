@@ -4,10 +4,6 @@ import Signals from "./network/Signals";
 export default class InputController {
 	public static currentPlatform: "Console" | "Touch" | "Desktop" = this.getPhysicalPlatform();
 
-	private static playerModule = require(
-		Players.LocalPlayer.WaitForChild("PlayerScripts").WaitForChild("PlayerModule") as ModuleScript,
-	);
-
 	public static initialize() {
 		Signals.PLATFORM_CHANGED.Fire(this.currentPlatform);
 
@@ -18,14 +14,6 @@ export default class InputController {
 				Signals.PLATFORM_CHANGED.Fire(newPlatform);
 			}
 		});
-	}
-
-	public static switchControls(state: boolean) {
-		if (state) {
-			(this.playerModule as { Enable: () => void }).Enable();
-		} else {
-			(this.playerModule as { Disable: () => void }).Disable();
-		}
 	}
 
 	private static getPlatformByLastInput(): typeof this.currentPlatform {

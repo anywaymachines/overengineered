@@ -2,8 +2,10 @@ import EventHandler from "client/core/event/EventHandler";
 import GuiUtils from "client/utils/GuiUtils";
 import GuiAnimations from "../utils/GuiAnimations";
 import BuildingManager from "shared/building/BuildingManager";
+import InputController from "client/core/InputController";
 
 export default class MaterialSelectGUI {
+	private static gameUI: ScreenGui & GameUI = GuiUtils.getGameUI() as ScreenGui & GameUI;
 	private static gameDialog: ScreenGui & GameDialog = GuiUtils.getGameDialog() as ScreenGui & GameDialog;
 	private static eventHandler: EventHandler = new EventHandler();
 	private static materialButtons: (TextButton & {
@@ -24,6 +26,8 @@ export default class MaterialSelectGUI {
 			return;
 		}
 
+		this.gameUI.Enabled = false;
+
 		this.materialButtons.forEach((element) => {
 			element.Destroy();
 		});
@@ -35,6 +39,8 @@ export default class MaterialSelectGUI {
 			this.eventHandler.registerEvent(obj.MouseButton1Click, () => {
 				this.gameDialog.MaterialSelectWindow.Visible = false;
 				this.eventHandler.killAll();
+				this.gameUI.Enabled = true;
+				this.gameUI.Sounds.GuiClick.Play();
 				callback(material);
 			});
 			obj.Parent = this.gameDialog.MaterialSelectWindow.Answers;
@@ -44,6 +50,8 @@ export default class MaterialSelectGUI {
 		this.eventHandler.registerOnce(this.gameDialog.MaterialSelectWindow.CloseButton.MouseButton1Click, () => {
 			this.gameDialog.MaterialSelectWindow.Visible = false;
 			this.eventHandler.killAll();
+			this.gameUI.Enabled = true;
+			this.gameUI.Sounds.GuiClick.Play();
 		});
 
 		// Display with animation

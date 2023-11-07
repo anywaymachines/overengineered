@@ -5,6 +5,7 @@ import { GuiService } from "@rbxts/services";
 import InputController from "client/core/InputController";
 
 export default class ConfirmPopupGUI {
+	private static gameUI: ScreenGui & GameUI = GuiUtils.getGameUI() as ScreenGui & GameUI;
 	private static gameDialog: ScreenGui & GameDialog = GuiUtils.getGameDialog() as ScreenGui & GameDialog;
 	private static eventHandler: EventHandler = new EventHandler();
 
@@ -12,6 +13,8 @@ export default class ConfirmPopupGUI {
 		if (this.eventHandler.size() > 0) {
 			return;
 		}
+
+		this.gameUI.Enabled = false;
 
 		// Update heading and description
 		this.gameDialog.ConfirmationWindow.HeadingLabel.Text = heading;
@@ -25,15 +28,21 @@ export default class ConfirmPopupGUI {
 		this.eventHandler.registerOnce(this.gameDialog.ConfirmationWindow.Answers.YesButton.MouseButton1Click, () => {
 			this.gameDialog.ConfirmationWindow.Visible = false;
 			this.eventHandler.killAll();
+			this.gameUI.Enabled = true;
+			this.gameUI.Sounds.GuiClick.Play();
 			callback();
 		});
 		this.eventHandler.registerOnce(this.gameDialog.ConfirmationWindow.Answers.NoButton.MouseButton1Click, () => {
 			this.gameDialog.ConfirmationWindow.Visible = false;
 			this.eventHandler.killAll();
+			this.gameUI.Enabled = true;
+			this.gameUI.Sounds.GuiClick.Play();
 		});
 		this.eventHandler.registerOnce(this.gameDialog.ConfirmationWindow.CloseButton.MouseButton1Click, () => {
 			this.gameDialog.ConfirmationWindow.Visible = false;
 			this.eventHandler.killAll();
+			this.gameUI.Enabled = true;
+			this.gameUI.Sounds.GuiClick.Play();
 		});
 
 		// Autoselect button on gamepad
