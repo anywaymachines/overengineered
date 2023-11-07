@@ -56,7 +56,7 @@ export default class BuildEvent {
 		model.SetAttribute("material", data.material.Name);
 
 		// Make transparent glass materials
-		if (data.material === Enum.Material.Glass || data.material === Enum.Material.Glacier) {
+		if (data.material === Enum.Material.Glass) {
 			PartUtils.switchDescendantsTransparency(model, 0.3);
 		}
 
