@@ -55,7 +55,7 @@ export default class SharedPlots {
 	/** Returns the `Region3` of the **construction area** for blocks
 	 * @param plot The plot to get the region of
 	 */
-	private static getPlotBuildingRegion(plot: Model) {
+	public static getPlotBuildingRegion(plot: Model) {
 		const buildingPlane = plot.PrimaryPart as BasePart;
 		const region = new Region3(
 			new Vector3(

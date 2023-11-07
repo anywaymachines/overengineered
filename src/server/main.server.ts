@@ -3,6 +3,7 @@ import BuildEvent from "./network/event/BuildEvent";
 import DeleteEvent from "./network/event/DeleteEvent";
 import RideStartEvent from "./network/event/RideStartEvent";
 import PlotDatabase from "./plots/PlotDatabase";
+import MoveEvent from "./network/event/MoveEvent";
 
 // Plots
 PlotDatabase.initialize();
@@ -10,5 +11,6 @@ ServerPlots.initialize();
 
 // Initializing event workders
 BuildEvent.initialize();
+MoveEvent.initialize();
 DeleteEvent.initialize();
 RideStartEvent.initialize();

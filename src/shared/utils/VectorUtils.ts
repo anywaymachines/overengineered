@@ -39,4 +39,31 @@ export default class VectorUtils {
 			relative.Z <= 0.5
 		);
 	}
+
+	static isRegion3InRegion3(region1: Region3, region2: Region3): boolean {
+		// Get the corners of the first region
+		const corners1 = [
+			new Vector3(
+				region1.CFrame.Position.X - region1.Size.X / 2,
+				region1.CFrame.Position.Y - region1.Size.Y / 2,
+				region1.CFrame.Position.Z - region1.Size.Z / 2,
+			),
+			new Vector3(
+				region1.CFrame.Position.X + region1.Size.X / 2,
+				region1.CFrame.Position.Y + region1.Size.Y / 2,
+				region1.CFrame.Position.Z + region1.Size.Z / 2,
+			),
+		];
+
+		// Check each corner of the first region
+		for (const corner of corners1) {
+			if (!this.isInRegion3(region2, corner)) {
+				// If any corner is not in the second region, return false
+				return false;
+			}
+		}
+
+		// If all corners are in the second region, return true
+		return true;
+	}
 }
