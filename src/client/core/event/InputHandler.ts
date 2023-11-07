@@ -9,6 +9,10 @@ export default class InputHandler {
 
 	constructor() {
 		this.eventHandler.registerEvent(UserInputService.InputBegan, (input: InputObject) => {
+			if (UserInputService.GetFocusedTextBox()) {
+				return;
+			}
+
 			this.keyCodeEvents.forEach((event) => {
 				if (input.KeyCode === event.keyCode) {
 					event.callback();
@@ -16,6 +20,10 @@ export default class InputHandler {
 			});
 		});
 		this.eventHandler.registerEvent(UserInputService.TouchTap, (_) => {
+			if (UserInputService.GetFocusedTextBox()) {
+				return;
+			}
+
 			this.touchTapEvents.forEach((callback) => {
 				callback();
 			});
