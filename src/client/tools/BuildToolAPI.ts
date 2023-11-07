@@ -286,6 +286,7 @@ export default class BuildToolAPI extends AbstractToolAPI {
 			this.gameUI.ToolsGui.BuildTool.Selection.SelectMaterialButton.MouseButton1Click,
 			() => {
 				MaterialSelectGUI.showSelectWindow((material: Enum.Material) => this.onMaterialChanged(material));
+				this.gameUI.Sounds.GuiClick.Play();
 			},
 		);
 	}

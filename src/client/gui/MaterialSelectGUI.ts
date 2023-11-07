@@ -2,7 +2,6 @@ import EventHandler from "client/core/event/EventHandler";
 import GuiUtils from "client/utils/GuiUtils";
 import GuiAnimations from "../utils/GuiAnimations";
 import BuildingManager from "shared/building/BuildingManager";
-import InputController from "client/core/InputController";
 
 export default class MaterialSelectGUI {
 	private static gameUI: ScreenGui & GameUI = GuiUtils.getGameUI() as ScreenGui & GameUI;
