@@ -6,6 +6,7 @@ import Signals from "client/core/network/Signals";
 import AbstractGUI from "../core/abstract/AbstractGUI";
 import InputController from "client/core/InputController";
 import MoveToolMeta from "client/tools/MoveToolMeta";
+import { StarterGui } from "@rbxts/services";
 
 export default class HotbarGUI extends AbstractGUI {
 	// Variables
@@ -31,6 +32,9 @@ export default class HotbarGUI extends AbstractGUI {
 
 		// Equip nothing
 		this.equipTool(undefined, true);
+
+		// Disable roblox native backpack
+		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
 		this.prepareEvents(InputController.currentPlatform);
 	}
