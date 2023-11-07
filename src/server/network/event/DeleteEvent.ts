@@ -1,3 +1,4 @@
+import ServerPlots from "server/plots/ServerPlots";
 import Logger from "shared/Logger";
 import Remotes from "shared/NetworkDefinitions";
 import BuildingManager from "shared/building/BuildingManager";
@@ -43,16 +44,7 @@ export default class DeleteEvent {
 	private static playerClearAll(player: Player) {
 		const parentPlot = SharedPlots.getPlotByOwnerID(player.UserId);
 
-		const folder = parentPlot.FindFirstChild("Blocks");
-
-		if (folder === undefined) {
-			return {
-				success: false,
-				message: "Unable to find plot's blocks",
-			};
-		}
-
-		folder.ClearAllChildren();
+		ServerPlots.clearAllBlocks(parentPlot);
 
 		return {
 			success: true,

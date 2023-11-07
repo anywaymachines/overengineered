@@ -48,8 +48,16 @@ export default class ServerPlots {
 		}) as Model;
 	}
 
+	public static clearAllBlocks(plot: Model) {
+		const blocks = plot.FindFirstChild("Blocks");
+		blocks?.ClearAllChildren();
+	}
+
 	private static resetPlotOf(player: Player): void {
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
+
+		this.clearAllBlocks(plot);
+
 		this.writePlotData(plot, this.defaultPlotData);
 	}
 }
