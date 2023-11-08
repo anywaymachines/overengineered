@@ -98,7 +98,16 @@ export default class MoveToolAPI extends AbstractToolAPI {
 	}
 
 	public registerConsoleEvents(): void {
-		// TODO
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadUp, () => this.move(Enum.NormalId.Top));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadDown, () => this.move(Enum.NormalId.Top));
+
+		// DPad
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadLeft, () => {
+			const camera = Workspace.CurrentCamera as Camera;
+			const xyz = camera.CFrame.ToOrientation();
+			const direction = math.floor(xyz[1] + 45 / 90) * 90;
+			// TODO: Use
+		});
 	}
 
 	public destroyHandles() {

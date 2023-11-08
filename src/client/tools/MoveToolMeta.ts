@@ -20,12 +20,19 @@ export default class MoveToolMeta extends AbstractToolMeta {
 	public getGamepadTooltips(): { image: string; text: string }[] {
 		const keys: { image: string; text: string }[] = [];
 
-		// TODO
-		// keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadLeft), text: "Move by X" });
-		// keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadUp), text: "Move by +Y" });
-		// keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadDown), text: "Move by -Y" });
-		// keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadRight), text: "Move by Z" });
-		// keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonY), text: "Hold to inverse" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonY), text: "Rotate" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadUp), text: "Move up" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadDown), text: "Move down" });
+
+		keys.push({
+			image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadLeft),
+			text: "Move left (based on camera)",
+		});
+
+		keys.push({
+			image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadRight),
+			text: "Move right (based on camera)",
+		});
 
 		return keys;
 	}
