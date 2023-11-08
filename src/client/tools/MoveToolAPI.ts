@@ -101,6 +101,12 @@ export default class MoveToolAPI extends AbstractToolAPI {
 		}
 	}
 
+	public onPlatformChanged(platform: "Console" | "Touch" | "Desktop"): void {
+		super.onPlatformChanged(platform);
+
+		this.createHandles();
+	}
+
 	public registerConsoleEvents(): void {
 		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadUp, () => this.move(Enum.NormalId.Top));
 		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadDown, () => this.move(Enum.NormalId.Bottom));
