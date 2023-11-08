@@ -38,6 +38,13 @@ export default class InputController {
 		}
 	}
 
+	static isCtrlPressed(): boolean {
+		return (
+			UserInputService.IsKeyDown(Enum.KeyCode.LeftControl) ||
+			UserInputService.IsKeyDown(Enum.KeyCode.RightControl)
+		);
+	}
+
 	static isShiftPressed(): boolean {
 		return (
 			UserInputService.IsKeyDown(Enum.KeyCode.LeftShift) || UserInputService.IsKeyDown(Enum.KeyCode.RightShift)

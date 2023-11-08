@@ -17,6 +17,7 @@ import CategoriesRegistry from "shared/registry/CategoriesRegistry";
 import ContraptionWelder from "client/core/contraption/ContraptionWelder";
 import Signals from "client/core/network/Signals";
 import MaterialSelectGUI from "client/gui/MaterialSelectGUI";
+import UndoManager from "./UndoManager";
 
 export default class BuildToolAPI extends AbstractToolAPI {
 	// Mouse
@@ -251,6 +252,9 @@ export default class BuildToolAPI extends AbstractToolAPI {
 
 			// Create welds
 			ContraptionWelder.makeJoints(response.model as Model);
+
+			// Send signal
+			UndoManager.blockSequence.push(response.model as Model);
 
 			// Play sound
 			this.gameUI.Sounds.Building.BlockPlace.PlaybackSpeed = SoundUtils.randomSoundSpeed();
