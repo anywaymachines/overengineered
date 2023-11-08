@@ -1,5 +1,5 @@
 import { UserInputService } from "@rbxts/services";
-import InputController from "client/core/InputController";
+import InputController from "client/controller/InputController";
 import Signals from "client/network/Signals";
 
 export default class InputTypeChangeEvent {
