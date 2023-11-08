@@ -2,10 +2,10 @@ import { GuiService, UserInputService } from "@rbxts/services";
 
 export default class InputController {
 	/** A variable that contains the control type that is being used by the player right now */
-	public static controlType: "Desktop" | "Touch" | "Gamepad" = this.getPhysicalСontrolType();
+	public static inputType: "Desktop" | "Touch" | "Gamepad" = this.getPhysicalInputType();
 
 	/** Returns the input type based on the device the client is playing from */
-	static getPhysicalСontrolType(): typeof this.controlType {
+	static getPhysicalInputType(): typeof this.inputType {
 		if (GuiService.IsTenFootInterface()) {
 			return "Gamepad";
 		} else if (UserInputService.TouchEnabled && !UserInputService.MouseEnabled) {
