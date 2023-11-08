@@ -137,6 +137,7 @@ export default class DeleteToolAPI extends AbstractToolAPI {
 			this.gameUI.Sounds.Building.BlockDelete.Play();
 
 			this.destroyHighlight();
+			this.updatePosition();
 		} else {
 			// Block not removed
 			Logger.info("[DELETING] Block deleting failed: " + response.message);
