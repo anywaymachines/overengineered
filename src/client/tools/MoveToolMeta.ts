@@ -20,7 +20,6 @@ export default class MoveToolMeta extends AbstractToolMeta {
 	public getGamepadTooltips(): { image: string; text: string }[] {
 		const keys: { image: string; text: string }[] = [];
 
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonY), text: "Rotate" });
 		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadUp), text: "Move up" });
 		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadDown), text: "Move down" });
 

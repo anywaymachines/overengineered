@@ -1,5 +1,7 @@
 import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
+import InputController from "client/core/InputController";
 import AbstractToolAPI from "client/core/abstract/AbstractToolAPI";
+import Signals from "client/core/network/Signals";
 import Logger from "shared/Logger";
 import Remotes from "shared/NetworkDefinitions";
 import SharedPlots from "shared/building/SharedPlots";
@@ -25,15 +27,15 @@ export default class MoveToolAPI extends AbstractToolAPI {
 	public createHandles() {
 		this.destroyHandles();
 
-		this.MoveExtent = ReplicatedStorage.Assets.MoveHandles.Clone();
-		this.MoveExtent.Parent = Workspace;
-
 		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
 		const blocks = plot.FindFirstChild("Blocks") as Model;
 
-		if (blocks.GetChildren().size() === 0) {
+		if (blocks.GetChildren().isEmpty()) {
 			return;
 		}
+
+		this.MoveExtent = ReplicatedStorage.Assets.MoveHandles.Clone();
+		this.MoveExtent.Parent = Workspace;
 
 		this.MoveExtent.Size = blocks.GetExtentsSize();
 		(this.MoveExtent as MoveHandles).SelectionBox.Adornee = blocks;
@@ -45,6 +47,8 @@ export default class MoveToolAPI extends AbstractToolAPI {
 		this.XHandles.Parent = this.gameUI as unknown as ScreenGui;
 		this.YHandles.Parent = this.gameUI as unknown as ScreenGui;
 		this.ZHandles.Parent = this.gameUI as unknown as ScreenGui;
+
+		this.updateVisibility();
 
 		this.eventHandler.registerOnce(
 			this.XHandles.MouseButton1Down,
@@ -99,15 +103,47 @@ export default class MoveToolAPI extends AbstractToolAPI {
 
 	public registerConsoleEvents(): void {
 		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadUp, () => this.move(Enum.NormalId.Top));
-		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadDown, () => this.move(Enum.NormalId.Top));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadDown, () => this.move(Enum.NormalId.Bottom));
 
 		// DPad
-		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadLeft, () => {
-			const camera = Workspace.CurrentCamera as Camera;
-			const xyz = camera.CFrame.ToOrientation();
-			const direction = math.floor(xyz[1] + 45 / 90) * 90;
-			// TODO: Use
-		});
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadLeft, () => this.gamepadMove(false));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadRight, () => this.gamepadMove(true));
+
+		this.eventHandler.registerEvent(Signals.CAMERA_MOVED, () => this.updateVisibility());
+	}
+
+	updateVisibility() {
+		if (!this.YHandles || !this.ZHandles) {
+			return;
+		}
+
+		if (InputController.currentPlatform !== "Console") {
+			return;
+		}
+
+		this.ZHandles.Visible = this.getDirection() === 0 || math.abs(this.getDirection()) === 180 ? true : false;
+		this.YHandles.Visible = math.abs(this.getDirection()) === 90 ? true : false;
+	}
+
+	getDirection() {
+		const camera = Workspace.CurrentCamera as Camera;
+		const xyz = camera.CFrame.ToOrientation();
+		const direction = math.floor((math.deg(xyz[1]) + 45) / 90) * 90;
+		return direction;
+	}
+
+	gamepadMove(isRight: boolean) {
+		const direction = this.getDirection();
+
+		if (direction === 0) {
+			this.move(isRight ? Enum.NormalId.Right : Enum.NormalId.Left);
+		} else if (direction === -90) {
+			this.move(isRight ? Enum.NormalId.Back : Enum.NormalId.Front);
+		} else if (direction === 90) {
+			this.move(isRight ? Enum.NormalId.Front : Enum.NormalId.Back);
+		} else if (math.abs(direction) === 180) {
+			this.move(isRight ? Enum.NormalId.Left : Enum.NormalId.Right);
+		}
 	}
 
 	public destroyHandles() {
