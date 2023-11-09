@@ -2,6 +2,10 @@
 export default class EventHandler {
 	private events: RBXScriptConnection[] = [];
 
+	public size(): number {
+		return this.events.size();
+	}
+
 	/** The function of registering an event
 	 * @param signal A signal. Example: `UserInputService.InputChanged`
 	 * @param callback Callback
@@ -12,10 +16,6 @@ export default class EventHandler {
 
 	public subscribeOnce(signal: RBXScriptSignal, callback: Callback): number {
 		return this.events.push(signal.Once((_) => callback(_)));
-	}
-
-	public size(): number {
-		return this.events.size();
 	}
 
 	public unsubscribe(index: number) {

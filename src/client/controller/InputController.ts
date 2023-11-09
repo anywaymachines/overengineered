@@ -1,5 +1,6 @@
 import { GuiService, UserInputService } from "@rbxts/services";
 
+/** Basic class of input data type control */
 export default class InputController {
 	/** A variable that contains the control type that is being used by the player right now */
 	public static inputType: "Desktop" | "Touch" | "Gamepad" = this.getPhysicalInputType();

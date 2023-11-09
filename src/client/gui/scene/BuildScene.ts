@@ -3,9 +3,10 @@ import ToolbarWidget from "../widget/ToolbarWidget";
 import GuiController from "client/controller/GuiController";
 import ToolInfoWidget from "../widget/ToolInfoWidget";
 
+/** Construction mode scene */
 export default class BuildScene extends Scene {
-	toolbarWidget: ToolbarWidget;
-	toolInfoWidget: ToolInfoWidget;
+	private toolbarWidget: ToolbarWidget;
+	private toolInfoWidget: ToolInfoWidget;
 
 	constructor() {
 		super();
@@ -16,15 +17,15 @@ export default class BuildScene extends Scene {
 		this.toolInfoWidget = this.addWidget(new ToolInfoWidget(gameUI.ToolInfo));
 	}
 
-	showScene(hasAnimations: boolean): void {
-		// Widgets
-		this.toolbarWidget.showWidget(hasAnimations);
-		this.toolInfoWidget.showWidget(hasAnimations);
-	}
-
 	hideScene(hasAnimations: boolean): void {
 		// Widgets
 		this.toolbarWidget.hideWidget(hasAnimations);
 		this.toolInfoWidget.hideWidget(hasAnimations);
+	}
+
+	showScene(hasAnimations: boolean): void {
+		// Widgets
+		this.toolbarWidget.showWidget(hasAnimations);
+		this.toolInfoWidget.showWidget(hasAnimations);
 	}
 }
