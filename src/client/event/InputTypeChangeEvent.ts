@@ -16,7 +16,7 @@ export default class InputTypeChangeEvent {
 			InputController.inputType = newInputType;
 
 			// Fire a new input type
-			Signals.PLATFORM_CHANGED_EVENT.Fire(newInputType);
+			Signals.INPUT_TYPE_CHANGED_EVENT.Fire(newInputType);
 		}
 	}
 

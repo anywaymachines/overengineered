@@ -1,118 +1,26 @@
-interface GameUI {
-	Sounds: Folder & MyGuiSounds;
-	TouchControls: Folder & {
-		BuildTool: Frame & {
-			PlaceButton: TextButton;
-			RotateRButton: TextButton;
-			RotateTButton: TextButton;
-			RotateYButton: TextButton;
-		};
-		DeleteTool: Frame & {
-			DeleteButton: TextButton;
-		};
+type Toolbar = Frame & {
+	Buttons: Frame & {
+		Template: ToolbarButton;
 	};
-	ActionBar: Frame & {
-		Buttons: Frame & {
-			UIListLayout: UIListLayout;
-			Save: TextButton;
-			Settings: TextButton;
-			Run: TextButton;
-		};
-		GamepadSelect: ImageLabel;
-	};
-	ToolsGui: Folder & {
-		BuildTool: Frame & {
-			Selection: Frame & {
-				Buttons: ScrollingFrame & {
-					UIListLayout: UIListLayout;
-					BlockTemplate: TextButton & {
-						Frame: Frame & {
-							LimitLabel: TextLabel;
-						};
-						TextLabel: TextLabel;
-					};
-					CategoryTemplate: TextButton & {
-						Frame: Frame & {
-							ImageLabel: ImageLabel;
-						};
-						TextLabel: TextLabel;
-					};
-				};
-				SelectMaterialButton: TextButton;
-				MaterialLabel: TextLabel;
-			};
-		};
-		DeleteAllButton: TextButton;
-	};
-	ControlTooltips: Frame & {
-		GamepadTemplate: Frame & GamepadTooltipFrame;
-		KeyboardTemplate: Frame & KeyboardTooltipFrame;
-	};
-	Tools: Frame & {
-		GamepadNext: ImageLabel;
-		GamepadBack: ImageLabel;
-		Buttons: Frame & {
-			Build: Frame & MyToolsGuiButton;
-			Connect: Frame & MyToolsGuiButton;
-			Configure: Frame & MyToolsGuiButton;
-			Delete: Frame & MyToolsGuiButton;
-			Move: Frame & MyToolsGuiButton;
-			Paint: Frame & MyToolsGuiButton;
-		};
-	};
-	CurrentToolLabel: TextLabel;
-	CurrentToolDescriptionLabel: TextLabel;
-}
 
-interface GameDialog {
-	ConfirmationWindow: Frame & {
-		CloseButton: TextButton;
-		Answers: Frame & {
-			YesButton: TextButton;
-			NoButton: TextButton;
-		};
-		HeadingLabel: TextLabel;
-		DescriptionLabel: TextLabel;
-	};
-	MaterialSelectWindow: Frame & {
-		CloseButton: TextButton;
-		Answers: Frame & {
-			Template: TextButton & {
-				TextLabel: TextLabel;
-			};
-		};
-	};
-}
+	// Tooltips
+	GamepadBack: ImageLabel;
+	GamepadNext: ImageLabel;
+};
 
-type GamepadTextTooltipKeys = "ButtonA" | "ButtonB" | "ButtonY" | "ButtonX";
-type GamepadTextTooltip = Partial<Record<GamepadTextTooltipKeys, string>>;
-
-interface GamepadTooltipFrame {
+type ToolbarButton = TextButton & {
 	ImageLabel: ImageLabel;
-	TextLabel: TextLabel;
-}
+	KeyboardNumberLabel: TextLabel;
+};
 
-interface KeyboardTooltipFrame {
-	ImageLabel: ImageLabel & {
-		KeyLabel: TextLabel;
-	};
-	TextLabel: TextLabel;
-}
+// ToolInfo
 
-interface MyGuiSounds {
-	Building: Folder & {
-		BlockPlace: Sound;
-		BlockPlaceError: Sound;
-		BlockRotate: Sound;
-		BlockDelete: Sound;
-	};
-	Ride: Folder & {
-		RideStart: Sound;
-	};
-	GuiClick: Sound;
-}
+type ToolInfo = Frame & {
+	NameLabel: TextLabel;
+	DescriptionLabel: TextLabel;
+};
 
-interface MyToolsGuiButton {
-	ImageButton: ImageButton;
-	KeyboardButtonTooltip: TextLabel;
+interface GameUI {
+	Toolbar: Toolbar;
+	ToolInfo: ToolInfo;
 }
