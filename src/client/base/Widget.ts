@@ -50,7 +50,9 @@ export default abstract class Widget {
 	}
 
 	/** Function for displaying the widget */
-	abstract showWidget(hasAnimations: boolean): void;
+	showWidget(hasAnimations: boolean): void {
+		this.prepare();
+	}
 
 	/** Function for hiding the widget */
 	hideWidget(hasAnimations: boolean): void {

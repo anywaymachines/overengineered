@@ -128,6 +128,6 @@ export default class ToolbarWidget extends Widget {
 			GuiAnimator.transition(this.frame, 0.2, "up");
 		}
 
-		this.prepare();
+		super.showWidget(hasAnimations);
 	}
 }

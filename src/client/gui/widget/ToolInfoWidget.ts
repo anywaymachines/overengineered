@@ -58,6 +58,6 @@ export default class ToolInfoWidget extends Widget {
 			GuiAnimator.transition(this.frame, 0.1, "up", 10);
 		}
 
-		this.prepare();
+		super.showWidget(hasAnimations);
 	}
 }
