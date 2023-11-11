@@ -5,15 +5,11 @@ import Signals from "client/event/Signals";
 
 /** A class for creating widgets for use on scenes */
 export default abstract class Widget {
-	protected frame: Frame;
-
 	// Handlers
 	protected readonly eventHandler: EventHandler;
 	protected readonly inputHandler: InputHandler;
 
-	constructor(frame: Frame) {
-		this.frame = frame;
-
+	constructor() {
 		this.eventHandler = new EventHandler();
 		this.inputHandler = new InputHandler();
 	}

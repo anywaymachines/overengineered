@@ -10,6 +10,9 @@ import Signals from "client/event/Signals";
 
 /** Widget-a substitute for the native Roblox Backpack */
 export default class ToolbarWidget extends Widget {
+	private gui: ToolbarGui;
+
+	// Colors
 	private readonly ACTIVE_COLOR = Color3.fromHex("#505050");
 	private readonly COLOR = Color3.fromHex("#2f2f2f");
 
@@ -20,8 +23,10 @@ export default class ToolbarWidget extends Widget {
 	private tools: ToolBase[] = [];
 	private toolsButtons: ToolbarButton[] = [];
 
-	constructor(frame: Toolbar) {
-		super(frame);
+	constructor(gui: ToolbarGui) {
+		super();
+
+		this.gui = gui;
 
 		// Disable roblox native backpack
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
@@ -32,7 +37,7 @@ export default class ToolbarWidget extends Widget {
 
 		// Preparation
 		const gameUI = GuiController.getGameUI();
-		const template = gameUI.Toolbar.Buttons.Template.Clone();
+		const template = gameUI.ToolbarGui.Buttons.Template.Clone();
 
 		// Creating buttons
 		let i = 1;
@@ -42,7 +47,7 @@ export default class ToolbarWidget extends Widget {
 			button.Name = tool.getDisplayName();
 			button.ImageLabel.Image = tool.getImageID();
 			button.KeyboardNumberLabel.Text = tostring(i);
-			button.Parent = frame.Buttons;
+			button.Parent = gui.Buttons;
 
 			// Equip on click
 			this.eventHandler.subscribe(button.MouseButton1Click, () => this.setTool(tool));
@@ -52,7 +57,7 @@ export default class ToolbarWidget extends Widget {
 		});
 
 		// Remove template
-		gameUI.Toolbar.Buttons.Template.Destroy();
+		gameUI.ToolbarGui.Buttons.Template.Destroy();
 	}
 
 	private setTool(tool?: ToolBase) {
@@ -65,7 +70,12 @@ export default class ToolbarWidget extends Widget {
 		// Call unequip of current tool
 		if (this.currentTool !== undefined) {
 			Signals.TOOL.UNEQUIPPED.Fire(this.currentTool);
-			//
+
+			// Update texts
+			this.gui.NameLabel.Text = "";
+			this.gui.DescriptionLabel.Text = "";
+
+			this.currentTool.deactivate();
 		}
 
 		this.currentTool = tool;
@@ -73,7 +83,14 @@ export default class ToolbarWidget extends Widget {
 		// Call equip of a new tool
 		if (this.currentTool !== undefined) {
 			Signals.TOOL.EQUIPPED.Fire(this.currentTool);
-			//this.currentTool.
+
+			// Update texts
+			this.gui.NameLabel.Text = this.currentTool.getDisplayName();
+			this.gui.DescriptionLabel.Text = this.currentTool.getShortDescription();
+			GuiAnimator.transition(this.gui.NameLabel, 0.1, "up", 25);
+			GuiAnimator.transition(this.gui.DescriptionLabel, 0.1, "up", 25);
+
+			this.currentTool.activate();
 		}
 
 		// Play sound
@@ -118,14 +135,14 @@ export default class ToolbarWidget extends Widget {
 	hideWidget(hasAnimations: boolean): void {
 		super.hideWidget(hasAnimations);
 
-		this.frame.Visible = false;
+		this.gui.Visible = false;
 	}
 
 	showWidget(hasAnimations: boolean): void {
-		this.frame.Visible = true;
+		this.gui.Visible = true;
 
 		if (hasAnimations) {
-			GuiAnimator.transition(this.frame, 0.2, "up");
+			GuiAnimator.transition(this.gui, 0.2, "up");
 		}
 
 		super.showWidget(hasAnimations);

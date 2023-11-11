@@ -13,4 +13,8 @@ export default class BuildTool extends ToolBase {
 	getShortDescription(): string {
 		return "hello";
 	}
+
+	protected prepareDesktop(): void {}
+	protected prepareTouch(): void {}
+	protected prepareGamepad(): void {}
 }

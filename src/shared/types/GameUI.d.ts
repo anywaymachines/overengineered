@@ -1,5 +1,5 @@
 // Toolbar
-type Toolbar = Frame & {
+type ToolbarGui = Frame & {
 	Buttons: Frame & {
 		Template: ToolbarButton;
 	};
@@ -7,6 +7,10 @@ type Toolbar = Frame & {
 	// Tooltips
 	GamepadBack: ImageLabel;
 	GamepadNext: ImageLabel;
+
+	// Texts
+	NameLabel: TextLabel;
+	DescriptionLabel: TextLabel;
 };
 
 type ToolbarButton = TextButton & {
@@ -14,10 +18,22 @@ type ToolbarButton = TextButton & {
 	KeyboardNumberLabel: TextLabel;
 };
 
-// ToolInfo
-type ToolInfo = Frame & {
-	NameLabel: TextLabel;
-	DescriptionLabel: TextLabel;
+// Build Tool
+type BuildToolGui = Frame & {
+	Selection: Frame & {
+		Buttons: ScrollingFrame & {
+			BlockTemplate: TextButton & { Frame: Frame & { LimitLabel: TextLabel }; TextLabel: TextLabel };
+			CategoryTemplate: TextButton & { Frame: Frame & { ImageLabel: ImageLabel }; TextLabel: TextLabel };
+		};
+		MaterialButton: TextButton;
+		MaterialLabel: TextLabel;
+	};
+	TouchControls: Frame & {
+		PlaceButton: TextButton;
+		RotateRButton: TextButton;
+		RotateTButton: TextButton;
+		RotateYButton: TextButton;
+	};
 };
 
 // Sounds
@@ -36,6 +52,6 @@ type Sounds = Folder & {
 
 interface GameUI {
 	Sounds: Sounds;
-	Toolbar: Toolbar;
-	ToolInfo: ToolInfo;
+	ToolbarGui: ToolbarGui;
+	BuildToolGui: BuildToolGui;
 }

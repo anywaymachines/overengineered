@@ -14,6 +14,10 @@ export default class EventHandler {
 		return this.events.push(signal.Connect((_) => callback(_)));
 	}
 
+	/** The function of registering an event once
+	 * @param signal A signal. Example: `UserInputService.InputChanged`
+	 * @param callback Callback
+	 */
 	public subscribeOnce(signal: RBXScriptSignal, callback: Callback): number {
 		return this.events.push(signal.Once((_) => callback(_)));
 	}
