@@ -46,15 +46,15 @@ export default class BuildToolWidget extends Widget {
 
 	protected prepareTouch(): void {
 		// Touchscreen controls
-		this.eventHandler.subscribe(this.gui.TouchControls.PlaceButton.MouseButton1Click, () => this.tool.place());
-		this.eventHandler.subscribe(this.gui.TouchControls.RotateRButton.MouseButton1Click, () =>
-			this.tool.rotate("x", true),
-		);
-		this.eventHandler.subscribe(this.gui.TouchControls.RotateTButton.MouseButton1Click, () =>
-			this.tool.rotate("y", true),
-		);
-		this.eventHandler.subscribe(this.gui.TouchControls.RotateYButton.MouseButton1Click, () =>
-			this.tool.rotate("z", true),
-		);
+		// this.eventHandler.subscribe(this.gui.TouchControls.PlaceButton.MouseButton1Click, () => this.tool.place());
+		// this.eventHandler.subscribe(this.gui.TouchControls.RotateRButton.MouseButton1Click, () =>
+		// 	this.tool.rotate("x", true),
+		// );
+		// this.eventHandler.subscribe(this.gui.TouchControls.RotateTButton.MouseButton1Click, () =>
+		// 	this.tool.rotate("y", true),
+		// );
+		// this.eventHandler.subscribe(this.gui.TouchControls.RotateYButton.MouseButton1Click, () =>
+		// 	this.tool.rotate("z", true),
+		// );
 	}
 }

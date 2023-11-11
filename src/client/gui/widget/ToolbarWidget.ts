@@ -23,10 +23,10 @@ export default class ToolbarWidget extends Widget {
 	private tools: ToolBase[] = [];
 	private toolsButtons: ToolbarButton[] = [];
 
-	constructor(gui: ToolbarGui) {
+	constructor() {
 		super();
 
-		this.gui = gui;
+		this.gui = this.getGui();
 
 		// Disable roblox native backpack
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
@@ -47,10 +47,7 @@ export default class ToolbarWidget extends Widget {
 			button.Name = tool.getDisplayName();
 			button.ImageLabel.Image = tool.getImageID();
 			button.KeyboardNumberLabel.Text = tostring(i);
-			button.Parent = gui.Buttons;
-
-			// Equip on click
-			this.eventHandler.subscribe(button.MouseButton1Click, () => this.setTool(tool));
+			button.Parent = GuiController.getGameUI().ToolbarGui.Buttons;
 
 			this.toolsButtons.push(button);
 			i++;
@@ -58,6 +55,14 @@ export default class ToolbarWidget extends Widget {
 
 		// Remove template
 		gameUI.ToolbarGui.Buttons.Template.Destroy();
+	}
+
+	private getGui() {
+		if (!(this.gui && this.gui.Parent !== undefined)) {
+			this.gui = GuiController.getGameUI().ToolbarGui;
+		}
+
+		return this.gui;
 	}
 
 	private setTool(tool?: ToolBase) {
@@ -72,8 +77,8 @@ export default class ToolbarWidget extends Widget {
 			Signals.TOOL.UNEQUIPPED.Fire(this.currentTool);
 
 			// Update texts
-			this.gui.NameLabel.Text = "";
-			this.gui.DescriptionLabel.Text = "";
+			this.getGui().NameLabel.Text = "";
+			this.getGui().DescriptionLabel.Text = "";
 
 			this.currentTool.deactivate();
 		}
@@ -85,16 +90,16 @@ export default class ToolbarWidget extends Widget {
 			Signals.TOOL.EQUIPPED.Fire(this.currentTool);
 
 			// Update texts
-			this.gui.NameLabel.Text = this.currentTool.getDisplayName();
-			this.gui.DescriptionLabel.Text = this.currentTool.getShortDescription();
-			GuiAnimator.transition(this.gui.NameLabel, 0.1, "up", 25);
-			GuiAnimator.transition(this.gui.DescriptionLabel, 0.1, "up", 25);
+			this.getGui().NameLabel.Text = this.currentTool.getDisplayName();
+			this.getGui().DescriptionLabel.Text = this.currentTool.getShortDescription();
+			GuiAnimator.transition(this.getGui().NameLabel, 0.1, "up", 25);
+			GuiAnimator.transition(this.getGui().DescriptionLabel, 0.1, "up", 25);
 
 			this.currentTool.activate();
 		}
 
 		// Play sound
-		SoundController.Sounds.GuiClick.Play();
+		SoundController.getSounds().GuiClick.Play();
 
 		// Update GUI
 		this.toolsButtons.forEach((button) => {
@@ -103,6 +108,17 @@ export default class ToolbarWidget extends Widget {
 			} else {
 				GuiAnimator.tweenColor(button, this.COLOR, 0.1);
 			}
+		});
+	}
+
+	protected prepare(): void {
+		super.prepare();
+
+		this.toolsButtons.forEach((button) => {
+			this.eventHandler.subscribe(button.MouseButton1Click, () => {
+				const tool = this.tools.find((element) => element.getDisplayName() === button.Name);
+				this.setTool(tool);
+			});
 		});
 	}
 
@@ -135,14 +151,17 @@ export default class ToolbarWidget extends Widget {
 	hideWidget(hasAnimations: boolean): void {
 		super.hideWidget(hasAnimations);
 
-		this.gui.Visible = false;
+		// Remove tool
+		this.setTool(undefined);
+
+		this.getGui().Visible = false;
 	}
 
 	showWidget(hasAnimations: boolean): void {
-		this.gui.Visible = true;
+		this.getGui().Visible = true;
 
 		if (hasAnimations) {
-			GuiAnimator.transition(this.gui, 0.2, "up");
+			GuiAnimator.transition(this.getGui(), 0.2, "up");
 		}
 
 		super.showWidget(hasAnimations);

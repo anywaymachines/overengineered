@@ -8,7 +8,12 @@ export default class Signals {
 		(platform: typeof InputController.inputType) => void
 	>();
 
-	public static TOOL = {
+	public static readonly PLAYER = {
+		SPAWN: new Signal<() => void>(),
+		DIED: new Signal<() => void>(),
+	};
+
+	public static readonly TOOL = {
 		EQUIPPED: new Signal<(tool: ToolBase) => void>(),
 		UNEQUIPPED: new Signal<(tool: ToolBase) => void>(),
 	};

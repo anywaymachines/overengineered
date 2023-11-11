@@ -10,8 +10,7 @@ export default class BuildScene extends Scene {
 		super();
 
 		// Widgets
-		const gameUI = GuiController.getGameUI();
-		this.toolbarWidget = this.addWidget(new ToolbarWidget(gameUI.ToolbarGui));
+		this.toolbarWidget = this.addWidget(new ToolbarWidget());
 	}
 
 	hideScene(hasAnimations: boolean): void {

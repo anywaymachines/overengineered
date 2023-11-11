@@ -22,15 +22,6 @@ export default abstract class ToolBase {
 		this.inputHandler = new InputHandler();
 	}
 
-	/** The name of the tool, for example: `Example Mode` */
-	abstract getDisplayName(): string;
-
-	/** Image of the tool*/
-	abstract getImageID(): string;
-
-	/** Description of the tool, for example: `Splits blocks into atoms` */
-	abstract getShortDescription(): string;
-
 	/** The function that is called when changing the input type */
 	protected inputTypeChanged(): void {
 		this.prepare();
@@ -72,4 +63,13 @@ export default abstract class ToolBase {
 		this.eventHandler.unsubscribeAll();
 		this.inputHandler.unsubscribeAll();
 	}
+
+	/** The name of the tool, for example: `Example Mode` */
+	abstract getDisplayName(): string;
+
+	/** Image of the tool*/
+	abstract getImageID(): string;
+
+	/** Description of the tool, for example: `Splits blocks into atoms` */
+	abstract getShortDescription(): string;
 }
