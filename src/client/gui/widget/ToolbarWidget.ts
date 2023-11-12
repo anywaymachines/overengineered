@@ -185,4 +185,8 @@ export default class ToolbarWidget extends Widget {
 
 		super.showWidget(hasAnimations);
 	}
+
+	isVisible(): boolean {
+		return this.gui.Visible;
+	}
 }

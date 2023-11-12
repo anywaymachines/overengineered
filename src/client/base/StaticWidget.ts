@@ -19,8 +19,6 @@ export default abstract class Widget {
 		this.prepare();
 	}
 
-	abstract isVisible(): boolean;
-
 	/** A function for preparing functionality for Desktop */
 	protected abstract prepareDesktop(): void;
 	/** A function for preparing functionality for Touch */

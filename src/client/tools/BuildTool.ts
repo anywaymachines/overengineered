@@ -317,6 +317,10 @@ export default class BuildTool extends ToolBase {
 	}
 
 	deactivate(): void {
+		super.deactivate();
+
 		this.widget.hideWidget(true);
+
+		this.previewBlock?.Destroy();
 	}
 }

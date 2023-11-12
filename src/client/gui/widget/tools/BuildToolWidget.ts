@@ -2,6 +2,7 @@ import Widget from "client/base/Widget";
 import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
 import GuiAnimator from "client/gui/GuiAnimator";
+import PopupWidgets from "client/gui/PopupWidgets";
 import BuildTool from "client/tools/BuildTool";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import CategoriesRegistry from "shared/registry/CategoriesRegistry";
@@ -55,15 +56,6 @@ export default class BuildToolWidget extends Widget {
 		}
 
 		return this.gui;
-	}
-
-	protected prepare(): void {
-		this.gui.TouchControls.Visible = false;
-
-		// Notice: Resets events
-		super.prepare();
-
-		this.updateLists(false);
 	}
 
 	private updateLists(hasAnimations: boolean) {
@@ -132,6 +124,18 @@ export default class BuildToolWidget extends Widget {
 		this.getGui().Selection.MaterialLabel.Text = this.selectedMaterial.Name;
 	}
 
+	protected prepare(): void {
+		this.gui.TouchControls.Visible = false;
+
+		// Notice: Resets events
+		super.prepare();
+
+		this.updateLists(false);
+		this.eventHandler.subscribe(this.gui.Selection.MaterialButton.MouseButton1Click, () => {
+			PopupWidgets.ConfirmPopupWidget.display("a", "e", () => {});
+		});
+	}
+
 	protected prepareDesktop(): void {
 		// Empty
 	}
@@ -155,5 +159,9 @@ export default class BuildToolWidget extends Widget {
 		this.eventHandler.subscribe(this.gui.TouchControls.RotateYButton.MouseButton1Click, () =>
 			this.tool.rotate("z", true),
 		);
+	}
+
+	isVisible(): boolean {
+		return this.gui.Visible;
 	}
 }

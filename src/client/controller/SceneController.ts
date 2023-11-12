@@ -1,8 +1,6 @@
-import { Players } from "@rbxts/services";
 import EventHandler from "client/event/EventHandler";
 import Signals from "client/event/Signals";
 import BuildScene from "client/gui/scene/BuildScene";
-import Logger from "shared/Logger";
 
 /** The controller of the scenes that are registered here */
 export default class SceneController {
