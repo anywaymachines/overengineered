@@ -95,7 +95,7 @@ export default class BuildTool extends ToolBase {
 		}
 	}
 
-	public updatePosition(savePosition: boolean = false) {
+	private updatePosition(savePosition: boolean = false) {
 		if (!this.widget.selectedBlock || !this.previewBlock) {
 			return;
 		}
