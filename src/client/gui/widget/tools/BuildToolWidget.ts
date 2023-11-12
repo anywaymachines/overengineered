@@ -2,13 +2,14 @@ import Widget from "client/base/Widget";
 import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
 import GuiAnimator from "client/gui/GuiAnimator";
-import PopupWidgets from "client/gui/PopupWidgets";
+import PopupWidgetsController from "client/controller/PopupWidgetsController";
 import BuildTool from "client/tools/BuildTool";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import CategoriesRegistry from "shared/registry/CategoriesRegistry";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import AbstractCategory from "shared/registry/abstract/AbstractCategory";
 
+/** Widget of the BuildTool tool */
 export default class BuildToolWidget extends Widget {
 	private blockTemplate: TextButton & { Frame: Frame & { LimitLabel: TextLabel }; TextLabel: TextLabel };
 	private gui: BuildToolGui;
@@ -132,7 +133,7 @@ export default class BuildToolWidget extends Widget {
 
 		this.updateLists(false);
 		this.eventHandler.subscribe(this.gui.Selection.MaterialButton.MouseButton1Click, () => {
-			PopupWidgets.ConfirmPopupWidget.display("a", "e", () => {});
+			PopupWidgetsController.ConfirmPopupWidget.display("a", "e", () => {});
 		});
 	}
 

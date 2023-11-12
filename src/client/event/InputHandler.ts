@@ -1,5 +1,6 @@
 import { UserInputService } from "@rbxts/services";
 import EventHandler from "./EventHandler";
+import PopupWidgetsController from "client/controller/PopupWidgetsController";
 
 /** A class similar to EventHandler, but created to listen to player input, instead of events */
 export default class InputHandler {
@@ -10,7 +11,7 @@ export default class InputHandler {
 
 	constructor() {
 		this.eventHandler.subscribe(UserInputService.InputBegan, (input: InputObject) => {
-			if (UserInputService.GetFocusedTextBox()) {
+			if (!this.isKeyPressed()) {
 				return;
 			}
 
@@ -21,7 +22,7 @@ export default class InputHandler {
 			});
 		});
 		this.eventHandler.subscribe(UserInputService.TouchTap, (_) => {
-			if (UserInputService.GetFocusedTextBox()) {
+			if (!this.isKeyPressed()) {
 				return;
 			}
 
@@ -29,6 +30,18 @@ export default class InputHandler {
 				callback();
 			});
 		});
+	}
+
+	private isKeyPressed(): boolean {
+		if (UserInputService.GetFocusedTextBox()) {
+			return false;
+		}
+
+		if (PopupWidgetsController.isPopupVisible()) {
+			return false;
+		}
+
+		return true;
 	}
 
 	public onKeyPressed(keyCode: Enum.KeyCode, callback: Callback) {

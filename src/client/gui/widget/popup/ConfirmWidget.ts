@@ -1,9 +1,10 @@
-import Widget from "client/base/Widget";
+import PopupWidget from "client/base/PopupWidget";
 import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
 import GuiAnimator from "client/gui/GuiAnimator";
 
-export default class ConfirmWidget extends Widget {
+/** Widget window with a choice of Yes or No */
+export default class ConfirmWidget extends PopupWidget {
 	private gui: ConfirmGui;
 
 	constructor() {
@@ -19,29 +20,33 @@ export default class ConfirmWidget extends Widget {
 		return this.gui;
 	}
 
-	protected prepareDesktop(): void {}
-	protected prepareTouch(): void {}
-	protected prepareGamepad(): void {}
-
 	private prepareCustomEvents(callback: Callback): void {
 		// Events
 		this.eventHandler.subscribeOnce(this.gui.Answers.YesButton.MouseButton1Click, () => {
-			this.hideWidget(true);
+			this.hideWidget();
 			SoundController.getSounds().GuiClick.Play();
 			callback();
 		});
 		this.eventHandler.subscribeOnce(this.gui.Answers.NoButton.MouseButton1Click, () => {
-			this.hideWidget(true);
+			this.hideWidget();
 			SoundController.getSounds().GuiClick.Play();
 		});
 		this.eventHandler.subscribeOnce(this.gui.CloseButton.MouseButton1Click, () => {
-			this.hideWidget(true);
+			this.hideWidget();
 			SoundController.getSounds().GuiClick.Play();
 		});
 	}
 
+	protected prepareDesktop(): void {}
+
+	protected prepareGamepad(): void {}
+
+	protected prepareTouch(): void {}
+
 	display(heading: string, text: string, callback: Callback): void {
-		super.showWidget(true);
+		if (this.isVisible()) {
+			return;
+		}
 
 		// Display
 		this.gui.Visible = true;
@@ -52,13 +57,13 @@ export default class ConfirmWidget extends Widget {
 		this.gui.DescriptionLabel.Text = text;
 
 		this.prepareCustomEvents(() => {
-			this.hideWidget(true);
+			this.hideWidget();
 			callback();
 		});
 	}
 
-	hideWidget(hasAnimations: boolean): void {
-		super.hideWidget(hasAnimations);
+	hideWidget(): void {
+		super.hideWidget();
 
 		this.gui.Visible = false;
 	}

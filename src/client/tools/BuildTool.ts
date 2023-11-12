@@ -314,6 +314,7 @@ export default class BuildTool extends ToolBase {
 		super.activate();
 
 		this.widget.showWidget(true);
+		this.prepareVisual();
 	}
 
 	deactivate(): void {
