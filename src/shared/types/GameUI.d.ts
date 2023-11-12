@@ -18,6 +18,17 @@ type ToolbarButton = TextButton & {
 	KeyboardNumberLabel: TextLabel;
 };
 
+// Confirm popup
+type ConfirmGui = Frame & {
+	CloseButton: TextButton;
+	HeadingLabel: TextLabel;
+	DescriptionLabel: TextLabel;
+	Answers: Frame & {
+		YesButton: TextButton;
+		NoButton: TextButton;
+	};
+};
+
 // Build Tool
 type BuildToolGui = Frame & {
 	Selection: Frame & {
@@ -54,4 +65,5 @@ interface GameUI {
 	Sounds: Sounds;
 	ToolbarGui: ToolbarGui;
 	BuildToolGui: BuildToolGui;
+	ConfirmGui: ConfirmGui;
 }

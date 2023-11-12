@@ -1,9 +1,13 @@
 import Signal from "@rbxts/signal";
 import InputController from "../controller/InputController";
 import ToolBase from "client/base/ToolBase";
+import { Workspace } from "@rbxts/services";
 
 /** Class for working with local networking signals */
 export default class Signals {
+	public static readonly CAMERA = {
+		MOVED: (Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame"),
+	};
 	public static readonly INPUT_TYPE_CHANGED_EVENT = new Signal<
 		(platform: typeof InputController.inputType) => void
 	>();

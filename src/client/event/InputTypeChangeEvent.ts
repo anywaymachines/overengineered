@@ -1,6 +1,7 @@
 import { UserInputService } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
+import Logger from "shared/Logger";
 
 /** A permanent event that monitors the change in the type of input type, which makes the game more flexible */
 export default class InputTypeChangeEvent {
@@ -24,6 +25,7 @@ export default class InputTypeChangeEvent {
 
 			// Fire a new input type
 			Signals.INPUT_TYPE_CHANGED_EVENT.Fire(newInputType);
+			Logger.info("New platform: " + newInputType);
 		}
 	}
 

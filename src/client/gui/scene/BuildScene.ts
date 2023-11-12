@@ -1,6 +1,5 @@
 import Scene from "client/base/Scene";
 import ToolbarWidget from "../widget/ToolbarWidget";
-import GuiController from "client/controller/GuiController";
 
 /** Construction mode scene */
 export default class BuildScene extends Scene {

@@ -2,10 +2,10 @@ import { Players } from "@rbxts/services";
 import Signals from "./Signals";
 
 export default class PlayerStateEvent {
-	static subscribe() {
-		Players.LocalPlayer.CharacterAdded.Connect(() => this.emitPlayerSpawn());
-
-		Signals.PLAYER.SPAWN.Connect(() => this.registerCharacterEvents());
+	private static registerCharacterEvents() {
+		(Players.LocalPlayer.Character as Model).FindFirstChildOfClass("Humanoid")?.Died.Once(() => {
+			Signals.PLAYER.DIED.Fire();
+		});
 	}
 
 	static emitPlayerSpawn() {
@@ -16,9 +16,9 @@ export default class PlayerStateEvent {
 		Signals.PLAYER.SPAWN.Fire();
 	}
 
-	private static registerCharacterEvents() {
-		(Players.LocalPlayer.Character as Model).FindFirstChildOfClass("Humanoid")?.Died.Once(() => {
-			Signals.PLAYER.DIED.Fire();
-		});
+	static subscribe() {
+		Players.LocalPlayer.CharacterAdded.Connect(() => this.emitPlayerSpawn());
+
+		Signals.PLAYER.SPAWN.Connect(() => this.registerCharacterEvents());
 	}
 }

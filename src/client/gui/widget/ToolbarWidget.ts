@@ -141,12 +141,31 @@ export default class ToolbarWidget extends Widget {
 	}
 
 	protected prepareGamepad(): void {
-		// Empty
+		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonB, () => this.setTool(undefined));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonR1, () => this.gamepadSelectTool(true));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonL1, () => this.gamepadSelectTool(false));
 	}
 
-	protected prepareTouch(): void {
-		// Empty
+	private gamepadSelectTool(isRight: boolean) {
+		if (!this.currentTool) {
+			this.setTool(this.tools[0]);
+			return;
+		}
+
+		const currentIndex = this.tools.indexOf(this.currentTool);
+		const toolsLength = this.tools.size();
+		let newIndex = isRight ? currentIndex + 1 : currentIndex - 1;
+
+		if (newIndex >= toolsLength) {
+			newIndex = 0;
+		} else if (newIndex < 0) {
+			newIndex = toolsLength - 1;
+		}
+
+		this.setTool(this.tools[newIndex]);
 	}
+
+	protected prepareTouch(): void {}
 
 	hideWidget(hasAnimations: boolean): void {
 		super.hideWidget(hasAnimations);
