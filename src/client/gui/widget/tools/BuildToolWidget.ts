@@ -136,6 +136,7 @@ export default class BuildToolWidget extends Widget {
 		this.eventHandler.subscribe(this.gui.Selection.MaterialButton.MouseButton1Click, () => {
 			StaticWidgetsController.materialWidget.display("Building Material", (material: Enum.Material) => {
 				this.selectedMaterial = material;
+				this.gui.Selection.MaterialLabel.Text = material.Name;
 				this.tool.prepareVisual();
 			});
 		});
