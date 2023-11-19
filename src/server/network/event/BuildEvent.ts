@@ -34,6 +34,7 @@ export default class BuildEvent {
 		// Create a new instance of the building model
 		const block = BlockRegistry.Blocks.get(data.block) as AbstractBlock;
 		const model = block.getModel().Clone();
+		model.SetAttribute("blockid", data.block);
 
 		if (model.PrimaryPart === undefined) {
 			// Delete block from game database (prevent discord spamming)

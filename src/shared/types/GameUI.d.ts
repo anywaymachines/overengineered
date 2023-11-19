@@ -1,105 +1,99 @@
-interface GameUI {
-	Sounds: Folder & MyGuiSounds;
-	TouchControls: Folder & {
-		BuildTool: Frame & {
-			PlaceButton: TextButton;
-			RotateRButton: TextButton;
-			RotateTButton: TextButton;
-			RotateYButton: TextButton;
-		};
-		DeleteTool: Frame & {
-			DeleteButton: TextButton;
-		};
+// Toolbar
+type ToolbarGui = Frame & {
+	Buttons: Frame & {
+		Template: ToolbarButton;
 	};
-	ActionBar: Frame & {
-		Buttons: Frame & {
-			UIListLayout: UIListLayout;
-			Save: TextButton;
-			Settings: TextButton;
-			Run: TextButton;
-		};
-		GamepadSelect: ImageLabel;
-	};
-	ToolsGui: Folder & {
-		BuildTool: Frame & {
-			Selection: Frame & {
-				Buttons: ScrollingFrame & {
-					UIListLayout: UIListLayout;
-					BlockTemplate: TextButton & {
-						Frame: Frame & {
-							LimitLabel: TextLabel;
-						};
-						TextLabel: TextLabel;
-					};
-					CategoryTemplate: TextButton & {
-						Frame: Frame & {
-							ImageLabel: ImageLabel;
-						};
-						TextLabel: TextLabel;
-					};
-				};
-				SelectMaterialButton: TextButton;
-				MaterialLabel: TextLabel;
-			};
-		};
-		DeleteAllButton: TextButton;
-	};
-	ControlTooltips: Frame & {
-		GamepadTemplate: Frame & GamepadTooltipFrame;
-		KeyboardTemplate: Frame & KeyboardTooltipFrame;
-	};
-	Tools: Frame & {
-		GamepadNext: ImageLabel;
-		GamepadBack: ImageLabel;
-		Buttons: Frame & {
-			Build: Frame & MyToolsGuiButton;
-			Connect: Frame & MyToolsGuiButton;
-			Configure: Frame & MyToolsGuiButton;
-			Delete: Frame & MyToolsGuiButton;
-			Move: Frame & MyToolsGuiButton;
-			Paint: Frame & MyToolsGuiButton;
-		};
-	};
-	CurrentToolLabel: TextLabel;
-	CurrentToolDescriptionLabel: TextLabel;
-}
 
-interface GameDialog {
-	ConfirmationWindow: Frame & {
-		CloseButton: TextButton;
-		Answers: Frame & {
-			YesButton: TextButton;
-			NoButton: TextButton;
-		};
-		HeadingLabel: TextLabel;
-		DescriptionLabel: TextLabel;
-	};
-	MaterialSelectWindow: Frame & {
-		CloseButton: TextButton;
-		Answers: Frame & {
-			Template: TextButton & {
-				TextLabel: TextLabel;
-			};
-		};
-	};
-}
+	// Tooltips
+	GamepadBack: ImageLabel;
+	GamepadNext: ImageLabel;
 
-type GamepadTextTooltipKeys = "ButtonA" | "ButtonB" | "ButtonY" | "ButtonX";
-type GamepadTextTooltip = Partial<Record<GamepadTextTooltipKeys, string>>;
+	// Texts
+	NameLabel: TextLabel;
+	DescriptionLabel: TextLabel;
+};
 
-interface GamepadTooltipFrame {
+type ToolbarButton = TextButton & {
+	ImageLabel: ImageLabel;
+	KeyboardNumberLabel: TextLabel;
+};
+
+// Confirm popup
+type ConfirmGui = Frame & {
+	CloseButton: TextButton;
+	HeadingLabel: TextLabel;
+	DescriptionLabel: TextLabel;
+	Answers: Frame & {
+		YesButton: TextButton;
+		NoButton: TextButton;
+	};
+};
+
+// Tooltips
+type GamepadTooltip = Frame & {
 	ImageLabel: ImageLabel;
 	TextLabel: TextLabel;
-}
+};
 
-interface KeyboardTooltipFrame {
+type KeyboardTooltip = Frame & {
 	ImageLabel: ImageLabel & {
 		KeyLabel: TextLabel;
 	};
 	TextLabel: TextLabel;
-}
+};
 
-interface MyGuiSounds {
+type ToolTooltipGui = Frame & {
+	GamepadTemplate: GamepadTooltip;
+	KeyboardTemplate: KeyboardTooltip;
+};
+
+// Material popup
+// type MaterialGui = Frame & {
+// 	CloseButton: TextButton;
+// 	HeadingLabel: TextLabel;
+// 	DescriptionLabel: TextLabel;
+// 	Answers: Frame & {
+// 		Template: TextButton & {
+// 			TextLabel: TextLabel;
+// 		};
+// 	};
+// };
+
+// Build Tool
+type BuildToolGui = Frame & {
+	Selection: Frame & {
+		Buttons: ScrollingFrame & {
+			BlockTemplate: TextButton & { Frame: Frame & { LimitLabel: TextLabel }; TextLabel: TextLabel };
+			CategoryTemplate: TextButton & { Frame: Frame & { ImageLabel: ImageLabel }; TextLabel: TextLabel };
+		};
+		MaterialButton: TextButton;
+		MaterialLabel: TextLabel;
+	};
+	TouchControls: Frame & {
+		PlaceButton: TextButton;
+		RotateRButton: TextButton;
+		RotateTButton: TextButton;
+		RotateYButton: TextButton;
+	};
+};
+
+type DeleteToolGui = Frame & {
+	TouchControls: Frame & {
+		DeleteButton: TextButton;
+	};
+	DeleteAllButton: TextButton;
+};
+
+type LogFrame = Frame & {
+	TextLabel: TextLabel;
+};
+
+type LogGui = Frame & {
+	Template: LogFrame;
+};
+
+// Sounds
+type Sounds = Folder & {
 	Building: Folder & {
 		BlockPlace: Sound;
 		BlockPlaceError: Sound;
@@ -110,9 +104,15 @@ interface MyGuiSounds {
 		RideStart: Sound;
 	};
 	GuiClick: Sound;
-}
+};
 
-interface MyToolsGuiButton {
-	ImageButton: ImageButton;
-	KeyboardButtonTooltip: TextLabel;
+interface GameUI {
+	Sounds: Sounds;
+	ToolbarGui: ToolbarGui;
+	BuildToolGui: BuildToolGui;
+	DeleteToolGui: DeleteToolGui;
+	ConfirmGui: ConfirmGui;
+	LogGui: LogGui;
+	//MaterialGui: MaterialGui;
+	ControlTooltips: ToolTooltipGui;
 }

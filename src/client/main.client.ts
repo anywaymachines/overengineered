@@ -1,18 +1,18 @@
-import { Players } from "@rbxts/services";
-import MainGUI from "./gui/MainGUI";
-import RideMode from "./core/RideMode";
-import InputController from "./core/InputController";
+import StaticWidgetsController from "./controller/StaticWidgetsController";
+import SceneController from "./controller/SceneController";
+import TooltipController from "./controller/TooltipController";
+import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
+import PlayerStateEvent from "./event/PlayerStateEvent";
+import ActionController from "./controller/ActionController";
 
-function initializeGUI() {
-	MainGUI.initialize();
-}
+// Events
+PlayerStateEvent.subscribe();
+InputTypeChangeEvent.subscribe();
 
-function initialize() {
-	Players.LocalPlayer.CharacterAdded.Connect((_) => initializeGUI());
-	initializeGUI(); // First start
+// Init
+SceneController.init();
+StaticWidgetsController.init();
+TooltipController.init();
+ActionController.init();
 
-	InputController.initialize();
-	RideMode.initialize();
-}
-
-initialize();
+PlayerStateEvent.emitPlayerSpawn();

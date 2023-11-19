@@ -1,0 +1,193 @@
+import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
+import ToolBase from "client/base/ToolBase";
+import ActionController from "client/controller/ActionController";
+import BuildingController from "client/controller/BuildingController";
+import InputController from "client/controller/InputController";
+import Signals from "client/event/Signals";
+import SharedPlots from "shared/building/SharedPlots";
+
+/** A tool for moving the entire building as a whole */
+export default class MoveTool extends ToolBase {
+	private MoveExtent?: BasePart;
+	private XHandles?: Handles;
+	private YHandles?: Handles;
+	private ZHandles?: Handles;
+
+	getDisplayName(): string {
+		return "Moving Mode";
+	}
+
+	getImageID(): string {
+		return "rbxassetid://12539306575";
+	}
+
+	getShortDescription(): string {
+		return "Move your contraption";
+	}
+
+	private destroyHandles() {
+		this.MoveExtent?.Destroy();
+		this.XHandles?.Destroy();
+		this.YHandles?.Destroy();
+		this.ZHandles?.Destroy();
+	}
+
+	private createHandles() {
+		this.destroyHandles();
+
+		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
+		const blocks = plot.FindFirstChild("Blocks") as Model;
+
+		if (blocks.GetChildren().isEmpty()) {
+			return;
+		}
+
+		this.MoveExtent = ReplicatedStorage.Assets.MoveHandles.Clone();
+		this.MoveExtent.Parent = Workspace;
+
+		this.MoveExtent.Size = blocks.GetExtentsSize();
+		(this.MoveExtent as MoveHandles).SelectionBox.Adornee = blocks;
+
+		this.XHandles = (this.MoveExtent as MoveHandles).XHandles;
+		this.YHandles = (this.MoveExtent as MoveHandles).YHandles;
+		this.ZHandles = (this.MoveExtent as MoveHandles).ZHandles;
+
+		this.XHandles.Parent = this.gameUI as unknown as ScreenGui;
+		this.YHandles.Parent = this.gameUI as unknown as ScreenGui;
+		this.ZHandles.Parent = this.gameUI as unknown as ScreenGui;
+
+		this.updateVisibility();
+
+		this.eventHandler.subscribeOnce(
+			this.XHandles.MouseButton1Down,
+			async (face: Enum.NormalId) => await this.move(face),
+		);
+		this.eventHandler.subscribeOnce(
+			this.YHandles.MouseButton1Down,
+			async (face: Enum.NormalId) => await this.move(face),
+		);
+		this.eventHandler.subscribeOnce(
+			this.ZHandles.MouseButton1Down,
+			async (face: Enum.NormalId) => await this.move(face),
+		);
+
+		this.MoveExtent.CFrame = blocks.GetBoundingBox()[0];
+	}
+
+	private updateVisibility() {
+		if (!this.YHandles || !this.ZHandles) {
+			return;
+		}
+
+		if (InputController.inputType !== "Gamepad") {
+			return;
+		}
+
+		this.ZHandles.Visible = this.getDirection() === 0 || math.abs(this.getDirection()) === 180 ? true : false;
+		this.YHandles.Visible = math.abs(this.getDirection()) === 90 ? true : false;
+	}
+
+	private getDirection() {
+		const camera = Workspace.CurrentCamera as Camera;
+		const xyz = camera.CFrame.ToOrientation();
+		const direction = math.floor((math.deg(xyz[1]) + 45) / 90) * 90;
+		return direction;
+	}
+
+	prepare() {
+		super.prepare();
+		this.createHandles();
+
+		this.eventHandler.subscribe(Signals.BLOCKS.ADDED, () => this.createHandles());
+		this.eventHandler.subscribe(Signals.BLOCKS.REMOVED, () => this.createHandles());
+		this.eventHandler.subscribe(Signals.CONTRAPTION.MOVED, () => this.createHandles());
+	}
+
+	activate() {
+		super.activate();
+	}
+
+	deactivate() {
+		super.deactivate();
+		this.destroyHandles();
+	}
+
+	private async move(face: Enum.NormalId): Promise<void> {
+		let vector: Vector3 = Vector3.zero;
+
+		if (face === Enum.NormalId.Top) vector = new Vector3(0, 2, 0);
+		else if (face === Enum.NormalId.Bottom) vector = new Vector3(0, -2, 0);
+		else if (face === Enum.NormalId.Front) vector = new Vector3(0, 0, -2);
+		else if (face === Enum.NormalId.Back) vector = new Vector3(0, 0, 2);
+		else if (face === Enum.NormalId.Left) vector = new Vector3(-2, 0, 0);
+		else if (face === Enum.NormalId.Right) vector = new Vector3(2, 0, 0);
+
+		const response = await ActionController.instance.executeOperation(
+			"Move block",
+			async () => {
+				await BuildingController.moveBlock({ vector: vector.mul(-1) });
+			},
+			{ vector: vector },
+			(info) => BuildingController.moveBlock(info),
+		);
+
+		// Parsing response
+		if (response.success) {
+			// Move success
+			task.wait();
+		}
+
+		this.createHandles();
+	}
+
+	private gamepadMove(isRight: boolean) {
+		const direction = this.getDirection();
+
+		if (direction === 0) {
+			this.move(isRight ? Enum.NormalId.Right : Enum.NormalId.Left);
+		} else if (direction === -90) {
+			this.move(isRight ? Enum.NormalId.Back : Enum.NormalId.Front);
+		} else if (direction === 90) {
+			this.move(isRight ? Enum.NormalId.Front : Enum.NormalId.Back);
+		} else if (math.abs(direction) === 180) {
+			this.move(isRight ? Enum.NormalId.Left : Enum.NormalId.Right);
+		}
+	}
+
+	protected prepareDesktop(): void {}
+
+	protected prepareGamepad(): void {
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadUp, () => this.move(Enum.NormalId.Top));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadDown, () => this.move(Enum.NormalId.Bottom));
+
+		// DPad
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadLeft, () => this.gamepadMove(false));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadRight, () => this.gamepadMove(true));
+
+		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updateVisibility());
+	}
+
+	protected prepareTouch(): void {}
+
+	public getGamepadTooltips(): { image: string; text: string }[] {
+		const keys: { image: string; text: string }[] = [];
+
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadUp), text: "Move up" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadDown), text: "Move down" });
+
+		keys.push({
+			image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadLeft),
+			text: "Move left (based on camera)",
+		});
+
+		keys.push({
+			image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadRight),
+			text: "Move right (based on camera)",
+		});
+
+		return keys;
+	}
+	public getKeyboardTooltips(): { key: string; text: string }[] {
+		return [];
+	}
+}
