@@ -64,7 +64,7 @@ export default class ActionController {
 
 		this.history.push(operation);
 		operation.redo?.();
-		StaticWidgetsController.LogStaticWidget.addLine(`Redone "${operation.description}"`);
+		StaticWidgetsController.logStaticWidget.addLine(`Redone "${operation.description}"`);
 		return true;
 	}
 
@@ -74,7 +74,7 @@ export default class ActionController {
 
 		this.redoHistory.push(operation);
 		operation.undo();
-		StaticWidgetsController.LogStaticWidget.addLine(`Undone "${operation.description}"`);
+		StaticWidgetsController.logStaticWidget.addLine(`Undone "${operation.description}"`);
 		return true;
 	}
 }

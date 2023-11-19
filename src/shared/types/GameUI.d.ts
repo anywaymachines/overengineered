@@ -48,16 +48,16 @@ type ToolTooltipGui = Frame & {
 };
 
 // Material popup
-// type MaterialGui = Frame & {
-// 	CloseButton: TextButton;
-// 	HeadingLabel: TextLabel;
-// 	DescriptionLabel: TextLabel;
-// 	Answers: Frame & {
-// 		Template: TextButton & {
-// 			TextLabel: TextLabel;
-// 		};
-// 	};
-// };
+type MaterialGuiButton = TextButton & {
+	TextLabel: TextLabel;
+};
+type MaterialGui = Frame & {
+	CloseButton: TextButton;
+	HeadingLabel: TextLabel;
+	Answers: ScrollingFrame & {
+		Template: MaterialGuiButton;
+	};
+};
 
 // Build Tool
 type BuildToolGui = Frame & {
@@ -113,6 +113,6 @@ interface GameUI {
 	DeleteToolGui: DeleteToolGui;
 	ConfirmGui: ConfirmGui;
 	LogGui: LogGui;
-	//MaterialGui: MaterialGui;
+	MaterialGui: MaterialGui;
 	ControlTooltips: ToolTooltipGui;
 }

@@ -1,3 +1,4 @@
+import { GuiService } from "@rbxts/services";
 import StaticWidget from "client/base/StaticWidget";
 import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
@@ -20,7 +21,9 @@ export default class ConfirmWidget extends StaticWidget {
 		return this.gui;
 	}
 
-	private prepareCustomEvents(callback: Callback): void {
+	private customPrepare(callback: Callback): void {
+		super.prepare();
+
 		// Events
 		this.eventHandler.subscribeOnce(this.gui.Answers.YesButton.MouseButton1Click, () => {
 			this.hideWidget();
@@ -39,7 +42,9 @@ export default class ConfirmWidget extends StaticWidget {
 
 	protected prepareDesktop(): void {}
 
-	protected prepareGamepad(): void {}
+	protected prepareGamepad(): void {
+		GuiService.Select(this.gui.Answers.NoButton);
+	}
 
 	protected prepareTouch(): void {}
 
@@ -56,7 +61,7 @@ export default class ConfirmWidget extends StaticWidget {
 		this.gui.HeadingLabel.Text = heading;
 		this.gui.DescriptionLabel.Text = text;
 
-		this.prepareCustomEvents(() => {
+		this.customPrepare(() => {
 			this.hideWidget();
 			callback();
 		});
