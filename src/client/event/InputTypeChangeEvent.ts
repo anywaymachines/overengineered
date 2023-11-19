@@ -1,5 +1,6 @@
 import { UserInputService } from "@rbxts/services";
 import InputController from "client/controller/InputController";
+import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import Signals from "client/event/Signals";
 import Logger from "shared/Logger";
 
@@ -26,6 +27,10 @@ export default class InputTypeChangeEvent {
 			// Fire a new input type
 			Signals.INPUT_TYPE_CHANGED_EVENT.Fire(newInputType);
 			Logger.info("New platform: " + newInputType);
+			StaticWidgetsController.LogStaticWidget.addLine(
+				"New input type set to " + newInputType,
+				Color3.fromRGB(252, 252, 145),
+			);
 		}
 	}
 

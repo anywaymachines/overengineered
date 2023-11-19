@@ -1,6 +1,6 @@
 import Widget from "client/base/Widget";
 import GuiController from "client/controller/GuiController";
-import PopupWidgetsController from "client/controller/PopupWidgetsController";
+import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import GuiAnimator from "client/gui/GuiAnimator";
 import DeleteTool from "client/tools/DeleteTool";
 
@@ -40,7 +40,7 @@ export default class DeleteToolWidget extends Widget {
 	}
 
 	public suggestClearAll() {
-		PopupWidgetsController.ConfirmPopupWidget.display(
+		StaticWidgetsController.ConfirmStaticWidget.display(
 			"Confirmation",
 			"Are you sure to clear all blocks?",
 			async () => await this.tool.clearAll(),

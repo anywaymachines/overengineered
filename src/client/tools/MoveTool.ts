@@ -1,9 +1,9 @@
 import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
 import ToolBase from "client/base/ToolBase";
+import ActionController from "client/controller/ActionController";
+import BuildingController from "client/controller/BuildingController";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
-import Logger from "shared/Logger";
-import Remotes from "shared/NetworkDefinitions";
 import SharedPlots from "shared/building/SharedPlots";
 
 /** A tool for moving the entire building as a whole */
@@ -22,7 +22,7 @@ export default class MoveTool extends ToolBase {
 	}
 
 	getShortDescription(): string {
-		return "Move your build";
+		return "Move your contraption";
 	}
 
 	private destroyHandles() {
@@ -97,11 +97,14 @@ export default class MoveTool extends ToolBase {
 	prepare() {
 		super.prepare();
 		this.createHandles();
+
+		this.eventHandler.subscribe(Signals.BLOCKS.ADDED, () => this.createHandles());
+		this.eventHandler.subscribe(Signals.BLOCKS.REMOVED, () => this.createHandles());
+		this.eventHandler.subscribe(Signals.CONTRAPTION.MOVED, () => this.createHandles());
 	}
 
 	activate() {
 		super.activate();
-		this.createHandles();
 	}
 
 	deactivate() {
@@ -119,22 +122,22 @@ export default class MoveTool extends ToolBase {
 		else if (face === Enum.NormalId.Left) vector = new Vector3(-2, 0, 0);
 		else if (face === Enum.NormalId.Right) vector = new Vector3(2, 0, 0);
 
-		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerMove").CallServerAsync({
-			vector: vector,
-		});
+		const response = await ActionController.instance.executeOperation(
+			"Move block",
+			async () => {
+				await BuildingController.moveBlock({ vector: vector.mul(-1) });
+			},
+			{ vector: vector },
+			(info) => BuildingController.moveBlock(info),
+		);
 
 		// Parsing response
 		if (response.success) {
 			// Move success
 			task.wait();
-
-			this.createHandles();
-		} else {
-			// Block not removed
-			Logger.info("[MOVING] Move failed: " + response.message);
-
-			this.createHandles();
 		}
+
+		this.createHandles();
 	}
 
 	private gamepadMove(isRight: boolean) {

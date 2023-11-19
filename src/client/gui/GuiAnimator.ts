@@ -24,6 +24,27 @@ export default class GuiAnimator {
 		frame.TweenPosition(defaultPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, duration);
 	}
 
+	static revTransition(
+		frame: GuiObject,
+		duration: number,
+		direction: "right" | "left" | "up" | "down",
+		power: number = 50,
+	) {
+		const defaultPosition = frame.Position;
+		const offsets = {
+			right: new UDim2(0, power, 0, 0),
+			left: new UDim2(0, -power, 0, 0),
+			up: new UDim2(0, 0, 0, -power),
+			down: new UDim2(0, 0, 0, power),
+		};
+
+		const offsetPosition = offsets[direction];
+
+		const newPosition = defaultPosition.add(offsetPosition);
+		frame.Position = defaultPosition;
+		frame.TweenPosition(newPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, duration);
+	}
+
 	/** Animation for changing GUI colors */
 	static tweenColor(gui: GuiObject, color: Color3, time: number) {
 		const info = { BackgroundColor3: color } as Partial<ExtractMembers<GuiBase, Tweenable>>;

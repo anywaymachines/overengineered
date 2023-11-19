@@ -1,10 +1,10 @@
-import PopupWidget from "client/base/PopupWidget";
+import StaticWidget from "client/base/StaticWidget";
 import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
 import GuiAnimator from "client/gui/GuiAnimator";
 
 /** Widget window with a choice of Yes or No */
-export default class ConfirmWidget extends PopupWidget {
+export default class ConfirmWidget extends StaticWidget {
 	private gui: ConfirmGui;
 
 	constructor() {

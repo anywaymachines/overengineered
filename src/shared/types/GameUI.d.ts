@@ -84,6 +84,14 @@ type DeleteToolGui = Frame & {
 	DeleteAllButton: TextButton;
 };
 
+type LogFrame = Frame & {
+	TextLabel: TextLabel;
+};
+
+type LogGui = Frame & {
+	Template: LogFrame;
+};
+
 // Sounds
 type Sounds = Folder & {
 	Building: Folder & {
@@ -104,6 +112,7 @@ interface GameUI {
 	BuildToolGui: BuildToolGui;
 	DeleteToolGui: DeleteToolGui;
 	ConfirmGui: ConfirmGui;
+	LogGui: LogGui;
 	//MaterialGui: MaterialGui;
 	ControlTooltips: ToolTooltipGui;
 }

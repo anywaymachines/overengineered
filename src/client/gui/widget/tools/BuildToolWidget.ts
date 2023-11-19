@@ -2,7 +2,7 @@ import Widget from "client/base/Widget";
 import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
 import GuiAnimator from "client/gui/GuiAnimator";
-import PopupWidgetsController from "client/controller/PopupWidgetsController";
+import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import BuildTool from "client/tools/BuildTool";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import CategoriesRegistry from "shared/registry/CategoriesRegistry";
@@ -134,7 +134,7 @@ export default class BuildToolWidget extends Widget {
 
 		this.updateLists(false);
 		this.eventHandler.subscribe(this.gui.Selection.MaterialButton.MouseButton1Click, () => {
-			PopupWidgetsController.ConfirmPopupWidget.display("a", "e", () => {});
+			StaticWidgetsController.ConfirmStaticWidget.display("a", "e", () => {});
 		});
 	}
 

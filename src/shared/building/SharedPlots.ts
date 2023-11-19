@@ -52,6 +52,10 @@ export default class SharedPlots {
 		return undefined;
 	}
 
+	public static getPlotBlocks(plot: Model): Model {
+		return plot.FindFirstChild("Blocks") as Model;
+	}
+
 	/** Returns the `Region3` of the **construction area** for blocks
 	 * @param plot The plot to get the region of
 	 */

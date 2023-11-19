@@ -1,13 +1,12 @@
 import { GuiService, Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
-import BuildingWelder from "client/BuildingWelder";
 import ToolBase from "client/base/ToolBase";
+import ActionController from "client/controller/ActionController";
+import BuildingController from "client/controller/BuildingController";
 import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
 import BuildToolWidget from "client/gui/widget/tools/BuildToolWidget";
-import Logger from "shared/Logger";
-import Remotes from "shared/NetworkDefinitions";
 import BuildingManager from "shared/building/BuildingManager";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -218,20 +217,22 @@ export default class BuildTool extends ToolBase {
 			return;
 		}
 
-		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerPlaceBlock").CallServerAsync({
-			block: this.widget.selectedBlock.id,
-			material: this.widget.selectedMaterial,
-			location: this.previewBlock.PrimaryPart.CFrame,
-		});
+		const pos = this.previewBlock.PrimaryPart.CFrame.Position;
+		const response = await ActionController.instance.executeOperation(
+			"Block placement",
+			async () => {
+				const block = BuildingManager.getBlockByPosition(pos);
+				if (block) await BuildingController.deleteBlock(block);
+			},
+			{
+				block: this.widget.selectedBlock.id,
+				material: this.widget.selectedMaterial,
+				location: this.previewBlock.PrimaryPart.CFrame,
+			},
+			(info) => BuildingController.placeBlock(info),
+		);
 
-		if (response.success === true) {
-			while (response.model?.PrimaryPart === undefined) {
-				task.wait();
-			}
-
-			// Create welds
-			BuildingWelder.makeJoints(response.model as Model);
-
+		if (response.success) {
 			// Play sound
 			SoundController.getSounds().Building.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
 			SoundController.getSounds().Building.BlockPlace.Play();
@@ -239,7 +240,6 @@ export default class BuildTool extends ToolBase {
 			task.wait();
 			this.updatePosition(true);
 		} else {
-			Logger.info("[BUILDING] Block placement failed: " + response.message);
 			SoundController.getSounds().Building.BlockPlaceError.PlaybackSpeed = SoundController.randomSoundSpeed();
 			SoundController.getSounds().Building.BlockPlaceError.Play();
 		}
@@ -285,11 +285,21 @@ export default class BuildTool extends ToolBase {
 		}
 	}
 
+	protected prepare(): void {
+		super.prepare();
+
+		this.eventHandler.subscribe(Signals.BLOCKS.ADDED, () => this.updatePosition());
+		this.eventHandler.subscribe(Signals.BLOCKS.REMOVED, () => this.updatePosition());
+	}
+
 	protected prepareDesktop(): void {
 		// Keyboard controls
 		this.inputHandler.onKeyPressed(Enum.KeyCode.R, () => this.rotate("x"));
 		this.inputHandler.onKeyPressed(Enum.KeyCode.T, () => this.rotate("y"));
-		this.inputHandler.onKeyPressed(Enum.KeyCode.Y, () => this.rotate("z"));
+		this.inputHandler.onKeyPressed(Enum.KeyCode.Y, () => {
+			if (InputController.isCtrlPressed()) return;
+			this.rotate("z");
+		});
 
 		this.eventHandler.subscribe(this.mouse.Move, () => this.updatePosition());
 		this.eventHandler.subscribe(this.mouse.Button1Down, async () => await this.placeBlock());

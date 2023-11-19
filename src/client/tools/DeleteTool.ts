@@ -1,12 +1,11 @@
 import { GuiService, Players, UserInputService, Workspace } from "@rbxts/services";
 import ToolBase from "client/base/ToolBase";
+import ActionController from "client/controller/ActionController";
+import BuildingController from "client/controller/BuildingController";
 import GuiController from "client/controller/GuiController";
-import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
 import DeleteToolWidget from "client/gui/widget/tools/DeleteToolWidget";
-import Logger from "shared/Logger";
-import Remotes from "shared/NetworkDefinitions";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -16,6 +15,13 @@ export default class DeleteTool extends ToolBase {
 
 	// GUI
 	private readonly widget: DeleteToolWidget = new DeleteToolWidget(this);
+
+	protected prepare(): void {
+		super.prepare();
+
+		this.eventHandler.subscribe(Signals.BLOCKS.ADDED, () => this.updatePosition());
+		this.eventHandler.subscribe(Signals.BLOCKS.REMOVED, () => this.updatePosition());
+	}
 
 	protected prepareDesktop(): void {
 		this.eventHandler.subscribe(this.mouse.Button1Down, () => this.deleteBlock());
@@ -37,20 +43,37 @@ export default class DeleteTool extends ToolBase {
 	}
 
 	public async clearAll() {
-		// Send block removing packet
-		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerClearAll").CallServerAsync();
+		const removedBlocks = SharedPlots.getPlotBlocks(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId))
+			.GetChildren()
+			.map((block) => this.blockToUndoRequest(block as Model));
+
+		const response = await ActionController.instance.executeOperation(
+			"Plot clear",
+			async () => {
+				for (const block of removedBlocks) await BuildingController.placeBlock(block);
+			},
+			undefined,
+			() => BuildingController.clearPlot(),
+		);
 
 		// Parsing response
-		if (response.success) {
+		if (response) {
 			// Block removed
 			task.wait();
 
 			SoundController.getSounds().Building.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
 			SoundController.getSounds().Building.BlockDelete.Play();
-		} else {
-			// Block not removed
-			Logger.info("[DELETING] Clearing all blocks failed: " + response.message);
 		}
+	}
+
+	private blockToUndoRequest(block: Model) {
+		const info: PlayerPlaceBlockRequest = {
+			location: block.PrimaryPart!.CFrame,
+			block: block.GetAttribute("blockid") as string,
+			material: Enum.Material.GetEnumItems().find((e) => e.Name === (block.GetAttribute("material") as string))!,
+		};
+
+		return info;
 	}
 
 	public async deleteBlock() {
@@ -59,12 +82,16 @@ export default class DeleteTool extends ToolBase {
 			return;
 		}
 
-		// Send block removing packet
-		const response = await Remotes.Client.GetNamespace("Building")
-			.Get("PlayerDeleteBlock")
-			.CallServerAsync({
-				block: this.highlight.Value.Parent as Model,
-			});
+		const undoRequest = this.blockToUndoRequest(this.highlight.Value.Parent as Model);
+
+		const response = await ActionController.instance.executeOperation(
+			"Block removed",
+			async () => {
+				await BuildingController.placeBlock(undoRequest);
+			},
+			this.highlight.Value.Parent as Model,
+			(info) => BuildingController.deleteBlock(info),
+		);
 
 		// Parsing response
 		if (response.success) {
@@ -76,9 +103,6 @@ export default class DeleteTool extends ToolBase {
 
 			this.destroyHighlight();
 			this.updatePosition();
-		} else {
-			// Block not removed
-			Logger.info("[DELETING] Block deleting failed: " + response.message);
 		}
 	}
 

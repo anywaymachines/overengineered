@@ -1,7 +1,7 @@
 import EventHandler from "client/event/EventHandler";
 
 /** A class for creating popup widgets for use on scenes AoD */
-export default abstract class PopupWidget {
+export default abstract class StaticWidget {
 	// Handlers
 	protected readonly eventHandler: EventHandler;
 
@@ -20,11 +20,6 @@ export default abstract class PopupWidget {
 	protected prepare() {
 		// Terminate exist events
 		this.eventHandler.unsubscribeAll();
-	}
-
-	/** Function for displaying the widget */
-	display(heading: string, text: string, callback: Callback): void {
-		this.prepare();
 	}
 
 	/** Function for hiding the widget */
