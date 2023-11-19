@@ -83,14 +83,13 @@ export default class DeleteTool extends ToolBase {
 		}
 
 		const undoRequest = this.blockToUndoRequest(this.highlight.Value.Parent as Model);
-
 		const response = await ActionController.instance.executeOperation(
 			"Block removed",
 			async () => {
 				await BuildingController.placeBlock(undoRequest);
 			},
-			this.highlight.Value.Parent as Model,
-			(info) => BuildingController.deleteBlock(info),
+			(this.highlight.Value.Parent as Model).GetPivot().Position,
+			(info) => BuildingController.deleteBlock(BuildingManager.getBlockByPosition(info)!),
 		);
 
 		// Parsing response
