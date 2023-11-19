@@ -17,6 +17,7 @@ export default class BuildToolWidget extends Widget {
 
 	// Templates
 	private categoryTemplate: TextButton & { Frame: Frame & { ImageLabel: ImageLabel }; TextLabel: TextLabel };
+
 	// Menu selection
 	private selectionButtons: TextButton[] = [];
 	private selectedCategory?: AbstractCategory;
@@ -46,7 +47,7 @@ export default class BuildToolWidget extends Widget {
 		super.showWidget(hasAnimations);
 
 		this.gui.Visible = true;
-		GuiAnimator.transition(this.gui.Selection, 0.1, "right");
+		GuiAnimator.transition(this.gui.Selection, 0.2, "right");
 
 		this.updateLists(true);
 	}
@@ -61,7 +62,7 @@ export default class BuildToolWidget extends Widget {
 
 	private updateLists(hasAnimations: boolean) {
 		if (hasAnimations) {
-			GuiAnimator.transition(this.getGui().Selection, 0.1, "right");
+			GuiAnimator.transition(this.getGui().Selection, 0.2, "right");
 		}
 
 		// Remove old buttons
@@ -147,7 +148,7 @@ export default class BuildToolWidget extends Widget {
 
 	protected prepareTouch(): void {
 		this.gui.TouchControls.Visible = true;
-		GuiAnimator.transition(this.gui.TouchControls, 0.1, "left");
+		GuiAnimator.transition(this.gui.TouchControls, 0.2, "left");
 
 		// Touchscreen controls
 		this.eventHandler.subscribe(this.gui.TouchControls.PlaceButton.MouseButton1Click, () => this.tool.placeBlock());

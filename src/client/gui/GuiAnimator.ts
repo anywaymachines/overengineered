@@ -21,7 +21,7 @@ export default class GuiAnimator {
 
 		const newPosition = defaultPosition.add(offsetPosition);
 		frame.Position = newPosition;
-		frame.TweenPosition(defaultPosition, Enum.EasingDirection.In, Enum.EasingStyle.Linear, duration);
+		frame.TweenPosition(defaultPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, duration);
 	}
 
 	/** Animation for changing GUI colors */
@@ -42,6 +42,11 @@ export default class GuiAnimator {
 		}
 
 		const tween = TweenService.Create(gui, new TweenInfo(time), info);
+		tween.Play();
+	}
+
+	static tween<T extends GuiObject>(gui: T, values: Partial<ExtractMembers<T, Tweenable>>, info: TweenInfo) {
+		const tween = TweenService.Create(gui, info, values);
 		tween.Play();
 	}
 }

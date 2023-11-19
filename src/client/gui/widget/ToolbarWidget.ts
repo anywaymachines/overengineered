@@ -7,6 +7,8 @@ import MoveTool from "client/tools/MoveTool";
 import GuiAnimator from "../GuiAnimator";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
+import TooltipController from "client/controller/TooltipController";
+import DeleteTool from "client/tools/DeleteTool";
 
 /** Widget-a substitute for the native Roblox Backpack */
 export default class ToolbarWidget extends Widget {
@@ -34,6 +36,7 @@ export default class ToolbarWidget extends Widget {
 		// Creating tools
 		this.tools.push(new BuildTool());
 		this.tools.push(new MoveTool());
+		this.tools.push(new DeleteTool());
 
 		// Preparation
 		const gameUI = GuiController.getGameUI();
@@ -51,6 +54,11 @@ export default class ToolbarWidget extends Widget {
 
 			this.toolsButtons.push(button);
 			i++;
+
+			TooltipController.addSimpleWidget({
+				isEnabled: (inputType) => inputType === "Desktop",
+				gui: button.KeyboardNumberLabel,
+			});
 		});
 
 		// Remove template
@@ -92,8 +100,8 @@ export default class ToolbarWidget extends Widget {
 			// Update texts
 			this.getGui().NameLabel.Text = this.currentTool.getDisplayName();
 			this.getGui().DescriptionLabel.Text = this.currentTool.getShortDescription();
-			GuiAnimator.transition(this.getGui().NameLabel, 0.1, "up", 25);
-			GuiAnimator.transition(this.getGui().DescriptionLabel, 0.1, "up", 25);
+			GuiAnimator.transition(this.getGui().NameLabel, 0.2, "up", 25);
+			GuiAnimator.transition(this.getGui().DescriptionLabel, 0.2, "up", 25);
 
 			this.currentTool.activate();
 		}
@@ -104,9 +112,9 @@ export default class ToolbarWidget extends Widget {
 		// Update GUI
 		this.toolsButtons.forEach((button) => {
 			if (this.currentTool && button.Name === this.currentTool.getDisplayName()) {
-				GuiAnimator.tweenColor(button, this.ACTIVE_COLOR, 0.1);
+				GuiAnimator.tweenColor(button, this.ACTIVE_COLOR, 0.2);
 			} else {
-				GuiAnimator.tweenColor(button, this.COLOR, 0.1);
+				GuiAnimator.tweenColor(button, this.COLOR, 0.2);
 			}
 		});
 	}

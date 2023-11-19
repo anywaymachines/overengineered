@@ -72,4 +72,7 @@ export default abstract class ToolBase {
 
 	/** Description of the tool, for example: `Splits blocks into atoms` */
 	abstract getShortDescription(): string;
+
+	public abstract getGamepadTooltips(): { image: string; text: string }[];
+	public abstract getKeyboardTooltips(): { key: string; text: string }[];
 }

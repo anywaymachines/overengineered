@@ -50,7 +50,7 @@ export default class ConfirmWidget extends PopupWidget {
 
 		// Display
 		this.gui.Visible = true;
-		GuiAnimator.transition(this.gui, 0.1, "up");
+		GuiAnimator.transition(this.gui, 0.2, "up");
 
 		// Update texts
 		this.gui.HeadingLabel.Text = heading;

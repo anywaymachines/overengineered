@@ -3,9 +3,8 @@ import ConfirmWidget from "../gui/widget/popup/ConfirmWidget";
 import Signals from "client/event/Signals";
 
 export default class PopupWidgetsController {
-	
 	public static readonly ConfirmPopupWidget = new ConfirmWidget();
-// Events
+	// Events
 	static eventHandler: EventHandler = new EventHandler();
 
 	static init() {

@@ -29,6 +29,36 @@ type ConfirmGui = Frame & {
 	};
 };
 
+// Tooltips
+type GamepadTooltip = Frame & {
+	ImageLabel: ImageLabel;
+	TextLabel: TextLabel;
+};
+
+type KeyboardTooltip = Frame & {
+	ImageLabel: ImageLabel & {
+		KeyLabel: TextLabel;
+	};
+	TextLabel: TextLabel;
+};
+
+type ToolTooltipGui = Frame & {
+	GamepadTemplate: GamepadTooltip;
+	KeyboardTemplate: KeyboardTooltip;
+};
+
+// Material popup
+// type MaterialGui = Frame & {
+// 	CloseButton: TextButton;
+// 	HeadingLabel: TextLabel;
+// 	DescriptionLabel: TextLabel;
+// 	Answers: Frame & {
+// 		Template: TextButton & {
+// 			TextLabel: TextLabel;
+// 		};
+// 	};
+// };
+
 // Build Tool
 type BuildToolGui = Frame & {
 	Selection: Frame & {
@@ -45,6 +75,13 @@ type BuildToolGui = Frame & {
 		RotateTButton: TextButton;
 		RotateYButton: TextButton;
 	};
+};
+
+type DeleteToolGui = Frame & {
+	TouchControls: Frame & {
+		DeleteButton: TextButton;
+	};
+	DeleteAllButton: TextButton;
 };
 
 // Sounds
@@ -65,5 +102,8 @@ interface GameUI {
 	Sounds: Sounds;
 	ToolbarGui: ToolbarGui;
 	BuildToolGui: BuildToolGui;
+	DeleteToolGui: DeleteToolGui;
 	ConfirmGui: ConfirmGui;
+	//MaterialGui: MaterialGui;
+	ControlTooltips: ToolTooltipGui;
 }

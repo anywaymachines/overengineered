@@ -1,8 +1,9 @@
-import { GuiService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { GuiService, Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
 import BuildingWelder from "client/BuildingWelder";
 import ToolBase from "client/base/ToolBase";
 import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
+import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
 import BuildToolWidget from "client/gui/widget/tools/BuildToolWidget";
 import Logger from "shared/Logger";
@@ -10,7 +11,6 @@ import Remotes from "shared/NetworkDefinitions";
 import BuildingManager from "shared/building/BuildingManager";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
-import SoundUtils from "shared/utils/SoundUtils";
 import VectorUtils from "shared/utils/VectorUtils";
 
 /** A tool for building in the world with blocks */
@@ -40,7 +40,7 @@ export default class BuildTool extends ToolBase {
 	}
 
 	getShortDescription(): string {
-		return "Put blocks in the world";
+		return "Place blocks in the world";
 	}
 
 	public prepareVisual() {
@@ -225,19 +225,23 @@ export default class BuildTool extends ToolBase {
 		});
 
 		if (response.success === true) {
-			task.wait();
-			this.updatePosition(true);
+			while (response.model?.PrimaryPart === undefined) {
+				task.wait();
+			}
 
 			// Create welds
 			BuildingWelder.makeJoints(response.model as Model);
 
 			// Play sound
-			this.gameUI.Sounds.Building.BlockPlace.PlaybackSpeed = SoundUtils.randomSoundSpeed();
-			this.gameUI.Sounds.Building.BlockPlace.Play();
+			SoundController.getSounds().Building.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().Building.BlockPlace.Play();
+
+			task.wait();
+			this.updatePosition(true);
 		} else {
 			Logger.info("[BUILDING] Block placement failed: " + response.message);
-			this.gameUI.Sounds.Building.BlockPlaceError.PlaybackSpeed = SoundUtils.randomSoundSpeed();
-			this.gameUI.Sounds.Building.BlockPlaceError.Play();
+			SoundController.getSounds().Building.BlockPlaceError.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().Building.BlockPlaceError.Play();
 		}
 	}
 
@@ -265,8 +269,8 @@ export default class BuildTool extends ToolBase {
 		);
 		this.updatePosition(true);
 
-		this.gameUI.Sounds.Building.BlockRotate.PlaybackSpeed = SoundUtils.randomSoundSpeed();
-		this.gameUI.Sounds.Building.BlockRotate.Play();
+		SoundController.getSounds().Building.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
+		SoundController.getSounds().Building.BlockRotate.Play();
 	}
 
 	private colorizePreviewBlock(highlight: Highlight) {
@@ -323,5 +327,28 @@ export default class BuildTool extends ToolBase {
 		this.widget.hideWidget(true);
 
 		this.previewBlock?.Destroy();
+	}
+
+	public getGamepadTooltips(): { image: string; text: string }[] {
+		const keys: { image: string; text: string }[] = [];
+
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonX), text: "Place" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonB), text: "Unequip" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonSelect), text: "Select block" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadLeft), text: "Rotate by X" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadUp), text: "Rotate by Y" });
+		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadRight), text: "Rotate by Z" });
+
+		return keys;
+	}
+
+	public getKeyboardTooltips(): { key: string; text: string }[] {
+		const keys: { key: string; text: string }[] = [];
+
+		keys.push({ key: "R", text: "Rotate by X" });
+		keys.push({ key: "T", text: "Rotate by Y" });
+		keys.push({ key: "Y", text: "Rotate by Z" });
+
+		return keys;
 	}
 }
