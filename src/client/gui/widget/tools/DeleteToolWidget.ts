@@ -42,7 +42,7 @@ export default class DeleteToolWidget extends Widget {
 	public suggestClearAll() {
 		StaticWidgetsController.confirmWidget.display(
 			"Confirmation",
-			"Are you sure to clear all blocks?",
+			"Are you sure you want to clear all blocks?",
 			async () => await this.tool.clearAll(),
 		);
 	}

@@ -74,5 +74,5 @@ export default abstract class ToolBase {
 	abstract getShortDescription(): string;
 
 	public abstract getGamepadTooltips(): { image: string; text: string }[];
-	public abstract getKeyboardTooltips(): { key: string; text: string }[];
+	public abstract getKeyboardTooltips(): { keys: string[]; text: string }[];
 }

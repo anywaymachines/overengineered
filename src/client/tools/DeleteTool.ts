@@ -185,7 +185,7 @@ export default class DeleteTool extends ToolBase {
 		return keys;
 	}
 
-	public getKeyboardTooltips(): { key: string; text: string }[] {
+	public getKeyboardTooltips() {
 		return [];
 	}
 

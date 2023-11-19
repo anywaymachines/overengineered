@@ -75,11 +75,29 @@ export default class TooltipController {
 		}
 
 		if (InputController.inputType === "Desktop") {
-			this.currentTool.getKeyboardTooltips().forEach((element) => {
+			const keys = [
+				...this.currentTool.getKeyboardTooltips(),
+				{ keys: ["Ctrl", "Z"], text: "Undo" },
+				{ keys: ["Ctrl", "Y"], text: "Redo" },
+			];
+
+			keys.forEach((element) => {
 				const button = this.keyboardTooltipTemplate.Clone();
 
 				button.TextLabel.Text = element.text;
-				button.ImageLabel.KeyLabel.Text = element.key;
+
+				for (let i = 0; i < element.keys.size(); i++) {
+					let key;
+
+					if (i === 0) key = button.Keys.ImageLabel;
+					else {
+						key = button.Keys.ImageLabel.Clone();
+						key.Parent = button.Keys;
+					}
+
+					key.KeyLabel.Text = element.keys[i];
+				}
+
 				button.Parent = this.gameUI.ControlTooltips;
 
 				this.tooltips.push(button);

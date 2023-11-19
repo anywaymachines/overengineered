@@ -36,8 +36,10 @@ type GamepadTooltip = Frame & {
 };
 
 type KeyboardTooltip = Frame & {
-	ImageLabel: ImageLabel & {
-		KeyLabel: TextLabel;
+	Keys: Frame & {
+		ImageLabel: ImageLabel & {
+			KeyLabel: TextLabel;
+		};
 	};
 	TextLabel: TextLabel;
 };

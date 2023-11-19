@@ -187,7 +187,7 @@ export default class MoveTool extends ToolBase {
 
 		return keys;
 	}
-	public getKeyboardTooltips(): { key: string; text: string }[] {
+	public getKeyboardTooltips() {
 		return [];
 	}
 }

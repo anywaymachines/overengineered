@@ -352,12 +352,12 @@ export default class BuildTool extends ToolBase {
 		return keys;
 	}
 
-	public getKeyboardTooltips(): { key: string; text: string }[] {
-		const keys: { key: string; text: string }[] = [];
+	public getKeyboardTooltips() {
+		const keys: { keys: string[]; text: string }[] = [];
 
-		keys.push({ key: "R", text: "Rotate by X" });
-		keys.push({ key: "T", text: "Rotate by Y" });
-		keys.push({ key: "Y", text: "Rotate by Z" });
+		keys.push({ keys: ["R"], text: "Rotate by X" });
+		keys.push({ keys: ["T"], text: "Rotate by Y" });
+		keys.push({ keys: ["Y"], text: "Rotate by Z" });
 
 		return keys;
 	}
