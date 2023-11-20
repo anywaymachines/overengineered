@@ -63,6 +63,10 @@ export default class ToolbarWidget extends Widget {
 
 		// Remove template
 		gameUI.ToolbarGui.Buttons.Template.Destroy();
+
+		// Update texts
+		this.getGui().NameLabel.Text = "";
+		this.getGui().DescriptionLabel.Text = "";
 	}
 
 	private getGui() {
