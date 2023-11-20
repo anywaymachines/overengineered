@@ -99,7 +99,7 @@ export default class BuildToolWidget extends Widget {
 				this.tool.prepareVisual();
 
 				SoundController.getSounds().GuiClick.Play();
-				this.updateLists(false);
+				this.updateLists(true);
 			});
 			this.selectionButtons.push(backButton);
 
