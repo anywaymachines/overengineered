@@ -8,12 +8,12 @@ import BlockRegistry from "shared/registry/BlocksRegistry";
 import CategoriesRegistry from "shared/registry/CategoriesRegistry";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import AbstractCategory from "shared/registry/abstract/AbstractCategory";
+import ToolWidget from "./ToolWidget";
 
 /** Widget of the BuildTool tool */
-export default class BuildToolWidget extends Widget {
+export default class BuildToolWidget extends ToolWidget<BuildTool> {
 	private blockTemplate: TextButton & { Frame: Frame & { LimitLabel: TextLabel }; TextLabel: TextLabel };
 	private gui: BuildToolGui;
-	private tool: BuildTool;
 
 	// Templates
 	private categoryTemplate: TextButton & { Frame: Frame & { ImageLabel: ImageLabel }; TextLabel: TextLabel };
@@ -24,10 +24,9 @@ export default class BuildToolWidget extends Widget {
 	public selectedMaterial: Enum.Material = Enum.Material.Plastic;
 	public selectedBlock?: AbstractBlock;
 
-	constructor(buildTool: BuildTool) {
-		super();
+	constructor(tool: BuildTool) {
+		super(tool);
 
-		this.tool = buildTool;
 		this.gui = this.getGui();
 
 		// Prepare templates

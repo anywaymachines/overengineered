@@ -10,6 +10,7 @@ import Signals from "client/event/Signals";
 import TooltipController from "client/controller/TooltipController";
 import DeleteTool from "client/tools/DeleteTool";
 import ConfigTool from "client/tools/ConfigTool";
+import ToolWidget from "./tools/ToolWidget";
 
 /** Widget-a substitute for the native Roblox Backpack */
 export default class ToolbarWidget extends Widget {
@@ -24,6 +25,7 @@ export default class ToolbarWidget extends Widget {
 
 	/** An array containing all kinds of tools */
 	private tools: ToolBase[] = [];
+	private toolWidgets: ToolWidget<ToolBase>[] = [];
 	private toolsButtons: ToolbarButton[] = [];
 
 	constructor() {
@@ -34,8 +36,15 @@ export default class ToolbarWidget extends Widget {
 		// Disable roblox native backpack
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
+		const addTool = <TTool extends ToolBase>(tool: TTool, widgetfunc: (tool:TTool)=>ToolWidget<TTool>) => {
+			this.tools.push(tool);
+			this.toolWidgets.push(widgetfunc(tool));
+		};
+
 		// Creating tools
-		this.tools.push(new BuildTool());
+		this.tools.push(new BuildTool(), tool => new BuildToolWidget(tool));
+		addTool(new BuildTool(), 
+
 		this.tools.push(new MoveTool());
 		this.tools.push(new DeleteTool());
 		this.tools.push(new ConfigTool());

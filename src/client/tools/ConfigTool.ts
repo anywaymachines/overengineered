@@ -191,15 +191,11 @@ export default class ConfigTool extends ToolBase {
 
 	activate(): void {
 		super.activate();
-
-		this.widget.showWidget(true);
 		this.updatePosition();
 	}
 
 	deactivate(): void {
 		super.deactivate();
-
-		this.widget.hideWidget(true);
 
 		this.destroyHighlight();
 		this.unselectAll();

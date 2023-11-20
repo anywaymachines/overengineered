@@ -86,45 +86,12 @@ type DeleteToolGui = Frame & {
 	DeleteAllButton: TextButton;
 };
 
-interface ICheckBoxWidget {
-	getValue(): boolean;
-}
-interface IKeyEditorWidget {}
-interface ISliderWidget {
-	getValue(): number;
-	setMin(value: number): void;
-	setMax(value: number): void;
-	setStep(value: number): void;
-}
-
 type ActionBarGui = Frame & {
 	Buttons: Frame & {
 		Run: TextButton;
 		Save: TextButton;
 		Settings: TextButton;
 	};
-};
-
-type Checkbox = Frame & {
-	CheckBoxWidget: ICheckBoxWidget;
-};
-type KeyEditor = Frame & {
-	KeyEditorWidget: IKeyEditorWidget;
-};
-type Seekbar = Frame & {
-	SliderWidget: ISliderWidget;
-};
-
-type ConfigToolGui = Frame & {
-	Selection: Frame & {
-		Buttons: ScrollingFrame & {
-			CheckboxTemplate: Checkbox;
-			KeyTemplate: KeyEditor;
-			SeekbarTemplate: Seekbar;
-		};
-	};
-	SelectSimilarButton: TextButton;
-	ClearSelectionButton: TextButton;
 };
 
 type LogFrame = Frame & {
@@ -154,7 +121,6 @@ interface GameUI {
 	ToolbarGui: ToolbarGui;
 	BuildToolGui: BuildToolGui;
 	DeleteToolGui: DeleteToolGui;
-	ConfigToolGui: ConfigToolGui;
 	ConfirmGui: ConfirmGui;
 	LogGui: LogGui;
 	MaterialGui: MaterialGui;

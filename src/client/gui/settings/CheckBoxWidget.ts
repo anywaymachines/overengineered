@@ -5,7 +5,7 @@ type CheckBoxWidgetType = Frame & {
 	TextLabel: TextLabel;
 };
 
-export default class CheckBoxWidget implements ICheckBoxWidget {
+export default class CheckBoxWidget {
 	private readonly eventHandler = new EventHandler();
 	private readonly widget: CheckBoxWidgetType;
 	private checked = false;

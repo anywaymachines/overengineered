@@ -1,4 +1,5 @@
 import { GuiService, Players, UserInputService, Workspace } from "@rbxts/services";
+import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
@@ -12,6 +13,8 @@ import SharedPlots from "shared/building/SharedPlots";
 import PlayerUtils from "shared/utils/PlayerUtils";
 
 export default class DeleteTool extends ToolBase {
+	public readonly onClearAllRequested = new Signal<() => void>();
+
 	public highlight: ObjectValue = new Instance("ObjectValue");
 
 	// GUI
@@ -37,7 +40,7 @@ export default class DeleteTool extends ToolBase {
 	protected prepareGamepad(): void {
 		// Gamepad buttons controls
 		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonX, () => this.deleteBlock());
-		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonY, () => this.widget.suggestClearAll());
+		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonY, () => this.onClearAllRequested.Fire());
 
 		// Prepare console events
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updatePosition());
@@ -193,15 +196,11 @@ export default class DeleteTool extends ToolBase {
 
 	activate(): void {
 		super.activate();
-
-		this.widget.showWidget(true);
 		this.updatePosition();
 	}
 
 	deactivate(): void {
 		super.deactivate();
-
-		this.widget.hideWidget(true);
 		this.destroyHighlight();
 	}
 }

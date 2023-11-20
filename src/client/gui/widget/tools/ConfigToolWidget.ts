@@ -1,21 +1,41 @@
 import Widget from "client/base/Widget";
 import GuiController from "client/controller/GuiController";
+import Signals from "client/event/Signals";
 import GuiAnimator from "client/gui/GuiAnimator";
+import CheckBoxWidget from "client/gui/settings/CheckBoxWidget";
+import SliderWidget from "client/gui/settings/SliderWidget";
 import ConfigTool from "client/tools/ConfigTool";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
+import ToolWidget from "./ToolWidget";
 
-export default class ConfigToolWidget extends Widget {
+type ConfigToolGui = Frame & {
+	Selection: Frame & {
+		Buttons: ScrollingFrame & {
+			CheckboxTemplate: Frame & {
+				CheckBoxWidget: CheckBoxWidget;
+			};
+			KeyTemplate: Frame & {
+				KeyEditorWidget: Frame; // TODO:
+			};
+			SeekbarTemplate: Frame & {
+				SliderWidget: SliderWidget;
+			};
+		};
+	};
+	SelectSimilarButton: TextButton;
+	ClearSelectionButton: TextButton;
+};
+
+export default class ConfigToolWidget extends ToolWidget<ConfigTool> {
 	private readonly gui: ConfigToolGui;
-	private readonly tool: ConfigTool;
 	private readonly checkboxTemplate;
 	private readonly keyTemplate;
 	private readonly sliderTemplate;
 
-	constructor(configTool: ConfigTool) {
-		super();
+	constructor(tool: ConfigTool) {
+		super(tool);
 
-		this.tool = configTool;
 		this.gui = this.getGui();
 
 		this.checkboxTemplate = this.gui.Selection.Buttons.CheckboxTemplate;
@@ -24,7 +44,7 @@ export default class ConfigToolWidget extends Widget {
 
 		this.checkboxTemplate.Visible = this.keyTemplate.Visible = this.sliderTemplate.Visible = false;
 
-		configTool.selectedBlocksChanged.Connect((selected) => {
+		tool.selectedBlocksChanged.Connect((selected) => {
 			this.updateConfigs(selected);
 		});
 	}
@@ -80,8 +100,9 @@ export default class ConfigToolWidget extends Widget {
 	}
 
 	private getGui() {
-		if (!(this.gui !== undefined && this.gui.Parent !== undefined)) {
-			return GuiController.getGameUI().ConfigToolGui;
+		const gameui = GuiController.getGameUI();
+		if (!(this.gui !== undefined && this.gui.Parent !== undefined) && "ConfigToolGui" in gameui) {
+			return gameui.ConfigToolGui as ConfigToolGui;
 		}
 
 		return this.gui;

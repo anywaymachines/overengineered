@@ -75,13 +75,7 @@ export default class TooltipController {
 		}
 
 		if (InputController.inputType === "Desktop") {
-			const keys = [
-				...this.currentTool.getKeyboardTooltips(),
-				{ keys: ["Ctrl", "Z"], text: "Undo" },
-				{ keys: ["Ctrl", "Y"], text: "Redo" },
-			];
-
-			keys.forEach((element) => {
+			this.currentTool.getKeyboardTooltips().forEach((element) => {
 				const button = this.keyboardTooltipTemplate.Clone();
 
 				button.TextLabel.Text = element.text;

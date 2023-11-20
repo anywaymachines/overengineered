@@ -3,16 +3,16 @@ import GuiController from "client/controller/GuiController";
 import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import GuiAnimator from "client/gui/GuiAnimator";
 import DeleteTool from "client/tools/DeleteTool";
+import ToolWidget from "./ToolWidget";
 
-export default class DeleteToolWidget extends Widget {
+export default class DeleteToolWidget extends ToolWidget<DeleteTool> {
 	private gui: DeleteToolGui;
-	private tool: DeleteTool;
 
-	constructor(deleteTool: DeleteTool) {
-		super();
-
-		this.tool = deleteTool;
+	constructor(tool: DeleteTool) {
+		super(tool);
 		this.gui = this.getGui();
+
+		this.eventHandler.subscribe(tool.onClearAllRequested, () => this.suggestClearAll());
 	}
 
 	showWidget(hasAnimations: boolean): void {
@@ -39,7 +39,7 @@ export default class DeleteToolWidget extends Widget {
 		return this.gui.Visible;
 	}
 
-	public suggestClearAll() {
+	private suggestClearAll() {
 		StaticWidgetsController.confirmWidget.display(
 			"Confirmation",
 			"Are you sure you want to clear all blocks?",

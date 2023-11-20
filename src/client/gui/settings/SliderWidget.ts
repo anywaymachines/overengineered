@@ -11,7 +11,7 @@ type SliderWidgetType = Frame & {
 	TextLabel: TextLabel;
 };
 
-export default class SliderWidget implements ISliderWidget {
+export default class SliderWidget {
 	private readonly eventHandler = new EventHandler();
 	private readonly widget: SliderWidgetType;
 	private value = 0;
