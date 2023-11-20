@@ -4,16 +4,13 @@ import Remotes from "shared/NetworkDefinitions";
 import StaticWidgetsController from "./StaticWidgetsController";
 
 export default class BuildingController {
-	public static async placeBlock(data: PlayerPlaceBlockRequest) {
-		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerPlaceBlock").CallServerAsync(data);
+	public static async placeBlock(data: PlaceBlockRequest) {
+		const response = await Remotes.Client.GetNamespace("Building").Get("PlaceBlockRequest").CallServerAsync(data);
 
 		if (response.success) {
 			while (response.model?.PrimaryPart === undefined) {
 				task.wait();
 			}
-
-			// Create welds
-			BuildingWelder.makeJoints(response.model as Model);
 
 			Signals.BLOCKS.ADDED.Fire(response.model);
 			return { success: true, position: response.model.GetPivot().Position } as const;
@@ -30,7 +27,7 @@ export default class BuildingController {
 
 	public static async deleteBlock(block: Model) {
 		// Send block removing packet
-		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerDeleteBlock").CallServerAsync({
+		const response = await Remotes.Client.GetNamespace("Building").Get("DeleteBlockRequest").CallServerAsync({
 			block: block,
 		});
 
@@ -48,7 +45,7 @@ export default class BuildingController {
 	}
 
 	public static async moveBlock(request: PlayerMoveRequest) {
-		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerMove").CallServerAsync(request);
+		const response = await Remotes.Client.GetNamespace("Building").Get("MoveRequest").CallServerAsync(request);
 
 		if (response.success) Signals.CONTRAPTION.MOVED.Fire(request.vector);
 		else
@@ -61,7 +58,7 @@ export default class BuildingController {
 	}
 
 	public static async clearPlot() {
-		const response = await Remotes.Client.GetNamespace("Building").Get("PlayerClearAll").CallServerAsync();
+		const response = await Remotes.Client.GetNamespace("Building").Get("ClearAllRequest").CallServerAsync();
 
 		if (response.success) Signals.CONTRAPTION.CLEARED.Fire();
 		else

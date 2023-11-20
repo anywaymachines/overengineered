@@ -7,7 +7,7 @@ export default class RideStartEvent {
 	static initialize(): void {
 		Logger.info("Loading RideStart event listener...");
 
-		Remotes.Server.GetNamespace("Ride").OnFunction("RideStart", (player) => this.startRide(player));
+		Remotes.Server.GetNamespace("Ride").OnFunction("RideStartRequest", (player) => this.startRide(player));
 	}
 
 	private static startRide(player: Player): void {

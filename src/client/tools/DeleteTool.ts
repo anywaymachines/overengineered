@@ -68,7 +68,7 @@ export default class DeleteTool extends ToolBase {
 	}
 
 	private blockToUndoRequest(block: Model) {
-		const info: PlayerPlaceBlockRequest = {
+		const info: PlaceBlockRequest = {
 			location: block.PrimaryPart!.CFrame,
 			block: block.GetAttribute("blockid") as string,
 			material: Enum.Material.GetEnumItems().find((e) => e.Name === (block.GetAttribute("material") as string))!,

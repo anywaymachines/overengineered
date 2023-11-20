@@ -8,11 +8,11 @@ export default class DeleteEvent {
 	static initialize(): void {
 		Logger.info("Loading Delete event listener...");
 
-		Remotes.Server.GetNamespace("Building").OnFunction("PlayerDeleteBlock", (player, data) =>
+		Remotes.Server.GetNamespace("Building").OnFunction("DeleteBlockRequest", (player, data) =>
 			this.playerDeleteBlock(player, data),
 		);
 
-		Remotes.Server.GetNamespace("Building").OnFunction("PlayerClearAll", (player) => this.playerClearAll(player));
+		Remotes.Server.GetNamespace("Building").OnFunction("ClearAllRequest", (player) => this.playerClearAll(player));
 	}
 
 	private static playerDeleteBlock(player: Player, data: PlayerDeleteBlockRequest): BuildResponse {

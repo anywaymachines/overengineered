@@ -7,7 +7,7 @@ export default class MoveEvent {
 	static initialize(): void {
 		Logger.info("Loading Move event listener...");
 
-		Remotes.Server.GetNamespace("Building").OnFunction("PlayerMove", (player, data) =>
+		Remotes.Server.GetNamespace("Building").OnFunction("MoveRequest", (player, data) =>
 			this.playerMove(player, data),
 		);
 	}

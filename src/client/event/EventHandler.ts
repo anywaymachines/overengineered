@@ -10,16 +10,16 @@ export default class EventHandler {
 	 * @param signal A signal. Example: `UserInputService.InputChanged`
 	 * @param callback Callback
 	 */
-	public subscribe(signal: RBXScriptSignal, callback: Callback): number {
-		return this.events.push(signal.Connect((_) => callback(_)));
+	public subscribe<T extends Callback = Callback>(signal: RBXScriptSignal<T>, callback: T): number {
+		return this.events.push(signal.Connect(callback));
 	}
 
 	/** The function of registering an event once
 	 * @param signal A signal. Example: `UserInputService.InputChanged`
 	 * @param callback Callback
 	 */
-	public subscribeOnce(signal: RBXScriptSignal, callback: Callback): number {
-		return this.events.push(signal.Once((_) => callback(_)));
+	public subscribeOnce<T extends Callback = Callback>(signal: RBXScriptSignal<T>, callback: T): number {
+		return this.events.push(signal.Once(callback));
 	}
 
 	public unsubscribe(index: number) {

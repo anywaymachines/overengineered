@@ -11,12 +11,12 @@ export default class BuildEvent {
 	static initialize(): void {
 		Logger.info("Loading Build event listener...");
 
-		Remotes.Server.GetNamespace("Building").OnFunction("PlayerPlaceBlock", (player, data) =>
+		Remotes.Server.GetNamespace("Building").OnFunction("PlaceBlockRequest", (player, data) =>
 			this.playerPlaceBlock(player, data),
 		);
 	}
 
-	private static playerPlaceBlock(player: Player, data: PlayerPlaceBlockRequest): BuildResponse {
+	private static playerPlaceBlock(player: Player, data: PlaceBlockRequest): BuildResponse {
 		if (BlockRegistry.Blocks.has(data.block) === false) {
 			return {
 				success: false,
@@ -60,6 +60,9 @@ export default class BuildEvent {
 		if (data.material === Enum.Material.Glass) {
 			PartUtils.switchDescendantsTransparency(model, 0.3);
 		}
+
+		// Weld block
+		Remotes.Server.GetNamespace("Building").Get("WeldBlock").SendToPlayer(player, model);
 
 		return { success: true, model: model };
 	}

@@ -1,6 +1,19 @@
 import { Workspace } from "@rbxts/services";
+import Remotes from "shared/NetworkDefinitions";
 
 export default class BuildingWelder {
+	static init() {
+		const WeldBlockRequest = Remotes.Client.GetNamespace("Building").Get("WeldBlock");
+		WeldBlockRequest.Connect((model) => {
+			while (model?.PrimaryPart === undefined) {
+				task.wait();
+			}
+
+			// Create welds
+			BuildingWelder.makeJoints(model as Model);
+		});
+	}
+
 	static getClosestParts(model: Model): BasePart[] {
 		const results: BasePart[] = [];
 

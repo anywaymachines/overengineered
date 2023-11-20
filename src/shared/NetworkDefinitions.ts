@@ -2,13 +2,15 @@ import Net from "@rbxts/net";
 
 const Remotes = Net.Definitions.Create({
 	Building: Net.Definitions.Namespace({
-		PlayerPlaceBlock: Net.Definitions.ServerAsyncFunction<(data: PlayerPlaceBlockRequest) => BuildResponse>(),
-		PlayerDeleteBlock: Net.Definitions.ServerAsyncFunction<(data: PlayerDeleteBlockRequest) => BuildResponse>(),
-		PlayerClearAll: Net.Definitions.ServerAsyncFunction<() => BuildResponse>(),
-		PlayerMove: Net.Definitions.ServerAsyncFunction<(data: PlayerMoveRequest) => BuildResponse>(),
+		PlaceBlockRequest: Net.Definitions.ServerAsyncFunction<(data: PlaceBlockRequest) => BuildResponse>(),
+		DeleteBlockRequest: Net.Definitions.ServerAsyncFunction<(data: PlayerDeleteBlockRequest) => BuildResponse>(),
+		ClearAllRequest: Net.Definitions.ServerAsyncFunction<() => BuildResponse>(),
+		MoveRequest: Net.Definitions.ServerAsyncFunction<(data: PlayerMoveRequest) => BuildResponse>(),
+
+		WeldBlock: Net.Definitions.ServerToClientEvent<[model: Model]>(),
 	}),
 	Ride: Net.Definitions.Namespace({
-		RideStart: Net.Definitions.ServerAsyncFunction<() => void>(),
+		RideStartRequest: Net.Definitions.ServerAsyncFunction<() => void>(),
 	}),
 });
 
