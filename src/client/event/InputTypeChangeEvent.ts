@@ -2,12 +2,12 @@ import { UserInputService } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import Signals from "client/event/Signals";
-import Logger from "shared/Logger";
+import Remotes from "shared/Remotes";
 
 /** A permanent event that monitors the change in the type of input type, which makes the game more flexible */
 export default class InputTypeChangeEvent {
 	/** Returns the input type based on the given input type */
-	private static getInputTypeByEnum(userInputType: Enum.UserInputType): typeof InputController.inputType {
+	private static getInputTypeByEnum(userInputType: Enum.UserInputType): InputType {
 		if (userInputType === Enum.UserInputType.Gamepad1) {
 			return "Gamepad";
 		} else if (userInputType === Enum.UserInputType.Touch) {
@@ -26,7 +26,8 @@ export default class InputTypeChangeEvent {
 
 			// Fire a new input type
 			Signals.INPUT_TYPE_CHANGED_EVENT.Fire(newInputType);
-			Logger.info("New platform: " + newInputType);
+			Remotes.Client.GetNamespace("Player").Get("InputTypeInfo").SendToServer(newInputType);
+
 			StaticWidgetsController.logStaticWidget.addLine(
 				"New input type set to " + newInputType,
 				Color3.fromRGB(252, 252, 145),

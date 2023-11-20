@@ -35,6 +35,10 @@ export default class MoveTool extends ToolBase {
 	private createHandles() {
 		this.destroyHandles();
 
+		if (!this.isEquipped) {
+			return;
+		}
+
 		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
 		const blocks = plot.FindFirstChild("Blocks") as Model;
 

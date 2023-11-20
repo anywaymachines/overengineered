@@ -1,10 +1,12 @@
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import BlockRegistry from "shared/registry/BlocksRegistry";
-import Remotes from "shared/NetworkDefinitions";
+import Remotes from "shared/Remotes";
 import Logger from "shared/Logger";
 import SharedPlots from "shared/building/SharedPlots";
 import BuildingManager from "shared/building/BuildingManager";
 import PartUtils from "shared/utils/PartUtils";
+import ConfigManager from "shared/ConfigManager";
+import PlayerData from "server/PlayerData";
 
 /** Class for **server-based** construction management from blocks */
 export default class BuildEvent {
@@ -34,7 +36,7 @@ export default class BuildEvent {
 		// Create a new instance of the building model
 		const block = BlockRegistry.Blocks.get(data.block) as AbstractBlock;
 		const model = block.getModel().Clone();
-		model.SetAttribute("blockid", data.block);
+		model.SetAttribute("id", data.block);
 
 		if (model.PrimaryPart === undefined) {
 			// Delete block from game database (prevent discord spamming)
@@ -49,7 +51,6 @@ export default class BuildEvent {
 		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;
 
 		model.PivotTo(data.location);
-		model.SetAttribute("isBlock", true);
 		model.Parent = plot.FindFirstChild("Blocks");
 
 		// Set material
@@ -63,6 +64,11 @@ export default class BuildEvent {
 
 		// Weld block
 		Remotes.Server.GetNamespace("Building").Get("WeldBlock").SendToPlayer(player, model);
+
+		// Configs
+		const inputType = PlayerData.playerData[player.UserId].inputType ?? "Desktop";
+
+		ConfigManager.loadDefaultConfigs(model, inputType);
 
 		return { success: true, model: model };
 	}

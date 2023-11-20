@@ -27,11 +27,33 @@ export default class DisconnectBlock extends AbstractBlock implements Configurab
 	getConfigDefinitions(): ConfigDefinition[] {
 		return [
 			{
+				id: "disconnect",
 				displayName: "Disconnect key",
 				type: "Key",
 				default: {
-					Desktop: Enum.KeyCode.F,
-					Gamepad: Enum.KeyCode.ButtonR2,
+					Desktop: Enum.KeyCode.F.Value,
+					Gamepad: Enum.KeyCode.ButtonR2.Value,
+				},
+			},
+			{
+				id: "test1",
+				displayName: "Test 1",
+				type: "Number",
+				default: {
+					Desktop: 1,
+					Gamepad: 1,
+				},
+				min: 0,
+				max: 10,
+				step: 1,
+			},
+			{
+				id: "test2",
+				displayName: "Test 2",
+				type: "Bool",
+				default: {
+					Desktop: true,
+					Gamepad: true,
 				},
 			},
 		];

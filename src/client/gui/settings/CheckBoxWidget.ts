@@ -5,7 +5,7 @@ type CheckBoxWidgetType = Frame & {
 	TextLabel: TextLabel;
 };
 
-class CheckBoxWidget {
+export default class CheckBoxWidget implements ICheckBoxWidget {
 	private readonly eventHandler = new EventHandler();
 	private readonly widget: CheckBoxWidgetType;
 	private checked = false;
@@ -25,10 +25,6 @@ class CheckBoxWidget {
 	}
 
 	private updateVisuals() {
-		this.widget.TextButton.Text = this.checked ? "+" : "-";
+		this.widget.TextButton.Text = this.checked ? "æ" : "";
 	}
 }
-
-const parent = script.Parent as CheckBoxWidgetType;
-print(parent);
-new CheckBoxWidget(parent);

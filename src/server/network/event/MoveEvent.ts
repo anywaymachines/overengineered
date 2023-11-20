@@ -1,5 +1,5 @@
 import Logger from "shared/Logger";
-import Remotes from "shared/NetworkDefinitions";
+import Remotes from "shared/Remotes";
 import SharedPlots from "shared/building/SharedPlots";
 import VectorUtils from "shared/utils/VectorUtils";
 

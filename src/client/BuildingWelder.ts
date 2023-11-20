@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import Remotes from "shared/NetworkDefinitions";
+import Remotes from "shared/Remotes";
 
 export default class BuildingWelder {
 	static init() {
@@ -38,7 +38,7 @@ export default class BuildingWelder {
 			(model.PrimaryPart as BasePart).GetTouchingParts().forEach((basepart) => {
 				if (
 					basepart.Parent &&
-					basepart.Parent.GetAttribute("isBlock") === true &&
+					basepart.Parent.GetAttribute("id") !== undefined &&
 					!results.includes(basepart) &&
 					!basepart.IsDescendantOf(model)
 				) {

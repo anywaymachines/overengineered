@@ -6,9 +6,9 @@ import { UserInputService } from "@rbxts/services";
 import ToolBase from "client/base/ToolBase";
 
 type SimpleTooltip = {
-	isEnabled: (inputType: typeof InputController.inputType) => boolean;
+	isEnabled: (inputType: InputType) => boolean;
 	gui: GuiObject;
-	updateFunc?: (inputType: typeof InputController.inputType, info: SimpleTooltip) => void;
+	updateFunc?: (inputType: InputType, info: SimpleTooltip) => void;
 };
 
 export default class TooltipController {
@@ -42,7 +42,7 @@ export default class TooltipController {
 
 		// Simple tooltips
 		this.addSimpleWidget({
-			isEnabled: (inputType: typeof InputController.inputType) => inputType === "Gamepad",
+			isEnabled: (inputType: InputType) => inputType === "Gamepad",
 			gui: this.gameUI.ToolbarGui.GamepadBack,
 			updateFunc: (inputType, element) => {
 				TooltipController.updateGamepadWidgetImage(element.gui as ImageLabel, Enum.KeyCode.ButtonL1);
@@ -120,7 +120,7 @@ export default class TooltipController {
 	public static updateGamepadWidgetImage(imageLabel: ImageLabel, key: Enum.KeyCode) {
 		imageLabel.Image = UserInputService.GetImageForKeyCode(key);
 	}
-	public static defaultTween(inputType: typeof InputController.inputType, element: SimpleTooltip) {
+	public static defaultTween(inputType: InputType, element: SimpleTooltip) {
 		if (element.isEnabled(inputType)) {
 			GuiAnimator.tweenTransparency(element.gui, 0, 0.2);
 			GuiAnimator.transition(element.gui, 0.2, "up");
@@ -134,7 +134,7 @@ export default class TooltipController {
 		TooltipController.simpleTooltips.push(tooltip);
 	}
 
-	private static inputTypeChanged(inputType: typeof InputController.inputType) {
+	private static inputTypeChanged(inputType: InputType) {
 		this.simpleTooltips.forEach((element) => {
 			if (element.updateFunc) element.updateFunc(inputType, element);
 			else this.defaultTween(inputType, element);

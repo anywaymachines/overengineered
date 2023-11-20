@@ -10,7 +10,7 @@ export default class Signals {
 	} as const;
 
 	public static readonly INPUT_TYPE_CHANGED_EVENT = new Signal<
-		(platform: typeof InputController.inputType) => void
+		(platform: InputType) => void
 	>();
 
 	public static readonly PLAYER = {

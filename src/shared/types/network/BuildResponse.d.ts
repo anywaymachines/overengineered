@@ -1,5 +1,3 @@
-interface BuildResponse {
-	success: boolean;
+interface BuildResponse extends Response {
 	model?: Model;
-	message?: string;
 }

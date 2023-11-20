@@ -1,6 +1,6 @@
 import BuildingWelder from "client/BuildingWelder";
 import Signals from "client/event/Signals";
-import Remotes from "shared/NetworkDefinitions";
+import Remotes from "shared/Remotes";
 import StaticWidgetsController from "./StaticWidgetsController";
 
 export default class BuildingController {

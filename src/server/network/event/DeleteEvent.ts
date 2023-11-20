@@ -1,6 +1,6 @@
 import ServerPlots from "server/plots/ServerPlots";
 import Logger from "shared/Logger";
-import Remotes from "shared/NetworkDefinitions";
+import Remotes from "shared/Remotes";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 

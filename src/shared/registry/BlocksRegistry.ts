@@ -9,6 +9,7 @@ import BlockWedge1x4 from "./blocks/BlockCorner1x4";
 import BlockCornerWedge2x1 from "./blocks/BlockCornerWedge2x1";
 import BlockCornerWedge3x1 from "./blocks/BlockCornerWedge3x1";
 import BlockCornerWedge4x1 from "./blocks/BlockCornerWedge4x1";
+import DisconnectBlock from "./blocks/DisconnectBlock";
 
 export default class BlockRegistry {
 	public static Blocks: Map<string, AbstractBlock> = new Map<string, AbstractBlock>();
@@ -28,10 +29,17 @@ export default class BlockRegistry {
 	public static readonly BLOCK_CORNERWEDGE3x1 = this.registerBlock(new BlockCornerWedge3x1());
 	public static readonly BLOCK_CORNERWEDGE4x1 = this.registerBlock(new BlockCornerWedge4x1());
 
+	// Misc
+	public static readonly DISCONNECT_BLOCK = this.registerBlock(new DisconnectBlock());
+
 	private static registerBlock(block: AbstractBlock): AbstractBlock {
 		this.Blocks.set(block.id, block);
 		this.RegisteredBlocks.push(block);
 		return block;
+	}
+
+	public static getBlockByID(id: string): AbstractBlock | undefined {
+		return BlockRegistry.RegisteredBlocks.find((value) => value.id === id);
 	}
 
 	public static getBlocksInCategory(category: AbstractCategory): AbstractBlock[] {

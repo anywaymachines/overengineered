@@ -9,6 +9,7 @@ import Signals from "client/event/Signals";
 export default abstract class ToolBase {
 	protected readonly gameUI: GameUI;
 	protected readonly mouse: Mouse;
+	protected isEquipped = false;
 
 	// Handlers
 	protected readonly eventHandler: EventHandler;
@@ -55,11 +56,13 @@ export default abstract class ToolBase {
 
 	/** Called when the tool is activated */
 	activate(): void {
+		this.isEquipped = true;
 		this.prepare();
 	}
 
 	/** Called when the tool is de-activated */
 	deactivate(): void {
+		this.isEquipped = false;
 		this.eventHandler.unsubscribeAll();
 		this.inputHandler.unsubscribeAll();
 	}

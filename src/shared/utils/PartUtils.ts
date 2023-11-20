@@ -40,9 +40,9 @@ export default class PartUtils {
 	static switchDescendantsNetworkOwner(model: Instance, owner: Player) {
 		const children = model.GetDescendants();
 		children.forEach((element) => {
-			if (element.IsA("BasePart")) {
-				element.SetNetworkOwner(owner);
-			}
+			pcall(() => {
+				(element as BasePart).SetNetworkOwner(owner);
+			});
 		});
 	}
 }

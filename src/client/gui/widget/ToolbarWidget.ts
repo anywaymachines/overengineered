@@ -9,6 +9,7 @@ import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
 import TooltipController from "client/controller/TooltipController";
 import DeleteTool from "client/tools/DeleteTool";
+import ConfigTool from "client/tools/ConfigTool";
 
 /** Widget-a substitute for the native Roblox Backpack */
 export default class ToolbarWidget extends Widget {
@@ -37,6 +38,7 @@ export default class ToolbarWidget extends Widget {
 		this.tools.push(new BuildTool());
 		this.tools.push(new MoveTool());
 		this.tools.push(new DeleteTool());
+		this.tools.push(new ConfigTool());
 
 		// Preparation
 		const gameUI = GuiController.getGameUI();
