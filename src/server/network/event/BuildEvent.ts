@@ -27,7 +27,7 @@ export default class BuildEvent {
 		if (!BuildingManager.vectorAbleToPlayer(data.location.Position, player)) {
 			return {
 				success: false,
-				message: "You are not allowed to place blocks here",
+				message: "Out of bounds",
 			};
 		}
 
@@ -42,7 +42,7 @@ export default class BuildEvent {
 
 			return {
 				success: false,
-				message: "Block is corrupted. Contact game developer",
+				message: "Block is corrupted",
 			};
 		}
 

@@ -5,6 +5,7 @@ import BuildingController from "client/controller/BuildingController";
 import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
+import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import Signals from "client/event/Signals";
 import BuildToolWidget from "client/gui/widget/tools/BuildToolWidget";
 import BuildingManager from "shared/building/BuildingManager";
@@ -202,13 +203,14 @@ export default class BuildTool extends ToolBase {
 	}
 
 	public async placeBlock() {
-		// ERROR: Nothing to place
-		if (!this.previewBlock || !this.previewBlock.PrimaryPart) {
+		// ERROR: Block is not selected
+		if (this.widget.selectedBlock === undefined) {
+			StaticWidgetsController.logStaticWidget.addLine("Block is not selected!");
 			return;
 		}
 
-		// ERROR: Block is not selected
-		if (this.widget.selectedBlock === undefined) {
+		// ERROR: Nothing to place
+		if (!this.previewBlock || !this.previewBlock.PrimaryPart) {
 			return;
 		}
 

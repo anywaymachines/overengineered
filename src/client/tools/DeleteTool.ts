@@ -4,6 +4,7 @@ import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
 import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
+import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import Signals from "client/event/Signals";
 import DeleteToolWidget from "client/gui/widget/tools/DeleteToolWidget";
 import BuildingManager from "shared/building/BuildingManager";
@@ -79,6 +80,7 @@ export default class DeleteTool extends ToolBase {
 	public async deleteBlock() {
 		// ERROR: No block selected
 		if (this.highlight.Value === undefined) {
+			StaticWidgetsController.logStaticWidget.addLine("Block is not selected!");
 			return;
 		}
 
