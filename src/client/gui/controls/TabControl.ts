@@ -1,25 +1,22 @@
 import Control from "client/base/Control";
 
-type BlockChooserDefinition = Frame & {
-	TabTemplate: GuiButton & {
-		Text: TextLabel;
+export type TabControlDefinition = Frame & {
+	Tabs: ScrollingFrame & {
+		Template: GuiButton & {
+			Text: TextLabel;
+		};
 	};
-	TabContentsTemplate: ScrollingFrame & {};
-
-	Tabs: ScrollingFrame & {};
 	Contents: Frame & {};
 };
 
-export default class TabControl extends Control<BlockChooserDefinition> {
+export default class TabControl extends Control<TabControlDefinition> {
 	private readonly tabTemplate;
-	private readonly contentsTemplate;
 
-	private currentContent?: Control<Frame>;
-
-	constructor(gui: BlockChooserDefinition) {
+	constructor(gui: TabControlDefinition) {
 		super(gui);
-		this.tabTemplate = this.gui.TabTemplate.Clone();
-		this.contentsTemplate = this.gui.TabContentsTemplate.Clone();
+
+		this.tabTemplate = this.gui.Tabs.Template.Clone();
+		this.gui.Tabs.ClearAllChildren();
 	}
 
 	addTab(name: string, content: Control<Frame>) {
@@ -28,9 +25,13 @@ export default class TabControl extends Control<BlockChooserDefinition> {
 		tab.Visible = true;
 		tab.Parent = this.gui.Tabs;
 
-		content.gui.Visible = false;
-		content.gui.Parent = this.gui.Contents;
+		this.addChild(content);
+		content.setVisible(false);
+		content.setParent(this.gui.Contents);
 
-		tab.InputBegan;
+		this.eventHandler.subscribe(tab.Activated, (input, clickCount) => {
+			this.gui.Contents.ClearAllChildren();
+			content.setParent(this.gui.Contents);
+		});
 	}
 }

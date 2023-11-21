@@ -6,7 +6,7 @@ import ConfirmWidget from "client/gui/widget/static/popup/ConfirmWidget";
 import MaterialWidget from "client/gui/widget/static/popup/MaterialWidget";
 
 export default class StaticWidgetsController {
-	public static readonly confirmWidget = new ConfirmWidget();
+	public static readonly confirmWidget = undefined! as ConfirmWidget;
 	public static readonly materialWidget = new MaterialWidget();
 	public static readonly logStaticWidget = new LogStaticWidget();
 	public static readonly actionBarWidget = new ActionBarWidget();

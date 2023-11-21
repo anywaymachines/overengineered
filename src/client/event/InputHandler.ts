@@ -1,6 +1,6 @@
 import { UserInputService } from "@rbxts/services";
-import EventHandler from "./EventHandler";
-import StaticWidgetsController from "client/controller/StaticWidgetsController";
+import EventHandler from "shared/EventHandler";
+//import StaticWidgetsController from "client/controller/StaticWidgetsController";
 
 type InputCallback = (input: InputObject) => boolean | unknown;
 type TouchCallback = () => boolean | unknown;
@@ -34,9 +34,9 @@ export default class InputHandler {
 			return false;
 		}
 
-		if (StaticWidgetsController.isPopupVisible()) {
+		/*if (StaticWidgetsController.isPopupVisible()) {
 			return false;
-		}
+		}*/
 
 		return true;
 	}

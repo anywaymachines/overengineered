@@ -1,3 +1,19 @@
+import PlayerStateEvent from "./event/PlayerStateEvent";
+import BlockChooserControl, { BlockChooserControlDefinition } from "./gui/tools/BlockChooser";
+import BlockRegistry from "shared/registry/BlocksRegistry";
+
+const bcgui = game
+	.GetService("Players")
+	.LocalPlayer.WaitForChild("PlayerGui")
+	.WaitForChild("GameUI")
+	.WaitForChild("BlockChooser")
+	.WaitForChild("Contents") as BlockChooserControlDefinition;
+
+const a = new BlockChooserControl(bcgui, BlockRegistry.RegisteredBlocks);
+
+PlayerStateEvent.emitPlayerSpawn();
+
+/*
 import StaticWidgetsController from "./controller/StaticWidgetsController";
 import SceneController from "./controller/SceneController";
 import TooltipController from "./controller/TooltipController";
@@ -23,3 +39,4 @@ PlayerStateEvent.emitPlayerSpawn();
 
 // Native input type share
 Remotes.Client.GetNamespace("Player").Get("InputTypeInfo").SendToServer(InputController.inputType);
+*/

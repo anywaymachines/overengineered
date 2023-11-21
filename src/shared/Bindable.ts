@@ -10,8 +10,10 @@ export interface ReadonlyBindable<T> {
 
 /** Stores a value and provides and event of it being changed */
 export default class Bindable<T> implements ReadonlyBindable<T> {
-	public readonly changed: Pick<Signal<(value: T) => void>, "Connect" | "ConnectParallel" | "Once" | "Wait"> =
-		new Signal<(value: T) => void>();
+	public readonly changed: Pick<
+		Signal<(value: T, prev: T) => void>,
+		"Connect" | "ConnectParallel" | "Once" | "Wait"
+	> = new Signal<(value: T, prev: T) => void>();
 
 	private value: T;
 
@@ -20,16 +22,21 @@ export default class Bindable<T> implements ReadonlyBindable<T> {
 	}
 
 	public set(value: T) {
+		const prev = this.get();
 		this.value = value;
-		(this.changed as Signal<(value: T) => void>).Fire(value);
+		(this.changed as Signal<(value: T, prev: T) => void>).Fire(value, prev);
 	}
 
 	public get() {
 		return this.value;
 	}
 
-	public subscribe(eventHandler: EventHandler, func: (value: T) => void, executeImmediately: boolean = false) {
+	public subscribe(
+		eventHandler: EventHandler,
+		func: (value: T, prev: T) => void,
+		executeImmediately: boolean = false,
+	) {
 		eventHandler.subscribe(this.changed, func);
-		if (executeImmediately) func(this.get());
+		if (executeImmediately) func(this.get(), this.get());
 	}
 }

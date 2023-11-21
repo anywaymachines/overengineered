@@ -1,11 +1,34 @@
-import Widget from "./Widget";
+import InputController from "client/controller/InputController";
+import InputHandler from "client/event/InputHandler";
+import Signals from "client/event/Signals";
+import EventHandler from "shared/EventHandler";
 
-export default abstract class Control<T extends Frame> extends Widget {
-	public readonly gui: T;
+export default abstract class Control<T extends GuiObject> {
+	// Handlers
+	protected readonly eventHandler = new EventHandler();
+	protected readonly inputHandler = new InputHandler();
 
-	constructor(gui: T) {
-		super();
-		this.gui = gui.Clone();
+	protected readonly gui: T;
+	protected readonly eventChildren: Control<GuiObject>[] = [];
+
+	constructor(template: T) {
+		this.gui = template.Clone();
+		this.gui.Parent = template.Parent;
+
+		template.Visible = false;
+	}
+
+	protected addChild(control: Control<GuiObject>) {
+		this.eventChildren.push(control);
+		control.prepare();
+	}
+	protected removeChild(child: Control<GuiObject>) {
+		const index = this.eventChildren.indexOf(child);
+		if (index === -1) return;
+
+		this.eventChildren.remove(index);
+		child.eventHandler.unsubscribeAll();
+		child.inputHandler.unsubscribeAll();
 	}
 
 	isVisible() {
@@ -13,5 +36,48 @@ export default abstract class Control<T extends Frame> extends Widget {
 	}
 	setVisible(value: boolean) {
 		this.gui.Visible = value;
+
+		if (value) {
+			this.prepare();
+		} else {
+			this.eventHandler.unsubscribeAll();
+			this.inputHandler.unsubscribeAll();
+		}
+	}
+
+	getParent() {
+		return this.gui.Parent;
+	}
+	setParent(value: GuiObject | undefined) {
+		this.gui.Parent = value;
+	}
+
+	/** A function for preparing functionality for Desktop */
+	protected prepareDesktop() {}
+	/** A function for preparing functionality for Touch */
+	protected prepareTouch() {}
+	/** A function for preparing functionality for Gamepad */
+	protected prepareGamepad() {}
+
+	/**
+	 * A function for preparing functionality.
+	 * ! Unsubscribes from everything !
+	 */
+	protected prepare() {
+		// Terminate exist events
+		this.eventHandler.unsubscribeAll();
+		this.inputHandler.unsubscribeAll();
+
+		// Required event
+		this.eventHandler.subscribeOnce(Signals.INPUT_TYPE_CHANGED_EVENT, () => this.prepare());
+
+		// Call init
+		const events = {
+			Desktop: () => this.prepareDesktop(),
+			Touch: () => this.prepareTouch(),
+			Gamepad: () => this.prepareGamepad(),
+		};
+
+		events[InputController.inputType]();
 	}
 }
