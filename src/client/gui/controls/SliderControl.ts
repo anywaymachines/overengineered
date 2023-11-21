@@ -1,9 +1,9 @@
 import { UserInputService } from "@rbxts/services";
 import { Players } from "@rbxts/services";
-import EventHandler from "client/event/EventHandler";
+import EventHandler from "shared/EventHandler";
 import GuiAnimator from "../GuiAnimator";
 
-type SliderWidgetType = Frame & {
+type SliderControlDefinition = {
 	TextButton: TextButton & {
 		TextButton: TextButton;
 	};
@@ -11,15 +11,15 @@ type SliderWidgetType = Frame & {
 	TextLabel: TextLabel;
 };
 
-export default class SliderWidget {
+export default class SliderControl {
 	private readonly eventHandler = new EventHandler();
-	private readonly widget: SliderWidgetType;
+	private readonly widget: SliderControlDefinition;
 	private value = 0;
 	private min = 0;
 	private max = 10;
 	private step = 1;
 
-	constructor(widget: SliderWidgetType) {
+	constructor(widget: SliderControlDefinition) {
 		this.widget = widget;
 		this.updateVisuals();
 

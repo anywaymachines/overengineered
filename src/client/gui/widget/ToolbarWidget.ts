@@ -11,6 +11,9 @@ import TooltipController from "client/controller/TooltipController";
 import DeleteTool from "client/tools/DeleteTool";
 import ConfigTool from "client/tools/ConfigTool";
 import ToolWidget from "./tools/ToolWidget";
+import BuildToolWidget from "./tools/BuildToolWidget";
+import DeleteToolWidget from "./tools/DeleteToolWidget";
+import ConfigToolWidget from "./tools/ConfigToolWidget";
 
 /** Widget-a substitute for the native Roblox Backpack */
 export default class ToolbarWidget extends Widget {
@@ -36,18 +39,16 @@ export default class ToolbarWidget extends Widget {
 		// Disable roblox native backpack
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
-		const addTool = <TTool extends ToolBase>(tool: TTool, widgetfunc: (tool:TTool)=>ToolWidget<TTool>) => {
+		const addTool = <TTool extends ToolBase>(tool: TTool, widgetfunc?: (tool: TTool) => ToolWidget<TTool>) => {
 			this.tools.push(tool);
-			this.toolWidgets.push(widgetfunc(tool));
+			if (widgetfunc) this.toolWidgets.push(widgetfunc(tool));
 		};
 
 		// Creating tools
-		this.tools.push(new BuildTool(), tool => new BuildToolWidget(tool));
-		addTool(new BuildTool(), 
-
-		this.tools.push(new MoveTool());
-		this.tools.push(new DeleteTool());
-		this.tools.push(new ConfigTool());
+		addTool(new BuildTool(), (tool) => new BuildToolWidget(tool));
+		addTool(new MoveTool());
+		addTool(new DeleteTool(), (tool) => new DeleteToolWidget(tool));
+		addTool(new ConfigTool(), (tool) => new ConfigToolWidget(tool));
 
 		// Preparation
 		const gameUI = GuiController.getGameUI();

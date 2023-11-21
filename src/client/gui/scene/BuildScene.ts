@@ -1,7 +1,7 @@
 import Scene from "client/base/Scene";
 import ToolbarWidget from "../widget/ToolbarWidget";
 import Signals from "client/event/Signals";
-import EventHandler from "client/event/EventHandler";
+import EventHandler from "shared/EventHandler";
 
 /** Construction mode scene */
 export default class BuildScene extends Scene {

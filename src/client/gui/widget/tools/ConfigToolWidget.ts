@@ -2,8 +2,8 @@ import Widget from "client/base/Widget";
 import GuiController from "client/controller/GuiController";
 import Signals from "client/event/Signals";
 import GuiAnimator from "client/gui/GuiAnimator";
-import CheckBoxWidget from "client/gui/settings/CheckBoxWidget";
-import SliderWidget from "client/gui/settings/SliderWidget";
+import CheckBoxControl from "client/gui/controls/CheckBoxControl";
+import SliderControl from "client/gui/controls/SliderControl";
 import ConfigTool from "client/tools/ConfigTool";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
@@ -13,13 +13,13 @@ type ConfigToolGui = Frame & {
 	Selection: Frame & {
 		Buttons: ScrollingFrame & {
 			CheckboxTemplate: Frame & {
-				CheckBoxWidget: CheckBoxWidget;
+				CheckBoxControl: CheckBoxControl;
 			};
 			KeyTemplate: Frame & {
 				KeyEditorWidget: Frame; // TODO:
 			};
 			SeekbarTemplate: Frame & {
-				SliderWidget: SliderWidget;
+				SliderControl: SliderControl;
 			};
 		};
 	};

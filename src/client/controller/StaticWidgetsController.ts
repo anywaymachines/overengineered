@@ -1,4 +1,4 @@
-import EventHandler from "client/event/EventHandler";
+import EventHandler from "shared/EventHandler";
 import Signals from "client/event/Signals";
 import ActionBarWidget from "client/gui/widget/static/ActionBarWidget";
 import LogStaticWidget from "client/gui/widget/static/LogStaticWidget";

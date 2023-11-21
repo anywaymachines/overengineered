@@ -1,16 +1,16 @@
-import EventHandler from "client/event/EventHandler";
+import EventHandler from "shared/EventHandler";
 
-type CheckBoxWidgetType = Frame & {
+type CheckBoxControlDefinition = {
 	TextButton: TextButton;
 	TextLabel: TextLabel;
 };
 
-export default class CheckBoxWidget {
+export default class CheckBoxControl {
 	private readonly eventHandler = new EventHandler();
-	private readonly widget: CheckBoxWidgetType;
+	private readonly widget: CheckBoxControlDefinition;
 	private checked = false;
 
-	constructor(widget: CheckBoxWidgetType) {
+	constructor(widget: CheckBoxControlDefinition) {
 		this.widget = widget;
 
 		this.updateVisuals();

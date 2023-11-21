@@ -1,5 +1,5 @@
 import InputController from "client/controller/InputController";
-import EventHandler from "client/event/EventHandler";
+import EventHandler from "shared/EventHandler";
 import InputHandler from "client/event/InputHandler";
 import Signals from "client/event/Signals";
 

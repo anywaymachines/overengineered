@@ -61,24 +61,6 @@ type MaterialGui = Frame & {
 	};
 };
 
-// Build Tool
-type BuildToolGui = Frame & {
-	Selection: Frame & {
-		Buttons: ScrollingFrame & {
-			BlockTemplate: TextButton & { Frame: Frame & { LimitLabel: TextLabel }; TextLabel: TextLabel };
-			CategoryTemplate: TextButton & { Frame: Frame & { ImageLabel: ImageLabel }; TextLabel: TextLabel };
-		};
-		MaterialButton: TextButton;
-		MaterialLabel: TextLabel;
-	};
-	TouchControls: Frame & {
-		PlaceButton: TextButton;
-		RotateRButton: TextButton;
-		RotateTButton: TextButton;
-		RotateYButton: TextButton;
-	};
-};
-
 type DeleteToolGui = Frame & {
 	TouchControls: Frame & {
 		DeleteButton: TextButton;

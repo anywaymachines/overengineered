@@ -18,9 +18,6 @@ export default class ConfigTool extends ToolBase {
 	private readonly selected: Highlight[] = [];
 	private highlight?: Highlight;
 
-	// GUI
-	private readonly widget: ConfigToolWidget = new ConfigToolWidget(this);
-
 	protected prepare(): void {
 		super.prepare();
 

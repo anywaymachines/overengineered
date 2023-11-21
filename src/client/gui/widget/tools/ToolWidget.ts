@@ -20,7 +20,7 @@ export default abstract class ToolWidget<T extends ToolBase> extends Widget {
 			if (tool !== this.tool) return;
 
 			this.equipped = false;
-			this.onUnequip;
+			this.onUnequip();
 		});
 	}
 

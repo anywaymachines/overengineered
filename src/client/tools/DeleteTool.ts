@@ -17,9 +17,6 @@ export default class DeleteTool extends ToolBase {
 
 	public highlight: ObjectValue = new Instance("ObjectValue");
 
-	// GUI
-	private readonly widget: DeleteToolWidget = new DeleteToolWidget(this);
-
 	protected prepare(): void {
 		super.prepare();
 

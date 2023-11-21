@@ -1,4 +1,3 @@
-import Widget from "client/base/Widget";
 import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
 import GuiAnimator from "client/gui/GuiAnimator";
@@ -10,10 +9,27 @@ import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import AbstractCategory from "shared/registry/abstract/AbstractCategory";
 import ToolWidget from "./ToolWidget";
 
+type BuildToolGuiDefinition = Frame & {
+	Selection: Frame & {
+		Buttons: ScrollingFrame & {
+			BlockTemplate: TextButton & { Frame: Frame & { LimitLabel: TextLabel }; TextLabel: TextLabel };
+			CategoryTemplate: TextButton & { Frame: Frame & { ImageLabel: ImageLabel }; TextLabel: TextLabel };
+		};
+		MaterialButton: TextButton;
+		MaterialLabel: TextLabel;
+	};
+	TouchControls: Frame & {
+		PlaceButton: TextButton;
+		RotateRButton: TextButton;
+		RotateTButton: TextButton;
+		RotateYButton: TextButton;
+	};
+};
+
 /** Widget of the BuildTool tool */
 export default class BuildToolWidget extends ToolWidget<BuildTool> {
 	private blockTemplate: TextButton & { Frame: Frame & { LimitLabel: TextLabel }; TextLabel: TextLabel };
-	private gui: BuildToolGui;
+	private gui: BuildToolGuiDefinition;
 
 	// Templates
 	private categoryTemplate: TextButton & { Frame: Frame & { ImageLabel: ImageLabel }; TextLabel: TextLabel };
@@ -21,8 +37,8 @@ export default class BuildToolWidget extends ToolWidget<BuildTool> {
 	// Menu selection
 	private selectionButtons: TextButton[] = [];
 	private selectedCategory?: AbstractCategory;
-	public selectedMaterial: Enum.Material = Enum.Material.Plastic;
-	public selectedBlock?: AbstractBlock;
+	private selectedMaterial: Enum.Material = Enum.Material.Plastic;
+	private selectedBlock?: AbstractBlock;
 
 	constructor(tool: BuildTool) {
 		super(tool);
@@ -95,7 +111,7 @@ export default class BuildToolWidget extends ToolWidget<BuildTool> {
 				this.selectedCategory = undefined;
 
 				this.selectedBlock = undefined;
-				this.tool.prepareVisual();
+				this.tool.setSelectedBlock(undefined);
 
 				SoundController.getSounds().GuiClick.Play();
 				this.updateLists(true);
@@ -113,7 +129,7 @@ export default class BuildToolWidget extends ToolWidget<BuildTool> {
 				obj.Parent = this.getGui().Selection.Buttons;
 				this.eventHandler.subscribeOnce(obj.MouseButton1Click, () => {
 					this.selectedBlock = block;
-					this.tool.prepareVisual();
+					this.tool.setSelectedBlock(block);
 
 					this.updateLists(false);
 					SoundController.getSounds().GuiClick.Play();
@@ -135,8 +151,8 @@ export default class BuildToolWidget extends ToolWidget<BuildTool> {
 		this.eventHandler.subscribe(this.gui.Selection.MaterialButton.MouseButton1Click, () => {
 			StaticWidgetsController.materialWidget.display("Building Material", (material: Enum.Material) => {
 				this.selectedMaterial = material;
+				this.tool.setSelectedMaterial(material);
 				this.gui.Selection.MaterialLabel.Text = material.Name;
-				this.tool.prepareVisual();
 			});
 		});
 	}

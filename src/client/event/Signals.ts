@@ -1,5 +1,4 @@
 import Signal from "@rbxts/signal";
-import InputController from "../controller/InputController";
 import ToolBase from "client/base/ToolBase";
 import { Workspace } from "@rbxts/services";
 
@@ -9,9 +8,7 @@ export default class Signals {
 		MOVED: (Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame"),
 	} as const;
 
-	public static readonly INPUT_TYPE_CHANGED_EVENT = new Signal<
-		(platform: InputType) => void
-	>();
+	public static readonly INPUT_TYPE_CHANGED_EVENT = new Signal<(platform: InputType) => void>();
 
 	public static readonly PLAYER = {
 		SPAWN: new Signal<() => void>(),
