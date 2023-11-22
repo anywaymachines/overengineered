@@ -1,6 +1,7 @@
 import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import { Workspace } from "@rbxts/services";
+import ObservableValue from "shared/event/ObservableValue";
 
 /** Class for working with local networking signals */
 export default class Signals {
@@ -9,6 +10,7 @@ export default class Signals {
 	} as const;
 
 	public static readonly INPUT_TYPE_CHANGED_EVENT = new Signal<(platform: InputType) => void>();
+	public static readonly INPUT_TYPE = new ObservableValue("Desktop");
 
 	public static readonly PLAYER = {
 		SPAWN: new Signal<() => void>(),
@@ -29,4 +31,8 @@ export default class Signals {
 		CLEARED: new Signal<() => void>(),
 		MOVED: new Signal<(offset: Vector3) => void>(),
 	} as const;
+
+	static {
+		this.INPUT_TYPE_CHANGED_EVENT.Connect((input) => this.INPUT_TYPE.set(input));
+	}
 }

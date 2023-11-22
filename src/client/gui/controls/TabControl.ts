@@ -25,7 +25,7 @@ export default class TabControl extends Control<TabControlDefinition> {
 		content.setParent(this.gui.Content);
 		content.setVisible(this.gui.Content.GetChildren().size() === 0);
 
-		this.eventHandler.subscribe(tab.MouseButton1Click, () => {
+		this.event.subscribe("Desktop", tab.MouseButton1Click, () => {
 			for (const child of this.gui.Content.GetChildren()) if ("Visible" in child) child.Visible = false;
 			content.setVisible(true);
 		});

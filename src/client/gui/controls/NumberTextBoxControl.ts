@@ -9,7 +9,7 @@ export default class NumberTextBoxControl extends Control<NumberTextBoxControlDe
 		super(gui);
 
 		this.value = new ObservableValue(0);
-		this.eventHandler.subscribe(this.gui.FocusLost, () => {
+		this.event.subscribe("All", this.gui.FocusLost, () => {
 			print("pressed " + this.gui.Text);
 			const text = this.gui.Text.gsub("%D", "")[0];
 			print("next " + text);

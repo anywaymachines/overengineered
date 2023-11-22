@@ -24,14 +24,14 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 		const eh = new EventHandler();
 		let startpos: number | undefined;
 
-		this.eventHandler.subscribe(UserInputService.InputEnded, (input, _) => {
+		this.event.subscribe("Desktop", UserInputService.InputEnded, (input, _) => {
 			if (input.UserInputType === Enum.UserInputType.MouseButton1) {
 				startpos = undefined;
 				eh.unsubscribeAll();
 			}
 		});
 
-		this.value.subscribe(this.eventHandler, () => this.updateVisuals(), true);
+		this.event.subscribeObservable("All", this.value, () => this.updateVisuals(), true);
 
 		const update = () => {
 			if (startpos === undefined) return;
@@ -41,7 +41,7 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 		};
 
 		const sub = (signal: RBXScriptSignal<(input: InputObject) => void>) => {
-			this.eventHandler.subscribe(signal, (input) => {
+			this.event.subscribe("Desktop", signal, (input) => {
 				if (
 					input.UserInputState === Enum.UserInputState.Begin &&
 					input.UserInputType === Enum.UserInputType.MouseButton1

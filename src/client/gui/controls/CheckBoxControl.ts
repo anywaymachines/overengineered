@@ -18,9 +18,8 @@ export default class CheckBoxControl extends Control<CheckBoxControlDefinition> 
 
 		this.updateVisuals();
 
-		// Events
-		this.eventHandler.subscribe(widget.MouseButton1Click, () => this.onClick());
-		this.eventHandler.subscribe(widget.Circle.MouseButton1Click, () => this.onClick());
+		this.event.subscribe("All", widget.MouseButton1Click, () => this.onClick());
+		this.event.subscribe("All", widget.Circle.MouseButton1Click, () => this.onClick());
 	}
 
 	public tempLock(time: number) {

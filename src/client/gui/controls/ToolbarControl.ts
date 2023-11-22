@@ -24,9 +24,10 @@ export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition
 		this.gui.ImageLabel.Image = tool.getImageID();
 		this.gui.KeyboardNumberLabel.Text = tostring(ToolController.tools.indexOf(tool) + 1);
 
-		this.eventHandler.subscribe(this.gui.Activated, () => ToolController.selectedTool.set(tool));
-		ToolController.selectedTool.subscribe(
-			this.eventHandler,
+		this.event.subscribe("All", this.gui.Activated, () => ToolController.selectedTool.set(tool));
+		this.event.subscribeObservable(
+			"All",
+			ToolController.selectedTool,
 			(newtool) => {
 				// Update GUI
 				if (newtool === tool) GuiAnimator.tweenColor(this.gui, this.activeColor, 0.2);
@@ -66,7 +67,7 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 			});
 		});
 
-		ToolController.selectedTool.subscribe(this.eventHandler, (tool) => this.toolChanged(tool));
+		this.event.subscribeObservable("All", ToolController.selectedTool, (tool) => this.toolChanged(tool));
 		this.resetLabels();
 	}
 

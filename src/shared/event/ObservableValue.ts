@@ -4,8 +4,12 @@ import EventHandler from "shared/event/EventHandler";
 export interface ReadonlyObservableValue<T> {
 	get(): T;
 
-	subscribe(eventHandler: EventHandler, func: (value: T) => void): void;
-	subscribe(eventHandler: EventHandler, func: (value: T) => void, executeImmediately: boolean | undefined): void;
+	subscribe(eventHandler: EventHandler | undefined, func: (value: T, prev: T) => void): void;
+	subscribe(
+		eventHandler: EventHandler | undefined,
+		func: (value: T, prev: T) => void,
+		executeImmediately: boolean | undefined,
+	): void;
 }
 
 /** Stores a value and provides and event of it being changed */

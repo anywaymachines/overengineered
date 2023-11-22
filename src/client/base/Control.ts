@@ -2,6 +2,7 @@ import InputController from "client/controller/InputController";
 import InputHandler from "client/event/InputHandler";
 import Signals from "client/event/Signals";
 import EventHandler from "shared/event/EventHandler";
+import ControlEventHolder from "./ControlEventHolder";
 
 /** Wraps the Roblox GUI objects and provides methods for easy handling */
 export default abstract class Control<T extends GuiObject = GuiObject> {
@@ -9,8 +10,10 @@ export default abstract class Control<T extends GuiObject = GuiObject> {
 	protected readonly eventHandler = new EventHandler();
 	protected readonly inputHandler = new InputHandler();
 
+	protected readonly event = new ControlEventHolder();
+
 	protected readonly gui: T;
-	protected readonly eventChildren: Control<GuiObject>[] = [];
+	private readonly eventChildren: Control[] = [];
 
 	constructor(gui: T) {
 		this.gui = gui;
@@ -33,11 +36,10 @@ export default abstract class Control<T extends GuiObject = GuiObject> {
 		return gui.FindFirstChild(name) !== undefined;
 	}
 
-	protected addChild(control: Control<GuiObject>) {
+	protected addChild(control: Control) {
 		this.eventChildren.push(control);
-		//control.prepare();
 	}
-	protected removeChild(child: Control<GuiObject>) {
+	protected removeChild(child: Control) {
 		const index = this.eventChildren.indexOf(child);
 		if (index === -1) return;
 

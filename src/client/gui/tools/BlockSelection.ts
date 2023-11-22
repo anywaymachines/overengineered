@@ -54,7 +54,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		// Prepare templates
 		this.itemTemplate = Control.asTemplate(this.gui.ScrollingFrame.Template);
 
-		this.selectedCategory.subscribe(this.eventHandler, (category) => this.create(category), true);
+		this.event.subscribeObservable("All", this.selectedCategory, (category) => this.create(category), true);
 	}
 
 	private create(category: AbstractCategory | undefined) {
@@ -79,8 +79,9 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 				.forEach((block) => {
 					const b = createPart(block.getDisplayName(), () => this.selectedBlock.set(block));
 
-					this.selectedBlock.subscribe(
-						this.eventHandler,
+					this.event.subscribeObservable(
+						"All",
+						this.selectedBlock,
 						(newblock) =>
 							(b.getGui().BackgroundColor3 =
 								newblock === block ? Color3.fromRGB(56, 61, 74) : Color3.fromRGB(86, 94, 114)),
