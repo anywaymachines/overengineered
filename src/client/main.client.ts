@@ -1,19 +1,32 @@
 import PlayerStateEvent from "./event/PlayerStateEvent";
-import BlockChooserControl, { BlockChooserControlDefinition } from "./gui/tools/BlockChooser";
-import BlockRegistry from "shared/registry/BlocksRegistry";
+import SliderControl, { SliderControlDefinition } from "./gui/controls/SliderControl";
 
-const bcgui = game
-	.GetService("Players")
-	.LocalPlayer.WaitForChild("PlayerGui")
-	.WaitForChild("GameUI")
-	.WaitForChild("BlockChooser")
-	.WaitForChild("Contents") as BlockChooserControlDefinition;
+const interfaceTest = true;
+if (interfaceTest) {
+	// const gameui = game.GetService("StarterGui").WaitForChild("GameUI");
+	const gameui = game.GetService("Players").LocalPlayer.WaitForChild("PlayerGui").WaitForChild("GameUI");
+	const uikit = game.GetService("Players").LocalPlayer.WaitForChild("PlayerGui").WaitForChild("UIKit");
 
-const a = new BlockChooserControl(bcgui, BlockRegistry.RegisteredBlocks);
+	new SliderControl(uikit.WaitForChild("Buttons").WaitForChild("Slider") as SliderControlDefinition);
 
-PlayerStateEvent.emitPlayerSpawn();
+	/*const backpack = new TabControl(
+		gameui.WaitForChild("InventoryGui").WaitForChild("Backpack") as TabControlDefinition,
+	);
 
-/*
+	for (const category of CategoriesRegistry.registeredCategories) {
+		const content = new BlockChooserControl(
+			backpack.getGuiChild("Content").WaitForChild("Template") as BlockChooserControlDefinition,
+			BlockRegistry.getBlocksInCategory(category),
+		);
+
+		backpack.addTab(category.getDisplayName(), content);
+	}
+
+	backpack.setVisible(true);*/
+
+	PlayerStateEvent.emitPlayerSpawn();
+} else {
+	/*
 import StaticWidgetsController from "./controller/StaticWidgetsController";
 import SceneController from "./controller/SceneController";
 import TooltipController from "./controller/TooltipController";
@@ -40,3 +53,4 @@ PlayerStateEvent.emitPlayerSpawn();
 // Native input type share
 Remotes.Client.GetNamespace("Player").Get("InputTypeInfo").SendToServer(InputController.inputType);
 */
+}

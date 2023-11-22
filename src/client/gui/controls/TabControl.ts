@@ -2,11 +2,9 @@ import Control from "client/base/Control";
 
 export type TabControlDefinition = Frame & {
 	Tabs: ScrollingFrame & {
-		Template: GuiButton & {
-			Text: TextLabel;
-		};
+		Template: TextButton & {};
 	};
-	Contents: Frame & {};
+	Content: Frame & {};
 };
 
 export default class TabControl extends Control<TabControlDefinition> {
@@ -14,24 +12,22 @@ export default class TabControl extends Control<TabControlDefinition> {
 
 	constructor(gui: TabControlDefinition) {
 		super(gui);
-
-		this.tabTemplate = this.gui.Tabs.Template.Clone();
-		this.gui.Tabs.ClearAllChildren();
+		this.tabTemplate = Control.cloneDestroy(this.gui.Tabs.Template);
 	}
 
-	addTab(name: string, content: Control<Frame>) {
+	addTab(name: string, content: Control<GuiObject>) {
 		const tab = this.tabTemplate.Clone();
-		tab.Text.Text = name;
+		tab.Text = name;
 		tab.Visible = true;
 		tab.Parent = this.gui.Tabs;
 
 		this.addChild(content);
-		content.setVisible(false);
-		content.setParent(this.gui.Contents);
+		content.setParent(this.gui.Content);
+		content.setVisible(this.gui.Content.GetChildren().size() === 0);
 
-		this.eventHandler.subscribe(tab.Activated, (input, clickCount) => {
-			this.gui.Contents.ClearAllChildren();
-			content.setParent(this.gui.Contents);
+		this.eventHandler.subscribe(tab.MouseButton1Click, () => {
+			for (const child of this.gui.Content.GetChildren()) if ("Visible" in child) child.Visible = false;
+			content.setVisible(true);
 		});
 	}
 }

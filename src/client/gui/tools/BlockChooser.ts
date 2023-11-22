@@ -2,20 +2,21 @@ import Control from "client/base/Control";
 import Bindable from "shared/Bindable";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 
-export type BlockControlDefinition = GuiObject & {
+export type BlockControlDefinition = GuiButton & {
 	BlockName: TextLabel;
 };
 
 /** Block control for choosing */
 class BlockControl extends Control<BlockControlDefinition> {
+	public readonly activated;
 	private readonly block;
 
 	constructor(template: BlockControlDefinition, block: AbstractBlock) {
 		super(template);
 
 		this.block = block;
-		print(this.gui.BlockName);
 		this.gui.BlockName.Text = block.getDisplayName();
+		this.activated = this.gui.Activated;
 	}
 }
 
@@ -36,8 +37,7 @@ export default class BlockChooserControl extends Control<BlockChooserControlDefi
 		this.selectedBlock = new Bindable<AbstractBlock | undefined>(blocks[0]);
 
 		// Prepare templates
-		this.blockTemplate = this.gui.BlockTemplate.Clone();
-		this.gui.BlockTemplate.Destroy();
+		this.blockTemplate = Control.cloneDestroy(this.gui.BlockTemplate);
 
 		this.create();
 	}

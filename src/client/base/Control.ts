@@ -3,6 +3,7 @@ import InputHandler from "client/event/InputHandler";
 import Signals from "client/event/Signals";
 import EventHandler from "shared/EventHandler";
 
+/** Base class for a gui object */
 export default abstract class Control<T extends GuiObject> {
 	// Handlers
 	protected readonly eventHandler = new EventHandler();
@@ -18,9 +19,13 @@ export default abstract class Control<T extends GuiObject> {
 		template.Visible = false;
 	}
 
+	public getGuiChild(name: string) {
+		return this.gui.WaitForChild(name);
+	}
+
 	protected addChild(control: Control<GuiObject>) {
 		this.eventChildren.push(control);
-		control.prepare();
+		//control.prepare();
 	}
 	protected removeChild(child: Control<GuiObject>) {
 		const index = this.eventChildren.indexOf(child);
@@ -31,18 +36,26 @@ export default abstract class Control<T extends GuiObject> {
 		child.inputHandler.unsubscribeAll();
 	}
 
+	/** Destroy the object and return its clone */
+	protected static cloneDestroy<T extends GuiObject>(object: T) {
+		const clone = object.Clone();
+		object.Destroy();
+
+		return clone;
+	}
+
 	isVisible() {
 		return this.gui.Visible;
 	}
 	setVisible(value: boolean) {
 		this.gui.Visible = value;
 
-		if (value) {
+		/*if (value) {
 			this.prepare();
 		} else {
 			this.eventHandler.unsubscribeAll();
 			this.inputHandler.unsubscribeAll();
-		}
+		}*/
 	}
 
 	getParent() {

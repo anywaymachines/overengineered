@@ -2,25 +2,22 @@ import { UserInputService } from "@rbxts/services";
 import { Players } from "@rbxts/services";
 import EventHandler from "shared/EventHandler";
 import GuiAnimator from "../GuiAnimator";
+import Control from "client/base/Control";
 
-type SliderControlDefinition = {
-	TextButton: TextButton & {
-		TextButton: TextButton;
-	};
-	TextBox: TextBox;
-	TextLabel: TextLabel;
+export type SliderControlDefinition = GuiObject & {
+	Filled: GuiObject;
+	Knob: GuiObject;
+	Text: TextLabel;
 };
 
-export default class SliderControl {
-	private readonly eventHandler = new EventHandler();
-	private readonly widget: SliderControlDefinition;
+export default class SliderControl extends Control<SliderControlDefinition> {
 	private value = 0;
 	private min = 0;
 	private max = 10;
 	private step = 1;
 
-	constructor(widget: SliderControlDefinition) {
-		this.widget = widget;
+	constructor(template: SliderControlDefinition) {
+		super(template);
 		this.updateVisuals();
 
 		const eh = new EventHandler();
@@ -37,21 +34,27 @@ export default class SliderControl {
 			if (startpos === undefined) return;
 
 			const x = Players.LocalPlayer.GetMouse().X;
-			this.value = math.clamp((x - startpos) / widget.TextButton.AbsoluteSize.X, 0, 1);
+			this.value = math.clamp((x - startpos) / this.gui.AbsoluteSize.X, 0, 1);
 			this.updateVisuals();
 		};
 
-		const sub = (event: RBXScriptSignal<(x: number, y: number) => void>) => {
-			this.eventHandler.subscribe(event, (x, y) => {
-				startpos = widget.TextButton.AbsolutePosition.X;
-				update();
+		const sub = (signal: RBXScriptSignal<(input: InputObject) => void>) => {
+			this.eventHandler.subscribe(signal, (input) => {
+				if (
+					input.UserInputState === Enum.UserInputState.Begin &&
+					input.UserInputType === Enum.UserInputType.MouseButton1
+				) {
+					startpos = this.gui.Text.AbsolutePosition.X;
+					update();
 
-				eh.subscribe(Players.LocalPlayer.GetMouse().Move, update);
+					eh.subscribe(Players.LocalPlayer.GetMouse().Move, update);
+				}
 			});
 		};
 
-		sub(widget.TextButton.MouseButton1Down);
-		sub(widget.TextButton.TextButton.MouseButton1Down);
+		sub(this.gui.Filled.InputBegan);
+		sub(this.gui.Knob.InputBegan);
+		sub(this.gui.InputBegan);
 	}
 
 	setMin(value: number): void {
@@ -74,14 +77,21 @@ export default class SliderControl {
 	private updateVisuals() {
 		const value = this.value + this.step / (this.max - this.min) / 2;
 
+		const guivalue = value - (value % (this.step / (this.max - this.min)));
 		GuiAnimator.tween(
-			this.widget.TextButton.TextButton,
-			{ Position: new UDim2(value - (value % (this.step / (this.max - this.min))), 0, 0.5, 0) },
+			this.gui.Knob,
+			{ Position: new UDim2(guivalue, 0, 0.5, 0) },
+			new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		);
+
+		GuiAnimator.tween(
+			this.gui.Filled,
+			{ Size: new UDim2(guivalue, 0, 1, 0) },
 			new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 		);
 
 		let text = value * (this.max - this.min) + this.min;
 		text -= text % this.step;
-		this.widget.TextBox.Text = math.floor(text * 10) / 10 + "";
+		this.gui.Text.Text = math.floor(text * 10) / 10 + "";
 	}
 }
