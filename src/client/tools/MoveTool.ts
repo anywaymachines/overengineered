@@ -3,6 +3,7 @@ import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
 import InputController from "client/controller/InputController";
+import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
 import SharedPlots from "shared/building/SharedPlots";
 
@@ -138,7 +139,8 @@ export default class MoveTool extends ToolBase {
 		// Parsing response
 		if (response.success) {
 			// Move success
-			task.wait();
+		} else {
+			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
 		}
 
 		this.createHandles();

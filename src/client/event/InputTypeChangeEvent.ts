@@ -26,14 +26,19 @@ export default class InputTypeChangeEvent {
 
 			// Fire a new input type
 			Signals.INPUT_TYPE_CHANGED_EVENT.Fire(newInputType);
-			Remotes.Client.GetNamespace("Player").Get("InputTypeInfo").SendToServer(newInputType);
+			this.share();
 
 			LogStaticWidget.instance.addLine("New input type set to " + newInputType, Color3.fromRGB(252, 252, 145));
 		}
 	}
 
+	static share() {
+		Remotes.Client.GetNamespace("Player").Get("InputTypeInfo").SendToServer(InputController.inputType);
+	}
+
 	static subscribe() {
 		// Event
 		UserInputService.LastInputTypeChanged.Connect((lastInputType) => this.onLastInputTypeChanged(lastInputType));
+		this.share();
 	}
 }

@@ -1,5 +1,5 @@
 import Control from "client/base/Control";
-import Bindable, { ReadonlyBindable } from "shared/event/ObservableValue";
+import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import { ListControl } from "../controls/ListControl";
 import { DictionaryControl } from "../controls/DictionaryControl";
 import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
@@ -40,7 +40,7 @@ class MaterialChoosePart extends Control<MaterialChoosePartDefinition> {
 		super(gui);
 
 		this.materials = materials;
-		this.selectedMaterial = new Bindable<Enum.Material>(materials[0]);
+		this.selectedMaterial = new ObservableValue<Enum.Material>(materials[0]);
 
 		this.list = new DictionaryControl<GuiObject, Enum.Material, MaterialControl>(this.gui.ScrollingFrame);
 
@@ -99,7 +99,7 @@ class MaterialColorChooseControl extends ListControl<MaterialColorChooseDefiniti
 	constructor(gui: MaterialColorChooseDefinition) {
 		super(gui);
 
-		this.selectedColor = new Bindable<Color3>(new Color3(159 / 255, 161 / 255, 172 / 255));
+		this.selectedColor = new ObservableValue<Color3>(new Color3(159 / 255, 161 / 255, 172 / 255));
 
 		const updateColor = () => {
 			this.selectedColor.set(Color3.fromHSV(hue.value.get(), sat.value.get(), 1 - bri.value.get()));
@@ -169,8 +169,8 @@ type MaterialPreviewDefinition = GuiObject & {
 class MaterialPreviewControl extends Control<MaterialPreviewDefinition> {
 	constructor(
 		gui: MaterialPreviewDefinition,
-		selectedMaterial: ReadonlyBindable<Enum.Material>,
-		selectedColor: ReadonlyBindable<Color3>,
+		selectedMaterial: ReadonlyObservableValue<Enum.Material>,
+		selectedColor: ReadonlyObservableValue<Color3>,
 	) {
 		super(gui);
 

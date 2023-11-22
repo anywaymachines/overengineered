@@ -3,7 +3,7 @@ import { Players } from "@rbxts/services";
 import EventHandler from "shared/event/EventHandler";
 import GuiAnimator from "../GuiAnimator";
 import Control from "client/base/Control";
-import Bindable from "shared/event/ObservableValue";
+import ObservableValue from "shared/event/ObservableValue";
 
 export type SliderControlDefinition = GuiObject & {
 	Filled?: GuiObject;
@@ -12,7 +12,7 @@ export type SliderControlDefinition = GuiObject & {
 };
 
 export default class SliderControl<T extends SliderControlDefinition = SliderControlDefinition> extends Control<T> {
-	public readonly value = new Bindable(0);
+	public readonly value = new ObservableValue(0);
 	private min = 0;
 	private max = 10;
 	private step = 1;

@@ -66,7 +66,8 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 			});
 		});
 
-		ToolController.selectedTool.subscribe(this.eventHandler, (tool) => this.toolChanged(tool), true);
+		ToolController.selectedTool.subscribe(this.eventHandler, (tool) => this.toolChanged(tool));
+		this.resetLabels();
 	}
 
 	private toolChanged(tool: ToolBase | undefined) {
@@ -77,12 +78,16 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 			GuiAnimator.transition(this.getGui().NameLabel, 0.2, "up", 25);
 			GuiAnimator.transition(this.getGui().DescriptionLabel, 0.2, "up", 25);
 		} else {
-			this.getGui().NameLabel.Text = "";
-			this.getGui().DescriptionLabel.Text = "";
+			this.resetLabels();
 		}
 
 		// Play sound
 		SoundController.getSounds().Click.Play();
+	}
+
+	private resetLabels() {
+		this.getGui().NameLabel.Text = "";
+		this.getGui().DescriptionLabel.Text = "";
 	}
 
 	private gamepadSelectTool(isRight: boolean) {

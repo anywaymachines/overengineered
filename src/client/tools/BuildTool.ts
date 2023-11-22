@@ -248,7 +248,6 @@ export default class BuildTool extends ToolBase {
 			task.wait();
 			this.updatePosition(true);
 		} else {
-			SoundController.getSounds().BuildingMode.BlockPlaceError.PlaybackSpeed = SoundController.randomSoundSpeed();
 			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
 		}
 	}

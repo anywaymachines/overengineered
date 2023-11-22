@@ -20,6 +20,7 @@ export default abstract class Control<T extends GuiObject = GuiObject> {
 	public getGui() {
 		return this.gui;
 	}
+
 	public getGuiChild(name: string) {
 		return this.gui.WaitForChild(name);
 	}
@@ -58,13 +59,6 @@ export default abstract class Control<T extends GuiObject = GuiObject> {
 	}
 	setVisible(value: boolean) {
 		this.gui.Visible = value;
-
-		/*if (value) {
-			this.prepare();
-		} else {
-			this.eventHandler.unsubscribeAll();
-			this.inputHandler.unsubscribeAll();
-		}*/
 	}
 
 	getParent() {

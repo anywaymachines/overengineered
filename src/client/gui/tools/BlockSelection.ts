@@ -1,8 +1,10 @@
 import Control from "client/base/Control";
-import Bindable from "shared/event/ObservableValue";
+import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import AbstractCategory from "shared/registry/abstract/AbstractCategory";
 import { ListControl } from "../controls/ListControl";
+import GuiAnimator from "../GuiAnimator";
+import SoundController from "client/controller/SoundController";
 
 type BlockControlDefinition = GuiButton & {
 	TextLabel: TextLabel;
@@ -20,23 +22,25 @@ class ButtonControl extends Control<BlockControlDefinition> {
 	}
 }
 
-export type BlockChooserControlDefinition = GuiObject & {
+export type BlockSelectionControlDefinition = GuiObject & {
 	ScrollingFrame: ScrollingFrame & {
 		Template: BlockControlDefinition;
 	};
 };
 
 /** Block chooser control */
-export default class BlockChooserControl extends Control<BlockChooserControlDefinition> {
+export default class BlockSelectionControl extends Control<BlockSelectionControlDefinition> {
+	public readonly selectedBlock = new ObservableValue<AbstractBlock | undefined>(undefined);
+
 	private readonly blocks;
 	private readonly categories;
 
 	private readonly itemTemplate;
 	private readonly list;
-	private readonly selectedCategory = new Bindable<AbstractCategory | undefined>(undefined);
+	private readonly selectedCategory = new ObservableValue<AbstractCategory | undefined>(undefined);
 
 	constructor(
-		template: BlockChooserControlDefinition,
+		template: BlockSelectionControlDefinition,
 		blocks: readonly AbstractBlock[],
 		categories: readonly AbstractCategory[],
 	) {
@@ -60,6 +64,7 @@ export default class BlockChooserControl extends Control<BlockChooserControlDefi
 			control.activated.Connect(activated);
 
 			this.list.add(control);
+			return control;
 		};
 
 		this.list.clear();
@@ -67,15 +72,24 @@ export default class BlockChooserControl extends Control<BlockChooserControlDefi
 		if (!category) {
 			this.categories.forEach((cat) => createPart(cat.getDisplayName(), () => this.selectedCategory.set(cat)));
 		} else {
-			createPart("Back", () => this.selectedCategory.set(undefined));
+			createPart("← Back ←", () => this.selectedCategory.set(undefined));
 
 			this.blocks
 				.filter((block) => block.getCategory() === category)
-				.forEach((block) =>
-					createPart(block.getDisplayName(), () => {
-						print("selected " + block);
-					}),
-				);
+				.forEach((block) => {
+					const b = createPart(block.getDisplayName(), () => this.selectedBlock.set(block));
+
+					this.selectedBlock.subscribe(
+						this.eventHandler,
+						(newblock) =>
+							(b.getGui().BackgroundColor3 =
+								newblock === block ? Color3.fromRGB(56, 61, 74) : Color3.fromRGB(86, 94, 114)),
+						true,
+					);
+				});
 		}
+
+		GuiAnimator.transition(this.gui.ScrollingFrame, 0.2, "up", 10);
+		SoundController.getSounds().Click.Play();
 	}
 }

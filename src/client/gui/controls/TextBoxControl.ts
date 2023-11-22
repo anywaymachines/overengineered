@@ -1,5 +1,5 @@
 import Control from "client/base/Control";
-import Bindable from "shared/event/ObservableValue";
+import ObservableValue from "shared/event/ObservableValue";
 
 export type TextBoxControlDefinition = TextBox;
 export default class TextBoxControl<T extends TextBoxControlDefinition = TextBoxControlDefinition> extends Control<T> {
@@ -8,7 +8,7 @@ export default class TextBoxControl<T extends TextBoxControlDefinition = TextBox
 	constructor(gui: T) {
 		super(gui);
 
-		this.value = new Bindable(this.gui.Text ?? "");
+		this.value = new ObservableValue(this.gui.Text ?? "");
 		this.eventHandler.subscribe(this.gui.ReturnPressedFromOnScreenKeyboard, () => this.value.set(this.gui.Text));
 	}
 }

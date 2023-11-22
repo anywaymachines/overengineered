@@ -1,7 +1,7 @@
 import Signal from "@rbxts/signal";
 import EventHandler from "shared/event/EventHandler";
 
-export interface ReadonlyBindable<T> {
+export interface ReadonlyObservableValue<T> {
 	get(): T;
 
 	subscribe(eventHandler: EventHandler, func: (value: T) => void): void;
@@ -9,7 +9,7 @@ export interface ReadonlyBindable<T> {
 }
 
 /** Stores a value and provides and event of it being changed */
-export default class Bindable<T> implements ReadonlyBindable<T> {
+export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 	public readonly changed: Pick<
 		Signal<(value: T, prev: T) => void>,
 		"Connect" | "ConnectParallel" | "Once" | "Wait"

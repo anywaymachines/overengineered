@@ -1,4 +1,3 @@
-import Widget from "client/base/Widget";
 import GuiController from "client/controller/GuiController";
 import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import GuiAnimator from "client/gui/GuiAnimator";

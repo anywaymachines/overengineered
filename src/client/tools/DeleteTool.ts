@@ -5,7 +5,6 @@ import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
 import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
-import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import Signals from "client/event/Signals";
 import LogStaticWidget from "client/gui/widget/static/LogStaticWidget";
 import BuildingManager from "shared/building/BuildingManager";
@@ -64,6 +63,8 @@ export default class DeleteTool extends ToolBase {
 
 			SoundController.getSounds().BuildingMode.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
 			SoundController.getSounds().BuildingMode.BlockDelete.Play();
+		} else {
+			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
 		}
 	}
 

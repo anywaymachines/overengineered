@@ -1,4 +1,4 @@
-import Bindable from "shared/event/ObservableValue";
+import ObservableValue from "shared/event/ObservableValue";
 import Control from "client/base/Control";
 
 export type NumberTextBoxControlDefinition = TextBox;
@@ -8,7 +8,7 @@ export default class NumberTextBoxControl extends Control<NumberTextBoxControlDe
 	constructor(gui: NumberTextBoxControlDefinition) {
 		super(gui);
 
-		this.value = new Bindable(0);
+		this.value = new ObservableValue(0);
 		this.eventHandler.subscribe(this.gui.FocusLost, () => {
 			print("pressed " + this.gui.Text);
 			const text = this.gui.Text.gsub("%D", "")[0];
