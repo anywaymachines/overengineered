@@ -43,7 +43,7 @@ export default class BuildToolWidget extends ToolWidget<BuildTool> {
 	constructor(tool: BuildTool) {
 		super(tool);
 
-		this.gui = this.getGui();
+		this.gui = GuiController.getGameUI().BuildToolGui;
 
 		// Prepare templates
 		this.categoryTemplate = this.gui.Selection.Buttons.CategoryTemplate.Clone();
@@ -67,17 +67,9 @@ export default class BuildToolWidget extends ToolWidget<BuildTool> {
 		this.updateLists(true);
 	}
 
-	private getGui() {
-		if (!(this.gui && this.gui.Parent !== undefined)) {
-			this.gui = GuiController.getGameUI().BuildToolGui;
-		}
-
-		return this.gui;
-	}
-
 	private updateLists(hasAnimations: boolean) {
 		if (hasAnimations) {
-			GuiAnimator.transition(this.getGui().Selection, 0.2, "right");
+			GuiAnimator.transition(this.gui.Selection, 0.2, "right");
 		}
 
 		// Remove old buttons
@@ -92,9 +84,9 @@ export default class BuildToolWidget extends ToolWidget<BuildTool> {
 				const obj = this.categoryTemplate.Clone();
 				obj.TextLabel.Text = registeredCategory.getDisplayName();
 				obj.Frame.ImageLabel.Image = `rbxassetid://${registeredCategory.getImageAssetID()}`;
-				obj.Parent = this.getGui().Selection.Buttons;
+				obj.Parent = this.gui.Selection.Buttons;
 				this.eventHandler.subscribeOnce(obj.MouseButton1Click, () => {
-					SoundController.getSounds().GuiClick.Play();
+					SoundController.getSounds().Click.Play();
 					this.selectedCategory = registeredCategory;
 					this.updateLists(true);
 				});
@@ -106,14 +98,14 @@ export default class BuildToolWidget extends ToolWidget<BuildTool> {
 			const backButton = this.categoryTemplate.Clone();
 			backButton.TextLabel.Text = "Back";
 			backButton.Frame.ImageLabel.Image = "http://www.roblox.com/asset/?id=15252518021";
-			backButton.Parent = this.getGui().Selection.Buttons;
+			backButton.Parent = this.gui.Selection.Buttons;
 			this.eventHandler.subscribeOnce(backButton.MouseButton1Click, () => {
 				this.selectedCategory = undefined;
 
 				this.selectedBlock = undefined;
 				this.tool.setSelectedBlock(undefined);
 
-				SoundController.getSounds().GuiClick.Play();
+				SoundController.getSounds().Click.Play();
 				this.updateLists(true);
 			});
 			this.selectionButtons.push(backButton);
@@ -126,19 +118,19 @@ export default class BuildToolWidget extends ToolWidget<BuildTool> {
 					obj.BackgroundColor3 = Color3.fromRGB(106, 106, 106);
 				}
 				obj.Frame.LimitLabel.Text = "inf";
-				obj.Parent = this.getGui().Selection.Buttons;
+				obj.Parent = this.gui.Selection.Buttons;
 				this.eventHandler.subscribeOnce(obj.MouseButton1Click, () => {
 					this.selectedBlock = block;
 					this.tool.setSelectedBlock(block);
 
 					this.updateLists(false);
-					SoundController.getSounds().GuiClick.Play();
+					SoundController.getSounds().Click.Play();
 				});
 				this.selectionButtons.push(obj);
 			});
 		}
 
-		this.getGui().Selection.MaterialLabel.Text = this.selectedMaterial.Name;
+		this.gui.Selection.MaterialLabel.Text = this.selectedMaterial.Name;
 	}
 
 	protected prepare(): void {
@@ -149,11 +141,12 @@ export default class BuildToolWidget extends ToolWidget<BuildTool> {
 
 		this.updateLists(false);
 		this.eventHandler.subscribe(this.gui.Selection.MaterialButton.MouseButton1Click, () => {
-			StaticWidgetsController.materialWidget.display("Building Material", (material: Enum.Material) => {
+			// TODO::
+			/*StaticWidgetsController.materialWidget.display("Building Material", (material: Enum.Material) => {
 				this.selectedMaterial = material;
 				this.tool.setSelectedMaterial(material);
 				this.gui.Selection.MaterialLabel.Text = material.Name;
-			});
+			});*/
 		});
 	}
 

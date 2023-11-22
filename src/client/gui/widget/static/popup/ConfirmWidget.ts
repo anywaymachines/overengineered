@@ -27,16 +27,16 @@ export default class ConfirmWidget extends StaticWidget {
 		// Events
 		this.eventHandler.subscribeOnce(this.gui.Answers.YesButton.MouseButton1Click, () => {
 			this.hideWidget();
-			SoundController.getSounds().GuiClick.Play();
+			SoundController.getSounds().Click.Play();
 			callback();
 		});
 		this.eventHandler.subscribeOnce(this.gui.Answers.NoButton.MouseButton1Click, () => {
 			this.hideWidget();
-			SoundController.getSounds().GuiClick.Play();
+			SoundController.getSounds().Click.Play();
 		});
 		this.eventHandler.subscribeOnce(this.gui.CloseButton.MouseButton1Click, () => {
 			this.hideWidget();
-			SoundController.getSounds().GuiClick.Play();
+			SoundController.getSounds().Click.Play();
 		});
 	}
 

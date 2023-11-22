@@ -1,5 +1,5 @@
 import Signal from "@rbxts/signal";
-import EventHandler from "shared/EventHandler";
+import EventHandler from "shared/event/EventHandler";
 
 export interface ReadonlyBindable<T> {
 	get(): T;
@@ -32,11 +32,13 @@ export default class Bindable<T> implements ReadonlyBindable<T> {
 	}
 
 	public subscribe(
-		eventHandler: EventHandler,
+		eventHandler: EventHandler | undefined,
 		func: (value: T, prev: T) => void,
 		executeImmediately: boolean = false,
 	) {
-		eventHandler.subscribe(this.changed, func);
+		if (eventHandler) eventHandler.subscribe(this.changed, func);
+		else this.changed.Connect(func);
+
 		if (executeImmediately) func(this.get(), this.get());
 	}
 }

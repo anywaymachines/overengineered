@@ -7,7 +7,7 @@ import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
 import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import Signals from "client/event/Signals";
-import DeleteToolWidget from "client/gui/widget/tools/DeleteToolWidget";
+import LogStaticWidget from "client/gui/widget/static/LogStaticWidget";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -62,8 +62,8 @@ export default class DeleteTool extends ToolBase {
 			// Block removed
 			task.wait();
 
-			SoundController.getSounds().Building.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().Building.BlockDelete.Play();
+			SoundController.getSounds().BuildingMode.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().BuildingMode.BlockDelete.Play();
 		}
 	}
 
@@ -80,7 +80,7 @@ export default class DeleteTool extends ToolBase {
 	public async deleteBlock() {
 		// ERROR: No block selected
 		if (this.highlight.Value === undefined) {
-			StaticWidgetsController.logStaticWidget.addLine("Block is not selected!");
+			LogStaticWidget.instance.addLine("Block is not selected!");
 			return;
 		}
 
@@ -99,8 +99,8 @@ export default class DeleteTool extends ToolBase {
 			// Block removed
 			task.wait();
 
-			SoundController.getSounds().Building.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().Building.BlockDelete.Play();
+			SoundController.getSounds().BuildingMode.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().BuildingMode.BlockDelete.Play();
 
 			this.destroyHighlight();
 			this.updatePosition();

@@ -1,22 +1,23 @@
 import { UserInputService } from "@rbxts/services";
 import { Players } from "@rbxts/services";
-import EventHandler from "shared/EventHandler";
+import EventHandler from "shared/event/EventHandler";
 import GuiAnimator from "../GuiAnimator";
 import Control from "client/base/Control";
+import Bindable from "shared/event/ObservableValue";
 
 export type SliderControlDefinition = GuiObject & {
-	Filled: GuiObject;
+	Filled?: GuiObject;
+	Text?: TextLabel;
 	Knob: GuiObject;
-	Text: TextLabel;
 };
 
-export default class SliderControl extends Control<SliderControlDefinition> {
-	private value = 0;
+export default class SliderControl<T extends SliderControlDefinition = SliderControlDefinition> extends Control<T> {
+	public readonly value = new Bindable(0);
 	private min = 0;
 	private max = 10;
 	private step = 1;
 
-	constructor(template: SliderControlDefinition) {
+	constructor(template: T) {
 		super(template);
 		this.updateVisuals();
 
@@ -30,12 +31,13 @@ export default class SliderControl extends Control<SliderControlDefinition> {
 			}
 		});
 
+		this.value.subscribe(this.eventHandler, () => this.updateVisuals(), true);
+
 		const update = () => {
 			if (startpos === undefined) return;
 
 			const x = Players.LocalPlayer.GetMouse().X;
-			this.value = math.clamp((x - startpos) / this.gui.AbsoluteSize.X, 0, 1);
-			this.updateVisuals();
+			this.value.set(math.clamp((x - startpos) / this.gui.AbsoluteSize.X, 0, 1));
 		};
 
 		const sub = (signal: RBXScriptSignal<(input: InputObject) => void>) => {
@@ -44,7 +46,7 @@ export default class SliderControl extends Control<SliderControlDefinition> {
 					input.UserInputState === Enum.UserInputState.Begin &&
 					input.UserInputType === Enum.UserInputType.MouseButton1
 				) {
-					startpos = this.gui.Text.AbsolutePosition.X;
+					startpos = this.gui.AbsolutePosition.X;
 					update();
 
 					eh.subscribe(Players.LocalPlayer.GetMouse().Move, update);
@@ -52,7 +54,7 @@ export default class SliderControl extends Control<SliderControlDefinition> {
 			});
 		};
 
-		sub(this.gui.Filled.InputBegan);
+		if (Control.exists(this.gui, "Filled")) sub(this.gui.Filled.InputBegan);
 		sub(this.gui.Knob.InputBegan);
 		sub(this.gui.InputBegan);
 	}
@@ -75,7 +77,7 @@ export default class SliderControl extends Control<SliderControlDefinition> {
 	}
 
 	private updateVisuals() {
-		const value = this.value + this.step / (this.max - this.min) / 2;
+		const value = this.value.get() + this.step / (this.max - this.min) / 2;
 
 		const guivalue = value - (value % (this.step / (this.max - this.min)));
 		GuiAnimator.tween(
@@ -84,14 +86,17 @@ export default class SliderControl extends Control<SliderControlDefinition> {
 			new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 		);
 
-		GuiAnimator.tween(
-			this.gui.Filled,
-			{ Size: new UDim2(guivalue, 0, 1, 0) },
-			new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		);
+		if (Control.exists(this.gui, "Filled"))
+			GuiAnimator.tween(
+				this.gui.Filled as GuiObject,
+				{ Size: new UDim2(guivalue, 0, 1, 0) },
+				new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			);
 
-		let text = value * (this.max - this.min) + this.min;
-		text -= text % this.step;
-		this.gui.Text.Text = math.floor(text * 10) / 10 + "";
+		if (Control.exists(this.gui, "Text")) {
+			let text = value * (this.max - this.min) + this.min;
+			text -= text % this.step;
+			this.gui.Text.Text = math.floor(text * 10) / 10 + "";
+		}
 	}
 }

@@ -12,6 +12,8 @@ type SimpleTooltip = {
 };
 
 export default class TooltipController {
+	public static readonly instance = new TooltipController();
+
 	private static gameUI: GameUI = GuiController.getGameUI();
 	private static simpleTooltips: SimpleTooltip[] = [];
 
@@ -41,7 +43,7 @@ export default class TooltipController {
 		});
 
 		// Simple tooltips
-		this.addSimpleWidget({
+		this.addSimpleTooltip({
 			isEnabled: (inputType: InputType) => inputType === "Gamepad",
 			gui: this.gameUI.ToolbarGui.GamepadBack,
 			updateFunc: (inputType, element) => {
@@ -49,7 +51,7 @@ export default class TooltipController {
 				this.defaultTween(inputType, element);
 			},
 		});
-		this.addSimpleWidget({
+		this.addSimpleTooltip({
 			isEnabled: (inputType) => inputType === "Gamepad",
 			gui: this.gameUI.ToolbarGui.GamepadNext,
 			updateFunc: (inputType, element) => {
@@ -124,7 +126,7 @@ export default class TooltipController {
 	}
 
 	// Simple tooltips
-	public static addSimpleWidget(tooltip: SimpleTooltip) {
+	public static addSimpleTooltip(tooltip: SimpleTooltip) {
 		TooltipController.simpleTooltips.push(tooltip);
 	}
 

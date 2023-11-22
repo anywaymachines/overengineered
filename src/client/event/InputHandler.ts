@@ -1,5 +1,5 @@
 import { UserInputService } from "@rbxts/services";
-import EventHandler from "shared/EventHandler";
+import EventHandler from "shared/event/EventHandler";
 //import StaticWidgetsController from "client/controller/StaticWidgetsController";
 
 type InputCallback = (input: InputObject) => boolean | unknown;

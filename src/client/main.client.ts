@@ -1,32 +1,64 @@
+import BlockRegistry from "shared/registry/BlocksRegistry";
 import PlayerStateEvent from "./event/PlayerStateEvent";
-import SliderControl, { SliderControlDefinition } from "./gui/controls/SliderControl";
+import BlockChooserControl, { BlockChooserControlDefinition } from "./gui/tools/BlockChooser";
+import CategoriesRegistry from "shared/registry/CategoriesRegistry";
+import MaterialChooserControl, { MaterialChooserControlDefinition } from "./gui/tools/MaterialChooser";
+import BuildingManager from "shared/building/BuildingManager";
+import CheckBoxControl, { CheckBoxControlDefinition } from "./gui/controls/CheckBoxControl";
+import ToolbarControl, { ToolbarControlDefinition } from "./gui/controls/ToolbarControl";
+import ToolController from "./tools/ToolController";
 
-const interfaceTest = true;
-if (interfaceTest) {
-	// const gameui = game.GetService("StarterGui").WaitForChild("GameUI");
-	const gameui = game.GetService("Players").LocalPlayer.WaitForChild("PlayerGui").WaitForChild("GameUI");
-	const uikit = game.GetService("Players").LocalPlayer.WaitForChild("PlayerGui").WaitForChild("UIKit");
+const gameui = game.GetService("Players").LocalPlayer.WaitForChild("PlayerGui").WaitForChild("GameUI");
+const uikit = game.GetService("Players").LocalPlayer.WaitForChild("PlayerGui").WaitForChild("UIKit");
 
-	new SliderControl(uikit.WaitForChild("Buttons").WaitForChild("Slider") as SliderControlDefinition);
+// new SliderControl(uikit.WaitForChild("Buttons").WaitForChild("Slider") as SliderControlDefinition);
 
-	/*const backpack = new TabControl(
-		gameui.WaitForChild("InventoryGui").WaitForChild("Backpack") as TabControlDefinition,
-	);
+ToolController.init();
 
-	for (const category of CategoriesRegistry.registeredCategories) {
-		const content = new BlockChooserControl(
-			backpack.getGuiChild("Content").WaitForChild("Template") as BlockChooserControlDefinition,
-			BlockRegistry.getBlocksInCategory(category),
-		);
+const bchooser = new BlockChooserControl(
+	gameui
+		.WaitForChild("BuildingMode")
+		.WaitForChild("Tools")
+		.WaitForChild("BuildToolGui")
+		.WaitForChild("BlockSelection") as BlockChooserControlDefinition,
+	BlockRegistry.RegisteredBlocks,
+	CategoriesRegistry.registeredCategories,
+);
+// bchooser.setVisible(true);
+// (bchooser.getParent() as GuiObject).Visible = true;
 
-		backpack.addTab(category.getDisplayName(), content);
-	}
+const mchooser = new MaterialChooserControl(
+	gameui
+		.WaitForChild("BuildingMode")
+		.WaitForChild("Popup")
+		.WaitForChild("MaterialGui")
+		.WaitForChild("Frame") as MaterialChooserControlDefinition,
+	BuildingManager.AllowedMaterials,
+);
+//mchooser.setVisible(true);
+//(mchooser.getParent() as GuiObject).Visible = true;
 
-	backpack.setVisible(true);*/
+const cb = new CheckBoxControl(
+	gameui
+		.WaitForChild("BuildingMode")
+		.WaitForChild("Tools")
+		.WaitForChild("ConfigToolGui")
+		.WaitForChild("ParamsSelection")
+		.WaitForChild("Buttons")
+		.WaitForChild("CheckboxTemplate")
+		.WaitForChild("Checkbox") as CheckBoxControlDefinition,
+);
+cb.setVisible(true);
+(cb.getParent() as GuiObject).Visible = true;
 
-	PlayerStateEvent.emitPlayerSpawn();
-} else {
-	/*
+const tb = new ToolbarControl(
+	gameui.WaitForChild("BuildingMode").WaitForChild("ToolbarGui") as ToolbarControlDefinition,
+);
+tb.setVisible(true);
+
+PlayerStateEvent.emitPlayerSpawn();
+
+/*
 import StaticWidgetsController from "./controller/StaticWidgetsController";
 import SceneController from "./controller/SceneController";
 import TooltipController from "./controller/TooltipController";
@@ -53,4 +85,3 @@ PlayerStateEvent.emitPlayerSpawn();
 // Native input type share
 Remotes.Client.GetNamespace("Player").Get("InputTypeInfo").SendToServer(InputController.inputType);
 */
-}

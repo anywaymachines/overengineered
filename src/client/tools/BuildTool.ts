@@ -5,9 +5,8 @@ import BuildingController from "client/controller/BuildingController";
 import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
-import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import Signals from "client/event/Signals";
-import BuildToolWidget from "client/gui/widget/tools/BuildToolWidget";
+import LogStaticWidget from "client/gui/widget/static/LogStaticWidget";
 import BuildingManager from "shared/building/BuildingManager";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import PartUtils from "shared/utils/PartUtils";
@@ -212,7 +211,7 @@ export default class BuildTool extends ToolBase {
 	public async placeBlock() {
 		// ERROR: Block is not selected
 		if (this.selectedBlock === undefined) {
-			StaticWidgetsController.logStaticWidget.addLine("Block is not selected!");
+			LogStaticWidget.instance.addLine("Block is not selected!");
 			return;
 		}
 
@@ -243,14 +242,14 @@ export default class BuildTool extends ToolBase {
 
 		if (response.success) {
 			// Play sound
-			SoundController.getSounds().Building.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().Building.BlockPlace.Play();
+			SoundController.getSounds().BuildingMode.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().BuildingMode.BlockPlace.Play();
 
 			task.wait();
 			this.updatePosition(true);
 		} else {
-			SoundController.getSounds().Building.BlockPlaceError.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().Building.BlockPlaceError.Play();
+			SoundController.getSounds().BuildingMode.BlockPlaceError.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
 		}
 	}
 
@@ -278,8 +277,8 @@ export default class BuildTool extends ToolBase {
 		);
 		this.updatePosition(true);
 
-		SoundController.getSounds().Building.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
-		SoundController.getSounds().Building.BlockRotate.Play();
+		SoundController.getSounds().BuildingMode.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
+		SoundController.getSounds().BuildingMode.BlockRotate.Play();
 	}
 
 	private colorizePreviewBlock(highlight: Highlight) {

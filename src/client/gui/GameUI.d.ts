@@ -86,16 +86,16 @@ type LogGui = Frame & {
 
 // Sounds
 type Sounds = Folder & {
-	Building: Folder & {
+	BuildingMode: Folder & {
 		BlockPlace: Sound;
 		BlockPlaceError: Sound;
 		BlockRotate: Sound;
 		BlockDelete: Sound;
 	};
-	Ride: Folder & {
+	RideMode: Folder & {
 		RideStart: Sound;
 	};
-	GuiClick: Sound;
+	Click: Sound;
 };
 
 interface GameUI {
@@ -104,8 +104,9 @@ interface GameUI {
 	BuildToolGui: BuildToolGui;
 	DeleteToolGui: DeleteToolGui;
 	ConfirmGui: ConfirmGui;
-	LogGui: LogGui;
-	MaterialGui: MaterialGui;
+	Static: {
+		LogGui: LogGui;
+	};
 	ControlTooltips: ToolTooltipGui;
 	ActionBarGui: ActionBarGui;
 }

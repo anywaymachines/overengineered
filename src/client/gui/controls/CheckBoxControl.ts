@@ -1,23 +1,40 @@
-import EventHandler from "shared/EventHandler";
+import Control from "client/base/Control";
+import GuiAnimator from "../GuiAnimator";
 
-type CheckBoxControlDefinition = {
-	TextButton: TextButton;
-	TextLabel: TextLabel;
+export type CheckBoxControlDefinition = TextButton & {
+	Circle: TextButton;
 };
 
-export default class CheckBoxControl {
-	private readonly eventHandler = new EventHandler();
-	private readonly widget: CheckBoxControlDefinition;
+export default class CheckBoxControl extends Control<CheckBoxControlDefinition> {
 	private checked = false;
+	private locked = false;
+
+	private readonly color = Color3.fromRGB(48, 62, 87);
+	private readonly activeColor = Color3.fromRGB(13, 150, 255);
+	private readonly activationColor = 0.15;
 
 	constructor(widget: CheckBoxControlDefinition) {
-		this.widget = widget;
+		super(widget);
 
 		this.updateVisuals();
-		this.eventHandler.subscribe(widget.TextButton.MouseButton1Click, () => {
-			this.checked = !this.checked;
-			this.updateVisuals();
+
+		// Events
+		this.eventHandler.subscribe(widget.MouseButton1Click, () => this.onClick());
+		this.eventHandler.subscribe(widget.Circle.MouseButton1Click, () => this.onClick());
+	}
+
+	public tempLock(time: number) {
+		this.locked = true;
+		spawn(() => {
+			wait(time);
+			this.locked = false;
 		});
+	}
+
+	public onClick() {
+		if (this.locked) return;
+		this.checked = !this.checked;
+		this.updateVisuals();
 	}
 
 	public getValue() {
@@ -25,6 +42,14 @@ export default class CheckBoxControl {
 	}
 
 	private updateVisuals() {
-		this.widget.TextButton.Text = this.checked ? "æ" : "";
+		if (this.checked) {
+			GuiAnimator.tweenPosition(this.gui.Circle, new UDim2(0.5, 0, 0, 0), 0.2);
+			GuiAnimator.tweenColor(this.gui, this.activeColor, this.activationColor);
+			this.tempLock(this.activationColor);
+		} else {
+			GuiAnimator.tweenPosition(this.gui.Circle, new UDim2(0, 0, 0, 0), 0.2);
+			GuiAnimator.tweenColor(this.gui, this.color, this.activationColor);
+			this.tempLock(this.activationColor);
+		}
 	}
 }

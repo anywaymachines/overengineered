@@ -3,6 +3,8 @@ import GuiController from "client/controller/GuiController";
 import GuiAnimator from "client/gui/GuiAnimator";
 
 export default class LogStaticWidget extends StaticWidget {
+	public static readonly instance = new LogStaticWidget();
+
 	private gui: LogGui;
 	private lineTemplate: LogFrame;
 
@@ -18,7 +20,7 @@ export default class LogStaticWidget extends StaticWidget {
 
 	private getGui() {
 		if (!(this.gui && this.gui.Parent !== undefined)) {
-			this.gui = GuiController.getGameUI().LogGui;
+			this.gui = GuiController.getGameUI().Static.LogGui;
 		}
 
 		return this.gui;

@@ -1,4 +1,4 @@
-import EventHandler from "shared/EventHandler";
+import EventHandler from "shared/event/EventHandler";
 
 /** A class for creating popup widgets for use on scenes AoD */
 export default abstract class StaticWidget {

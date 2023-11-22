@@ -12,11 +12,11 @@ export default class TabControl extends Control<TabControlDefinition> {
 
 	constructor(gui: TabControlDefinition) {
 		super(gui);
-		this.tabTemplate = Control.cloneDestroy(this.gui.Tabs.Template);
+		this.tabTemplate = Control.asTemplate(this.gui.Tabs.Template);
 	}
 
 	addTab(name: string, content: Control<GuiObject>) {
-		const tab = this.tabTemplate.Clone();
+		const tab = this.tabTemplate();
 		tab.Text = name;
 		tab.Visible = true;
 		tab.Parent = this.gui.Tabs;

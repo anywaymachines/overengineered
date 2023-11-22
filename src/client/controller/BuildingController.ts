@@ -1,7 +1,6 @@
-import BuildingWelder from "client/BuildingWelder";
 import Signals from "client/event/Signals";
 import Remotes from "shared/Remotes";
-import StaticWidgetsController from "./StaticWidgetsController";
+import LogStaticWidget from "client/gui/widget/static/LogStaticWidget";
 
 export default class BuildingController {
 	public static async placeBlock(data: PlaceBlockRequest) {
@@ -15,10 +14,7 @@ export default class BuildingController {
 			Signals.BLOCKS.ADDED.Fire(response.model);
 			return { success: true, position: response.model.GetPivot().Position } as const;
 		} else {
-			StaticWidgetsController.logStaticWidget.addLine(
-				"Placement failed: " + response.message,
-				Color3.fromRGB(255, 100, 100),
-			);
+			LogStaticWidget.instance.addLine("Placement failed: " + response.message, Color3.fromRGB(255, 100, 100));
 
 			// not OK
 			return { success: false } as const;
@@ -35,10 +31,7 @@ export default class BuildingController {
 			Signals.BLOCKS.REMOVED.Fire(block);
 		} else {
 			// Block not removed
-			StaticWidgetsController.logStaticWidget.addLine(
-				"Delete failed: " + response.message,
-				Color3.fromRGB(255, 100, 100),
-			);
+			LogStaticWidget.instance.addLine("Delete failed: " + response.message, Color3.fromRGB(255, 100, 100));
 		}
 
 		return response;
@@ -48,11 +41,7 @@ export default class BuildingController {
 		const response = await Remotes.Client.GetNamespace("Building").Get("MoveRequest").CallServerAsync(request);
 
 		if (response.success) Signals.CONTRAPTION.MOVED.Fire(request.vector);
-		else
-			StaticWidgetsController.logStaticWidget.addLine(
-				"Move failed: " + response.message,
-				Color3.fromRGB(255, 100, 100),
-			);
+		else LogStaticWidget.instance.addLine("Move failed: " + response.message, Color3.fromRGB(255, 100, 100));
 
 		return response;
 	}
@@ -62,10 +51,7 @@ export default class BuildingController {
 
 		if (response.success) Signals.CONTRAPTION.CLEARED.Fire();
 		else
-			StaticWidgetsController.logStaticWidget.addLine(
-				"Clearing all failed: " + response.message,
-				Color3.fromRGB(255, 100, 100),
-			);
+			LogStaticWidget.instance.addLine("Clearing all failed: " + response.message, Color3.fromRGB(255, 100, 100));
 
 		return response;
 	}

@@ -1,54 +1,81 @@
 import Control from "client/base/Control";
-import Bindable from "shared/Bindable";
+import Bindable from "shared/event/ObservableValue";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
+import AbstractCategory from "shared/registry/abstract/AbstractCategory";
+import { ListControl } from "../controls/ListControl";
 
-export type BlockControlDefinition = GuiButton & {
-	BlockName: TextLabel;
+type BlockControlDefinition = GuiButton & {
+	TextLabel: TextLabel;
 };
 
-/** Block control for choosing */
-class BlockControl extends Control<BlockControlDefinition> {
+/** Control for choosing a block or a category */
+class ButtonControl extends Control<BlockControlDefinition> {
 	public readonly activated;
-	private readonly block;
 
-	constructor(template: BlockControlDefinition, block: AbstractBlock) {
+	constructor(template: BlockControlDefinition, text: string) {
 		super(template);
 
-		this.block = block;
-		this.gui.BlockName.Text = block.getDisplayName();
 		this.activated = this.gui.Activated;
+		this.gui.TextLabel.Text = text;
 	}
 }
 
-export type BlockChooserControlDefinition = ScrollingFrame & {
-	BlockTemplate: BlockControlDefinition;
+export type BlockChooserControlDefinition = GuiObject & {
+	ScrollingFrame: ScrollingFrame & {
+		Template: BlockControlDefinition;
+	};
 };
 
 /** Block chooser control */
 export default class BlockChooserControl extends Control<BlockChooserControlDefinition> {
-	public readonly selectedBlock;
 	private readonly blocks;
-	private readonly blockTemplate;
+	private readonly categories;
 
-	constructor(template: BlockChooserControlDefinition, blocks: readonly AbstractBlock[]) {
+	private readonly itemTemplate;
+	private readonly list;
+	private readonly selectedCategory = new Bindable<AbstractCategory | undefined>(undefined);
+
+	constructor(
+		template: BlockChooserControlDefinition,
+		blocks: readonly AbstractBlock[],
+		categories: readonly AbstractCategory[],
+	) {
 		super(template);
 
 		this.blocks = blocks;
-		this.selectedBlock = new Bindable<AbstractBlock | undefined>(blocks[0]);
+		this.categories = categories;
+
+		this.list = new ListControl(this.gui.ScrollingFrame);
 
 		// Prepare templates
-		this.blockTemplate = Control.cloneDestroy(this.gui.BlockTemplate);
+		this.itemTemplate = Control.asTemplate(this.gui.ScrollingFrame.Template);
 
-		this.create();
+		this.selectedCategory.subscribe(this.eventHandler, (category) => this.create(category), true);
 	}
 
-	private create() {
-		const createBlock = (block: AbstractBlock) => {
-			const control = new BlockControl(this.blockTemplate, block);
+	private create(category: AbstractCategory | undefined) {
+		const createPart = (text: string, activated: () => void) => {
+			const control = new ButtonControl(this.itemTemplate(), text);
 			control.setVisible(true);
-			control.setParent(this.gui);
+			control.activated.Connect(activated);
+
+			this.list.add(control);
 		};
 
-		this.blocks.forEach(createBlock);
+		this.list.clear();
+
+		if (!category) {
+			this.categories.forEach((cat) => createPart(cat.getDisplayName(), () => this.selectedCategory.set(cat)));
+		} else {
+			createPart("Back", () => this.selectedCategory.set(undefined));
+
+			this.blocks
+				.filter((block) => block.getCategory() === category)
+				.forEach((block) =>
+					createPart(block.getDisplayName(), () => {
+						print("selected " + block);
+					}),
+				);
+		}
 	}
 }
