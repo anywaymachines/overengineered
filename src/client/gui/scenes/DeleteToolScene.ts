@@ -1,6 +1,7 @@
 import Scene from "client/base/Scene";
 import DeleteTool from "client/tools/DeleteTool";
 import GuiAnimator from "../GuiAnimator";
+import ConfirmPopup from "../popup/ConfirmPopup";
 
 export type DeleteToolSceneDefinition = GuiObject & {
 	TouchControls: Frame & {
@@ -15,22 +16,67 @@ export default class DeleteToolScene extends Scene<DeleteToolSceneDefinition> {
 	constructor(gui: DeleteToolSceneDefinition, tool: DeleteTool) {
 		super(gui);
 		this.tool = tool;
+
+		// TODO: do something
+		const e = (element: GuiObject, duration = 0.2) => {
+			return {
+				startPos: element.Position,
+				offset: new UDim2(0, 100, 0, 0),
+				show() {
+					element.Position = this.startPos.add(this.offset);
+					element.Visible = true;
+					GuiAnimator.tween(
+						element,
+						{ Position: this.startPos },
+						new TweenInfo(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					);
+				},
+				hide() {
+					element.Position = this.startPos;
+					GuiAnimator.tween(
+						element,
+						{ Position: this.startPos.add(this.offset) },
+						new TweenInfo(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					);
+
+					spawn(() => {
+						wait(duration);
+						element.Visible = false;
+					});
+				},
+			};
+		};
+
+		//const aboba = e(this.gui.TouchControls);
+
+		this.event.subscribeInputTypeChange((inputType) => {
+			//if (inputType === "Touch") aboba.hide();
+			//else aboba.show();
+
+			this.gui.TouchControls.Visible = inputType === "Touch";
+		}, true);
+		this.event.subscribeInputTypeChange((inputType) => {
+			this.gui.DeleteAllButton.Visible = inputType !== "Gamepad";
+		}, true);
+
+		this.event.subscribe(this.tool.onClearAllRequested, () => this.suggestClearAll());
+		this.event.subscribe(this.gui.DeleteAllButton.Activated, () => this.suggestClearAll());
 	}
 
-	protected prepare(): void {
-		super.prepare();
-
-		this.gui.DeleteAllButton.Visible = true;
-		this.gui.TouchControls.Visible = false;
+	public show() {
+		super.show();
+		GuiAnimator.transition(this.gui.DeleteAllButton, 0.2, "down");
 	}
 
-	protected prepareDesktop(): void {
-		// Events
-		this.eventHandler.subscribe(this.gui.DeleteAllButton.MouseButton1Click, () => this.suggestClearAll());
+	private suggestClearAll() {
+		ConfirmPopup.instance.show(
+			"Are you sure you want to delete all blocks?",
+			() => this.tool.clearAll(),
+			() => {},
+		);
 	}
 
 	protected prepareTouch(): void {
-		this.gui.TouchControls.Visible = true;
 		GuiAnimator.transition(this.gui.TouchControls, 0.2, "left");
 
 		// Events
@@ -54,10 +100,4 @@ export default class DeleteToolScene extends Scene<DeleteToolSceneDefinition> {
 			}
 		});
 	}
-
-	protected prepareGamepad(): void {
-		this.gui.DeleteAllButton.Visible = false;
-	}
-
-	private suggestClearAll() {}
 }

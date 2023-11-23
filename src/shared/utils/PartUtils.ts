@@ -37,6 +37,15 @@ export default class PartUtils {
 		});
 	}
 
+	static switchDescendantsColor(model: Instance, color: Color3) {
+		const children = model.GetDescendants();
+		children.forEach((element) => {
+			if (element.IsA("BasePart")) {
+				element.Color = color;
+			}
+		});
+	}
+
 	static switchDescendantsNetworkOwner(model: Instance, owner: Player) {
 		const children = model.GetDescendants();
 		children.forEach((element) => {

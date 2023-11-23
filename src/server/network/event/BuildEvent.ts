@@ -57,12 +57,16 @@ export default class BuildEvent {
 		PartUtils.switchDescendantsMaterial(model, data.material);
 		model.SetAttribute("material", data.material.Name);
 
+		// Set color
+		PartUtils.switchDescendantsColor(model, data.color);
+		model.SetAttribute("color", data.color);
+
 		// Make transparent glass materials
 		if (data.material === Enum.Material.Glass) {
 			PartUtils.switchDescendantsTransparency(model, 0.3);
 		}
 
-		// Weld block
+		// Weld block (TODO: Change)
 		Remotes.Server.GetNamespace("Building").Get("WeldBlock").SendToPlayer(player, model);
 
 		// Configs

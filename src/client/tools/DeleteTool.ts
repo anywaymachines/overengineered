@@ -72,6 +72,7 @@ export default class DeleteTool extends ToolBase {
 		const info: PlaceBlockRequest = {
 			location: block.PrimaryPart!.CFrame,
 			block: block.GetAttribute("id") as string,
+			color: block.GetAttribute("color") as Color3,
 			material: Enum.Material.GetEnumItems().find((e) => e.Name === (block.GetAttribute("material") as string))!,
 		};
 

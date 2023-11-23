@@ -1,13 +1,16 @@
 import Control from "./Control";
 
 /** The scene is the interface on which the widgets are located */
-export default abstract class Scene<T extends GuiObject = GuiObject> extends Control<T> {
+export default abstract class Scene<
+	T extends GuiObject = GuiObject,
+	TParams extends unknown[] = [],
+> extends Control<T> {
 	constructor(gui: T) {
 		super(gui);
 	}
 
-	/** Displaying the scene */
-	public show() {
+	/** Show the scene */
+	public show(...args: TParams) {
 		this.setVisible(true);
 	}
 

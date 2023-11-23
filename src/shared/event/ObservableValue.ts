@@ -1,17 +1,12 @@
 import Signal from "@rbxts/signal";
-import EventHandler from "shared/event/EventHandler";
 
 export interface ReadonlyObservableValue<T> {
 	readonly changed: Pick<Signal<(value: T, prev: T) => void>, "Connect" | "ConnectParallel" | "Once" | "Wait">;
 
 	get(): T;
 
-	subscribe(eventHandler: EventHandler | undefined, func: (value: T, prev: T) => void): void;
-	subscribe(
-		eventHandler: EventHandler | undefined,
-		func: (value: T, prev: T) => void,
-		executeImmediately: boolean | undefined,
-	): void;
+	subscribe(func: (value: T, prev: T) => void): void;
+	subscribe(func: (value: T, prev: T) => void, executeImmediately: boolean | undefined): void;
 }
 
 /** Stores a value and provides and event of it being changed */
@@ -37,14 +32,11 @@ export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 		return this.value;
 	}
 
-	public subscribe(
-		eventHandler: EventHandler | undefined,
-		func: (value: T, prev: T) => void,
-		executeImmediately: boolean = false,
-	) {
-		if (eventHandler) eventHandler.subscribe(this.changed, func);
-		else this.changed.Connect(func);
+	public subscribe(func: (value: T, prev: T) => void, executeImmediately: boolean = false) {
+		this.changed.Connect(func);
 
-		if (executeImmediately) func(this.get(), this.get());
+		if (executeImmediately) {
+			func(this.get(), this.get());
+		}
 	}
 }

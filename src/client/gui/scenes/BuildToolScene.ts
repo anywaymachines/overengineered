@@ -4,10 +4,13 @@ import BlockRegistry from "shared/registry/BlocksRegistry";
 import CategoriesRegistry from "shared/registry/CategoriesRegistry";
 import BuildTool from "client/tools/BuildTool";
 import GuiAnimator from "../GuiAnimator";
+import MaterialChooserControl, { MaterialPreviewControl, MaterialPreviewDefinition } from "../tools/MaterialChooser";
 
 export type BuildToolSceneDefinition = GuiObject & {
 	BlockSelection: BlockSelectionControlDefinition;
-	Preview: GuiObject;
+	Preview: MaterialPreviewDefinition & {
+		EditMaterialButton: GuiButton;
+	};
 	TouchControls: Frame & {
 		PlaceButton: TextButton;
 		RotateRButton: TextButton;
@@ -38,6 +41,25 @@ export default class BuildToolScene extends Scene<BuildToolSceneDefinition> {
 			(inputType) => (this.gui.TouchControls.Visible = inputType === "Touch"),
 			true,
 		);
+
+		this.add(
+			new MaterialPreviewControl(
+				this.gui.Preview,
+				MaterialChooserControl.instance.selectedMaterial,
+				MaterialChooserControl.instance.selectedColor,
+			),
+		);
+
+		this.event.subscribeObservable(MaterialChooserControl.instance.selectedMaterial, (material) => {
+			this.tool.setSelectedMaterial(material);
+		});
+		this.event.subscribeObservable(MaterialChooserControl.instance.selectedColor, (color) => {
+			this.tool.setSelectedColor(color);
+		});
+
+		this.event.subscribe(this.gui.Preview.EditMaterialButton.Activated, () => {
+			MaterialChooserControl.instance.show();
+		});
 	}
 
 	protected prepareTouch(): void {

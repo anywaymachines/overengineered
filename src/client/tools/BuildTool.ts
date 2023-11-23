@@ -30,6 +30,7 @@ export default class BuildTool extends ToolBase {
 
 	private selectedBlock?: AbstractBlock;
 	private selectedMaterial: Enum.Material = Enum.Material.Plastic;
+	private selectedColor: Color3 = Color3.fromRGB(255, 255, 255);
 
 	getDisplayName(): string {
 		return "Building Mode";
@@ -47,8 +48,14 @@ export default class BuildTool extends ToolBase {
 		this.selectedBlock = block;
 		this.prepareVisual();
 	}
+
 	public setSelectedMaterial(material: Enum.Material) {
 		this.selectedMaterial = material;
+		this.prepareVisual();
+	}
+
+	public setSelectedColor(color: Color3) {
+		this.selectedColor = color;
 		this.prepareVisual();
 	}
 
@@ -65,6 +72,7 @@ export default class BuildTool extends ToolBase {
 		this.addAxisModel();
 		this.addHighlight();
 		PartUtils.switchDescendantsMaterial(this.previewBlock, this.selectedMaterial);
+		PartUtils.switchDescendantsColor(this.previewBlock, this.selectedColor);
 		PartUtils.ghostModel(this.previewBlock);
 
 		// First update
@@ -234,6 +242,7 @@ export default class BuildTool extends ToolBase {
 			},
 			{
 				block: this.selectedBlock.id,
+				color: this.selectedColor,
 				material: this.selectedMaterial,
 				location: this.previewBlock.PrimaryPart.CFrame,
 			},
@@ -313,10 +322,12 @@ export default class BuildTool extends ToolBase {
 
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updatePosition());
 	}
+
 	protected prepareTouch(): void {
 		// Touch controls
 		this.inputHandler.onTouchTap(() => this.updatePosition());
 	}
+
 	protected prepareGamepad(): void {
 		// Gamepad button controls
 		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonX, () => this.placeBlock());

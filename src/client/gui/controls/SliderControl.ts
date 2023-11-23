@@ -31,7 +31,7 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 			}
 		});
 
-		this.event.subscribeObservable(this.value, () => this.updateVisuals(), true);
+		this.value.subscribe(() => this.updateVisuals(), true);
 
 		const update = () => {
 			if (startpos === undefined) return;

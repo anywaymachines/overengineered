@@ -5,6 +5,7 @@ import AbstractCategory from "shared/registry/abstract/AbstractCategory";
 import { ListControl } from "../controls/ListControl";
 import GuiAnimator from "../GuiAnimator";
 import SoundController from "client/controller/SoundController";
+import { GuiService } from "@rbxts/services";
 
 type BlockControlDefinition = GuiButton & {
 	TextLabel: TextLabel;
@@ -19,6 +20,7 @@ class ButtonControl extends Control<BlockControlDefinition> {
 
 		this.activated = this.gui.Activated;
 		this.gui.TextLabel.Text = text;
+		this.event.subscribe(this.gui.Activated, () => SoundController.getSounds().Click.Play());
 	}
 }
 
@@ -39,6 +41,8 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 	private readonly list;
 	private readonly selectedCategory = new ObservableValue<AbstractCategory | undefined>(undefined);
 
+	private readonly backButtonText = "← Back ←";
+
 	constructor(
 		template: BlockSelectionControlDefinition,
 		blocks: readonly AbstractBlock[],
@@ -49,7 +53,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		this.blocks = blocks;
 		this.categories = categories;
 
-		this.list = new ListControl(this.gui.ScrollingFrame);
+		this.list = new ListControl<GuiObject, ButtonControl>(this.gui.ScrollingFrame);
 		this.add(this.list);
 
 		// Prepare templates
@@ -68,29 +72,45 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 			return control;
 		};
 
+		const isSelected = GuiService.SelectedObject !== undefined;
 		this.list.clear();
 
 		if (!category) {
 			this.categories.forEach((cat) => createPart(cat.getDisplayName(), () => this.selectedCategory.set(cat)));
 		} else {
-			createPart("← Back ←", () => this.selectedCategory.set(undefined));
+			createPart(this.backButtonText, () => {
+				this.selectedBlock.set(undefined);
+				this.selectedCategory.set(undefined);
+			});
 
 			this.blocks
 				.filter((block) => block.getCategory() === category)
 				.forEach((block) => {
 					const b = createPart(block.getDisplayName(), () => this.selectedBlock.set(block));
 
+					// Block press event
+					this.event.subscribe(b.activated, () => {
+						// Gamepad selection improvements
+						GuiService.SelectedObject = undefined;
+					});
+
 					this.event.subscribeObservable(
 						this.selectedBlock,
-						(newblock) =>
-							(b.getGui().BackgroundColor3 =
-								newblock === block ? Color3.fromRGB(56, 61, 74) : Color3.fromRGB(86, 94, 114)),
+						(newblock) => {
+							b.getGui().BackgroundColor3 =
+								newblock === block ? Color3.fromRGB(56, 61, 74) : Color3.fromRGB(86, 94, 114);
+
+							// Gamepad selection improvements
+							b.getGui().SelectionOrder = newblock === block ? 0 : 1;
+						},
 						true,
 					);
 				});
 		}
 
+		// Gamepad selection improvements
+		GuiService.SelectedObject = isSelected ? this.list.getChildren()[0].getGui() : undefined;
+
 		GuiAnimator.transition(this.gui.ScrollingFrame, 0.2, "up", 10);
-		SoundController.getSounds().Click.Play();
 	}
 }

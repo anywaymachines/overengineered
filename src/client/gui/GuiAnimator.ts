@@ -24,6 +24,26 @@ export default class GuiAnimator {
 		frame.TweenPosition(defaultPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, duration);
 	}
 
+	static hide(frame: GuiObject, duration: number, direction: "right" | "left" | "up" | "down", power: number = 50) {
+		const defaultPosition = frame.Position;
+		const offsets = {
+			left: new UDim2(0, power, 0, 0),
+			right: new UDim2(0, -power, 0, 0),
+			down: new UDim2(0, 0, 0, -power),
+			up: new UDim2(0, 0, 0, power),
+		};
+
+		const offsetPosition = offsets[direction];
+
+		const newPosition = defaultPosition.add(offsetPosition);
+		frame.TweenPosition(newPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, duration);
+		spawn(() => {
+			wait(duration);
+			frame.Visible = false;
+			frame.Position = defaultPosition;
+		});
+	}
+
 	static tweenPosition(frame: GuiObject, position: UDim2, duration: number) {
 		const info = { Position: position };
 		const tween = TweenService.Create(

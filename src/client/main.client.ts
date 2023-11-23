@@ -3,6 +3,7 @@ import ToolbarControl, { ToolbarControlDefinition } from "./gui/controls/Toolbar
 import ToolController from "./tools/ToolController";
 import ToolSceneController from "./gui/scenes/ToolSceneController";
 import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
+import ConfirmPopup from "./gui/popup/ConfirmPopup";
 
 const gameui = game.GetService("Players").LocalPlayer.WaitForChild("PlayerGui").WaitForChild("GameUI");
 

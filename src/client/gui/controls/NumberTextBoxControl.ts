@@ -10,9 +10,7 @@ export default class NumberTextBoxControl extends Control<NumberTextBoxControlDe
 
 		this.value = new ObservableValue(0);
 		this.event.subscribe(this.gui.FocusLost, () => {
-			print("pressed " + this.gui.Text);
 			const text = this.gui.Text.gsub("%D", "")[0];
-			print("next " + text);
 
 			let num = tonumber(text);
 			if (num === undefined) {

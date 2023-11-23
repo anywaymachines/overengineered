@@ -24,18 +24,14 @@ export default class ToolSceneController {
 			new DeleteToolScene(gameui.BuildingMode.Tools.DeleteToolGui, ToolController.deleteTool),
 		);
 
-		ToolController.selectedTool.subscribe(
-			undefined,
-			(tool, prev) => {
-				const newscene = tool && this.scenes.get(tool);
-				const prevscene = prev && this.scenes.get(prev);
+		ToolController.selectedTool.subscribe((tool, prev) => {
+			const newscene = tool && this.scenes.get(tool);
+			const prevscene = prev && this.scenes.get(prev);
 
-				if (tool === prev) return;
+			if (tool === prev) return;
 
-				prevscene?.hide();
-				newscene?.show();
-			},
-			true,
-		);
+			prevscene?.hide();
+			newscene?.show();
+		}, true);
 	}
 }

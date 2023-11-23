@@ -4,6 +4,10 @@ import { ListControl } from "../controls/ListControl";
 import { DictionaryControl } from "../controls/DictionaryControl";
 import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
 import NumberTextBoxControl from "../controls/NumberTextBoxControl";
+import BuildingManager from "shared/building/BuildingManager";
+import GuiController from "client/controller/GuiController";
+import Scene from "client/base/Scene";
+import Signal from "@rbxts/signal";
 
 type MaterialControlDefinition = GuiButton & {
 	TextLabel: TextLabel;
@@ -25,10 +29,14 @@ type MaterialChoosePartDefinition = GuiObject & {
 	ScrollingFrame: ScrollingFrame & {
 		Template: MaterialControlDefinition;
 	};
+	CancelButton: GuiButton;
+	ConfirmButton: GuiButton;
 };
 
 /** Material chooser part */
 class MaterialChoosePart extends Control<MaterialChoosePartDefinition> {
+	public readonly canceled = new Signal<() => void>();
+	public readonly confirmed = new Signal<() => void>();
 	public readonly selectedMaterial;
 
 	private readonly materials;
@@ -63,6 +71,9 @@ class MaterialChoosePart extends Control<MaterialChoosePartDefinition> {
 			},
 			true,
 		);
+
+		this.event.subscribe(this.gui.CancelButton.Activated, () => this.canceled.Fire());
+		this.event.subscribe(this.gui.ConfirmButton.Activated, () => this.confirmed.Fire());
 	}
 
 	private create() {
@@ -113,7 +124,7 @@ class MaterialColorChooseControl extends ListControl<MaterialColorChooseDefiniti
 			slider.setMin(0);
 			slider.setMax(1);
 			slider.value.set(value);
-			this.event.subscribeObservable(slider.value, updateColor);
+			slider.value.subscribe(updateColor);
 			this.add(slider);
 
 			return slider;
@@ -163,13 +174,13 @@ class MaterialColorChooseControl extends ListControl<MaterialColorChooseDefiniti
 	}
 }
 
-type MaterialPreviewDefinition = GuiObject & {
-	ViewportFrame: ViewportFrame & {
-		Part: BasePart;
+export type MaterialPreviewDefinition = GuiObject & {
+	MaterialPreviewFrame: ViewportFrame & {
+		Part: Part;
 	};
 };
 /** Material preview */
-class MaterialPreviewControl extends Control<MaterialPreviewDefinition> {
+export class MaterialPreviewControl extends Control<MaterialPreviewDefinition> {
 	constructor(
 		gui: MaterialPreviewDefinition,
 		selectedMaterial: ReadonlyObservableValue<Enum.Material>,
@@ -179,37 +190,72 @@ class MaterialPreviewControl extends Control<MaterialPreviewDefinition> {
 
 		this.event.subscribeObservable(
 			selectedMaterial,
-			(material) => (this.gui.ViewportFrame.Part.Material = material),
+			(material) => (this.gui.MaterialPreviewFrame.Part.Material = material),
 			true,
 		);
 
-		this.event.subscribeObservable(selectedColor, (color) => (this.gui.ViewportFrame.Part.Color = color), true);
+		this.event.subscribeObservable(
+			selectedColor,
+			(color) => (this.gui.MaterialPreviewFrame.Part.Color = color),
+			true,
+		);
 	}
 }
 
 export type MaterialChooserControlDefinition = GuiObject & {
-	Body: MaterialChoosePartDefinition;
-	Color: MaterialColorChooseDefinition;
-	Preview: MaterialPreviewDefinition;
+	Body: GuiObject & {
+		Body: MaterialChoosePartDefinition;
+		Color: MaterialColorChooseDefinition;
+		Preview: MaterialPreviewDefinition;
+	};
 };
 
 /** Material choose & preview control */
-export default class MaterialChooserControl extends ListControl<MaterialChooserControlDefinition> {
+export default class MaterialChooserControl extends Scene<MaterialChooserControlDefinition> {
+	public static readonly instance = new MaterialChooserControl(
+		GuiController.getGameUI<{
+			Popup: {
+				MaterialGui: MaterialChooserControlDefinition;
+			};
+		}>().Popup.MaterialGui,
+		BuildingManager.AllowedMaterials,
+	);
+
 	public readonly selectedMaterial;
 	public readonly selectedColor;
+	private prevData: readonly [material: Enum.Material, color: Color3] | undefined;
 
 	constructor(gui: MaterialChooserControlDefinition, materials: readonly Enum.Material[]) {
 		super(gui);
 
-		const chooser = new MaterialChoosePart(gui.Body, materials);
+		const chooser = new MaterialChoosePart(gui.Body.Body, materials);
 		this.add(chooser);
 		this.selectedMaterial = chooser.selectedMaterial;
 
-		const color = new MaterialColorChooseControl(gui.Color);
+		const color = new MaterialColorChooseControl(gui.Body.Color);
 		this.add(color);
 		this.selectedColor = color.selectedColor;
 
-		const preview = new MaterialPreviewControl(gui.Preview, this.selectedMaterial, this.selectedColor);
+		const preview = new MaterialPreviewControl(gui.Body.Preview, this.selectedMaterial, this.selectedColor);
 		this.add(preview);
+
+		this.event.subscribe(chooser.canceled, () => {
+			if (this.prevData) {
+				this.selectedMaterial.set(this.prevData[0]);
+				this.selectedColor.set(this.prevData[1]);
+			}
+
+			this.hide();
+		});
+		this.event.subscribe(chooser.confirmed, () => this.hide());
+	}
+
+	show() {
+		super.show();
+		this.prevData = [this.selectedMaterial.get(), this.selectedColor.get()];
+	}
+	hide() {
+		super.hide();
+		this.prevData = undefined;
 	}
 }
