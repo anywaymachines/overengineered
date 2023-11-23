@@ -55,9 +55,12 @@ class MaterialChoosePart extends Control<MaterialChoosePartDefinition> {
 			"All",
 			this.selectedMaterial,
 			(material) => {
-				for (const [_, child] of this.list.getChildren()) child.getGui().BackgroundColor3 = color;
+				for (const [_, child] of this.list.getKeyedChildren()) child.getGui().BackgroundColor3 = color;
 
-				this.list.getChildren().get(material)!.getGui().BackgroundColor3 = color.Lerp(new Color3(1, 1, 1), 0.3);
+				this.list.getKeyedChildren().get(material)!.getGui().BackgroundColor3 = color.Lerp(
+					new Color3(1, 1, 1),
+					0.3,
+				);
 			},
 			true,
 		);
@@ -69,7 +72,7 @@ class MaterialChoosePart extends Control<MaterialChoosePartDefinition> {
 			control.setVisible(true);
 			control.activated.Connect(activated);
 
-			this.list.add(material, control);
+			this.list.addKeyed(material, control);
 		};
 
 		this.list.clear();

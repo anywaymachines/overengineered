@@ -10,7 +10,7 @@ export default class Signals {
 	} as const;
 
 	public static readonly INPUT_TYPE_CHANGED_EVENT = new Signal<(platform: InputType) => void>();
-	public static readonly INPUT_TYPE = new ObservableValue("Desktop");
+	public static readonly INPUT_TYPE = new ObservableValue<InputType>("Desktop");
 
 	public static readonly PLAYER = {
 		SPAWN: new Signal<() => void>(),

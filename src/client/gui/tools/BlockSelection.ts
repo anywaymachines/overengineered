@@ -50,6 +50,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		this.categories = categories;
 
 		this.list = new ListControl(this.gui.ScrollingFrame);
+		this.add(this.list);
 
 		// Prepare templates
 		this.itemTemplate = Control.asTemplate(this.gui.ScrollingFrame.Template);

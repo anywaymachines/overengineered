@@ -1,19 +1,16 @@
 import InputController from "client/controller/InputController";
 import InputHandler from "client/event/InputHandler";
 import Signals from "client/event/Signals";
-import EventHandler from "shared/event/EventHandler";
 import ControlEventHolder from "./ControlEventHolder";
 
 /** Wraps the Roblox GUI objects and provides methods for easy handling */
 export default abstract class Control<T extends GuiObject = GuiObject> {
 	// Handlers
-	protected readonly eventHandler = new EventHandler();
 	protected readonly inputHandler = new InputHandler();
-
 	protected readonly event = new ControlEventHolder();
 
 	protected readonly gui: T;
-	private readonly eventChildren: Control[] = [];
+	private readonly children: Control[] = [];
 
 	constructor(gui: T) {
 		this.gui = gui;
@@ -28,7 +25,7 @@ export default abstract class Control<T extends GuiObject = GuiObject> {
 		return this.gui.WaitForChild(name);
 	}
 
-	/** Checks if the child exists on an object */
+	/** Checks if the child exists on this gui object */
 	protected static exists<T extends GuiObject, TKey extends keyof T & string>(
 		gui: T,
 		name: TKey,
@@ -36,16 +33,31 @@ export default abstract class Control<T extends GuiObject = GuiObject> {
 		return gui.FindFirstChild(name) !== undefined;
 	}
 
-	protected addChild(control: Control) {
-		this.eventChildren.push(control);
+	/** Returns a list of added children */
+	public getChildren(): readonly Control[] {
+		return this.children;
 	}
-	protected removeChild(child: Control) {
-		const index = this.eventChildren.indexOf(child);
+
+	/** Add a child */
+	public add(control: Control, setParent = true) {
+		this.children.push(control);
+		if (this.isVisible()) control.enablePassthrough();
+		if (setParent) control.setParent(this.gui);
+	}
+
+	/** Remove a child */
+	public remove(child: Control, setParent = true) {
+		const index = this.children.indexOf(child);
 		if (index === -1) return;
 
-		this.eventChildren.remove(index);
-		child.eventHandler.unsubscribeAll();
+		this.children.remove(index);
+		if (setParent) child.setParent(undefined);
 		child.inputHandler.unsubscribeAll();
+	}
+
+	/** Clear all added children */
+	public clear(setParents = true) {
+		[...this.children].forEach((child) => this.remove(child, setParents));
 	}
 
 	/** Return a function that copies the provided object, and destroys it if specified */
@@ -59,8 +71,27 @@ export default abstract class Control<T extends GuiObject = GuiObject> {
 	isVisible() {
 		return this.gui.Visible;
 	}
+
+	private enablePassthrough() {
+		if (!this.gui.Visible) return;
+
+		this.event.enable();
+		for (const child of this.children) child.enablePassthrough();
+	}
+	private disablePassthrough() {
+		this.event.disable();
+		for (const child of this.children) child.enablePassthrough();
+	}
+	private destroyPassthrough() {
+		this.event.destroy();
+		for (const child of this.children) child.destroyPassthrough();
+	}
+
 	setVisible(value: boolean) {
 		this.gui.Visible = value;
+
+		if (value) this.enablePassthrough();
+		else this.disablePassthrough();
 	}
 
 	getParent() {
@@ -68,6 +99,7 @@ export default abstract class Control<T extends GuiObject = GuiObject> {
 	}
 	setParent(value: GuiObject | undefined) {
 		this.gui.Parent = value;
+		if (!value) this.destroyPassthrough();
 	}
 
 	/** A function for preparing functionality for Desktop */
@@ -82,11 +114,10 @@ export default abstract class Control<T extends GuiObject = GuiObject> {
 	 */
 	protected prepare() {
 		// Terminate exist events
-		this.eventHandler.unsubscribeAll();
 		this.inputHandler.unsubscribeAll();
 
 		// Required event
-		this.eventHandler.subscribeOnce(Signals.INPUT_TYPE_CHANGED_EVENT, () => this.prepare());
+		this.event.subscribeOnce("All", Signals.INPUT_TYPE_CHANGED_EVENT, () => this.prepare());
 
 		// Call init
 		const events = {

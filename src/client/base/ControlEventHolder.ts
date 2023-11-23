@@ -16,17 +16,38 @@ export default class ControlEventHolder {
 	private readonly eventsOnce: Partial<Record<Keys, Sub<unknown>[]>> = {};
 	private readonly subscribed: SigConnection[] = [];
 
-	private enabled = true;
-
-	constructor() {
-		this.enable();
-	}
+	private enabled = false;
 
 	public enable() {
+		if (this.enabled) return;
+
+		this.enabled = true;
 		this.subscribeOnce("All", Signals.INPUT_TYPE_CHANGED_EVENT, (inputType) => this.inputTypeChanged(inputType));
+		this.inputTypeChanged(Signals.INPUT_TYPE.get());
+	}
+
+	private connect(sub: Sub<unknown>) {
+		this.subscribed.push(sub[0].Connect(sub[1]));
+	}
+	private inputTypeChanged(device: InputType) {
+		if (!this.enabled) return;
+		this.disconnect();
+
+		const reg = (key: Keys) => {
+			this.events[key]?.forEach((e) => this.connect(e));
+
+			this.eventsOnce[key]?.forEach((e) => this.connect(e));
+			this.eventsOnce[key]?.clear();
+		};
+
+		this.subscribeOnce("All", Signals.INPUT_TYPE_CHANGED_EVENT, (inputType) => this.inputTypeChanged(inputType));
+		reg("All");
+		reg(device);
 	}
 
 	public disable() {
+		if (!this.enabled) return;
+
 		this.enabled = false;
 		this.disconnect();
 	}
@@ -36,50 +57,27 @@ export default class ControlEventHolder {
 		this.subscribed.clear();
 	}
 
-	public inputTypeChanged(device: InputType) {
-		if (!this.enabled) return;
-		this.disconnect();
+	private sub(events: Partial<Record<Keys, Sub<unknown>[]>>, inputType: Keys, sub: Sub<unknown>) {
+		events[inputType] ??= [];
+		events[inputType]!.push(sub);
 
-		const reg = (key: Keys) => {
-			const events = this.events[key];
-			if (events) {
-				for (const [signal, callback] of events) {
-					this.subscribed.push(signal.Connect(callback));
-				}
-			}
-
-			const eventsOnce = this.eventsOnce[key];
-			if (eventsOnce) {
-				for (const [signal, callback] of eventsOnce) {
-					this.subscribed.push(signal.Connect(callback));
-				}
-				eventsOnce.clear();
-			}
-		};
-
-		reg("All");
-		reg(device);
-		this.subscribeOnce("All", Signals.INPUT_TYPE_CHANGED_EVENT, (inputType) => this.inputTypeChanged(inputType));
+		if (this.enabled) this.connect(sub);
 	}
 
 	/** Register an input type change event */
-	public onInputTypeChange(inputType: InputType, callback: () => void, executeImmediately = false) {
-		this.events[inputType] ??= [];
-		this.events[inputType]!.push([Signals.INPUT_TYPE_CHANGED_EVENT, callback]);
-
-		if (executeImmediately && Signals.INPUT_TYPE.get() === inputType) callback();
+	public onInputTypeChange(callback: (inputType: InputType) => void, executeImmediately = false) {
+		this.subscribe("All", Signals.INPUT_TYPE_CHANGED_EVENT, callback);
+		if (executeImmediately) callback(Signals.INPUT_TYPE.get());
 	}
 
 	/** Register an event */
 	public subscribe<T extends Callback = Callback>(inputType: Keys, signal: Sig<T>, callback: T) {
-		this.events[inputType] ??= [];
-		this.events[inputType]!.push([signal, callback]);
+		this.sub(this.events, inputType, [signal, callback]);
 	}
 
 	/** Register an event that fires once */
 	public subscribeOnce<T extends Callback = Callback>(inputType: Keys, signal: Sig<T>, callback: T) {
-		this.eventsOnce[inputType] ??= [];
-		this.eventsOnce[inputType]!.push([signal, callback]);
+		this.sub(this.eventsOnce, inputType, [signal, callback]);
 	}
 
 	/** Subscribe to an observable value changed event */
@@ -89,25 +87,16 @@ export default class ControlEventHolder {
 		callback: (value: T, prev: T) => void,
 		executeImmediately = false,
 	) {
-		this.events[inputType] ??= [];
-
-		const sub: Sub<(value: T, prev: T) => void> = [
-			{
-				Connect(callback) {
-					const eventHandler = new EventHandler();
-					observable.subscribe(eventHandler, callback);
-
-					return {
-						Disconnect() {
-							eventHandler.unsubscribeAll();
-						},
-					};
-				},
-			},
-			callback,
-		];
-		this.events[inputType]!.push(sub);
-
+		this.subscribe(inputType, observable.changed, callback);
 		if (executeImmediately) callback(observable.get(), observable.get());
+	}
+
+	public destroy() {
+		for (const key of ["All", "Desktop", "Gamepad", "Touch"] as const) {
+			delete this.events[key];
+			delete this.eventsOnce[key];
+		}
+
+		this.disconnect();
 	}
 }

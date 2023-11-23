@@ -55,6 +55,7 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 
 		const template = Control.asTemplate(this.gui.Buttons.Template);
 		const toolButtons = new ListControl(this.gui.Buttons);
+		this.add(toolButtons);
 
 		// Creating buttons
 		ToolController.tools.forEach((tool, i) => {

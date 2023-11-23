@@ -27,15 +27,11 @@ export default class BuildToolScene extends Scene<BuildToolSceneDefinition> {
 		this.blockSelector.setVisible(true);
 		this.add(this.blockSelector);
 
-		// Final
-		this.prepare();
-	}
+		this.event.subscribeObservable("All", this.blockSelector.selectedBlock, (block) =>
+			this.tool.setSelectedBlock(block),
+		);
 
-	protected prepare(): void {
-		super.prepare();
-
-		this.blockSelector.selectedBlock.subscribe(this.eventHandler, (block) => this.tool.setSelectedBlock(block));
-		this.gui.TouchControls.Visible = false;
+		this.event.onInputTypeChange((inputType) => (this.gui.TouchControls.Visible = inputType === "Touch"), true);
 	}
 
 	protected prepareTouch(): void {
@@ -43,8 +39,8 @@ export default class BuildToolScene extends Scene<BuildToolSceneDefinition> {
 		GuiAnimator.transition(this.gui.TouchControls, 0.2, "left");
 	}
 
-	public showScene(): void {
-		super.showScene();
+	public show(): void {
+		super.show();
 
 		GuiAnimator.transition(this.gui.BlockSelection, 0.2, "right");
 		GuiAnimator.transition(this.gui.Preview, 0.2, "right");

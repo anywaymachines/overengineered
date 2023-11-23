@@ -32,8 +32,8 @@ export default class ToolSceneController {
 
 				if (tool === prev) return;
 
-				prevscene?.hideScene();
-				newscene?.showScene();
+				prevscene?.hide();
+				newscene?.show();
 			},
 			true,
 		);

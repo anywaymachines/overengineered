@@ -9,8 +9,7 @@ export type DeleteToolSceneDefinition = GuiObject & {
 export default class DeleteToolScene extends Scene<DeleteToolSceneDefinition> {
 	constructor(gui: DeleteToolSceneDefinition, tool: DeleteTool) {
 		super(gui);
-
-		this.eventHandler.subscribe(this.gui.DeleteAllButton.MouseButton1Click, () => this.suggestClearAll());
+		this.event.subscribe("Desktop", this.gui.DeleteAllButton.MouseButton1Click, () => this.suggestClearAll());
 	}
 
 	private suggestClearAll() {}

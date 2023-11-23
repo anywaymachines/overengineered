@@ -21,7 +21,7 @@ export default class TabControl extends Control<TabControlDefinition> {
 		tab.Visible = true;
 		tab.Parent = this.gui.Tabs;
 
-		this.addChild(content);
+		this.add(content);
 		content.setParent(this.gui.Content);
 		content.setVisible(this.gui.Content.GetChildren().size() === 0);
 

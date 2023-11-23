@@ -2,35 +2,35 @@ import Control from "client/base/Control";
 
 /** A GUI element that has children, keyed by some value */
 export class DictionaryControl<T extends GuiObject, TKey, TValue extends Control = Control> extends Control<T> {
-	private readonly children = new Map<TKey, TValue>();
+	private readonly keyedChildren = new Map<TKey, TValue>();
 
 	constructor(gui: T) {
 		super(gui);
 	}
 
 	/** Returns a list of added children */
-	getChildren(): ReadonlyMap<TKey, TValue> {
-		return this.children;
+	getKeyedChildren(): ReadonlyMap<TKey, TValue> {
+		return this.keyedChildren;
 	}
 
 	/** Add a child */
-	add(key: TKey, child: TValue) {
-		child.setParent(this.gui);
-		this.children.set(key, child);
+	addKeyed(key: TKey, child: TValue, setParent = true) {
+		this.keyedChildren.set(key, child);
+		this.add(child, setParent);
 	}
 
 	/** Remove a child */
-	remove(key: TKey) {
-		const child = this.children.get(key);
+	removeKeyed(key: TKey, setParent = true) {
+		const child = this.keyedChildren.get(key);
 		if (!child) return;
 
-		child.setParent(undefined);
-		this.children.delete(key);
+		this.keyedChildren.delete(key);
+		this.remove(child, setParent);
 	}
 
 	/** Clear all added children */
-	clear() {
-		this.children.forEach((child) => child.setParent(undefined));
-		this.children.clear();
+	clear(setParent = true) {
+		this.keyedChildren.clear();
+		super.clear(setParent);
 	}
 }

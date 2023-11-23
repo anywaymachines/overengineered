@@ -2,6 +2,8 @@ import Signal from "@rbxts/signal";
 import EventHandler from "shared/event/EventHandler";
 
 export interface ReadonlyObservableValue<T> {
+	readonly changed: Pick<Signal<(value: T, prev: T) => void>, "Connect" | "ConnectParallel" | "Once" | "Wait">;
+
 	get(): T;
 
 	subscribe(eventHandler: EventHandler | undefined, func: (value: T, prev: T) => void): void;
