@@ -1,4 +1,4 @@
-import { GuiService, Players, UserInputService, Workspace } from "@rbxts/services";
+import { GuiService, Players, ReplicatedFirst, UserInputService, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";

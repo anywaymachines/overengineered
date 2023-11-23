@@ -52,7 +52,6 @@ class MaterialChoosePart extends Control<MaterialChoosePartDefinition> {
 		this.create();
 
 		this.event.subscribeObservable(
-			"All",
 			this.selectedMaterial,
 			(material) => {
 				for (const [_, child] of this.list.getKeyedChildren()) child.getGui().BackgroundColor3 = color;
@@ -114,7 +113,7 @@ class MaterialColorChooseControl extends ListControl<MaterialColorChooseDefiniti
 			slider.setMin(0);
 			slider.setMax(1);
 			slider.value.set(value);
-			this.event.subscribeObservable("All", slider.value, updateColor);
+			this.event.subscribeObservable(slider.value, updateColor);
 			this.add(slider);
 
 			return slider;
@@ -126,27 +125,26 @@ class MaterialColorChooseControl extends ListControl<MaterialColorChooseDefiniti
 
 		const r = new NumberTextBoxControl(this.gui.ManualRed);
 		this.add(r);
-		this.event.subscribeObservable("All", r.value, (r) => {
+		this.event.subscribeObservable(r.value, (r) => {
 			const color = this.selectedColor.get();
 			this.selectedColor.set(new Color3(r / 255, color.G, color.B));
 		});
 
 		const g = new NumberTextBoxControl(this.gui.ManualGreen);
 		this.add(g);
-		this.event.subscribeObservable("All", g.value, (g) => {
+		this.event.subscribeObservable(g.value, (g) => {
 			const color = this.selectedColor.get();
 			this.selectedColor.set(new Color3(color.R, g / 255, color.B));
 		});
 
 		const b = new NumberTextBoxControl(this.gui.ManualBlue);
 		this.add(b);
-		this.event.subscribeObservable("All", b.value, (b) => {
+		this.event.subscribeObservable(b.value, (b) => {
 			const color = this.selectedColor.get();
 			this.selectedColor.set(new Color3(color.R, color.G, b / 255));
 		});
 
 		this.event.subscribeObservable(
-			"All",
 			this.selectedColor,
 			() => {
 				this.gui.Preview.BackgroundColor3 = this.selectedColor.get();
@@ -180,18 +178,12 @@ class MaterialPreviewControl extends Control<MaterialPreviewDefinition> {
 		super(gui);
 
 		this.event.subscribeObservable(
-			"All",
 			selectedMaterial,
 			(material) => (this.gui.ViewportFrame.Part.Material = material),
 			true,
 		);
 
-		this.event.subscribeObservable(
-			"All",
-			selectedColor,
-			(color) => (this.gui.ViewportFrame.Part.Color = color),
-			true,
-		);
+		this.event.subscribeObservable(selectedColor, (color) => (this.gui.ViewportFrame.Part.Color = color), true);
 	}
 }
 

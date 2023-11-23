@@ -1,6 +1,6 @@
+import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
-import EventHandler from "shared/event/EventHandler";
 import { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 type InputType = typeof InputController.inputType;
@@ -12,6 +12,7 @@ type Sig<T> = {
 type Sub<T> = [signal: Sig<T>, callback: T];
 
 export default class ControlEventHolder {
+	public readonly onEnable = new Signal<() => void>();
 	private readonly events: Partial<Record<Keys, Sub<unknown>[]>> = {};
 	private readonly eventsOnce: Partial<Record<Keys, Sub<unknown>[]>> = {};
 	private readonly subscribed: SigConnection[] = [];
@@ -22,8 +23,8 @@ export default class ControlEventHolder {
 		if (this.enabled) return;
 
 		this.enabled = true;
-		this.subscribeOnce("All", Signals.INPUT_TYPE_CHANGED_EVENT, (inputType) => this.inputTypeChanged(inputType));
 		this.inputTypeChanged(Signals.INPUT_TYPE.get());
+		this.onEnable.Fire();
 	}
 
 	private connect(sub: Sub<unknown>) {
@@ -32,6 +33,7 @@ export default class ControlEventHolder {
 	private inputTypeChanged(device: InputType) {
 		if (!this.enabled) return;
 		this.disconnect();
+		this.subscribeOnce(Signals.INPUT_TYPE_CHANGED_EVENT, (inputType) => this.inputTypeChanged(inputType));
 
 		const reg = (key: Keys) => {
 			this.events[key]?.forEach((e) => this.connect(e));
@@ -40,7 +42,6 @@ export default class ControlEventHolder {
 			this.eventsOnce[key]?.clear();
 		};
 
-		this.subscribeOnce("All", Signals.INPUT_TYPE_CHANGED_EVENT, (inputType) => this.inputTypeChanged(inputType));
 		reg("All");
 		reg(device);
 	}
@@ -57,6 +58,18 @@ export default class ControlEventHolder {
 		this.subscribed.clear();
 	}
 
+	/** Register an input type change event */
+	public subscribeInputTypeChange(callback: (inputType: InputType) => void, executeImmediately = false) {
+		this.subscribe(Signals.INPUT_TYPE_CHANGED_EVENT, callback);
+		if (executeImmediately) callback(Signals.INPUT_TYPE.get());
+	}
+
+	/** Register an events enable event */
+	public subscribeOnEnable(callback: () => void, executeImmediately = false) {
+		this.subscribe(this.onEnable, callback);
+		if (executeImmediately) callback();
+	}
+
 	private sub(events: Partial<Record<Keys, Sub<unknown>[]>>, inputType: Keys, sub: Sub<unknown>) {
 		events[inputType] ??= [];
 		events[inputType]!.push(sub);
@@ -64,30 +77,24 @@ export default class ControlEventHolder {
 		if (this.enabled) this.connect(sub);
 	}
 
-	/** Register an input type change event */
-	public onInputTypeChange(callback: (inputType: InputType) => void, executeImmediately = false) {
-		this.subscribe("All", Signals.INPUT_TYPE_CHANGED_EVENT, callback);
-		if (executeImmediately) callback(Signals.INPUT_TYPE.get());
-	}
-
 	/** Register an event */
-	public subscribe<T extends Callback = Callback>(inputType: Keys, signal: Sig<T>, callback: T) {
+	public subscribe<T extends Callback = Callback>(signal: Sig<T>, callback: T, inputType: Keys = "All") {
 		this.sub(this.events, inputType, [signal, callback]);
 	}
 
 	/** Register an event that fires once */
-	public subscribeOnce<T extends Callback = Callback>(inputType: Keys, signal: Sig<T>, callback: T) {
+	public subscribeOnce<T extends Callback = Callback>(signal: Sig<T>, callback: T, inputType: Keys = "All") {
 		this.sub(this.eventsOnce, inputType, [signal, callback]);
 	}
 
 	/** Subscribe to an observable value changed event */
 	public subscribeObservable<T>(
-		inputType: Keys,
 		observable: ReadonlyObservableValue<T>,
 		callback: (value: T, prev: T) => void,
 		executeImmediately = false,
+		inputType: Keys = "All",
 	) {
-		this.subscribe(inputType, observable.changed, callback);
+		this.subscribe(observable.changed, callback, inputType);
 		if (executeImmediately) callback(observable.get(), observable.get());
 	}
 

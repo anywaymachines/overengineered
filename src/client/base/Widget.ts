@@ -22,11 +22,11 @@ export default abstract class Widget {
 	abstract isVisible(): boolean;
 
 	/** A function for preparing functionality for Desktop */
-	protected abstract prepareDesktop(): void;
+	protected prepareDesktop(): void {}
 	/** A function for preparing functionality for Touch */
-	protected abstract prepareTouch(): void;
+	protected prepareTouch(): void {}
 	/** A function for preparing functionality for Gamepad */
-	protected abstract prepareGamepad(): void;
+	protected prepareGamepad(): void {}
 
 	/** A function for preparing functionality for certain platforms */
 	protected prepare() {

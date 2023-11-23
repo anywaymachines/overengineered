@@ -150,14 +150,6 @@ export default class BuildToolWidget extends ToolWidget<BuildTool> {
 		});
 	}
 
-	protected prepareDesktop(): void {
-		// Empty
-	}
-
-	protected prepareGamepad(): void {
-		// Empty
-	}
-
 	protected prepareTouch(): void {
 		this.gui.TouchControls.Visible = true;
 		GuiAnimator.transition(this.gui.TouchControls, 0.2, "left");

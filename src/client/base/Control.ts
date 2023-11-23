@@ -1,20 +1,27 @@
 import InputController from "client/controller/InputController";
 import InputHandler from "client/event/InputHandler";
-import Signals from "client/event/Signals";
 import ControlEventHolder from "./ControlEventHolder";
+import EventHandler from "shared/event/EventHandler";
 
 /** Wraps the Roblox GUI objects and provides methods for easy handling */
 export default abstract class Control<T extends GuiObject = GuiObject> {
-	// Handlers
-	protected readonly inputHandler = new InputHandler();
+	/** Main event handler. Does not register events until enabled and reregisters events when input type changes. */
 	protected readonly event = new ControlEventHolder();
+
+	/** Event handler for use in prepare***() */
+	protected readonly eventHandler = new EventHandler();
+
+	/** Input handler for use in prepare***() */
+	protected readonly inputHandler = new InputHandler();
 
 	protected readonly gui: T;
 	private readonly children: Control[] = [];
 
 	constructor(gui: T) {
 		this.gui = gui;
-		this.prepare();
+
+		this.event.subscribeInputTypeChange(() => this.prepare());
+		this.event.subscribeOnEnable(() => this.prepare());
 	}
 
 	public getGui() {
@@ -109,15 +116,11 @@ export default abstract class Control<T extends GuiObject = GuiObject> {
 	/** A function for preparing functionality for Gamepad */
 	protected prepareGamepad() {}
 
-	/**
-	 * A function for preparing functionality (**Unsubscribes from everything**)
-	 */
+	/** A function for preparing functionality (**Unsubscribes from every event and input handler**) */
 	protected prepare() {
 		// Terminate exist events
 		this.inputHandler.unsubscribeAll();
-
-		// Required event
-		this.event.subscribeOnce("All", Signals.INPUT_TYPE_CHANGED_EVENT, () => this.prepare());
+		this.eventHandler.unsubscribeAll();
 
 		// Call init
 		const events = {

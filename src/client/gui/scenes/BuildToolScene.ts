@@ -8,7 +8,12 @@ import GuiAnimator from "../GuiAnimator";
 export type BuildToolSceneDefinition = GuiObject & {
 	BlockSelection: BlockSelectionControlDefinition;
 	Preview: GuiObject;
-	TouchControls: GuiObject;
+	TouchControls: Frame & {
+		PlaceButton: TextButton;
+		RotateRButton: TextButton;
+		RotateTButton: TextButton;
+		RotateYButton: TextButton;
+	};
 };
 
 export default class BuildToolScene extends Scene<BuildToolSceneDefinition> {
@@ -27,16 +32,29 @@ export default class BuildToolScene extends Scene<BuildToolSceneDefinition> {
 		this.blockSelector.setVisible(true);
 		this.add(this.blockSelector);
 
-		this.event.subscribeObservable("All", this.blockSelector.selectedBlock, (block) =>
-			this.tool.setSelectedBlock(block),
-		);
+		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => this.tool.setSelectedBlock(block));
 
-		this.event.onInputTypeChange((inputType) => (this.gui.TouchControls.Visible = inputType === "Touch"), true);
+		this.event.subscribeInputTypeChange(
+			(inputType) => (this.gui.TouchControls.Visible = inputType === "Touch"),
+			true,
+		);
 	}
 
 	protected prepareTouch(): void {
 		this.gui.TouchControls.Visible = true;
 		GuiAnimator.transition(this.gui.TouchControls, 0.2, "left");
+
+		// Touchscreen controls
+		this.eventHandler.subscribe(this.gui.TouchControls.PlaceButton.MouseButton1Click, () => this.tool.placeBlock());
+		this.eventHandler.subscribe(this.gui.TouchControls.RotateRButton.MouseButton1Click, () =>
+			this.tool.rotate("x", true),
+		);
+		this.eventHandler.subscribe(this.gui.TouchControls.RotateTButton.MouseButton1Click, () =>
+			this.tool.rotate("y", true),
+		);
+		this.eventHandler.subscribe(this.gui.TouchControls.RotateYButton.MouseButton1Click, () =>
+			this.tool.rotate("z", true),
+		);
 	}
 
 	public show(): void {
