@@ -17,8 +17,8 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 	private max = 10;
 	private step = 1;
 
-	constructor(template: T) {
-		super(template);
+	constructor(gui: T) {
+		super(gui);
 		this.updateVisuals();
 
 		const eh = new EventHandler();

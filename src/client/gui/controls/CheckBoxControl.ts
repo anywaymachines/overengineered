@@ -13,13 +13,13 @@ export default class CheckBoxControl extends Control<CheckBoxControlDefinition> 
 	private readonly activeColor = Color3.fromRGB(13, 150, 255);
 	private readonly activationColor = 0.15;
 
-	constructor(widget: CheckBoxControlDefinition) {
-		super(widget);
+	constructor(gui: CheckBoxControlDefinition) {
+		super(gui);
 
 		this.updateVisuals();
 
-		this.event.subscribe(widget.MouseButton1Click, () => this.onClick());
-		this.event.subscribe(widget.Circle.MouseButton1Click, () => this.onClick());
+		this.event.subscribe(gui.MouseButton1Click, () => this.onClick());
+		this.event.subscribe(gui.Circle.MouseButton1Click, () => this.onClick());
 	}
 
 	public tempLock(time: number) {

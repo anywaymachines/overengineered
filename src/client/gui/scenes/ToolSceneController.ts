@@ -4,6 +4,7 @@ import ToolController from "client/tools/ToolController";
 import BuildToolScene, { BuildToolSceneDefinition } from "./BuildToolScene";
 import GuiController from "client/controller/GuiController";
 import DeleteToolScene, { DeleteToolSceneDefinition } from "./DeleteToolScene";
+import ConfigToolScene, { ConfigToolSceneDefinition } from "./ConfigToolScene";
 
 export default class ToolSceneController {
 	private static readonly scenes = new Map<ToolBase, Scene>();
@@ -11,7 +12,11 @@ export default class ToolSceneController {
 	public static init() {
 		const gameui = GuiController.getGameUI<{
 			BuildingMode: {
-				Tools: { BuildToolGui: BuildToolSceneDefinition; DeleteToolGui: DeleteToolSceneDefinition };
+				Tools: {
+					BuildToolGui: BuildToolSceneDefinition;
+					DeleteToolGui: DeleteToolSceneDefinition;
+					ConfigToolGui: ConfigToolSceneDefinition;
+				};
 			};
 		}>();
 
@@ -22,6 +27,10 @@ export default class ToolSceneController {
 		this.scenes.set(
 			ToolController.deleteTool,
 			new DeleteToolScene(gameui.BuildingMode.Tools.DeleteToolGui, ToolController.deleteTool),
+		);
+		this.scenes.set(
+			ToolController.configTool,
+			new ConfigToolScene(gameui.BuildingMode.Tools.ConfigToolGui, ToolController.configTool),
 		);
 
 		ToolController.selectedTool.subscribe((tool, prev) => {
