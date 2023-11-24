@@ -5,7 +5,7 @@ import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import Signals from "client/event/Signals";
-import LogStaticWidget from "client/gui/widget/static/LogStaticWidget";
+import LogControl from "client/gui/static/LogControl";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import BlockRegistry from "shared/registry/BlocksRegistry";
@@ -119,7 +119,7 @@ export default class ConfigTool extends ToolBase {
 
 		const block = this.highlight?.Parent;
 		if (!block) {
-			if (!pc) LogStaticWidget.instance.addLine("Block is not targeted!");
+			if (!pc) LogControl.instance.addLine("Block is not targeted!");
 			return;
 		}
 

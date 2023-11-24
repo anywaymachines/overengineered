@@ -34,8 +34,8 @@ export type ConfigToolSceneDefinition = GuiObject & {
 			SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 		};
 	};
-	SelectSimilarButton: TextButton;
-	ClearSelectionButton: TextButton;
+	ApplyToAllButton: TextButton;
+	DeselectAllButton: TextButton;
 };
 
 export default class ConfigToolScene extends Scene<ConfigToolSceneDefinition> {
@@ -60,8 +60,8 @@ export default class ConfigToolScene extends Scene<ConfigToolSceneDefinition> {
 		});
 
 		this.event.onPrepare((inputType) => {
-			this.gui.SelectSimilarButton.Visible = inputType !== "Gamepad";
-			this.gui.ClearSelectionButton.Visible = inputType !== "Gamepad";
+			this.gui.ApplyToAllButton.Visible = inputType !== "Gamepad";
+			this.gui.DeselectAllButton.Visible = inputType !== "Gamepad";
 		}, true);
 	}
 
@@ -69,8 +69,8 @@ export default class ConfigToolScene extends Scene<ConfigToolSceneDefinition> {
 		super.show();
 
 		GuiAnimator.transition(this.gui.ParamsSelection, 0.2, "right");
-		GuiAnimator.transition(this.gui.SelectSimilarButton, 0.2, "down");
-		GuiAnimator.transition(this.gui.ClearSelectionButton, 0.22, "down");
+		GuiAnimator.transition(this.gui.ApplyToAllButton, 0.2, "down");
+		GuiAnimator.transition(this.gui.DeselectAllButton, 0.22, "down");
 	}
 
 	private updateConfigs(selected: readonly Highlight[]) {

@@ -1,7 +1,7 @@
 import { UserInputService } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
-import LogStaticWidget from "client/gui/widget/static/LogStaticWidget";
+import LogControl from "client/gui/static/LogControl";
 import Remotes from "shared/Remotes";
 
 /** A permanent event that monitors the change in the type of input type, which makes the game more flexible */
@@ -28,7 +28,7 @@ export default class InputTypeChangeEvent {
 			Signals.INPUT_TYPE_CHANGED_EVENT.Fire(newInputType);
 			this.share();
 
-			LogStaticWidget.instance.addLine("New input type set to " + newInputType, Color3.fromRGB(252, 252, 145));
+			LogControl.instance.addLine("New input type set to " + newInputType, Color3.fromRGB(252, 252, 145));
 		}
 	}
 

@@ -6,7 +6,7 @@ import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
-import LogStaticWidget from "client/gui/widget/static/LogStaticWidget";
+import LogControl from "client/gui/static/LogControl";
 import BuildingManager from "shared/building/BuildingManager";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import PartUtils from "shared/utils/PartUtils";
@@ -219,7 +219,7 @@ export default class BuildTool extends ToolBase {
 	public async placeBlock() {
 		// ERROR: Block is not selected
 		if (this.selectedBlock === undefined) {
-			LogStaticWidget.instance.addLine("Block is not selected!");
+			LogControl.instance.addLine("Block is not selected!");
 			return;
 		}
 

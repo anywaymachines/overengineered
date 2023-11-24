@@ -1,7 +1,7 @@
 import Signal from "@rbxts/signal";
 import InputHandler from "client/event/InputHandler";
 import InputController from "./InputController";
-import LogStaticWidget from "client/gui/widget/static/LogStaticWidget";
+import LogControl from "client/gui/static/LogControl";
 
 type Operation = {
 	readonly description: string;
@@ -64,7 +64,7 @@ export default class ActionController {
 
 		this.history.push(operation);
 		operation.redo?.();
-		LogStaticWidget.instance.addLine(`Redone "${operation.description}"`);
+		LogControl.instance.addLine(`Redone "${operation.description}"`);
 		return true;
 	}
 
@@ -74,7 +74,7 @@ export default class ActionController {
 
 		this.redoHistory.push(operation);
 		operation.undo();
-		LogStaticWidget.instance.addLine(`Undone "${operation.description}"`);
+		LogControl.instance.addLine(`Undone "${operation.description}"`);
 		return true;
 	}
 }

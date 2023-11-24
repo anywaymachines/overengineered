@@ -1,6 +1,6 @@
 import Signals from "client/event/Signals";
 import Remotes from "shared/Remotes";
-import LogStaticWidget from "client/gui/widget/static/LogStaticWidget";
+import LogControl from "client/gui/static/LogControl";
 
 export default class BuildingController {
 	public static async placeBlock(data: PlaceBlockRequest) {
@@ -14,7 +14,7 @@ export default class BuildingController {
 			Signals.BLOCKS.ADDED.Fire(response.model);
 			return { success: true, position: response.model.GetPivot().Position } as const;
 		} else {
-			LogStaticWidget.instance.addLine("Placement failed: " + response.message, Color3.fromRGB(255, 100, 100));
+			LogControl.instance.addLine("Placement failed: " + response.message, Color3.fromRGB(255, 100, 100));
 
 			// not OK
 			return { success: false } as const;
@@ -31,7 +31,7 @@ export default class BuildingController {
 			Signals.BLOCKS.REMOVED.Fire(block);
 		} else {
 			// Block not removed
-			LogStaticWidget.instance.addLine("Delete failed: " + response.message, Color3.fromRGB(255, 100, 100));
+			LogControl.instance.addLine("Delete failed: " + response.message, Color3.fromRGB(255, 100, 100));
 		}
 
 		return response;
@@ -41,7 +41,7 @@ export default class BuildingController {
 		const response = await Remotes.Client.GetNamespace("Building").Get("MoveRequest").CallServerAsync(request);
 
 		if (response.success) Signals.CONTRAPTION.MOVED.Fire(request.vector);
-		else LogStaticWidget.instance.addLine("Move failed: " + response.message, Color3.fromRGB(255, 100, 100));
+		else LogControl.instance.addLine("Move failed: " + response.message, Color3.fromRGB(255, 100, 100));
 
 		return response;
 	}
@@ -51,7 +51,7 @@ export default class BuildingController {
 
 		if (response.success) Signals.CONTRAPTION.CLEARED.Fire();
 		else
-			LogStaticWidget.instance.addLine("Clearing all failed: " + response.message, Color3.fromRGB(255, 100, 100));
+			LogControl.instance.addLine("Clearing all failed: " + response.message, Color3.fromRGB(255, 100, 100));
 
 		return response;
 	}

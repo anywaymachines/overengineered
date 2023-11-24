@@ -13,7 +13,6 @@ type Sub<T> = [signal: Sig<T>, callback: T];
 
 export default class ControlEventHolder {
 	private readonly prepareEvents: ((inputType: InputType) => void)[] = [];
-	private readonly inputTypeEvents: ((inputType: InputType) => void)[] = [];
 	private readonly events: Partial<Record<Keys, Sub<unknown>[]>> = {};
 	private readonly eventsOnce: Partial<Record<Keys, Sub<unknown>[]>> = {};
 	private readonly subscribed: SigConnection[] = [];
@@ -35,9 +34,7 @@ export default class ControlEventHolder {
 		this.disconnect();
 		this.subscribeOnce(Signals.INPUT_TYPE_CHANGED_EVENT, (inputType) => this.inputTypeChanged(inputType));
 
-		for (const event of this.inputTypeEvents) {
-			event(Signals.INPUT_TYPE.get());
-		}
+		for (const event of this.prepareEvents) event(Signals.INPUT_TYPE.get());
 
 		const reg = (key: Keys) => {
 			this.events[key]?.forEach((e) => this.connect(e));
@@ -70,13 +67,11 @@ export default class ControlEventHolder {
 
 	/** Register an input type change event */
 	public onInputType(inputType: InputType, callback: () => void, executeImmediately = false) {
-		this.subscribeObservable(
-			Signals.INPUT_TYPE,
-			(newInputType) => {
-				if (newInputType === inputType) callback();
-			},
-			executeImmediately,
-		);
+		this.onPrepare((newInputType) => {
+			if (newInputType === inputType) {
+				callback();
+			}
+		}, executeImmediately);
 	}
 
 	private sub(events: Partial<Record<Keys, Sub<unknown>[]>>, inputType: Keys, sub: Sub<unknown>) {

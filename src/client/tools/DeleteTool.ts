@@ -6,7 +6,7 @@ import BuildingController from "client/controller/BuildingController";
 import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
-import LogStaticWidget from "client/gui/widget/static/LogStaticWidget";
+import LogControl from "client/gui/static/LogControl";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -82,7 +82,7 @@ export default class DeleteTool extends ToolBase {
 	public async deleteBlock() {
 		// ERROR: No block selected
 		if (this.highlight.Value === undefined) {
-			LogStaticWidget.instance.addLine("Block is not selected!");
+			LogControl.instance.addLine("Block is not selected!");
 			return;
 		}
 
