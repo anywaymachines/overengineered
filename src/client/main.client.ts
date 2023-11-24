@@ -1,19 +1,18 @@
 import PlayerStateEvent from "./event/PlayerStateEvent";
-import ToolbarControl, { ToolbarControlDefinition } from "./gui/controls/ToolbarControl";
-import ToolSceneController from "./gui/scenes/ToolSceneController";
+import BuildingModeScene from "./gui/scenes/BuildingModeScene";
 import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
 import LogControl from "./gui/static/LogControl";
-import { ActionBarControl } from "./gui/static/ActionBarControl";
 import TooltipsControl from "./gui/static/TooltipsControl";
+import ConfirmPopup from "./gui/popup/ConfirmPopup";
 
-ToolSceneController.init();
-ActionBarControl.instance.setVisible(true);
+BuildingModeScene.instance.setVisible(true);
+BuildingModeScene.instance.registerPopup(ConfirmPopup.instance);
+
 TooltipsControl.instance.setVisible(true);
 
 PlayerStateEvent.subscribe();
 InputTypeChangeEvent.subscribe();
 
-ToolbarControl.instance.setVisible(true);
 LogControl.instance.setVisible(true);
 
 /*

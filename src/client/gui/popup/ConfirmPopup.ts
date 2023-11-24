@@ -1,4 +1,4 @@
-import Scene from "client/base/Scene";
+import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
 import EventHandler from "shared/event/EventHandler";
@@ -20,7 +20,7 @@ export type ConfirmPopupDefinition = GuiObject & {
 	};
 };
 
-export default class ConfirmPopup extends Scene<
+export default class ConfirmPopup extends Popup<
 	ConfirmPopupDefinition,
 	[text: string, okFunc: () => void, noFunc: () => void]
 > {

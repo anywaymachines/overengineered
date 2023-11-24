@@ -79,9 +79,6 @@ export default class DeleteToolScene extends Scene<DeleteToolSceneDefinition> {
 	protected prepareTouch(): void {
 		GuiAnimator.transition(this.gui.TouchControls, 0.2, "left");
 
-		// Events
-		this.eventHandler.subscribe(this.gui.DeleteAllButton.MouseButton1Click, () => this.suggestClearAll());
-
 		// Touch controls
 		this.inputHandler.onTouchTap(() => this.tool.updatePosition());
 

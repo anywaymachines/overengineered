@@ -1,5 +1,4 @@
-import Control from "client/base/Control";
-import GuiController from "client/controller/GuiController";
+import Scene from "client/base/Scene";
 import Signals from "client/event/Signals";
 import GuiAnimator from "../GuiAnimator";
 import Remotes from "shared/Remotes";
@@ -12,13 +11,7 @@ export type ActionBarControlDefinition = GuiObject & {
 	};
 };
 
-export class ActionBarControl extends Control<ActionBarControlDefinition> {
-	public static readonly instance = new ActionBarControl(
-		GuiController.getGameUI<{
-			BuildingMode: { ActionBarGui: ActionBarControlDefinition };
-		}>().BuildingMode.ActionBarGui,
-	);
-
+export class ActionBarControl extends Scene<ActionBarControlDefinition> {
 	constructor(gui: ActionBarControlDefinition) {
 		super(gui);
 
