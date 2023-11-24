@@ -105,8 +105,10 @@ export default class GuiAnimator {
 		tween.Play();
 	}
 
-	static tween<T extends GuiObject>(gui: T, values: Partial<ExtractMembers<T, Tweenable>>, info: TweenInfo) {
+	static tween<T extends Instance>(gui: T, values: Partial<ExtractMembers<T, Tweenable>>, info: TweenInfo) {
 		const tween = TweenService.Create(gui, info, values);
 		tween.Play();
+
+		return tween;
 	}
 }

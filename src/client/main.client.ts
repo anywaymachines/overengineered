@@ -4,9 +4,12 @@ import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
 import LogControl from "./gui/static/LogControl";
 import TooltipsControl from "./gui/static/TooltipsControl";
 import ConfirmPopup from "./gui/popup/ConfirmPopup";
+import Animation from "./gui/Animation";
+import MaterialChooserControl from "./gui/tools/MaterialChooser";
 
 BuildingModeScene.instance.setVisible(true);
 BuildingModeScene.instance.registerPopup(ConfirmPopup.instance);
+BuildingModeScene.instance.registerPopup(MaterialChooserControl.instance);
 
 TooltipsControl.instance.setVisible(true);
 
@@ -14,6 +17,8 @@ PlayerStateEvent.subscribe();
 InputTypeChangeEvent.subscribe();
 
 LogControl.instance.setVisible(true);
+
+Animation.start();
 
 /*
 // Init

@@ -13,6 +13,7 @@ export type SliderControlDefinition = GuiObject & {
 
 export default class SliderControl<T extends SliderControlDefinition = SliderControlDefinition> extends Control<T> {
 	public readonly value = new ObservableValue(0);
+	private readonly visibleValue = new ObservableValue(0);
 	private min = 0;
 	private max = 10;
 	private step = 1;
@@ -25,26 +26,34 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 		let startpos: number | undefined;
 
 		this.event.subscribe(UserInputService.InputEnded, (input, _) => {
-			if (input.UserInputType === Enum.UserInputType.MouseButton1) {
+			if (
+				input.UserInputType === Enum.UserInputType.MouseButton1 ||
+				input.UserInputType === Enum.UserInputType.Touch
+			) {
 				startpos = undefined;
 				eh.unsubscribeAll();
+
+				const v = this.steppedValue() * (this.max - this.min);
+				this.value.setIfNotSame(v - (v % this.step));
 			}
 		});
 
-		this.value.subscribe(() => this.updateVisuals(), true);
+		this.visibleValue.subscribe(() => this.updateVisuals(), true);
+		this.value.subscribe((value) => this.visibleValue.set(value / (this.max - this.min)));
 
 		const update = () => {
 			if (startpos === undefined) return;
 
 			const x = Players.LocalPlayer.GetMouse().X;
-			this.value.set(math.clamp((x - startpos) / this.gui.AbsoluteSize.X, 0, 1));
+			this.visibleValue.set(math.clamp((x - startpos) / this.gui.AbsoluteSize.X, 0, 1));
 		};
 
 		const sub = (signal: RBXScriptSignal<(input: InputObject) => void>) => {
 			this.event.subscribe(signal, (input) => {
 				if (
 					input.UserInputState === Enum.UserInputState.Begin &&
-					input.UserInputType === Enum.UserInputType.MouseButton1
+					(input.UserInputType === Enum.UserInputType.MouseButton1 ||
+						input.UserInputType === Enum.UserInputType.Touch)
 				) {
 					startpos = this.gui.AbsolutePosition.X;
 					update();
@@ -76,8 +85,15 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 		return this.value;
 	}
 
+	private doStep(value: number) {
+		return value - (value % (this.step / (this.max - this.min)));
+	}
+	private steppedValue() {
+		return this.doStep(this.visibleValue.get() + this.step / (this.max - this.min) / 2);
+	}
+
 	private updateVisuals() {
-		const value = this.value.get() + this.step / (this.max - this.min) / 2;
+		const value = this.steppedValue();
 
 		const guivalue = value - (value % (this.step / (this.max - this.min)));
 		GuiAnimator.tween(

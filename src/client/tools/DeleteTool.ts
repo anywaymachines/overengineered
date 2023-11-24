@@ -156,6 +156,8 @@ export default class DeleteTool extends ToolBase {
 	}
 
 	public createHighlight(target: BasePart) {
+		this.destroyHighlight();
+
 		const instance = new Instance("Highlight");
 		instance.Parent = target.Parent;
 		instance.Adornee = target.Parent;

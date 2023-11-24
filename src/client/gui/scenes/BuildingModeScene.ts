@@ -8,6 +8,8 @@ import DeleteToolScene, { DeleteToolSceneDefinition } from "./DeleteToolScene";
 import ConfigToolScene, { ConfigToolSceneDefinition } from "./ConfigToolScene";
 import { ActionBarControl, ActionBarControlDefinition } from "../static/ActionBarControl";
 import ToolbarControl, { ToolbarControlDefinition } from "../controls/ToolbarControl";
+import { Players, UserInputService } from "@rbxts/services";
+import PlayerController from "client/controller/PlayerController";
 
 export type BuildingModeSceneDefinition = Folder & {
 	ActionBarGui: ActionBarControlDefinition;
@@ -82,6 +84,7 @@ export default class BuildingModeScene extends Scene<BuildingModeSceneDefinition
 		this.popups.push(popup);
 
 		popup.onShow.Connect(() => {
+			PlayerController.DisableControls();
 			this.currentPopup?.hide();
 			this.currentPopup = popup;
 
@@ -99,6 +102,7 @@ export default class BuildingModeScene extends Scene<BuildingModeSceneDefinition
 			});
 		});
 		popup.onHide.Connect(() => {
+			PlayerController.EnableControls();
 			this.currentPopup = undefined;
 			this.currentScene?.show();
 

@@ -28,6 +28,11 @@ export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 		(this.changed as Signal<(value: T, prev: T) => void>).Fire(value, prev);
 	}
 
+	public setIfNotSame(value: T) {
+		if (this.value === value) return;
+		this.set(value);
+	}
+
 	public get() {
 		return this.value;
 	}

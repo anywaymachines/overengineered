@@ -8,6 +8,7 @@ import BuildingManager from "shared/building/BuildingManager";
 import GuiController from "client/controller/GuiController";
 import Scene from "client/base/Scene";
 import Signal from "@rbxts/signal";
+import Popup from "client/base/Popup";
 
 type MaterialControlDefinition = GuiButton & {
 	TextLabel: TextLabel;
@@ -211,7 +212,7 @@ export type MaterialChooserControlDefinition = GuiObject & {
 };
 
 /** Material choose & preview control */
-export default class MaterialChooserControl extends Scene<MaterialChooserControlDefinition> {
+export default class MaterialChooserControl extends Popup<MaterialChooserControlDefinition> {
 	public static readonly instance = new MaterialChooserControl(
 		GuiController.getGameUI<{
 			Popup: {

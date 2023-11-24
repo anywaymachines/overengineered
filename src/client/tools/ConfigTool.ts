@@ -106,6 +106,10 @@ export default class ConfigTool extends ToolBase {
 
 		// Create highlight
 		this.createHighlight(target);
+
+		if (Signals.INPUT_TYPE.get() === "Touch") {
+			this.selectBlock(false, false);
+		}
 	}
 
 	private selectBlock(pc = false, add = true) {
@@ -148,6 +152,8 @@ export default class ConfigTool extends ToolBase {
 	}
 
 	public createHighlight(target: BasePart) {
+		this.destroyHighlight();
+
 		this.highlight = new Instance("Highlight");
 		this.highlight.Parent = target.Parent;
 		this.highlight.Adornee = target.Parent;
@@ -159,10 +165,9 @@ export default class ConfigTool extends ToolBase {
 	}
 
 	public unselectAll() {
-		this.selected.forEach((element) => {
-			element.Destroy();
-		});
+		this.selected.forEach((element) => element.Destroy());
 		this.selected.clear();
+		this.selectedBlocksChanged.Fire(this.selected);
 	}
 
 	getDisplayName(): string {

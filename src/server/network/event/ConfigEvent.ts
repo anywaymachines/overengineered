@@ -32,8 +32,8 @@ export default class ConfigEvent {
 			};
 		}
 
-		const dataTag = data.block.GetAttribute("config") as string;
-		const currentData = HttpService.JSONDecode(dataTag ?? "{}") as { [key: string]: string };
+		const dataTag = data.block.GetAttribute("config") as string | undefined;
+		const currentData = HttpService.JSONDecode(dataTag ?? "{}") as { [key: string]: unknown };
 		currentData[data.data.key] = data.data.value;
 		data.block.SetAttribute("config", HttpService.JSONEncode(currentData));
 

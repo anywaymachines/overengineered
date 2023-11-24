@@ -53,7 +53,7 @@ export default class DeleteToolScene extends Scene<DeleteToolSceneDefinition> {
 			//if (inputType === "Touch") aboba.hide();
 			//else aboba.show();
 
-			this.gui.TouchControls.Visible = inputType === "Touch";
+			this.gui.TouchControls.Visible = false;
 		}, true);
 		this.event.onPrepare((inputType) => {
 			this.gui.DeleteAllButton.Visible = inputType !== "Gamepad";
@@ -77,11 +77,6 @@ export default class DeleteToolScene extends Scene<DeleteToolSceneDefinition> {
 	}
 
 	protected prepareTouch(): void {
-		GuiAnimator.transition(this.gui.TouchControls, 0.2, "left");
-
-		// Touch controls
-		this.inputHandler.onTouchTap(() => this.tool.updatePosition());
-
 		// Prepare touch events
 		this.eventHandler.subscribe(this.gui.TouchControls.DeleteButton.MouseButton1Click, () =>
 			this.tool.deleteBlock(),

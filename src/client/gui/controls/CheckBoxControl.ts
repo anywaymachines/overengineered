@@ -1,13 +1,16 @@
 import Control from "client/base/Control";
 import GuiAnimator from "../GuiAnimator";
+import ObservableValue from "shared/event/ObservableValue";
 
 export type CheckBoxControlDefinition = TextButton & {
 	Circle: TextButton;
 };
 
 export default class CheckBoxControl extends Control<CheckBoxControlDefinition> {
-	private checked = false;
+	public readonly value = new ObservableValue(false);
+
 	private locked = false;
+	private animated = false;
 
 	private readonly color = Color3.fromRGB(48, 62, 87);
 	private readonly activeColor = Color3.fromRGB(13, 150, 255);
@@ -16,10 +19,11 @@ export default class CheckBoxControl extends Control<CheckBoxControlDefinition> 
 	constructor(gui: CheckBoxControlDefinition) {
 		super(gui);
 
-		this.updateVisuals();
-
 		this.event.subscribe(gui.MouseButton1Click, () => this.onClick());
 		this.event.subscribe(gui.Circle.MouseButton1Click, () => this.onClick());
+
+		this.event.subscribeObservable(this.value, () => this.updateVisuals(), true);
+		this.event.onPrepare(() => (this.animated = true));
 	}
 
 	public tempLock(time: number) {
@@ -32,22 +36,22 @@ export default class CheckBoxControl extends Control<CheckBoxControlDefinition> 
 
 	public onClick() {
 		if (this.locked) return;
-		this.checked = !this.checked;
+		this.value.set(!this.value.get());
 		this.updateVisuals();
 	}
 
 	public getValue() {
-		return this.checked;
+		return this.value.get();
 	}
 
 	private updateVisuals() {
-		if (this.checked) {
-			GuiAnimator.tweenPosition(this.gui.Circle, new UDim2(0.5, 0, 0, 0), 0.2);
-			GuiAnimator.tweenColor(this.gui, this.activeColor, this.activationColor);
+		if (this.value.get()) {
+			GuiAnimator.tweenPosition(this.gui.Circle, new UDim2(0.5, 0, 0, 0), this.animated ? 0.2 : 0);
+			GuiAnimator.tweenColor(this.gui, this.activeColor, this.animated ? this.activationColor : 0);
 			this.tempLock(this.activationColor);
 		} else {
-			GuiAnimator.tweenPosition(this.gui.Circle, new UDim2(0, 0, 0, 0), 0.2);
-			GuiAnimator.tweenColor(this.gui, this.color, this.activationColor);
+			GuiAnimator.tweenPosition(this.gui.Circle, new UDim2(0, 0, 0, 0), this.animated ? 0.2 : 0);
+			GuiAnimator.tweenColor(this.gui, this.color, this.animated ? this.activationColor : 0);
 			this.tempLock(this.activationColor);
 		}
 	}

@@ -23,7 +23,7 @@ export default class ConfigManager {
 						: element.default.Desktop;
 			});
 
-			model.SetAttribute("data", HttpService.JSONEncode(configData));
+			model.SetAttribute("config", HttpService.JSONEncode(configData));
 		}
 	}
 

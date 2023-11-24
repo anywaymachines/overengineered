@@ -86,10 +86,14 @@ export default class Control<T extends GuiObject | Folder = GuiObject> {
 	}
 	private disablePassthrough() {
 		this.event.disable();
+		this.inputHandler.unsubscribeAll();
+		this.eventHandler.unsubscribeAll();
 		for (const child of this.children) child.enablePassthrough();
 	}
 	private destroyPassthrough() {
 		this.event.destroy();
+		this.inputHandler.unsubscribeAll();
+		this.eventHandler.unsubscribeAll();
 		for (const child of this.children) child.destroyPassthrough();
 	}
 

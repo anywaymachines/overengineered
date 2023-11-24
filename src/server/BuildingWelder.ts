@@ -6,13 +6,14 @@ export default class BuildingWelder {
 		const results: BasePart[] = [];
 
 		// Vectors to check for joints
+		const size = model.GetExtentsSize();
 		const vectors: Vector3[] = [
-			new Vector3(0, 1, 0),
-			new Vector3(0, 0, 1),
-			new Vector3(1, 0, 0),
-			new Vector3(0, -1, 0),
-			new Vector3(0, 0, -1),
-			new Vector3(-1, 0, 0),
+			new Vector3(0, size.Y, 0),
+			new Vector3(0, 0, size.Z),
+			new Vector3(size.X, 0, 0),
+			new Vector3(0, -size.Y, 0),
+			new Vector3(0, 0, -size.Z),
+			new Vector3(-size.X, 0, 0),
 		];
 
 		// Checking all vectors

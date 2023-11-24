@@ -2,6 +2,7 @@ import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import { Workspace } from "@rbxts/services";
 import ObservableValue from "shared/event/ObservableValue";
+import InputController from "client/controller/InputController";
 
 /** Class for working with local networking signals */
 export default class Signals {
@@ -10,7 +11,7 @@ export default class Signals {
 	} as const;
 
 	public static readonly INPUT_TYPE_CHANGED_EVENT = new Signal<(platform: InputType) => void>();
-	public static readonly INPUT_TYPE = new ObservableValue<InputType>("Desktop");
+	public static readonly INPUT_TYPE = new ObservableValue<InputType>(InputController.getPhysicalInputType());
 
 	public static readonly PLAYER = {
 		SPAWN: new Signal<() => void>(),

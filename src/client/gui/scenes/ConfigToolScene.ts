@@ -7,6 +7,10 @@ import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import { ListControl } from "../controls/ListControl";
 import GuiAnimator from "../GuiAnimator";
+import { HttpService } from "@rbxts/services";
+import Remotes from "shared/Remotes";
+import Signal from "@rbxts/signal";
+import Signals from "client/event/Signals";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	HeadingLabel: TextLabel;
@@ -78,25 +82,48 @@ export default class ConfigToolScene extends Scene<ConfigToolSceneDefinition> {
 			return "getConfigDefinitions" in block;
 		}
 
+		this.list.clear();
 		if (selected.size() === 0) return;
 
 		const item = selected[0].Parent as Model;
 		const block = BlockRegistry.getBlockByID(item.GetAttribute("id") as string)!;
 
-		this.list.clear();
 		if (!isConfigurableBlock(block)) return;
 
 		const defs = block.getConfigDefinitions();
-		for (const config of defs) {
-			if (config.type === "Bool") {
+		const config = HttpService.JSONDecode((item.GetAttribute("config") as string | undefined) ?? "{}") as Record<
+			string,
+			boolean | number | string
+		>;
+
+		const send = (key: string, value: unknown) => {
+			print("send " + key + " to " + value);
+
+			return Remotes.Client.GetNamespace("Building")
+				.Get("UpdateConfigRequest")
+				.CallServerAsync({ block: item, data: { key, value } });
+		};
+
+		for (const def of defs) {
+			if (def.type === "Bool") {
 				const control = new ConfigPartControl(this.checkboxTemplate(), (cb) => new CheckBoxControl(cb));
+				control.control.value.set(
+					(config[def.id] as boolean | undefined) ?? def.default[Signals.INPUT_TYPE.get()],
+				);
 				this.list.add(control);
-			} else if (config.type === "Key") {
+
+				control.control.value.subscribe((value) => send(def.id, value));
+			} else if (def.type === "Key") {
 				// const control = this.keyTemplate();
 				// this.list.add(control)
-			} else if (config.type === "Number") {
+			} else if (def.type === "Number") {
 				const control = new ConfigPartControl(this.sliderTemplate(), (cb) => new SliderControl(cb));
+				control.control.value.set(
+					(config[def.id] as number | undefined) ?? def.default[Signals.INPUT_TYPE.get()],
+				);
 				this.list.add(control);
+
+				control.control.value.subscribe((value) => send(def.id, value));
 			}
 		}
 	}
