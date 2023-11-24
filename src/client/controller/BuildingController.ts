@@ -50,8 +50,7 @@ export default class BuildingController {
 		const response = await Remotes.Client.GetNamespace("Building").Get("ClearAllRequest").CallServerAsync();
 
 		if (response.success) Signals.CONTRAPTION.CLEARED.Fire();
-		else
-			LogControl.instance.addLine("Clearing all failed: " + response.message, Color3.fromRGB(255, 100, 100));
+		else LogControl.instance.addLine("Clearing all failed: " + response.message, Color3.fromRGB(255, 100, 100));
 
 		return response;
 	}

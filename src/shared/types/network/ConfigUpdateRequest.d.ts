@@ -1,4 +1,7 @@
 interface ConfigUpdateRequest {
 	block: Model;
-	data: {};
+	data: {
+		key: string;
+		value: string;
+	};
 }

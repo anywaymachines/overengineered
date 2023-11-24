@@ -175,19 +175,19 @@ export default class MoveTool extends ToolBase {
 
 	protected prepareTouch(): void {}
 
-	public getGamepadTooltips(): { image: string; text: string }[] {
-		const keys: { image: string; text: string }[] = [];
+	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
+		const keys: { key: Enum.KeyCode; text: string }[] = [];
 
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadUp), text: "Move up" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadDown), text: "Move down" });
+		keys.push({ key: Enum.KeyCode.DPadUp, text: "Move up" });
+		keys.push({ key: Enum.KeyCode.DPadDown, text: "Move down" });
 
 		keys.push({
-			image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadLeft),
+			key: Enum.KeyCode.DPadLeft,
 			text: "Move left (based on camera)",
 		});
 
 		keys.push({
-			image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadRight),
+			key: Enum.KeyCode.DPadRight,
 			text: "Move right (based on camera)",
 		});
 

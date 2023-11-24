@@ -34,6 +34,13 @@ export default class DeleteEvent {
 			};
 		}
 
+		// Terminate welds (perfomance issue)
+		const welds = data.block.PrimaryPart!.GetJoints();
+		welds.forEach((element) => {
+			element.Destroy();
+		});
+
+		// Terminate block
 		data.block.Destroy();
 
 		return {

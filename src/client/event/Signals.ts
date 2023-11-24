@@ -33,6 +33,6 @@ export default class Signals {
 	} as const;
 
 	static {
-		this.INPUT_TYPE_CHANGED_EVENT.Connect((input) => this.INPUT_TYPE.set(input));
+		this.INPUT_TYPE.changed.Connect((input) => this.INPUT_TYPE_CHANGED_EVENT.Fire(input));
 	}
 }

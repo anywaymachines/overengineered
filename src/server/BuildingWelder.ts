@@ -2,23 +2,8 @@ import { Workspace } from "@rbxts/services";
 import Remotes from "shared/Remotes";
 
 export default class BuildingWelder {
-	static init() {
-		const WeldBlockRequest = Remotes.Client.GetNamespace("Building").Get("WeldBlock");
-		WeldBlockRequest.Connect((model) => {
-			while (model?.PrimaryPart === undefined) {
-				task.wait();
-			}
-
-			// Create welds
-			BuildingWelder.makeJoints(model as Model);
-		});
-	}
-
 	static getClosestParts(model: Model): BasePart[] {
 		const results: BasePart[] = [];
-
-		const checker = model.Clone();
-		checker.Parent = Workspace;
 
 		// Vectors to check for joints
 		const vectors: Vector3[] = [
@@ -38,6 +23,7 @@ export default class BuildingWelder {
 			(model.PrimaryPart as BasePart).GetTouchingParts().forEach((basepart) => {
 				if (
 					basepart.Parent &&
+					!basepart.IsDescendantOf(model) &&
 					basepart.Parent.GetAttribute("id") !== undefined &&
 					!results.includes(basepart) &&
 					!basepart.IsDescendantOf(model)
@@ -52,8 +38,6 @@ export default class BuildingWelder {
 				.sub(model.GetPivot().Position);
 			model.PivotTo(model.GetPivot().add(returnWorldSpaceMovement));
 		}
-
-		checker.Destroy();
 
 		return results;
 	}

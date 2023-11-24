@@ -179,12 +179,12 @@ export default class DeleteTool extends ToolBase {
 		return "Remove unnecessary blocks";
 	}
 
-	public getGamepadTooltips(): { image: string; text: string }[] {
-		const keys: { image: string; text: string }[] = [];
+	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
+		const keys: { key: Enum.KeyCode; text: string }[] = [];
 
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonY), text: "Clear all" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonX), text: "Delete" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonB), text: "Unequip" });
+		keys.push({ key: Enum.KeyCode.ButtonY, text: "Clear all" });
+		keys.push({ key: Enum.KeyCode.ButtonX, text: "Delete" });
+		keys.push({ key: Enum.KeyCode.ButtonB, text: "Unequip" });
 
 		return keys;
 	}

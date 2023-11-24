@@ -3,7 +3,6 @@ import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
-import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
 import BuildingManager from "shared/building/BuildingManager";
@@ -178,7 +177,7 @@ export default class ConfigTool extends ToolBase {
 		return "Configure blocks";
 	}
 
-	public getGamepadTooltips(): { image: string; text: string }[] {
+	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
 		return [];
 	}
 

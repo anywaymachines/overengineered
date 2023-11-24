@@ -25,7 +25,7 @@ export default class InputTypeChangeEvent {
 			InputController.inputType = newInputType;
 
 			// Fire a new input type
-			Signals.INPUT_TYPE_CHANGED_EVENT.Fire(newInputType);
+			Signals.INPUT_TYPE.set(newInputType);
 			this.share();
 
 			LogControl.instance.addLine("New input type set to " + newInputType, Color3.fromRGB(252, 252, 145));

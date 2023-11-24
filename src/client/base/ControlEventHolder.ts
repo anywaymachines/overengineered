@@ -1,4 +1,3 @@
-import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import { ReadonlyObservableValue } from "shared/event/ObservableValue";
@@ -29,12 +28,14 @@ export default class ControlEventHolder {
 	private connect(sub: Sub<unknown>) {
 		this.subscribed.push(sub[0].Connect(sub[1]));
 	}
-	private inputTypeChanged(device: InputType) {
+	private inputTypeChanged(inputType: InputType) {
 		if (!this.enabled) return;
 		this.disconnect();
 		this.subscribeOnce(Signals.INPUT_TYPE_CHANGED_EVENT, (inputType) => this.inputTypeChanged(inputType));
 
-		for (const event of this.prepareEvents) event(Signals.INPUT_TYPE.get());
+		for (const event of this.prepareEvents) {
+			event(inputType);
+		}
 
 		const reg = (key: Keys) => {
 			this.events[key]?.forEach((e) => this.connect(e));
@@ -44,7 +45,7 @@ export default class ControlEventHolder {
 		};
 
 		reg("All");
-		reg(device);
+		reg(inputType);
 	}
 
 	public disable() {
@@ -63,15 +64,6 @@ export default class ControlEventHolder {
 	public onPrepare(callback: (inputType: InputType) => void, executeImmediately = false) {
 		this.prepareEvents.push(callback);
 		if (executeImmediately) callback(Signals.INPUT_TYPE.get());
-	}
-
-	/** Register an input type change event */
-	public onInputType(inputType: InputType, callback: () => void, executeImmediately = false) {
-		this.onPrepare((newInputType) => {
-			if (newInputType === inputType) {
-				callback();
-			}
-		}, executeImmediately);
 	}
 
 	private sub(events: Partial<Record<Keys, Sub<unknown>[]>>, inputType: Keys, sub: Sub<unknown>) {

@@ -352,15 +352,15 @@ export default class BuildTool extends ToolBase {
 		this.previewBlock?.Destroy();
 	}
 
-	public getGamepadTooltips(): { image: string; text: string }[] {
-		const keys: { image: string; text: string }[] = [];
+	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
+		const keys: { key: Enum.KeyCode; text: string }[] = [];
 
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonX), text: "Place" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonB), text: "Unequip" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonSelect), text: "Select block" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadLeft), text: "Rotate by X" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadUp), text: "Rotate by Y" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadRight), text: "Rotate by Z" });
+		keys.push({ key: Enum.KeyCode.ButtonX, text: "Place" });
+		keys.push({ key: Enum.KeyCode.ButtonB, text: "Unequip" });
+		keys.push({ key: Enum.KeyCode.ButtonSelect, text: "Select block" });
+		keys.push({ key: Enum.KeyCode.DPadLeft, text: "Rotate by X" });
+		keys.push({ key: Enum.KeyCode.DPadUp, text: "Rotate by Y" });
+		keys.push({ key: Enum.KeyCode.DPadRight, text: "Rotate by Z" });
 
 		return keys;
 	}

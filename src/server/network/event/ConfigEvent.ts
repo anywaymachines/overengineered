@@ -1,3 +1,4 @@
+import { HttpService } from "@rbxts/services";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import BuildingManager from "shared/building/BuildingManager";
@@ -31,7 +32,10 @@ export default class ConfigEvent {
 			};
 		}
 
-		// TODO
+		const dataTag = data.block.GetAttribute("config") as string;
+		const currentData = HttpService.JSONDecode(dataTag ?? "{}") as { [key: string]: string };
+		currentData[data.data.key] = data.data.value;
+		data.block.SetAttribute("config", HttpService.JSONEncode(currentData));
 
 		return { success: true };
 	}

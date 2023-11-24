@@ -11,8 +11,6 @@ const Remotes = Net.Definitions.Create({
 		MoveRequest: Net.Definitions.ServerAsyncFunction<(data: PlayerMoveRequest) => BuildResponse>(),
 
 		UpdateConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
-
-		WeldBlock: Net.Definitions.ServerToClientEvent<[model: Model]>(),
 	}),
 	Ride: Net.Definitions.Namespace({
 		RideStartRequest: Net.Definitions.ServerAsyncFunction<() => void>(),

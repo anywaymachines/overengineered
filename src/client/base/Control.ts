@@ -4,7 +4,7 @@ import ControlEventHolder from "./ControlEventHolder";
 import EventHandler from "shared/event/EventHandler";
 
 /** Wraps the Roblox GUI objects and provides methods for easy handling */
-export default abstract class Control<T extends GuiObject = GuiObject> {
+export default class Control<T extends GuiObject = GuiObject> {
 	/** Main event handler. Does not register events until enabled and reregisters events when input type changes. */
 	protected readonly event = new ControlEventHolder();
 

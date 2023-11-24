@@ -7,6 +7,7 @@ import BuildingManager from "shared/building/BuildingManager";
 import PartUtils from "shared/utils/PartUtils";
 import ConfigManager from "shared/ConfigManager";
 import PlayerData from "server/PlayerData";
+import BuildingWelder from "server/BuildingWelder";
 
 /** Class for **server-based** construction management from blocks */
 export default class BuildEvent {
@@ -66,12 +67,11 @@ export default class BuildEvent {
 			PartUtils.switchDescendantsTransparency(model, 0.3);
 		}
 
-		// Weld block (TODO: Change)
-		Remotes.Server.GetNamespace("Building").Get("WeldBlock").SendToPlayer(player, model);
+		// Weld block
+		BuildingWelder.makeJoints(model);
 
 		// Configs
 		const inputType = PlayerData.playerData[player.UserId].inputType ?? "Desktop";
-
 		ConfigManager.loadDefaultConfigs(model, inputType);
 
 		return { success: true, model: model };

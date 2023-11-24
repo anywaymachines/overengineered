@@ -1,12 +1,12 @@
-import { StarterGui } from "@rbxts/services";
+import { StarterGui, UserInputService } from "@rbxts/services";
 import Control from "client/base/Control";
 import ToolController from "client/tools/ToolController";
 import { ListControl } from "./ListControl";
 import ToolBase from "client/base/ToolBase";
 import GuiAnimator from "../GuiAnimator";
 import SoundController from "client/controller/SoundController";
-import TooltipController from "client/controller/TooltipController";
 import GuiController from "client/controller/GuiController";
+import TooltipsControl from "../static/TooltipsControl";
 
 export type ToolbarButtonControlDefinition = TextButton & {
 	ImageLabel: ImageLabel;
@@ -46,6 +46,8 @@ export type ToolbarControlDefinition = GuiObject & {
 	};
 	NameLabel: TextLabel;
 	DescriptionLabel: TextLabel;
+	GamepadBack: ImageLabel;
+	GamepadNext: ImageLabel;
 };
 
 export default class ToolbarControl extends Control<ToolbarControlDefinition> {
@@ -68,10 +70,22 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 			const button = new ToolbarButtonControl(template(), tool);
 			toolButtons.add(button);
 
-			TooltipController.addSimpleTooltip({
+			TooltipsControl.instance.addSimpleTooltip({
 				isEnabled: (inputType) => inputType === "Desktop",
 				gui: button.getGui().KeyboardNumberLabel,
 			});
+		});
+
+		for (const gamepadbtn of [this.gui.GamepadBack, this.gui.GamepadNext]) {
+			TooltipsControl.instance.addSimpleTooltip({
+				isEnabled: (inputType) => inputType === "Gamepad",
+				gui: gamepadbtn,
+			});
+		}
+
+		this.event.onPrepare(() => {
+			this.gui.GamepadBack.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonL1);
+			this.gui.GamepadNext.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
 		});
 
 		this.event.subscribeObservable(ToolController.selectedTool, (tool) => this.toolChanged(tool));
