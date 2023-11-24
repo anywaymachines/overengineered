@@ -83,6 +83,7 @@ export default class ConfigToolScene extends Scene<ConfigToolSceneDefinition> {
 		const item = selected[0].Parent as Model;
 		const block = BlockRegistry.getBlockByID(item.GetAttribute("id") as string)!;
 
+		this.list.clear();
 		if (!isConfigurableBlock(block)) return;
 
 		const defs = block.getConfigDefinitions();
