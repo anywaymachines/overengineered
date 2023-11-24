@@ -19,16 +19,20 @@ export default class MoveEvent {
 		const pivot = blocks.GetBoundingBox()[0];
 		const size = blocks.GetExtentsSize();
 
+		function gridRound(value: number) {
+			return math.round(value * 2) / 2;
+		}
+
 		const blocksRegion = new Region3(
 			new Vector3(
-				pivot.Position.X - size.X / 2 + data.vector.X + 1,
-				pivot.Position.Y - size.Y / 2 + data.vector.Y + 1,
-				pivot.Position.Z - size.Z / 2 + data.vector.Z + 1,
+				gridRound(pivot.Position.X - size.X / 2 + data.vector.X + 1),
+				gridRound(pivot.Position.Y - size.Y / 2 + data.vector.Y + 1),
+				gridRound(pivot.Position.Z - size.Z / 2 + data.vector.Z + 1),
 			),
 			new Vector3(
-				pivot.Position.X + size.X / 2 + data.vector.X - 1,
-				pivot.Position.Y + size.Y / 2 + data.vector.Y - 1,
-				pivot.Position.Z + size.Z / 2 + data.vector.Z - 1,
+				gridRound(pivot.Position.X + size.X / 2 + data.vector.X - 1),
+				gridRound(pivot.Position.Y + size.Y / 2 + data.vector.Y - 1),
+				gridRound(pivot.Position.Z + size.Z / 2 + data.vector.Z - 1),
 			),
 		);
 
