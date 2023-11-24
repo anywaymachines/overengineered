@@ -24,7 +24,9 @@ export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition
 		this.gui.ImageLabel.Image = tool.getImageID();
 		this.gui.KeyboardNumberLabel.Text = tostring(ToolController.tools.indexOf(tool) + 1);
 
-		this.event.subscribe(this.gui.Activated, () => ToolController.selectedTool.set(tool));
+		this.event.subscribe(this.gui.Activated, () =>
+			ToolController.selectedTool.set(tool === ToolController.selectedTool.get() ? undefined : tool),
+		);
 		this.event.subscribeObservable(
 			ToolController.selectedTool,
 			(newtool) => {
