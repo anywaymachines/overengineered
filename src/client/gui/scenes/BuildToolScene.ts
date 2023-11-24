@@ -37,10 +37,7 @@ export default class BuildToolScene extends Scene<BuildToolSceneDefinition> {
 
 		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => this.tool.setSelectedBlock(block));
 
-		this.event.subscribeInputTypeChange(
-			(inputType) => (this.gui.TouchControls.Visible = inputType === "Touch"),
-			true,
-		);
+		this.event.onPrepare((inputType) => (this.gui.TouchControls.Visible = inputType === "Touch"), true);
 
 		this.add(
 			new MaterialPreviewControl(

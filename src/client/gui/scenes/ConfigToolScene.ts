@@ -6,6 +6,7 @@ import Control from "client/base/Control";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import { ListControl } from "../controls/ListControl";
+import GuiAnimator from "../GuiAnimator";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	HeadingLabel: TextLabel;
@@ -57,6 +58,19 @@ export default class ConfigToolScene extends Scene<ConfigToolSceneDefinition> {
 		tool.selectedBlocksChanged.Connect((selected) => {
 			this.updateConfigs(selected);
 		});
+
+		this.event.onPrepare((inputType) => {
+			this.gui.SelectSimilarButton.Visible = inputType !== "Gamepad";
+			this.gui.ClearSelectionButton.Visible = inputType !== "Gamepad";
+		}, true);
+	}
+
+	public show() {
+		super.show();
+
+		GuiAnimator.transition(this.gui.ParamsSelection, 0.2, "right");
+		GuiAnimator.transition(this.gui.SelectSimilarButton, 0.2, "down");
+		GuiAnimator.transition(this.gui.ClearSelectionButton, 0.22, "down");
 	}
 
 	private updateConfigs(selected: readonly Highlight[]) {

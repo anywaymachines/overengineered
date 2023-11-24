@@ -19,9 +19,7 @@ export default abstract class Control<T extends GuiObject = GuiObject> {
 
 	constructor(gui: T) {
 		this.gui = gui;
-
-		this.event.subscribeInputTypeChange(() => this.prepare());
-		this.event.subscribeOnEnable(() => this.prepare());
+		this.event.onPrepare(() => this.prepare());
 	}
 
 	public getGui() {

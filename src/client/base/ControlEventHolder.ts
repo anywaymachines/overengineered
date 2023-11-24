@@ -12,7 +12,7 @@ type Sig<T> = {
 type Sub<T> = [signal: Sig<T>, callback: T];
 
 export default class ControlEventHolder {
-	public readonly onEnable = new Signal<() => void>();
+	private readonly prepareEvents: ((inputType: InputType) => void)[] = [];
 	private readonly inputTypeEvents: ((inputType: InputType) => void)[] = [];
 	private readonly events: Partial<Record<Keys, Sub<unknown>[]>> = {};
 	private readonly eventsOnce: Partial<Record<Keys, Sub<unknown>[]>> = {};
@@ -25,7 +25,6 @@ export default class ControlEventHolder {
 
 		this.enabled = true;
 		this.inputTypeChanged(Signals.INPUT_TYPE.get());
-		this.onEnable.Fire();
 	}
 
 	private connect(sub: Sub<unknown>) {
@@ -63,9 +62,9 @@ export default class ControlEventHolder {
 		this.subscribed.clear();
 	}
 
-	/** Register an input type change event */
-	public subscribeInputTypeChange(callback: (inputType: InputType) => void, executeImmediately = false) {
-		this.inputTypeEvents.push(callback);
+	/** Register an event that fires on enable and input type change */
+	public onPrepare(callback: (inputType: InputType) => void, executeImmediately = false) {
+		this.prepareEvents.push(callback);
 		if (executeImmediately) callback(Signals.INPUT_TYPE.get());
 	}
 
@@ -78,12 +77,6 @@ export default class ControlEventHolder {
 			},
 			executeImmediately,
 		);
-	}
-
-	/** Register an events enable event */
-	public subscribeOnEnable(callback: () => void, executeImmediately = false) {
-		this.subscribe(this.onEnable, callback);
-		if (executeImmediately) callback();
 	}
 
 	private sub(events: Partial<Record<Keys, Sub<unknown>[]>>, inputType: Keys, sub: Sub<unknown>) {
