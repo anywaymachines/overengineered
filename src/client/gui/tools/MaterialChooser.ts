@@ -230,15 +230,15 @@ export default class MaterialChooserControl extends Popup<MaterialChooserControl
 		super(gui);
 
 		const chooser = new MaterialChoosePart(gui.Body.Body, materials);
-		this.add(chooser);
+		this.add(chooser, false);
 		this.selectedMaterial = chooser.selectedMaterial;
 
 		const color = new MaterialColorChooseControl(gui.Body.Color);
-		this.add(color);
+		this.add(color, false);
 		this.selectedColor = color.selectedColor;
 
 		const preview = new MaterialPreviewControl(gui.Body.Preview, this.selectedMaterial, this.selectedColor);
-		this.add(preview);
+		this.add(preview, false);
 
 		this.event.subscribe(chooser.canceled, () => {
 			if (this.prevData) {
