@@ -6,6 +6,7 @@ import ToolBase from "client/base/ToolBase";
 import GuiAnimator from "../GuiAnimator";
 import SoundController from "client/controller/SoundController";
 import TooltipController from "client/controller/TooltipController";
+import GuiController from "client/controller/GuiController";
 
 export type ToolbarButtonControlDefinition = TextButton & {
 	ImageLabel: ImageLabel;
@@ -48,6 +49,10 @@ export type ToolbarControlDefinition = GuiObject & {
 };
 
 export default class ToolbarControl extends Control<ToolbarControlDefinition> {
+	public static readonly instance = new ToolbarControl(
+		GuiController.getGameUI<{ BuildingMode: { ToolbarGui: ToolbarControlDefinition } }>().BuildingMode.ToolbarGui,
+	);
+
 	constructor(gui: ToolbarControlDefinition) {
 		super(gui);
 

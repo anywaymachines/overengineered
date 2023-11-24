@@ -1,24 +1,15 @@
 import PlayerStateEvent from "./event/PlayerStateEvent";
 import ToolbarControl, { ToolbarControlDefinition } from "./gui/controls/ToolbarControl";
-import ToolController from "./tools/ToolController";
 import ToolSceneController from "./gui/scenes/ToolSceneController";
 import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
-import ConfirmPopup from "./gui/popup/ConfirmPopup";
 import LogControl from "./gui/static/LogControl";
 
-const gameui = game.GetService("Players").LocalPlayer.WaitForChild("PlayerGui").WaitForChild("GameUI");
-
-ToolController.init();
 ToolSceneController.init();
 
 PlayerStateEvent.subscribe();
 InputTypeChangeEvent.subscribe();
 
-const tb = new ToolbarControl(
-	gameui.WaitForChild("BuildingMode").WaitForChild("ToolbarGui") as ToolbarControlDefinition,
-);
-tb.setVisible(true);
-
+ToolbarControl.instance.setVisible(true);
 LogControl.instance.setVisible(true);
 
 /*

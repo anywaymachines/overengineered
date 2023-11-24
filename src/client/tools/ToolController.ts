@@ -15,7 +15,7 @@ export default class ToolController {
 	public static readonly deleteTool = new DeleteTool();
 	public static readonly configTool = new ConfigTool();
 
-	public static init() {
+	static {
 		ToolController.selectedTool.subscribe((tool, prev) => {
 			if (prev) Signals.TOOL.UNEQUIPPED.Fire(prev);
 			if (tool) Signals.TOOL.EQUIPPED.Fire(tool);
