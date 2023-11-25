@@ -1,4 +1,4 @@
-import Scene from "client/base/Scene";
+import Control from "client/base/Control";
 import DeleteTool from "client/tools/DeleteTool";
 import GuiAnimator from "../GuiAnimator";
 import ConfirmPopup from "../popup/ConfirmPopup";
@@ -10,7 +10,7 @@ export type DeleteToolSceneDefinition = GuiObject & {
 	DeleteAllButton: GuiButton;
 };
 
-export default class DeleteToolScene extends Scene<DeleteToolSceneDefinition> {
+export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> {
 	private tool: DeleteTool;
 
 	constructor(gui: DeleteToolSceneDefinition, tool: DeleteTool) {
@@ -69,7 +69,7 @@ export default class DeleteToolScene extends Scene<DeleteToolSceneDefinition> {
 	}
 
 	private suggestClearAll() {
-		ConfirmPopup.instance.show(
+		ConfirmPopup.instance.showPopup(
 			"Are you sure you want to delete all blocks?",
 			() => this.tool.clearAll(),
 			() => {},

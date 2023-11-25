@@ -7,14 +7,14 @@ import Main, { MainDefinition } from "./Main";
 import GuiController from "./controller/GuiController";
 
 const main = new Main(GuiController.getGameUI<MainDefinition>());
-main.setVisible(true);
+main.show();
 
-TooltipsControl.instance.setVisible(true);
+TooltipsControl.instance.show();
 
 PlayerStateEvent.subscribe();
 InputTypeChangeEvent.subscribe();
 
-LogControl.instance.setVisible(true);
+LogControl.instance.show();
 
 Animation.start();
 main.setMode("build");

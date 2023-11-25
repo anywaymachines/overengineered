@@ -1,4 +1,4 @@
-import Scene from "client/base/Scene";
+import Control from "client/base/Control";
 import ToolBase from "client/base/ToolBase";
 import ToolController from "client/tools/ToolController";
 import BuildToolScene, { BuildToolSceneDefinition } from "./BuildToolScene";
@@ -17,22 +17,22 @@ export type BuildingModeSceneDefinition = Folder & {
 	};
 };
 
-export default class BuildingModeScene extends Scene<BuildingModeSceneDefinition> {
+export default class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 	private readonly actionbar;
 	private readonly toolbar;
 
-	private readonly scenes = new Map<ToolBase, Scene>();
+	private readonly scenes = new Map<ToolBase, Control>();
 
 	constructor(gui: BuildingModeSceneDefinition) {
 		super(gui);
 
 		this.actionbar = new ActionBarControl(gui.ActionBarGui);
 		this.add(this.actionbar);
-		this.actionbar.setVisible(true);
+		this.actionbar.show();
 
 		this.toolbar = new ToolbarControl(gui.ToolbarGui);
 		this.add(this.toolbar);
-		this.toolbar.setVisible(true);
+		this.toolbar.show();
 
 		this.scenes.set(
 			ToolController.buildTool,

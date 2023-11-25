@@ -20,10 +20,7 @@ export type ConfirmPopupDefinition = GuiObject & {
 	};
 };
 
-export default class ConfirmPopup extends Popup<
-	ConfirmPopupDefinition,
-	[text: string, okFunc: () => void, noFunc: () => void]
-> {
+export default class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
 	public static readonly instance = new ConfirmPopup(
 		GuiController.getGameUI<{
 			Popup: {
@@ -36,9 +33,9 @@ export default class ConfirmPopup extends Popup<
 		super(gui);
 	}
 
-	show(text: string, okFunc: () => void, noFunc: () => void) {
+	showPopup(text: string, okFunc: () => void, noFunc: () => void) {
 		if (this.isVisible()) throw "Popup is already visible";
-		super.show(text, okFunc, noFunc);
+		super.show();
 		GuiAnimator.transition(this.gui.Body, 0.2, "up");
 
 		const eh = new EventHandler();

@@ -1,15 +1,12 @@
-import Scene from "client/base/Scene";
 import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
 import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
 import ConfigTool from "client/tools/ConfigTool";
 import Control from "client/base/Control";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import BlockRegistry from "shared/registry/BlocksRegistry";
-import { ListControl } from "../controls/ListControl";
 import GuiAnimator from "../GuiAnimator";
 import { HttpService } from "@rbxts/services";
 import Remotes from "shared/Remotes";
-import Signal from "@rbxts/signal";
 import Signals from "client/event/Signals";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
@@ -42,7 +39,7 @@ export type ConfigToolSceneDefinition = GuiObject & {
 	DeselectAllButton: TextButton;
 };
 
-export default class ConfigToolScene extends Scene<ConfigToolSceneDefinition> {
+export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> {
 	private readonly checkboxTemplate;
 	private readonly keyTemplate;
 	private readonly sliderTemplate;
@@ -56,7 +53,7 @@ export default class ConfigToolScene extends Scene<ConfigToolSceneDefinition> {
 		this.keyTemplate = Control.asTemplate(this.gui.ParamsSelection.Buttons.KeyTemplate);
 		this.sliderTemplate = Control.asTemplate(this.gui.ParamsSelection.Buttons.SliderTemplate);
 
-		this.list = new ListControl(this.gui.ParamsSelection.Buttons);
+		this.list = new Control(this.gui.ParamsSelection.Buttons);
 		this.add(this.list, false);
 
 		tool.selectedBlocksChanged.Connect((selected) => {

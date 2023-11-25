@@ -1,6 +1,6 @@
 import Control from "client/base/Control";
 
-/** A GUI element that has children */
+/** A control that has its children being the same type */
 export class ListControl<T extends GuiObject, TControl extends Control = Control> extends Control<T> {
 	constructor(gui: T) {
 		super(gui);

@@ -1,4 +1,4 @@
-import Scene from "client/base/Scene";
+import Control from "client/base/Control";
 import Signals from "client/event/Signals";
 import GuiAnimator from "../GuiAnimator";
 import Remotes from "shared/Remotes";
@@ -11,7 +11,7 @@ export type ActionBarControlDefinition = GuiObject & {
 	};
 };
 
-export class ActionBarControl extends Scene<ActionBarControlDefinition> {
+export class ActionBarControl extends Control<ActionBarControlDefinition> {
 	constructor(gui: ActionBarControlDefinition) {
 		super(gui);
 

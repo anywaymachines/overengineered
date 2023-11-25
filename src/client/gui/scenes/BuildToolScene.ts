@@ -1,9 +1,9 @@
-import Scene from "client/base/Scene";
-import BlockSelectionControl, { BlockSelectionControlDefinition } from "../tools/BlockSelection";
+import Control from "client/base/Control";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import CategoriesRegistry from "shared/registry/CategoriesRegistry";
 import BuildTool from "client/tools/BuildTool";
 import GuiAnimator from "../GuiAnimator";
+import BlockSelectionControl, { BlockSelectionControlDefinition } from "../tools/BlockSelection";
 import MaterialChooserControl, { MaterialPreviewControl, MaterialPreviewDefinition } from "../tools/MaterialChooser";
 
 export type BuildToolSceneDefinition = GuiObject & {
@@ -19,7 +19,7 @@ export type BuildToolSceneDefinition = GuiObject & {
 	};
 };
 
-export default class BuildToolScene extends Scene<BuildToolSceneDefinition> {
+export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 	readonly tool;
 	readonly blockSelector;
 
@@ -32,7 +32,7 @@ export default class BuildToolScene extends Scene<BuildToolSceneDefinition> {
 			BlockRegistry.RegisteredBlocks,
 			CategoriesRegistry.registeredCategories,
 		);
-		this.blockSelector.setVisible(true);
+		this.blockSelector.show();
 		this.add(this.blockSelector);
 
 		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => this.tool.setSelectedBlock(block));
@@ -69,7 +69,7 @@ export default class BuildToolScene extends Scene<BuildToolSceneDefinition> {
 		);
 	}
 
-	public show(): void {
+	public show() {
 		super.show();
 
 		GuiAnimator.transition(this.gui.BlockSelection, 0.2, "right");

@@ -1,13 +1,10 @@
 import { StarterGui, UserInputService } from "@rbxts/services";
 import Control from "client/base/Control";
 import ToolController from "client/tools/ToolController";
-import { ListControl } from "./ListControl";
 import ToolBase from "client/base/ToolBase";
 import GuiAnimator from "../GuiAnimator";
 import SoundController from "client/controller/SoundController";
-import GuiController from "client/controller/GuiController";
 import TooltipsControl from "../static/TooltipsControl";
-import Scene from "client/base/Scene";
 
 export type ToolbarButtonControlDefinition = TextButton & {
 	ImageLabel: ImageLabel;
@@ -51,7 +48,7 @@ export type ToolbarControlDefinition = GuiObject & {
 	GamepadNext: ImageLabel;
 };
 
-export default class ToolbarControl extends Scene<ToolbarControlDefinition> {
+export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 	constructor(gui: ToolbarControlDefinition) {
 		super(gui);
 
@@ -59,7 +56,7 @@ export default class ToolbarControl extends Scene<ToolbarControlDefinition> {
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
 		const template = Control.asTemplate(this.gui.Buttons.Template);
-		const toolButtons = new ListControl(this.gui.Buttons);
+		const toolButtons = new Control(this.gui.Buttons);
 		this.add(toolButtons);
 
 		// Creating buttons

@@ -1,12 +1,10 @@
 import Control from "client/base/Control";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import { ListControl } from "../controls/ListControl";
 import { DictionaryControl } from "../controls/DictionaryControl";
 import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
 import NumberTextBoxControl from "../controls/NumberTextBoxControl";
 import BuildingManager from "shared/building/BuildingManager";
 import GuiController from "client/controller/GuiController";
-import Scene from "client/base/Scene";
 import Signal from "@rbxts/signal";
 import Popup from "client/base/Popup";
 
@@ -83,7 +81,7 @@ class MaterialChoosePart extends Control<MaterialChoosePartDefinition> {
 			const control = new MaterialControl(this.itemTemplate(), material.Name);
 			this.list.addKeyed(material, control);
 
-			control.setVisible(true);
+			control.show();
 			control.activated.Connect(activated);
 		};
 
@@ -109,7 +107,7 @@ type MaterialColorChooseDefinition = GuiObject & {
 	ManualGreen: TextBox;
 };
 /** Material color chooser */
-class MaterialColorChooseControl extends ListControl<MaterialColorChooseDefinition> {
+class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> {
 	public readonly selectedColor;
 
 	constructor(gui: MaterialColorChooseDefinition) {
@@ -252,11 +250,11 @@ export default class MaterialChooserControl extends Popup<MaterialChooserControl
 		this.event.subscribe(chooser.confirmed, () => this.hide());
 	}
 
-	show() {
+	public show() {
 		super.show();
 		this.prevData = [this.selectedMaterial.get(), this.selectedColor.get()];
 	}
-	hide() {
+	public hide() {
 		super.hide();
 		this.prevData = undefined;
 	}

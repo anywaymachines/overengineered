@@ -1,7 +1,6 @@
 import Control from "./base/Control";
-import BuildingModeScene, { BuildingModeSceneDefinition } from "./gui/scenes/BuildingModeScene";
 import Popup from "./base/Popup";
-import Scene from "./base/Scene";
+import BuildingModeScene, { BuildingModeSceneDefinition } from "./gui/scenes/BuildingModeScene";
 import PlayerController from "./controller/PlayerController";
 
 export type MainDefinition = Instance & {
@@ -12,7 +11,7 @@ export type MainDefinition = Instance & {
 export type PlayModes = "build" | "play";
 
 export default class Main extends Control<MainDefinition> {
-	private readonly scenes: Readonly<Record<PlayModes, Scene>>;
+	private readonly scenes: Readonly<Record<PlayModes, Control>>;
 	private activeMode?: PlayModes;
 
 	constructor(gui: MainDefinition) {
@@ -29,18 +28,13 @@ export default class Main extends Control<MainDefinition> {
 		const controls = PlayerController.getPlayerModule().GetControls();
 		this.event.subscribe(Popup.onAnyShow, () => {
 			controls.Disable();
-			print("onAnyShow");
 
 			if (this.activeMode) {
-				print("onAnyShow " + this.scenes[this.activeMode].isVisible());
 				this.scenes[this.activeMode].hide();
-				print("onAnyShow " + this.scenes[this.activeMode].isVisible());
-				print("onAnyShow " + this.scenes[this.activeMode].getGui().IsA("GuiObject"));
 			}
 		});
 		this.event.subscribe(Popup.onAnyHide, () => {
 			controls.Enable();
-			print("onAnyHide");
 
 			if (this.activeMode) {
 				this.scenes[this.activeMode].show();

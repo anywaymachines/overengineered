@@ -65,7 +65,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 	private create(category: AbstractCategory | undefined) {
 		const createPart = (text: string, activated: () => void) => {
 			const control = new ButtonControl(this.itemTemplate(), text);
-			control.setVisible(true);
+			control.show();
 			control.activated.Connect(activated);
 
 			this.list.add(control);

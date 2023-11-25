@@ -2,6 +2,7 @@ import InputController from "client/controller/InputController";
 import InputHandler from "client/event/InputHandler";
 import ControlEventHolder from "./ControlEventHolder";
 import EventHandler from "shared/event/EventHandler";
+import Signal from "@rbxts/signal";
 
 /** Wraps the Roblox GUI objects and provides methods for easy handling */
 export default class Control<T extends GuiObject | Instance = Instance> {
@@ -13,6 +14,12 @@ export default class Control<T extends GuiObject | Instance = Instance> {
 
 	/** Input handler for use in prepare***() */
 	protected readonly inputHandler = new InputHandler();
+
+	/** Signal that fires when this element is shown */
+	public readonly onShow = new Signal<() => void>();
+
+	/** Signal that fires when this element is hidden */
+	public readonly onHide = new Signal<() => void>();
 
 	protected readonly gui: T;
 	private readonly children: Control[] = [];
@@ -97,11 +104,20 @@ export default class Control<T extends GuiObject | Instance = Instance> {
 		for (const child of this.children) child.destroyPassthrough();
 	}
 
-	setVisible(value: boolean) {
-		if (this.gui.IsA("GuiObject")) this.gui.Visible = value;
+	/** Show the control */
+	public show() {
+		if (this.gui.IsA("GuiObject")) this.gui.Visible = true;
 
-		if (value) this.enablePassthrough();
-		else this.disablePassthrough();
+		this.enablePassthrough();
+		this.onShow.Fire();
+	}
+
+	/** Hide the control */
+	public hide() {
+		if (this.gui.IsA("GuiObject")) this.gui.Visible = false;
+
+		this.disablePassthrough();
+		this.onHide.Fire();
 	}
 
 	getParent() {

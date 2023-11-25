@@ -1,13 +1,28 @@
-import { Workspace } from "@rbxts/services";
-import Remotes from "shared/Remotes";
-
 export default class BuildingWelder {
-	static getClosestParts(model: Model): BasePart[] {
+	private static getClosestParts(model: Model): BasePart[] {
 		const results: BasePart[] = [];
+		const vectors = this.getVectors(model);
+		const primaryPart = model.PrimaryPart as BasePart;
+		const canCollide = primaryPart.CanCollide;
 
-		// Vectors to check for joints
+		if (!canCollide) {
+			primaryPart.CanCollide = true;
+		}
+
+		for (let i = 0; i < vectors.size(); i++) {
+			this.checkVectorAndAddParts(model, primaryPart, vectors[i], results);
+		}
+
+		if (!canCollide) {
+			primaryPart.CanCollide = false;
+		}
+
+		return results;
+	}
+
+	private static getVectors(model: Model): Vector3[] {
 		const size = model.GetExtentsSize();
-		const vectors: Vector3[] = [
+		return [
 			new Vector3(0, size.Y, 0),
 			new Vector3(0, 0, size.Z),
 			new Vector3(size.X, 0, 0),
@@ -15,47 +30,45 @@ export default class BuildingWelder {
 			new Vector3(0, 0, -size.Z),
 			new Vector3(-size.X, 0, 0),
 		];
+	}
 
-		// Checking all vectors
-		for (let i = 0; i < vectors.size(); i++) {
-			const worldSpaceMovement = model.GetPivot().PointToWorldSpace(vectors[i]).sub(model.GetPivot().Position);
-			model.PivotTo(model.GetPivot().add(worldSpaceMovement));
+	private static checkVectorAndAddParts(
+		model: Model,
+		primaryPart: BasePart,
+		vector: Vector3,
+		results: BasePart[],
+	): void {
+		const worldSpaceMovement = model.GetPivot().PointToWorldSpace(vector).sub(model.GetPivot().Position);
+		model.PivotTo(model.GetPivot().add(worldSpaceMovement));
 
-			(model.PrimaryPart as BasePart).GetTouchingParts().forEach((basepart) => {
-				if (
-					basepart.Parent &&
-					!basepart.IsDescendantOf(model) &&
-					basepart.Parent.GetAttribute("id") !== undefined &&
-					!results.includes(basepart) &&
-					!basepart.IsDescendantOf(model)
-				) {
-					results.push(basepart);
-				}
-			});
+		primaryPart.GetTouchingParts().forEach((basepart) => {
+			if (
+				basepart.Parent &&
+				!basepart.IsDescendantOf(model) &&
+				basepart.Parent.GetAttribute("id") !== undefined &&
+				!results.includes(basepart)
+			) {
+				results.push(basepart);
+			}
+		});
 
-			wait(2);
-
-			const returnWorldSpaceMovement = model
-				.GetPivot()
-				.PointToWorldSpace(vectors[i].mul(-1))
-				.sub(model.GetPivot().Position);
-			model.PivotTo(model.GetPivot().add(returnWorldSpaceMovement));
-		}
-
-		return results;
+		const returnWorldSpaceMovement = model
+			.GetPivot()
+			.PointToWorldSpace(vector.mul(-1))
+			.sub(model.GetPivot().Position);
+		model.PivotTo(model.GetPivot().add(returnWorldSpaceMovement));
 	}
 
 	static makeJoints(model: Model): void {
 		const part0 = model.PrimaryPart as BasePart;
-
 		const closestParts = this.getClosestParts(model);
 		for (let i = 0; i < closestParts.size(); i++) {
 			const part1 = closestParts[i];
-
 			const weld = new Instance("WeldConstraint");
 			weld.Part0 = part0;
 			weld.Part1 = part1;
 			weld.Parent = part0;
+			weld.Name = "AutomaticWeldConstraint";
 		}
 	}
 }
