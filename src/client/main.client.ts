@@ -3,29 +3,20 @@ import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
 import LogControl from "./gui/static/LogControl";
 import TooltipsControl from "./gui/static/TooltipsControl";
 import Animation from "./gui/Animation";
-import Main, { MainDefinition } from "./Main";
-import GuiController from "./controller/GuiController";
+import Main from "./Main";
 
-const main = new Main(GuiController.getGameUI<MainDefinition>());
-main.show();
-
+Main.instance.show();
 TooltipsControl.instance.show();
-
-PlayerStateEvent.subscribe();
-InputTypeChangeEvent.subscribe();
-
 LogControl.instance.show();
 
-Animation.start();
-main.setMode("build");
-
-/*
-// Init
-StaticWidgetsController.init();
-TooltipController.init();
-ActionController.init();
-
-// Events
 PlayerStateEvent.subscribe();
 InputTypeChangeEvent.subscribe();
-*/
+
+//
+//
+// testing
+/*Animation.builder(Main.instance.getGui().BuildingMode)
+	.resetProperties(["Position"])
+	.tween({ Position: gui.Position.add(new UDim2(1, 0, 1, 0)) }, new TweenInfo(5))
+	.build()
+	.run();*/

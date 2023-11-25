@@ -31,11 +31,12 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 
 		this.event.subscribe(this.gui.Buttons.Run.Activated, async () => {
 			await Remotes.Client.GetNamespace("Ride").Get("RideStartRequest").CallServerAsync();
+			Signals.PLAY_MODE.set("ride");
 		});
 	}
 }
 
-export type BuildingModeSceneDefinition = Folder & {
+export type BuildingModeSceneDefinition = GuiObject & {
 	ActionBarGui: ActionBarControlDefinition;
 	ToolbarGui: ToolbarControlDefinition;
 	Tools: {

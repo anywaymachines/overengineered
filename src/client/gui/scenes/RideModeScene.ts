@@ -1,4 +1,5 @@
 import Control from "client/base/Control";
+import Signals from "client/event/Signals";
 import Remotes from "shared/Remotes";
 
 export type ActionBarControlDefinition = GuiObject & {
@@ -10,6 +11,7 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 
 		this.event.subscribe(this.gui.Stop.Activated, async () => {
 			// await Remotes.Client.GetNamespace("Ride").Get("RideStartRequest").CallServerAsync();
+			Signals.PLAY_MODE.set("build");
 		});
 	}
 }

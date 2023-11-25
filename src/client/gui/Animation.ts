@@ -1,6 +1,7 @@
 import { TweenService } from "@rbxts/services";
 import GuiAnimator from "./GuiAnimator";
 import BuildingModeScene from "./scenes/BuildingModeScene";
+import Control from "client/base/Control";
 
 export type AnimationPart<T extends Instance = Instance> = {
 	gui: T;
@@ -33,20 +34,6 @@ export default class Animation {
 		});
 	}
 
-	static start() {
-		/*const anim = Animation.builder(BuildingModeScene.instance.getGui().ActionBarGui)
-			.add({
-				gui: BuildingModeScene.instance.getGui().ActionBarGui,
-				properties: { Position: new UDim2(2, 0, 0, 0) },
-				duration: 10,
-				delay: 1,
-				easing: Enum.EasingStyle.Quad,
-				direction: Enum.EasingDirection.Out,
-			})
-			.build();*/
-		// Animation.builder(BuildingModeScene.instance.getGui().ActionBarGui).resetProperties(["Position"]);
-	}
-
 	public static builder<T extends Instance>(gui: T) {
 		const parts: AnimationPart[] = [];
 
@@ -60,11 +47,12 @@ export default class Animation {
 					properties[key] = gui[key];
 				}
 
-				this.setProperties(properties as Partial<ExtractMembers<T, Tweenable>>);
+				return this.tween(properties as Partial<ExtractMembers<T, Tweenable>>);
 			},
-			setProperties(properties: Readonly<Partial<ExtractMembers<T, Tweenable>>>) {
-				this.add((gui) => {
-					TweenService.Create(gui, new TweenInfo(), properties).Play();
+
+			tween(properties: Readonly<Partial<ExtractMembers<T, Tweenable>>>, info?: TweenInfo) {
+				return this.add((gui) => {
+					TweenService.Create(gui, info ?? new TweenInfo(), properties).Play();
 				});
 			},
 

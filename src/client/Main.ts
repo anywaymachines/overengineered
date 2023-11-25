@@ -1,6 +1,8 @@
 import Control from "./base/Control";
 import Popup from "./base/Popup";
+import GuiController from "./controller/GuiController";
 import PlayerController from "./controller/PlayerController";
+import Signals, { PlayModes } from "./event/Signals";
 import BuildingModeScene, { BuildingModeSceneDefinition } from "./gui/scenes/BuildingModeScene";
 import RideModeScene, { RideModeSceneDefinition } from "./gui/scenes/RideModeScene";
 
@@ -10,9 +12,9 @@ export type MainDefinition = Instance & {
 	RideMode: RideModeSceneDefinition;
 };
 
-export type PlayModes = "build" | "ride";
-
 export default class Main extends Control<MainDefinition> {
+	public static readonly instance = new Main(GuiController.getGameUI<MainDefinition>());
+
 	private readonly scenes: Readonly<Record<PlayModes, Control>>;
 	private activeMode?: PlayModes;
 
@@ -23,6 +25,7 @@ export default class Main extends Control<MainDefinition> {
 		this.add(buildingMode, false);
 
 		const rideMode = new RideModeScene(gui.RideMode);
+		rideMode.hide();
 		this.add(buildingMode, false);
 
 		this.scenes = {
@@ -45,14 +48,18 @@ export default class Main extends Control<MainDefinition> {
 				this.scenes[this.activeMode].show();
 			}
 		});
-	}
 
-	setMode(mode: PlayModes) {
-		if (this.activeMode) {
-			this.scenes[this.activeMode].hide();
-		}
+		this.event.subscribeObservable(
+			Signals.PLAY_MODE,
+			(mode) => {
+				if (this.activeMode) {
+					this.scenes[this.activeMode].hide();
+				}
 
-		this.activeMode = mode;
-		this.scenes[mode].show();
+				this.activeMode = mode;
+				this.scenes[mode].show();
+			},
+			true,
+		);
 	}
 }
