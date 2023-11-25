@@ -1,14 +1,16 @@
 import Control from "./base/Control";
 import Popup from "./base/Popup";
-import BuildingModeScene, { BuildingModeSceneDefinition } from "./gui/scenes/BuildingModeScene";
 import PlayerController from "./controller/PlayerController";
+import BuildingModeScene, { BuildingModeSceneDefinition } from "./gui/scenes/BuildingModeScene";
+import RideModeScene, { RideModeSceneDefinition } from "./gui/scenes/RideModeScene";
 
 export type MainDefinition = Instance & {
-	BuildingMode: BuildingModeSceneDefinition;
 	Popup: Folder & {};
+	BuildingMode: BuildingModeSceneDefinition;
+	RideMode: RideModeSceneDefinition;
 };
 
-export type PlayModes = "build" | "play";
+export type PlayModes = "build" | "ride";
 
 export default class Main extends Control<MainDefinition> {
 	private readonly scenes: Readonly<Record<PlayModes, Control>>;
@@ -20,9 +22,12 @@ export default class Main extends Control<MainDefinition> {
 		const buildingMode = new BuildingModeScene(gui.BuildingMode);
 		this.add(buildingMode, false);
 
+		const rideMode = new RideModeScene(gui.RideMode);
+		this.add(buildingMode, false);
+
 		this.scenes = {
 			build: buildingMode,
-			play: undefined!,
+			ride: rideMode!,
 		};
 
 		const controls = PlayerController.getPlayerModule().GetControls();

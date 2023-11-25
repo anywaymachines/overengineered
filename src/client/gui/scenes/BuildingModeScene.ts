@@ -4,8 +4,36 @@ import ToolController from "client/tools/ToolController";
 import BuildToolScene, { BuildToolSceneDefinition } from "./BuildToolScene";
 import DeleteToolScene, { DeleteToolSceneDefinition } from "./DeleteToolScene";
 import ConfigToolScene, { ConfigToolSceneDefinition } from "./ConfigToolScene";
-import { ActionBarControl, ActionBarControlDefinition } from "../static/ActionBarControl";
 import ToolbarControl, { ToolbarControlDefinition } from "../controls/ToolbarControl";
+import Signals from "client/event/Signals";
+import GuiAnimator from "../GuiAnimator";
+import Remotes from "shared/Remotes";
+
+type ActionBarControlDefinition = GuiObject & {
+	Buttons: {
+		Run: GuiButton;
+		Save: GuiButton;
+		Settings: GuiButton;
+	};
+};
+class ActionBarControl extends Control<ActionBarControlDefinition> {
+	constructor(gui: ActionBarControlDefinition) {
+		super(gui);
+
+		this.event.subscribe(Signals.TOOL.UNEQUIPPED, () => {
+			this.gui.Visible = true;
+			GuiAnimator.transition(this.gui, 0.2, "down");
+		});
+
+		this.event.subscribe(Signals.TOOL.EQUIPPED, () => {
+			this.gui.Visible = false;
+		});
+
+		this.event.subscribe(this.gui.Buttons.Run.Activated, async () => {
+			await Remotes.Client.GetNamespace("Ride").Get("RideStartRequest").CallServerAsync();
+		});
+	}
+}
 
 export type BuildingModeSceneDefinition = Folder & {
 	ActionBarGui: ActionBarControlDefinition;
@@ -16,7 +44,6 @@ export type BuildingModeSceneDefinition = Folder & {
 		ConfigToolGui: ConfigToolSceneDefinition;
 	};
 };
-
 export default class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 	private readonly actionbar;
 	private readonly toolbar;
