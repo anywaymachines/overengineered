@@ -7,7 +7,7 @@ import Signals from "client/event/Signals";
 
 /** An abstract class of tools for working with the world */
 export default abstract class ToolBase {
-	protected readonly gameUI: GameUI;
+	protected readonly gameUI;
 	protected readonly mouse: Mouse;
 	protected isEquipped = false;
 
@@ -16,7 +16,7 @@ export default abstract class ToolBase {
 	protected readonly inputHandler: InputHandler;
 
 	constructor() {
-		this.gameUI = GuiController.getGameUI();
+		this.gameUI = GuiController.getGameUI<unknown>();
 		this.mouse = Players.LocalPlayer.GetMouse();
 
 		this.eventHandler = new EventHandler();

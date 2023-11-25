@@ -108,7 +108,7 @@ export default class ConfigToolScene extends Scene<ConfigToolSceneDefinition> {
 			if (def.type === "Bool") {
 				const control = new ConfigPartControl(this.checkboxTemplate(), (cb) => new CheckBoxControl(cb));
 				control.control.value.set(
-					(config[def.id] as boolean | undefined) ?? def.default[Signals.INPUT_TYPE.get()],
+					(config[def.id] as boolean | undefined) ?? def.default[Signals.INPUT_TYPE.get()] ?? false,
 				);
 				this.list.add(control);
 
@@ -119,7 +119,7 @@ export default class ConfigToolScene extends Scene<ConfigToolSceneDefinition> {
 			} else if (def.type === "Number") {
 				const control = new ConfigPartControl(this.sliderTemplate(), (cb) => new SliderControl(cb));
 				control.control.value.set(
-					(config[def.id] as number | undefined) ?? def.default[Signals.INPUT_TYPE.get()],
+					(config[def.id] as number | undefined) ?? def.default[Signals.INPUT_TYPE.get()] ?? 0,
 				);
 				this.list.add(control);
 

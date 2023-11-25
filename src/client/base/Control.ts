@@ -4,7 +4,7 @@ import ControlEventHolder from "./ControlEventHolder";
 import EventHandler from "shared/event/EventHandler";
 
 /** Wraps the Roblox GUI objects and provides methods for easy handling */
-export default class Control<T extends GuiObject | Folder = GuiObject> {
+export default class Control<T extends GuiObject | Instance = Instance> {
 	/** Main event handler. Does not register events until enabled and reregisters events when input type changes. */
 	protected readonly event = new ControlEventHolder();
 
@@ -74,7 +74,7 @@ export default class Control<T extends GuiObject | Folder = GuiObject> {
 	}
 
 	isVisible() {
-		if (!this.gui.IsA("Folder")) return this.gui.Visible;
+		if (this.gui.IsA("GuiObject")) return this.gui.Visible;
 		return true;
 	}
 
@@ -88,7 +88,7 @@ export default class Control<T extends GuiObject | Folder = GuiObject> {
 		this.event.disable();
 		this.inputHandler.unsubscribeAll();
 		this.eventHandler.unsubscribeAll();
-		for (const child of this.children) child.enablePassthrough();
+		for (const child of this.children) child.disablePassthrough();
 	}
 	private destroyPassthrough() {
 		this.event.destroy();
@@ -98,7 +98,7 @@ export default class Control<T extends GuiObject | Folder = GuiObject> {
 	}
 
 	setVisible(value: boolean) {
-		if (!this.gui.IsA("Folder")) this.gui.Visible = value;
+		if (this.gui.IsA("GuiObject")) this.gui.Visible = value;
 
 		if (value) this.enablePassthrough();
 		else this.disablePassthrough();
@@ -107,7 +107,7 @@ export default class Control<T extends GuiObject | Folder = GuiObject> {
 	getParent() {
 		return this.gui.Parent;
 	}
-	setParent(value: GuiObject | Folder | undefined) {
+	setParent(value: Instance | undefined) {
 		this.gui.Parent = value;
 		if (!value) this.destroyPassthrough();
 	}

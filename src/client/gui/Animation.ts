@@ -44,8 +44,7 @@ export default class Animation {
 				direction: Enum.EasingDirection.Out,
 			})
 			.build();*/
-
-		Animation.builder(BuildingModeScene.instance.getGui().ActionBarGui).resetProperties(["Position"]);
+		// Animation.builder(BuildingModeScene.instance.getGui().ActionBarGui).resetProperties(["Position"]);
 	}
 
 	public static builder<T extends Instance>(gui: T) {

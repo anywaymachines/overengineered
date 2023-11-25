@@ -2,7 +2,7 @@ import Control from "./Control";
 
 /** The scene is the interface on which the widgets are located */
 export default abstract class Scene<
-	T extends GuiObject | Folder = GuiObject,
+	T extends GuiObject | Instance = Instance,
 	TParams extends unknown[] = [],
 > extends Control<T> {
 	constructor(gui: T) {

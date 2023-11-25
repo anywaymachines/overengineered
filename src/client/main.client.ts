@@ -1,15 +1,13 @@
 import PlayerStateEvent from "./event/PlayerStateEvent";
-import BuildingModeScene from "./gui/scenes/BuildingModeScene";
 import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
 import LogControl from "./gui/static/LogControl";
 import TooltipsControl from "./gui/static/TooltipsControl";
-import ConfirmPopup from "./gui/popup/ConfirmPopup";
 import Animation from "./gui/Animation";
-import MaterialChooserControl from "./gui/tools/MaterialChooser";
+import Main, { MainDefinition } from "./Main";
+import GuiController from "./controller/GuiController";
 
-BuildingModeScene.instance.setVisible(true);
-BuildingModeScene.instance.registerPopup(ConfirmPopup.instance);
-BuildingModeScene.instance.registerPopup(MaterialChooserControl.instance);
+const main = new Main(GuiController.getGameUI<MainDefinition>());
+main.setVisible(true);
 
 TooltipsControl.instance.setVisible(true);
 
@@ -19,6 +17,7 @@ InputTypeChangeEvent.subscribe();
 LogControl.instance.setVisible(true);
 
 Animation.start();
+main.setMode("build");
 
 /*
 // Init
