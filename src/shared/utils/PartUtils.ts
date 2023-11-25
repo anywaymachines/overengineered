@@ -28,6 +28,7 @@ export default class PartUtils {
 		});
 	}
 
+	// TODO: Material-static attributes
 	static switchDescendantsMaterial(model: Instance, material: Enum.Material) {
 		const children = model.GetDescendants();
 		children.forEach((element) => {
@@ -37,6 +38,7 @@ export default class PartUtils {
 		});
 	}
 
+	// TODO: Color-static attributes
 	static switchDescendantsColor(model: Instance, color: Color3) {
 		const children = model.GetDescendants();
 		children.forEach((element) => {

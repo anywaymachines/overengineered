@@ -1,4 +1,4 @@
-import { UserInputService } from "@rbxts/services";
+import { GuiService, UserInputService } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
@@ -22,6 +22,10 @@ export default class InputTypeChangeEvent {
 		const newInputType = this.getInputTypeByEnum(lastInputType);
 
 		if (newInputType !== InputController.inputType) {
+			if (UserInputService.GetFocusedTextBox()) {
+				return;
+			}
+
 			InputController.inputType = newInputType;
 
 			// Fire a new input type
