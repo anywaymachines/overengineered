@@ -23,4 +23,12 @@ export default class VehicleSeatBlock extends AbstractBlock {
 	public getCategory(): AbstractCategory {
 		return CategoriesRegistry.SEATS_CATEGORY;
 	}
+
+	public getLimit(): number {
+		return 1;
+	}
+
+	public isRequired(): boolean {
+		return true;
+	}
 }

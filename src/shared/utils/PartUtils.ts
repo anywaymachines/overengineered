@@ -19,16 +19,16 @@ export default class PartUtils {
 		});
 	}
 
-	// TODO: Material-static attributes
 	static switchDescendantsMaterial(model: Instance, material: Enum.Material) {
 		this.applyToAllParts(model, (part) => {
+			if (part.GetAttribute("static_material") === true) return;
 			part.Material = material;
 		});
 	}
 
-	// TODO: Color-static attributes
 	static switchDescendantsColor(model: Instance, color: Color3) {
 		this.applyToAllParts(model, (part) => {
+			if (part.GetAttribute("static_color") === true) return;
 			part.Color = color;
 		});
 	}

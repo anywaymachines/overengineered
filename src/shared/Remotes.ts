@@ -13,7 +13,7 @@ const Remotes = Net.Definitions.Create({
 		UpdateConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
 	}),
 	Ride: Net.Definitions.Namespace({
-		RideStartRequest: Net.Definitions.ServerAsyncFunction<() => void>(),
+		RideStartRequest: Net.Definitions.ServerAsyncFunction<() => Response>(),
 	}),
 });
 

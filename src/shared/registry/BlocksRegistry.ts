@@ -15,6 +15,7 @@ import VehicleSeatBlock from "./blocks/VehicleSeatBlock";
 export default class BlockRegistry {
 	public static Blocks: Map<string, AbstractBlock> = new Map<string, AbstractBlock>();
 	public static RegisteredBlocks: AbstractBlock[] = [];
+	public static RequiredBlocks: AbstractBlock[] = [];
 
 	public static readonly BLOCK = this.registerBlock(new Block());
 
@@ -39,6 +40,7 @@ export default class BlockRegistry {
 	private static registerBlock(block: AbstractBlock): AbstractBlock {
 		this.Blocks.set(block.id, block);
 		this.RegisteredBlocks.push(block);
+		if (block.isRequired()) this.RequiredBlocks.push(block);
 		return block;
 	}
 

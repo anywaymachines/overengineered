@@ -9,6 +9,7 @@ import ConfigManager from "shared/ConfigManager";
 import PlayerData from "server/PlayerData";
 import BuildingWelder from "server/BuildingWelder";
 import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
+import PlayerUtils from "shared/utils/PlayerUtils";
 
 /** Class for **server-based** construction management from blocks */
 export default class BuildEvent {
@@ -35,8 +36,25 @@ export default class BuildEvent {
 			};
 		}
 
+		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;
+		const block = BlockRegistry.Blocks.get(data.block)!;
+
+		// Check is limit exceeded
+		const placedBlocks = SharedPlots.getPlotBlocks(plot)
+			.GetChildren()
+			.filter((placed_block) => {
+				print(placed_block.GetAttribute("id") + " " + data.block);
+				return placed_block.GetAttribute("id") === data.block;
+			})
+			.size();
+		if (placedBlocks >= block.getLimit()) {
+			return {
+				success: false,
+				message: "Type limit exceeded",
+			};
+		}
+
 		// Create a new instance of the building model
-		const block = BlockRegistry.Blocks.get(data.block) as AbstractBlock;
 		const model = block.getModel().Clone();
 		model.SetAttribute("id", data.block);
 
@@ -49,8 +67,6 @@ export default class BuildEvent {
 				message: "Block is corrupted",
 			};
 		}
-
-		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;
 
 		model.PivotTo(data.location);
 		model.Parent = plot.FindFirstChild("Blocks");
