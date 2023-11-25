@@ -7,6 +7,7 @@ import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
+import MaterialChooserControl from "client/gui/tools/MaterialChooser";
 import BuildingManager from "shared/building/BuildingManager";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import PartUtils from "shared/utils/PartUtils";
@@ -31,6 +32,16 @@ export default class BuildTool extends ToolBase {
 	private selectedBlock?: AbstractBlock;
 	private selectedMaterial: Enum.Material = Enum.Material.Plastic;
 	private selectedColor: Color3 = Color3.fromRGB(255, 255, 255);
+
+	constructor() {
+		super();
+		MaterialChooserControl.instance.selectedMaterial.subscribe((material) => {
+			this.setSelectedMaterial(material);
+		}, true);
+		MaterialChooserControl.instance.selectedColor.subscribe((color) => {
+			this.setSelectedColor(color);
+		}, true);
+	}
 
 	getDisplayName(): string {
 		return "Building Mode";

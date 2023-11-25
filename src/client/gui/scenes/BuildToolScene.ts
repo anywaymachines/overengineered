@@ -47,13 +47,6 @@ export default class BuildToolScene extends Scene<BuildToolSceneDefinition> {
 			),
 		);
 
-		this.event.subscribeObservable(MaterialChooserControl.instance.selectedMaterial, (material) => {
-			this.tool.setSelectedMaterial(material);
-		});
-		this.event.subscribeObservable(MaterialChooserControl.instance.selectedColor, (color) => {
-			this.tool.setSelectedColor(color);
-		});
-
 		this.event.subscribe(this.gui.Preview.EditMaterialButton.Activated, () => {
 			MaterialChooserControl.instance.show();
 		});

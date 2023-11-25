@@ -52,6 +52,7 @@ class MaterialChoosePart extends Control<MaterialChoosePartDefinition> {
 		this.selectedMaterial = new ObservableValue<Enum.Material>(materials[0]);
 
 		this.list = new DictionaryControl<GuiObject, Enum.Material, MaterialControl>(this.gui.ScrollingFrame);
+		this.add(this.list, false);
 
 		const color = this.gui.ScrollingFrame.Template.BackgroundColor3;
 
@@ -80,10 +81,10 @@ class MaterialChoosePart extends Control<MaterialChoosePartDefinition> {
 	private create() {
 		const createPart = (material: Enum.Material, activated: () => void) => {
 			const control = new MaterialControl(this.itemTemplate(), material.Name);
+			this.list.addKeyed(material, control);
+
 			control.setVisible(true);
 			control.activated.Connect(activated);
-
-			this.list.addKeyed(material, control);
 		};
 
 		this.list.clear();
@@ -114,7 +115,7 @@ class MaterialColorChooseControl extends ListControl<MaterialColorChooseDefiniti
 	constructor(gui: MaterialColorChooseDefinition) {
 		super(gui);
 
-		this.selectedColor = new ObservableValue<Color3>(new Color3(159 / 255, 161 / 255, 172 / 255));
+		this.selectedColor = new ObservableValue<Color3>(new Color3(1, 1, 1));
 
 		const updateColor = () => {
 			this.selectedColor.set(Color3.fromHSV(hue.value.get(), sat.value.get(), 1 - bri.value.get()));
