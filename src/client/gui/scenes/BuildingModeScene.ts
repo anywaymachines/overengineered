@@ -20,15 +20,6 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 	constructor(gui: ActionBarControlDefinition) {
 		super(gui);
 
-		this.event.subscribe(Signals.TOOL.UNEQUIPPED, () => {
-			this.gui.Visible = true;
-			GuiAnimator.transition(this.gui, 0.2, "down");
-		});
-
-		this.event.subscribe(Signals.TOOL.EQUIPPED, () => {
-			this.gui.Visible = false;
-		});
-
 		this.event.subscribe(this.gui.Buttons.Run.Activated, async () => {
 			await Remotes.Client.GetNamespace("Ride").Get("RideStartRequest").CallServerAsync();
 			Signals.PLAY_MODE.set("ride");
@@ -57,6 +48,19 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 		this.actionbar = new ActionBarControl(gui.ActionBarGui);
 		this.add(this.actionbar);
 		this.actionbar.show();
+
+		this.event.subscribeObservable(
+			ToolController.selectedTool,
+			(tool) => {
+				if (tool) {
+					this.actionbar.hide();
+				} else {
+					this.actionbar.show();
+					GuiAnimator.transition(this.gui, 0.2, "down");
+				}
+			},
+			true,
+		);
 
 		this.toolbar = new ToolbarControl(gui.ToolbarGui);
 		this.add(this.toolbar);
