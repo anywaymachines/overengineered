@@ -33,10 +33,6 @@ export default class InputHandler {
 			return false;
 		}
 
-		/*if (StaticWidgetsController.isPopupVisible()) {
-			return false;
-		}*/
-
 		return true;
 	}
 

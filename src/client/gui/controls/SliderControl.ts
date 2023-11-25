@@ -30,24 +30,29 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 				input.UserInputType === Enum.UserInputType.MouseButton1 ||
 				input.UserInputType === Enum.UserInputType.Touch
 			) {
-				startpos = undefined;
-				eh.unsubscribeAll();
-
-				const v = this.steppedValue() * (this.max - this.min);
-				this.value.setIfNotSame(v - (v % this.step));
+				unsub();
 			}
 		});
 
 		this.visibleValue.subscribe(() => this.updateVisuals(), true);
 		this.value.subscribe((value) => this.visibleValue.set(value / (this.max - this.min)));
 
-		const update = () => {
+		const moveMouse = (input: InputObject) => {
 			if (startpos === undefined) return;
 
 			const x = Players.LocalPlayer.GetMouse().X;
 			this.visibleValue.set(math.clamp((x - startpos) / this.gui.AbsoluteSize.X, 0, 1));
 		};
 
+		let st = false;
+		const unsub = () => {
+			st = false;
+			startpos = undefined;
+			eh.unsubscribeAll();
+
+			const v = this.steppedValue() * (this.max - this.min);
+			this.value.setIfNotSame(v - (v % this.step));
+		};
 		const sub = (signal: RBXScriptSignal<(input: InputObject) => void>) => {
 			this.event.subscribe(signal, (input) => {
 				if (
@@ -56,12 +61,41 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 						input.UserInputType === Enum.UserInputType.Touch)
 				) {
 					startpos = this.gui.AbsolutePosition.X;
-					update();
-
-					eh.subscribe(Players.LocalPlayer.GetMouse().Move, update);
+					moveMouse(input);
+					eh.subscribe(Players.LocalPlayer.GetMouse().Move, () => moveMouse(input));
 				}
 			});
 		};
+
+		this.gui.Knob.SelectionGroup = true;
+		this.gui.Knob.SelectionBehaviorLeft = Enum.SelectionBehavior.Stop;
+		this.gui.Knob.SelectionBehaviorRight = Enum.SelectionBehavior.Stop;
+
+		const moveGamepad = (posx: boolean) => {
+			const x = this.value.get() + (posx ? this.step : -this.step);
+			this.value.set(math.clamp(x, this.min, this.max));
+		};
+
+		this.event.subscribe(this.gui.Knob.SelectionGained, () => {
+			eh.subscribe(UserInputService.InputBegan, (input) => {
+				if (!st) return;
+
+				if (input.UserInputType === Enum.UserInputType.Gamepad1) {
+					if (input.KeyCode === Enum.KeyCode.DPadRight) moveGamepad(true);
+					else if (input.KeyCode === Enum.KeyCode.DPadLeft) moveGamepad(false);
+				}
+			});
+			eh.subscribe(UserInputService.InputChanged, (input) => {
+				if (!st) return;
+
+				if (input.UserInputType === Enum.UserInputType.Gamepad1 && input.Position.X !== 0) {
+					moveGamepad(input.Position.X > 0);
+				}
+			});
+
+			st = true;
+		});
+		this.event.subscribe(this.gui.Knob.SelectionLost, unsub);
 
 		if (Control.exists(this.gui, "Filled")) sub(this.gui.Filled.InputBegan);
 		sub(this.gui.Knob.InputBegan);

@@ -83,10 +83,16 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 				this.selectedCategory.set(undefined);
 			});
 
+			let prev: ButtonControl | undefined;
 			this.blocks
 				.filter((block) => block.getCategory() === category)
 				.forEach((block) => {
 					const b = createPart(block.getDisplayName(), () => this.selectedBlock.set(block));
+					if (prev) {
+						b.getGui().NextSelectionUp = prev.getGui();
+						prev.getGui().NextSelectionDown = b.getGui();
+					}
+					prev = b;
 
 					// Block press event
 					this.event.subscribe(b.activated, () => {

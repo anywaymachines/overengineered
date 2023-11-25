@@ -8,6 +8,8 @@ import ToolbarControl, { ToolbarControlDefinition } from "../controls/ToolbarCon
 import Signals from "client/event/Signals";
 import GuiAnimator from "../GuiAnimator";
 import Remotes from "shared/Remotes";
+import LogControl from "../static/LogControl";
+import SoundController from "client/controller/SoundController";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {
@@ -21,8 +23,15 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 		super(gui);
 
 		this.event.subscribe(this.gui.Buttons.Run.Activated, async () => {
-			await Remotes.Client.GetNamespace("Ride").Get("RideStartRequest").CallServerAsync();
-			Signals.PLAY_MODE.set("ride");
+			const response = await Remotes.Client.GetNamespace("Ride").Get("RideStartRequest").CallServerAsync();
+
+			if (response.success) {
+				SoundController.getSounds().RideMode.RideStart.Play();
+				Signals.PLAY_MODE.set("ride");
+			} else {
+				LogControl.instance.addLine(response.message!, Color3.fromRGB(255, 100, 100));
+				SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
+			}
 		});
 	}
 }
@@ -56,7 +65,7 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 					this.actionbar.hide();
 				} else {
 					this.actionbar.show();
-					GuiAnimator.transition(this.gui, 0.2, "down");
+					GuiAnimator.transition(this.gui.ActionBarGui, 0.2, "down");
 				}
 			},
 			true,
