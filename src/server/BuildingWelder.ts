@@ -33,6 +33,8 @@ export default class BuildingWelder {
 				}
 			});
 
+			wait(2);
+
 			const returnWorldSpaceMovement = model
 				.GetPivot()
 				.PointToWorldSpace(vectors[i].mul(-1))

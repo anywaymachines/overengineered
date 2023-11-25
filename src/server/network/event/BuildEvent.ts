@@ -8,6 +8,7 @@ import PartUtils from "shared/utils/PartUtils";
 import ConfigManager from "shared/ConfigManager";
 import PlayerData from "server/PlayerData";
 import BuildingWelder from "server/BuildingWelder";
+import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
 
 /** Class for **server-based** construction management from blocks */
 export default class BuildEvent {
@@ -73,6 +74,21 @@ export default class BuildEvent {
 		// Configs
 		const inputType = PlayerData.playerData[player.UserId].inputType ?? "Desktop";
 		ConfigManager.loadDefaultConfigs(model, inputType);
+
+		// Custom physical properties
+		const customPhysProp =
+			MaterialPhysicalProperties.Properties[data.material.Name] ?? MaterialPhysicalProperties.Properties.Default;
+
+		PartUtils.applyToAllParts(model, (part) => {
+			const currentPhysProp = part.CurrentPhysicalProperties;
+			part.CustomPhysicalProperties = new PhysicalProperties(
+				customPhysProp.Density ?? currentPhysProp.Density,
+				customPhysProp.Friction ?? currentPhysProp.Friction,
+				customPhysProp.Elasticity ?? currentPhysProp.Elasticity,
+				customPhysProp.FrictionWeight ?? currentPhysProp.FrictionWeight,
+				customPhysProp.ElasticityWeight ?? currentPhysProp.ElasticityWeight,
+			);
+		});
 
 		return { success: true, model: model };
 	}
