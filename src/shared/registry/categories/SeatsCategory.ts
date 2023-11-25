@@ -1,11 +1,11 @@
 import AbstractCategory from "../abstract/AbstractCategory";
 
-export default class BlocksCategory extends AbstractCategory {
+export default class SeatsCategory extends AbstractCategory {
 	constructor() {
-		super("blocks");
+		super("seats");
 	}
 
 	public getDisplayName(): string {
-		return "Blocks";
+		return "Seats";
 	}
 }

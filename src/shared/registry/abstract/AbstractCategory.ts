@@ -7,6 +7,4 @@ export default abstract class AbstractCategory {
 
 	/** Must return the **displayed** name of the category */
 	public abstract getDisplayName(): string;
-
-	public abstract getImageAssetID(): number;
 }
