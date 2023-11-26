@@ -114,13 +114,16 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				// const control = this.keyTemplate();
 				// this.list.add(control)
 			} else if (def.type === "Number") {
-				const control = new ConfigPartControl(this.sliderTemplate(), (cb) => new SliderControl(cb));
+				const control = new ConfigPartControl(
+					this.sliderTemplate(),
+					(cb) => new SliderControl(cb, def.min, def.max, def.step),
+				);
 				control.control.value.set(
 					(config[def.id] as number | undefined) ?? def.default[Signals.INPUT_TYPE.get()] ?? 0,
 				);
 				this.list.add(control);
 
-				control.control.value.subscribe((value) => send(def.id, value));
+				control.control.submitted.Connect((value) => send(def.id, value));
 			}
 		}
 	}

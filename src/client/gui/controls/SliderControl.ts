@@ -3,25 +3,64 @@ import { Players } from "@rbxts/services";
 import EventHandler from "shared/event/EventHandler";
 import GuiAnimator from "../GuiAnimator";
 import Control from "client/base/Control";
-import ObservableValue from "shared/event/ObservableValue";
+import NumberTextBoxControl from "./NumberTextBoxControl";
+import NumberObservableValue from "shared/event/NumberObservableValue";
+import Signal from "@rbxts/signal";
 
 export type SliderControlDefinition = GuiObject & {
 	Filled?: GuiObject;
 	Text?: TextLabel;
+	TextBox?: TextBox;
 	Knob: GuiObject;
 };
 
 export default class SliderControl<T extends SliderControlDefinition = SliderControlDefinition> extends Control<T> {
-	public readonly value = new ObservableValue(0);
-	private readonly visibleValue = new ObservableValue(0);
-	private min = 0;
-	private max = 10;
-	private step = 1;
+	public readonly submitted = new Signal<(value: number) => void>();
+	public readonly value;
 
-	constructor(gui: T) {
+	constructor(gui: T, min: number, max: number, step: number) {
 		super(gui);
-		this.updateVisuals();
+		this.value = new NumberObservableValue(min, min, max, step);
 
+		this.subscribeVisual();
+		this.subscribeMovement();
+	}
+
+	private subscribeVisual() {
+		if (Control.exists(this.gui, "TextBox")) {
+			const num = new NumberTextBoxControl(this.gui.TextBox);
+			num.value.bindTo(this.value);
+			this.add(num);
+		}
+
+		if (Control.exists(this.gui, "Text")) {
+			const text = this.gui.Text;
+			this.value.subscribe((value) => (text.Text = tostring(value)), true);
+		}
+
+		this.value.subscribe(
+			(value) =>
+				GuiAnimator.tween(
+					this.gui.Knob,
+					{ Position: new UDim2(value / this.value.getRange(), 0, 0.5, 0) },
+					new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+				),
+			true,
+		);
+
+		if (Control.exists(this.gui, "Filled")) {
+			this.value.subscribe(
+				(value) =>
+					GuiAnimator.tween(
+						this.gui.Filled as GuiObject,
+						{ Size: new UDim2(value / this.value.getRange(), 0, 1, 0) },
+						new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					),
+				true,
+			);
+		}
+	}
+	private subscribeMovement() {
 		const eh = new EventHandler();
 		let startpos: number | undefined;
 
@@ -34,14 +73,11 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 			}
 		});
 
-		this.visibleValue.subscribe(() => this.updateVisuals(), true);
-		this.value.subscribe((value) => this.visibleValue.set(value / (this.max - this.min)));
-
-		const moveMouse = (input: InputObject) => {
+		const moveMouse = () => {
 			if (startpos === undefined) return;
 
 			const x = Players.LocalPlayer.GetMouse().X;
-			this.visibleValue.set(math.clamp((x - startpos) / this.gui.AbsoluteSize.X, 0, 1));
+			this.value.set(((x - startpos) / this.gui.AbsoluteSize.X) * this.value.getRange() + this.value.step / 2);
 		};
 
 		let st = false;
@@ -50,8 +86,7 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 			startpos = undefined;
 			eh.unsubscribeAll();
 
-			const v = this.steppedValue() * (this.max - this.min);
-			this.value.setIfNotSame(v - (v % this.step));
+			this.submitted.Fire(this.value.get());
 		};
 		const sub = (signal: RBXScriptSignal<(input: InputObject) => void>) => {
 			this.event.subscribe(signal, (input) => {
@@ -61,8 +96,8 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 						input.UserInputType === Enum.UserInputType.Touch)
 				) {
 					startpos = this.gui.AbsolutePosition.X;
-					moveMouse(input);
-					eh.subscribe(Players.LocalPlayer.GetMouse().Move, () => moveMouse(input));
+					moveMouse();
+					eh.subscribe(Players.LocalPlayer.GetMouse().Move, () => moveMouse());
 				}
 			});
 		};
@@ -72,8 +107,7 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 		this.gui.Knob.SelectionBehaviorRight = Enum.SelectionBehavior.Stop;
 
 		const moveGamepad = (posx: boolean) => {
-			const x = this.value.get() + (posx ? this.step : -this.step);
-			this.value.set(math.clamp(x, this.min, this.max));
+			this.value.set(this.value.get() + (posx ? this.value.step : -this.value.step));
 		};
 
 		this.event.subscribe(this.gui.Knob.SelectionGained, () => {
@@ -97,56 +131,11 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 		});
 		this.event.subscribe(this.gui.Knob.SelectionLost, unsub);
 
-		if (Control.exists(this.gui, "Filled")) sub(this.gui.Filled.InputBegan);
+		if (Control.exists(this.gui, "Filled")) {
+			sub(this.gui.Filled.InputBegan);
+		}
+
 		sub(this.gui.Knob.InputBegan);
 		sub(this.gui.InputBegan);
-	}
-
-	setMin(value: number): void {
-		this.min = value;
-		this.updateVisuals();
-	}
-	setMax(value: number): void {
-		this.max = value;
-		this.updateVisuals();
-	}
-	setStep(value: number): void {
-		this.step = value;
-		this.updateVisuals();
-	}
-
-	public getValue() {
-		return this.value;
-	}
-
-	private doStep(value: number) {
-		return value - (value % (this.step / (this.max - this.min)));
-	}
-	private steppedValue() {
-		return this.doStep(this.visibleValue.get() + this.step / (this.max - this.min) / 2);
-	}
-
-	private updateVisuals() {
-		const value = this.steppedValue();
-
-		const guivalue = value - (value % (this.step / (this.max - this.min)));
-		GuiAnimator.tween(
-			this.gui.Knob,
-			{ Position: new UDim2(guivalue, 0, 0.5, 0) },
-			new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		);
-
-		if (Control.exists(this.gui, "Filled"))
-			GuiAnimator.tween(
-				this.gui.Filled as GuiObject,
-				{ Size: new UDim2(guivalue, 0, 1, 0) },
-				new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-			);
-
-		if (Control.exists(this.gui, "Text")) {
-			let text = value * (this.max - this.min) + this.min;
-			text -= text % this.step;
-			this.gui.Text.Text = math.floor(text * 10) / 10 + "";
-		}
 	}
 }

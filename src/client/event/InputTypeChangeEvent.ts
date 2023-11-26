@@ -36,7 +36,7 @@ export default class InputTypeChangeEvent {
 		}
 	}
 
-	static share() {
+	private static share() {
 		Remotes.Client.GetNamespace("Player").Get("InputTypeInfo").SendToServer(InputController.inputType);
 	}
 

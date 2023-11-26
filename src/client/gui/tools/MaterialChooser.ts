@@ -119,10 +119,7 @@ class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> 
 			this.selectedColor.set(Color3.fromHSV(hue.value.get(), sat.value.get(), 1 - bri.value.get()));
 		};
 		const createSlider = <T extends SliderControlDefinition>(gui: T, value: number) => {
-			const slider = new SliderControl(gui);
-			slider.setStep(1 / 255);
-			slider.setMin(0);
-			slider.setMax(1);
+			const slider = new SliderControl(gui, 0, 1, 1 / 255);
 			slider.value.set(value);
 			slider.value.subscribe(updateColor);
 			this.add(slider);
