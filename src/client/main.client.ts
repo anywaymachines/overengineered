@@ -4,11 +4,13 @@ import LogControl from "./gui/static/LogControl";
 import TooltipsControl from "./gui/static/TooltipsControl";
 import Animation from "./gui/Animation";
 import Main from "./Main";
+import ActionController from "./controller/ActionController";
 
 Main.instance.show();
 TooltipsControl.instance.show();
 LogControl.instance.show();
 
+ActionController.init();
 PlayerStateEvent.subscribe();
 InputTypeChangeEvent.subscribe();
 
