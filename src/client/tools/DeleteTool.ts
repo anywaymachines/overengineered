@@ -1,4 +1,4 @@
-import { GuiService, Players, ReplicatedFirst, UserInputService, Workspace } from "@rbxts/services";
+import { GuiService, HttpService, Players, ReplicatedFirst, UserInputService, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";
@@ -7,6 +7,7 @@ import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
+import Serializer, { SerializedColor, SerializedEnum } from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -72,8 +73,12 @@ export default class DeleteTool extends ToolBase {
 		const info: PlaceBlockRequest = {
 			location: block.PrimaryPart!.CFrame,
 			block: block.GetAttribute("id") as string,
-			color: block.GetAttribute("color") as Color3,
-			material: Enum.Material.GetEnumItems().find((e) => e.Name === (block.GetAttribute("material") as string))!,
+			color: Serializer.Color3Serializer.deserialize(
+				HttpService.JSONDecode(block.GetAttribute("color") as string) as SerializedColor,
+			),
+			material: Serializer.EnumMaterialSerializer.deserialize(
+				block.GetAttribute("material") as number as SerializedEnum,
+			),
 		};
 
 		return info;

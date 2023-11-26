@@ -68,7 +68,7 @@ export default class BuildingWelder {
 			weld.Part0 = part0;
 			weld.Part1 = part1;
 			weld.Parent = part0;
-			weld.Name = "AutomaticWeldConstraint";
+			weld.Name = "AutoWeldConstraint";
 		}
 	}
 }

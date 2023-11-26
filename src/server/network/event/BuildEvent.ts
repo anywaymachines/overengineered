@@ -10,6 +10,8 @@ import PlayerData from "server/PlayerData";
 import BuildingWelder from "server/BuildingWelder";
 import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
 import PlayerUtils from "shared/utils/PlayerUtils";
+import Serializer from "shared/Serializer";
+import { HttpService } from "@rbxts/services";
 
 /** Class for **server-based** construction management from blocks */
 export default class BuildEvent {
@@ -73,11 +75,11 @@ export default class BuildEvent {
 
 		// Set material
 		PartUtils.switchDescendantsMaterial(model, data.material);
-		model.SetAttribute("material", data.material.Name);
+		model.SetAttribute("material", Serializer.EnumMaterialSerializer.serialize(data.material));
 
 		// Set color
 		PartUtils.switchDescendantsColor(model, data.color);
-		model.SetAttribute("color", data.color);
+		model.SetAttribute("color", HttpService.JSONEncode(Serializer.Color3Serializer.serialize(data.color)));
 
 		// Make transparent glass materials
 		if (data.material === Enum.Material.Glass) {

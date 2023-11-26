@@ -6,6 +6,8 @@ export default class PlotDatabase {
 	static readonly slotsDatabase = DataStoreService.GetDataStore("slots");
 	static readonly dataStoreSizeLimit = 4194304; // 4 MB
 
+	static serialize(plot: Model) {}
+
 	static initialize() {
 		// TODO
 	}
