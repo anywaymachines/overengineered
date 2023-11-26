@@ -8,20 +8,36 @@ import GuiAnimator from "../GuiAnimator";
 import { HttpService } from "@rbxts/services";
 import Remotes from "shared/Remotes";
 import Signals from "client/event/Signals";
+import ObservableValue from "shared/event/ObservableValue";
+import KeyChooserControl, { KeyChooserControlDefinition } from "../controls/KeyChooserControl";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	HeadingLabel: TextLabel;
 	Control: T;
 };
 
-export class ConfigPartControl<TControl extends Control<TDef>, TDef extends GuiObject> extends Control<
-	ConfigPartDefinition<TDef>
-> {
+export class ConfigPartControl<
+	TControl extends Control<TDef>,
+	TDef extends GuiObject,
+	TValue extends ConfigValues | undefined,
+> extends Control<ConfigPartDefinition<TDef>> {
 	public readonly control;
 
-	constructor(gui: ConfigPartDefinition<TDef>, ctor: (gui: TDef) => TControl) {
+	constructor(
+		gui: ConfigPartDefinition<TDef>,
+		ctor: (gui: TDef) => TControl & { value: ObservableValue<TValue> },
+		config: Record<string, ConfigValues | undefined>,
+		definition: ConfigDefinition,
+		def: TValue,
+	) {
 		super(gui);
-		this.add((this.control = ctor(this.gui.Control)));
+
+		this.control = ctor(this.gui.Control);
+		this.control.value.set(
+			(config[definition.id] as TValue) ?? (definition.default[Signals.INPUT_TYPE.get()] as TValue) ?? def,
+		);
+
+		this.add(this.control);
 	}
 }
 
@@ -29,9 +45,7 @@ export type ConfigToolSceneDefinition = GuiObject & {
 	ParamsSelection: Frame & {
 		Buttons: ScrollingFrame & {
 			CheckboxTemplate: ConfigPartDefinition<CheckBoxControlDefinition>;
-			KeyTemplate: Frame & {
-				Control: Frame; // TODO:
-			};
+			KeyTemplate: ConfigPartDefinition<KeyChooserControlDefinition>;
 			SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 		};
 	};
@@ -90,7 +104,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		const defs = block.getConfigDefinitions();
 		const config = HttpService.JSONDecode((item.GetAttribute("config") as string | undefined) ?? "{}") as Record<
 			string,
-			boolean | number | string
+			ConfigValues
 		>;
 
 		const send = (key: string, value: unknown) => {
@@ -103,23 +117,34 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 
 		for (const def of defs) {
 			if (def.type === "Bool") {
-				const control = new ConfigPartControl(this.checkboxTemplate(), (cb) => new CheckBoxControl(cb));
-				control.control.value.set(
-					(config[def.id] as boolean | undefined) ?? def.default[Signals.INPUT_TYPE.get()] ?? false,
+				const control = new ConfigPartControl(
+					this.checkboxTemplate(),
+					(cb) => new CheckBoxControl(cb),
+					config,
+					def,
+					false,
 				);
 				this.list.add(control);
 
 				control.control.value.subscribe((value) => send(def.id, value));
 			} else if (def.type === "Key") {
-				// const control = this.keyTemplate();
-				// this.list.add(control)
+				const control = new ConfigPartControl(
+					this.keyTemplate(),
+					(kb) => new KeyChooserControl(kb),
+					config,
+					def,
+					undefined,
+				);
+				this.list.add(control);
+
+				control.control.value.subscribe((value) => send(def.id, value));
 			} else if (def.type === "Number") {
 				const control = new ConfigPartControl(
 					this.sliderTemplate(),
 					(cb) => new SliderControl(cb, def.min, def.max, def.step),
-				);
-				control.control.value.set(
-					(config[def.id] as number | undefined) ?? def.default[Signals.INPUT_TYPE.get()] ?? 0,
+					config,
+					def,
+					0,
 				);
 				this.list.add(control);
 

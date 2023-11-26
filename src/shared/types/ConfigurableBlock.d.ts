@@ -1,19 +1,22 @@
+type DefaultValue<T> = Readonly<{ Desktop: T } & Partial<Record<InputType, T>>>;
+type ConfigValues = ConfigDefinition["default"]["Desktop"];
+
 type ConfigDefinition = Readonly<
 	{ id: string; displayName: string } & (
 		| {
 				type: "Key";
-				default: { Desktop: number } & Readonly<Partial<Record<InputType, number>>>;
+				default: DefaultValue<Enum.KeyCode>;
 		  }
 		| {
 				type: "Number";
-				default: { Desktop: number } & Readonly<Partial<Record<InputType, number>>>;
+				default: DefaultValue<number>;
 				min: number;
 				max: number;
 				step: number;
 		  }
 		| {
 				type: "Bool";
-				default: { Desktop: boolean } & Readonly<Partial<Record<InputType, boolean>>>;
+				default: DefaultValue<boolean>;
 		  }
 	)
 >;

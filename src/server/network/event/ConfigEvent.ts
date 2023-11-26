@@ -1,4 +1,5 @@
 import { HttpService } from "@rbxts/services";
+import BuildingWrapper from "server/BuildingWrapper";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import BuildingManager from "shared/building/BuildingManager";
@@ -32,11 +33,8 @@ export default class ConfigEvent {
 			};
 		}
 
-		const dataTag = data.block.GetAttribute("config") as string | undefined;
-		const currentData = HttpService.JSONDecode(dataTag ?? "{}") as { [key: string]: unknown };
-		currentData[data.data.key] = data.data.value;
-		data.block.SetAttribute("config", HttpService.JSONEncode(currentData));
+		const response = BuildingWrapper.updateConfig(data);
 
-		return { success: true };
+		return response;
 	}
 }

@@ -7,7 +7,7 @@ import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
-import Serializer, { SerializedColor, SerializedEnum } from "shared/Serializer";
+import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import PlayerUtils from "shared/utils/PlayerUtils";

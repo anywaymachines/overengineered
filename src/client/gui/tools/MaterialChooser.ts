@@ -97,11 +97,15 @@ class MaterialChoosePart extends Control<MaterialChoosePartDefinition> {
 
 type MaterialColorChooseDefinition = GuiObject & {
 	Preview: GuiObject & {};
-	Hue: SliderControlDefinition;
+	Hue: SliderControlDefinition & {
+		UIGradient: UIGradient;
+	};
 	Saturation: SliderControlDefinition & {
 		UIGradient: UIGradient;
 	};
-	Brightness: SliderControlDefinition;
+	Brightness: SliderControlDefinition & {
+		UIGradient: UIGradient;
+	};
 	ManualBlue: TextBox;
 	ManualRed: TextBox;
 	ManualGreen: TextBox;
@@ -116,7 +120,7 @@ class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> 
 		this.selectedColor = new ObservableValue<Color3>(new Color3(1, 1, 1));
 
 		const updateColor = () => {
-			this.selectedColor.set(Color3.fromHSV(hue.value.get(), sat.value.get(), 1 - bri.value.get()));
+			this.selectedColor.set(Color3.fromHSV(hue.value.get(), sat.value.get(), bri.value.get()), true);
 		};
 		const createSlider = <T extends SliderControlDefinition>(gui: T, value: number) => {
 			const slider = new SliderControl(gui, 0, 1, 1 / 255);
@@ -158,8 +162,13 @@ class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> 
 				this.gui.Preview.BackgroundColor3 = this.selectedColor.get();
 
 				sat.getGui().UIGradient.Color = new ColorSequence(
-					sat.getGui().UIGradient.Color.Keypoints[0].Value,
-					Color3.fromHSV(hue.value.get(), 1, 1 - bri.value.get()),
+					Color3.fromHSV(hue.value.get(), 0, bri.value.get()),
+					Color3.fromHSV(hue.value.get(), 1, bri.value.get()),
+				);
+
+				bri.getGui().UIGradient.Color = new ColorSequence(
+					bri.getGui().UIGradient.Color.Keypoints[0].Value,
+					Color3.fromHSV(hue.value.get(), sat.value.get(), 1),
 				);
 
 				this.gui.ManualRed.Text = math.floor(this.selectedColor.get().R * 255) + "";

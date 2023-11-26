@@ -41,7 +41,7 @@ export default class Control<T extends GuiObject | Instance = Instance> {
 	protected static exists<T extends GuiObject, TKey extends keyof T & string>(
 		gui: T,
 		name: TKey,
-	): gui is T & { [key in TKey]: NonNullable<(typeof gui)[TKey]> } {
+	): gui is T & { [key in TKey]: (typeof gui)[TKey] & defined } {
 		return gui.FindFirstChild(name) !== undefined;
 	}
 

@@ -1,17 +1,10 @@
-import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import Remotes from "shared/Remotes";
 import Logger from "shared/Logger";
 import SharedPlots from "shared/building/SharedPlots";
 import BuildingManager from "shared/building/BuildingManager";
-import PartUtils from "shared/utils/PartUtils";
-import ConfigManager from "shared/ConfigManager";
-import PlayerData from "server/PlayerData";
-import BuildingWelder from "server/BuildingWelder";
-import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
-import PlayerUtils from "shared/utils/PlayerUtils";
-import Serializer from "shared/Serializer";
-import { HttpService } from "@rbxts/services";
+import BuildingWrapper from "server/BuildingWrapper";
+import Signals from "server/Signals";
 
 /** Class for **server-based** construction management from blocks */
 export default class BuildEvent {
@@ -24,13 +17,7 @@ export default class BuildEvent {
 	}
 
 	private static playerPlaceBlock(player: Player, data: PlaceBlockRequest): BuildResponse {
-		if (BlockRegistry.Blocks.has(data.block) === false) {
-			return {
-				success: false,
-				message: "Block not found",
-			};
-		}
-
+		// Check is in plot
 		if (!BuildingManager.vectorAbleToPlayer(data.location.Position, player)) {
 			return {
 				success: false,
@@ -38,10 +25,9 @@ export default class BuildEvent {
 			};
 		}
 
+		// Check is limit exceeded
 		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;
 		const block = BlockRegistry.Blocks.get(data.block)!;
-
-		// Check is limit exceeded
 		const placedBlocks = SharedPlots.getPlotBlocks(plot)
 			.GetChildren()
 			.filter((placed_block) => {
@@ -56,58 +42,12 @@ export default class BuildEvent {
 			};
 		}
 
-		// Create a new instance of the building model
-		const model = block.getModel().Clone();
-		model.SetAttribute("id", data.block);
+		const response = BuildingWrapper.placeBlock(data);
 
-		if (model.PrimaryPart === undefined) {
-			// Delete block from game database (prevent discord spamming)
-			BlockRegistry.Blocks.delete(data.block);
-
-			return {
-				success: false,
-				message: "Block is corrupted",
-			};
+		if (response.success) {
+			Signals.BLOCK_PLACED.Fire();
 		}
 
-		model.PivotTo(data.location);
-		model.Parent = plot.FindFirstChild("Blocks");
-
-		// Set material
-		PartUtils.switchDescendantsMaterial(model, data.material);
-		model.SetAttribute("material", Serializer.EnumMaterialSerializer.serialize(data.material));
-
-		// Set color
-		PartUtils.switchDescendantsColor(model, data.color);
-		model.SetAttribute("color", HttpService.JSONEncode(Serializer.Color3Serializer.serialize(data.color)));
-
-		// Make transparent glass materials
-		if (data.material === Enum.Material.Glass) {
-			PartUtils.switchDescendantsTransparency(model, 0.3);
-		}
-
-		// Weld block
-		BuildingWelder.makeJoints(model);
-
-		// Configs
-		const inputType = PlayerData.playerData[player.UserId].inputType ?? "Desktop";
-		ConfigManager.loadDefaultConfigs(model, inputType);
-
-		// Custom physical properties
-		const customPhysProp =
-			MaterialPhysicalProperties.Properties[data.material.Name] ?? MaterialPhysicalProperties.Properties.Default;
-
-		PartUtils.applyToAllParts(model, (part) => {
-			const currentPhysProp = part.CurrentPhysicalProperties;
-			part.CustomPhysicalProperties = new PhysicalProperties(
-				customPhysProp.Density ?? currentPhysProp.Density,
-				customPhysProp.Friction ?? currentPhysProp.Friction,
-				customPhysProp.Elasticity ?? currentPhysProp.Elasticity,
-				customPhysProp.FrictionWeight ?? currentPhysProp.FrictionWeight,
-				customPhysProp.ElasticityWeight ?? currentPhysProp.ElasticityWeight,
-			);
-		});
-
-		return { success: true, model: model };
+		return response;
 	}
 }

@@ -6,6 +6,7 @@ import Control from "client/base/Control";
 import NumberTextBoxControl from "./NumberTextBoxControl";
 import NumberObservableValue from "shared/event/NumberObservableValue";
 import Signal from "@rbxts/signal";
+import Animation from "../Animation";
 
 export type SliderControlDefinition = GuiObject & {
 	Filled?: GuiObject;
@@ -38,25 +39,29 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 			this.value.subscribe((value) => (text.Text = tostring(value)), true);
 		}
 
-		this.value.subscribe(
-			(value) =>
-				GuiAnimator.tween(
-					this.gui.Knob,
-					{ Position: new UDim2(value / this.value.getRange(), 0, 0.5, 0) },
-					new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-				),
-			true,
+		Animation.value(
+			this.event,
+			this.gui.Knob,
+			this.value,
+			(value) => {
+				return {
+					Position: new UDim2(value / this.value.getRange(), 0, 0.5, 0),
+				};
+			},
+			new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 		);
 
 		if (Control.exists(this.gui, "Filled")) {
-			this.value.subscribe(
-				(value) =>
-					GuiAnimator.tween(
-						this.gui.Filled as GuiObject,
-						{ Size: new UDim2(value / this.value.getRange(), 0, 1, 0) },
-						new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-					),
-				true,
+			Animation.value(
+				this.event,
+				this.gui.Filled as GuiObject,
+				this.value,
+				(value) => {
+					return {
+						Size: new UDim2(value / this.value.getRange(), 0, 1, 0),
+					};
+				},
+				new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 			);
 		}
 	}
