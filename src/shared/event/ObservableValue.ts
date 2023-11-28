@@ -1,5 +1,7 @@
 import Signal from "@rbxts/signal";
 
+export type AsObservable<T extends object> = { [k in keyof T]: ObservableValue<T[k]> };
+
 export interface ReadonlyObservableValue<T> {
 	readonly changed: Pick<Signal<(value: T, prev: T) => void>, "Connect" | "ConnectParallel" | "Once" | "Wait">;
 

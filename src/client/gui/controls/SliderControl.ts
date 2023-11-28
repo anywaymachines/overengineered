@@ -1,7 +1,6 @@
 import { UserInputService } from "@rbxts/services";
 import { Players } from "@rbxts/services";
 import EventHandler from "shared/event/EventHandler";
-import GuiAnimator from "../GuiAnimator";
 import Control from "client/base/Control";
 import NumberTextBoxControl from "./NumberTextBoxControl";
 import NumberObservableValue from "shared/event/NumberObservableValue";
@@ -15,6 +14,7 @@ export type SliderControlDefinition = GuiObject & {
 	Knob: GuiObject;
 };
 
+/** Control that represents a number via a slider. */
 export default class SliderControl<T extends SliderControlDefinition = SliderControlDefinition> extends Control<T> {
 	public readonly submitted = new Signal<(value: number) => void>();
 	public readonly value;

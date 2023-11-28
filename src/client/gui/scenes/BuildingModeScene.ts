@@ -4,7 +4,7 @@ import ToolController from "client/tools/ToolController";
 import BuildToolScene, { BuildToolSceneDefinition } from "./BuildToolScene";
 import DeleteToolScene, { DeleteToolSceneDefinition } from "./DeleteToolScene";
 import ConfigToolScene, { ConfigToolSceneDefinition } from "./ConfigToolScene";
-import ToolbarControl, { ToolbarControlDefinition } from "../controls/ToolbarControl";
+import ToolbarControl, { ToolbarControlDefinition } from "./ToolbarControl";
 import Signals from "client/event/Signals";
 import GuiAnimator from "../GuiAnimator";
 import Remotes from "shared/Remotes";

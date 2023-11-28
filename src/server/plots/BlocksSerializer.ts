@@ -1,6 +1,5 @@
 import { DataStoreService, HttpService, Players, Workspace } from "@rbxts/services";
 import BuildingWrapper from "server/BuildingWrapper";
-import Signals from "server/Signals";
 import Serializer from "shared/Serializer";
 import SharedPlots from "shared/building/SharedPlots";
 
@@ -42,13 +41,11 @@ export default class BlocksSerializer {
 		return data;
 	}
 
-	static deserialize(plot: Model, data: SerializedBlock[]): Model {
+	static deserialize(plot: Model, data: readonly SerializedBlock[]): Model {
 		const buildingCenter = plot.FindFirstChild("BuildingArea")!.FindFirstChild("BuildingAreaCenter") as Part;
 
 		for (let i = 0; i < data.size(); i++) {
 			const blockData = data[i];
-
-			print(blockData); //todo
 
 			const loc = Serializer.CFrameSerializer.deserialize(blockData.loc);
 

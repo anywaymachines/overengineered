@@ -4,7 +4,6 @@ import Logger from "shared/Logger";
 import SharedPlots from "shared/building/SharedPlots";
 import BuildingManager from "shared/building/BuildingManager";
 import BuildingWrapper from "server/BuildingWrapper";
-import Signals from "server/Signals";
 
 /** Class for **server-based** construction management from blocks */
 export default class BuildEvent {
@@ -43,11 +42,6 @@ export default class BuildEvent {
 		}
 
 		const response = BuildingWrapper.placeBlock(data);
-
-		if (response.success) {
-			Signals.BLOCK_PLACED.Fire();
-		}
-
 		return response;
 	}
 }

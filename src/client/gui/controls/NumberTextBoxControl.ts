@@ -1,8 +1,12 @@
 import ObservableValue from "shared/event/ObservableValue";
 import Control from "client/base/Control";
+import Signal from "@rbxts/signal";
 
 export type NumberTextBoxControlDefinition = TextBox;
+
+/** Control that represents a number via a text input */
 export default class NumberTextBoxControl extends Control<NumberTextBoxControlDefinition> {
+	public readonly activated = new Signal<(value: number) => void>();
 	public readonly value;
 
 	constructor(gui: NumberTextBoxControlDefinition) {
@@ -11,7 +15,7 @@ export default class NumberTextBoxControl extends Control<NumberTextBoxControlDe
 		this.value = new ObservableValue(0);
 		this.event.subscribeObservable(this.value, (value) => (this.gui.Text = tostring(value)), true);
 
-		const update = () => {
+		const activated = () => {
 			const text = this.gui.Text.gsub("%D", "")[0];
 
 			let num = tonumber(text);
@@ -22,9 +26,10 @@ export default class NumberTextBoxControl extends Control<NumberTextBoxControlDe
 
 			this.gui.Text = tostring(num);
 			this.value.set(num);
+			this.activated.Fire(num);
 		};
 
-		this.event.subscribe(this.gui.FocusLost, update);
-		this.event.subscribe(this.gui.ReturnPressedFromOnScreenKeyboard, update);
+		this.event.subscribe(this.gui.FocusLost, activated);
+		this.event.subscribe(this.gui.ReturnPressedFromOnScreenKeyboard, activated);
 	}
 }

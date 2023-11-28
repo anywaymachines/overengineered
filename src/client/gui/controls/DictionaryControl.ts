@@ -1,6 +1,6 @@
 import Control from "client/base/Control";
 
-/** A GUI element that has children, keyed by some value */
+/** Control that has its children keyed by some value */
 export class DictionaryControl<T extends GuiObject, TKey, TValue extends Control = Control> extends Control<T> {
 	private readonly keyedChildren = new Map<TKey, TValue>();
 

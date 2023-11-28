@@ -2,10 +2,12 @@ import PlayerStateEvent from "./event/PlayerStateEvent";
 import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
 import LogControl from "./gui/static/LogControl";
 import TooltipsControl from "./gui/static/TooltipsControl";
-import Animation from "./gui/Animation";
 import Main from "./Main";
 import ActionController from "./controller/ActionController";
 import SavePopup from "./gui/popup/SavePopup";
+import Signal from "@rbxts/signal";
+import Remotes from "shared/Remotes";
+import Serializer from "shared/Serializer";
 
 Main.instance.show();
 TooltipsControl.instance.show();
@@ -16,34 +18,18 @@ PlayerStateEvent.subscribe();
 InputTypeChangeEvent.subscribe();
 
 SavePopup.instance.show();
-SavePopup.instance.data.set({
-	additionalSaveSlots: 123,
-	slots: [
-		{
-			color: [255, 0, 255],
-			name: "aboba",
-			blocks: 45,
-		},
-		{
-			color: [0, 0, 255],
-			name: "abeba",
-			blocks: 256,
-		},
-	],
-});
 
-//
-//
-// testing
-/*const anim = Animation.builder(Main.instance.getGui().BuildingMode)
-	.resetProperties(["Position"])
-	.tween({ Position: Main.instance.getGui().BuildingMode.Position.add(new UDim2(1, 0, 1, 0)) }, new TweenInfo(1))
-	.build();
+(async () => {
+	const msadnhfkjsadsadasd = await Remotes.Client.GetNamespace("Slots").Get("Fetch").CallServerAsync();
 
-//anim.run();
-spawn(() => {
-	wait(2);
-	print("res!");
-	anim.run();
-});
-*/
+	SavePopup.instance.data.set({
+		purchasedSlots: msadnhfkjsadsadasd.purchasedSlots,
+		slots: msadnhfkjsadsadasd.slots.map((slot) => {
+			return {
+				...slot,
+				updated: new Signal<() => void>(),
+				color: Serializer.Color3Serializer.deserialize(slot.color),
+			};
+		}),
+	});
+})();

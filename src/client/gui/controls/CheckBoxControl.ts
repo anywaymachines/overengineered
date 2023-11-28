@@ -1,12 +1,15 @@
 import Control from "client/base/Control";
 import ObservableValue from "shared/event/ObservableValue";
 import Animation from "../Animation";
+import Signal from "@rbxts/signal";
 
 export type CheckBoxControlDefinition = TextButton & {
 	Circle: TextButton;
 };
 
+/** Control that represents a boolean */
 export default class CheckBoxControl extends Control<CheckBoxControlDefinition> {
+	public readonly submitted = new Signal<(value: boolean) => void>();
 	public readonly value = new ObservableValue(false);
 
 	private readonly color = Color3.fromRGB(48, 62, 87);
@@ -16,7 +19,10 @@ export default class CheckBoxControl extends Control<CheckBoxControlDefinition> 
 		super(gui);
 
 		this.event.subscribe(gui.MouseButton1Click, () => this.value.set(!this.value.get()));
-		this.event.subscribe(gui.Circle.MouseButton1Click, () => this.value.set(!this.value.get()));
+		this.event.subscribe(gui.Circle.MouseButton1Click, () => {
+			this.value.set(!this.value.get());
+			this.submitted.Fire(this.value.get());
+		});
 
 		Animation.value(
 			this.event,

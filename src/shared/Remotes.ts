@@ -13,7 +13,8 @@ const Remotes = Net.Definitions.Create({
 		UpdateConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
 	}),
 	Slots: Net.Definitions.Namespace({
-		Load: Net.Definitions.ServerAsyncFunction<() => SlotsResponse>(),
+		Fetch: Net.Definitions.ServerAsyncFunction<() => SlotsResponse>(),
+		Load: Net.Definitions.ServerAsyncFunction<(index: number) => Response>(),
 		Save: Net.Definitions.ServerAsyncFunction<(data: PlayerSaveSlotRequest) => Response>(),
 	}),
 	Ride: Net.Definitions.Namespace({

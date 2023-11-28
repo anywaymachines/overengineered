@@ -5,7 +5,6 @@ import SharedPlots from "shared/building/SharedPlots";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import PartUtils from "shared/utils/PartUtils";
 import BuildingWelder from "./BuildingWelder";
-import Signals from "./Signals";
 
 export default class BuildingWrapper {
 	public static placeBlock(data: PlaceBlockRequest) {

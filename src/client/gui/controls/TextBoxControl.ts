@@ -2,6 +2,8 @@ import ObservableValue from "shared/event/ObservableValue";
 import Control from "client/base/Control";
 
 export type TextBoxControlDefinition = TextBox;
+
+/** Control that represents a text value */
 export default class TextBoxControl extends Control<TextBoxControlDefinition> {
 	public readonly text;
 
