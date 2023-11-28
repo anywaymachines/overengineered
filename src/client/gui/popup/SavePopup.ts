@@ -25,7 +25,7 @@ class SaveItem extends Control<SaveItemDefinition> {
 		this.gui.ImageLabel.ImageColor3 = Serializer.Color3Serializer.deserialize(slot.color);
 
 		this.selected.subscribe((selected) => {
-			this.gui.BackgroundColor3 = selected ? new Color3(1, 1, 1) : new Color3(0, 0, 0);
+			this.gui.BackgroundColor3 = selected ? Color3.fromRGB(63, 70, 88) : Color3.fromRGB(44, 48, 61);
 		}, true);
 	}
 }
