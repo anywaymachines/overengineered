@@ -1,6 +1,5 @@
 import { UserInputService } from "@rbxts/services";
-import EventHandler from "./EventHandler";
-import StaticWidgetsController from "client/controller/StaticWidgetsController";
+import EventHandler from "shared/event/EventHandler";
 
 type InputCallback = (input: InputObject) => boolean | unknown;
 type TouchCallback = () => boolean | unknown;
@@ -31,10 +30,6 @@ export default class InputHandler {
 
 	private isKeyPressed(): boolean {
 		if (UserInputService.GetFocusedTextBox()) {
-			return false;
-		}
-
-		if (StaticWidgetsController.isPopupVisible()) {
 			return false;
 		}
 

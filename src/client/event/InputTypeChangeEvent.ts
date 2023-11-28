@@ -1,7 +1,7 @@
-import { UserInputService } from "@rbxts/services";
+import { GuiService, UserInputService } from "@rbxts/services";
 import InputController from "client/controller/InputController";
-import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import Signals from "client/event/Signals";
+import LogControl from "client/gui/static/LogControl";
 import Remotes from "shared/Remotes";
 
 /** A permanent event that monitors the change in the type of input type, which makes the game more flexible */
@@ -22,21 +22,27 @@ export default class InputTypeChangeEvent {
 		const newInputType = this.getInputTypeByEnum(lastInputType);
 
 		if (newInputType !== InputController.inputType) {
+			if (UserInputService.GetFocusedTextBox()) {
+				return;
+			}
+
 			InputController.inputType = newInputType;
 
 			// Fire a new input type
-			Signals.INPUT_TYPE_CHANGED_EVENT.Fire(newInputType);
-			Remotes.Client.GetNamespace("Player").Get("InputTypeInfo").SendToServer(newInputType);
+			Signals.INPUT_TYPE.set(newInputType);
+			this.share();
 
-			StaticWidgetsController.logStaticWidget.addLine(
-				"New input type set to " + newInputType,
-				Color3.fromRGB(252, 252, 145),
-			);
+			LogControl.instance.addLine("New input type set to " + newInputType, Color3.fromRGB(252, 252, 145));
 		}
+	}
+
+	private static share() {
+		Remotes.Client.GetNamespace("Player").Get("InputTypeInfo").SendToServer(InputController.inputType);
 	}
 
 	static subscribe() {
 		// Event
 		UserInputService.LastInputTypeChanged.Connect((lastInputType) => this.onLastInputTypeChanged(lastInputType));
+		this.share();
 	}
 }

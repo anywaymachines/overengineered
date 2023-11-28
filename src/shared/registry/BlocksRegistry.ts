@@ -10,10 +10,12 @@ import BlockCornerWedge2x1 from "./blocks/BlockCornerWedge2x1";
 import BlockCornerWedge3x1 from "./blocks/BlockCornerWedge3x1";
 import BlockCornerWedge4x1 from "./blocks/BlockCornerWedge4x1";
 import DisconnectBlock from "./blocks/DisconnectBlock";
+import VehicleSeatBlock from "./blocks/VehicleSeatBlock";
 
 export default class BlockRegistry {
 	public static Blocks: Map<string, AbstractBlock> = new Map<string, AbstractBlock>();
 	public static RegisteredBlocks: AbstractBlock[] = [];
+	public static RequiredBlocks: AbstractBlock[] = [];
 
 	public static readonly BLOCK = this.registerBlock(new Block());
 
@@ -29,12 +31,16 @@ export default class BlockRegistry {
 	public static readonly BLOCK_CORNERWEDGE3x1 = this.registerBlock(new BlockCornerWedge3x1());
 	public static readonly BLOCK_CORNERWEDGE4x1 = this.registerBlock(new BlockCornerWedge4x1());
 
-	// Misc
+	// test
 	public static readonly DISCONNECT_BLOCK = this.registerBlock(new DisconnectBlock());
+
+	// Seats
+	public static readonly VEHICLE_SEAT = this.registerBlock(new VehicleSeatBlock());
 
 	private static registerBlock(block: AbstractBlock): AbstractBlock {
 		this.Blocks.set(block.id, block);
 		this.RegisteredBlocks.push(block);
+		if (block.isRequired()) this.RequiredBlocks.push(block);
 		return block;
 	}
 

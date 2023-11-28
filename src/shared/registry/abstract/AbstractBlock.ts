@@ -25,6 +25,14 @@ export default abstract class AbstractBlock {
 		return undefined;
 	}
 
+	public getLimit(): number {
+		return 500;
+	}
+
+	public isRequired(): boolean {
+		return false;
+	}
+
 	/** Enables locking of rotary axes */
 	public getAvailableRotationAxis(): {
 		x: boolean;

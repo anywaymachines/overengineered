@@ -24,6 +24,37 @@ export default class GuiAnimator {
 		frame.TweenPosition(defaultPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, duration);
 	}
 
+	static hide(frame: GuiObject, duration: number, direction: "right" | "left" | "up" | "down", power: number = 50) {
+		const defaultPosition = frame.Position;
+		const offsets = {
+			left: new UDim2(0, power, 0, 0),
+			right: new UDim2(0, -power, 0, 0),
+			down: new UDim2(0, 0, 0, -power),
+			up: new UDim2(0, 0, 0, power),
+		};
+
+		const offsetPosition = offsets[direction];
+
+		const newPosition = defaultPosition.add(offsetPosition);
+		frame.TweenPosition(newPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, duration);
+		spawn(() => {
+			wait(duration);
+			frame.Visible = false;
+			frame.Position = defaultPosition;
+		});
+	}
+
+	static tweenPosition(frame: GuiObject, position: UDim2, duration: number) {
+		const info = { Position: position };
+		const tween = TweenService.Create(
+			frame,
+			new TweenInfo(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			info,
+		);
+
+		tween.Play();
+	}
+
 	static revTransition(
 		frame: GuiObject,
 		duration: number,
@@ -48,7 +79,11 @@ export default class GuiAnimator {
 	/** Animation for changing GUI colors */
 	static tweenColor(gui: GuiObject, color: Color3, time: number) {
 		const info = { BackgroundColor3: color } as Partial<ExtractMembers<GuiBase, Tweenable>>;
-		const tween = TweenService.Create(gui, new TweenInfo(time), info);
+		const tween = TweenService.Create(
+			gui,
+			new TweenInfo(time, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			info,
+		);
 		tween.Play();
 	}
 
@@ -62,12 +97,18 @@ export default class GuiAnimator {
 			info = { Transparency: transparency } as Partial<ExtractMembers<GuiBase, Tweenable>>;
 		}
 
-		const tween = TweenService.Create(gui, new TweenInfo(time), info);
+		const tween = TweenService.Create(
+			gui,
+			new TweenInfo(time, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			info,
+		);
 		tween.Play();
 	}
 
-	static tween<T extends GuiObject>(gui: T, values: Partial<ExtractMembers<T, Tweenable>>, info: TweenInfo) {
+	static tween<T extends Instance>(gui: T, values: Partial<ExtractMembers<T, Tweenable>>, info: TweenInfo) {
 		const tween = TweenService.Create(gui, info, values);
 		tween.Play();
+
+		return tween;
 	}
 }

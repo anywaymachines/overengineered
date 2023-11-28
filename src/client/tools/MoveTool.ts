@@ -3,6 +3,7 @@ import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
 import InputController from "client/controller/InputController";
+import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
 import SharedPlots from "shared/building/SharedPlots";
 
@@ -138,7 +139,8 @@ export default class MoveTool extends ToolBase {
 		// Parsing response
 		if (response.success) {
 			// Move success
-			task.wait();
+		} else {
+			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
 		}
 
 		this.createHandles();
@@ -173,19 +175,19 @@ export default class MoveTool extends ToolBase {
 
 	protected prepareTouch(): void {}
 
-	public getGamepadTooltips(): { image: string; text: string }[] {
-		const keys: { image: string; text: string }[] = [];
+	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
+		const keys: { key: Enum.KeyCode; text: string }[] = [];
 
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadUp), text: "Move up" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadDown), text: "Move down" });
+		keys.push({ key: Enum.KeyCode.DPadUp, text: "Move up" });
+		keys.push({ key: Enum.KeyCode.DPadDown, text: "Move down" });
 
 		keys.push({
-			image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadLeft),
+			key: Enum.KeyCode.DPadLeft,
 			text: "Move left (based on camera)",
 		});
 
 		keys.push({
-			image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadRight),
+			key: Enum.KeyCode.DPadRight,
 			text: "Move right (based on camera)",
 		});
 

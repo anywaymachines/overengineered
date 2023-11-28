@@ -31,8 +31,8 @@ export default class DisconnectBlock extends AbstractBlock implements Configurab
 				displayName: "Disconnect key",
 				type: "Key",
 				default: {
-					Desktop: Enum.KeyCode.F.Value,
-					Gamepad: Enum.KeyCode.ButtonR2.Value,
+					Desktop: Enum.KeyCode.F,
+					Gamepad: Enum.KeyCode.ButtonR2,
 				},
 			},
 			{

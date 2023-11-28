@@ -3,9 +3,8 @@ import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
-import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import Signals from "client/event/Signals";
-import ConfigToolWidget from "client/gui/widget/tools/ConfigToolWidget";
+import LogControl from "client/gui/static/LogControl";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import BlockRegistry from "shared/registry/BlocksRegistry";
@@ -17,9 +16,6 @@ export default class ConfigTool extends ToolBase {
 
 	private readonly selected: Highlight[] = [];
 	private highlight?: Highlight;
-
-	// GUI
-	private readonly widget: ConfigToolWidget = new ConfigToolWidget(this);
 
 	protected prepare(): void {
 		super.prepare();
@@ -110,6 +106,10 @@ export default class ConfigTool extends ToolBase {
 
 		// Create highlight
 		this.createHighlight(target);
+
+		if (Signals.INPUT_TYPE.get() === "Touch") {
+			this.selectBlock(false, false);
+		}
 	}
 
 	private selectBlock(pc = false, add = true) {
@@ -122,7 +122,7 @@ export default class ConfigTool extends ToolBase {
 
 		const block = this.highlight?.Parent;
 		if (!block) {
-			if (!pc) StaticWidgetsController.logStaticWidget.addLine("Block is not targeted!");
+			if (!pc) LogControl.instance.addLine("Block is not targeted!");
 			return;
 		}
 
@@ -152,6 +152,8 @@ export default class ConfigTool extends ToolBase {
 	}
 
 	public createHighlight(target: BasePart) {
+		this.destroyHighlight();
+
 		this.highlight = new Instance("Highlight");
 		this.highlight.Parent = target.Parent;
 		this.highlight.Adornee = target.Parent;
@@ -163,10 +165,9 @@ export default class ConfigTool extends ToolBase {
 	}
 
 	public unselectAll() {
-		this.selected.forEach((element) => {
-			element.Destroy();
-		});
+		this.selected.forEach((element) => element.Destroy());
 		this.selected.clear();
+		this.selectedBlocksChanged.Fire(this.selected);
 	}
 
 	getDisplayName(): string {
@@ -181,7 +182,7 @@ export default class ConfigTool extends ToolBase {
 		return "Configure blocks";
 	}
 
-	public getGamepadTooltips(): { image: string; text: string }[] {
+	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
 		return [];
 	}
 
@@ -191,15 +192,11 @@ export default class ConfigTool extends ToolBase {
 
 	activate(): void {
 		super.activate();
-
-		this.widget.showWidget(true);
 		this.updatePosition();
 	}
 
 	deactivate(): void {
 		super.deactivate();
-
-		this.widget.hideWidget(true);
 
 		this.destroyHighlight();
 		this.unselectAll();

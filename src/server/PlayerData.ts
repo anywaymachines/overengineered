@@ -1,31 +1,59 @@
-import { Players } from "@rbxts/services";
-import Logger from "shared/Logger";
-import Remotes from "shared/Remotes";
+import { DataStoreService, HttpService, Players } from "@rbxts/services";
+import BlocksSerializer, { SerializedBlock } from "./plots/BlocksSerializer";
+import SharedPlots from "shared/building/SharedPlots";
 
-export default class PlayerData {
-	public static playerData: { [userID: number]: { inputType?: InputType } } = {};
+export type PlayerData = {
+	additionalSaveSlots?: number;
+	slots: { name?: string; color?: SerializedColor; data?: SerializedBlock[] }[];
+};
+
+export default class PlayerDatabase {
+	private static readonly playerDatastore = DataStoreService.GetDataStore("players");
+	private static readonly loadedData: { [key: string]: PlayerData } = {};
 
 	public static initialize() {
-		this.initEvents();
+		// Load player data on join
+		Players.PlayerAdded.Connect((plr) => {
+			try {
+				const [response, keyinfo] = this.playerDatastore.GetAsync<string>(tostring(plr.UserId));
+				this.loadedData[tostring(plr.UserId)] = HttpService.JSONDecode(response as string) as PlayerData;
+			} catch {
+				this.loadedData[tostring(plr.UserId)] = { slots: [] };
+			}
+		});
+
+		// Unload & save data on leave
+		Players.PlayerRemoving.Connect((plr) => {
+			this.playerDatastore.SetAsync(
+				tostring(plr.UserId),
+				HttpService.JSONEncode(this.loadedData[tostring(plr.UserId)]),
+			);
+
+			delete this.loadedData[tostring(plr.UserId)];
+		});
+
+		// Unload & save all players data on game closing
+		game.BindToClose(() => {
+			Players.GetPlayers().forEach((plr) => {
+				this.playerDatastore.SetAsync(
+					tostring(plr.UserId),
+					HttpService.JSONEncode(this.loadedData[tostring(plr.UserId)]),
+				);
+
+				delete this.loadedData[tostring(plr.UserId)];
+			});
+		});
 	}
 
-	private static initEvents() {
-		// Create empty data
-		Players.PlayerAdded.Connect((player) => {
-			this.playerData[player.UserId] = {};
-		});
+	public static getSlot(player: Player, index: number) {
+		return ((this.loadedData[tostring(player.UserId)] ??= { slots: [] }).slots[index] ??= {});
+	}
 
-		// Input type listener
-		Remotes.Server.GetNamespace("Player")
-			.Get("InputTypeInfo")
-			.Connect((player, inputType) => {
-				Logger.info(`Recieved ${player.Name}'s input type - ${inputType}`);
-				this.playerData[player.UserId]["inputType"] = inputType;
-			});
+	public static saveIntoSlot(player: Player, index: number) {
+		this.loadedData[tostring(player.UserId)].slots[index] ??= {};
 
-		// Data remove
-		Players.PlayerRemoving.Connect((player) => {
-			delete this.playerData[player.UserId];
-		});
+		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
+		const serializedBlocks = BlocksSerializer.serialize(plot);
+		this.loadedData[tostring(player.UserId)].slots[index].data = serializedBlocks;
 	}
 }

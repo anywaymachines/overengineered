@@ -11,11 +11,13 @@ const Remotes = Net.Definitions.Create({
 		MoveRequest: Net.Definitions.ServerAsyncFunction<(data: PlayerMoveRequest) => BuildResponse>(),
 
 		UpdateConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
-
-		WeldBlock: Net.Definitions.ServerToClientEvent<[model: Model]>(),
+	}),
+	Slots: Net.Definitions.Namespace({
+		Load: Net.Definitions.ServerAsyncFunction<() => SlotsResponse>(),
+		Save: Net.Definitions.ServerAsyncFunction<(data: PlayerSaveSlotRequest) => Response>(),
 	}),
 	Ride: Net.Definitions.Namespace({
-		RideStartRequest: Net.Definitions.ServerAsyncFunction<() => void>(),
+		RideStartRequest: Net.Definitions.ServerAsyncFunction<() => Response>(),
 	}),
 });
 

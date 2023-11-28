@@ -4,5 +4,6 @@ export default class GameDefinitions {
 		5184377367, // mgcode_ru
 	];
 
+	static readonly FREE_SLOTS: number = 10;
 	static readonly BUILD_HEIGHT_LIMIT: number = 100;
 }

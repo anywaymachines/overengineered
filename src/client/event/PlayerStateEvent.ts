@@ -6,6 +6,8 @@ export default class PlayerStateEvent {
 		(Players.LocalPlayer.Character as Model).FindFirstChildOfClass("Humanoid")?.Died.Once(() => {
 			Signals.PLAYER.DIED.Fire();
 		});
+
+		this.emitPlayerSpawn();
 	}
 
 	static emitPlayerSpawn() {

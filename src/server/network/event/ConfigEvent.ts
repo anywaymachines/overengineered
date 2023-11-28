@@ -1,3 +1,5 @@
+import { HttpService } from "@rbxts/services";
+import BuildingWrapper from "server/BuildingWrapper";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import BuildingManager from "shared/building/BuildingManager";
@@ -31,8 +33,8 @@ export default class ConfigEvent {
 			};
 		}
 
-		// TODO
+		const response = BuildingWrapper.updateConfig(data);
 
-		return { success: true };
+		return response;
 	}
 }

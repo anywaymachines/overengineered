@@ -1,21 +1,21 @@
-import { GuiService, Players, UserInputService, Workspace } from "@rbxts/services";
+import { GuiService, HttpService, Players, ReplicatedFirst, UserInputService, Workspace } from "@rbxts/services";
+import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
 import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
-import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import Signals from "client/event/Signals";
-import DeleteToolWidget from "client/gui/widget/tools/DeleteToolWidget";
+import LogControl from "client/gui/static/LogControl";
+import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import PlayerUtils from "shared/utils/PlayerUtils";
 
 export default class DeleteTool extends ToolBase {
-	public highlight: ObjectValue = new Instance("ObjectValue");
+	public readonly onClearAllRequested = new Signal<() => void>();
 
-	// GUI
-	private readonly widget: DeleteToolWidget = new DeleteToolWidget(this);
+	public highlight: ObjectValue = new Instance("ObjectValue");
 
 	protected prepare(): void {
 		super.prepare();
@@ -37,7 +37,7 @@ export default class DeleteTool extends ToolBase {
 	protected prepareGamepad(): void {
 		// Gamepad buttons controls
 		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonX, () => this.deleteBlock());
-		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonY, () => this.widget.suggestClearAll());
+		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonY, () => this.onClearAllRequested.Fire());
 
 		// Prepare console events
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updatePosition());
@@ -62,8 +62,10 @@ export default class DeleteTool extends ToolBase {
 			// Block removed
 			task.wait();
 
-			SoundController.getSounds().Building.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().Building.BlockDelete.Play();
+			SoundController.getSounds().BuildingMode.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().BuildingMode.BlockDelete.Play();
+		} else {
+			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
 		}
 	}
 
@@ -71,7 +73,12 @@ export default class DeleteTool extends ToolBase {
 		const info: PlaceBlockRequest = {
 			location: block.PrimaryPart!.CFrame,
 			block: block.GetAttribute("id") as string,
-			material: Enum.Material.GetEnumItems().find((e) => e.Name === (block.GetAttribute("material") as string))!,
+			color: Serializer.Color3Serializer.deserialize(
+				HttpService.JSONDecode(block.GetAttribute("color") as string) as SerializedColor,
+			),
+			material: Serializer.EnumMaterialSerializer.deserialize(
+				block.GetAttribute("material") as number as SerializedEnum,
+			),
 		};
 
 		return info;
@@ -80,7 +87,7 @@ export default class DeleteTool extends ToolBase {
 	public async deleteBlock() {
 		// ERROR: No block selected
 		if (this.highlight.Value === undefined) {
-			StaticWidgetsController.logStaticWidget.addLine("Block is not selected!");
+			LogControl.instance.addLine("Block is not selected!");
 			return;
 		}
 
@@ -99,8 +106,8 @@ export default class DeleteTool extends ToolBase {
 			// Block removed
 			task.wait();
 
-			SoundController.getSounds().Building.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().Building.BlockDelete.Play();
+			SoundController.getSounds().BuildingMode.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().BuildingMode.BlockDelete.Play();
 
 			this.destroyHighlight();
 			this.updatePosition();
@@ -154,6 +161,8 @@ export default class DeleteTool extends ToolBase {
 	}
 
 	public createHighlight(target: BasePart) {
+		this.destroyHighlight();
+
 		const instance = new Instance("Highlight");
 		instance.Parent = target.Parent;
 		instance.Adornee = target.Parent;
@@ -177,12 +186,12 @@ export default class DeleteTool extends ToolBase {
 		return "Remove unnecessary blocks";
 	}
 
-	public getGamepadTooltips(): { image: string; text: string }[] {
-		const keys: { image: string; text: string }[] = [];
+	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
+		const keys: { key: Enum.KeyCode; text: string }[] = [];
 
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonY), text: "Clear all" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonX), text: "Delete" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonB), text: "Unequip" });
+		keys.push({ key: Enum.KeyCode.ButtonY, text: "Clear all" });
+		keys.push({ key: Enum.KeyCode.ButtonX, text: "Delete" });
+		keys.push({ key: Enum.KeyCode.ButtonB, text: "Unequip" });
 
 		return keys;
 	}
@@ -193,15 +202,11 @@ export default class DeleteTool extends ToolBase {
 
 	activate(): void {
 		super.activate();
-
-		this.widget.showWidget(true);
 		this.updatePosition();
 	}
 
 	deactivate(): void {
 		super.deactivate();
-
-		this.widget.hideWidget(true);
 		this.destroyHighlight();
 	}
 }

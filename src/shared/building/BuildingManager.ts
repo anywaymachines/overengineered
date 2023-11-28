@@ -1,10 +1,8 @@
 import SharedPlots from "shared/building/SharedPlots";
 import VectorUtils from "shared/utils/VectorUtils";
 
-// Looks good
 export default class BuildingManager {
 	public static AllowedMaterials = [
-		Enum.Material.Cardboard,
 		Enum.Material.Plastic,
 		Enum.Material.Glass,
 		Enum.Material.Wood,

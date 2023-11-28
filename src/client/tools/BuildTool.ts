@@ -5,10 +5,11 @@ import BuildingController from "client/controller/BuildingController";
 import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
-import StaticWidgetsController from "client/controller/StaticWidgetsController";
 import Signals from "client/event/Signals";
-import BuildToolWidget from "client/gui/widget/tools/BuildToolWidget";
+import LogControl from "client/gui/static/LogControl";
+import MaterialChooserControl from "client/gui/tools/MaterialChooser";
 import BuildingManager from "shared/building/BuildingManager";
+import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import VectorUtils from "shared/utils/VectorUtils";
@@ -28,8 +29,19 @@ export default class BuildTool extends ToolBase {
 	private lastMouseTarget?: BasePart;
 	private lastMouseSurface?: Enum.NormalId;
 
-	// GUI
-	private readonly widget: BuildToolWidget = new BuildToolWidget(this);
+	private selectedBlock?: AbstractBlock;
+	private selectedMaterial: Enum.Material = Enum.Material.Plastic;
+	private selectedColor: Color3 = Color3.fromRGB(255, 255, 255);
+
+	constructor() {
+		super();
+		MaterialChooserControl.instance.selectedMaterial.subscribe((material) => {
+			this.setSelectedMaterial(material);
+		}, true);
+		MaterialChooserControl.instance.selectedColor.subscribe((color) => {
+			this.setSelectedColor(color);
+		}, true);
+	}
 
 	getDisplayName(): string {
 		return "Building Mode";
@@ -43,22 +55,35 @@ export default class BuildTool extends ToolBase {
 		return "Place blocks in the world";
 	}
 
-	public prepareVisual() {
+	public setSelectedBlock(block: AbstractBlock | undefined) {
+		this.selectedBlock = block;
+		this.prepareVisual();
+	}
+
+	public setSelectedMaterial(material: Enum.Material) {
+		this.selectedMaterial = material;
+		this.prepareVisual();
+	}
+
+	public setSelectedColor(color: Color3) {
+		this.selectedColor = color;
+		this.prepareVisual();
+	}
+
+	private prepareVisual() {
 		// Remove old block preview
 		this.previewBlock?.Destroy();
-
-		if (this.widget.selectedBlock === undefined) {
-			return;
-		}
+		if (!this.selectedBlock) return;
 
 		// Spawning a new block
-		this.previewBlock = this.widget.selectedBlock.getModel().Clone();
+		this.previewBlock = this.selectedBlock.getModel().Clone();
 		this.previewBlock.Parent = Workspace;
 
 		// Customizing
 		this.addAxisModel();
 		this.addHighlight();
-		PartUtils.switchDescendantsMaterial(this.previewBlock, this.widget.selectedMaterial);
+		PartUtils.switchDescendantsMaterial(this.previewBlock, this.selectedMaterial);
+		PartUtils.switchDescendantsColor(this.previewBlock, this.selectedColor);
 		PartUtils.ghostModel(this.previewBlock);
 
 		// First update
@@ -76,27 +101,27 @@ export default class BuildTool extends ToolBase {
 
 	private addAxisModel() {
 		assert(this.previewBlock);
-		assert(this.widget.selectedBlock);
+		assert(this.selectedBlock);
 
 		const axis = ReplicatedStorage.Assets.Axis.Clone();
 		axis.PivotTo(this.previewBlock.GetPivot());
 		axis.Parent = this.previewBlock;
 
-		if (this.widget.selectedBlock.getAvailableRotationAxis().x === false) {
+		if (this.selectedBlock.getAvailableRotationAxis().x === false) {
 			axis.X.Destroy();
 		}
 
-		if (this.widget.selectedBlock.getAvailableRotationAxis().y === false) {
+		if (this.selectedBlock.getAvailableRotationAxis().y === false) {
 			axis.Y.Destroy();
 		}
 
-		if (this.widget.selectedBlock.getAvailableRotationAxis().y === false) {
+		if (this.selectedBlock.getAvailableRotationAxis().y === false) {
 			axis.Z.Destroy();
 		}
 	}
 
 	private updatePosition(savePosition: boolean = false) {
-		if (!this.widget.selectedBlock || !this.previewBlock) {
+		if (!this.selectedBlock || !this.previewBlock) {
 			return;
 		}
 
@@ -204,8 +229,8 @@ export default class BuildTool extends ToolBase {
 
 	public async placeBlock() {
 		// ERROR: Block is not selected
-		if (this.widget.selectedBlock === undefined) {
-			StaticWidgetsController.logStaticWidget.addLine("Block is not selected!");
+		if (this.selectedBlock === undefined) {
+			LogControl.instance.addLine("Block is not selected!");
 			return;
 		}
 
@@ -227,8 +252,9 @@ export default class BuildTool extends ToolBase {
 				if (block) await BuildingController.deleteBlock(block);
 			},
 			{
-				block: this.widget.selectedBlock.id,
-				material: this.widget.selectedMaterial,
+				block: this.selectedBlock.id,
+				color: this.selectedColor,
+				material: this.selectedMaterial,
 				location: this.previewBlock.PrimaryPart.CFrame,
 			},
 			(info) => BuildingController.placeBlock(info),
@@ -236,23 +262,22 @@ export default class BuildTool extends ToolBase {
 
 		if (response.success) {
 			// Play sound
-			SoundController.getSounds().Building.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().Building.BlockPlace.Play();
+			SoundController.getSounds().BuildingMode.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().BuildingMode.BlockPlace.Play();
 
 			task.wait();
 			this.updatePosition(true);
 		} else {
-			SoundController.getSounds().Building.BlockPlaceError.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().Building.BlockPlaceError.Play();
+			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
 		}
 	}
 
 	public rotate(axis: "x" | "y" | "z", isInverted: boolean = InputController.isShiftPressed()) {
-		if (this.widget.selectedBlock === undefined) {
+		if (this.selectedBlock === undefined) {
 			return;
 		}
 
-		const { x, y, z } = this.widget.selectedBlock.getAvailableRotationAxis();
+		const { x, y, z } = this.selectedBlock.getAvailableRotationAxis();
 
 		if (axis === "x" && x) {
 			this.rotateFineTune(new Vector3(isInverted ? math.pi / 2 : math.pi / -2, 0, 0));
@@ -271,8 +296,8 @@ export default class BuildTool extends ToolBase {
 		);
 		this.updatePosition(true);
 
-		SoundController.getSounds().Building.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
-		SoundController.getSounds().Building.BlockRotate.Play();
+		SoundController.getSounds().BuildingMode.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
+		SoundController.getSounds().BuildingMode.BlockRotate.Play();
 	}
 
 	private colorizePreviewBlock(highlight: Highlight) {
@@ -308,10 +333,12 @@ export default class BuildTool extends ToolBase {
 
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updatePosition());
 	}
+
 	protected prepareTouch(): void {
 		// Touch controls
 		this.inputHandler.onTouchTap(() => this.updatePosition());
 	}
+
 	protected prepareGamepad(): void {
 		// Gamepad button controls
 		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonX, () => this.placeBlock());
@@ -328,28 +355,23 @@ export default class BuildTool extends ToolBase {
 
 	activate(): void {
 		super.activate();
-
-		this.widget.showWidget(true);
 		this.prepareVisual();
 	}
 
 	deactivate(): void {
 		super.deactivate();
-
-		this.widget.hideWidget(true);
-
 		this.previewBlock?.Destroy();
 	}
 
-	public getGamepadTooltips(): { image: string; text: string }[] {
-		const keys: { image: string; text: string }[] = [];
+	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
+		const keys: { key: Enum.KeyCode; text: string }[] = [];
 
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonX), text: "Place" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonB), text: "Unequip" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonSelect), text: "Select block" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadLeft), text: "Rotate by X" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadUp), text: "Rotate by Y" });
-		keys.push({ image: UserInputService.GetImageForKeyCode(Enum.KeyCode.DPadRight), text: "Rotate by Z" });
+		keys.push({ key: Enum.KeyCode.ButtonX, text: "Place" });
+		keys.push({ key: Enum.KeyCode.ButtonB, text: "Unequip" });
+		keys.push({ key: Enum.KeyCode.ButtonSelect, text: "Select block" });
+		keys.push({ key: Enum.KeyCode.DPadLeft, text: "Rotate by X" });
+		keys.push({ key: Enum.KeyCode.DPadUp, text: "Rotate by Y" });
+		keys.push({ key: Enum.KeyCode.DPadRight, text: "Rotate by Z" });
 
 		return keys;
 	}

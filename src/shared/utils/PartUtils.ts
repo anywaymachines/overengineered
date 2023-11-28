@@ -1,38 +1,43 @@
 export default class PartUtils {
 	static ghostModel(model: Model) {
-		const children = model.GetDescendants();
-		children.forEach((element) => {
-			if (element.IsA("BasePart")) {
-				element.CanCollide = false;
-				element.CanQuery = false;
-				element.CanTouch = false;
-			}
+		this.applyToAllParts(model, (part) => {
+			part.CanCollide = false;
+			part.CanQuery = false;
+			part.CanTouch = false;
 		});
 	}
 
 	static switchDescendantsTransparency(model: Instance, transparency: number) {
-		const children = model.GetDescendants();
-		children.forEach((element) => {
-			if (element.IsA("BasePart")) {
-				element.Transparency = transparency;
-			}
+		this.applyToAllParts(model, (part) => {
+			part.Transparency = transparency;
 		});
 	}
 
 	static switchDescendantsAnchor(model: Instance, isAnchored: boolean) {
-		const children = model.GetDescendants();
-		children.forEach((element) => {
-			if (element.IsA("BasePart")) {
-				element.Anchored = isAnchored;
-			}
+		this.applyToAllParts(model, (part) => {
+			part.Anchored = isAnchored;
 		});
 	}
 
 	static switchDescendantsMaterial(model: Instance, material: Enum.Material) {
+		this.applyToAllParts(model, (part) => {
+			if (part.GetAttribute("static_material") === true) return;
+			part.Material = material;
+		});
+	}
+
+	static switchDescendantsColor(model: Instance, color: Color3) {
+		this.applyToAllParts(model, (part) => {
+			if (part.GetAttribute("static_color") === true) return;
+			part.Color = color;
+		});
+	}
+
+	static applyToAllParts(model: Instance, callback: (part: BasePart) => void) {
 		const children = model.GetDescendants();
 		children.forEach((element) => {
 			if (element.IsA("BasePart")) {
-				element.Material = material;
+				callback(element);
 			}
 		});
 	}

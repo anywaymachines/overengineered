@@ -1,13 +1,13 @@
 import { Players } from "@rbxts/services";
 import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
-import EventHandler from "client/event/EventHandler";
+import EventHandler from "shared/event/EventHandler";
 import InputHandler from "client/event/InputHandler";
 import Signals from "client/event/Signals";
 
 /** An abstract class of tools for working with the world */
 export default abstract class ToolBase {
-	protected readonly gameUI: GameUI;
+	protected readonly gameUI;
 	protected readonly mouse: Mouse;
 	protected isEquipped = false;
 
@@ -16,7 +16,7 @@ export default abstract class ToolBase {
 	protected readonly inputHandler: InputHandler;
 
 	constructor() {
-		this.gameUI = GuiController.getGameUI();
+		this.gameUI = GuiController.getGameUI<unknown>();
 		this.mouse = Players.LocalPlayer.GetMouse();
 
 		this.eventHandler = new EventHandler();
@@ -76,6 +76,6 @@ export default abstract class ToolBase {
 	/** Description of the tool, for example: `Splits blocks into atoms` */
 	abstract getShortDescription(): string;
 
-	public abstract getGamepadTooltips(): { image: string; text: string }[];
+	public abstract getGamepadTooltips(): { key: Enum.KeyCode; text: string }[];
 	public abstract getKeyboardTooltips(): { keys: string[]; text: string }[];
 }
