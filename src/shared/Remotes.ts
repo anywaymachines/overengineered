@@ -14,11 +14,22 @@ const Remotes = Net.Definitions.Create({
 	}),
 	Slots: Net.Definitions.Namespace({
 		Fetch: Net.Definitions.ServerAsyncFunction<() => SlotsResponse>(),
-		Load: Net.Definitions.ServerAsyncFunction<(index: number) => Response>(),
-		Save: Net.Definitions.ServerAsyncFunction<(data: PlayerSaveSlotRequest) => Response>(),
+		Load: Net.Definitions.ServerAsyncFunction<(index: number) => Response>([
+			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 8 }),
+		]),
+		Save: Net.Definitions.ServerAsyncFunction<(data: PlayerSaveSlotRequest) => Response>([
+			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 60 }),
+		]),
 	}),
 	Ride: Net.Definitions.Namespace({
-		RideStartRequest: Net.Definitions.ServerAsyncFunction<() => Response>(),
+		RideStartRequest: Net.Definitions.ServerAsyncFunction<() => Response>([
+			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 2 }),
+		]),
+	}),
+	Blocks: Net.Definitions.Namespace({
+		DisconnectBlock: Net.Definitions.Namespace({
+			Disconnect: Net.Definitions.ClientToServerEvent<[block: Model]>(),
+		}),
 	}),
 });
 

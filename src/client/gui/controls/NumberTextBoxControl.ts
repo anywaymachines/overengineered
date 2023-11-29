@@ -6,7 +6,7 @@ export type NumberTextBoxControlDefinition = TextBox;
 
 /** Control that represents a number via a text input */
 export default class NumberTextBoxControl extends Control<NumberTextBoxControlDefinition> {
-	public readonly activated = new Signal<(value: number) => void>();
+	public readonly submitted = new Signal<(value: number) => void>();
 	public readonly value;
 
 	constructor(gui: NumberTextBoxControlDefinition) {
@@ -26,7 +26,7 @@ export default class NumberTextBoxControl extends Control<NumberTextBoxControlDe
 
 			this.gui.Text = tostring(num);
 			this.value.set(num);
-			this.activated.Fire(num);
+			this.submitted.Fire(num);
 		};
 
 		this.event.subscribe(this.gui.FocusLost, activated);

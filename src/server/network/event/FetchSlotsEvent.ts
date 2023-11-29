@@ -9,20 +9,12 @@ export default class FetchSlotEvent {
 
 		Remotes.Server.GetNamespace("Slots").OnFunction("Fetch", (player) => {
 			const playerData = PlayerDatabase.instance.get(tostring(player.UserId));
-			const meta = SlotsDatabase.instance.getAllMeta(player.UserId);
-
-			const slots: SlotsResponse["slots"] = meta.map((slot, i) => {
-				return {
-					color: slot.color ?? [255, 255, 255],
-					name: slot.name ?? "Slot " + (i + 1),
-					blocks: slot.blocks ?? 0,
-				};
-			});
+			const meta = SlotsDatabase.instance.getMeta(player.UserId);
 
 			return {
 				success: true,
 				purchasedSlots: playerData.purchasedSlots ?? 0,
-				slots,
+				slots: meta,
 			};
 		});
 	}

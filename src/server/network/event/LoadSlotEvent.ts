@@ -9,9 +9,8 @@ export default class LoadSlotEvent {
 		Logger.info("Loading Slot load event listener...");
 
 		Remotes.Server.GetNamespace("Slots").OnFunction("Load", (player, index) => {
-			const slot = SlotsDatabase.instance.getBlocks(player.UserId, index);
-
-			if (slot.size() === 0) {
+			const blocks = SlotsDatabase.instance.getBlocks(player.UserId, index);
+			if (!blocks || blocks.size() === 0) {
 				return {
 					success: false,
 					message: "Slot is empty",
@@ -19,7 +18,7 @@ export default class LoadSlotEvent {
 			}
 
 			const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-			BlocksSerializer.deserialize(plot, slot);
+			BlocksSerializer.deserialize(plot, blocks);
 
 			return { success: true };
 		});

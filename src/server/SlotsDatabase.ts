@@ -1,106 +1,197 @@
 import { DataStoreService, HttpService, Players } from "@rbxts/services";
 import { SerializedBlock } from "./plots/BlocksSerializer";
 import Logger from "shared/Logger";
+import Objects from "shared/Objects";
 
 export type SlotMeta = {
-	name: string;
-	color: SerializedColor;
-	blocks: number;
+	readonly index: number;
+	readonly name: string;
+	readonly color: SerializedColor;
+	readonly blocks: number;
 };
+
+abstract class DbBase<T> {
+	private readonly datastore;
+	private readonly cache: Record<string, { changed: boolean; value: T }> = {};
+
+	constructor(datastore: DataStore) {
+		this.datastore = datastore;
+	}
+
+	protected abstract createDefault(): T;
+	protected abstract deserialize(data: string): T;
+	protected abstract serialize(data: T): string;
+
+	public get(key: string) {
+		return (this.cache[key] ??= this.load(key)).value;
+	}
+
+	public set(key: string, value: T) {
+		this.cache[key] = { changed: true, value };
+	}
+
+	private load(key: string) {
+		const [response] = this.datastore.GetAsync<string>(key);
+		if (response !== undefined) {
+			return (this.cache[key] = { changed: false, value: this.deserialize(response) });
+		}
+
+		return { changed: false, value: this.createDefault() };
+	}
+
+	public loadedUnsavedEntries() {
+		return Objects.entries(this.cache).filter((entry) => entry[1].changed);
+	}
+
+	/** Removes an entry from the cache */
+	public free(key: string) {
+		delete this.cache[key];
+	}
+
+	/** Clears tha cache */
+	public freeAll() {
+		for (const key of Objects.keys(this.cache)) {
+			delete this.cache[key];
+		}
+	}
+
+	/** Saves an entry if it's not changed */
+	public save(key: string) {
+		const value = this.cache[key];
+		if (!value || !value.changed) return;
+
+		// delay between saves?
+		this.datastore.SetAsync(key, this.serialize(value.value));
+		value.changed = false;
+	}
+
+	public saveChanged() {
+		for (const [key, value] of Objects.entries(this.cache)) {
+			if (!value.changed) continue;
+
+			// delay between saves?
+			this.datastore.SetAsync(key, this.serialize(value.value));
+			value.changed = false;
+		}
+	}
+}
+
+class Db<T> extends DbBase<T> {
+	private readonly createDefaultFunc;
+	private readonly serializeFunc;
+	private readonly deserializeFunc;
+
+	constructor(
+		datastore: DataStore,
+		createDefaultFunc: () => T,
+		serializeFunc: (data: T) => string,
+		deserializeFunc: (data: string) => T,
+	) {
+		super(datastore);
+		this.createDefaultFunc = createDefaultFunc;
+		this.serializeFunc = serializeFunc;
+		this.deserializeFunc = deserializeFunc;
+	}
+
+	protected createDefault(): T {
+		return this.createDefaultFunc();
+	}
+
+	protected deserialize(data: string): T {
+		return this.deserializeFunc(data);
+	}
+
+	protected serialize(data: T): string {
+		return this.serializeFunc(data);
+	}
+}
 
 export class SlotsDatabase {
 	public static readonly instance = new SlotsDatabase();
 
 	private readonly datastore: DataStore = DataStoreService.GetDataStore("slots");
-
-	private readonly meta_cache: Record<string, SlotMeta[]> = {};
-	private readonly blocks_cache: Record<number, Record<number, readonly SerializedBlock[]> | undefined> = {};
-
-	// todo: move
-	private readonly player_lastsave: { [userId: number]: number } = {};
+	private readonly metadb;
+	private readonly blocksdb;
 
 	constructor() {
+		this.metadb = new Db<readonly SlotMeta[]>(
+			this.datastore,
+			() => [],
+			(data) => HttpService.JSONEncode(data),
+			(data) => HttpService.JSONDecode(data) as readonly SlotMeta[],
+		);
+		this.blocksdb = new Db<readonly SerializedBlock[]>(
+			this.datastore,
+			() => [],
+			(data) => HttpService.JSONEncode(data),
+			(data) => HttpService.JSONDecode(data) as readonly SerializedBlock[],
+		);
+
 		this.prepare();
 	}
 
 	private prepare() {
-		Players.PlayerAdded.Connect((plr) => {
-			this.loadMeta(plr.UserId);
-			this.player_lastsave[plr.UserId] = 0;
-		});
 		Players.PlayerRemoving.Connect((plr) => {
-			this.saveMeta(plr.UserId);
-			delete this.player_lastsave[plr.UserId];
+			const key = tostring(plr.UserId);
+			this.metadb.save(key);
+			this.metadb.free(key);
+
+			for (const [key] of this.blocksdb.loadedUnsavedEntries()) {
+				if (key.find(key + "_")[0] === undefined) {
+					continue;
+				}
+
+				Logger.info("Saving " + key);
+				this.blocksdb.save(key);
+				this.blocksdb.free(key);
+			}
 		});
 
 		game.BindToClose(() => {
 			Logger.info("Game termination detected");
-			const players = Players.GetPlayers();
 
-			for (let i = 0; i < players.size(); i++) {
-				const plr = players[i];
-				this.saveMeta(plr.UserId);
-				Logger.info(`Saving ${plr.UserId} to ${this.datastore.Name}`);
+			this.metadb.saveChanged();
+			this.metadb.freeAll();
+			this.blocksdb.saveChanged();
+			this.blocksdb.freeAll();
+		});
+	}
+
+	public getMeta(userId: number) {
+		return this.metadb.get(tostring(userId));
+	}
+	public setMeta(userId: number, meta: readonly SlotMeta[]) {
+		const slots: SlotMeta[] = [];
+
+		const indices: number[] = [];
+		for (let i = meta.size() - 1; i >= 0; i--) {
+			const slot = meta[i];
+			if (indices.includes(slot.index)) {
+				continue;
 			}
-		});
+
+			indices.push(slot.index);
+			slots.push(slot);
+		}
+
+		this.metadb.set(tostring(userId), slots);
 	}
 
-	public getAllMeta(userId: number) {
-		return (this.meta_cache[userId] ??= []);
+	private toKey(userId: number, index: number) {
+		return `${userId}_${index}`;
 	}
-
-	public getMeta(userId: number, index: number) {
-		return (this.getAllMeta(userId)[index] ??= {
-			name: "Slot " + index,
-			color: [255, 255, 255],
-			blocks: 0,
-		});
-	}
-
 	public getBlocks(userId: number, index: number) {
-		return ((this.blocks_cache[userId] ??= {})[index] ??= this.loadBlocks(userId, index) ?? []);
+		return this.blocksdb.get(this.toKey(userId, index)) as readonly SerializedBlock[] | undefined;
 	}
-
 	public setBlocks(userId: number, index: number, blocks: readonly SerializedBlock[]) {
-		return ((this.blocks_cache[userId] ??= {})[index] = blocks);
-	}
+		this.blocksdb.set(this.toKey(userId, index), blocks);
 
-	private loadBlocks(userId: number, index: number) {
-		// todo: move
-		if (math.abs(os.difftime(this.player_lastsave[userId], os.clock())) >= Players.GetPlayers().size() * 10) {
-			return;
-		}
+		const meta = [...SlotsDatabase.instance.getMeta(userId)];
+		meta.push({
+			...meta.find((s) => s.index === index)!,
+			blocks: blocks.size(),
+		});
 
-		this.player_lastsave[userId] = os.clock();
-		try {
-			const [response, keyinfo] = this.datastore.GetAsync<string>(`${userId}_${index}`);
-			return ((this.blocks_cache[userId] ??= {})[index] = HttpService.JSONDecode(
-				response as string,
-			) as SerializedBlock[]);
-		} catch {
-			return ((this.blocks_cache[userId] ??= {})[index] = []);
-		}
-	}
-
-	private saveBlocks(userId: number, index: number) {
-		this.datastore.SetAsync(
-			`${userId}_${index}`,
-			HttpService.JSONEncode((this.blocks_cache[userId] ??= {})[index]),
-		);
-		delete this.blocks_cache[userId];
-	}
-
-	private loadMeta(userId: number): void {
-		try {
-			const [response, keyinfo] = this.datastore.GetAsync<string>(tostring(userId));
-			this.meta_cache[userId] = HttpService.JSONDecode(response as string) as (typeof this.meta_cache)[number];
-		} catch {
-			this.meta_cache[userId] = [];
-		}
-	}
-
-	private saveMeta(userId: number): void {
-		this.datastore.SetAsync(tostring(userId), HttpService.JSONEncode(this.meta_cache[userId]));
-		delete this.meta_cache[userId];
+		SlotsDatabase.instance.setMeta(userId, meta);
 	}
 }

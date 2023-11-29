@@ -10,6 +10,8 @@ import GuiAnimator from "../GuiAnimator";
 import Remotes from "shared/Remotes";
 import LogControl from "../static/LogControl";
 import SoundController from "client/controller/SoundController";
+import BlockLogicController from "client/controller/BlockLogicController";
+import SavePopup from "../popup/SavePopup";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {
@@ -26,12 +28,17 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 			const response = await Remotes.Client.GetNamespace("Ride").Get("RideStartRequest").CallServerAsync();
 
 			if (response.success) {
+				BlockLogicController.setupBlocks();
 				SoundController.getSounds().RideMode.RideStart.Play();
 				Signals.PLAY_MODE.set("ride");
 			} else {
 				LogControl.instance.addLine(response.message!, Color3.fromRGB(255, 100, 100));
 				SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
 			}
+		});
+
+		this.event.subscribe(this.gui.Buttons.Save.Activated, async () => {
+			SavePopup.instance.show();
 		});
 	}
 }

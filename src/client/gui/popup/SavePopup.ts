@@ -55,7 +55,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 	private readonly buyNewTemplate;
 	private readonly template;
 
-	constructor(gui: SaveSlotsDefinition, data: PlayerData) {
+	constructor(gui: SaveSlotsDefinition) {
 		super(gui);
 
 		this.template = Control.asTemplate(this.gui.Template);
@@ -67,7 +67,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 		this.data.subscribe((data) => {
 			if (!data) return;
 
-			this.clear();
+			this.slots.clear();
 			data.slots.forEach((slot, i) => {
 				const item = new SaveItem(this.template(), slot);
 				item.activated.Connect(() => this.selectedSlot.set(i));
@@ -122,35 +122,35 @@ class SavePreview extends Control<SavePreviewDefinition> {
 		for (const child of this.gui.ColorButtons.GetChildren()) {
 			if (!child.IsA("GuiButton")) continue;
 
-			child.Activated.Connect(() => this.color.set(child.BackgroundColor3));
+			child.Activated.Connect(() => {
+				this.color.set(child.BackgroundColor3);
+				this.slot.get()?.updated.Fire();
+			});
 		}
+		textbox.submitted.Connect(() => {
+			this.slot.get()?.updated.Fire();
+		});
 
 		this.color.subscribe((value) => {
 			this.gui.ImageButton.ImageColor3 = value;
-			this.slot.get()?.updated.Fire();
 		});
 
 		this.slot.subscribe((slot) => {
 			this.gui.Visible = slot !== undefined;
-			this.slot.get()?.updated.Fire();
+			this.gui.HeadingLabel.Text = `Blocks: ${slot?.blocks}`;
 		}, true);
 	}
 }
 
-type OPlayerData = {
-	purchasedSlots: ObservableValue<number>;
-	slots: ObservableValue<AsObservable<Slot>[]>;
-};
-
-type Slot = {
+export type PlayerDataSlot = {
 	readonly updated: Signal<() => void>;
+	readonly blocks: number;
 	name: string;
 	color: Color3;
-	readonly blocks: number;
 };
-type PlayerData = {
+export type PlayerData = {
 	purchasedSlots: number;
-	slots: Slot[];
+	slots: readonly PlayerDataSlot[];
 };
 
 export type SavePopupDefinition = GuiObject & {
@@ -216,6 +216,37 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 		});
 
 		this.event.subscribe(this.gui.Body.Body.CancelButton.Activated, () => this.hide());
+	}
+
+	public async show() {
+		const data = await Remotes.Client.GetNamespace("Slots").Get("Fetch").CallServerAsync();
+
+		const slots: PlayerDataSlot[] = [];
+		const maxslots = GameDefinitions.FREE_SLOTS + data.purchasedSlots;
+		for (let i = 0; i < maxslots; i++) {
+			const slot = data.slots.find((s) => s.index === i);
+			if (slot) {
+				slots.push({
+					...slot,
+					updated: new Signal<() => void>(),
+					color: Serializer.Color3Serializer.deserialize(slot.color),
+				});
+			} else {
+				slots.push({
+					updated: new Signal<() => void>(),
+					color: new Color3(1, 1, 1),
+					name: "Slot " + (i + 1),
+					blocks: 0,
+				});
+			}
+		}
+
+		this.data.set({
+			...data,
+			slots,
+		});
+
+		super.show();
 	}
 
 	private async save(index: number, save: boolean) {
