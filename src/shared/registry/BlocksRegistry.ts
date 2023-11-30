@@ -11,6 +11,10 @@ import BlockCornerWedge3x1 from "./blocks/BlockCornerWedge3x1";
 import BlockCornerWedge4x1 from "./blocks/BlockCornerWedge4x1";
 import DisconnectBlock from "./blocks/DisconnectBlock";
 import VehicleSeatBlock from "./blocks/VehicleSeatBlock";
+import Wing1x1 from "./blocks/Wing1x1";
+import Wing1x2 from "./blocks/Wing1x2";
+import Wing1x3 from "./blocks/Wing1x3";
+import Wing1x4 from "./blocks/Wing1x4";
 
 export default class BlockRegistry {
 	public static Blocks: Map<string, AbstractBlock> = new Map<string, AbstractBlock>();
@@ -30,6 +34,12 @@ export default class BlockRegistry {
 	public static readonly BLOCK_CORNERWEDGE2x1 = this.registerBlock(new BlockCornerWedge2x1());
 	public static readonly BLOCK_CORNERWEDGE3x1 = this.registerBlock(new BlockCornerWedge3x1());
 	public static readonly BLOCK_CORNERWEDGE4x1 = this.registerBlock(new BlockCornerWedge4x1());
+
+	// Wings
+	public static readonly WING1x1 = this.registerBlock(new Wing1x1());
+	public static readonly WING1x2 = this.registerBlock(new Wing1x2());
+	public static readonly WING1x3 = this.registerBlock(new Wing1x3());
+	public static readonly WING1x4 = this.registerBlock(new Wing1x4());
 
 	// test
 	public static readonly DISCONNECT_BLOCK = this.registerBlock(new DisconnectBlock());

@@ -1,3 +1,4 @@
+import BuildingWelder from "server/BuildingWelder";
 import ServerPlots from "server/plots/ServerPlots";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
@@ -34,11 +35,7 @@ export default class DeleteEvent {
 			};
 		}
 
-		// Terminate welds (perfomance issue)
-		const welds = data.block.PrimaryPart!.GetJoints();
-		welds.forEach((element) => {
-			element.Destroy();
-		});
+		BuildingWelder.unweld(data.block);
 
 		// Terminate block
 		data.block.Destroy();

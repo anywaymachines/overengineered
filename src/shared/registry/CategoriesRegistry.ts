@@ -1,6 +1,7 @@
 import AbstractCategory from "./abstract/AbstractCategory";
 import BlocksCategory from "./categories/BlocksCategory";
 import SeatsCategory from "./categories/SeatsCategory";
+import WingsCategory from "./categories/WingsCategory";
 
 export default class CategoriesRegistry {
 	public static categories: Map<string, AbstractCategory> = new Map<string, AbstractCategory>();
@@ -8,6 +9,7 @@ export default class CategoriesRegistry {
 
 	public static readonly BLOCKS_CATEGORY = this.register(new BlocksCategory());
 	public static readonly SEATS_CATEGORY = this.register(new SeatsCategory());
+	public static readonly WINGS_CATEGORY = this.register(new WingsCategory());
 
 	public static register(category: AbstractCategory): AbstractCategory {
 		this.categories.set(category.id, category);

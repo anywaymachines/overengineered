@@ -3,6 +3,7 @@ import BlockRegistry from "shared/registry/BlocksRegistry";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 import DisconnectBlockLogic from "./logic/DisconnectBlockLogic";
+import WingLogic from "./logic/WingLogic";
 
 export type AnyBlockLogic = { new (block: Model): BlockLogic };
 export default class LogicRegistry {
@@ -11,6 +12,12 @@ export default class LogicRegistry {
 	public static initialize() {
 		this.attachLogic(BlockRegistry.VEHICLE_SEAT, VehicleSeatBlockLogic);
 		this.attachLogic(BlockRegistry.DISCONNECT_BLOCK, DisconnectBlockLogic);
+
+		// Wings
+		this.attachLogic(BlockRegistry.WING1x1, WingLogic);
+		this.attachLogic(BlockRegistry.WING1x2, WingLogic);
+		this.attachLogic(BlockRegistry.WING1x3, WingLogic);
+		this.attachLogic(BlockRegistry.WING1x4, WingLogic);
 	}
 
 	private static attachLogic(block: AbstractBlock, logic: AnyBlockLogic): void {

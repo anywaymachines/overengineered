@@ -79,6 +79,9 @@ export default class BuildTool extends ToolBase {
 		this.previewBlock = this.selectedBlock.getModel().Clone();
 		this.previewBlock.Parent = Workspace;
 
+		// Reset rotation
+		this.previewBlockRotation = new CFrame();
+
 		// Customizing
 		this.addAxisModel();
 		this.addHighlight();
@@ -361,6 +364,9 @@ export default class BuildTool extends ToolBase {
 	deactivate(): void {
 		super.deactivate();
 		this.previewBlock?.Destroy();
+
+		// Reset rotation
+		this.previewBlockRotation = new CFrame();
 	}
 
 	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
