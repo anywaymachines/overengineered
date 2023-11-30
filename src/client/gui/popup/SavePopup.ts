@@ -75,7 +75,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 				this.slots.add(item);
 			});
 
-			const add = new Control(this.buyNewTemplate());
+			/*const add = new Control(this.buyNewTemplate());
 			add.getGui().Activated.Connect(() => {
 				const slotcount = this.slots.getChildren().size();
 
@@ -83,7 +83,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 					return;
 				}
 			});
-			this.add(add);
+			this.add(add);*/
 		});
 	}
 }
@@ -135,7 +135,7 @@ class SavePreview extends Control<SavePreviewDefinition> {
 
 		blocks.subscribe((value) => {
 			this.gui.HeadingLabel.Text = `Blocks: ${value}`;
-		});
+		}, true);
 
 		this.slot.subscribe((slot) => (this.gui.Visible = slot !== undefined), true);
 	}
@@ -264,8 +264,8 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 				save,
 			});
 
-		if (response.blockCount !== undefined) {
-			this.preview.slot.get()!.blocks = response.blockCount;
+		if (response.blocks !== undefined) {
+			this.preview.slot.get()!.blocks = response.blocks;
 			this.preview.slot.set(this.preview.slot.get(), true);
 		}
 	}
