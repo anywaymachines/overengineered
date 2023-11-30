@@ -18,7 +18,7 @@ export default class Objects {
 	}
 
 	public static entries<T extends object>(object: T) {
-		const result: [keyof T, Exclude<T[keyof T], undefined>][] = [];
+		const result: (readonly [keyof T, Exclude<T[keyof T], undefined>])[] = [];
 		for (const [key, value] of pairs(object)) {
 			result.push([key as keyof T, value as Exclude<T[keyof T], undefined>]);
 		}

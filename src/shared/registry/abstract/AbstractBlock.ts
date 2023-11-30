@@ -1,5 +1,4 @@
 import AbstractCategory from "./AbstractCategory";
-import BlockLogic from "./BlockLogic";
 
 export default abstract class AbstractBlock {
 	public readonly id: string;
@@ -19,11 +18,6 @@ export default abstract class AbstractBlock {
 
 	/** Must return the **category* */
 	public abstract getCategory(): AbstractCategory | undefined;
-
-	/** Returns block's logic */
-	public getScript(): BlockLogic | undefined {
-		return undefined;
-	}
 
 	public getLimit(): number {
 		return 500;

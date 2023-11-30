@@ -1,5 +1,6 @@
 import { SlotsDatabase } from "server/SlotsDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
+import ServerPlots from "server/plots/ServerPlots";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import SharedPlots from "shared/building/SharedPlots";
@@ -18,6 +19,7 @@ export default class LoadSlotEvent {
 			}
 
 			const plot = SharedPlots.getPlotByOwnerID(player.UserId);
+			ServerPlots.clearAllBlocks(plot);
 			BlocksSerializer.deserialize(plot, blocks);
 
 			return { success: true };

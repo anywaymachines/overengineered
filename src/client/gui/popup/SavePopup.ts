@@ -2,7 +2,7 @@ import Control from "client/base/Control";
 import Popup from "client/base/Popup";
 import { ListControl } from "../controls/ListControl";
 import Serializer from "shared/Serializer";
-import ObservableValue, { AsObservable } from "shared/event/ObservableValue";
+import ObservableValue, { AsObservable, ReadonlyObservableValue } from "shared/event/ObservableValue";
 import Remotes from "shared/Remotes";
 import GuiController from "client/controller/GuiController";
 import TextBoxControl from "../controls/TextBoxControl";
@@ -103,27 +103,25 @@ class SavePreview extends Control<SavePreviewDefinition> {
 
 	public readonly slot = new ObservableValue<PlayerData["slots"][number] | undefined>(undefined);
 
-	public readonly color;
-	public readonly name;
-
 	constructor(gui: SavePreviewDefinition) {
 		super(gui);
 
-		this.color = this.slot.createChild("color", new Color3(1, 1, 1));
-		this.name = this.slot.createChild("name", "Save slot");
+		const color = this.slot.createChild("color", new Color3(1, 1, 1));
+		const name = this.slot.createChild("name", "Save slot");
+		const blocks = this.slot.createChild("blocks", 0) as ReadonlyObservableValue<number>;
 
 		this.onSave = this.gui.SaveButton.Activated;
 		this.onLoad = this.gui.LoadButton.Activated;
 
 		const textbox = new TextBoxControl(this.gui.TextBox);
 		this.add(textbox, false);
-		textbox.text.bindTo(this.name);
+		textbox.text.bindTo(name);
 
 		for (const child of this.gui.ColorButtons.GetChildren()) {
 			if (!child.IsA("GuiButton")) continue;
 
 			child.Activated.Connect(() => {
-				this.color.set(child.BackgroundColor3);
+				color.set(child.BackgroundColor3);
 				this.slot.get()?.updated.Fire();
 			});
 		}
@@ -131,20 +129,21 @@ class SavePreview extends Control<SavePreviewDefinition> {
 			this.slot.get()?.updated.Fire();
 		});
 
-		this.color.subscribe((value) => {
+		color.subscribe((value) => {
 			this.gui.ImageButton.ImageColor3 = value;
 		});
 
-		this.slot.subscribe((slot) => {
-			this.gui.Visible = slot !== undefined;
-			this.gui.HeadingLabel.Text = `Blocks: ${slot?.blocks}`;
-		}, true);
+		blocks.subscribe((value) => {
+			this.gui.HeadingLabel.Text = `Blocks: ${value}`;
+		});
+
+		this.slot.subscribe((slot) => (this.gui.Visible = slot !== undefined), true);
 	}
 }
 
 export type PlayerDataSlot = {
 	readonly updated: Signal<() => void>;
-	readonly blocks: number;
+	blocks: number;
 	name: string;
 	color: Color3;
 };
@@ -218,7 +217,7 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 		this.event.subscribe(this.gui.Body.Body.CancelButton.Activated, () => this.hide());
 	}
 
-	public async show() {
+	private async loadData() {
 		const data = await Remotes.Client.GetNamespace("Slots").Get("Fetch").CallServerAsync();
 
 		const slots: PlayerDataSlot[] = [];
@@ -245,7 +244,10 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 			...data,
 			slots,
 		});
+	}
 
+	public async show() {
+		if (!this.data.get()) await this.loadData();
 		super.show();
 	}
 
@@ -253,8 +255,7 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 		const data = this.data.get();
 		if (!data) return;
 
-		print("save " + index);
-		await Remotes.Client.GetNamespace("Slots")
+		const response = await Remotes.Client.GetNamespace("Slots")
 			.Get("Save")
 			.CallServerAsync({
 				index,
@@ -262,9 +263,14 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 				name: data.slots[index].name,
 				save,
 			});
+
+		if (response.blockCount !== undefined) {
+			this.preview.slot.get()!.blocks = response.blockCount;
+			this.preview.slot.set(this.preview.slot.get(), true);
+		}
 	}
 
 	private async load(index: number) {
-		print("loasd " + index);
+		await Remotes.Client.GetNamespace("Slots").Get("Load").CallServerAsync(index);
 	}
 }

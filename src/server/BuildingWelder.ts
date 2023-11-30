@@ -23,12 +23,12 @@ export default class BuildingWelder {
 	private static getVectors(model: Model): Vector3[] {
 		const size = model.GetExtentsSize();
 		return [
-			new Vector3(0, size.Y, 0),
-			new Vector3(0, 0, size.Z),
-			new Vector3(size.X, 0, 0),
-			new Vector3(0, -size.Y, 0),
-			new Vector3(0, 0, -size.Z),
-			new Vector3(-size.X, 0, 0),
+			new Vector3(0, size.Y * 0.1, 0),
+			new Vector3(0, 0, size.Z * 0.1),
+			new Vector3(size.X * 0.1, 0, 0),
+			new Vector3(0, -size.Y * 0.1, 0),
+			new Vector3(0, 0, -size.Z * 0.1),
+			new Vector3(-size.X * 0.1, 0, 0),
 		];
 	}
 

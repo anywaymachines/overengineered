@@ -19,13 +19,16 @@ export default class SaveSlotEvent {
 			});
 			SlotsDatabase.instance.setMeta(player.UserId, meta);
 
+			let blocksCount: number | undefined = undefined;
 			if (data.save) {
 				const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 				const blocks = BlocksSerializer.serialize(plot);
 				SlotsDatabase.instance.setBlocks(player.UserId, data.index, blocks);
+
+				blocksCount = blocks.size();
 			}
 
-			return { success: true };
+			return { success: true, blocks: blocksCount };
 		});
 	}
 }

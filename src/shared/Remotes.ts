@@ -17,7 +17,7 @@ const Remotes = Net.Definitions.Create({
 		Load: Net.Definitions.ServerAsyncFunction<(index: number) => Response>([
 			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 8 }),
 		]),
-		Save: Net.Definitions.ServerAsyncFunction<(data: PlayerSaveSlotRequest) => Response>([
+		Save: Net.Definitions.ServerAsyncFunction<(data: PlayerSaveSlotRequest) => Response & { blockCount?: number }>([
 			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 60 }),
 		]),
 	}),
