@@ -52,7 +52,7 @@ export default class BuildingWrapper {
 		});
 
 		// Weld block
-		BuildingWelder.makeJoints(model);
+		BuildingWelder.weld(model);
 
 		return { success: true, model: model };
 	}

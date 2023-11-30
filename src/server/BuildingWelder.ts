@@ -71,4 +71,11 @@ export default class BuildingWelder {
 			weld.Name = "AutoWeldConstraint";
 		}
 	}
+
+	static weld(model: Model) {
+		const closestParts = this.getClosestParts(model);
+		closestParts.forEach((element) => {
+			this.makeJoints(element.Parent as Model);
+		});
+	}
 }
