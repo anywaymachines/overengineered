@@ -18,7 +18,6 @@ export default class Main extends Control<MainDefinition> {
 	public static readonly instance = new Main(GuiController.getGameUI<MainDefinition>());
 
 	private readonly scenes: Readonly<Record<PlayModes, Control>>;
-	private activeMode?: PlayModes;
 
 	constructor(gui: MainDefinition) {
 		super(gui);
@@ -39,30 +38,28 @@ export default class Main extends Control<MainDefinition> {
 		this.event.subscribe(Popup.onAnyShow, () => {
 			controls.Disable();
 
-			if (this.activeMode) {
-				this.scenes[this.activeMode].hide();
-			}
+			const active = PlayModeController.instance.playmode.get();
+			if (active) this.scenes[active].hide();
 		});
 		this.event.subscribe(Popup.onAnyHide, () => {
 			controls.Enable();
 
-			if (this.activeMode) {
-				this.scenes[this.activeMode].show();
-			}
+			const active = PlayModeController.instance.playmode.get();
+			if (active) this.scenes[active].show();
 		});
 
-		this.event.subscribeObservable(PlayModeController.instance.playmode, (mode) => this.setMode(mode), true);
-		this.event.subscribe(Signals.PLAYER.DIED, () => this.setMode(undefined));
+		this.event.subscribeObservable(
+			PlayModeController.instance.playmode,
+			(mode, prev) => this.setMode(mode, prev),
+			true,
+		);
+		this.event.subscribe(Signals.PLAYER.DIED, () =>
+			this.setMode(undefined, PlayModeController.instance.playmode.get()),
+		);
 	}
 
-	private async setMode(mode: PlayModes | undefined) {
-		if (this.activeMode) {
-			this.scenes[this.activeMode].hide();
-		}
-
-		this.activeMode = mode;
-		if (mode) {
-			this.scenes[mode].show();
-		}
+	private async setMode(mode: PlayModes | undefined, prev: PlayModes | undefined) {
+		if (prev) this.scenes[prev].hide();
+		if (mode) this.scenes[mode].show();
 	}
 }

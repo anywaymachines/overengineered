@@ -30,7 +30,6 @@ export default class BuildEvent {
 		const placedBlocks = SharedPlots.getPlotBlocks(plot)
 			.GetChildren()
 			.filter((placed_block) => {
-				print(placed_block.GetAttribute("id") + " " + data.block);
 				return placed_block.GetAttribute("id") === data.block;
 			})
 			.size();
