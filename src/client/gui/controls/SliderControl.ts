@@ -11,17 +11,19 @@ export type SliderControlDefinition = GuiObject & {
 	Filled?: GuiObject;
 	Text?: TextLabel;
 	TextBox?: TextBox;
-	Knob: GuiObject;
+	Knob?: GuiObject;
 };
 
 /** Control that represents a number via a slider. */
 export default class SliderControl<T extends SliderControlDefinition = SliderControlDefinition> extends Control<T> {
 	public readonly submitted = new Signal<(value: number) => void>();
 	public readonly value;
+	private readonly vertical;
 
 	constructor(gui: T, min: number, max: number, step: number) {
 		super(gui);
 		this.value = new NumberObservableValue(min, min, max, step);
+		this.vertical = this.getAttribute<boolean>("SliderVertical") === true;
 
 		this.subscribeVisual();
 		this.subscribeMovement();
@@ -39,17 +41,20 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 			this.value.subscribe((value) => (text.Text = tostring(value)), true);
 		}
 
-		Animation.value(
-			this.event,
-			this.gui.Knob,
-			this.value,
-			(value) => {
-				return {
-					Position: new UDim2(value / this.value.getRange(), 0, 0.5, 0),
-				};
-			},
-			new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		);
+		if (Control.exists(this.gui, "Knob")) {
+			Animation.value(
+				this.event,
+				this.gui.Knob as GuiObject,
+				this.value,
+				(value) => {
+					const pos = value / this.value.getRange();
+					return {
+						Position: new UDim2(this.vertical ? 0.5 : pos, 0, this.vertical ? pos : 0.5, 0),
+					};
+				},
+				new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			);
+		}
 
 		if (Control.exists(this.gui, "Filled")) {
 			Animation.value(
@@ -57,8 +62,9 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 				this.gui.Filled as GuiObject,
 				this.value,
 				(value) => {
+					const pos = value / this.value.getRange();
 					return {
-						Size: new UDim2(value / this.value.getRange(), 0, 1, 0),
+						Size: new UDim2(this.vertical ? 1 : pos, 0, this.vertical ? pos : 1, 0),
 					};
 				},
 				new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
@@ -81,8 +87,17 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 		const moveMouse = () => {
 			if (startpos === undefined) return;
 
-			const x = Players.LocalPlayer.GetMouse().X;
-			this.value.set(((x - startpos) / this.gui.AbsoluteSize.X) * this.value.getRange() + this.value.step / 2);
+			if (this.vertical) {
+				const y = this.gui.AbsoluteSize.Y - Players.LocalPlayer.GetMouse().Y;
+				this.value.set(
+					((y - startpos) / this.gui.AbsoluteSize.Y) * this.value.getRange() + this.value.step / 2,
+				);
+			} else {
+				const x = Players.LocalPlayer.GetMouse().X;
+				this.value.set(
+					((x - startpos) / this.gui.AbsoluteSize.X) * this.value.getRange() + this.value.step / 2,
+				);
+			}
 		};
 
 		let st = false;
@@ -100,47 +115,65 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 					(input.UserInputType === Enum.UserInputType.MouseButton1 ||
 						input.UserInputType === Enum.UserInputType.Touch)
 				) {
-					startpos = this.gui.AbsolutePosition.X;
+					startpos = this.vertical
+						? this.gui.AbsoluteSize.Y - this.gui.AbsolutePosition.Y + this.gui.AbsoluteSize.Y
+						: this.gui.AbsolutePosition.X;
 					moveMouse();
 					eh.subscribe(Players.LocalPlayer.GetMouse().Move, () => moveMouse());
 				}
 			});
 		};
 
-		this.gui.Knob.SelectionGroup = true;
-		this.gui.Knob.SelectionBehaviorLeft = Enum.SelectionBehavior.Stop;
-		this.gui.Knob.SelectionBehaviorRight = Enum.SelectionBehavior.Stop;
+		if (Control.exists(this.gui, "Knob")) {
+			this.gui.Knob.SelectionGroup = true;
+			this.gui.Knob.SelectionBehaviorLeft = Enum.SelectionBehavior.Stop;
+			this.gui.Knob.SelectionBehaviorRight = Enum.SelectionBehavior.Stop;
+		}
 
 		const moveGamepad = (posx: boolean) => {
 			this.value.set(this.value.get() + (posx ? this.value.step : -this.value.step));
 		};
 
-		this.event.subscribe(this.gui.Knob.SelectionGained, () => {
-			eh.subscribe(UserInputService.InputBegan, (input) => {
-				if (!st) return;
+		if (Control.exists(this.gui, "Knob")) {
+			this.event.subscribe(this.gui.Knob.SelectionGained, () => {
+				eh.subscribe(UserInputService.InputBegan, (input) => {
+					if (!st) return;
 
-				if (input.UserInputType === Enum.UserInputType.Gamepad1) {
-					if (input.KeyCode === Enum.KeyCode.DPadRight) moveGamepad(true);
-					else if (input.KeyCode === Enum.KeyCode.DPadLeft) moveGamepad(false);
-				}
+					if (input.UserInputType === Enum.UserInputType.Gamepad1) {
+						if (this.vertical) {
+							if (input.KeyCode === Enum.KeyCode.DPadUp) moveGamepad(true);
+							else if (input.KeyCode === Enum.KeyCode.DPadDown) moveGamepad(false);
+						} else {
+							if (input.KeyCode === Enum.KeyCode.DPadRight) moveGamepad(true);
+							else if (input.KeyCode === Enum.KeyCode.DPadLeft) moveGamepad(false);
+						}
+					}
+				});
+				eh.subscribe(UserInputService.InputChanged, (input) => {
+					if (!st) return;
+
+					if (this.vertical) {
+						if (input.UserInputType === Enum.UserInputType.Gamepad1 && input.Position.X !== 0) {
+							moveGamepad(input.Position.X > 0);
+						}
+					} else {
+						if (input.UserInputType === Enum.UserInputType.Gamepad1 && input.Position.Y !== 0) {
+							moveGamepad(input.Position.Y > 0);
+						}
+					}
+				});
+
+				st = true;
 			});
-			eh.subscribe(UserInputService.InputChanged, (input) => {
-				if (!st) return;
 
-				if (input.UserInputType === Enum.UserInputType.Gamepad1 && input.Position.X !== 0) {
-					moveGamepad(input.Position.X > 0);
-				}
-			});
-
-			st = true;
-		});
-		this.event.subscribe(this.gui.Knob.SelectionLost, unsub);
+			this.event.subscribe(this.gui.Knob.SelectionLost, unsub);
+			sub(this.gui.Knob.InputBegan);
+		}
 
 		if (Control.exists(this.gui, "Filled")) {
 			sub(this.gui.Filled.InputBegan);
 		}
 
-		sub(this.gui.Knob.InputBegan);
 		sub(this.gui.InputBegan);
 	}
 }
