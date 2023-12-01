@@ -66,4 +66,43 @@ export default class VectorUtils {
 		// If all corners are in the second region, return true
 		return true;
 	}
+
+	static getModelRegion(model: Model) {
+		let minVector = new Vector3(math.huge, math.huge, math.huge);
+		let maxVector = new Vector3(-math.huge, -math.huge, -math.huge);
+
+		for (const part of model.GetDescendants()) {
+			if (part.IsA("BasePart")) {
+				const partCFrame = part.CFrame;
+				const partSize = part.Size;
+
+				const partCorners = [
+					partCFrame.mul(new Vector3(partSize.X / 2, partSize.Y / 2, partSize.Z / 2)),
+					partCFrame.mul(new Vector3(partSize.X / 2, partSize.Y / 2, -partSize.Z / 2)),
+					partCFrame.mul(new Vector3(partSize.X / 2, -partSize.Y / 2, partSize.Z / 2)),
+					partCFrame.mul(new Vector3(partSize.X / 2, -partSize.Y / 2, -partSize.Z / 2)),
+					partCFrame.mul(new Vector3(-partSize.X / 2, partSize.Y / 2, partSize.Z / 2)),
+					partCFrame.mul(new Vector3(-partSize.X / 2, partSize.Y / 2, -partSize.Z / 2)),
+					partCFrame.mul(new Vector3(-partSize.X / 2, -partSize.Y / 2, partSize.Z / 2)),
+					partCFrame.mul(new Vector3(-partSize.X / 2, -partSize.Y / 2, -partSize.Z / 2)),
+				];
+
+				for (const corner of partCorners) {
+					minVector = new Vector3(
+						math.min(minVector.X, corner.X),
+						math.min(minVector.Y, corner.Y),
+						math.min(minVector.Z, corner.Z),
+					);
+
+					maxVector = new Vector3(
+						math.max(maxVector.X, corner.X),
+						math.max(maxVector.Y, corner.Y),
+						math.max(maxVector.Z, corner.Z),
+					);
+				}
+			}
+		}
+
+		return new Region3(minVector, maxVector);
+	}
 }
