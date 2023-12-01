@@ -1,6 +1,7 @@
 import { HttpService } from "@rbxts/services";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
+import Objects from "./Objects";
 
 export default class ConfigManager {
 	static loadDefaultConfigs(model: Model, inputType: InputType): void {
@@ -14,7 +15,7 @@ export default class ConfigManager {
 			const def = block.getConfigDefinitions();
 			const configData: Record<string, ConfigDefinition["default"][InputType]> = {};
 
-			def.forEach((element) => {
+			Objects.values(def).forEach((element) => {
 				configData[element.id] =
 					inputType === "Gamepad" && element.default.Gamepad !== undefined
 						? element.default.Gamepad

@@ -10,6 +10,7 @@ import Remotes from "shared/Remotes";
 import Signals from "client/event/Signals";
 import ObservableValue from "shared/event/ObservableValue";
 import KeyChooserControl, { KeyChooserControlDefinition } from "../controls/KeyChooserControl";
+import Objects from "shared/Objects";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	HeadingLabel: TextLabel;
@@ -116,7 +117,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				.CallServerAsync({ block: item, data: { key, value } });
 		};
 
-		for (const def of defs) {
+		for (const def of Objects.values(defs)) {
 			if (def.type === "Bool") {
 				const control = new ConfigPartControl(
 					this.checkboxTemplate(),

@@ -24,9 +24,9 @@ export default class DisconnectBlock extends AbstractBlock implements Configurab
 		return CategoriesRegistry.BLOCKS_CATEGORY;
 	}
 
-	getConfigDefinitions(): ConfigDefinition[] {
-		return [
-			{
+	getConfigDefinitions() {
+		return {
+			disconnect: {
 				id: "disconnect",
 				displayName: "Disconnect key",
 				type: "Key",
@@ -35,7 +35,7 @@ export default class DisconnectBlock extends AbstractBlock implements Configurab
 					Gamepad: Enum.KeyCode.ButtonR2,
 				},
 			},
-			{
+			test1: {
 				id: "test1",
 				displayName: "Test 1",
 				type: "Number",
@@ -47,7 +47,7 @@ export default class DisconnectBlock extends AbstractBlock implements Configurab
 				max: 10,
 				step: 1,
 			},
-			{
+			test2: {
 				id: "test2",
 				displayName: "Test 2",
 				type: "Bool",
@@ -56,6 +56,6 @@ export default class DisconnectBlock extends AbstractBlock implements Configurab
 					Gamepad: true,
 				},
 			},
-		];
+		} satisfies Record<string, ConfigDefinition>;
 	}
 }

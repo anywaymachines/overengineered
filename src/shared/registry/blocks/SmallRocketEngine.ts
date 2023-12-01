@@ -20,9 +20,9 @@ export default class SmallRocketEngineBlock extends AbstractBlock implements Con
 		return CategoriesRegistry.ENGINES_CATEGORY;
 	}
 
-	getConfigDefinitions(): ConfigDefinition[] {
-		return [
-			{
+	getConfigDefinitions() {
+		return {
+			thrust_add: {
 				id: "thrust_add",
 				displayName: "Thrust +",
 				type: "Key",
@@ -31,7 +31,7 @@ export default class SmallRocketEngineBlock extends AbstractBlock implements Con
 					Gamepad: Enum.KeyCode.ButtonR2,
 				},
 			},
-			{
+			thrust_sub: {
 				id: "thrust_sub",
 				displayName: "Thrust -",
 				type: "Key",
@@ -40,7 +40,7 @@ export default class SmallRocketEngineBlock extends AbstractBlock implements Con
 					Gamepad: Enum.KeyCode.ButtonL2,
 				},
 			},
-			{
+			switchmode: {
 				id: "switchmode",
 				displayName: "Switch Mode",
 				type: "Bool",
@@ -49,6 +49,6 @@ export default class SmallRocketEngineBlock extends AbstractBlock implements Con
 					Gamepad: false,
 				},
 			},
-		];
+		} satisfies Record<string, ConfigDefinition>;
 	}
 }
