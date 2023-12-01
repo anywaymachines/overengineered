@@ -1,7 +1,6 @@
 import ServerPlots from "./plots/ServerPlots";
 import BuildEvent from "./network/event/BuildEvent";
 import DeleteEvent from "./network/event/DeleteEvent";
-import RideStartEvent from "./network/event/RideStartEvent";
 import MoveEvent from "./network/event/MoveEvent";
 import ConfigEvent from "./network/event/ConfigEvent";
 import PlayerCache from "./PlayerCache";
@@ -9,7 +8,7 @@ import SaveSlotEvent from "./network/event/SaveSlotEvent";
 import FetchSlotsEvent from "./network/event/FetchSlotsEvent";
 import BlocksLogic from "./blocks/BlocksLogic";
 import LoadSlotEvent from "./network/event/LoadSlotEvent";
-import RideStopEvent from "./network/event/RideStopEvent";
+import SetPlayModeEvent from "./network/event/SetPlayModeEvent";
 
 // Plots
 ServerPlots.initialize();
@@ -18,8 +17,7 @@ ServerPlots.initialize();
 BuildEvent.initialize();
 MoveEvent.initialize();
 DeleteEvent.initialize();
-RideStartEvent.initialize();
-RideStopEvent.initialize();
+SetPlayModeEvent.initialize();
 SaveSlotEvent.initialize();
 LoadSlotEvent.initialize();
 ConfigEvent.initialize();

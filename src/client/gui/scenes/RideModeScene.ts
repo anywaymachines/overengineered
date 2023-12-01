@@ -1,6 +1,5 @@
 import Control from "client/base/Control";
-import Signals from "client/event/Signals";
-import Remotes from "shared/Remotes";
+import PlayModeController from "client/controller/PlayModeController";
 
 export type ActionBarControlDefinition = GuiObject & {
 	Stop: GuiButton;
@@ -10,13 +9,7 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 		super(gui);
 
 		this.event.subscribe(this.gui.Stop.Activated, async () => {
-			const response = await Remotes.Client.GetNamespace("Ride").Get("RideStopRequest").CallServerAsync();
-			if (!response.success) {
-				print(response.message);
-				return;
-			}
-
-			Signals.PLAY_MODE.set("build");
+			await PlayModeController.instance.requestMode("build");
 		});
 	}
 }

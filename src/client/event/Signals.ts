@@ -4,8 +4,6 @@ import { Workspace } from "@rbxts/services";
 import ObservableValue from "shared/event/ObservableValue";
 import InputController from "client/controller/InputController";
 
-export type PlayModes = "build" | "ride";
-
 /** Class for working with local networking signals */
 export default class Signals {
 	public static readonly CAMERA = {
@@ -14,7 +12,6 @@ export default class Signals {
 
 	public static readonly INPUT_TYPE_CHANGED_EVENT = new Signal<(platform: InputType) => void>();
 	public static readonly INPUT_TYPE = new ObservableValue<InputType>(InputController.getPhysicalInputType());
-	public static readonly PLAY_MODE = new ObservableValue<PlayModes>("build");
 
 	public static readonly PLAYER = {
 		SPAWN: new Signal<() => void>(),

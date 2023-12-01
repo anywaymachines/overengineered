@@ -1,11 +1,11 @@
-import Remotes from "shared/Remotes";
 import Control from "./base/Control";
 import Popup from "./base/Popup";
 import GuiController from "./controller/GuiController";
 import PlayerController from "./controller/PlayerController";
-import Signals, { PlayModes } from "./event/Signals";
+import Signals from "./event/Signals";
 import BuildingModeScene, { BuildingModeSceneDefinition } from "./gui/scenes/BuildingModeScene";
 import RideModeScene, { RideModeSceneDefinition } from "./gui/scenes/RideModeScene";
+import PlayModeController from "./controller/PlayModeController";
 
 export type MainDefinition = Instance & {
 	Popup: Folder & {};
@@ -13,6 +13,7 @@ export type MainDefinition = Instance & {
 	RideMode: RideModeSceneDefinition;
 };
 
+/** Control that controls playmode scenes */
 export default class Main extends Control<MainDefinition> {
 	public static readonly instance = new Main(GuiController.getGameUI<MainDefinition>());
 
@@ -31,7 +32,7 @@ export default class Main extends Control<MainDefinition> {
 
 		this.scenes = {
 			build: buildingMode,
-			ride: rideMode!,
+			ride: rideMode,
 		};
 
 		const controls = PlayerController.getPlayerModule().GetControls();
@@ -50,33 +51,18 @@ export default class Main extends Control<MainDefinition> {
 			}
 		});
 
-		this.event.subscribeObservable(Signals.PLAY_MODE, (mode) => this.setMode(mode), true);
-		Signals.PLAYER.DIED.Connect(() => this.setMode(undefined));
-		Signals.PLAYER.SPAWN.Connect(() => this.setMode("build"));
+		this.event.subscribeObservable(PlayModeController.instance.playmode, (mode) => this.setMode(mode), true);
+		this.event.subscribe(Signals.PLAYER.DIED, () => this.setMode(undefined));
 	}
 
 	private async setMode(mode: PlayModes | undefined) {
-		if (this.activeMode === mode) return;
-
 		if (this.activeMode) {
 			this.scenes[this.activeMode].hide();
-
-			if (this.activeMode === "ride") {
-				const response = await Remotes.Client.GetNamespace("Ride").Get("RideStopRequest").CallServerAsync();
-				if (!response.success) {
-					print(response.message);
-					return;
-				}
-			} else if (this.activeMode === "build") {
-				const response = await Remotes.Client.GetNamespace("Ride").Get("RideStartRequest").CallServerAsync();
-				if (!response.success) {
-					print(response.message);
-					return;
-				}
-			}
 		}
 
 		this.activeMode = mode;
-		if (mode) this.scenes[mode].show();
+		if (mode) {
+			this.scenes[mode].show();
+		}
 	}
 }

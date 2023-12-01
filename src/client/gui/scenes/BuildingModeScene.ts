@@ -5,13 +5,9 @@ import BuildToolScene, { BuildToolSceneDefinition } from "./BuildToolScene";
 import DeleteToolScene, { DeleteToolSceneDefinition } from "./DeleteToolScene";
 import ConfigToolScene, { ConfigToolSceneDefinition } from "./ConfigToolScene";
 import ToolbarControl, { ToolbarControlDefinition } from "./ToolbarControl";
-import Signals from "client/event/Signals";
 import GuiAnimator from "../GuiAnimator";
-import Remotes from "shared/Remotes";
-import LogControl from "../static/LogControl";
-import SoundController from "client/controller/SoundController";
-import BlockLogicController from "client/controller/BlockLogicController";
 import SavePopup from "../popup/SavePopup";
+import PlayModeController from "client/controller/PlayModeController";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {
@@ -25,16 +21,7 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 		super(gui);
 
 		this.event.subscribe(this.gui.Buttons.Run.Activated, async () => {
-			const response = await Remotes.Client.GetNamespace("Ride").Get("RideStartRequest").CallServerAsync();
-
-			if (response.success) {
-				BlockLogicController.setupBlocks();
-				SoundController.getSounds().RideMode.RideStart.Play();
-				Signals.PLAY_MODE.set("ride");
-			} else {
-				LogControl.instance.addLine(response.message!, Color3.fromRGB(255, 100, 100));
-				SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
-			}
+			await PlayModeController.instance.requestMode("ride");
 		});
 
 		this.event.subscribe(this.gui.Buttons.Save.Activated, async () => {

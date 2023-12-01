@@ -22,12 +22,10 @@ const Remotes = Net.Definitions.Create({
 		]),
 	}),
 	Ride: Net.Definitions.Namespace({
-		RideStartRequest: Net.Definitions.ServerAsyncFunction<() => Response>([
-			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 2 }),
+		SetPlayMode: Net.Definitions.ServerAsyncFunction<(mode: PlayModes) => Response>([
+			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 30 }),
 		]),
-		RideStopRequest: Net.Definitions.ServerAsyncFunction<() => Response>([
-			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 2 }),
-		]),
+		SetPlayModeOnClient: Net.Definitions.ClientAsyncFunction<(mode: PlayModes | undefined) => Response>(),
 	}),
 	Blocks: Net.Definitions.Namespace({
 		DisconnectBlock: Net.Definitions.Namespace({
