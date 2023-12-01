@@ -137,7 +137,18 @@ class SavePreview extends Control<SavePreviewDefinition> {
 			this.gui.HeadingLabel.Text = `Blocks: ${value}`;
 		}, true);
 
-		this.slot.subscribe((slot) => (this.gui.Visible = slot !== undefined), true);
+		this.slot.subscribe((slot) => {
+			this.gui.Visible = slot !== undefined;
+
+			this.gui.TextBox.Interactable = slot?.locked !== true;
+			this.gui.ImageButton.Interactable = slot?.locked !== true;
+			this.gui.SaveButton.Interactable = slot?.locked !== true;
+			for (const child of this.gui.ColorButtons.GetChildren()) {
+				if (child.IsA("GuiButton")) {
+					child.Interactable = slot?.locked !== true;
+				}
+			}
+		}, true);
 	}
 }
 
@@ -146,6 +157,7 @@ export type PlayerDataSlot = {
 	blocks: number;
 	name: string;
 	color: Color3;
+	locked?: boolean;
 };
 export type PlayerData = {
 	purchasedSlots: number;
@@ -219,8 +231,19 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 
 	private async loadData() {
 		const data = await Remotes.Client.GetNamespace("Slots").Get("Fetch").CallServerAsync();
-
 		const slots: PlayerDataSlot[] = [];
+
+		const autosaveslot = data.slots.find((s) => s.index === -1);
+		if (autosaveslot) {
+			slots.push({
+				...autosaveslot,
+				updated: new Signal<() => void>(),
+				name: "Autosave",
+				color: new Color3(0, 1, 1),
+				locked: true,
+			});
+		}
+
 		const maxslots = GameDefinitions.FREE_SLOTS + data.purchasedSlots;
 		for (let i = 0; i < maxslots; i++) {
 			const slot = data.slots.find((s) => s.index === i);

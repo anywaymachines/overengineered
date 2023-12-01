@@ -1,7 +1,8 @@
 import { DataStoreService, HttpService, Players } from "@rbxts/services";
-import { SerializedBlock } from "./plots/BlocksSerializer";
+import BlocksSerializer, { SerializedBlock } from "./plots/BlocksSerializer";
 import Logger from "shared/Logger";
 import Objects from "shared/Objects";
+import SharedPlots from "shared/building/SharedPlots";
 
 export type SlotMeta = {
 	readonly index: number;
@@ -193,5 +194,28 @@ export class SlotsDatabase {
 		});
 
 		SlotsDatabase.instance.setMeta(userId, meta);
+	}
+
+	public setSlot(
+		userid: number,
+		index: number,
+		slot: (existing: SlotMeta | undefined) => SlotMeta,
+		saveBlocks: boolean,
+	) {
+		const meta = [...SlotsDatabase.instance.getMeta(userid)];
+
+		meta.push(slot(meta.find((s) => s.index === index)));
+		SlotsDatabase.instance.setMeta(userid, meta);
+
+		let blocksCount: number | undefined = undefined;
+		if (saveBlocks) {
+			const plot = SharedPlots.getPlotByOwnerID(userid);
+			const blocks = BlocksSerializer.serialize(plot);
+			SlotsDatabase.instance.setBlocks(userid, index, blocks);
+
+			blocksCount = blocks.size();
+		}
+
+		return blocksCount;
 	}
 }

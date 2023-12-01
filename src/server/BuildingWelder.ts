@@ -3,6 +3,7 @@ import { Visualize } from "@rbxts/visualize";
 
 export default class BuildingWelder {
 	static readonly points: Vector3[] = [];
+	static readonly lines: (readonly [Vector3, Vector3])[] = [];
 
 	static {
 		Visualize.configure({
@@ -14,13 +15,16 @@ export default class BuildingWelder {
 			for (const vector of this.points) {
 				Visualize.point(vector, Color3.fromRGB(0, 132, 0));
 			}
+			for (const [from, dir] of this.lines) {
+				Visualize.line(from, from.add(dir), Color3.fromRGB(255, 0, 0));
+			}
 		});
 	}
 
 	static getSides(part: BasePart): readonly (readonly [origin: Vector3, normal: Vector3])[] {
 		const get = (sides: readonly Enum.NormalId[]) => {
 			const ret: (readonly [origin: Vector3, normal: Vector3])[] = [];
-			const size = part.Size.mul(0.999);
+			const size = part.Size;
 
 			for (const side of sides) {
 				const diff = Vector3.FromNormalId(side);
@@ -28,12 +32,15 @@ export default class BuildingWelder {
 				const push = (x: number, y: number, z: number) => {
 					ret.push([
 						part.CFrame.PointToWorldSpace(new Vector3(x, y, z).sub(part.Size.div(2))),
-						part.CFrame.PointToWorldSpace(diff.mul(0.01)).sub(part.Position),
+						part.CFrame.PointToWorldSpace(diff.mul(1)).sub(part.Position),
+					] as const);
+					this.lines.push([
+						part.CFrame.PointToWorldSpace(new Vector3(x, y, z).sub(part.Size.div(2))),
+						part.CFrame.PointToWorldSpace(diff.mul(1)).sub(part.Position),
 					] as const);
 				};
 
-				print(size);
-
+				const offset = 0.1;
 				if (diff.X !== 0) {
 					const my = math.min(size.Y / 2, 1);
 					const mz = math.min(size.Z / 2, 1);
@@ -42,10 +49,10 @@ export default class BuildingWelder {
 						for (let z = mz; z < size.Z; z += 2) {
 							push(diff.X > 0 ? size.X : 0, y, z);
 
-							push(diff.X > 0 ? size.X : 0, y + my, z + mz);
-							push(diff.X > 0 ? size.X : 0, y + my, z - mz);
-							push(diff.X > 0 ? size.X : 0, y - my, z + mz);
-							push(diff.X > 0 ? size.X : 0, y - my, z - mz);
+							push(diff.X > 0 ? size.X - offset : offset, y + my * 0.9, z + mz * 0.9);
+							push(diff.X > 0 ? size.X - offset : offset, y + my * 0.9, z - mz * 0.9);
+							push(diff.X > 0 ? size.X - offset : offset, y - my * 0.9, z + mz * 0.9);
+							push(diff.X > 0 ? size.X - offset : offset, y - my * 0.9, z - mz * 0.9);
 						}
 					}
 				} else if (diff.Y !== 0) {
@@ -56,10 +63,10 @@ export default class BuildingWelder {
 						for (let z = mz; z < size.Z; z += 2) {
 							push(x, diff.Y > 0 ? size.Y : 0, z);
 
-							push(x + mx, diff.Y > 0 ? size.Y : 0, z + mz);
-							push(x + mx, diff.Y > 0 ? size.Y : 0, z - mz);
-							push(x - mx, diff.Y > 0 ? size.Y : 0, z + mz);
-							push(x - mx, diff.Y > 0 ? size.Y : 0, z - mz);
+							push(x + mx * 0.9, diff.Y > 0 ? size.Y - offset : offset, z + mz * 0.9);
+							push(x + mx * 0.9, diff.Y > 0 ? size.Y - offset : offset, z - mz * 0.9);
+							push(x - mx * 0.9, diff.Y > 0 ? size.Y - offset : offset, z + mz * 0.9);
+							push(x - mx * 0.9, diff.Y > 0 ? size.Y - offset : offset, z - mz * 0.9);
 						}
 					}
 				} else if (diff.Z !== 0) {
@@ -70,10 +77,10 @@ export default class BuildingWelder {
 						for (let y = my; y < size.Y; y += 2) {
 							push(x, y, diff.Z > 0 ? size.Z : 0);
 
-							push(x + mx, y + my, diff.Z > 0 ? size.Z : 0);
-							push(x + mx, y - my, diff.Z > 0 ? size.Z : 0);
-							push(x - mx, y + my, diff.Z > 0 ? size.Z : 0);
-							push(x - mx, y - my, diff.Z > 0 ? size.Z : 0);
+							push(x + mx * 0.9, y + my * 0.9, diff.Z > 0 ? size.Z - offset : offset);
+							push(x + mx * 0.9, y - my * 0.9, diff.Z > 0 ? size.Z - offset : offset);
+							push(x - mx * 0.9, y + my * 0.9, diff.Z > 0 ? size.Z - offset : offset);
+							push(x - mx * 0.9, y - my * 0.9, diff.Z > 0 ? size.Z - offset : offset);
 						}
 					}
 				}

@@ -1,3 +1,4 @@
+import { SlotsDatabase } from "server/SlotsDatabase";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import SharedPlots from "shared/building/SharedPlots";
@@ -31,6 +32,18 @@ export default class RideStartEvent {
 				};
 			}
 		}
+
+		SlotsDatabase.instance.setSlot(
+			player.UserId,
+			-1,
+			(existing) => ({
+				index: -1,
+				name: "Autosave",
+				color: [0, 255, 255],
+				blocks: existing?.blocks ?? 0,
+			}),
+			true,
+		);
 
 		// Teleport player to seat
 		const Humanoid = PartUtils.switchDescendantsAnchor(blocks, false);
