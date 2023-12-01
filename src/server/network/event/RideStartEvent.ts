@@ -1,6 +1,8 @@
-import { SlotsDatabase } from "server/SlotsDatabase";
+import SlotsDatabase from "server/SlotsDatabase";
+import BlocksSerializer from "server/plots/BlocksSerializer";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
+import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
@@ -33,20 +35,17 @@ export default class RideStartEvent {
 			}
 		}
 
-		SlotsDatabase.instance.setSlot(
-			player.UserId,
-			-1,
-			(existing) => ({
-				index: -1,
-				name: "Autosave",
-				color: [0, 255, 255],
-				blocks: existing?.blocks ?? 0,
-			}),
-			true,
-		);
+		SlotsDatabase.instance.setBlocks(player.UserId, SlotsMeta.autosaveSlotIndex, BlocksSerializer.serialize(plot));
 
 		// Teleport player to seat
-		const Humanoid = PartUtils.switchDescendantsAnchor(blocks, false);
+		// const hrp = player.Character?.WaitForChild("HumanoidRootPart") as Part;
+		// const vehicleSeatModel = blocksChildren.find(
+		// 	(model) => model.GetAttribute("id") === BlockRegistry.VEHICLE_SEAT.id,
+		// ) as Model;
+		// const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
+		// hrp.PivotTo(vehicleSeat.GetPivot());
+
+		PartUtils.switchDescendantsAnchor(blocks, false);
 		PartUtils.switchDescendantsNetworkOwner(blocks, player);
 
 		return {

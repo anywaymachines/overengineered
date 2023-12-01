@@ -10,7 +10,12 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 		super(gui);
 
 		this.event.subscribe(this.gui.Stop.Activated, async () => {
-			// await Remotes.Client.GetNamespace("Ride").Get("RideStartRequest").CallServerAsync();
+			const response = await Remotes.Client.GetNamespace("Ride").Get("RideStopRequest").CallServerAsync();
+			if (!response.success) {
+				print(response.message);
+				return;
+			}
+
 			Signals.PLAY_MODE.set("build");
 		});
 	}

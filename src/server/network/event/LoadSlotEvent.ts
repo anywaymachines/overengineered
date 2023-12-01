@@ -1,4 +1,4 @@
-import { SlotsDatabase } from "server/SlotsDatabase";
+import SlotsDatabase from "server/SlotsDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
 import ServerPlots from "server/plots/ServerPlots";
 import Logger from "shared/Logger";

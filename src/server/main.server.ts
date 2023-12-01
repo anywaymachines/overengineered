@@ -6,9 +6,10 @@ import MoveEvent from "./network/event/MoveEvent";
 import ConfigEvent from "./network/event/ConfigEvent";
 import PlayerCache from "./PlayerCache";
 import SaveSlotEvent from "./network/event/SaveSlotEvent";
-import FetchSlotEvent from "./network/event/FetchSlotsEvent";
+import FetchSlotsEvent from "./network/event/FetchSlotsEvent";
 import BlocksLogic from "./blocks/BlocksLogic";
 import LoadSlotEvent from "./network/event/LoadSlotEvent";
+import RideStopEvent from "./network/event/RideStopEvent";
 
 // Plots
 ServerPlots.initialize();
@@ -18,10 +19,11 @@ BuildEvent.initialize();
 MoveEvent.initialize();
 DeleteEvent.initialize();
 RideStartEvent.initialize();
+RideStopEvent.initialize();
 SaveSlotEvent.initialize();
 LoadSlotEvent.initialize();
 ConfigEvent.initialize();
-FetchSlotEvent.initialize();
+FetchSlotsEvent.initialize();
 
 // Initializing other
 PlayerCache.initialize();

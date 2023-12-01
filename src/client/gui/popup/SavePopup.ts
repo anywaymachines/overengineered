@@ -8,6 +8,7 @@ import GuiController from "client/controller/GuiController";
 import TextBoxControl from "../controls/TextBoxControl";
 import Signal from "@rbxts/signal";
 import GameDefinitions from "shared/GameDefinitions";
+import SlotsMeta from "shared/SlotsMeta";
 
 type SaveItemDefinition = GuiButton & {
 	ImageLabel: ImageLabel;
@@ -214,6 +215,7 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 			const index = this.slots.selectedSlot.get();
 			if (index === undefined) return;
 			this.load(index);
+			this.hide();
 		});
 
 		this.data.subscribe((data) => {
@@ -231,37 +233,17 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 
 	private async loadData() {
 		const data = await Remotes.Client.GetNamespace("Slots").Get("Fetch").CallServerAsync();
-		const slots: PlayerDataSlot[] = [];
-
-		const autosaveslot = data.slots.find((s) => s.index === -1);
-		if (autosaveslot) {
-			slots.push({
-				...autosaveslot,
-				updated: new Signal<() => void>(),
-				name: "Autosave",
-				color: new Color3(0, 1, 1),
-				locked: true,
-			});
-		}
-
-		const maxslots = GameDefinitions.FREE_SLOTS + data.purchasedSlots;
-		for (let i = 0; i < maxslots; i++) {
-			const slot = data.slots.find((s) => s.index === i);
-			if (slot) {
-				slots.push({
-					...slot,
-					updated: new Signal<() => void>(),
-					color: Serializer.Color3Serializer.deserialize(slot.color),
-				});
-			} else {
-				slots.push({
-					updated: new Signal<() => void>(),
-					color: new Color3(1, 1, 1),
-					name: "Slot " + (i + 1),
-					blocks: 0,
-				});
-			}
-		}
+		const slots = SlotsMeta.fromSerialized(data.slots)
+			.getAll(GameDefinitions.FREE_SLOTS + data.purchasedSlots)
+			.map(
+				(slot, index) =>
+					({
+						...slot,
+						updated: new Signal<() => void>(),
+						color: Serializer.Color3Serializer.deserialize(slot.color),
+						locked: index < 0,
+					}) as PlayerDataSlot,
+			);
 
 		this.data.set({
 			...data,

@@ -13,7 +13,7 @@ const Remotes = Net.Definitions.Create({
 		UpdateConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
 	}),
 	Slots: Net.Definitions.Namespace({
-		Fetch: Net.Definitions.ServerAsyncFunction<() => SlotsResponse>(),
+		Fetch: Net.Definitions.ServerAsyncFunction<() => FetchSlotsResponse>(),
 		Load: Net.Definitions.ServerAsyncFunction<(index: number) => Response>([
 			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 8 }),
 		]),
@@ -23,6 +23,9 @@ const Remotes = Net.Definitions.Create({
 	}),
 	Ride: Net.Definitions.Namespace({
 		RideStartRequest: Net.Definitions.ServerAsyncFunction<() => Response>([
+			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 2 }),
+		]),
+		RideStopRequest: Net.Definitions.ServerAsyncFunction<() => Response>([
 			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 2 }),
 		]),
 	}),

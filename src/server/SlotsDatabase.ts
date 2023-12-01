@@ -3,13 +3,9 @@ import BlocksSerializer, { SerializedBlock } from "./plots/BlocksSerializer";
 import Logger from "shared/Logger";
 import Objects from "shared/Objects";
 import SharedPlots from "shared/building/SharedPlots";
-
-export type SlotMeta = {
-	readonly index: number;
-	readonly name: string;
-	readonly color: SerializedColor;
-	readonly blocks: number;
-};
+import SlotsMeta from "../shared/SlotsMeta";
+import GameDefinitions from "shared/GameDefinitions";
+import PlayerDatabase from "./PlayerDatabase";
 
 abstract class DbBase<T> {
 	private readonly datastore;
@@ -76,7 +72,6 @@ abstract class DbBase<T> {
 		}
 	}
 }
-
 class Db<T> extends DbBase<T> {
 	private readonly createDefaultFunc;
 	private readonly serializeFunc;
@@ -107,7 +102,7 @@ class Db<T> extends DbBase<T> {
 	}
 }
 
-export class SlotsDatabase {
+export default class SlotsDatabase {
 	public static readonly instance = new SlotsDatabase();
 
 	private readonly datastore: DataStore = DataStoreService.GetDataStore("slots");
@@ -115,11 +110,11 @@ export class SlotsDatabase {
 	private readonly blocksdb;
 
 	constructor() {
-		this.metadb = new Db<readonly SlotMeta[]>(
+		this.metadb = new Db<SlotsMeta>(
 			this.datastore,
-			() => [],
-			(data) => HttpService.JSONEncode(data),
-			(data) => HttpService.JSONDecode(data) as readonly SlotMeta[],
+			() => new SlotsMeta(),
+			(data) => data.serialize(),
+			(data) => SlotsMeta.deserialize(data),
 		);
 		this.blocksdb = new Db<readonly SerializedBlock[]>(
 			this.datastore,
@@ -158,60 +153,53 @@ export class SlotsDatabase {
 		});
 	}
 
-	public getMeta(userId: number) {
+	private ensureValidSlotIndex(userId: number, index: number) {
+		if (index === SlotsMeta.autosaveSlotIndex) return;
+
+		const pdata = PlayerDatabase.instance.get(tostring(userId));
+		if (index >= 0 && index < GameDefinitions.FREE_SLOTS + (pdata.purchasedSlots ?? 0)) return;
+
+		throw "Invalid slot index " + index;
+	}
+
+	public getAllMeta(userId: number) {
 		return this.metadb.get(tostring(userId));
 	}
-	public setMeta(userId: number, meta: readonly SlotMeta[]) {
-		const slots: SlotMeta[] = [];
-
-		const indices: number[] = [];
-		for (let i = meta.size() - 1; i >= 0; i--) {
-			const slot = meta[i];
-			if (indices.includes(slot.index)) {
-				continue;
-			}
-
-			indices.push(slot.index);
-			slots.push(slot);
-		}
-
-		this.metadb.set(tostring(userId), slots);
+	private getMeta(userId: number) {
+		return this.metadb.get(tostring(userId));
+	}
+	public setMeta(userId: number, meta: SlotsMeta) {
+		this.metadb.set(tostring(userId), meta);
 	}
 
 	private toKey(userId: number, index: number) {
 		return `${userId}_${index}`;
 	}
 	public getBlocks(userId: number, index: number) {
+		this.ensureValidSlotIndex(userId, index);
 		return this.blocksdb.get(this.toKey(userId, index)) as readonly SerializedBlock[] | undefined;
 	}
 	public setBlocks(userId: number, index: number, blocks: readonly SerializedBlock[]) {
+		this.ensureValidSlotIndex(userId, index);
 		this.blocksdb.set(this.toKey(userId, index), blocks);
 
-		const meta = [...SlotsDatabase.instance.getMeta(userId)];
-		meta.push({
-			...meta.find((s) => s.index === index)!,
-			blocks: blocks.size(),
-		});
-
-		SlotsDatabase.instance.setMeta(userId, meta);
+		const meta = this.getMeta(userId);
+		meta.set(index, { ...meta.get(index), blocks: blocks.size() });
+		this.setMeta(userId, meta);
 	}
 
-	public setSlot(
-		userid: number,
-		index: number,
-		slot: (existing: SlotMeta | undefined) => SlotMeta,
-		saveBlocks: boolean,
-	) {
-		const meta = [...SlotsDatabase.instance.getMeta(userid)];
+	public update(userId: number, index: number, update: (meta: SlotsMeta) => void, saveBlocks: boolean) {
+		this.ensureValidSlotIndex(userId, index);
 
-		meta.push(slot(meta.find((s) => s.index === index)));
-		SlotsDatabase.instance.setMeta(userid, meta);
+		const meta = this.getMeta(userId);
+		update(meta);
+		this.setMeta(userId, meta);
 
 		let blocksCount: number | undefined = undefined;
 		if (saveBlocks) {
-			const plot = SharedPlots.getPlotByOwnerID(userid);
+			const plot = SharedPlots.getPlotByOwnerID(userId);
 			const blocks = BlocksSerializer.serialize(plot);
-			SlotsDatabase.instance.setBlocks(userid, index, blocks);
+			this.setBlocks(userId, index, blocks);
 
 			blocksCount = blocks.size();
 		}

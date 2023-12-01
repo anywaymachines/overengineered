@@ -1,4 +1,4 @@
-import { SlotsDatabase } from "server/SlotsDatabase";
+import SlotsDatabase from "server/SlotsDatabase";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 
@@ -7,15 +7,15 @@ export default class SaveSlotEvent {
 		Logger.info("Loading Slot event listener...");
 
 		Remotes.Server.GetNamespace("Slots").OnFunction("Save", (player, data) => {
-			const blocksCount = SlotsDatabase.instance.setSlot(
+			const blocksCount = SlotsDatabase.instance.update(
 				player.UserId,
 				data.index,
-				(existing) => ({
-					index: data.index,
-					name: data.name,
-					color: data.color,
-					blocks: existing?.blocks ?? 0,
-				}),
+				(meta) =>
+					meta.set(data.index, {
+						...meta.get(data.index),
+						name: data.name,
+						color: data.color,
+					}),
 				data.save,
 			);
 

@@ -1,3 +1,4 @@
+import Remotes from "shared/Remotes";
 import Control from "./base/Control";
 import Popup from "./base/Popup";
 import GuiController from "./controller/GuiController";
@@ -49,17 +50,33 @@ export default class Main extends Control<MainDefinition> {
 			}
 		});
 
-		this.event.subscribeObservable(
-			Signals.PLAY_MODE,
-			(mode) => {
-				if (this.activeMode) {
-					this.scenes[this.activeMode].hide();
-				}
+		this.event.subscribeObservable(Signals.PLAY_MODE, (mode) => this.setMode(mode), true);
+		Signals.PLAYER.DIED.Connect(() => this.setMode(undefined));
+		Signals.PLAYER.SPAWN.Connect(() => this.setMode("build"));
+	}
 
-				this.activeMode = mode;
-				this.scenes[mode].show();
-			},
-			true,
-		);
+	private async setMode(mode: PlayModes | undefined) {
+		if (this.activeMode === mode) return;
+
+		if (this.activeMode) {
+			this.scenes[this.activeMode].hide();
+
+			if (this.activeMode === "ride") {
+				const response = await Remotes.Client.GetNamespace("Ride").Get("RideStopRequest").CallServerAsync();
+				if (!response.success) {
+					print(response.message);
+					return;
+				}
+			} else if (this.activeMode === "build") {
+				const response = await Remotes.Client.GetNamespace("Ride").Get("RideStartRequest").CallServerAsync();
+				if (!response.success) {
+					print(response.message);
+					return;
+				}
+			}
+		}
+
+		this.activeMode = mode;
+		if (mode) this.scenes[mode].show();
 	}
 }

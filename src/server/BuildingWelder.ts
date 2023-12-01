@@ -2,25 +2,6 @@ import { Workspace } from "@rbxts/services";
 import { Visualize } from "@rbxts/visualize";
 
 export default class BuildingWelder {
-	static readonly points: Vector3[] = [];
-	static readonly lines: (readonly [Vector3, Vector3])[] = [];
-
-	static {
-		Visualize.configure({
-			enabled: true,
-			alwaysOnTop: false,
-		});
-
-		game.GetService("RunService").Heartbeat.Connect(() => {
-			for (const vector of this.points) {
-				Visualize.point(vector, Color3.fromRGB(0, 132, 0));
-			}
-			for (const [from, dir] of this.lines) {
-				Visualize.line(from, from.add(dir), Color3.fromRGB(255, 0, 0));
-			}
-		});
-	}
-
 	static getSides(part: BasePart): readonly (readonly [origin: Vector3, normal: Vector3])[] {
 		const get = (sides: readonly Enum.NormalId[]) => {
 			const ret: (readonly [origin: Vector3, normal: Vector3])[] = [];
@@ -31,10 +12,6 @@ export default class BuildingWelder {
 
 				const push = (x: number, y: number, z: number) => {
 					ret.push([
-						part.CFrame.PointToWorldSpace(new Vector3(x, y, z).sub(part.Size.div(2))),
-						part.CFrame.PointToWorldSpace(diff.mul(1)).sub(part.Position),
-					] as const);
-					this.lines.push([
 						part.CFrame.PointToWorldSpace(new Vector3(x, y, z).sub(part.Size.div(2))),
 						part.CFrame.PointToWorldSpace(diff.mul(1)).sub(part.Position),
 					] as const);
@@ -115,13 +92,10 @@ export default class BuildingWelder {
 
 		const ret = new Set<BasePart>();
 		for (const [origin, normal] of this.getSides(part)) {
-			this.points.push(origin);
 			const raycastResult = Workspace.Raycast(origin, normal.mul(1), raycastParams);
 			if (!raycastResult) continue;
 
 			ret.add(raycastResult.Instance);
-			//this.points.clear();
-			this.points.push(origin);
 		}
 
 		return ret;
