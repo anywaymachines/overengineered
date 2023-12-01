@@ -6,6 +6,8 @@ import SharedPlots from "shared/building/SharedPlots";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 
 export default class BlockLogicController {
+	private static readonly blocks: BlockLogic[] = [];
+
 	static setupBlocks() {
 		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
 		const blocks = SharedPlots.getPlotBlocks(plot).GetChildren();
@@ -20,14 +22,19 @@ export default class BlockLogicController {
 				continue;
 			}
 
-			const logic = LogicRegistry.Blocks.get(BlockRegistry.Blocks.get(id)!) as AnyBlockLogic | undefined;
+			const ctor = LogicRegistry.Blocks.get(BlockRegistry.Blocks.get(id)!) as AnyBlockLogic | undefined;
 
-			if (logic === undefined) {
+			if (ctor === undefined) {
 				//Logger.info(`No script for block with id ${id}`);
 				continue;
 			}
 
-			new logic(block);
+			const logic = new ctor(block);
+			this.blocks.push(logic);
 		}
+	}
+
+	public static getBlocks() {
+		return this.blocks as readonly BlockLogic[];
 	}
 }
