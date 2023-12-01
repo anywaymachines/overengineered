@@ -11,6 +11,7 @@ import Signals from "client/event/Signals";
 import ObservableValue from "shared/event/ObservableValue";
 import KeyChooserControl, { KeyChooserControlDefinition } from "../controls/KeyChooserControl";
 import Objects from "shared/Objects";
+import ConfigManager from "client/ConfigManager";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	HeadingLabel: TextLabel;
@@ -76,6 +77,10 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 			this.updateConfigs(selected);
 		});
 
+		this.gui.DeselectAllButton.Activated.Connect(() => {
+			tool.unselectAll();
+		});
+
 		this.event.onPrepare((inputType) => {
 			this.gui.ApplyToAllButton.Visible = inputType !== "Gamepad";
 			this.gui.DeselectAllButton.Visible = inputType !== "Gamepad";
@@ -104,17 +109,22 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		if (!isConfigurableBlock(block)) return;
 
 		const defs = block.getConfigDefinitions();
-		const config = HttpService.JSONDecode((item.GetAttribute("config") as string | undefined) ?? "{}") as Record<
+		const aconfig = HttpService.JSONDecode((item.GetAttribute("config") as string | undefined) ?? "{}") as Record<
 			string,
-			ConfigValues
+			string
 		>;
+
+		const config = ConfigManager.deserialize(aconfig, defs);
 
 		const send = (key: string, value: unknown) => {
 			print("send " + key + " to " + value);
 
 			return Remotes.Client.GetNamespace("Building")
 				.Get("UpdateConfigRequest")
-				.CallServerAsync({ block: item, data: { key, value } });
+				.CallServerAsync({
+					block: item,
+					data: { key, value: ConfigManager.serialize({ [key]: value }, defs)[key] },
+				});
 		};
 
 		for (const def of Objects.values(defs)) {
@@ -122,9 +132,9 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				const control = new ConfigPartControl(
 					this.checkboxTemplate(),
 					(cb) => new CheckBoxControl(cb),
-					config,
+					config as Record<string, boolean>,
 					def,
-					false,
+					false as boolean,
 				);
 				this.list.add(control);
 
@@ -133,9 +143,9 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				const control = new ConfigPartControl(
 					this.keyTemplate(),
 					(kb) => new KeyChooserControl(kb),
-					config,
+					config as Record<string, Enum.KeyCode | undefined>,
 					def,
-					undefined,
+					undefined as Enum.KeyCode | undefined,
 				);
 				this.list.add(control);
 
@@ -144,9 +154,9 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				const control = new ConfigPartControl(
 					this.sliderTemplate(),
 					(cb) => new SliderControl(cb, def.min, def.max, def.step),
-					config,
+					config as Record<string, number>,
 					def,
-					0,
+					0 as number,
 				);
 				this.list.add(control);
 
