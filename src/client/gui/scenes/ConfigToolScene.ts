@@ -32,6 +32,7 @@ export class ConfigPartControl<
 	) {
 		super(gui);
 
+		this.gui.HeadingLabel.Text = definition.displayName;
 		this.control = ctor(this.gui.Control);
 		this.control.value.set(
 			(config[definition.id] as TValue) ?? (definition.default[Signals.INPUT_TYPE.get()] as TValue) ?? def,

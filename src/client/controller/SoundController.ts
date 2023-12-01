@@ -1,13 +1,13 @@
 import GuiController from "./GuiController";
 
-declare type Sounds = Folder & {
-	BuildingMode: Folder & {
+declare type Sounds = {
+	BuildingMode: {
 		BlockPlace: Sound;
 		BlockPlaceError: Sound;
 		BlockRotate: Sound;
 		BlockDelete: Sound;
 	};
-	RideMode: Folder & {
+	RideMode: {
 		RideStart: Sound;
 	};
 	Click: Sound;

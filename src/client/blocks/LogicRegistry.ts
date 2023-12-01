@@ -4,6 +4,7 @@ import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 import DisconnectBlockLogic from "./logic/DisconnectBlockLogic";
 import WingLogic from "./logic/WingLogic";
+import RocketEngineLogic from "./logic/RocketEngineLogic";
 
 export type AnyBlockLogic = { new (block: Model): BlockLogic };
 export default class LogicRegistry {
@@ -18,6 +19,9 @@ export default class LogicRegistry {
 		this.attachLogic(BlockRegistry.WING1x2, WingLogic);
 		this.attachLogic(BlockRegistry.WING1x3, WingLogic);
 		this.attachLogic(BlockRegistry.WING1x4, WingLogic);
+
+		// Engines
+		this.attachLogic(BlockRegistry.SMALL_ROCKET_ENIGNE, RocketEngineLogic);
 	}
 
 	private static attachLogic(block: AbstractBlock, logic: AnyBlockLogic): void {

@@ -67,6 +67,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 			const control = new ButtonControl(this.itemTemplate(), text);
 			control.show();
 			control.activated.Connect(activated);
+			control.activated.Connect(() => SoundController.getSounds().Click.Play());
 
 			this.list.add(control);
 			return control;

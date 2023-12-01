@@ -10,28 +10,32 @@ export default class Signals {
 		MOVED: (Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame"),
 	} as const;
 
-	public static readonly INPUT_TYPE_CHANGED_EVENT = new Signal<(platform: InputType) => void>();
+	public static readonly INPUT_TYPE_CHANGED_EVENT = this.registerSignal(new Signal<(platform: InputType) => void>());
 	public static readonly INPUT_TYPE = new ObservableValue<InputType>(InputController.getPhysicalInputType());
 
 	public static readonly PLAYER = {
-		SPAWN: new Signal<() => void>(),
-		DIED: new Signal<() => void>(),
+		SPAWN: this.registerSignal(new Signal<() => void>()),
+		DIED: this.registerSignal(new Signal<() => void>()),
 	} as const;
 
 	public static readonly TOOL = {
-		EQUIPPED: new Signal<(tool: ToolBase) => void>(),
-		UNEQUIPPED: new Signal<(tool: ToolBase) => void>(),
+		EQUIPPED: this.registerSignal(new Signal<(tool: ToolBase) => void>()),
+		UNEQUIPPED: this.registerSignal(new Signal<(tool: ToolBase) => void>()),
 	} as const;
 
 	public static readonly BLOCKS = {
-		ADDED: new Signal<(block: Model) => void>(),
-		REMOVED: new Signal<(block: Model) => void>(),
+		ADDED: this.registerSignal(new Signal<(block: Model) => void>()),
+		REMOVED: this.registerSignal(new Signal<(block: Model) => void>()),
 	} as const;
 
 	public static readonly CONTRAPTION = {
-		CLEARED: new Signal<() => void>(),
-		MOVED: new Signal<(offset: Vector3) => void>(),
+		CLEARED: this.registerSignal(new Signal<() => void>()),
+		MOVED: this.registerSignal(new Signal<(offset: Vector3) => void>()),
 	} as const;
+
+	private static registerSignal<T extends Signal>(signal: T): T {
+		return signal;
+	}
 
 	static {
 		this.INPUT_TYPE.changed.Connect((input) => this.INPUT_TYPE_CHANGED_EVENT.Fire(input));
