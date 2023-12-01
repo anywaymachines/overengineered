@@ -53,7 +53,15 @@ export default class SharedPlots {
 	}
 
 	public static getPlotBlocks(plot: Model): Model {
-		return plot.FindFirstChild("Blocks") as Model;
+		let model = plot.FindFirstChild("Blocks") as Model | undefined;
+
+		if (!model) {
+			model = new Instance("Model");
+			model.Name = "Blocks";
+			model.Parent = plot;
+		}
+
+		return model;
 	}
 
 	/** Returns the `Region3` of the **construction area** for blocks

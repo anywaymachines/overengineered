@@ -16,6 +16,10 @@ import Wing1x2 from "./blocks/Wing1x2";
 import Wing1x3 from "./blocks/Wing1x3";
 import Wing1x4 from "./blocks/Wing1x4";
 import SmallRocketEngineBlock from "./blocks/SmallRocketEngine";
+import WedgeWing1x1 from "./blocks/WedgeWing1x1";
+import WedgeWing1x2 from "./blocks/WedgeWing1x2";
+import WedgeWing1x3 from "./blocks/WedgeWing1x3";
+import WedgeWing1x4 from "./blocks/WedgeWing1x4";
 
 export default class BlockRegistry {
 	public static Blocks: Map<string, AbstractBlock> = new Map<string, AbstractBlock>();
@@ -41,6 +45,11 @@ export default class BlockRegistry {
 	public static readonly WING1x2 = this.registerBlock(new Wing1x2());
 	public static readonly WING1x3 = this.registerBlock(new Wing1x3());
 	public static readonly WING1x4 = this.registerBlock(new Wing1x4());
+
+	public static readonly WEDGE_WING1x1 = this.registerBlock(new WedgeWing1x1());
+	public static readonly WEDGE_WING1x2 = this.registerBlock(new WedgeWing1x2());
+	public static readonly WEDGE_WING1x3 = this.registerBlock(new WedgeWing1x3());
+	public static readonly WEDGE_WING1x4 = this.registerBlock(new WedgeWing1x4());
 
 	// Engines
 	public static readonly SMALL_ROCKET_ENIGNE = this.registerBlock(new SmallRocketEngineBlock());

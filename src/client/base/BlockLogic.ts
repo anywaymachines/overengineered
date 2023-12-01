@@ -20,5 +20,6 @@ export default abstract class BlockLogic {
 
 	protected kill(): void {
 		this.eventHandler.unsubscribeAll();
+		this.inputHandler.unsubscribeAll();
 	}
 }

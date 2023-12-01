@@ -76,7 +76,8 @@ export default class MoveTool extends ToolBase {
 			async (face: Enum.NormalId) => await this.move(face),
 		);
 
-		this.MoveExtent.CFrame = blocks.GetBoundingBox()[0];
+		this.MoveExtent.Position = blocks.GetBoundingBox()[0].Position;
+		this.MoveExtent.Size = blocks.GetExtentsSize();
 	}
 
 	private updateVisibility() {
