@@ -21,6 +21,6 @@ type ConfigDefinition = Readonly<
 	{ id: string; displayName: string } & (KeyConfigDefinition | NumberConfigDefinition | BooleanConfigDefinition)
 >;
 
-interface ConfigurableBlock<T extends Record<string, ConfigDefinition> = Record<string, ConfigDefinition>> {
-	getConfigDefinitions(): T;
+interface ConfigurableBlock {
+	getConfigDefinitions(): Record<string, ConfigDefinition>;
 }

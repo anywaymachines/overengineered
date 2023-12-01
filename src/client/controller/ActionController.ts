@@ -19,14 +19,14 @@ export default class ActionController {
 	public static init() {
 		const inputHandler = new InputHandler();
 
-		inputHandler.onKeyPressed(Enum.KeyCode.Z, () => {
+		inputHandler.onKeyDown(Enum.KeyCode.Z, () => {
 			if (InputController.isCtrlPressed()) {
 				ActionController.instance.undo();
 				return true;
 			}
 		});
 
-		inputHandler.onKeyPressed(Enum.KeyCode.Y, () => {
+		inputHandler.onKeyDown(Enum.KeyCode.Y, () => {
 			if (InputController.isCtrlPressed()) {
 				ActionController.instance.redo();
 				return true;

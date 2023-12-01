@@ -29,7 +29,7 @@ export default class SetPlayModeEvent {
 				const response = this.setMode(plr, "build");
 				if (!response.success) print(response.message);
 
-				(character.WaitForChild("Humanoid") as Humanoid).Died.Connect(() => {
+				(character.WaitForChild("Humanoid") as Humanoid).Died.Once(() => {
 					const response = this.setMode(plr, undefined);
 					if (!response.success) print(response.message);
 				});

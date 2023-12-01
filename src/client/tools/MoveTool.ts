@@ -163,12 +163,12 @@ export default class MoveTool extends ToolBase {
 	protected prepareDesktop(): void {}
 
 	protected prepareGamepad(): void {
-		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadUp, () => this.move(Enum.NormalId.Top));
-		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadDown, () => this.move(Enum.NormalId.Bottom));
+		this.inputHandler.onKeyDown(Enum.KeyCode.DPadUp, () => this.move(Enum.NormalId.Top));
+		this.inputHandler.onKeyDown(Enum.KeyCode.DPadDown, () => this.move(Enum.NormalId.Bottom));
 
 		// DPad
-		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadLeft, () => this.gamepadMove(false));
-		this.inputHandler.onKeyPressed(Enum.KeyCode.DPadRight, () => this.gamepadMove(true));
+		this.inputHandler.onKeyDown(Enum.KeyCode.DPadLeft, () => this.gamepadMove(false));
+		this.inputHandler.onKeyDown(Enum.KeyCode.DPadRight, () => this.gamepadMove(true));
 
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updateVisibility());
 	}

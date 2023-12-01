@@ -5,14 +5,13 @@ import TooltipsControl from "./gui/static/TooltipsControl";
 import Main from "./Main";
 import ActionController from "./controller/ActionController";
 import LogicRegistry from "./blocks/LogicRegistry";
-import Signals from "./event/Signals";
 
 Main.instance.show();
 TooltipsControl.instance.show();
 LogControl.instance.show();
 
 ActionController.init();
-PlayerStateEvent.subscribe();
+PlayerStateEvent.initialize();
 InputTypeChangeEvent.subscribe();
 
 LogicRegistry.initialize();

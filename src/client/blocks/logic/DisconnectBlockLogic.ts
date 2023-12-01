@@ -13,7 +13,7 @@ export default class DisconnectBlockLogic extends BlockLogic {
 		print("setup");
 		super.setup();
 
-		this.inputHandler.onKeyPressed(Enum.KeyCode.X, () => this.keyPressed(Enum.KeyCode.X));
+		this.inputHandler.onKeyDown(Enum.KeyCode.X, () => this.keyPressed(Enum.KeyCode.X));
 	}
 
 	private keyPressed(keyCode: Enum.KeyCode) {

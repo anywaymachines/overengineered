@@ -49,7 +49,7 @@ export default class ConfigTool extends ToolBase {
 
 	protected prepareGamepad(): void {
 		// Gamepad buttons controls
-		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonX, () => this.selectBlock());
+		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonX, () => this.selectBlock());
 
 		// Prepare console events
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updatePosition());

@@ -9,6 +9,7 @@ export default class InputHandler {
 	private readonly eventHandler: EventHandler = new EventHandler();
 
 	private readonly listenableKeycodes: InputCallback[] = [];
+	private readonly releaseKeycodes: InputCallback[] = [];
 	private readonly touchTapCallbacks: TouchCallback[] = [];
 
 	constructor() {
@@ -16,6 +17,13 @@ export default class InputHandler {
 			if (!this.isKeyPressed()) return;
 
 			for (const callback of this.listenableKeycodes) {
+				if (callback(input) === true) break;
+			}
+		});
+		this.eventHandler.subscribe(UserInputService.InputEnded, (input: InputObject) => {
+			if (!this.isKeyPressed()) return;
+
+			for (const callback of this.releaseKeycodes) {
 				if (callback(input) === true) break;
 			}
 		});
@@ -36,14 +44,25 @@ export default class InputHandler {
 		return true;
 	}
 
-	public onKeyPressed(keyCode: Enum.KeyCode, callback: InputCallback) {
-		return this.onKeysPressed((input) => {
+	public onKeyUp(keyCode: Enum.KeyCode, callback: InputCallback) {
+		return this.onKeysUp((input) => {
 			if (input.KeyCode !== keyCode) return;
 
 			return callback(input);
 		});
 	}
-	public onKeysPressed(callback: InputCallback) {
+	public onKeysUp(callback: InputCallback) {
+		return this.releaseKeycodes.push(callback);
+	}
+
+	public onKeyDown(keyCode: Enum.KeyCode, callback: InputCallback) {
+		return this.onKeysDown((input) => {
+			if (input.KeyCode !== keyCode) return;
+
+			return callback(input);
+		});
+	}
+	public onKeysDown(callback: InputCallback) {
 		return this.listenableKeycodes.push(callback);
 	}
 

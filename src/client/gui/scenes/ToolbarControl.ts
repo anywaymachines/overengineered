@@ -141,15 +141,15 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 		] as const;
 
 		ToolController.tools.forEach((tool, i) => {
-			this.inputHandler.onKeyPressed(keycodes[i], () =>
+			this.inputHandler.onKeyDown(keycodes[i], () =>
 				ToolController.selectedTool.set(tool === ToolController.selectedTool.get() ? undefined : tool),
 			);
 		});
 	}
 
 	protected prepareGamepad() {
-		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonB, () => ToolController.selectedTool.set(undefined));
-		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonR1, () => this.gamepadSelectTool(true));
-		this.inputHandler.onKeyPressed(Enum.KeyCode.ButtonL1, () => this.gamepadSelectTool(false));
+		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonB, () => ToolController.selectedTool.set(undefined));
+		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonR1, () => this.gamepadSelectTool(true));
+		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonL1, () => this.gamepadSelectTool(false));
 	}
 }
