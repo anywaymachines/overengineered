@@ -5,6 +5,7 @@ import SharedPlots from "shared/building/SharedPlots";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import PartUtils from "shared/utils/PartUtils";
 import BuildingWelder from "./BuildingWelder";
+import Objects from "shared/Objects";
 
 export default class BuildingWrapper {
 	public static placeBlock(data: PlaceBlockRequest) {
@@ -59,7 +60,7 @@ export default class BuildingWrapper {
 
 	public static updateConfig(data: ConfigUpdateRequest) {
 		const dataTag = data.block.GetAttribute("config") as string | undefined;
-		const currentData = HttpService.JSONDecode(dataTag ?? "{}") as { [key: string]: unknown };
+		const currentData = HttpService.JSONDecode(dataTag ?? "{}") as { [key: string]: string };
 		currentData[data.data.key] = data.data.value;
 		data.block.SetAttribute("config", HttpService.JSONEncode(currentData));
 
