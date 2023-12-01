@@ -34,7 +34,6 @@ export default class ConfigEvent {
 		}
 
 		const response = BuildingWrapper.updateConfig(data);
-
 		return response;
 	}
 }

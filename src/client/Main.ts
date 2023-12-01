@@ -4,7 +4,7 @@ import GuiController from "./controller/GuiController";
 import PlayerController from "./controller/PlayerController";
 import Signals from "./event/Signals";
 import BuildingModeScene, { BuildingModeSceneDefinition } from "./gui/scenes/BuildingModeScene";
-import RideModeScene, { RideModeSceneDefinition } from "./gui/scenes/RideModeScene";
+import RideModeScene, { RideModeSceneDefinition } from "./gui/ridemode/RideModeScene";
 import PlayModeController from "./controller/PlayModeController";
 
 export type MainDefinition = Instance & {

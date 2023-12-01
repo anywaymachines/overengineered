@@ -72,6 +72,10 @@ export default class Control<T extends GuiObject | Instance = Instance> {
 		[...this.children].forEach((child) => this.remove(child, setParents));
 	}
 
+	public getAttribute<T extends AttributeValue>(name: string) {
+		return this.gui.GetAttribute(name) as T;
+	}
+
 	/** Return a function that copies the provided object, and destroys it if specified */
 	protected static asTemplate<T extends GuiObject>(object: T, destroyOriginal = true) {
 		const template = object.Clone();

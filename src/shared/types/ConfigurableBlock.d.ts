@@ -17,9 +17,8 @@ type BooleanConfigDefinition = {
 	default: DefaultValue<boolean>;
 };
 
-type ConfigDefinition = Readonly<
-	{ id: string; displayName: string } & (KeyConfigDefinition | NumberConfigDefinition | BooleanConfigDefinition)
->;
+type BaseConfigDefinitions = KeyConfigDefinition | NumberConfigDefinition | BooleanConfigDefinition;
+type ConfigDefinition = Readonly<{ id: string; displayName: string } & BaseConfigDefinitions>;
 
 interface ConfigurableBlock {
 	getConfigDefinitions(): Record<string, ConfigDefinition>;

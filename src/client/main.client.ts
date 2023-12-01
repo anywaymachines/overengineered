@@ -5,6 +5,8 @@ import TooltipsControl from "./gui/static/TooltipsControl";
 import Main from "./Main";
 import ActionController from "./controller/ActionController";
 import LogicRegistry from "./blocks/LogicRegistry";
+import TestScene, { TestSceneDefinition } from "./gui/scenes/TestScene";
+import GuiController from "./controller/GuiController";
 
 Main.instance.show();
 TooltipsControl.instance.show();
@@ -15,3 +17,6 @@ PlayerStateEvent.initialize();
 InputTypeChangeEvent.subscribe();
 
 LogicRegistry.initialize();
+
+const guitests = new TestScene(GuiController.getGameUI<{ Tests: TestSceneDefinition }>().Tests);
+// guitests.show();
