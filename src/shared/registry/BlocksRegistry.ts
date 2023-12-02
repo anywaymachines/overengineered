@@ -22,6 +22,7 @@ import WedgeWing1x3 from "./blocks/WedgeWing1x3";
 import WedgeWing1x4 from "./blocks/WedgeWing1x4";
 import MotorBlock from "./blocks/MotorBlock";
 import HingeBlock from "./blocks/HingeBlock";
+import ServoMotorBlock from "./blocks/ServoMotorBlock";
 
 export default class BlockRegistry {
 	public static Blocks: Map<string, AbstractBlock> = new Map<string, AbstractBlock>();
@@ -56,6 +57,7 @@ export default class BlockRegistry {
 	// Engines
 	public static readonly SMALL_ROCKET_ENIGNE = this.registerBlock(new SmallRocketEngineBlock());
 	public static readonly MOTOR_BLOCK = this.registerBlock(new MotorBlock());
+	public static readonly SERVOMOTOR_BLOCK = this.registerBlock(new ServoMotorBlock());
 	public static readonly HINGE_BLOCK = this.registerBlock(new HingeBlock());
 
 	// test

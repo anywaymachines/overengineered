@@ -13,7 +13,7 @@ export default class BuildingWelder {
 				const push = (x: number, y: number, z: number) => {
 					ret.push([
 						part.CFrame.PointToWorldSpace(new Vector3(x, y, z).sub(part.Size.div(2))),
-						part.CFrame.PointToWorldSpace(diff.mul(offset + 0.01)).sub(part.Position),
+						part.CFrame.PointToWorldSpace(diff.mul(offset + 0.15)).sub(part.Position),
 					] as const);
 				};
 

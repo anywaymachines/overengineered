@@ -1,7 +1,6 @@
 import { RunService } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import BlockLogic from "client/base/BlockLogic";
-import ObservableValue from "shared/event/ObservableValue";
+import GameEnvironmentController from "client/controller/GameEnvironmentController";
 
 export default class WingLogic extends BlockLogic {
 	private wingSurface: BasePart;

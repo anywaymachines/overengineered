@@ -7,6 +7,8 @@ import ActionController from "./controller/ActionController";
 import LogicRegistry from "./blocks/LogicRegistry";
 import TestScene, { TestSceneDefinition } from "./gui/scenes/TestScene";
 import GuiController from "./controller/GuiController";
+import GameEnvironmentController from "./controller/GameEnvironmentController";
+import RideMode from "./controller/modes/RideMode";
 
 Main.instance.show();
 TooltipsControl.instance.show();
@@ -17,6 +19,9 @@ PlayerStateEvent.initialize();
 InputTypeChangeEvent.subscribe();
 
 LogicRegistry.initialize();
+
+GameEnvironmentController.initialize();
+RideMode.initialize();
 
 const guitests = new TestScene(GuiController.getGameUI<{ Tests: TestSceneDefinition }>().Tests);
 // guitests.show();

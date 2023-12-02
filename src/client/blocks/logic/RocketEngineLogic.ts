@@ -14,6 +14,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<SmallRocke
 	private readonly isSwitch;
 	private readonly increaseKey;
 	private readonly decreaseKey;
+	private readonly strength;
 
 	// Math
 	private readonly multiplier;
@@ -38,6 +39,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<SmallRocke
 		this.increaseKey = this.config.get("thrust_add");
 		this.decreaseKey = this.config.get("thrust_sub");
 		this.isSwitch = this.config.get("switchmode");
+		this.strength = this.config.get("strength");
 
 		// Instances
 		const effectEmitter = block.FindFirstChild("EffectEmitter") as Part;
@@ -87,15 +89,23 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<SmallRocke
 
 	private update() {
 		// Force
-		this.vectorForce.Force = new Vector3((this.power * this.multiplier * this.torque * -1) / 100, 0, 0);
+		this.vectorForce.Force = new Vector3(
+			((this.power * this.multiplier * this.torque * -1) / 100) * (this.strength / 100),
+			0,
+			0,
+		);
 
 		// Particles
 		this.particleEmitter.Enabled = this.torque !== 0;
-		this.particleEmitter.Acceleration = new Vector3((this.maxParticlesAcceleration / 100) * this.torque, 0, 0);
+		this.particleEmitter.Acceleration = new Vector3(
+			(this.maxParticlesAcceleration / 100) * this.torque * (this.strength / 100),
+			0,
+			0,
+		);
 
 		// Sound
 		this.sound.Playing = this.torque !== 0;
-		this.sound.Volume = (this.maxSoundVolume / 100) * this.torque;
+		this.sound.Volume = (this.maxSoundVolume / 100) * this.torque * (this.strength / 100);
 
 		// TODO: Enable animation
 		// TODO: Send packet to server to replicate particles and sounds to other players

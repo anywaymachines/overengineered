@@ -49,6 +49,17 @@ export default class SmallRocketEngineBlock extends AbstractBlock implements Con
 					Gamepad: false,
 				},
 			},
+			strength: {
+				id: "strength",
+				displayName: "Strength %",
+				type: "Number",
+				min: 0,
+				max: 100,
+				step: 1,
+				default: {
+					Desktop: 100,
+				},
+			},
 		} satisfies Record<string, ConfigDefinition>;
 	}
 }

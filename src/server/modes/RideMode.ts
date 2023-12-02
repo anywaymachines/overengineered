@@ -29,7 +29,9 @@ export default class RideMode implements PlayModeBase {
 		// Check is required blocks exist
 		for (let i = 0; i < BlockRegistry.RequiredBlocks.size(); i++) {
 			const requiredBlock = BlockRegistry.RequiredBlocks[i];
-			if (!blocksChildren.find((model) => model.GetAttribute("id") === requiredBlock.id)) {
+
+			const vehicleSeat = blocksChildren.find((model) => model.GetAttribute("id") === requiredBlock.id);
+			if (!vehicleSeat) {
 				return {
 					success: false,
 					message: requiredBlock.getDisplayName() + " not found",
