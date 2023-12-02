@@ -138,7 +138,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				);
 				this.list.add(control);
 
-				control.control.value.subscribe((value) => send(def.id, value));
+				control.control.submitted.Connect((value) => send(def.id, value));
 			} else if (def.type === "Key") {
 				const control = new ConfigPartControl(
 					this.keyTemplate(),
@@ -149,7 +149,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				);
 				this.list.add(control);
 
-				control.control.value.subscribe((value) => send(def.id, value));
+				control.control.submitted.Connect((value) => send(def.id, value));
 			} else if (def.type === "Number") {
 				const control = new ConfigPartControl(
 					this.sliderTemplate(),

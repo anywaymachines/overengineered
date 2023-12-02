@@ -33,6 +33,7 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 		if (Control.exists(this.gui, "TextBox")) {
 			const num = new NumberTextBoxControl(this.gui.TextBox);
 			num.value.bindTo(this.value);
+			this.event.subscribe(num.submitted, (value) => this.submitted.Fire(value));
 			this.add(num);
 		}
 
