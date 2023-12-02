@@ -324,8 +324,8 @@ export default class BuildTool extends ToolBase {
 
 	protected prepareDesktop(): void {
 		// Keyboard controls
-		this.inputHandler.onKeyDown(Enum.KeyCode.R, () => this.rotate("x"));
-		this.inputHandler.onKeyDown(Enum.KeyCode.T, () => this.rotate("y"));
+		this.inputHandler.onKeyDown(Enum.KeyCode.T, () => this.rotate("x"));
+		this.inputHandler.onKeyDown(Enum.KeyCode.R, () => this.rotate("y"));
 		this.inputHandler.onKeyDown(Enum.KeyCode.Y, () => {
 			if (InputController.isCtrlPressed()) return;
 			this.rotate("z");
@@ -385,8 +385,8 @@ export default class BuildTool extends ToolBase {
 	public getKeyboardTooltips() {
 		const keys: { keys: string[]; text: string }[] = [];
 
-		keys.push({ keys: ["R"], text: "Rotate by X" });
-		keys.push({ keys: ["T"], text: "Rotate by Y" });
+		keys.push({ keys: ["R"], text: "Rotate by Y" });
+		keys.push({ keys: ["T"], text: "Rotate by X" });
 		keys.push({ keys: ["Y"], text: "Rotate by Z" });
 
 		return keys;
