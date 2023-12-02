@@ -23,6 +23,7 @@ import WedgeWing1x4 from "./blocks/WedgeWing1x4";
 import MotorBlock from "./blocks/MotorBlock";
 import HingeBlock from "./blocks/HingeBlock";
 import ServoMotorBlock from "./blocks/ServoMotorBlock";
+import Seat from "./blocks/Seat";
 
 export default class BlockRegistry {
 	public static Blocks: Map<string, AbstractBlock> = new Map<string, AbstractBlock>();
@@ -65,6 +66,7 @@ export default class BlockRegistry {
 
 	// Seats
 	public static readonly VEHICLE_SEAT = this.registerBlock(new VehicleSeatBlock());
+	public static readonly SEAT = this.registerBlock(new Seat());
 
 	private static registerBlock(block: AbstractBlock): AbstractBlock {
 		this.Blocks.set(block.id, block);
