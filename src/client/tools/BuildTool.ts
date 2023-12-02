@@ -252,7 +252,7 @@ export default class BuildTool extends ToolBase {
 			"Block placement",
 			async () => {
 				const block = BuildingManager.getBlockByPosition(pos);
-				if (block) await BuildingController.deleteBlock(block);
+				if (block) await BuildingController.deleteBlock([block]);
 			},
 			{
 				block: this.selectedBlock.id,

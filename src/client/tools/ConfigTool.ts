@@ -6,33 +6,35 @@ import LogControl from "client/gui/static/LogControl";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import BlockSelector from "./BlockSelector";
+import { initializeMultiBlockSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
 
 export default class ConfigTool extends ToolBase {
 	public readonly selectedBlocksChanged = new Signal<(selected: Highlight[]) => void>();
-
 	private readonly selected: Highlight[] = [];
-	private readonly selector;
 
-	constructor() {
-		super();
-
-		this.selector = new BlockSelector(this.eventHandler, this.inputHandler, (target) => {
-			return (
-				"getConfigDefinitions" in
-				(BlockRegistry.getBlockByID(target.Parent.GetAttribute("id") as string) as
-					| AbstractBlock
-					| ConfigurableBlock)
-			);
-		});
-
-		this.selector.blockSelected.Connect((block) => {
-			this.selectBlock(block);
-		});
-	}
-
-	protected prepare(): void {
+	protected prepare() {
 		super.prepare();
-		this.selector.prepare();
+
+		const selectionFilter = (target: Model) =>
+			"getConfigDefinitions" in
+			(BlockRegistry.getBlockByID(target.GetAttribute("id") as string) as AbstractBlock | ConfigurableBlock);
+
+		initializeSingleBlockSelection(
+			this.eventHandler,
+			this.inputHandler,
+			() => {},
+			async (block) => {
+				if (!block) return;
+				// if (Signals.INPUT_TYPE.get() !== "Desktop")  return;
+				this.selectBlock(block);
+			},
+			selectionFilter,
+		);
+		initializeMultiBlockSelection(this.eventHandler, (blocks) => {
+			for (const block of blocks) {
+				this.selectBlock(block);
+			}
+		});
 
 		this.eventHandler.subscribe(Signals.BLOCKS.REMOVED, (model) => {
 			const removed = this.selected.filter((sel) => sel.Parent === model);
@@ -119,7 +121,6 @@ export default class ConfigTool extends ToolBase {
 
 	deactivate(): void {
 		super.deactivate();
-		this.selector.deactivate();
 		this.unselectAll();
 	}
 }

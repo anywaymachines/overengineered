@@ -61,8 +61,6 @@ export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 	public bindTo(observable: ObservableValue<T>) {
 		this.subscribe((value) => observable.set(value));
 		observable.subscribe((value) => this.set(value), true);
-
-		this.set(observable.get());
 	}
 
 	public createChild<TKey extends keyof NonNullable<T>>(key: TKey, def: NonNullable<T>[TKey]) {

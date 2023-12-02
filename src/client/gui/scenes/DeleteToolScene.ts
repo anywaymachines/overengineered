@@ -74,19 +74,20 @@ export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> 
 	private suggestClearAll() {
 		ConfirmPopup.instance.showPopup(
 			"Are you sure you want to delete all blocks?",
-			() => this.tool.clearAll(),
+			() => this.tool.deleteBlocks("all"),
 			() => {},
 		);
 	}
 
 	protected prepareTouch(): void {
 		// Prepare touch events
-		this.eventHandler.subscribe(this.gui.TouchControls.DeleteButton.MouseButton1Click, () =>
-			this.tool.deleteSelectedBlock(),
-		);
+		this.eventHandler.subscribe(this.gui.TouchControls.DeleteButton.MouseButton1Click, () => {
+			const highlighted = this.tool.highlightedBlock.get();
+			if (highlighted) this.tool.deleteBlocks([highlighted]);
+		});
 
 		// Delete button
-		this.eventHandler.subscribe(this.tool.selector.blockHighlighted, (block) => {
+		this.eventHandler.subscribe(this.tool.highlightedBlock.changed, (block) => {
 			if (block !== undefined) {
 				this.gui.TouchControls.Visible = true;
 				GuiAnimator.transition(this.gui.TouchControls, 0.1, "left");

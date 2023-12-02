@@ -21,14 +21,17 @@ export default class BuildingController {
 		}
 	}
 
-	public static async deleteBlock(block: Model) {
-		// Send block removing packet
-		const response = await Remotes.Client.GetNamespace("Building").Get("DeleteBlockRequest").CallServerAsync({
-			block: block,
-		});
+	public static async deleteBlock(request: PlayerDeleteBlockRequest) {
+		const response = await Remotes.Client.GetNamespace("Building").Get("Delete").CallServerAsync(request);
 
 		if (response.success) {
-			Signals.BLOCKS.REMOVED.Fire(block);
+			if (request === "all") {
+				Signals.CONTRAPTION.CLEARED.Fire();
+			} else {
+				for (const block of request) {
+					Signals.BLOCKS.REMOVED.Fire(block);
+				}
+			}
 		} else {
 			// Block not removed
 			LogControl.instance.addLine("Delete failed: " + response.message, Color3.fromRGB(255, 100, 100));
@@ -42,15 +45,6 @@ export default class BuildingController {
 
 		if (response.success) Signals.CONTRAPTION.MOVED.Fire(request.vector);
 		else LogControl.instance.addLine("Move failed: " + response.message, Color3.fromRGB(255, 100, 100));
-
-		return response;
-	}
-
-	public static async clearPlot() {
-		const response = await Remotes.Client.GetNamespace("Building").Get("ClearAllRequest").CallServerAsync();
-
-		if (response.success) Signals.CONTRAPTION.CLEARED.Fire();
-		else LogControl.instance.addLine("Clearing all failed: " + response.message, Color3.fromRGB(255, 100, 100));
 
 		return response;
 	}

@@ -9,49 +9,42 @@ export default class DeleteEvent {
 	static initialize(): void {
 		Logger.info("Loading Delete event listener...");
 
-		Remotes.Server.GetNamespace("Building").OnFunction("DeleteBlockRequest", (player, data) =>
-			this.playerDeleteBlock(player, data),
+		Remotes.Server.GetNamespace("Building").OnFunction("Delete", (player, data) =>
+			this.playerDeleteBlocks(player, data),
 		);
-
-		Remotes.Server.GetNamespace("Building").OnFunction("ClearAllRequest", (player) => this.playerClearAll(player));
 	}
 
-	private static playerDeleteBlock(player: Player, data: PlayerDeleteBlockRequest): BuildResponse {
-		const parentPlot = SharedPlots.getPlotByBlock(data.block);
+	private static playerDeleteBlocks(player: Player, blocks: PlayerDeleteBlockRequest): BuildResponse {
+		if (blocks === "all") {
+			const parentPlot = SharedPlots.getPlotByOwnerID(player.UserId);
+			ServerPlots.clearAllBlocks(parentPlot);
 
-		// No plot?
-		if (parentPlot === undefined) {
-			return {
-				success: false,
-				message: "Plot not found",
-			};
+			return { success: true };
 		}
 
-		// Plot is forbidden
-		if (!BuildingManager.isBuildingAllowed(parentPlot, player)) {
-			return {
-				success: false,
-				message: "Building is not permitted",
-			};
+		for (const block of blocks) {
+			const parentPlot = SharedPlots.getPlotByBlock(block);
+
+			// No plot?
+			if (parentPlot === undefined) {
+				return {
+					success: false,
+					message: "Plot not found",
+				};
+			}
+
+			// Plot is forbidden
+			if (!BuildingManager.isBuildingAllowed(parentPlot, player)) {
+				return {
+					success: false,
+					message: "Building is not permitted",
+				};
+			}
+
+			BuildingWelder.unweld(block);
+			block.Destroy();
 		}
 
-		BuildingWelder.unweld(data.block);
-
-		// Terminate block
-		data.block.Destroy();
-
-		return {
-			success: true,
-		};
-	}
-
-	private static playerClearAll(player: Player) {
-		const parentPlot = SharedPlots.getPlotByOwnerID(player.UserId);
-
-		ServerPlots.clearAllBlocks(parentPlot);
-
-		return {
-			success: true,
-		};
+		return { success: true };
 	}
 }

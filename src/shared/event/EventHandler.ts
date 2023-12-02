@@ -1,6 +1,9 @@
+import Signal from "@rbxts/signal";
+
 /** Killable EventHandler for roblox connections */
 export default class EventHandler {
-	private events: RBXScriptConnection[] = [];
+	public readonly allUnsibscribed = new Signal<() => void>();
+	private readonly events: RBXScriptConnection[] = [];
 
 	public size(): number {
 		return this.events.size();

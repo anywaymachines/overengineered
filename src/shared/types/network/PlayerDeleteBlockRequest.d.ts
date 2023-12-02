@@ -1,3 +1,1 @@
-interface PlayerDeleteBlockRequest {
-	block: Model;
-}
+type PlayerDeleteBlockRequest = readonly Model[] | "all";

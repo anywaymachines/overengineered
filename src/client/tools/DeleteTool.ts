@@ -7,59 +7,34 @@ import SoundController from "client/controller/SoundController";
 import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
-import BlockSelector from "./BlockSelector";
-import Signals from "client/event/Signals";
+import { initializeMultiBlockSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
+import ObservableValue from "shared/event/ObservableValue";
 
 export default class DeleteTool extends ToolBase {
 	public readonly onClearAllRequested = new Signal<() => void>();
-	public readonly selector;
+	public readonly highlightedBlock = new ObservableValue<Model | undefined>(undefined);
 
-	constructor() {
-		super();
-
-		this.selector = new BlockSelector(this.eventHandler, this.inputHandler);
-		this.selector.blockSelected.Connect((block) => {
-			if (!block) return;
-
-			if (Signals.INPUT_TYPE.get() === "Desktop") {
-				this.deleteBlock(block);
-			}
-		});
-	}
-
-	protected prepare(): void {
+	protected prepare() {
 		super.prepare();
-		this.selector.prepare();
+
+		initializeSingleBlockSelection(
+			this.eventHandler,
+			this.inputHandler,
+			(block) => this.highlightedBlock.set(block),
+			async (block) => {
+				if (!block) return;
+				// if (Signals.INPUT_TYPE.get() !== "Desktop")  return;
+				await this.deleteBlocks([block]);
+			},
+			() => true,
+		);
+		initializeMultiBlockSelection(this.eventHandler, async (blocks) => {
+			await this.deleteBlocks(blocks);
+		});
 	}
 
 	protected prepareGamepad(): void {
 		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonY, () => this.onClearAllRequested.Fire());
-	}
-
-	public async clearAll() {
-		const removedBlocks = SharedPlots.getPlotBlocks(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId))
-			.GetChildren()
-			.map((block) => this.blockToUndoRequest(block as Model));
-
-		const response = await ActionController.instance.executeOperation(
-			"Plot clear",
-			async () => {
-				for (const block of removedBlocks) await BuildingController.placeBlock(block);
-			},
-			undefined,
-			() => BuildingController.clearPlot(),
-		);
-
-		// Parsing response
-		if (response) {
-			// Block removed
-			task.wait();
-
-			SoundController.getSounds().BuildingMode.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().BuildingMode.BlockDelete.Play();
-		} else {
-			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
-		}
 	}
 
 	private blockToUndoRequest(block: Model) {
@@ -77,19 +52,32 @@ export default class DeleteTool extends ToolBase {
 		return info;
 	}
 
-	public async deleteSelectedBlock() {
-		const selected = this.selector.getHighlightedBlock();
-		if (selected) await this.deleteBlock(selected);
-	}
-	public async deleteBlock(block: Model) {
-		const undoRequest = this.blockToUndoRequest(block);
+	public async deleteBlocks(blocks: readonly Model[] | "all") {
+		const getDeletedBlocks = () => {
+			if (blocks === "all") {
+				return SharedPlots.getPlotBlocks(
+					SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId),
+				).GetChildren() as Model[];
+			}
+
+			return blocks;
+		};
+
+		const deletedBlocks = getDeletedBlocks();
+
+		const undoRequests = deletedBlocks.map((block) => this.blockToUndoRequest(block));
 		const response = await ActionController.instance.executeOperation(
-			"Block removed",
+			blocks === "all" ? "Plot cleared" : "Blocks removed",
 			async () => {
-				await BuildingController.placeBlock(undoRequest);
+				for (const undo of undoRequests) {
+					await BuildingController.placeBlock(undo);
+				}
 			},
-			block.GetPivot().Position,
-			(info) => BuildingController.deleteBlock(BuildingManager.getBlockByPosition(info)!),
+			blocks === "all" ? ("all" as const) : deletedBlocks.map((block) => block.GetPivot().Position),
+			(info) =>
+				BuildingController.deleteBlock(
+					info === "all" ? "all" : info.map((pos) => BuildingManager.getBlockByPosition(pos)!),
+				),
 		);
 
 		// Parsing response
@@ -125,10 +113,5 @@ export default class DeleteTool extends ToolBase {
 
 	public getKeyboardTooltips() {
 		return [];
-	}
-
-	deactivate() {
-		super.deactivate();
-		this.selector.deactivate();
 	}
 }

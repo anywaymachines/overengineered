@@ -82,7 +82,7 @@ export default class Control<T extends GuiObject | Instance = Instance> {
 	}
 
 	/** Return a function that copies the provided object, and destroys it if specified */
-	protected static asTemplate<T extends GuiObject>(object: T, destroyOriginal = true) {
+	public static asTemplate<T extends GuiObject>(object: T, destroyOriginal = true) {
 		const template = object.Clone();
 		if (destroyOriginal) object.Destroy();
 
@@ -94,23 +94,23 @@ export default class Control<T extends GuiObject | Instance = Instance> {
 		return true;
 	}
 
-	private enablePassthrough() {
+	protected enablePassthrough() {
 		if (!this.isVisible()) return;
 
 		this.event.enable();
 		for (const child of this.children) child.enablePassthrough();
 	}
-	private disablePassthrough() {
+	protected disablePassthrough() {
+		for (const child of this.children) child.disablePassthrough();
 		this.event.disable();
 		this.inputHandler.unsubscribeAll();
 		this.eventHandler.unsubscribeAll();
-		for (const child of this.children) child.disablePassthrough();
 	}
-	private destroyPassthrough() {
+	protected destroyPassthrough() {
+		for (const child of this.children) child.destroyPassthrough();
 		this.event.destroy();
 		this.inputHandler.unsubscribeAll();
 		this.eventHandler.unsubscribeAll();
-		for (const child of this.children) child.destroyPassthrough();
 	}
 
 	/** Show the control */

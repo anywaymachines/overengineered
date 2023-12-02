@@ -1,6 +1,7 @@
 import { GuiService, Players, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import GuiController from "client/controller/GuiController";
+import InputController from "client/controller/InputController";
 import InputHandler from "client/event/InputHandler";
 import Signals from "client/event/Signals";
 import BuildingManager from "shared/building/BuildingManager";
@@ -36,7 +37,11 @@ export default class BlockSelector {
 		this.eventHandler.subscribe(Signals.BLOCKS.REMOVED, () => this.updatePosition());
 
 		if (Signals.INPUT_TYPE.get() === "Desktop") {
-			this.eventHandler.subscribe(this.mouse.Button1Down, fireSelected);
+			this.eventHandler.subscribe(this.mouse.Button1Down, () => {
+				if (!InputController.isCtrlPressed()) {
+					fireSelected();
+				}
+			});
 			this.eventHandler.subscribe(this.mouse.Move, () => this.updatePosition());
 		} else if (Signals.INPUT_TYPE.get() === "Gamepad") {
 			// gamepad

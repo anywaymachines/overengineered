@@ -1,0 +1,212 @@
+import { GuiService, Players, Workspace } from "@rbxts/services";
+import Control from "client/base/Control";
+import GuiController from "client/controller/GuiController";
+import InputController from "client/controller/InputController";
+import InputHandler from "client/event/InputHandler";
+import Signals from "client/event/Signals";
+import BuildingManager from "shared/building/BuildingManager";
+import SharedPlots from "shared/building/SharedPlots";
+import EventHandler from "shared/event/EventHandler";
+import PlayerUtils from "shared/utils/PlayerUtils";
+
+export const initializeSingleBlockSelection = (
+	eventHandler: EventHandler,
+	inputHandler: InputHandler,
+	blockHighlighted = (model: Model | undefined) => {},
+	submit = (model: Model | undefined) => {},
+	filter = (target: Model) => true,
+) => {
+	const mouse = Players.LocalPlayer.GetMouse();
+	let highlight: Highlight | undefined;
+
+	const createHighlight = (target: Model) => {
+		destroyHighlight();
+
+		highlight = new Instance("Highlight");
+		highlight.Parent = target;
+		highlight.Adornee = target;
+
+		blockHighlighted(highlight.Parent as Model);
+	};
+
+	const destroyHighlight = () => {
+		highlight?.Destroy();
+		highlight = undefined;
+
+		blockHighlighted(undefined);
+	};
+
+	const updatePosition = () => {
+		// ignore if ESC menu is open
+		if (GuiService.MenuIsOpen) {
+			return;
+		}
+
+		// ignore if not alivec
+		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
+			return;
+		}
+
+		// ignore if over a GUI element
+		if (GuiController.isCursorOnVisibleGui()) {
+			return;
+		}
+
+		const target = mouse.Target;
+
+		// if the same target
+		if (target === highlight?.Parent) {
+			return;
+		}
+
+		destroyHighlight();
+
+		// if no target
+		if (!target) {
+			return;
+		}
+
+		// if target invalid
+		if (!target.Parent || !target.IsDescendantOf(Workspace.Plots)) {
+			return;
+		}
+
+		const parentPlot = SharedPlots.getPlotByBlock(target.Parent as Model);
+
+		// if no plot
+		if (!parentPlot) {
+			return;
+		}
+
+		// wrong plot
+		if (!BuildingManager.isBuildingAllowed(parentPlot, Players.LocalPlayer)) {
+			return;
+		}
+
+		if (!filter(target.Parent as Model)) {
+			return;
+		}
+
+		createHighlight(target.Parent as Model);
+		eventHandler.allUnsibscribed.Once(destroyHighlight);
+	};
+
+	const prepare = () => {
+		const fireSelected = () => submit(highlight?.Parent as Model | undefined);
+
+		eventHandler.subscribe(Signals.BLOCKS.ADDED, () => updatePosition());
+		eventHandler.subscribe(Signals.BLOCKS.REMOVED, () => updatePosition());
+
+		if (Signals.INPUT_TYPE.get() === "Desktop") {
+			eventHandler.subscribe(mouse.Button1Down, () => {
+				if (!InputController.isCtrlPressed()) {
+					fireSelected();
+				}
+			});
+			eventHandler.subscribe(mouse.Move, () => updatePosition());
+		} else if (Signals.INPUT_TYPE.get() === "Gamepad") {
+			// gamepad
+			inputHandler.onKeyDown(Enum.KeyCode.ButtonX, fireSelected);
+			eventHandler.subscribe(Signals.CAMERA.MOVED, () => updatePosition());
+		} else if (Signals.INPUT_TYPE.get() === "Touch") {
+			// touch
+			inputHandler.onTouchTap(() => {
+				updatePosition();
+				fireSelected();
+			});
+		}
+		updatePosition();
+	};
+	prepare();
+};
+
+export const initializeMultiBlockSelection = (
+	eventHandler: EventHandler,
+	onrelease: (blocks: readonly Model[]) => void,
+) => {
+	const camera = Workspace.CurrentCamera!;
+	const mouse = Players.LocalPlayer.GetMouse();
+	const template = Control.asTemplate(GuiController.getGameUI<{ Selection: GuiObject }>().Selection, false);
+
+	const search = (objects: readonly Model[], p1: Vector2, p2: Vector2) => {
+		const to3dSpace = (pos: Vector2) => {
+			return camera.ScreenPointToRay(pos.X, pos.Y).Origin;
+		};
+
+		const calcSlope = (vec: Vector3) => {
+			const rel = camera.CFrame.PointToObjectSpace(vec);
+			return new Vector2(rel.X / -rel.Z, rel.Y / -rel.Z);
+		};
+
+		const swap = (a1: Vector2, a2: Vector2) => {
+			return [
+				new Vector2(math.min(a1.X, a2.X), math.min(a1.Y, a2.Y)),
+				new Vector2(math.max(a1.X, a2.X), math.max(a1.Y, a2.Y)),
+			] as const;
+		};
+
+		const overlaps = (cf: CFrame, a1: Vector2, a2: Vector2) => {
+			const rel = camera.CFrame.ToObjectSpace(cf);
+			const x = rel.X / -rel.Z;
+			const y = rel.Y / -rel.Z;
+
+			return a1.X < x && x < a2.X && a1.Y < y && y < a2.Y && rel.Z < 0;
+		};
+
+		const search = (objs: readonly Model[], p1: Vector3, p2: Vector3) => {
+			let a1 = calcSlope(p1);
+			let a2 = calcSlope(p2);
+			[a1, a2] = swap(a1, a2);
+
+			return objs.filter((obj) => overlaps(obj.GetBoundingBox()[0], a1, a2));
+		};
+
+		return search(objects, to3dSpace(p1), to3dSpace(p2));
+	};
+
+	const start = () => {
+		if (Signals.INPUT_TYPE.get() === "Desktop") {
+			const startpos = new UDim2(0, mouse.X, 0, mouse.Y);
+
+			const selection = template();
+			selection.Position = startpos;
+			selection.Parent = GuiController.getGameUI();
+			selection.Visible = true;
+			selection.Size = new UDim2(0, 0, 0, 0);
+
+			const eventHandler = new EventHandler();
+
+			const searchBlocks = () =>
+				search(
+					SharedPlots.getPlotBlocks(
+						SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId),
+					).GetChildren() as unknown as readonly Model[],
+					new Vector2(startpos.Width.Offset, startpos.Height.Offset),
+					new Vector2(mouse.X, mouse.Y),
+				);
+
+			eventHandler.subscribe(mouse.Move, () => {
+				const endpos = new UDim2(0, mouse.X, 0, mouse.Y).sub(startpos);
+				selection.Size = endpos;
+
+				const inside = searchBlocks();
+				for (const block of inside) {
+					// this.createHighlight(block)
+				}
+			});
+			eventHandler.subscribeOnce(mouse.Button1Up, () => {
+				selection.Destroy();
+				eventHandler.unsubscribeAll();
+
+				const inside = searchBlocks();
+				onrelease(inside);
+			});
+		}
+	};
+
+	eventHandler.subscribe(mouse.Button1Down, () => {
+		if (InputController.isCtrlPressed()) {
+			start();
+		}
+	});
+};
