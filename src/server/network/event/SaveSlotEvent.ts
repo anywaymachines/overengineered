@@ -7,7 +7,7 @@ export default class SaveSlotEvent {
 		Logger.info("Loading Slot event listener...");
 
 		Remotes.Server.GetNamespace("Slots").OnFunction("Save", (player, data) => {
-			const blocksCount = SlotsDatabase.instance.update(
+			const output = SlotsDatabase.instance.update(
 				player.UserId,
 				data.index,
 				(meta) =>
@@ -19,7 +19,10 @@ export default class SaveSlotEvent {
 				data.save,
 			);
 
-			return { success: true, blocks: blocksCount };
+			return {
+				...output,
+				success: true,
+			};
 		});
 	}
 }

@@ -17,9 +17,9 @@ const Remotes = Net.Definitions.Create({
 		Load: Net.Definitions.ServerAsyncFunction<(index: number) => Response>([
 			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 8 }),
 		]),
-		Save: Net.Definitions.ServerAsyncFunction<(data: PlayerSaveSlotRequest) => Response & { blocks?: number }>([
-			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 60 }),
-		]),
+		Save: Net.Definitions.ServerAsyncFunction<
+			(data: PlayerSaveSlotRequest) => Response & { blocks: number | undefined; size: number | undefined }
+		>([Net.Middleware.RateLimit({ MaxRequestsPerMinute: 60 })]),
 	}),
 	Ride: Net.Definitions.Namespace({
 		SetPlayMode: Net.Definitions.ServerAsyncFunction<(mode: PlayModes) => Response>([
@@ -30,6 +30,10 @@ const Remotes = Net.Definitions.Create({
 	Blocks: Net.Definitions.Namespace({
 		DisconnectBlock: Net.Definitions.Namespace({
 			Disconnect: Net.Definitions.ClientToServerEvent<[block: Model]>(),
+		}),
+		RocketEngine: Net.Definitions.Namespace({
+			UpdateSound: Net.Definitions.ClientToServerEvent<[block: Model, volume: number]>(),
+			UpdateParticle: Net.Definitions.ClientToServerEvent<[block: Model, acceleration: number]>(),
 		}),
 	}),
 });

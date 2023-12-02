@@ -10,6 +10,7 @@ import Signal from "@rbxts/signal";
 import GameDefinitions from "shared/GameDefinitions";
 import SlotsMeta from "shared/SlotsMeta";
 import { ButtonControl } from "../controls/Button";
+import { Players } from "@rbxts/services";
 
 type SaveItemDefinition = GuiButton & {
 	ImageLabel: ImageLabel;
@@ -133,7 +134,11 @@ class SavePreview extends Control<SavePreviewDefinition> {
 		});
 
 		blocks.subscribe((value) => {
-			this.gui.HeadingLabel.Text = `Blocks: ${value}`;
+			if (GameDefinitions.DEVELOPERS.includes(Players.LocalPlayer.UserId)) {
+				this.gui.HeadingLabel.Text = `Blocks: ${value}; Size: ${this.slot.get()?.size ?? 0}b`;
+			} else {
+				this.gui.HeadingLabel.Text = `Blocks: ${value}`;
+			}
 		}, true);
 
 		const buttons: ButtonControl[] = [];
@@ -165,6 +170,7 @@ class SavePreview extends Control<SavePreviewDefinition> {
 export type PlayerDataSlot = {
 	readonly updated: Signal<() => void>;
 	blocks: number;
+	size: number;
 	name: string;
 	color: Color3;
 	locked?: boolean;
@@ -281,6 +287,11 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 
 		if (response.blocks !== undefined) {
 			this.preview.slot.get()!.blocks = response.blocks;
+			this.preview.slot.set(this.preview.slot.get(), true);
+		}
+
+		if (response.size !== undefined) {
+			this.preview.slot.get()!.size = response.size;
 			this.preview.slot.set(this.preview.slot.get(), true);
 		}
 	}

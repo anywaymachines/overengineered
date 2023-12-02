@@ -196,14 +196,16 @@ export default class SlotsDatabase {
 		this.setMeta(userId, meta);
 
 		let blocksCount: number | undefined = undefined;
+		let size: number | undefined = undefined;
 		if (saveBlocks) {
 			const plot = SharedPlots.getPlotByOwnerID(userId);
 			const blocks = BlocksSerializer.serialize(plot);
 			this.setBlocks(userId, index, blocks);
 
 			blocksCount = blocks.size();
+			size = HttpService.JSONEncode(blocks).size();
 		}
 
-		return blocksCount;
+		return { blocks: blocksCount, size: size };
 	}
 }

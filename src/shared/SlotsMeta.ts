@@ -16,6 +16,7 @@ export default class SlotsMeta {
 				name: "Autosave",
 				color: [0, 255, 255],
 				blocks: 0,
+				size: 0,
 			};
 		}
 
@@ -23,6 +24,7 @@ export default class SlotsMeta {
 			name: "Slot " + (index + 1),
 			color: [255, 255, 255],
 			blocks: 0,
+			size: 0,
 		};
 	}
 
