@@ -48,7 +48,7 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 				this.gui.Knob as GuiObject,
 				this.value,
 				(value) => {
-					const pos = value / this.value.getRange();
+					const pos = (value - this.value.min) / this.value.getRange();
 					return {
 						Position: new UDim2(this.vertical ? 0.5 : pos, 0, this.vertical ? pos : 0.5, 0),
 					};
@@ -63,7 +63,7 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 				this.gui.Filled as GuiObject,
 				this.value,
 				(value) => {
-					const pos = value / this.value.getRange();
+					const pos = (value - this.value.min) / this.value.getRange();
 					return {
 						Size: new UDim2(this.vertical ? 1 : pos, 0, this.vertical ? pos : 1, 0),
 					};
@@ -91,12 +91,16 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 			if (this.vertical) {
 				const y = this.gui.AbsoluteSize.Y - Players.LocalPlayer.GetMouse().Y;
 				this.value.set(
-					((y - startpos) / this.gui.AbsoluteSize.Y) * this.value.getRange() + this.value.step / 2,
+					((y - startpos) / this.gui.AbsoluteSize.Y) * this.value.getRange() +
+						this.value.min +
+						this.value.step / 2,
 				);
 			} else {
 				const x = Players.LocalPlayer.GetMouse().X;
 				this.value.set(
-					((x - startpos) / this.gui.AbsoluteSize.X) * this.value.getRange() + this.value.step / 2,
+					((x - startpos) / this.gui.AbsoluteSize.X) * this.value.getRange() +
+						this.value.min +
+						this.value.step / 2,
 				);
 			}
 		};

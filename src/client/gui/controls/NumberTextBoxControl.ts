@@ -20,7 +20,7 @@ export default class NumberTextBoxControl extends Control<NumberTextBoxControlDe
 	}
 
 	private commit() {
-		const text = this.gui.Text.gsub("%D", "")[0];
+		const text = this.gui.Text.gsub("[^-0123456789]", "")[0];
 
 		let num = tonumber(text);
 		if (num === undefined) {
