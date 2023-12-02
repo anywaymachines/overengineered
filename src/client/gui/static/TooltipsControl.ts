@@ -2,7 +2,7 @@ import Control from "client/base/Control";
 import GuiController from "client/controller/GuiController";
 import GuiAnimator from "../GuiAnimator";
 import Signals from "client/event/Signals";
-import ToolController from "client/tools/ToolController";
+import ToolController from "client/controller/ToolController";
 import { ListControl } from "../controls/ListControl";
 import ToolBase from "client/base/ToolBase";
 import { UserInputService } from "@rbxts/services";

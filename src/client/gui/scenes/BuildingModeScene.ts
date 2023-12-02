@@ -1,6 +1,6 @@
 import Control from "client/base/Control";
 import ToolBase from "client/base/ToolBase";
-import ToolController from "client/tools/ToolController";
+import ToolController from "client/controller/ToolController";
 import BuildToolScene, { BuildToolSceneDefinition } from "./BuildToolScene";
 import DeleteToolScene, { DeleteToolSceneDefinition } from "./DeleteToolScene";
 import ConfigToolScene, { ConfigToolSceneDefinition } from "./ConfigToolScene";
