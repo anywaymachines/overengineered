@@ -6,19 +6,17 @@ import { ListControl } from "../controls/ListControl";
 import GuiAnimator from "../GuiAnimator";
 import SoundController from "client/controller/SoundController";
 import { GuiService } from "@rbxts/services";
+import { ButtonControl } from "../controls/Button";
 
 type BlockControlDefinition = GuiButton & {
 	TextLabel: TextLabel;
 };
 
 /** Control for choosing a block or a category */
-class ButtonControl extends Control<BlockControlDefinition> {
-	public readonly activated;
-
+class SelectorControl extends ButtonControl<BlockControlDefinition> {
 	constructor(template: BlockControlDefinition, text: string) {
 		super(template);
 
-		this.activated = this.gui.Activated;
 		this.gui.TextLabel.Text = text;
 		this.event.subscribe(this.gui.Activated, () => SoundController.getSounds().Click.Play());
 	}
@@ -53,7 +51,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		this.blocks = blocks;
 		this.categories = categories;
 
-		this.list = new ListControl<GuiObject, ButtonControl>(this.gui.ScrollingFrame);
+		this.list = new ListControl<GuiObject, SelectorControl>(this.gui.ScrollingFrame);
 		this.add(this.list);
 
 		// Prepare templates
@@ -64,7 +62,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 
 	private create(category: AbstractCategory | undefined) {
 		const createPart = (text: string, activated: () => void) => {
-			const control = new ButtonControl(this.itemTemplate(), text);
+			const control = new SelectorControl(this.itemTemplate(), text);
 			control.show();
 			control.activated.Connect(activated);
 			control.activated.Connect(() => SoundController.getSounds().Click.Play());
@@ -84,7 +82,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 				this.selectedCategory.set(undefined);
 			});
 
-			let prev: ButtonControl | undefined;
+			let prev: SelectorControl | undefined;
 			this.blocks
 				.filter((block) => block.getCategory() === category)
 				.forEach((block) => {

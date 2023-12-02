@@ -2,6 +2,7 @@ import Control from "client/base/Control";
 import DeleteTool from "client/tools/DeleteTool";
 import GuiAnimator from "../GuiAnimator";
 import ConfirmPopup from "../popup/ConfirmPopup";
+import { ButtonControl } from "../controls/Button";
 
 export type DeleteToolSceneDefinition = GuiObject & {
 	TouchControls: Frame & {
@@ -60,7 +61,9 @@ export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> 
 		}, true);
 
 		this.event.subscribe(this.tool.onClearAllRequested, () => this.suggestClearAll());
-		this.event.subscribe(this.gui.DeleteAllButton.Activated, () => this.suggestClearAll());
+
+		const deleteAllButton = this.added(new ButtonControl(this.gui.DeleteAllButton), false);
+		this.event.subscribe(deleteAllButton.activated, () => this.suggestClearAll());
 	}
 
 	public show() {

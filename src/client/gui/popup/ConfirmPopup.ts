@@ -4,6 +4,7 @@ import SoundController from "client/controller/SoundController";
 import EventHandler from "shared/event/EventHandler";
 import GuiAnimator from "../GuiAnimator";
 import { GuiService } from "@rbxts/services";
+import { ButtonControl } from "../controls/Button";
 
 export type ConfirmPopupDefinition = GuiObject & {
 	Body: GuiObject & {
@@ -29,8 +30,14 @@ export default class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
 		}>().Popup.ConfirmGui,
 	);
 
+	private readonly confirmButton;
+	private readonly cancelButton;
+
 	constructor(gui: ConfirmPopupDefinition) {
 		super(gui);
+
+		this.confirmButton = this.added(new ButtonControl(gui.Body.ConfirmButton), false);
+		this.cancelButton = this.added(new ButtonControl(gui.Body.CancelButton), false);
 	}
 
 	showPopup(text: string, okFunc: () => void, noFunc: () => void) {
@@ -41,13 +48,13 @@ export default class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
 		const eh = new EventHandler();
 
 		this.gui.Body.HeadingLabel.Text = text;
-		eh.subscribeOnce(this.gui.Body.ConfirmButton.Activated, () => {
+		eh.subscribeOnce(this.confirmButton.activated, () => {
 			eh.unsubscribeAll();
 			SoundController.getSounds().Click.Play();
 			okFunc();
 			this.hide();
 		});
-		eh.subscribeOnce(this.gui.Body.CancelButton.Activated, () => {
+		eh.subscribeOnce(this.cancelButton.activated, () => {
 			eh.unsubscribeAll();
 			SoundController.getSounds().Click.Play();
 			noFunc();

@@ -7,19 +7,17 @@ import BuildingManager from "shared/building/BuildingManager";
 import GuiController from "client/controller/GuiController";
 import Signal from "@rbxts/signal";
 import Popup from "client/base/Popup";
+import { ButtonControl } from "../controls/Button";
 
 type MaterialControlDefinition = GuiButton & {
 	TextLabel: TextLabel;
 };
 
 /** Material viewer button */
-class MaterialControl extends Control<MaterialControlDefinition> {
-	public readonly activated;
-
+class MaterialControl extends ButtonControl<MaterialControlDefinition> {
 	constructor(template: MaterialControlDefinition, text: string) {
 		super(template);
 
-		this.activated = this.gui.Activated;
 		this.gui.TextLabel.Text = text;
 	}
 }

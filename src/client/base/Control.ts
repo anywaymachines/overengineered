@@ -50,6 +50,11 @@ export default class Control<T extends GuiObject | Instance = Instance> {
 		return this.children;
 	}
 
+	protected added<T extends Control>(control: T, setParent = true) {
+		this.add(control, setParent);
+		return control;
+	}
+
 	/** Add a child */
 	public add(control: Control, setParent = true) {
 		this.children.push(control);
@@ -73,7 +78,7 @@ export default class Control<T extends GuiObject | Instance = Instance> {
 	}
 
 	public getAttribute<T extends AttributeValue>(name: string) {
-		return this.gui.GetAttribute(name) as T;
+		return this.gui.GetAttribute(name) as T | undefined;
 	}
 
 	/** Return a function that copies the provided object, and destroys it if specified */
@@ -124,10 +129,10 @@ export default class Control<T extends GuiObject | Instance = Instance> {
 		this.onHide.Fire();
 	}
 
-	getParent() {
+	private getParent() {
 		return this.gui.Parent;
 	}
-	setParent(value: Instance | undefined) {
+	private setParent(value: Instance | undefined) {
 		this.gui.Parent = value;
 		if (!value) this.destroyPassthrough();
 	}

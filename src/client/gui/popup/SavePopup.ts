@@ -9,15 +9,14 @@ import TextBoxControl from "../controls/TextBoxControl";
 import Signal from "@rbxts/signal";
 import GameDefinitions from "shared/GameDefinitions";
 import SlotsMeta from "shared/SlotsMeta";
+import { ButtonControl } from "../controls/Button";
 
 type SaveItemDefinition = GuiButton & {
 	ImageLabel: ImageLabel;
 	TextBox: TextBox;
 };
 
-class SaveItem extends Control<SaveItemDefinition> {
-	public readonly activated;
-
+class SaveItem extends ButtonControl<SaveItemDefinition> {
 	private readonly slot;
 	public readonly selected = new ObservableValue(false);
 	public readonly color = new ObservableValue(new Color3(1, 1, 1));
@@ -28,7 +27,6 @@ class SaveItem extends Control<SaveItemDefinition> {
 		this.slot = slot;
 		this.update();
 
-		this.activated = this.gui.Activated;
 		this.slot.updated.Connect(() => this.update());
 
 		this.selected.subscribe((selected) => {
@@ -111,8 +109,8 @@ class SavePreview extends Control<SavePreviewDefinition> {
 		const name = this.slot.createChild("name", "Save slot");
 		const blocks = this.slot.createChild("blocks", 0) as ReadonlyObservableValue<number>;
 
-		this.onSave = this.gui.SaveButton.Activated;
-		this.onLoad = this.gui.LoadButton.Activated;
+		this.onSave = this.added(new ButtonControl(this.gui.SaveButton), false).activated;
+		this.onLoad = this.added(new ButtonControl(this.gui.LoadButton), false).activated;
 
 		const textbox = new TextBoxControl(this.gui.TextBox);
 		this.add(textbox, false);
@@ -138,16 +136,27 @@ class SavePreview extends Control<SavePreviewDefinition> {
 			this.gui.HeadingLabel.Text = `Blocks: ${value}`;
 		}, true);
 
+		const buttons: ButtonControl[] = [];
+		for (const child of this.gui.ColorButtons.GetChildren()) {
+			if (child.IsA("GuiButton")) {
+				const button = this.added(new ButtonControl(child), false);
+				buttons.push(button);
+
+				button.activated.Connect(() => {
+					color.set(child.BackgroundColor3);
+					this.slot.get()?.updated.Fire();
+				});
+			}
+		}
+
 		this.slot.subscribe((slot) => {
 			this.gui.Visible = slot !== undefined;
 
 			this.gui.TextBox.Interactable = slot?.locked !== true;
 			this.gui.ImageButton.Interactable = slot?.locked !== true;
 			this.gui.SaveButton.Interactable = slot?.locked !== true;
-			for (const child of this.gui.ColorButtons.GetChildren()) {
-				if (child.IsA("GuiButton")) {
-					child.Interactable = slot?.locked !== true;
-				}
+			for (const child of buttons) {
+				child.getGui().Interactable = slot?.locked !== true;
 			}
 		}, true);
 	}
@@ -228,7 +237,8 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 			});
 		});
 
-		this.event.subscribe(this.gui.Body.Body.CancelButton.Activated, () => this.hide());
+		const cancelButton = this.added(new ButtonControl(this.gui.Body.Body.CancelButton), false);
+		this.event.subscribe(cancelButton.activated, () => this.hide());
 	}
 
 	private async loadData() {

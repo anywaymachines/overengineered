@@ -8,6 +8,7 @@ import ToolbarControl, { ToolbarControlDefinition } from "./ToolbarControl";
 import GuiAnimator from "../GuiAnimator";
 import SavePopup from "../popup/SavePopup";
 import PlayModeController from "client/controller/PlayModeController";
+import { ButtonControl } from "../controls/Button";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {
@@ -20,11 +21,15 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 	constructor(gui: ActionBarControlDefinition) {
 		super(gui);
 
-		this.event.subscribe(this.gui.Buttons.Run.Activated, async () => {
+		const runButton = this.added(new ButtonControl(this.gui.Buttons.Run), false);
+		const saveButton = this.added(new ButtonControl(this.gui.Buttons.Save), false);
+		const settingsButton = this.added(new ButtonControl(this.gui.Buttons.Settings), false);
+
+		this.event.subscribe(runButton.activated, async () => {
 			await PlayModeController.instance.requestMode("ride");
 		});
 
-		this.event.subscribe(this.gui.Buttons.Save.Activated, async () => {
+		this.event.subscribe(saveButton.activated, async () => {
 			SavePopup.instance.show();
 		});
 	}

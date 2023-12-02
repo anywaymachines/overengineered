@@ -6,6 +6,7 @@ import GuiAnimator from "../GuiAnimator";
 import BlockSelectionControl, { BlockSelectionControlDefinition } from "../tools/BlockSelection";
 import MaterialChooserControl, { MaterialPreviewControl, MaterialPreviewDefinition } from "../tools/MaterialChooser";
 import SoundController from "client/controller/SoundController";
+import { ButtonControl } from "../controls/Button";
 
 export type BuildToolSceneDefinition = GuiObject & {
 	BlockSelection: BlockSelectionControlDefinition;
@@ -48,8 +49,8 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 			),
 		);
 
-		this.event.subscribe(this.gui.Preview.EditMaterialButton.Activated, () => {
-			SoundController.getSounds().Click.Play();
+		const editMaterialButton = this.added(new ButtonControl(this.gui.Preview.EditMaterialButton), false);
+		this.event.subscribe(editMaterialButton.activated, () => {
 			MaterialChooserControl.instance.show();
 		});
 	}
