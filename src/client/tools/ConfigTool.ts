@@ -1,27 +1,38 @@
-import { GuiService, Players, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
-import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
-import BuildingManager from "shared/building/BuildingManager";
-import SharedPlots from "shared/building/SharedPlots";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
-import PlayerUtils from "shared/utils/PlayerUtils";
+import BlockSelector from "./BlockSelector";
 
 export default class ConfigTool extends ToolBase {
 	public readonly selectedBlocksChanged = new Signal<(selected: Highlight[]) => void>();
 
 	private readonly selected: Highlight[] = [];
-	private highlight?: Highlight;
+	private readonly selector;
+
+	constructor() {
+		super();
+
+		this.selector = new BlockSelector(this.eventHandler, this.inputHandler, (target) => {
+			return (
+				"getConfigDefinitions" in
+				(BlockRegistry.getBlockByID(target.Parent.GetAttribute("id") as string) as
+					| AbstractBlock
+					| ConfigurableBlock)
+			);
+		});
+
+		this.selector.blockSelected.Connect((block) => {
+			this.selectBlock(block);
+		});
+	}
 
 	protected prepare(): void {
 		super.prepare();
-
-		this.eventHandler.subscribe(Signals.BLOCKS.ADDED, () => this.updatePosition());
-		this.eventHandler.subscribe(Signals.BLOCKS.REMOVED, () => this.updatePosition());
+		this.selector.prepare();
 
 		this.eventHandler.subscribe(Signals.BLOCKS.REMOVED, (model) => {
 			const removed = this.selected.filter((sel) => sel.Parent === model);
@@ -35,84 +46,10 @@ export default class ConfigTool extends ToolBase {
 		});
 	}
 
-	protected prepareDesktop(): void {
-		this.eventHandler.subscribe(this.mouse.Button1Down, () =>
-			this.selectBlock(true, InputController.isShiftPressed()),
-		);
-		this.eventHandler.subscribe(this.mouse.Move, () => this.updatePosition());
-	}
+	private selectBlock(block: Model | undefined) {
+		const pc = Signals.INPUT_TYPE.get() === "Desktop";
+		const add = Signals.INPUT_TYPE.get() === "Gamepad" || InputController.isShiftPressed();
 
-	protected prepareTouch(): void {
-		// Touch controls
-		this.inputHandler.onTouchTap(() => this.updatePosition());
-	}
-
-	protected prepareGamepad(): void {
-		// Gamepad buttons controls
-		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonX, () => this.selectBlock());
-
-		// Prepare console events
-		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updatePosition());
-	}
-
-	public updatePosition() {
-		// ERROR: If ESC menu is open - freeze movement
-		if (GuiService.MenuIsOpen) {
-			return;
-		}
-
-		// ERROR: Non-alive players bypass
-		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
-			return;
-		}
-
-		// ERROR: Fix buttons positions
-		if (GuiController.isCursorOnVisibleGui()) {
-			return;
-		}
-
-		const target = this.mouse.Target;
-
-		this.destroyHighlight();
-
-		// ERROR: Mouse is in space
-		if (target === undefined) {
-			return;
-		}
-
-		// ERROR: Useless parts
-		if (target.Parent === undefined || !target.IsDescendantOf(Workspace.Plots)) {
-			return;
-		}
-
-		const parentPlot = SharedPlots.getPlotByBlock(target.Parent as Model);
-
-		// ERROR: No plot?
-		if (parentPlot === undefined) {
-			return;
-		}
-
-		// ERROR: Plot is forbidden
-		if (!BuildingManager.isBuildingAllowed(parentPlot, Players.LocalPlayer)) {
-			return;
-		}
-
-		function isConfigurableBlock(block: AbstractBlock): block is ConfigurableBlock & AbstractBlock {
-			return "getConfigDefinitions" in block;
-		}
-		if (!isConfigurableBlock(BlockRegistry.getBlockByID(target.Parent.GetAttribute("id") as string)!)) {
-			return;
-		}
-
-		// Create highlight
-		this.createHighlight(target);
-
-		if (Signals.INPUT_TYPE.get() === "Touch") {
-			this.selectBlock(false, false);
-		}
-	}
-
-	private selectBlock(pc = false, add = true) {
 		if (pc && !add) {
 			for (const sel of this.selected) sel.Destroy();
 
@@ -120,7 +57,6 @@ export default class ConfigTool extends ToolBase {
 			this.selectedBlocksChanged.Fire(this.selected);
 		}
 
-		const block = this.highlight?.Parent;
 		if (!block) {
 			if (!pc) LogControl.instance.addLine("Block is not targeted!");
 			return;
@@ -151,19 +87,6 @@ export default class ConfigTool extends ToolBase {
 		}
 	}
 
-	public createHighlight(target: BasePart) {
-		this.destroyHighlight();
-
-		this.highlight = new Instance("Highlight");
-		this.highlight.Parent = target.Parent;
-		this.highlight.Adornee = target.Parent;
-	}
-
-	public destroyHighlight() {
-		this.highlight?.Destroy();
-		this.highlight = undefined;
-	}
-
 	public unselectAll() {
 		this.selected.forEach((element) => element.Destroy());
 		this.selected.clear();
@@ -192,13 +115,11 @@ export default class ConfigTool extends ToolBase {
 
 	activate(): void {
 		super.activate();
-		this.updatePosition();
 	}
 
 	deactivate(): void {
 		super.deactivate();
-
-		this.destroyHighlight();
+		this.selector.deactivate();
 		this.unselectAll();
 	}
 }

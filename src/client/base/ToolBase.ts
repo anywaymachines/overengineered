@@ -29,11 +29,11 @@ export default abstract class ToolBase {
 	}
 
 	/** A function for preparing functionality for Desktop */
-	protected abstract prepareDesktop(): void;
+	protected prepareDesktop() {}
 	/** A function for preparing functionality for Touch */
-	protected abstract prepareTouch(): void;
+	protected prepareTouch() {}
 	/** A function for preparing functionality for Gamepad */
-	protected abstract prepareGamepad(): void;
+	protected prepareGamepad() {}
 
 	/** A function for preparing functionality for certain platforms */
 	protected prepare() {

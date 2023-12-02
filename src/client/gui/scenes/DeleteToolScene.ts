@@ -82,12 +82,12 @@ export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> 
 	protected prepareTouch(): void {
 		// Prepare touch events
 		this.eventHandler.subscribe(this.gui.TouchControls.DeleteButton.MouseButton1Click, () =>
-			this.tool.deleteBlock(),
+			this.tool.deleteSelectedBlock(),
 		);
 
 		// Delete button
-		this.eventHandler.subscribe(this.tool.highlight.Changed, () => {
-			if (this.tool.highlight.Value !== undefined) {
+		this.eventHandler.subscribe(this.tool.selector.blockHighlighted, (block) => {
+			if (block !== undefined) {
 				this.gui.TouchControls.Visible = true;
 				GuiAnimator.transition(this.gui.TouchControls, 0.1, "left");
 			} else {

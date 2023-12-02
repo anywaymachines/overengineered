@@ -1,46 +1,39 @@
-import { GuiService, HttpService, Players, ReplicatedFirst, UserInputService, Workspace } from "@rbxts/services";
+import { HttpService, Players } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
-import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
-import Signals from "client/event/Signals";
-import LogControl from "client/gui/static/LogControl";
 import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
-import PlayerUtils from "shared/utils/PlayerUtils";
+import BlockSelector from "./BlockSelector";
+import Signals from "client/event/Signals";
 
 export default class DeleteTool extends ToolBase {
 	public readonly onClearAllRequested = new Signal<() => void>();
+	public readonly selector;
 
-	public highlight: ObjectValue = new Instance("ObjectValue");
+	constructor() {
+		super();
+
+		this.selector = new BlockSelector(this.eventHandler, this.inputHandler);
+		this.selector.blockSelected.Connect((block) => {
+			if (!block) return;
+
+			if (Signals.INPUT_TYPE.get() === "Desktop") {
+				this.deleteBlock(block);
+			}
+		});
+	}
 
 	protected prepare(): void {
 		super.prepare();
-
-		this.eventHandler.subscribe(Signals.BLOCKS.ADDED, () => this.updatePosition());
-		this.eventHandler.subscribe(Signals.BLOCKS.REMOVED, () => this.updatePosition());
-	}
-
-	protected prepareDesktop(): void {
-		this.eventHandler.subscribe(this.mouse.Button1Down, () => this.deleteBlock());
-		this.eventHandler.subscribe(this.mouse.Move, () => this.updatePosition());
-	}
-
-	protected prepareTouch(): void {
-		// Touch controls
-		this.inputHandler.onTouchTap(() => this.updatePosition());
+		this.selector.prepare();
 	}
 
 	protected prepareGamepad(): void {
-		// Gamepad buttons controls
-		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonX, () => this.deleteBlock());
 		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonY, () => this.onClearAllRequested.Fire());
-
-		// Prepare console events
-		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updatePosition());
 	}
 
 	public async clearAll() {
@@ -84,20 +77,18 @@ export default class DeleteTool extends ToolBase {
 		return info;
 	}
 
-	public async deleteBlock() {
-		// ERROR: No block selected
-		if (this.highlight.Value === undefined) {
-			LogControl.instance.addLine("Block is not selected!");
-			return;
-		}
-
-		const undoRequest = this.blockToUndoRequest(this.highlight.Value.Parent as Model);
+	public async deleteSelectedBlock() {
+		const selected = this.selector.getHighlightedBlock();
+		if (selected) await this.deleteBlock(selected);
+	}
+	public async deleteBlock(block: Model) {
+		const undoRequest = this.blockToUndoRequest(block);
 		const response = await ActionController.instance.executeOperation(
 			"Block removed",
 			async () => {
 				await BuildingController.placeBlock(undoRequest);
 			},
-			(this.highlight.Value.Parent as Model).GetPivot().Position,
+			block.GetPivot().Position,
 			(info) => BuildingController.deleteBlock(BuildingManager.getBlockByPosition(info)!),
 		);
 
@@ -108,72 +99,8 @@ export default class DeleteTool extends ToolBase {
 
 			SoundController.getSounds().BuildingMode.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
 			SoundController.getSounds().BuildingMode.BlockDelete.Play();
-
-			this.destroyHighlight();
-			this.updatePosition();
 		}
 	}
-
-	public updatePosition() {
-		// ERROR: If ESC menu is open - freeze movement
-		if (GuiService.MenuIsOpen) {
-			return;
-		}
-
-		// ERROR: Non-alive players bypass
-		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
-			return;
-		}
-
-		// ERROR: Fix buttons positions
-		if (GuiController.isCursorOnVisibleGui()) {
-			return;
-		}
-
-		const target = this.mouse.Target;
-
-		this.destroyHighlight();
-
-		// ERROR: Mouse is in space
-		if (target === undefined) {
-			return;
-		}
-
-		// ERROR: Useless parts
-		if (target.Parent === undefined || !target.IsDescendantOf(Workspace.Plots)) {
-			return;
-		}
-
-		const parentPlot = SharedPlots.getPlotByBlock(target.Parent as Model);
-
-		// ERROR: No plot?
-		if (parentPlot === undefined) {
-			return;
-		}
-
-		// ERROR: Plot is forbidden
-		if (!BuildingManager.isBuildingAllowed(parentPlot, Players.LocalPlayer)) {
-			return;
-		}
-
-		// Create highlight
-		this.createHighlight(target);
-	}
-
-	public createHighlight(target: BasePart) {
-		this.destroyHighlight();
-
-		const instance = new Instance("Highlight");
-		instance.Parent = target.Parent;
-		instance.Adornee = target.Parent;
-		this.highlight.Value = instance;
-	}
-
-	public destroyHighlight() {
-		this.highlight.Value?.Destroy();
-		this.highlight.Value = undefined;
-	}
-
 	getDisplayName(): string {
 		return "Deleting Mode";
 	}
@@ -200,13 +127,8 @@ export default class DeleteTool extends ToolBase {
 		return [];
 	}
 
-	activate(): void {
-		super.activate();
-		this.updatePosition();
-	}
-
-	deactivate(): void {
+	deactivate() {
 		super.deactivate();
-		this.destroyHighlight();
+		this.selector.deactivate();
 	}
 }
