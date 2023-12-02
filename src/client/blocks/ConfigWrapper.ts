@@ -1,4 +1,5 @@
 import { HttpService } from "@rbxts/services";
+import ConfigManager from "client/ConfigManager";
 import Signals from "client/event/Signals";
 
 type ConfigToConfigDefinition<T extends Readonly<Record<string, unknown>>> = {
@@ -13,8 +14,13 @@ export default class ConfigWrapper<T extends Record<string, unknown>> {
 		this.definitions = definitions;
 
 		const configAttribute = block.GetAttribute("config") as string | undefined;
-		this.config =
-			configAttribute !== undefined ? (HttpService.JSONDecode(configAttribute) as T | undefined) : undefined;
+
+		const content =
+			configAttribute !== undefined
+				? (HttpService.JSONDecode(configAttribute) as Record<string, string> | undefined)
+				: undefined;
+
+		this.config = content === undefined ? undefined : (ConfigManager.deserialize(content, definitions) as T);
 	}
 
 	get<TKey extends keyof T>(key: TKey): T[TKey] {
