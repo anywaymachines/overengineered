@@ -5,6 +5,7 @@ import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 import DisconnectBlockLogic from "./logic/DisconnectBlockLogic";
 import WingLogic from "./logic/WingLogic";
 import RocketEngineLogic from "./logic/RocketEngineLogic";
+import MotorBlockLogic from "./logic/MotorBlockLogic";
 
 export type AnyBlockLogic = { new (block: Model): BlockLogic };
 export default class LogicRegistry {
@@ -22,6 +23,7 @@ export default class LogicRegistry {
 
 		// Engines
 		this.attachLogic(BlockRegistry.SMALL_ROCKET_ENIGNE, RocketEngineLogic);
+		this.attachLogic(BlockRegistry.MOTOR_BLOCK, MotorBlockLogic);
 	}
 
 	private static attachLogic(block: AbstractBlock, logic: AnyBlockLogic): void {
