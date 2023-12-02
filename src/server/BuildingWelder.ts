@@ -23,7 +23,7 @@ export default class BuildingWelder {
 
 					for (let y = my; y < size.Y; y += 2) {
 						for (let z = mz; z < size.Z; z += 2) {
-							push(diff.X > 0 ? size.X : 0, y, z);
+							push(diff.X > 0 ? size.X - offset : offset, y, z);
 
 							push(diff.X > 0 ? size.X - offset : offset, y + my * 0.9, z + mz * 0.9);
 							push(diff.X > 0 ? size.X - offset : offset, y + my * 0.9, z - mz * 0.9);
@@ -37,7 +37,7 @@ export default class BuildingWelder {
 
 					for (let x = mx; x < size.X; x += 2) {
 						for (let z = mz; z < size.Z; z += 2) {
-							push(x, diff.Y > 0 ? size.Y : 0, z);
+							push(x, diff.Y > 0 ? size.Y - offset : offset, z);
 
 							push(x + mx * 0.9, diff.Y > 0 ? size.Y - offset : offset, z + mz * 0.9);
 							push(x + mx * 0.9, diff.Y > 0 ? size.Y - offset : offset, z - mz * 0.9);
@@ -51,7 +51,7 @@ export default class BuildingWelder {
 
 					for (let x = mx; x < size.X; x += 2) {
 						for (let y = my; y < size.Y; y += 2) {
-							push(x, y, diff.Z > 0 ? size.Z : 0);
+							push(x, y, diff.Z > 0 ? size.Z - offset : offset);
 
 							push(x + mx * 0.9, y + my * 0.9, diff.Z > 0 ? size.Z - offset : offset);
 							push(x + mx * 0.9, y - my * 0.9, diff.Z > 0 ? size.Z - offset : offset);
