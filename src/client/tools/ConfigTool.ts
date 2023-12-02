@@ -5,12 +5,11 @@ import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
-import BlockSelector from "./BlockSelector";
 import { initializeMultiBlockSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
 
 export default class ConfigTool extends ToolBase {
-	public readonly selectedBlocksChanged = new Signal<(selected: Highlight[]) => void>();
-	private readonly selected: Highlight[] = [];
+	public readonly selectedBlocksChanged = new Signal<(selected: SelectionBox[]) => void>();
+	private readonly selected: SelectionBox[] = [];
 
 	protected prepare() {
 		super.prepare();
@@ -26,7 +25,7 @@ export default class ConfigTool extends ToolBase {
 			async (block) => {
 				if (!block) return;
 				// if (Signals.INPUT_TYPE.get() !== "Desktop")  return;
-				this.selectBlock(block);
+				this.selectBlockByClick(block);
 			},
 			selectionFilter,
 		);
@@ -48,7 +47,17 @@ export default class ConfigTool extends ToolBase {
 		});
 	}
 
-	private selectBlock(block: Model | undefined) {
+	private selectBlock(block: Model) {
+		const instance = new Instance("SelectionBox");
+		instance.Parent = block;
+		instance.Adornee = block;
+		instance.LineThickness = 0.05;
+		instance.Color3 = Color3.fromRGB(0, 255 / 2, 255);
+
+		this.selected.push(instance);
+		this.selectedBlocksChanged.Fire(this.selected);
+	}
+	private selectBlockByClick(block: Model | undefined) {
 		const pc = Signals.INPUT_TYPE.get() === "Desktop";
 		const add = Signals.INPUT_TYPE.get() === "Gamepad" || InputController.isShiftPressed();
 
@@ -64,27 +73,18 @@ export default class ConfigTool extends ToolBase {
 			return;
 		}
 
-		const addHighlight = () => {
-			const instance = new Instance("Highlight");
-			instance.Parent = block;
-			instance.Adornee = block;
-			instance.FillColor = Color3.fromRGB(0, 0, 255);
-
-			this.selected.push(instance);
-			this.selectedBlocksChanged.Fire(this.selected);
-		};
 		const removeOrAddHighlight = () => {
 			const existing = this.selected.findIndex((sel) => sel.Parent === block);
 			if (existing !== -1) {
 				this.selected[existing].Destroy();
 				this.selected.remove(existing);
 				this.selectedBlocksChanged.Fire(this.selected);
-			} else addHighlight();
+			} else this.selectBlock(block);
 		};
 
 		if (pc) removeOrAddHighlight();
 		else {
-			if (add) addHighlight();
+			if (add) this.selectBlock(block);
 			else removeOrAddHighlight();
 		}
 	}

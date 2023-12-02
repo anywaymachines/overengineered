@@ -95,7 +95,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		GuiAnimator.transition(this.gui.DeselectAllButton, 0.22, "down");
 	}
 
-	private updateConfigs(selected: readonly Highlight[]) {
+	private updateConfigs(selected: readonly SelectionBox[]) {
 		function isConfigurableBlock(block: AbstractBlock): block is ConfigurableBlock & AbstractBlock {
 			return "getConfigDefinitions" in block;
 		}

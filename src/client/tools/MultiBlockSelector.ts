@@ -19,16 +19,6 @@ export const initializeSingleBlockSelection = (
 	const mouse = Players.LocalPlayer.GetMouse();
 	let highlight: Highlight | undefined;
 
-	const createHighlight = (target: Model) => {
-		destroyHighlight();
-
-		highlight = new Instance("Highlight");
-		highlight.Parent = target;
-		highlight.Adornee = target;
-
-		blockHighlighted(highlight.Parent as Model);
-	};
-
 	const destroyHighlight = () => {
 		highlight?.Destroy();
 		highlight = undefined;
@@ -87,8 +77,13 @@ export const initializeSingleBlockSelection = (
 			return;
 		}
 
-		createHighlight(target.Parent as Model);
-		eventHandler.allUnsibscribed.Once(destroyHighlight);
+		destroyHighlight();
+
+		highlight = new Instance("Highlight");
+		highlight.Parent = target.Parent;
+		highlight.Adornee = target.Parent;
+
+		blockHighlighted(highlight.Parent as Model);
 	};
 
 	const prepare = () => {
@@ -115,7 +110,9 @@ export const initializeSingleBlockSelection = (
 				fireSelected();
 			});
 		}
+
 		updatePosition();
+		eventHandler.allUnsibscribed.Once(destroyHighlight);
 	};
 	prepare();
 };
@@ -164,6 +161,15 @@ export const initializeMultiBlockSelection = (
 		return search(objects, to3dSpace(p1), to3dSpace(p2));
 	};
 
+	const eh = new EventHandler();
+	const highlights: SelectionBox[] = [];
+	const clearHighlights = () => {
+		for (const highlight of highlights) {
+			highlight.Destroy();
+		}
+		highlights.clear();
+	};
+
 	const start = () => {
 		if (Signals.INPUT_TYPE.get() === "Desktop") {
 			const startpos = new UDim2(0, mouse.X, 0, mouse.Y);
@@ -174,8 +180,6 @@ export const initializeMultiBlockSelection = (
 			selection.Visible = true;
 			selection.Size = new UDim2(0, 0, 0, 0);
 
-			const eventHandler = new EventHandler();
-
 			const searchBlocks = () =>
 				search(
 					SharedPlots.getPlotBlocks(
@@ -185,25 +189,37 @@ export const initializeMultiBlockSelection = (
 					new Vector2(mouse.X, mouse.Y),
 				);
 
-			eventHandler.subscribe(mouse.Move, () => {
-				const endpos = new UDim2(0, mouse.X, 0, mouse.Y).sub(startpos);
-				selection.Size = endpos;
+			eh.subscribe(mouse.Move, () => {
+				selection.Size = new UDim2(0, mouse.X, 0, mouse.Y).sub(startpos);
 
 				const inside = searchBlocks();
+				clearHighlights();
+
 				for (const block of inside) {
-					// this.createHighlight(block)
+					const highlight = new Instance("SelectionBox");
+					highlight.Parent = block;
+					highlight.Adornee = block;
+					highlight.LineThickness = 0.05;
+					highlight.Color3 = Color3.fromRGB(0, 255 / 2, 255);
+
+					highlights.push(highlight);
 				}
 			});
-			eventHandler.subscribeOnce(mouse.Button1Up, () => {
+			eh.subscribeOnce(mouse.Button1Up, () => {
 				selection.Destroy();
-				eventHandler.unsubscribeAll();
+				eh.unsubscribeAll();
+				clearHighlights();
 
 				const inside = searchBlocks();
-				onrelease(inside);
+				if (inside.size() !== 0) {
+					onrelease(inside);
+				}
 			});
 		}
 	};
 
+	eventHandler.allUnsibscribed.Once(clearHighlights);
+	eventHandler.allUnsibscribed.Once(() => eh.unsubscribeAll());
 	eventHandler.subscribe(mouse.Button1Down, () => {
 		if (InputController.isCtrlPressed()) {
 			start();

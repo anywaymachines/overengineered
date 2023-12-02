@@ -37,6 +37,7 @@ export default class EventHandler {
 			event.Disconnect();
 		}
 
+		this.allUnsibscribed.Fire();
 		this.events.clear();
 	}
 }
