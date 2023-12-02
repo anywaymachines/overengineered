@@ -18,7 +18,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<SmallRocke
 
 	// Math
 	private readonly multiplier;
-	private readonly power = 10000;
+	private readonly power = 30_000;
 
 	// Const
 	private readonly maxSoundVolume = 0.5;

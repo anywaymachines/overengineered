@@ -10,6 +10,8 @@ import GuiController from "./controller/GuiController";
 import GameEnvironmentController from "./controller/GameEnvironmentController";
 import RideMode from "./controller/modes/RideMode";
 
+GameEnvironmentController.initialize();
+
 Main.instance.show();
 TooltipsControl.instance.show();
 LogControl.instance.show();
@@ -20,7 +22,6 @@ InputTypeChangeEvent.subscribe();
 
 LogicRegistry.initialize();
 
-GameEnvironmentController.initialize();
 RideMode.initialize();
 
 const guitests = new TestScene(GuiController.getGameUI<{ Tests: TestSceneDefinition }>().Tests);

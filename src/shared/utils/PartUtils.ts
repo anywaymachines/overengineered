@@ -9,6 +9,8 @@ export default class PartUtils {
 
 	static switchDescendantsTransparency(model: Instance, transparency: number) {
 		this.applyToAllParts(model, (part) => {
+			if (part.GetAttribute("static_material") === true) return;
+			if (part.Transparency === 1) return;
 			part.Transparency = transparency;
 		});
 	}
@@ -22,6 +24,7 @@ export default class PartUtils {
 	static switchDescendantsMaterial(model: Instance, material: Enum.Material) {
 		this.applyToAllParts(model, (part) => {
 			if (part.GetAttribute("static_material") === true) return;
+			if (part.Transparency === 1) return;
 			part.Material = material;
 		});
 	}
