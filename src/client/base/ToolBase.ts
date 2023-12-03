@@ -1,70 +1,28 @@
 import { Players } from "@rbxts/services";
 import GuiController from "client/controller/GuiController";
-import InputController from "client/controller/InputController";
-import EventHandler from "shared/event/EventHandler";
-import InputHandler from "client/event/InputHandler";
-import Signals from "client/event/Signals";
+import ComponentBase from "./ComponentBase";
 
 /** An abstract class of tools for working with the world */
-export default abstract class ToolBase {
+export default abstract class ToolBase extends ComponentBase {
 	protected readonly gameUI;
 	protected readonly mouse: Mouse;
 	protected isEquipped = false;
 
-	// Handlers
-	protected readonly eventHandler: EventHandler;
-	protected readonly inputHandler: InputHandler;
-
 	constructor() {
-		this.gameUI = GuiController.getGameUI<unknown>();
+		super();
+
+		this.gameUI = GuiController.getGameUI<ScreenGui>();
 		this.mouse = Players.LocalPlayer.GetMouse();
-
-		this.eventHandler = new EventHandler();
-		this.inputHandler = new InputHandler();
 	}
 
-	/** The function that is called when changing the input type */
-	protected inputTypeChanged(): void {
-		this.prepare();
-	}
-
-	/** A function for preparing functionality for Desktop */
-	protected prepareDesktop() {}
-	/** A function for preparing functionality for Touch */
-	protected prepareTouch() {}
-	/** A function for preparing functionality for Gamepad */
-	protected prepareGamepad() {}
-
-	/** A function for preparing functionality for certain platforms */
-	protected prepare() {
-		// Terminate exist events
-		this.eventHandler.unsubscribeAll();
-		this.inputHandler.unsubscribeAll();
-
-		// Required event
-		this.eventHandler.subscribeOnce(Signals.INPUT_TYPE_CHANGED_EVENT, () => this.inputTypeChanged());
-
-		// Call init
-		const events = {
-			Desktop: () => this.prepareDesktop(),
-			Touch: () => this.prepareTouch(),
-			Gamepad: () => this.prepareGamepad(),
-		};
-
-		events[InputController.inputType]();
-	}
-
-	/** Called when the tool is activated */
-	activate(): void {
+	public enable() {
 		this.isEquipped = true;
-		this.prepare();
+		super.enable();
 	}
 
-	/** Called when the tool is de-activated */
-	deactivate(): void {
+	public disable() {
 		this.isEquipped = false;
-		this.eventHandler.unsubscribeAll();
-		this.inputHandler.unsubscribeAll();
+		super.disable();
 	}
 
 	/** The name of the tool, for example: `Example Mode` */
@@ -76,6 +34,6 @@ export default abstract class ToolBase {
 	/** Description of the tool, for example: `Splits blocks into atoms` */
 	abstract getShortDescription(): string;
 
-	public abstract getGamepadTooltips(): { key: Enum.KeyCode; text: string }[];
-	public abstract getKeyboardTooltips(): { keys: string[]; text: string }[];
+	public abstract getGamepadTooltips(): readonly { key: Enum.KeyCode; text: string }[];
+	public abstract getKeyboardTooltips(): readonly { keys: string[]; text: string }[];
 }

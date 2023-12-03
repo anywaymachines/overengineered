@@ -20,8 +20,8 @@ export default class ToolController {
 			if (prev) Signals.TOOL.UNEQUIPPED.Fire(prev);
 			if (tool) Signals.TOOL.EQUIPPED.Fire(tool);
 
-			prev?.deactivate();
-			tool?.activate();
+			prev?.disable();
+			tool?.enable();
 		});
 
 		this.tools.push(this.buildTool);

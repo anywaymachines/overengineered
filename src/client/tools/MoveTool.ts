@@ -9,7 +9,7 @@ import SharedPlots from "shared/building/SharedPlots";
 
 /** A tool for moving the entire building as a whole */
 export default class MoveTool extends ToolBase {
-	private MoveExtent?: BasePart;
+	private MoveExtent?: MoveHandles;
 	private XHandles?: Handles;
 	private YHandles?: Handles;
 	private ZHandles?: Handles;
@@ -51,15 +51,15 @@ export default class MoveTool extends ToolBase {
 		this.MoveExtent.Parent = Workspace;
 
 		this.MoveExtent.Size = blocks.GetExtentsSize();
-		(this.MoveExtent as MoveHandles).SelectionBox.Adornee = blocks;
+		this.MoveExtent.SelectionBox.Adornee = blocks;
 
-		this.XHandles = (this.MoveExtent as MoveHandles).XHandles;
-		this.YHandles = (this.MoveExtent as MoveHandles).YHandles;
-		this.ZHandles = (this.MoveExtent as MoveHandles).ZHandles;
+		this.XHandles = this.MoveExtent.XHandles;
+		this.YHandles = this.MoveExtent.YHandles;
+		this.ZHandles = this.MoveExtent.ZHandles;
 
-		this.XHandles.Parent = this.gameUI as unknown as ScreenGui;
-		this.YHandles.Parent = this.gameUI as unknown as ScreenGui;
-		this.ZHandles.Parent = this.gameUI as unknown as ScreenGui;
+		this.XHandles.Parent = this.gameUI;
+		this.YHandles.Parent = this.gameUI;
+		this.ZHandles.Parent = this.gameUI;
 
 		this.updateVisibility();
 
@@ -109,12 +109,8 @@ export default class MoveTool extends ToolBase {
 		this.eventHandler.subscribe(Signals.CONTRAPTION.MOVED, () => this.createHandles());
 	}
 
-	activate() {
-		super.activate();
-	}
-
-	deactivate() {
-		super.deactivate();
+	public disable() {
+		super.disable();
 		this.destroyHandles();
 	}
 

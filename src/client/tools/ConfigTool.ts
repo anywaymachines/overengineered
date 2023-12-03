@@ -115,12 +115,8 @@ export default class ConfigTool extends ToolBase {
 		return [];
 	}
 
-	activate(): void {
-		super.activate();
-	}
-
-	deactivate(): void {
-		super.deactivate();
+	public disable() {
+		super.disable();
 		this.unselectAll();
 	}
 }

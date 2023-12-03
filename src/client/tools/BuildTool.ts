@@ -356,16 +356,14 @@ export default class BuildTool extends ToolBase {
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updatePosition());
 	}
 
-	activate(): void {
-		super.activate();
+	public enable() {
+		super.enable();
 		this.prepareVisual();
 	}
+	public disable() {
+		super.disable();
 
-	deactivate(): void {
-		super.deactivate();
 		this.previewBlock?.Destroy();
-
-		// Reset rotation
 		this.previewBlockRotation = new CFrame();
 	}
 

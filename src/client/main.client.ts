@@ -2,7 +2,6 @@ import PlayerStateEvent from "./event/PlayerStateEvent";
 import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
 import LogControl from "./gui/static/LogControl";
 import TooltipsControl from "./gui/static/TooltipsControl";
-import PlaymodeSceneController from "./PlaymodeSceneController";
 import ActionController from "./controller/ActionController";
 import LogicRegistry from "./blocks/LogicRegistry";
 import TestScene, { TestSceneDefinition } from "./gui/scenes/TestScene";
