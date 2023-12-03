@@ -61,7 +61,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 		this.buyNewTemplate = Control.asTemplate(this.gui.BuyNewTemplate);
 
 		this.slots = new Control<SaveSlotsDefinition, SaveItem>(this.gui);
-		this.add(this.slots, false);
+		this.add(this.slots);
 
 		this.data.subscribe((data) => {
 			if (!data) return;
@@ -109,11 +109,11 @@ class SavePreview extends Control<SavePreviewDefinition> {
 		const name = this.slot.createChild("name", "Save slot");
 		const blocks = this.slot.createChild("blocks", 0) as ReadonlyObservableValue<number>;
 
-		this.onSave = this.added(new ButtonControl(this.gui.SaveButton), false).activated;
-		this.onLoad = this.added(new ButtonControl(this.gui.LoadButton), false).activated;
+		this.onSave = this.added(new ButtonControl(this.gui.SaveButton)).activated;
+		this.onLoad = this.added(new ButtonControl(this.gui.LoadButton)).activated;
 
 		const textbox = new TextBoxControl(this.gui.TextBox);
-		this.add(textbox, false);
+		this.add(textbox);
 		textbox.text.bindTo(name);
 
 		for (const child of this.gui.ColorButtons.GetChildren()) {
@@ -143,7 +143,7 @@ class SavePreview extends Control<SavePreviewDefinition> {
 		const buttons: ButtonControl[] = [];
 		for (const child of this.gui.ColorButtons.GetChildren()) {
 			if (child.IsA("GuiButton")) {
-				const button = this.added(new ButtonControl(child), false);
+				const button = this.added(new ButtonControl(child));
 				buttons.push(button);
 
 				button.activated.Connect(() => {
@@ -208,10 +208,10 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 
 		this.slots = new SaveSlots(this.gui.Body.Body.ScrollingFrame);
 		this.slots.data.bindTo(this.data);
-		this.add(this.slots, false);
+		this.add(this.slots);
 
 		this.preview = new SavePreview(this.gui.Body.Preview);
-		this.add(this.preview, false);
+		this.add(this.preview);
 
 		this.slots.selectedSlot.subscribe((index) => {
 			const data = this.data.get();
@@ -242,7 +242,7 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 			});
 		});
 
-		const cancelButton = this.added(new ButtonControl(this.gui.Body.Body.CancelButton), false);
+		const cancelButton = this.added(new ButtonControl(this.gui.Body.Body.CancelButton));
 		this.event.subscribe(cancelButton.activated, () => this.hide());
 	}
 
@@ -267,7 +267,10 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 	}
 
 	public async show() {
-		if (!this.data.get()) await this.loadData();
+		if (!this.data.get()) {
+			await this.loadData();
+		}
+
 		super.show();
 	}
 

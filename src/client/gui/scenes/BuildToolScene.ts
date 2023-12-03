@@ -49,7 +49,7 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 			),
 		);
 
-		const editMaterialButton = this.added(new ButtonControl(this.gui.Preview.EditMaterialButton), false);
+		const editMaterialButton = this.added(new ButtonControl(this.gui.Preview.EditMaterialButton));
 		this.event.subscribe(editMaterialButton.activated, () => {
 			MaterialChooserControl.instance.show();
 		});

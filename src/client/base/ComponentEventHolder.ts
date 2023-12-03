@@ -98,14 +98,14 @@ export default class ComponentEventHolder {
 		if (executeImmediately) callback(observable.get(), observable.get());
 	}
 
+	/* eslint-disable @typescript-eslint/no-this-alias */
 	public destroy() {
 		this.disable();
 
-		for (const key of ["All", "Desktop", "Gamepad", "Touch"] as const) {
-			delete this.events[key];
-			delete this.eventsOnce[key];
-		}
-
-		this.disconnect();
+		const tis = this;
+		delete (this as unknown as { prepareEvents?: typeof tis.prepareEvents }).prepareEvents;
+		delete (this as unknown as { events?: typeof tis.events }).events;
+		delete (this as unknown as { eventsOnce?: typeof tis.eventsOnce }).eventsOnce;
+		delete (this as unknown as { subscribed?: typeof tis.subscribed }).subscribed;
 	}
 }

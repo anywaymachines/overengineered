@@ -36,8 +36,8 @@ export default class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
 	constructor(gui: ConfirmPopupDefinition) {
 		super(gui);
 
-		this.confirmButton = this.added(new ButtonControl(gui.Body.ConfirmButton), false);
-		this.cancelButton = this.added(new ButtonControl(gui.Body.CancelButton), false);
+		this.confirmButton = this.added(new ButtonControl(gui.Body.ConfirmButton));
+		this.cancelButton = this.added(new ButtonControl(gui.Body.CancelButton));
 	}
 
 	showPopup(text: string, okFunc: () => void, noFunc: () => void) {

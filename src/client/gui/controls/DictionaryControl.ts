@@ -14,23 +14,23 @@ export class DictionaryControl<T extends GuiObject, TKey, TValue extends Control
 	}
 
 	/** Add a child */
-	addKeyed(key: TKey, child: TValue, setParent = true) {
+	addKeyed(key: TKey, child: TValue) {
 		this.keyedChildren.set(key, child);
-		this.add(child, setParent);
+		this.add(child);
 	}
 
 	/** Remove a child */
-	removeKeyed(key: TKey, setParent = true) {
+	removeKeyed(key: TKey) {
 		const child = this.keyedChildren.get(key);
 		if (!child) return;
 
 		this.keyedChildren.delete(key);
-		this.remove(child, setParent);
+		this.remove(child);
 	}
 
 	/** Clear all added children */
-	clear(setParent = true) {
+	clear() {
 		this.keyedChildren.clear();
-		super.clear(setParent);
+		super.clear();
 	}
 }

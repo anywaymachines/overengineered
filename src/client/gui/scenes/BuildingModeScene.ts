@@ -21,9 +21,9 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 	constructor(gui: ActionBarControlDefinition) {
 		super(gui);
 
-		const runButton = this.added(new ButtonControl(this.gui.Buttons.Run), false);
-		const saveButton = this.added(new ButtonControl(this.gui.Buttons.Save), false);
-		const settingsButton = this.added(new ButtonControl(this.gui.Buttons.Settings), false);
+		const runButton = this.added(new ButtonControl(this.gui.Buttons.Run));
+		const saveButton = this.added(new ButtonControl(this.gui.Buttons.Save));
+		const settingsButton = this.added(new ButtonControl(this.gui.Buttons.Settings));
 
 		this.event.subscribe(runButton.activated, async () => {
 			await PlayModeController.instance.requestMode("ride");

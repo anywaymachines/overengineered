@@ -48,7 +48,7 @@ class MaterialChoosePart extends Control<MaterialChoosePartDefinition> {
 		this.selectedMaterial = new ObservableValue<Enum.Material>(materials[0]);
 
 		this.list = new DictionaryControl<GuiObject, Enum.Material, MaterialControl>(this.gui.ScrollingFrame);
-		this.add(this.list, false);
+		this.add(this.list);
 
 		const color = this.gui.ScrollingFrame.Template.BackgroundColor3;
 
@@ -233,15 +233,15 @@ export default class MaterialChooserControl extends Popup<MaterialChooserControl
 		super(gui);
 
 		const chooser = new MaterialChoosePart(gui.Body.Body, materials);
-		this.add(chooser, false);
+		this.add(chooser);
 		this.selectedMaterial = chooser.selectedMaterial;
 
 		const color = new MaterialColorChooseControl(gui.Body.Color);
-		this.add(color, false);
+		this.add(color);
 		this.selectedColor = color.selectedColor;
 
 		const preview = new MaterialPreviewControl(gui.Body.Preview, this.selectedMaterial, this.selectedColor);
-		this.add(preview, false);
+		this.add(preview);
 
 		this.event.subscribe(chooser.canceled, () => {
 			if (this.prevData) {

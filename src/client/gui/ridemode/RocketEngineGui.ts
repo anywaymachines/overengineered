@@ -14,7 +14,7 @@ export default class RocketEngineGui extends Control<RocketEngineGuiDefinition> 
 
 		this.slider = new SliderControl(this.gui, 0, 1, 0.01);
 		this.slider.getGui().Active = false;
-		this.add(this.slider, false);
+		this.add(this.slider);
 
 		this.event.subscribe(RunService.Heartbeat, () => {
 			const avg: number[] = [];

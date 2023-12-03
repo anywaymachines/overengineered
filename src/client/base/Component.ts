@@ -1,17 +1,17 @@
 import ComponentBase from "./ComponentBase";
+import ComponentContainer from "./ComponentContainer";
 
 /** A component that controls an Instance and has children. */
 export default class Component<
 	T extends Instance = Instance,
 	TChild extends ComponentBase = ComponentBase,
-> extends ComponentBase {
-	private readonly children: TChild[] = [];
+> extends ComponentContainer<TChild> {
 	protected readonly instance: T;
 
 	constructor(instance: T) {
 		super();
 		this.instance = instance;
-		this.event.onPrepare(() => this.prepare());
+		this.instance.Destroying.Connect(() => this.destroy());
 	}
 
 	/** Checks if the child exists on an Instance */
@@ -31,68 +31,18 @@ export default class Component<
 		return this.instance;
 	}
 
-	/** Returns a list of added children */
-	public getChildren(): readonly TChild[] {
-		return this.children;
-	}
+	/** Add a child */
+	public add(instance: TChild) {
+		super.add(instance);
 
-	/** Enable component events, for self and every child */
-	public enable() {
-		super.enable();
-
-		for (const child of this.getChildren()) {
-			child.enable();
+		if (instance instanceof Component && instance.getInstance().Parent === undefined) {
+			instance.getInstance().Parent = this.instance;
 		}
 	}
-	/** Disable component events, for self and every child */
-	public disable() {
-		for (const child of this.getChildren()) {
-			child.disable();
-		}
 
-		super.disable();
-	}
-	/** Disable component events, destroy the Instance and free the memory, for self and every child */
+	/** Disable component events, destroy the Instance and free the memory */
 	public destroy() {
-		for (const child of this.getChildren()) {
-			child.destroy();
-		}
-
 		super.destroy();
 		this.instance.Parent = undefined;
-	}
-
-	/** Add a child and return it */
-	protected added<T extends TChild>(instance: T, setParent = true) {
-		this.add(instance, setParent);
-		return instance;
-	}
-
-	/** Add a child */
-	public add(instance: TChild, setParent = true) {
-		this.children.push(instance);
-		if (this.isEnabled()) instance.enable();
-		if (setParent && instance instanceof Component) {
-			instance.instance.Parent = this.instance;
-		}
-	}
-
-	/** Remove a child */
-	public remove(child: TChild, setParent = true) {
-		const index = this.children.indexOf(child);
-		if (index === -1) return;
-
-		this.children.remove(index);
-		if (setParent) {
-			child.destroy();
-		}
-	}
-
-	/**
-	 * Clear all added children.
-	 * Removes only children that have been added using this.add()
-	 */
-	public clear(setParents = true) {
-		[...this.children].forEach((child) => this.remove(child, setParents));
 	}
 }

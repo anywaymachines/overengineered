@@ -7,7 +7,7 @@ import ComponentEventHolder from "./ComponentEventHolder";
  * Base of any component.
  * Handles events and signals which can be enabled or disabled.
  */
-export default abstract class ComponentBase {
+export default class ComponentBase {
 	/** Main event handler. Does not register events until enabled and reregisters events when input type changes. */
 	protected readonly event = new ComponentEventHolder();
 

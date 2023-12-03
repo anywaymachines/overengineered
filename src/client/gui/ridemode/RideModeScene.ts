@@ -11,7 +11,7 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 	constructor(gui: ActionBarControlDefinition) {
 		super(gui);
 
-		const stopButton = this.added(new ButtonControl(this.gui.Stop), false);
+		const stopButton = this.added(new ButtonControl(this.gui.Stop));
 		this.event.subscribe(stopButton.activated, async () => {
 			await PlayModeController.instance.requestMode("build");
 		});
@@ -34,7 +34,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		this.actionbar.show();
 
 		const blocksgui = new Control(this.gui);
-		this.add(blocksgui, false);
+		this.add(blocksgui);
 
 		const torque = new RocketEngineGui(this.gui.Torque);
 		this.add(torque);

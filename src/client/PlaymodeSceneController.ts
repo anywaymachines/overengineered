@@ -1,6 +1,5 @@
 import Control from "./base/Control";
 import Popup from "./base/Popup";
-import GuiController from "./controller/GuiController";
 import PlayerController from "./controller/PlayerController";
 import Signals from "./event/Signals";
 import BuildingModeScene, { BuildingModeSceneDefinition } from "./gui/scenes/BuildingModeScene";
@@ -15,20 +14,18 @@ export type MainDefinition = ScreenGui & {
 };
 
 /** Control that controls playmode scenes */
-export default class Main extends Component<MainDefinition> {
-	public static readonly instance = new Main(GuiController.getGameUI<MainDefinition>());
-
+export default class PlaymodeSceneController extends Component<MainDefinition> {
 	private readonly scenes: Readonly<Record<PlayModes, Control>>;
 
 	constructor(gui: MainDefinition) {
 		super(gui);
 
 		const buildingMode = new BuildingModeScene(gui.BuildingMode);
-		this.add(buildingMode, false);
+		this.add(buildingMode);
 
 		const rideMode = new RideModeScene(gui.RideMode);
 		rideMode.hide();
-		this.add(buildingMode, false);
+		this.add(buildingMode);
 
 		this.scenes = {
 			build: buildingMode,

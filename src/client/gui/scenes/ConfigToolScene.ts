@@ -71,7 +71,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		this.sliderTemplate = Control.asTemplate(this.gui.ParamsSelection.Buttons.SliderTemplate);
 
 		this.list = new Control(this.gui.ParamsSelection.Buttons);
-		this.add(this.list, false);
+		this.add(this.list);
 
 		tool.selectedBlocksChanged.Connect((selected) => {
 			this.updateConfigs(selected);
