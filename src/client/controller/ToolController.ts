@@ -5,18 +5,22 @@ import DeleteTool from "../tools/DeleteTool";
 import MoveTool from "../tools/MoveTool";
 import ObservableValue from "shared/event/ObservableValue";
 import Signals from "client/event/Signals";
+import ComponentBase from "client/base/ComponentBase";
+import TooltipsControl from "client/gui/static/TooltipsControl";
 
-export default class ToolController {
-	public static readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);
-	public static readonly tools: ToolBase[] = [];
+export default class ToolController extends ComponentBase {
+	public readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);
+	public readonly tools: ToolBase[] = [];
 
-	public static readonly buildTool = new BuildTool();
-	public static readonly moveTool = new MoveTool();
-	public static readonly deleteTool = new DeleteTool();
-	public static readonly configTool = new ConfigTool();
+	public readonly buildTool = new BuildTool();
+	public readonly moveTool = new MoveTool();
+	public readonly deleteTool = new DeleteTool();
+	public readonly configTool = new ConfigTool();
 
-	static {
-		ToolController.selectedTool.subscribe((tool, prev) => {
+	constructor() {
+		super();
+
+		this.selectedTool.subscribe((tool, prev) => {
 			if (prev) Signals.TOOL.UNEQUIPPED.Fire(prev);
 			if (tool) Signals.TOOL.EQUIPPED.Fire(tool);
 
@@ -28,5 +32,7 @@ export default class ToolController {
 		this.tools.push(this.moveTool);
 		this.tools.push(this.deleteTool);
 		this.tools.push(this.configTool);
+
+		this.selectedTool.subscribe((tool) => TooltipsControl.instance.updateControlTooltips(tool), true);
 	}
 }

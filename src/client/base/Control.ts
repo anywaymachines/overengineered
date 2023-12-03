@@ -1,10 +1,11 @@
 import Signal from "@rbxts/signal";
 import Component from "./Component";
+import ComponentBase from "./ComponentBase";
 
 /** A component that is a GUI element */
 export default class Control<
 	T extends GuiObject = GuiObject,
-	TChild extends Component = Component<GuiObject>,
+	TChild extends ComponentBase = ComponentBase,
 > extends Component<T, TChild> {
 	/** Signal that fires when this element is shown */
 	public readonly onShow = new Signal<() => void>();
@@ -12,14 +13,14 @@ export default class Control<
 	/** Signal that fires when this element is hidden */
 	public readonly onHide = new Signal<() => void>();
 
-	private enabled;
+	private visible;
 	protected readonly gui: T;
 
 	constructor(gui: T) {
 		super(gui);
 
 		this.gui = gui;
-		this.enabled = gui.Visible;
+		this.visible = gui.Visible;
 	}
 
 	public getGui() {
@@ -33,12 +34,12 @@ export default class Control<
 
 	/** Is control visible */
 	public isVisible() {
-		return this.enabled;
+		return this.visible;
 	}
 
 	/** Show the control and enable it with the children */
 	public show() {
-		this.enabled = true;
+		this.visible = true;
 		this.instance.Visible = true;
 
 		this.enable();
@@ -47,7 +48,7 @@ export default class Control<
 
 	/** Hide the control and disable it with the children */
 	public hide() {
-		this.enabled = false;
+		this.visible = false;
 		this.instance.Visible = false;
 
 		this.disable();

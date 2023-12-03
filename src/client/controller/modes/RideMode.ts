@@ -1,14 +1,16 @@
-import BlockLogicController from "../BlockLogicController";
-import PlayModeController from "../PlayModeController";
-import SoundController from "../SoundController";
+import PlayMode from "./PlayMode";
+import RideModeScene, { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
+import GuiController from "../GuiController";
 
-export default class RideMode {
-	public static initialize() {
-		PlayModeController.instance.playmode.subscribe((mode: PlayModes | undefined, prev: PlayModes | undefined) => {
-			if (prev === "build" && mode === "ride") {
-				BlockLogicController.setupBlocks();
-				SoundController.getSounds().RideMode.RideStart.Play();
-			}
-		});
+export default class RideMode extends PlayMode {
+	constructor() {
+		super();
+
+		const rideMode = new RideModeScene(GuiController.getGameUI<{ RideMode: RideModeSceneDefinition }>().RideMode);
+		this.add(rideMode);
+	}
+
+	getName(): PlayModes {
+		return "ride";
 	}
 }

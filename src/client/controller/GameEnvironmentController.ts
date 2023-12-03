@@ -1,6 +1,5 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
 import SharedPlots from "shared/building/SharedPlots";
-import PlayModeController from "./PlayModeController";
 import EventHandler from "shared/event/EventHandler";
 import Signals from "client/event/Signals";
 

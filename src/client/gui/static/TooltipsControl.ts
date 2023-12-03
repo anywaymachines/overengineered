@@ -2,7 +2,6 @@ import Control from "client/base/Control";
 import GuiController from "client/controller/GuiController";
 import GuiAnimator from "../GuiAnimator";
 import Signals from "client/event/Signals";
-import ToolController from "client/controller/ToolController";
 import ToolBase from "client/base/ToolBase";
 import { UserInputService } from "@rbxts/services";
 
@@ -50,17 +49,12 @@ export default class TooltipsControl extends Control<
 		this.keyboardTooltipTemplate = Control.asTemplate(this.gui.KeyboardTemplate);
 		this.gamepadTooltipTemplate = Control.asTemplate(this.gui.GamepadTemplate);
 
-		this.event.subscribeObservable(ToolController.selectedTool, (tool) => {
-			this.updateControlTooltips(tool);
-		});
-
 		this.event.onPrepare((inputType) => {
-			this.updateControlTooltips(ToolController.selectedTool.get());
 			this.simpleTooltips.forEach((element) => this.processTooltip(element, inputType));
 		});
 	}
 
-	private updateControlTooltips(tool: ToolBase | undefined) {
+	public updateControlTooltips(tool: ToolBase | undefined) {
 		this.clear();
 		if (!tool) return;
 

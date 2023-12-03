@@ -7,8 +7,8 @@ import ConfigToolScene, { ConfigToolSceneDefinition } from "./ConfigToolScene";
 import ToolbarControl, { ToolbarControlDefinition } from "./ToolbarControl";
 import GuiAnimator from "../GuiAnimator";
 import SavePopup from "../popup/SavePopup";
-import PlayModeController from "client/controller/PlayModeController";
 import { ButtonControl } from "../controls/Button";
+import { requestMode } from "client/controller/modes/PlayModeRequest";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {
@@ -26,7 +26,7 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 		const settingsButton = this.added(new ButtonControl(this.gui.Buttons.Settings));
 
 		this.event.subscribe(runButton.activated, async () => {
-			await PlayModeController.instance.requestMode("ride");
+			await requestMode("ride");
 		});
 
 		this.event.subscribe(saveButton.activated, async () => {
@@ -50,7 +50,7 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 
 	private readonly scenes = new Map<ToolBase, Control>();
 
-	constructor(gui: BuildingModeSceneDefinition) {
+	constructor(gui: BuildingModeSceneDefinition, tools: ToolController) {
 		super(gui);
 
 		this.actionbar = new ActionBarControl(gui.ActionBarGui);
@@ -58,7 +58,7 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 		this.actionbar.show();
 
 		this.event.subscribeObservable(
-			ToolController.selectedTool,
+			tools.selectedTool,
 			(tool) => {
 				if (tool) {
 					this.actionbar.hide();
@@ -70,26 +70,17 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 			true,
 		);
 
-		this.toolbar = new ToolbarControl(gui.ToolbarGui);
+		this.toolbar = new ToolbarControl(tools, gui.ToolbarGui);
 		this.add(this.toolbar);
 		this.toolbar.show();
 
-		this.scenes.set(
-			ToolController.buildTool,
-			new BuildToolScene(this.gui.Tools.BuildToolGui, ToolController.buildTool),
-		);
-		this.scenes.set(
-			ToolController.deleteTool,
-			new DeleteToolScene(this.gui.Tools.DeleteToolGui, ToolController.deleteTool),
-		);
-		this.scenes.set(
-			ToolController.configTool,
-			new ConfigToolScene(this.gui.Tools.ConfigToolGui, ToolController.configTool),
-		);
+		this.scenes.set(tools.buildTool, new BuildToolScene(this.gui.Tools.BuildToolGui, tools.buildTool));
+		this.scenes.set(tools.deleteTool, new DeleteToolScene(this.gui.Tools.DeleteToolGui, tools.deleteTool));
+		this.scenes.set(tools.configTool, new ConfigToolScene(this.gui.Tools.ConfigToolGui, tools.configTool));
 
 		this.scenes.forEach((scene) => this.add(scene));
 
-		ToolController.selectedTool.subscribe((tool, prev) => {
+		tools.selectedTool.subscribe((tool, prev) => {
 			const newscene = tool && this.scenes.get(tool);
 			const prevscene = prev && this.scenes.get(prev);
 

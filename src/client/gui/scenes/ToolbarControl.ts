@@ -16,18 +16,18 @@ export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition
 	private readonly activeColor = Color3.fromHex("#3c4250");
 	private readonly inactiveColor = Color3.fromHex("#2c303d");
 
-	constructor(gui: ToolbarButtonControlDefinition, tool: ToolBase) {
+	constructor(gui: ToolbarButtonControlDefinition, tools: ToolController, tool: ToolBase) {
 		super(gui);
 
 		this.gui.Name = tool.getDisplayName();
 		this.gui.ImageLabel.Image = tool.getImageID();
-		this.gui.KeyboardNumberLabel.Text = tostring(ToolController.tools.indexOf(tool) + 1);
+		this.gui.KeyboardNumberLabel.Text = tostring(tools.tools.indexOf(tool) + 1);
 
 		this.event.subscribe(this.gui.Activated, () =>
-			ToolController.selectedTool.set(tool === ToolController.selectedTool.get() ? undefined : tool),
+			tools.selectedTool.set(tool === tools.selectedTool.get() ? undefined : tool),
 		);
 		this.event.subscribeObservable(
-			ToolController.selectedTool,
+			tools.selectedTool,
 			(newtool) => {
 				// Update GUI
 				if (newtool === tool) GuiAnimator.tweenColor(this.gui, this.activeColor, 0.2);
@@ -49,8 +49,11 @@ export type ToolbarControlDefinition = GuiObject & {
 };
 
 export default class ToolbarControl extends Control<ToolbarControlDefinition> {
-	constructor(gui: ToolbarControlDefinition) {
+	private readonly tools;
+
+	constructor(tools: ToolController, gui: ToolbarControlDefinition) {
 		super(gui);
+		this.tools = tools;
 
 		// Disable roblox native backpack
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
@@ -60,8 +63,8 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 		this.add(toolButtons);
 
 		// Creating buttons
-		ToolController.tools.forEach((tool, i) => {
-			const button = new ToolbarButtonControl(template(), tool);
+		tools.tools.forEach((tool, i) => {
+			const button = new ToolbarButtonControl(template(), tools, tool);
 			toolButtons.add(button);
 
 			TooltipsControl.instance.addSimpleTooltip({
@@ -82,7 +85,7 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 			this.gui.GamepadNext.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
 		});
 
-		this.event.subscribeObservable(ToolController.selectedTool, (tool) => this.toolChanged(tool));
+		this.event.subscribeObservable(tools.selectedTool, (tool) => this.toolChanged(tool));
 		this.resetLabels();
 	}
 
@@ -107,14 +110,14 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 	}
 
 	private gamepadSelectTool(isRight: boolean) {
-		const tools = ToolController.tools;
+		const tools = this.tools.tools;
 
-		if (!ToolController.selectedTool.get()) {
-			ToolController.selectedTool.set(tools[0]);
+		if (!this.tools.selectedTool.get()) {
+			this.tools.selectedTool.set(tools[0]);
 			return;
 		}
 
-		const currentIndex = tools.indexOf(ToolController.selectedTool.get()!);
+		const currentIndex = tools.indexOf(this.tools.selectedTool.get()!);
 		const toolsLength = tools.size();
 		let newIndex = isRight ? currentIndex + 1 : currentIndex - 1;
 
@@ -124,7 +127,7 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 			newIndex = toolsLength - 1;
 		}
 
-		ToolController.selectedTool.set(tools[newIndex]);
+		this.tools.selectedTool.set(tools[newIndex]);
 	}
 
 	protected prepareDesktop() {
@@ -140,15 +143,15 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 			Enum.KeyCode.Nine,
 		] as const;
 
-		ToolController.tools.forEach((tool, i) => {
+		this.tools.tools.forEach((tool, i) => {
 			this.inputHandler.onKeyDown(keycodes[i], () =>
-				ToolController.selectedTool.set(tool === ToolController.selectedTool.get() ? undefined : tool),
+				this.tools.selectedTool.set(tool === this.tools.selectedTool.get() ? undefined : tool),
 			);
 		});
 	}
 
 	protected prepareGamepad() {
-		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonB, () => ToolController.selectedTool.set(undefined));
+		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonB, () => this.tools.selectedTool.set(undefined));
 		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonR1, () => this.gamepadSelectTool(true));
 		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonL1, () => this.gamepadSelectTool(false));
 	}

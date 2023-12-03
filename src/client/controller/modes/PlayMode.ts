@@ -1,0 +1,25 @@
+import ComponentContainer from "client/base/ComponentContainer";
+import Control from "client/base/Control";
+
+export default abstract class PlayMode extends ComponentContainer {
+	public abstract getName(): PlayModes;
+
+	public enable() {
+		for (const child of this.getChildren()) {
+			if (child instanceof Control) {
+				child.show();
+			}
+		}
+
+		super.enable();
+	}
+	public disable() {
+		for (const child of this.getChildren()) {
+			if (child instanceof Control) {
+				child.hide();
+			}
+		}
+
+		super.disable();
+	}
+}

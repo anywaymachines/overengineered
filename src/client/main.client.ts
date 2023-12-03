@@ -7,8 +7,9 @@ import LogicRegistry from "./blocks/LogicRegistry";
 import TestScene, { TestSceneDefinition } from "./gui/scenes/TestScene";
 import GuiController from "./controller/GuiController";
 import GameEnvironmentController from "./controller/GameEnvironmentController";
-import RideMode from "./controller/modes/RideMode";
-import { startGame } from "./Startup";
+import DebugControl from "./gui/static/DebugControl";
+import ComponentContainer from "./base/ComponentContainer";
+import PlayModeController from "./controller/PlayModeController";
 
 GameEnvironmentController.initialize();
 
@@ -20,9 +21,11 @@ PlayerStateEvent.initialize();
 InputTypeChangeEvent.subscribe();
 
 LogicRegistry.initialize();
+DebugControl.instance.show();
 
-RideMode.initialize();
-const root = startGame();
+const root = new ComponentContainer();
+root.add(new PlayModeController());
+root.enable();
 
 const guitests = new TestScene(GuiController.getGameUI<{ Tests: TestSceneDefinition }>().Tests);
 // guitests.show();
