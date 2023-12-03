@@ -1,13 +1,13 @@
-import Control from "client/base/Control";
-import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import { DictionaryControl } from "../controls/DictionaryControl";
-import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
-import NumberTextBoxControl from "../controls/NumberTextBoxControl";
-import BuildingManager from "shared/building/BuildingManager";
-import GuiController from "client/controller/GuiController";
 import Signal from "@rbxts/signal";
+import Control from "client/base/Control";
 import Popup from "client/base/Popup";
+import GuiController from "client/controller/GuiController";
+import BuildingManager from "shared/building/BuildingManager";
+import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import { ButtonControl } from "../controls/Button";
+import { DictionaryControl } from "../controls/DictionaryControl";
+import NumberTextBoxControl from "../controls/NumberTextBoxControl";
+import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
 
 type MaterialControlDefinition = GuiButton & {
 	TextLabel: TextLabel;

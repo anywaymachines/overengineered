@@ -1,10 +1,10 @@
+import { GuiService } from "@rbxts/services";
 import Control from "client/base/Control";
-import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import SoundController from "client/controller/SoundController";
+import ObservableValue from "shared/event/ObservableValue";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import AbstractCategory from "shared/registry/abstract/AbstractCategory";
 import GuiAnimator from "../GuiAnimator";
-import SoundController from "client/controller/SoundController";
-import { GuiService } from "@rbxts/services";
 import { ButtonControl } from "../controls/Button";
 
 type BlockControlDefinition = GuiButton & {

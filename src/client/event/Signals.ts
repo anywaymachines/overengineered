@@ -18,11 +18,6 @@ export default class Signals {
 		DIED: this.registerSignal(new Signal<() => void>()),
 	} as const;
 
-	public static readonly TOOL = {
-		EQUIPPED: this.registerSignal(new Signal<(tool: ToolBase) => void>()),
-		UNEQUIPPED: this.registerSignal(new Signal<(tool: ToolBase) => void>()),
-	} as const;
-
 	public static readonly BLOCKS = {
 		ADDED: this.registerSignal(new Signal<(block: Model) => void>()),
 		REMOVED: this.registerSignal(new Signal<(block: Model) => void>()),

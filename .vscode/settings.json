@@ -11,7 +11,10 @@
 	},
 	"eslint.run": "onType",
 	"eslint.format.enable": true,
+
+	"editor.codeActionsOnSave": {
+	  "source.organizeImports": true,
+	},
 	
-	"discord.detailsEditing": "Editing {file_name}",
 	"discord.removeRemoteRepository": true,
 }

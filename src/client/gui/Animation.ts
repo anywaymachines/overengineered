@@ -1,8 +1,8 @@
 import { TweenService } from "@rbxts/services";
-import GuiAnimator from "./GuiAnimator";
+import ComponentEventHolder from "client/base/ComponentEventHolder";
 import Objects from "shared/Objects";
 import { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import ComponentEventHolder from "client/base/ComponentEventHolder";
+import GuiAnimator from "./GuiAnimator";
 
 export type AnimationPartTween<T extends Instance> = {
 	gui: T;

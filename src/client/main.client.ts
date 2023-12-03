@@ -1,15 +1,15 @@
-import PlayerStateEvent from "./event/PlayerStateEvent";
+import ComponentContainer from "./base/ComponentContainer";
+import LogicRegistry from "./blocks/LogicRegistry";
+import ActionController from "./controller/ActionController";
+import GameEnvironmentController from "./controller/GameEnvironmentController";
+import GuiController from "./controller/GuiController";
+import PlayModeController from "./controller/PlayModeController";
 import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
+import PlayerStateEvent from "./event/PlayerStateEvent";
+import TestScene, { TestSceneDefinition } from "./gui/scenes/TestScene";
+import DebugControl from "./gui/static/DebugControl";
 import LogControl from "./gui/static/LogControl";
 import TooltipsControl from "./gui/static/TooltipsControl";
-import ActionController from "./controller/ActionController";
-import LogicRegistry from "./blocks/LogicRegistry";
-import TestScene, { TestSceneDefinition } from "./gui/scenes/TestScene";
-import GuiController from "./controller/GuiController";
-import GameEnvironmentController from "./controller/GameEnvironmentController";
-import DebugControl from "./gui/static/DebugControl";
-import ComponentContainer from "./base/ComponentContainer";
-import PlayModeController from "./controller/PlayModeController";
 
 GameEnvironmentController.initialize();
 

@@ -3,6 +3,8 @@ import Control from "client/base/Control";
 
 export default abstract class PlayMode extends ComponentContainer {
 	public abstract getName(): PlayModes;
+	public abstract onSwitchTo(mode: PlayModes | undefined): void;
+	public abstract onSwitchFrom(prev: PlayModes | undefined): void;
 
 	public enable() {
 		for (const child of this.getChildren()) {

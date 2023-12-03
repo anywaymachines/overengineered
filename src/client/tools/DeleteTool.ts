@@ -7,8 +7,8 @@ import SoundController from "client/controller/SoundController";
 import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
-import { initializeMultiBlockSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
 import ObservableValue from "shared/event/ObservableValue";
+import { initializeMultiBlockSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
 
 export default class DeleteTool extends ToolBase {
 	public readonly onClearAllRequested = new Signal<() => void>();

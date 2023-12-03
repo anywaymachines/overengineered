@@ -20,4 +20,7 @@ export default class BuildingMode extends PlayMode {
 	getName(): PlayModes {
 		return "build";
 	}
+
+	public onSwitchTo(mode: PlayModes | undefined) {}
+	public onSwitchFrom(prev: PlayModes | undefined) {}
 }
