@@ -2,9 +2,9 @@ import SlotsDatabase from "server/SlotsDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
-import PlayModeBase from "./PlayModeBase";
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import PartUtils from "shared/utils/PartUtils";
+import PlayModeBase from "./PlayModeBase";
 
 export default class RideMode implements PlayModeBase {
 	onTransitionFrom(player: Player, prevmode: PlayModes | undefined) {
@@ -39,13 +39,12 @@ export default class RideMode implements PlayModeBase {
 
 		SlotsDatabase.instance.setBlocks(player.UserId, SlotsMeta.autosaveSlotIndex, BlocksSerializer.serialize(plot));
 
-		// Teleport player to seat
-		// const hrp = player.Character?.WaitForChild("HumanoidRootPart") as Part;
-		// const vehicleSeatModel = blocksChildren.find(
-		// 	(model) => model.GetAttribute("id") === BlockRegistry.VEHICLE_SEAT.id,
-		// ) as Model;
-		// const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
-		// hrp.PivotTo(vehicleSeat.GetPivot());
+		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
+		const vehicleSeatModel = blocksChildren.find(
+			(model) => model.GetAttribute("id") === BlockRegistry.VEHICLE_SEAT.id,
+		) as Model;
+		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
+		vehicleSeat.Sit(hrp);
 
 		PartUtils.switchDescendantsAnchor(blocks, false);
 		PartUtils.switchDescendantsNetworkOwner(blocks, player);
