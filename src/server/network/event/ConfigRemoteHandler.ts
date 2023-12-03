@@ -1,20 +1,19 @@
-import { HttpService } from "@rbxts/services";
 import BuildingWrapper from "server/BuildingWrapper";
-import Logger from "shared/Logger";
+import BaseRemoteHandler from "server/base/BaseRemoteHandler";
 import Remotes from "shared/Remotes";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 
-export default class ConfigEvent {
-	static initialize(): void {
-		Logger.info("Loading Config event listener...");
+export default class ConfigRemoteHandler extends BaseRemoteHandler {
+	constructor() {
+		super("config");
 
 		Remotes.Server.GetNamespace("Building").OnFunction("UpdateConfigRequest", (player, data) =>
-			this.playerUpdateConfig(player, data),
+			this.emit(player, data),
 		);
 	}
 
-	private static playerUpdateConfig(player: Player, data: ConfigUpdateRequest): Response {
+	public emit(player: Player, data: ConfigUpdateRequest): Response {
 		const parentPlot = SharedPlots.getPlotByBlock(data.block);
 
 		// No plot?

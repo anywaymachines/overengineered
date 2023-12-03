@@ -1,20 +1,19 @@
 import BuildingWelder from "server/BuildingWelder";
+import BaseRemoteHandler from "server/base/BaseRemoteHandler";
 import ServerPlots from "server/plots/ServerPlots";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 
-export default class DeleteEvent {
-	static initialize(): void {
-		Logger.info("Loading Delete event listener...");
+export default class DeleteRemoteHandler extends BaseRemoteHandler {
+	constructor() {
+		super("delete");
 
-		Remotes.Server.GetNamespace("Building").OnFunction("Delete", (player, data) =>
-			this.playerDeleteBlocks(player, data),
-		);
+		Remotes.Server.GetNamespace("Building").OnFunction("Delete", (player, data) => this.emit(player, data));
 	}
 
-	private static playerDeleteBlocks(player: Player, blocks: PlayerDeleteBlockRequest): BuildResponse {
+	public emit(player: Player, blocks: PlayerDeleteBlockRequest): BuildResponse {
 		if (blocks === "all") {
 			const parentPlot = SharedPlots.getPlotByOwnerID(player.UserId);
 			ServerPlots.clearAllBlocks(parentPlot);

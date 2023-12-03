@@ -36,6 +36,9 @@ const Remotes = Net.Definitions.Create({
 			UpdateParticle: Net.Definitions.ClientToServerEvent<[block: Model, acceleration: number]>(),
 		}),
 	}),
+	Debug: Net.Definitions.Namespace({
+		DisplayLine: Net.Definitions.ServerToClientEvent<[text: string, isClient: boolean]>(),
+	}),
 });
 
 export default Remotes;

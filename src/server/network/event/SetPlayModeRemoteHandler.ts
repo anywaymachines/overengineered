@@ -1,23 +1,18 @@
 import { Players } from "@rbxts/services";
-import SlotsDatabase from "server/SlotsDatabase";
+import BaseRemoteHandler from "server/base/BaseRemoteHandler";
 import BuildMode from "server/modes/BuildMode";
 import PlayModeBase from "server/modes/PlayModeBase";
 import RideMode from "server/modes/RideMode";
-import BlocksSerializer from "server/plots/BlocksSerializer";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
-import SlotsMeta from "shared/SlotsMeta";
-import SharedPlots from "shared/building/SharedPlots";
-import BlockRegistry from "shared/registry/BlocksRegistry";
-import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 
-export default class SetPlayModeEvent {
-	private static readonly playerModes: Record<number, PlayModes | undefined> = {};
-	private static readonly modes = new Map<PlayModes, PlayModeBase>();
+export default class SetPlayModeRemoteHandler extends BaseRemoteHandler {
+	private readonly playerModes: Record<number, PlayModes | undefined> = {};
+	private readonly modes = new Map<PlayModes, PlayModeBase>();
 
-	static initialize(): void {
-		Logger.info("Loading SetPlayModeEvent event listener...");
+	constructor() {
+		super("playMode => set");
 
 		this.modes.set("ride", new RideMode());
 		this.modes.set("build", new BuildMode());
@@ -26,20 +21,20 @@ export default class SetPlayModeEvent {
 		Players.PlayerAdded.Connect((plr) => {
 			// on spawn
 			plr.CharacterAdded.Connect((character) => {
-				const response = this.setMode(plr, "build");
+				const response = this.emit(plr, "build");
 				if (!response.success) print(response.message);
 
 				(character.WaitForChild("Humanoid") as Humanoid).Died.Once(() => {
-					const response = this.setMode(plr, undefined);
+					const response = this.emit(plr, undefined);
 					if (!response.success) print(response.message);
 				});
 			});
 		});
 
-		Remotes.Server.GetNamespace("Ride").OnFunction("SetPlayMode", (player, mode) => this.setMode(player, mode));
+		Remotes.Server.GetNamespace("Ride").OnFunction("SetPlayMode", (player, mode) => this.emit(player, mode));
 	}
 
-	private static setMode(player: Player, mode: PlayModes | undefined): Response {
+	public emit(player: Player, mode: PlayModes | undefined): Response {
 		if (mode !== undefined && !PlayerUtils.isAlive(player)) {
 			return { success: false, message: "Player is not alive" };
 		}
@@ -62,7 +57,7 @@ export default class SetPlayModeEvent {
 			}
 		}
 
-		print("Player " + player.UserId + " changed his mode from " + this.playerModes[player.UserId] + " to " + mode);
+		Logger.info(`${player.Name}'s mode: '${this.playerModes[player.UserId]}' => '${mode}'`);
 		this.playerModes[player.UserId] = mode;
 		Remotes.Server.GetNamespace("Ride").Get("SetPlayModeOnClient").CallPlayerAsync(player, mode);
 		return { success: true };

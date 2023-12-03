@@ -11,13 +11,11 @@ export default class RideMode implements PlayModeBase {
 		if (prevmode === "build") {
 			return this.rideStart(player);
 		}
-		return { success: true };
 	}
 	onTransitionTo(player: Player, nextmode: PlayModes | undefined) {
 		if (nextmode === undefined || nextmode === "build") {
 			return this.rideStop(player);
 		}
-		return { success: true };
 	}
 
 	private rideStart(player: Player) {

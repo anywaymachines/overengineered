@@ -1,8 +1,8 @@
 import Control from "client/base/Control";
 import GuiController from "client/controller/GuiController";
+import Remotes from "shared/Remotes";
 import GuiAnimator from "../GuiAnimator";
 import { LogControlDefinition } from "./LogControl";
-import Remotes from "shared/Remotes";
 
 export type DebugControlDefinition = LogControlDefinition;
 
@@ -36,7 +36,7 @@ export default class DebugControl extends Control<DebugControlDefinition> {
 
 		GuiAnimator.transition(line.TextLabel, 0.3, "left");
 		spawn(() => {
-			wait(5);
+			wait(15);
 			GuiAnimator.revTransition(line.TextLabel, 0.3, "left");
 			GuiAnimator.tweenTransparency(line.TextLabel, 1, 0.25);
 			wait(0.3);

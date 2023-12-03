@@ -1,21 +1,21 @@
 import BlockRegistry from "shared/registry/BlocksRegistry";
 import Remotes from "shared/Remotes";
-import Logger from "shared/Logger";
 import SharedPlots from "shared/building/SharedPlots";
 import BuildingManager from "shared/building/BuildingManager";
 import BuildingWrapper from "server/BuildingWrapper";
+import BaseRemoteHandler from "server/base/BaseRemoteHandler";
 
 /** Class for **server-based** construction management from blocks */
-export default class BuildEvent {
-	static initialize(): void {
-		Logger.info("Loading Build event listener...");
+export default class BuildRemoteHandler extends BaseRemoteHandler {
+	constructor() {
+		super("build");
 
 		Remotes.Server.GetNamespace("Building").OnFunction("PlaceBlockRequest", (player, data) =>
-			this.playerPlaceBlock(player, data),
+			this.emit(player, data),
 		);
 	}
 
-	private static playerPlaceBlock(player: Player, data: PlaceBlockRequest): BuildResponse {
+	public emit(player: Player, data: PlaceBlockRequest): BuildResponse {
 		// Check is in plot
 		if (!BuildingManager.vectorAbleToPlayer(data.location.Position, player)) {
 			return {
