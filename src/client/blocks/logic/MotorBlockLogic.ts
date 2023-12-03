@@ -1,7 +1,5 @@
-import { UserInputService } from "@rbxts/services";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import MotorBlock from "shared/registry/blocks/MotorBlock";
-import VehicleSeatBlockLogic from "./VehicleSeatBlockLogic";
 
 export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorBlock> {
 	private readonly hingeConstraint;
@@ -21,11 +19,5 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorBlock> 
 		this.isSwitch = this.config.get("switch");
 
 		this.hingeConstraint = block.FindFirstChild("Base")?.FindFirstChild("HingeConstraint") as HingeConstraint;
-
-		this.setup();
-	}
-
-	protected setup(): void {
-		super.setup();
 	}
 }

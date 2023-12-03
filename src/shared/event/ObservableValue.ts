@@ -75,10 +75,4 @@ export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 
 		return observable;
 	}
-	/*public createChild<TType>(func: (value: T) => TType) {
-		const observable = new ObservableValue(func(this.value));
-		this.subscribe((value) => observable.set(func(value)));
-
-		return observable;
-	}*/
 }

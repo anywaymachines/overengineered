@@ -1,7 +1,6 @@
 import { UserInputService } from "@rbxts/services";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import ServoMotorBlock from "shared/registry/blocks/ServoMotorBlock";
-import VehicleSeatBlockLogic from "./VehicleSeatBlockLogic";
 
 export default class Servo9MotorBlockLogic extends ConfigurableBlockLogic<ServoMotorBlock> {
 	private readonly hingeConstraint;
@@ -23,12 +22,10 @@ export default class Servo9MotorBlockLogic extends ConfigurableBlockLogic<ServoM
 		this.isSwitch = this.config.get("switch");
 
 		this.hingeConstraint = block.FindFirstChild("Base")?.FindFirstChild("HingeConstraint") as HingeConstraint;
-
-		this.setup();
 	}
 
-	protected setup() {
-		super.setup();
+	protected prepare() {
+		super.prepare();
 
 		this.hingeConstraint.AngularSpeed = this.speed;
 
@@ -37,10 +34,6 @@ export default class Servo9MotorBlockLogic extends ConfigurableBlockLogic<ServoM
 	}
 
 	private update() {
-		if (!VehicleSeatBlockLogic.occupant.get()) {
-			return;
-		}
-
 		const isIncreasing = UserInputService.IsKeyDown(this.increaseKey);
 		const isDecreasing = UserInputService.IsKeyDown(this.decreaseKey);
 		const isMoving = math.abs(this.hingeConstraint.TargetAngle) === math.abs(this.angle);

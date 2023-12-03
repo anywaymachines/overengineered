@@ -1,7 +1,6 @@
-import { UserInputService, RunService } from "@rbxts/services";
+import { UserInputService } from "@rbxts/services";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import SmallRocketEngineBlock from "shared/registry/blocks/SmallRocketEngine";
-import VehicleSeatBlockLogic from "./VehicleSeatBlockLogic";
 
 export default class RocketEngineLogic extends ConfigurableBlockLogic<SmallRocketEngineBlock> {
 	// Instances
@@ -51,19 +50,13 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<SmallRocke
 		// Math
 		const colbox = block.FindFirstChild("ColBox") as Part;
 		this.multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16;
-
-		this.setup();
 	}
 
-	protected setup() {
-		super.setup();
+	protected prepare() {
+		super.prepare();
 
 		// Increase events
 		this.inputHandler.onKeyDown(this.increaseKey, () => {
-			if (!VehicleSeatBlockLogic.occupant.get()) {
-				return;
-			}
-
 			if (this.isSwitch) {
 				this.torque = 100;
 				this.update();
@@ -74,10 +67,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<SmallRocke
 
 		// Decrease events
 		this.inputHandler.onKeyDown(this.decreaseKey, () => {
-			if (!VehicleSeatBlockLogic.occupant.get()) {
-				return;
-			}
-
 			if (this.isSwitch) {
 				this.torque = 0;
 				this.update();

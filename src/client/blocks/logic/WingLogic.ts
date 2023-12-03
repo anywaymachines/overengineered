@@ -1,6 +1,5 @@
 import { RunService } from "@rbxts/services";
 import BlockLogic from "client/base/BlockLogic";
-import GameEnvironmentController from "client/controller/GameEnvironmentController";
 
 export default class WingLogic extends BlockLogic {
 	private wingSurface: BasePart;
@@ -16,8 +15,6 @@ export default class WingLogic extends BlockLogic {
 		this.surface = this.findSurface(this.wingSurface);
 
 		this.wingSurface.CustomPhysicalProperties = new PhysicalProperties(0.7, 0.3, 0.5, 1, 1);
-
-		this.setup();
 	}
 
 	private findSurface(wingSurface: BasePart): Vector3 {
@@ -26,8 +23,8 @@ export default class WingLogic extends BlockLogic {
 		return wingSurface.IsA("WedgePart") ? new Vector3(Z, X, X).mul(0.5) : new Vector3(X, Z, X);
 	}
 
-	protected setup() {
-		super.setup();
+	protected prepare() {
+		super.prepare();
 
 		this.eventHandler.subscribe(RunService.Heartbeat, () => {
 			const force = this.surface

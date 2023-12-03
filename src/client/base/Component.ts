@@ -43,6 +43,11 @@ export default class Component<
 	/** Disable component events, destroy the Instance and free the memory */
 	public destroy() {
 		super.destroy();
-		this.instance.Parent = undefined;
+
+		try {
+			this.instance.Parent = undefined;
+		} catch {
+			// empty
+		}
 	}
 }

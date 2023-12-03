@@ -1,6 +1,6 @@
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
-import { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 type InputType = typeof InputController.inputType;
 type Keys = InputType | "All";
@@ -96,6 +96,16 @@ export default class ComponentEventHolder {
 	) {
 		this.subscribe(observable.changed, callback, inputType);
 		if (executeImmediately) callback(observable.get(), observable.get());
+	}
+
+	public observableFromGuiParam<TInstance extends Instance, TParam extends InstancePropertyNames<TInstance>>(
+		instance: TInstance,
+		param: TParam,
+	) {
+		const observable = new ObservableValue(instance[param]);
+		this.subscribe(instance.GetPropertyChangedSignal(param), () => observable.set(instance[param]));
+
+		return observable;
 	}
 
 	/* eslint-disable @typescript-eslint/no-this-alias */

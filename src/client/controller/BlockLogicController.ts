@@ -1,6 +1,7 @@
 import { Players } from "@rbxts/services";
 import BlockLogic from "client/base/BlockLogic";
 import LogicRegistry, { AnyBlockLogic } from "client/blocks/LogicRegistry";
+import Machine from "client/blocks/logic/Machine";
 import Logger from "shared/Logger";
 import SharedPlots from "shared/building/SharedPlots";
 import BlockRegistry from "shared/registry/BlocksRegistry";
@@ -11,6 +12,9 @@ export default class BlockLogicController {
 	static setupBlocks() {
 		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
 		const blocks = SharedPlots.getPlotBlocks(plot).GetChildren();
+
+		const machine = new Machine();
+		machine.enable();
 
 		for (let i = 0; i < blocks.size(); i++) {
 			const block = blocks[i] as Model;
@@ -31,7 +35,10 @@ export default class BlockLogicController {
 
 			const logic = new ctor(block);
 			this.blocks.push(logic);
+			machine.add(logic);
 		}
+
+		return machine;
 	}
 
 	public static getBlocks() {

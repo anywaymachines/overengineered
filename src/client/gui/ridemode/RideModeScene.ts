@@ -1,8 +1,7 @@
 import Control from "client/base/Control";
-import BlockLogicController from "client/controller/BlockLogicController";
-import RocketEngineGui, { RocketEngineGuiDefinition } from "./RocketEngineGui";
-import { ButtonControl } from "../controls/Button";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
+import { ButtonControl } from "../controls/Button";
+import RocketEngineGui, { RocketEngineGuiDefinition } from "./RocketEngineGui";
 
 export type ActionBarControlDefinition = GuiObject & {
 	Stop: GuiButton;
@@ -40,10 +39,5 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		this.add(torque);
 
 		blocksgui.clear();
-		for (const block of BlockLogicController.getBlocks()) {
-			//
-		}
-
-		// const blocks = SharedPlots.getPlotBlocks(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId));
 	}
 }
