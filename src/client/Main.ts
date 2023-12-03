@@ -6,15 +6,16 @@ import Signals from "./event/Signals";
 import BuildingModeScene, { BuildingModeSceneDefinition } from "./gui/scenes/BuildingModeScene";
 import RideModeScene, { RideModeSceneDefinition } from "./gui/ridemode/RideModeScene";
 import PlayModeController from "./controller/PlayModeController";
+import Component from "./base/Component";
 
-export type MainDefinition = Instance & {
+export type MainDefinition = ScreenGui & {
 	Popup: Folder & {};
 	BuildingMode: BuildingModeSceneDefinition;
 	RideMode: RideModeSceneDefinition;
 };
 
 /** Control that controls playmode scenes */
-export default class Main extends Control<MainDefinition> {
+export default class Main extends Component<MainDefinition> {
 	public static readonly instance = new Main(GuiController.getGameUI<MainDefinition>());
 
 	private readonly scenes: Readonly<Record<PlayModes, Control>>;

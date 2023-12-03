@@ -1,10 +1,8 @@
 import { TweenService } from "@rbxts/services";
 import GuiAnimator from "./GuiAnimator";
-import BuildingModeScene from "./scenes/BuildingModeScene";
-import Control from "client/base/Control";
 import Objects from "shared/Objects";
-import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import ControlEventHolder from "client/base/ControlEventHolder";
+import { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import ComponentEventHolder from "client/base/ComponentEventHolder";
 
 export type AnimationPartTween<T extends Instance> = {
 	gui: T;
@@ -59,7 +57,7 @@ export default class Animation {
 	 * Also immediately sets the properties on prepare.
 	 */
 	public static value<T extends Instance, TValue>(
-		event: ControlEventHolder,
+		event: ComponentEventHolder,
 		gui: T,
 		value: ReadonlyObservableValue<TValue>,
 		converter: (value: TValue) => Partial<ExtractMembers<T, Tweenable>>,
@@ -70,7 +68,7 @@ export default class Animation {
 	}
 
 	public static hideShow<T extends GuiObject>(
-		event: ControlEventHolder,
+		event: ComponentEventHolder,
 		gui: T,
 		opened: ReadonlyObservableValue<boolean>,
 		offset: UDim2,

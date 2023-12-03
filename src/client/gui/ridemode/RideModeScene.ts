@@ -18,7 +18,7 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 	}
 }
 
-export type RideModeSceneDefinition = Folder & {
+export type RideModeSceneDefinition = GuiObject & {
 	ActionBarGui: ActionBarControlDefinition;
 	Torque: RocketEngineGuiDefinition;
 };

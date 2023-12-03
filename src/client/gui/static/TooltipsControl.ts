@@ -3,7 +3,6 @@ import GuiController from "client/controller/GuiController";
 import GuiAnimator from "../GuiAnimator";
 import Signals from "client/event/Signals";
 import ToolController from "client/controller/ToolController";
-import { ListControl } from "../controls/ListControl";
 import ToolBase from "client/base/ToolBase";
 import { UserInputService } from "@rbxts/services";
 
@@ -28,7 +27,7 @@ export type TooltipsControlDefinition = GuiObject & {
 	};
 };
 
-export default class TooltipsControl extends ListControl<
+export default class TooltipsControl extends Control<
 	TooltipsControlDefinition,
 	Control<TooltipsControlDefinition["GamepadTemplate"] | TooltipsControlDefinition["KeyboardTemplate"]>
 > {

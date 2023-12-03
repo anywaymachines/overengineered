@@ -12,7 +12,7 @@ import RideMode from "./controller/modes/RideMode";
 
 GameEnvironmentController.initialize();
 
-Main.instance.show();
+Main.instance.enable();
 TooltipsControl.instance.show();
 LogControl.instance.show();
 

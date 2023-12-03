@@ -1,6 +1,5 @@
 import Control from "client/base/Control";
 import Popup from "client/base/Popup";
-import { ListControl } from "../controls/ListControl";
 import Serializer from "shared/Serializer";
 import ObservableValue, { AsObservable, ReadonlyObservableValue } from "shared/event/ObservableValue";
 import Remotes from "shared/Remotes";
@@ -61,7 +60,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 		this.template = Control.asTemplate(this.gui.Template);
 		this.buyNewTemplate = Control.asTemplate(this.gui.BuyNewTemplate);
 
-		this.slots = new ListControl<SaveSlotsDefinition, SaveItem>(this.gui);
+		this.slots = new Control<SaveSlotsDefinition, SaveItem>(this.gui);
 		this.add(this.slots, false);
 
 		this.data.subscribe((data) => {

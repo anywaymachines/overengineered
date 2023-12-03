@@ -33,8 +33,8 @@ export default class NumberTextBoxControl extends Control<NumberTextBoxControlDe
 		this.submitted.Fire(num);
 	}
 
-	protected destroyPassthrough() {
+	public destroy() {
 		this.commit();
-		super.destroyPassthrough();
+		super.destroy();
 	}
 }

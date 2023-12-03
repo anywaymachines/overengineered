@@ -10,13 +10,17 @@ type Sig<T> = {
 };
 type Sub<T> = [signal: Sig<T>, callback: T];
 
-export default class ControlEventHolder {
+export default class ComponentEventHolder {
 	private readonly prepareEvents: ((inputType: InputType) => void)[] = [];
 	private readonly events: Partial<Record<Keys, Sub<unknown>[]>> = {};
 	private readonly eventsOnce: Partial<Record<Keys, Sub<unknown>[]>> = {};
 	private readonly subscribed: SigConnection[] = [];
 
 	private enabled = false;
+
+	public isEnabled() {
+		return this.enabled;
+	}
 
 	public enable() {
 		if (this.enabled) return;
@@ -95,6 +99,8 @@ export default class ControlEventHolder {
 	}
 
 	public destroy() {
+		this.disable();
+
 		for (const key of ["All", "Desktop", "Gamepad", "Touch"] as const) {
 			delete this.events[key];
 			delete this.eventsOnce[key];

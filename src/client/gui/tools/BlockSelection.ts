@@ -2,7 +2,6 @@ import Control from "client/base/Control";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import AbstractBlock from "shared/registry/abstract/AbstractBlock";
 import AbstractCategory from "shared/registry/abstract/AbstractCategory";
-import { ListControl } from "../controls/ListControl";
 import GuiAnimator from "../GuiAnimator";
 import SoundController from "client/controller/SoundController";
 import { GuiService } from "@rbxts/services";
@@ -51,7 +50,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		this.blocks = blocks;
 		this.categories = categories;
 
-		this.list = new ListControl<GuiObject, SelectorControl>(this.gui.ScrollingFrame);
+		this.list = new Control<GuiObject, SelectorControl>(this.gui.ScrollingFrame);
 		this.add(this.list);
 
 		// Prepare templates
