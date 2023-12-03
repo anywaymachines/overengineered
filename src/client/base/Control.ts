@@ -12,11 +12,14 @@ export default class Control<
 	/** Signal that fires when this element is hidden */
 	public readonly onHide = new Signal<() => void>();
 
+	private enabled;
 	protected readonly gui: T;
 
 	constructor(gui: T) {
 		super(gui);
+
 		this.gui = gui;
+		this.enabled = gui.Visible;
 	}
 
 	public getGui() {
@@ -30,11 +33,12 @@ export default class Control<
 
 	/** Is control visible */
 	public isVisible() {
-		return this.instance.Visible;
+		return this.enabled;
 	}
 
 	/** Show the control and enable it with the children */
 	public show() {
+		this.enabled = true;
 		this.instance.Visible = true;
 
 		this.enable();
@@ -43,6 +47,7 @@ export default class Control<
 
 	/** Hide the control and disable it with the children */
 	public hide() {
+		this.enabled = false;
 		this.instance.Visible = false;
 
 		this.disable();

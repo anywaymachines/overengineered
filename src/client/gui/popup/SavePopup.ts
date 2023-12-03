@@ -10,6 +10,7 @@ import GameDefinitions from "shared/GameDefinitions";
 import SlotsMeta from "shared/SlotsMeta";
 import { ButtonControl } from "../controls/Button";
 import { Players } from "@rbxts/services";
+import GuiAnimator from "../GuiAnimator";
 
 type SaveItemDefinition = GuiButton & {
 	ImageLabel: ImageLabel;
@@ -272,6 +273,7 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 		}
 
 		super.show();
+		GuiAnimator.transition(this.gui, 0.2, "down");
 	}
 
 	private async save(index: number, save: boolean) {
