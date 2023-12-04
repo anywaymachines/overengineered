@@ -2,8 +2,8 @@ import { GuiService } from "@rbxts/services";
 import Control from "client/base/Control";
 import SoundController from "client/controller/SoundController";
 import ObservableValue from "shared/event/ObservableValue";
-import AbstractBlock from "shared/registry/abstract/AbstractBlock";
-import AbstractCategory from "shared/registry/abstract/AbstractCategory";
+import { Category } from "shared/registry/BlockRegistry";
+import Block from "shared/registry/abstract/Block";
 import GuiAnimator from "../GuiAnimator";
 import { ButtonControl } from "../controls/Button";
 
@@ -29,22 +29,18 @@ export type BlockSelectionControlDefinition = GuiObject & {
 
 /** Block chooser control */
 export default class BlockSelectionControl extends Control<BlockSelectionControlDefinition> {
-	public readonly selectedBlock = new ObservableValue<AbstractBlock | undefined>(undefined);
+	public readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
 
 	private readonly blocks;
 	private readonly categories;
 
 	private readonly itemTemplate;
 	private readonly list;
-	private readonly selectedCategory = new ObservableValue<AbstractCategory | undefined>(undefined);
+	private readonly selectedCategory = new ObservableValue<Category | undefined>(undefined);
 
 	private readonly backButtonText = "← Back ←";
 
-	constructor(
-		template: BlockSelectionControlDefinition,
-		blocks: readonly AbstractBlock[],
-		categories: readonly AbstractCategory[],
-	) {
+	constructor(template: BlockSelectionControlDefinition, blocks: readonly Block[], categories: readonly Category[]) {
 		super(template);
 
 		this.blocks = blocks;
@@ -59,7 +55,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		this.event.subscribeObservable(this.selectedCategory, (category) => this.create(category), true);
 	}
 
-	private create(category: AbstractCategory | undefined) {
+	private create(category: Category | undefined) {
 		const createPart = (text: string, activated: () => void) => {
 			const control = new SelectorControl(this.itemTemplate(), text);
 			control.show();
@@ -73,8 +69,8 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		const isSelected = GuiService.SelectedObject !== undefined;
 		this.list.clear();
 
-		if (!category) {
-			this.categories.forEach((cat) => createPart(cat.getDisplayName(), () => this.selectedCategory.set(cat)));
+		if (category === undefined) {
+			this.categories.forEach((cat) => createPart(cat, () => this.selectedCategory.set(cat)));
 		} else {
 			createPart(this.backButtonText, () => {
 				this.selectedBlock.set(undefined);
@@ -83,9 +79,9 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 
 			let prev: SelectorControl | undefined;
 			this.blocks
-				.filter((block) => block.getCategory() === category)
+				.filter((block) => block.category === category)
 				.forEach((block) => {
-					const b = createPart(block.getDisplayName(), () => this.selectedBlock.set(block));
+					const b = createPart(block.displayName, () => this.selectedBlock.set(block));
 					if (prev) {
 						b.getGui().NextSelectionUp = prev.getGui();
 						prev.getGui().NextSelectionDown = b.getGui();

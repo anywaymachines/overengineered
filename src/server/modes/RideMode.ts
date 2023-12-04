@@ -2,7 +2,7 @@ import SlotsDatabase from "server/SlotsDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
-import BlockRegistry from "shared/registry/BlocksRegistry";
+import BlockRegistry from "shared/registry/BlockRegistry";
 import PartUtils from "shared/utils/PartUtils";
 import PlayModeBase from "./PlayModeBase";
 
@@ -22,17 +22,14 @@ export default class RideMode implements PlayModeBase {
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 		const blocks = SharedPlots.getPlotBlocks(plot);
 
-		const blocksChildren = blocks.GetChildren();
+		const blocksChildren = blocks.GetChildren() as unknown as readonly Model[];
 
-		// Check is required blocks exist
-		for (let i = 0; i < BlockRegistry.RequiredBlocks.size(); i++) {
-			const requiredBlock = BlockRegistry.RequiredBlocks[i];
-
-			const vehicleSeat = blocksChildren.find((model) => model.GetAttribute("id") === requiredBlock.id);
-			if (!vehicleSeat) {
+		const requiredBlocks = BlockRegistry.blockList.filter((value) => value.required);
+		for (const block of requiredBlocks) {
+			if (!blocksChildren.find((value) => value.GetAttribute("id") === block.id)) {
 				return {
 					success: false,
-					message: requiredBlock.getDisplayName() + " not found",
+					message: block.displayName + " not found",
 				};
 			}
 		}
@@ -40,9 +37,7 @@ export default class RideMode implements PlayModeBase {
 		SlotsDatabase.instance.setBlocks(player.UserId, SlotsMeta.autosaveSlotIndex, BlocksSerializer.serialize(plot));
 
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
-		const vehicleSeatModel = blocksChildren.find(
-			(model) => model.GetAttribute("id") === BlockRegistry.VEHICLE_SEAT.id,
-		) as Model;
+		const vehicleSeatModel = blocksChildren.find((model) => model.GetAttribute("id") === "vehicleseat") as Model;
 		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
 		vehicleSeat.Sit(hrp);
 

@@ -1,5 +1,5 @@
 import ConfigWrapper from "client/blocks/ConfigWrapper";
-import BlockRegistry from "shared/registry/BlocksRegistry";
+import BlockRegistry from "shared/registry/BlockRegistry";
 import BlockLogic from "./BlockLogic";
 
 type ConfigDefinitionToConfig<T extends Readonly<Record<string, ConfigDefinition>>> = {
@@ -18,7 +18,7 @@ export default abstract class ConfigurableBlockLogic<TConfigurableBlock extends 
 	constructor(block: Model) {
 		super(block);
 
-		const b = BlockRegistry.Blocks.get(block.GetAttribute("id") as string) as unknown as TConfigurableBlock;
+		const b = BlockRegistry.blocks.get(block.GetAttribute("id") as string) as unknown as TConfigurableBlock;
 
 		this.config = new ConfigWrapper<
 			ConfigDefinitionToConfig<ReturnType<TConfigurableBlock["getConfigDefinitions"]>>

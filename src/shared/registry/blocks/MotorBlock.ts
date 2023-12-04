@@ -1,25 +1,4 @@
-import { ReplicatedStorage } from "@rbxts/services";
-import AbstractBlock from "shared/registry/abstract/AbstractBlock";
-import AbstractCategory from "../abstract/AbstractCategory";
-import CategoriesRegistry from "../CategoriesRegistry";
-
-export default class MotorBlock extends AbstractBlock implements ConfigurableBlock {
-	constructor() {
-		super("motorblock");
-	}
-
-	public getDisplayName(): string {
-		return "Motor Block";
-	}
-
-	public getModel(): Model {
-		return ReplicatedStorage.Assets.Blocks.FindFirstChild("MotorBlock") as Model;
-	}
-
-	public getCategory(): AbstractCategory {
-		return CategoriesRegistry.ENGINES_CATEGORY;
-	}
-
+export default class MotorBlock {
 	getConfigDefinitions() {
 		return {
 			rotate_add: {

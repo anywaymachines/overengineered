@@ -3,8 +3,8 @@ import ToolBase from "client/base/ToolBase";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
-import BlockRegistry from "shared/registry/BlocksRegistry";
-import AbstractBlock from "shared/registry/abstract/AbstractBlock";
+import BlockRegistry from "shared/registry/BlockRegistry";
+import Block from "shared/registry/abstract/Block";
 import { initializeMultiBlockSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
 
 export default class ConfigTool extends ToolBase {
@@ -16,7 +16,7 @@ export default class ConfigTool extends ToolBase {
 
 		const selectionFilter = (target: Model) =>
 			"getConfigDefinitions" in
-			(BlockRegistry.getBlockByID(target.GetAttribute("id") as string) as AbstractBlock | ConfigurableBlock);
+			(BlockRegistry.blocks.get(target.GetAttribute("id") as string) as Block | ConfigurableBlock);
 
 		initializeSingleBlockSelection(
 			this.eventHandler,

@@ -1,17 +1,17 @@
-import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
-import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
-import ConfigTool from "client/tools/ConfigTool";
-import Control from "client/base/Control";
-import AbstractBlock from "shared/registry/abstract/AbstractBlock";
-import BlockRegistry from "shared/registry/BlocksRegistry";
-import GuiAnimator from "../GuiAnimator";
 import { HttpService } from "@rbxts/services";
-import Remotes from "shared/Remotes";
-import Signals from "client/event/Signals";
-import ObservableValue from "shared/event/ObservableValue";
-import KeyChooserControl, { KeyChooserControlDefinition } from "../controls/KeyChooserControl";
-import Objects from "shared/Objects";
 import ConfigManager from "client/ConfigManager";
+import Control from "client/base/Control";
+import Signals from "client/event/Signals";
+import ConfigTool from "client/tools/ConfigTool";
+import Objects from "shared/Objects";
+import Remotes from "shared/Remotes";
+import ObservableValue from "shared/event/ObservableValue";
+import BlockRegistry from "shared/registry/BlockRegistry";
+import Block from "shared/registry/abstract/Block";
+import GuiAnimator from "../GuiAnimator";
+import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
+import KeyChooserControl, { KeyChooserControlDefinition } from "../controls/KeyChooserControl";
+import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	HeadingLabel: TextLabel;
@@ -96,7 +96,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 	}
 
 	private updateConfigs(selected: readonly SelectionBox[]) {
-		function isConfigurableBlock(block: AbstractBlock): block is ConfigurableBlock & AbstractBlock {
+		function isConfigurableBlock(block: Block): block is ConfigurableBlock & Block {
 			return "getConfigDefinitions" in block;
 		}
 
@@ -104,7 +104,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		if (selected.size() === 0) return;
 
 		const item = selected[0].Parent as Model;
-		const block = BlockRegistry.getBlockByID(item.GetAttribute("id") as string)!;
+		const block = BlockRegistry.blocks.get(item.GetAttribute("id") as string)!;
 
 		if (!isConfigurableBlock(block)) return;
 

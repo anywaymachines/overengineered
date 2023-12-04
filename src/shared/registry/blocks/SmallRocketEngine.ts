@@ -1,25 +1,4 @@
-import { ReplicatedStorage } from "@rbxts/services";
-import AbstractBlock from "shared/registry/abstract/AbstractBlock";
-import AbstractCategory from "../abstract/AbstractCategory";
-import CategoriesRegistry from "../CategoriesRegistry";
-
-export default class SmallRocketEngineBlock extends AbstractBlock implements ConfigurableBlock {
-	constructor() {
-		super("smallrocketengine");
-	}
-
-	public getDisplayName(): string {
-		return "Small Rocket Engine";
-	}
-
-	public getModel(): Model {
-		return ReplicatedStorage.Assets.Blocks.FindFirstChild("SmallRocketEngine") as Model;
-	}
-
-	public getCategory(): AbstractCategory {
-		return CategoriesRegistry.ENGINES_CATEGORY;
-	}
-
+export default class SmallRocketEngineBlock {
 	getConfigDefinitions() {
 		return {
 			thrust_add: {

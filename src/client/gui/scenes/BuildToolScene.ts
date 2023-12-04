@@ -1,12 +1,10 @@
 import Control from "client/base/Control";
-import BlockRegistry from "shared/registry/BlocksRegistry";
-import CategoriesRegistry from "shared/registry/CategoriesRegistry";
 import BuildTool from "client/tools/BuildTool";
+import { default as BlockRegistry, default as CategoriesRegistry } from "shared/registry/BlockRegistry";
 import GuiAnimator from "../GuiAnimator";
+import { ButtonControl } from "../controls/Button";
 import BlockSelectionControl, { BlockSelectionControlDefinition } from "../tools/BlockSelection";
 import MaterialChooserControl, { MaterialPreviewControl, MaterialPreviewDefinition } from "../tools/MaterialChooser";
-import SoundController from "client/controller/SoundController";
-import { ButtonControl } from "../controls/Button";
 
 export type BuildToolSceneDefinition = GuiObject & {
 	BlockSelection: BlockSelectionControlDefinition;
@@ -31,8 +29,8 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 
 		this.blockSelector = new BlockSelectionControl(
 			gui.BlockSelection,
-			BlockRegistry.RegisteredBlocks,
-			CategoriesRegistry.registeredCategories,
+			BlockRegistry.blockList,
+			CategoriesRegistry.categories,
 		);
 		this.blockSelector.show();
 		this.add(this.blockSelector);

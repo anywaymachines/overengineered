@@ -9,7 +9,7 @@ import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
 import MaterialChooserControl from "client/gui/tools/MaterialChooser";
 import BuildingManager from "shared/building/BuildingManager";
-import AbstractBlock from "shared/registry/abstract/AbstractBlock";
+import Block from "shared/registry/abstract/Block";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import VectorUtils from "shared/utils/VectorUtils";
@@ -29,7 +29,7 @@ export default class BuildTool extends ToolBase {
 	private lastMouseTarget?: BasePart;
 	private lastMouseSurface?: Enum.NormalId;
 
-	private selectedBlock?: AbstractBlock;
+	private selectedBlock?: Block;
 	private selectedMaterial: Enum.Material = Enum.Material.Plastic;
 	private selectedColor: Color3 = Color3.fromRGB(255, 255, 255);
 
@@ -55,7 +55,7 @@ export default class BuildTool extends ToolBase {
 		return "Place blocks in the world";
 	}
 
-	public setSelectedBlock(block: AbstractBlock | undefined) {
+	public setSelectedBlock(block: Block | undefined) {
 		this.selectedBlock = block;
 		this.prepareVisual();
 	}
@@ -76,7 +76,7 @@ export default class BuildTool extends ToolBase {
 		if (!this.selectedBlock) return;
 
 		// Spawning a new block
-		this.previewBlock = this.selectedBlock.getModel().Clone();
+		this.previewBlock = this.selectedBlock.model.Clone();
 		this.previewBlock.Parent = Workspace;
 
 		// Reset rotation
@@ -109,18 +109,6 @@ export default class BuildTool extends ToolBase {
 		const axis = ReplicatedStorage.Assets.Axis.Clone();
 		axis.PivotTo(this.previewBlock.GetPivot());
 		axis.Parent = this.previewBlock;
-
-		if (this.selectedBlock.getAvailableRotationAxis().x === false) {
-			axis.X.Destroy();
-		}
-
-		if (this.selectedBlock.getAvailableRotationAxis().y === false) {
-			axis.Y.Destroy();
-		}
-
-		if (this.selectedBlock.getAvailableRotationAxis().y === false) {
-			axis.Z.Destroy();
-		}
 	}
 
 	private updatePosition(savePosition: boolean = false) {
@@ -280,13 +268,11 @@ export default class BuildTool extends ToolBase {
 			return;
 		}
 
-		const { x, y, z } = this.selectedBlock.getAvailableRotationAxis();
-
-		if (axis === "x" && x) {
+		if (axis === "x") {
 			this.rotateFineTune(new Vector3(isInverted ? math.pi / 2 : math.pi / -2, 0, 0));
-		} else if (axis === "y" && y) {
+		} else if (axis === "y") {
 			this.rotateFineTune(new Vector3(0, isInverted ? math.pi / 2 : math.pi / -2, 0));
-		} else if (axis === "z" && z) {
+		} else if (axis === "z") {
 			this.rotateFineTune(new Vector3(0, 0, isInverted ? math.pi / 2 : math.pi / -2));
 		} else {
 			return;

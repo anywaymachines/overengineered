@@ -13,7 +13,7 @@
 	"eslint.format.enable": true,
 
 	"editor.codeActionsOnSave": {
-	  "source.organizeImports": false,
+	  "source.organizeImports": true,
 	},
 	
 	"discord.removeRemoteRepository": true,

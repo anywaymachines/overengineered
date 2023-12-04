@@ -1,11 +1,10 @@
-import { HttpService, Workspace } from "@rbxts/services";
+import { HttpService } from "@rbxts/services";
 import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
 import Serializer from "shared/Serializer";
 import SharedPlots from "shared/building/SharedPlots";
-import BlockRegistry from "shared/registry/BlocksRegistry";
+import BlockRegistry from "shared/registry/BlockRegistry";
 import PartUtils from "shared/utils/PartUtils";
 import BuildingWelder from "./BuildingWelder";
-import Objects from "shared/Objects";
 
 export default class BuildingWrapper {
 	public static placeBlock(data: PlaceBlockRequest) {
@@ -17,10 +16,10 @@ export default class BuildingWrapper {
 			};
 		}
 
-		const block = BlockRegistry.Blocks.get(data.block)!;
+		const block = BlockRegistry.blocks.get(data.block)!;
 
 		// Create a new instance of the building model
-		const model = block.getModel().Clone();
+		const model = block.model.Clone();
 		model.SetAttribute("id", data.block);
 
 		model.PivotTo(data.location);
