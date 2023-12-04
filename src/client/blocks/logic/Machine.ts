@@ -5,7 +5,7 @@ import ComponentContainer from "client/base/ComponentContainer";
 import Logger from "shared/Logger";
 import SharedPlots from "shared/building/SharedPlots";
 import BlockRegistry from "shared/registry/BlockRegistry";
-import LogicRegistry, { AnyBlockLogic } from "../LogicRegistry";
+import logicRegistry from "../LogicRegistry";
 import VehicleSeatBlockLogic from "./VehicleSeatBlockLogic";
 
 export default class Machine extends ComponentContainer<BlockLogic> {
@@ -57,9 +57,8 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 				continue;
 			}
 
-			const ctor = LogicRegistry.Blocks.get(BlockRegistry.blocks.get(id)!) as AnyBlockLogic | undefined;
-
-			if (ctor === undefined) {
+			const ctor = logicRegistry[id];
+			if (!ctor) {
 				//Logger.info(`No script for block with id ${id}`);
 				continue;
 			}

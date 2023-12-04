@@ -1,10 +1,9 @@
 import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
+import logicRegistry from "client/blocks/LogicRegistry";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
-import BlockRegistry from "shared/registry/BlockRegistry";
-import Block from "shared/registry/abstract/Block";
 import { initializeMultiBlockSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
 
 export default class ConfigTool extends ToolBase {
@@ -13,10 +12,6 @@ export default class ConfigTool extends ToolBase {
 
 	protected prepare() {
 		super.prepare();
-
-		const selectionFilter = (target: Model) =>
-			"getConfigDefinitions" in
-			(BlockRegistry.blocks.get(target.GetAttribute("id") as string) as Block | ConfigurableBlock);
 
 		initializeSingleBlockSelection(
 			this.eventHandler,
@@ -27,7 +22,7 @@ export default class ConfigTool extends ToolBase {
 				// if (Signals.INPUT_TYPE.get() !== "Desktop")  return;
 				this.selectBlockByClick(block);
 			},
-			selectionFilter,
+			(target: Model) => logicRegistry[target.GetAttribute("id") as string] !== undefined,
 		);
 		initializeMultiBlockSelection(this.eventHandler, (blocks) => {
 			for (const block of blocks) {

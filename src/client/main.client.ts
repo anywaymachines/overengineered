@@ -1,5 +1,4 @@
 import ComponentContainer from "./base/ComponentContainer";
-import LogicRegistry from "./blocks/LogicRegistry";
 import ActionController from "./controller/ActionController";
 import GameEnvironmentController from "./controller/GameEnvironmentController";
 import GuiController from "./controller/GuiController";
@@ -21,7 +20,6 @@ ActionController.init();
 LocalPlayerController.initialize();
 InputTypeChangeEvent.subscribe();
 
-LogicRegistry.initialize();
 DebugControl.instance.show();
 SoundController.initialize();
 

@@ -1,7 +1,9 @@
-import { DataStoreService, HttpService, Players, Workspace } from "@rbxts/services";
+import { HttpService } from "@rbxts/services";
 import BuildingWrapper from "server/BuildingWrapper";
+import Logger from "shared/Logger";
 import Serializer from "shared/Serializer";
 import SharedPlots from "shared/building/SharedPlots";
+import BlockRegistry from "shared/registry/BlockRegistry";
 
 export type SerializedBlock = {
 	id: string;
@@ -46,6 +48,11 @@ export default class BlocksSerializer {
 
 		for (let i = 0; i < data.size(); i++) {
 			const blockData = data[i];
+
+			if (!BlockRegistry.blocks.has(blockData.id)) {
+				Logger.info(`Could not load ${blockData.id} from slot: not exists`);
+				continue;
+			}
 
 			const loc = Serializer.CFrameSerializer.deserialize(blockData.loc);
 

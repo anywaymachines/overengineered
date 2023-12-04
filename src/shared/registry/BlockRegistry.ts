@@ -1,7 +1,4 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import Block from "./abstract/Block";
-
-export type Category = string;
 
 export default class BlockRegistry {
 	public static readonly blocks = new Map<string, Block>() as ReadonlyMap<string, Block>;
@@ -9,10 +6,12 @@ export default class BlockRegistry {
 	public static readonly categories: readonly Category[] = [];
 
 	static {
-		for (const rbcategory of ReplicatedStorage.WaitForChild("Assets")
+		const cats = ReplicatedStorage.WaitForChild("Assets")
 			.WaitForChild("Placeable")
 			.GetChildren()
-			.sort((a, b) => a.Name < b.Name)) {
+			.sort((a, b) => a.Name < b.Name);
+
+		for (const rbcategory of cats) {
 			if (!rbcategory.IsA("Folder")) continue;
 
 			const category = rbcategory.Name;
@@ -26,7 +25,7 @@ export default class BlockRegistry {
 				const required = (rbblock.GetAttribute("required") as boolean | undefined) ?? false;
 				const limit = (rbblock.GetAttribute("limit") as number | undefined) ?? 500;
 
-				const block = new Block(id, name, rbblock, category, required, limit);
+				const block: Block = { id, displayName: name, model: rbblock, category, required, limit };
 				(this.blocks as Map<string, Block>).set(id, block);
 				(this.blockList as Block[]).push(block);
 

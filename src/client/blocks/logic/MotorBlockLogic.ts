@@ -1,7 +1,13 @@
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
-import MotorBlock from "shared/registry/blocks/MotorBlock";
 
-export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorBlock> {
+type MotorConfig = {
+	readonly rotate_add: "key";
+	readonly rotate_sub: "key";
+	readonly speed: "number";
+	readonly switch: "bool";
+};
+
+export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorConfig> {
 	private readonly hingeConstraint;
 
 	private readonly increaseKey;
@@ -19,5 +25,47 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorBlock> 
 		this.isSwitch = this.config.get("switch");
 
 		this.hingeConstraint = block.FindFirstChild("Base")?.FindFirstChild("HingeConstraint") as HingeConstraint;
+	}
+
+	public getConfigDefinition(): ConfigTypesToDefinition<MotorConfig> {
+		return {
+			rotate_add: {
+				id: "rotate_add",
+				displayName: "Rotate +",
+				type: "key",
+				default: {
+					Desktop: Enum.KeyCode.R,
+					Gamepad: Enum.KeyCode.ButtonR1,
+				},
+			},
+			rotate_sub: {
+				id: "rotate_sub",
+				displayName: "Rotate -",
+				type: "key",
+				default: {
+					Desktop: Enum.KeyCode.F,
+					Gamepad: Enum.KeyCode.ButtonL1,
+				},
+			},
+			speed: {
+				id: "speed",
+				displayName: "Max. speed",
+				type: "number",
+				min: 0,
+				max: 50,
+				step: 1,
+				default: {
+					Desktop: 15,
+				},
+			},
+			switch: {
+				id: "switch",
+				displayName: "Switch",
+				type: "bool",
+				default: {
+					Desktop: false,
+				},
+			},
+		};
 	}
 }

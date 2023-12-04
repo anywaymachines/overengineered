@@ -1,8 +1,15 @@
 import { UserInputService } from "@rbxts/services";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
-import ServoMotorBlock from "shared/registry/blocks/ServoMotorBlock";
 
-export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMotorBlock> {
+type ServoMotorConfig = {
+	readonly rotate_add: "key";
+	readonly rotate_sub: "key";
+	readonly speed: "number";
+	readonly angle: "number";
+	readonly switch: "bool";
+};
+
+export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMotorConfig> {
 	private readonly hingeConstraint;
 
 	private readonly increaseKey;
@@ -31,6 +38,59 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 
 		this.eventHandler.subscribe(UserInputService.InputBegan, () => this.update());
 		this.eventHandler.subscribe(UserInputService.InputEnded, () => this.update());
+	}
+
+	public getConfigDefinition(): ConfigTypesToDefinition<ServoMotorConfig> {
+		return {
+			rotate_add: {
+				id: "rotate_add",
+				displayName: "Rotate +",
+				type: "key",
+				default: {
+					Desktop: Enum.KeyCode.Q,
+					Gamepad: Enum.KeyCode.ButtonR2,
+				},
+			},
+			rotate_sub: {
+				id: "rotate_sub",
+				displayName: "Rotate -",
+				type: "key",
+				default: {
+					Desktop: Enum.KeyCode.E,
+					Gamepad: Enum.KeyCode.ButtonL2,
+				},
+			},
+			speed: {
+				id: "speed",
+				displayName: "Max. speed",
+				type: "number",
+				min: 0,
+				max: 50,
+				step: 1,
+				default: {
+					Desktop: 15,
+				},
+			},
+			angle: {
+				id: "angle",
+				displayName: "Angle",
+				type: "number",
+				min: -180,
+				max: 180,
+				step: 1,
+				default: {
+					Desktop: 45,
+				},
+			},
+			switch: {
+				id: "switch",
+				displayName: "Switch",
+				type: "bool",
+				default: {
+					Desktop: false,
+				},
+			},
+		};
 	}
 
 	private update() {

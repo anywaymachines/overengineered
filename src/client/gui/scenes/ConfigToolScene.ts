@@ -1,13 +1,13 @@
-import { HttpService } from "@rbxts/services";
-import ConfigManager from "client/ConfigManager";
+import BlockLogic from "client/base/BlockLogic";
+import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Control from "client/base/Control";
-import Signals from "client/event/Signals";
+import { BlockConfig } from "client/blocks/BlockConfig";
+import logicRegistry from "client/blocks/LogicRegistry";
 import ConfigTool from "client/tools/ConfigTool";
 import Objects from "shared/Objects";
 import Remotes from "shared/Remotes";
 import ObservableValue from "shared/event/ObservableValue";
 import BlockRegistry from "shared/registry/BlockRegistry";
-import Block from "shared/registry/abstract/Block";
 import GuiAnimator from "../GuiAnimator";
 import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
 import KeyChooserControl, { KeyChooserControlDefinition } from "../controls/KeyChooserControl";
@@ -21,24 +21,23 @@ export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 export class ConfigPartControl<
 	TControl extends Control<TDef>,
 	TDef extends GuiObject,
-	TValue extends ConfigValues | undefined,
+	TValue extends ConfigValue | undefined,
 > extends Control<ConfigPartDefinition<TDef>> {
 	public readonly control;
 
 	constructor(
 		gui: ConfigPartDefinition<TDef>,
 		ctor: (gui: TDef) => TControl & { value: ObservableValue<TValue> },
-		config: Record<string, ConfigValues | undefined>,
+		config: BlockConfig<ConfigValueTypes>,
 		definition: ConfigDefinition,
+		key: string,
 		def: TValue,
 	) {
 		super(gui);
 
 		this.gui.HeadingLabel.Text = definition.displayName;
 		this.control = ctor(this.gui.Control);
-		this.control.value.set(
-			(config[definition.id] as TValue) ?? (definition.default[Signals.INPUT_TYPE.get()] as TValue) ?? def,
-		);
+		this.control.value.set((config.get(key) as TValue | undefined) ?? def);
 
 		this.add(this.control);
 	}
@@ -96,67 +95,66 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 	}
 
 	private updateConfigs(selected: readonly SelectionBox[]) {
-		function isConfigurableBlock(block: Block): block is ConfigurableBlock & Block {
-			return "getConfigDefinitions" in block;
-		}
-
 		this.list.clear();
 		if (selected.size() === 0) return;
 
-		const item = selected[0].Parent as Model;
-		const block = BlockRegistry.blocks.get(item.GetAttribute("id") as string)!;
+		const blockmodel = selected[0].Parent as Model;
+		const block = BlockRegistry.blocks.get(blockmodel.GetAttribute("id") as string)!;
 
-		if (!isConfigurableBlock(block)) return;
+		// TODO: redo logic-config stuff
+		const logicctor = logicRegistry[block.id];
+		if (!logicctor) return;
 
-		const defs = block.getConfigDefinitions();
-		const aconfig = HttpService.JSONDecode((item.GetAttribute("config") as string | undefined) ?? "{}") as Record<
-			string,
-			string
-		>;
+		const logic = new logicctor(blockmodel) as BlockLogic | ConfigurableBlockLogic<ConfigValueTypes>;
+		if (!("getConfigDefinition" in logic)) return;
 
-		const config = ConfigManager.deserialize(aconfig, defs);
+		const defs = logic.getConfigDefinition();
+		const config = logic.config;
 
-		const send = (key: string, value: unknown) => {
-			print("send " + key + " to " + value);
+		const send = (key: string, value: ConfigValue) => {
+			print("sending " + key + " " + BlockConfig.serializeOne(value, defs[key]));
 
 			return Remotes.Client.GetNamespace("Building")
 				.Get("UpdateConfigRequest")
 				.CallServerAsync({
-					block: item,
-					data: { key, value: ConfigManager.serialize({ [key]: value }, defs)[key] },
+					block: blockmodel,
+					data: { key, value: BlockConfig.serializeOne(value, defs[key]) },
 				});
 		};
 
-		for (const def of Objects.values(defs)) {
-			if (def.type === "Bool") {
+		for (const [id, def] of Objects.entries(defs)) {
+			if (def.type === "bool") {
 				const control = new ConfigPartControl(
 					this.checkboxTemplate(),
 					(cb) => new CheckBoxControl(cb),
-					config as Record<string, boolean>,
+					config,
 					def,
-					false as boolean,
+					id,
+					false,
 				);
 				this.list.add(control);
 
 				control.control.submitted.Connect((value) => send(def.id, value));
-			} else if (def.type === "Key") {
+			} else if (def.type === "key") {
 				const control = new ConfigPartControl(
 					this.keyTemplate(),
 					(kb) => new KeyChooserControl(kb),
-					config as Record<string, Enum.KeyCode | undefined>,
+					config,
 					def,
-					undefined as Enum.KeyCode | undefined,
+					id,
+					Enum.KeyCode.P,
 				);
 				this.list.add(control);
 
 				control.control.submitted.Connect((value) => send(def.id, value));
-			} else if (def.type === "Number") {
+			} else if (def.type === "number") {
 				const control = new ConfigPartControl(
 					this.sliderTemplate(),
 					(cb) => new SliderControl(cb, def.min, def.max, def.step),
-					config as Record<string, number>,
+					config,
 					def,
-					0 as number,
+					id,
+					0,
 				);
 				this.list.add(control);
 

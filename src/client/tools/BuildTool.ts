@@ -9,7 +9,6 @@ import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
 import MaterialChooserControl from "client/gui/tools/MaterialChooser";
 import BuildingManager from "shared/building/BuildingManager";
-import Block from "shared/registry/abstract/Block";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import VectorUtils from "shared/utils/VectorUtils";

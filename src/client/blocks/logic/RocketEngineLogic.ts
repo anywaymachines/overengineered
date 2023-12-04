@@ -1,8 +1,14 @@
 import { UserInputService } from "@rbxts/services";
-import ConfigurableBlockLogic, { TypedConfigKeys } from "client/base/ConfigurableBlockLogic";
-import SmallRocketEngineBlock from "shared/registry/blocks/SmallRocketEngine";
+import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 
-export default class RocketEngineLogic extends ConfigurableBlockLogic<SmallRocketEngineBlock> {
+type RocketEngineConfig = {
+	readonly thrust_add: "key";
+	readonly thrust_sub: "key";
+	readonly switchmode: "bool";
+	readonly strength: "number";
+};
+
+export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngineConfig> {
 	// Instances
 	private readonly engine;
 	private readonly vectorForce;
@@ -48,10 +54,48 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<SmallRocke
 		this.multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16;
 	}
 
-	/*public keyDown(key: "thrust_add" | "thrust_sub") {
-		// asdasdads
-		print(key);
-	}*/
+	public getConfigDefinition(): ConfigTypesToDefinition<RocketEngineConfig> {
+		return {
+			thrust_add: {
+				id: "thrust_add",
+				displayName: "Thrust +",
+				type: "key",
+				default: {
+					Desktop: Enum.KeyCode.W,
+					Gamepad: Enum.KeyCode.ButtonR2,
+				},
+			},
+			thrust_sub: {
+				id: "thrust_sub",
+				displayName: "Thrust -",
+				type: "key",
+				default: {
+					Desktop: Enum.KeyCode.S,
+					Gamepad: Enum.KeyCode.ButtonL2,
+				},
+			},
+			switchmode: {
+				id: "switchmode",
+				displayName: "Switch Mode",
+				type: "bool",
+				default: {
+					Desktop: false,
+					Gamepad: false,
+				},
+			},
+			strength: {
+				id: "strength",
+				displayName: "Strength %",
+				type: "number",
+				min: 0,
+				max: 100,
+				step: 1,
+				default: {
+					Desktop: 100,
+				},
+			},
+		};
+	}
 
 	protected prepare() {
 		super.prepare();

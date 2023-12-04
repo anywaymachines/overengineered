@@ -1,7 +1,11 @@
-import BlockLogic from "client/base/BlockLogic";
+import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Remotes from "shared/Remotes";
 
-export default class DisconnectBlockLogic extends BlockLogic {
+type DisconnectConfig = {
+	readonly disconnect: "key";
+};
+
+export default class DisconnectBlockLogic extends ConfigurableBlockLogic<DisconnectConfig> {
 	protected prepare() {
 		super.prepare();
 		this.inputHandler.onKeyDown(Enum.KeyCode.X, () => this.keyPressed(Enum.KeyCode.X));
@@ -12,5 +16,19 @@ export default class DisconnectBlockLogic extends BlockLogic {
 			.GetNamespace("DisconnectBlock")
 			.Get("Disconnect")
 			.SendToServer(this.block);
+	}
+
+	public getConfigDefinition(): ConfigTypesToDefinition<DisconnectConfig> {
+		return {
+			disconnect: {
+				id: "disconnect",
+				displayName: "Disconnect key",
+				type: "key",
+				default: {
+					Desktop: Enum.KeyCode.F,
+					Gamepad: Enum.KeyCode.ButtonR2,
+				},
+			},
+		};
 	}
 }

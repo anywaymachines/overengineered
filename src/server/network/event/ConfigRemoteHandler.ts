@@ -15,6 +15,7 @@ export default class ConfigRemoteHandler extends BaseRemoteHandler {
 
 	public emit(player: Player, data: ConfigUpdateRequest): Response {
 		const parentPlot = SharedPlots.getPlotByBlock(data.block);
+		print("received  " + data.data.key + " " + data.data.value);
 
 		// No plot?
 		if (parentPlot === undefined) {

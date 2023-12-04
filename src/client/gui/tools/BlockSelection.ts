@@ -2,8 +2,6 @@ import { GuiService } from "@rbxts/services";
 import Control from "client/base/Control";
 import SoundController from "client/controller/SoundController";
 import ObservableValue from "shared/event/ObservableValue";
-import { Category } from "shared/registry/BlockRegistry";
-import Block from "shared/registry/abstract/Block";
 import GuiAnimator from "../GuiAnimator";
 import { ButtonControl } from "../controls/Button";
 

@@ -1,14 +1,14 @@
-import Control from "client/base/Control";
-import ObservableValue from "shared/event/ObservableValue";
 import { UserInputService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import Control from "client/base/Control";
+import ObservableValue from "shared/event/ObservableValue";
 
 export type KeyChooserControlDefinition = TextButton;
 
 /** Control that represents a key */
 export default class KeyChooserControl extends Control<KeyChooserControlDefinition> {
-	public readonly submitted = new Signal<(value: Enum.KeyCode | undefined) => void>();
-	public readonly value = new ObservableValue<Enum.KeyCode | undefined>(undefined);
+	public readonly submitted = new Signal<(value: Enum.KeyCode) => void>();
+	public readonly value = new ObservableValue<Enum.KeyCode>(Enum.KeyCode.P);
 
 	private readonly color = Color3.fromRGB(48, 62, 87);
 	private readonly activeColor = Color3.fromRGB(13, 150, 255);
