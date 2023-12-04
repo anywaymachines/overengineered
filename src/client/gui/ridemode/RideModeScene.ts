@@ -1,4 +1,5 @@
 import Control from "client/base/Control";
+import Machine from "client/blocks/logic/Machine";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
 import { ButtonControl } from "../controls/Button";
 import RocketEngineGui, { RocketEngineGuiDefinition } from "./RocketEngineGui";
@@ -24,6 +25,9 @@ export type RideModeSceneDefinition = GuiObject & {
 
 export default class RideModeScene extends Control<RideModeSceneDefinition> {
 	private readonly actionbar;
+	private readonly controls;
+
+	private readonly torqueTemplate;
 
 	constructor(gui: RideModeSceneDefinition) {
 		super(gui);
@@ -32,12 +36,18 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		this.add(this.actionbar);
 		this.actionbar.show();
 
-		const blocksgui = new Control(this.gui);
-		this.add(blocksgui);
+		this.controls = new Control(this.gui);
+		this.add(this.controls);
 
-		const torque = new RocketEngineGui(this.gui.Torque);
-		this.add(torque);
+		this.torqueTemplate = Control.asTemplate(this.gui.Torque);
+	}
 
-		blocksgui.clear();
+	public start(machine: Machine) {
+		this.controls.clear();
+		machine.destroyed.Connect(() => this.controls.clear());
+
+		const torque = new RocketEngineGui(this.torqueTemplate(), machine);
+		torque.show();
+		this.controls.add(torque);
 	}
 }

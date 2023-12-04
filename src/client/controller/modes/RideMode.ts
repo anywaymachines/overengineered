@@ -1,18 +1,20 @@
 import Machine from "client/blocks/logic/Machine";
 import RideModeScene, { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
-import BlockLogicController from "../BlockLogicController";
 import GuiController from "../GuiController";
 import SoundController from "../SoundController";
 import PlayMode from "./PlayMode";
 
 export default class RideMode extends PlayMode {
 	private currentMachine?: Machine;
+	private readonly rideModeScene;
 
 	constructor() {
 		super();
 
-		const rideMode = new RideModeScene(GuiController.getGameUI<{ RideMode: RideModeSceneDefinition }>().RideMode);
-		this.add(rideMode);
+		this.rideModeScene = new RideModeScene(
+			GuiController.getGameUI<{ RideMode: RideModeSceneDefinition }>().RideMode,
+		);
+		this.add(this.rideModeScene);
 	}
 
 	getName(): PlayModes {
@@ -25,10 +27,9 @@ export default class RideMode extends PlayMode {
 	}
 	public onSwitchFrom(prev: PlayModes | undefined) {
 		if (prev === "build") {
-			this.currentMachine = BlockLogicController.setupBlocks();
-			this.currentMachine.initializeSeat();
-
+			this.currentMachine = Machine.fromBlocks();
 			SoundController.getSounds().RideMode.RideStart.Play();
+			this.rideModeScene.start(this.currentMachine);
 		}
 	}
 }

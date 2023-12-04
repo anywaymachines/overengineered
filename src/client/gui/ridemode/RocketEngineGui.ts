@@ -1,15 +1,15 @@
-import Control from "client/base/Control";
-import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
-import BlockLogicController from "client/controller/BlockLogicController";
 import { RunService } from "@rbxts/services";
+import Control from "client/base/Control";
+import Machine from "client/blocks/logic/Machine";
 import RocketEngineLogic from "client/blocks/logic/RocketEngineLogic";
+import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
 
 export type RocketEngineGuiDefinition = SliderControlDefinition & {};
 
 export default class RocketEngineGui extends Control<RocketEngineGuiDefinition> {
 	public readonly slider;
 
-	constructor(gui: RocketEngineGuiDefinition) {
+	constructor(gui: RocketEngineGuiDefinition, machine: Machine) {
 		super(gui);
 
 		this.slider = new SliderControl(this.gui, 0, 1, 0.01);
@@ -18,8 +18,7 @@ export default class RocketEngineGui extends Control<RocketEngineGuiDefinition> 
 
 		this.event.subscribe(RunService.Heartbeat, () => {
 			const avg: number[] = [];
-
-			for (const block of BlockLogicController.getBlocks()) {
+			for (const block of machine.getChildren()) {
 				if (!(block instanceof RocketEngineLogic)) continue;
 				avg.push(block.getTorque());
 			}

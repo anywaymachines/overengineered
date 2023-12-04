@@ -35,7 +35,11 @@ export default class Component<
 	public add(instance: TChild) {
 		super.add(instance);
 
-		if (instance instanceof Component && instance.getInstance().Parent === undefined) {
+		if (
+			instance instanceof Component &&
+			instance.getInstance() !== this.instance &&
+			instance.getInstance().Parent === undefined
+		) {
 			instance.getInstance().Parent = this.instance;
 		}
 	}
