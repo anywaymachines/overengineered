@@ -1,11 +1,10 @@
-import { UserInputService } from "@rbxts/services";
-import { Players } from "@rbxts/services";
-import EventHandler from "shared/event/EventHandler";
-import Control from "client/base/Control";
-import NumberTextBoxControl from "./NumberTextBoxControl";
-import NumberObservableValue from "shared/event/NumberObservableValue";
+import { Players, UserInputService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import Control from "client/base/Control";
+import EventHandler from "shared/event/EventHandler";
+import NumberObservableValue from "shared/event/NumberObservableValue";
 import Animation from "../Animation";
+import NumberTextBoxControl from "./NumberTextBoxControl";
 
 export type SliderControlDefinition = GuiObject & {
 	Filled?: GuiObject;
@@ -77,6 +76,8 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 		let startpos: number | undefined;
 
 		this.event.subscribe(UserInputService.InputEnded, (input, _) => {
+			if (startpos === undefined) return;
+
 			if (
 				input.UserInputType === Enum.UserInputType.MouseButton1 ||
 				input.UserInputType === Enum.UserInputType.Touch
