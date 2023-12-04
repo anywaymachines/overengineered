@@ -5,6 +5,12 @@ import BlockLogic from "./BlockLogic";
 type ConfigDefinitionToConfig<T extends Readonly<Record<string, ConfigDefinition>>> = {
 	readonly [k in keyof T]: T[k]["default"]["Desktop"];
 };
+export type TypedConfigKeys<
+	T extends Readonly<Record<string, ConfigDefinition>>,
+	TType extends ConfigDefinition["type"],
+> = {
+	readonly [k in keyof T]: T[k]["type"] extends TType ? k : never;
+};
 
 export default abstract class ConfigurableBlockLogic<TConfigurableBlock extends ConfigurableBlock> extends BlockLogic {
 	protected readonly config;
@@ -18,4 +24,14 @@ export default abstract class ConfigurableBlockLogic<TConfigurableBlock extends 
 			ConfigDefinitionToConfig<ReturnType<TConfigurableBlock["getConfigDefinitions"]>>
 		>(block, b.getConfigDefinitions() as ReturnType<TConfigurableBlock["getConfigDefinitions"]>);
 	}
+
+	public keyDown(key: TypedConfigKeys<ReturnType<TConfigurableBlock["getConfigDefinitions"]>, "Key">) {
+		//
+	}
+	/*public keyHold(key: ){
+
+	}
+	public keyUp(key: ){
+
+	}*/
 }

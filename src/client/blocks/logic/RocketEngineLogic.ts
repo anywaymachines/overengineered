@@ -1,5 +1,5 @@
 import { UserInputService } from "@rbxts/services";
-import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
+import ConfigurableBlockLogic, { TypedConfigKeys } from "client/base/ConfigurableBlockLogic";
 import SmallRocketEngineBlock from "shared/registry/blocks/SmallRocketEngine";
 
 export default class RocketEngineLogic extends ConfigurableBlockLogic<SmallRocketEngineBlock> {
@@ -22,10 +22,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<SmallRocke
 	// Const
 	private readonly maxSoundVolume = 0.5;
 	private readonly maxParticlesAcceleration = 120;
-
-	// TODO
-	// private readonly workingColor = Color3.fromRGB(255, 176, 0);
-	// private readonly idleColor = Color3.fromRGB(0, 0, 0);
 
 	// hz
 	private torque = 0;
@@ -51,6 +47,11 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<SmallRocke
 		const colbox = block.FindFirstChild("ColBox") as Part;
 		this.multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16;
 	}
+
+	/*public keyDown(key: "thrust_add" | "thrust_sub") {
+		// asdasdads
+		print(key);
+	}*/
 
 	protected prepare() {
 		super.prepare();
@@ -96,7 +97,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<SmallRocke
 		this.sound.Playing = this.torque !== 0;
 		this.sound.Volume = (this.maxSoundVolume / 100) * this.torque * (this.strength / 100);
 
-		// TODO: Enable animation
 		// TODO: Send packet to server to replicate particles and sounds to other players
 	}
 

@@ -4,7 +4,7 @@ import Signals from "client/event/Signals";
 import Objects from "shared/Objects";
 import Remotes from "shared/Remotes";
 import ObservableValue from "shared/event/ObservableValue";
-import PlayerController from "./PlayerController";
+import LocalPlayerController from "./LocalPlayerController";
 import BuildingMode from "./modes/BuildingMode";
 import RideMode from "./modes/RideMode";
 
@@ -31,7 +31,7 @@ export default class PlayModeController extends ComponentContainer {
 			mode.disable();
 		}
 
-		const controls = PlayerController.getPlayerModule().GetControls();
+		const controls = LocalPlayerController.getPlayerModule().GetControls();
 		this.event.subscribe(Popup.onAnyShow, () => {
 			controls.Disable();
 

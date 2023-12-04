@@ -2,7 +2,7 @@ import { UserInputService } from "@rbxts/services";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import ServoMotorBlock from "shared/registry/blocks/ServoMotorBlock";
 
-export default class Servo9MotorBlockLogic extends ConfigurableBlockLogic<ServoMotorBlock> {
+export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMotorBlock> {
 	private readonly hingeConstraint;
 
 	private readonly increaseKey;

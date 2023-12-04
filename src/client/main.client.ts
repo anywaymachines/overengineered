@@ -3,9 +3,10 @@ import LogicRegistry from "./blocks/LogicRegistry";
 import ActionController from "./controller/ActionController";
 import GameEnvironmentController from "./controller/GameEnvironmentController";
 import GuiController from "./controller/GuiController";
+import LocalPlayerController from "./controller/LocalPlayerController";
 import PlayModeController from "./controller/PlayModeController";
+import SoundController from "./controller/SoundController";
 import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
-import PlayerStateEvent from "./event/PlayerStateEvent";
 import TestScene, { TestSceneDefinition } from "./gui/scenes/TestScene";
 import DebugControl from "./gui/static/DebugControl";
 import LogControl from "./gui/static/LogControl";
@@ -17,11 +18,12 @@ TooltipsControl.instance.show();
 LogControl.instance.show();
 
 ActionController.init();
-PlayerStateEvent.initialize();
+LocalPlayerController.initialize();
 InputTypeChangeEvent.subscribe();
 
 LogicRegistry.initialize();
 DebugControl.instance.show();
+SoundController.initialize();
 
 const root = new ComponentContainer();
 root.add(new PlayModeController());

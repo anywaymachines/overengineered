@@ -1,4 +1,6 @@
+import { Players, RunService } from "@rbxts/services";
 import GuiController from "./GuiController";
+import LocalPlayerController from "./LocalPlayerController";
 
 declare type Sounds = {
 	BuildingMode: {
@@ -15,6 +17,8 @@ declare type Sounds = {
 
 /** A class for controlling sounds and their effects */
 export default class SoundController {
+	public static initialize() {}
+
 	public static getSounds(): Sounds {
 		return GuiController.getGameUI<{ Sounds: Sounds }>().Sounds;
 	}
