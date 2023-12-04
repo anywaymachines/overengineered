@@ -95,7 +95,9 @@ export default class ComponentEventHolder {
 		inputType: Keys = "All",
 	) {
 		this.subscribe(observable.changed, callback, inputType);
-		if (executeImmediately) callback(observable.get(), observable.get());
+		if (executeImmediately) {
+			this.onPrepare(() => callback(observable.get(), observable.get()), true);
+		}
 	}
 
 	public observableFromGuiParam<TInstance extends Instance, TParam extends InstancePropertyNames<TInstance>>(
