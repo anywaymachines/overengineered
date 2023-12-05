@@ -1,8 +1,8 @@
 import { HttpService } from "@rbxts/services";
+import { blockRegistry } from "shared/BlockRegistry";
 import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
 import Serializer from "shared/Serializer";
 import SharedPlots from "shared/building/SharedPlots";
-import BlockRegistry from "shared/registry/BlockRegistry";
 import PartUtils from "shared/utils/PartUtils";
 import BuildingWelder from "./BuildingWelder";
 
@@ -16,7 +16,7 @@ export default class BuildingWrapper {
 			};
 		}
 
-		const block = BlockRegistry.blocks.get(data.block)!;
+		const block = blockRegistry.get(data.block)!;
 
 		// Create a new instance of the building model
 		const model = block.model.Clone();

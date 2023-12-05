@@ -4,10 +4,10 @@ import Control from "client/base/Control";
 import { BlockConfig } from "client/blocks/BlockConfig";
 import logicRegistry from "client/blocks/LogicRegistry";
 import ConfigTool from "client/tools/ConfigTool";
+import { blockRegistry } from "shared/BlockRegistry";
 import Objects from "shared/Objects";
 import Remotes from "shared/Remotes";
 import ObservableValue from "shared/event/ObservableValue";
-import BlockRegistry from "shared/registry/BlockRegistry";
 import GuiAnimator from "../GuiAnimator";
 import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
 import KeyChooserControl, { KeyChooserControlDefinition } from "../controls/KeyChooserControl";
@@ -99,7 +99,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		if (selected.size() === 0) return;
 
 		const blockmodel = selected[0].Parent as Model;
-		const block = BlockRegistry.blocks.get(blockmodel.GetAttribute("id") as string)!;
+		const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
 
 		// TODO: redo logic-config stuff
 		const logicctor = logicRegistry[block.id];

@@ -1,9 +1,9 @@
 import BuildingWrapper from "server/BuildingWrapper";
 import BaseRemoteHandler from "server/base/BaseRemoteHandler";
+import { blockRegistry } from "shared/BlockRegistry";
 import Remotes from "shared/Remotes";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
-import BlockRegistry from "shared/registry/BlockRegistry";
 
 /** Class for **server-based** construction management from blocks */
 export default class BuildRemoteHandler extends BaseRemoteHandler {
@@ -26,7 +26,7 @@ export default class BuildRemoteHandler extends BaseRemoteHandler {
 
 		// Check is limit exceeded
 		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;
-		const block = BlockRegistry.blocks.get(data.block)!;
+		const block = blockRegistry.get(data.block)!;
 		const placedBlocks = SharedPlots.getPlotBlocks(plot)
 			.GetChildren()
 			.filter((placed_block) => {

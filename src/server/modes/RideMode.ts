@@ -1,8 +1,8 @@
 import SlotsDatabase from "server/SlotsDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
+import { blockList } from "shared/BlockRegistry";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
-import BlockRegistry from "shared/registry/BlockRegistry";
 import PartUtils from "shared/utils/PartUtils";
 import PlayModeBase from "./PlayModeBase";
 
@@ -24,7 +24,7 @@ export default class RideMode implements PlayModeBase {
 
 		const blocksChildren = blocks.GetChildren() as unknown as readonly Model[];
 
-		const requiredBlocks = BlockRegistry.blockList.filter((value) => value.required);
+		const requiredBlocks = blockList.filter((value) => value.required);
 		for (const block of requiredBlocks) {
 			if (!blocksChildren.find((value) => value.GetAttribute("id") === block.id)) {
 				return {

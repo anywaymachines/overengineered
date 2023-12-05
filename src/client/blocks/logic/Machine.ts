@@ -2,9 +2,9 @@ import { Players } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import BlockLogic from "client/base/BlockLogic";
 import ComponentContainer from "client/base/ComponentContainer";
+import { blockRegistry } from "shared/BlockRegistry";
 import Logger from "shared/Logger";
 import SharedPlots from "shared/building/SharedPlots";
-import BlockRegistry from "shared/registry/BlockRegistry";
 import logicRegistry from "../LogicRegistry";
 import VehicleSeatBlockLogic from "./VehicleSeatBlockLogic";
 
@@ -52,7 +52,7 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 			const block = blocks[i] as Model;
 			const id = block.GetAttribute("id") as string;
 
-			if (BlockRegistry.blocks.get(id) === undefined) {
+			if (blockRegistry.get(id) === undefined) {
 				Logger.info(`Unknown block id ${id}`);
 				continue;
 			}
