@@ -1,0 +1,3 @@
+type PlayerConfig = {
+	betterCamera?: boolean;
+};

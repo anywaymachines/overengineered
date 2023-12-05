@@ -1,51 +1,47 @@
-import { DataStoreService, Players, HttpService } from "@rbxts/services";
+import { DataStoreService, HttpService, Players } from "@rbxts/services";
 import Logger from "shared/Logger";
+import { Db } from "./Database";
 
 export type PlayerData = {
-	purchasedSlots?: number;
+	readonly purchasedSlots?: number;
+	readonly settings?: PlayerConfig;
 };
 
 export default class PlayerDatabase {
 	public static readonly instance = new PlayerDatabase();
 
 	private readonly datastore: DataStore = DataStoreService.GetDataStore("players");
-	private readonly cache: { [key: string]: PlayerData } = {};
+	private readonly db;
 
 	constructor() {
+		this.db = new Db<PlayerData>(
+			this.datastore,
+			() => ({}),
+			(data) => HttpService.JSONEncode(data),
+			(data) => HttpService.JSONDecode(data) as PlayerData,
+		);
 		this.prepare();
 	}
 
-	protected prepare() {
-		Players.PlayerAdded.Connect((plr) => this.load(tostring(plr.UserId)));
-		Players.PlayerRemoving.Connect((plr) => this.save(tostring(plr.UserId)));
+	private prepare() {
+		Players.PlayerRemoving.Connect((plr) => {
+			const key = tostring(plr.UserId);
+			this.db.save(key);
+		});
 
 		game.BindToClose(() => {
 			Logger.info("Game termination detected");
-			const players = Players.GetPlayers();
 
-			for (let i = 0; i < players.size(); i++) {
-				const plr = players[i];
-				Logger.info(`Saving ${plr.UserId} to ${this.datastore.Name}`);
-				this.datastore.SetAsync(tostring(plr.UserId), HttpService.JSONEncode(this.cache[tostring(plr.UserId)]));
-			}
+			this.db.saveChanged();
+			this.db.freeAll();
 		});
 	}
 
-	public get(key: string) {
-		return (this.cache[key] ??= {});
+	public get(userId: string) {
+		return this.db.get(userId);
 	}
 
-	public save(key: string) {
-		this.datastore.SetAsync(key, HttpService.JSONEncode(this.cache[key]));
-		delete this.cache[key];
-	}
-
-	private load(key: string) {
-		try {
-			const [response, keyinfo] = this.datastore.GetAsync<string>(key);
-			return (this.cache[key] = HttpService.JSONDecode(response as string) as PlayerData);
-		} catch {
-			// Empty
-		}
+	public set(userId: string, data: PlayerData) {
+		this.db.set(userId, data);
 	}
 }

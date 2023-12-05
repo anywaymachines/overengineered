@@ -3,6 +3,8 @@ import Net from "@rbxts/net";
 const Remotes = Net.Definitions.Create({
 	Player: Net.Definitions.Namespace({
 		InputTypeInfo: Net.Definitions.ClientToServerEvent<[inputType: InputType]>(),
+		UpdateSettings: Net.Definitions.ClientToServerEvent<[{ key: string; value: string }]>(),
+		FetchSettings: Net.Definitions.ServerAsyncFunction<() => PlayerConfig>(),
 	}),
 	Building: Net.Definitions.Namespace({
 		PlaceBlockRequest: Net.Definitions.ServerAsyncFunction<(data: PlaceBlockRequest) => BuildResponse>(),

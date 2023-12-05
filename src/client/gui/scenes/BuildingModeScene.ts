@@ -1,14 +1,15 @@
 import Control from "client/base/Control";
 import ToolBase from "client/base/ToolBase";
 import ToolController from "client/controller/ToolController";
-import BuildToolScene, { BuildToolSceneDefinition } from "./BuildToolScene";
-import DeleteToolScene, { DeleteToolSceneDefinition } from "./DeleteToolScene";
-import ConfigToolScene, { ConfigToolSceneDefinition } from "./ConfigToolScene";
-import ToolbarControl, { ToolbarControlDefinition } from "./ToolbarControl";
-import GuiAnimator from "../GuiAnimator";
-import SavePopup from "../popup/SavePopup";
-import { ButtonControl } from "../controls/Button";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
+import GuiAnimator from "../GuiAnimator";
+import { ButtonControl } from "../controls/Button";
+import SavePopup from "../popup/SavePopup";
+import SettingsPopup from "../popup/SettingsPopup";
+import BuildToolScene, { BuildToolSceneDefinition } from "./BuildToolScene";
+import ConfigToolScene, { ConfigToolSceneDefinition } from "./ConfigToolScene";
+import DeleteToolScene, { DeleteToolSceneDefinition } from "./DeleteToolScene";
+import ToolbarControl, { ToolbarControlDefinition } from "./ToolbarControl";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {
@@ -31,6 +32,10 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 
 		this.event.subscribe(saveButton.activated, async () => {
 			SavePopup.instance.show();
+		});
+
+		this.event.subscribe(settingsButton.activated, async () => {
+			SettingsPopup.instance.show();
 		});
 	}
 }
