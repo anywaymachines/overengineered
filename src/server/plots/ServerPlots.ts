@@ -31,7 +31,9 @@ export default class ServerPlots {
 
 	/** Initialization part */
 	private static initializeEvents(): void {
-		Players.PlayerAdded.Connect((player) => this.assignPlotTo(player));
+		Players.PlayerAdded.Connect((player) => {
+			this.assignPlotTo(player);
+		});
 		Players.PlayerRemoving.Connect((player) => this.resetPlotOf(player));
 	}
 
