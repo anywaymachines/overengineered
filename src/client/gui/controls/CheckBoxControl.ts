@@ -1,7 +1,7 @@
+import Signal from "@rbxts/signal";
 import Control from "client/base/Control";
 import ObservableValue from "shared/event/ObservableValue";
 import Animation from "../Animation";
-import Signal from "@rbxts/signal";
 
 export type CheckBoxControlDefinition = TextButton & {
 	Circle: TextButton;
@@ -18,11 +18,13 @@ export default class CheckBoxControl extends Control<CheckBoxControlDefinition> 
 	constructor(gui: CheckBoxControlDefinition) {
 		super(gui);
 
-		this.event.subscribe(gui.MouseButton1Click, () => this.value.set(!this.value.get()));
-		this.event.subscribe(gui.Circle.MouseButton1Click, () => {
+		const clicked = () => {
 			this.value.set(!this.value.get());
 			this.submitted.Fire(this.value.get());
-		});
+		};
+
+		this.event.subscribe(gui.MouseButton1Click, clicked);
+		this.event.subscribe(gui.Circle.MouseButton1Click, clicked);
 
 		Animation.value(
 			this.event,
