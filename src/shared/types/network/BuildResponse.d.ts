@@ -1,3 +1,1 @@
-interface BuildResponse extends Response {
-	model?: Model;
-}
+type BuildResponse = (SuccessResponse & { model: Model }) | ErrorResponse;

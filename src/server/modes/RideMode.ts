@@ -7,18 +7,18 @@ import PartUtils from "shared/utils/PartUtils";
 import PlayModeBase from "./PlayModeBase";
 
 export default class RideMode implements PlayModeBase {
-	onTransitionFrom(player: Player, prevmode: PlayModes | undefined) {
+	onTransitionFrom(player: Player, prevmode: PlayModes | undefined): Response | undefined {
 		if (prevmode === "build") {
 			return this.rideStart(player);
 		}
 	}
-	onTransitionTo(player: Player, nextmode: PlayModes | undefined) {
+	onTransitionTo(player: Player, nextmode: PlayModes | undefined): Response | undefined {
 		if (nextmode === undefined || nextmode === "build") {
 			return this.rideStop(player);
 		}
 	}
 
-	private rideStart(player: Player) {
+	private rideStart(player: Player): Response {
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 		const blocks = SharedPlots.getPlotBlocks(plot);
 
@@ -46,7 +46,7 @@ export default class RideMode implements PlayModeBase {
 
 		return { success: true };
 	}
-	private rideStop(player: Player) {
+	private rideStop(player: Player): Response {
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 		const blocks = SharedPlots.getPlotBlocks(plot);
 

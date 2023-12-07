@@ -1,4 +1,5 @@
-import BlocksLogic from "./blocks/BlocksLogic";
+import BlockLogicRemoteHandler from "./blocks/BlockLogicRemoteHandler";
+import PlayModeController from "./modes/PlayModeController";
 import BuildRemoteHandler from "./network/event/BuildRemoteHandler";
 import ConfigRemoteHandler from "./network/event/ConfigRemoteHandler";
 import DeleteRemoteHandler from "./network/event/DeleteRemoteHandler";
@@ -14,15 +15,15 @@ import ServerPlots from "./plots/ServerPlots";
 ServerPlots.initialize();
 
 // Initializing event workders
-new BuildRemoteHandler();
-new MoveRemoteHandler();
-new DeleteRemoteHandler();
-new SetPlayModeRemoteHandler();
-new SaveSlotRemoteHandler();
-new LoadSlotRemoteHandler();
-new ConfigRemoteHandler();
-new FetchSlotsRemoteHandler();
-new PlayerSettingsHandler();
+BuildRemoteHandler.init();
+MoveRemoteHandler.init();
+DeleteRemoteHandler.init();
+SetPlayModeRemoteHandler.init();
+SaveSlotRemoteHandler.init();
+LoadSlotRemoteHandler.init();
+ConfigRemoteHandler.init();
+FetchSlotsRemoteHandler.init();
+PlayerSettingsHandler.init();
+BlockLogicRemoteHandler.init();
 
-// Initializing other
-BlocksLogic.initialize();
+PlayModeController.init();

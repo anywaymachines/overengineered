@@ -8,11 +8,11 @@ const Remotes = Net.Definitions.Create({
 	}),
 	Building: Net.Definitions.Namespace({
 		PlaceBlockRequest: Net.Definitions.ServerAsyncFunction<(data: PlaceBlockRequest) => BuildResponse>(),
-		MoveRequest: Net.Definitions.ServerAsyncFunction<(data: PlayerMoveRequest) => BuildResponse>(),
+		MoveRequest: Net.Definitions.ServerAsyncFunction<(data: PlayerMoveRequest) => Response>(),
 
 		UpdateConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
 
-		Delete: Net.Definitions.ServerAsyncFunction<(data: PlayerDeleteBlockRequest) => BuildResponse>(),
+		Delete: Net.Definitions.ServerAsyncFunction<(data: PlayerDeleteBlockRequest) => Response>(),
 	}),
 	Slots: Net.Definitions.Namespace({
 		Fetch: Net.Definitions.ServerAsyncFunction<() => FetchSlotsResponse>(),

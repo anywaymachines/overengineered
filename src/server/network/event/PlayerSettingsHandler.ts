@@ -1,33 +1,25 @@
-import { Players } from "@rbxts/services";
 import PlayerDatabase from "server/PlayerDatabase";
-import BaseRemoteHandler from "server/base/BaseRemoteHandler";
-import Remotes from "shared/Remotes";
+import { registerOnRemoteEvent, registerOnRemoteFunction } from "./RemoteHandler";
 
-export default class PlayerSettingsHandler extends BaseRemoteHandler {
-	constructor() {
-		super("player => settings");
+export default class PlayerSettingsHandler {
+	static init() {
+		registerOnRemoteEvent("Player", "UpdateSettings", (player: Player, data: { key: string; value: string }) => {
+			const playerData = PlayerDatabase.instance.get(tostring(player.UserId));
 
-		Players.PlayerAdded.Connect((player) => {});
+			const newPlayerData = {
+				...playerData,
+				settings: {
+					...(playerData.settings ?? {}),
+					[data.key]: data.value,
+				},
+			};
 
-		// Update request
-		Remotes.Server.GetNamespace("Player").OnEvent("UpdateSettings", (player, data) => this.emit(player, data));
-		Remotes.Server.GetNamespace("Player").OnFunction("FetchSettings", (player) => {
+			PlayerDatabase.instance.set(tostring(player.UserId), newPlayerData);
+		});
+
+		registerOnRemoteFunction("Player", "FetchSettings", (player) => {
 			const playerData = PlayerDatabase.instance.get(tostring(player.UserId));
 			return playerData.settings ?? {};
 		});
-	}
-
-	public emit(player: Player, data: { key: string; value: string }) {
-		const playerData = PlayerDatabase.instance.get(tostring(player.UserId));
-
-		const newPlayerData = {
-			...playerData,
-			settings: {
-				...(playerData.settings ?? {}),
-				[data.key]: data.value,
-			},
-		};
-
-		PlayerDatabase.instance.set(tostring(player.UserId), newPlayerData);
 	}
 }

@@ -64,7 +64,7 @@ export default class BlocksSerializer {
 			};
 
 			const response = BuildingWrapper.placeBlock(deserializedData);
-			if (response.model && blockData.config) {
+			if (response.success && response.model && blockData.config) {
 				response.model.SetAttribute("config", HttpService.JSONEncode(blockData.config));
 			}
 		}

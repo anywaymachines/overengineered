@@ -1,12 +1,9 @@
-import Remotes from "shared/Remotes";
+import { registerOnRemoteEvent2 } from "server/network/event/RemoteHandler";
 
 export default class DisconnectBlockLogic {
-	static initialize() {
-		Remotes.Server.GetNamespace("Blocks")
-			.GetNamespace("DisconnectBlock")
-			.Get("Disconnect")
-			.Connect((player: Player, block: Model) => {
-				block.FindFirstChild("Ejector")?.Destroy();
-			});
+	static init() {
+		registerOnRemoteEvent2("Blocks", "DisconnectBlock", "Disconnect", (player, block) => {
+			block.FindFirstChild("Ejector")?.Destroy();
+		});
 	}
 }

@@ -1,4 +1,3 @@
-interface Response {
-	success: boolean;
-	message?: string;
-}
+type SuccessResponse = { success: true };
+type ErrorResponse = { success: false; message: string };
+type Response = SuccessResponse | ErrorResponse;

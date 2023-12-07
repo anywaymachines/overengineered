@@ -1,33 +1,28 @@
 import SlotsDatabase from "server/SlotsDatabase";
-import BaseRemoteHandler from "server/base/BaseRemoteHandler";
 import BlocksSerializer from "server/plots/BlocksSerializer";
 import ServerPlots from "server/plots/ServerPlots";
 import Logger from "shared/Logger";
-import Remotes from "shared/Remotes";
 import SharedPlots from "shared/building/SharedPlots";
+import { registerOnRemoteFunction } from "./RemoteHandler";
 
-export default class LoadSlotRemoteHandler extends BaseRemoteHandler {
-	constructor() {
-		super("slots => load");
+export default class LoadSlotRemoteHandler {
+	static init() {
+		registerOnRemoteFunction("Slots", "Load", (player, index) => {
+			const blocks = SlotsDatabase.instance.getBlocks(player.UserId, index);
+			if (!blocks || blocks.size() === 0) {
+				return {
+					success: false,
+					message: "Slot is empty",
+				};
+			}
 
-		Remotes.Server.GetNamespace("Slots").OnFunction("Load", (player, index) => this.emit(player, index));
-	}
+			Logger.info(`Loading ${player.Name}'s slot ${index}`);
 
-	public emit(player: Player, index: number) {
-		const blocks = SlotsDatabase.instance.getBlocks(player.UserId, index);
-		if (!blocks || blocks.size() === 0) {
-			return {
-				success: false,
-				message: "Slot is empty",
-			};
-		}
+			const plot = SharedPlots.getPlotByOwnerID(player.UserId);
+			ServerPlots.clearAllBlocks(plot);
+			BlocksSerializer.deserialize(plot, blocks);
 
-		Logger.info(`Loading ${player.Name}'s slot ${index}`);
-
-		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-		ServerPlots.clearAllBlocks(plot);
-		BlocksSerializer.deserialize(plot, blocks);
-
-		return { success: true };
+			return { success: true };
+		});
 	}
 }
