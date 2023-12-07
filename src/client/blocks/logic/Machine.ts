@@ -53,13 +53,12 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 			const id = block.GetAttribute("id") as string;
 
 			if (blockRegistry.get(id) === undefined) {
-				Logger.info(`Unknown block id ${id}`);
+				Logger.error(`Unknown block id ${id}`);
 				continue;
 			}
 
 			const ctor = logicRegistry[id];
 			if (!ctor) {
-				//Logger.info(`No script for block with id ${id}`);
 				continue;
 			}
 
