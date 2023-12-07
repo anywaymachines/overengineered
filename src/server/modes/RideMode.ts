@@ -34,7 +34,12 @@ export default class RideMode implements PlayModeBase {
 			}
 		}
 
-		SlotsDatabase.instance.setBlocks(player.UserId, SlotsMeta.autosaveSlotIndex, BlocksSerializer.serialize(plot));
+		SlotsDatabase.instance.setBlocks(
+			player.UserId,
+			SlotsMeta.autosaveSlotIndex,
+			BlocksSerializer.current.serialize(plot),
+			SharedPlots.getPlotBlocks(plot).GetChildren().size(),
+		);
 
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
 		const vehicleSeatModel = blocksChildren.find((model) => model.GetAttribute("id") === "vehicleseat") as Model;
@@ -53,7 +58,10 @@ export default class RideMode implements PlayModeBase {
 		blocks.ClearAllChildren();
 
 		const blocksToLoad = SlotsDatabase.instance.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
-		if (blocksToLoad) BlocksSerializer.deserialize(plot, blocksToLoad);
+		if (blocksToLoad !== undefined) {
+			const deserialized = BlocksSerializer.current.deserialize(blocksToLoad);
+			BlocksSerializer.deserialize(plot, deserialized);
+		}
 
 		return { success: true };
 	}

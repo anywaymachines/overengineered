@@ -1,11 +1,12 @@
-import { DataStoreService, HttpService, Players } from "@rbxts/services";
+import { Base64 } from "@rbxts/crypto";
+import { DataStoreService, Players } from "@rbxts/services";
 import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import SharedPlots from "shared/building/SharedPlots";
 import SlotsMeta from "../shared/SlotsMeta";
 import { Db } from "./Database";
 import PlayerDatabase from "./PlayerDatabase";
-import BlocksSerializer, { SerializedBlock } from "./plots/BlocksSerializer";
+import BlocksSerializer from "./plots/BlocksSerializer";
 
 export default class SlotsDatabase {
 	public static readonly instance = new SlotsDatabase();
@@ -14,11 +15,11 @@ export default class SlotsDatabase {
 	private readonly blocksdb;
 
 	constructor() {
-		this.blocksdb = new Db<readonly SerializedBlock[]>(
+		this.blocksdb = new Db<string | undefined>(
 			this.datastore,
-			() => [],
-			(data) => HttpService.JSONEncode(data),
-			(data) => HttpService.JSONDecode(data) as readonly SerializedBlock[],
+			() => undefined,
+			(data) => (data === undefined ? undefined : Base64.Encode(data)),
+			(data) => Base64.Decode(data),
 		);
 
 		this.prepare();
@@ -64,9 +65,9 @@ export default class SlotsDatabase {
 	}
 	public getBlocks(userId: number, index: number) {
 		this.ensureValidSlotIndex(userId, index);
-		return this.blocksdb.get(this.toKey(userId, index)) as readonly SerializedBlock[] | undefined;
+		return this.blocksdb.get(this.toKey(userId, index)) as string | undefined;
 	}
-	public setBlocks(userId: number, index: number, blocks: readonly SerializedBlock[]) {
+	public setBlocks(userId: number, index: number, blocks: string, blockCount: number) {
 		this.ensureValidSlotIndex(userId, index);
 		this.blocksdb.set(this.toKey(userId, index), blocks);
 
@@ -86,11 +87,11 @@ export default class SlotsDatabase {
 		let size: number | undefined = undefined;
 		if (saveBlocks) {
 			const plot = SharedPlots.getPlotByOwnerID(userId);
-			const blocks = BlocksSerializer.serialize(plot);
-			this.setBlocks(userId, index, blocks);
+			const blocks = BlocksSerializer.current.serialize(plot);
+			blocksCount = SharedPlots.getPlotBlocks(plot).GetChildren().size();
 
-			blocksCount = blocks.size();
-			size = HttpService.JSONEncode(blocks).size();
+			this.setBlocks(userId, index, blocks, blocksCount);
+			size = blocks.size();
 		}
 
 		return { blocks: blocksCount, size: size };

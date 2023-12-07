@@ -9,7 +9,7 @@ export default class LoadSlotRemoteHandler {
 	static init() {
 		registerOnRemoteFunction("Slots", "Load", (player, index) => {
 			const blocks = SlotsDatabase.instance.getBlocks(player.UserId, index);
-			if (!blocks || blocks.size() === 0) {
+			if (blocks === undefined || blocks.size() === 0) {
 				return {
 					success: false,
 					message: "Slot is empty",
@@ -20,7 +20,8 @@ export default class LoadSlotRemoteHandler {
 
 			const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 			ServerPlots.clearAllBlocks(plot);
-			BlocksSerializer.deserialize(plot, blocks);
+			const dblocks = BlocksSerializer.current.deserialize(blocks);
+			BlocksSerializer.deserialize(plot, dblocks);
 
 			return { success: true };
 		});

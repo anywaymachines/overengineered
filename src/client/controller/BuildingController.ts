@@ -1,6 +1,6 @@
 import Signals from "client/event/Signals";
-import Remotes from "shared/Remotes";
 import LogControl from "client/gui/static/LogControl";
+import Remotes from "shared/Remotes";
 
 export default class BuildingController {
 	public static async placeBlock(data: PlaceBlockRequest) {

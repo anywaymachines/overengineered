@@ -33,11 +33,14 @@ export default class Serializer {
 
 	static Color3Serializer = {
 		serialize(color: Color3): SerializedColor {
-			return [math.round(color.R * 255), math.round(color.G * 255), math.round(color.B * 255)];
+			return color.ToHex();
 		},
 
-		deserialize(serializedColor: SerializedColor): Color3 {
-			return Color3.fromRGB(serializedColor[0], serializedColor[1], serializedColor[2]);
+		deserialize(serializedColor: SerializedColor | readonly [number, number, number]): Color3 {
+			if (!typeIs(serializedColor, "string"))
+				return Color3.fromRGB(serializedColor[0], serializedColor[1], serializedColor[2]);
+
+			return Color3.fromHex(serializedColor);
 		},
 	};
 

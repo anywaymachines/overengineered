@@ -18,7 +18,7 @@ export abstract class DbBase<T> {
 
 	protected abstract createDefault(): T;
 	protected abstract deserialize(data: string): T;
-	protected abstract serialize(data: T): string;
+	protected abstract serialize(data: T): string | undefined;
 
 	public get(key: string) {
 		return (this.cache[key] ??= this.load(key)).value;
@@ -82,7 +82,7 @@ export class Db<T> extends DbBase<T> {
 	constructor(
 		datastore: DataStore,
 		createDefaultFunc: () => T,
-		serializeFunc: (data: T) => string,
+		serializeFunc: (data: T) => string | undefined,
 		deserializeFunc: (data: string) => T,
 	) {
 		super(datastore);
@@ -99,7 +99,7 @@ export class Db<T> extends DbBase<T> {
 		return this.deserializeFunc(data);
 	}
 
-	protected serialize(data: T): string {
+	protected serialize(data: T): string | undefined {
 		return this.serializeFunc(data);
 	}
 }

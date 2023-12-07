@@ -27,7 +27,8 @@ DebugControl.instance.show();
 SoundController.initialize();
 
 const root = new ComponentContainer();
-root.add(new PlayModeController());
+const playModeController = new PlayModeController();
+root.add(playModeController);
 root.enable();
 
 const guitests = new TestScene(GuiController.getGameUI<{ Tests: TestSceneDefinition }>().Tests);

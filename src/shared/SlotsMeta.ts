@@ -14,7 +14,7 @@ export default class SlotsMeta {
 		if (index === SlotsMeta.autosaveSlotIndex) {
 			return {
 				name: "Autosave",
-				color: [0, 255, 255],
+				color: "00FFFF",
 				blocks: 0,
 				size: 0,
 			};
@@ -22,7 +22,7 @@ export default class SlotsMeta {
 
 		return {
 			name: "Slot " + (index + 1),
-			color: [255, 255, 255],
+			color: "FFFFFF",
 			blocks: 0,
 			size: 0,
 		};
