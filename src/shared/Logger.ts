@@ -1,8 +1,10 @@
 import { Players, RunService } from "@rbxts/services";
+import Signal from "@rbxts/signal";
 import GameDefinitions from "./GameDefinitions";
-import Remotes from "./Remotes";
 
 export default class Logger {
+	public static readonly onLog = new Signal<(text: string, error: boolean) => void>();
+
 	static info(msg: string) {
 		if (RunService.IsClient() === true) {
 			// Show logs only to maintainers
@@ -15,10 +17,28 @@ export default class Logger {
 			print(`[INFO] [SERVER] ${msg}`);
 		}
 
-		if (RunService.IsStudio()) {
-			Remotes.Server.GetNamespace("Debug")
-				.Get("DisplayLine")
-				.SendToAllPlayers("■ (DEBUG) " + msg, RunService.IsClient());
+		this.onLog.Fire(msg, false);
+	}
+	static error(msg: string) {
+		if (RunService.IsClient() === true) {
+			// Show logs only to maintainers
+			if (!GameDefinitions.DEVELOPERS.includes(Players.LocalPlayer.UserId)) {
+				return;
+			}
+
+			try {
+				error(`[ERROR] [CLIENT] ${msg}`);
+			} catch {
+				// empty
+			}
+		} else {
+			try {
+				error(`[ERROR] [SERVER] ${msg}`);
+			} catch {
+				// empty
+			}
 		}
+
+		this.onLog.Fire(msg, true);
 	}
 }

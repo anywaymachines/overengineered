@@ -1,3 +1,6 @@
+import { RunService } from "@rbxts/services";
+import Logger from "shared/Logger";
+import Remotes from "shared/Remotes";
 import BlockLogicRemoteHandler from "./blocks/BlockLogicRemoteHandler";
 import PlayModeController from "./modes/PlayModeController";
 import BuildRemoteHandler from "./network/event/BuildRemoteHandler";
@@ -9,6 +12,7 @@ import MoveRemoteHandler from "./network/event/MoveRemoteHandler";
 import PlayerSettingsHandler from "./network/event/PlayerSettingsHandler";
 import SaveSlotRemoteHandler from "./network/event/SaveSlotRemoteHandler";
 import SetPlayModeRemoteHandler from "./network/event/SetPlayModeRemoteHandler";
+import SitRemoteHandler from "./network/event/SitRemoteHandler";
 import ServerPlots from "./plots/ServerPlots";
 
 // Plots
@@ -25,5 +29,12 @@ ConfigRemoteHandler.init();
 FetchSlotsRemoteHandler.init();
 PlayerSettingsHandler.init();
 BlockLogicRemoteHandler.init();
+SitRemoteHandler.init();
 
 PlayModeController.init();
+
+if (RunService.IsStudio()) {
+	Logger.onLog.Connect((text, isError) => {
+		Remotes.Server.GetNamespace("Debug").Get("DisplayLine").SendToAllPlayers(text, false, isError);
+	});
+}

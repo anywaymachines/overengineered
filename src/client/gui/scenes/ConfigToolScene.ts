@@ -5,6 +5,7 @@ import logicRegistry from "client/blocks/LogicRegistry";
 import ConfigTool from "client/tools/ConfigTool";
 import { blockRegistry } from "shared/BlockRegistry";
 import { ConfigValue, ConfigValueTypes, KeyCode } from "shared/Configuration";
+import Logger from "shared/Logger";
 import Objects from "shared/Objects";
 import Remotes from "shared/Remotes";
 import GuiAnimator from "../GuiAnimator";
@@ -87,7 +88,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		const config = logic.config;
 
 		const send = (key: string, value: ConfigValue) => {
-			print("sending " + key + " " + serializeOne(value, defs[key]));
+			Logger.info("Sending block config value " + key + " " + serializeOne(value, defs[key]));
 
 			return Remotes.Client.GetNamespace("Building")
 				.Get("UpdateConfigRequest")

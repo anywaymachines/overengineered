@@ -1,19 +1,26 @@
 import Control from "client/base/Control";
 import Machine from "client/blocks/logic/Machine";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
+import Remotes from "shared/Remotes";
 import { ButtonControl } from "../controls/Button";
 import RocketEngineGui, { RocketEngineGuiDefinition } from "./RocketEngineGui";
 
 export type ActionBarControlDefinition = GuiObject & {
 	Stop: GuiButton;
+	Sit: GuiButton;
 };
 export class ActionBarControl extends Control<ActionBarControlDefinition> {
 	constructor(gui: ActionBarControlDefinition) {
 		super(gui);
 
 		const stopButton = this.added(new ButtonControl(this.gui.Stop));
+		const sitButton = this.added(new ButtonControl(this.gui.Sit));
 		this.event.subscribe(stopButton.activated, async () => {
 			await requestMode("build");
+		});
+
+		this.event.subscribe(sitButton.activated, async () => {
+			Remotes.Client.GetNamespace("Ride").Get("Sit").SendToServer();
 		});
 	}
 }

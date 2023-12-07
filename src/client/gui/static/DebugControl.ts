@@ -1,5 +1,6 @@
 import Control from "client/base/Control";
 import GuiController from "client/controller/GuiController";
+import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import GuiAnimator from "../GuiAnimator";
 import { LogControlDefinition } from "./LogControl";
@@ -21,10 +22,21 @@ export default class DebugControl extends Control<DebugControlDefinition> {
 		super(gui);
 		this.lineTemplate = Control.asTemplate(this.gui.Template);
 
+		this.event.subscribe(Logger.onLog, (text, isError) => {
+			this.addLine(`■ [DEBUG] ${text}`, isError ? Color3.fromRGB(255, 0, 0) : Color3.fromRGB(52, 154, 213));
+		});
+
 		Remotes.Client.GetNamespace("Debug")
 			.Get("DisplayLine")
-			.Connect((text: string, isClient: boolean) => {
-				this.addLine(text, isClient ? Color3.fromRGB(52, 154, 213) : Color3.fromRGB(0, 204, 103));
+			.Connect((text: string, isClient: boolean, isError: boolean) => {
+				this.addLine(
+					`■ [DEBUG] ${text}`,
+					isError
+						? Color3.fromRGB(255, 0, 0)
+						: isClient
+						  ? Color3.fromRGB(52, 154, 213)
+						  : Color3.fromRGB(0, 204, 103),
+				);
 			});
 	}
 
