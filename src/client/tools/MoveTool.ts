@@ -104,9 +104,9 @@ export default class MoveTool extends ToolBase {
 		super.prepare();
 		this.createHandles();
 
-		this.eventHandler.subscribe(Signals.BLOCKS.ADDED, () => this.createHandles());
-		this.eventHandler.subscribe(Signals.BLOCKS.REMOVED, () => this.createHandles());
-		this.eventHandler.subscribe(Signals.CONTRAPTION.MOVED, () => this.createHandles());
+		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.createHandles());
+		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.createHandles());
+		this.eventHandler.subscribe(Signals.BLOCKS.BLOCKS_MOVED, () => this.createHandles());
 	}
 
 	public disable() {

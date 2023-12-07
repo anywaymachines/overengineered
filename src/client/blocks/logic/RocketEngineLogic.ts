@@ -1,6 +1,5 @@
 import { UserInputService } from "@rbxts/services";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
-import { ConfigTypesToDefinition, KeyCode } from "../../../shared/Configuration";
 
 type RocketEngineConfig = {
 	readonly thrust_add: "key";

@@ -1,5 +1,4 @@
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
-import { ConfigTypesToDefinition } from "../../../shared/Configuration";
 
 type MotorConfig = {
 	readonly rotate_add: "key";

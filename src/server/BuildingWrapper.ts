@@ -1,6 +1,6 @@
 import { HttpService } from "@rbxts/services";
-import { blockRegistry } from "shared/BlockRegistry";
 import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
+import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";

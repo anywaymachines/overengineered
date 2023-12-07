@@ -1,14 +1,4 @@
-import Objects from "shared/Objects";
-import {
-	ConfigDefinition,
-	ConfigDefinitionType,
-	ConfigTypesToConfig,
-	ConfigTypesToDefinition,
-	ConfigValue,
-	ConfigValueOf,
-	ConfigValueTypes,
-	KeyCode,
-} from "../shared/Configuration";
+import Objects from "shared/_fixes_/objects";
 import InputController from "./controller/InputController";
 
 export const serializeOne = (value: ConfigValue, definition: ConfigDefinition) => {

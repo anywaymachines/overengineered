@@ -1,6 +1,5 @@
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Remotes from "shared/Remotes";
-import { ConfigTypesToDefinition } from "../../../shared/Configuration";
 
 type DisconnectConfig = {
 	readonly disconnect: "key";

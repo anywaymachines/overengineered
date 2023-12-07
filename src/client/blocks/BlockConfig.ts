@@ -1,6 +1,5 @@
 import { HttpService } from "@rbxts/services";
 import { Config, deserialize } from "client/Config";
-import { ConfigTypesToDefinition, ConfigValueTypes } from "shared/Configuration";
 
 export class BlockConfig<T extends ConfigValueTypes> extends Config<T> {
 	constructor(source: Instance, definitions: ConfigTypesToDefinition<T>) {

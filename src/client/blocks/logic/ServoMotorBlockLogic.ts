@@ -1,6 +1,5 @@
 import { UserInputService } from "@rbxts/services";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
-import { ConfigTypesToDefinition } from "../../../shared/Configuration";
 
 type ServoMotorConfig = {
 	readonly rotate_add: "key";

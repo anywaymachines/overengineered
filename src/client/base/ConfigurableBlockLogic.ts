@@ -1,5 +1,4 @@
 import { BlockConfig } from "client/blocks/BlockConfig";
-import { ConfigTypesToDefinition, ConfigValueTypes } from "shared/Configuration";
 import BlockLogic from "./BlockLogic";
 
 export default abstract class ConfigurableBlockLogic<TConfig extends ConfigValueTypes> extends BlockLogic {

@@ -303,8 +303,8 @@ export default class BuildTool extends ToolBase {
 	protected prepare(): void {
 		super.prepare();
 
-		this.eventHandler.subscribe(Signals.BLOCKS.ADDED, () => this.updatePosition());
-		this.eventHandler.subscribe(Signals.BLOCKS.REMOVED, () => this.updatePosition());
+		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.updatePosition());
+		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.updatePosition());
 	}
 
 	protected prepareDesktop(): void {

@@ -89,8 +89,8 @@ export const initializeSingleBlockSelection = (
 	const prepare = () => {
 		const fireSelected = () => submit(highlight?.Parent as Model | undefined);
 
-		eventHandler.subscribe(Signals.BLOCKS.ADDED, () => updatePosition());
-		eventHandler.subscribe(Signals.BLOCKS.REMOVED, () => updatePosition());
+		eventHandler.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => updatePosition());
+		eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => updatePosition());
 
 		if (InputController.inputType.get() === "Desktop") {
 			eventHandler.subscribe(mouse.Button1Down, () => {

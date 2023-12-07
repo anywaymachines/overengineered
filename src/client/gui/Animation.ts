@@ -1,6 +1,6 @@
 import { TweenService } from "@rbxts/services";
 import ComponentEventHolder from "client/base/ComponentEventHolder";
-import Objects from "shared/Objects";
+import Objects from "shared/_fixes_/objects";
 import { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import GuiAnimator from "./GuiAnimator";
 

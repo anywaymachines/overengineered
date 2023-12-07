@@ -13,13 +13,9 @@ export default class Signals {
 	} as const;
 
 	public static readonly BLOCKS = {
-		ADDED: this.registerSignal(new Signal<(block: Model) => void>()),
-		REMOVED: this.registerSignal(new Signal<(block: Model) => void>()),
-	} as const;
-
-	public static readonly CONTRAPTION = {
-		CLEARED: this.registerSignal(new Signal<() => void>()),
-		MOVED: this.registerSignal(new Signal<(offset: Vector3) => void>()),
+		BLOCK_ADDED: this.registerSignal(new Signal<(block: Model) => void>()),
+		BLOCK_REMOVED: this.registerSignal(new Signal<(block: Model) => void>()),
+		BLOCKS_MOVED: this.registerSignal(new Signal<(offset: Vector3) => void>()),
 	} as const;
 
 	private static registerSignal<T extends Signal>(signal: T): T {

@@ -1,6 +1,5 @@
 import Control from "client/base/Control";
 import { BlockConfig } from "client/blocks/BlockConfig";
-import { ConfigDefinition, ConfigValue, ConfigValueTypes } from "shared/Configuration";
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigPartDefinition } from "../scenes/ConfigToolScene";
 

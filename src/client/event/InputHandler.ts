@@ -1,5 +1,4 @@
 import { UserInputService } from "@rbxts/services";
-import { KeyCode } from "shared/Configuration";
 import EventHandler from "shared/event/EventHandler";
 
 type InputCallback = (input: InputObject) => boolean | unknown;

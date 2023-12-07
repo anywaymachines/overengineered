@@ -30,7 +30,7 @@ export default class ConfigTool extends ToolBase {
 			}
 		});
 
-		this.eventHandler.subscribe(Signals.BLOCKS.REMOVED, (model) => {
+		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, (model) => {
 			const removed = this.selected.filter((sel) => sel.Parent === model);
 
 			for (const sel of removed) {

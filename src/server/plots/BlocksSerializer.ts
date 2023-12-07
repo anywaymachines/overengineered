@@ -1,8 +1,8 @@
 import { Base64 } from "@rbxts/crypto";
 import { HttpService } from "@rbxts/services";
 import BuildingWrapper from "server/BuildingWrapper";
-import { blockRegistry } from "shared/BlockRegistry";
 import Logger from "shared/Logger";
+import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
 import SharedPlots from "shared/building/SharedPlots";
 

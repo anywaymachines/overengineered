@@ -1,7 +1,6 @@
 import { UserInputService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import Control from "client/base/Control";
-import { KeyCode } from "shared/Configuration";
 import ObservableValue from "shared/event/ObservableValue";
 
 export type KeyChooserControlDefinition = TextButton;

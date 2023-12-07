@@ -4,7 +4,7 @@ import Control from "client/base/Control";
 import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
 import GameDefinitions from "shared/GameDefinitions";
-import Objects from "shared/Objects";
+import Objects from "shared/_fixes_/objects";
 import { ButtonControl } from "../controls/Button";
 import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
 import ConfigPartControl from "../controls/ConfigPartControl";

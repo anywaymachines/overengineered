@@ -1,6 +1,6 @@
 import Control from "client/base/Control";
 import BuildTool from "client/tools/BuildTool";
-import { blockList, categoriesRegistry } from "shared/BlockRegistry";
+import { blockList, categoriesRegistry } from "shared/Registry";
 import GuiAnimator from "../GuiAnimator";
 import { ButtonControl } from "../controls/Button";
 import BlockSelectionControl, { BlockSelectionControlDefinition } from "../tools/BlockSelection";

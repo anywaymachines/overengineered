@@ -1,6 +1,6 @@
 import SlotsDatabase from "server/SlotsDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
-import { blockList } from "shared/BlockRegistry";
+import { blockList } from "shared/Registry";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
 import PartUtils from "shared/utils/PartUtils";
