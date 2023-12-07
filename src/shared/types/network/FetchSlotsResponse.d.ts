@@ -6,7 +6,9 @@ type SlotMeta = {
 };
 type SerializedSlotsMeta = readonly Readonly<SlotMeta & { index: number }>[];
 
-interface FetchSlotsResponse extends Response {
-	readonly purchasedSlots: number;
-	readonly slots: SerializedSlotsMeta;
-}
+type FetchSlotsResponse =
+	| (SuccessResponse & {
+			readonly purchasedSlots: number;
+			readonly slots: SerializedSlotsMeta;
+	  })
+	| ErrorResponse;

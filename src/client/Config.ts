@@ -21,8 +21,9 @@ export const serializeOne = (value: ConfigValue, definition: ConfigDefinition) =
 	};
 
 	return (
-		//convertIf("key", (value) => value.Name) ??
-		convertIf("bool", (value) => (value ? "Y" : "N")) ?? convertIf("number", (value) => tostring(value))!
+		convertIf("key", (value) => value) ??
+		convertIf("bool", (value) => (value ? "Y" : "N")) ??
+		convertIf("number", (value) => tostring(value))!
 	);
 };
 

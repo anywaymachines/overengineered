@@ -249,6 +249,8 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 
 	private async loadData() {
 		const data = await Remotes.Client.GetNamespace("Slots").Get("Fetch").CallServerAsync();
+		if (!data.success) throw "Could not load slots";
+
 		const slots = SlotsMeta.fromSerialized(data.slots)
 			.getAll(GameDefinitions.FREE_SLOTS + data.purchasedSlots)
 			.map(

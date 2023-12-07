@@ -1,3 +1,4 @@
+import PlayerDataStorage from "./PlayerDataStorage";
 import ComponentContainer from "./base/ComponentContainer";
 import ActionController from "./controller/ActionController";
 import GameEnvironmentController from "./controller/GameEnvironmentController";
@@ -10,6 +11,8 @@ import TestScene, { TestSceneDefinition } from "./gui/scenes/TestScene";
 import DebugControl from "./gui/static/DebugControl";
 import LogControl from "./gui/static/LogControl";
 import TooltipsControl from "./gui/static/TooltipsControl";
+
+(async () => await PlayerDataStorage.init())();
 
 GameEnvironmentController.initialize();
 

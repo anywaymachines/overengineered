@@ -50,7 +50,7 @@ export default class BlocksSerializer {
 			const blockData = data[i];
 
 			if (!blockRegistry.has(blockData.id)) {
-				Logger.info(`Could not load ${blockData.id} from slot: not exists`);
+				Logger.error(`Could not load ${blockData.id} from slot: not exists`);
 				continue;
 			}
 

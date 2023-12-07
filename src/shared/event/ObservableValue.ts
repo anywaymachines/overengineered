@@ -36,6 +36,10 @@ export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 		return this.value;
 	}
 
+	public triggerChanged() {
+		this.set(this.value, true);
+	}
+
 	/** Function that modifies the value before it gets stored */
 	protected processValue(value: T) {
 		return value;

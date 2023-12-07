@@ -1,21 +1,28 @@
 import PlayerDatabase from "server/PlayerDatabase";
-import { registerOnRemoteEvent, registerOnRemoteFunction } from "./RemoteHandler";
+import { registerOnRemoteFunction } from "./RemoteHandler";
 
 export default class PlayerSettingsHandler {
 	static init() {
-		registerOnRemoteEvent("Player", "UpdateSettings", (player: Player, data: { key: string; value: string }) => {
-			const playerData = PlayerDatabase.instance.get(tostring(player.UserId));
+		registerOnRemoteFunction(
+			"Player",
+			"UpdateSettings",
+			<TKey extends keyof PlayerConfig>(player: Player, key: TKey, value: PlayerConfig[TKey]) => {
+				const playerData = PlayerDatabase.instance.get(tostring(player.UserId));
 
-			const newPlayerData = {
-				...playerData,
-				settings: {
-					...(playerData.settings ?? {}),
-					[data.key]: data.value,
-				},
-			};
+				const newPlayerData = {
+					...playerData,
+					settings: {
+						...(playerData.settings ?? {}),
+						[key]: value,
+					},
+				};
 
-			PlayerDatabase.instance.set(tostring(player.UserId), newPlayerData);
-		});
+				PlayerDatabase.instance.set(tostring(player.UserId), newPlayerData);
+				return {
+					success: true,
+				};
+			},
+		);
 
 		registerOnRemoteFunction("Player", "FetchSettings", (player) => {
 			const playerData = PlayerDatabase.instance.get(tostring(player.UserId));

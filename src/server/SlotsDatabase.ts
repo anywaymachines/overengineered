@@ -47,15 +47,6 @@ export default class SlotsDatabase {
 				this.blocksdb.free(key);
 			}
 		});
-
-		game.BindToClose(() => {
-			Logger.info("Game termination detected");
-
-			this.metadb.saveChanged();
-			this.metadb.freeAll();
-			this.blocksdb.saveChanged();
-			this.blocksdb.freeAll();
-		});
 	}
 
 	private ensureValidSlotIndex(userId: number, index: number) {

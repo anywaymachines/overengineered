@@ -3,7 +3,10 @@ import Net from "@rbxts/net";
 const Remotes = Net.Definitions.Create({
 	Player: Net.Definitions.Namespace({
 		InputTypeInfo: Net.Definitions.ClientToServerEvent<[inputType: InputType]>(),
-		UpdateSettings: Net.Definitions.ClientToServerEvent<[{ key: string; value: string }]>(),
+		UpdateSettings:
+			Net.Definitions.ServerAsyncFunction<
+				<TKey extends keyof PlayerConfig>(key: TKey, value: PlayerConfig[TKey]) => Response
+			>(),
 		FetchSettings: Net.Definitions.ServerAsyncFunction<() => PlayerConfig>(),
 	}),
 	Building: Net.Definitions.Namespace({
@@ -28,6 +31,7 @@ const Remotes = Net.Definitions.Create({
 			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 30 }),
 		]),
 		SetPlayModeOnClient: Net.Definitions.ClientAsyncFunction<(mode: PlayModes | undefined) => Response>(),
+		Sit: Net.Definitions.ClientToServerEvent<[]>(),
 	}),
 	Blocks: Net.Definitions.Namespace({
 		DisconnectBlock: Net.Definitions.Namespace({
@@ -39,7 +43,7 @@ const Remotes = Net.Definitions.Create({
 		}),
 	}),
 	Debug: Net.Definitions.Namespace({
-		DisplayLine: Net.Definitions.ServerToClientEvent<[text: string, isClient: boolean]>(),
+		DisplayLine: Net.Definitions.ServerToClientEvent<[text: string, isClient: boolean, isError: boolean]>(),
 	}),
 });
 

@@ -1,5 +1,4 @@
 import { DataStoreService, HttpService, Players } from "@rbxts/services";
-import Logger from "shared/Logger";
 import { Db } from "./Database";
 
 export type PlayerData = {
@@ -27,13 +26,6 @@ export default class PlayerDatabase {
 		Players.PlayerRemoving.Connect((plr) => {
 			const key = tostring(plr.UserId);
 			this.db.save(key);
-		});
-
-		game.BindToClose(() => {
-			Logger.info("Game termination detected");
-
-			this.db.saveChanged();
-			this.db.freeAll();
 		});
 	}
 

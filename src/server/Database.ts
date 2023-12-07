@@ -1,3 +1,4 @@
+import Logger from "shared/Logger";
 import Objects from "shared/Objects";
 
 export abstract class DbBase<T> {
@@ -6,6 +7,13 @@ export abstract class DbBase<T> {
 
 	constructor(datastore: DataStore) {
 		this.datastore = datastore;
+
+		game.BindToClose(() => {
+			Logger.info("Game termination detected");
+
+			this.saveChanged();
+			this.freeAll();
+		});
 	}
 
 	protected abstract createDefault(): T;

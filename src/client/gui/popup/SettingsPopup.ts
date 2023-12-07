@@ -1,11 +1,10 @@
-import { Config, serializeOne } from "client/Config";
+import { Config } from "client/Config";
+import PlayerDataStorage from "client/PlayerDataStorage";
 import Control from "client/base/Control";
 import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
-import { ConfigValue } from "shared/Configuration";
 import GameDefinitions from "shared/GameDefinitions";
 import Objects from "shared/Objects";
-import Remotes from "shared/Remotes";
 import { ButtonControl } from "../controls/Button";
 import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
 import ConfigPartControl from "../controls/ConfigPartControl";
@@ -52,18 +51,19 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 		const closeButton = this.added(new ButtonControl(this.gui.Body.Body.CloseButton));
 		this.event.subscribe(closeButton.activated, () => this.hide());
 
-		const config = new Config({}, GameDefinitions.PLAYER_SETTINGS_DEFINITION);
+		this.event.subscribeObservable(
+			PlayerDataStorage.config,
+			(config) => {
+				if (!config) return;
+				this.create();
+			},
+			true,
+		);
+	}
 
-		const send = (key: keyof typeof GameDefinitions.PLAYER_SETTINGS_DEFINITION, value: ConfigValue) => {
-			print("sending " + key + " " + serializeOne(value, GameDefinitions.PLAYER_SETTINGS_DEFINITION[key]));
-
-			Remotes.Client.GetNamespace("Player")
-				.Get("UpdateSettings")
-				.SendToServer({
-					key,
-					value: serializeOne(value, GameDefinitions.PLAYER_SETTINGS_DEFINITION[key]),
-				});
-		};
+	private create() {
+		const config = new Config(PlayerDataStorage.config.get(), GameDefinitions.PLAYER_SETTINGS_DEFINITION);
+		this.list.clear();
 
 		for (const [id, def] of Objects.entries(GameDefinitions.PLAYER_SETTINGS_DEFINITION)) {
 			if (def.type === "bool") {
@@ -77,32 +77,32 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 				);
 				this.list.add(control);
 
-				control.control.submitted.Connect((value) => send(def.id, value));
+				control.control.submitted.Connect((value) => PlayerDataStorage.updatePlayerConfig(def.id, value));
 			} /* else if (def.type === "key") {
-				const control = new ConfigPartControl(
-					this.keyTemplate(),
-					(kb) => new KeyChooserControl(kb),
-					config,
-					def,
-					id,
-					Enum.KeyCode.P,
-				);
-				this.list.add(control);
-
-				control.control.submitted.Connect((value) => send(def.id, value));
-			} else if (def.type === "number") {
-				const control = new ConfigPartControl(
-					this.sliderTemplate(),
-					(cb) => new SliderControl(cb, def.min, def.max, def.step),
-					config,
-					def,
-					id,
-					0,
-				);
-				this.list.add(control);
-
-				control.control.submitted.Connect((value) => send(def.id, value));
-			}*/
+					const control = new ConfigPartControl(
+						this.keyTemplate(),
+						(kb) => new KeyChooserControl(kb),
+						config,
+						def,
+						id,
+						Enum.KeyCode.P,
+					);
+					this.list.add(control);
+	
+					control.control.submitted.Connect((value) => send(def.id, value));
+				} else if (def.type === "number") {
+					const control = new ConfigPartControl(
+						this.sliderTemplate(),
+						(cb) => new SliderControl(cb, def.min, def.max, def.step),
+						config,
+						def,
+						id,
+						0,
+					);
+					this.list.add(control);
+	
+					control.control.submitted.Connect((value) => send(def.id, value));
+				}*/
 		}
 	}
 }
