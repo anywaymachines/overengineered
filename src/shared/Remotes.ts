@@ -7,7 +7,7 @@ const Remotes = Net.Definitions.Create({
 			Net.Definitions.ServerAsyncFunction<
 				<TKey extends keyof PlayerConfig>(key: TKey, value: PlayerConfig[TKey]) => Response
 			>(),
-		FetchSettings: Net.Definitions.ServerAsyncFunction<() => PlayerConfig>(),
+		FetchData: Net.Definitions.ServerAsyncFunction<() => PlayerDataResponse>(),
 	}),
 	Building: Net.Definitions.Namespace({
 		PlaceBlockRequest: Net.Definitions.ServerAsyncFunction<(data: PlaceBlockRequest) => BuildResponse>(),
@@ -18,7 +18,6 @@ const Remotes = Net.Definitions.Create({
 		Delete: Net.Definitions.ServerAsyncFunction<(data: PlayerDeleteBlockRequest) => Response>(),
 	}),
 	Slots: Net.Definitions.Namespace({
-		Fetch: Net.Definitions.ServerAsyncFunction<() => FetchSlotsResponse>(),
 		Load: Net.Definitions.ServerAsyncFunction<(index: number) => Response>([
 			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 8 }),
 		]),

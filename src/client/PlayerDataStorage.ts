@@ -3,11 +3,23 @@ import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import ObservableValue from "shared/event/ObservableValue";
 
+type NonNullableFields<T> = {
+	[P in keyof T]: NonNullable<T[P]>;
+};
+
 export default class PlayerDataStorage {
-	public static readonly config = new ObservableValue<PlayerConfig | undefined>(undefined);
+	public static readonly data = new ObservableValue<NonNullableFields<PlayerDataResponse> | undefined>(undefined);
+	public static readonly config = this.data.createChild("settings", {});
 
 	static async init() {
-		this.config.set((await Remotes.Client.GetNamespace("Player").Get("FetchSettings").CallServerAsync()) ?? {});
+		{
+			const data = await Remotes.Client.GetNamespace("Player").Get("FetchData").CallServerAsync();
+			this.data.set({
+				purchasedSlots: data.purchasedSlots ?? 0,
+				settings: data.settings ?? {},
+				slots: data.slots ?? [],
+			});
+		}
 		Logger.info("Configuration loaded: " + HttpService.JSONEncode(this.config.get()));
 
 		this.config.subscribe((config) => {

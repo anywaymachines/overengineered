@@ -4,7 +4,7 @@ type SlotMeta = {
 	readonly blocks: number;
 	readonly size: number;
 };
-type SerializedSlotsMeta = readonly Readonly<SlotMeta & { index: number }>[];
+type SerializedSlotsMeta = readonly (SlotMeta & { readonly index: number })[];
 
 type FetchSlotsResponse =
 	| (SuccessResponse & {

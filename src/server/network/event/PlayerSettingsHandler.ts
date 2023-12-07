@@ -24,9 +24,14 @@ export default class PlayerSettingsHandler {
 			},
 		);
 
-		registerOnRemoteFunction("Player", "FetchSettings", (player) => {
-			const playerData = PlayerDatabase.instance.get(tostring(player.UserId));
-			return playerData.settings ?? {};
+		registerOnRemoteFunction("Player", "FetchData", (player) => {
+			const data = PlayerDatabase.instance.get(tostring(player.UserId)) ?? {};
+
+			return {
+				purchasedSlots: data.purchasedSlots,
+				settings: data.settings,
+				slots: data.slots,
+			};
 		});
 	}
 }

@@ -11,16 +11,9 @@ export default class SlotsDatabase {
 	public static readonly instance = new SlotsDatabase();
 
 	private readonly datastore: DataStore = DataStoreService.GetDataStore("slots");
-	private readonly metadb;
 	private readonly blocksdb;
 
 	constructor() {
-		this.metadb = new Db<SlotsMeta>(
-			this.datastore,
-			() => new SlotsMeta(),
-			(data) => data.serialize(),
-			(data) => SlotsMeta.deserialize(data),
-		);
 		this.blocksdb = new Db<readonly SerializedBlock[]>(
 			this.datastore,
 			() => [],
@@ -33,12 +26,10 @@ export default class SlotsDatabase {
 
 	private prepare() {
 		Players.PlayerRemoving.Connect((plr) => {
-			const key = tostring(plr.UserId);
-			this.metadb.save(key);
-			this.metadb.free(key);
+			const id = tostring(plr.UserId);
 
 			for (const [key] of this.blocksdb.loadedUnsavedEntries()) {
-				if (key.find(key + "_")[0] === undefined) {
+				if (key.find(id + "_")[0] === undefined) {
 					continue;
 				}
 
@@ -58,14 +49,14 @@ export default class SlotsDatabase {
 		throw "Invalid slot index " + index;
 	}
 
-	public getAllMeta(userId: number) {
-		return this.metadb.get(tostring(userId));
-	}
 	private getMeta(userId: number) {
-		return this.metadb.get(tostring(userId));
+		return SlotsMeta.fromSerialized(PlayerDatabase.instance.get(tostring(userId)).slots ?? []);
 	}
-	public setMeta(userId: number, meta: SlotsMeta) {
-		this.metadb.set(tostring(userId), meta);
+	private setMeta(userId: number, meta: SlotsMeta) {
+		PlayerDatabase.instance.set(tostring(userId), {
+			...PlayerDatabase.instance.get(tostring(userId)),
+			slots: meta.toSerialized(),
+		});
 	}
 
 	private toKey(userId: number, index: number) {

@@ -1,5 +1,6 @@
 import { Players } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import PlayerDataStorage from "client/PlayerDataStorage";
 import Control from "client/base/Control";
 import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
@@ -245,22 +246,23 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 
 		const cancelButton = this.added(new ButtonControl(this.gui.Body.Body.CancelButton));
 		this.event.subscribe(cancelButton.activated, () => this.hide());
+
+		this.event.subscribeObservable(PlayerDataStorage.data, () => this.create(), true);
 	}
 
-	private async loadData() {
-		const data = await Remotes.Client.GetNamespace("Slots").Get("Fetch").CallServerAsync();
-		if (!data.success) throw "Could not load slots";
+	private create() {
+		const data = PlayerDataStorage.data.get();
+		if (!data) return;
 
-		const slots = SlotsMeta.fromSerialized(data.slots)
+		const slots = SlotsMeta.fromSerialized(data.slots ?? [])
 			.getAll(GameDefinitions.FREE_SLOTS + data.purchasedSlots)
 			.map(
-				(slot, index) =>
-					({
-						...slot,
-						updated: new Signal<() => void>(),
-						color: Serializer.Color3Serializer.deserialize(slot.color),
-						locked: index < 0,
-					}) as PlayerDataSlot,
+				(slot, index): PlayerDataSlot => ({
+					...slot,
+					updated: new Signal<() => void>(),
+					color: Serializer.Color3Serializer.deserialize(slot.color),
+					locked: index < 0,
+				}),
 			);
 
 		this.data.set({
@@ -270,12 +272,8 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 	}
 
 	public async show() {
-		if (!this.data.get()) {
-			await this.loadData();
-		}
-
 		super.show();
-		GuiAnimator.transition(this.gui, 0.2, "down");
+		GuiAnimator.transition(this.gui.Body, 0.2, "down");
 	}
 
 	private async save(index: number, save: boolean) {

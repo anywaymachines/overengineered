@@ -77,4 +77,13 @@ export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 
 		return observable;
 	}
+	public createNullableChild<TKey extends keyof NonNullable<T>>(
+		key: TKey,
+		def: NonNullable<T>[TKey] | undefined,
+	): ReadonlyObservableValue<NonNullable<T>[TKey] | undefined> {
+		const observable = new ObservableValue<NonNullable<T>[TKey] | undefined>(this.value?.[key] ?? def);
+		this.subscribe((value) => observable.set(value?.[key] ?? def));
+
+		return observable;
+	}
 }
