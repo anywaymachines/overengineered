@@ -1,5 +1,5 @@
 export default class Objects {
-	public static keys<T extends object>(object: T) {
+	public static keys<T extends object>(object: T): (keyof T)[] {
 		const result: (keyof T)[] = [];
 		for (const [key] of pairs(object)) {
 			result.push(key as keyof T);
@@ -8,7 +8,7 @@ export default class Objects {
 		return result;
 	}
 
-	public static values<T extends object>(object: T) {
+	public static values<T extends object>(object: T): T[keyof T][] {
 		const result: (T[keyof T] & defined)[] = [];
 		for (const [_, value] of pairs(object)) {
 			result.push(value as T[keyof T] & defined);
@@ -17,8 +17,8 @@ export default class Objects {
 		return result;
 	}
 
-	public static entries<T extends object>(object: T) {
-		const result: (readonly [keyof T, Exclude<T[keyof T], undefined>])[] = [];
+	public static entries<T extends object>(object: T): (readonly [keyof T, Exclude<T[keyof T], undefined>])[] {
+		const result: [keyof T, Exclude<T[keyof T], undefined>][] = [];
 		for (const [key, value] of pairs(object)) {
 			result.push([key as keyof T, value as Exclude<T[keyof T], undefined>]);
 		}
@@ -37,11 +37,13 @@ export default class Objects {
 		return toObj as T & TProps;
 	}
 
-	public static copy<T extends object>(object: T) {
+	public static copy<T extends object>(object: T): T {
 		return { ...object };
 	}
 
-	public static fromEntries<T extends readonly Readonly<[key: string | number, value: unknown]>[]>(entries: T) {
+	public static fromEntries<T extends readonly Readonly<[key: string | number, value: unknown]>[]>(
+		entries: T,
+	): { [key in T[number][0]]: T[number][1] } {
 		const result: Record<string | number, unknown> = {};
 
 		if (entries) {

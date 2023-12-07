@@ -1,5 +1,6 @@
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Remotes from "shared/Remotes";
+import { ConfigTypesToDefinition } from "../../../shared/Configuration";
 
 type DisconnectConfig = {
 	readonly disconnect: "key";
@@ -8,7 +9,9 @@ type DisconnectConfig = {
 export default class DisconnectBlockLogic extends ConfigurableBlockLogic<DisconnectConfig> {
 	protected prepare() {
 		super.prepare();
-		this.inputHandler.onKeyDown(Enum.KeyCode.X, () => this.keyPressed(Enum.KeyCode.X));
+
+		const disconnectButton = this.config.get("disconnect");
+		this.inputHandler.onKeyDown(disconnectButton, () => this.keyPressed(Enum.KeyCode.X));
 	}
 
 	private keyPressed(keyCode: Enum.KeyCode) {
@@ -25,8 +28,8 @@ export default class DisconnectBlockLogic extends ConfigurableBlockLogic<Disconn
 				displayName: "Disconnect key",
 				type: "key",
 				default: {
-					Desktop: Enum.KeyCode.F,
-					Gamepad: Enum.KeyCode.ButtonR2,
+					Desktop: "F",
+					Gamepad: "ButtonR2",
 				},
 			},
 		};

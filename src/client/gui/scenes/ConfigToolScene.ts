@@ -1,15 +1,15 @@
-import BlockLogic from "client/base/BlockLogic";
+import { serializeOne } from "client/Config";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Control from "client/base/Control";
-import { BlockConfig } from "client/blocks/BlockConfig";
 import logicRegistry from "client/blocks/LogicRegistry";
 import ConfigTool from "client/tools/ConfigTool";
 import { blockRegistry } from "shared/BlockRegistry";
+import { ConfigValue, ConfigValueTypes, KeyCode } from "shared/Configuration";
 import Objects from "shared/Objects";
 import Remotes from "shared/Remotes";
-import ObservableValue from "shared/event/ObservableValue";
 import GuiAnimator from "../GuiAnimator";
 import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
+import ConfigPartControl from "../controls/ConfigPartControl";
 import KeyChooserControl, { KeyChooserControlDefinition } from "../controls/KeyChooserControl";
 import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
 
@@ -17,31 +17,6 @@ export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	HeadingLabel: TextLabel;
 	Control: T;
 };
-
-export class ConfigPartControl<
-	TControl extends Control<TDef>,
-	TDef extends GuiObject,
-	TValue extends ConfigValue | undefined,
-> extends Control<ConfigPartDefinition<TDef>> {
-	public readonly control;
-
-	constructor(
-		gui: ConfigPartDefinition<TDef>,
-		ctor: (gui: TDef) => TControl & { value: ObservableValue<TValue> },
-		config: BlockConfig<ConfigValueTypes>,
-		definition: ConfigDefinition,
-		key: string,
-		def: TValue,
-	) {
-		super(gui);
-
-		this.gui.HeadingLabel.Text = definition.displayName;
-		this.control = ctor(this.gui.Control);
-		this.control.value.set((config.get(key) as TValue | undefined) ?? def);
-
-		this.add(this.control);
-	}
-}
 
 export type ConfigToolSceneDefinition = GuiObject & {
 	ParamsSelection: Frame & {
@@ -105,20 +80,20 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		const logicctor = logicRegistry[block.id];
 		if (!logicctor) return;
 
-		const logic = new logicctor(blockmodel) as BlockLogic | ConfigurableBlockLogic<ConfigValueTypes>;
+		const logic = new logicctor(blockmodel) as ConfigurableBlockLogic<ConfigValueTypes>;
 		if (!("getConfigDefinition" in logic)) return;
 
 		const defs = logic.getConfigDefinition();
 		const config = logic.config;
 
 		const send = (key: string, value: ConfigValue) => {
-			print("sending " + key + " " + BlockConfig.serializeOne(value, defs[key]));
+			print("sending " + key + " " + serializeOne(value, defs[key]));
 
 			return Remotes.Client.GetNamespace("Building")
 				.Get("UpdateConfigRequest")
 				.CallServerAsync({
 					block: blockmodel,
-					data: { key, value: BlockConfig.serializeOne(value, defs[key]) },
+					data: { key, value: serializeOne(value, defs[key]) },
 				});
 		};
 
@@ -130,7 +105,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 					config,
 					def,
 					id,
-					false,
+					false as boolean,
 				);
 				this.list.add(control);
 
@@ -142,7 +117,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 					config,
 					def,
 					id,
-					Enum.KeyCode.P,
+					"P" as KeyCode,
 				);
 				this.list.add(control);
 

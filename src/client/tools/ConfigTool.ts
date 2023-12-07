@@ -19,7 +19,7 @@ export default class ConfigTool extends ToolBase {
 			() => {},
 			async (block) => {
 				if (!block) return;
-				// if (Signals.INPUT_TYPE.get() !== "Desktop")  return;
+				// if (InputController.inputType.get() !== "Desktop")  return;
 				this.selectBlockByClick(block);
 			},
 			(target: Model) => logicRegistry[target.GetAttribute("id") as string] !== undefined,
@@ -53,8 +53,8 @@ export default class ConfigTool extends ToolBase {
 		this.selectedBlocksChanged.Fire(this.selected);
 	}
 	private selectBlockByClick(block: Model | undefined) {
-		const pc = Signals.INPUT_TYPE.get() === "Desktop";
-		const add = Signals.INPUT_TYPE.get() === "Gamepad" || InputController.isShiftPressed();
+		const pc = InputController.inputType.get() === "Desktop";
+		const add = InputController.inputType.get() === "Gamepad" || InputController.isShiftPressed();
 
 		if (pc && !add) {
 			for (const sel of this.selected) sel.Destroy();

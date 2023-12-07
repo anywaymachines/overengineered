@@ -1,4 +1,5 @@
 import { UserInputService } from "@rbxts/services";
+import { KeyCode } from "shared/Configuration";
 import EventHandler from "shared/event/EventHandler";
 
 type InputCallback = (input: InputObject) => boolean | unknown;
@@ -55,9 +56,11 @@ export default class InputHandler {
 		return this.releaseKeycodes.push(callback);
 	}
 
-	public onKeyDown(keyCode: Enum.KeyCode, callback: InputCallback) {
+	public onKeyDown(keyCode: Enum.KeyCode | KeyCode, callback: InputCallback) {
 		return this.onKeysDown((input) => {
-			if (input.KeyCode !== keyCode) return;
+			if (input.KeyCode !== keyCode && input.KeyCode.Name !== keyCode) {
+				return;
+			}
 
 			return callback(input);
 		});

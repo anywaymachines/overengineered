@@ -1,5 +1,6 @@
 import { UserInputService } from "@rbxts/services";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
+import { ConfigTypesToDefinition, KeyCode } from "../../../shared/Configuration";
 
 type RocketEngineConfig = {
 	readonly thrust_add: "key";
@@ -61,8 +62,8 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 				displayName: "Thrust +",
 				type: "key",
 				default: {
-					Desktop: Enum.KeyCode.W,
-					Gamepad: Enum.KeyCode.ButtonR2,
+					Desktop: "W",
+					Gamepad: "ButtonR2",
 				},
 			},
 			thrust_sub: {
@@ -70,8 +71,8 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 				displayName: "Thrust -",
 				type: "key",
 				default: {
-					Desktop: Enum.KeyCode.S,
-					Gamepad: Enum.KeyCode.ButtonL2,
+					Desktop: "S",
+					Gamepad: "ButtonL2",
 				},
 			},
 			switchmode: {
@@ -144,7 +145,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 		// TODO: Send packet to server to replicate particles and sounds to other players
 	}
 
-	private loop(keyCode: Enum.KeyCode, p: number) {
+	private loop(keyCode: KeyCode, p: number) {
 		if (this.isWorking) {
 			return;
 		}

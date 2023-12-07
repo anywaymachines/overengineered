@@ -1,7 +1,7 @@
 import Signal from "@rbxts/signal";
 import InputHandler from "client/event/InputHandler";
-import InputController from "./InputController";
 import LogControl from "client/gui/static/LogControl";
+import InputController from "./InputController";
 
 type Operation = {
 	readonly description: string;

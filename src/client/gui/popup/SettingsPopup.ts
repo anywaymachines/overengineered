@@ -1,13 +1,14 @@
-import { Config } from "client/Config";
+import { Config, serializeOne } from "client/Config";
 import Control from "client/base/Control";
 import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
+import { ConfigValue } from "shared/Configuration";
 import GameDefinitions from "shared/GameDefinitions";
 import Objects from "shared/Objects";
 import Remotes from "shared/Remotes";
 import { ButtonControl } from "../controls/Button";
 import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
-import { ConfigPartControl } from "../scenes/ConfigToolScene";
+import ConfigPartControl from "../controls/ConfigPartControl";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	HeadingLabel: TextLabel;
@@ -54,13 +55,13 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 		const config = new Config({}, GameDefinitions.PLAYER_SETTINGS_DEFINITION);
 
 		const send = (key: keyof typeof GameDefinitions.PLAYER_SETTINGS_DEFINITION, value: ConfigValue) => {
-			print("sending " + key + " " + Config.serializeOne(value, GameDefinitions.PLAYER_SETTINGS_DEFINITION[key]));
+			print("sending " + key + " " + serializeOne(value, GameDefinitions.PLAYER_SETTINGS_DEFINITION[key]));
 
 			Remotes.Client.GetNamespace("Player")
 				.Get("UpdateSettings")
 				.SendToServer({
 					key,
-					value: Config.serializeOne(value, GameDefinitions.PLAYER_SETTINGS_DEFINITION[key]),
+					value: serializeOne(value, GameDefinitions.PLAYER_SETTINGS_DEFINITION[key]),
 				});
 		};
 

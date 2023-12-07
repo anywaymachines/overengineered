@@ -1,9 +1,9 @@
-import Control from "client/base/Control";
-import GuiController from "client/controller/GuiController";
-import GuiAnimator from "../GuiAnimator";
-import Signals from "client/event/Signals";
-import ToolBase from "client/base/ToolBase";
 import { UserInputService } from "@rbxts/services";
+import Control from "client/base/Control";
+import ToolBase from "client/base/ToolBase";
+import GuiController from "client/controller/GuiController";
+import InputController from "client/controller/InputController";
+import GuiAnimator from "../GuiAnimator";
 
 export type SimpleTooltip = {
 	isEnabled: (inputType: InputType) => boolean;
@@ -58,7 +58,7 @@ export default class TooltipsControl extends Control<
 		this.clear();
 		if (!tool) return;
 
-		if (Signals.INPUT_TYPE.get() === "Desktop") {
+		if (InputController.inputType.get() === "Desktop") {
 			tool.getKeyboardTooltips().forEach((element) => {
 				const button = this.keyboardTooltipTemplate();
 				this.add(new Control(button));
@@ -77,7 +77,7 @@ export default class TooltipsControl extends Control<
 					key.KeyLabel.Text = element.keys[i];
 				}
 			});
-		} else if (Signals.INPUT_TYPE.get() === "Gamepad") {
+		} else if (InputController.inputType.get() === "Gamepad") {
 			tool.getGamepadTooltips().forEach((element) => {
 				const button = this.gamepadTooltipTemplate();
 				this.add(new Control(button));
@@ -107,6 +107,6 @@ export default class TooltipsControl extends Control<
 	// Simple tooltips
 	public addSimpleTooltip(tooltip: SimpleTooltip) {
 		this.simpleTooltips.push(tooltip);
-		this.processTooltip(tooltip, Signals.INPUT_TYPE.get());
+		this.processTooltip(tooltip, InputController.inputType.get());
 	}
 }

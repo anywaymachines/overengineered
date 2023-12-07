@@ -1,4 +1,5 @@
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
+import { ConfigTypesToDefinition } from "../../../shared/Configuration";
 
 type MotorConfig = {
 	readonly rotate_add: "key";
@@ -34,8 +35,8 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorConfig>
 				displayName: "Rotate +",
 				type: "key",
 				default: {
-					Desktop: Enum.KeyCode.R,
-					Gamepad: Enum.KeyCode.ButtonR1,
+					Desktop: "R",
+					Gamepad: "ButtonR1",
 				},
 			},
 			rotate_sub: {
@@ -43,8 +44,8 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorConfig>
 				displayName: "Rotate -",
 				type: "key",
 				default: {
-					Desktop: Enum.KeyCode.F,
-					Gamepad: Enum.KeyCode.ButtonL1,
+					Desktop: "F",
+					Gamepad: "ButtonL1",
 				},
 			},
 			speed: {

@@ -1,14 +1,10 @@
 import InputController from "client/controller/InputController";
-import Signals from "client/event/Signals";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
-type InputType = typeof InputController.inputType;
 type Keys = InputType | "All";
 type SigConnection = { Disconnect(): void };
-type Sig<T> = {
-	Connect(callback: T): SigConnection;
-};
-type Sub<T> = [signal: Sig<T>, callback: T];
+type Sig<T> = { Connect(callback: T): SigConnection };
+type Sub<T> = readonly [signal: Sig<T>, callback: T];
 
 export default class ComponentEventHolder {
 	private readonly prepareEvents: ((inputType: InputType) => void)[] = [];
@@ -18,24 +14,24 @@ export default class ComponentEventHolder {
 
 	private enabled = false;
 
-	public isEnabled() {
+	public isEnabled(): boolean {
 		return this.enabled;
 	}
 
-	public enable() {
+	public enable(): void {
 		if (this.enabled) return;
 
 		this.enabled = true;
-		this.inputTypeChanged(Signals.INPUT_TYPE.get());
+		this.inputTypeChanged(InputController.inputType.get());
 	}
 
-	private connect(sub: Sub<unknown>) {
+	private connect(sub: Sub<unknown>): void {
 		this.subscribed.push(sub[0].Connect(sub[1]));
 	}
-	private inputTypeChanged(inputType: InputType) {
+	private inputTypeChanged(inputType: InputType): void {
 		if (!this.enabled) return;
 		this.disconnect();
-		this.subscribeOnce(Signals.INPUT_TYPE_CHANGED_EVENT, (inputType) => this.inputTypeChanged(inputType));
+		this.subscribeOnce(InputController.inputType.changed, (inputType) => this.inputTypeChanged(inputType));
 
 		for (const event of this.prepareEvents) {
 			event(inputType);
@@ -52,25 +48,25 @@ export default class ComponentEventHolder {
 		reg(inputType);
 	}
 
-	public disable() {
+	public disable(): void {
 		if (!this.enabled) return;
 
 		this.enabled = false;
 		this.disconnect();
 	}
 
-	private disconnect() {
+	private disconnect(): void {
 		for (const sub of this.subscribed) sub.Disconnect();
 		this.subscribed.clear();
 	}
 
 	/** Register an event that fires on enable and input type change */
-	public onPrepare(callback: (inputType: InputType) => void, executeImmediately = false) {
+	public onPrepare(callback: (inputType: InputType) => void, executeImmediately = false): void {
 		this.prepareEvents.push(callback);
-		if (executeImmediately) callback(Signals.INPUT_TYPE.get());
+		if (executeImmediately) callback(InputController.inputType.get());
 	}
 
-	private sub(events: Partial<Record<Keys, Sub<unknown>[]>>, inputType: Keys, sub: Sub<unknown>) {
+	private sub(events: Partial<Record<Keys, Sub<unknown>[]>>, inputType: Keys, sub: Sub<unknown>): void {
 		events[inputType] ??= [];
 		events[inputType]!.push(sub);
 
@@ -78,12 +74,12 @@ export default class ComponentEventHolder {
 	}
 
 	/** Register an event */
-	public subscribe<T extends Callback = Callback>(signal: Sig<T>, callback: T, inputType: Keys = "All") {
+	public subscribe<T extends Callback = Callback>(signal: Sig<T>, callback: T, inputType: Keys = "All"): void {
 		this.sub(this.events, inputType, [signal, callback]);
 	}
 
 	/** Register an event that fires once */
-	public subscribeOnce<T extends Callback = Callback>(signal: Sig<T>, callback: T, inputType: Keys = "All") {
+	public subscribeOnce<T extends Callback = Callback>(signal: Sig<T>, callback: T, inputType: Keys = "All"): void {
 		this.sub(this.eventsOnce, inputType, [signal, callback]);
 	}
 
@@ -93,7 +89,7 @@ export default class ComponentEventHolder {
 		callback: (value: T, prev: T) => void,
 		executeImmediately = false,
 		inputType: Keys = "All",
-	) {
+	): void {
 		this.subscribe(observable.changed, callback, inputType);
 		if (executeImmediately) {
 			this.onPrepare(() => callback(observable.get(), observable.get()), true);
@@ -103,15 +99,15 @@ export default class ComponentEventHolder {
 	public observableFromGuiParam<TInstance extends Instance, TParam extends InstancePropertyNames<TInstance>>(
 		instance: TInstance,
 		param: TParam,
-	) {
-		const observable = new ObservableValue(instance[param]);
+	): ObservableValue<TInstance[TParam]> {
+		const observable = new ObservableValue<TInstance[TParam]>(instance[param]);
 		this.subscribe(instance.GetPropertyChangedSignal(param), () => observable.set(instance[param]));
 
 		return observable;
 	}
 
 	/* eslint-disable @typescript-eslint/no-this-alias */
-	public destroy() {
+	public destroy(): void {
 		this.disable();
 
 		const tis = this;

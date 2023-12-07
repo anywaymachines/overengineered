@@ -92,18 +92,18 @@ export const initializeSingleBlockSelection = (
 		eventHandler.subscribe(Signals.BLOCKS.ADDED, () => updatePosition());
 		eventHandler.subscribe(Signals.BLOCKS.REMOVED, () => updatePosition());
 
-		if (Signals.INPUT_TYPE.get() === "Desktop") {
+		if (InputController.inputType.get() === "Desktop") {
 			eventHandler.subscribe(mouse.Button1Down, () => {
 				if (!InputController.isCtrlPressed()) {
 					fireSelected();
 				}
 			});
 			eventHandler.subscribe(mouse.Move, () => updatePosition());
-		} else if (Signals.INPUT_TYPE.get() === "Gamepad") {
+		} else if (InputController.inputType.get() === "Gamepad") {
 			// gamepad
 			inputHandler.onKeyDown(Enum.KeyCode.ButtonX, fireSelected);
 			eventHandler.subscribe(Signals.CAMERA.MOVED, () => updatePosition());
-		} else if (Signals.INPUT_TYPE.get() === "Touch") {
+		} else if (InputController.inputType.get() === "Touch") {
 			// touch
 			inputHandler.onTouchTap(() => {
 				updatePosition();
@@ -171,7 +171,7 @@ export const initializeMultiBlockSelection = (
 	};
 
 	const start = () => {
-		if (Signals.INPUT_TYPE.get() === "Desktop") {
+		if (InputController.inputType.get() === "Desktop") {
 			const startpos = new UDim2(0, mouse.X, 0, mouse.Y);
 
 			const selection = template();

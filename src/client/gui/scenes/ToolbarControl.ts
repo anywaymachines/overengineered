@@ -1,9 +1,9 @@
 import { StarterGui, UserInputService } from "@rbxts/services";
 import Control from "client/base/Control";
-import ToolController from "client/controller/ToolController";
 import ToolBase from "client/base/ToolBase";
-import GuiAnimator from "../GuiAnimator";
 import SoundController from "client/controller/SoundController";
+import ToolController from "client/controller/ToolController";
+import GuiAnimator from "../GuiAnimator";
 import TooltipsControl from "../static/TooltipsControl";
 
 export type ToolbarButtonControlDefinition = TextButton & {

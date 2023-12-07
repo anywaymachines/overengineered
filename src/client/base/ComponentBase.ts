@@ -9,13 +9,13 @@ import ComponentEventHolder from "./ComponentEventHolder";
  */
 export default class ComponentBase {
 	/** Main event handler. Does not register events until enabled and reregisters events when input type changes. */
-	protected readonly event = new ComponentEventHolder();
+	protected readonly event: ComponentEventHolder = new ComponentEventHolder();
 
 	/** Event handler for use in prepare***() */
-	protected readonly eventHandler = new EventHandler();
+	protected readonly eventHandler: EventHandler = new EventHandler();
 
 	/** Input handler for use in prepare***() */
-	protected readonly inputHandler = new InputHandler();
+	protected readonly inputHandler: InputHandler = new InputHandler();
 
 	constructor() {
 		this.event.onPrepare(() => this.prepare());
@@ -30,48 +30,44 @@ export default class ComponentBase {
 	}
 
 	/** Are component events enabled */
-	public isEnabled() {
+	public isEnabled(): boolean {
 		return this.event.isEnabled();
 	}
 
 	/** Enable component events */
-	public enable() {
+	public enable(): void {
 		this.event.enable();
 	}
 
 	/** Disable component events */
-	public disable() {
+	public disable(): void {
 		this.event.disable();
 		this.inputHandler.unsubscribeAll();
 		this.eventHandler.unsubscribeAll();
 	}
 
 	/** Disable component events and free the memory */
-	public destroy() {
+	public destroy(): void {
 		this.disable();
 		this.event.destroy();
 	}
 
 	/** Prepare the functionality for Desktop */
-	protected prepareDesktop() {}
+	protected prepareDesktop(): void {}
 	/** Prepare the functionality for Touch */
-	protected prepareTouch() {}
+	protected prepareTouch(): void {}
 	/** Prepare the functionality for Gamepad */
-	protected prepareGamepad() {}
+	protected prepareGamepad(): void {}
 
 	/** Prepare the functionality (**Unsubscribes from every event and input handler**) */
-	protected prepare() {
+	protected prepare(): void {
 		// Terminate exist events
 		this.inputHandler.unsubscribeAll();
 		this.eventHandler.unsubscribeAll();
 
-		// Call init
-		const events = {
-			Desktop: () => this.prepareDesktop(),
-			Touch: () => this.prepareTouch(),
-			Gamepad: () => this.prepareGamepad(),
-		};
-
-		events[InputController.inputType]();
+		const inputType = InputController.inputType.get();
+		if (inputType === "Desktop") this.prepareDesktop();
+		else if (inputType === "Touch") this.prepareDesktop();
+		else if (inputType === "Gamepad") this.prepareGamepad();
 	}
 }

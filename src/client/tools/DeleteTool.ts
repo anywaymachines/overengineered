@@ -23,7 +23,7 @@ export default class DeleteTool extends ToolBase {
 			(block) => this.highlightedBlock.set(block),
 			async (block) => {
 				if (!block) return;
-				// if (Signals.INPUT_TYPE.get() !== "Desktop")  return;
+				// if (InputController.inputType.get() !== "Desktop")  return;
 				await this.deleteBlocks([block]);
 			},
 			() => true,

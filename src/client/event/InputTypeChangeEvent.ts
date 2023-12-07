@@ -1,6 +1,5 @@
-import { GuiService, UserInputService } from "@rbxts/services";
+import { UserInputService } from "@rbxts/services";
 import InputController from "client/controller/InputController";
-import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
 import Remotes from "shared/Remotes";
 
@@ -21,15 +20,12 @@ export default class InputTypeChangeEvent {
 	private static onLastInputTypeChanged(lastInputType: Enum.UserInputType) {
 		const newInputType = this.getInputTypeByEnum(lastInputType);
 
-		if (newInputType !== InputController.inputType) {
+		if (newInputType !== InputController.inputType.get()) {
 			if (UserInputService.GetFocusedTextBox()) {
 				return;
 			}
 
-			InputController.inputType = newInputType;
-
-			// Fire a new input type
-			Signals.INPUT_TYPE.set(newInputType);
+			InputController.inputType.set(newInputType);
 			this.share();
 
 			LogControl.instance.addLine("New input type set to " + newInputType, Color3.fromRGB(252, 252, 145));
@@ -37,7 +33,7 @@ export default class InputTypeChangeEvent {
 	}
 
 	private static share() {
-		Remotes.Client.GetNamespace("Player").Get("InputTypeInfo").SendToServer(InputController.inputType);
+		Remotes.Client.GetNamespace("Player").Get("InputTypeInfo").SendToServer(InputController.inputType.get());
 	}
 
 	static subscribe() {

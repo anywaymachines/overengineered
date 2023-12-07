@@ -1,9 +1,9 @@
 import { GuiService, UserInputService } from "@rbxts/services";
+import ObservableValue from "shared/event/ObservableValue";
 
 /** Basic class of input data type control */
 export default class InputController {
-	/** A variable that contains the control type that is being used by the player right now */
-	public static inputType: InputType = this.getPhysicalInputType();
+	public static readonly inputType = new ObservableValue<InputType>(InputController.getPhysicalInputType());
 
 	/** Returns the input type based on the device the client is playing from */
 	static getPhysicalInputType(): InputType {

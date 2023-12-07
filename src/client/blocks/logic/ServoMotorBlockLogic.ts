@@ -1,5 +1,6 @@
 import { UserInputService } from "@rbxts/services";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
+import { ConfigTypesToDefinition } from "../../../shared/Configuration";
 
 type ServoMotorConfig = {
 	readonly rotate_add: "key";
@@ -47,8 +48,8 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 				displayName: "Rotate +",
 				type: "key",
 				default: {
-					Desktop: Enum.KeyCode.Q,
-					Gamepad: Enum.KeyCode.ButtonR2,
+					Desktop: "Q",
+					Gamepad: "ButtonR2",
 				},
 			},
 			rotate_sub: {
@@ -56,8 +57,8 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 				displayName: "Rotate -",
 				type: "key",
 				default: {
-					Desktop: Enum.KeyCode.E,
-					Gamepad: Enum.KeyCode.ButtonL2,
+					Desktop: "E",
+					Gamepad: "ButtonL2",
 				},
 			},
 			speed: {

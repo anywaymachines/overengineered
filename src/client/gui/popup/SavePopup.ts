@@ -1,16 +1,16 @@
+import { Players } from "@rbxts/services";
+import Signal from "@rbxts/signal";
 import Control from "client/base/Control";
 import Popup from "client/base/Popup";
-import Serializer from "shared/Serializer";
-import ObservableValue, { AsObservable, ReadonlyObservableValue } from "shared/event/ObservableValue";
-import Remotes from "shared/Remotes";
 import GuiController from "client/controller/GuiController";
-import TextBoxControl from "../controls/TextBoxControl";
-import Signal from "@rbxts/signal";
 import GameDefinitions from "shared/GameDefinitions";
+import Remotes from "shared/Remotes";
+import Serializer from "shared/Serializer";
 import SlotsMeta from "shared/SlotsMeta";
-import { ButtonControl } from "../controls/Button";
-import { Players } from "@rbxts/services";
+import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import GuiAnimator from "../GuiAnimator";
+import { ButtonControl } from "../controls/Button";
+import TextBoxControl from "../controls/TextBoxControl";
 
 type SaveItemDefinition = GuiButton & {
 	ImageLabel: ImageLabel;

@@ -85,7 +85,7 @@ export default class MoveTool extends ToolBase {
 			return;
 		}
 
-		if (InputController.inputType !== "Gamepad") {
+		if (InputController.inputType.get() !== "Gamepad") {
 			return;
 		}
 
