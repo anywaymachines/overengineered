@@ -1,4 +1,4 @@
-import ComponentContainer from "client/base/ComponentContainer";
+import ComponentBase from "client/base/ComponentBase";
 import Popup from "client/base/Popup";
 import Signals from "client/event/Signals";
 import Remotes from "shared/Remotes";
@@ -8,7 +8,7 @@ import LocalPlayerController from "./LocalPlayerController";
 import BuildingMode from "./modes/BuildingMode";
 import RideMode from "./modes/RideMode";
 
-export default class PlayModeController extends ComponentContainer {
+export default class PlayModeController extends ComponentBase {
 	public readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
 	private readonly modes;
 
@@ -51,11 +51,11 @@ export default class PlayModeController extends ComponentContainer {
 
 	private async setMode(mode: PlayModes | undefined, prev: PlayModes | undefined) {
 		if (prev) {
-			this.modes[prev].onSwitchTo(mode);
+			this.modes[prev].onSwitchToNext(mode);
 			this.modes[prev].disable();
 		}
 		if (mode) {
-			this.modes[mode].onSwitchFrom(prev);
+			this.modes[mode].onSwitchFromPrev(prev);
 			this.modes[mode].enable();
 		}
 	}

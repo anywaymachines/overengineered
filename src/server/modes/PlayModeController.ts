@@ -32,14 +32,14 @@ export default class PlayModeController {
 		});
 	}
 
-	static changeModeForPlayer(player: Player, mode: PlayModes | undefined): Response {
+	static changeModeForPlayer(this: void, player: Player, mode: PlayModes | undefined): Response {
 		if (mode !== undefined && !PlayerUtils.isAlive(player)) {
 			return { success: false, message: "Player is not alive" };
 		}
 
-		const prevmode = this.playerModes[player.UserId];
+		const prevmode = PlayModeController.playerModes[player.UserId];
 		if (prevmode) {
-			const transition = this.modes[prevmode];
+			const transition = PlayModeController.modes[prevmode];
 			if (transition) {
 				const result = transition.onTransitionTo(player, mode);
 				if (!result || !result.success)
@@ -47,7 +47,7 @@ export default class PlayModeController {
 			}
 		}
 		if (mode) {
-			const transition = this.modes[mode];
+			const transition = PlayModeController.modes[mode];
 			if (transition) {
 				const result = transition.onTransitionFrom(player, prevmode);
 				if (!result || !result.success)
@@ -55,8 +55,8 @@ export default class PlayModeController {
 			}
 		}
 
-		Logger.info(`${player.Name}'s mode: '${this.playerModes[player.UserId]}' => '${mode}'`);
-		this.playerModes[player.UserId] = mode;
+		Logger.info(`${player.Name}'s mode: '${PlayModeController.playerModes[player.UserId]}' => '${mode}'`);
+		PlayModeController.playerModes[player.UserId] = mode;
 		Remotes.Server.GetNamespace("Ride").Get("SetPlayModeOnClient").CallPlayerAsync(player, mode);
 		return { success: true };
 	}

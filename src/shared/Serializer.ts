@@ -33,14 +33,4 @@ export default class Serializer {
 			return Color3.fromHex(serializedColor);
 		},
 	};
-
-	static VectorSerializer = {
-		serialize(vec: Vector3): SerializedVector {
-			return [vec.X, vec.Y, vec.Z];
-		},
-
-		deserialize(serializedVec: SerializedVector): Vector3 {
-			return new Vector3(serializedVec[0], serializedVec[1], serializedVec[2]);
-		},
-	};
 }

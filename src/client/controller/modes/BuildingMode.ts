@@ -23,8 +23,8 @@ export default class BuildingMode extends PlayMode {
 		return "build";
 	}
 
-	public onSwitchTo(mode: PlayModes | undefined) {}
-	public onSwitchFrom(prev: PlayModes | undefined) {
+	public onSwitchToNext(mode: PlayModes | undefined) {}
+	public onSwitchFromPrev(prev: PlayModes | undefined) {
 		if (Players.LocalPlayer.Character) {
 			const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
 			const pos = plot.GetPivot().Position.add(new Vector3(plot.GetExtentsSize().X / 2 + 2, 10, 0));

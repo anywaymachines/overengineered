@@ -80,10 +80,10 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		const logicctor = logicRegistry[block.id];
 		if (!logicctor) return;
 
-		const logic = new logicctor(blockmodel) as ConfigurableBlockLogic<ConfigValueTypes>;
-		if (!("getConfigDefinition" in logic)) return;
+		const logic = new logicctor(blockmodel);
+		if (!(logic instanceof ConfigurableBlockLogic)) return;
 
-		const defs = logic.getConfigDefinition();
+		const defs = logic.getConfigDefinition() as ConfigTypesToDefinition<ConfigValueTypes>;
 		const config = logic.config;
 
 		const send = (key: string, value: ConfigValue) => {

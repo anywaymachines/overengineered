@@ -1,3 +1,3 @@
 type PlayerConfig = {
-	betterCamera?: boolean;
+	readonly betterCamera?: boolean;
 };
