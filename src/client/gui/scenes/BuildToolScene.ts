@@ -47,12 +47,22 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 		this.event.subscribe(editMaterialButton.activated, () => {
 			MaterialChooserControl.instance.show();
 		});
+
+		this.event.subscribe(
+			tool.selectedBlockChanged,
+			(block) => {
+				const visible = block !== undefined;
+				this.gui.TouchControls.Visible = visible;
+
+				if (visible) {
+					GuiAnimator.transition(this.gui.TouchControls, 0.2, "left");
+				}
+			},
+			"Touch",
+		);
 	}
 
 	protected prepareTouch(): void {
-		this.gui.TouchControls.Visible = true;
-		GuiAnimator.transition(this.gui.TouchControls, 0.2, "left");
-
 		// Touchscreen controls
 		this.eventHandler.subscribe(this.gui.TouchControls.PlaceButton.MouseButton1Click, () => this.tool.placeBlock());
 		this.eventHandler.subscribe(this.gui.TouchControls.RotateRButton.MouseButton1Click, () =>

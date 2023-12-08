@@ -1,4 +1,4 @@
-import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
+import ConfigurableBlockLogic, { KeyDefinition } from "client/base/ConfigurableBlockLogic";
 
 type MotorConfig = {
 	readonly rotate_add: "key";
@@ -63,5 +63,8 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorConfig>
 				},
 			},
 		};
+	}
+	public getKeysDefinition(): Partial<Record<ExtractKeys<MotorConfig, "key">, KeyDefinition>> {
+		return {};
 	}
 }

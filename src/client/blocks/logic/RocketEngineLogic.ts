@@ -1,5 +1,4 @@
-import { UserInputService } from "@rbxts/services";
-import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
+import ConfigurableBlockLogic, { KeyDefinition } from "client/base/ConfigurableBlockLogic";
 
 type RocketEngineConfig = {
 	readonly thrust_add: "key";
@@ -32,6 +31,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 	// hz
 	private torque = 0;
 	private isWorking = false;
+	private direction?: boolean;
 
 	constructor(block: Model) {
 		super(block);
@@ -92,27 +92,51 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 			},
 		};
 	}
+	public getKeysDefinition(): Partial<Record<ExtractKeys<RocketEngineConfig, "key">, KeyDefinition>> {
+		return {
+			thrust_add: {
+				keyDown: () => {
+					if (this.isSwitch) {
+						this.torque = 100;
+						this.update();
+					} else {
+						this.direction = true;
+						this.start(true);
+					}
+				},
+				keyUp: () => {
+					if (this.direction !== true) return;
+					this.direction = undefined;
+				},
+			},
+			thrust_sub: {
+				keyDown: () => {
+					if (this.isSwitch) {
+						this.torque = 0;
+						this.update();
+					} else {
+						this.direction = false;
+						this.start(false);
+					}
+				},
+				keyUp: () => {
+					if (this.direction !== false) return;
+					this.direction = undefined;
+				},
+			},
+		};
+	}
 
-	protected prepare() {
-		super.prepare();
+	private start(direction: boolean) {
+		spawn(() => {
+			while (this.direction === direction) {
+				const p = direction ? 1 : -1;
+				if (this.torque + p >= 0 && this.torque + p <= 100) {
+					this.torque += p;
+					this.update();
+				}
 
-		// Increase events
-		this.inputHandler.onKeyDown(this.increaseKey, () => {
-			if (this.isSwitch) {
-				this.torque = 100;
-				this.update();
-			} else {
-				this.loop(this.increaseKey, 1);
-			}
-		});
-
-		// Decrease events
-		this.inputHandler.onKeyDown(this.decreaseKey, () => {
-			if (this.isSwitch) {
-				this.torque = 0;
-				this.update();
-			} else {
-				this.loop(this.decreaseKey, -1);
+				wait(0.05);
 			}
 		});
 	}
@@ -138,23 +162,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 		this.sound.Volume = (this.maxSoundVolume / 100) * this.torque * (this.strength / 100);
 
 		// TODO: Send packet to server to replicate particles and sounds to other players
-	}
-
-	private loop(keyCode: KeyCode, p: number) {
-		if (this.isWorking) {
-			return;
-		}
-
-		this.isWorking = true;
-		while (UserInputService.IsKeyDown(keyCode)) {
-			if (this.torque + p >= 0 && this.torque + p <= 100) {
-				this.torque += p;
-				this.update();
-			}
-
-			wait(0.05);
-		}
-		this.isWorking = false;
 	}
 
 	public getTorque() {

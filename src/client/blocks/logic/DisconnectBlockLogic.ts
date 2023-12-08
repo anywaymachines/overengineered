@@ -1,4 +1,4 @@
-import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
+import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
 import Remotes from "shared/Remotes";
 
 type DisconnectConfig = {
@@ -6,20 +6,6 @@ type DisconnectConfig = {
 };
 
 export default class DisconnectBlockLogic extends ConfigurableBlockLogic<DisconnectConfig> {
-	protected prepare() {
-		super.prepare();
-
-		const disconnectButton = this.config.get("disconnect");
-		this.inputHandler.onKeyDown(disconnectButton, () => this.keyPressed(Enum.KeyCode.X));
-	}
-
-	private keyPressed(keyCode: Enum.KeyCode) {
-		Remotes.Client.GetNamespace("Blocks")
-			.GetNamespace("DisconnectBlock")
-			.Get("Disconnect")
-			.SendToServer(this.block);
-	}
-
 	public getConfigDefinition(): ConfigTypesToDefinition<DisconnectConfig> {
 		return {
 			disconnect: {
@@ -28,6 +14,19 @@ export default class DisconnectBlockLogic extends ConfigurableBlockLogic<Disconn
 				default: {
 					Desktop: "F",
 					Gamepad: "ButtonR2",
+				},
+			},
+		};
+	}
+
+	public getKeysDefinition(): KeyDefinitions<DisconnectConfig> {
+		return {
+			disconnect: {
+				keyDown: () => {
+					Remotes.Client.GetNamespace("Blocks")
+						.GetNamespace("DisconnectBlock")
+						.Get("Disconnect")
+						.SendToServer(this.block);
 				},
 			},
 		};

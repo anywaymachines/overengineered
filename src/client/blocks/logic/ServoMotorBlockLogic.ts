@@ -1,5 +1,5 @@
 import { UserInputService } from "@rbxts/services";
-import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
+import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
 
 type ServoMotorConfig = {
 	readonly rotate_add: "key";
@@ -88,14 +88,36 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 		};
 	}
 
+	private isIncreasing = false;
+	private isDecreasing = false;
+
+	public getKeysDefinition(): KeyDefinitions<ServoMotorConfig> {
+		return {
+			rotate_add: {
+				keyDown: () => {
+					this.isIncreasing = true;
+				},
+				keyUp: () => {
+					this.isIncreasing = false;
+				},
+			},
+			rotate_sub: {
+				keyDown: () => {
+					this.isDecreasing = true;
+				},
+				keyUp: () => {
+					this.isDecreasing = false;
+				},
+			},
+		};
+	}
+
 	private update() {
-		const isIncreasing = UserInputService.IsKeyDown(this.increaseKey);
-		const isDecreasing = UserInputService.IsKeyDown(this.decreaseKey);
 		const isMoving = math.abs(this.hingeConstraint.TargetAngle) === math.abs(this.angle);
 
 		// Switch logic
 		if (this.isSwitch) {
-			if (isIncreasing) {
+			if (this.isIncreasing) {
 				// Increase
 				if (isMoving) {
 					this.hingeConstraint.TargetAngle = 0;
@@ -104,7 +126,7 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 				this.hingeConstraint.TargetAngle = this.angle;
 			}
 
-			if (isDecreasing) {
+			if (this.isDecreasing) {
 				// Decrease
 				if (isMoving) {
 					this.hingeConstraint.TargetAngle = 0;
@@ -117,13 +139,13 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 		}
 
 		// Basic logic
-		if (isIncreasing && isDecreasing) {
+		if (this.isIncreasing && this.isDecreasing) {
 			// Reset
 			this.hingeConstraint.TargetAngle = 0;
-		} else if (isIncreasing) {
+		} else if (this.isIncreasing) {
 			// Increase
 			this.hingeConstraint.TargetAngle = this.angle;
-		} else if (isDecreasing) {
+		} else if (this.isDecreasing) {
 			// Decrease
 			this.hingeConstraint.TargetAngle = -1 * this.angle;
 		} else {

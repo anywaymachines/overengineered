@@ -1,4 +1,5 @@
 import { GuiService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
@@ -15,6 +16,8 @@ import VectorUtils from "shared/utils/VectorUtils";
 
 /** A tool for building in the world with blocks */
 export default class BuildTool extends ToolBase {
+	public readonly selectedBlockChanged = new Signal<(block: Block | undefined) => void>();
+
 	// Const
 	private readonly allowedColor: Color3 = Color3.fromRGB(194, 217, 255);
 	private readonly forbiddenColor: Color3 = Color3.fromRGB(255, 189, 189);
@@ -56,6 +59,7 @@ export default class BuildTool extends ToolBase {
 
 	public setSelectedBlock(block: Block | undefined) {
 		this.selectedBlock = block;
+		this.selectedBlockChanged.Fire(block);
 		this.prepareVisual();
 	}
 
