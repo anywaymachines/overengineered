@@ -1,6 +1,5 @@
-import { Players, RunService } from "@rbxts/services";
+import GameEnvironmentController from "./GameEnvironmentController";
 import GuiController from "./GuiController";
-import LocalPlayerController from "./LocalPlayerController";
 
 declare type Sounds = {
 	BuildingMode: {
@@ -13,6 +12,9 @@ declare type Sounds = {
 		RideStart: Sound;
 	};
 	Click: Sound;
+	Music: {
+		Space: Folder & { [key: string]: Sound };
+	};
 };
 
 /** A class for controlling sounds and their effects */
@@ -25,5 +27,20 @@ export default class SoundController {
 
 	public static randomSoundSpeed(): number {
 		return math.random(8, 12) / 10;
+	}
+
+	public static applyPropagationPhysics(sound: Sound) {
+		const defaultSoundVolume = 0.5;
+		const NoSoundHeightPercentage = math.clamp(
+			1 -
+				(GameEnvironmentController.currentHeight /
+					GameEnvironmentController.NoSoundHeight /
+					(1 / defaultSoundVolume) +
+					defaultSoundVolume),
+			defaultSoundVolume,
+			1,
+		);
+
+		sound.Volume *= NoSoundHeightPercentage;
 	}
 }

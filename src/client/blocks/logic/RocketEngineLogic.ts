@@ -1,4 +1,6 @@
+import { Workspace } from "@rbxts/services";
 import ConfigurableBlockLogic, { KeyDefinition } from "client/base/ConfigurableBlockLogic";
+import SoundController from "client/controller/SoundController";
 
 type RocketEngineConfig = {
 	readonly thrust_add: "key";
@@ -52,6 +54,8 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 		// Math
 		const colbox = block.FindFirstChild("ColBox") as Part;
 		this.multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16;
+
+		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 	}
 
 	public getConfigDefinition(): ConfigTypesToDefinition<RocketEngineConfig> {
@@ -167,6 +171,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 		// Sound
 		this.sound.Playing = this.torque !== 0;
 		this.sound.Volume = (this.maxSoundVolume / 100) * this.torque * (this.strength / 100);
+		SoundController.applyPropagationPhysics(this.sound);
 
 		// TODO: Send packet to server to replicate particles and sounds to other players
 	}

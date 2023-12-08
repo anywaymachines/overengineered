@@ -1,15 +1,13 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
-import SharedPlots from "shared/building/SharedPlots";
-import EventHandler from "shared/event/EventHandler";
 import Signals from "client/event/Signals";
+import EventHandler from "shared/event/EventHandler";
 
 export default class GameEnvironmentController {
-	private static readonly plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
-
 	// Const
-	public static readonly WeightlessnessHeight = 10000;
-	public static readonly NormalGravity = 192.2;
-	public static readonly NoGravityGravity = 0;
+	public static readonly NoSoundHeight = 14000;
+	public static readonly WeightlessnessHeight = 15000;
+	public static readonly NormalGravity = 180;
+	public static readonly NoGravityGravity = 0.001;
 
 	// Vars
 	public static currentHeight = 0;

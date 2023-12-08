@@ -1,4 +1,4 @@
-import { Players } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import BlockLogic from "client/base/BlockLogic";
 import ComponentContainer from "client/base/ComponentContainer";
@@ -10,7 +10,7 @@ import VehicleSeatBlockLogic from "./VehicleSeatBlockLogic";
 
 export default class Machine extends ComponentContainer<BlockLogic> {
 	public readonly destroyed = new Signal<() => void>();
-	public readonly seat;
+	public readonly seat: VehicleSeatBlockLogic;
 
 	constructor(logics: readonly BlockLogic[]) {
 		super();
@@ -34,6 +34,24 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 					child.enable();
 				}
 			}
+		});
+
+		const maxAngularVelocity = 50;
+		const maxLinearVelocity = 800;
+		this.event.subscribe(RunService.Heartbeat, () => {
+			const currentAngularVelocity = this.seat.vehicleSeat.AssemblyAngularVelocity;
+			this.seat.vehicleSeat.AssemblyAngularVelocity = new Vector3(
+				math.clamp(currentAngularVelocity.X, -maxAngularVelocity, maxAngularVelocity),
+				math.clamp(currentAngularVelocity.Y, -maxAngularVelocity, maxAngularVelocity),
+				math.clamp(currentAngularVelocity.Z, -maxAngularVelocity, maxAngularVelocity),
+			);
+
+			const currentLinearVelocity = this.seat.vehicleSeat.AssemblyLinearVelocity;
+			this.seat.vehicleSeat.AssemblyLinearVelocity = new Vector3(
+				math.clamp(currentLinearVelocity.X, -maxLinearVelocity, maxLinearVelocity),
+				math.clamp(currentLinearVelocity.Y, -maxLinearVelocity, maxLinearVelocity),
+				math.clamp(currentLinearVelocity.Z, -maxLinearVelocity, maxLinearVelocity),
+			);
 		});
 	}
 
