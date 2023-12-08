@@ -8,24 +8,21 @@ export default class Logger {
 	static info(msg: string) {
 		if (RunService.IsClient() === true) {
 			// Show logs only to maintainers
-			if (!GameDefinitions.DEVELOPERS.includes(Players.LocalPlayer.UserId)) {
-				return;
+			if (
+				Players.LocalPlayer.IsInGroup(GameDefinitions.GROUP) &&
+				Players.LocalPlayer.GetRankInGroup(GameDefinitions.GROUP) > 250
+			) {
+				print(`[INFO] [CLIENT] ${msg}`);
 			}
-
-			print(`[INFO] [CLIENT] ${msg}`);
 		} else {
 			print(`[INFO] [SERVER] ${msg}`);
 		}
 
 		this.onLog.Fire(msg, false);
 	}
+
 	static error(msg: string) {
 		if (RunService.IsClient() === true) {
-			// Show logs only to maintainers
-			if (!GameDefinitions.DEVELOPERS.includes(Players.LocalPlayer.UserId)) {
-				return;
-			}
-
 			try {
 				error(`[ERROR] [CLIENT] ${msg}`);
 			} catch {

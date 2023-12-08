@@ -21,16 +21,6 @@ export default class Serializer {
 		},
 	};
 
-	static EnumKeyCodeSerializer = {
-		serialize(material: Enum.KeyCode): SerializedEnum {
-			return material.Value;
-		},
-
-		deserialize(serializedEnumKeyCode: SerializedEnum): Enum.KeyCode {
-			return Enum.KeyCode.GetEnumItems().find((value) => value.Value === serializedEnumKeyCode)!;
-		},
-	};
-
 	static Color3Serializer = {
 		serialize(color: Color3): SerializedColor {
 			return color.ToHex();

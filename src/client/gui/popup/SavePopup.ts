@@ -135,7 +135,10 @@ class SavePreview extends Control<SavePreviewDefinition> {
 		});
 
 		blocks.subscribe((value) => {
-			if (GameDefinitions.DEVELOPERS.includes(Players.LocalPlayer.UserId)) {
+			if (
+				Players.LocalPlayer.IsInGroup(GameDefinitions.GROUP) &&
+				Players.LocalPlayer.GetRankInGroup(GameDefinitions.GROUP) > 250
+			) {
 				this.gui.HeadingLabel.Text = `Blocks: ${value}; Size: ${this.slot.get()?.size ?? 0}b`;
 			} else {
 				this.gui.HeadingLabel.Text = `Blocks: ${value}`;
