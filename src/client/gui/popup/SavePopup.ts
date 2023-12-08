@@ -12,6 +12,7 @@ import ObservableValue, { ReadonlyObservableValue } from "shared/event/Observabl
 import GuiAnimator from "../GuiAnimator";
 import { ButtonControl } from "../controls/Button";
 import TextBoxControl from "../controls/TextBoxControl";
+import LogControl from "../static/LogControl";
 
 type SaveItemDefinition = GuiButton & {
 	ImageLabel: ImageLabel;
@@ -291,6 +292,11 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 				name: data.slots[index].name,
 				save,
 			});
+
+		if (!response.success) {
+			LogControl.instance.addLine(response.message);
+			return;
+		}
 
 		if (response.blocks !== undefined) {
 			this.preview.slot.get()!.blocks = response.blocks;
