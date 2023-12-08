@@ -30,7 +30,6 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorConfig>
 	public getConfigDefinition(): ConfigTypesToDefinition<MotorConfig> {
 		return {
 			rotate_add: {
-				id: "rotate_add",
 				displayName: "Rotate +",
 				type: "key",
 				default: {
@@ -39,7 +38,6 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorConfig>
 				},
 			},
 			rotate_sub: {
-				id: "rotate_sub",
 				displayName: "Rotate -",
 				type: "key",
 				default: {
@@ -48,7 +46,6 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorConfig>
 				},
 			},
 			speed: {
-				id: "speed",
 				displayName: "Max. speed",
 				type: "number",
 				min: 0,
@@ -59,7 +56,6 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorConfig>
 				},
 			},
 			switch: {
-				id: "switch",
 				displayName: "Switch",
 				type: "bool",
 				default: {

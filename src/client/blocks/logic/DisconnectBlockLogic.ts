@@ -23,7 +23,6 @@ export default class DisconnectBlockLogic extends ConfigurableBlockLogic<Disconn
 	public getConfigDefinition(): ConfigTypesToDefinition<DisconnectConfig> {
 		return {
 			disconnect: {
-				id: "disconnect",
 				displayName: "Disconnect key",
 				type: "key",
 				default: {

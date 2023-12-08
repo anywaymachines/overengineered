@@ -7,7 +7,6 @@ export default class GameDefinitions {
 
 	static readonly PLAYER_SETTINGS_DEFINITION = {
 		betterCamera: {
-			id: "betterCamera",
 			displayName: "Better camera",
 			type: "bool",
 			default: {

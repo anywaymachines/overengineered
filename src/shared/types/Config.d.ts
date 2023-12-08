@@ -3,7 +3,6 @@ type DefaultConfigValue<T> = Readonly<{ Desktop: T } & Partial<Record<InputType,
 type ConfigDefinitionTypeBase<TKey extends string, TValue, TAdditional extends {} = {}> = {
 	readonly [k in TKey]: {
 		readonly type: k;
-		readonly id: string;
 		readonly displayName: string;
 		readonly default: DefaultConfigValue<TValue>;
 	} & TAdditional;

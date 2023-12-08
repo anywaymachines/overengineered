@@ -43,7 +43,6 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 	public getConfigDefinition(): ConfigTypesToDefinition<ServoMotorConfig> {
 		return {
 			rotate_add: {
-				id: "rotate_add",
 				displayName: "Rotate +",
 				type: "key",
 				default: {
@@ -52,7 +51,6 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 				},
 			},
 			rotate_sub: {
-				id: "rotate_sub",
 				displayName: "Rotate -",
 				type: "key",
 				default: {
@@ -61,7 +59,6 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 				},
 			},
 			speed: {
-				id: "speed",
 				displayName: "Max. speed",
 				type: "number",
 				min: 0,
@@ -72,7 +69,6 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 				},
 			},
 			angle: {
-				id: "angle",
 				displayName: "Angle",
 				type: "number",
 				min: -180,
@@ -83,7 +79,6 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 				},
 			},
 			switch: {
-				id: "switch",
 				displayName: "Switch",
 				type: "bool",
 				default: {

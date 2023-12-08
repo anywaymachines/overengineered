@@ -57,7 +57,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 	public getConfigDefinition(): ConfigTypesToDefinition<RocketEngineConfig> {
 		return {
 			thrust_add: {
-				id: "thrust_add",
 				displayName: "Thrust +",
 				type: "key",
 				default: {
@@ -66,7 +65,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 				},
 			},
 			thrust_sub: {
-				id: "thrust_sub",
 				displayName: "Thrust -",
 				type: "key",
 				default: {
@@ -75,7 +73,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 				},
 			},
 			switchmode: {
-				id: "switchmode",
 				displayName: "Switch Mode",
 				type: "bool",
 				default: {
@@ -84,7 +81,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 				},
 			},
 			strength: {
-				id: "strength",
 				displayName: "Strength %",
 				type: "number",
 				min: 0,
