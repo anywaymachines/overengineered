@@ -72,7 +72,7 @@ export default class SlotsDatabase {
 		this.blocksdb.set(this.toKey(userId, index), blocks);
 
 		const meta = this.getMeta(userId);
-		meta.set(index, { ...meta.get(index), blocks: blocks.size() });
+		meta.set(index, { ...meta.get(index), blocks: blockCount, size: blocks.size() });
 		this.setMeta(userId, meta);
 	}
 
