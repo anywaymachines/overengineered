@@ -30,8 +30,8 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 
 	// hz
 	private torque = 0;
-	private isWorking = false;
-	private direction?: boolean;
+	private movingUp = false;
+	private movingDown = false;
 
 	constructor(block: Model) {
 		super(block);
@@ -96,41 +96,48 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 		return {
 			thrust_add: {
 				keyDown: () => {
+					if (this.movingUp) return;
+
 					if (this.isSwitch) {
 						this.torque = 100;
 						this.update();
 					} else {
-						this.direction = true;
+						this.movingUp = true;
 						this.start(true);
 					}
 				},
 				keyUp: () => {
-					if (this.direction !== true) return;
-					this.direction = undefined;
+					this.movingUp = false;
 				},
 			},
 			thrust_sub: {
 				keyDown: () => {
+					if (this.movingDown) return;
+
 					if (this.isSwitch) {
 						this.torque = 0;
 						this.update();
 					} else {
-						this.direction = false;
+						this.movingDown = true;
 						this.start(false);
 					}
 				},
 				keyUp: () => {
-					if (this.direction !== false) return;
-					this.direction = undefined;
+					this.movingDown = false;
 				},
 			},
 		};
 	}
 
-	private start(direction: boolean) {
+	private start(up: boolean) {
 		spawn(() => {
-			while (this.direction === direction) {
-				const p = direction ? 1 : -1;
+			while (up ? this.movingUp : this.movingDown) {
+				if (this.movingUp && this.movingDown) {
+					wait(0.05);
+					continue;
+				}
+
+				const p = up ? 1 : -1;
 				if (this.torque + p >= 0 && this.torque + p <= 100) {
 					this.torque += p;
 					this.update();

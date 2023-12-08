@@ -1,4 +1,4 @@
-import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
+import ConfigurableBlockLogic, { KeyDefinition } from "client/base/ConfigurableBlockLogic";
 import Control from "client/base/Control";
 import Machine from "client/blocks/logic/Machine";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
@@ -43,6 +43,8 @@ export class RideModeControls extends Control<RideModeControlsDefinition> {
 		machine.destroyed.Connect(() => this.clear());
 
 		let pos = 0;
+		const map: Record<string, KeyDefinition[]> = {};
+
 		for (const block of machine.getChildren()) {
 			if (!(block instanceof ConfigurableBlockLogic)) {
 				continue;
@@ -51,27 +53,37 @@ export class RideModeControls extends Control<RideModeControlsDefinition> {
 			const config = block.config;
 			for (const [id, key] of Objects.entries(block.getKeysDefinition())) {
 				const keycode = config.get(id) as KeyCode;
+				print(keycode + map[keycode]);
 
-				const btn = new TextButtonControl(this.buttonTemplate());
-				btn.text.set(keycode);
-				this.add(btn);
+				map[keycode] ??= [];
+				map[keycode].push(key);
+			}
+		}
 
-				this.event.subscribe(btn.getGui().InputBegan, (input) => {
-					if (input.UserInputType === Enum.UserInputType.MouseButton1) {
+		for (const [keycode, keys] of Objects.entries(map)) {
+			const btn = new TextButtonControl(this.buttonTemplate());
+			btn.text.set(keycode);
+			this.add(btn);
+
+			this.event.subscribe(btn.getGui().InputBegan, (input) => {
+				if (input.UserInputType === Enum.UserInputType.MouseButton1) {
+					for (const key of keys) {
 						key.keyDown?.();
 					}
-				});
-				this.event.subscribe(btn.getGui().InputEnded, (input) => {
-					if (input.UserInputType === Enum.UserInputType.MouseButton1) {
+				}
+			});
+			this.event.subscribe(btn.getGui().InputEnded, (input) => {
+				if (input.UserInputType === Enum.UserInputType.MouseButton1) {
+					for (const key of keys) {
 						key.keyUp?.();
 					}
-				});
+				}
+			});
 
-				const size = btn.getGui().Size;
-				btn.getGui().Position = new UDim2(0, 0, size.Y.Scale * pos, 0);
+			const size = btn.getGui().Size;
+			btn.getGui().Position = new UDim2(0.95, 0, 1 - size.Y.Scale * pos, -10 * (pos + 1));
 
-				pos++;
-			}
+			pos++;
 		}
 	}
 }
