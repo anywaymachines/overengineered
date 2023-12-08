@@ -4,7 +4,7 @@ import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
 import BuildingManager from "shared/building/BuildingManager";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import { ButtonControl } from "../controls/Button";
+import { TextButtonControl } from "../controls/Button";
 import { DictionaryControl } from "../controls/DictionaryControl";
 import NumberTextBoxControl from "../controls/NumberTextBoxControl";
 import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
@@ -14,11 +14,10 @@ type MaterialControlDefinition = GuiButton & {
 };
 
 /** Material viewer button */
-class MaterialControl extends ButtonControl<MaterialControlDefinition> {
+class MaterialControl extends TextButtonControl<MaterialControlDefinition> {
 	constructor(template: MaterialControlDefinition, text: string) {
 		super(template);
-
-		this.gui.TextLabel.Text = text;
+		this.text.set(text);
 	}
 }
 

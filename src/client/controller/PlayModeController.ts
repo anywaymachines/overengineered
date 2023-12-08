@@ -45,11 +45,16 @@ export default class PlayModeController extends ComponentBase {
 			if (active) this.modes[active].enable();
 		});
 
-		this.event.subscribeObservable(this.playmode, (mode, prev) => this.setMode(mode, prev), true);
+		this.event.subscribeObservable(this.playmode, (mode, prev) => this.setMode(mode, prev));
 		this.event.subscribe(Signals.PLAYER.DIED, () => this.setMode(undefined, this.playmode.get()));
+
+		this.setMode(this.playmode.get(), undefined);
 	}
 
 	private async setMode(mode: PlayModes | undefined, prev: PlayModes | undefined) {
+		print("sw " + mode + " " + prev);
+		if (mode === prev) return;
+
 		if (prev) {
 			this.modes[prev].onSwitchToNext(mode);
 			this.modes[prev].disable();

@@ -67,7 +67,7 @@ export default class ComponentBase {
 
 		const inputType = InputController.inputType.get();
 		if (inputType === "Desktop") this.prepareDesktop();
-		else if (inputType === "Touch") this.prepareDesktop();
+		else if (inputType === "Touch") this.prepareTouch();
 		else if (inputType === "Gamepad") this.prepareGamepad();
 	}
 }

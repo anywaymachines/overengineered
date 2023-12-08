@@ -76,7 +76,6 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		const blockmodel = selected[0].Parent as Model;
 		const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
 
-		// TODO: redo logic-config stuff
 		const logicctor = logicRegistry[block.id];
 		if (!logicctor) return;
 

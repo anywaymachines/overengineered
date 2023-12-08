@@ -4,7 +4,6 @@ import SoundController from "client/controller/SoundController";
 import ObservableValue from "shared/event/ObservableValue";
 
 export type ButtonDefinition = GuiButton;
-
 export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extends Control<T> {
 	public readonly activated = new Signal<() => void>();
 
@@ -20,12 +19,14 @@ export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extend
 	}
 }
 
-export type TextButtonDefinition = TextButton;
-export class TextButtonControl extends ButtonControl<TextButtonDefinition> {
+export type TextButtonDefinition = GuiButton & {
+	readonly TextLabel: TextLabel;
+};
+export class TextButtonControl<T extends TextButtonDefinition = TextButtonDefinition> extends ButtonControl<T> {
 	public readonly text = new ObservableValue("");
 
-	constructor(gui: TextButtonDefinition) {
+	constructor(gui: T) {
 		super(gui);
-		this.event.subscribeObservable(this.text, (value) => (this.gui.Text = value));
+		this.event.subscribeObservable(this.text, (value) => (this.gui.TextLabel!.Text = value), true);
 	}
 }

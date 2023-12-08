@@ -3,18 +3,18 @@ import Control from "client/base/Control";
 import SoundController from "client/controller/SoundController";
 import ObservableValue from "shared/event/ObservableValue";
 import GuiAnimator from "../GuiAnimator";
-import { ButtonControl } from "../controls/Button";
+import { TextButtonControl } from "../controls/Button";
 
 type BlockControlDefinition = GuiButton & {
 	TextLabel: TextLabel;
 };
 
 /** Control for choosing a block or a category */
-class SelectorControl extends ButtonControl<BlockControlDefinition> {
+class SelectorControl extends TextButtonControl<BlockControlDefinition> {
 	constructor(template: BlockControlDefinition, text: string) {
 		super(template);
 
-		this.gui.TextLabel.Text = text;
+		this.text.set(text);
 		this.event.subscribe(this.gui.Activated, () => SoundController.getSounds().Click.Play());
 	}
 }
