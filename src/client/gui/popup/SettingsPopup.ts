@@ -1,4 +1,4 @@
-import { Config } from "client/Config";
+import Config from "client/Config";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import Control from "client/base/Control";
 import Popup from "client/base/Popup";

@@ -1,4 +1,4 @@
-import { serializeOne } from "client/Config";
+import Config from "client/Config";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Control from "client/base/Control";
 import logicRegistry from "client/blocks/LogicRegistry";
@@ -87,13 +87,13 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		const config = logic.config;
 
 		const send = (key: string, value: ConfigValue) => {
-			Logger.info("Sending block config value " + key + " " + serializeOne(value, defs[key]));
+			Logger.info("Sending block config value " + key + " " + Config.serializeOne(value, defs[key]));
 
 			return Remotes.Client.GetNamespace("Building")
 				.Get("UpdateConfigRequest")
 				.CallServerAsync({
 					block: blockmodel,
-					data: { key, value: serializeOne(value, defs[key]) },
+					data: { key, value: Config.serializeOne(value, defs[key]) },
 				});
 		};
 

@@ -1,5 +1,5 @@
 import { HttpService } from "@rbxts/services";
-import { Config, deserialize } from "client/Config";
+import Config from "client/Config";
 
 export class BlockConfig<T extends ConfigValueTypes> extends Config<T> {
 	constructor(source: Instance, definitions: ConfigTypesToDefinition<T>) {
@@ -9,7 +9,7 @@ export class BlockConfig<T extends ConfigValueTypes> extends Config<T> {
 				? (HttpService.JSONDecode(configAttribute) as Readonly<Record<keyof T, string>> | undefined)
 				: undefined;
 
-		const config = content === undefined ? undefined : deserialize(content, definitions);
+		const config = content === undefined ? undefined : Config.deserialize(content, definitions);
 		super(config, definitions);
 	}
 }
