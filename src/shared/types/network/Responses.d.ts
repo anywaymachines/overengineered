@@ -4,11 +4,13 @@ type Response<T extends {} = {}> = SuccessResponse<T> | ErrorResponse;
 
 type BuildResponse = Response<{ readonly model: Model }>;
 
+type TouchControlInfo = Readonly<Record<string, { readonly pos: SerializedVector2 }>>;
 type SlotMeta = {
 	readonly name: string;
 	readonly color: SerializedColor;
 	readonly blocks: number;
 	readonly size: number;
+	readonly touchControls: TouchControlInfo;
 };
 type SerializedSlotsMeta = readonly (SlotMeta & { readonly index: number })[];
 

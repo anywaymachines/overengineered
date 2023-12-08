@@ -311,5 +311,6 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 
 	private async load(index: number) {
 		await Remotes.Client.GetNamespace("Slots").Get("Load").CallServerAsync(index);
+		PlayerDataStorage.loadedSlot.set(index);
 	}
 }

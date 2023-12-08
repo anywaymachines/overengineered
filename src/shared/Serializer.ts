@@ -33,4 +33,34 @@ export default class Serializer {
 			return Color3.fromHex(serializedColor);
 		},
 	};
+
+	static UDim = {
+		serialize(unserialized: UDim): SerializedUDim {
+			return [unserialized.Scale, unserialized.Offset];
+		},
+
+		deserialize(serialized: SerializedUDim): UDim {
+			return new UDim(serialized[0], serialized[1]);
+		},
+	};
+
+	static UDim2 = {
+		serialize(unserialized: UDim2): SerializedUDim2 {
+			return [Serializer.UDim.serialize(unserialized.X), Serializer.UDim.serialize(unserialized.Y)];
+		},
+
+		deserialize(serialized: SerializedUDim2): UDim2 {
+			return new UDim2(Serializer.UDim.deserialize(serialized[0]), Serializer.UDim.deserialize(serialized[1]));
+		},
+	};
+
+	static Vector2 = {
+		serialize(unserialized: Vector2): SerializedVector2 {
+			return [unserialized.X, unserialized.Y];
+		},
+
+		deserialize(serialized: SerializedVector2): Vector2 {
+			return new Vector2(serialized[0], serialized[1]);
+		},
+	};
 }

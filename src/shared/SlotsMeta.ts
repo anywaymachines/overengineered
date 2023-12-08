@@ -11,21 +11,23 @@ export default class SlotsMeta {
 	}
 
 	private defaultSlot(index: number): SlotMeta {
-		if (index === SlotsMeta.autosaveSlotIndex) {
-			return {
-				name: "Autosave",
-				color: "00FFFF",
-				blocks: 0,
-				size: 0,
-			};
-		}
-
-		return {
+		const def: SlotMeta = {
 			name: "Slot " + (index + 1),
 			color: "FFFFFF",
 			blocks: 0,
 			size: 0,
+			touchControls: {},
 		};
+
+		if (index === SlotsMeta.autosaveSlotIndex) {
+			return {
+				...def,
+				name: "Autosave",
+				color: "00FFFF",
+			};
+		}
+
+		return def;
 	}
 
 	get(index: number) {

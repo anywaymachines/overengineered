@@ -71,8 +71,9 @@ class RemoteHandlers {
 			(meta) =>
 				meta.set(data.index, {
 					...meta.get(data.index),
-					name: data.name,
-					color: data.color,
+					name: data.name ?? meta.get(data.index).name,
+					color: data.color ?? meta.get(data.index).color,
+					touchControls: data.touchControls ?? meta.get(data.index).touchControls,
 				}),
 			data.save,
 		);
