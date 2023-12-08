@@ -21,11 +21,11 @@ export default class RideMode extends PlayMode {
 		return "ride";
 	}
 
-	public onSwitchTo(mode: PlayModes | undefined) {
+	public onSwitchToNext(mode: PlayModes | undefined) {
 		this.currentMachine?.destroy();
 		this.currentMachine = undefined;
 	}
-	public onSwitchFrom(prev: PlayModes | undefined) {
+	public onSwitchFromPrev(prev: PlayModes | undefined) {
 		if (prev === "build") {
 			this.currentMachine = Machine.fromBlocks();
 			SoundController.getSounds().RideMode.RideStart.Play();

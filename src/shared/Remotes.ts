@@ -21,9 +21,9 @@ const Remotes = Net.Definitions.Create({
 		Load: Net.Definitions.ServerAsyncFunction<(index: number) => Response>([
 			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 8 }),
 		]),
-		Save: Net.Definitions.ServerAsyncFunction<
-			(data: PlayerSaveSlotRequest) => Response & { blocks: number | undefined; size: number | undefined }
-		>([Net.Middleware.RateLimit({ MaxRequestsPerMinute: 60 })]),
+		Save: Net.Definitions.ServerAsyncFunction<(data: PlayerSaveSlotRequest) => SaveSlotResponse>([
+			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 60 }),
+		]),
 	}),
 	Ride: Net.Definitions.Namespace({
 		SetPlayMode: Net.Definitions.ServerAsyncFunction<(mode: PlayModes) => Response>([

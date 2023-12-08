@@ -21,16 +21,6 @@ export default class Serializer {
 		},
 	};
 
-	static EnumKeyCodeSerializer = {
-		serialize(material: Enum.KeyCode): SerializedEnum {
-			return material.Value;
-		},
-
-		deserialize(serializedEnumKeyCode: SerializedEnum): Enum.KeyCode {
-			return Enum.KeyCode.GetEnumItems().find((value) => value.Value === serializedEnumKeyCode)!;
-		},
-	};
-
 	static Color3Serializer = {
 		serialize(color: Color3): SerializedColor {
 			return color.ToHex();
@@ -41,16 +31,6 @@ export default class Serializer {
 				return Color3.fromRGB(serializedColor[0], serializedColor[1], serializedColor[2]);
 
 			return Color3.fromHex(serializedColor);
-		},
-	};
-
-	static VectorSerializer = {
-		serialize(vec: Vector3): SerializedVector {
-			return [vec.X, vec.Y, vec.Z];
-		},
-
-		deserialize(serializedVec: SerializedVector): Vector3 {
-			return new Vector3(serializedVec[0], serializedVec[1], serializedVec[2]);
 		},
 	};
 }
