@@ -2,81 +2,34 @@ import { Players, UserInputService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import Control from "client/base/Control";
 import EventHandler from "shared/event/EventHandler";
-import NumberObservableValue from "shared/event/NumberObservableValue";
-import Animation from "../Animation";
 import NumberTextBoxControl from "./NumberTextBoxControl";
+import ProgressBarControl, { ProgressBarControlDefinition } from "./ProgressBarControl";
 
-export type SliderControlDefinition = GuiObject & {
-	Filled?: GuiObject;
-	Text?: TextLabel;
-	TextBox?: TextBox;
-	TextLabel?: TextLabel;
-	Knob?: GuiObject;
-};
+export type SliderControlDefinition = GuiObject &
+	ProgressBarControlDefinition & {
+		TextBox?: TextBox;
+	};
 
 /** Control that represents a number via a slider. */
-export default class SliderControl<T extends SliderControlDefinition = SliderControlDefinition> extends Control<T> {
+export default class SliderControl<
+	T extends SliderControlDefinition = SliderControlDefinition,
+> extends ProgressBarControl<T> {
 	public readonly submitted = new Signal<(value: number) => void>();
-	public readonly value;
-	private readonly vertical;
 
 	constructor(gui: T, min: number, max: number, step: number) {
-		super(gui);
-		this.value = new NumberObservableValue(min, min, max, step);
-		this.vertical = this.getAttribute<boolean>("SliderVertical") === true;
+		super(gui, min, max, step);
 
-		this.subscribeVisual();
+		this.value.subscribe((value) => this.textValue.set(tostring(value)));
+		this.subscribeVisualSlider();
 		this.subscribeMovement();
 	}
 
-	private subscribeVisual() {
+	private subscribeVisualSlider() {
 		if (Control.exists(this.gui, "TextBox")) {
 			const num = new NumberTextBoxControl(this.gui.TextBox);
 			num.value.bindTo(this.value);
 			this.event.subscribe(num.submitted, (value) => this.submitted.Fire(value));
 			this.add(num);
-		}
-
-		if (Control.exists(this.gui, "TextLabel")) {
-			const label = this.gui.TextLabel;
-			const template = label.Text ?? "{}";
-
-			this.event.subscribeObservable(this.value, (value) => (label.Text = template.format(value)), true);
-		}
-
-		if (Control.exists(this.gui, "Text")) {
-			const text = this.gui.Text;
-			this.value.subscribe((value) => (text.Text = tostring(value)), true);
-		}
-
-		if (Control.exists(this.gui, "Knob")) {
-			Animation.value(
-				this.event,
-				this.gui.Knob as GuiObject,
-				this.value,
-				(value) => {
-					const pos = (value - this.value.min) / this.value.getRange();
-					return {
-						Position: new UDim2(this.vertical ? 0.5 : pos, 0, this.vertical ? pos : 0.5, 0),
-					};
-				},
-				new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-			);
-		}
-
-		if (Control.exists(this.gui, "Filled")) {
-			Animation.value(
-				this.event,
-				this.gui.Filled as GuiObject,
-				this.value,
-				(value) => {
-					const pos = (value - this.value.min) / this.value.getRange();
-					return {
-						Size: new UDim2(this.vertical ? 1 : pos, 0, this.vertical ? pos : 1, 0),
-					};
-				},
-				new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-			);
 		}
 	}
 	private subscribeMovement() {
