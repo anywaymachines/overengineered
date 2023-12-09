@@ -82,6 +82,7 @@ export const initializeSingleBlockSelection = (
 		highlight = new Instance("Highlight");
 		highlight.Parent = target.Parent;
 		highlight.Adornee = target.Parent;
+		highlight.DepthMode = Enum.HighlightDepthMode.Occluded;
 
 		blockHighlighted(highlight.Parent as Model);
 	};

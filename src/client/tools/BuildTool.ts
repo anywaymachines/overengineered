@@ -103,6 +103,7 @@ export default class BuildTool extends ToolBase {
 		blockHighlight.FillTransparency = 0.4;
 		blockHighlight.OutlineTransparency = 0.5;
 		blockHighlight.Adornee = this.previewBlock;
+		blockHighlight.DepthMode = Enum.HighlightDepthMode.Occluded;
 	}
 
 	private addAxisModel() {
