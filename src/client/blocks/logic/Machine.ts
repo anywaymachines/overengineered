@@ -23,19 +23,6 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 			this.add(logic);
 		}
 
-		this.event.subscribe(seat.vehicleSeat.GetPropertyChangedSignal("Occupant"), () => {
-			const occupant = seat.vehicleSeat.Occupant;
-			if (!occupant) {
-				for (const child of this.getChildren()) {
-					child.disable();
-				}
-			} else {
-				for (const child of this.getChildren()) {
-					child.enable();
-				}
-			}
-		});
-
 		const maxAngularVelocity = 50;
 		const maxLinearVelocity = 800;
 		this.event.subscribe(RunService.Heartbeat, () => {
@@ -53,6 +40,11 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 				math.clamp(currentLinearVelocity.Z, -maxLinearVelocity, maxLinearVelocity),
 			);
 		});
+	}
+
+	public add(instance: BlockLogic<Model>) {
+		instance.machine = this;
+		super.add(instance);
 	}
 
 	public destroy() {

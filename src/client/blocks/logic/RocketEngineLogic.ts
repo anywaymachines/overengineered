@@ -78,7 +78,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 				},
 			},
 			switchmode: {
-				displayName: "Switch Mode",
+				displayName: "Toggle Mode",
 				type: "bool",
 				default: {
 					Desktop: false,
@@ -137,6 +137,8 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 	private start(up: boolean) {
 		spawn(() => {
 			while (up ? this.movingUp : this.movingDown) {
+				if (!this.machine?.seat.occupant.get()) return;
+
 				if (this.movingUp && this.movingDown) {
 					wait(0.05);
 					continue;

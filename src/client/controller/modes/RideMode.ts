@@ -21,6 +21,10 @@ export default class RideMode extends PlayMode {
 		return "ride";
 	}
 
+	getCurrentMachine() {
+		return this.currentMachine;
+	}
+
 	public onSwitchToNext(mode: PlayModes | undefined) {
 		this.currentMachine?.destroy();
 		this.currentMachine = undefined;
