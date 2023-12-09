@@ -23,7 +23,9 @@ export default class ConfigTool extends ToolBase {
 				// if (InputController.inputType.get() !== "Desktop")  return;
 				this.selectBlockByClick(block);
 			},
-			(target: Model) => logicRegistry[target.GetAttribute("id") as string] instanceof ConfigurableBlockLogic,
+			(target: Model) =>
+				logicRegistry[target.GetAttribute("id") as string] !== undefined &&
+				new logicRegistry[target.GetAttribute("id") as string]!(target) instanceof ConfigurableBlockLogic,
 		);
 		initializeMultiBlockSelection(this.eventHandler, (blocks) => {
 			for (const block of blocks) {
