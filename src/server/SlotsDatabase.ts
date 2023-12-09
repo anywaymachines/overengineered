@@ -1,4 +1,3 @@
-import { Base64 } from "@rbxts/crypto";
 import { DataStoreService, Players } from "@rbxts/services";
 import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
@@ -18,8 +17,8 @@ export default class SlotsDatabase {
 		this.blocksdb = new Db<string | undefined>(
 			this.datastore,
 			() => undefined,
-			(data) => (data === undefined ? undefined : Base64.Encode(data)),
-			(data) => Base64.Decode(data),
+			(data) => data,
+			(data) => data,
 		);
 
 		this.prepare();
@@ -51,12 +50,12 @@ export default class SlotsDatabase {
 	}
 
 	private getMeta(userId: number) {
-		return SlotsMeta.fromSerialized(PlayerDatabase.instance.get(tostring(userId)).slots ?? []);
+		return PlayerDatabase.instance.get(tostring(userId)).slots ?? [];
 	}
-	private setMeta(userId: number, meta: SlotsMeta) {
+	private setMeta(userId: number, slots: readonly SlotMeta[]) {
 		PlayerDatabase.instance.set(tostring(userId), {
 			...PlayerDatabase.instance.get(tostring(userId)),
-			slots: meta.toSerialized(),
+			slots,
 		});
 	}
 
@@ -71,16 +70,20 @@ export default class SlotsDatabase {
 		this.ensureValidSlotIndex(userId, index);
 		this.blocksdb.set(this.toKey(userId, index), blocks);
 
-		const meta = this.getMeta(userId);
-		meta.set(index, { ...meta.get(index), blocks: blockCount, size: blocks.size() });
+		const meta = [...this.getMeta(userId)];
+		SlotsMeta.set(meta, { ...SlotsMeta.get(meta, index), blocks: blockCount, size: blocks.size(), index });
 		this.setMeta(userId, meta);
 	}
 
-	public update(userId: number, index: number, update: (meta: SlotsMeta) => void, saveBlocks: boolean) {
+	public update(
+		userId: number,
+		index: number,
+		update: (meta: readonly SlotMeta[]) => readonly SlotMeta[],
+		saveBlocks: boolean,
+	) {
 		this.ensureValidSlotIndex(userId, index);
 
-		const meta = this.getMeta(userId);
-		update(meta);
+		const meta = update(this.getMeta(userId));
 		this.setMeta(userId, meta);
 
 		let blocksCount: number | undefined = undefined;

@@ -1,5 +1,5 @@
 export default class Serializer {
-	static CFrameSerializer = {
+	static readonly CFrameSerializer = {
 		serialize(cframe: CFrame): SerializedCFrame {
 			return [cframe.Position.X, cframe.Position.Y, cframe.Position.Z, cframe.ToEulerAnglesXYZ()];
 		},
@@ -11,7 +11,7 @@ export default class Serializer {
 		},
 	};
 
-	static EnumMaterialSerializer = {
+	static readonly EnumMaterialSerializer = {
 		serialize(material: Enum.Material): SerializedEnum {
 			return material.Value;
 		},
@@ -21,7 +21,7 @@ export default class Serializer {
 		},
 	};
 
-	static Color3Serializer = {
+	static readonly Color3Serializer = {
 		serialize(color: Color3): SerializedColor {
 			return color.ToHex();
 		},
@@ -34,7 +34,7 @@ export default class Serializer {
 		},
 	};
 
-	static UDim = {
+	static readonly UDim = {
 		serialize(unserialized: UDim): SerializedUDim {
 			return [unserialized.Scale, unserialized.Offset];
 		},
@@ -44,7 +44,7 @@ export default class Serializer {
 		},
 	};
 
-	static UDim2 = {
+	static readonly UDim2 = {
 		serialize(unserialized: UDim2): SerializedUDim2 {
 			return [Serializer.UDim.serialize(unserialized.X), Serializer.UDim.serialize(unserialized.Y)];
 		},
@@ -54,7 +54,7 @@ export default class Serializer {
 		},
 	};
 
-	static Vector2 = {
+	static readonly Vector2 = {
 		serialize(unserialized: Vector2): SerializedVector2 {
 			return [unserialized.X, unserialized.Y];
 		},

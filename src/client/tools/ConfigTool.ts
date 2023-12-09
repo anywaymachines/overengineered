@@ -1,4 +1,5 @@
 import Signal from "@rbxts/signal";
+import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import ToolBase from "client/base/ToolBase";
 import logicRegistry from "client/blocks/LogicRegistry";
 import InputController from "client/controller/InputController";

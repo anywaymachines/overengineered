@@ -77,7 +77,7 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 				);
 				this.list.add(control);
 
-				control.control.submitted.Connect((value) => PlayerDataStorage.updatePlayerConfig(id, value));
+				control.control.submitted.Connect((value) => PlayerDataStorage.sendPlayerConfigValue(id, value));
 			} /* else if (def.type === "key") {
 					const control = new ConfigPartControl(
 						this.keyTemplate(),

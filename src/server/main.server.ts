@@ -1,6 +1,7 @@
 import { RunService } from "@rbxts/services";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
+import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
 import BuildingWrapper from "./BuildingWrapper";
 import PlayerDatabase from "./PlayerDatabase";
@@ -8,6 +9,7 @@ import SlotsDatabase from "./SlotsDatabase";
 import DisconnectBlockLogic from "./blocks/logic/DisconnectBlockLogic";
 import PlayModeController from "./modes/PlayModeController";
 import { registerOnRemoteEvent, registerOnRemoteFunction } from "./network/event/RemoteHandler";
+import ReplicateRemoteHandler from "./network/event/ReplicateRemoteHandler";
 import BlocksSerializer from "./plots/BlocksSerializer";
 import ServerPlots from "./plots/ServerPlots";
 
@@ -68,13 +70,14 @@ class RemoteHandlers {
 		const output = SlotsDatabase.instance.update(
 			player.UserId,
 			data.index,
-			(meta) =>
-				meta.set(data.index, {
-					...meta.get(data.index),
-					name: data.name ?? meta.get(data.index).name,
-					color: data.color ?? meta.get(data.index).color,
-					touchControls: data.touchControls ?? meta.get(data.index).touchControls,
-				}),
+			(meta) => {
+				const get = SlotsMeta.get(meta, data.index);
+				return SlotsMeta.with(meta, data.index, {
+					name: data.name ?? get.name,
+					color: data.color ?? get.color,
+					touchControls: data.touchControls ?? get.touchControls,
+				});
+			},
 			data.save,
 		);
 
@@ -111,6 +114,7 @@ registerOnRemoteFunction("Building", "UpdateConfigRequest", BuildingWrapper.upda
 registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSetting);
 registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
+ReplicateRemoteHandler.init();
 
 DisconnectBlockLogic.init();
 

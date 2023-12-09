@@ -1,5 +1,4 @@
 import { Players } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import Control from "client/base/Control";
 import Popup from "client/base/Popup";
@@ -8,7 +7,7 @@ import GameDefinitions from "shared/GameDefinitions";
 import Remotes from "shared/Remotes";
 import Serializer from "shared/Serializer";
 import SlotsMeta from "shared/SlotsMeta";
-import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import ObservableValue from "shared/event/ObservableValue";
 import GuiAnimator from "../GuiAnimator";
 import { ButtonControl } from "../controls/Button";
 import TextBoxControl from "../controls/TextBoxControl";
@@ -20,26 +19,28 @@ type SaveItemDefinition = GuiButton & {
 };
 
 class SaveItem extends ButtonControl<SaveItemDefinition> {
-	private readonly slot;
+	private readonly index;
 	public readonly selected = new ObservableValue(false);
-	public readonly color = new ObservableValue(new Color3(1, 1, 1));
-	public readonly name = new ObservableValue("Slot");
 
-	constructor(gui: SaveItemDefinition, slot: PlayerData["slots"][number]) {
+	constructor(gui: SaveItemDefinition, index: number) {
 		super(gui);
-		this.slot = slot;
-		this.update();
+		this.index = index;
 
-		this.slot.updated.Connect(() => this.update());
+		this.event.subscribeObservable(
+			PlayerDataStorage.data,
+			(data) => {
+				if (!data) return;
+
+				const slot = SlotsMeta.get(data.slots, this.index);
+				this.gui.TextBox.Text = slot.name;
+				this.gui.ImageLabel.ImageColor3 = Serializer.Color3Serializer.deserialize(slot.color);
+			},
+			true,
+		);
 
 		this.selected.subscribe((selected) => {
 			this.gui.BackgroundColor3 = selected ? Color3.fromRGB(63, 70, 88) : Color3.fromRGB(44, 48, 61);
 		}, true);
-	}
-
-	public update() {
-		this.gui.TextBox.Text = this.slot.name;
-		this.gui.ImageLabel.ImageColor3 = this.slot.color;
 	}
 }
 
@@ -49,10 +50,7 @@ type SaveSlotsDefinition = ScrollingFrame & {
 };
 
 class SaveSlots extends Control<SaveSlotsDefinition> {
-	public readonly data = new ObservableValue<PlayerData | undefined>(undefined);
 	public readonly selectedSlot = new ObservableValue<number | undefined>(undefined);
-
-	private readonly slots;
 
 	private readonly buyNewTemplate;
 	private readonly template;
@@ -63,19 +61,21 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 		this.template = Control.asTemplate(this.gui.Template);
 		this.buyNewTemplate = Control.asTemplate(this.gui.BuyNewTemplate);
 
-		this.slots = new Control<SaveSlotsDefinition, SaveItem>(this.gui);
-		this.add(this.slots);
+		const slots = new Control<SaveSlotsDefinition, SaveItem>(this.gui);
+		this.add(slots);
 
-		this.data.subscribe((data) => {
+		PlayerDataStorage.data.subscribe((data) => {
 			if (!data) return;
 
-			this.slots.clear();
-			data.slots.forEach((slot, i) => {
-				const item = new SaveItem(this.template(), slot);
-				item.activated.Connect(() => this.selectedSlot.set(i));
-				this.selectedSlot.subscribe((index) => item.selected.set(index === i));
-				this.slots.add(item);
-			});
+			slots.clear();
+			[...data.slots]
+				.sort((left, right) => left.index < right.index)
+				.forEach((slot) => {
+					const item = new SaveItem(this.template(), slot.index);
+					item.activated.Connect(() => this.selectedSlot.set(slot.index));
+					this.selectedSlot.subscribe((index) => item.selected.set(index === slot.index));
+					slots.add(item);
+				});
 
 			/*const add = new Control(this.buyNewTemplate());
 			add.getGui().Activated.Connect(() => {
@@ -86,7 +86,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 				}
 			});
 			this.add(add);*/
-		});
+		}, true);
 	}
 }
 
@@ -103,48 +103,78 @@ class SavePreview extends Control<SavePreviewDefinition> {
 	public readonly onSave;
 	public readonly onLoad;
 
-	public readonly slot = new ObservableValue<PlayerData["slots"][number] | undefined>(undefined);
+	public readonly selectedSlotIndex = new ObservableValue<number | undefined>(undefined);
 
 	constructor(gui: SavePreviewDefinition) {
 		super(gui);
-
-		const color = this.slot.createChild("color", new Color3(1, 1, 1));
-		const name = this.slot.createChild("name", "Save slot");
-		const blocks = this.slot.createChild("blocks", 0) as ReadonlyObservableValue<number>;
 
 		this.onSave = this.added(new ButtonControl(this.gui.SaveButton)).activated;
 		this.onLoad = this.added(new ButtonControl(this.gui.LoadButton)).activated;
 
 		const textbox = new TextBoxControl(this.gui.TextBox);
 		this.add(textbox);
-		textbox.text.bindTo(name);
 
-		for (const child of this.gui.ColorButtons.GetChildren()) {
-			if (!child.IsA("GuiButton")) continue;
+		const send = async (slotData: Readonly<Partial<SlotMeta>>) => {
+			const data = PlayerDataStorage.data.get();
+			if (!data) return;
 
-			child.Activated.Connect(() => {
-				color.set(child.BackgroundColor3);
-				this.slot.get()?.updated.Fire();
+			const slotIndex = this.selectedSlotIndex.get();
+			if (slotIndex === undefined) return;
+
+			await PlayerDataStorage.sendPlayerSlot({
+				...slotData,
+				index: slotIndex,
+				save: false,
 			});
-		}
-		textbox.submitted.Connect(() => {
-			this.slot.get()?.updated.Fire();
-		});
+		};
 
-		color.subscribe((value) => {
-			this.gui.ImageButton.ImageColor3 = value;
-		});
-
-		blocks.subscribe((value) => {
-			if (
-				Players.LocalPlayer.IsInGroup(GameDefinitions.GROUP) &&
-				Players.LocalPlayer.GetRankInGroup(GameDefinitions.GROUP) > 250
-			) {
-				this.gui.HeadingLabel.Text = `Blocks: ${value}; Size: ${this.slot.get()?.size ?? 0}b`;
-			} else {
-				this.gui.HeadingLabel.Text = `Blocks: ${value}`;
+		const update = () => {
+			const data = PlayerDataStorage.data.get();
+			if (!data) {
+				this.gui.Visible = false;
+				return;
 			}
-		}, true);
+
+			const slotIndex = this.selectedSlotIndex.get();
+			if (slotIndex === undefined) {
+				this.gui.Visible = false;
+				return;
+			}
+
+			this.gui.Visible = true;
+			const slot = SlotsMeta.get(data.slots, slotIndex);
+
+			this.gui.ImageButton.ImageColor3 = Serializer.Color3Serializer.deserialize(slot.color);
+			textbox.text.set(slot.name);
+
+			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
+				this.gui.HeadingLabel.Text = `Blocks: ${slot.blocks}; Size: ${slot.size}b`;
+			} else {
+				this.gui.HeadingLabel.Text = `Blocks: ${slot.blocks}`;
+			}
+
+			// lock
+			const interactable = slotIndex >= 0;
+			const setControlActive = (gui: GuiObject) => {
+				gui.Interactable = gui.Active = interactable;
+				gui.BackgroundTransparency = interactable ? 0 : 0.8;
+
+				if (gui.IsA("TextBox")) {
+					gui.TextEditable = interactable;
+				}
+			};
+
+			setControlActive(this.gui.TextBox);
+			setControlActive(this.gui.SaveButton);
+
+			for (const child of buttons) {
+				setControlActive(child.getGui());
+			}
+		};
+
+		this.event.subscribeObservable(this.selectedSlotIndex, update);
+		this.event.subscribeObservable(PlayerDataStorage.data, update);
+		update();
 
 		const buttons: ButtonControl[] = [];
 		for (const child of this.gui.ColorButtons.GetChildren()) {
@@ -153,37 +183,15 @@ class SavePreview extends Control<SavePreviewDefinition> {
 				buttons.push(button);
 
 				button.activated.Connect(() => {
-					color.set(child.BackgroundColor3);
-					this.slot.get()?.updated.Fire();
+					send({ color: Serializer.Color3Serializer.serialize(button.getGui().BackgroundColor3) });
 				});
 			}
 		}
-
-		this.slot.subscribe((slot) => {
-			this.gui.Visible = slot !== undefined;
-
-			this.gui.TextBox.Interactable = slot?.locked !== true;
-			this.gui.ImageButton.Interactable = slot?.locked !== true;
-			this.gui.SaveButton.Interactable = slot?.locked !== true;
-			for (const child of buttons) {
-				child.getGui().Interactable = slot?.locked !== true;
-			}
-		}, true);
+		textbox.submitted.Connect(() => {
+			send({ name: textbox.text.get() });
+		});
 	}
 }
-
-export type PlayerDataSlot = {
-	readonly updated: Signal<() => void>;
-	blocks: number;
-	size: number;
-	name: string;
-	color: Color3;
-	locked?: boolean;
-};
-export type PlayerData = {
-	purchasedSlots: number;
-	slots: readonly PlayerDataSlot[];
-};
 
 export type SavePopupDefinition = GuiObject & {
 	Body: GuiObject & {
@@ -204,8 +212,6 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 		}>().Popup.SlotsGui,
 	);
 
-	public readonly data = new ObservableValue<PlayerData | undefined>(undefined);
-
 	private readonly slots;
 	private readonly preview;
 
@@ -213,18 +219,11 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 		super(gui);
 
 		this.slots = new SaveSlots(this.gui.Body.Body.ScrollingFrame);
-		this.slots.data.bindTo(this.data);
 		this.add(this.slots);
 
 		this.preview = new SavePreview(this.gui.Body.Preview);
 		this.add(this.preview);
-
-		this.slots.selectedSlot.subscribe((index) => {
-			const data = this.data.get();
-			if (!data) return;
-
-			this.preview.slot.set(index === undefined ? undefined : data.slots[index]);
-		});
+		this.preview.selectedSlotIndex.bindTo(this.slots.selectedSlot);
 
 		this.event.subscribe(this.preview.onSave, () => {
 			const index = this.slots.selectedSlot.get();
@@ -238,41 +237,8 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 			this.hide();
 		});
 
-		this.data.subscribe((data) => {
-			if (!data) return;
-
-			data.slots.forEach((slot, index) => {
-				slot.updated.Connect(() => {
-					this.save(index, false);
-				});
-			});
-		});
-
 		const cancelButton = this.added(new ButtonControl(this.gui.Body.Body.CancelButton));
 		this.event.subscribe(cancelButton.activated, () => this.hide());
-
-		this.event.subscribeObservable(PlayerDataStorage.data, () => this.create(), true);
-	}
-
-	private create() {
-		const data = PlayerDataStorage.data.get();
-		if (!data) return;
-
-		const slots = SlotsMeta.fromSerialized(data.slots ?? [])
-			.getAll(GameDefinitions.FREE_SLOTS + data.purchasedSlots)
-			.map(
-				(slot, index): PlayerDataSlot => ({
-					...slot,
-					updated: new Signal<() => void>(),
-					color: Serializer.Color3Serializer.deserialize(slot.color),
-					locked: index < 0,
-				}),
-			);
-
-		this.data.set({
-			...data,
-			slots,
-		});
 	}
 
 	public async show() {
@@ -281,32 +247,30 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 	}
 
 	private async save(index: number, save: boolean) {
-		const data = this.data.get();
+		const data = PlayerDataStorage.data.get();
 		if (!data) return;
 
-		const response = await Remotes.Client.GetNamespace("Slots")
-			.Get("Save")
-			.CallServerAsync({
-				index,
-				color: Serializer.Color3Serializer.serialize(data.slots[index].color),
-				name: data.slots[index].name,
-				save,
-			});
+		const slot = SlotsMeta.get(data.slots, index);
+
+		const response = await Remotes.Client.GetNamespace("Slots").Get("Save").CallServerAsync({
+			index,
+			color: slot.color,
+			name: slot.name,
+			save,
+		});
 
 		if (!response.success) {
 			LogControl.instance.addLine(response.message);
 			return;
 		}
 
-		if (response.blocks !== undefined) {
-			this.preview.slot.get()!.blocks = response.blocks;
-			this.preview.slot.set(this.preview.slot.get(), true);
-		}
-
-		if (response.size !== undefined) {
-			this.preview.slot.get()!.size = response.size;
-			this.preview.slot.set(this.preview.slot.get(), true);
-		}
+		PlayerDataStorage.data.set({
+			...data,
+			slots: SlotsMeta.with(data.slots, index, {
+				blocks: response.blocks ?? slot.blocks,
+				size: response.size ?? slot.size,
+			}),
+		});
 	}
 
 	private async load(index: number) {

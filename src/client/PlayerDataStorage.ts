@@ -1,6 +1,8 @@
 import { HttpService, Workspace } from "@rbxts/services";
+import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
+import SlotsMeta from "shared/SlotsMeta";
 import ObservableValue from "shared/event/ObservableValue";
 
 type NonNullableFields<T> = {
@@ -12,6 +14,7 @@ export default class PlayerDataStorage {
 
 	public static readonly data = new ObservableValue<NonNullableFields<PlayerDataResponse> | undefined>(undefined);
 	public static readonly config = this.data.createChild("settings", {});
+	public static readonly slots = this.data.createChild("slots", []);
 
 	static async init() {
 		await this.refetchData();
@@ -27,13 +30,16 @@ export default class PlayerDataStorage {
 		this.data.set({
 			purchasedSlots: data.purchasedSlots ?? 0,
 			settings: data.settings ?? {},
-			slots: data.slots ?? [],
+			slots: SlotsMeta.getAll(data.slots ?? [], GameDefinitions.FREE_SLOTS + (data.purchasedSlots ?? 0)),
 		});
 
 		Logger.info("Configuration loaded: " + HttpService.JSONEncode(this.config.get()));
 	}
 
-	static async updatePlayerConfig<TKey extends keyof PlayerConfig>(key: TKey, value: PlayerConfig[TKey] & defined) {
+	static async sendPlayerConfigValue<TKey extends keyof PlayerConfig>(
+		key: TKey,
+		value: PlayerConfig[TKey] & defined,
+	) {
 		Logger.info("Setting config value " + key + " to " + value);
 		await Remotes.Client.GetNamespace("Player").Get("UpdateSettings").CallServerAsync(key, value);
 
@@ -41,5 +47,19 @@ export default class PlayerDataStorage {
 			...this.config.get(),
 			[key]: value,
 		});
+	}
+
+	static async sendPlayerSlot(req: PlayerSaveSlotRequest) {
+		Logger.info("Setting slot " + req.index + " to " + HttpService.JSONEncode(req));
+
+		const data = PlayerDataStorage.data.get();
+		if (data) {
+			this.data.set({
+				...data,
+				slots: SlotsMeta.with(data.slots, req.index, req),
+			});
+		}
+
+		await Remotes.Client.GetNamespace("Slots").Get("Save").CallServerAsync(req);
 	}
 }

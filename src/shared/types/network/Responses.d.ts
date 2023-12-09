@@ -11,18 +11,18 @@ type SlotMeta = {
 	readonly blocks: number;
 	readonly size: number;
 	readonly touchControls: TouchControlInfo;
+	readonly index: number;
 };
-type SerializedSlotsMeta = readonly (SlotMeta & { readonly index: number })[];
 
 type FetchSlotsResponse = Response<{
 	readonly purchasedSlots: number;
-	readonly slots: SerializedSlotsMeta;
+	readonly slots: readonly SlotMeta[];
 }>;
 
 type PlayerDataResponse = {
 	readonly purchasedSlots: number | undefined;
 	readonly settings: PlayerConfig | undefined;
-	readonly slots: SerializedSlotsMeta | undefined;
+	readonly slots: readonly SlotMeta[] | undefined;
 };
 
 type SaveSlotResponse = Response<{ readonly blocks: number | undefined; readonly size: number | undefined }>;

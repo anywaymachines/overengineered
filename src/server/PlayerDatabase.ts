@@ -4,7 +4,7 @@ import { Db } from "./Database";
 export type PlayerData = {
 	readonly purchasedSlots?: number;
 	readonly settings?: PlayerConfig;
-	readonly slots?: SerializedSlotsMeta;
+	readonly slots?: readonly SlotMeta[];
 };
 
 export default class PlayerDatabase {

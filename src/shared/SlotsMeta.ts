@@ -1,17 +1,10 @@
-import { HttpService } from "@rbxts/services";
-
 /** Slots storage for a single user */
 export default class SlotsMeta {
 	public static readonly autosaveSlotIndex = -1;
 
-	private readonly slots: SlotMeta[];
-
-	constructor(slots?: SlotMeta[]) {
-		this.slots = slots ?? [];
-	}
-
-	private defaultSlot(index: number): SlotMeta {
+	private static defaultSlot(index: number): SlotMeta {
 		const def: SlotMeta = {
+			index,
 			name: "Slot " + (index + 1),
 			color: "FFFFFF",
 			blocks: 0,
@@ -30,45 +23,37 @@ export default class SlotsMeta {
 		return def;
 	}
 
-	get(index: number) {
-		return this.slots[index] ?? this.defaultSlot(index);
+	static indexOf(slots: readonly SlotMeta[], index: number): number | undefined {
+		return slots.findIndex((slot) => slot.index === index);
 	}
-	set(index: number, meta: SlotMeta) {
-		this.slots[index] = meta;
+	static get(slots: readonly SlotMeta[], index: number): SlotMeta {
+		const idx = this.indexOf(slots, index);
+		if (idx === undefined) return this.defaultSlot(index);
+
+		return slots[idx] ?? this.defaultSlot(index);
+	}
+	static set(slots: SlotMeta[], meta: SlotMeta) {
+		const idx = this.indexOf(slots, meta.index);
+		if (idx !== undefined) slots.remove(idx);
+
+		slots.push(meta);
+	}
+	static with(slots: readonly SlotMeta[], index: number, meta: Readonly<Partial<SlotMeta>>): readonly SlotMeta[] {
+		const s = [...slots];
+		this.set(s, {
+			...this.get(s, index),
+			...meta,
+			index,
+		});
+		return s;
 	}
 
-	getAll(min = 0) {
-		const slots: SlotMeta[] = new Array(min);
+	static getAll(slots: readonly SlotMeta[], min: number): readonly SlotMeta[] {
+		const ret: SlotMeta[] = [];
 		for (let i = -1; i < min; i++) {
-			slots[i] = this.slots[i] ?? this.defaultSlot(i);
+			ret.push(this.get(slots, i));
 		}
 
-		return slots as readonly SlotMeta[];
-	}
-
-	toSerialized(): SerializedSlotsMeta {
-		return this.slots
-			.map((slot, index) => [slot, index] as const)
-			.filter((slot) => slot[0] !== undefined)
-			.map((slot) => ({
-				...slot[0],
-				index: slot[1],
-			}));
-	}
-	static fromSerialized(serialized: SerializedSlotsMeta) {
-		const slots: SlotMeta[] = [];
-		serialized.forEach((slot) => {
-			slots[slot.index] = { ...slot };
-			delete (slots[slot.index] as { index?: number }).index;
-		});
-
-		return new SlotsMeta(slots);
-	}
-
-	serialize() {
-		return HttpService.JSONEncode(this.toSerialized());
-	}
-	static deserialize(data: string) {
-		return this.fromSerialized(HttpService.JSONDecode(data) as SerializedSlotsMeta);
+		return ret;
 	}
 }

@@ -14,4 +14,8 @@ export default class GameDefinitions {
 			},
 		},
 	} as const satisfies ConfigDefinitions;
+
+	static isAdmin(player: Player) {
+		return player.IsInGroup(GameDefinitions.GROUP) && player.GetRankInGroup(GameDefinitions.GROUP) > 250;
+	}
 }

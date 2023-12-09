@@ -163,11 +163,11 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			}
 		}
 
-		const controlsInfo = PlayerDataStorage.data
+		const controlsInfo = PlayerDataStorage.slots
 			.get()
-			?.slots.find((slot) => slot.index === PlayerDataStorage.loadedSlot.get() ?? -1)?.touchControls;
+			.find((slot) => slot.index === PlayerDataStorage.loadedSlot.get() ?? -1)?.touchControls;
 		print(controlsInfo);
-		print(HttpService.JSONEncode(PlayerDataStorage.data.get()?.slots));
+		print(HttpService.JSONEncode(PlayerDataStorage.slots.get()));
 
 		for (const [keycode, keys] of Objects.entries(map)) {
 			const btn = new TextButtonControl(this.buttonTemplate());
