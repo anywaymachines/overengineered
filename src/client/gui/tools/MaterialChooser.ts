@@ -10,14 +10,19 @@ import NumberTextBoxControl from "../controls/NumberTextBoxControl";
 import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
 
 type MaterialControlDefinition = GuiButton & {
+	ViewportFrame: ViewportFrame & {
+		Part: Part;
+	};
 	TextLabel: TextLabel;
 };
 
 /** Material viewer button */
 class MaterialControl extends TextButtonControl<MaterialControlDefinition> {
-	constructor(template: MaterialControlDefinition, text: string) {
+	constructor(template: MaterialControlDefinition, material: Enum.Material) {
 		super(template);
-		this.text.set(text);
+
+		this.text.set(material.Name);
+		this.gui.ViewportFrame.Part.Material = material;
 	}
 }
 
@@ -75,7 +80,7 @@ class MaterialChoosePart extends Control<MaterialChoosePartDefinition> {
 
 	private create() {
 		const createPart = (material: Enum.Material, activated: () => void) => {
-			const control = new MaterialControl(this.itemTemplate(), material.Name);
+			const control = new MaterialControl(this.itemTemplate(), material);
 			this.list.addKeyed(material, control);
 
 			control.show();
