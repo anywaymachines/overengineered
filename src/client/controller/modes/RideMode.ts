@@ -30,7 +30,9 @@ export default class RideMode extends PlayMode {
 		this.currentMachine = undefined;
 	}
 	public onSwitchFromPrev(prev: PlayModes | undefined) {
-		if (prev === "build") {
+		if (prev === undefined) {
+			//
+		} else if (prev === "build") {
 			this.currentMachine = Machine.fromBlocks();
 			SoundController.getSounds().RideMode.RideStart.Play();
 			this.rideModeScene.start(this.currentMachine);

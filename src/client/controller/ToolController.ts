@@ -1,11 +1,11 @@
+import ComponentBase from "client/base/ComponentBase";
 import ToolBase from "client/base/ToolBase";
+import TooltipsControl from "client/gui/static/TooltipsControl";
+import ObservableValue from "shared/event/ObservableValue";
 import BuildTool from "../tools/BuildTool";
 import ConfigTool from "../tools/ConfigTool";
 import DeleteTool from "../tools/DeleteTool";
 import MoveTool from "../tools/MoveTool";
-import ObservableValue from "shared/event/ObservableValue";
-import ComponentBase from "client/base/ComponentBase";
-import TooltipsControl from "client/gui/static/TooltipsControl";
 
 export default class ToolController extends ComponentBase {
 	public readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);
@@ -25,6 +25,7 @@ export default class ToolController extends ComponentBase {
 		});
 
 		this.tools = [this.buildTool, this.moveTool, this.deleteTool, this.configTool];
-		this.selectedTool.subscribe((tool) => TooltipsControl.instance.updateControlTooltips(tool), true);
+		this.selectedTool.subscribe((tool) => TooltipsControl.instance.updateControlTooltips(tool));
+		this.event.onPrepare(() => TooltipsControl.instance.updateControlTooltips(this.selectedTool.get()), true);
 	}
 }

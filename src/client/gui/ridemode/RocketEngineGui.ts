@@ -12,7 +12,7 @@ export default class RocketEngineGui extends Control<RocketEngineGuiDefinition> 
 	constructor(gui: RocketEngineGuiDefinition, machine: Machine) {
 		super(gui);
 
-		this.slider = new SliderControl(this.gui, 0, 1, 0.01);
+		this.slider = new SliderControl(this.gui, 0, 100, 1);
 		this.slider.getGui().Active = false;
 		this.add(this.slider);
 
@@ -23,7 +23,7 @@ export default class RocketEngineGui extends Control<RocketEngineGuiDefinition> 
 				avg.push(block.getTorque());
 			}
 
-			this.slider.value.set(avg.reduce((acc, val) => acc + val, 0) / avg.size() / 100);
+			this.slider.value.set(avg.reduce((acc, val) => acc + val, 0) / avg.size());
 		});
 	}
 }

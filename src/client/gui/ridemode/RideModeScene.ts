@@ -3,6 +3,7 @@ import PlayerDataStorage from "client/PlayerDataStorage";
 import ConfigurableBlockLogic, { KeyDefinition } from "client/base/ConfigurableBlockLogic";
 import Control from "client/base/Control";
 import Machine from "client/blocks/logic/Machine";
+import RocketEngineLogic from "client/blocks/logic/RocketEngineLogic";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
 import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
@@ -10,7 +11,8 @@ import Objects from "shared/_fixes_/objects";
 import EventHandler from "shared/event/EventHandler";
 import { ButtonControl, TextButtonControl, TextButtonDefinition } from "../controls/Button";
 import { DictionaryControl } from "../controls/DictionaryControl";
-import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
+import ProgressBarControl from "../controls/ProgressBarControl";
+import { SliderControlDefinition } from "../controls/SliderControl";
 import RocketEngineGui, { RocketEngineGuiDefinition } from "./RocketEngineGui";
 
 export type ActionBarControlDefinition = GuiObject & {
@@ -224,6 +226,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 	private readonly controls;
 
 	private readonly torqueTemplate;
+	private readonly speedTemplate;
 
 	constructor(gui: RideModeSceneDefinition) {
 		super(gui);
@@ -236,6 +239,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		this.actionbar.show();
 
 		this.torqueTemplate = Control.asTemplate(this.gui.Torque);
+		this.speedTemplate = Control.asTemplate(this.gui.Speed);
 	}
 
 	public start(machine: Machine) {
@@ -243,20 +247,25 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		{
 			const player = Players.LocalPlayer.Character!.WaitForChild("HumanoidRootPart") as Part;
-			const maxSpdShow = 1000;
+			const maxSpdShow = 800;
 
-			const speed = new SliderControl(this.gui.Speed, 0, maxSpdShow, 0.1);
+			const speed = new ProgressBarControl(this.speedTemplate(), 0, maxSpdShow, 0.1);
 			speed.show();
 			this.controls.add(speed);
 
 			this.event.subscribe(RunService.Heartbeat, () => {
-				const spd = player.GetVelocityAtPosition(player.Position);
-				speed.value.set(math.min(spd.Magnitude, maxSpdShow));
+				const spd = player.GetVelocityAtPosition(player.Position).Magnitude;
+
+				speed.value.set(spd);
+				speed.getTextValue().set(spd);
 			});
 		}
 
-		const torque = new RocketEngineGui(this.torqueTemplate(), machine);
-		torque.show();
-		this.controls.add(torque);
+		const rockets = machine.getChildren().filter((c) => c instanceof RocketEngineLogic);
+		if (rockets.size() !== 0) {
+			const torque = new RocketEngineGui(this.torqueTemplate(), machine);
+			torque.show();
+			this.controls.add(torque);
+		}
 	}
 }

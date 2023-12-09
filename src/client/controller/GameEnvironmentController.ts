@@ -5,7 +5,7 @@ import EventHandler from "shared/event/EventHandler";
 export default class GameEnvironmentController {
 	// Const
 	public static readonly NoSoundHeight = 10000;
-	public static readonly MinSoundValue = 0.005;
+	public static readonly MinSoundValue = 0.01;
 	public static readonly WeightlessnessHeight = 15000;
 	public static readonly NormalGravity = 180;
 	public static readonly NoGravityGravity = 0.001;

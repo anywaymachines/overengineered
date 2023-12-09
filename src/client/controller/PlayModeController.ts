@@ -52,7 +52,6 @@ export default class PlayModeController extends ComponentBase {
 	}
 
 	private async setMode(mode: PlayModes | undefined, prev: PlayModes | undefined) {
-		print("sw " + mode + " " + prev);
 		if (mode === prev) return;
 
 		if (prev) {

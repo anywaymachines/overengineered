@@ -1,3 +1,4 @@
+import { Workspace } from "@rbxts/services";
 import { UnreliableRemotes } from "shared/Remotes";
 
 export default class ReplicateRemoteHandler {
@@ -12,7 +13,14 @@ export default class ReplicateRemoteHandler {
 	}
 
 	static replicateSoundEvent(player: Player, sound: Sound, isPlaying: boolean, volume: number) {
+		if (!sound) {
+			return;
+		}
 		if (!sound.Parent) {
+			return;
+		}
+
+		if (sound.Parent.IsDescendantOf(Workspace)) {
 			return;
 		}
 
@@ -36,7 +44,11 @@ export default class ReplicateRemoteHandler {
 		isEnabled: boolean,
 		acceleration: Vector3,
 	) {
-		if (!particle.Parent) {
+		if (!particle || !particle.Parent) {
+			return;
+		}
+
+		if (particle.Parent.IsDescendantOf(Workspace)) {
 			return;
 		}
 
