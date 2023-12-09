@@ -144,6 +144,16 @@ export default class BlocksSerializer {
 		serialize(plot: Model): string {
 			const blocks = BlocksSerializer.serialize(plot);
 			return HttpService.JSONEncode(blocks);
+		},
+		deserialize(data: string): readonly SerializedBlock[] {
+			return HttpService.JSONDecode(data) as readonly SerializedBlock[];
+		},
+	} as const;
+	static readonly v1 = {
+		version: 1,
+
+		serialize(plot: Model): string {
+			const blocks = BlocksSerializer.serialize(plot);
 
 			const palette = new Map<string, number>(
 				[...new Set<string>(blocks.map((b) => b.id))]
@@ -199,8 +209,6 @@ export default class BlocksSerializer {
 			return buffer.tostring(buf2);
 		},
 		deserialize(data: string): readonly SerializedBlock[] {
-			return HttpService.JSONDecode(data) as readonly SerializedBlock[];
-
 			const buf = createBufferReader(buffer.fromstring(data));
 			const version = buf.readu8();
 			if (version !== 0) throw "invalid save version"; // TODO: check version before
