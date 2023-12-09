@@ -154,7 +154,19 @@ export default class BuildingWrapper {
 			};
 		}
 
-		return BuildingWrapper.placeBlock(data);
+		const placedBlock = BuildingWrapper.placeBlock(data);
+
+		if (placedBlock.success) {
+			PartUtils.applyToAllDescendantsOfType("Sound", placedBlock.model, (sound) => {
+				sound.SetAttribute("owner", player.UserId);
+			});
+
+			PartUtils.applyToAllDescendantsOfType("ParticleEmitter", placedBlock.model, (sound) => {
+				sound.SetAttribute("owner", player.UserId);
+			});
+		}
+
+		return placedBlock;
 	}
 	public static placeBlock(this: void, data: PlaceBlockRequest): BuildResponse {
 		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;
@@ -189,7 +201,7 @@ export default class BuildingWrapper {
 		const customPhysProp =
 			MaterialPhysicalProperties.Properties[data.material.Name] ?? MaterialPhysicalProperties.Properties.Default;
 
-		PartUtils.applyToAllParts(model, (part) => {
+		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
 			const currentPhysProp = part.CurrentPhysicalProperties;
 			part.CustomPhysicalProperties = new PhysicalProperties(
 				customPhysProp.Density ?? currentPhysProp.Density,

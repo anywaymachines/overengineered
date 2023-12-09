@@ -29,18 +29,19 @@ export default class SoundController {
 		return math.random(8, 12) / 10;
 	}
 
-	public static applyPropagationPhysics(sound: Sound) {
-		const defaultSoundVolume = 0.5;
-		const NoSoundHeightPercentage = math.clamp(
+	public static getWorldVolume(volume: number) {
+		return this.applyPropagationPhysics(volume);
+	}
+
+	private static applyPropagationPhysics(currentLevel: number) {
+		const volumePercentage = math.clamp(
 			1 -
-				(GameEnvironmentController.currentHeight /
-					GameEnvironmentController.NoSoundHeight /
-					(1 / defaultSoundVolume) +
-					defaultSoundVolume),
-			defaultSoundVolume,
+				(GameEnvironmentController.currentHeight / GameEnvironmentController.NoSoundHeight) *
+					(1 - GameEnvironmentController.MinSoundValue),
+			GameEnvironmentController.MinSoundValue,
 			1,
 		);
 
-		sound.Volume *= NoSoundHeightPercentage;
+		return currentLevel * volumePercentage;
 	}
 }

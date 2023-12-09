@@ -1,4 +1,5 @@
 import Net from "@rbxts/net";
+import { ReplicatedStorage } from "@rbxts/services";
 
 const Remotes = Net.Definitions.Create({
 	Player: Net.Definitions.Namespace({
@@ -36,14 +37,22 @@ const Remotes = Net.Definitions.Create({
 		DisconnectBlock: Net.Definitions.Namespace({
 			Disconnect: Net.Definitions.ClientToServerEvent<[block: Model]>(),
 		}),
-		RocketEngine: Net.Definitions.Namespace({
-			UpdateSound: Net.Definitions.ClientToServerEvent<[block: Model, volume: number]>(),
-			UpdateParticle: Net.Definitions.ClientToServerEvent<[block: Model, acceleration: number]>(),
-		}),
 	}),
 	Debug: Net.Definitions.Namespace({
 		DisplayLine: Net.Definitions.ServerToClientEvent<[text: string, isClient: boolean, isError: boolean]>(),
 	}),
 });
+
+type _UnreliableRemoteEvent<T extends Callback> = Omit<UnreliableRemoteEvent<T>, "OnServerEvent"> & {
+	readonly OnServerEvent: RBXScriptSignal<(player: Player, ...args: Parameters<T>) => ReturnType<T>>;
+};
+export const UnreliableRemotes = {
+	ReplicateSound: ReplicatedStorage.FindFirstChild("ReplicateSound") as unknown as _UnreliableRemoteEvent<
+		(sound: Sound, isPlaying: boolean, volume: number) => void
+	>,
+	ReplicateParticle: ReplicatedStorage.FindFirstChild("ReplicateParticle") as unknown as _UnreliableRemoteEvent<
+		(particle: ParticleEmitter, isEnabled: boolean, acceleration: Vector3) => void
+	>,
+};
 
 export default Remotes;

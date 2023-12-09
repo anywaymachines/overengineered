@@ -52,7 +52,7 @@ export default class PlayerDataStorage {
 	static async sendPlayerSlot(req: PlayerSaveSlotRequest) {
 		Logger.info("Setting slot " + req.index + " to " + HttpService.JSONEncode(req));
 
-		const data = PlayerDataStorage.data.get();
+		let data = this.data.get();
 		if (data) {
 			this.data.set({
 				...data,
@@ -60,6 +60,21 @@ export default class PlayerDataStorage {
 			});
 		}
 
-		await Remotes.Client.GetNamespace("Slots").Get("Save").CallServerAsync(req);
+		const response = await Remotes.Client.GetNamespace("Slots").Get("Save").CallServerAsync(req);
+		if (!response.success) {
+			Logger.error(response.message);
+			return;
+		}
+
+		data = this.data.get();
+		if (data) {
+			this.data.set({
+				...this.data.get()!,
+				slots: SlotsMeta.with(data.slots, req.index, {
+					blocks: response.blocks ?? SlotsMeta.get(data.slots, req.index).blocks,
+					size: response.size ?? SlotsMeta.get(data.slots, req.index).size,
+				}),
+			});
+		}
 	}
 }

@@ -1,6 +1,6 @@
 export default class PartUtils {
 	static ghostModel(model: Model) {
-		this.applyToAllParts(model, (part) => {
+		this.applyToAllDescendantsOfType("BasePart", model, (part) => {
 			part.CanCollide = false;
 			part.CanQuery = false;
 			part.CanTouch = false;
@@ -8,7 +8,7 @@ export default class PartUtils {
 	}
 
 	static switchDescendantsTransparency(model: Instance, transparency: number) {
-		this.applyToAllParts(model, (part) => {
+		this.applyToAllDescendantsOfType("BasePart", model, (part) => {
 			if (part.GetAttribute("static_material") === true) return;
 			if (part.Transparency === 1) return;
 			part.Transparency = transparency;
@@ -16,13 +16,13 @@ export default class PartUtils {
 	}
 
 	static switchDescendantsAnchor(model: Instance, isAnchored: boolean) {
-		this.applyToAllParts(model, (part) => {
+		this.applyToAllDescendantsOfType("BasePart", model, (part) => {
 			part.Anchored = isAnchored;
 		});
 	}
 
 	static switchDescendantsMaterial(model: Instance, material: Enum.Material) {
-		this.applyToAllParts(model, (part) => {
+		this.applyToAllDescendantsOfType("BasePart", model, (part) => {
 			if (part.GetAttribute("static_material") === true) return;
 			if (part.Transparency === 1) return;
 			part.Material = material;
@@ -30,18 +30,20 @@ export default class PartUtils {
 	}
 
 	static switchDescendantsColor(model: Instance, color: Color3) {
-		this.applyToAllParts(model, (part) => {
+		this.applyToAllDescendantsOfType("BasePart", model, (part) => {
 			if (part.GetAttribute("static_color") === true) return;
 			part.Color = color;
 		});
 	}
 
-	static applyToAllParts(model: Instance, callback: (part: BasePart) => void) {
-		const children = model.GetDescendants();
+	static applyToAllDescendantsOfType<T extends keyof Instances>(
+		typeName: T,
+		parent: Instance,
+		callback: (instance: Instances[T]) => void,
+	) {
+		const children = parent.GetDescendants().filter((value) => value.IsA(typeName)) as Instances[T][];
 		children.forEach((element) => {
-			if (element.IsA("BasePart")) {
-				callback(element);
-			}
+			callback(element);
 		});
 	}
 
