@@ -143,10 +143,10 @@ export default class BlocksSerializer {
 
 		serialize(plot: Model): string {
 			const blocks = BlocksSerializer.serialize(plot);
-			return HttpService.JSONEncode(blocks);
+			return Base64.Encode(HttpService.JSONEncode(blocks));
 		},
 		deserialize(data: string): readonly SerializedBlock[] {
-			return HttpService.JSONDecode(data) as readonly SerializedBlock[];
+			return HttpService.JSONDecode(Base64.Decode(data)) as readonly SerializedBlock[];
 		},
 	} as const;
 	static readonly v1 = {
