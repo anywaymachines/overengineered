@@ -1,15 +1,16 @@
-import { HttpService, UserInputService } from "@rbxts/services";
+import { Players, RunService, UserInputService } from "@rbxts/services";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import ConfigurableBlockLogic, { KeyDefinition } from "client/base/ConfigurableBlockLogic";
 import Control from "client/base/Control";
 import Machine from "client/blocks/logic/Machine";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
-import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
+import SlotsMeta from "shared/SlotsMeta";
 import Objects from "shared/_fixes_/objects";
 import EventHandler from "shared/event/EventHandler";
 import { ButtonControl, TextButtonControl, TextButtonDefinition } from "../controls/Button";
 import { DictionaryControl } from "../controls/DictionaryControl";
+import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
 import RocketEngineGui, { RocketEngineGuiDefinition } from "./RocketEngineGui";
 
 export type ActionBarControlDefinition = GuiObject & {
@@ -73,6 +74,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			instance.Position = new UDim2(0, 0, 0, 0);
 			instance.Size = new UDim2(1, 0, 1, 0);
 			instance.Parent = child.getGui();
+			child.getGui().Active = false;
 
 			instance.InputBegan.Connect((input) => {
 				if (
@@ -113,6 +115,11 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		}
 
 		this.quitSettingsMode = async () => {
+			for (const child of overlay.getChildren()) {
+				if (!(child instanceof Control)) continue;
+				child.getGui().Active = true;
+			}
+
 			this.remove(overlay);
 
 			for (const eh of ehandlers) {
@@ -126,20 +133,11 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 				};
 			}
 
-			const response = await Remotes.Client.GetNamespace("Slots")
-				.Get("Save")
-				.CallServerAsync({
-					index: PlayerDataStorage.loadedSlot.get() ?? -1,
-					touchControls,
-					save: false,
-				});
-
-			if (!response.success) {
-				Logger.error(response.message);
-				return;
-			}
-
-			await PlayerDataStorage.refetchData();
+			await PlayerDataStorage.sendPlayerSlot({
+				index: PlayerDataStorage.loadedSlot.get() ?? -1,
+				touchControls,
+				save: false,
+			});
 		};
 	}
 
@@ -163,11 +161,11 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			}
 		}
 
-		const controlsInfo = PlayerDataStorage.slots
-			.get()
-			.find((slot) => slot.index === PlayerDataStorage.loadedSlot.get() ?? -1)?.touchControls;
-		print(controlsInfo);
-		print(HttpService.JSONEncode(PlayerDataStorage.slots.get()));
+		let controlsInfo: TouchControlInfo | undefined;
+		const slots = PlayerDataStorage.slots.get();
+		if (slots) {
+			controlsInfo = SlotsMeta.get(slots, PlayerDataStorage.loadedSlot.get() ?? -1)?.touchControls;
+		}
 
 		for (const [keycode, keys] of Objects.entries(map)) {
 			const btn = new TextButtonControl(this.buttonTemplate());
@@ -175,21 +173,26 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			this.addKeyed(keycode, btn);
 
 			this.event.subscribe(btn.getGui().InputBegan, (input) => {
-				if (input.UserInputType === Enum.UserInputType.MouseButton1) {
+				if (
+					input.UserInputType === Enum.UserInputType.MouseButton1 ||
+					input.UserInputType === Enum.UserInputType.Touch
+				) {
 					for (const key of keys) {
 						key.keyDown?.();
 					}
 				}
 			});
 			this.event.subscribe(btn.getGui().InputEnded, (input) => {
-				if (input.UserInputType === Enum.UserInputType.MouseButton1) {
+				if (
+					input.UserInputType === Enum.UserInputType.MouseButton1 ||
+					input.UserInputType === Enum.UserInputType.Touch
+				) {
 					for (const key of keys) {
 						key.keyUp?.();
 					}
 				}
 			});
 
-			print(controlsInfo);
 			if (controlsInfo) {
 				const kc = controlsInfo[keycode];
 				if (kc)
@@ -212,6 +215,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 export type RideModeSceneDefinition = GuiObject & {
 	ActionBarGui: ActionBarControlDefinition;
 	Torque: RocketEngineGuiDefinition;
+	Speed: SliderControlDefinition;
 	Controls: RideModeControlsDefinition;
 };
 
@@ -236,6 +240,20 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 
 	public start(machine: Machine) {
 		this.controls.start(machine);
+
+		{
+			const player = Players.LocalPlayer.Character!.WaitForChild("HumanoidRootPart") as Part;
+			const maxSpdShow = 1000;
+
+			const speed = new SliderControl(this.gui.Speed, 0, maxSpdShow, 0.1);
+			speed.show();
+			this.controls.add(speed);
+
+			this.event.subscribe(RunService.Heartbeat, () => {
+				const spd = player.GetVelocityAtPosition(player.Position);
+				speed.value.set(math.min(spd.Magnitude, maxSpdShow));
+			});
+		}
 
 		const torque = new RocketEngineGui(this.torqueTemplate(), machine);
 		torque.show();

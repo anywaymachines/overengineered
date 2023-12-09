@@ -10,6 +10,7 @@ export type SliderControlDefinition = GuiObject & {
 	Filled?: GuiObject;
 	Text?: TextLabel;
 	TextBox?: TextBox;
+	TextLabel?: TextLabel;
 	Knob?: GuiObject;
 };
 
@@ -34,6 +35,13 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 			num.value.bindTo(this.value);
 			this.event.subscribe(num.submitted, (value) => this.submitted.Fire(value));
 			this.add(num);
+		}
+
+		if (Control.exists(this.gui, "TextLabel")) {
+			const label = this.gui.TextLabel;
+			const template = label.Text ?? "{}";
+
+			this.event.subscribeObservable(this.value, (value) => (label.Text = template.format(value)), true);
 		}
 
 		if (Control.exists(this.gui, "Text")) {

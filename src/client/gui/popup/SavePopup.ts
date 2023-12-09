@@ -11,7 +11,6 @@ import ObservableValue from "shared/event/ObservableValue";
 import GuiAnimator from "../GuiAnimator";
 import { ButtonControl } from "../controls/Button";
 import TextBoxControl from "../controls/TextBoxControl";
-import LogControl from "../static/LogControl";
 
 type SaveItemDefinition = GuiButton & {
 	ImageLabel: ImageLabel;
@@ -27,11 +26,9 @@ class SaveItem extends ButtonControl<SaveItemDefinition> {
 		this.index = index;
 
 		this.event.subscribeObservable(
-			PlayerDataStorage.data,
-			(data) => {
-				if (!data) return;
-
-				const slot = SlotsMeta.get(data.slots, this.index);
+			PlayerDataStorage.slots,
+			(slots) => {
+				const slot = SlotsMeta.get(slots, this.index);
 				this.gui.TextBox.Text = slot.name;
 				this.gui.ImageLabel.ImageColor3 = Serializer.Color3Serializer.deserialize(slot.color);
 			},
@@ -55,26 +52,28 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 	private readonly buyNewTemplate;
 	private readonly template;
 
+	private readonly slots;
+
 	constructor(gui: SaveSlotsDefinition) {
 		super(gui);
 
 		this.template = Control.asTemplate(this.gui.Template);
 		this.buyNewTemplate = Control.asTemplate(this.gui.BuyNewTemplate);
 
-		const slots = new Control<SaveSlotsDefinition, SaveItem>(this.gui);
-		this.add(slots);
+		this.slots = new Control<SaveSlotsDefinition, SaveItem>(this.gui);
+		this.add(this.slots);
 
-		PlayerDataStorage.data.subscribe((data) => {
-			if (!data) return;
+		PlayerDataStorage.slots.subscribe((slots) => {
+			if (!slots) return;
 
-			slots.clear();
-			[...data.slots]
+			this.slots.clear();
+			[...slots]
 				.sort((left, right) => left.index < right.index)
 				.forEach((slot) => {
 					const item = new SaveItem(this.template(), slot.index);
 					item.activated.Connect(() => this.selectedSlot.set(slot.index));
 					this.selectedSlot.subscribe((index) => item.selected.set(index === slot.index));
-					slots.add(item);
+					this.slots.add(item);
 				});
 
 			/*const add = new Control(this.buyNewTemplate());
@@ -115,9 +114,6 @@ class SavePreview extends Control<SavePreviewDefinition> {
 		this.add(textbox);
 
 		const send = async (slotData: Readonly<Partial<SlotMeta>>) => {
-			const data = PlayerDataStorage.data.get();
-			if (!data) return;
-
 			const slotIndex = this.selectedSlotIndex.get();
 			if (slotIndex === undefined) return;
 
@@ -129,8 +125,8 @@ class SavePreview extends Control<SavePreviewDefinition> {
 		};
 
 		const update = () => {
-			const data = PlayerDataStorage.data.get();
-			if (!data) {
+			const slots = PlayerDataStorage.slots.get();
+			if (!slots) {
 				this.gui.Visible = false;
 				return;
 			}
@@ -142,7 +138,7 @@ class SavePreview extends Control<SavePreviewDefinition> {
 			}
 
 			this.gui.Visible = true;
-			const slot = SlotsMeta.get(data.slots, slotIndex);
+			const slot = SlotsMeta.get(slots, slotIndex);
 
 			this.gui.ImageButton.ImageColor3 = Serializer.Color3Serializer.deserialize(slot.color);
 			textbox.text.set(slot.name);
@@ -173,7 +169,7 @@ class SavePreview extends Control<SavePreviewDefinition> {
 		};
 
 		this.event.subscribeObservable(this.selectedSlotIndex, update);
-		this.event.subscribeObservable(PlayerDataStorage.data, update);
+		this.event.subscribeObservable(PlayerDataStorage.slots, update);
 		update();
 
 		const buttons: ButtonControl[] = [];
@@ -228,7 +224,11 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 		this.event.subscribe(this.preview.onSave, () => {
 			const index = this.slots.selectedSlot.get();
 			if (index === undefined) return;
-			this.save(index, true);
+
+			PlayerDataStorage.sendPlayerSlot({
+				index,
+				save: true,
+			});
 		});
 		this.event.subscribe(this.preview.onLoad, () => {
 			const index = this.slots.selectedSlot.get();
@@ -244,33 +244,6 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 	public async show() {
 		super.show();
 		GuiAnimator.transition(this.gui.Body, 0.2, "down");
-	}
-
-	private async save(index: number, save: boolean) {
-		const data = PlayerDataStorage.data.get();
-		if (!data) return;
-
-		const slot = SlotsMeta.get(data.slots, index);
-
-		const response = await Remotes.Client.GetNamespace("Slots").Get("Save").CallServerAsync({
-			index,
-			color: slot.color,
-			name: slot.name,
-			save,
-		});
-
-		if (!response.success) {
-			LogControl.instance.addLine(response.message);
-			return;
-		}
-
-		PlayerDataStorage.data.set({
-			...data,
-			slots: SlotsMeta.with(data.slots, index, {
-				blocks: response.blocks ?? slot.blocks,
-				size: response.size ?? slot.size,
-			}),
-		});
 	}
 
 	private async load(index: number) {

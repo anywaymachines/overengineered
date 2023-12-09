@@ -1,6 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import ConfigurableBlockLogic, { KeyDefinition } from "client/base/ConfigurableBlockLogic";
 import SoundController from "client/controller/SoundController";
+import { UnreliableRemotes } from "shared/Remotes";
 
 type RocketEngineConfig = {
 	readonly thrust_add: "key";
@@ -45,14 +46,14 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 		this.strength = this.config.get("strength");
 
 		// Instances
-		const effectEmitter = block.FindFirstChild("EffectEmitter") as Part;
-		this.engine = block.FindFirstChild("Engine")!;
-		this.vectorForce = this.engine.FindFirstChild("VectorForce") as VectorForce;
-		this.sound = this.engine.FindFirstChild("Sound") as Sound;
-		this.particleEmitter = effectEmitter.FindFirstChild("Fire") as ParticleEmitter;
+		const effectEmitter = block.WaitForChild("EffectEmitter") as Part;
+		this.engine = block.WaitForChild("Engine")!;
+		this.vectorForce = this.engine.WaitForChild("VectorForce") as VectorForce;
+		this.sound = this.engine.WaitForChild("Sound") as Sound;
+		this.particleEmitter = effectEmitter.WaitForChild("Fire") as ParticleEmitter;
 
 		// Math
-		const colbox = block.FindFirstChild("ColBox") as Part;
+		const colbox = block.WaitForChild("ColBox") as Part;
 		this.multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16;
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
@@ -161,7 +162,17 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 		);
 
 		// Particles
-		this.particleEmitter.Enabled = this.torque !== 0;
+		const newParticleEmitterState = this.torque !== 0;
+		const newParticleEmitterAcceleration = new Vector3(
+			(this.maxParticlesAcceleration / 100) * this.torque * (this.strength / 100),
+			0,
+			0,
+		);
+		const particleEmmiterHasDifference =
+			this.particleEmitter.Enabled !== newParticleEmitterState ||
+			math.abs(this.particleEmitter.Acceleration.X - newParticleEmitterAcceleration.X) > 1;
+
+		this.particleEmitter.Enabled = newParticleEmitterState;
 		this.particleEmitter.Acceleration = new Vector3(
 			(this.maxParticlesAcceleration / 100) * this.torque * (this.strength / 100),
 			0,
@@ -169,11 +180,25 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 		);
 
 		// Sound
-		this.sound.Playing = this.torque !== 0;
-		this.sound.Volume = (this.maxSoundVolume / 100) * this.torque * (this.strength / 100);
-		SoundController.applyPropagationPhysics(this.sound);
+		const newSoundState = this.torque !== 0;
+		const newVolume = SoundController.getWorldVolume(
+			(this.maxSoundVolume / 100) * this.torque * (this.strength / 100),
+		);
+		const volumeHasDifference =
+			newSoundState !== this.sound.Playing || math.abs(this.sound.Volume - newVolume) > 0.005;
+		this.sound.Playing = newSoundState;
+		this.sound.Volume = newVolume;
 
-		// TODO: Send packet to server to replicate particles and sounds to other players
+		if (volumeHasDifference) {
+			UnreliableRemotes.ReplicateSound.FireServer(this.sound, this.sound.Playing, this.sound.Volume);
+		}
+		if (particleEmmiterHasDifference) {
+			UnreliableRemotes.ReplicateParticle.FireServer(
+				this.particleEmitter,
+				this.particleEmitter.Enabled,
+				this.particleEmitter.Acceleration,
+			);
+		}
 	}
 
 	public getTorque() {
