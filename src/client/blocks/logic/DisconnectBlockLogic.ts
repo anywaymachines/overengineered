@@ -6,7 +6,11 @@ type DisconnectConfig = {
 };
 
 export default class DisconnectBlockLogic extends ConfigurableBlockLogic<DisconnectConfig> {
-	public getConfigDefinition(): ConfigTypesToDefinition<DisconnectConfig> {
+	constructor(block: Model) {
+		super(block, DisconnectBlockLogic.getConfigDefinition());
+	}
+
+	static getConfigDefinition(): ConfigTypesToDefinition<DisconnectConfig> {
 		return {
 			disconnect: {
 				displayName: "Disconnect key",

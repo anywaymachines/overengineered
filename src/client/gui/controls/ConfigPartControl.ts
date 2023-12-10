@@ -16,13 +16,12 @@ export default class ConfigPartControl<
 		config: BlockConfig<ConfigValueTypes>,
 		definition: ConfigDefinition,
 		key: string,
-		def: TValue,
 	) {
 		super(gui);
 
 		this.gui.HeadingLabel.Text = definition.displayName;
 		this.control = ctor(this.gui.Control);
-		this.control.value.set((config.get(key) as TValue | undefined) ?? def);
+		this.control.value.set(config.get(key) as TValue);
 
 		this.add(this.control);
 	}

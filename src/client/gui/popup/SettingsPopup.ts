@@ -73,7 +73,6 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 					config,
 					def,
 					id,
-					false as boolean,
 				);
 				this.list.add(control);
 
@@ -85,7 +84,6 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 						config,
 						def,
 						id,
-						Enum.KeyCode.P,
 					);
 					this.list.add(control);
 	
@@ -97,7 +95,6 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 						config,
 						def,
 						id,
-						0,
 					);
 					this.list.add(control);
 	

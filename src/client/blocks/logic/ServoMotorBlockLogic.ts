@@ -19,7 +19,7 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 	private readonly isSwitch;
 
 	constructor(block: Model) {
-		super(block);
+		super(block, ServoMotorBlockLogic.getConfigDefinition());
 
 		// Configuration
 		this.increaseKey = this.config.get("rotate_add");
@@ -40,7 +40,7 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 		this.eventHandler.subscribe(UserInputService.InputEnded, () => this.update());
 	}
 
-	public getConfigDefinition(): ConfigTypesToDefinition<ServoMotorConfig> {
+	static getConfigDefinition(): ConfigTypesToDefinition<ServoMotorConfig> {
 		return {
 			rotate_add: {
 				displayName: "Rotate +",

@@ -37,7 +37,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 	private movingDown = false;
 
 	constructor(block: Model) {
-		super(block);
+		super(block, RocketEngineLogic.getConfigDefinition());
 
 		// Configuration
 		this.increaseKey = this.config.get("thrust_add");
@@ -59,7 +59,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 	}
 
-	public getConfigDefinition(): ConfigTypesToDefinition<RocketEngineConfig> {
+	static getConfigDefinition(): ConfigTypesToDefinition<RocketEngineConfig> {
 		return {
 			thrust_add: {
 				displayName: "Thrust +",

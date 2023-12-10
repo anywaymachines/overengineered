@@ -15,10 +15,10 @@ export default abstract class ConfigurableBlockLogic<TConfig extends ConfigValue
 	protected readonly keysDefinition;
 	public readonly config: BlockConfig<TConfig>;
 
-	constructor(block: Model) {
+	constructor(block: Model, configDefinition: ConfigTypesToDefinition<TConfig>) {
 		super(block);
 
-		this.config = new BlockConfig<TConfig>(block, this.getConfigDefinition());
+		this.config = new BlockConfig<TConfig>(block, configDefinition);
 		this.keysDefinition = this.getKeysDefinition();
 
 		// input event handlers
@@ -52,6 +52,6 @@ export default abstract class ConfigurableBlockLogic<TConfig extends ConfigValue
 
 	public keyPressed(key: KeyCode) {}
 
-	public abstract getConfigDefinition(): ConfigTypesToDefinition<TConfig>;
+	// public abstract getConfigDefinition(): ConfigTypesToDefinition<TConfig>;
 	public abstract getKeysDefinition(): KeyDefinitions<TConfig>;
 }

@@ -16,7 +16,7 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorConfig>
 	private readonly isSwitch;
 
 	constructor(block: Model) {
-		super(block);
+		super(block, MotorBlockLogic.getConfigDefinition());
 
 		// Configuration
 		this.increaseKey = this.config.get("rotate_add");
@@ -27,7 +27,7 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorConfig>
 		this.hingeConstraint = block.FindFirstChild("Base")?.FindFirstChild("HingeConstraint") as HingeConstraint;
 	}
 
-	public getConfigDefinition(): ConfigTypesToDefinition<MotorConfig> {
+	static getConfigDefinition(): ConfigTypesToDefinition<MotorConfig> {
 		return {
 			rotate_add: {
 				displayName: "Rotate +",

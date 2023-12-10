@@ -1,7 +1,7 @@
 import Config from "client/Config";
-import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Control from "client/base/Control";
-import logicRegistry from "client/blocks/LogicRegistry";
+import { BlockConfig } from "client/blocks/BlockConfig";
+import { blockConfigRegistry } from "client/blocks/LogicRegistry";
 import ConfigTool from "client/tools/ConfigTool";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
@@ -76,14 +76,10 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		const blockmodel = selected[0].Parent as Model;
 		const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
 
-		const logicctor = logicRegistry[block.id];
-		if (!logicctor) return;
+		const defs = blockConfigRegistry[block.id];
+		if (!defs) return;
 
-		const logic = new logicctor(blockmodel);
-		if (!(logic instanceof ConfigurableBlockLogic)) return;
-
-		const defs = logic.getConfigDefinition() as ConfigTypesToDefinition<ConfigValueTypes>;
-		const config = logic.config;
+		const config = new BlockConfig(blockmodel, defs);
 
 		const send = (key: string, value: ConfigValue) => {
 			Logger.info("Sending block config value " + key + " " + Config.serializeOne(value, defs[key]));
@@ -104,7 +100,6 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 					config,
 					def,
 					id,
-					false as boolean,
 				);
 				this.list.add(control);
 
@@ -116,7 +111,6 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 					config,
 					def,
 					id,
-					"P" as KeyCode,
 				);
 				this.list.add(control);
 
@@ -128,7 +122,6 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 					config,
 					def,
 					id,
-					0,
 				);
 				this.list.add(control);
 
