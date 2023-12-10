@@ -2,7 +2,9 @@ import { HttpService } from "@rbxts/services";
 import Config from "client/Config";
 
 export class BlockConfig<T extends ConfigValueTypes> extends Config<T> {
-	constructor(source: Instance, definitions: ConfigTypesToDefinition<T>) {
+	readonly block;
+
+	constructor(source: Model, definitions: ConfigTypesToDefinition<T>) {
 		const configAttribute = source.GetAttribute("config") as string | undefined;
 		const content =
 			configAttribute !== undefined
@@ -11,5 +13,7 @@ export class BlockConfig<T extends ConfigValueTypes> extends Config<T> {
 
 		const config = content === undefined ? undefined : Config.deserialize(content, definitions);
 		super(config, definitions);
+
+		this.block = source;
 	}
 }

@@ -36,17 +36,6 @@ export default class SliderControl<
 		const eh = new EventHandler();
 		let startpos: number | undefined;
 
-		this.event.subscribe(UserInputService.InputEnded, (input, _) => {
-			if (startpos === undefined) return;
-
-			if (
-				input.UserInputType === Enum.UserInputType.MouseButton1 ||
-				input.UserInputType === Enum.UserInputType.Touch
-			) {
-				unsub();
-			}
-		});
-
 		const moveMouse = () => {
 			if (startpos === undefined) return;
 
@@ -86,7 +75,19 @@ export default class SliderControl<
 						? this.gui.AbsoluteSize.Y - this.gui.AbsolutePosition.Y + this.gui.AbsoluteSize.Y
 						: this.gui.AbsolutePosition.X;
 					moveMouse();
+
 					eh.subscribe(Players.LocalPlayer.GetMouse().Move, () => moveMouse());
+					eh.subscribe(UserInputService.InputEnded, (input, _) => {
+						if (startpos === undefined) return;
+
+						if (
+							input.UserInputType === Enum.UserInputType.MouseButton1 ||
+							input.UserInputType === Enum.UserInputType.Touch
+						) {
+							print("ie");
+							unsub();
+						}
+					});
 				}
 			});
 		};

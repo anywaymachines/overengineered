@@ -219,16 +219,20 @@ export default class BuildingWrapper {
 	}
 
 	public static updateConfigAsPlayer(this: void, player: Player, data: ConfigUpdateRequest): Response {
-		const plot = BuildingWrapper.tryGetValidPlotByBlock(player, data.block);
-		if (!plot.success) return plot;
+		for (const block of data.blocks) {
+			const plot = BuildingWrapper.tryGetValidPlotByBlock(player, block);
+			if (!plot.success) return plot;
+		}
 
 		return BuildingWrapper.updateConfig(data);
 	}
 	public static updateConfig(this: void, data: ConfigUpdateRequest): Response {
-		const dataTag = data.block.GetAttribute("config") as string | undefined;
-		const currentData = HttpService.JSONDecode(dataTag ?? "{}") as { [key: string]: string };
-		currentData[data.data.key] = data.data.value;
-		data.block.SetAttribute("config", HttpService.JSONEncode(currentData));
+		for (const block of data.blocks) {
+			const dataTag = block.GetAttribute("config") as string | undefined;
+			const currentData = HttpService.JSONDecode(dataTag ?? "{}") as { [key: string]: string };
+			currentData[data.data.key] = data.data.value;
+			block.SetAttribute("config", HttpService.JSONEncode(currentData));
+		}
 
 		return { success: true };
 	}

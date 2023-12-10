@@ -73,31 +73,40 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		this.list.clear();
 		if (selected.size() === 0) return;
 
-		const blockmodel = selected[0].Parent as Model;
-		const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
+		const configs = selected
+			.map((selected) => {
+				const blockmodel = selected.Parent as Model;
+				const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
 
-		const defs = blockConfigRegistry[block.id];
-		if (!defs) return;
+				const defs = blockConfigRegistry[block.id];
+				if (!defs) return undefined! as BlockConfig<ConfigValueTypes>;
 
-		const config = new BlockConfig(blockmodel, defs);
+				return new BlockConfig(blockmodel, defs);
+			})
+			.filter((x) => x !== undefined);
 
-		const send = (key: string, value: ConfigValue) => {
-			Logger.info("Sending block config value " + key + " " + Config.serializeOne(value, defs[key]));
+		const send = async (key: string, value: ConfigValue) => {
+			Logger.info(
+				`Sending (${configs.size()}) block config values ${key} ${Config.serializeOne(
+					value,
+					configs[0].definitions[key],
+				)}`,
+			);
 
-			return Remotes.Client.GetNamespace("Building")
+			await Remotes.Client.GetNamespace("Building")
 				.Get("UpdateConfigRequest")
 				.CallServerAsync({
-					block: blockmodel,
-					data: { key, value: Config.serializeOne(value, defs[key]) },
+					blocks: configs.map((config) => config.block),
+					data: { key, value: Config.serializeOne(value, configs[0].definitions[key]) },
 				});
 		};
 
-		for (const [id, def] of Objects.entries(defs)) {
+		for (const [id, def] of Objects.entries(configs[0].definitions)) {
 			if (def.type === "bool") {
 				const control = new ConfigPartControl(
 					this.checkboxTemplate(),
 					(cb) => new CheckBoxControl(cb),
-					config,
+					configs,
 					def,
 					id,
 				);
@@ -108,7 +117,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				const control = new ConfigPartControl(
 					this.keyTemplate(),
 					(kb) => new KeyChooserControl(kb),
-					config,
+					configs,
 					def,
 					id,
 				);
@@ -119,7 +128,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				const control = new ConfigPartControl(
 					this.sliderTemplate(),
 					(cb) => new SliderControl(cb, def.min, def.max, def.step),
-					config,
+					configs,
 					def,
 					id,
 				);

@@ -1,6 +1,6 @@
-import ObservableValue from "shared/event/ObservableValue";
-import Control from "client/base/Control";
 import Signal from "@rbxts/signal";
+import Control from "client/base/Control";
+import ObservableValue from "shared/event/ObservableValue";
 
 export type NumberTextBoxControlDefinition = TextBox;
 
@@ -27,6 +27,7 @@ export default class NumberTextBoxControl extends Control<NumberTextBoxControlDe
 			this.gui.Text = "0";
 			num = 0;
 		}
+		if (num === this.value.get()) return;
 
 		this.gui.Text = tostring(num);
 		this.value.set(num);

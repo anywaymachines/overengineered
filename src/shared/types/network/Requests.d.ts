@@ -1,5 +1,5 @@
 type ConfigUpdateRequest = {
-	readonly block: Model;
+	readonly blocks: readonly Model[];
 	readonly data: {
 		readonly key: string;
 		readonly value: string;

@@ -70,7 +70,7 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 				const control = new ConfigPartControl(
 					this.checkboxTemplate(),
 					(cb) => new CheckBoxControl(cb),
-					config,
+					[config],
 					def,
 					id,
 				);

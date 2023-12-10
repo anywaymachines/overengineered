@@ -74,7 +74,18 @@ export default class ConfigTool extends ToolBase {
 				this.selected[existing].Destroy();
 				this.selected.remove(existing);
 				this.selectedBlocksChanged.Fire(this.selected);
-			} else this.selectBlock(block);
+			} else {
+				const differentId = this.selected.find(
+					(s) => ((s.Parent as Model).GetAttribute("id") as string) !== (block.GetAttribute("id") as string),
+				);
+
+				if (differentId !== undefined) {
+					LogControl.instance.addLine("Could not select different blocks");
+					return;
+				}
+
+				this.selectBlock(block);
+			}
 		};
 
 		if (pc) removeOrAddHighlight();

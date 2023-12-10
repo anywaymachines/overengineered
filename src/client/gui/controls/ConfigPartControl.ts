@@ -1,5 +1,5 @@
+import Config from "client/Config";
 import Control from "client/base/Control";
-import { BlockConfig } from "client/blocks/BlockConfig";
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigPartDefinition } from "../scenes/ConfigToolScene";
 
@@ -13,7 +13,7 @@ export default class ConfigPartControl<
 	constructor(
 		gui: ConfigPartDefinition<TDef>,
 		ctor: (gui: TDef) => TControl & { value: ObservableValue<TValue> },
-		config: BlockConfig<ConfigValueTypes>,
+		configs: readonly Config<ConfigValueTypes>[],
 		definition: ConfigDefinition,
 		key: string,
 	) {
@@ -21,7 +21,7 @@ export default class ConfigPartControl<
 
 		this.gui.HeadingLabel.Text = definition.displayName;
 		this.control = ctor(this.gui.Control);
-		this.control.value.set(config.get(key) as TValue);
+		this.control.value.set(configs[0].get(key) as TValue);
 
 		this.add(this.control);
 	}
