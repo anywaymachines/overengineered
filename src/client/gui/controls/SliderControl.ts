@@ -19,7 +19,7 @@ export default class SliderControl<
 	constructor(gui: T, min: number, max: number, step: number) {
 		super(gui, min, max, step);
 
-		this.value.subscribe((value) => this.textValue.set(tostring(value)));
+		this.value.subscribe((value) => this.textValue.set(tostring(value)), true);
 		this.subscribeVisualSlider();
 		this.subscribeMovement();
 	}
