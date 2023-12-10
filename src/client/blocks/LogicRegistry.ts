@@ -1,8 +1,10 @@
 import BlockLogic from "client/base/BlockLogic";
 import Objects from "shared/_fixes_/objects";
 import DisconnectBlockLogic from "./logic/DisconnectBlockLogic";
+import HeliumBlockLogic from "./logic/HeliumBlockLogic";
 import MotorBlockLogic from "./logic/MotorBlockLogic";
 import RocketEngineLogic from "./logic/RocketEngineLogic";
+import RopeLogic from "./logic/RopeLogic";
 import ServoMotorBlockLogic from "./logic/ServoMotorBlockLogic";
 import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 import WingLogic from "./logic/WingLogic";
@@ -20,6 +22,8 @@ const logicRegistry: Readonly<Record<string, BlockLogicCtor | undefined>> = {
 	smallrocketengine: RocketEngineLogic,
 	motorblock: MotorBlockLogic,
 	servomotorblock: ServoMotorBlockLogic,
+	rope: RopeLogic,
+	heliumblock: HeliumBlockLogic,
 };
 
 export const blockConfigRegistry = Objects.fromEntries(
