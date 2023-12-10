@@ -1,5 +1,5 @@
 import Signal from "@rbxts/signal";
-import InputHandler from "client/event/InputHandler";
+import ComponentBase from "client/base/ComponentBase";
 import LogControl from "client/gui/static/LogControl";
 import InputController from "./InputController";
 
@@ -9,24 +9,28 @@ type Operation = {
 	readonly redo?: () => Promise<void>;
 };
 
-export default class ActionController {
+export default class ActionController extends ComponentBase {
 	public static readonly instance = new ActionController();
 
 	public readonly onUndo = new Signal<(operation: Operation) => void>();
 	private readonly history: Operation[] = [];
 	private readonly redoHistory: Operation[] = [];
 
-	public static init() {
-		const inputHandler = new InputHandler();
+	constructor() {
+		super();
+	}
 
-		inputHandler.onKeyDown(Enum.KeyCode.Z, () => {
+	protected prepare() {
+		super.prepare();
+
+		this.inputHandler.onKeyDown(Enum.KeyCode.Z, () => {
 			if (InputController.isCtrlPressed()) {
 				ActionController.instance.undo();
 				return true;
 			}
 		});
 
-		inputHandler.onKeyDown(Enum.KeyCode.Y, () => {
+		this.inputHandler.onKeyDown(Enum.KeyCode.Y, () => {
 			if (InputController.isCtrlPressed()) {
 				ActionController.instance.redo();
 				return true;

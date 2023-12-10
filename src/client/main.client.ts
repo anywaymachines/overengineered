@@ -1,6 +1,5 @@
 import PlayerDataStorage from "./PlayerDataStorage";
 import ComponentContainer from "./base/ComponentContainer";
-import ActionController from "./controller/ActionController";
 import GameEnvironmentController from "./controller/GameEnvironmentController";
 import GuiController from "./controller/GuiController";
 import LocalPlayerController from "./controller/LocalPlayerController";
@@ -19,7 +18,6 @@ GameEnvironmentController.initialize();
 TooltipsControl.instance.show();
 LogControl.instance.show();
 
-ActionController.init();
 LocalPlayerController.initialize();
 InputTypeChangeEvent.subscribe();
 

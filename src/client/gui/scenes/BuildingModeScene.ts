@@ -1,5 +1,6 @@
 import Control from "client/base/Control";
 import ToolBase from "client/base/ToolBase";
+import ActionController from "client/controller/ActionController";
 import ToolController from "client/controller/ToolController";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
 import GuiAnimator from "../GuiAnimator";
@@ -57,6 +58,8 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 
 	constructor(gui: BuildingModeSceneDefinition, tools: ToolController) {
 		super(gui);
+
+		this.add(ActionController.instance);
 
 		this.actionbar = new ActionBarControl(gui.ActionBarGui);
 		this.add(this.actionbar);
