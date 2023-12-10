@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import ConfigurableBlockLogic, { KeyDefinition } from "client/base/ConfigurableBlockLogic";
+import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
 import SoundController from "client/controller/SoundController";
 import { UnreliableRemotes } from "shared/Remotes";
 
@@ -97,9 +97,10 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 			},
 		};
 	}
-	public getKeysDefinition(): Partial<Record<ExtractKeys<RocketEngineConfig, "key">, KeyDefinition>> {
+	public getKeysDefinition(): KeyDefinitions<RocketEngineConfig> {
 		return {
 			thrust_add: {
+				conflicts: "thrust_sub",
 				keyDown: () => {
 					if (this.movingUp) return;
 
@@ -116,6 +117,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 				},
 			},
 			thrust_sub: {
+				conflicts: "thrust_add",
 				keyDown: () => {
 					if (this.movingDown) return;
 
@@ -137,12 +139,10 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 	private start(up: boolean) {
 		spawn(() => {
 			while (up ? this.movingUp : this.movingDown) {
-				if (!this.machine?.seat.occupant.get()) return;
-
-				if (this.movingUp && this.movingDown) {
+				/*if (this.movingUp && this.movingDown) {
 					wait(0.05);
 					continue;
-				}
+				}*/
 
 				const p = up ? 1 : -1;
 				if (this.torque + p >= 0 && this.torque + p <= 100) {

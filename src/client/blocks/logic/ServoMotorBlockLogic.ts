@@ -12,8 +12,6 @@ type ServoMotorConfig = {
 export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMotorConfig> {
 	private readonly hingeConstraint;
 
-	private readonly increaseKey;
-	private readonly decreaseKey;
 	private readonly speed;
 	private readonly angle;
 	private readonly isSwitch;
@@ -22,8 +20,6 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 		super(block, ServoMotorBlockLogic.getConfigDefinition());
 
 		// Configuration
-		this.increaseKey = this.config.get("rotate_add");
-		this.decreaseKey = this.config.get("rotate_sub");
 		this.speed = this.config.get("speed");
 		this.angle = this.config.get("angle") * -1;
 		this.isSwitch = this.config.get("switch");
@@ -94,6 +90,7 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 	public getKeysDefinition(): KeyDefinitions<ServoMotorConfig> {
 		return {
 			rotate_add: {
+				conflicts: "rotate_sub",
 				keyDown: () => {
 					this.isIncreasing = true;
 				},
@@ -102,6 +99,7 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 				},
 			},
 			rotate_sub: {
+				conflicts: "rotate_add",
 				keyDown: () => {
 					this.isDecreasing = true;
 				},

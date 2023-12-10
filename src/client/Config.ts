@@ -2,7 +2,7 @@ import Objects from "shared/_fixes_/objects";
 import InputController from "./controller/InputController";
 
 export default class Config<T extends ConfigValueTypes> {
-	private readonly definitions: ConfigTypesToDefinition<T>;
+	public readonly definitions: ConfigTypesToDefinition<T>;
 	private readonly config: ConfigTypesToConfig<T> | undefined;
 
 	constructor(config: ConfigTypesToConfig<T> | undefined, definitions: ConfigTypesToDefinition<T>) {

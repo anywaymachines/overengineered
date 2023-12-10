@@ -1,6 +1,6 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
 import PlayerDataStorage from "client/PlayerDataStorage";
-import ConfigurableBlockLogic, { KeyDefinition } from "client/base/ConfigurableBlockLogic";
+import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Control from "client/base/Control";
 import Machine from "client/blocks/logic/Machine";
 import RocketEngineLogic from "client/blocks/logic/RocketEngineLogic";
@@ -148,7 +148,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		machine.destroyed.Connect(() => this.clear());
 
 		let pos = 0;
-		const map: Record<string, KeyDefinition[]> = {};
+		const map: Record<string, ConfigurableBlockLogic<ConfigValueTypes>[]> = {};
 
 		for (const block of machine.getChildren()) {
 			if (!(block instanceof ConfigurableBlockLogic)) {
@@ -156,10 +156,10 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			}
 
 			const config = block.config;
-			for (const [id, key] of Objects.entries(block.getKeysDefinition())) {
+			for (const id of Objects.keys(block.getKeysDefinition())) {
 				const keycode = config.get(id) as KeyCode;
 				map[keycode] ??= [];
-				map[keycode].push(key);
+				map[keycode].push(block);
 			}
 		}
 
@@ -169,7 +169,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			controlsInfo = SlotsMeta.get(slots, PlayerDataStorage.loadedSlot.get() ?? -1)?.touchControls;
 		}
 
-		for (const [keycode, keys] of Objects.entries(map)) {
+		for (const [keycode, blocks] of Objects.entries(map)) {
 			const btn = new TextButtonControl(this.buttonTemplate());
 			btn.text.set(keycode);
 			this.addKeyed(keycode, btn);
@@ -179,8 +179,10 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 					input.UserInputType === Enum.UserInputType.MouseButton1 ||
 					input.UserInputType === Enum.UserInputType.Touch
 				) {
-					for (const key of keys) {
-						key.keyDown?.();
+					if (!machine.seat.occupant) return;
+
+					for (const block of blocks) {
+						block.tryTriggerKeycodeDown(keycode as never);
 					}
 				}
 			});
@@ -189,8 +191,10 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 					input.UserInputType === Enum.UserInputType.MouseButton1 ||
 					input.UserInputType === Enum.UserInputType.Touch
 				) {
-					for (const key of keys) {
-						key.keyUp?.();
+					if (!machine.seat.occupant) return;
+
+					for (const block of blocks) {
+						block.tryTriggerKeycodeUp(keycode as never);
 					}
 				}
 			});
