@@ -44,6 +44,16 @@ type RemoteNamespaceDefinition2<
 	TNamespace2 extends RemoteNamespace2<TNamespace>,
 > = InferDefinition<InferDefinition<Remotes[TNamespace]>[TNamespace2]>;
 
+const wrapError = <TFunc extends (player: Player, ...args: unknown[]) => unknown>(func: TFunc): TFunc => {
+	return ((player: Player, ...args: Parameters<TFunc>) => {
+		try {
+			return func(player, ...args) as ReturnType<TFunc>;
+		} catch (error) {
+			return { success: false, message: error as string } as ErrorResponse as ReturnType<TFunc>;
+		}
+	}) as TFunc;
+};
+
 // Functions
 export const registerOnRemoteFunction = <
 	TNamespace extends RemoteNamespace,
@@ -55,7 +65,7 @@ export const registerOnRemoteFunction = <
 	func: TFunc,
 ) => {
 	Logger.info(`Registering ${namespace}.${funcname} function remote handler`);
-	Remotes.Server.GetNamespace(namespace).OnFunction(funcname, func);
+	Remotes.Server.GetNamespace(namespace).OnFunction(funcname, wrapError(func));
 };
 
 export const registerOnRemoteEvent = <
@@ -68,7 +78,7 @@ export const registerOnRemoteEvent = <
 	func: TFunc,
 ) => {
 	Logger.info(`Registering ${namespace}.${funcname} event remote handler`);
-	Remotes.Server.GetNamespace(namespace).OnEvent(funcname, func);
+	Remotes.Server.GetNamespace(namespace).OnEvent(funcname, wrapError(func));
 };
 
 export const registerOnRemoteFunction2 = <
@@ -83,7 +93,7 @@ export const registerOnRemoteFunction2 = <
 	func: TFunc,
 ) => {
 	Logger.info(`Registering ${namespace}.${funcname} function remote handler`);
-	Remotes.Server.GetNamespace(namespace).GetNamespace(namespace2).OnFunction(funcname, func);
+	Remotes.Server.GetNamespace(namespace).GetNamespace(namespace2).OnFunction(funcname, wrapError(func));
 };
 
 export const registerOnRemoteEvent2 = <
@@ -98,5 +108,5 @@ export const registerOnRemoteEvent2 = <
 	func: TFunc,
 ) => {
 	Logger.info(`Registering ${namespace}.${funcname} event remote handler`);
-	Remotes.Server.GetNamespace(namespace).GetNamespace(namespace2).OnEvent(funcname, func);
+	Remotes.Server.GetNamespace(namespace).GetNamespace(namespace2).OnEvent(funcname, wrapError(func));
 };

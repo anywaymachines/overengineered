@@ -14,6 +14,10 @@ type SlotMeta = {
 	readonly index: number;
 };
 
+type LoadSlotResponse = Response<{
+	readonly isEmpty: boolean;
+}>;
+
 type FetchSlotsResponse = Response<{
 	readonly purchasedSlots: number;
 	readonly slots: readonly SlotMeta[];

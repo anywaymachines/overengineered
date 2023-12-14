@@ -1,10 +1,10 @@
 import { Players } from "@rbxts/services";
+import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import Control from "client/base/Control";
 import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
 import GameDefinitions from "shared/GameDefinitions";
-import Remotes from "shared/Remotes";
 import Serializer from "shared/Serializer";
 import SlotsMeta from "shared/SlotsMeta";
 import ObservableValue from "shared/event/ObservableValue";
@@ -99,16 +99,50 @@ type SavePreviewDefinition = GuiButton & {
 };
 
 class SavePreview extends Control<SavePreviewDefinition> {
-	public readonly onSave;
-	public readonly onLoad;
+	readonly onSave = new Signal<() => void>();
+	readonly onLoad = new Signal<() => void>();
 
 	public readonly selectedSlotIndex = new ObservableValue<number | undefined>(undefined);
 
 	constructor(gui: SavePreviewDefinition) {
 		super(gui);
 
-		this.onSave = this.added(new ButtonControl(this.gui.SaveButton)).activated;
-		this.onLoad = this.added(new ButtonControl(this.gui.LoadButton)).activated;
+		const saveButton = this.added(new ButtonControl(this.gui.SaveButton));
+		const loadButton = this.added(new ButtonControl(this.gui.LoadButton));
+
+		this.event.subscribe(saveButton.activated, () => {
+			try {
+				saveButton.disable();
+
+				const index = this.selectedSlotIndex.get();
+				if (index === undefined) return;
+
+				PlayerDataStorage.sendPlayerSlot({
+					index,
+					save: true,
+				});
+
+				this.onSave.Fire();
+			} finally {
+				saveButton.enable();
+			}
+		});
+
+		this.event.subscribe(loadButton.activated, async () => {
+			try {
+				loadButton.disable();
+
+				const index = this.selectedSlotIndex.get();
+				if (index === undefined) return;
+
+				const response = await PlayerDataStorage.loadPlayerSlot(index);
+				if (response.success && !response.isEmpty) {
+					this.onLoad.Fire();
+				}
+			} finally {
+				loadButton.enable();
+			}
+		});
 
 		const textbox = new TextBoxControl(this.gui.TextBox);
 		this.add(textbox);
@@ -221,21 +255,7 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 		this.add(this.preview);
 		this.preview.selectedSlotIndex.bindTo(this.slots.selectedSlot);
 
-		this.event.subscribe(this.preview.onSave, () => {
-			const index = this.slots.selectedSlot.get();
-			if (index === undefined) return;
-
-			PlayerDataStorage.sendPlayerSlot({
-				index,
-				save: true,
-			});
-		});
-		this.event.subscribe(this.preview.onLoad, () => {
-			const index = this.slots.selectedSlot.get();
-			if (index === undefined) return;
-			this.load(index);
-			this.hide();
-		});
+		this.event.subscribe(this.preview.onLoad, () => this.hide());
 
 		const cancelButton = this.added(new ButtonControl(this.gui.Body.Body.CancelButton));
 		this.event.subscribe(cancelButton.activated, () => this.hide());
@@ -244,10 +264,5 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 	public async show() {
 		super.show();
 		GuiAnimator.transition(this.gui.Body, 0.2, "down");
-	}
-
-	private async load(index: number) {
-		await Remotes.Client.GetNamespace("Slots").Get("Load").CallServerAsync(index);
-		PlayerDataStorage.loadedSlot.set(index);
 	}
 }

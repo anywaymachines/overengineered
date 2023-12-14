@@ -19,7 +19,7 @@ const Remotes = Net.Definitions.Create({
 		Delete: Net.Definitions.ServerAsyncFunction<(data: PlayerDeleteBlockRequest) => Response>(),
 	}),
 	Slots: Net.Definitions.Namespace({
-		Load: Net.Definitions.ServerAsyncFunction<(index: number) => Response>([
+		Load: Net.Definitions.ServerAsyncFunction<(index: number) => LoadSlotResponse>([
 			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 8 }),
 		]),
 		Save: Net.Definitions.ServerAsyncFunction<(data: PlayerSaveSlotRequest) => SaveSlotResponse>([

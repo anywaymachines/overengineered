@@ -77,4 +77,15 @@ export default class PlayerDataStorage {
 			});
 		}
 	}
+
+	static async loadPlayerSlot(index: number) {
+		Logger.info("Loading slot " + index);
+
+		const response = await Remotes.Client.GetNamespace("Slots").Get("Load").CallServerAsync(index);
+		if (response.success && !response.isEmpty) {
+			this.loadedSlot.set(index);
+		}
+
+		return response;
+	}
 }

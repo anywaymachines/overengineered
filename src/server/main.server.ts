@@ -14,7 +14,7 @@ import BlocksSerializer from "./plots/BlocksSerializer";
 import ServerPlots from "./plots/ServerPlots";
 
 class RemoteHandlers {
-	static loadSlot(this: void, player: Player, index: number): Response {
+	static loadSlot(this: void, player: Player, index: number): LoadSlotResponse {
 		const blocks = SlotsDatabase.instance.getBlocks(player.UserId, index);
 		if (blocks === undefined || blocks.size() === 0) {
 			return {
@@ -30,7 +30,7 @@ class RemoteHandlers {
 		const dblocks = BlocksSerializer.current.deserialize(blocks);
 		BlocksSerializer.deserialize(plot, dblocks);
 
-		return { success: true };
+		return { success: true, isEmpty: dblocks.size() === 0 };
 	}
 
 	static updateSetting<TKey extends keyof PlayerConfig>(
