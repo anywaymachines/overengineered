@@ -24,8 +24,17 @@ export default class ToolController extends ComponentBase {
 			tool?.enable();
 		});
 
-		this.tools = [this.buildTool, this.moveTool, this.deleteTool, this.configTool];
+		this.tools = [this.buildTool, this.moveTool, this.deleteTool, this.configTool] as const;
 		this.selectedTool.subscribe((tool) => TooltipsControl.instance.updateControlTooltips(tool));
 		this.event.onPrepare(() => TooltipsControl.instance.updateControlTooltips(this.selectedTool.get()), true);
+	}
+
+	public enable() {
+		super.enable();
+		TooltipsControl.instance.updateControlTooltips(this.selectedTool.get());
+	}
+	public disable() {
+		super.disable();
+		TooltipsControl.instance.updateControlTooltips(undefined);
 	}
 }

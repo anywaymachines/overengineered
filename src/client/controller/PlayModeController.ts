@@ -10,7 +10,7 @@ import RideMode from "./modes/RideMode";
 
 export default class PlayModeController extends ComponentBase {
 	public readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
-	private readonly modes;
+	public readonly modes;
 
 	constructor() {
 		super();

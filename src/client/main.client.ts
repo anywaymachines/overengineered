@@ -1,3 +1,4 @@
+import { UserInputService } from "@rbxts/services";
 import PlayerDataStorage from "./PlayerDataStorage";
 import ComponentContainer from "./base/ComponentContainer";
 import GameEnvironmentController from "./controller/GameEnvironmentController";
@@ -28,6 +29,28 @@ const root = new ComponentContainer();
 const playModeController = new PlayModeController();
 root.add(playModeController);
 root.enable();
+
+UserInputService.InputBegan.Connect((input) => {
+	if (input.UserInputType !== Enum.UserInputType.Keyboard) {
+		return;
+	}
+
+	const toggle = () => {
+		const mode = playModeController.playmode.get();
+		if (!mode) return;
+
+		const scene = playModeController.modes[mode];
+		if (scene.isEnabled()) {
+			scene.disable();
+		} else {
+			scene.enable();
+		}
+	};
+
+	if (input.IsModifierKeyDown("Shift") && UserInputService.IsKeyDown(Enum.KeyCode.G)) {
+		toggle();
+	}
+});
 
 const guitests = new TestScene(GuiController.getGameUI<{ Tests: TestSceneDefinition }>().Tests);
 // guitests.show();
