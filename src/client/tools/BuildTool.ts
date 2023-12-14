@@ -8,8 +8,8 @@ import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
-import MaterialChooserControl from "client/gui/tools/MaterialChooser";
 import BuildingManager from "shared/building/BuildingManager";
+import ObservableValue from "shared/event/ObservableValue";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import VectorUtils from "shared/utils/VectorUtils";
@@ -17,6 +17,9 @@ import VectorUtils from "shared/utils/VectorUtils";
 /** A tool for building in the world with blocks */
 export default class BuildTool extends ToolBase {
 	public readonly selectedBlockChanged = new Signal<(block: Block | undefined) => void>();
+
+	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
+	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 
 	// Const
 	private readonly allowedColor: Color3 = Color3.fromRGB(194, 217, 255);
@@ -32,17 +35,16 @@ export default class BuildTool extends ToolBase {
 	private lastMouseSurface?: Enum.NormalId;
 
 	private selectedBlock?: Block;
-	private selectedMaterial: Enum.Material = Enum.Material.Plastic;
-	private selectedColor: Color3 = Color3.fromRGB(255, 255, 255);
 
 	constructor() {
 		super();
-		MaterialChooserControl.instance.selectedMaterial.subscribe((material) => {
+
+		/*MaterialChooserControl.instance.selectedMaterial.subscribe((material) => {
 			this.setSelectedMaterial(material);
-		}, true);
-		MaterialChooserControl.instance.selectedColor.subscribe((color) => {
+		}, true);*/
+		/*MaterialChooserControl.instance.selectedColor.subscribe((color) => {
 			this.setSelectedColor(color);
-		}, true);
+		}, true);*/
 	}
 
 	getDisplayName(): string {
@@ -64,12 +66,12 @@ export default class BuildTool extends ToolBase {
 	}
 
 	public setSelectedMaterial(material: Enum.Material) {
-		this.selectedMaterial = material;
+		this.selectedMaterial.set(material);
 		this.prepareVisual();
 	}
 
 	public setSelectedColor(color: Color3) {
-		this.selectedColor = color;
+		this.selectedColor.set(color);
 		this.prepareVisual();
 	}
 
@@ -88,8 +90,8 @@ export default class BuildTool extends ToolBase {
 		// Customizing
 		this.addAxisModel();
 		this.addHighlight();
-		PartUtils.switchDescendantsMaterial(this.previewBlock, this.selectedMaterial);
-		PartUtils.switchDescendantsColor(this.previewBlock, this.selectedColor);
+		PartUtils.switchDescendantsMaterial(this.previewBlock, this.selectedMaterial.get());
+		PartUtils.switchDescendantsColor(this.previewBlock, this.selectedColor.get());
 		PartUtils.ghostModel(this.previewBlock);
 
 		// First update
@@ -248,8 +250,8 @@ export default class BuildTool extends ToolBase {
 			},
 			{
 				block: this.selectedBlock.id,
-				color: this.selectedColor,
-				material: this.selectedMaterial,
+				color: this.selectedColor.get(),
+				material: this.selectedMaterial.get(),
 				location: this.previewBlock.PrimaryPart.CFrame,
 			},
 			(info) => BuildingController.placeBlock(info),

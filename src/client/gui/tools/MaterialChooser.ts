@@ -226,17 +226,16 @@ export default class MaterialChooserControl extends Popup<MaterialChooserControl
 				MaterialGui: MaterialChooserControlDefinition;
 			};
 		}>().Popup.MaterialGui,
-		BuildingManager.AllowedMaterials,
 	);
 
 	public readonly selectedMaterial;
 	public readonly selectedColor;
 	private prevData: readonly [material: Enum.Material, color: Color3] | undefined;
 
-	constructor(gui: MaterialChooserControlDefinition, materials: readonly Enum.Material[]) {
+	constructor(gui: MaterialChooserControlDefinition) {
 		super(gui);
 
-		const chooser = new MaterialChoosePart(gui.Body.Body, materials);
+		const chooser = new MaterialChoosePart(gui.Body.Body, BuildingManager.AllowedMaterials);
 		this.add(chooser);
 		this.selectedMaterial = chooser.selectedMaterial;
 

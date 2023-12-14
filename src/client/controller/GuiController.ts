@@ -7,6 +7,11 @@ export default class GuiController {
 		return this.getPlayerGui().WaitForChild("GameUI") as T;
 	}
 
+	/** Receives Popups from the PlayerGui */
+	static getPopupUI<T extends ScreenGui>() {
+		return this.getPlayerGui().WaitForChild("Popups") as T;
+	}
+
 	/** Receives PlayerGui from the client */
 	static getPlayerGui() {
 		return Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;

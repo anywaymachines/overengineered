@@ -35,13 +35,10 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 
 		this.event.onPrepare((inputType) => (this.gui.TouchControls.Visible = inputType === "Touch"), true);
 
-		this.add(
-			new MaterialPreviewControl(
-				this.gui.Preview,
-				MaterialChooserControl.instance.selectedMaterial,
-				MaterialChooserControl.instance.selectedColor,
-			),
-		);
+		this.add(new MaterialPreviewControl(this.gui.Preview, tool.selectedMaterial, tool.selectedColor));
+
+		MaterialChooserControl.instance.selectedMaterial.bindTo(tool.selectedMaterial);
+		MaterialChooserControl.instance.selectedColor.bindTo(tool.selectedColor);
 
 		const editMaterialButton = this.added(new ButtonControl(this.gui.Preview.EditMaterialButton));
 		this.event.subscribe(editMaterialButton.activated, () => {
