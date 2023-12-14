@@ -26,7 +26,6 @@
   "dependencies": {
     "@rbxts/crypto": "^1.2.1",
     "@rbxts/net": "^3.0.7",
-    "@rbxts/roact": "^1.4.4-ts.0",
     "@rbxts/services": "^1.5.1",
     "@rbxts/signal": "^1.1.1",
     "@rbxts/visualize": "^1.1.1"
