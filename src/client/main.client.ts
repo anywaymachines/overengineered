@@ -1,4 +1,4 @@
-import { UserInputService } from "@rbxts/services";
+import { RunService, UserInputService } from "@rbxts/services";
 import PlayerDataStorage from "./PlayerDataStorage";
 import ComponentContainer from "./base/ComponentContainer";
 import GameEnvironmentController from "./controller/GameEnvironmentController";
@@ -22,7 +22,10 @@ LogControl.instance.show();
 LocalPlayerController.initialize();
 InputTypeChangeEvent.subscribe();
 
-DebugControl.instance.show();
+if (RunService.IsStudio()) {
+	DebugControl.instance.show();
+}
+
 SoundController.initialize();
 
 const root = new ComponentContainer();
