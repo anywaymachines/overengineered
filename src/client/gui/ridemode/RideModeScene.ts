@@ -6,6 +6,7 @@ import Machine from "client/blocks/logic/Machine";
 import RocketEngineLogic from "client/blocks/logic/RocketEngineLogic";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
 import Remotes from "shared/Remotes";
+import RobloxUnit from "shared/RobloxUnit";
 import SlotsMeta from "shared/SlotsMeta";
 import Objects from "shared/_fixes_/objects";
 import EventHandler from "shared/event/EventHandler";
@@ -251,14 +252,17 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		{
 			const player = Players.LocalPlayer.Character!.WaitForChild("HumanoidRootPart") as Part;
-			const maxSpdShow = 800;
+			const maxSpdShow = RobloxUnit.getSpeedFromMagnitude(800, "MetersPerSecond");
 
 			const speed = new ProgressBarControl(this.speedTemplate(), 0, maxSpdShow, 0.1);
 			speed.show();
 			this.controls.add(speed);
 
 			this.event.subscribe(RunService.Heartbeat, () => {
-				const spd = player.GetVelocityAtPosition(player.Position).Magnitude;
+				const spd = RobloxUnit.getSpeedFromMagnitude(
+					player.GetVelocityAtPosition(player.Position).Magnitude,
+					"MetersPerSecond",
+				);
 
 				speed.value.set(spd);
 				speed.getTextValue().set(spd);

@@ -1,7 +1,9 @@
 import { UserInputService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import Control from "client/base/Control";
+import InputController from "client/controller/InputController";
 import ObservableValue from "shared/event/ObservableValue";
+import SelectButtonPopup from "../popup/SelectButtonPopup";
 
 export type KeyChooserControlDefinition = TextButton;
 
@@ -20,12 +22,22 @@ export default class KeyChooserControl extends Control<KeyChooserControlDefiniti
 		this.event.onPrepare(() => (this.gui.BackgroundColor3 = this.color));
 
 		this.gui.Activated.Connect(() => {
-			this.gui.BackgroundColor3 = this.activeColor;
-			this.eventHandler.subscribeOnce(UserInputService.InputBegan, (input) => {
-				this.value.set(input.KeyCode.Name);
-				this.submitted.Fire(input.KeyCode.Name);
-				this.gui.BackgroundColor3 = this.color;
-			});
+			if (InputController.inputType.get() === "Touch") {
+				SelectButtonPopup.instance.showPopup(
+					(key) => {
+						this.value.set(key);
+						this.submitted.Fire(key);
+					},
+					() => {},
+				);
+			} else {
+				this.gui.BackgroundColor3 = this.activeColor;
+				this.eventHandler.subscribeOnce(UserInputService.InputBegan, (input) => {
+					this.value.set(input.KeyCode.Name);
+					this.submitted.Fire(input.KeyCode.Name);
+					this.gui.BackgroundColor3 = this.color;
+				});
+			}
 		});
 	}
 }

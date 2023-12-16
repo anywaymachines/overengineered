@@ -32,13 +32,14 @@ export const initializeSingleBlockSelection = (
 			return;
 		}
 
-		// ignore if not alivec
+		// ignore if not alive
 		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
 			return;
 		}
 
 		// ignore if over a GUI element
 		if (GuiController.isCursorOnVisibleGui()) {
+			destroyHighlight();
 			return;
 		}
 

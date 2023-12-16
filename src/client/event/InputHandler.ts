@@ -1,7 +1,7 @@
 import { UserInputService } from "@rbxts/services";
 import EventHandler from "shared/event/EventHandler";
 
-type InputCallback = (input: InputObject) => boolean | unknown;
+type InputCallback = (input: InputObject, gameProcessedEvent: boolean) => boolean | unknown;
 type TouchCallback = () => boolean | unknown;
 
 /** A class similar to EventHandler, but created to listen to player input, instead of events */
@@ -13,18 +13,18 @@ export default class InputHandler {
 	private readonly touchTapCallbacks: TouchCallback[] = [];
 
 	constructor() {
-		this.eventHandler.subscribe(UserInputService.InputBegan, (input: InputObject) => {
+		this.eventHandler.subscribe(UserInputService.InputBegan, (input: InputObject, gameProcessedEvent: boolean) => {
 			if (!this.isKeyPressed()) return;
 
 			for (const callback of this.listenableKeycodes) {
-				if (callback(input) === true) break;
+				if (callback(input, gameProcessedEvent) === true) break;
 			}
 		});
-		this.eventHandler.subscribe(UserInputService.InputEnded, (input: InputObject) => {
+		this.eventHandler.subscribe(UserInputService.InputEnded, (input: InputObject, gameProcessedEvent: boolean) => {
 			if (!this.isKeyPressed()) return;
 
 			for (const callback of this.releaseKeycodes) {
-				if (callback(input) === true) break;
+				if (callback(input, gameProcessedEvent) === true) break;
 			}
 		});
 		this.eventHandler.subscribe(UserInputService.TouchTap, (_) => {
@@ -45,10 +45,10 @@ export default class InputHandler {
 	}
 
 	public onKeyUp(keyCode: Enum.KeyCode, callback: InputCallback) {
-		return this.onKeysUp((input) => {
+		return this.onKeysUp((input, gameProcessedEvent) => {
 			if (input.KeyCode !== keyCode) return;
 
-			return callback(input);
+			return callback(input, gameProcessedEvent);
 		});
 	}
 	public onKeysUp(callback: InputCallback) {
@@ -56,12 +56,12 @@ export default class InputHandler {
 	}
 
 	public onKeyDown(keyCode: Enum.KeyCode | KeyCode, callback: InputCallback) {
-		return this.onKeysDown((input) => {
+		return this.onKeysDown((input, gameProcessedEvent) => {
 			if (input.KeyCode !== keyCode && input.KeyCode.Name !== keyCode) {
 				return;
 			}
 
-			return callback(input);
+			return callback(input, gameProcessedEvent);
 		});
 	}
 	public onKeysDown(callback: InputCallback) {

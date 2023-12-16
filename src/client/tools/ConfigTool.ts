@@ -17,7 +17,7 @@ export default class ConfigTool extends ToolBase {
 			this.eventHandler,
 			this.inputHandler,
 			() => {},
-			async (block) => {
+			(block) => {
 				if (!block) return;
 				// if (InputController.inputType.get() !== "Desktop")  return;
 				this.selectBlockByClick(block);
