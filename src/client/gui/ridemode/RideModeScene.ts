@@ -66,6 +66,12 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 		this.buttonTemplate = Control.asTemplate(this.gui.Button);
 		this.overlayTemplate = Control.asTemplate(this.gui.Overlay);
+
+		this.onDisabled.Connect(() => {
+			if (this.quitSettingsMode) {
+				this.toggleSettingsMode();
+			}
+		});
 	}
 
 	toggleSettingsMode() {
@@ -88,12 +94,16 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			instance.Parent = child.getGui();
 			child.getGui().Active = false;
 
+			let inputting = false;
 			instance.InputBegan.Connect((input) => {
+				if (inputting) return;
+
 				if (
 					input.UserInputType !== Enum.UserInputType.MouseButton1 &&
 					input.UserInputType !== Enum.UserInputType.Touch
 				)
 					return;
+				inputting = true;
 
 				let prevpos = input.Position;
 
@@ -108,8 +118,13 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 					const delta = input.Position.sub(prevpos);
 					prevpos = input.Position;
-					child.getGui().Position = child.getGui().Position.add(new UDim2(0, delta.X, 0, delta.Y));
+					child.getGui().Position = child
+						.getGui()
+						.Position.add(
+							new UDim2(delta.X / this.gui.AbsoluteSize.X, 0, delta.Y / this.gui.AbsoluteSize.Y, 0),
+						);
 				});
+
 				eh.subscribe(UserInputService.InputEnded, (input) => {
 					if (
 						input.UserInputType !== Enum.UserInputType.MouseButton1 &&
@@ -119,6 +134,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 					eh.unsubscribeAll();
 					ehandlers.remove(ehandlers.indexOf(eh));
+					inputting = false;
 				});
 			});
 
@@ -141,7 +157,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			const touchControls: Record<string, TouchControlInfo[string]> = {};
 			for (const [keycode, child] of this.getKeyedChildren()) {
 				touchControls[keycode] = {
-					pos: [child.getGui().Position.X.Offset, child.getGui().Position.Y.Offset],
+					pos: [child.getGui().Position.X.Scale, child.getGui().Position.Y.Scale],
 				};
 			}
 
@@ -209,18 +225,20 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 				}
 			});
 
-			if (controlsInfo) {
-				const kc = controlsInfo[keycode];
-				if (kc)
-					btn.getGui().Position = new UDim2(
-						0,
-						math.clamp(kc.pos[0], btn.getGui().AbsoluteSize.X, this.gui.AbsoluteSize.X),
-						0,
-						math.clamp(kc.pos[1], btn.getGui().AbsoluteSize.Y, this.gui.AbsoluteSize.Y),
-					);
+			const doload =
+				controlsInfo !== undefined &&
+				controlsInfo[keycode] !== undefined &&
+				controlsInfo[keycode].pos[0] >= btn.getGui().AbsoluteSize.X / this.gui.AbsoluteSize.X &&
+				controlsInfo[keycode].pos[0] <= 1 &&
+				controlsInfo[keycode].pos[1] >= btn.getGui().AbsoluteSize.Y / this.gui.AbsoluteSize.Y &&
+				controlsInfo[keycode].pos[1] <= 1;
+
+			if (doload) {
+				const kc = controlsInfo?.[keycode];
+				if (kc) btn.getGui().Position = new UDim2(kc.pos[0], 0, kc.pos[1], 0);
 			} else {
 				const size = btn.getGui().Size;
-				btn.getGui().Position = new UDim2(0.95, 0, 1 - size.Y.Scale * pos, -10 * (pos + 1));
+				btn.getGui().Position = new UDim2(0.95, 0, 1 - size.Y.Scale * pos - 0.01 * pos, 0);
 
 				pos++;
 			}

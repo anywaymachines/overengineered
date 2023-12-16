@@ -1,3 +1,4 @@
+import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import InputHandler from "client/event/InputHandler";
 import EventHandler from "shared/event/EventHandler";
@@ -8,6 +9,9 @@ import ComponentEventHolder from "./ComponentEventHolder";
  * Handles events and signals which can be enabled or disabled.
  */
 export default class ComponentBase {
+	public readonly onEnabled = new Signal<() => void>();
+	public readonly onDisabled = new Signal<() => void>();
+
 	/** Main event handler. Does not register events until enabled and reregisters events when input type changes. */
 	protected readonly event: ComponentEventHolder = new ComponentEventHolder();
 
@@ -36,11 +40,13 @@ export default class ComponentBase {
 
 	/** Enable component events */
 	public enable(): void {
+		this.onEnabled.Fire();
 		this.event.enable();
 	}
 
 	/** Disable component events */
 	public disable(): void {
+		this.onDisabled.Fire();
 		this.event.disable();
 		this.inputHandler.unsubscribeAll();
 		this.eventHandler.unsubscribeAll();
