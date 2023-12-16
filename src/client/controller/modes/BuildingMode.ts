@@ -40,7 +40,10 @@ export default class BuildingMode extends PlayMode {
 
 		if (prev === undefined) {
 			Signals.PLAYER.SPAWN.Once(tp);
-			tp();
+
+			if (Players.LocalPlayer.Character?.FindFirstChild("HumanoidRootPart")) {
+				tp();
+			}
 		} else tp();
 	}
 }
