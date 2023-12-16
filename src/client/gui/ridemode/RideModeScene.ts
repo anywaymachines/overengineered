@@ -4,6 +4,7 @@ import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Control from "client/base/Control";
 import Machine from "client/blocks/logic/Machine";
 import RocketEngineLogic from "client/blocks/logic/RocketEngineLogic";
+import InputController from "client/controller/InputController";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
 import Remotes from "shared/Remotes";
 import RobloxUnit from "shared/RobloxUnit";
@@ -248,7 +249,9 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 	}
 
 	public start(machine: Machine) {
-		this.controls.start(machine);
+		if (InputController.inputType.get() === "Touch") {
+			this.controls.start(machine);
+		}
 
 		{
 			const player = Players.LocalPlayer.Character!.WaitForChild("HumanoidRootPart") as Part;
