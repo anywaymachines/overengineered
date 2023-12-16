@@ -30,6 +30,14 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 		const sitButton = this.added(new ButtonControl(this.gui.Sit));
 		const settingsButton = this.added(new ButtonControl(this.gui.Settings));
 
+		this.event.onPrepare((input) => {
+			if (input === "Touch") {
+				settingsButton.show();
+			} else {
+				settingsButton.hide();
+			}
+		});
+
 		this.event.subscribe(stopButton.activated, async () => {
 			await requestMode("build");
 		});
