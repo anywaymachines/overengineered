@@ -16,11 +16,12 @@ export default class ReplicateRemoteHandler {
 		if (!sound) {
 			return;
 		}
+
 		if (!sound.Parent) {
 			return;
 		}
 
-		if (sound.Parent.IsDescendantOf(Workspace)) {
+		if (!sound.Parent.IsDescendantOf(Workspace)) {
 			return;
 		}
 
@@ -48,7 +49,7 @@ export default class ReplicateRemoteHandler {
 			return;
 		}
 
-		if (particle.Parent.IsDescendantOf(Workspace)) {
+		if (!particle.Parent.IsDescendantOf(Workspace)) {
 			return;
 		}
 
