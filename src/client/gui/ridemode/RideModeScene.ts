@@ -118,6 +118,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		const overlay = new Control(new Instance("Frame"));
 		this.add(overlay);
 		const ehandlers: EventHandler[] = [];
+		let inputting = false;
 
 		for (const [_, child] of this.getKeyedChildren()) {
 			if (child === overlay) continue;
@@ -128,7 +129,6 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			instance.Parent = child.getGui();
 			child.getGui().Active = false;
 
-			let inputting = false;
 			instance.InputBegan.Connect((input) => {
 				if (inputting) return;
 
