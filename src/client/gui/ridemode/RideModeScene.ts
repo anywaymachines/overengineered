@@ -1,4 +1,5 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
+import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Control from "client/base/Control";
@@ -20,7 +21,8 @@ import RocketEngineGui, { RocketEngineGuiDefinition } from "./RocketEngineGui";
 export type ActionBarControlDefinition = GuiObject & {
 	Stop: GuiButton;
 	Sit: GuiButton;
-	Settings: GuiButton;
+	ControlSettings: GuiButton;
+	ControlReset: GuiButton;
 };
 export class ActionBarControl extends Control<ActionBarControlDefinition> {
 	constructor(gui: ActionBarControlDefinition, controls: RideModeControls) {
@@ -28,13 +30,15 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 
 		const stopButton = this.added(new ButtonControl(this.gui.Stop));
 		const sitButton = this.added(new ButtonControl(this.gui.Sit));
-		const settingsButton = this.added(new ButtonControl(this.gui.Settings));
+		const controlSettingsButton = this.added(new ButtonControl(this.gui.ControlSettings));
+		const controlResetButton = this.added(new ButtonControl(this.gui.ControlReset));
+		controlResetButton.hide();
 
 		this.event.onPrepare((input) => {
 			if (input === "Touch") {
-				settingsButton.show();
+				controlSettingsButton.show();
 			} else {
-				settingsButton.hide();
+				controlSettingsButton.hide();
 			}
 		});
 
@@ -46,8 +50,23 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 			Remotes.Client.GetNamespace("Ride").Get("Sit").SendToServer();
 		});
 
-		this.event.subscribe(settingsButton.activated, async () => {
+		this.event.subscribe(controlSettingsButton.activated, async () => {
 			controls.toggleSettingsMode();
+		});
+
+		this.event.subscribe(controlResetButton.activated, async () => {
+			controls.resetControls();
+		});
+
+		this.event.subscribe(controls.onEnterSettingsMode, () => {
+			stopButton.hide();
+			sitButton.hide();
+			controlResetButton.show();
+		});
+		this.event.subscribe(controls.onQuitSettingsMode, () => {
+			stopButton.show();
+			sitButton.show();
+			controlResetButton.hide();
 		});
 	}
 }
@@ -57,6 +76,9 @@ type RideModeControlsDefinition = GuiObject & {
 	Button: TextButtonDefinition;
 };
 export class RideModeControls extends DictionaryControl<RideModeControlsDefinition, string, Control> {
+	readonly onEnterSettingsMode = new Signal<() => void>();
+	readonly onQuitSettingsMode = new Signal<() => void>();
+
 	private readonly buttonTemplate;
 	private readonly overlayTemplate;
 	private quitSettingsMode?: () => void;
@@ -72,6 +94,18 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 				this.toggleSettingsMode();
 			}
 		});
+	}
+
+	resetControl(btn: Control, pos: number) {
+		const size = btn.getGui().Size;
+		btn.getGui().Position = new UDim2(0.95, 0, 1 - size.Y.Scale * pos - 0.01 * pos, 0);
+	}
+	resetControls() {
+		let pos = 0;
+		for (const [key, btn] of this.getKeyedChildren()) {
+			this.resetControl(btn, pos);
+			pos++;
+		}
 	}
 
 	toggleSettingsMode() {
@@ -142,12 +176,14 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			overlay.add(box);
 		}
 
+		this.onEnterSettingsMode.Fire();
 		this.quitSettingsMode = async () => {
 			for (const child of overlay.getChildren()) {
 				if (!(child instanceof Control)) continue;
 				child.getGui().Active = true;
 			}
 
+			this.onQuitSettingsMode.Fire();
 			this.remove(overlay);
 
 			for (const eh of ehandlers) {
@@ -237,9 +273,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 				const kc = controlsInfo?.[keycode];
 				if (kc) btn.getGui().Position = new UDim2(kc.pos[0], 0, kc.pos[1], 0);
 			} else {
-				const size = btn.getGui().Size;
-				btn.getGui().Position = new UDim2(0.95, 0, 1 - size.Y.Scale * pos - 0.01 * pos, 0);
-
+				this.resetControl(btn, pos);
 				pos++;
 			}
 		}
