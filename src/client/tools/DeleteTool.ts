@@ -8,7 +8,7 @@ import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
-import { initializeMultiBlockSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
+import { initializeBoxSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
 
 export default class DeleteTool extends ToolBase {
 	public readonly onClearAllRequested = new Signal<() => void>();
@@ -28,7 +28,7 @@ export default class DeleteTool extends ToolBase {
 			},
 			() => true,
 		);
-		initializeMultiBlockSelection(this.eventHandler, async (blocks) => {
+		initializeBoxSelection(this.eventHandler, async (blocks) => {
 			await this.deleteBlocks(blocks);
 		});
 	}
@@ -47,6 +47,9 @@ export default class DeleteTool extends ToolBase {
 			material: Serializer.EnumMaterialSerializer.deserialize(
 				block.GetAttribute("material") as number as SerializedEnum,
 			),
+			config: HttpService.JSONDecode((block.GetAttribute("config") as string | undefined) ?? "{}") as Readonly<
+				Record<keyof ConfigValueTypes, string>
+			>,
 		};
 
 		return info;

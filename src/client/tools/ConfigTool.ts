@@ -4,7 +4,7 @@ import { blockConfigRegistry } from "client/blocks/LogicRegistry";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
-import { initializeMultiBlockSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
+import { initializeBoxSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
 
 export default class ConfigTool extends ToolBase {
 	public readonly selectedBlocksChanged = new Signal<(selected: SelectionBox[]) => void>();
@@ -24,11 +24,15 @@ export default class ConfigTool extends ToolBase {
 			},
 			(target: Model) => blockConfigRegistry[target.GetAttribute("id") as string] !== undefined,
 		);
-		initializeMultiBlockSelection(this.eventHandler, (blocks) => {
-			for (const block of blocks) {
-				this.selectBlock(block);
-			}
-		});
+		initializeBoxSelection(
+			this.eventHandler,
+			(blocks) => {
+				for (const block of blocks) {
+					this.selectBlock(block);
+				}
+			},
+			(target: Model) => blockConfigRegistry[target.GetAttribute("id") as string] !== undefined,
+		);
 
 		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, (model) => {
 			const removed = this.selected.filter((sel) => sel.Parent === model);

@@ -119,9 +119,10 @@ export const initializeSingleBlockSelection = (
 	prepare();
 };
 
-export const initializeMultiBlockSelection = (
+export const initializeBoxSelection = (
 	eventHandler: EventHandler,
 	onrelease: (blocks: readonly Model[]) => void,
+	filter = (block: Model) => true,
 ) => {
 	const camera = Workspace.CurrentCamera!;
 	const mouse = Players.LocalPlayer.GetMouse();
@@ -189,7 +190,7 @@ export const initializeMultiBlockSelection = (
 					).GetChildren() as unknown as readonly Model[],
 					new Vector2(startpos.Width.Offset, startpos.Height.Offset),
 					new Vector2(mouse.X, mouse.Y),
-				);
+				).filter(filter);
 
 			eh.subscribe(mouse.Move, () => {
 				selection.Size = new UDim2(0, mouse.X, 0, mouse.Y).sub(startpos);
