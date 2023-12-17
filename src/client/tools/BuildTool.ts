@@ -8,6 +8,7 @@ import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
+import MaterialChooserControl from "client/gui/tools/MaterialChooser";
 import BuildingManager from "shared/building/BuildingManager";
 import ObservableValue from "shared/event/ObservableValue";
 import PartUtils from "shared/utils/PartUtils";
@@ -39,12 +40,12 @@ export default class BuildTool extends ToolBase {
 	constructor() {
 		super();
 
-		/*MaterialChooserControl.instance.selectedMaterial.subscribe((material) => {
+		MaterialChooserControl.instance.selectedMaterial.subscribe((material) => {
 			this.setSelectedMaterial(material);
-		}, true);*/
-		/*MaterialChooserControl.instance.selectedColor.subscribe((color) => {
+		}, true);
+		MaterialChooserControl.instance.selectedColor.subscribe((color) => {
 			this.setSelectedColor(color);
-		}, true);*/
+		}, true);
 	}
 
 	getDisplayName(): string {
