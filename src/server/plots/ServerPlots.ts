@@ -8,11 +8,13 @@ export default class ServerPlots {
 		this.initializeEvents();
 	}
 
-	private static defaultPlotData: Plot = {
-		ownerID: 0,
-		whitelistedPlayerIDs: [],
-		blacklistedPlayerIDs: [],
-	};
+	private static createDefaultPlotData(): Plot {
+		return {
+			ownerID: 0,
+			whitelistedPlayerIDs: [],
+			blacklistedPlayerIDs: [],
+		};
+	}
 
 	/** Function for writing and encoding Plot data to `Model`
 	 * @param plot The Plot model
@@ -25,7 +27,7 @@ export default class ServerPlots {
 	/** Initialization part */
 	private static initializePlots(): void {
 		SharedPlots.plots.forEach((plot) => {
-			this.writePlotData(plot as Model, this.defaultPlotData);
+			this.writePlotData(plot as Model, this.createDefaultPlotData());
 		});
 	}
 
@@ -39,7 +41,7 @@ export default class ServerPlots {
 
 	private static assignPlotTo(player: Player): void {
 		const plot = this.getFreePlot();
-		const data = this.defaultPlotData;
+		const data = this.createDefaultPlotData();
 		data.ownerID = player.UserId;
 		this.writePlotData(plot, data);
 	}
@@ -60,6 +62,6 @@ export default class ServerPlots {
 
 		this.clearAllBlocks(plot);
 
-		this.writePlotData(plot, this.defaultPlotData);
+		this.writePlotData(plot, this.createDefaultPlotData());
 	}
 }
