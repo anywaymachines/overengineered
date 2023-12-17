@@ -25,6 +25,9 @@ export type ConfigToolSceneDefinition = GuiObject & {
 			KeyTemplate: ConfigPartDefinition<KeyChooserControlDefinition>;
 			SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 		};
+		Title: GuiObject & {
+			HeadingLabel: TextLabel;
+		};
 	};
 	ApplyToAllButton: TextButton;
 	DeselectAllButton: TextButton;
@@ -72,6 +75,8 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 	private updateConfigs(selected: readonly SelectionBox[]) {
 		this.list.clear();
 		if (selected.size() === 0) return;
+
+		this.gui.ParamsSelection.Title.HeadingLabel.Text = `CONFIGURATION (${selected.size()})`;
 
 		const configs = selected
 			.map((selected) => {
