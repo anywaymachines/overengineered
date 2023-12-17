@@ -6,6 +6,7 @@ import MotorBlockLogic from "./logic/MotorBlockLogic";
 import RocketEngineLogic from "./logic/RocketEngineLogic";
 import RopeLogic from "./logic/RopeLogic";
 import ServoMotorBlockLogic from "./logic/ServoMotorBlockLogic";
+import TNTBlockLogic from "./logic/TNTBlockLogic";
 import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 import WingLogic from "./logic/WingLogic";
 
@@ -24,6 +25,7 @@ const logicRegistry: Readonly<Record<string, BlockLogicCtor | undefined>> = {
 	servomotorblock: ServoMotorBlockLogic,
 	rope: RopeLogic,
 	heliumblock: HeliumBlockLogic,
+	tnt: TNTBlockLogic,
 };
 
 export const blockConfigRegistry = Objects.fromEntries(

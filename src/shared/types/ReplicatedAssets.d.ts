@@ -7,6 +7,7 @@ interface ReplicatedStorage {
 			Z: BasePart;
 		};
 		MoveHandles: MoveHandles;
+		Fire: Folder;
 	};
 }
 

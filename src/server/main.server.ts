@@ -7,6 +7,7 @@ import BuildingWrapper from "./BuildingWrapper";
 import PlayerDatabase from "./PlayerDatabase";
 import SlotsDatabase from "./SlotsDatabase";
 import DisconnectBlockLogic from "./blocks/logic/DisconnectBlockLogic";
+import TNTBlockLogic from "./blocks/logic/TNTBlockLogic";
 import PlayModeController from "./modes/PlayModeController";
 import { registerOnRemoteEvent, registerOnRemoteFunction } from "./network/event/RemoteHandler";
 import ReplicateRemoteHandler from "./network/event/ReplicateRemoteHandler";
@@ -117,6 +118,7 @@ registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
 ReplicateRemoteHandler.init();
 
 DisconnectBlockLogic.init();
+TNTBlockLogic.init();
 
 PlayModeController.init();
 

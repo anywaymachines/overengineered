@@ -37,6 +37,12 @@ const Remotes = Net.Definitions.Create({
 		DisconnectBlock: Net.Definitions.Namespace({
 			Disconnect: Net.Definitions.ClientToServerEvent<[block: Model]>(),
 		}),
+		TNTBlock: Net.Definitions.Namespace({
+			Explode:
+				Net.Definitions.ClientToServerEvent<
+					[block: Model, radius: number, pressure: number, isFlammable: boolean]
+				>(),
+		}),
 	}),
 	Debug: Net.Definitions.Namespace({
 		DisplayLine: Net.Definitions.ServerToClientEvent<[text: string, isClient: boolean, isError: boolean]>(),

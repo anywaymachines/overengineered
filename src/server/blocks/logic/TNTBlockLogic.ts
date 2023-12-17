@@ -1,0 +1,65 @@
+import { Workspace } from "@rbxts/services";
+import SpreadingFireController from "server/SpreadingFireController";
+import { registerOnRemoteEvent2 } from "server/network/event/RemoteHandler";
+
+export default class TNTBlockLogic {
+	private static readonly spreadingFire = new SpreadingFireController();
+
+	static init() {
+		registerOnRemoteEvent2("Blocks", "TNTBlock", "Explode", (player, block, radius, pressure, isFlammable) => {
+			// TODO: SECURITY
+
+			if (!block) {
+				return;
+			}
+
+			// temporary until block configuration moved to shared
+			radius = math.clamp(radius, 0, 12);
+			pressure = math.clamp(pressure, 0, 2500);
+
+			// Explosion
+			const explosion = new Instance("Explosion");
+			explosion.ExplosionType = Enum.ExplosionType.NoCraters;
+			explosion.BlastRadius = radius;
+			explosion.BlastPressure = 0;
+			explosion.DestroyJointRadiusPercent = 0;
+			explosion.Position = block.GetPivot().Position;
+
+			// Flame explosion
+			if (isFlammable) {
+				const flameExplosion = explosion.Clone();
+				flameExplosion.BlastRadius *= 1.5;
+				flameExplosion.Parent = Workspace;
+				flameExplosion.Hit.Connect((part, distance) => {
+					this.spreadingFire.burn(part);
+				});
+			}
+
+			explosion.Parent = Workspace;
+			explosion.Hit.Connect((part, distance) => {
+				if (part.Anchored || !part.IsDescendantOf(Workspace.Plots) || part.GetAttribute("Burn")) {
+					return;
+				}
+
+				if (math.random(1, 2) === 1) {
+					part.BreakJoints();
+				}
+
+				part.Velocity = new Vector3(
+					math.random(0, pressure / 100),
+					math.random(0, pressure / 100),
+					math.random(0, pressure / 100),
+				);
+
+				game.GetService("Debris").AddItem(part.Parent!, 60);
+			});
+
+			// Explosion sound
+			const sound = block.PrimaryPart!.FindFirstChild("Sound") as Sound;
+			sound.Play();
+			sound.Ended.Once(() => {
+				block.Destroy();
+			});
+		});
+	}
+}
