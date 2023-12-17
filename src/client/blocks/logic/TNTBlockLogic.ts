@@ -1,8 +1,12 @@
 import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Remotes from "shared/Remotes";
 
-type TNTBlockConfig = ConfigDefinitionToTypes<(typeof blockConfigRegistry)["tnt"]>;
+type TNTBlockConfig = {
+	readonly explode: "key";
+	readonly radius: "number";
+	readonly pressure: "number";
+	readonly flammable: "bool";
+};
 
 export default class TNTBlockLogic extends ConfigurableBlockLogic<TNTBlockConfig> {
 	constructor(block: Model) {

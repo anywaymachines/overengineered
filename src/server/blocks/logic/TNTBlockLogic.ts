@@ -1,6 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import SpreadingFireController from "server/SpreadingFireController";
 import { registerOnRemoteEvent2 } from "server/network/event/RemoteHandler";
+import PartUtils from "shared/utils/PartUtils";
 
 export default class TNTBlockLogic {
 	private static readonly spreadingFire = new SpreadingFireController();
@@ -54,11 +55,15 @@ export default class TNTBlockLogic {
 				game.GetService("Debris").AddItem(part.Parent!, 60);
 			});
 
+			PartUtils.applyToAllDescendantsOfType("Decal", block.PrimaryPart!, (decal) => {
+				decal.Destroy();
+			});
+
 			// Explosion sound
 			const sound = block.PrimaryPart!.FindFirstChild("Sound") as Sound;
 			sound.Play();
 			sound.Ended.Once(() => {
-				block.Destroy();
+				sound.Destroy();
 			});
 		});
 	}
