@@ -32,8 +32,8 @@ export default abstract class ConfigurableBlockLogic<TConfig extends ConfigValue
 		);
 
 		this.event.onPrepare(() => {
-			this.eventHandler.subscribe(this.machine!.seat.occupant.changed, (occupant) => {
-				if (occupant) return;
+			this.eventHandler.subscribe(this.machine!.seat.occupiedByLocalPlayer.changed, (occupied) => {
+				if (occupied) return;
 				this.keyController.releaseAll();
 			});
 		});
@@ -73,11 +73,11 @@ export default abstract class ConfigurableBlockLogic<TConfig extends ConfigValue
 	}
 
 	triggerKeyDown(key: KeyMembers<TConfig>) {
-		if (!this.machine?.seat.occupant.get()) return;
+		if (!this.machine?.seat.occupiedByLocalPlayer.get()) return;
 		this.keyController.keyDown(key);
 	}
 	triggerKeyUp(key: KeyMembers<TConfig>) {
-		if (!this.machine?.seat.occupant.get()) return;
+		if (!this.machine?.seat.occupiedByLocalPlayer.get()) return;
 		this.keyController.keyUp(key);
 	}
 

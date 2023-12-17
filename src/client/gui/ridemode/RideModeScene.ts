@@ -241,7 +241,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 					input.UserInputType === Enum.UserInputType.MouseButton1 ||
 					input.UserInputType === Enum.UserInputType.Touch
 				) {
-					if (!machine.seat.occupant) return;
+					if (!machine.seat.occupiedByLocalPlayer.get()) return;
 
 					for (const block of blocks) {
 						block.tryTriggerKeycodeDown(keycode as never);
@@ -253,7 +253,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 					input.UserInputType === Enum.UserInputType.MouseButton1 ||
 					input.UserInputType === Enum.UserInputType.Touch
 				) {
-					if (!machine.seat.occupant) return;
+					if (!machine.seat.occupiedByLocalPlayer.get()) return;
 
 					for (const block of blocks) {
 						block.tryTriggerKeycodeUp(keycode as never);
