@@ -137,21 +137,21 @@ class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> 
 		const sat = createSlider(this.gui.Saturation, this.selectedColor.get().ToHSV()[1]);
 		const bri = createSlider(this.gui.Brightness, this.selectedColor.get().ToHSV()[2]);
 
-		const r = new NumberTextBoxControl(this.gui.ManualRed);
+		const r = new NumberTextBoxControl(this.gui.ManualRed, 0, 255, 1);
 		this.add(r);
 		this.event.subscribeObservable(r.value, (r) => {
 			const color = this.selectedColor.get();
 			this.selectedColor.set(new Color3(r / 255, color.G, color.B));
 		});
 
-		const g = new NumberTextBoxControl(this.gui.ManualGreen);
+		const g = new NumberTextBoxControl(this.gui.ManualGreen, 0, 255, 1);
 		this.add(g);
 		this.event.subscribeObservable(g.value, (g) => {
 			const color = this.selectedColor.get();
 			this.selectedColor.set(new Color3(color.R, g / 255, color.B));
 		});
 
-		const b = new NumberTextBoxControl(this.gui.ManualBlue);
+		const b = new NumberTextBoxControl(this.gui.ManualBlue, 0, 255, 1);
 		this.add(b);
 		this.event.subscribeObservable(b.value, (b) => {
 			const color = this.selectedColor.get();

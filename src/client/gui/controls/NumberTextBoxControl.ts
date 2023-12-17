@@ -1,6 +1,6 @@
 import Signal from "@rbxts/signal";
 import Control from "client/base/Control";
-import ObservableValue from "shared/event/ObservableValue";
+import NumberObservableValue from "shared/event/NumberObservableValue";
 
 export type NumberTextBoxControlDefinition = TextBox;
 
@@ -9,10 +9,10 @@ export default class NumberTextBoxControl extends Control<NumberTextBoxControlDe
 	public readonly submitted = new Signal<(value: number) => void>();
 	public readonly value;
 
-	constructor(gui: NumberTextBoxControlDefinition) {
+	constructor(gui: NumberTextBoxControlDefinition, min: number, max: number, step: number) {
 		super(gui);
 
-		this.value = new ObservableValue(0);
+		this.value = new NumberObservableValue(0, min, max, step);
 		this.event.subscribeObservable(this.value, (value) => (this.gui.Text = tostring(value)), true);
 
 		this.event.subscribe(this.gui.FocusLost, () => this.commit());

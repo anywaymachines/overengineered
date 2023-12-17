@@ -20,18 +20,16 @@ export default class SliderControl<
 		super(gui, min, max, step);
 
 		this.value.subscribe((value) => this.textValue.set(tostring(value)), true);
-		this.subscribeVisualSlider();
 		this.subscribeMovement();
-	}
 
-	private subscribeVisualSlider() {
 		if (Control.exists(this.gui, "TextBox")) {
-			const num = new NumberTextBoxControl(this.gui.TextBox);
+			const num = new NumberTextBoxControl(this.gui.TextBox, min, max, step);
 			num.value.bindTo(this.value);
 			this.event.subscribe(num.submitted, (value) => this.submitted.Fire(value));
 			this.add(num);
 		}
 	}
+
 	private subscribeMovement() {
 		const eh = new EventHandler();
 		let startpos: number | undefined;
