@@ -17,6 +17,7 @@ type PlaceBlockRequest = {
 	readonly color: Color3;
 	readonly material: Enum.Material;
 	readonly location: CFrame;
+	readonly config?: Readonly<Record<keyof ConfigValueTypes, string>>;
 };
 
 type PlayerSaveSlotRequest = {

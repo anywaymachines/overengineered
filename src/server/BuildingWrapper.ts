@@ -2,6 +2,7 @@ import { HttpService } from "@rbxts/services";
 import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
+import Objects from "shared/_fixes_/objects";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import PartUtils from "shared/utils/PartUtils";
@@ -189,6 +190,10 @@ export default class BuildingWrapper {
 		// Set material & color
 		model.SetAttribute("material", Serializer.EnumMaterialSerializer.serialize(data.material));
 		model.SetAttribute("color", HttpService.JSONEncode(Serializer.Color3Serializer.serialize(data.color)));
+		if (data.config && Objects.keys(data.config).size() !== 0) {
+			model.SetAttribute("config", HttpService.JSONEncode(data.config));
+		}
+
 		PartUtils.switchDescendantsMaterial(model, data.material);
 		PartUtils.switchDescendantsColor(model, data.color);
 

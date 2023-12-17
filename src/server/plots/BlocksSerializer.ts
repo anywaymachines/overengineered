@@ -303,6 +303,7 @@ export default class BlocksSerializer {
 				color: Serializer.Color3Serializer.deserialize(blockData.col),
 				material: Serializer.EnumMaterialSerializer.deserialize(blockData.mat),
 				location: buildingCenter.CFrame.ToWorldSpace(loc),
+				config: (blockData.config ?? {}) as Readonly<Record<string, string>>,
 			};
 
 			const response = BuildingWrapper.placeBlock(deserializedData);
