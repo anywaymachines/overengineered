@@ -23,11 +23,6 @@ export default class PlayModeController {
 			plr.CharacterAdded.Connect((character) => {
 				const response = this.changeModeForPlayer(plr, "build");
 				if (!response.success) Logger.error(response.message);
-
-				(character.WaitForChild("Humanoid") as Humanoid).Died.Once(() => {
-					const response = this.changeModeForPlayer(plr, undefined);
-					if (!response.success) Logger.error(response.message);
-				});
 			});
 		});
 	}
