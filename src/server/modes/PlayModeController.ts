@@ -10,21 +10,17 @@ export default class PlayModeController {
 	private static readonly playerModes: Record<number, PlayModes | undefined> = {};
 	private static readonly modes = {
 		ride: new RideMode(),
-		build: new BuildMode(),
+		build: new BuildMode(PlayModeController),
 	} as const satisfies Record<PlayModes, PlayModeBase>;
 
 	static init() {
 		Players.PlayerRemoving.Connect((plr) => {
 			delete this.playerModes[plr.UserId];
 		});
+	}
 
-		Players.PlayerAdded.Connect((plr) => {
-			// on spawn
-			plr.CharacterAdded.Connect((character) => {
-				const response = this.changeModeForPlayer(plr, "build");
-				if (!response.success) Logger.error(response.message);
-			});
-		});
+	static getPlayerMode(player: Player) {
+		return this.playerModes[player.UserId];
 	}
 
 	static changeModeForPlayer(this: void, player: Player, mode: PlayModes | undefined): Response {
