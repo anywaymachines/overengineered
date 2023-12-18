@@ -8,9 +8,16 @@ export default class TNTBlockLogic {
 
 	static init() {
 		registerOnRemoteEvent2("Blocks", "TNTBlock", "Explode", (player, block, radius, pressure, isFlammable) => {
-			// TODO: SECURITY
-
 			if (!block) {
+				return;
+			}
+
+			if (!block.IsDescendantOf(Workspace)) {
+				return;
+			}
+
+			if (block.PrimaryPart!.GetNetworkOwner() !== player) {
+				player.Kick();
 				return;
 			}
 
@@ -52,7 +59,7 @@ export default class TNTBlockLogic {
 					math.random(0, pressure / 100),
 				);
 
-				game.GetService("Debris").AddItem(part.Parent!, 60);
+				game.GetService("Debris").AddItem(part.Parent!, 180);
 			});
 
 			PartUtils.applyToAllDescendantsOfType("Decal", block.PrimaryPart!, (decal) => {
