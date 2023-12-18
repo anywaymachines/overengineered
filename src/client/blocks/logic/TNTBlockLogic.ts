@@ -66,6 +66,8 @@ export default class TNTBlockLogic extends ConfigurableBlockLogic<TNTBlockConfig
 							this.config.get("pressure"),
 							this.config.get("flammable"),
 						);
+
+					this.disable();
 				},
 			},
 		};
