@@ -85,14 +85,19 @@ export default class BuildingWelder {
 		]);
 	}
 
-	static getClosestParts(part: BasePart) {
+	static getClosestParts(part: BasePart, plot: Model) {
 		const raycastParams = new RaycastParams();
 		raycastParams.CollisionGroup = "BlockWeld";
 
 		const ret = new Set<BasePart>();
 		for (const [origin, normal] of this.getSides(part)) {
 			const raycastResult = Workspace.Raycast(origin, normal, raycastParams);
-			if (!raycastResult) continue;
+			if (!raycastResult || !raycastResult.Instance) {
+				continue;
+			}
+			if (!raycastResult.Instance.IsDescendantOf(plot)) {
+				continue;
+			}
 
 			ret.add(raycastResult.Instance);
 		}
@@ -121,11 +126,11 @@ export default class BuildingWelder {
 		}
 	}
 
-	static weld(model: Model): void {
+	static weld(model: Model, plot: Model): void {
 		const modelParts = model.GetChildren().filter((value) => value.IsA("BasePart") && value.CanCollide);
 		for (let i = 0; i < modelParts.size(); i++) {
 			const modelPart = modelParts[i] as BasePart;
-			const closestParts = this.getClosestParts(modelPart);
+			const closestParts = this.getClosestParts(modelPart, plot);
 
 			for (const closestPart of closestParts) {
 				if (closestPart.IsDescendantOf(model)) continue;

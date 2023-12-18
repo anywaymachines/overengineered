@@ -218,7 +218,7 @@ export default class BuildingWrapper {
 		});
 
 		// Weld block
-		BuildingWelder.weld(model);
+		BuildingWelder.weld(model, plot);
 
 		return { success: true, model: model };
 	}
