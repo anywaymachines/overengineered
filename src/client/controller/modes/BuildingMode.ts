@@ -1,5 +1,4 @@
 import { Players } from "@rbxts/services";
-import Signals from "client/event/Signals";
 import BuildingModeScene, { BuildingModeSceneDefinition } from "client/gui/scenes/BuildingModeScene";
 import SharedPlots from "shared/building/SharedPlots";
 import GuiController from "../GuiController";
@@ -38,12 +37,6 @@ export default class BuildingMode extends PlayMode {
 			hrp.AssemblyAngularVelocity = Vector3.zero;
 		};
 
-		if (prev === undefined) {
-			Signals.PLAYER.SPAWN.Once(tp);
-
-			if (Players.LocalPlayer.Character?.FindFirstChild("HumanoidRootPart")) {
-				tp();
-			}
-		} else tp();
+		delay(0.1, tp);
 	}
 }
