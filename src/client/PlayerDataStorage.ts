@@ -4,6 +4,7 @@ import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
 import ObservableValue from "shared/event/ObservableValue";
+import Config from "./Config";
 
 type NonNullableFields<T> = {
 	[P in keyof T]: NonNullable<T[P]>;
@@ -29,7 +30,7 @@ export default class PlayerDataStorage {
 		const data = await Remotes.Client.GetNamespace("Player").Get("FetchData").CallServerAsync();
 		this.data.set({
 			purchasedSlots: data.purchasedSlots ?? 0,
-			settings: data.settings ?? {},
+			settings: new Config(data.settings ?? {}, GameDefinitions.PLAYER_SETTINGS_DEFINITION).getAll(),
 			slots: SlotsMeta.getAll(data.slots ?? [], GameDefinitions.FREE_SLOTS + (data.purchasedSlots ?? 0)),
 		});
 

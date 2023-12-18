@@ -22,6 +22,16 @@ export default class Config<T extends ConfigValueTypes> {
 		this.config[key] = value;
 	}
 
+	/** Returns the configuration with all undefined keys set to their default values */
+	public getAll(): ConfigTypesToConfig<T> {
+		const cfg: Partial<Record<keyof T, ConfigValue>> = {};
+		for (const key of Objects.keys(this.definitions)) {
+			cfg[key] = this.get(key);
+		}
+
+		return cfg as ConfigTypesToConfig<T>;
+	}
+
 	static deserialize<T extends ConfigValueTypes>(
 		content: Readonly<Record<keyof T, string>>,
 		definitions: ConfigTypesToDefinition<T>,
