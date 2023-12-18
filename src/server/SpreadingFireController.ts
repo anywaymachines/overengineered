@@ -15,7 +15,7 @@ export default class SpreadingFireController {
 		}
 
 		part.SetAttribute("Burn", true);
-		game.GetService("Debris").AddItem(part, 60);
+		game.GetService("Debris").AddItem(part, 180);
 
 		// Apply color
 		const rand_rgb = math.random(0, 50);
