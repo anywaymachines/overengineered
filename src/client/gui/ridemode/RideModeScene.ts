@@ -292,6 +292,7 @@ export type RideModeSceneDefinition = GuiObject & {
 	ActionBarGui: ActionBarControlDefinition;
 	Torque: RocketEngineGuiDefinition;
 	Speed: SliderControlDefinition;
+	Altitude: SliderControlDefinition;
 	Controls: RideModeControlsDefinition;
 };
 
@@ -301,6 +302,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 
 	private readonly torqueTemplate;
 	private readonly speedTemplate;
+	private readonly altitudeTemplate;
 
 	constructor(gui: RideModeSceneDefinition) {
 		super(gui);
@@ -314,6 +316,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		this.torqueTemplate = Control.asTemplate(this.gui.Torque);
 		this.speedTemplate = Control.asTemplate(this.gui.Speed);
+		this.altitudeTemplate = Control.asTemplate(this.gui.Altitude);
 	}
 
 	public start(machine: Machine) {
@@ -337,6 +340,22 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 
 				speed.value.set(spd);
 				speed.getTextValue().set(spd);
+			});
+		}
+
+		{
+			const player = Players.LocalPlayer.Character!.WaitForChild("HumanoidRootPart") as Part;
+			const maxAltitude = RobloxUnit.Studs_To_Meters(1500);
+
+			const altitude = new ProgressBarControl(this.altitudeTemplate(), 0, maxAltitude, 0.1);
+			altitude.show();
+			this.controls.add(altitude);
+
+			this.event.subscribe(RunService.Heartbeat, () => {
+				const alt = RobloxUnit.Studs_To_Meters(player.Position.Y);
+
+				altitude.value.set(alt);
+				altitude.getTextValue().set(alt);
 			});
 		}
 
