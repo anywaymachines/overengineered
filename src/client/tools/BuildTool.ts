@@ -219,7 +219,7 @@ export default class BuildTool extends ToolBase {
 
 		// Rounding vectors
 		this.previewBlock.PivotTo(
-			new CFrame(VectorUtils.roundVectorToNearestHalf(this.previewBlock.GetPivot().Position)).mul(
+			new CFrame(VectorUtils.roundVectorToBase(this.previewBlock.GetPivot().Position, moveRangeStuds)).mul(
 				this.previewBlock.GetPivot().Rotation,
 			),
 		);
