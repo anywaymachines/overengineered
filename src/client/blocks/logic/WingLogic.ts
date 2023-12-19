@@ -10,8 +10,8 @@ export default class WingLogic extends BlockLogic {
 	constructor(block: Model) {
 		super(block);
 
-		this.wingSurface = block.FindFirstChild("WingSurface") as BasePart;
-		this.vectorForce = this.wingSurface.FindFirstChild("VectorForce") as VectorForce;
+		this.wingSurface = block.WaitForChild("WingSurface") as BasePart;
+		this.vectorForce = this.wingSurface.WaitForChild("VectorForce") as VectorForce;
 		this.surface = this.findSurface(this.wingSurface);
 
 		this.wingSurface.CustomPhysicalProperties = new PhysicalProperties(0.7, 0.3, 0.5, 1, 1);

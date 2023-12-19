@@ -179,6 +179,39 @@ const tnt = {
 	},
 } as const satisfies ConfigDefinitions;
 
+const suspensionblock = {
+	damping: {
+		displayName: "Damping",
+		type: "number",
+		default: {
+			Desktop: 30,
+		},
+		min: 0,
+		max: 100,
+		step: 0.01,
+	},
+	stiffness: {
+		displayName: "Stiffness",
+		type: "number",
+		default: {
+			Desktop: 20,
+		},
+		min: 0,
+		max: 1000,
+		step: 0.01,
+	},
+	free_length: {
+		displayName: "Free Length",
+		type: "number",
+		default: {
+			Desktop: 4.5,
+		},
+		min: 0,
+		max: 10,
+		step: 0.01,
+	},
+} as const satisfies ConfigDefinitions;
+
 const blockConfigRegistry = {
 	disconnectblock,
 	motorblock,
@@ -186,6 +219,7 @@ const blockConfigRegistry = {
 	rope,
 	servomotorblock,
 	tnt,
+	suspensionblock,
 } as const satisfies Record<string, ConfigDefinitions>;
 
 type RocketEngineConfig = ConfigDefinitionToTypes<typeof blockConfigRegistry.smallrocketengine>;
