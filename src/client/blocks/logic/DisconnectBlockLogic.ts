@@ -1,29 +1,17 @@
 import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
+import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Remotes from "shared/Remotes";
 
-type DisconnectConfig = {
-	readonly disconnect: "key";
-};
-
-export default class DisconnectBlockLogic extends ConfigurableBlockLogic<DisconnectConfig> {
+export default class DisconnectBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.disconnectblock> {
 	constructor(block: Model) {
 		super(block, DisconnectBlockLogic.getConfigDefinition());
 	}
 
-	static getConfigDefinition(): ConfigTypesToDefinition<DisconnectConfig> {
-		return {
-			disconnect: {
-				displayName: "Disconnect key",
-				type: "key",
-				default: {
-					Desktop: "F",
-					Gamepad: "ButtonR2",
-				},
-			},
-		};
+	static getConfigDefinition() {
+		return blockConfigRegistry.disconnectblock;
 	}
 
-	public getKeysDefinition(): KeyDefinitions<DisconnectConfig> {
+	public getKeysDefinition(): KeyDefinitions<ConfigDefinitionToTypes<typeof blockConfigRegistry.disconnectblock>> {
 		return {
 			disconnect: {
 				keyDown: () => {

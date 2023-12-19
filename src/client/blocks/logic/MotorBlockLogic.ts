@@ -1,14 +1,8 @@
 import { UserInputService } from "@rbxts/services";
 import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
+import blockConfigRegistry from "shared/BlockConfigRegistry";
 
-type MotorConfig = {
-	readonly rotate_add: "key";
-	readonly rotate_sub: "key";
-	readonly speed: "number";
-	readonly switch: "bool";
-};
-
-export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorConfig> {
+export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.motorblock> {
 	private readonly hingeConstraint;
 
 	private readonly increaseKey;
@@ -35,48 +29,14 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<MotorConfig>
 		this.eventHandler.subscribe(UserInputService.InputEnded, () => this.update());
 	}
 
-	static getConfigDefinition(): ConfigTypesToDefinition<MotorConfig> {
-		return {
-			rotate_add: {
-				displayName: "Rotate +",
-				type: "key",
-				default: {
-					Desktop: "R",
-					Gamepad: "ButtonR1",
-				},
-			},
-			rotate_sub: {
-				displayName: "Rotate -",
-				type: "key",
-				default: {
-					Desktop: "F",
-					Gamepad: "ButtonL1",
-				},
-			},
-			speed: {
-				displayName: "Max. speed",
-				type: "number",
-				min: 0,
-				max: 50,
-				step: 1,
-				default: {
-					Desktop: 15,
-				},
-			},
-			switch: {
-				displayName: "Switch",
-				type: "bool",
-				default: {
-					Desktop: false,
-				},
-			},
-		};
+	static getConfigDefinition() {
+		return blockConfigRegistry.motorblock;
 	}
 
 	private isIncreasing = false;
 	private isDecreasing = false;
 
-	public getKeysDefinition(): KeyDefinitions<MotorConfig> {
+	public getKeysDefinition(): KeyDefinitions<ConfigDefinitionToTypes<typeof blockConfigRegistry.motorblock>> {
 		return {
 			rotate_add: {
 				conflicts: "rotate_sub",

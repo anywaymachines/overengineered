@@ -1,42 +1,42 @@
 import Objects from "shared/_fixes_/objects";
 import InputController from "./controller/InputController";
 
-export default class Config<T extends ConfigValueTypes> {
-	public readonly definitions: ConfigTypesToDefinition<T>;
-	private readonly config: ConfigTypesToConfig<T> | undefined;
+export default class Config<TDef extends ConfigDefinitions> {
+	public readonly definitions: TDef;
+	private readonly config: Partial<ConfigDefinitionsToConfig<TDef>> | undefined;
 
-	constructor(config: ConfigTypesToConfig<T> | undefined, definitions: ConfigTypesToDefinition<T>) {
+	constructor(config: Partial<ConfigDefinitionsToConfig<TDef>> | undefined, definitions: TDef) {
 		this.definitions = definitions;
 		this.config = config;
 	}
 
-	public get<TKey extends keyof T>(key: TKey): (typeof this.config & defined)[TKey] {
+	public get<TKey extends keyof TDef>(key: TKey): (typeof this.config & defined)[TKey] & defined {
 		return (
 			this.config?.[key] ??
 			this.definitions[key].default[InputController.inputType.get()] ??
 			this.definitions[key].default.Desktop
 		);
 	}
-	public set<TKey extends keyof T>(key: TKey, value: (typeof this.config & defined)[TKey]) {
+	public set<TKey extends keyof TDef>(key: TKey, value: (typeof this.config & defined)[TKey] & defined) {
 		if (!this.config) return;
 		this.config[key] = value;
 	}
 
 	/** Returns the configuration with all undefined keys set to their default values */
-	public getAll(): ConfigTypesToConfig<T> {
-		const cfg: Partial<Record<keyof T, ConfigValue>> = {};
+	public getAll(): ConfigDefinitionsToConfig<TDef> {
+		const cfg: Partial<Record<keyof TDef, ConfigValue>> = {};
 		for (const key of Objects.keys(this.definitions)) {
 			cfg[key] = this.get(key);
 		}
 
-		return cfg as ConfigTypesToConfig<T>;
+		return cfg as ConfigDefinitionsToConfig<TDef>;
 	}
 
-	static deserialize<T extends ConfigValueTypes>(
-		content: Readonly<Record<keyof T, string>>,
-		definitions: ConfigTypesToDefinition<T>,
+	static deserialize<TDef extends ConfigDefinitions>(
+		content: Readonly<Record<keyof TDef, string>>,
+		definitions: TDef,
 	) {
-		const result: Partial<ConfigTypesToConfig<T>> = {};
+		const result: Partial<ConfigDefinitionsToConfig<TDef>> = {};
 
 		for (const [key, value] of Objects.entries(content)) {
 			const convertIf = <TType extends keyof ConfigDefinitionType>(
@@ -52,7 +52,7 @@ export default class Config<T extends ConfigValueTypes> {
 			convertIf("number", () => tonumber(value)!);
 		}
 
-		return result as ConfigTypesToConfig<T>;
+		return result as ConfigDefinitionsToConfig<TDef>;
 	}
 
 	static serializeOne(value: ConfigValue, definition: ConfigDefinition) {

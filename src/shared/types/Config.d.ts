@@ -40,3 +40,11 @@ type ConfigTypesToConfig<T extends ConfigValueTypes> = {
 type ConfigTypesToDefinition<T extends ConfigValueTypes> = {
 	readonly [k in keyof T]: ConfigDefinitionType[T[k]];
 };
+
+type ConfigDefinitionToTypes<T extends ConfigDefinitions> = {
+	readonly [k in keyof T]: T[k]["type"];
+};
+
+type ConfigDefinitionsToConfig<T extends ConfigDefinitions> = {
+	[k in keyof T]: ConfigValueOf<ConfigDefinitionType[T[k]["type"]]>;
+};

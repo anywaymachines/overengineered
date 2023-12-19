@@ -13,7 +13,7 @@ export default class ConfigPartControl<
 	constructor(
 		gui: ConfigPartDefinition<TDef>,
 		ctor: (gui: TDef) => TControl & { value: ObservableValue<TValue> },
-		configs: readonly Config<ConfigValueTypes>[],
+		configs: readonly Config<ConfigDefinitions>[],
 		definition: ConfigDefinition,
 		key: string,
 	) {

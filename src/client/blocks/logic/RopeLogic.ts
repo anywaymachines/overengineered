@@ -1,10 +1,7 @@
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
+import blockConfigRegistry from "shared/BlockConfigRegistry";
 
-type RopeConfig = {
-	readonly length: "number";
-};
-
-export default class RopeLogic extends ConfigurableBlockLogic<RopeConfig> {
+export default class RopeLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.rope> {
 	private ropeSide: BasePart;
 	private ropeConstraint: RopeConstraint;
 
@@ -21,18 +18,7 @@ export default class RopeLogic extends ConfigurableBlockLogic<RopeConfig> {
 		this.ropeConstraint.Length = this.config.get("length");
 	}
 
-	static getConfigDefinition(): ConfigTypesToDefinition<RopeConfig> {
-		return {
-			length: {
-				displayName: "Length",
-				type: "number",
-				min: 2,
-				max: 50,
-				step: 1,
-				default: {
-					Desktop: 15,
-				},
-			},
-		};
+	static getConfigDefinition() {
+		return blockConfigRegistry.rope;
 	}
 }

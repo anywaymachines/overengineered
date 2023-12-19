@@ -1,16 +1,10 @@
 import { Workspace } from "@rbxts/services";
 import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
 import SoundController from "client/controller/SoundController";
+import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { UnreliableRemotes } from "shared/Remotes";
 
-type RocketEngineConfig = {
-	readonly thrust_add: "key";
-	readonly thrust_sub: "key";
-	readonly switchmode: "bool";
-	readonly strength: "number";
-};
-
-export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngineConfig> {
+export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.smallrocketengine> {
 	// Instances
 	private readonly engine;
 	private readonly vectorForce;
@@ -37,7 +31,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 	private movingDown = false;
 
 	constructor(block: Model) {
-		super(block, RocketEngineLogic.getConfigDefinition());
+		super(block, blockConfigRegistry.smallrocketengine);
 
 		// Configuration
 		this.increaseKey = this.config.get("thrust_add");
@@ -59,45 +53,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<RocketEngi
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 	}
 
-	static getConfigDefinition(): ConfigTypesToDefinition<RocketEngineConfig> {
-		return {
-			thrust_add: {
-				displayName: "Thrust +",
-				type: "key",
-				default: {
-					Desktop: "W",
-					Gamepad: "ButtonR2",
-				},
-			},
-			thrust_sub: {
-				displayName: "Thrust -",
-				type: "key",
-				default: {
-					Desktop: "S",
-					Gamepad: "ButtonL2",
-				},
-			},
-			switchmode: {
-				displayName: "Toggle Mode",
-				type: "bool",
-				default: {
-					Desktop: false,
-					Gamepad: false,
-				},
-			},
-			strength: {
-				displayName: "Strength %",
-				type: "number",
-				min: 0,
-				max: 100,
-				step: 1,
-				default: {
-					Desktop: 100,
-				},
-			},
-		};
-	}
-	public getKeysDefinition(): KeyDefinitions<RocketEngineConfig> {
+	public getKeysDefinition(): KeyDefinitions<ConfigDefinitionToTypes<typeof blockConfigRegistry.smallrocketengine>> {
 		return {
 			thrust_add: {
 				conflicts: "thrust_sub",

@@ -1,59 +1,17 @@
 import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
+import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Remotes from "shared/Remotes";
 
-type TNTBlockConfig = {
-	readonly explode: "key";
-	readonly radius: "number";
-	readonly pressure: "number";
-	readonly flammable: "bool";
-};
-
-export default class TNTBlockLogic extends ConfigurableBlockLogic<TNTBlockConfig> {
+export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.tnt> {
 	constructor(block: Model) {
 		super(block, TNTBlockLogic.getConfigDefinition());
 	}
 
-	static getConfigDefinition(): ConfigTypesToDefinition<TNTBlockConfig> {
-		return {
-			explode: {
-				displayName: "Explode",
-				type: "key",
-				default: {
-					Desktop: "B",
-					Gamepad: "ButtonR2",
-				},
-			},
-			radius: {
-				displayName: "Explosion radius",
-				type: "number",
-				default: {
-					Desktop: 12,
-				},
-				min: 1,
-				max: 12,
-				step: 1,
-			},
-			pressure: {
-				displayName: "Explosion pressure",
-				type: "number",
-				default: {
-					Desktop: 2500,
-				},
-				min: 0,
-				max: 2500,
-				step: 1,
-			},
-			flammable: {
-				displayName: "Flammable",
-				type: "bool",
-				default: {
-					Desktop: true,
-				},
-			},
-		};
+	static getConfigDefinition() {
+		return blockConfigRegistry.tnt;
 	}
 
-	public getKeysDefinition(): KeyDefinitions<TNTBlockConfig> {
+	public getKeysDefinition(): KeyDefinitions<ConfigDefinitionToTypes<typeof blockConfigRegistry.tnt>> {
 		return {
 			explode: {
 				keyDown: () => {

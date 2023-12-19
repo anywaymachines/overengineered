@@ -1,15 +1,8 @@
 import { UserInputService } from "@rbxts/services";
 import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
+import blockConfigRegistry from "shared/BlockConfigRegistry";
 
-type ServoMotorConfig = {
-	readonly rotate_add: "key";
-	readonly rotate_sub: "key";
-	readonly speed: "number";
-	readonly angle: "number";
-	readonly switch: "bool";
-};
-
-export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMotorConfig> {
+export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.servomotorblock> {
 	private readonly hingeConstraint;
 
 	private readonly speed;
@@ -36,58 +29,14 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<ServoMo
 		this.eventHandler.subscribe(UserInputService.InputEnded, () => this.update());
 	}
 
-	static getConfigDefinition(): ConfigTypesToDefinition<ServoMotorConfig> {
-		return {
-			rotate_add: {
-				displayName: "Rotate +",
-				type: "key",
-				default: {
-					Desktop: "Q",
-					Gamepad: "ButtonR2",
-				},
-			},
-			rotate_sub: {
-				displayName: "Rotate -",
-				type: "key",
-				default: {
-					Desktop: "E",
-					Gamepad: "ButtonL2",
-				},
-			},
-			speed: {
-				displayName: "Max. speed",
-				type: "number",
-				min: 0,
-				max: 50,
-				step: 1,
-				default: {
-					Desktop: 15,
-				},
-			},
-			angle: {
-				displayName: "Angle",
-				type: "number",
-				min: -180,
-				max: 180,
-				step: 1,
-				default: {
-					Desktop: 45,
-				},
-			},
-			switch: {
-				displayName: "Switch",
-				type: "bool",
-				default: {
-					Desktop: false,
-				},
-			},
-		};
+	static getConfigDefinition() {
+		return blockConfigRegistry.servomotorblock;
 	}
 
 	private isIncreasing = false;
 	private isDecreasing = false;
 
-	public getKeysDefinition(): KeyDefinitions<ServoMotorConfig> {
+	public getKeysDefinition(): KeyDefinitions<ConfigDefinitionToTypes<typeof blockConfigRegistry.servomotorblock>> {
 		return {
 			rotate_add: {
 				conflicts: "rotate_sub",

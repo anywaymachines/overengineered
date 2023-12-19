@@ -14,7 +14,7 @@ export default class PlayerDataStorage {
 	public static readonly loadedSlot = new ObservableValue<number | undefined>(undefined);
 
 	public static readonly data = new ObservableValue<NonNullableFields<PlayerDataResponse> | undefined>(undefined);
-	public static readonly config = this.data.createChild("settings", {});
+	public static readonly config = this.data.createChild("settings", {}) as ObservableValue<Required<PlayerConfig>>;
 	public static readonly slots = this.data.createChild("slots", []);
 
 	static async init() {

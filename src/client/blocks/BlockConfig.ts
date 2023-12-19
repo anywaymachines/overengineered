@@ -1,14 +1,14 @@
 import { HttpService } from "@rbxts/services";
 import Config from "client/Config";
 
-export class BlockConfig<T extends ConfigValueTypes> extends Config<T> {
+export default class BlockConfig<TDef extends ConfigDefinitions> extends Config<TDef> {
 	readonly block;
 
-	constructor(source: Model, definitions: ConfigTypesToDefinition<T>) {
+	constructor(source: Model, definitions: TDef) {
 		const configAttribute = source.GetAttribute("config") as string | undefined;
 		const content =
 			configAttribute !== undefined
-				? (HttpService.JSONDecode(configAttribute) as Readonly<Record<keyof T, string>> | undefined)
+				? (HttpService.JSONDecode(configAttribute) as Readonly<Record<keyof TDef, string>> | undefined)
 				: undefined;
 
 		const config = content === undefined ? undefined : Config.deserialize(content, definitions);

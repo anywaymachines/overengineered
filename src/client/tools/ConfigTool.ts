@@ -1,9 +1,9 @@
 import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
-import { blockConfigRegistry } from "client/blocks/LogicRegistry";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
+import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { initializeBoxSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
 
 export default class ConfigTool extends ToolBase {
@@ -22,7 +22,8 @@ export default class ConfigTool extends ToolBase {
 				// if (InputController.inputType.get() !== "Desktop")  return;
 				this.selectBlockByClick(block);
 			},
-			(target: Model) => blockConfigRegistry[target.GetAttribute("id") as string] !== undefined,
+			(target: Model) =>
+				blockConfigRegistry[target.GetAttribute("id") as keyof typeof blockConfigRegistry] !== undefined,
 		);
 		initializeBoxSelection(
 			this.eventHandler,
@@ -31,7 +32,8 @@ export default class ConfigTool extends ToolBase {
 					this.selectBlock(block);
 				}
 			},
-			(target: Model) => blockConfigRegistry[target.GetAttribute("id") as string] !== undefined,
+			(target: Model) =>
+				blockConfigRegistry[target.GetAttribute("id") as keyof typeof blockConfigRegistry] !== undefined,
 		);
 
 		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, (model) => {

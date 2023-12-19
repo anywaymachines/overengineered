@@ -1,8 +1,8 @@
 import Config from "client/Config";
 import Control from "client/base/Control";
-import { BlockConfig } from "client/blocks/BlockConfig";
-import { blockConfigRegistry } from "client/blocks/LogicRegistry";
+import BlockConfig from "client/blocks/BlockConfig";
 import ConfigTool from "client/tools/ConfigTool";
+import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Remotes from "shared/Remotes";
@@ -83,14 +83,17 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				const blockmodel = selected.Parent as Model;
 				const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
 
-				const defs = blockConfigRegistry[block.id];
-				if (!defs) return undefined! as BlockConfig<ConfigValueTypes>;
+				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry];
+				if (!defs) return undefined! as BlockConfig<ConfigDefinitions>;
 
 				return new BlockConfig(blockmodel, defs);
 			})
 			.filter((x) => x !== undefined);
 
-		const send = async (key: string, value: ConfigValue) => {
+		const send = async (
+			key: keyof (typeof blockConfigRegistry)[keyof typeof blockConfigRegistry],
+			value: ConfigValue,
+		) => {
 			Logger.info(
 				`Sending (${configs.size()}) block config values ${key} ${Config.serializeOne(
 					value,
@@ -106,7 +109,10 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				});
 		};
 
-		for (const [id, def] of Objects.entries(configs[0].definitions)) {
+		for (const [id, def] of Objects.entries(configs[0].definitions) as (readonly [
+			keyof (typeof blockConfigRegistry)[keyof typeof blockConfigRegistry],
+			ConfigDefinition,
+		])[]) {
 			if (def.type === "bool") {
 				const control = new ConfigPartControl(
 					this.checkboxTemplate(),
