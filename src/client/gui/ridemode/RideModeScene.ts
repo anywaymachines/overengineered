@@ -290,15 +290,18 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 export type RideModeSceneDefinition = GuiObject & {
 	ActionBarGui: ActionBarControlDefinition;
-	Torque: RocketEngineGuiDefinition;
-	Speed: SliderControlDefinition;
-	Altitude: SliderControlDefinition;
 	Controls: RideModeControlsDefinition;
+	Info: GuiObject & {
+		Torque: RocketEngineGuiDefinition;
+		Speed: SliderControlDefinition;
+		Altitude: SliderControlDefinition;
+	};
 };
 
 export default class RideModeScene extends Control<RideModeSceneDefinition> {
 	private readonly actionbar;
 	private readonly controls;
+	private readonly info;
 
 	private readonly torqueTemplate;
 	private readonly speedTemplate;
@@ -314,9 +317,12 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		this.add(this.actionbar);
 		this.actionbar.show();
 
-		this.torqueTemplate = Control.asTemplate(this.gui.Torque);
-		this.speedTemplate = Control.asTemplate(this.gui.Speed);
-		this.altitudeTemplate = Control.asTemplate(this.gui.Altitude);
+		this.info = new Control(this.gui.Info);
+		this.add(this.info);
+
+		this.torqueTemplate = Control.asTemplate(this.gui.Info.Torque);
+		this.speedTemplate = Control.asTemplate(this.gui.Info.Speed);
+		this.altitudeTemplate = Control.asTemplate(this.gui.Info.Altitude);
 	}
 
 	public start(machine: Machine) {
@@ -324,13 +330,15 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 			this.controls.start(machine);
 		}
 
+		this.info.clear();
+
 		{
 			const player = Players.LocalPlayer.Character!.WaitForChild("HumanoidRootPart") as Part;
 			const maxSpdShow = RobloxUnit.getSpeedFromMagnitude(800, "MetersPerSecond");
 
 			const speed = new ProgressBarControl(this.speedTemplate(), 0, maxSpdShow, 0.1);
 			speed.show();
-			this.controls.add(speed);
+			this.info.add(speed);
 
 			this.event.subscribe(RunService.Heartbeat, () => {
 				const spd = RobloxUnit.getSpeedFromMagnitude(
@@ -349,7 +357,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 
 			const altitude = new ProgressBarControl(this.altitudeTemplate(), 0, maxAltitude, 0.1);
 			altitude.show();
-			this.controls.add(altitude);
+			this.info.add(altitude);
 
 			this.event.subscribe(RunService.Heartbeat, () => {
 				const alt = RobloxUnit.Studs_To_Meters(player.Position.Y);
@@ -363,7 +371,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		if (rockets.size() !== 0) {
 			const torque = new RocketEngineGui(this.torqueTemplate(), machine);
 			torque.show();
-			this.controls.add(torque);
+			this.info.add(torque);
 		}
 	}
 }
