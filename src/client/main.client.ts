@@ -1,4 +1,4 @@
-import { RunService, UserInputService } from "@rbxts/services";
+import { RunService, StarterGui, UserInputService } from "@rbxts/services";
 import PlayerDataStorage from "./PlayerDataStorage";
 import ComponentContainer from "./base/ComponentContainer";
 import GameEnvironmentController from "./controller/GameEnvironmentController";
@@ -42,8 +42,12 @@ UserInputService.InputBegan.Connect((input) => {
 
 		const scene = playModeController.modes[mode];
 		if (scene.isEnabled()) {
+			StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.All, false);
+
 			scene.disable();
 		} else {
+			StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.All, true);
+
 			scene.enable();
 		}
 	};
