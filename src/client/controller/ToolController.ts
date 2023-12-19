@@ -1,22 +1,25 @@
 import ComponentBase from "client/base/ComponentBase";
 import ToolBase from "client/base/ToolBase";
 import TooltipsControl from "client/gui/static/TooltipsControl";
+import BuildTool2 from "client/tools/BuildTool2";
 import ObservableValue from "shared/event/ObservableValue";
 import BuildTool from "../tools/BuildTool";
 import ConfigTool from "../tools/ConfigTool";
 import DeleteTool from "../tools/DeleteTool";
 import MoveTool from "../tools/MoveTool";
+import BuildingMode from "./modes/BuildingMode";
 
 export default class ToolController extends ComponentBase {
 	public readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);
 	public readonly tools: readonly ToolBase[];
 
-	public readonly buildTool = new BuildTool();
-	public readonly moveTool = new MoveTool();
-	public readonly deleteTool = new DeleteTool();
-	public readonly configTool = new ConfigTool();
+	public readonly buildTool;
+	public readonly moveTool;
+	public readonly deleteTool;
+	public readonly configTool;
+	public readonly buildTool2;
 
-	constructor() {
+	constructor(mode: BuildingMode) {
 		super();
 
 		this.selectedTool.subscribe((tool, prev) => {
@@ -24,7 +27,13 @@ export default class ToolController extends ComponentBase {
 			tool?.enable();
 		});
 
-		this.tools = [this.buildTool, this.moveTool, this.deleteTool, this.configTool] as const;
+		this.buildTool = new BuildTool(mode);
+		this.moveTool = new MoveTool(mode);
+		this.deleteTool = new DeleteTool(mode);
+		this.configTool = new ConfigTool(mode);
+		this.buildTool2 = new BuildTool2(mode);
+
+		this.tools = [this.buildTool, this.moveTool, this.deleteTool, this.configTool, this.buildTool2] as const;
 		this.selectedTool.subscribe((tool) => TooltipsControl.instance.updateControlTooltips(tool));
 		this.event.onPrepare(() => TooltipsControl.instance.updateControlTooltips(this.selectedTool.get()), true);
 	}

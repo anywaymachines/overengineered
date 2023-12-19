@@ -1,15 +1,22 @@
 import { Players } from "@rbxts/services";
 import GuiController from "client/controller/GuiController";
+import BuildingMode from "client/controller/modes/BuildingMode";
+import ObservableValue from "shared/event/ObservableValue";
 import ComponentBase from "./ComponentBase";
 
 /** An abstract class of tools for working with the world */
 export default abstract class ToolBase extends ComponentBase {
+	readonly mirrorMode = new ObservableValue<MirrorModeProperties>({});
+
 	protected readonly gameUI;
 	protected readonly mouse: Mouse;
 	protected isEquipped = false;
+	protected readonly mode: BuildingMode;
 
-	constructor() {
+	constructor(mode: BuildingMode) {
 		super();
+		this.mode = mode;
+		this.mirrorMode.bindTo(mode.mirrorMode);
 
 		this.gameUI = GuiController.getGameUI<ScreenGui>();
 		this.mouse = Players.LocalPlayer.GetMouse();

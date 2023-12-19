@@ -6,6 +6,7 @@ import BuildingController from "client/controller/BuildingController";
 import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
+import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
 import MaterialChooserControl from "client/gui/tools/MaterialChooser";
@@ -37,8 +38,8 @@ export default class BuildTool extends ToolBase {
 
 	private selectedBlock?: Block;
 
-	constructor() {
-		super();
+	constructor(mode: BuildingMode) {
+		super(mode);
 
 		MaterialChooserControl.instance.selectedMaterial.subscribe((material) => {
 			this.setSelectedMaterial(material);

@@ -1,15 +1,18 @@
 import { Players } from "@rbxts/services";
 import BuildingModeScene, { BuildingModeSceneDefinition } from "client/gui/scenes/BuildingModeScene";
 import SharedPlots from "shared/building/SharedPlots";
+import ObservableValue from "shared/event/ObservableValue";
 import GuiController from "../GuiController";
 import ToolController from "../ToolController";
 import PlayMode from "./PlayMode";
 
 export default class BuildingMode extends PlayMode {
+	readonly mirrorMode = new ObservableValue<MirrorModeProperties>({ X: 0, Y: 5, Z: 0 });
+
 	constructor() {
 		super();
 
-		const tools = new ToolController();
+		const tools = new ToolController(this);
 		this.add(tools);
 
 		const scene = new BuildingModeScene(
