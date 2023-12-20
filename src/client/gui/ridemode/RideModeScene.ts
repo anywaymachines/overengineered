@@ -6,6 +6,7 @@ import Control from "client/base/Control";
 import Machine from "client/blocks/logic/Machine";
 import RocketEngineLogic from "client/blocks/logic/RocketEngineLogic";
 import InputController from "client/controller/InputController";
+import PopupController from "client/controller/PopupController";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
 import Remotes from "shared/Remotes";
 import RobloxUnit from "shared/RobloxUnit";
@@ -55,7 +56,11 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 		});
 
 		this.event.subscribe(controlResetButton.activated, async () => {
-			controls.resetControls();
+			PopupController.instance.showConfirmation(
+				"Reset the controls?",
+				() => controls.resetControls(),
+				() => {},
+			);
 		});
 
 		this.event.subscribe(controls.onEnterSettingsMode, () => {
@@ -98,7 +103,16 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 	resetControl(btn: Control, pos: number) {
 		const size = btn.getGui().Size;
-		btn.getGui().Position = new UDim2(0.95, 0, 1 - size.Y.Scale * pos - 0.01 * pos, 0);
+
+		let x = 0.95;
+		let y = 1 - size.Y.Scale * pos - 0.01 * pos;
+
+		while (y < 0.05) {
+			y += 0.95;
+			x -= 0.05;
+		}
+
+		btn.getGui().Position = new UDim2(x, 0, y, 0);
 	}
 	resetControls() {
 		let pos = 0;
