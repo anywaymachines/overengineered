@@ -23,7 +23,7 @@ placeable
 				const id = categoryBlock.Name.lower();
 				const name = (categoryBlock.GetAttribute("name") as string | undefined) ?? categoryBlock.Name;
 				const required = (categoryBlock.GetAttribute("required") as boolean | undefined) ?? false;
-				const limit = (categoryBlock.GetAttribute("limit") as number | undefined) ?? 500;
+				const limit = (categoryBlock.GetAttribute("limit") as number | undefined) ?? 2000;
 
 				const block: Block = {
 					id,
