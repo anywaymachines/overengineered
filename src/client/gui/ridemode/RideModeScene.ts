@@ -208,14 +208,10 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 	start(machine: Machine) {
 		this.clear();
 		machine.destroyed.Connect(() => this.clear());
-		this.event.subscribeObservable(
-			machine.seat.occupiedByLocalPlayer,
-			(occupied) => {
-				if (occupied) this.show();
-				else this.hide();
-			},
-			true,
-		);
+		machine.seat.occupiedByLocalPlayer.subscribe((occupied) => {
+			if (occupied) this.show();
+			else this.hide();
+		}, true);
 
 		let pos = 0;
 		const map: Record<string, ConfigurableBlockLogic<ConfigDefinitions>[]> = {};
