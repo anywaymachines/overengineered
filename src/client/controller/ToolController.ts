@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import ComponentBase from "client/base/ComponentBase";
 import ToolBase from "client/base/ToolBase";
 import TooltipsControl from "client/gui/static/TooltipsControl";
@@ -33,7 +34,12 @@ export default class ToolController extends ComponentBase {
 		this.configTool = new ConfigTool(mode);
 		this.buildTool2 = new BuildTool2(mode);
 
-		this.tools = [this.buildTool, this.moveTool, this.deleteTool, this.configTool, this.buildTool2] as const;
+		const aboba: ToolBase[] = [this.buildTool, this.moveTool, this.deleteTool, this.configTool];
+		if (RunService.IsStudio()) {
+			aboba.push(this.buildTool2);
+		}
+
+		this.tools = aboba; // [this.buildTool, this.moveTool, this.deleteTool, this.configTool, this.buildTool2] as const;
 		this.selectedTool.subscribe((tool) => TooltipsControl.instance.updateControlTooltips(tool));
 		this.event.onPrepare(() => TooltipsControl.instance.updateControlTooltips(this.selectedTool.get()), true);
 	}
