@@ -28,6 +28,16 @@ export default class SpreadingFireController {
 		effects.forEach((value) => {
 			const obj = value.Clone();
 			obj.Parent = part;
+
+			if (obj.IsA("Sound")) {
+				if (math.random(1, 2) === 1) {
+					obj.Play();
+				} else {
+					obj.Destroy();
+					return;
+				}
+			}
+
 			appliedEffects.push(obj);
 		});
 

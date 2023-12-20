@@ -3,6 +3,10 @@ export default class RobloxUnit {
 		return Studs * 0.28;
 	}
 
+	static Meters_To_Studs(Meters: number) {
+		return Meters / 0.28;
+	}
+
 	/** BasePart.Mass */
 	static RMU_To_Kilograms(Mass: number) {
 		return Mass * 21.952;
