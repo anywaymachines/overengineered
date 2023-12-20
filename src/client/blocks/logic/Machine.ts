@@ -2,6 +2,7 @@ import { Players, RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import BlockLogic from "client/base/BlockLogic";
 import ComponentContainer from "client/base/ComponentContainer";
+import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import SharedPlots from "shared/building/SharedPlots";
@@ -23,21 +24,43 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 			this.add(logic);
 		}
 
-		const maxAngularVelocity = 50;
-		const maxLinearVelocity = 800;
 		this.event.subscribe(RunService.Heartbeat, () => {
 			const currentAngularVelocity = this.seat.vehicleSeat.AssemblyAngularVelocity;
 			this.seat.vehicleSeat.AssemblyAngularVelocity = new Vector3(
-				math.clamp(currentAngularVelocity.X, -maxAngularVelocity, maxAngularVelocity),
-				math.clamp(currentAngularVelocity.Y, -maxAngularVelocity, maxAngularVelocity),
-				math.clamp(currentAngularVelocity.Z, -maxAngularVelocity, maxAngularVelocity),
+				math.clamp(
+					currentAngularVelocity.X,
+					-GameDefinitions.MAX_ANGULAR_SPEED,
+					GameDefinitions.MAX_ANGULAR_SPEED,
+				),
+				math.clamp(
+					currentAngularVelocity.Y,
+					-GameDefinitions.MAX_ANGULAR_SPEED,
+					GameDefinitions.MAX_ANGULAR_SPEED,
+				),
+				math.clamp(
+					currentAngularVelocity.Z,
+					-GameDefinitions.MAX_ANGULAR_SPEED,
+					GameDefinitions.MAX_ANGULAR_SPEED,
+				),
 			);
 
 			const currentLinearVelocity = this.seat.vehicleSeat.AssemblyLinearVelocity;
 			this.seat.vehicleSeat.AssemblyLinearVelocity = new Vector3(
-				math.clamp(currentLinearVelocity.X, -maxLinearVelocity, maxLinearVelocity),
-				math.clamp(currentLinearVelocity.Y, -maxLinearVelocity, maxLinearVelocity),
-				math.clamp(currentLinearVelocity.Z, -maxLinearVelocity, maxLinearVelocity),
+				math.clamp(
+					currentLinearVelocity.X,
+					-GameDefinitions.MAX_LINEAR_SPEED,
+					GameDefinitions.MAX_LINEAR_SPEED,
+				),
+				math.clamp(
+					currentLinearVelocity.Y,
+					-GameDefinitions.MAX_LINEAR_SPEED,
+					GameDefinitions.MAX_LINEAR_SPEED,
+				),
+				math.clamp(
+					currentLinearVelocity.Z,
+					-GameDefinitions.MAX_LINEAR_SPEED,
+					GameDefinitions.MAX_LINEAR_SPEED,
+				),
 			);
 		});
 	}

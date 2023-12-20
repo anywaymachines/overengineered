@@ -1,13 +1,25 @@
+import RobloxUnit from "./RobloxUnit";
+
 export default class GameDefinitions {
 	static readonly GROUP = 1088368 as const;
 
 	// Building
 	static readonly FREE_SLOTS = 10 as const;
-	static readonly BUILD_HEIGHT_LIMIT = 100 as const;
+	static readonly BUILD_HEIGHT_LIMIT = 400 as const;
+
+	static readonly MAX_LINEAR_SPEED = RobloxUnit.Meters_To_Studs(1000);
+	static readonly MAX_ANGULAR_SPEED = 40;
 
 	static readonly PLAYER_SETTINGS_DEFINITION = {
 		betterCamera: {
 			displayName: "Better camera",
+			type: "bool",
+			default: {
+				Desktop: true,
+			},
+		},
+		music: {
+			displayName: "Music",
 			type: "bool",
 			default: {
 				Desktop: true,
