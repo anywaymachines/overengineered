@@ -1,4 +1,4 @@
-import { GuiService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { GuiService, HttpService, Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";
@@ -10,6 +10,8 @@ import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
 import MaterialChooserControl from "client/gui/tools/MaterialChooser";
+import { blockRegistry } from "shared/Registry";
+import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
 import ObservableValue from "shared/event/ObservableValue";
 import PartUtils from "shared/utils/PartUtils";
@@ -271,6 +273,31 @@ export default class BuildTool extends ToolBase {
 		}
 	}
 
+	pickBlock() {
+		const target = this.mouse.Target;
+		if (!target) return;
+
+		let model = target as Model | BasePart;
+		while (!model.IsA("Model")) {
+			model = model.Parent as Model | BasePart;
+			if (!model) return;
+		}
+
+		const id = model.GetAttribute("id") as string | undefined;
+		if (id === undefined) return;
+
+		this.setSelectedBlock(blockRegistry.get(id));
+
+		const mat = Serializer.EnumMaterialSerializer.deserialize(model.GetAttribute("material") as SerializedEnum);
+		const col = Serializer.Color3Serializer.deserialize(
+			HttpService.JSONDecode(model.GetAttribute("color") as string) as SerializedColor,
+		);
+		this.setSelectedMaterial(mat);
+		this.setSelectedColor(col);
+
+		this.rotateFineTune(model.GetPivot().Rotation);
+	}
+
 	public rotate(axis: "x" | "y" | "z", isInverted: boolean = InputController.isShiftPressed()) {
 		if (this.selectedBlock === undefined) {
 			return;
@@ -287,10 +314,14 @@ export default class BuildTool extends ToolBase {
 		}
 	}
 
-	private rotateFineTune(rotationVector: Vector3) {
-		this.previewBlockRotation = CFrame.fromEulerAnglesXYZ(rotationVector.X, rotationVector.Y, rotationVector.Z).mul(
-			this.previewBlockRotation,
-		);
+	private rotateFineTune(rotationVector: Vector3): void;
+	private rotateFineTune(cframe: CFrame): void;
+	private rotateFineTune(rotation: CFrame | Vector3): void {
+		if (!("LookVector" in rotation)) {
+			rotation = CFrame.fromEulerAnglesXYZ(rotation.X, rotation.Y, rotation.Z);
+		}
+
+		this.previewBlockRotation = rotation.mul(this.previewBlockRotation);
 		this.updatePosition(true);
 
 		SoundController.getSounds().BuildingMode.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
@@ -327,6 +358,11 @@ export default class BuildTool extends ToolBase {
 
 		this.eventHandler.subscribe(this.mouse.Move, () => this.updatePosition());
 		this.eventHandler.subscribe(this.mouse.Button1Down, async () => await this.placeBlock());
+		this.eventHandler.subscribe(UserInputService.InputBegan, async (input) => {
+			if (input.UserInputType === Enum.UserInputType.MouseButton3) {
+				this.pickBlock();
+			}
+		});
 
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updatePosition());
 	}
