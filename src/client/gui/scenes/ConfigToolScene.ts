@@ -70,6 +70,8 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		GuiAnimator.transition(this.gui.ParamsSelection, 0.2, "right");
 		GuiAnimator.transition(this.gui.ApplyToAllButton, 0.2, "down");
 		GuiAnimator.transition(this.gui.DeselectAllButton, 0.22, "down");
+
+		this.updateConfigs([]);
 	}
 
 	private updateConfigs(selected: readonly SelectionBox[]) {
