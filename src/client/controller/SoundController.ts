@@ -1,5 +1,6 @@
 import GameEnvironmentController from "./GameEnvironmentController";
 import GuiController from "./GuiController";
+import MusicController from "./sound/MusicController";
 
 declare type Sounds = {
 	BuildingMode: {
@@ -19,7 +20,9 @@ declare type Sounds = {
 
 /** A class for controlling sounds and their effects */
 export default class SoundController {
-	public static initialize() {}
+	public static initialize() {
+		MusicController.initialize();
+	}
 
 	public static getSounds(): Sounds {
 		return GuiController.getGameUI<{ Sounds: Sounds }>().Sounds;
