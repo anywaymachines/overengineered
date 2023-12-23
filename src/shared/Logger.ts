@@ -8,10 +8,7 @@ export default class Logger {
 	static info(msg: string) {
 		if (RunService.IsClient() === true) {
 			// Show logs only to maintainers
-			if (
-				Players.LocalPlayer.IsInGroup(GameDefinitions.GROUP) &&
-				Players.LocalPlayer.GetRankInGroup(GameDefinitions.GROUP) > 250
-			) {
+			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
 				print(`[INFO] [CLIENT] ${msg}`);
 			}
 		} else {

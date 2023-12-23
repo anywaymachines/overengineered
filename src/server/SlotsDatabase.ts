@@ -44,7 +44,12 @@ export default class SlotsDatabase {
 		if (index === SlotsMeta.autosaveSlotIndex) return;
 
 		const pdata = PlayerDatabase.instance.get(tostring(userId));
-		if (index >= 0 && index < GameDefinitions.FREE_SLOTS + (pdata.purchasedSlots ?? 0)) return;
+		const player = Players.GetPlayerByUserId(userId);
+		if (!player) return;
+
+		if (index >= 0 && index < GameDefinitions.getMaxSlots(player, pdata.purchasedSlots ?? 0)) {
+			return;
+		}
 
 		throw "Invalid slot index " + index;
 	}

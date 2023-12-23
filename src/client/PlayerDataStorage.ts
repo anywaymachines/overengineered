@@ -1,4 +1,4 @@
-import { HttpService, Workspace } from "@rbxts/services";
+import { HttpService, Players, Workspace } from "@rbxts/services";
 import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
@@ -31,7 +31,10 @@ export default class PlayerDataStorage {
 		this.data.set({
 			purchasedSlots: data.purchasedSlots ?? 0,
 			settings: new Config(data.settings ?? {}, GameDefinitions.PLAYER_SETTINGS_DEFINITION).getAll(),
-			slots: SlotsMeta.getAll(data.slots ?? [], GameDefinitions.FREE_SLOTS + (data.purchasedSlots ?? 0)),
+			slots: SlotsMeta.getAll(
+				data.slots ?? [],
+				GameDefinitions.getMaxSlots(Players.LocalPlayer, data.purchasedSlots ?? 0),
+			),
 		});
 
 		Logger.info("Configuration loaded: " + HttpService.JSONEncode(this.config.get()));

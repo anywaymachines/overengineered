@@ -5,6 +5,7 @@ export default class GameDefinitions {
 
 	// Building
 	static readonly FREE_SLOTS = 10 as const;
+	static readonly ADMIN_SLOTS = 50 as const;
 	static readonly BUILD_HEIGHT_LIMIT = 400 as const;
 
 	static readonly MAX_LINEAR_SPEED = RobloxUnit.Meters_To_Studs(1000);
@@ -29,5 +30,12 @@ export default class GameDefinitions {
 
 	static isAdmin(player: Player) {
 		return player.IsInGroup(GameDefinitions.GROUP) && player.GetRankInGroup(GameDefinitions.GROUP) > 250;
+	}
+
+	static getMaxSlots(player: Player, additional: number) {
+		let max = this.FREE_SLOTS + additional;
+		if (this.isAdmin(player)) max += this.ADMIN_SLOTS;
+
+		return max;
 	}
 }
