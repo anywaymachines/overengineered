@@ -44,6 +44,10 @@ export default class ServerPlots {
 		const data = this.createDefaultPlotData();
 		data.ownerID = player.UserId;
 		this.writePlotData(plot, data);
+
+		// Add persistant player
+		const blocks = plot.FindFirstChild("Blocks") as Model;
+		blocks.AddPersistentPlayer(player);
 	}
 
 	public static getFreePlot(): Model {
@@ -63,5 +67,9 @@ export default class ServerPlots {
 		this.clearAllBlocks(plot);
 
 		this.writePlotData(plot, this.createDefaultPlotData());
+
+		// Remove persistant player
+		const blocks = plot.FindFirstChild("Blocks") as Model;
+		blocks.RemovePersistentPlayer(player);
 	}
 }

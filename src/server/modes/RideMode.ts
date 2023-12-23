@@ -1,5 +1,6 @@
 import SlotsDatabase from "server/SlotsDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
+import Logger from "shared/Logger";
 import { blockList } from "shared/Registry";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
@@ -19,6 +20,7 @@ export default class RideMode implements PlayModeBase {
 	}
 
 	private rideStart(player: Player): Response {
+		Logger.info("TimeRSB " + DateTime.now());
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 		const blocks = SharedPlots.getPlotBlocks(plot);
 
@@ -37,7 +39,7 @@ export default class RideMode implements PlayModeBase {
 		SlotsDatabase.instance.setBlocks(
 			player.UserId,
 			SlotsMeta.autosaveSlotIndex,
-			BlocksSerializer.current.serialize(plot),
+			BlocksSerializer.serialize(plot),
 			SharedPlots.getPlotBlocks(plot).GetChildren().size(),
 		);
 
@@ -59,8 +61,7 @@ export default class RideMode implements PlayModeBase {
 
 		const blocksToLoad = SlotsDatabase.instance.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
 		if (blocksToLoad !== undefined) {
-			const deserialized = BlocksSerializer.current.deserialize(blocksToLoad);
-			BlocksSerializer.deserialize(plot, deserialized);
+			BlocksSerializer.deserialize(blocksToLoad, plot);
 		}
 
 		return { success: true };

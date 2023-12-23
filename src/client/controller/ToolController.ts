@@ -1,8 +1,9 @@
-import { RunService } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import ComponentBase from "client/base/ComponentBase";
 import ToolBase from "client/base/ToolBase";
 import TooltipsControl from "client/gui/static/TooltipsControl";
 import BuildTool2 from "client/tools/BuildTool2";
+import GameDefinitions from "shared/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
 import BuildTool from "../tools/BuildTool";
 import ConfigTool from "../tools/ConfigTool";
@@ -35,7 +36,7 @@ export default class ToolController extends ComponentBase {
 		this.buildTool2 = new BuildTool2(mode);
 
 		const aboba: ToolBase[] = [this.buildTool, this.moveTool, this.deleteTool, this.configTool];
-		if (RunService.IsStudio()) {
+		if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
 			aboba.push(this.buildTool2);
 		}
 

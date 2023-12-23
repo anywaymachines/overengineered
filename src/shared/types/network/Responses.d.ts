@@ -1,6 +1,6 @@
-type SuccessResponse<T extends {} = {}> = T & { readonly success: true };
+type SuccessResponse<T extends object = {}> = T & { readonly success: true };
 type ErrorResponse = { readonly success: false; readonly message: string };
-type Response<T extends {} = {}> = SuccessResponse<T> | ErrorResponse;
+type Response<T extends object = {}> = SuccessResponse<T> | ErrorResponse;
 
 type BuildResponse = Response<{ readonly model: Model }>;
 

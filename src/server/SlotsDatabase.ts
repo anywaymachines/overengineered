@@ -95,7 +95,7 @@ export default class SlotsDatabase {
 		let size: number | undefined = undefined;
 		if (saveBlocks) {
 			const plot = SharedPlots.getPlotByOwnerID(userId);
-			const blocks = BlocksSerializer.current.serialize(plot);
+			const blocks = BlocksSerializer.serialize(plot);
 			blocksCount = SharedPlots.getPlotBlocks(plot).GetChildren().size();
 
 			this.setBlocks(userId, index, blocks, blocksCount);

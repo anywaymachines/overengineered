@@ -28,10 +28,9 @@ class RemoteHandlers {
 
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 		ServerPlots.clearAllBlocks(plot);
-		const dblocks = BlocksSerializer.current.deserialize(blocks);
-		BlocksSerializer.deserialize(plot, dblocks);
+		const dblocks = BlocksSerializer.deserialize(blocks, plot);
 
-		return { success: true, isEmpty: dblocks.size() === 0 };
+		return { success: true, isEmpty: dblocks === 0 };
 	}
 
 	static updateSetting<TKey extends keyof PlayerConfig>(
