@@ -130,9 +130,13 @@ export default class BuildingWrapper {
 		return { success: true };
 	}
 
-	public static placeBlockAsPlayer(this: void, player: Player, data: PlaceBlockRequest): BuildResponse {
+	public static placeSingleBlockAsPlayer(
+		this: void,
+		player: Player,
+		data: ExcludeMembers<PlaceBlockRequest, "mirrors">,
+	): BuildResponse {
 		// Check is in plot
-		if (!BuildingManager.vectorAbleToPlayer(data.location.Position, player)) {
+		if (!BuildingManager.blockCanBePlacedAt(data.location.Position, player)) {
 			return {
 				success: false,
 				message: "Out of bounds",
@@ -168,6 +172,23 @@ export default class BuildingWrapper {
 		}
 
 		return placedBlock;
+	}
+	public static placeBlockAsPlayer(this: void, player: Player, data: PlaceBlockRequest): BuildResponse {
+		const result = BuildingWrapper.placeSingleBlockAsPlayer(player, data);
+		return result;
+
+		/*if (!result.success) return result;
+		
+		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;
+		const mirrorPositions = BuildingManager.getMirrorBlocksCFrames(plot, data.location.Position, data.mirrors);
+		for (const pos of Objects.values(mirrorPositions)) {
+			const result = BuildingWrapper.placeSingleBlockAsPlayer(player, {
+				...data,
+				location: pos,
+			});
+
+			if (!result.success) return result;
+		}*/
 	}
 	public static placeBlock(this: void, data: PlaceBlockRequest): BuildResponse {
 		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;

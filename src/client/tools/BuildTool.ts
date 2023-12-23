@@ -317,7 +317,7 @@ export default class BuildTool extends ToolBase {
 	private rotateFineTune(rotationVector: Vector3): void;
 	private rotateFineTune(cframe: CFrame): void;
 	private rotateFineTune(rotation: CFrame | Vector3): void {
-		if (!("LookVector" in rotation)) {
+		if (typeIs(rotation, "Vector3")) {
 			rotation = CFrame.fromEulerAnglesXYZ(rotation.X, rotation.Y, rotation.Z);
 		}
 

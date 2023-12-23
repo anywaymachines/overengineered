@@ -12,6 +12,11 @@ type PlayerMoveRequest = {
 	readonly vector: Vector3;
 };
 
+type BlockMirrorParams = {
+	readonly X?: number;
+	readonly Y?: number;
+	readonly Z?: number;
+};
 type PlaceBlockRequest = {
 	readonly block: string;
 	readonly color: Color3;

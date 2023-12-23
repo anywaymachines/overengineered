@@ -1,23 +1,33 @@
-import { Workspace } from "@rbxts/services";
+import { Players, Workspace } from "@rbxts/services";
 import ToolBase from "client/base/ToolBase";
+import ActionController from "client/controller/ActionController";
+import BuildingController from "client/controller/BuildingController";
+import SoundController from "client/controller/SoundController";
 import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
+import LogControl from "client/gui/static/LogControl";
 import MaterialChooserControl from "client/gui/tools/MaterialChooser";
+import Logger from "shared/Logger";
 import Objects from "shared/_fixes_/objects";
+import BuildingManager, { MirrorBlocksCFrames } from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import PartUtils from "shared/utils/PartUtils";
+import PlayerUtils from "shared/utils/PlayerUtils";
 
-type MirroredGhosts = {
-	X?: Model;
-	Y?: Model;
-	Z?: Model;
+type BlockGhost = { readonly model: Model; readonly highlight: Highlight };
+type BlockGhosts = {
+	Main?: BlockGhost;
 
-	XZ?: Model;
-	XY?: Model;
-	YZ?: Model;
+	X?: BlockGhost;
+	Y?: BlockGhost;
+	Z?: BlockGhost;
 
-	XYZ?: Model;
+	XZ?: BlockGhost;
+	XY?: BlockGhost;
+	YZ?: BlockGhost;
+
+	XYZ?: BlockGhost;
 };
 
 /** A tool for building in the world with blocks */
@@ -26,8 +36,10 @@ export default class BuildTool2 extends ToolBase {
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
 
-	private mainGhost: Model | undefined;
-	private readonly mirroredGhosts: MirroredGhosts = {};
+	private readonly allowedColor = Color3.fromRGB(194, 217, 255);
+	private readonly forbiddenColor = Color3.fromRGB(255, 189, 189);
+
+	private readonly ghosts: BlockGhosts = {};
 	private blockRotation = CFrame.identity;
 
 	constructor(mode: BuildingMode) {
@@ -47,6 +59,8 @@ export default class BuildTool2 extends ToolBase {
 		this.event.subscribe(this.mouse.Move, () => this.updateBlockPosition());
 		this.event.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.updateBlockPosition());
 		this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.updateBlockPosition());
+
+		this.event.subscribe(this.mouse.Button1Down, () => this.placeBlock());
 	}
 
 	public disable(): void {
@@ -55,28 +69,38 @@ export default class BuildTool2 extends ToolBase {
 	}
 
 	private destroyGhosts() {
-		this.mainGhost?.Destroy();
-		this.mainGhost = undefined;
-
 		this.blockRotation = CFrame.identity;
 
-		for (const [key, ghost] of Objects.entries(this.mirroredGhosts)) {
-			ghost?.Destroy();
-			delete this.mirroredGhosts[key];
+		for (const [key, ghost] of Objects.entries(this.ghosts)) {
+			ghost.model?.Destroy();
+			delete this.ghosts[key];
 		}
 	}
 
-	private createBlockGhost(block: Block) {
+	private createBlockHighlight(block: Model) {
+		const highlight = new Instance("Highlight");
+		highlight.Name = "BlockHighlight";
+		highlight.Parent = block;
+		highlight.Adornee = block;
+		highlight.FillTransparency = 0.4;
+		highlight.OutlineTransparency = 0.5;
+		highlight.DepthMode = Enum.HighlightDepthMode.Occluded;
+
+		return highlight;
+	}
+
+	private createBlockGhost(block: Block): BlockGhost {
 		const model = block.model.Clone();
 		model.Parent = Workspace;
 
-		// this.addAxisModel(model);
-		// this.addHighlight(model);
 		PartUtils.switchDescendantsMaterial(model, this.selectedMaterial.get());
 		PartUtils.switchDescendantsColor(model, this.selectedColor.get());
 		PartUtils.ghostModel(model);
+		// this.addAxisModel(model);
 
-		return model;
+		const highlight = this.createBlockHighlight(model);
+
+		return { model, highlight };
 	}
 
 	private updateBlockPosition() {
@@ -84,6 +108,11 @@ export default class BuildTool2 extends ToolBase {
 		if (!selected) return;
 
 		const getMouseTargetBlockPosition = () => {
+			const constrainPositionToGrid = (pos: Vector3) => {
+				const constrain = (num: number) => math.round(num);
+				return new Vector3(constrain(pos.X), constrain(pos.Y), constrain(pos.Z));
+			};
+
 			const mouseTarget = this.mouse.Target;
 			if (!mouseTarget) return undefined;
 
@@ -93,66 +122,136 @@ export default class BuildTool2 extends ToolBase {
 			const globalMouseHitPos = mouseHit.PointToWorldSpace(Vector3.zero);
 			const normal = Vector3.FromNormalId(mouseSurface);
 
-			const targetPosition = globalMouseHitPos.add(normal);
+			let targetPosition = globalMouseHitPos.add(normal);
+			targetPosition = constrainPositionToGrid(targetPosition);
 			return targetPosition;
 		};
-		const constrainPositionToGrid = (pos: Vector3) => {
-			const constrain = (num: number) => math.round(num);
-			return new Vector3(constrain(pos.X), constrain(pos.Y), constrain(pos.Z));
+		const deleteMirrorGhosts = () => {
+			for (const [key, ghost] of Objects.entries(this.ghosts)) {
+				if (key === "Main") continue;
+
+				ghost?.model.Destroy();
+				delete this.ghosts[key];
+			}
 		};
-		const createMirrorBlocksIfNeeded = () => {
-			const mirror = this.mirrorMode.get();
+		const updateMirrorGhostBlocksPosition = (plot: Model, mainPosition: Vector3) => {
+			const mirrorCFrames = BuildingManager.getBlocksCFramesWithMirrored(
+				plot,
+				mainPosition,
+				this.mirrorMode.get(),
+			);
 
-			const x = mirror.X !== undefined;
-			const y = mirror.Y !== undefined;
-			const z = mirror.Z !== undefined;
+			const set = (key: keyof MirrorBlocksCFrames & keyof BlockGhosts) => {
+				const pos = mirrorCFrames[key];
+				if (!pos) return;
 
-			if (x) this.mirroredGhosts.X ??= this.createBlockGhost(selected);
-			if (y) this.mirroredGhosts.Y ??= this.createBlockGhost(selected);
-			if (z) this.mirroredGhosts.Z ??= this.createBlockGhost(selected);
-			if (x && y) this.mirroredGhosts.XY ??= this.createBlockGhost(selected);
-			if (y && z) this.mirroredGhosts.YZ ??= this.createBlockGhost(selected);
-			if (x && z) this.mirroredGhosts.XZ ??= this.createBlockGhost(selected);
-			if (x && y && z) this.mirroredGhosts.XYZ ??= this.createBlockGhost(selected);
-		};
-		const updateMirrorBlocksPosition = (mainPosition: Vector3) => {
-			const mirror = this.mirrorMode.get();
+				(this.ghosts[key] ??= this.createBlockGhost(selected)).model.PivotTo(pos);
+			};
 
-			const plot = SharedPlots.getPlotByPosition(mainPosition);
-			if (!plot) return;
+			set("X");
+			set("Y");
+			set("Z");
 
-			const center = plot.GetPivot().Position.add(new Vector3(mirror.X ?? 0, mirror.Y ?? 0, mirror.Z ?? 0));
-			const offsetx2 = mainPosition.sub(center).mul(-2);
+			set("XY");
+			set("YZ");
+			set("XZ");
 
-			this.mirroredGhosts.X?.PivotTo(new CFrame(mainPosition.add(new Vector3(offsetx2.X, 0, 0))));
-			this.mirroredGhosts.Y?.PivotTo(new CFrame(mainPosition.add(new Vector3(0, offsetx2.Y, 0))));
-			this.mirroredGhosts.Z?.PivotTo(new CFrame(mainPosition.add(new Vector3(0, 0, offsetx2.Z))));
-
-			this.mirroredGhosts.XY?.PivotTo(new CFrame(mainPosition.add(new Vector3(offsetx2.X, offsetx2.Y, 0))));
-			this.mirroredGhosts.YZ?.PivotTo(new CFrame(mainPosition.add(new Vector3(0, offsetx2.Y, offsetx2.Z))));
-			this.mirroredGhosts.XZ?.PivotTo(new CFrame(mainPosition.add(new Vector3(offsetx2.X, 0, offsetx2.Z))));
-
-			this.mirroredGhosts.XYZ?.PivotTo(new CFrame(mainPosition.add(offsetx2)));
+			set("XYZ");
 		};
 
-		let mainPosition = getMouseTargetBlockPosition();
+		const mainPosition = getMouseTargetBlockPosition();
 		if (!mainPosition) return;
 
-		mainPosition = constrainPositionToGrid(mainPosition);
+		const plot = SharedPlots.getPlotByPosition(mainPosition);
 
-		this.mainGhost ??= this.createBlockGhost(selected);
-		this.mainGhost!.PivotTo(new CFrame(mainPosition));
+		this.ghosts.Main ??= this.createBlockGhost(selected);
+		this.ghosts.Main.model!.PivotTo(new CFrame(mainPosition));
 
-		createMirrorBlocksIfNeeded();
-		updateMirrorBlocksPosition(mainPosition);
+		if (plot) {
+			updateMirrorGhostBlocksPosition(plot, mainPosition);
+		} else {
+			deleteMirrorGhosts();
+		}
+
+		const canBePlaced =
+			Objects.values(this.ghosts).find(
+				(ghost) => !BuildingManager.blockCanBePlacedAt(ghost.model.GetPivot().Position, Players.LocalPlayer),
+			) === undefined;
+
+		for (const ghost of Objects.values(this.ghosts)) {
+			ghost.highlight.FillColor = canBePlaced ? this.allowedColor : this.forbiddenColor;
+		}
 	}
 
 	rotateBlock(axis: "x" | "y" | "z", inverted: boolean): void {
 		//
 	}
 
-	placeBlock(): void {
-		//
+	async placeBlock() {
+		const selected = this.selectedBlock.get();
+
+		// ERROR: Block is not selected
+		if (!selected) {
+			LogControl.instance.addLine("Block is not selected!");
+			return;
+		}
+
+		// Non-alive players bypass
+		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
+			return;
+		}
+
+		const preview = this.ghosts.Main;
+		if (!preview || !preview.model.PrimaryPart) {
+			return;
+		}
+
+		const pos = preview.model.PrimaryPart.CFrame.Position;
+		const mirrors = this.mirrorMode.get();
+		const response = await ActionController.instance.executeOperation(
+			"Block placement",
+			async () => {
+				const cframes = BuildingManager.getBlocksCFramesWithMirrored(
+					SharedPlots.getPlotByPosition(pos)!,
+					pos,
+					mirrors,
+				);
+
+				const blocks: Model[] = [];
+				for (const cframe of Objects.values(cframes)) {
+					const block = BuildingManager.getBlockByPosition(cframe.Position);
+					if (block) blocks.push(block);
+				}
+
+				if (blocks.size() !== 0) await BuildingController.deleteBlock(blocks!);
+			},
+			Objects.values(this.ghosts).map((g) => ({
+				block: selected.id,
+				color: this.selectedColor.get(),
+				material: this.selectedMaterial.get(),
+				location: g.model.PrimaryPart!.CFrame,
+			})),
+			async (infos) => {
+				for (const info of infos) {
+					const result = await BuildingController.placeBlock(info);
+					if (!result.success) return result;
+				}
+
+				return { success: true };
+			},
+		);
+
+		if (response.success) {
+			// Play sound
+			SoundController.getSounds().BuildingMode.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().BuildingMode.BlockPlace.Play();
+
+			task.wait();
+			this.updateBlockPosition();
+		} else {
+			Logger.error(response.message);
+			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
+		}
 	}
 
 	getDisplayName(): string {

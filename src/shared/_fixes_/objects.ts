@@ -8,7 +8,7 @@ export default class Objects {
 		return result;
 	}
 
-	public static values<T extends object>(object: T): T[keyof T][] {
+	public static values<T extends object>(object: T): (T[keyof T] & defined)[] {
 		const result: (T[keyof T] & defined)[] = [];
 		for (const [_, value] of pairs(object)) {
 			result.push(value as T[keyof T] & defined);

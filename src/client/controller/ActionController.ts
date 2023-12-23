@@ -38,7 +38,7 @@ export default class ActionController extends ComponentBase {
 		});
 	}
 
-	public async executeOperation<TInfo, TResult extends { success: boolean }>(
+	public async executeOperation<TInfo, TResult extends Response>(
 		description: string,
 		undo: Operation["undo"],
 		info: TInfo,

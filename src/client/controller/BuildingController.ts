@@ -3,7 +3,7 @@ import LogControl from "client/gui/static/LogControl";
 import Remotes from "shared/Remotes";
 
 export default class BuildingController {
-	public static async placeBlock(data: PlaceBlockRequest) {
+	public static async placeBlock(data: PlaceBlockRequest): Promise<Response<{ position: Vector3 }>> {
 		const response = await Remotes.Client.GetNamespace("Building").Get("PlaceBlockRequest").CallServerAsync(data);
 
 		if (response.success) {
@@ -15,9 +15,7 @@ export default class BuildingController {
 			return { success: true, position: response.model.GetPivot().Position } as const;
 		} else {
 			LogControl.instance.addLine("Placement failed: " + response.message, Color3.fromRGB(255, 100, 100));
-
-			// not OK
-			return { success: false } as const;
+			return response;
 		}
 	}
 
