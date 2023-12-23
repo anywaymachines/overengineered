@@ -6,19 +6,22 @@ import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
 import SharedPlots from "shared/building/SharedPlots";
 
-export type SerializedBlocks = [
-	version: 0,
-	palette: readonly string[],
-	blocks: readonly (SerializedBlock & { id: number })[],
-];
-
-export type SerializedBlock = {
-	id: string;
-	mat: SerializedEnum;
-	col: SerializedColor;
-	loc: SerializedCFrame;
-	config?: object;
+type SerializedBlocks<TBlocks extends SerializedBlockV2> = {
+	version: number;
+	blocks: readonly TBlocks[];
 };
+
+interface SerializedBlockV0 {
+	readonly id: string;
+	readonly mat: SerializedEnum;
+	readonly col: SerializedColor;
+	readonly loc: SerializedCFrame;
+	readonly config?: object;
+}
+interface SerializedBlockV2 extends SerializedBlockV0 {
+	readonly guid: number;
+	readonly welds: readonly { readonly guid: number; readonly path: string }[];
+}
 
 const createBufferReader = (buf: buffer) => {
 	let position = 0;
@@ -149,52 +152,62 @@ interface BlocksSerializerCurrentVersion extends BlocksSerializerVersion {
 	serialize(plot: Model): string;
 }
 
-const getBlocksFromPlot = (plot: Model): readonly SerializedBlock[] => {
-	const blocks = SharedPlots.getPlotBlocks(plot).GetChildren();
+const read = {
+	blocksFromPlot: <T extends SerializedBlockV0>(
+		plot: Model,
+		serialize: (block: Model, index: number, buildingCenter: CFrame) => T,
+	): readonly T[] => {
+		const buildingCenter = (plot.FindFirstChild("BuildingArea")!.FindFirstChild("BuildingAreaCenter") as Part)
+			.CFrame;
+		return SharedPlots.getPlotBlocks(plot)
+			.GetChildren()
+			.map((block, i) => serialize(block as Model, i, buildingCenter));
+	},
 
-	const data: SerializedBlock[] = [];
-	for (let i = 0; i < blocks.size(); i++) {
-		const block = blocks[i] as Model;
-		const pivot = block.GetPivot();
-		const buildingCenter = plot.FindFirstChild("BuildingArea")!.FindFirstChild("BuildingAreaCenter") as Part;
+	blockV0: (block: Model, index: number, buildingCenter: CFrame): SerializedBlockV0 => {
+		const configattr = block.GetAttribute("config") as string | undefined;
 
-		const relativeOrientation = buildingCenter.CFrame.ToObjectSpace(pivot).LookVector;
-		const relativePosition = buildingCenter.CFrame.ToObjectSpace(pivot);
-
-		const blockData: SerializedBlock = {
+		return {
 			id: block.GetAttribute("id") as string, // Block ID
 			mat: block.GetAttribute("material") as SerializedEnum, // Material
 			col: HttpService.JSONDecode(block.GetAttribute("color") as string) as SerializedColor, // Color
-			loc: Serializer.CFrameSerializer.serialize(relativePosition), // Position
+			loc: Serializer.CFrameSerializer.serialize(buildingCenter.ToObjectSpace(block.GetPivot())), // Position
+			config:
+				configattr === undefined
+					? undefined
+					: (HttpService.JSONDecode(block.GetAttribute("config") as string) as object),
 		};
+	},
+	blockV2: (block: Model, index: number, buildingCenter: CFrame): SerializedBlockV2 => {
+		return {
+			...read.blockV0(block, index, buildingCenter),
+			guid: index,
+			welds: [],
+		};
+	},
+} as const;
+const place = {
+	blocksOnPlot: <T extends SerializedBlockV0>(
+		plot: Model,
+		data: readonly T[],
+		place: (plot: Model, blockData: T, buildingCenter: CFrame) => void,
+	) => {
+		const buildingCenter = (plot.FindFirstChild("BuildingArea")!.FindFirstChild("BuildingAreaCenter") as Part)
+			.CFrame;
+		data.forEach((blockData) => place(plot, blockData, buildingCenter));
+	},
 
-		if (block.GetAttribute("config") !== undefined) {
-			blockData["config"] = HttpService.JSONDecode(block.GetAttribute("config") as string) as object;
-		}
-
-		data.push(blockData);
-	}
-
-	return data;
-};
-const placeBlocksOnPlot = (plot: Model, data: readonly SerializedBlock[]): Model => {
-	const buildingCenter = plot.FindFirstChild("BuildingArea")!.FindFirstChild("BuildingAreaCenter") as Part;
-
-	for (let i = 0; i < data.size(); i++) {
-		const blockData = data[i];
-
+	blockOnPlotV0: (plot: Model, blockData: SerializedBlockV0, buildingCenter: CFrame) => {
 		if (!blockRegistry.has(blockData.id)) {
-			Logger.error(`Could not load ${blockData.id} from slot: not exists`);
-			continue;
+			Logger.error(`Could not load ${blockData.id} from slot: Block does not exists`);
+			return;
 		}
-
-		const loc = Serializer.CFrameSerializer.deserialize(blockData.loc);
 
 		const deserializedData: PlaceBlockRequest = {
 			block: blockData.id,
 			color: Serializer.Color3Serializer.deserialize(blockData.col),
 			material: Serializer.EnumMaterialSerializer.deserialize(blockData.mat),
-			location: buildingCenter.CFrame.ToWorldSpace(loc),
+			location: buildingCenter.ToWorldSpace(Serializer.CFrameSerializer.deserialize(blockData.loc)),
 			config: (blockData.config ?? {}) as Readonly<Record<string, string>>,
 		};
 
@@ -202,17 +215,34 @@ const placeBlocksOnPlot = (plot: Model, data: readonly SerializedBlock[]): Model
 		if (response.success && response.model && blockData.config) {
 			response.model.SetAttribute("config", HttpService.JSONEncode(blockData.config));
 		}
-	}
+	},
+	blockOnPlotV2: (plot: Model, blockData: SerializedBlockV2, buildingCenter: CFrame) => {
+		if (!blockRegistry.has(blockData.id)) {
+			Logger.error(`Could not load ${blockData.id} from slot: Block does not exists`);
+			return;
+		}
 
-	return plot;
-};
+		const deserializedData: PlaceBlockRequest = {
+			block: blockData.id,
+			color: Serializer.Color3Serializer.deserialize(blockData.col),
+			material: Serializer.EnumMaterialSerializer.deserialize(blockData.mat),
+			location: buildingCenter.ToWorldSpace(Serializer.CFrameSerializer.deserialize(blockData.loc)),
+			config: (blockData.config ?? {}) as Readonly<Record<string, string>>,
+		};
+
+		const response = BuildingWrapper.placeBlock(deserializedData);
+		if (response.success && response.model && blockData.config) {
+			response.model.SetAttribute("config", HttpService.JSONEncode(blockData.config));
+		}
+	},
+} as const;
 
 const v0: BlocksSerializerVersion = {
 	version: 0,
 
 	deserialize(data: string, plot: Model): number {
-		const blocks = HttpService.JSONDecode(Base64.Decode(data)) as readonly SerializedBlock[];
-		placeBlocksOnPlot(plot, blocks);
+		const blocks = HttpService.JSONDecode(Base64.Decode(data)) as readonly SerializedBlockV0[];
+		place.blocksOnPlot(plot, blocks, place.blockOnPlotV0);
 
 		return blocks.size();
 	},
@@ -221,13 +251,27 @@ const v1: BlocksSerializerCurrentVersion = {
 	version: 1,
 
 	deserialize(data: string, plot: Model): number {
-		const blocks = HttpService.JSONDecode(data) as readonly SerializedBlock[];
-		placeBlocksOnPlot(plot, blocks);
+		const blocks = HttpService.JSONDecode(data) as readonly SerializedBlockV0[];
+		place.blocksOnPlot(plot, blocks, place.blockOnPlotV0);
 
 		return blocks.size();
 	},
 	serialize(plot: Model): string {
-		return HttpService.JSONEncode(getBlocksFromPlot(plot));
+		return HttpService.JSONEncode(read.blocksFromPlot(plot, read.blockV0));
+	},
+};
+const v2: BlocksSerializerCurrentVersion = {
+	version: 2,
+
+	deserialize(data: string, plot: Model): number {
+		const blocks = HttpService.JSONDecode(data) as SerializedBlocks<SerializedBlockV2> | SerializedBlockV0[];
+		if (!("version" in blocks) || blocks.version !== this.version) throw "Wrong version";
+
+		place.blocksOnPlot(plot, blocks.blocks, place.blockOnPlotV2);
+		return blocks.blocks.size();
+	},
+	serialize(plot: Model): string {
+		return HttpService.JSONEncode(read.blocksFromPlot(plot, read.blockV0));
 	},
 };
 
@@ -262,7 +306,7 @@ const vBUFFER = {
 	version: 3,
 
 	serialize(plot: Model): string {
-		const blocks = getBlocksFromPlot(plot);
+		const blocks = read.blocksFromPlot(plot, read.blockV0);
 
 		const palette = new Map<string, number>(
 			[...new Set<string>(blocks.map((b) => b.id))]
@@ -317,7 +361,7 @@ const vBUFFER = {
 		print(HttpService.JSONEncode(blocks).size());
 		return buffer.tostring(buf2);
 	},
-	deserialize(data: string): readonly SerializedBlock[] {
+	deserialize(data: string): readonly SerializedBlockV0[] {
 		const buf = createBufferReader(buffer.fromstring(data));
 		const version = buf.readu8();
 		if (version !== 0) throw "invalid save version"; // TODO: check version before
@@ -333,7 +377,7 @@ const vBUFFER = {
 		}
 
 		const blockssize = buf.readu16();
-		const blocks: SerializedBlock[] = new Array(blockssize);
+		const blocks: SerializedBlockV0[] = new Array(blockssize);
 		for (let i = 0; i < blockssize; i++) {
 			const id = palette.get(buf.readu16())!;
 			const mat = buf.readu16();
@@ -353,7 +397,7 @@ const vBUFFER = {
 				config = HttpService.JSONDecode(buf.readstring(configstrsize)) as object;
 			}
 
-			const block: SerializedBlock = { id, mat, col, loc, config };
+			const block: SerializedBlockV0 = { id, mat, col, loc, config };
 			blocks.push(block);
 		}
 
