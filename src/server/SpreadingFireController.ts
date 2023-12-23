@@ -1,8 +1,15 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 
+const explosionBase = new Instance("Explosion");
+explosionBase.BlastPressure = 0;
+explosionBase.BlastRadius = 3.5;
+explosionBase.ExplosionType = Enum.ExplosionType.NoCraters;
+explosionBase.DestroyJointRadiusPercent = 0;
+explosionBase.Visible = false;
+
 export default class SpreadingFireController {
 	private isPartBurnable(part: BasePart) {
-		if (part.Anchored || !part.IsDescendantOf(Workspace.Plots) || part.GetAttribute("Burn")) {
+		if (part.Anchored || part.GetAttribute("Burn") === true || !part.IsDescendantOf(Workspace.Plots)) {
 			return false;
 		}
 
@@ -30,7 +37,7 @@ export default class SpreadingFireController {
 			obj.Parent = part;
 
 			if (obj.IsA("Sound")) {
-				if (math.random(1, 2) === 1) {
+				if (math.random(1, 4) === 1) {
 					obj.Play();
 				} else {
 					obj.Destroy();
@@ -50,19 +57,14 @@ export default class SpreadingFireController {
 			});
 
 			// Break joints with a chance
-			if (math.random(1, 2) === 1) {
+			if (math.random(1, 4) === 1) {
 				part.BreakJoints();
 			}
 
 			// Burn closest parts
-			const explosion = new Instance("Explosion");
-			explosion.BlastPressure = 0;
-			explosion.BlastRadius = 3.5;
-			explosion.ExplosionType = Enum.ExplosionType.NoCraters;
-			explosion.DestroyJointRadiusPercent = 0;
+			const explosion = explosionBase.Clone();
 			explosion.Position = part.Position;
 			explosion.Parent = part;
-			explosion.Visible = false;
 			explosion.Hit.Connect((part, distance) => {
 				this.burn(part);
 			});
