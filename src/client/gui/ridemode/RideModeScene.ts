@@ -15,9 +15,7 @@ import Objects from "shared/_fixes_/objects";
 import EventHandler from "shared/event/EventHandler";
 import { ButtonControl, TextButtonControl, TextButtonDefinition } from "../controls/Button";
 import { DictionaryControl } from "../controls/DictionaryControl";
-import ProgressBarControl from "../controls/ProgressBarControl";
-import { SliderControlDefinition } from "../controls/SliderControl";
-import RocketEngineGui, { RocketEngineGuiDefinition } from "./RocketEngineGui";
+import ProgressBarControl, { ProgressBarControlDefinition } from "../controls/ProgressBarControl";
 
 export type ActionBarControlDefinition = GuiObject & {
 	Stop: GuiButton;
@@ -302,9 +300,7 @@ export type RideModeSceneDefinition = GuiObject & {
 	ActionBarGui: ActionBarControlDefinition;
 	Controls: RideModeControlsDefinition;
 	Info: GuiObject & {
-		Torque: RocketEngineGuiDefinition;
-		Speed: SliderControlDefinition;
-		Altitude: SliderControlDefinition;
+		Template: ProgressBarControlDefinition & { Title: TextLabel };
 	};
 };
 
@@ -313,9 +309,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 	private readonly controls;
 	private readonly info;
 
-	private readonly torqueTemplate;
-	private readonly speedTemplate;
-	private readonly altitudeTemplate;
+	private readonly infoTemplate;
 
 	constructor(gui: RideModeSceneDefinition) {
 		super(gui);
@@ -330,9 +324,100 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		this.info = new Control(this.gui.Info);
 		this.add(this.info);
 
-		this.torqueTemplate = Control.asTemplate(this.gui.Info.Torque);
-		this.speedTemplate = Control.asTemplate(this.gui.Info.Speed);
-		this.altitudeTemplate = Control.asTemplate(this.gui.Info.Altitude);
+		this.infoTemplate = Control.asTemplate(this.gui.Info.Template);
+	}
+
+	private addMeters(machine: Machine) {
+		this.info.clear();
+
+		const init = (
+			title: string,
+			textformat: string,
+			min: number,
+			max: number,
+			step: number,
+			update: (control: ProgressBarControl) => void,
+		) => {
+			const gui = this.infoTemplate();
+			gui.Title.Text = title.upper();
+			gui.FormattedText!.Text = textformat;
+
+			const control = new ProgressBarControl(gui, min, max, step);
+			control.event.subscribe(RunService.Heartbeat, () => update(control));
+			this.info.add(control);
+		};
+
+		const player = Players.LocalPlayer.Character!.WaitForChild("HumanoidRootPart") as Part;
+
+		{
+			const maxSpdShow = RobloxUnit.getSpeedFromMagnitude(800, "MetersPerSecond");
+
+			init("Speed", "%d m/s", 0, maxSpdShow, 0.1, (control) => {
+				const spd = RobloxUnit.getSpeedFromMagnitude(
+					player.GetVelocityAtPosition(player.Position).Magnitude,
+					"MetersPerSecond",
+				);
+
+				control.value.set(spd);
+				control.getTextValue().set(spd);
+			});
+		}
+
+		{
+			const maxAltitude = RobloxUnit.Studs_To_Meters(1500);
+			init("Altitude", "%d m", 0, maxAltitude, 0.1, (control) => {
+				const alt = RobloxUnit.Studs_To_Meters(player.Position.Y);
+
+				control.value.set(alt);
+				control.getTextValue().set(alt);
+			});
+		}
+
+		{
+			init("Position", "%s m", 0, 1, 1, (control) => {
+				control
+					.getTextValue()
+					.set(
+						math.floor(RobloxUnit.Studs_To_Meters(player.Position.X)) +
+							" m " +
+							math.floor(RobloxUnit.Studs_To_Meters(player.Position.Z)),
+					);
+			});
+		}
+
+		{
+			const startTime = DateTime.now();
+			const pretty = (ms: number) => {
+				return `${math.floor(ms / 1000 / 60 / 60)}h ${math.floor(ms / 1000 / 60)}m ${math.floor(ms / 1000)}s`;
+			};
+
+			init("Time", "%s", 0, 1, 1, (control) => {
+				control
+					.getTextValue()
+					.set(
+						pretty(
+							DateTime.fromUnixTimestampMillis(
+								DateTime.now().UnixTimestampMillis - startTime.UnixTimestampMillis,
+							).UnixTimestampMillis,
+						),
+					);
+			});
+		}
+
+		{
+			const rockets = machine.getChildren().filter((c) => c instanceof RocketEngineLogic);
+			if (rockets.size() !== 0) {
+				init("Torque", "%d %%", 0, 100, 1, (control) => {
+					const avg: number[] = [];
+					for (const block of machine.getChildren()) {
+						if (!(block instanceof RocketEngineLogic)) continue;
+						avg.push(block.getTorque());
+					}
+
+					control.value.set(avg.reduce((acc, val) => acc + val, 0) / avg.size());
+				});
+			}
+		}
 	}
 
 	public start(machine: Machine) {
@@ -340,48 +425,6 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 			this.controls.start(machine);
 		}
 
-		this.info.clear();
-
-		{
-			const player = Players.LocalPlayer.Character!.WaitForChild("HumanoidRootPart") as Part;
-			const maxSpdShow = RobloxUnit.getSpeedFromMagnitude(800, "MetersPerSecond");
-
-			const speed = new ProgressBarControl(this.speedTemplate(), 0, maxSpdShow, 0.1);
-			speed.show();
-			this.info.add(speed);
-
-			this.event.subscribe(RunService.Heartbeat, () => {
-				const spd = RobloxUnit.getSpeedFromMagnitude(
-					player.GetVelocityAtPosition(player.Position).Magnitude,
-					"MetersPerSecond",
-				);
-
-				speed.value.set(spd);
-				speed.getTextValue().set(spd);
-			});
-		}
-
-		{
-			const player = Players.LocalPlayer.Character!.WaitForChild("HumanoidRootPart") as Part;
-			const maxAltitude = RobloxUnit.Studs_To_Meters(1500);
-
-			const altitude = new ProgressBarControl(this.altitudeTemplate(), 0, maxAltitude, 0.1);
-			altitude.show();
-			this.info.add(altitude);
-
-			this.event.subscribe(RunService.Heartbeat, () => {
-				const alt = RobloxUnit.Studs_To_Meters(player.Position.Y);
-
-				altitude.value.set(alt);
-				altitude.getTextValue().set(alt);
-			});
-		}
-
-		const rockets = machine.getChildren().filter((c) => c instanceof RocketEngineLogic);
-		if (rockets.size() !== 0) {
-			const torque = new RocketEngineGui(this.torqueTemplate(), machine);
-			torque.show();
-			this.info.add(torque);
-		}
+		this.addMeters(machine);
 	}
 }

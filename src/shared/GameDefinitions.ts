@@ -26,6 +26,13 @@ export default class GameDefinitions {
 				Desktop: true,
 			},
 		},
+		beacons: {
+			displayName: "Beacons",
+			type: "bool",
+			default: {
+				Desktop: true,
+			},
+		},
 	} as const satisfies ConfigDefinitions;
 
 	static isAdmin(player: Player) {

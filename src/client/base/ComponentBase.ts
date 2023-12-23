@@ -13,7 +13,7 @@ export default class ComponentBase {
 	public readonly onDisabled = new Signal<() => void>();
 
 	/** Main event handler. Does not register events until enabled and reregisters events when input type changes. */
-	protected readonly event: ComponentEventHolder = new ComponentEventHolder();
+	public readonly event: ComponentEventHolder = new ComponentEventHolder();
 
 	/** Event handler for use in prepare***() */
 	protected readonly eventHandler: EventHandler = new EventHandler();
