@@ -29,7 +29,6 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 		this.value.subscribe((value) => this.visualValue.set(value));
 		this.visualValue = this.progressBar.value;
 
-		this.value.subscribe((value) => this.progressBar.textValue.set(tostring(value)), true);
 		this.subscribeMovement();
 
 		if (Control.exists(this.gui, "TextBox")) {

@@ -15,7 +15,9 @@ import Objects from "shared/_fixes_/objects";
 import EventHandler from "shared/event/EventHandler";
 import { ButtonControl, TextButtonControl, TextButtonDefinition } from "../controls/Button";
 import { DictionaryControl } from "../controls/DictionaryControl";
-import ProgressBarControl, { ProgressBarControlDefinition } from "../controls/ProgressBarControl";
+import FormattedLabelControl from "../controls/FormattedLabelControl";
+import { ProgressBarControlDefinition } from "../controls/ProgressBarControl";
+import SliderControl from "../controls/SliderControl";
 
 export type ActionBarControlDefinition = GuiObject & {
 	Stop: GuiButton;
@@ -296,11 +298,24 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 	}
 }
 
+export type RideModeInfoControlDefinition = GuiObject & ProgressBarControlDefinition & { FormattedText: TextLabel };
+export class RideModeInfoControl extends Control<RideModeInfoControlDefinition> {
+	readonly slider;
+	readonly text;
+
+	constructor(gui: RideModeInfoControlDefinition, min: number, max: number, step: number) {
+		super(gui);
+
+		this.slider = this.added(new SliderControl(this.gui, min, max, step));
+		this.text = this.added(new FormattedLabelControl(this.gui.FormattedText));
+	}
+}
+
 export type RideModeSceneDefinition = GuiObject & {
 	ActionBarGui: ActionBarControlDefinition;
 	Controls: RideModeControlsDefinition;
 	Info: GuiObject & {
-		Template: ProgressBarControlDefinition & { Title: TextLabel };
+		Template: RideModeInfoControlDefinition & { Title: TextLabel };
 	};
 };
 
@@ -336,13 +351,13 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 			min: number,
 			max: number,
 			step: number,
-			update: (control: ProgressBarControl) => void,
+			update: (control: RideModeInfoControl) => void,
 		) => {
 			const gui = this.infoTemplate();
 			gui.Title.Text = title.upper();
 			gui.FormattedText!.Text = textformat;
 
-			const control = new ProgressBarControl(gui, min, max, step);
+			const control = new RideModeInfoControl(gui, min, max, step);
 			control.event.subscribe(RunService.Heartbeat, () => update(control));
 			this.info.add(control);
 		};
@@ -358,8 +373,8 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 					"MetersPerSecond",
 				);
 
-				control.value.set(spd);
-				control.getTextValue().set(spd);
+				control.slider.value.set(spd);
+				control.text.value.set(control.slider.value.get());
 			});
 		}
 
@@ -368,20 +383,18 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 			init("Altitude", "%d m", 0, maxAltitude, 0.1, (control) => {
 				const alt = RobloxUnit.Studs_To_Meters(player.Position.Y);
 
-				control.value.set(alt);
-				control.getTextValue().set(alt);
+				control.slider.value.set(alt);
+				control.text.value.set(control.slider.value.get());
 			});
 		}
 
 		{
 			init("Position", "%s m", 0, 1, 1, (control) => {
-				control
-					.getTextValue()
-					.set(
-						math.floor(RobloxUnit.Studs_To_Meters(player.Position.X)) +
-							" m " +
-							math.floor(RobloxUnit.Studs_To_Meters(player.Position.Z)),
-					);
+				control.text.value.set(
+					math.floor(RobloxUnit.Studs_To_Meters(player.Position.X)) +
+						" m " +
+						math.floor(RobloxUnit.Studs_To_Meters(player.Position.Z)),
+				);
 			});
 		}
 
@@ -392,15 +405,13 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 			};
 
 			init("Time", "%s", 0, 1, 1, (control) => {
-				control
-					.getTextValue()
-					.set(
-						pretty(
-							DateTime.fromUnixTimestampMillis(
-								DateTime.now().UnixTimestampMillis - startTime.UnixTimestampMillis,
-							).UnixTimestampMillis,
-						),
-					);
+				control.text.value.set(
+					pretty(
+						DateTime.fromUnixTimestampMillis(
+							DateTime.now().UnixTimestampMillis - startTime.UnixTimestampMillis,
+						).UnixTimestampMillis,
+					),
+				);
 			});
 		}
 
@@ -414,7 +425,8 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 						avg.push(block.getTorque());
 					}
 
-					control.value.set(avg.reduce((acc, val) => acc + val, 0) / avg.size());
+					control.slider.value.set(avg.reduce((acc, val) => acc + val, 0) / avg.size());
+					control.text.value.set(control.slider.value.get());
 				});
 			}
 		}

@@ -1,12 +1,10 @@
 import Control from "client/base/Control";
 import NumberObservableValue from "shared/event/NumberObservableValue";
-import ObservableValue from "shared/event/ObservableValue";
 import Animation from "../Animation";
 
 export type ProgressBarControlDefinition = GuiObject & {
 	Filled?: GuiObject;
 	Text?: TextLabel;
-	FormattedText?: TextLabel;
 	Knob?: GuiObject;
 };
 
@@ -14,41 +12,21 @@ export type ProgressBarControlDefinition = GuiObject & {
 export default class ProgressBarControl<
 	T extends ProgressBarControlDefinition = ProgressBarControlDefinition,
 > extends Control<T> {
-	public readonly textValue;
 	public readonly value;
 	public readonly vertical;
 
 	constructor(gui: T, min: number, max: number, step: number) {
 		super(gui);
-		this.textValue = new ObservableValue<string | number | undefined>(undefined);
 		this.value = new NumberObservableValue(min, min, max, step);
 		this.vertical = this.getAttribute<boolean>("Vertical") === true;
 
 		this.subscribeVisual();
 	}
 
-	public getTextValue() {
-		return this.textValue;
-	}
-
 	private subscribeVisual() {
-		if (Control.exists(this.gui, "FormattedText")) {
-			const label = this.gui.FormattedText;
-			const template = label.Text ?? "{}";
-
-			this.event.subscribeObservable(
-				this.textValue,
-				(value) => {
-					if (value === undefined) return;
-					label.Text = template.format(value);
-				},
-				true,
-			);
-		}
-
 		if (Control.exists(this.gui, "Text")) {
 			const text = this.gui.Text;
-			this.event.subscribeObservable(this.textValue, (value) => (text.Text = tostring(value)), true);
+			this.event.subscribeObservable(this.value, (value) => (text.Text = tostring(value)), true);
 		}
 
 		if (Control.exists(this.gui, "Knob")) {
