@@ -45,8 +45,8 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 			MaterialChooserControl.instance.show();
 		});
 
-		this.event.subscribe(
-			tool.selectedBlockChanged,
+		this.event.subscribeObservable(
+			tool.selectedBlock,
 			(block) => {
 				const visible = block !== undefined;
 				this.gui.TouchControls.Visible = visible;
@@ -55,6 +55,7 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 					GuiAnimator.transition(this.gui.TouchControls, 0.2, "left");
 				}
 			},
+			true,
 			"Touch",
 		);
 	}

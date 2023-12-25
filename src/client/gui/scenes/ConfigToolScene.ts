@@ -29,7 +29,6 @@ export type ConfigToolSceneDefinition = GuiObject & {
 			HeadingLabel: TextLabel;
 		};
 	};
-	ApplyToAllButton: TextButton;
 	DeselectAllButton: TextButton;
 };
 
@@ -59,7 +58,6 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		});
 
 		this.event.onPrepare((inputType) => {
-			this.gui.ApplyToAllButton.Visible = inputType !== "Gamepad";
 			this.gui.DeselectAllButton.Visible = inputType !== "Gamepad";
 		}, true);
 	}
@@ -68,7 +66,6 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		super.show();
 
 		GuiAnimator.transition(this.gui.ParamsSelection, 0.2, "right");
-		GuiAnimator.transition(this.gui.ApplyToAllButton, 0.2, "down");
 		GuiAnimator.transition(this.gui.DeselectAllButton, 0.22, "down");
 
 		this.updateConfigs([]);

@@ -1,5 +1,4 @@
 import { GuiService, HttpService, Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
@@ -20,7 +19,7 @@ import VectorUtils from "shared/utils/VectorUtils";
 
 /** A tool for building in the world with blocks */
 export default class BuildTool extends ToolBase {
-	public readonly selectedBlockChanged = new Signal<(block: Block | undefined) => void>();
+	public readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
 
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
@@ -37,8 +36,6 @@ export default class BuildTool extends ToolBase {
 	private lastMouseHit?: CFrame;
 	private lastMouseTarget?: BasePart;
 	private lastMouseSurface?: Enum.NormalId;
-
-	private selectedBlock?: Block;
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -64,8 +61,7 @@ export default class BuildTool extends ToolBase {
 	}
 
 	public setSelectedBlock(block: Block | undefined) {
-		this.selectedBlock = block;
-		this.selectedBlockChanged.Fire(block);
+		this.selectedBlock.set(block);
 		this.prepareVisual();
 	}
 
@@ -82,10 +78,11 @@ export default class BuildTool extends ToolBase {
 	private prepareVisual() {
 		// Remove old block preview
 		this.previewBlock?.Destroy();
-		if (!this.selectedBlock) return;
+		const selected = this.selectedBlock.get();
+		if (!selected) return;
 
 		// Spawning a new block
-		this.previewBlock = this.selectedBlock.model.Clone();
+		this.previewBlock = selected.model.Clone();
 		this.previewBlock.Parent = Workspace;
 
 		// Reset rotation
@@ -114,7 +111,7 @@ export default class BuildTool extends ToolBase {
 
 	private addAxisModel() {
 		assert(this.previewBlock);
-		assert(this.selectedBlock);
+		assert(this.selectedBlock.get());
 
 		const axis = ReplicatedStorage.Assets.Axis.Clone();
 		axis.PivotTo(this.previewBlock.GetPivot());
@@ -122,7 +119,7 @@ export default class BuildTool extends ToolBase {
 	}
 
 	private updatePosition(savePosition: boolean = false) {
-		if (!this.selectedBlock || !this.previewBlock) {
+		if (!this.selectedBlock.get() || !this.previewBlock) {
 			return;
 		}
 
@@ -230,7 +227,7 @@ export default class BuildTool extends ToolBase {
 
 	public async placeBlock() {
 		// ERROR: Block is not selected
-		if (this.selectedBlock === undefined) {
+		if (this.selectedBlock.get() === undefined) {
 			LogControl.instance.addLine("Block is not selected!");
 			return;
 		}
@@ -253,7 +250,7 @@ export default class BuildTool extends ToolBase {
 				if (block) await BuildingController.deleteBlock([block]);
 			},
 			{
-				block: this.selectedBlock.id,
+				block: this.selectedBlock.get()!.id,
 				color: this.selectedColor.get(),
 				material: this.selectedMaterial.get(),
 				location: this.previewBlock.PrimaryPart.CFrame,
@@ -299,7 +296,7 @@ export default class BuildTool extends ToolBase {
 	}
 
 	public rotate(axis: "x" | "y" | "z", isInverted: boolean = InputController.isShiftPressed()) {
-		if (this.selectedBlock === undefined) {
+		if (this.selectedBlock.get() === undefined) {
 			return;
 		}
 
