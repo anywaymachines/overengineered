@@ -177,6 +177,13 @@ const tnt = {
 			Desktop: true,
 		},
 	},
+	impact: {
+		displayName: "Impact",
+		type: "bool",
+		default: {
+			Desktop: true,
+		},
+	},
 } as const satisfies ConfigDefinitions;
 
 const suspensionblock = {
