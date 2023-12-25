@@ -2,6 +2,7 @@ import { Players, UserInputService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import Control from "client/base/Control";
 import EventHandler from "shared/event/EventHandler";
+import NumberObservableValue from "shared/event/NumberObservableValue";
 import NumberTextBoxControl from "./NumberTextBoxControl";
 import ProgressBarControl, { ProgressBarControlDefinition } from "./ProgressBarControl";
 
@@ -11,15 +12,24 @@ export type SliderControlDefinition = GuiObject &
 	};
 
 /** Control that represents a number via a slider. */
-export default class SliderControl<
-	T extends SliderControlDefinition = SliderControlDefinition,
-> extends ProgressBarControl<T> {
+export default class SliderControl<T extends SliderControlDefinition = SliderControlDefinition> extends Control<T> {
 	public readonly submitted = new Signal<(value: number) => void>();
+	readonly value;
+	readonly visualValue;
+
+	private readonly progressBar;
 
 	constructor(gui: T, min: number, max: number, step: number) {
-		super(gui, min, max, step);
+		super(gui);
 
-		this.value.subscribe((value) => this.textValue.set(tostring(value)), true);
+		this.progressBar = new ProgressBarControl<T>(this.gui, min, max, step);
+		this.add(this.progressBar);
+
+		this.value = new NumberObservableValue(min, min, max, step);
+		this.value.subscribe((value) => this.visualValue.set(value));
+		this.visualValue = this.progressBar.value;
+
+		this.value.subscribe((value) => this.progressBar.textValue.set(tostring(value)), true);
 		this.subscribeMovement();
 
 		if (Control.exists(this.gui, "TextBox")) {
@@ -37,7 +47,7 @@ export default class SliderControl<
 		const moveMouse = () => {
 			if (startpos === undefined) return;
 
-			if (this.vertical) {
+			if (this.progressBar.vertical) {
 				const y = this.gui.AbsoluteSize.Y - Players.LocalPlayer.GetMouse().Y;
 				this.value.set(
 					((y - startpos) / this.gui.AbsoluteSize.Y) * this.value.getRange() +
@@ -69,7 +79,7 @@ export default class SliderControl<
 					(input.UserInputType === Enum.UserInputType.MouseButton1 ||
 						input.UserInputType === Enum.UserInputType.Touch)
 				) {
-					startpos = this.vertical
+					startpos = this.progressBar.vertical
 						? this.gui.AbsoluteSize.Y - this.gui.AbsolutePosition.Y + this.gui.AbsoluteSize.Y
 						: this.gui.AbsolutePosition.X;
 					moveMouse();
@@ -106,7 +116,7 @@ export default class SliderControl<
 					if (!st) return;
 
 					if (input.UserInputType === Enum.UserInputType.Gamepad1) {
-						if (this.vertical) {
+						if (this.progressBar.vertical) {
 							if (input.KeyCode === Enum.KeyCode.DPadUp) moveGamepad(true);
 							else if (input.KeyCode === Enum.KeyCode.DPadDown) moveGamepad(false);
 						} else {
@@ -118,7 +128,7 @@ export default class SliderControl<
 				eh.subscribe(UserInputService.InputChanged, (input) => {
 					if (!st) return;
 
-					if (this.vertical) {
+					if (this.progressBar.vertical) {
 						if (input.UserInputType === Enum.UserInputType.Gamepad1 && input.Position.X !== 0) {
 							moveGamepad(input.Position.X > 0);
 						}

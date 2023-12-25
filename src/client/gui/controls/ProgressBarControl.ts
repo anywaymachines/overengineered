@@ -14,9 +14,9 @@ export type ProgressBarControlDefinition = GuiObject & {
 export default class ProgressBarControl<
 	T extends ProgressBarControlDefinition = ProgressBarControlDefinition,
 > extends Control<T> {
-	protected readonly textValue;
+	public readonly textValue;
 	public readonly value;
-	protected readonly vertical;
+	public readonly vertical;
 
 	constructor(gui: T, min: number, max: number, step: number) {
 		super(gui);
