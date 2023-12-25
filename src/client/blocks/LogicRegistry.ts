@@ -18,6 +18,7 @@ const logicRegistry: Readonly<Record<string, { new (block: Model): BlockLogic } 
 	wing1x3: WingLogic,
 	wing1x4: WingLogic,
 	smallrocketengine: RocketEngineLogic,
+	rocketengine: RocketEngineLogic,
 	motorblock: MotorBlockLogic,
 	servomotorblock: ServoMotorBlockLogic,
 	rope: RopeLogic,

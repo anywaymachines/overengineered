@@ -50,6 +50,10 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 		const colbox = block.WaitForChild("ColBox") as Part;
 		this.multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16;
 
+		if (this.multiplier !== 1) {
+			this.multiplier *= 2;
+		}
+
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 	}
 

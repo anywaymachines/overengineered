@@ -223,6 +223,7 @@ const blockConfigRegistry = {
 	disconnectblock,
 	motorblock,
 	smallrocketengine,
+	rocketengine: smallrocketengine,
 	rope,
 	servomotorblock,
 	tnt,
