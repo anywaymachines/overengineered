@@ -13,7 +13,7 @@ export default class MusicPlaylist {
 	}
 
 	play() {
-		this.currentSound = this.sounds[math.random(0, this.sounds.size())];
+		this.currentSound = this.sounds[math.random(0, this.sounds.size() - 1)];
 		this.currentSoundEndEvent = this.currentSound.Ended.Once(() => {
 			wait(this.interval);
 			this.play();
