@@ -16,8 +16,7 @@ import EventHandler from "shared/event/EventHandler";
 import { ButtonControl, TextButtonControl, TextButtonDefinition } from "../controls/Button";
 import { DictionaryControl } from "../controls/DictionaryControl";
 import FormattedLabelControl from "../controls/FormattedLabelControl";
-import { ProgressBarControlDefinition } from "../controls/ProgressBarControl";
-import SliderControl from "../controls/SliderControl";
+import ProgressBarControl, { ProgressBarControlDefinition } from "../controls/ProgressBarControl";
 
 export type ActionBarControlDefinition = GuiObject & {
 	Stop: GuiButton;
@@ -306,7 +305,7 @@ export class RideModeInfoControl extends Control<RideModeInfoControlDefinition> 
 	constructor(gui: RideModeInfoControlDefinition, min: number, max: number, step: number) {
 		super(gui);
 
-		this.slider = this.added(new SliderControl(this.gui, min, max, step));
+		this.slider = this.added(new ProgressBarControl(this.gui, min, max, step));
 		this.text = this.added(new FormattedLabelControl(this.gui.FormattedText));
 	}
 }
@@ -374,7 +373,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 				);
 
 				control.slider.value.set(spd);
-				control.text.value.set(control.slider.value.get());
+				control.text.value.set(spd);
 			});
 		}
 
@@ -384,7 +383,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 				const alt = RobloxUnit.Studs_To_Meters(player.Position.Y);
 
 				control.slider.value.set(alt);
-				control.text.value.set(control.slider.value.get());
+				control.text.value.set(alt);
 			});
 		}
 
