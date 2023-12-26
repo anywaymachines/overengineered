@@ -8,7 +8,9 @@ export default class ConfigPartControl<
 	TDef extends GuiObject,
 	TValue extends ConfigValue | undefined,
 > extends Control<ConfigPartDefinition<TDef>> {
-	public readonly control: TControl & { value: ObservableValue<TValue> };
+	readonly control: TControl & { value: ObservableValue<TValue> };
+	readonly key;
+	readonly definition;
 
 	constructor(
 		gui: ConfigPartDefinition<TDef>,
@@ -18,6 +20,8 @@ export default class ConfigPartControl<
 		key: string,
 	) {
 		super(gui);
+		this.key = key;
+		this.definition = definition;
 
 		this.gui.HeadingLabel.Text = definition.displayName;
 		this.control = ctor(this.gui.Control);

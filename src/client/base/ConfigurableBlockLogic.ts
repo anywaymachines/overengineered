@@ -4,15 +4,13 @@ import Objects from "shared/_fixes_/objects";
 import BlockLogic from "./BlockLogic";
 import { KeyPressingConflictingController } from "./KeyPressingController";
 
-type KeyMembers<TConfig extends ConfigValueTypes> = ExtractKeys<TConfig, "key"> & KeyCode;
-export type KeyDefinition<TConfig extends ConfigValueTypes> = {
+type KeyMembers<TDef extends ConfigDefinitions> = ExtractKeys<TDef, { type: "key" }> & string;
+export type KeyDefinition<TDef extends ConfigDefinitions> = {
 	keyDown?: () => void;
 	keyUp?: () => void;
-	conflicts?: KeyMembers<TConfig>;
+	conflicts?: KeyMembers<TDef>;
 };
-export type KeyDefinitions<TConfig extends ConfigValueTypes> = Partial<
-	Record<KeyMembers<TConfig>, KeyDefinition<TConfig>>
->;
+export type KeyDefinitions<TDef extends ConfigDefinitions> = Partial<Record<KeyMembers<TDef>, KeyDefinition<TDef>>>;
 
 export default abstract class ConfigurableBlockLogic<TDef extends ConfigDefinitions> extends BlockLogic {
 	protected readonly keysDefinition;
@@ -25,11 +23,9 @@ export default abstract class ConfigurableBlockLogic<TDef extends ConfigDefiniti
 
 		this.config = new BlockConfig<TDef>(block, configDefinition);
 		this.keysDefinition = this.getKeysDefinition();
-		this.keyController = new KeyPressingConflictingController<KeyMembers<ConfigDefinitionToTypes<TDef>>>(
-			this.keysDefinition,
-		);
+		this.keyController = new KeyPressingConflictingController<KeyMembers<TDef>>(this.keysDefinition);
 
-		this.btnmap = new Map<KeyCode, KeyMembers<ConfigDefinitionToTypes<TDef>>>(
+		this.btnmap = new Map<KeyCode, KeyMembers<TDef>>(
 			Objects.entries(this.keysDefinition).map((d) => [this.config.get(d[0]) as KeyCode, d[0]] as const),
 		);
 
@@ -74,16 +70,16 @@ export default abstract class ConfigurableBlockLogic<TDef extends ConfigDefiniti
 		this.triggerKeyUp(btnmap);
 	}
 
-	triggerKeyDown(key: KeyMembers<ConfigDefinitionToTypes<TDef>>) {
+	triggerKeyDown(key: KeyMembers<TDef>) {
 		if (!this.machine?.seat.occupiedByLocalPlayer.get()) return;
 		this.keyController.keyDown(key);
 	}
-	triggerKeyUp(key: KeyMembers<ConfigDefinitionToTypes<TDef>>) {
+	triggerKeyUp(key: KeyMembers<TDef>) {
 		if (!this.machine?.seat.occupiedByLocalPlayer.get()) return;
 		this.keyController.keyUp(key);
 	}
 
-	getKeysDefinition(): KeyDefinitions<ConfigDefinitionToTypes<TDef>> {
+	getKeysDefinition(): KeyDefinitions<TDef> {
 		return {};
 	}
 }

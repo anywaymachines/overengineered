@@ -26,7 +26,7 @@ export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockCo
 		return blockConfigRegistry.tnt;
 	}
 
-	public getKeysDefinition(): KeyDefinitions<ConfigDefinitionToTypes<typeof blockConfigRegistry.tnt>> {
+	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.tnt> {
 		return {
 			explode: {
 				keyDown: () => this.explode(),

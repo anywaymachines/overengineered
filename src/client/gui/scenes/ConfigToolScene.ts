@@ -82,7 +82,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				const blockmodel = selected.Parent as Model;
 				const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
 
-				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry];
+				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry] as ConfigDefinitions;
 				if (!defs) return undefined! as BlockConfig<ConfigDefinitions>;
 
 				return new BlockConfig(blockmodel, defs);
@@ -133,7 +133,27 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				);
 				this.list.add(control);
 
-				control.control.submitted.Connect((value) => send(id, value));
+				let prev = control.control.value.get();
+				control.control.submitted.Connect((value) => {
+					print(`Sending ${id} to ${value}`);
+					send(id, value);
+
+					if (def.conflicts !== undefined) {
+						const conflict = this.list
+							.getChildren()
+							.find(
+								(c) => c instanceof ConfigPartControl && c.key === def.conflicts,
+							) as ConfigPartControl<KeyChooserControl, GuiObject, KeyCode>;
+
+						if (conflict && conflict.control.value.get() === value) {
+							print(`Sending conflicted ${conflict.key} to ${prev}`);
+							conflict.control.value.set(prev);
+							conflict.control.submitted.Fire(prev);
+						}
+					}
+
+					prev = value;
+				});
 			} else if (def.type === "number") {
 				const control = new ConfigPartControl(
 					this.sliderTemplate(),

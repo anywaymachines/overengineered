@@ -5,8 +5,6 @@ import blockConfigRegistry from "shared/BlockConfigRegistry";
 export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.motorblock> {
 	private readonly hingeConstraint;
 
-	private readonly increaseKey;
-	private readonly decreaseKey;
 	private readonly speed;
 	private readonly isSwitch;
 
@@ -14,8 +12,6 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof block
 		super(block, MotorBlockLogic.getConfigDefinition());
 
 		// Configuration
-		this.increaseKey = this.config.get("rotate_add");
-		this.decreaseKey = this.config.get("rotate_sub");
 		this.speed = this.config.get("speed");
 		this.isSwitch = this.config.get("switch");
 
@@ -36,7 +32,7 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof block
 	private isIncreasing = false;
 	private isDecreasing = false;
 
-	public getKeysDefinition(): KeyDefinitions<ConfigDefinitionToTypes<typeof blockConfigRegistry.motorblock>> {
+	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.motorblock> {
 		return {
 			rotate_add: {
 				conflicts: "rotate_sub",

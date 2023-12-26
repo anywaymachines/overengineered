@@ -9,7 +9,13 @@ type ConfigDefinitionTypeBase<TKey extends string, TValue, TAdditional extends {
 };
 
 type KeyCode = Enum.KeyCode["Name"];
-type KeyConfigDefinitionType = ConfigDefinitionTypeBase<"key", KeyCode>;
+type KeyConfigDefinitionType = ConfigDefinitionTypeBase<
+	"key",
+	KeyCode,
+	{
+		readonly conflicts?: string;
+	}
+>;
 type BoolConfigDefinitionType = ConfigDefinitionTypeBase<"bool", boolean>;
 type NumberConfigDefinitionType = ConfigDefinitionTypeBase<
 	"number",
@@ -32,18 +38,6 @@ type ConfigValueTypes = Readonly<Record<string, ConfigValueType>>;
 type ConfigValueOf<T extends ConfigDefinition> = T["default"]["Desktop"];
 type ConfigValue = ConfigValueOf<ConfigDefinition>;
 type ConfigValues = Readonly<Record<string, ConfigValue>>;
-
-type ConfigTypesToConfig<T extends ConfigValueTypes> = {
-	[k in keyof T]: ConfigValueOf<ConfigDefinitionType[T[k]]>;
-};
-
-type ConfigTypesToDefinition<T extends ConfigValueTypes> = {
-	readonly [k in keyof T]: ConfigDefinitionType[T[k]];
-};
-
-type ConfigDefinitionToTypes<T extends ConfigDefinitions> = {
-	readonly [k in keyof T]: T[k]["type"];
-};
 
 type ConfigDefinitionsToConfig<T extends ConfigDefinitions> = {
 	[k in keyof T]: ConfigValueOf<ConfigDefinitionType[T[k]["type"]]>;

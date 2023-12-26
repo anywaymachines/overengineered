@@ -11,6 +11,7 @@ const disconnectblock = {
 
 const motorblock = {
 	rotate_add: {
+		conflicts: "rotate_sub",
 		displayName: "Rotate +",
 		type: "key",
 		default: {
@@ -19,6 +20,7 @@ const motorblock = {
 		},
 	},
 	rotate_sub: {
+		conflicts: "rotate_add",
 		displayName: "Rotate -",
 		type: "key",
 		default: {
@@ -47,6 +49,7 @@ const motorblock = {
 
 const smallrocketengine = {
 	thrust_add: {
+		conflicts: "thrust_sub",
 		displayName: "Thrust +",
 		type: "key",
 		default: {
@@ -55,6 +58,7 @@ const smallrocketengine = {
 		},
 	},
 	thrust_sub: {
+		conflicts: "thrust_add",
 		displayName: "Thrust -",
 		type: "key",
 		default: {
@@ -97,6 +101,7 @@ const rope = {
 
 const servomotorblock = {
 	rotate_add: {
+		conflicts: "rotate_sub",
 		displayName: "Rotate +",
 		type: "key",
 		default: {
@@ -105,6 +110,7 @@ const servomotorblock = {
 		},
 	},
 	rotate_sub: {
+		conflicts: "rotate_add",
 		displayName: "Rotate -",
 		type: "key",
 		default: {
@@ -229,7 +235,5 @@ const blockConfigRegistry = {
 	tnt,
 	suspensionblock,
 } as const satisfies Record<string, ConfigDefinitions>;
-
-type RocketEngineConfig = ConfigDefinitionToTypes<typeof blockConfigRegistry.smallrocketengine>;
 
 export default blockConfigRegistry;

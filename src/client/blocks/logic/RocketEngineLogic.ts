@@ -13,8 +13,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 
 	// Configuration
 	private readonly isSwitch;
-	private readonly increaseKey;
-	private readonly decreaseKey;
 	private readonly strength;
 
 	// Math
@@ -34,8 +32,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 		super(block, blockConfigRegistry.smallrocketengine);
 
 		// Configuration
-		this.increaseKey = this.config.get("thrust_add");
-		this.decreaseKey = this.config.get("thrust_sub");
 		this.isSwitch = this.config.get("switchmode");
 		this.strength = this.config.get("strength");
 
@@ -57,7 +53,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 	}
 
-	public getKeysDefinition(): KeyDefinitions<ConfigDefinitionToTypes<typeof blockConfigRegistry.smallrocketengine>> {
+	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.smallrocketengine> {
 		return {
 			thrust_add: {
 				conflicts: "thrust_sub",

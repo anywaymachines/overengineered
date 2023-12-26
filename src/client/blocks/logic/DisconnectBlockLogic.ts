@@ -11,7 +11,7 @@ export default class DisconnectBlockLogic extends ConfigurableBlockLogic<typeof 
 		return blockConfigRegistry.disconnectblock;
 	}
 
-	public getKeysDefinition(): KeyDefinitions<ConfigDefinitionToTypes<typeof blockConfigRegistry.disconnectblock>> {
+	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.disconnectblock> {
 		return {
 			disconnect: {
 				keyDown: () => {
