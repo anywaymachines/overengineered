@@ -1,7 +1,7 @@
 import Config from "client/Config";
 import Control from "client/base/Control";
 import ObservableValue from "shared/event/ObservableValue";
-import { ConfigPartDefinition } from "../scenes/ConfigToolScene";
+import { ConfigPartDefinition } from "../buildmode/tools/ConfigToolScene";
 
 export default class ConfigPartControl<
 	TControl extends Control<TDef>,

@@ -1,4 +1,7 @@
 import { TweenService } from "@rbxts/services";
+import ComponentEventHolder from "client/base/ComponentEventHolder";
+import Objects from "shared/_fixes_/objects";
+import { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 /** A class created for animating interfaces */
 export default class GuiAnimator {
@@ -110,5 +113,20 @@ export default class GuiAnimator {
 		tween.Play();
 
 		return tween;
+	}
+
+	/**
+	 * Subscribes to the observable changed event and tweens the gui when it's changed.
+	 * Also immediately sets the properties on prepare.
+	 */
+	static value<T extends Instance, TValue>(
+		event: ComponentEventHolder,
+		gui: T,
+		value: ReadonlyObservableValue<TValue>,
+		converter: (value: TValue) => Partial<ExtractMembers<T, Tweenable>>,
+		tweenInfo: TweenInfo,
+	) {
+		event.onPrepare(() => Objects.assign(gui, converter(value.get())), true);
+		event.subscribeObservable(value, (value) => GuiAnimator.tween(gui, converter(value), tweenInfo));
 	}
 }

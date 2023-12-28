@@ -7,11 +7,11 @@ import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Remotes from "shared/Remotes";
 import Objects from "shared/_fixes_/objects";
-import GuiAnimator from "../GuiAnimator";
-import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
-import ConfigPartControl from "../controls/ConfigPartControl";
-import KeyChooserControl, { KeyChooserControlDefinition } from "../controls/KeyChooserControl";
-import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
+import GuiAnimator from "../../GuiAnimator";
+import CheckBoxControl, { CheckBoxControlDefinition } from "../../controls/CheckBoxControl";
+import ConfigPartControl from "../../controls/ConfigPartControl";
+import KeyChooserControl, { KeyChooserControlDefinition } from "../../controls/KeyChooserControl";
+import SliderControl, { SliderControlDefinition } from "../../controls/SliderControl";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	HeadingLabel: TextLabel;

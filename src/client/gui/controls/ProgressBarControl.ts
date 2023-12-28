@@ -1,6 +1,6 @@
 import Control from "client/base/Control";
 import NumberObservableValue from "shared/event/NumberObservableValue";
-import Animation from "../Animation";
+import GuiAnimator from "../GuiAnimator";
 
 export type ProgressBarControlDefinition = GuiObject & {
 	Filled?: GuiObject;
@@ -30,7 +30,7 @@ export default class ProgressBarControl<
 		}
 
 		if (Control.exists(this.gui, "Knob")) {
-			Animation.value(
+			GuiAnimator.value(
 				this.event,
 				this.gui.Knob as GuiObject,
 				this.value,
@@ -45,7 +45,7 @@ export default class ProgressBarControl<
 		}
 
 		if (Control.exists(this.gui, "Filled")) {
-			Animation.value(
+			GuiAnimator.value(
 				this.event,
 				this.gui.Filled as GuiObject,
 				this.value,

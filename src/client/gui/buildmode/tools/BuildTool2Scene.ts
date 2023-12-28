@@ -1,10 +1,10 @@
 import Control from "client/base/Control";
 import BuildTool2 from "client/tools/BuildTool2";
 import { blockList, categoriesRegistry } from "shared/Registry";
-import GuiAnimator from "../GuiAnimator";
-import { ButtonControl } from "../controls/Button";
-import BlockSelectionControl, { BlockSelectionControlDefinition } from "../tools/BlockSelection";
-import MaterialChooserControl, { MaterialPreviewControl, MaterialPreviewDefinition } from "../tools/MaterialChooser";
+import GuiAnimator from "../../GuiAnimator";
+import { ButtonControl } from "../../controls/Button";
+import BlockSelectionControl, { BlockSelectionControlDefinition } from "../BlockSelection";
+import MaterialChooserControl, { MaterialPreviewControl, MaterialPreviewDefinition } from "../MaterialChooser";
 
 export type BuildToolSceneDefinition = GuiObject & {
 	BlockSelection: BlockSelectionControlDefinition;

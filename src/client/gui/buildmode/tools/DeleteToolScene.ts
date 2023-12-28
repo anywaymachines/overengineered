@@ -1,8 +1,8 @@
 import Control from "client/base/Control";
 import PopupController from "client/controller/PopupController";
 import DeleteTool from "client/tools/DeleteTool";
-import GuiAnimator from "../GuiAnimator";
-import { ButtonControl } from "../controls/Button";
+import GuiAnimator from "../../GuiAnimator";
+import { ButtonControl } from "../../controls/Button";
 
 export type DeleteToolSceneDefinition = GuiObject & {
 	TouchControls: Frame & {

@@ -7,11 +7,11 @@ import GuiAnimator from "../GuiAnimator";
 import { ButtonControl } from "../controls/Button";
 import SavePopup from "../popup/SavePopup";
 import SettingsPopup from "../popup/SettingsPopup";
-import BuildTool2Scene from "./BuildTool2Scene";
-import BuildToolScene, { BuildToolSceneDefinition } from "./BuildToolScene";
-import ConfigToolScene, { ConfigToolSceneDefinition } from "./ConfigToolScene";
-import DeleteToolScene, { DeleteToolSceneDefinition } from "./DeleteToolScene";
 import ToolbarControl, { ToolbarControlDefinition } from "./ToolbarControl";
+import BuildTool2Scene from "./tools/BuildTool2Scene";
+import BuildToolScene, { BuildToolSceneDefinition } from "./tools/BuildToolScene";
+import ConfigToolScene, { ConfigToolSceneDefinition } from "./tools/ConfigToolScene";
+import DeleteToolScene, { DeleteToolSceneDefinition } from "./tools/DeleteToolScene";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {
