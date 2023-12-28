@@ -1,20 +1,6 @@
 import SharedPlots from "shared/building/SharedPlots";
 import VectorUtils from "shared/utils/VectorUtils";
 
-export type MirrorBlocksCFrames = {
-	readonly Main: CFrame;
-
-	readonly X?: CFrame;
-	readonly Y?: CFrame;
-	readonly Z?: CFrame;
-
-	readonly XZ?: CFrame;
-	readonly XY?: CFrame;
-	readonly YZ?: CFrame;
-
-	readonly XYZ?: CFrame;
-};
-
 export default class BuildingManager {
 	public static AllowedMaterials = [
 		Enum.Material.Plastic,
@@ -113,27 +99,33 @@ export default class BuildingManager {
 		return true;
 	}
 
-	public static getBlocksCFramesWithMirrored(
+	static time = 0;
+	public static getMirroredBlocksCFrames(
 		plot: Model,
-		mainPosition: Vector3,
-		axis: BlockMirrorParams,
-	): MirrorBlocksCFrames {
-		const center = plot.GetPivot().Position.add(new Vector3(axis.X ?? 0, axis.Y ?? 0, axis.Z ?? 0));
-		const offsetx2 = mainPosition.sub(center).mul(-2);
+		cframeToMirror: CFrame,
+		axes: readonly CFrame[],
+	): readonly CFrame[] {
+		const reflect = (cframe: CFrame, mirrorCFrame: CFrame) => {
+			const [X, Y, Z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = mirrorCFrame
+				.ToObjectSpace(cframe)
+				.GetComponents();
 
-		// TODO: rotations
-
-		return {
-			Main: new CFrame(mainPosition),
-			X: new CFrame(mainPosition.add(new Vector3(offsetx2.X, 0, 0))),
-			Y: new CFrame(mainPosition.add(new Vector3(0, offsetx2.Y, 0))),
-			Z: new CFrame(mainPosition.add(new Vector3(0, 0, offsetx2.Z))),
-
-			XY: new CFrame(mainPosition.add(new Vector3(offsetx2.X, offsetx2.Y, 0))),
-			YZ: new CFrame(mainPosition.add(new Vector3(0, offsetx2.Y, offsetx2.Z))),
-			XZ: new CFrame(mainPosition.add(new Vector3(offsetx2.X, 0, offsetx2.Z))),
-
-			XYZ: new CFrame(mainPosition.add(offsetx2)),
+			// reflect along X/Y plane (Z axis)
+			const reflection = new CFrame(X, Y, -Z, -R00, R01, R02, -R10, R11, R12, R20, -R21, -R22);
+			const reflectedCFrame = mirrorCFrame.ToWorldSpace(reflection);
+			return reflectedCFrame;
 		};
+
+		const plotframe = plot.GetPivot();
+
+		const ret: CFrame[] = [cframeToMirror];
+		for (const axis of axes) {
+			for (const frame of [...ret]) {
+				ret.push(reflect(frame, plotframe.ToWorldSpace(axis)));
+			}
+		}
+
+		ret.remove(0);
+		return ret;
 	}
 }

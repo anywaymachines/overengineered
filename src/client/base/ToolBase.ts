@@ -6,7 +6,7 @@ import ComponentBase from "./ComponentBase";
 
 /** An abstract class of tools for working with the world */
 export default abstract class ToolBase extends ComponentBase {
-	readonly mirrorMode = new ObservableValue<MirrorModeProperties>({});
+	readonly mirrorMode = new ObservableValue<readonly CFrame[]>([]);
 
 	protected readonly gameUI;
 	protected readonly mouse: Mouse;

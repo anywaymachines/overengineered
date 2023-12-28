@@ -35,12 +35,12 @@ export default class ToolController extends ComponentBase {
 		this.configTool = new ConfigTool(mode);
 		this.buildTool2 = new BuildTool2(mode);
 
-		const aboba: ToolBase[] = [this.buildTool, this.moveTool, this.deleteTool, this.configTool];
+		const tools: ToolBase[] = [this.buildTool, this.moveTool, this.deleteTool, this.configTool];
 		if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
-			aboba.push(this.buildTool2);
+			tools.push(this.buildTool2);
 		}
 
-		this.tools = aboba; // [this.buildTool, this.moveTool, this.deleteTool, this.configTool, this.buildTool2] as const;
+		this.tools = tools;
 		this.selectedTool.subscribe((tool) => TooltipsControl.instance.updateControlTooltips(tool));
 		this.event.onPrepare(() => TooltipsControl.instance.updateControlTooltips(this.selectedTool.get()), true);
 	}

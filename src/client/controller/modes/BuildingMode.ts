@@ -3,14 +3,24 @@ import BuildingModeScene, { BuildingModeSceneDefinition } from "client/gui/scene
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import GuiController from "../GuiController";
+import MirrorVisualizer from "../MirrorVisualizer";
 import ToolController from "../ToolController";
 import PlayMode from "./PlayMode";
 
 export default class BuildingMode extends PlayMode {
-	readonly mirrorMode = new ObservableValue<MirrorModeProperties>({ X: 0, Y: 5, Z: 0 });
+	readonly mirrorMode = new ObservableValue<readonly CFrame[]>([
+		CFrame.identity,
+		CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2),
+		CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(new Vector3(0, 4, 0)),
+	]);
+
+	readonly mirrorVisualizer = new MirrorVisualizer();
 
 	constructor() {
 		super();
+
+		this.mirrorVisualizer.mirrorMode.bindTo(this.mirrorMode);
+		this.add(this.mirrorVisualizer);
 
 		const tools = new ToolController(this);
 		this.add(tools);
