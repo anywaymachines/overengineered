@@ -6,8 +6,8 @@ import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBox
 import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "../controls/NumberTextBoxControl";
 
 export type MirrorEditorSingleControlDefinition = GuiObject & {
-	Enabled: CheckBoxControlDefinition;
-	Position: NumberTextBoxControlDefinition;
+	Checkbox: CheckBoxControlDefinition;
+	TextBox: NumberTextBoxControlDefinition;
 };
 export class MirrorEditorSingleControl extends Control<MirrorEditorSingleControlDefinition> {
 	readonly value = new ObservableValue<number | undefined>(undefined);
@@ -18,10 +18,10 @@ export class MirrorEditorSingleControl extends Control<MirrorEditorSingleControl
 	constructor(gui: MirrorEditorSingleControlDefinition) {
 		super(gui);
 
-		this.enabled = this.added(new CheckBoxControl(this.gui.Enabled));
+		this.enabled = this.added(new CheckBoxControl(this.gui.Checkbox));
 
 		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId).GetBoundingBox()[1];
-		this.position = this.added(new NumberTextBoxControl(this.gui.Position, -plot.X / 2, plot.X / 2, 1));
+		this.position = this.added(new NumberTextBoxControl(this.gui.TextBox, -plot.X / 2, plot.X / 2, 1));
 
 		const update = () => this.value.set(this.enabled.value.get() ? this.position.value.get() : undefined);
 		this.event.subscribe(this.enabled.submitted, update);
@@ -36,7 +36,7 @@ export type MirrorEditorControlDefinition = GuiObject & {
 };
 
 export default class MirrorEditorControl extends Control<MirrorEditorControlDefinition> {
-	readonly value = new ObservableValue<readonly CFrame[] | undefined>(undefined);
+	readonly value = new ObservableValue<readonly CFrame[]>([]);
 
 	private readonly x;
 	private readonly y;
@@ -57,18 +57,20 @@ export default class MirrorEditorControl extends Control<MirrorEditorControlDefi
 			const frames: CFrame[] = [];
 
 			if (x !== undefined) {
-				frames.push(new CFrame(x, 0, 0));
+				frames.push(new CFrame(0, 0, x));
 			}
 			if (y !== undefined) {
 				frames.push(CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(new Vector3(0, y, 0)));
 			}
 			if (z !== undefined) {
-				frames.push(CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(0, 0, z)));
+				frames.push(CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(z, 0, 0)));
 			}
 
 			this.value.set(frames);
 		};
 
 		this.x.value.subscribe(update);
+		this.y.value.subscribe(update);
+		this.z.value.subscribe(update);
 	}
 }

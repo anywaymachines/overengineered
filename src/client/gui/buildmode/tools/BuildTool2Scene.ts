@@ -5,9 +5,11 @@ import GuiAnimator from "../../GuiAnimator";
 import { ButtonControl } from "../../controls/Button";
 import BlockSelectionControl, { BlockSelectionControlDefinition } from "../BlockSelection";
 import MaterialChooserControl, { MaterialPreviewControl, MaterialPreviewDefinition } from "../MaterialChooser";
+import MirrorEditorControl, { MirrorEditorControlDefinition } from "../MirrorEditorControl";
 
 export type BuildToolSceneDefinition = GuiObject & {
 	BlockSelection: BlockSelectionControlDefinition;
+	Mirrors: MirrorEditorControlDefinition;
 	Preview: MaterialPreviewDefinition & {
 		EditMaterialButton: GuiButton;
 	};
@@ -22,6 +24,7 @@ export type BuildToolSceneDefinition = GuiObject & {
 export default class BuildTool2Scene extends Control<BuildToolSceneDefinition> {
 	readonly tool;
 	readonly blockSelector;
+	readonly mirrors;
 
 	constructor(gui: BuildToolSceneDefinition, tool: BuildTool2) {
 		super(gui);
@@ -30,6 +33,10 @@ export default class BuildTool2Scene extends Control<BuildToolSceneDefinition> {
 		this.blockSelector = new BlockSelectionControl(gui.BlockSelection, blockList, categoriesRegistry);
 		this.blockSelector.show();
 		this.add(this.blockSelector);
+
+		this.mirrors = this.added(new MirrorEditorControl(this.gui.Mirrors));
+		this.mirrors.show();
+		this.tool.mirrorMode.bindTo(this.mirrors.value);
 
 		this.tool.selectedBlock.bindTo(this.blockSelector.selectedBlock);
 

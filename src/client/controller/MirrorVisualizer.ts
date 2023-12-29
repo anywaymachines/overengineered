@@ -42,7 +42,6 @@ export default class MirrorVisualizer extends ComponentBase {
 			mirrors.Parent = plot;
 		}
 
-		print("recreate!");
 		mirrors.ClearAllChildren();
 
 		for (const cframe of this.mirrorMode.get()) {
