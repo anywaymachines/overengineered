@@ -81,7 +81,13 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 
 		this.toolbar = new ToolbarControl(tools, gui.ToolbarGui);
 		this.add(this.toolbar);
-		this.toolbar.show();
+		this.event.onPrepare((input) => {
+			if (input === "Touch") {
+				this.toolbar.show();
+			} else {
+				this.toolbar.hide();
+			}
+		}, true);
 
 		const bt2 = this.gui.Tools.BuildToolGui.Clone();
 		bt2.Parent = this.gui.Tools.BuildToolGui.Parent;
