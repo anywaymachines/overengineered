@@ -1,5 +1,5 @@
+import { StarterGui } from "@rbxts/services";
 import GameEnvironmentController from "./GameEnvironmentController";
-import GuiController from "./GuiController";
 import MusicController from "./sound/MusicController";
 
 declare type Sounds = {
@@ -25,7 +25,7 @@ export default class SoundController {
 	}
 
 	public static getSounds(): Sounds {
-		return GuiController.getGameUI<{ Sounds: Sounds }>().Sounds;
+		return (StarterGui as unknown as { GameUI: { Sounds: Sounds } }).GameUI.Sounds;
 	}
 
 	public static randomSoundSpeed(): number {

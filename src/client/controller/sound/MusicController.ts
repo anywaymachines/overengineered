@@ -1,18 +1,21 @@
-import { Workspace } from "@rbxts/services";
+import { StarterGui, Workspace } from "@rbxts/services";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import GameEnvironmentController from "../GameEnvironmentController";
-import GuiController from "../GuiController";
 import MusicPlaylist from "./MusicPlaylist";
 
 export default class MusicController {
 	private static playlist = new MusicPlaylist(
-		GuiController.getGameUI<{
-			Sounds: Folder & {
-				Music: Folder & {
-					Space: Folder;
+		(
+			StarterGui as unknown as {
+				GameUI: {
+					Sounds: Folder & {
+						Music: Folder & {
+							Space: Folder;
+						};
+					};
 				};
-			};
-		}>().Sounds.Music.Space.GetChildren() as Sound[],
+			}
+		).GameUI.Sounds.Music.Space.GetChildren() as Sound[],
 		15,
 	);
 

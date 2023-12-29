@@ -2,6 +2,8 @@ import Signal from "@rbxts/signal";
 import Component from "./Component";
 import ComponentBase from "./ComponentBase";
 
+print("control loaded");
+
 /** A component that is a GUI element */
 export default class Control<
 	T extends GuiObject = GuiObject,
@@ -23,6 +25,13 @@ export default class Control<
 		this.visible = gui.Visible;
 	}
 
+	/*public withGuiProps(properties: Partial<T>) {
+		//Objects.assign(this.gui, properties);
+		return this;
+	}*/
+	public when() {
+		return this.gui;
+	}
 	public getGui() {
 		return this.gui;
 	}

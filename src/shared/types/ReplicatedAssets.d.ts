@@ -11,6 +11,10 @@ interface ReplicatedStorage {
 	};
 }
 
+interface Workspace {
+	ServerClockTime: NumberValue;
+}
+
 type MoveHandles = Part & {
 	XHandles: Handles;
 	YHandles: Handles;

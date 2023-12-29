@@ -1,0 +1,74 @@
+import { Players } from "@rbxts/services";
+import Control from "client/base/Control";
+import SharedPlots from "shared/building/SharedPlots";
+import ObservableValue from "shared/event/ObservableValue";
+import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
+import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "../controls/NumberTextBoxControl";
+
+export type MirrorEditorSingleControlDefinition = GuiObject & {
+	Enabled: CheckBoxControlDefinition;
+	Position: NumberTextBoxControlDefinition;
+};
+export class MirrorEditorSingleControl extends Control<MirrorEditorSingleControlDefinition> {
+	readonly value = new ObservableValue<number | undefined>(undefined);
+
+	private readonly enabled;
+	private readonly position;
+
+	constructor(gui: MirrorEditorSingleControlDefinition) {
+		super(gui);
+
+		this.enabled = this.added(new CheckBoxControl(this.gui.Enabled));
+
+		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId).GetBoundingBox()[1];
+		this.position = this.added(new NumberTextBoxControl(this.gui.Position, -plot.X / 2, plot.X / 2, 1));
+
+		const update = () => this.value.set(this.enabled.value.get() ? this.position.value.get() : undefined);
+		this.event.subscribe(this.enabled.submitted, update);
+		this.event.subscribe(this.position.submitted, update);
+	}
+}
+
+export type MirrorEditorControlDefinition = GuiObject & {
+	X: MirrorEditorSingleControlDefinition;
+	Y: MirrorEditorSingleControlDefinition;
+	Z: MirrorEditorSingleControlDefinition;
+};
+
+export default class MirrorEditorControl extends Control<MirrorEditorControlDefinition> {
+	readonly value = new ObservableValue<readonly CFrame[] | undefined>(undefined);
+
+	private readonly x;
+	private readonly y;
+	private readonly z;
+
+	constructor(gui: MirrorEditorControlDefinition) {
+		super(gui);
+
+		this.x = this.added(new MirrorEditorSingleControl(this.gui.X));
+		this.y = this.added(new MirrorEditorSingleControl(this.gui.Y));
+		this.z = this.added(new MirrorEditorSingleControl(this.gui.Z));
+
+		const update = () => {
+			const x = this.x.value.get();
+			const y = this.y.value.get();
+			const z = this.z.value.get();
+
+			const frames: CFrame[] = [];
+
+			if (x !== undefined) {
+				frames.push(new CFrame(x, 0, 0));
+			}
+			if (y !== undefined) {
+				frames.push(CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(new Vector3(0, y, 0)));
+			}
+			if (z !== undefined) {
+				frames.push(CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(0, 0, z)));
+			}
+
+			this.value.set(frames);
+		};
+
+		this.x.value.subscribe(update);
+	}
+}

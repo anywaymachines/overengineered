@@ -1,4 +1,4 @@
-import { GuiService, RunService, StarterGui, UserInputService } from "@rbxts/services";
+import { RunService, StarterGui, UserInputService } from "@rbxts/services";
 import PlayerDataStorage from "./PlayerDataStorage";
 import ComponentContainer from "./base/ComponentContainer";
 import BeaconController from "./controller/BeaconController";
@@ -6,12 +6,11 @@ import GameEnvironmentController from "./controller/GameEnvironmentController";
 import LocalPlayerController from "./controller/LocalPlayerController";
 import PlayModeController from "./controller/PlayModeController";
 import SoundController from "./controller/SoundController";
+import WorldController from "./controller/WorldController";
 import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
 import DebugControl from "./gui/static/DebugControl";
 import LogControl from "./gui/static/LogControl";
 import TooltipsControl from "./gui/static/TooltipsControl";
-
-GuiService.SetGameplayPausedNotificationEnabled(false);
 
 (async () => await PlayerDataStorage.init())();
 
@@ -19,6 +18,7 @@ GameEnvironmentController.initialize();
 
 TooltipsControl.instance.show();
 LogControl.instance.show();
+WorldController.generate();
 
 LocalPlayerController.initialize();
 InputTypeChangeEvent.subscribe();
@@ -52,6 +52,7 @@ UserInputService.InputBegan.Connect((input) => {
 			scene.disable();
 		} else {
 			StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.All, true);
+			StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 			UserInputService.MouseIconEnabled = true;
 
 			scene.enable();

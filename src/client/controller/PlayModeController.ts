@@ -1,3 +1,4 @@
+import { GuiService, StarterGui } from "@rbxts/services";
 import ComponentBase from "client/base/ComponentBase";
 import Popup from "client/base/Popup";
 import Signals from "client/event/Signals";
@@ -14,6 +15,11 @@ export default class PlayModeController extends ComponentBase {
 
 	constructor() {
 		super();
+
+		this.event.onPrepare(() => {
+			GuiService.SetGameplayPausedNotificationEnabled(false);
+			StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
+		}, true);
 
 		Remotes.Client.GetNamespace("Ride")
 			.Get("SetPlayModeOnClient")
