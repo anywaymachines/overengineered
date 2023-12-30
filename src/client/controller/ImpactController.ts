@@ -1,4 +1,4 @@
-import { Players, Workspace } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import { UnreliableRemotes } from "shared/Remotes";
 import SharedPlots from "shared/building/SharedPlots";
 import PartUtils from "shared/utils/PartUtils";
@@ -22,10 +22,6 @@ export default class ImpactController {
 
 	private static initializeBlock(part: BasePart) {
 		const event = part.Touched.Connect((secondPart: BasePart) => {
-			if (!secondPart.IsA("Terrain") && secondPart.IsDescendantOf(Workspace.Atmosphere)) {
-				return;
-			}
-
 			const id = (part.Parent as Model).GetAttribute("id") as string;
 			const disallowedDiffDefault = this.blacklist.includes(id)
 				? 250
