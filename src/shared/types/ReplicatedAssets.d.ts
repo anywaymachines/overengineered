@@ -8,6 +8,7 @@ interface ReplicatedStorage {
 		};
 		MoveHandles: MoveHandles;
 		Fire: Folder;
+		Sparks: ParticleEmitter;
 	};
 }
 

@@ -1,4 +1,4 @@
-import { Players } from "@rbxts/services";
+import { Players, ReplicatedStorage } from "@rbxts/services";
 import { UnreliableRemotes } from "shared/Remotes";
 import SharedPlots from "shared/building/SharedPlots";
 import PartUtils from "shared/utils/PartUtils";
@@ -26,8 +26,8 @@ export default class ImpactController {
 			const disallowedDiffDefault = this.blacklist.includes(id)
 				? 250
 				: secondPart.IsA("Terrain") || !secondPart.Anchored
-					? 70
-					: 160;
+				  ? 70
+				  : 160;
 			const m1 = part.AssemblyLinearVelocity.Magnitude;
 			const m2 = secondPart.AssemblyLinearVelocity.Magnitude;
 
@@ -39,8 +39,14 @@ export default class ImpactController {
 				if (math.random(1, 16) === 1) {
 					UnreliableRemotes.Burn.FireServer(part);
 				}
-				UnreliableRemotes.BreakJoints.FireServer(part);
+				if (math.random(1, 2) === 1) {
+					UnreliableRemotes.BreakJoints.FireServer(part);
+				}
 				event.Disconnect();
+			} else if (diff + disallowedDiffDefault * 0.2 > disallowedDiffDefault * power) {
+				const sparks = ReplicatedStorage.Assets.Sparks.Clone();
+				sparks.Parent = part;
+				game.GetService("Debris").AddItem(sparks, 1.5);
 			}
 		});
 	}
