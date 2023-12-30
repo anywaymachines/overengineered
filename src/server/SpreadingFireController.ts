@@ -5,7 +5,6 @@ explosionBase.BlastPressure = 0;
 explosionBase.BlastRadius = 3.5;
 explosionBase.ExplosionType = Enum.ExplosionType.NoCraters;
 explosionBase.DestroyJointRadiusPercent = 0;
-explosionBase.Visible = false;
 
 export default class SpreadingFireController {
 	private isPartBurnable(part: BasePart) {
@@ -22,7 +21,6 @@ export default class SpreadingFireController {
 		}
 
 		part.SetAttribute("Burn", true);
-		game.GetService("Debris").AddItem(part, 180);
 
 		// Apply color
 		const rand_rgb = math.random(0, 50);

@@ -228,14 +228,16 @@ export default class BuildingWrapper {
 			MaterialPhysicalProperties.Properties[data.material.Name] ?? MaterialPhysicalProperties.Properties.Default;
 
 		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
-			const currentPhysProp = part.CurrentPhysicalProperties;
-			part.CustomPhysicalProperties = new PhysicalProperties(
-				customPhysProp.Density ?? currentPhysProp.Density,
-				customPhysProp.Friction ?? currentPhysProp.Friction,
-				customPhysProp.Elasticity ?? currentPhysProp.Elasticity,
-				customPhysProp.FrictionWeight ?? currentPhysProp.FrictionWeight,
-				customPhysProp.ElasticityWeight ?? currentPhysProp.ElasticityWeight,
-			);
+			if (!part.CustomPhysicalProperties) {
+				const currentPhysProp = part.CurrentPhysicalProperties;
+				part.CustomPhysicalProperties = new PhysicalProperties(
+					customPhysProp.Density ?? currentPhysProp.Density,
+					customPhysProp.Friction ?? currentPhysProp.Friction,
+					customPhysProp.Elasticity ?? currentPhysProp.Elasticity,
+					customPhysProp.FrictionWeight ?? currentPhysProp.FrictionWeight,
+					customPhysProp.ElasticityWeight ?? currentPhysProp.ElasticityWeight,
+				);
+			}
 		});
 
 		// Weld block

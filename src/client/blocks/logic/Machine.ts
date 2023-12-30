@@ -25,6 +25,7 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 		}
 
 		this.event.subscribe(RunService.Heartbeat, () => {
+			// Angular speed limit
 			const currentAngularVelocity = this.seat.vehicleSeat.AssemblyAngularVelocity;
 			this.seat.vehicleSeat.AssemblyAngularVelocity = new Vector3(
 				math.clamp(
@@ -44,6 +45,7 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 				),
 			);
 
+			// Linear speed limit
 			const currentLinearVelocity = this.seat.vehicleSeat.AssemblyLinearVelocity;
 			this.seat.vehicleSeat.AssemblyLinearVelocity = new Vector3(
 				math.clamp(

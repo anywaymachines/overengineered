@@ -1,4 +1,5 @@
 import BlockLogic from "client/base/BlockLogic";
+import AnchorBlockLogic from "./logic/AnchorBlockLogic";
 import DisconnectBlockLogic from "./logic/DisconnectBlockLogic";
 import HeliumBlockLogic from "./logic/HeliumBlockLogic";
 import MotorBlockLogic from "./logic/MotorBlockLogic";
@@ -25,6 +26,7 @@ const logicRegistry: Readonly<Record<string, { new (block: Model): BlockLogic } 
 	heliumblock: HeliumBlockLogic,
 	tnt: TNTBlockLogic,
 	suspensionblock: SuspensionLogic,
+	anchorblock: AnchorBlockLogic,
 };
 
 export default logicRegistry;

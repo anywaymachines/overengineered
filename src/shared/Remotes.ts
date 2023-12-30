@@ -43,6 +43,9 @@ const Remotes = Net.Definitions.Create({
 					[block: Model, radius: number, pressure: number, isFlammable: boolean]
 				>(),
 		}),
+		AnchorBlock: Net.Definitions.Namespace({
+			Anchor: Net.Definitions.ClientToServerEvent<[block: Model]>(),
+		}),
 	}),
 	Debug: Net.Definitions.Namespace({
 		DisplayLine: Net.Definitions.ServerToClientEvent<[text: string, isClient: boolean, isError: boolean]>(),

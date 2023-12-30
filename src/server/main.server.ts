@@ -6,6 +6,7 @@ import SharedPlots from "shared/building/SharedPlots";
 import BuildingWrapper from "./BuildingWrapper";
 import PlayerDatabase from "./PlayerDatabase";
 import SlotsDatabase from "./SlotsDatabase";
+import AnchorBlockLogic from "./blocks/logic/AnchorBlockLogic";
 import DisconnectBlockLogic from "./blocks/logic/DisconnectBlockLogic";
 import TNTBlockLogic from "./blocks/logic/TNTBlockLogic";
 import PlayModeController from "./modes/PlayModeController";
@@ -116,6 +117,7 @@ registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
 ReplicateRemoteHandler.init();
 
+AnchorBlockLogic.init();
 DisconnectBlockLogic.init();
 TNTBlockLogic.init();
 
