@@ -1,4 +1,5 @@
 import Control from "client/base/Control";
+import InputController from "client/controller/InputController";
 import BuildTool from "client/tools/BuildTool";
 import { blockList, categoriesRegistry } from "shared/Registry";
 import GuiAnimator from "../../GuiAnimator";
@@ -37,8 +38,6 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 
 		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => this.tool.setSelectedBlock(block));
 
-		this.event.onPrepare((inputType) => (this.gui.TouchControls.Visible = inputType === "Touch"), true);
-
 		this.add(new MaterialPreviewControl(this.gui.Preview, tool.selectedMaterial, tool.selectedColor));
 
 		MaterialChooserControl.instance.selectedMaterial.bindTo(tool.selectedMaterial);
@@ -49,19 +48,18 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 			MaterialChooserControl.instance.show();
 		});
 
-		this.event.subscribeObservable(
-			tool.selectedBlock,
-			(block) => {
-				const visible = block !== undefined;
-				this.gui.TouchControls.Visible = visible;
+		const updateTouchControls = () => {
+			const visible =
+				InputController.inputType.get() === "Touch" && this.blockSelector.selectedBlock.get() !== undefined;
+			this.gui.TouchControls.Visible = visible;
 
-				if (visible) {
-					GuiAnimator.transition(this.gui.TouchControls, 0.2, "left");
-				}
-			},
-			true,
-			"Touch",
-		);
+			if (visible) {
+				GuiAnimator.transition(this.gui.TouchControls, 0.2, "left");
+			}
+		};
+		this.event.onPrepare(updateTouchControls);
+		this.event.subscribeObservable(tool.selectedBlock, updateTouchControls);
+		updateTouchControls();
 	}
 
 	protected prepareTouch(): void {
