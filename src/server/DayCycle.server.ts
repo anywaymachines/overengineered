@@ -1,4 +1,4 @@
-import { Lighting, Workspace } from "@rbxts/services";
+import { Lighting } from "@rbxts/services";
 
 let curTime = tick();
 let prevTime;
@@ -27,6 +27,5 @@ while (true as boolean) {
 	}
 
 	Lighting.TimeOfDay = hours + ":" + math.floor(minutes) + ":" + math.floor(seconds);
-	Workspace.ServerClockTime.Value = Lighting.ClockTime;
 	wait();
 }
