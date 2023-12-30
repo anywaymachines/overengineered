@@ -1,4 +1,4 @@
-import { Workspace } from "@rbxts/services";
+import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import SpreadingFireController from "server/SpreadingFireController";
 import { UnreliableRemotes } from "shared/Remotes";
 
@@ -14,6 +14,7 @@ export default class ReplicateRemoteHandler {
 
 		UnreliableRemotes.BreakJoints.OnServerEvent.Connect((player, part) => this.breakJointsEvent(player, part));
 		UnreliableRemotes.Burn.OnServerEvent.Connect((player, part) => this.burnEvent(player, part));
+		UnreliableRemotes.CreateSparks.OnServerEvent.Connect((player, part) => this.createSparksEvent(player, part));
 	}
 
 	static replicateSoundEvent(player: Player, sound: Sound, isPlaying: boolean, volume: number) {
@@ -95,5 +96,23 @@ export default class ReplicateRemoteHandler {
 		}
 
 		SpreadingFireController.burn(block);
+	}
+
+	static createSparksEvent(player: Player, block: BasePart) {
+		if (!block || !block.Parent) {
+			return;
+		}
+
+		if (!block.IsDescendantOf(Workspace)) {
+			return;
+		}
+
+		if (block.GetNetworkOwner() !== player) {
+			return;
+		}
+
+		const sparks = ReplicatedStorage.Assets.Sparks.Clone();
+		sparks.Parent = block;
+		game.GetService("Debris").AddItem(sparks, 1.5);
 	}
 }

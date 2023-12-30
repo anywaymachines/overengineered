@@ -66,6 +66,9 @@ export const UnreliableRemotes = {
 		(part: BasePart) => void
 	>,
 	Burn: ReplicatedStorage.FindFirstChild("Burn") as unknown as _UnreliableRemoteEvent<(part: BasePart) => void>,
+	CreateSparks: ReplicatedStorage.FindFirstChild("CreateSparks") as unknown as _UnreliableRemoteEvent<
+		(part: BasePart) => void
+	>,
 };
 
 export default Remotes;

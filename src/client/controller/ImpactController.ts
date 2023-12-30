@@ -1,4 +1,4 @@
-import { Players, ReplicatedStorage } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import { UnreliableRemotes } from "shared/Remotes";
 import SharedPlots from "shared/building/SharedPlots";
 import PartUtils from "shared/utils/PartUtils";
@@ -44,9 +44,7 @@ export default class ImpactController {
 				}
 				event.Disconnect();
 			} else if (diff + disallowedDiffDefault * 0.2 > disallowedDiffDefault * power) {
-				const sparks = ReplicatedStorage.Assets.Sparks.Clone();
-				sparks.Parent = part;
-				game.GetService("Debris").AddItem(sparks, 1.5);
+				UnreliableRemotes.CreateSparks.FireServer(part);
 			}
 		});
 	}
