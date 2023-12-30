@@ -1,9 +1,32 @@
 import { Lighting, Workspace } from "@rbxts/services";
 
-Workspace.ServerClockTime.Value = Lighting.ClockTime;
+let curTime = tick();
+let prevTime;
 
 while (true as boolean) {
-	Workspace.ServerClockTime.Value += 0.001;
-	Lighting.ClockTime = Workspace.ServerClockTime.Value;
+	const currentTime = Lighting.TimeOfDay.split(":");
+
+	let hours = tonumber(currentTime[0])!;
+	let minutes = tonumber(currentTime[1])!;
+	let seconds = tonumber(currentTime[2])!;
+
+	prevTime = curTime;
+	curTime = tick();
+	const dt = curTime - prevTime;
+	seconds = seconds + 60 * dt;
+	if (seconds >= 60) {
+		seconds = seconds - 60;
+		minutes = minutes + 1;
+		if (minutes >= 60) {
+			minutes = minutes - 60;
+			hours = hours + 1;
+			if (hours >= 24) {
+				hours = 0;
+			}
+		}
+	}
+
+	Lighting.TimeOfDay = hours + ":" + math.floor(minutes) + ":" + math.floor(seconds);
+	Workspace.ServerClockTime.Value = Lighting.ClockTime;
 	wait();
 }
