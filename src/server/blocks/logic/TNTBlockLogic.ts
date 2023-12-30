@@ -4,8 +4,6 @@ import { registerOnRemoteEvent2 } from "server/network/event/RemoteHandler";
 import PartUtils from "shared/utils/PartUtils";
 
 export default class TNTBlockLogic {
-	private static readonly spreadingFire = new SpreadingFireController();
-
 	static init() {
 		registerOnRemoteEvent2("Blocks", "TNTBlock", "Explode", (player, block, radius, pressure, isFlammable) => {
 			if (!block) {
@@ -39,7 +37,7 @@ export default class TNTBlockLogic {
 				flameExplosion.BlastRadius *= 1.5;
 				flameExplosion.Parent = Workspace;
 				flameExplosion.Hit.Connect((part, distance) => {
-					this.spreadingFire.burn(part);
+					SpreadingFireController.burn(part);
 				});
 			}
 
@@ -58,8 +56,6 @@ export default class TNTBlockLogic {
 					math.random(0, pressure / 100),
 					math.random(0, pressure / 100),
 				);
-
-				game.GetService("Debris").AddItem(part.Parent!, 180);
 			});
 
 			PartUtils.applyToAllDescendantsOfType("Decal", block.PrimaryPart!, (decal) => {

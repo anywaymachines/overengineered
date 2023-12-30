@@ -1,7 +1,9 @@
 import { Players, RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import PlayerDataStorage from "client/PlayerDataStorage";
 import BlockLogic from "client/base/BlockLogic";
 import ComponentContainer from "client/base/ComponentContainer";
+import ImpactController from "client/controller/ImpactController";
 import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
@@ -22,6 +24,11 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 
 		for (const logic of logics) {
 			this.add(logic);
+		}
+
+		// TODO: Option OR isPVP
+		if (PlayerDataStorage.config.get().impact_destruction) {
+			ImpactController.initializeBlocks();
 		}
 
 		this.event.subscribe(RunService.Heartbeat, () => {

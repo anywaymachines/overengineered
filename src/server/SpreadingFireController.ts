@@ -5,17 +5,23 @@ explosionBase.BlastPressure = 0;
 explosionBase.BlastRadius = 3.5;
 explosionBase.ExplosionType = Enum.ExplosionType.NoCraters;
 explosionBase.DestroyJointRadiusPercent = 0;
+explosionBase.Visible = false;
 
 export default class SpreadingFireController {
-	private isPartBurnable(part: BasePart) {
-		if (part.Anchored || part.GetAttribute("Burn") === true || !part.IsDescendantOf(Workspace.Plots)) {
+	private static isPartBurnable(part: BasePart) {
+		if (
+			part.Anchored ||
+			(math.random(1, 8) !== 1 && part.Position.Y < 1) ||
+			part.GetAttribute("Burn") === true ||
+			!part.IsDescendantOf(Workspace.Plots)
+		) {
 			return false;
 		}
 
 		return true;
 	}
 
-	burn(part: BasePart) {
+	static burn(part: BasePart) {
 		if (!this.isPartBurnable(part)) {
 			return;
 		}

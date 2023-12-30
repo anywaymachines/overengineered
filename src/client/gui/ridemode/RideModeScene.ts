@@ -315,6 +315,7 @@ export type RideModeSceneDefinition = GuiObject & {
 	Controls: RideModeControlsDefinition;
 	Info: GuiObject & {
 		Template: RideModeInfoControlDefinition & { Title: TextLabel };
+		TextTemplate: RideModeInfoControlDefinition & { Title: TextLabel };
 	};
 };
 
@@ -324,6 +325,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 	private readonly info;
 
 	private readonly infoTemplate;
+	private readonly infoTextTemplate;
 
 	constructor(gui: RideModeSceneDefinition) {
 		super(gui);
@@ -339,6 +341,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		this.add(this.info);
 
 		this.infoTemplate = Control.asTemplate(this.gui.Info.Template);
+		this.infoTextTemplate = Control.asTemplate(this.gui.Info.TextTemplate);
 	}
 
 	private addMeters(machine: Machine) {
@@ -347,12 +350,12 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		const init = (
 			title: string,
 			textformat: string,
+			gui: RideModeInfoControlDefinition & { Title: TextLabel },
 			min: number,
 			max: number,
 			step: number,
 			update: (control: RideModeInfoControl) => void,
 		) => {
-			const gui = this.infoTemplate();
 			gui.Title.Text = title.upper();
 			gui.FormattedText!.Text = textformat;
 
@@ -366,7 +369,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		{
 			const maxSpdShow = RobloxUnit.getSpeedFromMagnitude(800, "MetersPerSecond");
 
-			init("Speed", "%d m/s", 0, maxSpdShow, 0.1, (control) => {
+			init("Speed", "%d m/s", this.infoTemplate(), 0, maxSpdShow, 0.1, (control) => {
 				const spd = RobloxUnit.getSpeedFromMagnitude(
 					player.GetVelocityAtPosition(player.Position).Magnitude,
 					"MetersPerSecond",
@@ -378,8 +381,24 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 
 		{
+			const rockets = machine.getChildren().filter((c) => c instanceof RocketEngineLogic);
+			if (rockets.size() !== 0) {
+				init("Torque", "%d %%", this.infoTemplate(), 0, 100, 1, (control) => {
+					const avg: number[] = [];
+					for (const block of machine.getChildren()) {
+						if (!(block instanceof RocketEngineLogic)) continue;
+						avg.push(block.getTorque());
+					}
+
+					control.slider.value.set(avg.reduce((acc, val) => acc + val, 0) / avg.size());
+					control.text.value.set(control.slider.value.get());
+				});
+			}
+		}
+
+		{
 			const maxAltitude = RobloxUnit.Studs_To_Meters(1500);
-			init("Altitude", "%d m", 0, maxAltitude, 0.1, (control) => {
+			init("Altitude", "%d m", this.infoTextTemplate(), 0, maxAltitude, 0.1, (control) => {
 				const alt = RobloxUnit.Studs_To_Meters(player.Position.Y);
 
 				control.slider.value.set(alt);
@@ -388,7 +407,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 
 		{
-			init("Position", "%s m", 0, 1, 1, (control) => {
+			init("Position", "%s m", this.infoTextTemplate(), 0, 1, 1, (control) => {
 				control.text.value.set(
 					math.floor(RobloxUnit.Studs_To_Meters(player.Position.X)) +
 						" m " +
@@ -403,7 +422,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 				return `${math.floor(ms / 1000 / 60 / 60)}h ${math.floor(ms / 1000 / 60)}m ${math.floor(ms / 1000)}s`;
 			};
 
-			init("Time", "%s", 0, 1, 1, (control) => {
+			init("Time", "%s", this.infoTextTemplate(), 0, 1, 1, (control) => {
 				control.text.value.set(
 					pretty(
 						DateTime.fromUnixTimestampMillis(
@@ -412,22 +431,6 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 					),
 				);
 			});
-		}
-
-		{
-			const rockets = machine.getChildren().filter((c) => c instanceof RocketEngineLogic);
-			if (rockets.size() !== 0) {
-				init("Torque", "%d %%", 0, 100, 1, (control) => {
-					const avg: number[] = [];
-					for (const block of machine.getChildren()) {
-						if (!(block instanceof RocketEngineLogic)) continue;
-						avg.push(block.getTorque());
-					}
-
-					control.slider.value.set(avg.reduce((acc, val) => acc + val, 0) / avg.size());
-					control.text.value.set(control.slider.value.get());
-				});
-			}
 		}
 	}
 

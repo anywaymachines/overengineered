@@ -33,6 +33,13 @@ export default class GameDefinitions {
 				Desktop: true,
 			},
 		},
+		impact_destruction: {
+			displayName: "Impact destruction",
+			type: "bool",
+			default: {
+				Desktop: true,
+			},
+		},
 	} as const satisfies ConfigDefinitions;
 
 	static isAdmin(player: Player) {

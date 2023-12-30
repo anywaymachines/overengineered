@@ -11,7 +11,11 @@ export default class Component<
 	constructor(instance: T) {
 		super();
 		this.instance = instance;
-		this.instance.Destroying.Connect(() => this.destroy());
+
+		(this.instance as Instance).GetPropertyChangedSignal("Parent").Connect(() => {
+			if (this.instance.Parent) return;
+			this.destroy();
+		});
 	}
 
 	/** Checks if the child exists on an Instance */

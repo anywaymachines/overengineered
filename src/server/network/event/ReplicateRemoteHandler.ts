@@ -1,4 +1,5 @@
 import { Workspace } from "@rbxts/services";
+import SpreadingFireController from "server/SpreadingFireController";
 import { UnreliableRemotes } from "shared/Remotes";
 
 export default class ReplicateRemoteHandler {
@@ -10,6 +11,9 @@ export default class ReplicateRemoteHandler {
 		UnreliableRemotes.ReplicateParticle.OnServerEvent.Connect((player, particle, isEnabled, acceleration) =>
 			this.replicateParticleEvent(player, particle, isEnabled, acceleration),
 		);
+
+		UnreliableRemotes.BreakJoints.OnServerEvent.Connect((player, part) => this.breakJointsEvent(player, part));
+		UnreliableRemotes.Burn.OnServerEvent.Connect((player, part) => this.burnEvent(player, part));
 	}
 
 	static replicateSoundEvent(player: Player, sound: Sound, isPlaying: boolean, volume: number) {
@@ -26,7 +30,6 @@ export default class ReplicateRemoteHandler {
 		}
 
 		if ((sound.Parent as Part).GetNetworkOwner() !== player) {
-			player.Kick();
 			return;
 		}
 
@@ -54,11 +57,43 @@ export default class ReplicateRemoteHandler {
 		}
 
 		if ((particle.Parent as Part).GetNetworkOwner() !== player) {
-			player.Kick();
 			return;
 		}
 
 		particle.Enabled = isEnabled;
 		particle.Acceleration = acceleration;
+	}
+
+	static breakJointsEvent(player: Player, block: BasePart) {
+		if (!block || !block.Parent) {
+			return;
+		}
+
+		if (!block.IsDescendantOf(Workspace)) {
+			return;
+		}
+
+		if (block.GetNetworkOwner() !== player) {
+			return;
+		}
+
+		block.BreakJoints();
+		block.SetAttribute("broken", true);
+	}
+
+	static burnEvent(player: Player, block: BasePart) {
+		if (!block || !block.Parent) {
+			return;
+		}
+
+		if (!block.IsDescendantOf(Workspace)) {
+			return;
+		}
+
+		if (block.GetNetworkOwner() !== player) {
+			return;
+		}
+
+		SpreadingFireController.burn(block);
 	}
 }

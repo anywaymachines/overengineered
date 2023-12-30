@@ -1,4 +1,5 @@
 import Machine from "client/blocks/logic/Machine";
+import PartUtils from "shared/utils/PartUtils";
 import Component from "./Component";
 
 export default abstract class BlockLogic<T extends Model = Model> extends Component<T> {
@@ -8,15 +9,22 @@ export default abstract class BlockLogic<T extends Model = Model> extends Compon
 	constructor(block: T) {
 		super(block);
 		this.block = block;
+	}
 
-		block.Destroying.Connect(() => this.destroy());
+	protected subscribeOnDestroyed(instance: BasePart, func: () => void) {
+		const update = () => {
+			if (!instance.CanTouch) return;
+			if (instance.Parent && instance.GetAttribute("broken") === undefined) return;
 
-		// used for destroying stuff out of bounds of player
-		// but breaks blocks like `DisconnectBlock`
-		/*
-		PartUtils.applyToAllDescendantsOfType("BasePart", this.instance, (part) => {
-			part.Destroying.Connect(() => this.destroy());
-		});
-		*/
+			func();
+		};
+
+		instance.AttributeChanged.Connect(update);
+		instance.GetPropertyChangedSignal("Parent").Connect(update);
+	}
+	protected onDescendantDestroyed(func: () => void) {
+		PartUtils.applyToAllDescendantsOfType("BasePart", this.instance, (part) =>
+			this.subscribeOnDestroyed(part, func),
+		);
 	}
 }

@@ -62,6 +62,10 @@ export const UnreliableRemotes = {
 	ReplicateParticle: ReplicatedStorage.FindFirstChild("ReplicateParticle") as unknown as _UnreliableRemoteEvent<
 		(particle: ParticleEmitter, isEnabled: boolean, acceleration: Vector3) => void
 	>,
+	BreakJoints: ReplicatedStorage.FindFirstChild("BreakJoints") as unknown as _UnreliableRemoteEvent<
+		(part: BasePart) => void
+	>,
+	Burn: ReplicatedStorage.FindFirstChild("Burn") as unknown as _UnreliableRemoteEvent<(part: BasePart) => void>,
 };
 
 export default Remotes;

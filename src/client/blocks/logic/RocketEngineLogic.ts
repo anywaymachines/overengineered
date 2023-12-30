@@ -31,6 +31,14 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 	constructor(block: Model) {
 		super(block, blockConfigRegistry.smallrocketengine);
 
+		this.onDescendantDestroyed(() => {
+			this.torque = 0;
+			this.movingUp = false;
+			this.movingDown = false;
+			this.update();
+			this.disable();
+		});
+
 		// Configuration
 		this.isSwitch = this.config.get("switchmode");
 		this.strength = this.config.get("strength");
