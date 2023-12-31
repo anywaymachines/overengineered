@@ -1,4 +1,4 @@
-import { RunService, StarterGui, UserInputService } from "@rbxts/services";
+import { Players, RunService, StarterGui, UserInputService, Workspace } from "@rbxts/services";
 import PlayerDataStorage from "./PlayerDataStorage";
 import ComponentContainer from "./base/ComponentContainer";
 import BeaconController from "./controller/BeaconController";
@@ -61,5 +61,38 @@ UserInputService.InputBegan.Connect((input) => {
 
 	if (input.IsModifierKeyDown("Shift") && UserInputService.IsKeyDown(Enum.KeyCode.G)) {
 		toggle();
+	}
+});
+
+const parts: readonly Part[] = [
+	Workspace.FindFirstChild("Baseplate") as Part,
+	...Workspace.WaitForChild("Plots")
+		.GetChildren()
+		.map((p) => p.WaitForChild("BuildingArea") as Part),
+];
+const tr: (Part | Decal)[] = [];
+for (const part of parts.map((p) => p.GetDescendants() as (Part | Decal)[])) {
+	for (const p of part) {
+		if (p.IsA("Part") || p.IsA("Decal")) {
+			tr.push(p);
+		}
+	}
+}
+
+const transparencies = new Map([...parts, ...tr].map((p) => [p, p.Transparency]));
+
+print([...transparencies].map((t) => `${t[0]} ${t[1]}`).join(", "));
+RunService.Heartbeat.Connect(() => {
+	const maxDistance = 1024;
+
+	for (const part of parts) {
+		const distance =
+			Players.LocalPlayer.Character?.GetPivot().Position.sub(part.GetPivot().Position).Magnitude ?? 0;
+
+		for (const child of [part, ...part.GetDescendants()]) {
+			if (child.IsA("Part") || child.IsA("Decal")) {
+				child.Transparency = distance > maxDistance ? 1 : transparencies.get(child) ?? 0;
+			}
+		}
 	}
 });
