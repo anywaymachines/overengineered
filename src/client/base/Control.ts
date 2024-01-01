@@ -2,8 +2,6 @@ import Signal from "@rbxts/signal";
 import Component from "./Component";
 import ComponentBase from "./ComponentBase";
 
-print("control loaded");
-
 /** A component that is a GUI element */
 export default class Control<
 	T extends GuiObject = GuiObject,

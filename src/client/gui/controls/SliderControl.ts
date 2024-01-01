@@ -91,7 +91,6 @@ export default class SliderControl<T extends SliderControlDefinition = SliderCon
 							input.UserInputType === Enum.UserInputType.MouseButton1 ||
 							input.UserInputType === Enum.UserInputType.Touch
 						) {
-							print("ie");
 							unsub();
 						}
 					});

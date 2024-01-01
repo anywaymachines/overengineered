@@ -1,7 +1,5 @@
 import { StarterPlayer } from "@rbxts/services";
 
-print("visual izer");
-
 const ctest = StarterPlayer.GetDescendants()
 	.filter((d) => d.IsA("ModuleScript") && d.HasTag("vcontrol"))
 	.map((s) => s as ModuleScript & { Source: string });

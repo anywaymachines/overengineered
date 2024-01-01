@@ -383,8 +383,6 @@ const createPopup = () => {
 		},
 	);
 
-	print("her");
-
 	const content = new Control(contents);
 	window.setContents(content);
 	content.add(confirmButton);

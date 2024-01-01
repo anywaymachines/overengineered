@@ -81,7 +81,6 @@ for (const part of parts.map((p) => p.GetDescendants() as (Part | Decal)[])) {
 
 const transparencies = new Map([...parts, ...tr].map((p) => [p, p.Transparency]));
 
-print([...transparencies].map((t) => `${t[0]} ${t[1]}`).join(", "));
 RunService.Heartbeat.Connect(() => {
 	const maxDistance = 1024;
 
