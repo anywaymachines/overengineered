@@ -5,14 +5,14 @@ if (!game.IsLoaded()) {
 	game.Loaded.Wait();
 }
 
-const truu = true;
+const truu = false;
 if (truu || Players.LocalPlayer.Name !== "i3ymm") {
 	ReplicatedFirst.WaitForChild("Terrain").WaitForChild("Actor").Destroy();
 	new Signal<() => void>().Wait();
 }
 
-print("INITIALIZEING inf ter");
-ReplicatedFirst.WaitForChild("Terrain").WaitForChild("TerrainV2").Destroy();
+print("INITIALIZING infinite terrain ts");
+ReplicatedFirst.WaitForChild("Terrain").WaitForChild("Terrain").Destroy();
 
 const folder = ReplicatedFirst.WaitForChild("Terrain") as Folder & {
 	Actor: TerrainActor;
@@ -23,7 +23,6 @@ const folder = ReplicatedFirst.WaitForChild("Terrain") as Folder & {
 		UnloadDistance: IntValue;
 	};
 };
-//const mainActor = folder.Actor;
 
 type TerrainActor = {
 	Load: Signal<(chunkX: number, chunkZ: number) => void>;
@@ -45,7 +44,7 @@ let positionZ = math.huge;
 let selectedActor = 0;
 let first = true;
 
-for (let i = 1; i < actorAmount; i++) {
+for (let i = 2; i < actorAmount; i++) {
 	const actor = new Instance("Actor") as Actor;
 	actor.Parent = folder;
 
@@ -169,7 +168,7 @@ while (tru) {
 	const chunkZ = math.floor(positionZ / 4 / chunkSize);
 
 	LoadChunks(chunkX, chunkZ, undefined);
-	/*if (unloadDistance >= loadDistance) {
+	if (unloadDistance >= loadDistance) {
 		UnloadChunks(chunkX, chunkZ);
-	}*/
+	}
 }
