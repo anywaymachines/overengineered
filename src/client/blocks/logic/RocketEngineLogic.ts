@@ -3,6 +3,7 @@ import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/Configurable
 import SoundController from "client/controller/SoundController";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { UnreliableRemotes } from "shared/Remotes";
+import RobloxUnit from "shared/RobloxUnit";
 
 export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.smallrocketengine> {
 	// Instances
@@ -57,6 +58,12 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 		if (this.multiplier !== 1) {
 			this.multiplier *= 2;
 		}
+
+		// The strength depends on the material
+		const material =
+			Enum.Material.GetEnumItems().find((value) => value.Value === (block.GetAttribute("material") as number)) ??
+			Enum.Material.Plastic;
+		this.multiplier *= math.max(1, RobloxUnit.GetMaterialPhysicalProperties(material).Density);
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 	}

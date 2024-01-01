@@ -1,5 +1,6 @@
 import { RunService } from "@rbxts/services";
 import BlockLogic from "client/base/BlockLogic";
+import RobloxUnit from "shared/RobloxUnit";
 
 export default class WingLogic extends BlockLogic {
 	private wingSurface: BasePart;
@@ -14,7 +15,11 @@ export default class WingLogic extends BlockLogic {
 		this.vectorForce = this.wingSurface.WaitForChild("VectorForce") as VectorForce;
 		this.surface = this.findSurface(this.wingSurface);
 
-		this.wingSurface.CustomPhysicalProperties = new PhysicalProperties(0.7, 0.3, 0.5, 1, 1);
+		const material =
+			Enum.Material.GetEnumItems().find((value) => value.Value === (block.GetAttribute("material") as number)) ??
+			Enum.Material.Plastic;
+		const density = math.max(0.7, RobloxUnit.GetMaterialPhysicalProperties(material).Density);
+		this.wingSurface.CustomPhysicalProperties = new PhysicalProperties(density, 0.3, 0.5, 1, 1);
 	}
 
 	private findSurface(wingSurface: BasePart): Vector3 {
