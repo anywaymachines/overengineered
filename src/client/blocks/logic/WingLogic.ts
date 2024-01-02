@@ -18,7 +18,7 @@ export default class WingLogic extends BlockLogic {
 		const material =
 			Enum.Material.GetEnumItems().find((value) => value.Value === (block.GetAttribute("material") as number)) ??
 			Enum.Material.Plastic;
-		const density = math.max(0.7, RobloxUnit.GetMaterialPhysicalProperties(material).Density);
+		const density = math.max(0.7, RobloxUnit.GetMaterialPhysicalProperties(material).Density / 2);
 		this.wingSurface.CustomPhysicalProperties = new PhysicalProperties(density, 0.3, 0.5, 1, 1);
 	}
 

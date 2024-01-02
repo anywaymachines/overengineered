@@ -5,6 +5,7 @@ import PartUtils from "shared/utils/PartUtils";
 
 export default class ImpactController {
 	static blacklist = ["wheel"];
+
 	static initializeBlocks() {
 		const blocks = SharedPlots.getPlotBlocks(
 			SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId),
@@ -31,12 +32,12 @@ export default class ImpactController {
 			const m1 = part.AssemblyLinearVelocity.Magnitude;
 			const m2 = secondPart.AssemblyLinearVelocity.Magnitude;
 
-			const power = math.max(1, part.CurrentPhysicalProperties.Density / 1.5);
+			const power = math.max(0.5, part.CurrentPhysicalProperties.Density / 5);
 
 			const diff = math.round(math.abs(m1 - m2));
 
 			if (diff > disallowedDiffDefault * power) {
-				if (math.random(1, 16) === 1) {
+				if (math.random(1, 20) === 1) {
 					UnreliableRemotes.Burn.FireServer(part);
 				}
 				if (math.random(1, 2) === 1) {

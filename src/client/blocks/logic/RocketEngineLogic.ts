@@ -63,7 +63,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 		const material =
 			Enum.Material.GetEnumItems().find((value) => value.Value === (block.GetAttribute("material") as number)) ??
 			Enum.Material.Plastic;
-		this.multiplier *= math.max(1, RobloxUnit.GetMaterialPhysicalProperties(material).Density);
+		this.multiplier *= math.max(1, RobloxUnit.GetMaterialPhysicalProperties(material).Density / 2);
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 	}
