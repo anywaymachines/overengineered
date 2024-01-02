@@ -25,14 +25,14 @@ export default class ImpactController {
 		const event = part.Touched.Connect((secondPart: BasePart) => {
 			const id = (part.Parent as Model).GetAttribute("id") as string;
 			const disallowedDiffDefault = this.blacklist.includes(id)
-				? 250
+				? 400
 				: secondPart.IsA("Terrain") || !secondPart.Anchored
 				  ? 70
 				  : 160;
 			const m1 = part.AssemblyLinearVelocity.Magnitude;
 			const m2 = secondPart.AssemblyLinearVelocity.Magnitude;
 
-			const power = math.max(0.5, part.CurrentPhysicalProperties.Density / 5);
+			const power = math.max(0.5, part.CurrentPhysicalProperties.Density / 3.5);
 
 			const diff = math.round(math.abs(m1 - m2));
 
