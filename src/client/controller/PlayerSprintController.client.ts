@@ -56,7 +56,6 @@ const mobileGui = GuiController.getGameUI().WaitForChild("MobileSprint") as Fram
 	Toggle: GuiButton & { Icon: ImageLabel };
 };
 InputController.inputType.subscribe((input) => (mobileGui.Visible = input === "Touch"), true);
-InputController.inputType.subscribe((input) => print("swt to " + input), true);
 
 sprintmode.subscribe((sprinting) => (mobileGui.Toggle.Icon.ImageTransparency = sprinting ? 0 : 0.5));
 mobileGui.Toggle.Activated.Connect(() => sprintmode.set(!sprintmode.get()));
