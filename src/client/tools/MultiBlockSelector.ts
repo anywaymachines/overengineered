@@ -197,6 +197,7 @@ export const initializeBoxSelection = (
 					new Vector2(mouse.X, mouse.Y),
 				).filter(filter);
 
+			eh.allUnsibscribed.Connect(() => selection.Destroy());
 			eh.subscribe(mouse.Move, () => {
 				selection.Size = new UDim2(0, mouse.X, 0, mouse.Y).sub(startpos);
 
