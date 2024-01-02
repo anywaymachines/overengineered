@@ -79,6 +79,8 @@ for (const part of parts.map((p) => p.GetDescendants() as (Part | Decal)[])) {
 	}
 }
 
+Players.LocalPlayer.CameraMaxZoomDistance = 512;
+
 const transparencies = new Map([...parts, ...tr].map((p) => [p, p.Transparency]));
 
 RunService.Heartbeat.Connect(() => {
