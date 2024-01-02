@@ -1,11 +1,9 @@
 import { Players } from "@rbxts/services";
 
-declare const plugin: object | undefined;
-
 /** Basic class for interfaces control */
 export default class GuiController {
 	/** Receives GameUI from the PlayerGui */
-	static getGameUI<T>() {
+	static getGameUI<T = ScreenGui>() {
 		return this.getPlayerGui().WaitForChild("GameUI") as T;
 	}
 
