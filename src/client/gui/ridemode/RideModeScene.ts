@@ -419,7 +419,9 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		{
 			const startTime = DateTime.now();
 			const pretty = (ms: number) => {
-				return `${math.floor(ms / 1000 / 60 / 60)}h ${math.floor(ms / 1000 / 60)}m ${math.floor(ms / 1000)}s`;
+				return `${math.floor(ms / 1000 / 60 / 60)}h ${math.floor(ms / 1000 / 60) % 60}m ${
+					math.floor(ms / 1000) % 60
+				}s`;
 			};
 
 			init("Time", "%s", this.infoTextTemplate(), 0, 1, 1, (control) => {
