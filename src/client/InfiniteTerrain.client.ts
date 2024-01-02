@@ -163,12 +163,12 @@ const terrainsrc = ReplicatedFirst.WaitForChild("Terrain").WaitForChild("Terrain
 terrainsrc.Enabled = false;
 
 let terra: LocalScript | undefined;
-PlayerDataStorage.config.subscribe((cfg) => {
+PlayerDataStorage.config.createNullableChild("betaTerrain", undefined).subscribe((enabled) => {
 	unloadWholeTerrain();
 	terra?.Destroy();
-	work = cfg.betaTerrain;
+	work = enabled === true;
 
-	if (!cfg.betaTerrain) {
+	if (!enabled) {
 		terra = terrainsrc.Clone();
 		terra.Parent = terrainsrc.Parent;
 		terra.Enabled = true;
