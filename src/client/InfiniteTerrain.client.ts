@@ -1,5 +1,6 @@
 import { Players, ReplicatedFirst, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import PlayerUtils from "shared/utils/PlayerUtils";
 import PlayerDataStorage from "./PlayerDataStorage";
 
 if (!game.IsLoaded()) {
@@ -27,6 +28,9 @@ PlayerDataStorage.config.subscribe((cfg) => {
 		terra = terrainsrc.Clone();
 		terra.Parent = terrainsrc.Parent;
 		terra.Enabled = true;
+	} else {
+		positionX = math.huge;
+		positionZ = math.huge;
 	}
 }, true);
 
@@ -58,17 +62,27 @@ const loadedChunks: boolean[][] = [];
 let positionX = math.huge;
 let positionZ = math.huge;
 let selectedActor = 0;
-let first = true;
 
-for (let i = 2; i < actorAmount; i++) {
-	const actor = new Instance("Actor") as Actor;
-	actor.Parent = folder;
+const recreateActors = () => {
+	for (const actor of folder.GetChildren()) {
+		if (actor.IsA("Actor")) {
+			actor.Destroy();
+		}
+	}
+	actors.clear();
 
-	const actorScript = (script.Parent!.WaitForChild("InfiniteTerrainActor") as ModuleScript).Clone();
-	actorScript.Parent = actor;
+	for (let i = 1; i < actorAmount; i++) {
+		const actor = new Instance("Actor");
+		actor.Parent = folder;
 
-	actors.push((require(actorScript) as { default: TerrainActor }).default);
-}
+		const actorScript = (script.Parent!.WaitForChild("InfiniteTerrainActor") as ModuleScript).Clone();
+		actorScript.Parent = actor;
+
+		actors.push((require(actorScript) as { default: TerrainActor }).default);
+	}
+};
+recreateActors();
+
 const findAvailableActor = () => {
 	const actor = actors[++selectedActor];
 	if (actor) return actor;
@@ -89,7 +103,6 @@ const LoadChunk = (chunkX: number, chunkZ: number) => {
 
 const UnloadChunk = (chunkX: number, chunkZ: number) => {
 	findAvailableActor().Unload.Fire(chunkX, chunkZ);
-
 	if (!loadedChunks[chunkX]) return;
 
 	delete loadedChunks[chunkX][chunkZ];
@@ -98,35 +111,21 @@ const UnloadChunk = (chunkX: number, chunkZ: number) => {
 	}
 };
 
-const isAlive = () => {
-	const v = Players.LocalPlayer;
-	return (
-		v &&
-		v.Character &&
-		v.Character.Parent &&
-		v.Character.FindFirstChild("Humanoid") &&
-		(v.Character.FindFirstChild("Humanoid") as Humanoid).Health > 0
-	);
-};
-
 const shouldBeLoaded = (chunkX: number, chunkZ: number, centerX: number, centerZ: number) => {
-	const tr = false;
-	if (tr) return true;
+	const alwaysLoad = false;
+	if (alwaysLoad) return true;
 
 	if (new Vector2(chunkX - centerX, chunkZ - centerZ).Magnitude > loadDistance) {
 		return false;
 	}
-	if (Workspace.CurrentCamera && Workspace.CurrentCamera.Focus.Position.Y >= 1500) {
-		return false;
-	}
-	if (!isAlive()) {
+	if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
 		return false;
 	}
 
 	return true;
 };
 
-const LoadChunks = (centerX: number, centerZ: number, start: number | undefined) => {
+const LoadChunks = (centerX: number, centerZ: number) => {
 	let chunkX = centerX;
 	let chunkZ = centerZ;
 	let directionX = 1;
@@ -134,14 +133,9 @@ const LoadChunks = (centerX: number, centerZ: number, start: number | undefined)
 	let count = 0;
 	let length = 1;
 
-	if (first) {
-		first = false;
-		LoadChunk(chunkX, chunkZ);
-	}
+	LoadChunk(chunkX, chunkZ);
 
-	start ??= 2;
-
-	for (let i = start; i < chunkAmount; i++) {
+	for (let i = 0; i < chunkAmount; i++) {
 		chunkX += directionX;
 		chunkZ += directionZ;
 		count++;
@@ -167,6 +161,20 @@ const UnloadChunks = (centerX: number, centerZ: number) => {
 	});
 };
 
+// terrain hides if player is higher than this value
+const maxVisibleHeight = 1500;
+
+const isTooHigh = () => {
+	return Workspace.CurrentCamera && Workspace.CurrentCamera.Focus.Position.Y >= maxVisibleHeight;
+};
+const unloadWholeTerrain = () => {
+	loadedChunks.clear();
+	recreateActors();
+
+	(Workspace.WaitForChild("Terrain") as Terrain).Clear();
+	(Workspace.WaitForChild("Terrain") as Terrain).ClearAllChildren();
+};
+
 const tru = true;
 while (tru) {
 	while (!work) {
@@ -177,9 +185,24 @@ while (tru) {
 	task.wait();
 	if (!Workspace.CurrentCamera) continue;
 
+	if (isTooHigh()) {
+		unloadWholeTerrain();
+
+		do {
+			task.wait();
+		} while (isTooHigh());
+
+		positionX = math.huge;
+		positionZ = math.huge;
+		continue;
+	}
+
 	const focusX = Workspace.CurrentCamera.Focus.Position.X;
 	const focusZ = Workspace.CurrentCamera.Focus.Position.Z;
-	if (isAlive() && math.pow(positionX - focusX, 2) + math.pow(positionZ - focusZ, 2) < moveDistance) {
+	if (
+		PlayerUtils.isAlive(Players.LocalPlayer) &&
+		math.pow(positionX - focusX, 2) + math.pow(positionZ - focusZ, 2) < moveDistance
+	) {
 		continue;
 	}
 
@@ -188,7 +211,7 @@ while (tru) {
 	const chunkX = math.floor(positionX / 4 / chunkSize);
 	const chunkZ = math.floor(positionZ / 4 / chunkSize);
 
-	LoadChunks(chunkX, chunkZ, undefined);
+	LoadChunks(chunkX, chunkZ);
 	if (unloadDistance >= loadDistance) {
 		UnloadChunks(chunkX, chunkZ);
 	}

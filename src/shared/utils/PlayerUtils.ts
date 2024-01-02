@@ -1,5 +1,5 @@
 export default class PlayerUtils {
-	static isAlive(player: Player): boolean {
+	static isAlive(this: void, player: Player): boolean {
 		return (
 			player.Character !== undefined &&
 			player.Character.FindFirstChild("Humanoid") !== undefined &&
