@@ -3,5 +3,4 @@ type PlayerConfig = {
 	readonly music?: boolean;
 	readonly beacons?: boolean;
 	readonly impact_destruction?: boolean;
-	readonly betaTerrain?: boolean;
 };

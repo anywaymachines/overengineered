@@ -1,6 +1,7 @@
 import { Players, ReplicatedFirst, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import Objects from "shared/_fixes_/objects";
+import ObservableValue from "shared/event/ObservableValue";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import PlayerDataStorage from "./PlayerDataStorage";
 
@@ -163,7 +164,8 @@ const terrainsrc = ReplicatedFirst.WaitForChild("Terrain").WaitForChild("Terrain
 terrainsrc.Enabled = false;
 
 let terra: LocalScript | undefined;
-PlayerDataStorage.config.createNullableChild("betaTerrain", undefined).subscribe((enabled) => {
+/*PlayerDataStorage.config.createNullableChild("betaTerrain", undefined)*/
+new ObservableValue(true).subscribe((enabled) => {
 	unloadWholeTerrain();
 	terra?.Destroy();
 	work = enabled === true;

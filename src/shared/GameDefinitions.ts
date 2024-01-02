@@ -40,13 +40,6 @@ export default class GameDefinitions {
 				Desktop: true,
 			},
 		},
-		betaTerrain: {
-			displayName: "Beta terrain",
-			type: "bool",
-			default: {
-				Desktop: false,
-			},
-		},
 	} as const satisfies ConfigDefinitions;
 
 	static isAdmin(player: Player) {
