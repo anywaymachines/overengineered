@@ -1,18 +1,34 @@
 import { Players, ReplicatedFirst, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import PlayerDataStorage from "./PlayerDataStorage";
 
 if (!game.IsLoaded()) {
 	game.Loaded.Wait();
 }
 
-const truu = false;
-if (truu || Players.LocalPlayer.Name !== "i3ymm") {
-	ReplicatedFirst.WaitForChild("Terrain").WaitForChild("Actor").Destroy();
-	new Signal<() => void>().Wait();
+while (!PlayerDataStorage.data.get()) {
+	task.wait();
 }
 
-print("INITIALIZING infinite terrain ts");
-ReplicatedFirst.WaitForChild("Terrain").WaitForChild("Terrain").Destroy();
+let work = true;
+
+const terrainsrc = ReplicatedFirst.WaitForChild("Terrain").WaitForChild("Terrain") as LocalScript;
+terrainsrc.Enabled = false;
+
+let terra: LocalScript | undefined;
+
+PlayerDataStorage.config.subscribe((cfg) => {
+	(Workspace.WaitForChild("Terrain") as Terrain).Clear();
+	(Workspace.WaitForChild("Terrain") as Terrain).ClearAllChildren();
+	terra?.Destroy();
+	work = cfg.betaTerrain;
+
+	if (!cfg.betaTerrain) {
+		terra = terrainsrc.Clone();
+		terra.Parent = terrainsrc.Parent;
+		terra.Enabled = true;
+	}
+}, true);
 
 const folder = ReplicatedFirst.WaitForChild("Terrain") as Folder & {
 	Actor: TerrainActor;
@@ -94,7 +110,7 @@ const isAlive = () => {
 };
 
 const shouldBeLoaded = (chunkX: number, chunkZ: number, centerX: number, centerZ: number) => {
-	const tr = true;
+	const tr = false;
 	if (tr) return true;
 
 	if (new Vector2(chunkX - centerX, chunkZ - centerZ).Magnitude > loadDistance) {
@@ -153,6 +169,11 @@ const UnloadChunks = (centerX: number, centerZ: number) => {
 
 const tru = true;
 while (tru) {
+	while (!work) {
+		loadedChunks.clear();
+		task.wait();
+	}
+
 	task.wait();
 	if (!Workspace.CurrentCamera) continue;
 
