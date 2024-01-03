@@ -41,8 +41,8 @@ export default class ImpactController {
 			let maxDiff = this.blacklist.includes(id)
 				? 1000
 				: secondPart.IsA("Terrain") || !secondPart.Anchored
-					? 70
-					: 160;
+				  ? 70
+				  : 160;
 
 			// Player character diff
 			if (
@@ -71,22 +71,24 @@ export default class ImpactController {
 
 				if (math.random(1, 20) === 1) {
 					UnreliableRemotes.Burn.FireServer(part);
-					const soundsFolder =
-						ReplicatedStorage.Assets.Sounds.Impact.Materials.FindFirstChild(part.Material.Name) ??
-						ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal;
-					const soundList = soundsFolder.GetChildren();
-					const randomSound = soundList[math.random(0, soundList.size() - 1)] as Sound;
-					const sound = randomSound.Clone();
-					sound.RollOffMaxDistance = 1000;
-					sound.Volume = 0.5;
-					sound.Parent = part;
-					sound.Play();
-					game.GetService("Debris").AddItem(sound, sound.TimeLength);
 				}
+
 				if (math.random(1, 2) === 1) {
 					UnreliableRemotes.BreakJoints.FireServer(part);
 					event.Disconnect();
 				}
+
+				const soundsFolder =
+					ReplicatedStorage.Assets.Sounds.Impact.Materials.FindFirstChild(part.Material.Name) ??
+					ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal;
+				const soundList = soundsFolder.GetChildren();
+				const randomSound = soundList[math.random(0, soundList.size() - 1)] as Sound;
+				const sound = randomSound.Clone();
+				sound.RollOffMaxDistance = 1000;
+				sound.Volume = 0.5;
+				sound.Parent = math.random(1, 2) === 1 && secondPart.IsA("Terrain") ? secondPart : part;
+				sound.Play();
+				game.GetService("Debris").AddItem(sound, sound.TimeLength);
 			} else if (diff + maxDiff * 0.2 > maxDiff) {
 				UnreliableRemotes.CreateSparks.FireServer(part);
 			}
