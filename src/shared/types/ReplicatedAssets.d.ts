@@ -9,6 +9,14 @@ interface ReplicatedStorage {
 		MoveHandles: MoveHandles;
 		Fire: Folder;
 		Sparks: ParticleEmitter;
+		Sounds: Folder & {
+			Impact: Folder & {
+				Materials: Folder & {
+					Metal: SoundGroup;
+					Wood: SoundGroup;
+				};
+			};
+		};
 	};
 }
 
