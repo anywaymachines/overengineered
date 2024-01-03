@@ -23,20 +23,36 @@ export default class ImpactController {
 
 	private static initializeBlock(part: BasePart) {
 		const event = part.Touched.Connect((secondPart: BasePart) => {
+			if (secondPart.IsA("BasePart") && !secondPart.CanCollide) {
+				return;
+			}
+
 			const id = (part.Parent as Model).GetAttribute("id") as string;
-			const disallowedDiffDefault = this.blacklist.includes(id)
+			let maxDiff = this.blacklist.includes(id)
 				? 400
 				: secondPart.IsA("Terrain") || !secondPart.Anchored
 				  ? 70
 				  : 160;
+
+			// Player character diff
+			if (
+				secondPart.IsA("BasePart") &&
+				secondPart.Parent &&
+				(secondPart.Parent as Model).PrimaryPart &&
+				(secondPart.Parent as Model).PrimaryPart!.Name === "HumanoidRootPart"
+			) {
+				maxDiff *= 2;
+			}
+
+			// Magnitudes
 			const m1 = part.AssemblyLinearVelocity.Magnitude;
 			const m2 = secondPart.AssemblyLinearVelocity.Magnitude;
 
-			const power = math.max(0.5, part.CurrentPhysicalProperties.Density / 3.5);
+			// Material protection
+			maxDiff *= math.max(0.5, part.CurrentPhysicalProperties.Density / 3.5);
 
 			const diff = math.round(math.abs(m1 - m2));
-
-			if (diff > disallowedDiffDefault * power) {
+			if (diff > maxDiff) {
 				if (math.random(1, 20) === 1) {
 					UnreliableRemotes.Burn.FireServer(part);
 				}
@@ -44,7 +60,7 @@ export default class ImpactController {
 					UnreliableRemotes.BreakJoints.FireServer(part);
 					event.Disconnect();
 				}
-			} else if (diff + disallowedDiffDefault * 0.2 > disallowedDiffDefault * power) {
+			} else if (diff + maxDiff * 0.2 > maxDiff) {
 				UnreliableRemotes.CreateSparks.FireServer(part);
 			}
 		});
