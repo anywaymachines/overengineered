@@ -28,11 +28,13 @@ const folder = ReplicatedFirst.WaitForChild("Terrain") as Folder & {
 type TerrainActor = {
 	Load: Signal<(chunkX: number, chunkZ: number) => void>;
 	Unload: Signal<(chunkX: number, chunkZ: number) => void>;
+	Loaded: Signal<(chunkX: number, chunkZ: number) => void>;
 };
 
 const actorAmount = folder.Configuration.ActorAmount.Value;
 const chunkSize = folder.Configuration.ChunkSize.Value;
 const loadDistance = folder.Configuration.LoadDistance.Value;
+const loadDistancePow = math.pow(folder.Configuration.LoadDistance.Value, 2);
 const unloadDistance = folder.Configuration.UnloadDistance.Value;
 const chunkAmount = math.pow(folder.Configuration.LoadDistance.Value * 2 + 1, 2);
 const moveDistance = math.pow(chunkSize * 4, 2);
@@ -40,8 +42,6 @@ const moveDistance = math.pow(chunkSize * 4, 2);
 const actors: TerrainActor[] = [];
 let loadedChunks: Record<number, Record<number, boolean>> = {};
 
-let positionX = math.huge;
-let positionZ = math.huge;
 let selectedActor = 0;
 
 const recreateActors = () => {
@@ -59,16 +59,51 @@ const recreateActors = () => {
 		const actorScript = (script.Parent!.WaitForChild("InfiniteTerrainActor") as ModuleScript).Clone();
 		actorScript.Parent = actor;
 
-		actors.push((require(actorScript) as { default: TerrainActor }).default);
+		const tactor = (require(actorScript) as { default: TerrainActor }).default;
+		tactor.Loaded.Connect(() => actorSemaphore.release());
+		actors.push(tactor);
 	}
 };
 recreateActors();
 
+const createSemaphore = (maxCount: number) => {
+	const queue: Callback[] = [];
+	let currentCount = maxCount;
+
+	const q = {
+		wait: () => {
+			if (currentCount > 0) {
+				currentCount--;
+				return;
+			}
+
+			let completed = false;
+			const resolver = () => (completed = true);
+			queue.push(resolver);
+
+			while (!completed) {
+				task.wait();
+			}
+		},
+		release: () => {
+			if (queue.size() === 0) {
+				if (currentCount > maxCount) throw "Trying to release beyond the maximum.";
+				currentCount++;
+				return;
+			}
+
+			queue.remove(0)?.();
+		},
+	};
+
+	return q;
+};
+
+const actorSemaphore = createSemaphore(actorAmount);
 const findAvailableActor = () => {
 	const actor = actors[++selectedActor];
 	if (actor) return actor;
 
-	task.wait();
 	return actors[(selectedActor = 0)];
 };
 
@@ -79,6 +114,8 @@ const LoadChunk = (chunkX: number, chunkZ: number) => {
 	}
 
 	loadedChunks[chunkX][chunkZ] = true;
+
+	actorSemaphore.wait();
 	findAvailableActor().Load.Fire(chunkX, chunkZ);
 };
 
@@ -99,41 +136,11 @@ const shouldBeLoaded = (chunkX: number, chunkZ: number, centerX: number, centerZ
 	const alwaysLoad = false;
 	if (alwaysLoad) return true;
 
-	if (new Vector2(chunkX - centerX, chunkZ - centerZ).Magnitude > loadDistance) {
-		return false;
-	}
-	if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
+	if (math.pow(chunkX - centerX, 2) + math.pow(chunkZ - centerZ, 2) > loadDistancePow) {
 		return false;
 	}
 
 	return true;
-};
-
-const LoadChunks = (centerX: number, centerZ: number) => {
-	let chunkX = centerX;
-	let chunkZ = centerZ;
-	let directionX = 1;
-	let directionZ = 0;
-	let count = 0;
-	let length = 1;
-
-	LoadChunk(chunkX, chunkZ);
-
-	for (let i = 0; i < chunkAmount; i++) {
-		chunkX += directionX;
-		chunkZ += directionZ;
-		count++;
-		if (count === length) {
-			count = 0;
-			[directionX, directionZ] = [-directionZ, directionX];
-			if (directionZ === 0) {
-				length++;
-			}
-		}
-
-		if (!shouldBeLoaded(chunkX, chunkZ, centerX, centerZ)) continue;
-		LoadChunk(chunkX, chunkZ);
-	}
 };
 
 const UnloadChunks = (centerX: number, centerZ: number) => {
@@ -163,61 +170,92 @@ const unloadWholeTerrain = () => {
 const terrainsrc = ReplicatedFirst.WaitForChild("Terrain").WaitForChild("Terrain") as LocalScript;
 terrainsrc.Enabled = false;
 
-let terra: LocalScript | undefined;
-/*PlayerDataStorage.config.createNullableChild("betaTerrain", undefined)*/
-new ObservableValue(true).subscribe((enabled) => {
-	unloadWholeTerrain();
-	terra?.Destroy();
-	work = enabled === true;
+const betaChunkLoader = () => {
+	const loadChunksAround = (centerX: number, centerZ: number) => {
+		for (let size = 0; size < loadDistance; size++) {
+			let alreadyLoaded = true;
 
-	if (!enabled) {
-		terra = terrainsrc.Clone();
-		terra.Parent = terrainsrc.Parent;
-		terra.Enabled = true;
-	} else {
-		positionX = math.huge;
-		positionZ = math.huge;
-	}
-}, true);
-//
+			for (let num = -size; num <= size; num++) {
+				for (const [x, z] of [
+					[num, -size],
+					[-size, num],
+					[num, size],
+					[size, num],
+				]) {
+					const chunkX = centerX + x;
+					const chunkZ = centerZ + z;
 
-const tru = true;
-while (tru) {
-	while (!work) {
-		task.wait();
-	}
+					if (loadedChunks[chunkX]?.[chunkZ]) continue;
+					if (!shouldBeLoaded(chunkX, chunkZ, centerX, centerZ)) continue;
 
-	task.wait();
-	if (!Workspace.CurrentCamera) continue;
+					alreadyLoaded = false;
+					LoadChunk(chunkX, chunkZ);
+				}
+			}
 
-	if (isTooHigh()) {
+			if (!alreadyLoaded) {
+				return true;
+			}
+		}
+
+		return false;
+	};
+
+	let positionX = math.huge;
+	let positionZ = math.huge;
+
+	let terra: LocalScript | undefined;
+	new ObservableValue(true).subscribe((enabled) => {
 		unloadWholeTerrain();
+		terra?.Destroy();
+		work = enabled === true;
 
-		do {
+		if (!enabled) {
+			terra = terrainsrc.Clone();
+			terra.Parent = terrainsrc.Parent;
+			terra.Enabled = true;
+		} else {
+			positionX = math.huge;
+			positionZ = math.huge;
+		}
+	}, true);
+
+	const tru = true;
+	while (tru) {
+		while (!work) {
 			task.wait();
-		} while (isTooHigh());
+		}
 
-		positionX = math.huge;
-		positionZ = math.huge;
-		continue;
+		task.wait();
+		if (!Workspace.CurrentCamera) continue;
+
+		if (isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer)) {
+			unloadWholeTerrain();
+
+			do {
+				task.wait();
+			} while (isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer));
+
+			continue;
+		}
+
+		const focusX = Workspace.CurrentCamera.Focus.Position.X;
+		const focusZ = Workspace.CurrentCamera.Focus.Position.Z;
+
+		positionX = focusX;
+		positionZ = focusZ;
+		const chunkX = math.floor(positionX / 4 / chunkSize);
+		const chunkZ = math.floor(positionZ / 4 / chunkSize);
+
+		loadChunksAround(chunkX, chunkZ);
+
+		if (
+			math.pow(positionX - focusX, 2) + math.pow(positionZ - focusZ, 2) < moveDistance &&
+			unloadDistance >= loadDistance
+		) {
+			UnloadChunks(chunkX, chunkZ);
+		}
 	}
+};
 
-	const focusX = Workspace.CurrentCamera.Focus.Position.X;
-	const focusZ = Workspace.CurrentCamera.Focus.Position.Z;
-	if (
-		PlayerUtils.isAlive(Players.LocalPlayer) &&
-		math.pow(positionX - focusX, 2) + math.pow(positionZ - focusZ, 2) < moveDistance
-	) {
-		continue;
-	}
-
-	positionX = focusX;
-	positionZ = focusZ;
-	const chunkX = math.floor(positionX / 4 / chunkSize);
-	const chunkZ = math.floor(positionZ / 4 / chunkSize);
-
-	LoadChunks(chunkX, chunkZ);
-	if (unloadDistance >= loadDistance) {
-		UnloadChunks(chunkX, chunkZ);
-	}
-}
+betaChunkLoader();

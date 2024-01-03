@@ -103,6 +103,7 @@ const GetHeight = (x: number, z: number) => {
 
 const infterrainActor = {
 	Load: new Signal<(chunkX: number, chunkZ: number) => void>(),
+	Loaded: new Signal<(chunkX: number, chunkZ: number) => void>(),
 	Unload: new Signal<(chunkX: number, chunkZ: number) => void>(),
 } as const;
 
@@ -311,6 +312,8 @@ infterrainActor.Load.ConnectParallel((chunkX: number, chunkZ: number) => {
 	}
 	task.synchronize();
 	game.Workspace.Terrain.WriteVoxels(region, 4, materials, occupancys);
+	infterrainActor.Loaded.Fire(chunkX, chunkZ);
+
 	if (models.size() === 0) {
 		return;
 	}
