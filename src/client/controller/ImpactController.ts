@@ -7,6 +7,13 @@ import PartUtils from "shared/utils/PartUtils";
 export default class ImpactController {
 	private static debug = false;
 
+	private static materialSounds: { [key: string]: Instance[] } = {
+		Default: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
+
+		Metal: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
+		Wood: ReplicatedStorage.Assets.Sounds.Impact.Materials.Wood.GetChildren(),
+	};
+
 	private static materialImpactSounds = {
 		Default: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal,
 
@@ -78,11 +85,8 @@ export default class ImpactController {
 					event.Disconnect();
 				}
 
-				const soundsFolder =
-					ReplicatedStorage.Assets.Sounds.Impact.Materials.FindFirstChild(part.Material.Name) ??
-					ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal;
-				const soundList = soundsFolder.GetChildren();
-				const randomSound = soundList[math.random(0, soundList.size() - 1)] as Sound;
+				const soundsFolder = this.materialSounds[part.Material.Name] ?? this.materialSounds["Default"];
+				const randomSound = soundsFolder[math.random(0, soundsFolder.size() - 1)] as Sound;
 				const sound = randomSound.Clone();
 				sound.RollOffMaxDistance = 1000;
 				sound.Volume = 0.5;
