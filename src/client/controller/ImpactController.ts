@@ -42,8 +42,8 @@ export default class ImpactController {
 				}
 				if (math.random(1, 2) === 1) {
 					UnreliableRemotes.BreakJoints.FireServer(part);
+					event.Disconnect();
 				}
-				event.Disconnect();
 			} else if (diff + disallowedDiffDefault * 0.2 > disallowedDiffDefault * power) {
 				UnreliableRemotes.CreateSparks.FireServer(part);
 			}
