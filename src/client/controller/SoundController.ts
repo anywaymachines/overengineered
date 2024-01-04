@@ -29,7 +29,6 @@ export default class SoundController {
 
 		Signals.CAMERA.MOVED.Connect(() => {
 			this.underwater = Workspace.CurrentCamera!.CFrame.Y < 0;
-			print(this.underwater);
 			this.updateAllSounds();
 		});
 
