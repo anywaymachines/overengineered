@@ -1,4 +1,4 @@
-import { Players, ReplicatedStorage } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import Logger from "shared/Logger";
 import { UnreliableRemotes } from "shared/Remotes";
 import SharedPlots from "shared/building/SharedPlots";
@@ -6,20 +6,6 @@ import PartUtils from "shared/utils/PartUtils";
 
 export default class ImpactController {
 	private static debug = false;
-
-	private static materialSounds: { [key: string]: Instance[] } = {
-		Default: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
-
-		Metal: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
-		Wood: ReplicatedStorage.Assets.Sounds.Impact.Materials.Wood.GetChildren(),
-	};
-
-	private static materialImpactSounds = {
-		Default: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal,
-
-		Wood: ReplicatedStorage.Assets.Sounds.Impact.Materials.Wood,
-		Metal: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal,
-	};
 
 	static blacklist = ["wheel"];
 
@@ -46,7 +32,7 @@ export default class ImpactController {
 
 			const id = (part.Parent as Model).GetAttribute("id") as string;
 			let maxDiff = this.blacklist.includes(id)
-				? 1000
+				? 1500
 				: secondPart.IsA("Terrain") || !secondPart.Anchored
 				  ? 70
 				  : 160;

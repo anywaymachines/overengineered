@@ -28,7 +28,7 @@ export default class SoundController {
 		MusicController.initialize();
 
 		Signals.CAMERA.MOVED.Connect(() => {
-			this.underwater = Workspace.CurrentCamera!.CFrame.Y < -1;
+			this.underwater = Workspace.CurrentCamera!.CFrame.Y < 0;
 			this.updateAllSounds();
 		});
 
@@ -53,6 +53,9 @@ export default class SoundController {
 	}
 
 	private static updateAllSounds() {
+		PartUtils.applyToAllDescendantsOfType("Sound", StarterGui, (sound) => {
+			this.updateSound(sound);
+		});
 		PartUtils.applyToAllDescendantsOfType("Sound", Workspace, (sound) => {
 			this.updateSound(sound);
 		});

@@ -170,6 +170,51 @@ const unloadWholeTerrain = () => {
 const terrainsrc = ReplicatedFirst.WaitForChild("Terrain").WaitForChild("Terrain") as LocalScript;
 terrainsrc.Enabled = false;
 
+const createChunkLoader = () => {
+	let radiusLoaded = 0;
+
+	const loadChunksNextSingleRadius = (centerX: number, centerZ: number) => {
+		const size = ++radiusLoaded;
+
+		for (let num = -size; num <= size; num++) {
+			for (const [x, z] of [
+				[num, -size],
+				[-size, num],
+				[num, size],
+				[size, num],
+			]) {
+				const chunkX = centerX + x;
+				const chunkZ = centerZ + z;
+
+				if (loadedChunks[chunkX]?.[chunkZ]) continue;
+				if (!shouldBeLoaded(chunkX, chunkZ, centerX, centerZ)) continue;
+
+				LoadChunk(chunkX, chunkZ);
+			}
+		}
+	};
+
+	const prevPosX = math.huge;
+	const prevPosZ = math.huge;
+
+	const tr = true;
+	while (tr) {
+		task.wait();
+		if (!Workspace.CurrentCamera) continue;
+
+		const pos = Workspace.CurrentCamera.Focus.Position;
+		const chunkX = math.floor(pos.X / 4 / chunkSize);
+		const chunkZ = math.floor(pos.Z / 4 / chunkSize);
+
+		if (radiusLoaded < loadDistance) {
+			loadChunksNextSingleRadius(chunkX, chunkZ);
+			continue;
+		}
+
+		//
+	}
+};
+
 const betaChunkLoader = () => {
 	const loadChunksAround = (centerX: number, centerZ: number) => {
 		for (let size = 0; size < loadDistance; size++) {
