@@ -16,6 +16,9 @@ interface ReplicatedStorage {
 					Wood: SoundGroup;
 				};
 			};
+			Effects: Folder & {
+				Underwater: EqualizerSoundEffect;
+			};
 		};
 	};
 }

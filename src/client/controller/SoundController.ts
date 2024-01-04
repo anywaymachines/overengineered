@@ -1,4 +1,6 @@
-import { StarterGui } from "@rbxts/services";
+import { ReplicatedStorage, StarterGui, Workspace } from "@rbxts/services";
+import Signals from "client/event/Signals";
+import PartUtils from "shared/utils/PartUtils";
 import GameEnvironmentController from "./GameEnvironmentController";
 import MusicController from "./sound/MusicController";
 
@@ -20,8 +22,41 @@ declare type Sounds = {
 
 /** A class for controlling sounds and their effects */
 export default class SoundController {
+	private static underwater = false;
+
 	public static initialize() {
 		MusicController.initialize();
+
+		Signals.CAMERA.MOVED.Connect(() => {
+			this.underwater = Workspace.CurrentCamera!.CFrame.Y < 0;
+			print(this.underwater);
+			this.updateAllSounds();
+		});
+
+		Workspace.DescendantAdded.Connect((descendant) => {
+			if (!this.underwater) {
+				return;
+			}
+			if (!descendant.IsA("Sound")) {
+				return;
+			}
+			this.updateSound(descendant);
+		});
+	}
+
+	private static updateSound(sound: Sound) {
+		const underwaterEffect = sound.FindFirstChild(ReplicatedStorage.Assets.Sounds.Effects.Underwater.Name);
+		if (this.underwater && !underwaterEffect) {
+			ReplicatedStorage.Assets.Sounds.Effects.Underwater.Clone().Parent = sound;
+		} else if (!this.underwater && underwaterEffect) {
+			underwaterEffect.Destroy();
+		}
+	}
+
+	private static updateAllSounds() {
+		PartUtils.applyToAllDescendantsOfType("Sound", Workspace, (sound) => {
+			this.updateSound(sound);
+		});
 	}
 
 	public static getSounds(): Sounds {
