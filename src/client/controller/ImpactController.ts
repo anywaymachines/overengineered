@@ -55,10 +55,11 @@ export default class ImpactController {
 			if (
 				secondPart.IsA("BasePart") &&
 				secondPart.Parent &&
+				secondPart.Parent.IsA("Model") &&
 				(secondPart.Parent as Model).PrimaryPart &&
 				(secondPart.Parent as Model).PrimaryPart!.Name === "HumanoidRootPart"
 			) {
-				maxDiff *= 2;
+				maxDiff *= 4;
 			}
 
 			// Magnitudes
@@ -84,15 +85,6 @@ export default class ImpactController {
 					UnreliableRemotes.BreakJoints.FireServer(part);
 					event.Disconnect();
 				}
-
-				const soundsFolder = this.materialSounds[part.Material.Name] ?? this.materialSounds["Default"];
-				const randomSound = soundsFolder[math.random(0, soundsFolder.size() - 1)] as Sound;
-				const sound = randomSound.Clone();
-				sound.RollOffMaxDistance = 1000;
-				sound.Volume = 0.5;
-				sound.Parent = math.random(1, 2) === 1 && secondPart.IsA("Terrain") ? secondPart : part;
-				sound.Play();
-				game.GetService("Debris").AddItem(sound, sound.TimeLength);
 			} else if (diff + maxDiff * 0.2 > maxDiff) {
 				UnreliableRemotes.CreateSparks.FireServer(part);
 			}

@@ -3,6 +3,20 @@ import SpreadingFireController from "server/SpreadingFireController";
 import { UnreliableRemotes } from "shared/Remotes";
 
 export default class ReplicateRemoteHandler {
+	private static materialSounds: { [key: string]: Instance[] } = {
+		Default: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
+
+		Metal: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
+		Wood: ReplicatedStorage.Assets.Sounds.Impact.Materials.Wood.GetChildren(),
+	};
+
+	private static materialImpactSounds = {
+		Default: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal,
+
+		Wood: ReplicatedStorage.Assets.Sounds.Impact.Materials.Wood,
+		Metal: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal,
+	};
+
 	static init() {
 		UnreliableRemotes.ReplicateSound.OnServerEvent.Connect((player, sound, isPlaying, volume) =>
 			this.replicateSoundEvent(player, sound, isPlaying, volume),
@@ -78,8 +92,21 @@ export default class ReplicateRemoteHandler {
 			return;
 		}
 
+		if (block.GetAttribute("broken") === true) {
+			return;
+		}
+
 		block.BreakJoints();
 		block.SetAttribute("broken", true);
+
+		const soundsFolder = this.materialSounds[block.Material.Name] ?? this.materialSounds["Default"];
+		const randomSound = soundsFolder[math.random(0, soundsFolder.size() - 1)] as Sound;
+		const sound = randomSound.Clone();
+		sound.RollOffMaxDistance = 1000;
+		sound.Volume = 0.5;
+		sound.Parent = block;
+		sound.Play();
+		game.GetService("Debris").AddItem(sound, sound.TimeLength);
 	}
 
 	static burnEvent(player: Player, block: BasePart) {
