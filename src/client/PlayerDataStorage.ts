@@ -20,9 +20,9 @@ export default class PlayerDataStorage {
 	static async init() {
 		await this.refetchData();
 
-		this.config.subscribe((config) => {
-			Logger.info("better_camera set to " + config?.betterCamera);
-			Workspace.SetAttribute("better_camera", config?.betterCamera === true);
+		this.config.createNullableChild("betterCamera", undefined).subscribe((betterCamera) => {
+			Logger.info("better_camera set to " + betterCamera);
+			Workspace.SetAttribute("better_camera", betterCamera === true);
 		}, true);
 	}
 
