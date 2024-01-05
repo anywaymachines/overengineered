@@ -247,8 +247,40 @@ const v0: BlocksSerializerVersion = {
 		return blocks.size();
 	},
 };
-const v1: BlocksSerializerCurrentVersion = {
+const v1: BlocksSerializerVersion = {
 	version: 1,
+
+	deserialize(data: string, plot: Model): number {
+		let blocks = HttpService.JSONDecode(data) as readonly SerializedBlockV0[];
+		blocks = blocks.map((b) => {
+			if (b.id === "wheel") {
+				return {
+					...b,
+					id: "smallwheel",
+				};
+			}
+
+			return b;
+		});
+
+		place.blocksOnPlot(plot, blocks, place.blockOnPlotV0);
+
+		return blocks.size();
+	},
+};
+const v2: BlocksSerializerVersion = {
+	version: 2,
+
+	deserialize(data: string, plot: Model): number {
+		const blocks = HttpService.JSONDecode(data) as SerializedBlocks<SerializedBlockV2> | SerializedBlockV0[];
+		if (!("version" in blocks) || blocks.version !== this.version) throw "Wrong version";
+
+		place.blocksOnPlot(plot, blocks.blocks, place.blockOnPlotV2);
+		return blocks.blocks.size();
+	},
+};
+const v3: BlocksSerializerCurrentVersion = {
+	version: 3,
 
 	deserialize(data: string, plot: Model): number {
 		const blocks = HttpService.JSONDecode(data) as readonly SerializedBlockV0[];
@@ -260,22 +292,8 @@ const v1: BlocksSerializerCurrentVersion = {
 		return HttpService.JSONEncode(read.blocksFromPlot(plot, read.blockV0));
 	},
 };
-const v2: BlocksSerializerCurrentVersion = {
-	version: 2,
 
-	deserialize(data: string, plot: Model): number {
-		const blocks = HttpService.JSONDecode(data) as SerializedBlocks<SerializedBlockV2> | SerializedBlockV0[];
-		if (!("version" in blocks) || blocks.version !== this.version) throw "Wrong version";
-
-		place.blocksOnPlot(plot, blocks.blocks, place.blockOnPlotV2);
-		return blocks.blocks.size();
-	},
-	serialize(plot: Model): string {
-		return HttpService.JSONEncode(read.blocksFromPlot(plot, read.blockV0));
-	},
-};
-
-const versions = [v0, v1] as const;
+const versions = [v0, v1, v3] as const;
 const current = versions[versions.size() - 1] as BlocksSerializerCurrentVersion;
 
 const BlocksSerializer = {

@@ -1,6 +1,5 @@
 import SlotsDatabase from "server/SlotsDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
-import Logger from "shared/Logger";
 import { blockList } from "shared/Registry";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
@@ -20,7 +19,6 @@ export default class RideMode implements PlayModeBase {
 	}
 
 	private rideStart(player: Player): Response {
-		Logger.info("TimeRSB " + DateTime.now());
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 		const blocks = SharedPlots.getPlotBlocks(plot);
 

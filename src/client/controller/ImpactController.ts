@@ -6,7 +6,7 @@ import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 
 export default class ImpactController {
-	static STRONG_BLOCKS = ["wheel"];
+	static STRONG_BLOCKS = ["smallwheel", "wheel"];
 
 	static readonly STRONG_BLOCKS_ALLOWED_DIFF = 1500 as const;
 	static readonly OBJECTS_ALLOWED_DIFF = 70 as const;
@@ -61,7 +61,7 @@ export default class ImpactController {
 				secondPart.AssemblyLinearVelocity.Magnitude + secondPart.AssemblyAngularVelocity.Magnitude;
 
 			// Material protection
-			allowedMagnitudeDiff *= math.max(0.5, part.CurrentPhysicalProperties.Density / 2.5);
+			allowedMagnitudeDiff *= math.max(0.5, part.CurrentPhysicalProperties.Density / 3.5);
 			allowedMagnitudeDiff = math.round(allowedMagnitudeDiff);
 
 			const magnitudeDiff = math.round(math.abs(partMagnitude - secondPartMagnitude));
