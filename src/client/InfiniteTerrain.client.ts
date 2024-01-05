@@ -1,9 +1,9 @@
 import { Players, ReplicatedFirst, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import Objects from "shared/_fixes_/objects";
-import ObservableValue from "shared/event/ObservableValue";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import PlayerDataStorage from "./PlayerDataStorage";
+import TerrainDataInfo from "./TerrainDataInfo";
 
 if (!game.IsLoaded()) {
 	game.Loaded.Wait();
@@ -13,17 +13,9 @@ while (!PlayerDataStorage.data.get()) {
 	task.wait();
 }
 
-let work = true;
+const work = true;
 
-const folder = ReplicatedFirst.WaitForChild("Terrain") as Folder & {
-	Actor: TerrainActor;
-	Configuration: {
-		ActorAmount: IntValue;
-		ChunkSize: IntValue;
-		LoadDistance: IntValue;
-		UnloadDistance: IntValue;
-	};
-};
+const folder = TerrainDataInfo.getInfo();
 
 type TerrainActor = {
 	Load: Signal<(chunkX: number, chunkZ: number) => void>;
@@ -61,6 +53,19 @@ const recreateActors = () => {
 
 		const tactor = (require(actorScript) as { default: TerrainActor }).default;
 		tactor.Loaded.Connect(() => actorSemaphore.release());
+		tactor.Loaded.Connect((chunkX, chunkZ) => {
+			const load = false;
+			if (!load) return;
+
+			const name = chunkX + "," + chunkZ;
+
+			const heightData = ReplicatedFirst.WaitForChild("Terrain").WaitForChild("Data").WaitForChild("HeightData");
+			heightData.FindFirstChild(name)?.Destroy();
+
+			const data = new Instance("ModuleScript") as ModuleScript & { Source: string };
+			data.Source = "asd";
+			data.Parent = heightData;
+		});
 		actors.push(tactor);
 	}
 };
@@ -171,10 +176,11 @@ const terrainsrc = ReplicatedFirst.WaitForChild("Terrain").WaitForChild("Terrain
 terrainsrc.Enabled = false;
 
 const createChunkLoader = () => {
+	print("Initializing chunk LOAD er");
 	let radiusLoaded = 0;
 
 	const loadChunksNextSingleRadius = (centerX: number, centerZ: number) => {
-		const size = ++radiusLoaded;
+		const size = radiusLoaded++;
 
 		for (let num = -size; num <= size; num++) {
 			for (const [x, z] of [
@@ -194,24 +200,40 @@ const createChunkLoader = () => {
 		}
 	};
 
-	const prevPosX = math.huge;
-	const prevPosZ = math.huge;
+	let prevPosX = math.huge;
+	let prevPosZ = math.huge;
 
 	const tr = true;
 	while (tr) {
 		task.wait();
 		if (!Workspace.CurrentCamera) continue;
 
+		if (isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer)) {
+			unloadWholeTerrain();
+
+			do {
+				task.wait();
+			} while (isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer));
+
+			continue;
+		}
+
 		const pos = Workspace.CurrentCamera.Focus.Position;
 		const chunkX = math.floor(pos.X / 4 / chunkSize);
 		const chunkZ = math.floor(pos.Z / 4 / chunkSize);
+
+		if (prevPosX !== chunkX || prevPosZ !== chunkZ) {
+			UnloadChunks(chunkX, chunkZ);
+			radiusLoaded = 0;
+
+			prevPosX = chunkX;
+			prevPosZ = chunkZ;
+		}
 
 		if (radiusLoaded < loadDistance) {
 			loadChunksNextSingleRadius(chunkX, chunkZ);
 			continue;
 		}
-
-		//
 	}
 };
 
@@ -248,22 +270,6 @@ const betaChunkLoader = () => {
 
 	let positionX = math.huge;
 	let positionZ = math.huge;
-
-	let terra: LocalScript | undefined;
-	new ObservableValue(true).subscribe((enabled) => {
-		unloadWholeTerrain();
-		terra?.Destroy();
-		work = enabled === true;
-
-		if (!enabled) {
-			terra = terrainsrc.Clone();
-			terra.Parent = terrainsrc.Parent;
-			terra.Enabled = true;
-		} else {
-			positionX = math.huge;
-			positionZ = math.huge;
-		}
-	}, true);
 
 	const tru = true;
 	while (tru) {
@@ -302,5 +308,10 @@ const betaChunkLoader = () => {
 		}
 	}
 };
+
+//if (Players.LocalPlayer.Name === "i3ymm") {
+createChunkLoader();
+throw "ded";
+//}
 
 betaChunkLoader();

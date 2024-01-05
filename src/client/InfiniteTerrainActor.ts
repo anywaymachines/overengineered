@@ -1,36 +1,17 @@
 import { ReplicatedFirst, ReplicatedStorage, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import { TerrainData, TerrainInfo } from "./TerrainDataInfo";
 
-type TerrainData = {
-	thickness: number;
-	shift: number;
-	waterHeight: number;
-	minimumHeight: number;
-	maximumHeight: number;
-	noises: { 1: 28135.1; 2: 150; 3: 0.006; 4: 0.4; 5: 10 }[];
-	materials: { 1: 1296; 2: -10000; 3: 8; 4: 0; 5: 7 }[];
-	models: { 1: string; 2: 10; 3: 8; 4: 175; 5: 0; 6: 5; 7: { 1: 1; 2: 24232.388; 3: 0.007; 4: 0.2; 5: 10 }[] }[];
-};
-
-const folder = ReplicatedFirst.WaitForChild("Terrain") as Folder & {
-	Data: Instance;
-	Configuration: {
-		ActorAmount: IntValue;
-		ChunkSize: IntValue;
-		LoadDistance: IntValue;
-		UnloadDistance: IntValue;
-	};
-};
-const terrainChild = folder.Data.FindFirstChild("TerrainData") as ModuleScript;
-const heightChild = folder.Data.FindFirstChild("HeightData") as Folder;
-const materialChild = folder.Data.FindFirstChild("MaterialData") as Folder;
-
+const folder = ReplicatedFirst.WaitForChild("Terrain") as Folder & TerrainInfo;
+const terrainChild = folder.Data.TerrainData;
+const heightChild = folder.Data.HeightData;
+const materialChild = folder.Data.MaterialData;
 if (!terrainChild) {
 	throw "No terrin";
 }
 
 const chunkSize = folder.Configuration.ChunkSize.Value;
-const terrainData = require(terrainChild) as TerrainData;
+const terrainData = require(folder.Data.TerrainData) as TerrainData;
 const heightData: number[][] = [];
 const materialData: number[][] = [];
 
@@ -292,7 +273,7 @@ infterrainActor.Load.ConnectParallel((chunkX: number, chunkZ: number) => {
 				if (materials[x][y][z] !== Enum.Material.Air) {
 					continue;
 				}
-				const yHeight = minimumHeight + (y + 1) * 4 - 2;
+				const yHeight = minimumHeight + (y + 1) * 4;
 				let occupancy = (height - yHeight) / 4;
 
 				if (occupancy > 0) {

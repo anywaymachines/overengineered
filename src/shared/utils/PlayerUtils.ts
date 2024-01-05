@@ -6,4 +6,14 @@ export default class PlayerUtils {
 			(player.Character.FindFirstChild("Humanoid") as Humanoid).Health > 0
 		);
 	}
+
+	static isPlayerPart(part: BasePart): boolean {
+		return (
+			(part.IsA("BasePart") &&
+				part.Parent &&
+				part.Parent.IsA("Model") &&
+				(part.Parent as Model).PrimaryPart &&
+				(part.Parent as Model).PrimaryPart!.Name === "HumanoidRootPart") === true
+		);
+	}
 }

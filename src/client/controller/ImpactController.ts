@@ -1,13 +1,18 @@
 import { Players } from "@rbxts/services";
-import Logger from "shared/Logger";
+import TerrainDataInfo from "client/TerrainDataInfo";
 import { UnreliableRemotes } from "shared/Remotes";
 import SharedPlots from "shared/building/SharedPlots";
 import PartUtils from "shared/utils/PartUtils";
+import PlayerUtils from "shared/utils/PlayerUtils";
 
 export default class ImpactController {
-	private static debug = false;
+	static STRONG_BLOCKS = ["wheel"];
 
-	static blacklist = ["wheel"];
+	static readonly STRONG_BLOCKS_ALLOWED_DIFF = 1500 as const;
+	static readonly OBJECTS_ALLOWED_DIFF = 70 as const;
+
+	static readonly WATER_DIFF_MULTIPLIER = 3 as const;
+	static readonly PLAYER_CHARACTER_DIFF_MULTIPLIER = 4 as const;
 
 	static initializeBlocks() {
 		const blocks = SharedPlots.getPlotBlocks(
@@ -31,49 +36,39 @@ export default class ImpactController {
 			}
 
 			const id = (part.Parent as Model).GetAttribute("id") as string;
-			let maxDiff = this.blacklist.includes(id)
-				? 1500
-				: secondPart.IsA("Terrain") || !secondPart.Anchored
-				  ? 70
-				  : 160;
 
-			// TODO: Move away water level (-1)
-			if (part.CFrame.Y < -1 + 4) {
-				maxDiff *= 3;
+			// Default diff
+			let allowedMagnitudeDiff: number = this.STRONG_BLOCKS.includes(id)
+				? this.STRONG_BLOCKS_ALLOWED_DIFF
+				: this.OBJECTS_ALLOWED_DIFF;
+
+			// Some randomness
+			allowedMagnitudeDiff += math.random(0, 30);
+
+			// Terrain Water
+			if (part.CFrame.Y < TerrainDataInfo.getData().waterHeight + 4) {
+				allowedMagnitudeDiff *= this.WATER_DIFF_MULTIPLIER;
 			}
 
 			// Player character diff
-			if (
-				secondPart.IsA("BasePart") &&
-				secondPart.Parent &&
-				secondPart.Parent.IsA("Model") &&
-				(secondPart.Parent as Model).PrimaryPart &&
-				(secondPart.Parent as Model).PrimaryPart!.Name === "HumanoidRootPart"
-			) {
-				maxDiff *= 4;
+			if (PlayerUtils.isPlayerPart(secondPart)) {
+				allowedMagnitudeDiff *= this.PLAYER_CHARACTER_DIFF_MULTIPLIER;
 			}
 
-			// Magnitudes
-			const m1 = part.AssemblyLinearVelocity.Magnitude + part.AssemblyAngularVelocity.Magnitude;
-			const m2 = secondPart.AssemblyLinearVelocity.Magnitude + secondPart.AssemblyAngularVelocity.Magnitude;
+			// Compute magnitudes
+			const partMagnitude = part.AssemblyLinearVelocity.Magnitude + part.AssemblyAngularVelocity.Magnitude;
+			const secondPartMagnitude =
+				secondPart.AssemblyLinearVelocity.Magnitude + secondPart.AssemblyAngularVelocity.Magnitude;
 
 			// Material protection
-			maxDiff *= math.max(0.5, part.CurrentPhysicalProperties.Density / 2.5);
+			allowedMagnitudeDiff *= math.max(0.5, part.CurrentPhysicalProperties.Density / 2.5);
+			allowedMagnitudeDiff = math.round(allowedMagnitudeDiff);
 
-			maxDiff = math.round(maxDiff);
-
-			const diff = math.round(math.abs(m1 - m2));
-			if (diff > maxDiff * 5) {
-				if (this.debug) {
-					Logger.info(`Heavy Block Overload ${diff} of ${maxDiff} allowed`);
-				}
-				UnreliableRemotes.ImpactExplode.FireServer(part, 1 + diff / (2 * maxDiff * 5));
+			const magnitudeDiff = math.round(math.abs(partMagnitude - secondPartMagnitude));
+			if (magnitudeDiff > allowedMagnitudeDiff * 5) {
+				UnreliableRemotes.ImpactExplode.FireServer(part, 1 + magnitudeDiff / (2 * allowedMagnitudeDiff * 5));
 				event.Disconnect();
-			} else if (diff > maxDiff) {
-				if (this.debug) {
-					Logger.info(`Block Overload ${diff} of ${maxDiff} allowed`);
-				}
-
+			} else if (magnitudeDiff > allowedMagnitudeDiff) {
 				if (math.random(1, 20) === 1) {
 					UnreliableRemotes.Burn.FireServer(part);
 				}
@@ -82,7 +77,7 @@ export default class ImpactController {
 					UnreliableRemotes.ImpactBreak.FireServer(part);
 					event.Disconnect();
 				}
-			} else if (diff + maxDiff * 0.2 > maxDiff) {
+			} else if (magnitudeDiff + allowedMagnitudeDiff * 0.2 > allowedMagnitudeDiff) {
 				UnreliableRemotes.CreateSparks.FireServer(part);
 			}
 		});

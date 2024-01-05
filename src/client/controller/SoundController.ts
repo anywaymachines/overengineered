@@ -1,4 +1,5 @@
 import { ReplicatedStorage, StarterGui, Workspace } from "@rbxts/services";
+import TerrainDataInfo from "client/TerrainDataInfo";
 import Signals from "client/event/Signals";
 import PartUtils from "shared/utils/PartUtils";
 import GameEnvironmentController from "./GameEnvironmentController";
@@ -28,7 +29,7 @@ export default class SoundController {
 		MusicController.initialize();
 
 		Signals.CAMERA.MOVED.Connect(() => {
-			this.underwater = Workspace.CurrentCamera!.CFrame.Y < 0;
+			this.underwater = Workspace.CurrentCamera!.CFrame.Y <= TerrainDataInfo.getData().waterHeight - 5;
 			this.updateAllSounds();
 		});
 
