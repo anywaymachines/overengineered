@@ -10,10 +10,7 @@ export type PhysicalProperties = {
 
 export default class MaterialPhysicalProperties {
 	static Properties: PhysicalProperties = {
-		Default: {
-			Friction: 0.1,
-			FrictionWeight: 10,
-		},
+		Default: {},
 		Ice: {
 			Friction: 0.02,
 			FrictionWeight: 50,

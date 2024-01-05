@@ -37,6 +37,11 @@ export default class ImpactController {
 				  ? 70
 				  : 160;
 
+			// TODO: Move away water level (-1)
+			if (part.CFrame.Y < -1 + 4) {
+				maxDiff *= 3;
+			}
+
 			// Player character diff
 			if (
 				secondPart.IsA("BasePart") &&
@@ -53,7 +58,7 @@ export default class ImpactController {
 			const m2 = secondPart.AssemblyLinearVelocity.Magnitude + secondPart.AssemblyAngularVelocity.Magnitude;
 
 			// Material protection
-			maxDiff *= math.max(0.5, part.CurrentPhysicalProperties.Density / 3.5);
+			maxDiff *= math.max(0.5, part.CurrentPhysicalProperties.Density / 2.5);
 
 			maxDiff = math.round(maxDiff);
 
