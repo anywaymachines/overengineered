@@ -26,7 +26,10 @@ export default class ReplicateRemoteHandler {
 			this.replicateParticleEvent(player, particle, isEnabled, acceleration),
 		);
 
-		UnreliableRemotes.BreakJoints.OnServerEvent.Connect((player, part) => this.breakJointsEvent(player, part));
+		UnreliableRemotes.ImpactBreak.OnServerEvent.Connect((player, part) => this.impactBreakEvent(player, part));
+		UnreliableRemotes.ImpactExplode.OnServerEvent.Connect((player, part, blastRadius) =>
+			this.impactExplodeEvent(player, part, blastRadius),
+		);
 		UnreliableRemotes.Burn.OnServerEvent.Connect((player, part) => this.burnEvent(player, part));
 		UnreliableRemotes.CreateSparks.OnServerEvent.Connect((player, part) => this.createSparksEvent(player, part));
 	}
@@ -79,12 +82,45 @@ export default class ReplicateRemoteHandler {
 		particle.Acceleration = acceleration;
 	}
 
-	static breakJointsEvent(player: Player, block: BasePart) {
+	static impactExplodeEvent(player: Player, block: BasePart, blastRadius: number) {
 		if (!block || !block.Parent) {
 			return;
 		}
 
 		if (!block.IsDescendantOf(Workspace)) {
+			return;
+		}
+
+		if (block.GetNetworkOwner() !== player) {
+			return;
+		}
+
+		if (block.GetAttribute("broken") === true) {
+			return;
+		}
+
+		const explosion = new Instance("Explosion");
+		explosion.BlastPressure = 0;
+		explosion.BlastRadius = blastRadius;
+		explosion.ExplosionType = Enum.ExplosionType.NoCraters;
+		explosion.Visible = false;
+		explosion.Position = block.Position;
+		explosion.DestroyJointRadiusPercent = 0;
+		explosion.Parent = block;
+		explosion.Hit.Connect((part) => {
+			if (math.random(1, 3) > 1) {
+				wait(math.random(0.05, 0.2));
+				this.impactBreakEvent(player, part);
+			}
+		});
+	}
+
+	static impactBreakEvent(player: Player, block: BasePart) {
+		if (!block || !block.Parent) {
+			return;
+		}
+
+		if (!block.IsDescendantOf(Workspace.Plots)) {
 			return;
 		}
 

@@ -58,7 +58,13 @@ export default class ImpactController {
 			maxDiff = math.round(maxDiff);
 
 			const diff = math.round(math.abs(m1 - m2));
-			if (diff > maxDiff) {
+			if (diff > maxDiff * 5) {
+				if (this.debug) {
+					Logger.info(`Heavy Block Overload ${diff} of ${maxDiff} allowed`);
+				}
+				UnreliableRemotes.ImpactExplode.FireServer(part, 1 + diff / (2 * maxDiff * 5));
+				event.Disconnect();
+			} else if (diff > maxDiff) {
 				if (this.debug) {
 					Logger.info(`Block Overload ${diff} of ${maxDiff} allowed`);
 				}
@@ -67,8 +73,8 @@ export default class ImpactController {
 					UnreliableRemotes.Burn.FireServer(part);
 				}
 
-				if (math.random(1, 2) === 1) {
-					UnreliableRemotes.BreakJoints.FireServer(part);
+				if (math.random(1, 3) > 1) {
+					UnreliableRemotes.ImpactBreak.FireServer(part);
 					event.Disconnect();
 				}
 			} else if (diff + maxDiff * 0.2 > maxDiff) {
