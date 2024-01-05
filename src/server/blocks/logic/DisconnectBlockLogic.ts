@@ -17,7 +17,7 @@ export default class DisconnectBlockLogic {
 				return;
 			}
 
-			(block.FindFirstChild("Ejector") as Part | undefined)?.BreakJoints();
+			(block.FindFirstChild("Ejector") as Part | undefined)?.Destroy();
 		});
 	}
 }
