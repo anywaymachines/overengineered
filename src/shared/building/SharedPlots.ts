@@ -9,6 +9,24 @@ export default class SharedPlots {
 		return model?.Parent === Workspace.Plots;
 	}
 
+	static getAllowedPlots(player: Player) {
+		const data: PlotModel[] = [];
+		for (let i = 0; i < this.plots.size(); i++) {
+			const plot = data[i];
+			if (!plot) {
+				continue;
+			}
+
+			if (
+				this.readPlotData(plot).ownerID === player.UserId ||
+				this.readPlotData(plot).whitelistedPlayerIDs.includes(player.UserId)
+			) {
+				data.push(plot);
+			}
+		}
+		return data;
+	}
+
 	/** Function for reading encoded Plot data inside `Model`
 	 * @param plot The Plot model to read
 	 */

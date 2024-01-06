@@ -374,6 +374,7 @@ export default class BuildTool extends ToolBase {
 		super.enable();
 		this.prepareVisual();
 	}
+
 	public disable() {
 		super.disable();
 

@@ -12,6 +12,13 @@ export default class GameDefinitions {
 	static readonly MAX_ANGULAR_SPEED = 40;
 
 	static readonly PLAYER_SETTINGS_DEFINITION = {
+		proMode: {
+			displayName: "Professional Mode",
+			type: "bool",
+			default: {
+				Desktop: false,
+			},
+		},
 		betterCamera: {
 			displayName: "Better camera",
 			type: "bool",

@@ -4,6 +4,7 @@ import ToolBase from "client/base/ToolBase";
 import TooltipsControl from "client/gui/static/TooltipsControl";
 import BuildTool2 from "client/tools/BuildTool2";
 import PaintTool from "client/tools/PaintTool";
+import WireTool from "client/tools/WireTool";
 import GameDefinitions from "shared/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
 import BuildTool from "../tools/BuildTool";
@@ -22,6 +23,7 @@ export default class ToolController extends ComponentBase {
 	public readonly configTool;
 	public readonly paintTool;
 	public readonly buildTool2;
+	public readonly wiretool;
 
 	constructor(mode: BuildingMode) {
 		super();
@@ -37,10 +39,12 @@ export default class ToolController extends ComponentBase {
 		this.configTool = new ConfigTool(mode);
 		this.paintTool = new PaintTool(mode);
 		this.buildTool2 = new BuildTool2(mode);
+		this.wiretool = new WireTool(mode);
 
 		const tools: ToolBase[] = [this.buildTool, this.moveTool, this.deleteTool, this.configTool, this.paintTool];
 		if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
 			tools.push(this.buildTool2);
+			tools.push(this.wiretool);
 		}
 
 		this.tools = tools;

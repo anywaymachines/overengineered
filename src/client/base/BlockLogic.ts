@@ -22,9 +22,25 @@ export default abstract class BlockLogic<T extends BlockModel = BlockModel> exte
 		instance.AttributeChanged.Connect(update);
 		instance.GetPropertyChangedSignal("Parent").Connect(update);
 	}
+
 	protected onDescendantDestroyed(func: () => void) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", this.instance, (part) =>
 			this.subscribeOnDestroyed(part, func),
 		);
 	}
+
+	protected onWireValueChanged(name: string, value: unknown) {
+		return;
+	}
+
+	// TODO
+	// protected getWireInputs(): { [name: string]: { displayName: string; logicType: "boolean" | "number" | "string" } } {
+	// 	return {};
+	// }
+
+	// protected getWireOutputs(): {
+	// 	[name: string]: { displayName: string; logicType: "boolean" | "number" | "string" };
+	// } {
+	// 	return {};
+	// }
 }

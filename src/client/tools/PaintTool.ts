@@ -44,13 +44,13 @@ export default class PaintTool extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Paint mode";
+		return "Paint Mode";
 	}
 	getShortDescription(): string {
 		return "Paint your build";
 	}
 	getImageID(): string {
-		return "rbxassetid://12539295858";
+		return "http://www.roblox.com/asset/?id=15895846447";
 	}
 
 	public getGamepadTooltips(): readonly { key: Enum.KeyCode; text: string }[] {

@@ -1,4 +1,5 @@
 import { GuiService } from "@rbxts/services";
+import PlayerDataStorage from "client/PlayerDataStorage";
 import Control from "client/base/Control";
 import SoundController from "client/controller/SoundController";
 import ObservableValue from "shared/event/ObservableValue";
@@ -37,6 +38,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 	private readonly selectedCategory = new ObservableValue<Category | undefined>(undefined);
 
 	private readonly backButtonText = "← Back ←";
+	private readonly proCategories = ["Logic"];
 
 	constructor(template: BlockSelectionControlDefinition, blocks: readonly Block[], categories: readonly Category[]) {
 		super(template);
@@ -68,7 +70,13 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		this.list.clear();
 
 		if (category === undefined) {
-			this.categories.forEach((cat) => createPart(cat, () => this.selectedCategory.set(cat)));
+			this.categories.forEach((cat) => {
+				if (this.proCategories.includes("Logic") && !PlayerDataStorage.config.get().proMode) {
+					return;
+				}
+
+				createPart(cat, () => this.selectedCategory.set(cat));
+			});
 		} else {
 			createPart(this.backButtonText, () => {
 				this.selectedBlock.set(undefined);
