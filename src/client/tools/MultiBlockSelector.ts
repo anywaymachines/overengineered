@@ -12,12 +12,12 @@ import PlayerUtils from "shared/utils/PlayerUtils";
 export const initializeSingleBlockSelection = (
 	eventHandler: EventHandler,
 	inputHandler: InputHandler,
-	blockHighlighted = (model: Model | undefined) => {},
-	submit = (model: Model | undefined) => {},
-	filter = (target: Model) => true,
+	blockHighlighted = (model: BlockModel | undefined) => {},
+	submit = (model: BlockModel | undefined) => {},
+	filter = (target: BlockModel) => true,
 ) => {
 	const mouse = Players.LocalPlayer.GetMouse();
-	let highlight: Highlight | undefined;
+	let highlight: (Highlight & { Parent: BlockModel }) | undefined;
 
 	const destroyHighlight = () => {
 		highlight?.Destroy();
@@ -62,7 +62,7 @@ export const initializeSingleBlockSelection = (
 			return;
 		}
 
-		const parentPlot = SharedPlots.getPlotByBlock(target.Parent as Model);
+		const parentPlot = SharedPlots.getPlotByBlock(target.Parent);
 
 		// if no plot
 		if (!parentPlot) {
@@ -74,22 +74,22 @@ export const initializeSingleBlockSelection = (
 			return;
 		}
 
-		if (!filter(target.Parent as Model)) {
+		if (!filter(target.Parent as BlockModel)) {
 			return;
 		}
 
 		destroyHighlight();
 
-		highlight = new Instance("Highlight");
-		highlight.Parent = target.Parent;
+		highlight = new Instance("Highlight") as Highlight & { Parent: BlockModel };
+		highlight.Parent = target.Parent as BlockModel;
 		highlight.Adornee = target.Parent;
 		highlight.DepthMode = Enum.HighlightDepthMode.Occluded;
 
-		blockHighlighted(highlight.Parent as Model);
+		blockHighlighted(highlight.Parent as BlockModel);
 	};
 
 	const prepare = () => {
-		const fireSelected = () => submit(highlight?.Parent as Model | undefined);
+		const fireSelected = () => submit(highlight?.Parent as BlockModel | undefined);
 
 		eventHandler.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => updatePosition());
 		eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => updatePosition());
@@ -121,14 +121,14 @@ export const initializeSingleBlockSelection = (
 
 export const initializeBoxSelection = (
 	eventHandler: EventHandler,
-	onrelease: (blocks: readonly Model[]) => void,
-	filter = (block: Model) => true,
+	onrelease: (blocks: readonly BlockModel[]) => void,
+	filter = (block: BlockModel) => true,
 ) => {
 	const camera = Workspace.CurrentCamera!;
 	const mouse = Players.LocalPlayer.GetMouse();
 	const template = Control.asTemplate(GuiController.getGameUI<{ Selection: GuiObject }>().Selection, false);
 
-	const search = (objects: readonly Model[], p1: Vector2, p2: Vector2) => {
+	const search = (objects: readonly BlockModel[], p1: Vector2, p2: Vector2) => {
 		const to3dSpace = (pos: Vector2) => {
 			return camera.ScreenPointToRay(pos.X, pos.Y).Origin;
 		};
@@ -153,7 +153,7 @@ export const initializeBoxSelection = (
 			return a1.X < x && x < a2.X && a1.Y < y && y < a2.Y && rel.Z < 0;
 		};
 
-		const search = (objs: readonly Model[], p1: Vector3, p2: Vector3) => {
+		const search = (objs: readonly BlockModel[], p1: Vector3, p2: Vector3) => {
 			let a1 = calcSlope(p1);
 			let a2 = calcSlope(p2);
 			[a1, a2] = swap(a1, a2);
@@ -190,9 +190,9 @@ export const initializeBoxSelection = (
 
 			const searchBlocks = () =>
 				search(
-					SharedPlots.getPlotBlocks(
-						SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId),
-					).GetChildren() as unknown as readonly Model[],
+					SharedPlots.getPlotBlocks(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId)).GetChildren(
+						undefined,
+					),
 					new Vector2(startpos.Width.Offset, startpos.Height.Offset),
 					new Vector2(mouse.X, mouse.Y),
 				).filter(filter);

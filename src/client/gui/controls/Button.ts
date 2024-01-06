@@ -7,7 +7,7 @@ export type ButtonDefinition = GuiButton;
 export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extends Control<T> {
 	public readonly activated = new Signal<() => void>();
 
-	constructor(gui: T) {
+	constructor(gui: T, activated?: () => void) {
 		super(gui);
 
 		const silent = this.getAttribute<boolean>("silent") === true;
@@ -16,6 +16,10 @@ export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extend
 			if (!silent) SoundController.getSounds().Click.Play();
 			this.activated.Fire();
 		});
+
+		if (activated) {
+			this.activated.Connect(activated);
+		}
 	}
 }
 

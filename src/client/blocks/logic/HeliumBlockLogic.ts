@@ -6,7 +6,7 @@ export default class HeliumBlockLogic extends BlockLogic {
 	private part: BasePart;
 	private vectorForce: VectorForce;
 
-	constructor(block: Model) {
+	constructor(block: BlockModel) {
 		super(block);
 
 		this.part = block.FindFirstChild("Part") as BasePart;

@@ -241,7 +241,7 @@ export default class BuildTool2 extends ToolBase {
 				);
 				cframes = [...cframes, mainGhost.model.GetPivot()];
 
-				const blocks: Model[] = [];
+				const blocks: BlockModel[] = [];
 				for (const cframe of cframes) {
 					const block = BuildingManager.getBlockByPosition(cframe.Position);
 					if (block) blocks.push(block);

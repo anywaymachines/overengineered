@@ -17,10 +17,10 @@ export default class BeaconController {
 	readonly billboard;
 
 	constructor() {
-		let plot: Model | undefined;
+		let plot: PlotModel | undefined;
 
 		while (!plot) {
-			plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
+			plot = SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId);
 			wait(0.1);
 		}
 

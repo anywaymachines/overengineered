@@ -7,7 +7,7 @@ export default class VehicleSeatBlockLogic extends BlockLogic {
 	public readonly vehicleSeat;
 	private readonly occupant;
 
-	constructor(block: Model) {
+	constructor(block: BlockModel) {
 		super(block);
 
 		this.vehicleSeat = block.WaitForChild("VehicleSeat") as VehicleSeat;

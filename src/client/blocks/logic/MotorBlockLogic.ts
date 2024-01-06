@@ -8,7 +8,7 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof block
 	private readonly speed;
 	private readonly isSwitch;
 
-	constructor(block: Model) {
+	constructor(block: BlockModel) {
 		super(block, MotorBlockLogic.getConfigDefinition());
 
 		// Configuration

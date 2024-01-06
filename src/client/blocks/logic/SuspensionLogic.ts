@@ -5,7 +5,7 @@ export default class SuspensionLogic extends ConfigurableBlockLogic<typeof block
 	private springSide: BasePart;
 	private springConstraint: SpringConstraint;
 
-	constructor(block: Model) {
+	constructor(block: BlockModel) {
 		super(block, SuspensionLogic.getConfigDefinition());
 
 		this.springSide = block.FindFirstChild("SpringSide") as BasePart;

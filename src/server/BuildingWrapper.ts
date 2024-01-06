@@ -14,8 +14,8 @@ export default class BuildingWrapper {
 	public static tryGetValidPlotByBlock(
 		this: void,
 		player: Player,
-		block: Model,
-	): (SuccessResponse & { plot: Model }) | ErrorResponse {
+		block: BlockModel,
+	): (SuccessResponse & { plot: PlotModel }) | ErrorResponse {
 		const plot = SharedPlots.getPlotByBlock(block);
 
 		// No plot?
@@ -44,8 +44,8 @@ export default class BuildingWrapper {
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 		return BuildingWrapper.movePlot(plot, data);
 	}
-	public static movePlot(this: void, plot: Model, data: PlayerMoveRequest): Response {
-		const blocks = plot.WaitForChild("Blocks") as Model;
+	public static movePlot(this: void, plot: PlotModel, data: PlayerMoveRequest): Response {
+		const blocks = plot.Blocks;
 
 		const pivot = blocks.GetBoundingBox()[0];
 		const size = blocks.GetExtentsSize();
@@ -119,11 +119,11 @@ export default class BuildingWrapper {
 
 		return { success: true };
 	}
-	public static clearPlot(this: void, plot: Model): Response {
+	public static clearPlot(this: void, plot: PlotModel): Response {
 		ServerPlots.clearAllBlocks(plot);
 		return { success: true };
 	}
-	public static deleteBlock(this: void, block: Model): Response {
+	public static deleteBlock(this: void, block: BlockModel): Response {
 		BuildingWelder.unweld(block);
 		block.Destroy();
 
@@ -144,7 +144,13 @@ export default class BuildingWrapper {
 		}
 
 		// Check is limit exceeded
-		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;
+		const plot = SharedPlots.getPlotByPosition(data.location.Position);
+		if (!plot)
+			return {
+				success: false,
+				message: "Out of bounds",
+			};
+
 		const block = blockRegistry.get(data.block)!;
 		const placedBlocks = SharedPlots.getPlotBlocks(plot)
 			.GetChildren()
@@ -191,7 +197,7 @@ export default class BuildingWrapper {
 		}*/
 	}
 	public static placeBlock(this: void, data: PlaceBlockRequest): BuildResponse {
-		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;
+		const plot = SharedPlots.getPlotByPosition(data.location.Position);
 		if (!plot) {
 			return {
 				success: false,

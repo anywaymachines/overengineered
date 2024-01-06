@@ -71,7 +71,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		this.updateConfigs([]);
 	}
 
-	private updateConfigs(selected: readonly SelectionBox[]) {
+	private updateConfigs(selected: readonly (SelectionBox & { Parent: BlockModel })[]) {
 		this.list.clear();
 		if (selected.size() === 0) return;
 
@@ -79,7 +79,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 
 		const configs = selected
 			.map((selected) => {
-				const blockmodel = selected.Parent as Model;
+				const blockmodel = selected.Parent;
 				const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
 
 				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry] as ConfigDefinitions;

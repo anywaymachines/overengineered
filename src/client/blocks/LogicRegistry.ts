@@ -11,7 +11,7 @@ import TNTBlockLogic from "./logic/TNTBlockLogic";
 import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 import WingLogic from "./logic/WingLogic";
 
-const logicRegistry: Readonly<Record<string, { new (block: Model): BlockLogic } | undefined>> = {
+const logicRegistry: Readonly<Record<string, { new (block: BlockModel): BlockLogic } | undefined>> = {
 	vehicleseat: VehicleSeatBlockLogic,
 	disconnectblock: DisconnectBlockLogic,
 	wing1x1: WingLogic,

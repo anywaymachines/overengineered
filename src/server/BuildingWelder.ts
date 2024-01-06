@@ -85,7 +85,7 @@ export default class BuildingWelder {
 		]);
 	}
 
-	static getClosestParts(part: BasePart, plot: Model) {
+	static getClosestParts(part: BasePart, plot: PlotModel) {
 		const raycastParams = new RaycastParams();
 		raycastParams.CollisionGroup = "BlockWeld";
 
@@ -115,7 +115,7 @@ export default class BuildingWelder {
 		weld.Parent = part0;
 	}
 
-	static unweld(model: Model): void {
+	static unweld(model: BlockModel): void {
 		const modelParts = model.GetChildren().filter((value) => value.IsA("BasePart") && value.CanCollide);
 		for (let i = 0; i < modelParts.size(); i++) {
 			const modelPart = modelParts[i] as BasePart;
@@ -126,7 +126,7 @@ export default class BuildingWelder {
 		}
 	}
 
-	static weld(model: Model, plot: Model): void {
+	static weld(model: BlockModel, plot: PlotModel): void {
 		const modelParts = model.GetChildren().filter((value) => value.IsA("BasePart") && value.CanCollide);
 		for (let i = 0; i < modelParts.size(); i++) {
 			const modelPart = modelParts[i] as BasePart;

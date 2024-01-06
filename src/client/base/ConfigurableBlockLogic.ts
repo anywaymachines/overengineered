@@ -18,7 +18,7 @@ export default abstract class ConfigurableBlockLogic<TDef extends ConfigDefiniti
 	private readonly btnmap;
 	private readonly keyController;
 
-	constructor(block: Model, configDefinition: TDef) {
+	constructor(block: BlockModel, configDefinition: TDef) {
 		super(block);
 
 		this.config = new BlockConfig<TDef>(block, configDefinition);

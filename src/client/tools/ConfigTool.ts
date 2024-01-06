@@ -7,8 +7,8 @@ import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { initializeBoxSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
 
 export default class ConfigTool extends ToolBase {
-	public readonly selectedBlocksChanged = new Signal<(selected: SelectionBox[]) => void>();
-	private readonly selected: SelectionBox[] = [];
+	public readonly selectedBlocksChanged = new Signal<(selected: (SelectionBox & { Parent: BlockModel })[]) => void>();
+	private readonly selected: (SelectionBox & { Parent: BlockModel })[] = [];
 
 	protected prepare() {
 		super.prepare();
@@ -48,8 +48,8 @@ export default class ConfigTool extends ToolBase {
 		});
 	}
 
-	private selectBlock(block: Model) {
-		const instance = new Instance("SelectionBox");
+	private selectBlock(block: BlockModel) {
+		const instance = new Instance("SelectionBox") as SelectionBox & { Parent: BlockModel };
 		instance.Parent = block;
 		instance.Adornee = block;
 		instance.LineThickness = 0.05;
@@ -58,7 +58,7 @@ export default class ConfigTool extends ToolBase {
 		this.selected.push(instance);
 		this.selectedBlocksChanged.Fire(this.selected);
 	}
-	private selectBlockByClick(block: Model | undefined) {
+	private selectBlockByClick(block: BlockModel | undefined) {
 		const pc = InputController.inputType.get() === "Desktop";
 		const add = InputController.inputType.get() === "Gamepad" || InputController.isShiftPressed();
 

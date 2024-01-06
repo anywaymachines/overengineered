@@ -1,12 +1,12 @@
 type ConfigUpdateRequest = {
-	readonly blocks: readonly Model[];
+	readonly blocks: readonly BlockModel[];
 	readonly data: {
 		readonly key: string;
 		readonly value: string;
 	};
 };
 
-type PlayerDeleteBlockRequest = readonly Model[] | "all";
+type PlayerDeleteBlockRequest = readonly BlockModel[] | "all";
 
 type PlayerMoveRequest = {
 	readonly vector: Vector3;

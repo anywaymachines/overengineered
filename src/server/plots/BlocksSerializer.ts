@@ -142,15 +142,15 @@ interface BlocksSerializerVersion {
 	/**
 	 * @returns Block count
 	 */
-	deserialize(data: string, plot: Model): number;
+	deserialize(data: string, plot: PlotModel): number;
 }
 interface BlocksSerializerCurrentVersion extends BlocksSerializerVersion {
-	serialize(plot: Model): string;
+	serialize(plot: PlotModel): string;
 }
 
 const read = {
 	blocksFromPlot: <T extends SerializedBlockV0>(
-		plot: Model,
+		plot: PlotModel,
 		serialize: (block: Model, index: number, buildingCenter: CFrame) => T,
 	): readonly T[] => {
 		const buildingCenter = (plot.FindFirstChild("BuildingArea")!.FindFirstChild("BuildingAreaCenter") as Part)
@@ -177,16 +177,16 @@ const read = {
 } as const;
 const place = {
 	blocksOnPlot: <T extends SerializedBlockV0>(
-		plot: Model,
+		plot: PlotModel,
 		data: readonly T[],
-		place: (plot: Model, blockData: T, buildingCenter: CFrame) => void,
+		place: (plot: PlotModel, blockData: T, buildingCenter: CFrame) => void,
 	) => {
 		const buildingCenter = (plot.FindFirstChild("BuildingArea")!.FindFirstChild("BuildingAreaCenter") as Part)
 			.CFrame;
 		data.forEach((blockData) => place(plot, blockData, buildingCenter));
 	},
 
-	blockOnPlotV0: (plot: Model, blockData: SerializedBlockV0, buildingCenter: CFrame) => {
+	blockOnPlotV0: (plot: PlotModel, blockData: SerializedBlockV0, buildingCenter: CFrame) => {
 		if (!blockRegistry.has(blockData.id)) {
 			Logger.error(`Could not load ${blockData.id} from slot: Block does not exists`);
 			return;
@@ -210,7 +210,7 @@ const place = {
 const v0: BlocksSerializerVersion = {
 	version: 0,
 
-	deserialize(data: string, plot: Model): number {
+	deserialize(data: string, plot: PlotModel): number {
 		const blocks = HttpService.JSONDecode(Base64.Decode(data)) as readonly SerializedBlockV0[];
 		place.blocksOnPlot(plot, blocks, place.blockOnPlotV0);
 
@@ -222,7 +222,7 @@ const v0: BlocksSerializerVersion = {
 const v1: BlocksSerializerVersion = {
 	version: 1,
 
-	deserialize(data: string, plot: Model): number {
+	deserialize(data: string, plot: PlotModel): number {
 		let blocks = HttpService.JSONDecode(data) as readonly SerializedBlockV0[];
 		blocks = blocks.map((b) => {
 			if (b.id === "wheel") {
@@ -245,7 +245,7 @@ const v1: BlocksSerializerVersion = {
 const v3: BlocksSerializerVersion = {
 	version: 3,
 
-	deserialize(data: string, plot: Model): number {
+	deserialize(data: string, plot: PlotModel): number {
 		const blocks = HttpService.JSONDecode(data) as readonly SerializedBlockV0[];
 		place.blocksOnPlot(plot, blocks, place.blockOnPlotV0);
 
@@ -257,14 +257,14 @@ const v3: BlocksSerializerVersion = {
 const v4: BlocksSerializerCurrentVersion = {
 	version: 4,
 
-	deserialize(data: string, plot: Model): number {
+	deserialize(data: string, plot: PlotModel): number {
 		const blocks = HttpService.JSONDecode(data) as SerializedBlocks<SerializedBlockV0> | SerializedBlockV0[];
 		if (!("version" in blocks) || blocks.version !== this.version) throw "Wrong version";
 
 		place.blocksOnPlot(plot, blocks.blocks, place.blockOnPlotV0);
 		return blocks.blocks.size();
 	},
-	serialize(plot: Model): string {
+	serialize(plot: PlotModel): string {
 		const serialized: SerializedBlocks<SerializedBlockV0> = {
 			version: this.version,
 			blocks: read.blocksFromPlot(plot, read.blockV0),
@@ -280,10 +280,10 @@ const current = versions[versions.size() - 1] as BlocksSerializerCurrentVersion;
 const BlocksSerializer = {
 	version: current.version,
 
-	serialize: function (plot: Model): string {
+	serialize: function (plot: PlotModel): string {
 		return current.serialize(plot);
 	},
-	deserialize: function (data: string, plot: Model): number {
+	deserialize: function (data: string, plot: PlotModel): number {
 		for (let i = versions.size() - 1; i >= 0; i--) {
 			try {
 				const result = versions[i].deserialize(data, plot);
@@ -304,7 +304,7 @@ export default BlocksSerializer;
 const vBUFFER = {
 	version: 3,
 
-	serialize(plot: Model): string {
+	serialize(plot: PlotModel): string {
 		const blocks = read.blocksFromPlot(plot, read.blockV0);
 
 		const palette = new Map<string, number>(

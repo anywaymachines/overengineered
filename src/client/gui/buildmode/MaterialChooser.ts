@@ -3,11 +3,12 @@ import Control from "client/base/Control";
 import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
 import BuildingManager from "shared/building/BuildingManager";
-import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import ObservableValue from "shared/event/ObservableValue";
 import { TextButtonControl } from "../controls/Button";
 import { DictionaryControl } from "../controls/DictionaryControl";
 import NumberTextBoxControl from "../controls/NumberTextBoxControl";
 import SliderControl, { SliderControlDefinition } from "../controls/SliderControl";
+import { MaterialPreviewControl, MaterialPreviewDefinition } from "./MaterialPreviewControl";
 
 type MaterialControlDefinition = GuiButton & {
 	ViewportFrame: ViewportFrame & {
@@ -193,39 +194,11 @@ class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> 
 	}
 }
 
-export type MaterialPreviewDefinition = GuiObject & {
-	MaterialPreviewFrame: ViewportFrame & {
-		Part: Part;
-	};
-};
-/** Material preview */
-export class MaterialPreviewControl extends Control<MaterialPreviewDefinition> {
-	constructor(
-		gui: MaterialPreviewDefinition,
-		selectedMaterial: ReadonlyObservableValue<Enum.Material>,
-		selectedColor: ReadonlyObservableValue<Color3>,
-	) {
-		super(gui);
-
-		this.event.subscribeObservable(
-			selectedMaterial,
-			(material) => (this.gui.MaterialPreviewFrame.Part.Material = material),
-			true,
-		);
-
-		this.event.subscribeObservable(
-			selectedColor,
-			(color) => (this.gui.MaterialPreviewFrame.Part.Color = color),
-			true,
-		);
-	}
-}
-
 export type MaterialChooserControlDefinition = GuiObject & {
 	Body: GuiObject & {
 		Body: MaterialChoosePartDefinition;
 		Color: MaterialColorChooseDefinition;
-		Preview: MaterialPreviewDefinition;
+		Preview: GuiObject & { MaterialPreviewFrame: MaterialPreviewDefinition };
 	};
 };
 
@@ -254,7 +227,11 @@ export default class MaterialChooserControl extends Popup<MaterialChooserControl
 		this.add(color);
 		this.selectedColor = color.selectedColor;
 
-		const preview = new MaterialPreviewControl(gui.Body.Preview, this.selectedMaterial, this.selectedColor);
+		const preview = new MaterialPreviewControl(
+			gui.Body.Preview.MaterialPreviewFrame,
+			this.selectedMaterial,
+			this.selectedColor,
+		);
 		this.add(preview);
 
 		this.event.subscribe(chooser.canceled, () => {

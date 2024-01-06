@@ -8,7 +8,7 @@ export default class WingLogic extends BlockLogic {
 
 	private surface: Vector3;
 
-	constructor(block: Model) {
+	constructor(block: BlockModel) {
 		super(block);
 
 		this.wingSurface = block.WaitForChild("WingSurface") as BasePart;

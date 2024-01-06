@@ -8,7 +8,7 @@ export default class ServerPlots {
 		this.initializeEvents();
 	}
 
-	private static createDefaultPlotData(): Plot {
+	private static createDefaultPlotData(): PlotData {
 		return {
 			ownerID: 0,
 			whitelistedPlayerIDs: [],
@@ -20,56 +20,62 @@ export default class ServerPlots {
 	 * @param plot The Plot model
 	 * @param plotData The Plot data to write
 	 */
-	public static writePlotData(plot: Model, plotData: Plot) {
+	public static writePlotData(plot: PlotModel, plotData: PlotData) {
 		plot.SetAttribute("data", HttpService.JSONEncode(plotData));
 	}
 
 	/** Initialization part */
 	private static initializePlots(): void {
 		SharedPlots.plots.forEach((plot) => {
-			this.writePlotData(plot as Model, this.createDefaultPlotData());
+			this.writePlotData(plot, this.createDefaultPlotData());
 		});
 	}
 
 	/** Initialization part */
 	private static initializeEvents(): void {
-		Players.PlayerAdded.Connect((player) => {
-			this.assignPlotTo(player);
-		});
+		Players.PlayerAdded.Connect((player) => this.assignPlotTo(player));
 		Players.PlayerRemoving.Connect((player) => this.resetPlotOf(player));
 	}
 
 	private static assignPlotTo(player: Player): void {
-		const plot = this.getFreePlot();
-		const data = this.createDefaultPlotData();
-		data.ownerID = player.UserId;
-		this.writePlotData(plot, data);
+		try {
+			const plot = this.getFreePlot();
+			const data = this.createDefaultPlotData();
+			data.ownerID = player.UserId;
+			this.writePlotData(plot, data);
 
-		// Add persistant player
-		const blocks = plot.FindFirstChild("Blocks") as Model;
-		blocks.AddPersistentPlayer(player);
+			// Add persistant player
+			const blocks = plot.FindFirstChild("Blocks") as Model;
+			blocks.AddPersistentPlayer(player);
+		} catch {
+			player.Kick("No free plot found, try again later");
+		}
 	}
 
-	public static getFreePlot(): Model {
-		return SharedPlots.plots.find((plot) => {
-			return SharedPlots.readPlotData(plot as Model).ownerID === 0;
-		}) as Model;
+	public static getFreePlot(): PlotModel {
+		const plot = SharedPlots.plots.find((plot) => {
+			return SharedPlots.readPlotData(plot).ownerID === 0;
+		});
+
+		if (!plot) throw "No free plot available";
+		return plot;
 	}
 
-	public static clearAllBlocks(plot: Model) {
-		const blocks = plot.FindFirstChild("Blocks");
-		blocks?.ClearAllChildren();
+	public static clearAllBlocks(plot: PlotModel) {
+		plot.Blocks.ClearAllChildren();
 	}
 
 	private static resetPlotOf(player: Player): void {
-		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
+		try {
+			const plot = SharedPlots.getPlotByOwnerID(player.UserId);
+			this.clearAllBlocks(plot);
+			this.writePlotData(plot, this.createDefaultPlotData());
 
-		this.clearAllBlocks(plot);
-
-		this.writePlotData(plot, this.createDefaultPlotData());
-
-		// Remove persistant player
-		const blocks = plot.FindFirstChild("Blocks") as Model;
-		blocks.RemovePersistentPlayer(player);
+			// Remove persistant player
+			const blocks = plot.FindFirstChild("Blocks") as Model;
+			blocks.RemovePersistentPlayer(player);
+		} catch {
+			// empty
+		}
 	}
 }

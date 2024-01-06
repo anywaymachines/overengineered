@@ -2,8 +2,8 @@ import Machine from "client/blocks/logic/Machine";
 import PartUtils from "shared/utils/PartUtils";
 import Component from "./Component";
 
-export default abstract class BlockLogic<T extends Model = Model> extends Component<T> {
-	protected readonly block: Model;
+export default abstract class BlockLogic<T extends BlockModel = BlockModel> extends Component<T> {
+	protected readonly block: BlockModel;
 	public machine?: Machine;
 
 	constructor(block: T) {

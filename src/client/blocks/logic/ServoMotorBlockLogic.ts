@@ -9,7 +9,7 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<typeof 
 	private readonly angle;
 	private readonly isSwitch;
 
-	constructor(block: Model) {
+	constructor(block: BlockModel) {
 		super(block, ServoMotorBlockLogic.getConfigDefinition());
 
 		// Configuration

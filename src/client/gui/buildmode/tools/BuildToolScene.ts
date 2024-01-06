@@ -3,17 +3,15 @@ import InputController from "client/controller/InputController";
 import BuildTool from "client/tools/BuildTool";
 import { blockList, categoriesRegistry } from "shared/Registry";
 import GuiAnimator from "../../GuiAnimator";
-import { ButtonControl } from "../../controls/Button";
 import BlockSelectionControl, { BlockSelectionControlDefinition } from "../BlockSelection";
-import MaterialChooserControl, { MaterialPreviewControl, MaterialPreviewDefinition } from "../MaterialChooser";
+import MaterialChooserControl from "../MaterialChooser";
+import { MaterialPreviewEditControl, MaterialPreviewEditDefinition } from "../MaterialPreviewEditControl";
 import { MirrorEditorControlDefinition } from "../MirrorEditorControl";
 
 export type BuildToolSceneDefinition = GuiObject & {
 	BlockSelection: BlockSelectionControlDefinition;
 	Mirrors: MirrorEditorControlDefinition;
-	Preview: MaterialPreviewDefinition & {
-		EditMaterialButton: GuiButton;
-	};
+	Preview: MaterialPreviewEditDefinition;
 	TouchControls: Frame & {
 		PlaceButton: TextButton;
 		RotateRButton: TextButton;
@@ -38,15 +36,10 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 
 		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => this.tool.setSelectedBlock(block));
 
-		this.add(new MaterialPreviewControl(this.gui.Preview, tool.selectedMaterial, tool.selectedColor));
+		this.add(new MaterialPreviewEditControl(this.gui.Preview, tool.selectedMaterial, tool.selectedColor));
 
 		MaterialChooserControl.instance.selectedMaterial.bindTo(tool.selectedMaterial);
 		MaterialChooserControl.instance.selectedColor.bindTo(tool.selectedColor);
-
-		const editMaterialButton = this.added(new ButtonControl(this.gui.Preview.EditMaterialButton));
-		this.event.subscribe(editMaterialButton.activated, () => {
-			MaterialChooserControl.instance.show();
-		});
 
 		const updateTouchControls = () => {
 			const visible =

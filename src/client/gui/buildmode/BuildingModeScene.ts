@@ -12,6 +12,7 @@ import BuildTool2Scene from "./tools/BuildTool2Scene";
 import BuildToolScene, { BuildToolSceneDefinition } from "./tools/BuildToolScene";
 import ConfigToolScene, { ConfigToolSceneDefinition } from "./tools/ConfigToolScene";
 import DeleteToolScene, { DeleteToolSceneDefinition } from "./tools/DeleteToolScene";
+import PaintToolScene, { PaintToolSceneDefinition } from "./tools/PaintToolScene";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {
@@ -49,6 +50,7 @@ export type BuildingModeSceneDefinition = GuiObject & {
 		BuildToolGui: BuildToolSceneDefinition;
 		DeleteToolGui: DeleteToolSceneDefinition;
 		ConfigToolGui: ConfigToolSceneDefinition;
+		PaintToolGui: PaintToolSceneDefinition;
 	};
 };
 export default class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
@@ -88,6 +90,7 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 		this.scenes.set(tools.buildTool, new BuildToolScene(this.gui.Tools.BuildToolGui, tools.buildTool));
 		this.scenes.set(tools.deleteTool, new DeleteToolScene(this.gui.Tools.DeleteToolGui, tools.deleteTool));
 		this.scenes.set(tools.configTool, new ConfigToolScene(this.gui.Tools.ConfigToolGui, tools.configTool));
+		this.scenes.set(tools.paintTool, new PaintToolScene(this.gui.Tools.PaintToolGui, tools.paintTool));
 		this.scenes.set(tools.buildTool2, new BuildTool2Scene(bt2, tools.buildTool2));
 
 		this.scenes.forEach((scene) => this.add(scene));

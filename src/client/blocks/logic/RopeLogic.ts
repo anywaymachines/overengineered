@@ -5,7 +5,7 @@ export default class RopeLogic extends ConfigurableBlockLogic<typeof blockConfig
 	private ropeSide: BasePart;
 	private ropeConstraint: RopeConstraint;
 
-	constructor(block: Model) {
+	constructor(block: BlockModel) {
 		super(block, RopeLogic.getConfigDefinition());
 
 		this.ropeSide = block.FindFirstChild("RopeSide") as BasePart;

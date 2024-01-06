@@ -3,7 +3,7 @@ import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Remotes from "shared/Remotes";
 
 export default class DisconnectBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.disconnectblock> {
-	constructor(block: Model) {
+	constructor(block: BlockModel) {
 		super(block, DisconnectBlockLogic.getConfigDefinition());
 	}
 

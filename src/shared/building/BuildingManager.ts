@@ -23,7 +23,7 @@ export default class BuildingManager {
 	 * @param plot The Plot to check
 	 * @param player The player to check
 	 */
-	public static isBuildingAllowed(plot: Model, player: Player) {
+	public static isBuildingAllowed(plot: PlotModel, player: Player) {
 		const data = SharedPlots.readPlotData(plot);
 		return data.ownerID === player.UserId || data.whitelistedPlayerIDs.includes(player.UserId);
 	}
@@ -31,16 +31,15 @@ export default class BuildingManager {
 	/** Returns the block or nothing that is set on (or near) the given vector
 	 * @param vector The vector to check
 	 */
-	public static getBlockByPosition(vector: Vector3): Model | undefined {
+	public static getBlockByPosition(vector: Vector3): BlockModel | undefined {
 		const plot = SharedPlots.getPlotByPosition(vector);
 		if (!plot) {
-			// No plot => No block
 			return undefined;
 		}
 
-		const blocks = (plot.FindFirstChild("Blocks") as Folder).GetChildren();
+		const blocks = plot.Blocks.GetChildren(undefined);
 		for (let i = 0; i < blocks.size(); i++) {
-			const block = blocks[i] as Model;
+			const block = blocks[i];
 			if (
 				VectorUtils.roundVectorToNearestHalf(block.GetPivot().Position) ===
 				VectorUtils.roundVectorToNearestHalf(vector)

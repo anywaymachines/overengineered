@@ -29,7 +29,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 	private movingUp = false;
 	private movingDown = false;
 
-	constructor(block: Model) {
+	constructor(block: BlockModel) {
 		super(block, blockConfigRegistry.smallrocketengine);
 
 		this.onDescendantDestroyed(() => {

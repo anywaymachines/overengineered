@@ -4,7 +4,7 @@ import Config from "client/Config";
 export default class BlockConfig<TDef extends ConfigDefinitions> extends Config<TDef> {
 	readonly block;
 
-	constructor(source: Model, definitions: TDef) {
+	constructor(source: BlockModel, definitions: TDef) {
 		const configAttribute = source.GetAttribute("config") as string | undefined;
 		const content =
 			configAttribute !== undefined

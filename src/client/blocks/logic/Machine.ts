@@ -74,7 +74,7 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 		});
 	}
 
-	public add(instance: BlockLogic<Model>) {
+	public add(instance: BlockLogic<BlockModel>) {
 		instance.machine = this;
 		super.add(instance);
 	}
@@ -86,12 +86,11 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 
 	public static fromBlocks() {
 		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
-		const blocks = SharedPlots.getPlotBlocks(plot).GetChildren();
-
+		const blocks = SharedPlots.getPlotBlocks(plot).GetChildren(undefined);
 		const logics: BlockLogic[] = [];
 
 		for (let i = 0; i < blocks.size(); i++) {
-			const block = blocks[i] as Model;
+			const block = blocks[i];
 			const id = block.GetAttribute("id") as string;
 
 			if (blockRegistry.get(id) === undefined) {
