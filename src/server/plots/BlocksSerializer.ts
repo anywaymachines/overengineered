@@ -6,7 +6,7 @@ import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
 import SharedPlots from "shared/building/SharedPlots";
 
-type SerializedBlocks<TBlocks extends SerializedBlockV2> = {
+type SerializedBlocks<TBlocks extends SerializedBlockV0> = {
 	version: number;
 	blocks: readonly TBlocks[];
 };
@@ -17,10 +17,6 @@ interface SerializedBlockV0 {
 	readonly col: SerializedColor;
 	readonly loc: SerializedCFrame;
 	readonly config?: object;
-}
-interface SerializedBlockV2 extends SerializedBlockV0 {
-	readonly guid: number;
-	readonly welds: readonly { readonly guid: number; readonly path: string }[];
 }
 
 const createBufferReader = (buf: buffer) => {
@@ -178,13 +174,6 @@ const read = {
 					: (HttpService.JSONDecode(block.GetAttribute("config") as string) as object),
 		};
 	},
-	blockV2: (block: Model, index: number, buildingCenter: CFrame): SerializedBlockV2 => {
-		return {
-			...read.blockV0(block, index, buildingCenter),
-			guid: index,
-			welds: [],
-		};
-	},
 } as const;
 const place = {
 	blocksOnPlot: <T extends SerializedBlockV0>(
@@ -216,25 +205,6 @@ const place = {
 			response.model.SetAttribute("config", HttpService.JSONEncode(blockData.config));
 		}
 	},
-	blockOnPlotV2: (plot: Model, blockData: SerializedBlockV2, buildingCenter: CFrame) => {
-		if (!blockRegistry.has(blockData.id)) {
-			Logger.error(`Could not load ${blockData.id} from slot: Block does not exists`);
-			return;
-		}
-
-		const deserializedData: PlaceBlockRequest = {
-			block: blockData.id,
-			color: Serializer.Color3Serializer.deserialize(blockData.col),
-			material: Serializer.EnumMaterialSerializer.deserialize(blockData.mat),
-			location: buildingCenter.ToWorldSpace(Serializer.CFrameSerializer.deserialize(blockData.loc)),
-			config: (blockData.config ?? {}) as Readonly<Record<string, string>>,
-		};
-
-		const response = BuildingWrapper.placeBlock(deserializedData);
-		if (response.success && response.model && blockData.config) {
-			response.model.SetAttribute("config", HttpService.JSONEncode(blockData.config));
-		}
-	},
 } as const;
 
 const v0: BlocksSerializerVersion = {
@@ -247,6 +217,8 @@ const v0: BlocksSerializerVersion = {
 		return blocks.size();
 	},
 };
+
+/** Removed unnesessary base64 encode/decode */
 const v1: BlocksSerializerVersion = {
 	version: 1,
 
@@ -268,18 +240,9 @@ const v1: BlocksSerializerVersion = {
 		return blocks.size();
 	},
 };
-const v2: BlocksSerializerVersion = {
-	version: 2,
 
-	deserialize(data: string, plot: Model): number {
-		const blocks = HttpService.JSONDecode(data) as SerializedBlocks<SerializedBlockV2> | SerializedBlockV0[];
-		if (!("version" in blocks) || blocks.version !== this.version) throw "Wrong version";
-
-		place.blocksOnPlot(plot, blocks.blocks, place.blockOnPlotV2);
-		return blocks.blocks.size();
-	},
-};
-const v3: BlocksSerializerCurrentVersion = {
+/** Updated block 'wheel' > 'smallwheel' */
+const v3: BlocksSerializerVersion = {
 	version: 3,
 
 	deserialize(data: string, plot: Model): number {
@@ -288,12 +251,30 @@ const v3: BlocksSerializerCurrentVersion = {
 
 		return blocks.size();
 	},
+};
+
+/** Added versioning */
+const v4: BlocksSerializerCurrentVersion = {
+	version: 4,
+
+	deserialize(data: string, plot: Model): number {
+		const blocks = HttpService.JSONDecode(data) as SerializedBlocks<SerializedBlockV0> | SerializedBlockV0[];
+		if (!("version" in blocks) || blocks.version !== this.version) throw "Wrong version";
+
+		place.blocksOnPlot(plot, blocks.blocks, place.blockOnPlotV0);
+		return blocks.blocks.size();
+	},
 	serialize(plot: Model): string {
-		return HttpService.JSONEncode(read.blocksFromPlot(plot, read.blockV0));
+		const serialized: SerializedBlocks<SerializedBlockV0> = {
+			version: this.version,
+			blocks: read.blocksFromPlot(plot, read.blockV0),
+		};
+
+		return HttpService.JSONEncode(serialized);
 	},
 };
 
-const versions = [v0, v1, v3] as const;
+const versions = [v0, v1, v3, v4] as const;
 const current = versions[versions.size() - 1] as BlocksSerializerCurrentVersion;
 
 const BlocksSerializer = {
