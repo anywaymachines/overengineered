@@ -102,7 +102,6 @@ export default class BuildTool2 extends ToolBase {
 
 		PartUtils.switchDescendantsMaterial(model, this.selectedMaterial.get());
 		PartUtils.switchDescendantsColor(model, this.selectedColor.get());
-		PartUtils.ghostModel(model);
 		// this.addAxisModel(model);
 
 		const highlight = this.createBlockHighlight(model);
@@ -250,7 +249,7 @@ export default class BuildTool2 extends ToolBase {
 				if (blocks.size() !== 0) await BuildingController.deleteBlock(blocks!);
 			},
 			[mainGhost, ...this.mirroredGhosts].map((g) => ({
-				block: selected.id,
+				id: selected.id,
 				color: this.selectedColor.get(),
 				material: this.selectedMaterial.get(),
 				location: g.model.PrimaryPart!.CFrame,

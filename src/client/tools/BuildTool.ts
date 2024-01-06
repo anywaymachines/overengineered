@@ -25,8 +25,8 @@ export default class BuildTool extends ToolBase {
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 
 	// Const
-	private readonly allowedColor: Color3 = Color3.fromRGB(194, 217, 255);
-	private readonly forbiddenColor: Color3 = Color3.fromRGB(255, 189, 189);
+	private readonly allowedColor: Color3 = Color3.fromRGB(151, 235, 255);
+	private readonly forbiddenColor: Color3 = Color3.fromRGB(255, 156, 158);
 
 	// Block
 	private previewBlock?: Model;
@@ -90,23 +90,11 @@ export default class BuildTool extends ToolBase {
 
 		// Customizing
 		this.addAxisModel();
-		this.addHighlight();
 		PartUtils.switchDescendantsMaterial(this.previewBlock, this.selectedMaterial.get());
 		PartUtils.switchDescendantsColor(this.previewBlock, this.selectedColor.get());
-		PartUtils.ghostModel(this.previewBlock);
 
 		// First update
 		this.updatePosition();
-	}
-
-	private addHighlight() {
-		const blockHighlight = new Instance("Highlight");
-		blockHighlight.Name = "BlockHighlight";
-		blockHighlight.Parent = this.previewBlock;
-		blockHighlight.FillTransparency = 0.4;
-		blockHighlight.OutlineTransparency = 0.5;
-		blockHighlight.Adornee = this.previewBlock;
-		blockHighlight.DepthMode = Enum.HighlightDepthMode.Occluded;
 	}
 
 	private addAxisModel() {
@@ -128,10 +116,9 @@ export default class BuildTool extends ToolBase {
 		}
 
 		const { mouseTarget, mouseHit, mouseSurface } = this.getMouseProperties(savePosition);
-		const highlight = this.previewBlock.FindFirstChildOfClass("Highlight") as Highlight;
 
 		this.performPositioning(mouseTarget, mouseSurface, mouseHit);
-		this.colorizePreviewBlock(highlight);
+		this.colorizePreviewBlock();
 
 		if (!savePosition) {
 			this.lastMouseTarget = mouseTarget;
@@ -250,7 +237,7 @@ export default class BuildTool extends ToolBase {
 				if (block) await BuildingController.deleteBlock([block]);
 			},
 			{
-				block: this.selectedBlock.get()!.id,
+				id: this.selectedBlock.get()!.id,
 				color: this.selectedColor.get(),
 				material: this.selectedMaterial.get(),
 				location: this.previewBlock.PrimaryPart.CFrame,
@@ -325,15 +312,15 @@ export default class BuildTool extends ToolBase {
 		SoundController.getSounds().BuildingMode.BlockRotate.Play();
 	}
 
-	private colorizePreviewBlock(highlight: Highlight) {
+	private colorizePreviewBlock() {
 		assert(this.previewBlock);
 		assert(this.previewBlock.PrimaryPart);
 
 		// Colorizing
 		if (BuildingManager.vectorAbleToPlayer(this.previewBlock.PrimaryPart.Position, Players.LocalPlayer)) {
-			highlight.FillColor = this.allowedColor;
+			PartUtils.ghostModel(this.previewBlock, this.allowedColor);
 		} else {
-			highlight.FillColor = this.forbiddenColor;
+			PartUtils.ghostModel(this.previewBlock, this.forbiddenColor);
 		}
 	}
 

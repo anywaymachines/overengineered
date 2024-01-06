@@ -44,6 +44,7 @@ export default class BuildingWrapper {
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 		return BuildingWrapper.movePlot(plot, data);
 	}
+
 	public static movePlot(this: void, plot: PlotModel, data: PlayerMoveRequest): Response {
 		const blocks = plot.Blocks;
 
@@ -119,10 +120,12 @@ export default class BuildingWrapper {
 
 		return { success: true };
 	}
+
 	public static clearPlot(this: void, plot: PlotModel): Response {
 		ServerPlots.clearAllBlocks(plot);
 		return { success: true };
 	}
+
 	public static deleteBlock(this: void, block: BlockModel): Response {
 		BuildingWelder.unweld(block);
 		block.Destroy();
@@ -151,11 +154,11 @@ export default class BuildingWrapper {
 				message: "Out of bounds",
 			};
 
-		const block = blockRegistry.get(data.block)!;
+		const block = blockRegistry.get(data.id)!;
 		const placedBlocks = SharedPlots.getPlotBlocks(plot)
 			.GetChildren()
 			.filter((placed_block) => {
-				return placed_block.GetAttribute("id") === data.block;
+				return placed_block.GetAttribute("id") === data.id;
 			})
 			.size();
 		if (placedBlocks >= block.limit) {
@@ -179,6 +182,7 @@ export default class BuildingWrapper {
 
 		return placedBlock;
 	}
+
 	public static placeBlockAsPlayer(this: void, player: Player, data: PlaceBlockRequest): BuildResponse {
 		const result = BuildingWrapper.placeSingleBlockAsPlayer(player, data);
 		return result;
@@ -205,11 +209,11 @@ export default class BuildingWrapper {
 			};
 		}
 
-		const block = blockRegistry.get(data.block)!;
+		const block = blockRegistry.get(data.id)!;
 
 		// Create a new instance of the building model
 		const model = block.model.Clone();
-		model.SetAttribute("id", data.block);
+		model.SetAttribute("id", data.id);
 
 		model.PivotTo(data.location);
 		model.Parent = plot.FindFirstChild("Blocks");
@@ -220,6 +224,8 @@ export default class BuildingWrapper {
 		if (data.config && Objects.keys(data.config).size() !== 0) {
 			model.SetAttribute("config", HttpService.JSONEncode(data.config));
 		}
+
+		model.SetAttribute("uuid", data.uuid ?? HttpService.GenerateGUID(false));
 
 		PartUtils.switchDescendantsMaterial(model, data.material);
 		PartUtils.switchDescendantsColor(model, data.color);

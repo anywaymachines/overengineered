@@ -13,10 +13,11 @@ type PlayerMoveRequest = {
 };
 
 type PlaceBlockRequest = {
-	readonly block: string;
+	readonly id: string;
 	readonly color: Color3;
 	readonly material: Enum.Material;
 	readonly location: CFrame;
+	readonly uuid?: string;
 	readonly config?: Readonly<Record<keyof ConfigValueTypes, string>>;
 };
 

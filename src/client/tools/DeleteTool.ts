@@ -40,7 +40,7 @@ export default class DeleteTool extends ToolBase {
 	private blockToUndoRequest(block: Model) {
 		const info: PlaceBlockRequest = {
 			location: block.PrimaryPart!.CFrame,
-			block: block.GetAttribute("id") as string,
+			id: block.GetAttribute("id") as string,
 			color: Serializer.Color3Serializer.deserialize(
 				HttpService.JSONDecode(block.GetAttribute("color") as string) as SerializedColor,
 			),

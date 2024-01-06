@@ -1,6 +1,7 @@
 import { Players } from "@rbxts/services";
 import TerrainDataInfo from "client/TerrainDataInfo";
 import { UnreliableRemotes } from "shared/Remotes";
+import BlockManager from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -30,15 +31,19 @@ export default class ImpactController {
 	}
 
 	private static initializeBlock(part: BasePart) {
+		const blockData = BlockManager.getBlockDataByPart(part);
+
+		if (!blockData) {
+			return;
+		}
+
 		const event = part.Touched.Connect((secondPart: BasePart) => {
 			if (secondPart.IsA("BasePart") && !secondPart.CanCollide) {
 				return;
 			}
 
-			const id = (part.Parent as Model).GetAttribute("id") as string;
-
 			// Default diff
-			let allowedMagnitudeDiff: number = this.STRONG_BLOCKS.includes(id)
+			let allowedMagnitudeDiff: number = this.STRONG_BLOCKS.includes(blockData.id)
 				? this.STRONG_BLOCKS_ALLOWED_DIFF
 				: this.OBJECTS_ALLOWED_DIFF;
 

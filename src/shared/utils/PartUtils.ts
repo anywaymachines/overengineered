@@ -1,10 +1,27 @@
 export default class PartUtils {
-	static ghostModel(model: Model) {
-		this.applyToAllDescendantsOfType("BasePart", model, (part) => {
+	static ghostModel(model: Model, color: Color3) {
+		function fix(part: BasePart | UnionOperation) {
+			if (part.Parent?.Name === "Axis") {
+				return;
+			}
+
+			part.Material = Enum.Material.SmoothPlastic;
+			part.Color = color;
 			part.CanCollide = false;
 			part.CanQuery = false;
 			part.CanTouch = false;
-		});
+
+			if (part.IsA("UnionOperation")) {
+				part.UsePartColor = true;
+			}
+
+			if (part.Transparency !== 1) {
+				part.Transparency = 0.5;
+			}
+		}
+
+		this.applyToAllDescendantsOfType("BasePart", model, (part) => fix(part));
+		this.applyToAllDescendantsOfType("UnionOperation", model, (part) => fix(part));
 	}
 
 	static switchDescendantsTransparency(model: Instance, transparency: number) {

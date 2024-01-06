@@ -193,7 +193,7 @@ const place = {
 		}
 
 		const deserializedData: PlaceBlockRequest = {
-			block: blockData.id,
+			id: blockData.id,
 			color: Serializer.Color3Serializer.deserialize(blockData.col),
 			material: Serializer.EnumMaterialSerializer.deserialize(blockData.mat),
 			location: buildingCenter.ToWorldSpace(Serializer.CFrameSerializer.deserialize(blockData.loc)),
