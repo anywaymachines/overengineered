@@ -9,6 +9,7 @@ import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import SharedPlots from "shared/building/SharedPlots";
 import logicRegistry from "../LogicRegistry";
+import LampBlockLogic from "./LampBlockLogic";
 import VehicleSeatBlockLogic from "./VehicleSeatBlockLogic";
 
 export default class Machine extends ComponentContainer<BlockLogic> {
@@ -106,6 +107,12 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 			const logic = new ctor(block);
 			logics.push(logic);
 		}
+
+		(
+			logics.find((l) => l instanceof VehicleSeatBlockLogic) as VehicleSeatBlockLogic
+		).logicConfig.outputs.occupied.autoSet(
+			(logics.find((l) => l instanceof LampBlockLogic) as LampBlockLogic).logicConfig.inputs.enabled.value,
+		);
 
 		const machine = new Machine(logics);
 		machine.enable();

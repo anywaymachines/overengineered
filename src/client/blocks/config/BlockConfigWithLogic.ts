@@ -4,8 +4,12 @@ import ConfigLogicValue from "./ConfigLogicValue";
 import ConfigLogicValueBase from "./ConfigLogicValueBase";
 
 export default class BlockConfigWithLogic<TDef extends BlockConfigDefinitions> {
-	readonly inputs: Readonly<Record<keyof TDef["input"], ConfigLogicValueBase<ConfigValue>>>;
-	readonly outputs: Readonly<Record<keyof TDef["output"], ObservableValue<ConfigValue>>>;
+	readonly inputs: {
+		readonly [k in keyof TDef["input"]]: ConfigLogicValueBase<TDef["input"][k]["default"]["Desktop"]>;
+	};
+	readonly outputs: {
+		readonly [k in keyof TDef["output"]]: ObservableValue<TDef["output"][k]["default"]["Desktop"]>;
+	};
 
 	constructor(inputConfig: ConfigDefinitionsToConfig<TDef["input"]>, definitions: TDef) {
 		const inputs: Partial<Record<keyof TDef, ConfigLogicValueBase<ConfigValue>>> = {};

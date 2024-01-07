@@ -210,6 +210,19 @@ const tnt = {
 	output: {},
 } as const satisfies BlockConfigDefinitions;
 
+const lamp = {
+	input: {
+		enabled: {
+			displayName: "Enabled",
+			type: "bool",
+			default: {
+				Desktop: false as boolean,
+			},
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigDefinitions;
+
 const suspensionblock = {
 	input: {
 		damping: {
@@ -246,6 +259,19 @@ const suspensionblock = {
 	output: {},
 } as const satisfies BlockConfigDefinitions;
 
+const seat = {
+	input: {},
+	output: {
+		occupied: {
+			displayName: "Occupied",
+			type: "bool",
+			default: {
+				Desktop: false as boolean,
+			},
+		},
+	},
+} as const satisfies BlockConfigDefinitions;
+
 const blockConfigRegistry = {
 	disconnectblock,
 	motorblock,
@@ -254,7 +280,9 @@ const blockConfigRegistry = {
 	rope,
 	servomotorblock,
 	tnt,
+	lamp,
 	suspensionblock,
+	seat,
 } as const satisfies Record<string, BlockConfigDefinitions>;
 
 export default blockConfigRegistry;
