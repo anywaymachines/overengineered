@@ -1,4 +1,5 @@
 import { Players, RunService } from "@rbxts/services";
+import SharedPlots from "shared/building/SharedPlots";
 import PlayerDataStorage from "./PlayerDataStorage";
 import ComponentContainer from "./base/ComponentContainer";
 import BeaconController from "./controller/BeaconController";
@@ -23,7 +24,13 @@ WorldController.generate();
 
 LocalPlayerController.initialize();
 InputTypeChangeEvent.subscribe();
-const _ = BeaconController.instance; // initialize
+
+let plot: PlotModel | undefined;
+while (!plot) {
+	plot = SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId);
+	wait(0.1);
+}
+new BeaconController(plot!, "not a plot");
 
 if (RunService.IsStudio()) {
 	DebugControl.instance.show();
