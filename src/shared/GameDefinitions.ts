@@ -59,4 +59,15 @@ export default class GameDefinitions {
 
 		return max;
 	}
+
+	static RANKS: { [rank: number]: { name: string; color?: Color3; rainbow?: boolean } } = {
+		254: {
+			name: "Developer",
+			rainbow: true,
+		},
+		2: {
+			name: "Game Test",
+			color: Color3.fromRGB(170, 255, 255),
+		},
+	};
 }

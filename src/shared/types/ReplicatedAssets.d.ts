@@ -9,6 +9,12 @@ interface ReplicatedStorage {
 		MoveHandles: MoveHandles;
 		Fire: Folder;
 		Sparks: ParticleEmitter;
+		PlotOwnerGui: BillboardGui & {
+			UserImage: ImageLabel;
+			DisplayNameLabel: TextLabel;
+			UsernameLabel: TextLabel;
+			RankLabel: TextLabel;
+		};
 		Wires: Folder & {
 			WireMarkerInput: BillboardGui;
 			WireMarkerInputConnected: BillboardGui;

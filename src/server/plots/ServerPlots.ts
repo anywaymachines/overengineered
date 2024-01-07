@@ -1,4 +1,5 @@
-import { HttpService, Players } from "@rbxts/services";
+import { HttpService, Players, ReplicatedStorage } from "@rbxts/services";
+import GameDefinitions from "shared/GameDefinitions";
 import SharedPlots from "shared/building/SharedPlots";
 
 /** A class that is designed to manage **Plots** where players can build */
@@ -47,6 +48,37 @@ export default class ServerPlots {
 			// Add persistant player
 			const blocks = plot.FindFirstChild("Blocks") as Model;
 			blocks.AddPersistentPlayer(player);
+
+			// Add gui
+			const gui = ReplicatedStorage.Assets.PlotOwnerGui.Clone();
+			gui.UserImage.Image = Players.GetUserThumbnailAsync(
+				player.UserId,
+				Enum.ThumbnailType.AvatarThumbnail,
+				Enum.ThumbnailSize.Size420x420,
+			)[0];
+			gui.DisplayNameLabel.Text = player.DisplayName;
+			gui.UsernameLabel.Text = `@${player.Name}`;
+			gui.Parent = plot;
+			gui.Adornee = plot.FindFirstChild("BuildingArea") as BasePart;
+
+			const rank = player.GetRankInGroup(GameDefinitions.GROUP);
+			const rankData = GameDefinitions.RANKS[rank];
+			if (rankData) {
+				gui.RankLabel.Text = rankData.name;
+				if (rankData.rainbow) {
+					spawn(() => {
+						while (gui !== undefined) {
+							const t = 5;
+							const hue = (tick() % t) / t;
+							const colorrr = Color3.fromHSV(hue, 1, 1);
+							gui.RankLabel.TextColor3 = colorrr;
+							task.wait();
+						}
+					});
+				} else if (rankData.color) {
+					gui.RankLabel.TextColor3 = rankData.color;
+				}
+			}
 		} catch {
 			player.Kick("No free plot found, try again later");
 		}
@@ -74,6 +106,9 @@ export default class ServerPlots {
 			// Remove persistant player
 			const blocks = plot.FindFirstChild("Blocks") as Model;
 			blocks.RemovePersistentPlayer(player);
+
+			// Remove gui
+			plot.FindFirstChild(ReplicatedStorage.Assets.PlotOwnerGui.Name)?.Destroy();
 		} catch {
 			// empty
 		}
