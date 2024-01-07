@@ -71,7 +71,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 
 		if (category === undefined) {
 			this.categories.forEach((cat) => {
-				if (this.proCategories.includes("Logic") && !PlayerDataStorage.config.get().proMode) {
+				if (this.proCategories.includes(cat) && !PlayerDataStorage.config.get().proMode) {
 					return;
 				}
 
