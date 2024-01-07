@@ -72,6 +72,8 @@ export default class WireTool extends ToolBase {
 			}
 		});
 		this.renderedMarkers.push(marker);
+
+		return marker;
 	}
 
 	/**
@@ -85,41 +87,48 @@ export default class WireTool extends ToolBase {
 		secondPoint: Vector3,
 		color: Color3 = Color3.fromRGB(255, 0, 255),
 	): BasePart {
+		const wire = new Instance("Part");
+		wire.Anchored = true;
+		wire.CanCollide = false;
+		wire.CanQuery = false;
+		wire.CanTouch = false;
+
+		wire.Material = Enum.Material.SmoothPlastic;
+		wire.Transparency = 0.1;
+		wire.Color = color;
+
+		wire.Parent = this.viewportFrame;
+
+		this.updateWire(wire, firstPoint, secondPoint);
+
+		this.renderedWires.push(wire);
+
+		return wire;
+	}
+
+	private updateWire(wire: BasePart, firstPoint: Vector3, secondPoint: Vector3) {
 		const distance = secondPoint.sub(firstPoint).Magnitude;
-
-		const ray_visual = new Instance("Part");
-		ray_visual.Anchored = true;
-		ray_visual.CanCollide = false;
-		ray_visual.CanQuery = false;
-		ray_visual.CanTouch = false;
-
-		ray_visual.Material = Enum.Material.SmoothPlastic;
-		ray_visual.Transparency = 0.1;
-		ray_visual.Color = color;
-
-		ray_visual.Size = new Vector3(0.1, 0.1, distance - 0.45);
-		ray_visual.CFrame = new CFrame(firstPoint, secondPoint).mul(new CFrame(0, 0, -distance / 2));
-		ray_visual.Parent = this.viewportFrame;
-
-		this.renderedWires.push(ray_visual);
-
-		return ray_visual;
+		wire.Size = new Vector3(0.1, 0.1, distance - 0.4);
+		wire.CFrame = new CFrame(firstPoint, secondPoint).mul(new CFrame(0, 0, -distance / 2));
 	}
 
 	private clearWire(wire: BasePart) {
 		wire.Destroy();
+		this.renderedWires.remove(this.renderedWires.indexOf(wire));
 	}
 
 	private clearWires() {
 		this.renderedWires.forEach((element) => {
 			element.Destroy();
 		});
+		this.renderedWires.clear();
 	}
 
 	private clearMarkers() {
 		this.renderedMarkers.forEach((element) => {
 			element.Destroy();
 		});
+		this.renderedMarkers.clear();
 	}
 
 	public enable(): void {
@@ -129,6 +138,12 @@ export default class WireTool extends ToolBase {
 		const col = Color3.fromRGB(107, 176, 219);
 		this.createMarker(part, "output", col);
 		this.createWire(part.Position, new Vector3(50, 50, 50), col);
+
+		/*
+			key - boolean
+			switch - boolean
+			number - number
+		*/
 	}
 
 	public disable(): void {
