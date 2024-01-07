@@ -67,7 +67,7 @@ export default class ServerPlots {
 				gui.RankLabel.Text = rankData.name;
 				if (rankData.rainbow) {
 					spawn(() => {
-						while (gui !== undefined) {
+						while (gui && gui.FindFirstChild("RankLabel")) {
 							const t = 5;
 							const hue = (tick() % t) / t;
 							const colorrr = Color3.fromHSV(hue, 1, 1);
