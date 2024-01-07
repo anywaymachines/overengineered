@@ -82,7 +82,8 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				const blockmodel = selected.Parent;
 				const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
 
-				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry] as ConfigDefinitions;
+				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
+					.input as ConfigDefinitions;
 				if (!defs) return undefined! as BlockConfig<ConfigDefinitions>;
 
 				return new BlockConfig(blockmodel, defs);

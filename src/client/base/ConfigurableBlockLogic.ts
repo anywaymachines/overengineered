@@ -1,5 +1,6 @@
 import { UserInputService } from "@rbxts/services";
 import BlockConfig from "client/blocks/BlockConfig";
+import BlockConfigWithLogic from "client/blocks/config/BlockConfigWithLogic";
 import Objects from "shared/_fixes_/objects";
 import BlockLogic from "./BlockLogic";
 import { KeyPressingConflictingController } from "./KeyPressingController";
@@ -12,20 +13,23 @@ export type KeyDefinition<TDef extends ConfigDefinitions> = {
 };
 export type KeyDefinitions<TDef extends ConfigDefinitions> = Partial<Record<KeyMembers<TDef>, KeyDefinition<TDef>>>;
 
-export default abstract class ConfigurableBlockLogic<TDef extends ConfigDefinitions> extends BlockLogic {
+export default abstract class ConfigurableBlockLogic<TDef extends BlockConfigDefinitions> extends BlockLogic {
+	readonly config: BlockConfig<TDef["input"]>;
+	readonly logicConfig: BlockConfigWithLogic<TDef>;
 	protected readonly keysDefinition;
-	public readonly config: BlockConfig<TDef>;
 	private readonly btnmap;
 	private readonly keyController;
 
 	constructor(block: BlockModel, configDefinition: TDef) {
 		super(block);
 
-		this.config = new BlockConfig<TDef>(block, configDefinition);
-		this.keysDefinition = this.getKeysDefinition();
-		this.keyController = new KeyPressingConflictingController<KeyMembers<TDef>>(this.keysDefinition);
+		this.config = new BlockConfig<TDef["input"]>(block, configDefinition.input);
+		this.logicConfig = new BlockConfigWithLogic(this.config.getAll(), configDefinition);
 
-		this.btnmap = new Map<KeyCode, KeyMembers<TDef>>(
+		this.keysDefinition = this.getKeysDefinition();
+		this.keyController = new KeyPressingConflictingController<KeyMembers<TDef["input"]>>(this.keysDefinition);
+
+		this.btnmap = new Map<KeyCode, KeyMembers<TDef["input"]>>(
 			Objects.entries(this.keysDefinition).map((d) => [this.config.get(d[0]) as KeyCode, d[0]] as const),
 		);
 
@@ -70,16 +74,16 @@ export default abstract class ConfigurableBlockLogic<TDef extends ConfigDefiniti
 		this.triggerKeyUp(btnmap);
 	}
 
-	triggerKeyDown(key: KeyMembers<TDef>) {
+	triggerKeyDown(key: KeyMembers<TDef["input"]>) {
 		if (!this.machine?.seat.occupiedByLocalPlayer.get()) return;
 		this.keyController.keyDown(key);
 	}
-	triggerKeyUp(key: KeyMembers<TDef>) {
+	triggerKeyUp(key: KeyMembers<TDef["input"]>) {
 		if (!this.machine?.seat.occupiedByLocalPlayer.get()) return;
 		this.keyController.keyUp(key);
 	}
 
-	getKeysDefinition(): KeyDefinitions<TDef> {
+	getKeysDefinition(): KeyDefinitions<TDef["input"]> {
 		return {};
 	}
 }

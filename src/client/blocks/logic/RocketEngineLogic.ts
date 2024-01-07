@@ -68,7 +68,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 	}
 
-	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.smallrocketengine> {
+	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.smallrocketengine.input> {
 		return {
 			thrust_add: {
 				conflicts: "thrust_sub",

@@ -39,6 +39,7 @@ type ConfigValueOf<T extends ConfigDefinition> = T["default"]["Desktop"];
 type ConfigValue = ConfigValueOf<ConfigDefinition>;
 type ConfigValues = Readonly<Record<string, ConfigValue>>;
 
+type ConfigDefinitionToConfig<T extends ConfigDefinition> = ConfigValueOf<ConfigDefinitionType[T["type"]]>;
 type ConfigDefinitionsToConfig<T extends ConfigDefinitions> = {
-	[k in keyof T]: ConfigValueOf<ConfigDefinitionType[T[k]["type"]]>;
+	[k in keyof T]: ConfigDefinitionToConfig<T[k]>;
 };

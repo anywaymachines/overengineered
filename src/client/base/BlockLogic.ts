@@ -28,19 +28,4 @@ export default abstract class BlockLogic<T extends BlockModel = BlockModel> exte
 			this.subscribeOnDestroyed(part, func),
 		);
 	}
-
-	protected onWireValueChanged(name: string, value: unknown) {
-		return;
-	}
-
-	// TODO
-	// protected getWireInputs(): { [name: string]: { displayName: string; logicType: "boolean" | "number" | "string" } } {
-	// 	return {};
-	// }
-
-	// protected getWireOutputs(): {
-	// 	[name: string]: { displayName: string; logicType: "boolean" | "number" | "string" };
-	// } {
-	// 	return {};
-	// }
 }

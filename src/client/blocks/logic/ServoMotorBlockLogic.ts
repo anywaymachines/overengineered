@@ -36,7 +36,7 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<typeof 
 	private isIncreasing = false;
 	private isDecreasing = false;
 
-	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.servomotorblock> {
+	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.servomotorblock.input> {
 		return {
 			rotate_add: {
 				conflicts: "rotate_sub",

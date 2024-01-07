@@ -4,14 +4,14 @@ import Remotes from "shared/Remotes";
 
 export default class DisconnectBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.disconnectblock> {
 	constructor(block: BlockModel) {
-		super(block, DisconnectBlockLogic.getConfigDefinition());
+		super(block, blockConfigRegistry.disconnectblock);
 	}
 
 	static getConfigDefinition() {
 		return blockConfigRegistry.disconnectblock;
 	}
 
-	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.disconnectblock> {
+	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.disconnectblock.input> {
 		return {
 			disconnect: {
 				keyDown: () => {

@@ -227,7 +227,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		}, true);
 
 		let pos = 0;
-		const map: Record<string, ConfigurableBlockLogic<ConfigDefinitions>[]> = {};
+		const map: Record<string, ConfigurableBlockLogic<BlockConfigDefinitions>[]> = {};
 
 		for (const block of machine.getChildren()) {
 			if (!(block instanceof ConfigurableBlockLogic)) {

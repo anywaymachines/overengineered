@@ -32,7 +32,7 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof block
 	private isIncreasing = false;
 	private isDecreasing = false;
 
-	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.motorblock> {
+	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.motorblock.input> {
 		return {
 			rotate_add: {
 				conflicts: "rotate_sub",
