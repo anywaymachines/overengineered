@@ -9,6 +9,11 @@ interface ReplicatedStorage {
 		MoveHandles: MoveHandles;
 		Fire: Folder;
 		Sparks: ParticleEmitter;
+		Wires: Folder & {
+			WireMarkerInput: BillboardGui;
+			WireMarkerInputConnected: BillboardGui;
+			WireMarkerOutput: BillboardGui;
+		};
 		Sounds: Folder & {
 			Impact: Folder & {
 				Materials: Folder & {
