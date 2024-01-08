@@ -1,4 +1,9 @@
 export default class VectorUtils {
+	static normilzeVector2(vector: Vector2) {
+		const vectorLength = math.abs(math.sqrt(vector.X ** 2 + vector.Y ** 2));
+		return vector.div(vectorLength);
+	}
+
 	static roundVectorToBase(vector: Vector3, base: number): Vector3 {
 		const x = math.floor(vector.X / base + 0.5) * base;
 		const y = math.floor(vector.Y / base + 0.5) * base;

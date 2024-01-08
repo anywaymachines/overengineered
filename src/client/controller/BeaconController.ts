@@ -1,6 +1,8 @@
 import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import RobloxUnit from "shared/RobloxUnit";
+import PartUtils from "shared/utils/PartUtils";
+import VectorUtils from "shared/utils/VectorUtils";
 import GuiController from "./GuiController";
 
 type BeaconBillboardGui = GuiObject & {
@@ -16,6 +18,11 @@ export default class BeaconController {
 		this.billboard = (
 			ReplicatedStorage.Assets as unknown as { BeaconBillboardGui: BeaconBillboardGui }
 		).BeaconBillboardGui.Clone();
+
+		PartUtils.applyToAllDescendantsOfType("GuiObject", this.billboard, (gui) => {
+			gui.ZIndex = -1;
+		});
+
 		this.billboard.Parent = part;
 
 		const frame = this.billboard;
@@ -61,21 +68,22 @@ export default class BeaconController {
 			const halfScreenY = screenSize.Y / 2;
 
 			if (!isVisible || pos_x > screenSize.X || pos_y > screenSize.Y || pos_x < 0 || pos_y < 0) {
-				pos_x = math.clamp(
-					pos_x - halfScreenX + halfScreenX,
-					adjustableOffset,
-					screenSize.X - adjustableOffset,
-				);
-				pos_y = math.clamp(
-					pos_y - halfScreenY + halfScreenY,
-					adjustableOffset,
-					screenSize.Y - adjustableOffset,
-				);
-
 				if (screenPos.Z < 0) {
 					pos_x = screenSize.X - pos_x;
 					pos_y = screenSize.Y - pos_y;
 				}
+
+				//print(screenPos.Z);
+				const vector = new Vector2(pos_x, pos_y);
+				const normalizedVector = VectorUtils.normilzeVector2(vector)
+					.mul(new Vector2(screenSize.X, screenSize.Y))
+					.add(new Vector2(halfScreenX, halfScreenY));
+
+				[pos_x, pos_y] = [normalizedVector.X, normalizedVector.Y];
+
+				pos_x = math.clamp(pos_x, adjustableOffset, screenSize.X - adjustableOffset);
+
+				pos_y = math.clamp(pos_y, adjustableOffset, screenSize.Y - adjustableOffset);
 			}
 
 			/*
