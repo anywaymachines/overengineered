@@ -91,6 +91,10 @@ export default class ReplicateRemoteHandler {
 			return;
 		}
 
+		if (block.Anchored || block.AssemblyRootPart?.Anchored) {
+			return;
+		}
+
 		if (block.GetNetworkOwner() !== player) {
 			return;
 		}
@@ -120,6 +124,10 @@ export default class ReplicateRemoteHandler {
 		}
 
 		if (!block.IsDescendantOf(Workspace.Plots)) {
+			return;
+		}
+
+		if (block.Anchored || block.AssemblyRootPart?.Anchored) {
 			return;
 		}
 
