@@ -68,61 +68,33 @@ export default class BeaconController {
 			const halfScreenY = screenSize.Y / 2;
 
 			if (!isVisible || pos_x > screenSize.X || pos_y > screenSize.Y || pos_x < 0 || pos_y < 0) {
-				if (screenPos.Z < 0) {
-					pos_x = screenSize.X - pos_x;
-					pos_y = screenSize.Y - pos_y;
-				}
-
-				//print(screenPos.Z);
-				const vector = new Vector2(pos_x, pos_y);
-				const normalizedVector = VectorUtils.normilzeVector2(vector)
+				const vector = new Vector2(pos_x - halfScreenX, pos_y - halfScreenY);
+				const normalizedVector = VectorUtils.normalizeVector2(vector)
 					.mul(new Vector2(screenSize.X, screenSize.Y))
 					.add(new Vector2(halfScreenX, halfScreenY));
 
 				[pos_x, pos_y] = [normalizedVector.X, normalizedVector.Y];
 
-				pos_x = math.clamp(pos_x, adjustableOffset, screenSize.X - adjustableOffset);
+				if (screenPos.Z < 0) {
+					pos_x = screenSize.X - pos_x;
+					pos_y = screenSize.Y - pos_y;
+				}
 
+				const d = halfScreenX / halfScreenY;
+				let vec = new Vector2(pos_x, pos_y).sub(new Vector2(halfScreenX, halfScreenY));
+				vec = new Vector2(math.abs(vec.X), math.abs(vec.Y))
+					.sub(new Vector2(halfScreenX, halfScreenY))
+					.div(new Vector2(d, 1));
+				vec = new Vector2(math.abs(vec.X), math.abs(vec.Y));
+				const newTransparency = vec.Magnitude / halfScreenX;
+				this.billboard.ImageLabel.ImageTransparency = newTransparency;
+				this.billboard.Title.TextTransparency = newTransparency;
+				this.billboard.Distance.TextTransparency = newTransparency;
+				pos_x = math.clamp(pos_x, adjustableOffset, screenSize.X - adjustableOffset);
 				pos_y = math.clamp(pos_y, adjustableOffset, screenSize.Y - adjustableOffset);
 			}
 
-			/*
-			if (!isVisible) {
-				const xmore = math.abs(halfScreenX - pos_x) > math.abs(halfScreenY - pos_y);
-
-				if (xmore) {
-					pos_y = math.clamp(pos_y, adjustableOffset, screenSize.Y - adjustableOffset);
-					pos_x = pos_x > halfScreenX ? screenSize.X - adjustableOffset : adjustableOffset;
-				} else {
-					pos_x = math.clamp(pos_x, adjustableOffset, screenSize.X - adjustableOffset);
-					pos_y = pos_y > halfScreenY ? screenSize.Y - adjustableOffset : adjustableOffset;
-				}
-			}
-			*/
-			//if (Players.LocalPlayer.Name === "samlovebutter") {
-			//	print(isVisible);
-			//}
-
-			//if (pos_x > screenSize.X - adjustableOffset) pos_x = screenSize.X - adjustableOffset;
-			//if (pos_x < adjustableOffset) pos_x = adjustableOffset;
-			//if (pos_y > screenSize.Y - adjustableOffset) pos_y = screenSize.Y - adjustableOffset;
-			//if (pos_y < adjustableOffset) pos_y = adjustableOffset;
-
-			//if off screen then move to closes maximum
-			//if(!isVisible){
-			//	;
-			//}
-
 			frame.Position = new UDim2(0, pos_x, 0, pos_y);
-
-			//const aOff = adjustableOffset * 100;
-			//const offByX = screenPos.X > screenSize.X + aOff || screenPos.X < -aOff;
-			//const offByY = screenPos.Y > screenSize.Y + aOff || screenPos.Y < -aOff;
-			//print(isVisible);
-			//if (!(offByX || offByY) || isVisible) return;
-			//this.billboard.ImageLabel.ImageTransparency = 1;
-			//this.billboard.Title.TextTransparency = 1;
-			//this.billboard.Distance.TextTransparency = 1;
 		});
 	}
 }

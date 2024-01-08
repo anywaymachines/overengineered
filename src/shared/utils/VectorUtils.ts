@@ -1,5 +1,5 @@
 export default class VectorUtils {
-	static normilzeVector2(vector: Vector2) {
+	static normalizeVector2(vector: Vector2) {
 		const vectorLength = math.abs(math.sqrt(vector.X ** 2 + vector.Y ** 2));
 		return vector.div(vectorLength);
 	}
