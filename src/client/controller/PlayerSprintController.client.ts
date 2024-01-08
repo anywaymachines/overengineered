@@ -1,6 +1,5 @@
-import { Players, UserInputService } from "@rbxts/services";
+import { ContextActionService, Players } from "@rbxts/services";
 import ObservableValue from "shared/event/ObservableValue";
-import GuiController from "./GuiController";
 import InputController from "./InputController";
 
 const walkSpeed = 20;
@@ -16,46 +15,24 @@ sprintmode.subscribe((sprinting) => {
 });
 Players.LocalPlayer.CharacterAdded.Connect(() => sprintmode.triggerChanged());
 
-// -------------------
-// desktop
-UserInputService.InputBegan.Connect((input) => {
-	if (input.UserInputType !== Enum.UserInputType.Keyboard || input.KeyCode !== Enum.KeyCode.LeftShift) {
-		return;
+function runEvent(actionName: string, inputState: Enum.UserInputState, inputObject: InputObject) {
+	if (inputState !== Enum.UserInputState.Begin) {
+		sprintmode.set(false);
+		return Enum.ContextActionResult.Pass;
 	}
-
 	sprintmode.set(true);
-});
-UserInputService.InputEnded.Connect((input) => {
-	if (input.UserInputType !== Enum.UserInputType.Keyboard || input.KeyCode !== Enum.KeyCode.LeftShift) {
-		return;
-	}
+	return Enum.ContextActionResult.Pass;
+}
 
-	sprintmode.set(false);
-});
-
-// -------------------
-// console
-UserInputService.InputBegan.Connect((input) => {
-	if (input.KeyCode !== Enum.KeyCode.ButtonY) {
-		return;
-	}
-
-	sprintmode.set(true);
-});
-UserInputService.InputEnded.Connect((input) => {
-	if (input.KeyCode !== Enum.KeyCode.ButtonY) {
-		return;
-	}
-
-	sprintmode.set(false);
-});
-
-// -------------------
-// mobile
-const mobileGui = GuiController.getGameUI().WaitForChild("MobileSprint") as Frame & {
-	Toggle: GuiButton & { Icon: ImageLabel };
-};
-InputController.inputType.subscribe((input) => (mobileGui.Visible = input === "Touch"), true);
-
-sprintmode.subscribe((sprinting) => (mobileGui.Toggle.Icon.ImageTransparency = sprinting ? 0 : 0.5));
-mobileGui.Toggle.Activated.Connect(() => sprintmode.set(!sprintmode.get()));
+InputController.inputType.subscribe((value) => {
+	ContextActionService.UnbindAction("Sprint");
+	ContextActionService.BindAction(
+		"Sprint",
+		runEvent,
+		value === "Touch",
+		Enum.KeyCode.LeftShift,
+		Enum.KeyCode.ButtonY,
+	);
+	ContextActionService.SetImage("Sprint", "rbxassetid://9555118706");
+	ContextActionService.SetDescription("Sprint", "Allows you to move more quickly");
+}, true);
