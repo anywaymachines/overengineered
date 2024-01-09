@@ -4,6 +4,13 @@ import DisconnectBlockLogic from "./logic/DisconnectBlockLogic";
 import HeliumBlockLogic from "./logic/HeliumBlockLogic";
 import LampBlockLogic from "./logic/LampBlockLogic";
 import MotorBlockLogic from "./logic/MotorBlockLogic";
+import OperationAndBlockLogic from "./logic/OperationAndBlockLogic";
+import OperationNandBlockLogic from "./logic/OperationNandBlockLogic";
+import OperationNorBlockLogic from "./logic/OperationNorBlockLogic";
+import OperationNotBlockLogic from "./logic/OperationNotBlockLogic";
+import OperationOrBlockLogic from "./logic/OperationOrBlockLogic";
+import OperationXnorBlockLogic from "./logic/OperationXnorBlockLogic";
+import OperationXorBlockLogic from "./logic/OperationXorBlockLogic";
 import RocketEngineLogic from "./logic/RocketEngineLogic";
 import RopeLogic from "./logic/RopeLogic";
 import ServoMotorBlockLogic from "./logic/ServoMotorBlockLogic";
@@ -29,6 +36,14 @@ const logicRegistry: Readonly<Record<string, { new (block: BlockModel): BlockLog
 	lamp: LampBlockLogic,
 	suspensionblock: SuspensionLogic,
 	anchorblock: AnchorBlockLogic,
+
+	operationnot: OperationNotBlockLogic,
+	operationand: OperationAndBlockLogic,
+	operationnand: OperationNandBlockLogic,
+	operationor: OperationOrBlockLogic,
+	operationxor: OperationXorBlockLogic,
+	operationxnor: OperationXnorBlockLogic,
+	operationnor: OperationNorBlockLogic,
 };
 
 export default logicRegistry;

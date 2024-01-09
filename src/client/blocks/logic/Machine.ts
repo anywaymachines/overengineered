@@ -113,25 +113,25 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 		}
 
 		// initialize connections
-		for (const [blockFrom, logicFrom] of logicmap) {
-			if (!("inputConfig" in logicFrom)) continue;
+		for (const [inputBlock, inputLogic] of logicmap) {
+			if (!("inputConfig" in inputLogic)) continue;
 
-			for (const [connectionFrom, connection] of Objects.entries(blockFrom.connections)) {
-				const blockTo = blocksmap.get(connection.blockUuid);
-				if (!blockTo) {
+			for (const [connectionFrom, connection] of Objects.entries(inputBlock.connections)) {
+				const outputBlock = blocksmap.get(connection.blockUuid);
+				if (!outputBlock) {
 					throw "Unknown block to connect: " + connection.blockUuid;
 				}
 
-				const logicTo = logicmap.get(blockTo);
-				if (!logicTo) {
+				const outputLogic = logicmap.get(outputBlock);
+				if (!outputLogic) {
 					throw "No logic found for connecting block " + connection.blockUuid;
 				}
-				if (!("inputConfig" in logicTo)) {
+				if (!("inputConfig" in outputLogic)) {
 					throw "Connecting block is not configurable: " + connection.blockUuid;
 				}
 
-				logicTo.inputConfig.values[connection.connectionName].autoSetFrom(
-					logicFrom.outputConfig.values[connectionFrom],
+				inputLogic.inputConfig.values[connectionFrom].autoSetFrom(
+					outputLogic.outputConfig.values[connection.connectionName],
 				);
 			}
 		}

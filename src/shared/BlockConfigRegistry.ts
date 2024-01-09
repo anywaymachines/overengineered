@@ -277,6 +277,56 @@ const vehicleseat = {
 	},
 } as const satisfies BlockConfigDefinitions;
 
+const operationnot = {
+	input: {
+		value: {
+			displayName: "Value",
+			type: "bool",
+			default: {
+				Desktop: false as boolean,
+			},
+		},
+	},
+	output: {
+		result: {
+			displayName: "Result",
+			type: "bool",
+			default: {
+				Desktop: false as boolean,
+			},
+		},
+	},
+} as const satisfies BlockConfigDefinitions;
+
+const twoInputsOneOutput = {
+	input: {
+		value1: {
+			displayName: "Value 1",
+			type: "bool",
+			default: {
+				Desktop: false as boolean,
+			},
+		},
+
+		value2: {
+			displayName: "Value 2",
+			type: "bool",
+			default: {
+				Desktop: false as boolean,
+			},
+		},
+	},
+	output: {
+		result: {
+			displayName: "Result",
+			type: "bool",
+			default: {
+				Desktop: false as boolean,
+			},
+		},
+	},
+} as const satisfies BlockConfigDefinitions;
+
 const blockConfigRegistry = {
 	disconnectblock,
 	motorblock,
@@ -288,6 +338,13 @@ const blockConfigRegistry = {
 	lamp,
 	suspensionblock,
 	vehicleseat,
+	operationnot,
+	operationand: twoInputsOneOutput,
+	operationnand: twoInputsOneOutput,
+	operationor: twoInputsOneOutput,
+	operationxor: twoInputsOneOutput,
+	operationxnor: twoInputsOneOutput,
+	operationnor: twoInputsOneOutput,
 } as const satisfies Record<string, BlockConfigDefinitions>;
 
 export default blockConfigRegistry;
