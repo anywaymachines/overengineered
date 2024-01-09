@@ -3,7 +3,7 @@ import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
 import Objects from "shared/_fixes_/objects";
-import BlockManager from "shared/building/BlockManager";
+import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import PartUtils from "shared/utils/PartUtils";
@@ -128,6 +128,27 @@ export default class BuildingWrapper {
 	}
 
 	public static deleteBlock(this: void, block: BlockModel): Response {
+		const plot = SharedPlots.getPlotByBlock(block);
+		if (!plot)
+			return {
+				success: false,
+				message: "No plot",
+			};
+
+		const data = BlockManager.getBlockDataByBlockModel(block);
+		for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
+			for (const [connector, connection] of Objects.entries(otherblock.connections)) {
+				// what the hel help me THIS IS WRONG FIX
+				if (!(connector in otherblock.connections)) continue;
+
+				BuildingWrapper.updateLogicConnection({
+					operation: "disconnect",
+					inputBlock: otherblock.instance,
+					inputConnection: connector,
+				});
+			}
+		}
+
 		BuildingWelder.unweld(block);
 		block.Destroy();
 
@@ -286,36 +307,40 @@ export default class BuildingWrapper {
 	}
 
 	static updateLogicConnectionAsPlayer(this: void, player: Player, data: UpdateLogicConnectionRequest): Response {
-		for (const block of [data.fromBlock, data.toBlock]) {
-			const plot = BuildingWrapper.tryGetValidPlotByBlock(player, block);
-			if (!plot.success) return plot;
+		const plot1 = BuildingWrapper.tryGetValidPlotByBlock(player, data.inputBlock);
+		if (!plot1.success) return plot1;
+
+		if (data.operation === "connect") {
+			const plot2 = BuildingWrapper.tryGetValidPlotByBlock(player, data.outputBlock);
+			if (!plot2.success) return plot2;
 		}
 
 		return BuildingWrapper.updateLogicConnection(data);
 	}
 	static updateLogicConnection(this: void, data: UpdateLogicConnectionRequest): Response {
-		const fromInfo = BlockManager.getBlockDataByBlockModel(data.fromBlock);
-		const toInfo = BlockManager.getBlockDataByBlockModel(data.toBlock);
+		const inputInfo = BlockManager.getBlockDataByBlockModel(data.inputBlock);
 
 		if (data.operation === "connect") {
-			const connections = {
-				...fromInfo.connections,
-				[data.fromConnection]: {
-					blockUuid: toInfo.uuid,
-					connectionName: data.toConnection,
+			const outputInfo = BlockManager.getBlockDataByBlockModel(data.outputBlock);
+
+			const connections: PlacedBlockData["connections"] = {
+				...inputInfo.connections,
+				[data.inputConnection]: {
+					blockUuid: outputInfo.uuid,
+					connectionName: data.outputConnection,
 				},
 			};
 
-			data.fromBlock.SetAttribute("connections", HttpService.JSONEncode(connections));
+			data.inputBlock.SetAttribute("connections", HttpService.JSONEncode(connections));
 		}
 
 		if (data.operation === "disconnect") {
-			const connections = { ...fromInfo.connections };
-			if (connections[data.fromConnection]) {
-				delete connections[data.fromConnection];
+			const connections = { ...inputInfo.connections };
+			if (connections[data.inputConnection]) {
+				delete connections[data.inputConnection];
 			}
 
-			data.fromBlock.SetAttribute("connections", HttpService.JSONEncode(connections));
+			data.inputBlock.SetAttribute("connections", HttpService.JSONEncode(connections));
 		}
 
 		return {

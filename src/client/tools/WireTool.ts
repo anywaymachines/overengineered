@@ -1,10 +1,10 @@
 import { GamepadService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import ToolBase from "client/base/ToolBase";
 import GuiController from "client/controller/GuiController";
+import InputController from "client/controller/InputController";
 import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
 import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/BlockConfigRegistry";
-import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import Objects from "shared/_fixes_/objects";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -71,7 +71,8 @@ export default class WireTool extends ToolBase {
 		const keys: { key: Enum.KeyCode; text: string }[] = [];
 
 		keys.push({ key: Enum.KeyCode.ButtonY, text: "Marker selection mode" });
-		keys.push({ key: Enum.KeyCode.ButtonX, text: "Click on marker" });
+		keys.push({ key: Enum.KeyCode.ButtonA, text: "Click on marker" });
+		keys.push({ key: Enum.KeyCode.ButtonX, text: "Cancel selection" });
 		keys.push({ key: Enum.KeyCode.ButtonB, text: "Unequip" });
 
 		return keys;
@@ -105,6 +106,7 @@ export default class WireTool extends ToolBase {
 	}
 
 	public stopDragging() {
+		GamepadService.DisableGamepadCursor();
 		this.draggingWire?.Destroy();
 		this.draggingWire = undefined;
 		this.hoverMarker = undefined;
@@ -122,11 +124,55 @@ export default class WireTool extends ToolBase {
 				inputBlock: this.hoverMarker.blockData.instance,
 				inputConnection: this.hoverMarker.id,
 			});
-			Logger.info("looks like connect");
 			this.updateVisual();
 		}
 
 		this.stopDragging();
+	}
+
+	protected prepare(): void {
+		this.updateVisual(false);
+		super.prepare();
+	}
+
+	protected prepareTouch(): void {
+		this.renderedMarkers.forEach((marker) => {
+			const button = marker.instance.FindFirstChildWhichIsA("TextButton") as TextButton;
+
+			// Always show tooltips
+			this.createTooltip(marker);
+
+			if (marker.markerType === "output") {
+				this.eventHandler.subscribe(button.MouseButton1Click, () => {
+					if (this.startMarker.get()) return;
+
+					this.startMarker.set(marker);
+				});
+			} else if (marker.markerType === "input") {
+				this.eventHandler.subscribe(button.MouseButton1Click, async () => {
+					if (!this.startMarker.get()) return;
+
+					if (
+						marker.dataType === this.startMarker.get()!.dataType &&
+						marker.blockData !== this.startMarker.get()!.blockData
+					) {
+						this.hoverMarker = marker;
+						this.finishDragging();
+					}
+				});
+			} else if (marker.markerType === "connected_input") {
+				this.eventHandler.subscribe(button.MouseButton1Click, async () => {
+					if (this.startMarker.get()) return;
+
+					await Remotes.Client.GetNamespace("Building").Get("UpdateLogicConnectionRequest").CallServerAsync({
+						operation: "disconnect",
+						inputBlock: marker.blockData.instance,
+						inputConnection: marker.id,
+					});
+					this.updateVisual();
+				});
+			}
+		});
 	}
 
 	protected prepareDesktop(): void {
@@ -145,13 +191,11 @@ export default class WireTool extends ToolBase {
 				this.eventHandler.subscribe(button.MouseButton1Down, () => {
 					if (this.startMarker.get()) return;
 
-					Logger.info("Dragging started");
-
 					this.startMarker.set(marker);
 				});
 			} else if (marker.markerType === "connected_input") {
 				this.eventHandler.subscribe(button.MouseButton1Click, async () => {
-					Logger.info("Destroy wire");
+					if (this.startMarker.get()) return;
 
 					await Remotes.Client.GetNamespace("Building").Get("UpdateLogicConnectionRequest").CallServerAsync({
 						operation: "disconnect",
@@ -166,7 +210,12 @@ export default class WireTool extends ToolBase {
 			this.eventHandler.subscribe(button.MouseEnter, () => {
 				if (!this.startMarker.get()) return;
 
-				if (marker && marker.markerType === "input" && marker.dataType === this.startMarker.get()!.dataType) {
+				if (
+					marker &&
+					marker.markerType === "input" &&
+					marker.dataType === this.startMarker.get()!.dataType &&
+					marker.blockData !== this.startMarker.get()!.blockData
+				) {
 					this.hoverMarker = marker;
 				}
 			});
@@ -210,6 +259,25 @@ export default class WireTool extends ToolBase {
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, updateWire);
 	}
 
+	protected prepareGamepad(): void {
+		// Selection mode
+		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonY, () => {
+			if (GamepadService.GamepadCursorEnabled) {
+				GamepadService.DisableGamepadCursor();
+			} else {
+				GamepadService.EnableGamepadCursor(undefined);
+			}
+		});
+
+		// Cancel
+		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonX, () => {
+			this.startMarker.set(undefined);
+		});
+
+		// It works
+		this.prepareTouch();
+	}
+
 	/** Creates text above the marker with a dot signature with its name */
 	private createTooltip(marker: Marker) {
 		const gui = ReplicatedStorage.Assets.Wires.WireInfo.Clone();
@@ -218,6 +286,15 @@ export default class WireTool extends ToolBase {
 		gui.StudsOffsetWorldSpace = marker.instance.StudsOffsetWorldSpace.add(new Vector3(0, 1, 0));
 		gui.Adornee = marker.instance.Adornee;
 		gui.Parent = marker.instance.Parent;
+
+		if (InputController.inputType.get() === "Gamepad") {
+			gui.Size = new UDim2(
+				gui.Size.X.Scale * 1.5,
+				gui.Size.X.Offset * 1.5,
+				gui.Size.Y.Scale * 1.5,
+				gui.Size.Y.Offset * 1.5,
+			);
+		}
 
 		this.renderedTooltips.push(gui);
 
@@ -240,6 +317,15 @@ export default class WireTool extends ToolBase {
 		markerInstance.Adornee = part;
 		markerInstance.Parent = GuiController.getGameUI();
 		markerInstance.StudsOffsetWorldSpace = part.CFrame.PointToObjectSpace(part.CFrame.PointToWorldSpace(offset));
+
+		if (InputController.inputType.get() === "Gamepad") {
+			markerInstance.Size = new UDim2(
+				markerInstance.Size.X.Scale * 1.5,
+				markerInstance.Size.X.Offset * 1.5,
+				markerInstance.Size.Y.Scale * 1.5,
+				markerInstance.Size.Y.Offset * 1.5,
+			);
+		}
 
 		PartUtils.applyToAllDescendantsOfType("TextButton", markerInstance, (button) => {
 			if (button.BackgroundColor3 === Color3.fromRGB(255, 0, 255)) {
@@ -331,7 +417,7 @@ export default class WireTool extends ToolBase {
 		return marker.blockData.instance.GetPivot().PointToWorldSpace(marker.instance.StudsOffsetWorldSpace);
 	}
 
-	private updateVisual() {
+	private updateVisual(prepare: boolean = true) {
 		// Cleanup
 		this.clearWires();
 		this.clearMarkers();
@@ -342,7 +428,9 @@ export default class WireTool extends ToolBase {
 			this.createPlotWires(plot);
 		}
 
-		this.prepare();
+		if (prepare) {
+			this.prepare();
+		}
 	}
 
 	private createPlotWires(plot: PlotModel) {

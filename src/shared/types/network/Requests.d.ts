@@ -6,13 +6,19 @@ type ConfigUpdateRequest = {
 	};
 };
 
-type UpdateLogicConnectionRequest = {
-	readonly operation: "connect" | "disconnect";
-	readonly fromBlock: BlockModel;
-	readonly fromConnection: BlockConnectionName;
-	readonly toBlock: BlockModel;
-	readonly toConnection: BlockConnectionName;
-};
+type UpdateLogicConnectionRequest =
+	| {
+			readonly operation: "connect";
+			readonly outputBlock: BlockModel;
+			readonly outputConnection: BlockConnectionName;
+			readonly inputBlock: BlockModel;
+			readonly inputConnection: BlockConnectionName;
+	  }
+	| {
+			readonly operation: "disconnect";
+			readonly inputBlock: BlockModel;
+			readonly inputConnection: BlockConnectionName;
+	  };
 
 type PlayerDeleteBlockRequest = readonly BlockModel[] | "all";
 

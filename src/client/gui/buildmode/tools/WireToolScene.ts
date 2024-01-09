@@ -6,7 +6,7 @@ import GuiAnimator from "../../GuiAnimator";
 import { ButtonControl } from "../../controls/Button";
 
 export type WireToolSceneDefinition = GuiObject & {
-	Button: GuiButton;
+	CancelButton: GuiButton;
 	TextLabel: TextLabel;
 	NameLabel: TextLabel;
 };
@@ -18,35 +18,46 @@ export default class WireToolScene extends Control<WireToolSceneDefinition> {
 		super(gui);
 		this.tool = tool;
 
-		this.add(new ButtonControl(this.gui.Button, () => this.cancel()));
+		this.add(new ButtonControl(this.gui.CancelButton, () => this.cancel()));
 
 		this.tool.startMarker.subscribe(() => this.update(), true);
 		this.event.subscribe(GuiService.GetPropertyChangedSignal("SelectedObject"), () => this.update());
 	}
 
+	prepare() {
+		super.prepare();
+
+		this.update();
+	}
+
 	private update() {
-		this.gui.Button.Visible = false;
+		this.gui.CancelButton.Visible = false;
 		this.gui.TextLabel.Visible = false;
 		this.gui.NameLabel.Visible = false;
 
+		const inputType = InputController.inputType.get();
+		if (inputType !== "Desktop") {
+			this.gui.TextLabel.Visible = true;
+
+			if (!this.tool.startMarker.get()) {
+				this.gui.TextLabel.Text = "Select the first marker";
+				this.gui.CancelButton.Visible = false;
+			} else {
+				this.gui.TextLabel.Text = "Select the second marker";
+				if (InputController.inputType.get() !== "Gamepad") {
+					this.gui.CancelButton.Visible = true;
+				}
+			}
+		}
+
 		if (InputController.inputType.get() === "Gamepad") {
 			if (GamepadService.GamepadCursorEnabled) {
-				this.gui.TextLabel.Visible = true;
-
 				if (GuiService.SelectedObject) {
 					this.gui.NameLabel.Visible = true;
 					this.gui.NameLabel.Text = GuiService.SelectedObject.Name;
 					this.gui.NameLabel.TextColor3 = GuiService.SelectedObject.BackgroundColor3;
 				} else {
 					this.gui.NameLabel.Visible = false;
-				}
-
-				if (!this.tool.startMarker.get()) {
-					this.gui.TextLabel.Text = "Select the first marker";
-					this.gui.Button.Visible = false;
-				} else {
-					this.gui.TextLabel.Text = "Select the second marker";
-					this.gui.Button.Visible = true;
 				}
 			}
 		}
