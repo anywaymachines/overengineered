@@ -1,6 +1,6 @@
 import { UserInputService } from "@rbxts/services";
 import BlockConfig from "client/blocks/BlockConfig";
-import BlockConfigWithLogic from "client/blocks/config/BlockConfigWithLogic";
+import { InputBlockConfig, OutputBlockConfig } from "client/blocks/config/BlockConfigWithLogic";
 import Objects from "shared/_fixes_/objects";
 import BlockLogic from "./BlockLogic";
 import { KeyPressingConflictingController } from "./KeyPressingController";
@@ -15,7 +15,8 @@ export type KeyDefinitions<TDef extends ConfigDefinitions> = Partial<Record<KeyM
 
 export default abstract class ConfigurableBlockLogic<TDef extends BlockConfigDefinitions> extends BlockLogic {
 	readonly config: BlockConfig<TDef["input"]>;
-	readonly logicConfig: BlockConfigWithLogic<TDef>;
+	readonly inputConfig: InputBlockConfig<TDef["input"]>;
+	readonly outputConfig: OutputBlockConfig<TDef["output"]>;
 	protected readonly keysDefinition;
 	private readonly btnmap;
 	private readonly keyController;
@@ -24,7 +25,8 @@ export default abstract class ConfigurableBlockLogic<TDef extends BlockConfigDef
 		super(block);
 
 		this.config = new BlockConfig<TDef["input"]>(block, configDefinition.input);
-		this.logicConfig = new BlockConfigWithLogic(this.config.getAll(), configDefinition);
+		this.inputConfig = new InputBlockConfig(this.config.getAll(), configDefinition.input);
+		this.outputConfig = new OutputBlockConfig(configDefinition.output);
 
 		this.keysDefinition = this.getKeysDefinition();
 		this.keyController = new KeyPressingConflictingController<KeyMembers<TDef["input"]>>(this.keysDefinition);

@@ -1,7 +1,7 @@
 import { HttpService } from "@rbxts/services";
 import Config from "client/Config";
 import Control from "client/base/Control";
-import BlockConfigWithLogic from "client/blocks/config/BlockConfigWithLogic";
+import { InputBlockConfig } from "client/blocks/config/BlockConfigWithLogic";
 import ConfigTool from "client/tools/ConfigTool";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Logger from "shared/Logger";
@@ -85,7 +85,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 
 				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
 					.input as ConfigDefinitions;
-				if (!defs) return undefined! as BlockConfigWithLogic<{ input: ConfigDefinitions; output: {} }>;
+				if (!defs) return undefined!;
 
 				{
 					const configAttribute = blockmodel.GetAttribute("config") as string | undefined;
@@ -97,7 +97,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 							: undefined;
 					const config = content === undefined ? {} : Config.deserialize(content, defs);
 
-					return [blockmodel, new BlockConfigWithLogic(config, { input: defs, output: {} })] as const;
+					return [blockmodel, new InputBlockConfig(config, defs)] as const;
 				}
 
 				//return new BlockConfig(blockmodel, defs);
@@ -116,7 +116,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 			await Remotes.Client.GetNamespace("Building")
 				.Get("UpdateConfigRequest")
 				.CallServerAsync({
-					blocks: configs.map((config) => config.block),
+					blocks: configs.map((config) => config[0]),
 					data: { key, value: Config.serializeOne(value, onedef[key]) },
 				});
 		};

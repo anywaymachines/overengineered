@@ -7,7 +7,7 @@ export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockCo
 		super(block, TNTBlockLogic.getConfigDefinition());
 
 		this.event.subscribe(this.block.PrimaryPart!.Touched, (part) => {
-			if (!this.logicConfig.inputs.impact.value.get()) return;
+			if (!this.inputConfig.values.impact.value.get()) return;
 
 			const velocity1 = this.block.PrimaryPart!.AssemblyLinearVelocity.Magnitude;
 			const velocity2 = part.AssemblyLinearVelocity.Magnitude;
@@ -17,7 +17,7 @@ export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockCo
 			}
 		});
 
-		this.event.subscribeObservable(this.logicConfig.inputs.explode.value, (explode) => {
+		this.event.subscribeObservable(this.inputConfig.values.explode.value, (explode) => {
 			if (!explode) return;
 			this.explode();
 		});

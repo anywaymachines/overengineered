@@ -114,7 +114,7 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 
 		// initialize connections
 		for (const [blockFrom, logicFrom] of logicmap) {
-			if (!("logicConfig" in logicFrom)) continue;
+			if (!("inputConfig" in logicFrom)) continue;
 
 			for (const [connectionFrom, connection] of Objects.entries(blockFrom.connections)) {
 				const blockTo = blocksmap.get(connection.blockUuid);
@@ -126,12 +126,12 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 				if (!logicTo) {
 					throw "No logic found for connecting block " + connection.blockUuid;
 				}
-				if (!("logicConfig" in logicTo)) {
+				if (!("inputConfig" in logicTo)) {
 					throw "Connecting block is not configurable: " + connection.blockUuid;
 				}
 
-				logicTo.logicConfig.inputs[connection.connectionName].autoSetFrom(
-					logicFrom.logicConfig.outputs[connectionFrom],
+				logicTo.inputConfig.values[connection.connectionName].autoSetFrom(
+					logicFrom.outputConfig.values[connectionFrom],
 				);
 			}
 		}

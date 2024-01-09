@@ -1,5 +1,5 @@
 import Control from "client/base/Control";
-import BlockConfigWithLogic from "client/blocks/config/BlockConfigWithLogic";
+import { InputBlockConfig } from "client/blocks/config/BlockConfigWithLogic";
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigPartDefinition } from "../buildmode/tools/ConfigToolScene";
 
@@ -15,7 +15,7 @@ export default class ConfigPartControl<
 	constructor(
 		gui: ConfigPartDefinition<TDef>,
 		ctor: (gui: TDef) => TControl & { value: ObservableValue<TValue> },
-		configs: readonly BlockConfigWithLogic<{ input: ConfigDefinitions; output: {} }>[],
+		configs: readonly InputBlockConfig<ConfigDefinitions>[],
 		definition: ConfigDefinition,
 		key: string,
 	) {
@@ -25,7 +25,7 @@ export default class ConfigPartControl<
 
 		this.gui.HeadingLabel.Text = definition.displayName;
 		this.control = ctor(this.gui.Control);
-		this.control.value.set(configs[0].inputs[key].value.get() as TValue);
+		this.control.value.set(configs[0].values[key].value.get() as TValue);
 
 		this.add(this.control);
 	}

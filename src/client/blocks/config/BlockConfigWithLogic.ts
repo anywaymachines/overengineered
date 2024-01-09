@@ -3,31 +3,35 @@ import ObservableValue from "shared/event/ObservableValue";
 import ConfigLogicValue from "./ConfigLogicValue";
 import ConfigLogicValueBase from "./ConfigLogicValueBase";
 
-export default class BlockConfigWithLogic<TDef extends BlockConfigDefinitions> {
-	readonly inputs: {
-		readonly [k in keyof TDef["input"]]: ConfigLogicValueBase<TDef["input"][k]["default"]["Desktop"]>;
-	};
-	readonly outputs: {
-		readonly [k in keyof TDef["output"]]: ObservableValue<TDef["output"][k]["default"]["Desktop"]>;
+export class InputBlockConfig<TDef extends BlockLogicConfigDefinitions> {
+	readonly values: {
+		readonly [k in keyof TDef]: ConfigLogicValueBase<TDef[k]["default"]["Desktop"]>;
 	};
 
-	constructor(inputConfig: ConfigDefinitionsToConfig<TDef["input"]>, definitions: TDef) {
-		const inputs: Partial<Record<keyof TDef, ConfigLogicValueBase<ConfigValue>>> = {};
-		for (const key of Objects.keys(definitions.input)) {
-			const logic = ConfigLogicValue.create(inputConfig[key], definitions.input[key]);
-			logic.value.set(inputConfig[key]);
+	constructor(config: ConfigDefinitionsToConfig<TDef>, definitions: TDef) {
+		const values: Partial<Record<keyof TDef, ConfigLogicValueBase<ConfigValue>>> = {};
+		for (const key of Objects.keys(definitions)) {
+			const logic = ConfigLogicValue.create(config[key], definitions[key]);
+			logic.value.set(config[key]);
 
-			inputs[key as keyof typeof inputs] = logic;
+			values[key as keyof typeof values] = logic;
 		}
-		this.inputs = inputs as typeof this.inputs;
+		this.values = values as typeof this.values;
+	}
+}
 
-		const outputs: Partial<Record<keyof TDef, ObservableValue<ConfigValue>>> = {};
-		for (const key of Objects.keys(definitions.output)) {
-			const logic = ConfigLogicValue.createOutput(definitions.output[key]);
-			logic.set(inputConfig[key]);
+export class OutputBlockConfig<TDef extends ConfigDefinitions> {
+	readonly values: {
+		readonly [k in keyof TDef]: ObservableValue<TDef[k]["default"]["Desktop"]>;
+	};
 
-			outputs[key as keyof typeof outputs] = logic;
+	constructor(definitions: TDef) {
+		const values: Partial<Record<keyof TDef, ObservableValue<ConfigValue>>> = {};
+		for (const key of Objects.keys(definitions)) {
+			const logic = ConfigLogicValue.createOutput(definitions[key]);
+
+			values[key as keyof typeof values] = logic;
 		}
-		this.outputs = outputs as typeof this.outputs;
+		this.values = values as typeof this.values;
 	}
 }
