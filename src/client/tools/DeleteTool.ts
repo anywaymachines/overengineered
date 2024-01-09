@@ -3,6 +3,7 @@ import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
+import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
@@ -23,7 +24,7 @@ export default class DeleteTool extends ToolBase {
 			(block) => this.highlightedBlock.set(block),
 			async (block) => {
 				if (!block) return;
-				// if (InputController.inputType.get() !== "Desktop")  return;
+				if (InputController.inputType.get() !== "Desktop") return;
 				await this.deleteBlocks([block]);
 			},
 			() => true,
