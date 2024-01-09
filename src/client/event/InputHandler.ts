@@ -11,6 +11,7 @@ export default class InputHandler {
 	private readonly listenableKeycodes: InputCallback[] = [];
 	private readonly releaseKeycodes: InputCallback[] = [];
 	private readonly touchTapCallbacks: TouchCallback[] = [];
+	private readonly events: InputCallback[] = [];
 
 	constructor() {
 		this.eventHandler.subscribe(UserInputService.InputBegan, (input: InputObject, gameProcessedEvent: boolean) => {
@@ -33,6 +34,13 @@ export default class InputHandler {
 			this.touchTapCallbacks.forEach((callback) => {
 				callback();
 			});
+		});
+
+		this.eventHandler.subscribe(UserInputService.InputBegan, (input: InputObject, gameProcessedEvent: boolean) => {
+			this.events.forEach((callback) => callback(input, gameProcessedEvent));
+		});
+		this.eventHandler.subscribe(UserInputService.InputEnded, (input: InputObject, gameProcessedEvent: boolean) => {
+			this.events.forEach((callback) => callback(input, gameProcessedEvent));
 		});
 	}
 
@@ -70,18 +78,18 @@ export default class InputHandler {
 	}
 
 	public onMouseButton1Down(callback: InputCallback) {
-		this.eventHandler.subscribe(UserInputService.InputBegan, (input: InputObject, gameProcessedEvent: boolean) => {
-			if (input.UserInputType === Enum.UserInputType.MouseButton1) {
-				callback(input, gameProcessedEvent);
-			}
+		return this.events.push((input, gameProcessedEvent) => {
+			if (input.UserInputState !== Enum.UserInputState.Begin) return;
+			if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
+			callback(input, gameProcessedEvent);
 		});
 	}
 
 	public onMouseButton1Up(callback: InputCallback) {
-		this.eventHandler.subscribe(UserInputService.InputEnded, (input: InputObject, gameProcessedEvent: boolean) => {
-			if (input.UserInputType === Enum.UserInputType.MouseButton1) {
-				callback(input, gameProcessedEvent);
-			}
+		return this.events.push((input, gameProcessedEvent) => {
+			if (input.UserInputState !== Enum.UserInputState.End) return;
+			if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
+			callback(input, gameProcessedEvent);
 		});
 	}
 
@@ -92,5 +100,6 @@ export default class InputHandler {
 	public unsubscribeAll() {
 		this.listenableKeycodes.clear();
 		this.touchTapCallbacks.clear();
+		this.events.clear();
 	}
 }
