@@ -2,7 +2,9 @@ import { HttpService } from "@rbxts/services";
 import Serializer from "shared/Serializer";
 
 export type PlacedBlockDataConnection = {
+	/** OUTPUT block uiid */
 	readonly blockUuid: BlockUuid;
+	/** OUTPUT connector name */
 	readonly connectionName: BlockConnectionName;
 };
 
@@ -14,6 +16,8 @@ export type PlacedBlockData = {
 	readonly id: string;
 	readonly uuid: BlockUuid;
 	readonly displayName: string | undefined;
+
+	/** Connections to the INPUT connectors */
 	readonly connections: Readonly<Record<BlockConnectionName, PlacedBlockDataConnection>>;
 };
 
