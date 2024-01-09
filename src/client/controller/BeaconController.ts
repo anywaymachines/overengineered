@@ -48,11 +48,14 @@ export default class BeaconController {
 			);
 
 			const cutoffDistance = 30;
-			const transparency = 1 - math.clamp((distance - cutoffDistance) / 10, 0, 1);
+			const transparencyMultiplier = 0.8;
+			const transparency = 1 - math.clamp((distance - cutoffDistance) / 10, 0, 1) * transparencyMultiplier;
 
 			this.billboard.ImageLabel.ImageTransparency = transparency;
 			this.billboard.Title.TextTransparency = transparency;
 			this.billboard.Distance.TextTransparency = transparency;
+
+			if (transparency >= transparencyMultiplier) return;
 
 			let distancestr: string;
 			if (distance > 1000) distancestr = `${math.floor(distance / 100) / 10} km`;
@@ -86,10 +89,12 @@ export default class BeaconController {
 					.sub(new Vector2(halfScreenX, halfScreenY))
 					.div(new Vector2(d, 1));
 				vec = new Vector2(math.abs(vec.X), math.abs(vec.Y));
-				const newTransparency = vec.Magnitude / halfScreenX;
+
+				const newTransparency = 1 - (1 - vec.Magnitude / halfScreenX) * (1 - transparency);
 				this.billboard.ImageLabel.ImageTransparency = newTransparency;
 				this.billboard.Title.TextTransparency = newTransparency;
 				this.billboard.Distance.TextTransparency = newTransparency;
+
 				pos_x = math.clamp(pos_x, adjustableOffset, screenSize.X - adjustableOffset);
 				pos_y = math.clamp(pos_y, adjustableOffset, screenSize.Y - adjustableOffset);
 			}
