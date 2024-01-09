@@ -7,14 +7,14 @@ import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/Block
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import Objects from "shared/_fixes_/objects";
-import BlockManager from "shared/building/BlockManager";
+import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import PartUtils from "shared/utils/PartUtils";
 
 type MarkerData = {
 	readonly id: BlockConnectionName;
-	readonly block: BlockModel;
+	readonly blockData: PlacedBlockData;
 	readonly dataType: keyof ConfigDefinitionType;
 	readonly markerType: "input" | "connected_input" | "output";
 	readonly color: Color3;
@@ -26,9 +26,9 @@ type Marker = MarkerData & { readonly instance: BillboardGui & { Adornee: BlockM
 /** A tool for wiring */
 export default class WireTool extends ToolBase {
 	private static readonly colors: Readonly<Record<ConfigValueType, Color3>> = {
-		bool: Color3.fromRGB(170, 255, 0),
-		number: Color3.fromRGB(24, 255, 247),
-		key: new Color3(1, 1, 1), // useless
+		bool: Color3.fromRGB(255, 170, 0),
+		number: Color3.fromRGB(81, 202, 21),
+		key: new Color3(0, 0, 0), // useless
 	};
 
 	private renderedWires: BasePart[] = [];
@@ -36,14 +36,15 @@ export default class WireTool extends ToolBase {
 	private renderedTooltips: BillboardGui[] = [];
 
 	private draggingWire: BasePart | undefined;
-	private possibleDraggingEnd: Marker | undefined;
-	public draggingStartMarker = new ObservableValue<Marker | undefined>(undefined);
+	private hoverMarker: Marker | undefined;
+	public startMarker = new ObservableValue<Marker | undefined>(undefined);
 
 	private readonly viewportFrame;
 
 	constructor(mode: BuildingMode) {
 		super(mode);
 
+		// Wire rendering
 		this.viewportFrame = new Instance("ViewportFrame");
 		this.viewportFrame.Name = "WireViewportFrame";
 		this.viewportFrame.Size = UDim2.fromScale(1, 1);
@@ -93,42 +94,39 @@ export default class WireTool extends ToolBase {
 			new Vector3(0, 0, 0),
 		];
 
+		if (markers.size() === 1) {
+			this.createMarker(part, markers[0], Vector3.zero);
+			return;
+		}
+
 		for (let i = 0; i < markers.size(); i++) {
 			this.createMarker(part, markers[i], order[i]);
 		}
 	}
 
-	public stop() {
+	public stopDragging() {
 		this.draggingWire?.Destroy();
 		this.draggingWire = undefined;
-		this.possibleDraggingEnd = undefined;
-		this.draggingStartMarker.set(undefined);
+		this.hoverMarker = undefined;
+		this.startMarker.set(undefined);
 	}
 
-	public async stopDragging() {
-		if (!this.draggingStartMarker.get()) return;
+	public async finishDragging() {
+		if (!this.startMarker.get()) return;
 
-		if (this.possibleDraggingEnd) {
+		if (this.hoverMarker) {
 			await Remotes.Client.GetNamespace("Building").Get("UpdateLogicConnectionRequest").CallServerAsync({
 				operation: "connect",
-				fromBlock: this.draggingStartMarker.get()!.block,
-				fromConnection: this.draggingStartMarker.get()!.id,
-				toBlock: this.possibleDraggingEnd.block,
-				toConnection: this.possibleDraggingEnd.id,
+				outputBlock: this.startMarker.get()!.blockData.instance,
+				outputConnection: this.startMarker.get()!.id,
+				inputBlock: this.hoverMarker.blockData.instance,
+				inputConnection: this.hoverMarker.id,
 			});
 			Logger.info("looks like connect");
-		} else {
-			Logger.info("cancelled");
+			this.updateVisual();
 		}
 
-		this.stop();
-	}
-
-	protected prepare(): void {
-		this.clearTooltips();
 		this.stopDragging();
-
-		super.prepare();
 	}
 
 	protected prepareDesktop(): void {
@@ -137,74 +135,71 @@ export default class WireTool extends ToolBase {
 
 			// Show tooltip on hover
 			this.eventHandler.subscribe(button.MouseEnter, () => {
-				const gui = ReplicatedStorage.Assets.Wires.WireInfo.Clone();
-				gui.TextLabel.Text = marker.name;
-				gui.TextLabel.TextColor3 = marker.color;
-				gui.StudsOffsetWorldSpace = marker.instance.StudsOffsetWorldSpace.add(new Vector3(0, 1, 0));
-				gui.Adornee = marker.instance.Adornee;
-				gui.Parent = marker.instance.Parent;
-
+				const gui = this.createTooltip(marker);
 				this.eventHandler.subscribeOnce(button.MouseLeave, () => {
 					gui.Destroy();
 				});
-
-				this.renderedTooltips.push(gui);
 			});
-		});
 
-		this.renderedMarkers.forEach((marker) => {
-			const button = marker.instance.FindFirstChildWhichIsA("TextButton") as TextButton;
-
-			// Dragging start
 			if (marker.markerType === "output") {
 				this.eventHandler.subscribe(button.MouseButton1Down, () => {
+					if (this.startMarker.get()) return;
+
 					Logger.info("Dragging started");
 
-					this.draggingStartMarker.set(marker);
+					this.startMarker.set(marker);
+				});
+			} else if (marker.markerType === "connected_input") {
+				this.eventHandler.subscribe(button.MouseButton1Click, async () => {
+					Logger.info("Destroy wire");
+
+					await Remotes.Client.GetNamespace("Building").Get("UpdateLogicConnectionRequest").CallServerAsync({
+						operation: "disconnect",
+						inputBlock: marker.blockData.instance,
+						inputConnection: marker.id,
+					});
+					this.updateVisual();
 				});
 			}
 
-			// Dragging end
-			this.inputHandler.onMouseButton1Up(() => this.stopDragging());
-
-			// Possible wire detection
+			// Get marker on hover
 			this.eventHandler.subscribe(button.MouseEnter, () => {
-				if (!this.draggingStartMarker.get()) return;
+				if (!this.startMarker.get()) return;
 
-				if (
-					marker &&
-					marker.markerType === "input" &&
-					marker.dataType === this.draggingStartMarker.get()!.dataType
-				) {
-					this.possibleDraggingEnd = marker;
+				if (marker && marker.markerType === "input" && marker.dataType === this.startMarker.get()!.dataType) {
+					this.hoverMarker = marker;
 				}
 			});
 			this.eventHandler.subscribe(button.MouseLeave, () => {
-				if (!this.draggingStartMarker.get()) return;
+				if (!this.startMarker.get()) return;
 
-				if (this.possibleDraggingEnd === marker) {
-					this.possibleDraggingEnd = undefined;
+				if (this.hoverMarker === marker) {
+					this.hoverMarker = undefined;
 				}
 			});
 		});
 
+		// Dragging end
+		this.inputHandler.onMouseButton1Up(() => {
+			if (!this.startMarker.get()) return;
+			this.finishDragging();
+		});
+
 		const updateWire = () => {
-			const marker = this.draggingStartMarker.get();
+			const marker = this.startMarker.get();
 			if (!marker) return;
 
 			// Get absolute position of marker
-			const startPosition = marker.block.GetPivot().Position.add(marker.instance.StudsOffsetWorldSpace);
+			const startPosition = this.getMarkerAbsolutePosition(marker);
 
 			// Create new wire
 			if (!this.draggingWire) {
 				this.draggingWire = this.createWire(startPosition, startPosition, marker.color);
 			}
 
-			// Get position of possible end / mouse hit
-			const endPosition = this.possibleDraggingEnd
-				? this.possibleDraggingEnd.block
-						.GetPivot()
-						.Position.add(this.possibleDraggingEnd.instance.StudsOffsetWorldSpace)
+			// Get position of hover marker / mouse hit
+			const endPosition = this.hoverMarker
+				? this.getMarkerAbsolutePosition(this.hoverMarker)
 				: this.mouse.Hit.Position;
 
 			this.updateWire(this.draggingWire, startPosition, endPosition);
@@ -215,76 +210,18 @@ export default class WireTool extends ToolBase {
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, updateWire);
 	}
 
-	protected prepareGamepad(): void {
-		this.renderedMarkers.forEach((marker) => {
-			const button = marker.instance.FindFirstChildWhichIsA("TextButton") as TextButton;
+	/** Creates text above the marker with a dot signature with its name */
+	private createTooltip(marker: Marker) {
+		const gui = ReplicatedStorage.Assets.Wires.WireInfo.Clone();
+		gui.TextLabel.Text = marker.name;
+		gui.TextLabel.TextColor3 = marker.color;
+		gui.StudsOffsetWorldSpace = marker.instance.StudsOffsetWorldSpace.add(new Vector3(0, 1, 0));
+		gui.Adornee = marker.instance.Adornee;
+		gui.Parent = marker.instance.Parent;
 
-			// Show tooltips always
-			const gui = ReplicatedStorage.Assets.Wires.WireInfo.Clone();
-			gui.TextLabel.Text = marker.name;
-			gui.TextLabel.TextColor3 = marker.color;
-			gui.StudsOffsetWorldSpace = marker.instance.StudsOffsetWorldSpace.add(new Vector3(0, 1, 0));
-			gui.Adornee = marker.instance.Adornee;
-			gui.Parent = marker.instance.Parent;
-			this.renderedTooltips.push(gui);
+		this.renderedTooltips.push(gui);
 
-			// Start marker selection mode
-			this.inputHandler.onKeyDown(Enum.KeyCode.ButtonY, () => {
-				if (!GamepadService.GamepadCursorEnabled) {
-					GamepadService.EnableGamepadCursor(undefined);
-				} else {
-					GamepadService.DisableGamepadCursor();
-				}
-			});
-
-			// TODO: Rewrite
-			// this.eventHandler.subscribe(button.MouseButton1Down, async () => {
-			// 	if (!this.draggingStartMarker.get()) {
-			// 		if (marker.markerType === "output") {
-			// 			this.draggingStartMarker.set(marker);
-			// 		}
-			// 	} else {
-			// 		if (marker.markerType === "input") {
-			// 			await Remotes.Client.GetNamespace("Building")
-			// 				.Get("UpdateLogicConnectionRequest")
-			// 				.CallServerAsync({
-			// 					operation: "connect",
-			// 					fromBlock: this.draggingStartMarker.get()!.block,
-			// 					fromConnection: this.draggingStartMarker.get()!.id,
-			// 					toBlock: marker.block,
-			// 					toConnection: marker.id,
-			// 				});
-			// 			Logger.info("looks like connect");
-			// 			this.stop();
-			// 		}
-			// 		if (marker.markerType === "connected_input" && !this.draggingStartMarker.get()) {
-			// 			// TODO: REMOVE WIRE
-			// 		}
-			// 	}
-			// });
-
-			// const updateWire = () => {
-			// 	const marker = this.draggingStartMarker.get();
-			// 	if (!marker) return;
-
-			// 	const startPosition = marker.block.GetPivot().Position.add(marker.instance.StudsOffsetWorldSpace);
-
-			// 	// Create new wire
-			// 	if (!this.draggingWire) {
-			// 		this.draggingWire = this.createWire(startPosition, startPosition, marker.color);
-			// 	}
-
-			// 	const endPosition = this.possibleDraggingEnd
-			// 		? this.possibleDraggingEnd.block
-			// 				.GetPivot()
-			// 				.Position.add(this.possibleDraggingEnd.instance.StudsOffsetWorldSpace)
-			// 		: this.mouse.Hit.Position;
-
-			// 	this.updateWire(this.draggingWire, startPosition, endPosition);
-			// };
-
-			// this.eventHandler.subscribe(Signals.CAMERA.MOVED, updateWire);
-		});
+		return gui;
 	}
 
 	private createMarker(part: BasePart, markerData: MarkerData, offset: Vector3 = Vector3.zero): Marker {
@@ -297,14 +234,21 @@ export default class WireTool extends ToolBase {
 		} else if (markerData.markerType === "input") {
 			markerInstance = ReplicatedStorage.Assets.Wires.WireMarkerInput.Clone();
 		} else {
-			markerInstance = ReplicatedStorage.Assets.Wires.WireMarkerOutput.Clone();
+			throw "No marker";
 		}
 
 		markerInstance.Adornee = part;
 		markerInstance.Parent = GuiController.getGameUI();
-		markerInstance.StudsOffsetWorldSpace = offset;
+		markerInstance.StudsOffsetWorldSpace = part.CFrame.PointToObjectSpace(part.CFrame.PointToWorldSpace(offset));
 
 		PartUtils.applyToAllDescendantsOfType("TextButton", markerInstance, (button) => {
+			if (button.BackgroundColor3 === Color3.fromRGB(255, 0, 255)) {
+				button.Name = markerData.name;
+				button.BackgroundColor3 = markerData.color;
+			}
+		});
+
+		PartUtils.applyToAllDescendantsOfType("Frame", markerInstance, (button) => {
 			if (button.BackgroundColor3 === Color3.fromRGB(255, 0, 255)) {
 				button.Name = markerData.name;
 				button.BackgroundColor3 = markerData.color;
@@ -379,48 +323,87 @@ export default class WireTool extends ToolBase {
 	}
 
 	public enable(): void {
-		for (const plot of SharedPlots.getAllowedPlots(Players.LocalPlayer)) {
-			this.createPlotWires(plot);
-		}
+		this.updateVisual();
 		super.enable();
 	}
 
+	private getMarkerAbsolutePosition(marker: Marker): Vector3 {
+		return marker.blockData.instance.GetPivot().PointToWorldSpace(marker.instance.StudsOffsetWorldSpace);
+	}
+
+	private updateVisual() {
+		// Cleanup
+		this.clearWires();
+		this.clearMarkers();
+		this.clearTooltips();
+		this.stopDragging();
+
+		for (const plot of SharedPlots.getAllowedPlots(Players.LocalPlayer)) {
+			this.createPlotWires(plot);
+		}
+
+		this.prepare();
+	}
+
 	private createPlotWires(plot: PlotModel) {
-		const blocks = SharedPlots.getPlotBlocks(plot).GetChildren(undefined);
+		const blocks = SharedPlots.getPlotBlockDatas(plot);
+
 		for (const block of blocks) {
-			const blockData = BlockManager.getBlockDataByBlockModel(block);
-			const configDef = (blockConfigRegistry as BlockConfigRegistryNonGeneric)[blockData.id];
+			const configDef = (blockConfigRegistry as BlockConfigRegistryNonGeneric)[block.id];
 			if (!configDef) continue;
 
 			const markers: MarkerData[] = [];
-			for (const markerType of ["input", "output"] as const) {
-				for (const marker of Objects.entries(configDef[markerType]).map(
-					(e): MarkerData => ({
-						id: e[0] as BlockConnectionName,
-						block: block,
-						markerType,
-						dataType: e[1].type,
-						color: WireTool.colors[e[1].type],
-						name: e[1].displayName,
-					}),
-				)) {
+			for (const markerType of ["output", "input"] as const) {
+				for (const [key, config] of Objects.entries(configDef[markerType])) {
+					const marker: MarkerData = {
+						id: key as BlockConnectionName,
+						blockData: block,
+						markerType:
+							markerType === "input" &&
+							blocks.find(
+								(b) =>
+									key in block.connections &&
+									block.connections[key as keyof typeof b.connections].blockUuid === b.uuid,
+							)
+								? "connected_input"
+								: markerType,
+						dataType: config.type,
+						color: WireTool.colors[config.type],
+						name: config.displayName,
+					};
+
 					markers.push(marker);
 				}
 			}
 
-			this.createMarkers(block.PrimaryPart!, markers);
+			this.createMarkers(block.instance.PrimaryPart!, markers);
+		}
+
+		for (const block of blocks) {
+			for (const [connector, connection] of Objects.entries(block.connections)) {
+				const input = this.renderedMarkers.find((m) => m.blockData.uuid === block.uuid && m.id === connector)!;
+				const output = this.renderedMarkers.find(
+					(m) => m.blockData.uuid === connection.blockUuid && m.id === connection.connectionName,
+				)!;
+
+				this.createWire(
+					this.getMarkerAbsolutePosition(output),
+					this.getMarkerAbsolutePosition(input),
+					input?.color,
+				);
+			}
 		}
 	}
 
 	public disable(): void {
 		super.disable();
+		this.stopDragging();
 
+		// Cleanup
 		this.clearWires();
 		this.clearMarkers();
 		this.clearTooltips();
 
 		GamepadService.DisableGamepadCursor();
-
-		this.stopDragging();
 	}
 }

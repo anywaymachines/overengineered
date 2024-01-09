@@ -20,7 +20,7 @@ export default class WireToolScene extends Control<WireToolSceneDefinition> {
 
 		this.add(new ButtonControl(this.gui.Button, () => this.cancel()));
 
-		this.tool.draggingStartMarker.subscribe(() => this.update(), true);
+		this.tool.startMarker.subscribe(() => this.update(), true);
 		this.event.subscribe(GuiService.GetPropertyChangedSignal("SelectedObject"), () => this.update());
 	}
 
@@ -41,7 +41,7 @@ export default class WireToolScene extends Control<WireToolSceneDefinition> {
 					this.gui.NameLabel.Visible = false;
 				}
 
-				if (!this.tool.draggingStartMarker.get()) {
+				if (!this.tool.startMarker.get()) {
 					this.gui.TextLabel.Text = "Select the first marker";
 					this.gui.Button.Visible = false;
 				} else {
@@ -53,7 +53,7 @@ export default class WireToolScene extends Control<WireToolSceneDefinition> {
 	}
 
 	private cancel() {
-		this.tool.stop();
+		this.tool.stopDragging();
 		this.update();
 	}
 
