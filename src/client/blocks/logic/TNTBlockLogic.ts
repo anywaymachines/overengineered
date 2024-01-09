@@ -5,21 +5,22 @@ import Remotes from "shared/Remotes";
 export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.tnt> {
 	constructor(block: BlockModel) {
 		super(block, TNTBlockLogic.getConfigDefinition());
-	}
 
-	protected prepare() {
-		super.prepare();
+		this.event.subscribe(this.block.PrimaryPart!.Touched, (part) => {
+			if (!this.logicConfig.inputs.impact.value.get()) return;
 
-		if (this.config.get("impact")) {
-			this.eventHandler.subscribe(this.block.PrimaryPart!.Touched, (part) => {
-				const velocity1 = this.block.PrimaryPart!.AssemblyLinearVelocity.Magnitude;
-				const velocity2 = part.AssemblyLinearVelocity.Magnitude;
+			const velocity1 = this.block.PrimaryPart!.AssemblyLinearVelocity.Magnitude;
+			const velocity2 = part.AssemblyLinearVelocity.Magnitude;
 
-				if (velocity1 > (velocity2 + 1) * 10) {
-					this.explode();
-				}
-			});
-		}
+			if (velocity1 > (velocity2 + 1) * 10) {
+				this.explode();
+			}
+		});
+
+		this.event.subscribeObservable(this.logicConfig.inputs.explode.value, (explode) => {
+			if (!explode) return;
+			this.explode();
+		});
 	}
 
 	static getConfigDefinition() {
@@ -29,7 +30,7 @@ export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockCo
 	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.tnt.input> {
 		return {
 			explode: {
-				keyDown: () => this.explode(),
+				keyDown: () => {},
 			},
 		};
 	}

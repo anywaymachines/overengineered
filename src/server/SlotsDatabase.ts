@@ -6,6 +6,7 @@ import SlotsMeta from "../shared/SlotsMeta";
 import { Db } from "./Database";
 import PlayerDatabase from "./PlayerDatabase";
 import BlocksSerializer from "./plots/BlocksSerializer";
+import ServerPlots from "./plots/ServerPlots";
 
 export default class SlotsDatabase {
 	public static readonly instance = new SlotsDatabase();
@@ -103,5 +104,41 @@ export default class SlotsDatabase {
 		}
 
 		return { blocks: blocksCount, size: size };
+	}
+
+	/** @deprecated don't use */
+	triggerFullUpgrade() {
+		const pager = this.datastore.ListKeysAsync();
+		const ids: string[] = [];
+
+		while (!pager.IsFinished) {
+			for (const item of pager.GetCurrentPage() as DataStoreKey[]) {
+				ids.push(item.KeyName);
+			}
+			try {
+				pager.AdvanceToNextPageAsync();
+			} catch {
+				// empty
+			}
+		}
+
+		for (const id of ids) {
+			try {
+				const bs = this.blocksdb.get(id) as string | undefined;
+				if (bs === undefined) continue;
+
+				const plot = SharedPlots.getPlotByOwnerID(Players.GetPlayers()[0].UserId);
+				ServerPlots.clearAllBlocks(plot);
+
+				BlocksSerializer.deserialize(bs, plot);
+				const serialized = BlocksSerializer.serialize(plot);
+
+				this.blocksdb.set(id, serialized);
+			} catch (err) {
+				print(err);
+			}
+		}
+
+		this.blocksdb.saveChanged();
 	}
 }

@@ -112,6 +112,7 @@ registerOnRemoteFunction("Ride", "SetPlayMode", PlayModeController.changeModeFor
 registerOnRemoteFunction("Slots", "Save", RemoteHandlers.saveSlot);
 registerOnRemoteFunction("Slots", "Load", RemoteHandlers.loadSlot);
 registerOnRemoteFunction("Building", "UpdateConfigRequest", BuildingWrapper.updateConfigAsPlayer);
+registerOnRemoteFunction("Building", "UpdateLogicConnectionRequest", BuildingWrapper.updateLogicConnectionAsPlayer);
 registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSetting);
 registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);

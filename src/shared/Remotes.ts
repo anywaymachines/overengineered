@@ -15,6 +15,8 @@ const Remotes = Net.Definitions.Create({
 		MoveRequest: Net.Definitions.ServerAsyncFunction<(data: PlayerMoveRequest) => Response>(),
 
 		UpdateConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
+		UpdateLogicConnectionRequest:
+			Net.Definitions.ServerAsyncFunction<(data: UpdateLogicConnectionRequest) => Response>(),
 
 		Delete: Net.Definitions.ServerAsyncFunction<(data: PlayerDeleteBlockRequest) => Response>(),
 	}),

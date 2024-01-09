@@ -165,11 +165,15 @@ const servomotorblock = {
 const tnt = {
 	input: {
 		explode: {
-			displayName: "Explode",
-			type: "key",
-			default: {
+			blockConfigType: "keyb",
+			blockConfigDefault: {
 				Desktop: "B",
 				Gamepad: "ButtonR2",
+			},
+			displayName: "Explode",
+			type: "bool",
+			default: {
+				Desktop: false,
 			},
 		},
 		radius: {
@@ -213,6 +217,7 @@ const tnt = {
 const lamp = {
 	input: {
 		enabled: {
+			blockConfigType: "bool",
 			displayName: "Enabled",
 			type: "bool",
 			default: {
@@ -259,7 +264,7 @@ const suspensionblock = {
 	output: {},
 } as const satisfies BlockConfigDefinitions;
 
-const seat = {
+const vehicleseat = {
 	input: {},
 	output: {
 		occupied: {
@@ -282,7 +287,10 @@ const blockConfigRegistry = {
 	tnt,
 	lamp,
 	suspensionblock,
-	seat,
+	vehicleseat,
 } as const satisfies Record<string, BlockConfigDefinitions>;
 
 export default blockConfigRegistry;
+
+export type BlockConfigRegistry = Readonly<Record<keyof typeof blockConfigRegistry, BlockConfigDefinitions>>;
+export type BlockConfigRegistryNonGeneric = Readonly<Record<string, BlockConfigDefinitions | undefined>>;

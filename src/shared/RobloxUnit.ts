@@ -37,7 +37,7 @@ export default class RobloxUnit {
 		return Stiffnes / 0.0456;
 	}
 
-	static SprintDumping_To_NewtonSecondOnMeter(Dumping: number) {
+	static SpringDumping_To_NewtonSecondOnMeter(Dumping: number) {
 		return Dumping / 0.0456;
 	}
 

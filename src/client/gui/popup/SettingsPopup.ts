@@ -5,9 +5,37 @@ import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
 import GameDefinitions from "shared/GameDefinitions";
 import Objects from "shared/_fixes_/objects";
+import ObservableValue from "shared/event/ObservableValue";
 import { ButtonControl } from "../controls/Button";
 import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
-import ConfigPartControl from "../controls/ConfigPartControl";
+
+class ConfigPartControl<
+	TControl extends Control<TDef>,
+	TDef extends GuiObject,
+	TValue extends ConfigValue | undefined,
+> extends Control<ConfigPartDefinition<TDef>> {
+	readonly control: TControl & { value: ObservableValue<TValue> };
+	readonly key;
+	readonly definition;
+
+	constructor(
+		gui: ConfigPartDefinition<TDef>,
+		ctor: (gui: TDef) => TControl & { value: ObservableValue<TValue> },
+		configs: readonly Config<ConfigDefinitions>[],
+		definition: ConfigDefinition,
+		key: string,
+	) {
+		super(gui);
+		this.key = key;
+		this.definition = definition;
+
+		this.gui.HeadingLabel.Text = definition.displayName;
+		this.control = ctor(this.gui.Control);
+		this.control.value.set(configs[0].get(key) as TValue);
+
+		this.add(this.control);
+	}
+}
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	HeadingLabel: TextLabel;

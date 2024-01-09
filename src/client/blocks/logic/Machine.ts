@@ -3,13 +3,15 @@ import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import BlockLogic from "client/base/BlockLogic";
 import ComponentContainer from "client/base/ComponentContainer";
+import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import ImpactController from "client/controller/ImpactController";
 import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
+import Objects from "shared/_fixes_/objects";
+import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import logicRegistry from "../LogicRegistry";
-import LampBlockLogic from "./LampBlockLogic";
 import VehicleSeatBlockLogic from "./VehicleSeatBlockLogic";
 
 export default class Machine extends ComponentContainer<BlockLogic> {
@@ -87,14 +89,15 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 
 	public static fromBlocks() {
 		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
-		const blocks = SharedPlots.getPlotBlocks(plot).GetChildren(undefined);
+		const blockdatas = SharedPlots.getPlotBlockDatas(plot);
+		const blocksmap = new Map(blockdatas.map((b) => [b.uuid, b] as const));
+		const logicmap = new Map<PlacedBlockData, BlockLogic | ConfigurableBlockLogic<BlockConfigDefinitions>>();
 		const logics: BlockLogic[] = [];
 
-		for (let i = 0; i < blocks.size(); i++) {
-			const block = blocks[i];
-			const id = block.GetAttribute("id") as string;
+		for (const block of blockdatas) {
+			const id = block.id;
 
-			if (blockRegistry.get(id) === undefined) {
+			if (!blockRegistry.get(id)) {
 				Logger.error(`Unknown block id ${id}`);
 				continue;
 			}
@@ -104,15 +107,34 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 				continue;
 			}
 
-			const logic = new ctor(block);
+			const logic = new ctor(block.instance);
+			logicmap.set(block, logic);
 			logics.push(logic);
 		}
 
-		(
-			logics.find((l) => l instanceof VehicleSeatBlockLogic) as VehicleSeatBlockLogic
-		).logicConfig.outputs.occupied.autoSet(
-			(logics.find((l) => l instanceof LampBlockLogic) as LampBlockLogic).logicConfig.inputs.enabled.value,
-		);
+		// initialize connections
+		for (const [blockFrom, logicFrom] of logicmap) {
+			if (!("logicConfig" in logicFrom)) continue;
+
+			for (const [connectionFrom, connection] of Objects.entries(blockFrom.connections)) {
+				const blockTo = blocksmap.get(connection.blockUuid);
+				if (!blockTo) {
+					throw "Unknown block to connect: " + connection.blockUuid;
+				}
+
+				const logicTo = logicmap.get(blockTo);
+				if (!logicTo) {
+					throw "No logic found for connecting block " + connection.blockUuid;
+				}
+				if (!("logicConfig" in logicTo)) {
+					throw "Connecting block is not configurable: " + connection.blockUuid;
+				}
+
+				logicTo.logicConfig.inputs[connection.connectionName].autoSetFrom(
+					logicFrom.logicConfig.outputs[connectionFrom],
+				);
+			}
+		}
 
 		const machine = new Machine(logics);
 		machine.enable();

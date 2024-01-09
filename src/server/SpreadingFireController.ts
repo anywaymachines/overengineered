@@ -1,4 +1,5 @@
-import { ReplicatedStorage, Workspace } from "@rbxts/services";
+import { ReplicatedStorage } from "@rbxts/services";
+import BlockManager from "shared/building/BlockManager";
 
 const explosionBase = new Instance("Explosion");
 explosionBase.BlastPressure = 0;
@@ -13,7 +14,7 @@ export default class SpreadingFireController {
 			part.Anchored ||
 			(math.random(1, 8) !== 1 && part.Position.Y < 1) ||
 			part.GetAttribute("Burn") === true ||
-			!part.IsDescendantOf(Workspace.Plots)
+			!BlockManager.isBlockPart(part)
 		) {
 			return false;
 		}

@@ -3,6 +3,7 @@ import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
 import Objects from "shared/_fixes_/objects";
+import BlockManager from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import PartUtils from "shared/utils/PartUtils";
@@ -184,6 +185,13 @@ export default class BuildingWrapper {
 	}
 
 	public static placeBlockAsPlayer(this: void, player: Player, data: PlaceBlockRequest): BuildResponse {
+		if (data.uuid !== undefined) {
+			return {
+				success: false,
+				message: "Invalid request",
+			};
+		}
+
 		const result = BuildingWrapper.placeSingleBlockAsPlayer(player, data);
 		return result;
 
@@ -275,5 +283,44 @@ export default class BuildingWrapper {
 		}
 
 		return { success: true };
+	}
+
+	static updateLogicConnectionAsPlayer(this: void, player: Player, data: UpdateLogicConnectionRequest): Response {
+		for (const block of [data.fromBlock, data.toBlock]) {
+			const plot = BuildingWrapper.tryGetValidPlotByBlock(player, block);
+			if (!plot.success) return plot;
+		}
+
+		return BuildingWrapper.updateLogicConnection(data);
+	}
+	static updateLogicConnection(this: void, data: UpdateLogicConnectionRequest): Response {
+		const fromInfo = BlockManager.getBlockDataByBlockModel(data.fromBlock);
+		const toInfo = BlockManager.getBlockDataByBlockModel(data.toBlock);
+
+		if (data.operation === "connect") {
+			const connections = {
+				...fromInfo.connections,
+				[data.fromConnection]: {
+					blockUuid: toInfo.uuid,
+					connectionName: data.toConnection,
+				},
+			};
+
+			data.fromBlock.SetAttribute("connections", HttpService.JSONEncode(connections));
+		}
+
+		if (data.operation === "disconnect") {
+			const connections = { ...fromInfo.connections };
+			if (connections[data.fromConnection]) {
+				delete connections[data.fromConnection];
+			}
+
+			data.fromBlock.SetAttribute("connections", HttpService.JSONEncode(connections));
+		}
+
+		return {
+			success: false,
+			message: "Invalid operation",
+		};
 	}
 }

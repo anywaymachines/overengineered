@@ -19,6 +19,9 @@ interface ReplicatedStorage {
 			WireMarkerInput: BillboardGui;
 			WireMarkerInputConnected: BillboardGui;
 			WireMarkerOutput: BillboardGui;
+			WireInfo: BillboardGui & {
+				TextLabel: TextLabel;
+			};
 		};
 		Sounds: Folder & {
 			Impact: Folder & {

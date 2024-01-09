@@ -1,6 +1,7 @@
+import { HttpService } from "@rbxts/services";
 import Config from "client/Config";
 import Control from "client/base/Control";
-import BlockConfig from "client/blocks/BlockConfig";
+import BlockConfigWithLogic from "client/blocks/config/BlockConfigWithLogic";
 import ConfigTool from "client/tools/ConfigTool";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Logger from "shared/Logger";
@@ -84,40 +85,48 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 
 				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
 					.input as ConfigDefinitions;
-				if (!defs) return undefined! as BlockConfig<ConfigDefinitions>;
+				if (!defs) return undefined! as BlockConfigWithLogic<{ input: ConfigDefinitions; output: {} }>;
 
-				return new BlockConfig(blockmodel, defs);
+				{
+					const configAttribute = blockmodel.GetAttribute("config") as string | undefined;
+					const content =
+						configAttribute !== undefined
+							? (HttpService.JSONDecode(configAttribute) as
+									| Readonly<Record<keyof ConfigDefinitions, string>>
+									| undefined)
+							: undefined;
+					const config = content === undefined ? {} : Config.deserialize(content, defs);
+
+					return [blockmodel, new BlockConfigWithLogic(config, { input: defs, output: {} })] as const;
+				}
+
+				//return new BlockConfig(blockmodel, defs);
 			})
 			.filter((x) => x !== undefined);
 
-		const send = async (
-			key: keyof (typeof blockConfigRegistry)[keyof typeof blockConfigRegistry],
-			value: ConfigValue,
-		) => {
+		const blockmodel = selected[0].Parent;
+		const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
+		const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry].input as ConfigDefinitions;
+
+		const send = async (key: string, value: ConfigValue) => {
 			Logger.info(
-				`Sending (${configs.size()}) block config values ${key} ${Config.serializeOne(
-					value,
-					configs[0].definitions[key],
-				)}`,
+				`Sending (${configs.size()}) block config values ${key} ${Config.serializeOne(value, onedef[key])}`,
 			);
 
 			await Remotes.Client.GetNamespace("Building")
 				.Get("UpdateConfigRequest")
 				.CallServerAsync({
 					blocks: configs.map((config) => config.block),
-					data: { key, value: Config.serializeOne(value, configs[0].definitions[key]) },
+					data: { key, value: Config.serializeOne(value, onedef[key]) },
 				});
 		};
 
-		for (const [id, def] of Objects.entries(configs[0].definitions) as (readonly [
-			keyof (typeof blockConfigRegistry)[keyof typeof blockConfigRegistry],
-			ConfigDefinition,
-		])[]) {
+		for (const [id, def] of Objects.entries(onedef)) {
 			if (def.type === "bool") {
 				const control = new ConfigPartControl(
 					this.checkboxTemplate(),
 					(cb) => new CheckBoxControl(cb),
-					configs,
+					configs.map((c) => c[1]),
 					def,
 					id,
 				);
@@ -128,38 +137,18 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				const control = new ConfigPartControl(
 					this.keyTemplate(),
 					(kb) => new KeyChooserControl(kb),
-					configs,
+					configs.map((c) => c[1]),
 					def,
 					id,
 				);
 				this.list.add(control);
 
-				let prev = control.control.value.get();
-				control.control.submitted.Connect((value) => {
-					print(`Sending ${id} to ${value}`);
-					send(id, value);
-
-					if (def.conflicts !== undefined) {
-						const conflict = this.list
-							.getChildren()
-							.find(
-								(c) => c instanceof ConfigPartControl && c.key === def.conflicts,
-							) as ConfigPartControl<KeyChooserControl, GuiObject, KeyCode>;
-
-						if (conflict && conflict.control.value.get() === value) {
-							print(`Sending conflicted ${conflict.key} to ${prev}`);
-							conflict.control.value.set(prev);
-							conflict.control.submitted.Fire(prev);
-						}
-					}
-
-					prev = value;
-				});
+				control.control.submitted.Connect((value) => send(id, value));
 			} else if (def.type === "number") {
 				const control = new ConfigPartControl(
 					this.sliderTemplate(),
 					(cb) => new SliderControl(cb, def.min, def.max, def.step),
-					configs,
+					configs.map((c) => c[1]),
 					def,
 					id,
 				);

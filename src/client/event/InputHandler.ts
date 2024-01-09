@@ -64,8 +64,25 @@ export default class InputHandler {
 			return callback(input, gameProcessedEvent);
 		});
 	}
+
 	public onKeysDown(callback: InputCallback) {
 		return this.listenableKeycodes.push(callback);
+	}
+
+	public onMouseButton1Down(callback: InputCallback) {
+		this.eventHandler.subscribe(UserInputService.InputBegan, (input: InputObject, gameProcessedEvent: boolean) => {
+			if (input.UserInputType === Enum.UserInputType.MouseButton1) {
+				callback(input, gameProcessedEvent);
+			}
+		});
+	}
+
+	public onMouseButton1Up(callback: InputCallback) {
+		this.eventHandler.subscribe(UserInputService.InputEnded, (input: InputObject, gameProcessedEvent: boolean) => {
+			if (input.UserInputType === Enum.UserInputType.MouseButton1) {
+				callback(input, gameProcessedEvent);
+			}
+		});
 	}
 
 	public onTouchTap(callback: TouchCallback) {

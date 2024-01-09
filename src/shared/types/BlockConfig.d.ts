@@ -1,4 +1,4 @@
 type BlockConfigDefinitions = {
-	readonly input: ConfigDefinitions;
+	readonly input: BlockLogicConfigDefinitions;
 	readonly output: ConfigDefinitions;
 };

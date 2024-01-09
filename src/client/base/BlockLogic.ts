@@ -3,7 +3,7 @@ import PartUtils from "shared/utils/PartUtils";
 import Component from "./Component";
 
 export default abstract class BlockLogic<T extends BlockModel = BlockModel> extends Component<T> {
-	protected readonly block: BlockModel;
+	readonly block: BlockModel;
 	public machine?: Machine;
 
 	constructor(block: T) {

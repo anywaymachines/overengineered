@@ -1,6 +1,7 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import SpreadingFireController from "server/SpreadingFireController";
 import { UnreliableRemotes } from "shared/Remotes";
+import BlockManager from "shared/building/BlockManager";
 
 export default class ReplicateRemoteHandler {
 	private static materialSounds: { [key: string]: Instance[] } = {
@@ -123,7 +124,7 @@ export default class ReplicateRemoteHandler {
 			return;
 		}
 
-		if (!block.IsDescendantOf(Workspace.Plots)) {
+		if (!BlockManager.isBlockPart(block)) {
 			return;
 		}
 

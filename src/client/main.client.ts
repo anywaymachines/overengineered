@@ -25,13 +25,6 @@ WorldController.generate();
 LocalPlayerController.initialize();
 InputTypeChangeEvent.subscribe();
 
-let plot: PlotModel | undefined;
-while (!plot) {
-	plot = SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId);
-	wait(0.1);
-}
-new BeaconController(plot!, "not a plot");
-
 if (RunService.IsStudio()) {
 	DebugControl.instance.show();
 }
@@ -46,3 +39,10 @@ root.enable();
 initializeHideInterfaceController(playModeController);
 
 Players.LocalPlayer.CameraMaxZoomDistance = 512;
+
+let plot: PlotModel | undefined;
+while (!plot) {
+	plot = SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId);
+	wait(0.1);
+}
+new BeaconController(plot!, "Plot");

@@ -1,14 +1,20 @@
 import { HttpService } from "@rbxts/services";
 import Serializer from "shared/Serializer";
 
+export type PlacedBlockDataConnection = {
+	readonly blockUuid: BlockUuid;
+	readonly connectionName: BlockConnectionName;
+};
+
 export type PlacedBlockData = {
-	instance: BlockModel;
-	cframe: CFrame;
-	color: Color3;
-	material: Enum.Material;
-	id: string;
-	uuid: string | undefined;
-	displayName: string | undefined;
+	readonly instance: BlockModel;
+	readonly cframe: CFrame;
+	readonly color: Color3;
+	readonly material: Enum.Material;
+	readonly id: string;
+	readonly uuid: BlockUuid;
+	readonly displayName: string | undefined;
+	readonly connections: Readonly<Record<BlockConnectionName, PlacedBlockDataConnection>>;
 };
 
 export default class BlockManager {
@@ -35,8 +41,11 @@ export default class BlockManager {
 				HttpService.JSONDecode(model.GetAttribute("color") as string) as SerializedColor,
 			),
 			material: Serializer.EnumMaterialSerializer.deserialize(model.GetAttribute("material") as number),
-			uuid: model.GetAttribute("uuid") as string | undefined,
+			uuid: model.GetAttribute("uuid") as BlockUuid,
 			displayName: model.GetAttribute("displayName") as string | undefined,
+			connections: HttpService.JSONDecode(
+				(model.GetAttribute("connections") as string | undefined) ?? "{}",
+			) as PlacedBlockData["connections"],
 		};
 	}
 }

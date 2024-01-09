@@ -1,6 +1,7 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import GameDefinitions from "shared/GameDefinitions";
 import VectorUtils from "shared/utils/VectorUtils";
+import BlockManager, { PlacedBlockData } from "./BlockManager";
 
 export default class SharedPlots {
 	public static readonly plots = Workspace.Plots.GetChildren() as unknown as readonly PlotModel[];
@@ -10,21 +11,10 @@ export default class SharedPlots {
 	}
 
 	static getAllowedPlots(player: Player) {
-		const data: PlotModel[] = [];
-		for (let i = 0; i < this.plots.size(); i++) {
-			const plot = data[i];
-			if (!plot) {
-				continue;
-			}
-
-			if (
-				this.readPlotData(plot).ownerID === player.UserId ||
-				this.readPlotData(plot).whitelistedPlayerIDs.includes(player.UserId)
-			) {
-				data.push(plot);
-			}
-		}
-		return data;
+		return this.plots.filter((p) => {
+			const data = this.readPlotData(p);
+			return data.ownerID === player.UserId || data.whitelistedPlayerIDs.includes(player.UserId);
+		});
 	}
 
 	/** Function for reading encoded Plot data inside `Model`
@@ -96,6 +86,11 @@ export default class SharedPlots {
 		}
 
 		return model;
+	}
+	public static getPlotBlockDatas(plot: PlotModel): readonly PlacedBlockData[] {
+		return this.getPlotBlocks(plot)
+			.GetChildren(undefined)
+			.map((b) => BlockManager.getBlockDataByBlockModel(b));
 	}
 
 	/** Returns the `Region3` of the **construction area** for blocks

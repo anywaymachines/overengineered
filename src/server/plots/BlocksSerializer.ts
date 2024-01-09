@@ -1,14 +1,14 @@
-import { Base64 } from "@rbxts/crypto";
 import { HttpService } from "@rbxts/services";
 import BuildingWrapper from "server/BuildingWrapper";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
+import { PlacedBlockDataConnection } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 
 type SerializedBlocks<TBlocks extends SerializedBlockV0> = {
-	version: number;
-	blocks: readonly TBlocks[];
+	readonly version: number;
+	readonly blocks: readonly TBlocks[];
 };
 
 interface SerializedBlockV0 {
@@ -17,6 +17,12 @@ interface SerializedBlockV0 {
 	readonly col: SerializedColor;
 	readonly loc: SerializedCFrame;
 	readonly config?: object;
+}
+interface SerializedBlockV2 extends SerializedBlockV0 {
+	readonly uuid: string;
+}
+interface SerializedBlockV3 extends SerializedBlockV2 {
+	readonly connections?: Readonly<Record<BlockConnectionName, PlacedBlockDataConnection>>;
 }
 
 const createBufferReader = (buf: buffer) => {
@@ -136,18 +142,6 @@ const createBufferWriter = (buf: buffer) => {
 	};
 };
 
-interface BlocksSerializerVersion {
-	readonly version: number;
-
-	/**
-	 * @returns Block count
-	 */
-	deserialize(data: string, plot: PlotModel): number;
-}
-interface BlocksSerializerCurrentVersion extends BlocksSerializerVersion {
-	serialize(plot: PlotModel): string;
-}
-
 const read = {
 	blocksFromPlot: <T extends SerializedBlockV0>(
 		plot: PlotModel,
@@ -160,18 +154,21 @@ const read = {
 			.map((block, i) => serialize(block as Model, i, buildingCenter));
 	},
 
-	blockV0: (block: Model, index: number, buildingCenter: CFrame): SerializedBlockV0 => {
+	blockV3: (block: Model, index: number, buildingCenter: CFrame): SerializedBlockV3 => {
 		const configattr = block.GetAttribute("config") as string | undefined;
+		const connectionsattr = block.GetAttribute("connections") as string | undefined;
 
 		return {
 			id: block.GetAttribute("id") as string, // Block ID
 			mat: block.GetAttribute("material") as SerializedEnum, // Material
 			col: HttpService.JSONDecode(block.GetAttribute("color") as string) as SerializedColor, // Color
 			loc: Serializer.CFrameSerializer.serialize(buildingCenter.ToObjectSpace(block.GetPivot())), // Position
-			config:
-				configattr === undefined
+			config: configattr === undefined ? undefined : (HttpService.JSONDecode(configattr as string) as object),
+			uuid: block.GetAttribute("uuid") as string,
+			connections:
+				connectionsattr === undefined
 					? undefined
-					: (HttpService.JSONDecode(block.GetAttribute("config") as string) as object),
+					: (HttpService.JSONDecode(connectionsattr as string) as SerializedBlockV3["connections"]),
 		};
 	},
 } as const;
@@ -186,7 +183,7 @@ const place = {
 		data.forEach((blockData) => place(plot, blockData, buildingCenter));
 	},
 
-	blockOnPlotV0: (plot: PlotModel, blockData: SerializedBlockV0, buildingCenter: CFrame) => {
+	blockOnPlotV3: (plot: PlotModel, blockData: SerializedBlockV3, buildingCenter: CFrame) => {
 		if (!blockRegistry.has(blockData.id)) {
 			Logger.error(`Could not load ${blockData.id} from slot: Block does not exists`);
 			return;
@@ -198,114 +195,124 @@ const place = {
 			material: Serializer.EnumMaterialSerializer.deserialize(blockData.mat),
 			location: buildingCenter.ToWorldSpace(Serializer.CFrameSerializer.deserialize(blockData.loc)),
 			config: (blockData.config ?? {}) as Readonly<Record<string, string>>,
+			uuid: blockData.uuid,
 		};
 
 		const response = BuildingWrapper.placeBlock(deserializedData);
 		if (response.success && response.model && blockData.config) {
 			response.model.SetAttribute("config", HttpService.JSONEncode(blockData.config));
 		}
+		if (response.success && response.model && blockData.connections) {
+			response.model.SetAttribute("connections", HttpService.JSONEncode(blockData.connections));
+		}
 	},
 } as const;
 
-const v0: BlocksSerializerVersion = {
-	version: 0,
+interface BlockSerializer<TBlocks extends SerializedBlocks<SerializedBlockV0>> {
+	readonly version: number;
+}
+interface UpgradableBlocksSerializer<
+	TBlocks extends SerializedBlocks<SerializedBlockV0>,
+	TPrev extends BlockSerializer<SerializedBlocks<SerializedBlockV0>>,
+> extends BlockSerializer<TBlocks> {
+	upgradeFrom(data: string, prev: TPrev extends BlockSerializer<infer T> ? T : never): TBlocks;
+}
+interface CurrentUpgradableBlocksSerializer<
+	TBlocks extends SerializedBlocks<SerializedBlockV0>,
+	TPrev extends BlockSerializer<SerializedBlocks<SerializedBlockV0>>,
+> extends UpgradableBlocksSerializer<TBlocks, TPrev> {
+	read(plot: PlotModel): TBlocks;
+	place(data: TBlocks, plot: PlotModel): number;
+}
 
-	deserialize(data: string, plot: PlotModel): number {
-		const blocks = HttpService.JSONDecode(Base64.Decode(data)) as readonly SerializedBlockV0[];
-		place.blocksOnPlot(plot, blocks, place.blockOnPlotV0);
+//
 
-		return blocks.size();
-	},
-};
-
-/** Removed unnesessary base64 encode/decode */
-const v1: BlocksSerializerVersion = {
-	version: 1,
-
-	deserialize(data: string, plot: PlotModel): number {
-		let blocks = HttpService.JSONDecode(data) as readonly SerializedBlockV0[];
-		blocks = blocks.map((b) => {
-			if (b.id === "wheel") {
-				return {
-					...b,
-					id: "smallwheel",
-				};
-			}
-
-			return b;
-		});
-
-		place.blocksOnPlot(plot, blocks, place.blockOnPlotV0);
-
-		return blocks.size();
-	},
-};
-
-/** Updated block 'wheel' > 'smallwheel' */
-const v3: BlocksSerializerVersion = {
-	version: 3,
-
-	deserialize(data: string, plot: PlotModel): number {
-		const blocks = HttpService.JSONDecode(data) as readonly SerializedBlockV0[];
-		place.blocksOnPlot(plot, blocks, place.blockOnPlotV0);
-
-		return blocks.size();
-	},
-};
-
-/** Added versioning */
-const v4: BlocksSerializerCurrentVersion = {
+const v4: BlockSerializer<SerializedBlocks<SerializedBlockV0>> = {
 	version: 4,
+};
 
-	deserialize(data: string, plot: PlotModel): number {
-		const blocks = HttpService.JSONDecode(data) as SerializedBlocks<SerializedBlockV0> | SerializedBlockV0[];
-		if (!("version" in blocks) || blocks.version !== this.version) throw "Wrong version";
+// added uuid
+const v5: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV2>, typeof v4> = {
+	version: 5,
 
-		place.blocksOnPlot(plot, blocks.blocks, place.blockOnPlotV0);
-		return blocks.blocks.size();
-	},
-	serialize(plot: PlotModel): string {
-		const serialized: SerializedBlocks<SerializedBlockV0> = {
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV0>): SerializedBlocks<SerializedBlockV2> {
+		return {
 			version: this.version,
-			blocks: read.blocksFromPlot(plot, read.blockV0),
+			blocks: prev.blocks.map(
+				(b, i): SerializedBlockV2 => ({
+					...b,
+					uuid: tostring(i),
+				}),
+			),
 		};
-
-		return HttpService.JSONEncode(serialized);
 	},
 };
 
-const versions = [v0, v1, v3, v4] as const;
-const current = versions[versions.size() - 1] as BlocksSerializerCurrentVersion;
+// added logic connecitons
+const v6: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v5> = {
+	version: 6,
+
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV2>): SerializedBlocks<SerializedBlockV3> {
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(
+				(b, i): SerializedBlockV3 => ({
+					...b,
+					connections: {},
+				}),
+			),
+		};
+	},
+
+	read(plot: PlotModel): SerializedBlocks<SerializedBlockV3> {
+		return {
+			version: this.version,
+			blocks: read.blocksFromPlot(plot, read.blockV3),
+		};
+	},
+	place(data: SerializedBlocks<SerializedBlockV3>, plot: PlotModel): number {
+		place.blocksOnPlot(plot, data.blocks, place.blockOnPlotV3);
+		return data.blocks.size();
+	},
+};
+
+//
+
+const versions = [undefined!, undefined!, undefined!, undefined!, v4, v5, v6] as const;
+const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const BlocksSerializer = {
 	version: current.version,
 
 	serialize: function (plot: PlotModel): string {
-		return current.serialize(plot);
+		return HttpService.JSONEncode(current.read(plot));
 	},
 	deserialize: function (data: string, plot: PlotModel): number {
-		for (let i = versions.size() - 1; i >= 0; i--) {
-			try {
-				const result = versions[i].deserialize(data, plot);
-				Logger.info(`Loaded a slot using savev${versions[i].version}`);
+		let deserialized = HttpService.JSONDecode(data) as SerializedBlocks<SerializedBlockV0>;
+		Logger.info(`Loaded a slot using savev${deserialized.version}`);
 
-				return result;
-			} catch (err) {
-				Logger.error(`Could not a load slot using savev${versions[i].version}: ${err}`);
-			}
+		const version = deserialized.version;
+		for (let i = version + 1; i < versions.size(); i++) {
+			const version = versions[i];
+			if (!("upgradeFrom" in version)) continue;
+
+			deserialized = version.upgradeFrom(data, deserialized);
+			Logger.info(`Upgrading a slot to savev${version.version}`);
 		}
 
-		throw "Could not deserialize a slot with any serializer version";
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		current.place(deserialized as any, plot);
+		return deserialized.blocks.size();
 	},
 } as const;
-
 export default BlocksSerializer;
 
+/*
 const vBUFFER = {
 	version: 3,
 
 	serialize(plot: PlotModel): string {
-		const blocks = read.blocksFromPlot(plot, read.blockV0);
+		const blocks = read.blocksFromPlot(plot, read.blockV3);
 
 		const palette = new Map<string, number>(
 			[...new Set<string>(blocks.map((b) => b.id))]
@@ -403,3 +410,4 @@ const vBUFFER = {
 		return blocks;
 	},
 } as const;
+*/
