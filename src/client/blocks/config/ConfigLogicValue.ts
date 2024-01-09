@@ -32,7 +32,7 @@ export default class ConfigLogicValue<T extends ConfigValue> extends ConfigLogic
 
 		if (definition.type === "number") {
 			return new NumberObservableValue(
-				definition.default[inputType] ?? definition.default.Desktop,
+				definition.default[inputType] ?? definition.default.Desktop ?? 0,
 				definition.min,
 				definition.max,
 				definition.step,
