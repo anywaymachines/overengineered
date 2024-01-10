@@ -4,13 +4,6 @@ import DisconnectBlockLogic from "./logic/DisconnectBlockLogic";
 import HeliumBlockLogic from "./logic/HeliumBlockLogic";
 import LampBlockLogic from "./logic/LampBlockLogic";
 import MotorBlockLogic from "./logic/MotorBlockLogic";
-import OperationAndBlockLogic from "./logic/OperationAndBlockLogic";
-import OperationNandBlockLogic from "./logic/OperationNandBlockLogic";
-import OperationNorBlockLogic from "./logic/OperationNorBlockLogic";
-import OperationNotBlockLogic from "./logic/OperationNotBlockLogic";
-import OperationOrBlockLogic from "./logic/OperationOrBlockLogic";
-import OperationXnorBlockLogic from "./logic/OperationXnorBlockLogic";
-import OperationXorBlockLogic from "./logic/OperationXorBlockLogic";
 import RocketEngineLogic from "./logic/RocketEngineLogic";
 import RopeLogic from "./logic/RopeLogic";
 import ServoMotorBlockLogic from "./logic/ServoMotorBlockLogic";
@@ -18,6 +11,15 @@ import SuspensionLogic from "./logic/SuspensionLogic";
 import TNTBlockLogic from "./logic/TNTBlockLogic";
 import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 import WingLogic from "./logic/WingLogic";
+import OperationAndBlockLogic from "./operations/boolean/OperationAndBlockLogic";
+import OperationNandBlockLogic from "./operations/boolean/OperationNandBlockLogic";
+import OperationNorBlockLogic from "./operations/boolean/OperationNorBlockLogic";
+import OperationNotBlockLogic from "./operations/boolean/OperationNotBlockLogic";
+import OperationOrBlockLogic from "./operations/boolean/OperationOrBlockLogic";
+import OperationXnorBlockLogic from "./operations/boolean/OperationXnorBlockLogic";
+import OperationXorBlockLogic from "./operations/boolean/OperationXorBlockLogic";
+import NumericalSwitchbox from "./operations/number/NumericalSwitchbox";
+import OperationAddBlockLogic from "./operations/number/OperationAddBlockLogic";
 
 const logicRegistry: Readonly<Record<string, { new (block: BlockModel): BlockLogic } | undefined>> = {
 	vehicleseat: VehicleSeatBlockLogic,
@@ -37,6 +39,8 @@ const logicRegistry: Readonly<Record<string, { new (block: BlockModel): BlockLog
 	suspensionblock: SuspensionLogic,
 	anchorblock: AnchorBlockLogic,
 
+	numericalswitchbox: NumericalSwitchbox,
+
 	operationnot: OperationNotBlockLogic,
 	operationand: OperationAndBlockLogic,
 	operationnand: OperationNandBlockLogic,
@@ -44,6 +48,8 @@ const logicRegistry: Readonly<Record<string, { new (block: BlockModel): BlockLog
 	operationxor: OperationXorBlockLogic,
 	operationxnor: OperationXnorBlockLogic,
 	operationnor: OperationNorBlockLogic,
+
+	operationadd: OperationAddBlockLogic,
 };
 
 export default logicRegistry;

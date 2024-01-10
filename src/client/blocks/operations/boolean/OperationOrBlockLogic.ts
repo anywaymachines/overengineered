@@ -12,7 +12,7 @@ export default class OperationOrBlockLogic extends ConfigurableBlockLogic<typeof
 
 	private update() {
 		this.outputConfig.values.result.set(
-			this.inputConfig.values.value1.value.get() || this.inputConfig.values.value2.value.get(),
+			this.inputConfig.values.value1.value.get() === true || this.inputConfig.values.value2.value.get() === true,
 		);
 	}
 }

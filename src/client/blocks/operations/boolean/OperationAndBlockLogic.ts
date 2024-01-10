@@ -1,9 +1,9 @@
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 
-export default class OperationNorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationnor> {
+export default class OperationAndBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationand> {
 	constructor(block: BlockModel) {
-		super(block, blockConfigRegistry.operationnor);
+		super(block, blockConfigRegistry.operationand);
 
 		this.event.subscribeObservable(this.inputConfig.values.value1.value, () => this.update());
 		this.event.subscribeObservable(this.inputConfig.values.value2.value, () => this.update());
@@ -12,7 +12,7 @@ export default class OperationNorBlockLogic extends ConfigurableBlockLogic<typeo
 
 	private update() {
 		this.outputConfig.values.result.set(
-			!(this.inputConfig.values.value1.value.get() || this.inputConfig.values.value2.value.get()),
+			this.inputConfig.values.value1.value.get() === true && this.inputConfig.values.value2.value.get() === true,
 		);
 	}
 }

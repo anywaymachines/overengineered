@@ -277,7 +277,7 @@ const vehicleseat = {
 	},
 } as const satisfies BlockConfigDefinitions;
 
-const operationnot = {
+const booleanProcessing = {
 	input: {
 		value: {
 			displayName: "Value",
@@ -298,7 +298,72 @@ const operationnot = {
 	},
 } as const satisfies BlockConfigDefinitions;
 
-const twoInputsOneOutput = {
+const numberProcessing = {
+	input: {
+		value: {
+			displayName: "Value",
+			type: "number",
+			min: -math.huge, // TODO: WTF
+			max: math.huge, // TODO: WTF
+			step: 0.001, // TODO: WTF
+			default: {
+				Desktop: 0 as number,
+			},
+		},
+	},
+	output: {
+		result: {
+			displayName: "Result",
+			type: "number",
+			min: -math.huge, // TODO: WTF
+			max: math.huge, // TODO: WTF
+			step: 0.001, // TODO: WTF
+			default: {
+				Desktop: 0 as number,
+			},
+		},
+	},
+} as const satisfies BlockConfigDefinitions;
+
+const twoNumberInputsOneNumberOutput = {
+	input: {
+		value1: {
+			displayName: "Value 1",
+			type: "number",
+			min: -math.huge, // TODO: WTF
+			max: math.huge, // TODO: WTF
+			step: 0.001, // TODO: WTF
+			default: {
+				Desktop: 0 as number,
+			},
+		},
+
+		value2: {
+			displayName: "Value 2",
+			type: "number",
+			min: -math.huge, // TODO: WTF
+			max: math.huge, // TODO: WTF
+			step: 0.001, // TODO: WTF
+			default: {
+				Desktop: 0 as number,
+			},
+		},
+	},
+	output: {
+		result: {
+			displayName: "Result",
+			type: "number",
+			min: -math.huge, // TODO: WTF
+			max: math.huge, // TODO: WTF
+			step: 0.001, // TODO: WTF
+			default: {
+				Desktop: 0 as number,
+			},
+		},
+	},
+} as const satisfies BlockConfigDefinitions;
+
+const twoBooleanInputsOneBooleanOutput = {
 	input: {
 		value1: {
 			displayName: "Value 1",
@@ -327,6 +392,52 @@ const twoInputsOneOutput = {
 	},
 } as const satisfies BlockConfigDefinitions;
 
+const numericalswitchbox = {
+	input: {
+		value: {
+			displayName: "Value",
+			type: "bool",
+			default: {
+				Desktop: false as boolean,
+			},
+		},
+
+		truenumber: {
+			displayName: "True number",
+			type: "number",
+			min: -math.huge, // TODO: WTF
+			max: math.huge, // TODO: WTF
+			step: 0.001, // TODO: WTF
+			default: {
+				Desktop: 0 as number,
+			},
+		},
+
+		falsenumber: {
+			displayName: "False number",
+			type: "number",
+			min: -math.huge, // TODO: WTF
+			max: math.huge, // TODO: WTF
+			step: 0.001, // TODO: WTF
+			default: {
+				Desktop: 0 as number,
+			},
+		},
+	},
+	output: {
+		result: {
+			displayName: "Result",
+			type: "number",
+			min: -math.huge, // TODO: WTF
+			max: math.huge, // TODO: WTF
+			step: 0.001, // TODO: WTF
+			default: {
+				Desktop: 0 as number,
+			},
+		},
+	},
+} as const satisfies BlockConfigDefinitions;
+
 const blockConfigRegistry = {
 	disconnectblock,
 	motorblock,
@@ -338,13 +449,18 @@ const blockConfigRegistry = {
 	lamp,
 	suspensionblock,
 	vehicleseat,
-	operationnot,
-	operationand: twoInputsOneOutput,
-	operationnand: twoInputsOneOutput,
-	operationor: twoInputsOneOutput,
-	operationxor: twoInputsOneOutput,
-	operationxnor: twoInputsOneOutput,
-	operationnor: twoInputsOneOutput,
+
+	numericalswitchbox,
+
+	operationnot: booleanProcessing,
+	operationand: twoBooleanInputsOneBooleanOutput,
+	operationnand: twoBooleanInputsOneBooleanOutput,
+	operationor: twoBooleanInputsOneBooleanOutput,
+	operationxor: twoBooleanInputsOneBooleanOutput,
+	operationxnor: twoBooleanInputsOneBooleanOutput,
+	operationnor: twoBooleanInputsOneBooleanOutput,
+
+	operationadd: twoNumberInputsOneNumberOutput,
 } as const satisfies Record<string, BlockConfigDefinitions>;
 
 export default blockConfigRegistry;
