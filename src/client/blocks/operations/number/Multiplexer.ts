@@ -1,9 +1,9 @@
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 
-export default class NumericalSwitchbox extends ConfigurableBlockLogic<typeof blockConfigRegistry.numericalswitchbox> {
+export default class Multiplexer extends ConfigurableBlockLogic<typeof blockConfigRegistry.multiplexer> {
 	constructor(block: BlockModel) {
-		super(block, blockConfigRegistry.numericalswitchbox);
+		super(block, blockConfigRegistry.multiplexer);
 
 		this.event.subscribeObservable(this.inputConfig.values.falsenumber.value, () => this.update());
 		this.event.subscribeObservable(this.inputConfig.values.truenumber.value, () => this.update());

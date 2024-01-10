@@ -392,7 +392,7 @@ const twoBooleanInputsOneBooleanOutput = {
 	},
 } as const satisfies BlockConfigDefinitions;
 
-const numericalswitchbox = {
+const multiplexer = {
 	input: {
 		value: {
 			displayName: "Value",
@@ -450,7 +450,7 @@ const blockConfigRegistry = {
 	suspensionblock,
 	vehicleseat,
 
-	numericalswitchbox,
+	multiplexer,
 
 	operationnot: booleanProcessing,
 	operationand: twoBooleanInputsOneBooleanOutput,

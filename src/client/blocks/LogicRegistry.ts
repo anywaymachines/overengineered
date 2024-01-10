@@ -18,7 +18,7 @@ import OperationNotBlockLogic from "./operations/boolean/OperationNotBlockLogic"
 import OperationOrBlockLogic from "./operations/boolean/OperationOrBlockLogic";
 import OperationXnorBlockLogic from "./operations/boolean/OperationXnorBlockLogic";
 import OperationXorBlockLogic from "./operations/boolean/OperationXorBlockLogic";
-import NumericalSwitchbox from "./operations/number/NumericalSwitchbox";
+import Multiplexer from "./operations/number/Multiplexer";
 import OperationAddBlockLogic from "./operations/number/OperationAddBlockLogic";
 
 const logicRegistry: Readonly<Record<string, { new (block: BlockModel): BlockLogic } | undefined>> = {
@@ -39,7 +39,7 @@ const logicRegistry: Readonly<Record<string, { new (block: BlockModel): BlockLog
 	suspensionblock: SuspensionLogic,
 	anchorblock: AnchorBlockLogic,
 
-	numericalswitchbox: NumericalSwitchbox,
+	multiplexer: Multiplexer,
 
 	operationnot: OperationNotBlockLogic,
 	operationand: OperationAndBlockLogic,
