@@ -112,7 +112,11 @@ export default class BuildingManager {
 			// reflect along X/Y plane (Z axis)
 			const reflection = new CFrame(X, Y, -Z, -R00, R01, R02, -R10, R11, R12, R20, -R21, -R22);
 			const reflectedCFrame = mirrorCFrame.ToWorldSpace(reflection);
-			return reflectedCFrame;
+			const [x, y, z] = reflectedCFrame.ToEulerAnglesXYZ();
+
+			return CFrame.fromEulerAnglesXYZ(x * -1, y, z)
+				.add(reflectedCFrame.Position)
+				.mul(CFrame.fromEulerAnglesXYZ(0, math.pi / 2, 0));
 		};
 
 		const plotframe = plot.GetPivot();

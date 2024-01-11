@@ -115,7 +115,7 @@ export default class BuildTool2 extends ToolBase {
 
 		const getMouseTargetBlockPosition = () => {
 			const constrainPositionToGrid = (pos: Vector3) => {
-				const constrain = (num: number) => math.round(num);
+				const constrain = math.round;
 				return new Vector3(constrain(pos.X), constrain(pos.Y), constrain(pos.Z));
 			};
 			const addBlockSize = (pos: Vector3) => {
@@ -175,9 +175,9 @@ export default class BuildTool2 extends ToolBase {
 				(ghost) => !BuildingManager.blockCanBePlacedAt(ghost.model.GetPivot().Position, Players.LocalPlayer),
 			) === undefined;
 
-		this.mainGhost.highlight.FillColor = canBePlaced ? this.allowedColor : this.forbiddenColor;
+		PartUtils.ghostModel(this.mainGhost.model, canBePlaced ? this.allowedColor : this.forbiddenColor);
 		for (const ghost of this.mirroredGhosts) {
-			ghost.highlight.FillColor = canBePlaced ? this.allowedColor : this.forbiddenColor;
+			PartUtils.ghostModel(ghost.model, canBePlaced ? this.allowedColor : this.forbiddenColor);
 		}
 	}
 
