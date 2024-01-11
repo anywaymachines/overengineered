@@ -32,7 +32,7 @@ type PlaceBlockRequest = {
 	readonly material: Enum.Material;
 	readonly location: CFrame;
 	readonly uuid?: string;
-	readonly config?: Readonly<Record<keyof ConfigValueTypes, string>>;
+	readonly config?: Readonly<Record<string, string>>;
 };
 
 type PlayerSaveSlotRequest = {

@@ -28,7 +28,7 @@ placeable
 				const block: Block = {
 					id,
 					displayName: name,
-					model: categoryBlock as Model,
+					model: categoryBlock as BlockModel,
 					category: categoryName,
 					required,
 					limit,

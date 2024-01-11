@@ -1,22 +1,35 @@
 import { UserInputService } from "@rbxts/services";
-import BlockConfig from "client/blocks/BlockConfig";
-import { InputBlockConfig, OutputBlockConfig } from "client/blocks/config/BlockConfigWithLogic";
+import blockConfigRegistryClient, { ConfigLogicValueBase } from "client/blocks/config/BlockConfigRegistryClient";
+import BlockConfig from "shared/BlockConfig";
+import {
+	BlockConfigBothDefinitions,
+	BlockConfigDefinition,
+	BlockConfigDefinitions,
+	BlockConfigDefinitionsToConfig,
+} from "shared/BlockConfigDefinitionRegistry";
 import Objects from "shared/_fixes_/objects";
+import ObservableValue from "shared/event/ObservableValue";
 import BlockLogic from "./BlockLogic";
 import { KeyPressingConflictingController } from "./KeyPressingController";
 
-type KeyMembers<TDef extends ConfigDefinitions> = ExtractKeys<TDef, { type: "key" }> & string;
-export type KeyDefinition<TDef extends ConfigDefinitions> = {
+type KeyMembers<TDef extends BlockConfigDefinitions> = ExtractKeys<TDef, { type: "key" | "keybool" }> & string;
+export type KeyDefinition<TDef extends BlockConfigDefinitions> = {
 	keyDown?: () => void;
 	keyUp?: () => void;
 	conflicts?: KeyMembers<TDef>;
 };
-export type KeyDefinitions<TDef extends ConfigDefinitions> = Partial<Record<KeyMembers<TDef>, KeyDefinition<TDef>>>;
+export type KeyDefinitions<TDef extends BlockConfigDefinitions> = Partial<
+	Record<KeyMembers<TDef>, KeyDefinition<TDef>>
+>;
 
-export default abstract class ConfigurableBlockLogic<TDef extends BlockConfigDefinitions> extends BlockLogic {
-	readonly config: BlockConfig<TDef["input"]>;
-	readonly inputConfig: InputBlockConfig<TDef["input"]>;
-	readonly outputConfig: OutputBlockConfig<TDef["output"]>;
+export default abstract class ConfigurableBlockLogic<TDef extends BlockConfigBothDefinitions> extends BlockLogic {
+	readonly config: BlockConfigDefinitionsToConfig<TDef["input"]>;
+	readonly input: {
+		readonly [k in keyof TDef["input"]]: ConfigLogicValueBase<TDef["input"][k]>;
+	};
+	readonly output: {
+		readonly [k in keyof TDef["output"]]: ObservableValue<TDef["output"][k]["default"]>;
+	};
 	protected readonly keysDefinition;
 	private readonly btnmap;
 	private readonly keyController;
@@ -24,16 +37,30 @@ export default abstract class ConfigurableBlockLogic<TDef extends BlockConfigDef
 	constructor(block: BlockModel, configDefinition: TDef) {
 		super(block);
 
-		this.config = new BlockConfig<TDef["input"]>(block, configDefinition.input);
-		this.inputConfig = new InputBlockConfig(this.config.getAll(), configDefinition.input);
-		this.outputConfig = new OutputBlockConfig(configDefinition.output);
+		this.config = BlockConfig.deserialize(block, configDefinition.input);
+
+		const createInput = (key: string, definition: BlockConfigDefinition) => {
+			return new blockConfigRegistryClient[definition.type].input(
+				this.config[key] as never,
+				definition as never,
+				false,
+			);
+		};
+
+		this.input = Objects.fromEntries(
+			Objects.entries(configDefinition.input).map((d) => [d[0], createInput(d[0], d[1])] as const),
+		) as typeof this.input;
+
+		this.output = Objects.fromEntries(
+			Objects.entries(configDefinition.output).map(
+				(d) => [d[0], blockConfigRegistryClient[d[1].type].output(d[1] as never)] as const,
+			),
+		) as typeof this.output;
 
 		this.keysDefinition = this.getKeysDefinition();
 		this.keyController = new KeyPressingConflictingController<KeyMembers<TDef["input"]>>(this.keysDefinition);
 
-		this.btnmap = new Map<KeyCode, KeyMembers<TDef["input"]>>(
-			Objects.entries(this.keysDefinition).map((d) => [this.config.get(d[0]) as KeyCode, d[0]] as const),
-		);
+		this.btnmap = new Map<KeyCode, KeyMembers<TDef["input"]>>();
 
 		this.event.onPrepare(() => {
 			this.eventHandler.subscribe(this.machine!.seat.occupiedByLocalPlayer.changed, (occupied) => {

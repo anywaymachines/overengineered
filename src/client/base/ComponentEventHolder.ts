@@ -1,3 +1,4 @@
+import { UserInputService } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
@@ -81,6 +82,29 @@ export default class ComponentEventHolder {
 	/** Register an event that fires once */
 	public subscribeOnce<T extends Callback = Callback>(signal: Sig<T>, callback: T, inputType: Keys = "All"): void {
 		this.sub(this.eventsOnce, inputType, [signal, callback]);
+	}
+
+	onInput(callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
+		return this.subscribe(UserInputService.InputBegan, (input, gameProcessedEvent) => {
+			if (gameProcessedEvent && !allowGameProcessedEvents) return;
+			callback(input);
+		});
+	}
+	onKeyDown(key: KeyCode, callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
+		return this.onInput((input) => {
+			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
+			if (input.KeyCode.Name !== key) return;
+
+			callback(input);
+		}, allowGameProcessedEvents);
+	}
+	onKeyUp(key: KeyCode, callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
+		return this.onInput((input) => {
+			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
+			if (input.KeyCode.Name !== key) return;
+
+			callback(input);
+		}, allowGameProcessedEvents);
 	}
 
 	/** Subscribe to an observable value changed event */

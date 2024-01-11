@@ -49,7 +49,7 @@ export default class DeleteTool extends ToolBase {
 				block.GetAttribute("material") as number as SerializedEnum,
 			),
 			config: HttpService.JSONDecode((block.GetAttribute("config") as string | undefined) ?? "{}") as Readonly<
-				Record<keyof ConfigValueTypes, string>
+				Record<string, string>
 			>,
 		};
 

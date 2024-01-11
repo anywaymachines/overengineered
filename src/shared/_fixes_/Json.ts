@@ -8,7 +8,7 @@ type Serializer<TActual, TSerialized extends JsonSerializedProperty> = {
 };
 
 /** A value or that is serializable by `HTTPService.JSONEncode` */
-type JsonSerializedProperty =
+export type JsonSerializedProperty =
 	| number
 	| string
 	| undefined
@@ -22,7 +22,7 @@ type JsonSerializedProperty =
 	| SerializedColor3;
 
 /** A value that is serializable by `JSON.encode` */
-type JsonSerializablePrimitive =
+export type JsonSerializablePrimitive =
 	| number
 	| string
 	| boolean
@@ -35,9 +35,11 @@ type JsonSerializablePrimitive =
 	| Color3;
 
 /** A value or that is serializable by `JSON.encode` */
-type JsonSerializable<T> = T extends JsonSerializablePrimitive
+export type JsonSerializable<T> = T extends JsonSerializablePrimitive
 	? T
-	: T extends keyof CheckableTypes
+	: T extends
+				| CheckableTypes[Exclude<keyof CheckableTypes, keyof CheckablePrimitives>]
+				| CreatableInstances[keyof CreatableInstances]
 		? never
 		: T extends () => void
 			? never
@@ -48,6 +50,12 @@ type JsonSerializable<T> = T extends JsonSerializablePrimitive
 						? T
 						: never
 					: never;
+
+type Definition<T> = { readonly default: T };
+type Definitions = Readonly<Record<string, Definition<unknown>>>;
+type DefinitionToConfig<T extends Definitions> = {
+	readonly [k in keyof T]: T[k]["default"];
+};
 
 //
 
@@ -227,6 +235,21 @@ const JSON = {
 		};
 
 		return process(HttpService.JSONDecode(data) as JsonSerializedProperty) as JsonSerializable<T>;
+	},
+
+	addDefaults: <TDef extends Definitions>(
+		config: Partial<DefinitionToConfig<TDef>>,
+		definition: TDef,
+	): DefinitionToConfig<TDef> => {
+		for (const [key, def] of Objects.entries(definition)) {
+			config[key] ??= def.default;
+		}
+
+		return config as DefinitionToConfig<TDef>;
+	},
+	deserializeWithDefaults: <TDef extends Definitions>(data: string, definition: TDef): DefinitionToConfig<TDef> => {
+		const config = JSON.deserialize<DefinitionToConfig<TDef>>(data) as Writable<DefinitionToConfig<TDef>>;
+		return JSON.addDefaults(config, definition);
 	},
 };
 

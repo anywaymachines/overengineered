@@ -4,6 +4,7 @@ import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
+import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
 import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/BlockConfigRegistry";
 import Remotes from "shared/Remotes";
 import Objects from "shared/_fixes_/objects";
@@ -15,7 +16,7 @@ import PartUtils from "shared/utils/PartUtils";
 type MarkerData = {
 	readonly id: BlockConnectionName;
 	readonly blockData: PlacedBlockData;
-	readonly dataType: keyof ConfigDefinitionType;
+	readonly dataType: keyof BlockConfigDefinitionRegistry;
 	readonly markerType: "input" | "connected_input" | "output";
 	readonly color: Color3;
 	readonly name: string;
@@ -25,10 +26,18 @@ type Marker = MarkerData & { readonly instance: BillboardGui & { Adornee: BlockM
 
 /** A tool for wiring */
 export default class WireTool extends ToolBase {
-	private static readonly colors: Readonly<Record<ConfigValueType, Color3>> = {
-		bool: Color3.fromRGB(255, 170, 0),
+	private static readonly primitiveColors = {
 		number: Color3.fromRGB(81, 202, 21),
-		key: new Color3(0, 0, 0), // useless
+		bool: Color3.fromRGB(255, 170, 0),
+	} as const;
+	private static readonly colors: Readonly<Record<keyof BlockConfigDefinitionRegistry, Color3>> = {
+		bool: this.primitiveColors.bool,
+		keybool: this.primitiveColors.bool,
+
+		number: this.primitiveColors.number,
+		clampedNumber: this.primitiveColors.number,
+		motorRotationSpeed: this.primitiveColors.number,
+		thrust: this.primitiveColors.number,
 	};
 
 	private renderedWires: BasePart[] = [];

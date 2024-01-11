@@ -3,6 +3,7 @@ import BuildingWrapper from "server/BuildingWrapper";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
+import Objects from "shared/_fixes_/objects";
 import { PlacedBlockDataConnection } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 
@@ -249,7 +250,7 @@ const v5: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV2>, typeof
 };
 
 // added logic connecitons
-const v6: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v5> = {
+const v6: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v5> = {
 	version: 6,
 
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV2>): SerializedBlocks<SerializedBlockV3> {
@@ -259,6 +260,30 @@ const v6: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>,
 				(b, i): SerializedBlockV3 => ({
 					...b,
 					connections: {},
+				}),
+			),
+		};
+	},
+};
+
+// changed serialization to actual JSON
+const v7: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v6> = {
+	version: 7,
+
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(
+				(b): SerializedBlockV3 => ({
+					...b,
+					config:
+						b.config === undefined
+							? undefined
+							: Objects.fromEntries(
+									Objects.entries(b.config).map(
+										(e) => [e[0], e[1] === "Y" ? true : e[1] === "N" ? false : e[1]] as const,
+									),
+								),
 				}),
 			),
 		};
@@ -278,7 +303,7 @@ const v6: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>,
 
 //
 
-const versions = [undefined!, undefined!, undefined!, undefined!, v4, v5, v6] as const;
+const versions = [undefined!, undefined!, undefined!, undefined!, v4, v5, v6, v7] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const BlocksSerializer = {

@@ -16,7 +16,7 @@ export default class VehicleSeatBlockLogic extends ConfigurableBlockLogic<typeof
 
 		this.occupant.subscribe((occupant) => {
 			this.occupiedByLocalPlayer.set(occupant === Players.LocalPlayer.Character!.WaitForChild("Humanoid"));
-			this.outputConfig.values.occupied.set(occupant !== undefined);
+			this.output.occupied.set(occupant !== undefined);
 		}, true);
 	}
 }

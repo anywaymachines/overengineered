@@ -12,10 +12,18 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof block
 		super(block, MotorBlockLogic.getConfigDefinition());
 
 		// Configuration
-		this.speed = this.config.get("speed");
-		this.isSwitch = this.config.get("switch");
+		this.speed = 0; //this.config.speed;
+		this.isSwitch = false; //this.config.switch;
 
 		this.hingeConstraint = block.FindFirstChild("Base")?.FindFirstChild("HingeConstraint") as HingeConstraint;
+
+		this.event.subscribeObservable(
+			this.input.rotationSpeed.value,
+			(speed) => {
+				this.hingeConstraint.AngularVelocity = speed;
+			},
+			true,
+		);
 	}
 
 	protected prepare() {

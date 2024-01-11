@@ -2,6 +2,7 @@ import { HttpService } from "@rbxts/services";
 import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
+import JSON, { JsonSerializablePrimitive } from "shared/_fixes_/Json";
 import Objects from "shared/_fixes_/objects";
 import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
@@ -298,8 +299,8 @@ export default class BuildingWrapper {
 	public static updateConfig(this: void, data: ConfigUpdateRequest): Response {
 		for (const block of data.blocks) {
 			const dataTag = block.GetAttribute("config") as string | undefined;
-			const currentData = HttpService.JSONDecode(dataTag ?? "{}") as { [key: string]: string };
-			currentData[data.data.key] = data.data.value;
+			const currentData = HttpService.JSONDecode(dataTag ?? "{}") as { [key: string]: JsonSerializablePrimitive };
+			currentData[data.data.key] = JSON.deserialize(data.data.value);
 			block.SetAttribute("config", HttpService.JSONEncode(currentData));
 		}
 

@@ -15,9 +15,9 @@ export default class SuspensionLogic extends ConfigurableBlockLogic<typeof block
 	protected prepare() {
 		super.prepare();
 
-		this.springConstraint.Damping = this.config.get("damping");
-		this.springConstraint.Stiffness = this.config.get("stiffness");
-		this.springConstraint.FreeLength = this.config.get("free_length");
+		this.springConstraint.Damping = this.config.damping;
+		this.springConstraint.Stiffness = this.config.stiffness;
+		this.springConstraint.FreeLength = this.config.free_length;
 	}
 
 	static getConfigDefinition() {

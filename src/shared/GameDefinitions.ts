@@ -1,3 +1,4 @@
+import { BlockConfigDefinitions } from "./BlockConfigDefinitionRegistry";
 import RobloxUnit from "./RobloxUnit";
 
 export default class GameDefinitions {
@@ -15,39 +16,34 @@ export default class GameDefinitions {
 		proMode: {
 			displayName: "Professional Mode",
 			type: "bool",
-			default: {
-				Desktop: false,
-			},
+			default: false as boolean,
+			config: { value: false as boolean },
 		},
 		betterCamera: {
 			displayName: "Better camera",
 			type: "bool",
-			default: {
-				Desktop: true,
-			},
+			default: true as boolean,
+			config: { value: true as boolean },
 		},
 		music: {
 			displayName: "Music",
 			type: "bool",
-			default: {
-				Desktop: true,
-			},
+			default: true as boolean,
+			config: { value: true as boolean },
 		},
 		beacons: {
 			displayName: "Beacons",
 			type: "bool",
-			default: {
-				Desktop: true,
-			},
+			default: true as boolean,
+			config: { value: true as boolean },
 		},
 		impact_destruction: {
 			displayName: "Impact destruction",
 			type: "bool",
-			default: {
-				Desktop: true,
-			},
+			default: true as boolean,
+			config: { value: true as boolean },
 		},
-	} as const satisfies ConfigDefinitions;
+	} as const satisfies BlockConfigDefinitions;
 
 	static isAdmin(player: Player) {
 		return player.IsInGroup(GameDefinitions.GROUP) && player.GetRankInGroup(GameDefinitions.GROUP) > 250;

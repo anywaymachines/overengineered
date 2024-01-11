@@ -1,9 +1,10 @@
-import Config from "client/Config";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import Control from "client/base/Control";
 import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
+import { BlockConfigDefinition } from "shared/BlockConfigDefinitionRegistry";
 import GameDefinitions from "shared/GameDefinitions";
+import { JsonSerializablePrimitive } from "shared/_fixes_/Json";
 import Objects from "shared/_fixes_/objects";
 import ObservableValue from "shared/event/ObservableValue";
 import { ButtonControl } from "../controls/Button";
@@ -12,7 +13,7 @@ import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBox
 class ConfigPartControl<
 	TControl extends Control<TDef>,
 	TDef extends GuiObject,
-	TValue extends ConfigValue | undefined,
+	TValue extends JsonSerializablePrimitive,
 > extends Control<ConfigPartDefinition<TDef>> {
 	readonly control: TControl & { value: ObservableValue<TValue> };
 	readonly key;
@@ -21,8 +22,8 @@ class ConfigPartControl<
 	constructor(
 		gui: ConfigPartDefinition<TDef>,
 		ctor: (gui: TDef) => TControl & { value: ObservableValue<TValue> },
-		configs: readonly Config<ConfigDefinitions>[],
-		definition: ConfigDefinition,
+		configs: readonly Record<string, unknown>[],
+		definition: BlockConfigDefinition,
 		key: string,
 	) {
 		super(gui);
@@ -31,7 +32,7 @@ class ConfigPartControl<
 
 		this.gui.HeadingLabel.Text = definition.displayName;
 		this.control = ctor(this.gui.Control);
-		this.control.value.set(configs[0].get(key) as TValue);
+		this.control.value.set(configs[0][key] as TValue);
 
 		this.add(this.control);
 	}
@@ -90,7 +91,7 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 	}
 
 	private create() {
-		const config = new Config(PlayerDataStorage.config.get(), GameDefinitions.PLAYER_SETTINGS_DEFINITION);
+		const config = PlayerDataStorage.config.get();
 		this.list.clear();
 
 		for (const [id, def] of Objects.entries(GameDefinitions.PLAYER_SETTINGS_DEFINITION)) {

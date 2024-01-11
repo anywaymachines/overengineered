@@ -5,6 +5,7 @@ import BlockLogic from "client/base/BlockLogic";
 import ComponentContainer from "client/base/ComponentContainer";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import ImpactController from "client/controller/ImpactController";
+import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
 import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
@@ -91,7 +92,7 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
 		const blockdatas = SharedPlots.getPlotBlockDatas(plot);
 		const blocksmap = new Map(blockdatas.map((b) => [b.uuid, b] as const));
-		const logicmap = new Map<PlacedBlockData, BlockLogic | ConfigurableBlockLogic<BlockConfigDefinitions>>();
+		const logicmap = new Map<PlacedBlockData, BlockLogic | ConfigurableBlockLogic<BlockConfigBothDefinitions>>();
 		const logics: BlockLogic[] = [];
 
 		for (const block of blockdatas) {
@@ -114,7 +115,7 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 
 		// initialize connections
 		for (const [inputBlock, inputLogic] of logicmap) {
-			if (!("inputConfig" in inputLogic)) continue;
+			if (!("input" in inputLogic)) continue;
 
 			for (const [connectionFrom, connection] of Objects.entries(inputBlock.connections)) {
 				const outputBlock = blocksmap.get(connection.blockUuid);
@@ -126,13 +127,11 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 				if (!outputLogic) {
 					throw "No logic found for connecting block " + connection.blockUuid;
 				}
-				if (!("inputConfig" in outputLogic)) {
+				if (!("input" in outputLogic)) {
 					throw "Connecting block is not configurable: " + connection.blockUuid;
 				}
 
-				inputLogic.inputConfig.values[connectionFrom].autoSetFrom(
-					outputLogic.outputConfig.values[connection.connectionName],
-				);
+				outputLogic.output[connection.connectionName].autoSet(inputLogic.input[connectionFrom].value);
 			}
 		}
 

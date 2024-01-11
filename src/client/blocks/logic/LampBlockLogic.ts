@@ -6,7 +6,7 @@ export default class LampBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		super(block, blockConfigRegistry.lamp);
 
 		this.event.subscribeObservable(
-			this.inputConfig.values.enabled.value,
+			this.input.enabled.value,
 			(enabled) => {
 				const part = block.PrimaryPart as BasePart;
 

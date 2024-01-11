@@ -8,6 +8,7 @@ import RocketEngineLogic from "client/blocks/logic/RocketEngineLogic";
 import InputController from "client/controller/InputController";
 import PopupController from "client/controller/PopupController";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
+import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
 import Remotes from "shared/Remotes";
 import RobloxUnit from "shared/RobloxUnit";
 import SlotsMeta from "shared/SlotsMeta";
@@ -227,7 +228,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		}, true);
 
 		let pos = 0;
-		const map: Record<string, ConfigurableBlockLogic<BlockConfigDefinitions>[]> = {};
+		const map: Record<string, ConfigurableBlockLogic<BlockConfigBothDefinitions>[]> = {};
 
 		for (const block of machine.getChildren()) {
 			if (!(block instanceof ConfigurableBlockLogic)) {

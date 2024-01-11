@@ -41,8 +41,17 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 		});
 
 		// Configuration
-		this.isSwitch = this.config.get("switchmode");
-		this.strength = this.config.get("strength");
+		this.strength = 0; //this.config.strength;
+		this.isSwitch = false; // this.config.switchmode;
+
+		this.event.subscribeObservable(
+			this.input.thrust.value,
+			(thrust) => {
+				this.torque = thrust;
+				this.update();
+			},
+			true,
+		);
 
 		// Instances
 		const effectEmitter = block.WaitForChild("EffectEmitter") as Part;

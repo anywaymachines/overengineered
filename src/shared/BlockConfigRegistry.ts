@@ -1,20 +1,30 @@
+import { BlockConfigBothDefinitions } from "./BlockConfigDefinitionRegistry";
+
 const disconnectblock = {
 	input: {
 		disconnect: {
 			displayName: "Disconnect key",
-			type: "key",
-			default: {
-				Desktop: "F",
-				Gamepad: "ButtonR2",
+			type: "keybool",
+			default: false as boolean,
+			config: {
+				key: "F",
+				switch: false,
 			},
 		},
 	},
 	output: {},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const motorblock = {
 	input: {
-		rotate_add: {
+		rotationSpeed: {
+			displayName: "Rotation speed",
+			type: "motorRotationSpeed",
+			default: 0 as number,
+			config: {},
+			maxSpeed: 10000 as number,
+		},
+		/*rotate_add: {
 			conflicts: "rotate_sub",
 			displayName: "Rotate +",
 			type: "key",
@@ -34,28 +44,36 @@ const motorblock = {
 		},
 		speed: {
 			displayName: "Max. speed",
-			type: "number",
+			type: "clampedNumber",
 			min: 0,
 			max: 50,
 			step: 1,
-			default: {
-				Desktop: 15,
+			default: 15,
+			config: {
+				value: 0,
 			},
 		},
 		switch: {
 			displayName: "Switch",
 			type: "bool",
-			default: {
-				Desktop: false,
+			default: false as boolean,
+			config: {
+				value: false,
 			},
-		},
+		},*/
 	},
 	output: {},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const smallrocketengine = {
 	input: {
-		thrust_add: {
+		thrust: {
+			displayName: "Thrust",
+			type: "thrust",
+			default: 0 as number,
+			config: {},
+		},
+		/*thrust_add: {
 			conflicts: "thrust_sub",
 			displayName: "Thrust +",
 			type: "key",
@@ -83,37 +101,39 @@ const smallrocketengine = {
 		},
 		strength: {
 			displayName: "Strength %",
-			type: "number",
+			type: "clampedNumber",
 			min: 0,
 			max: 100,
 			step: 1,
-			default: {
-				Desktop: 100,
+			default: 100,
+			config: {
+				value: 100 as number,
 			},
-		},
+		},*/
 	},
 	output: {},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const rope = {
 	input: {
 		length: {
 			displayName: "Length",
-			type: "number",
+			type: "clampedNumber",
 			min: 2,
 			max: 50,
 			step: 1,
-			default: {
-				Desktop: 15,
+			default: 15,
+			config: {
+				value: 15 as number,
 			},
 		},
 	},
 	output: {},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const servomotorblock = {
 	input: {
-		rotate_add: {
+		/*rotate_add: {
 			conflicts: "rotate_sub",
 			displayName: "Rotate +",
 			type: "key",
@@ -130,139 +150,143 @@ const servomotorblock = {
 				Desktop: "E",
 				Gamepad: "ButtonL2",
 			},
-		},
+		},*/
 		speed: {
 			displayName: "Max. speed",
-			type: "number",
+			type: "clampedNumber",
 			min: 0,
 			max: 50,
 			step: 1,
-			default: {
-				Desktop: 15,
+			default: 15 as number,
+			config: {
+				value: 15 as number,
 			},
 		},
 		angle: {
-			displayName: "Angle",
-			type: "number",
+			displayName: "Target angle",
+			type: "clampedNumber",
 			min: -180,
 			max: 180,
 			step: 1,
-			default: {
-				Desktop: 45,
+			default: 0 as number,
+			config: {
+				value: 0 as number,
 			},
 		},
-		switch: {
+		/*switch: {
 			displayName: "Switch",
 			type: "bool",
-			default: {
-				Desktop: false,
-			},
-		},
+			default: false as boolean,
+		},*/
 	},
 	output: {},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const tnt = {
 	input: {
 		explode: {
-			blockConfigType: "keyb",
-			blockConfigDefault: {
-				Desktop: "B",
-				Gamepad: "ButtonR2",
-			},
 			displayName: "Explode",
-			type: "bool",
-			default: {
-				Desktop: false,
+			type: "keybool",
+			default: false as boolean as boolean,
+			config: {
+				key: "B",
+				switch: false,
 			},
 		},
 		radius: {
 			displayName: "Explosion radius",
-			type: "number",
-			default: {
-				Desktop: 12,
-			},
+			type: "clampedNumber",
+			default: 12,
 			min: 1,
 			max: 12,
 			step: 1,
+			config: {
+				value: 2500 as number,
+			},
 		},
 		pressure: {
 			displayName: "Explosion pressure",
-			type: "number",
-			default: {
-				Desktop: 2500,
-			},
+			type: "clampedNumber",
+			default: 2500,
 			min: 0,
 			max: 2500,
 			step: 1,
+			config: {
+				value: 2500 as number,
+			},
 		},
 		flammable: {
 			displayName: "Flammable",
 			type: "bool",
-			default: {
-				Desktop: true,
+			default: true,
+			config: {
+				value: true as boolean,
 			},
 		},
 		impact: {
 			displayName: "Impact",
 			type: "bool",
-			default: {
-				Desktop: true,
+			default: true,
+			config: {
+				value: true as boolean,
 			},
 		},
 	},
 	output: {},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const lamp = {
 	input: {
 		enabled: {
-			blockConfigType: "bool",
 			displayName: "Enabled",
 			type: "bool",
-			default: {
-				Desktop: false as boolean,
+			default: false as boolean,
+			config: {
+				value: false,
 			},
 		},
 	},
 	output: {},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const suspensionblock = {
 	input: {
 		damping: {
 			displayName: "Damping",
-			type: "number",
-			default: {
-				Desktop: 30,
-			},
+			type: "clampedNumber",
+			default: 30,
 			min: 0,
 			max: 100,
 			step: 0.01,
+			config: {
+				value: 30 as number,
+			},
 		},
 		stiffness: {
 			displayName: "Stiffness",
-			type: "number",
-			default: {
-				Desktop: 20,
-			},
+			type: "clampedNumber",
+			default: 20,
 			min: 0,
 			max: 1000,
 			step: 0.01,
+			config: {
+				value: 20 as number,
+			},
 		},
 		free_length: {
 			displayName: "Free Length",
-			type: "number",
-			default: {
-				Desktop: 4.5,
-			},
+			type: "clampedNumber",
+			default: 4.5,
 			min: 0,
 			max: 10,
 			step: 0.01,
+			config: {
+				value: 4.5 as number,
+			},
 		},
 	},
 	output: {},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const vehicleseat = {
 	input: {},
@@ -270,20 +294,22 @@ const vehicleseat = {
 		occupied: {
 			displayName: "Occupied",
 			type: "bool",
-			default: {
-				Desktop: false as boolean,
+			default: false as boolean,
+			config: {
+				value: false as boolean,
 			},
 		},
 	},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const booleanProcessing = {
 	input: {
 		value: {
 			displayName: "Value",
 			type: "bool",
-			default: {
-				Desktop: false as boolean,
+			default: false as boolean,
+			config: {
+				value: false as boolean,
 			},
 		},
 	},
@@ -291,23 +317,22 @@ const booleanProcessing = {
 		result: {
 			displayName: "Result",
 			type: "bool",
-			default: {
-				Desktop: false as boolean,
+			default: false as boolean,
+			config: {
+				value: false as boolean,
 			},
 		},
 	},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const numberProcessing = {
 	input: {
 		value: {
 			displayName: "Value",
 			type: "number",
-			min: -math.huge, // TODO: WTF
-			max: math.huge, // TODO: WTF
-			step: 0.001, // TODO: WTF
-			default: {
-				Desktop: 0 as number,
+			default: 0 as number,
+			config: {
+				value: 0 as number,
 			},
 		},
 	},
@@ -315,37 +340,31 @@ const numberProcessing = {
 		result: {
 			displayName: "Result",
 			type: "number",
-			min: -math.huge, // TODO: WTF
-			max: math.huge, // TODO: WTF
-			step: 0.001, // TODO: WTF
-			default: {
-				Desktop: 0 as number,
+			default: 0 as number,
+			config: {
+				value: 0 as number,
 			},
 		},
 	},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const twoNumberInputsOneNumberOutput = {
 	input: {
 		value1: {
 			displayName: "Value 1",
 			type: "number",
-			min: -math.huge, // TODO: WTF
-			max: math.huge, // TODO: WTF
-			step: 0.001, // TODO: WTF
-			default: {
-				Desktop: 0 as number,
+			default: 0 as number,
+			config: {
+				value: 0 as number,
 			},
 		},
 
 		value2: {
 			displayName: "Value 2",
 			type: "number",
-			min: -math.huge, // TODO: WTF
-			max: math.huge, // TODO: WTF
-			step: 0.001, // TODO: WTF
-			default: {
-				Desktop: 0 as number,
+			default: 0 as number,
+			config: {
+				value: 0 as number,
 			},
 		},
 	},
@@ -353,31 +372,31 @@ const twoNumberInputsOneNumberOutput = {
 		result: {
 			displayName: "Result",
 			type: "number",
-			min: -math.huge, // TODO: WTF
-			max: math.huge, // TODO: WTF
-			step: 0.001, // TODO: WTF
-			default: {
-				Desktop: 0 as number,
+			default: 0 as number,
+			config: {
+				value: 0 as number,
 			},
 		},
 	},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const twoBooleanInputsOneBooleanOutput = {
 	input: {
 		value1: {
 			displayName: "Value 1",
 			type: "bool",
-			default: {
-				Desktop: false as boolean,
+			default: false as boolean,
+			config: {
+				value: false as boolean,
 			},
 		},
 
 		value2: {
 			displayName: "Value 2",
 			type: "bool",
-			default: {
-				Desktop: false as boolean,
+			default: false as boolean,
+			config: {
+				value: false as boolean,
 			},
 		},
 	},
@@ -385,42 +404,40 @@ const twoBooleanInputsOneBooleanOutput = {
 		result: {
 			displayName: "Result",
 			type: "bool",
-			default: {
-				Desktop: false as boolean,
+			default: false as boolean,
+			config: {
+				value: false as boolean,
 			},
 		},
 	},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const multiplexer = {
 	input: {
 		value: {
 			displayName: "Value",
 			type: "bool",
-			default: {
-				Desktop: false as boolean,
+			default: false as boolean,
+			config: {
+				value: false as boolean,
 			},
 		},
 
 		truenumber: {
 			displayName: "True number",
 			type: "number",
-			min: -math.huge, // TODO: WTF
-			max: math.huge, // TODO: WTF
-			step: 0.001, // TODO: WTF
-			default: {
-				Desktop: 0 as number,
+			default: 0 as number,
+			config: {
+				value: 0 as number,
 			},
 		},
 
 		falsenumber: {
 			displayName: "False number",
 			type: "number",
-			min: -math.huge, // TODO: WTF
-			max: math.huge, // TODO: WTF
-			step: 0.001, // TODO: WTF
-			default: {
-				Desktop: 0 as number,
+			default: 0 as number,
+			config: {
+				value: 0 as number,
 			},
 		},
 	},
@@ -428,15 +445,13 @@ const multiplexer = {
 		result: {
 			displayName: "Result",
 			type: "number",
-			min: -math.huge, // TODO: WTF
-			max: math.huge, // TODO: WTF
-			step: 0.001, // TODO: WTF
-			default: {
-				Desktop: 0 as number,
+			default: 0 as number,
+			config: {
+				value: 0 as number,
 			},
 		},
 	},
-} as const satisfies BlockConfigDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
 
 const blockConfigRegistry = {
 	disconnectblock,
@@ -461,9 +476,9 @@ const blockConfigRegistry = {
 	operationnor: twoBooleanInputsOneBooleanOutput,
 
 	operationadd: twoNumberInputsOneNumberOutput,
-} as const satisfies Record<string, BlockConfigDefinitions>;
+} as const satisfies Record<string, BlockConfigBothDefinitions>;
 
 export default blockConfigRegistry;
 
-export type BlockConfigRegistry = Readonly<Record<keyof typeof blockConfigRegistry, BlockConfigDefinitions>>;
-export type BlockConfigRegistryNonGeneric = Readonly<Record<string, BlockConfigDefinitions | undefined>>;
+export type BlockConfigRegistry = Readonly<Record<keyof typeof blockConfigRegistry, BlockConfigBothDefinitions>>;
+export type BlockConfigRegistryNonGeneric = Readonly<Record<string, BlockConfigBothDefinitions | undefined>>;

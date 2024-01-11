@@ -1,30 +1,179 @@
-import { HttpService } from "@rbxts/services";
-import Config from "client/Config";
+import Signal from "@rbxts/signal";
 import Control from "client/base/Control";
-import { InputBlockConfig } from "client/blocks/config/BlockConfigWithLogic";
+import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import ConfigTool from "client/tools/ConfigTool";
+import BlockConfigDefinitionRegistry, {
+	BlockConfigDefinitions,
+	BlockConfigRegToDefinition,
+} from "shared/BlockConfigDefinitionRegistry";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Remotes from "shared/Remotes";
+import JSON, { JsonSerializablePrimitive } from "shared/_fixes_/Json";
 import Objects from "shared/_fixes_/objects";
 import GuiAnimator from "../../GuiAnimator";
 import CheckBoxControl, { CheckBoxControlDefinition } from "../../controls/CheckBoxControl";
-import ConfigPartControl from "../../controls/ConfigPartControl";
 import KeyChooserControl, { KeyChooserControlDefinition } from "../../controls/KeyChooserControl";
 import SliderControl, { SliderControlDefinition } from "../../controls/SliderControl";
+
+//
+
+abstract class ConfigValueControl<
+	TGui extends GuiObject,
+	T extends keyof BlockConfigDefinitionRegistry,
+> extends Control<ConfigPartDefinition<TGui>> {
+	constructor(gui: ConfigPartDefinition<TGui>) {
+		super(gui);
+	}
+}
+
+class BoolConfigValueControl extends ConfigValueControl<CheckBoxControlDefinition, "bool"> {
+	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["bool"]["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: BlockConfigDefinitionRegistry["bool"]["config"],
+		definition: BlockConfigDefinitionRegistry["bool"],
+	) {
+		super(templates.checkbox());
+
+		const control = this.added(new CheckBoxControl(this.gui.Control));
+		control.value.set(config.value);
+
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire({ value }));
+	}
+}
+
+class SliderConfigValueControl extends ConfigValueControl<SliderControlDefinition, "clampedNumber"> {
+	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["clampedNumber"]["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: BlockConfigDefinitionRegistry["clampedNumber"]["config"],
+		definition: BlockConfigDefinitionRegistry["clampedNumber"],
+	) {
+		super(templates.slider());
+
+		const control = this.added(
+			new SliderControl(this.gui.Control, definition.min, definition.max, definition.step),
+		);
+		control.value.set(config.value);
+
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire({ value }));
+	}
+}
+
+class NumberConfigValueControl extends ConfigValueControl<NumberTextBoxControlDefinition, "number"> {
+	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["number"]["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: BlockConfigDefinitionRegistry["number"]["config"],
+		definition: BlockConfigDefinitionRegistry["number"],
+	) {
+		super(templates.number());
+
+		const control = this.added(new NumberTextBoxControl(this.gui.Control));
+		control.value.set(config.value);
+
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire({ value }));
+	}
+}
+
+class KeyBoolConfigValueControl extends ConfigValueControl<KeyChooserControlDefinition, "keybool"> {
+	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["keybool"]["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: BlockConfigDefinitionRegistry["keybool"]["config"],
+		definition: BlockConfigDefinitionRegistry["keybool"],
+	) {
+		super(templates.key());
+
+		const control = this.added(new KeyChooserControl(this.gui.Control));
+		control.value.set(config.key);
+
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire({ key: value, switch: false }));
+	}
+}
+
+class ThrustConfigValueControl extends ConfigValueControl<KeyChooserControlDefinition, "thrust"> {
+	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["thrust"]["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: BlockConfigDefinitionRegistry["thrust"]["config"],
+		definition: BlockConfigDefinitionRegistry["thrust"],
+	) {
+		super(templates.key());
+
+		const control = this.added(new KeyChooserControl(this.gui.Control));
+		//control.value.set(config.value);
+
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire({ key: value, switch: false }));
+	}
+}
+
+class MotorRotationSpeedConfigValueControl extends ConfigValueControl<
+	KeyChooserControlDefinition,
+	"motorRotationSpeed"
+> {
+	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["motorRotationSpeed"]["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: BlockConfigDefinitionRegistry["motorRotationSpeed"]["config"],
+		definition: BlockConfigDefinitionRegistry["motorRotationSpeed"],
+	) {
+		super(templates.key());
+
+		const control = this.added(new KeyChooserControl(this.gui.Control));
+		//control.value.set(config.value);
+
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire({ key: value, switch: false }));
+	}
+}
+
+const configControls = {
+	bool: BoolConfigValueControl,
+	keybool: KeyBoolConfigValueControl,
+	number: NumberConfigValueControl,
+	clampedNumber: SliderConfigValueControl,
+	thrust: ThrustConfigValueControl,
+	motorRotationSpeed: MotorRotationSpeedConfigValueControl,
+} as const satisfies {
+	readonly [k in keyof BlockConfigDefinitionRegistry]: {
+		new (
+			templates: Templates,
+			config: BlockConfigDefinitionRegistry[k]["config"],
+			definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry[k]>,
+		): ConfigValueControl<GuiObject, k> & {
+			submitted: Signal<(value: BlockConfigDefinitionRegistry[k]["config"]) => void>;
+		};
+	};
+};
+
+//
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	HeadingLabel: TextLabel;
 	Control: T;
 };
 
+type Templates = {
+	checkbox: () => ConfigPartDefinition<CheckBoxControlDefinition>;
+	key: () => ConfigPartDefinition<KeyChooserControlDefinition>;
+	slider: () => ConfigPartDefinition<SliderControlDefinition>;
+	number: () => ConfigPartDefinition<NumberTextBoxControlDefinition>;
+};
 export type ConfigToolSceneDefinition = GuiObject & {
 	ParamsSelection: Frame & {
 		Buttons: ScrollingFrame & {
 			CheckboxTemplate: ConfigPartDefinition<CheckBoxControlDefinition>;
 			KeyTemplate: ConfigPartDefinition<KeyChooserControlDefinition>;
 			SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
+			NumberTemplate: ConfigPartDefinition<NumberTextBoxControlDefinition>;
 		};
 		Title: GuiObject & {
 			HeadingLabel: TextLabel;
@@ -37,6 +186,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 	private readonly checkboxTemplate;
 	private readonly keyTemplate;
 	private readonly sliderTemplate;
+	private readonly numberTemplate;
 
 	private readonly list;
 
@@ -46,6 +196,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		this.checkboxTemplate = Control.asTemplate(this.gui.ParamsSelection.Buttons.CheckboxTemplate);
 		this.keyTemplate = Control.asTemplate(this.gui.ParamsSelection.Buttons.KeyTemplate);
 		this.sliderTemplate = Control.asTemplate(this.gui.ParamsSelection.Buttons.SliderTemplate);
+		this.numberTemplate = Control.asTemplate(this.gui.ParamsSelection.Buttons.NumberTemplate);
 
 		this.list = new Control(this.gui.ParamsSelection.Buttons);
 		this.add(this.list);
@@ -84,78 +235,49 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
 
 				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
-					.input as ConfigDefinitions;
+					.input as BlockConfigDefinitions;
 				if (!defs) return undefined!;
 
-				{
-					const configAttribute = blockmodel.GetAttribute("config") as string | undefined;
-					const content =
-						configAttribute !== undefined
-							? (HttpService.JSONDecode(configAttribute) as
-									| Readonly<Record<keyof ConfigDefinitions, string>>
-									| undefined)
-							: undefined;
-					const config = content === undefined ? {} : Config.deserialize(content, defs);
+				const jsonstr = (blockmodel.GetAttribute("config") as string | undefined) ?? "{}";
+				const config = JSON.deserialize<Record<string, JsonSerializablePrimitive>>(jsonstr);
 
-					return [blockmodel, new InputBlockConfig(config, defs)] as const;
-				}
-
-				//return new BlockConfig(blockmodel, defs);
+				return [blockmodel, config] as const;
 			})
 			.filter((x) => x !== undefined);
 
 		const blockmodel = selected[0].Parent;
 		const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
-		const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry].input as ConfigDefinitions;
+		const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
+			.input as BlockConfigDefinitions;
 
-		const send = async (key: string, value: ConfigValue) => {
-			Logger.info(
-				`Sending (${configs.size()}) block config values ${key} ${Config.serializeOne(value, onedef[key])}`,
-			);
+		const send = async (
+			key: string,
+			value: BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry]["config"],
+		) => {
+			Logger.info(`Sending (${configs.size()}) block config values ${key} ${JSON.serialize(value)}`);
 
 			await Remotes.Client.GetNamespace("Building")
 				.Get("UpdateConfigRequest")
 				.CallServerAsync({
 					blocks: configs.map((config) => config[0]),
-					data: { key, value: Config.serializeOne(value, onedef[key]) },
+					data: { key, value: JSON.serialize(value) },
 				});
 		};
 
 		for (const [id, def] of Objects.entries(onedef)) {
-			if (def.type === "bool") {
-				const control = new ConfigPartControl(
-					this.checkboxTemplate(),
-					(cb) => new CheckBoxControl(cb),
-					configs.map((c) => c[1]),
-					def,
-					id,
-				);
-				this.list.add(control);
+			const control = new configControls[def.type](
+				{
+					checkbox: this.checkboxTemplate,
+					key: this.keyTemplate,
+					number: this.numberTemplate,
+					slider: this.sliderTemplate,
+				},
+				configs[0][1][id] as never,
+				def as never,
+			);
+			this.list.add(control);
 
-				control.control.submitted.Connect((value) => send(id, value));
-			} else if (def.type === "key") {
-				const control = new ConfigPartControl(
-					this.keyTemplate(),
-					(kb) => new KeyChooserControl(kb),
-					configs.map((c) => c[1]),
-					def,
-					id,
-				);
-				this.list.add(control);
-
-				control.control.submitted.Connect((value) => send(id, value));
-			} else if (def.type === "number") {
-				const control = new ConfigPartControl(
-					this.sliderTemplate(),
-					(cb) => new SliderControl(cb, def.min, def.max, def.step),
-					configs.map((c) => c[1]),
-					def,
-					id,
-				);
-				this.list.add(control);
-
-				control.control.submitted.Connect((value) => send(id, value));
-			}
+			control.submitted.Connect((value) => send(id, value));
 		}
 	}
 }

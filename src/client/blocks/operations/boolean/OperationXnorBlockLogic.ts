@@ -5,14 +5,12 @@ export default class OperationXnorBlockLogic extends ConfigurableBlockLogic<type
 	constructor(block: BlockModel) {
 		super(block, blockConfigRegistry.operationxnor);
 
-		this.event.subscribeObservable(this.inputConfig.values.value1.value, () => this.update());
-		this.event.subscribeObservable(this.inputConfig.values.value2.value, () => this.update());
+		this.event.subscribeObservable(this.input.value1.value, () => this.update());
+		this.event.subscribeObservable(this.input.value2.value, () => this.update());
 		this.update();
 	}
 
 	private update() {
-		this.outputConfig.values.result.set(
-			!(this.inputConfig.values.value1.value.get() !== this.inputConfig.values.value2.value.get()),
-		);
+		this.output.result.set(!(this.input.value1.value.get() !== this.input.value2.value.get()));
 	}
 }

@@ -1,12 +1,13 @@
 import Control from "client/base/Control";
-import { InputBlockConfig } from "client/blocks/config/BlockConfigWithLogic";
+import { BlockConfigDefinition } from "shared/BlockConfigDefinitionRegistry";
+import { JsonSerializablePrimitive } from "shared/_fixes_/Json";
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigPartDefinition } from "../buildmode/tools/ConfigToolScene";
 
 export default class ConfigPartControl<
 	TControl extends Control<TDef>,
 	TDef extends GuiObject,
-	TValue extends ConfigValue | undefined,
+	TValue extends JsonSerializablePrimitive,
 > extends Control<ConfigPartDefinition<TDef>> {
 	readonly control: TControl & { value: ObservableValue<TValue> };
 	readonly key;
@@ -15,8 +16,8 @@ export default class ConfigPartControl<
 	constructor(
 		gui: ConfigPartDefinition<TDef>,
 		ctor: (gui: TDef) => TControl & { value: ObservableValue<TValue> },
-		configs: readonly InputBlockConfig<ConfigDefinitions>[],
-		definition: ConfigDefinition,
+		configs: Readonly<Record<string, unknown>>[],
+		definition: BlockConfigDefinition,
 		key: string,
 	) {
 		super(gui);
@@ -25,7 +26,7 @@ export default class ConfigPartControl<
 
 		this.gui.HeadingLabel.Text = definition.displayName;
 		this.control = ctor(this.gui.Control);
-		this.control.value.set(configs[0].values[key].value.get() as TValue);
+		this.control.value.set(configs[0][key] as TValue);
 
 		this.add(this.control);
 	}
