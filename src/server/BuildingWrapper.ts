@@ -139,8 +139,7 @@ export default class BuildingWrapper {
 		const data = BlockManager.getBlockDataByBlockModel(block);
 		for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
 			for (const [connector, connection] of Objects.entries(otherblock.connections)) {
-				// what the hel help me THIS IS WRONG FIX
-				if (!(connector in otherblock.connections)) continue;
+				if (connection.blockUuid !== data.uuid) continue;
 
 				BuildingWrapper.updateLogicConnection({
 					operation: "disconnect",
