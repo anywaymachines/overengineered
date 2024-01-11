@@ -186,6 +186,7 @@ const tnt = {
 				key: "B",
 				switch: false,
 			},
+			canBeSwitch: false,
 		},
 		radius: {
 			displayName: "Explosion radius",

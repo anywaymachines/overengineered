@@ -113,6 +113,9 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 			logics.push(logic);
 		}
 
+		const machine = new Machine(logics);
+		machine.enable();
+
 		// initialize connections
 		for (const [inputBlock, inputLogic] of logicmap) {
 			if (!("input" in inputLogic)) continue;
@@ -134,9 +137,6 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 				outputLogic.output[connection.connectionName].autoSet(inputLogic.input[connectionFrom].value);
 			}
 		}
-
-		const machine = new Machine(logics);
-		machine.enable();
 
 		return machine;
 	}

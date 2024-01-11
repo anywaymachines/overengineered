@@ -14,7 +14,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 
 	// Configuration
 	private readonly isSwitch;
-	private readonly strength;
 
 	// Math
 	private readonly multiplier;
@@ -41,17 +40,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 		});
 
 		// Configuration
-		this.strength = 0; //this.config.strength;
 		this.isSwitch = false; // this.config.switchmode;
-
-		this.event.subscribeObservable(
-			this.input.thrust.value,
-			(thrust) => {
-				this.torque = thrust;
-				this.update();
-			},
-			true,
-		);
 
 		// Instances
 		const effectEmitter = block.WaitForChild("EffectEmitter") as Part;
@@ -75,6 +64,15 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 		this.multiplier *= math.max(1, RobloxUnit.GetMaterialPhysicalProperties(material).Density / 2);
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
+
+		this.event.subscribeObservable(
+			this.input.thrust.value,
+			(thrust) => {
+				this.torque = thrust;
+				this.update();
+			},
+			true,
+		);
 	}
 
 	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.smallrocketengine.input> {
@@ -137,35 +135,21 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 
 	private update() {
 		// Force
-		this.vectorForce.Force = new Vector3(
-			((this.power * this.multiplier * this.torque * -1) / 100) * (this.strength / 100),
-			0,
-			0,
-		);
+		this.vectorForce.Force = new Vector3((this.power * this.multiplier * this.torque * -1) / 100, 0, 0);
 
 		// Particles
 		const newParticleEmitterState = this.torque !== 0;
-		const newParticleEmitterAcceleration = new Vector3(
-			(this.maxParticlesAcceleration / 100) * this.torque * (this.strength / 100),
-			0,
-			0,
-		);
+		const newParticleEmitterAcceleration = new Vector3((this.maxParticlesAcceleration / 100) * this.torque, 0, 0);
 		const particleEmmiterHasDifference =
 			this.particleEmitter.Enabled !== newParticleEmitterState ||
 			math.abs(this.particleEmitter.Acceleration.X - newParticleEmitterAcceleration.X) > 1;
 
 		this.particleEmitter.Enabled = newParticleEmitterState;
-		this.particleEmitter.Acceleration = new Vector3(
-			(this.maxParticlesAcceleration / 100) * this.torque * (this.strength / 100),
-			0,
-			0,
-		);
+		this.particleEmitter.Acceleration = new Vector3((this.maxParticlesAcceleration / 100) * this.torque, 0, 0);
 
 		// Sound
 		const newSoundState = this.torque !== 0;
-		const newVolume = SoundController.getWorldVolume(
-			(this.maxSoundVolume / 100) * this.torque * (this.strength / 100),
-		);
+		const newVolume = SoundController.getWorldVolume((this.maxSoundVolume / 100) * this.torque);
 		const volumeHasDifference =
 			newSoundState !== this.sound.Playing || math.abs(this.sound.Volume - newVolume) > 0.005;
 		this.sound.Playing = newSoundState;

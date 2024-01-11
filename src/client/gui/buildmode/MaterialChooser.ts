@@ -129,7 +129,7 @@ class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> 
 				const hsv = this.selectedColor.get().ToHSV();
 				hsv[hsvIndex] = val;
 
-				this.selectedColor.set(Color3.fromHSV(hsv[0], hsv[1], hsv[2]), true);
+				this.selectedColor.set(Color3.fromHSV(hsv[0], hsv[1], hsv[2]));
 			});
 			this.add(slider);
 

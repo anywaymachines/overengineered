@@ -109,6 +109,10 @@ class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefinitionR
 			this.value.set(0);
 		}
 	}
+
+	protected createObservable(): ObservableValue<number> {
+		return new NumberObservableValue(this.definition.default, 0, 100, 0.01);
+	}
 }
 
 class MotorRotationSpeedConfigLogicValue extends ConfigLogicValueBase<

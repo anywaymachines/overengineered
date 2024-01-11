@@ -108,7 +108,7 @@ class ThrustConfigValueControl extends ConfigValueControl<KeyChooserControlDefin
 		super(templates.key(), definition.displayName);
 
 		const control = this.added(new KeyChooserControl(this.gui.Control));
-		//control.value.set(config.value);
+		// control.value.set(definition.config);
 
 		this.event.subscribe(control.submitted, (value) => this.submitted.Fire({ key: value, switch: false }));
 	}

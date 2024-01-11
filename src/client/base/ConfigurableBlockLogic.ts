@@ -40,10 +40,12 @@ export default abstract class ConfigurableBlockLogic<TDef extends BlockConfigBot
 		this.config = BlockConfig.deserialize(block, configDefinition.input);
 
 		const createInput = (key: string, definition: BlockConfigDefinition) => {
-			return new blockConfigRegistryClient[definition.type].input(
-				this.config[key] as never,
-				definition as never,
-				false,
+			return this.added(
+				new blockConfigRegistryClient[definition.type].input(
+					this.config[key] as never,
+					definition as never,
+					false,
+				),
 			);
 		};
 
