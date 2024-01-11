@@ -2,6 +2,7 @@ import Signal from "@rbxts/signal";
 import Control from "client/base/Control";
 import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import ConfigTool from "client/tools/ConfigTool";
+import BlockConfig from "shared/BlockConfig";
 import BlockConfigDefinitionRegistry, {
 	BlockConfigDefinitions,
 	BlockConfigRegToDefinition,
@@ -19,77 +20,75 @@ import SliderControl, { SliderControlDefinition } from "../../controls/SliderCon
 
 //
 
-abstract class ConfigValueControl<
-	TGui extends GuiObject,
-	T extends keyof BlockConfigDefinitionRegistry,
-> extends Control<ConfigPartDefinition<TGui>> {
-	constructor(gui: ConfigPartDefinition<TGui>) {
+abstract class ConfigValueControl<TGui extends GuiObject> extends Control<ConfigPartDefinition<TGui>> {
+	constructor(gui: ConfigPartDefinition<TGui>, name: string) {
 		super(gui);
+		this.gui.HeadingLabel.Text = name;
 	}
 }
 
-class BoolConfigValueControl extends ConfigValueControl<CheckBoxControlDefinition, "bool"> {
+class BoolConfigValueControl extends ConfigValueControl<CheckBoxControlDefinition> {
 	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["bool"]["config"]) => void>();
 
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["bool"]["config"],
-		definition: BlockConfigDefinitionRegistry["bool"],
+		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["bool"]>,
 	) {
-		super(templates.checkbox());
+		super(templates.checkbox(), definition.displayName);
 
 		const control = this.added(new CheckBoxControl(this.gui.Control));
-		control.value.set(config.value);
+		control.value.set(config);
 
-		this.event.subscribe(control.submitted, (value) => this.submitted.Fire({ value }));
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
 	}
 }
 
-class SliderConfigValueControl extends ConfigValueControl<SliderControlDefinition, "clampedNumber"> {
+class SliderConfigValueControl extends ConfigValueControl<SliderControlDefinition> {
 	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["clampedNumber"]["config"]) => void>();
 
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["clampedNumber"]["config"],
-		definition: BlockConfigDefinitionRegistry["clampedNumber"],
+		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["clampedNumber"]>,
 	) {
-		super(templates.slider());
+		super(templates.slider(), definition.displayName);
 
 		const control = this.added(
 			new SliderControl(this.gui.Control, definition.min, definition.max, definition.step),
 		);
-		control.value.set(config.value);
+		control.value.set(config);
 
-		this.event.subscribe(control.submitted, (value) => this.submitted.Fire({ value }));
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
 	}
 }
 
-class NumberConfigValueControl extends ConfigValueControl<NumberTextBoxControlDefinition, "number"> {
+class NumberConfigValueControl extends ConfigValueControl<NumberTextBoxControlDefinition> {
 	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["number"]["config"]) => void>();
 
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["number"]["config"],
-		definition: BlockConfigDefinitionRegistry["number"],
+		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["number"]>,
 	) {
-		super(templates.number());
+		super(templates.number(), definition.displayName);
 
 		const control = this.added(new NumberTextBoxControl(this.gui.Control));
-		control.value.set(config.value);
+		control.value.set(config);
 
-		this.event.subscribe(control.submitted, (value) => this.submitted.Fire({ value }));
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
 	}
 }
 
-class KeyBoolConfigValueControl extends ConfigValueControl<KeyChooserControlDefinition, "keybool"> {
+class KeyBoolConfigValueControl extends ConfigValueControl<KeyChooserControlDefinition> {
 	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["keybool"]["config"]) => void>();
 
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["keybool"]["config"],
-		definition: BlockConfigDefinitionRegistry["keybool"],
+		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["keybool"]>,
 	) {
-		super(templates.key());
+		super(templates.key(), definition.displayName);
 
 		const control = this.added(new KeyChooserControl(this.gui.Control));
 		control.value.set(config.key);
@@ -98,15 +97,15 @@ class KeyBoolConfigValueControl extends ConfigValueControl<KeyChooserControlDefi
 	}
 }
 
-class ThrustConfigValueControl extends ConfigValueControl<KeyChooserControlDefinition, "thrust"> {
+class ThrustConfigValueControl extends ConfigValueControl<KeyChooserControlDefinition> {
 	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["thrust"]["config"]) => void>();
 
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["thrust"]["config"],
-		definition: BlockConfigDefinitionRegistry["thrust"],
+		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["thrust"]>,
 	) {
-		super(templates.key());
+		super(templates.key(), definition.displayName);
 
 		const control = this.added(new KeyChooserControl(this.gui.Control));
 		//control.value.set(config.value);
@@ -115,18 +114,15 @@ class ThrustConfigValueControl extends ConfigValueControl<KeyChooserControlDefin
 	}
 }
 
-class MotorRotationSpeedConfigValueControl extends ConfigValueControl<
-	KeyChooserControlDefinition,
-	"motorRotationSpeed"
-> {
+class MotorRotationSpeedConfigValueControl extends ConfigValueControl<KeyChooserControlDefinition> {
 	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["motorRotationSpeed"]["config"]) => void>();
 
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["motorRotationSpeed"]["config"],
-		definition: BlockConfigDefinitionRegistry["motorRotationSpeed"],
+		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["motorRotationSpeed"]>,
 	) {
-		super(templates.key());
+		super(templates.key(), definition.displayName);
 
 		const control = this.added(new KeyChooserControl(this.gui.Control));
 		//control.value.set(config.value);
@@ -148,7 +144,7 @@ const configControls = {
 			templates: Templates,
 			config: BlockConfigDefinitionRegistry[k]["config"],
 			definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry[k]>,
-		): ConfigValueControl<GuiObject, k> & {
+		): ConfigValueControl<GuiObject> & {
 			submitted: Signal<(value: BlockConfigDefinitionRegistry[k]["config"]) => void>;
 		};
 	};
@@ -239,7 +235,10 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				if (!defs) return undefined!;
 
 				const jsonstr = (blockmodel.GetAttribute("config") as string | undefined) ?? "{}";
-				const config = JSON.deserialize<Record<string, JsonSerializablePrimitive>>(jsonstr);
+				const config = BlockConfig.addDefaults(
+					JSON.deserialize<Record<string, JsonSerializablePrimitive>>(jsonstr),
+					defs,
+				);
 
 				return [blockmodel, config] as const;
 			})

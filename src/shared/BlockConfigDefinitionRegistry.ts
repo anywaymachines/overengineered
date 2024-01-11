@@ -1,9 +1,7 @@
 type bool = {
 	type: "bool";
 	default: boolean;
-	config: {
-		value: boolean;
-	};
+	config: boolean;
 };
 type keybool = {
 	type: "keybool";
@@ -18,16 +16,12 @@ type keybool = {
 type _number = {
 	type: "number";
 	default: number;
-	config: {
-		value: number;
-	};
+	config: number;
 };
 type clampedNumber = {
 	type: "clampedNumber";
 	default: number;
-	config: {
-		value: number;
-	};
+	config: number;
 	min: number;
 	max: number;
 	step: number;
@@ -77,5 +71,5 @@ export type BlockConfigBothDefinitions = {
 export type BlockConfigDefinitions = Readonly<Record<string, BlockConfigDefinition>>;
 
 export type BlockConfigDefinitionsToConfig<TDef extends BlockConfigDefinitions> = {
-	readonly [k in keyof TDef]: TDef[k]["default"];
+	readonly [k in keyof TDef]: TDef[k]["config"];
 };

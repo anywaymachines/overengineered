@@ -15,7 +15,7 @@ export default class RopeLogic extends ConfigurableBlockLogic<typeof blockConfig
 	protected prepare() {
 		super.prepare();
 
-		this.ropeConstraint.Length = this.config.length;
+		this.ropeConstraint.Length = this.input.length.value.get();
 	}
 
 	static getConfigDefinition() {

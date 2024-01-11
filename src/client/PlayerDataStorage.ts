@@ -1,9 +1,9 @@
 import { HttpService, Players, Workspace } from "@rbxts/services";
+import BlockConfig from "shared/BlockConfig";
 import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
-import JSON from "shared/_fixes_/Json";
 import ObservableValue from "shared/event/ObservableValue";
 
 type NonNullableFields<T> = {
@@ -30,7 +30,7 @@ export default class PlayerDataStorage {
 		const data = await Remotes.Client.GetNamespace("Player").Get("FetchData").CallServerAsync();
 		this.data.set({
 			purchasedSlots: data.purchasedSlots ?? 0,
-			settings: JSON.addDefaults(data.settings ?? {}, GameDefinitions.PLAYER_SETTINGS_DEFINITION),
+			settings: BlockConfig.addDefaults(data.settings ?? {}, GameDefinitions.PLAYER_SETTINGS_DEFINITION),
 			slots: SlotsMeta.getAll(
 				data.slots ?? [],
 				GameDefinitions.getMaxSlots(Players.LocalPlayer, data.purchasedSlots ?? 0),

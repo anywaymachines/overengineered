@@ -51,12 +51,6 @@ export type JsonSerializable<T> = T extends JsonSerializablePrimitive
 						: never
 					: never;
 
-type Definition<T> = { readonly default: T };
-type Definitions = Readonly<Record<string, Definition<unknown>>>;
-type DefinitionToConfig<T extends Definitions> = {
-	readonly [k in keyof T]: T[k]["default"];
-};
-
 //
 
 type SerializedCFrame = {
@@ -235,21 +229,6 @@ const JSON = {
 		};
 
 		return process(HttpService.JSONDecode(data) as JsonSerializedProperty) as JsonSerializable<T>;
-	},
-
-	addDefaults: <TDef extends Definitions>(
-		config: Partial<DefinitionToConfig<TDef>>,
-		definition: TDef,
-	): DefinitionToConfig<TDef> => {
-		for (const [key, def] of Objects.entries(definition)) {
-			config[key] ??= def.default;
-		}
-
-		return config as DefinitionToConfig<TDef>;
-	},
-	deserializeWithDefaults: <TDef extends Definitions>(data: string, definition: TDef): DefinitionToConfig<TDef> => {
-		const config = JSON.deserialize<DefinitionToConfig<TDef>>(data) as Writable<DefinitionToConfig<TDef>>;
-		return JSON.addDefaults(config, definition);
 	},
 };
 

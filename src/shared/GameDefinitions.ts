@@ -17,31 +17,31 @@ export default class GameDefinitions {
 			displayName: "Professional Mode",
 			type: "bool",
 			default: false as boolean,
-			config: { value: false as boolean },
+			config: false as boolean,
 		},
 		betterCamera: {
 			displayName: "Better camera",
 			type: "bool",
 			default: true as boolean,
-			config: { value: true as boolean },
+			config: true as boolean,
 		},
 		music: {
 			displayName: "Music",
 			type: "bool",
 			default: true as boolean,
-			config: { value: true as boolean },
+			config: true as boolean,
 		},
 		beacons: {
 			displayName: "Beacons",
 			type: "bool",
 			default: true as boolean,
-			config: { value: true as boolean },
+			config: true as boolean,
 		},
 		impact_destruction: {
 			displayName: "Impact destruction",
 			type: "bool",
 			default: true as boolean,
-			config: { value: true as boolean },
+			config: true as boolean,
 		},
 	} as const satisfies BlockConfigDefinitions;
 

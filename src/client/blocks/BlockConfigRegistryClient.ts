@@ -36,7 +36,7 @@ class NumberConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefinitionR
 		super(config, definition, connected);
 
 		if (!this.connected) {
-			this.value.set(config.value);
+			this.value.set(config);
 		}
 	}
 }
@@ -50,7 +50,7 @@ class ClampedNumberConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefi
 		super(config, definition, connected);
 
 		if (!this.connected) {
-			this.value.set(config.value);
+			this.value.set(config);
 		}
 	}
 
@@ -73,7 +73,7 @@ class BoolConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefinitionReg
 		super(config, definition, connected);
 
 		if (!this.connected) {
-			this.value.set(config.value);
+			this.value.set(config);
 		}
 	}
 }

@@ -3,6 +3,8 @@ import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Remotes from "shared/Remotes";
 
 export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.tnt> {
+	private exploded = false;
+
 	constructor(block: BlockModel) {
 		super(block, TNTBlockLogic.getConfigDefinition());
 
@@ -40,10 +42,18 @@ export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockCo
 	}
 
 	private explode() {
+		if (this.exploded) return;
+		this.exploded = true;
+
 		Remotes.Client.GetNamespace("Blocks")
 			.GetNamespace("TNTBlock")
 			.Get("Explode")
-			.SendToServer(this.block, this.config.radius, this.config.pressure, this.config.flammable);
+			.SendToServer(
+				this.block,
+				this.input.radius.value.get(),
+				this.input.pressure.value.get(),
+				this.input.flammable.value.get(),
+			);
 
 		this.disable();
 	}

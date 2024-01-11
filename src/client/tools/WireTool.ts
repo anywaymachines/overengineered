@@ -26,19 +26,23 @@ type Marker = MarkerData & { readonly instance: BillboardGui & { Adornee: BlockM
 
 /** A tool for wiring */
 export default class WireTool extends ToolBase {
-	private static readonly primitiveColors = {
-		number: Color3.fromRGB(81, 202, 21),
-		bool: Color3.fromRGB(255, 170, 0),
+	private static readonly typeGroups = {
+		number: {
+			color: Color3.fromRGB(81, 202, 21),
+		},
+		bool: {
+			color: Color3.fromRGB(255, 170, 0),
+		},
 	} as const;
-	private static readonly colors: Readonly<Record<keyof BlockConfigDefinitionRegistry, Color3>> = {
-		bool: this.primitiveColors.bool,
-		keybool: this.primitiveColors.bool,
 
-		number: this.primitiveColors.number,
-		clampedNumber: this.primitiveColors.number,
-		motorRotationSpeed: this.primitiveColors.number,
-		thrust: this.primitiveColors.number,
-	};
+	private static readonly groups = {
+		bool: "bool",
+		keybool: "bool",
+		number: "number",
+		clampedNumber: "number",
+		motorRotationSpeed: "number",
+		thrust: "number",
+	} as const satisfies Record<keyof BlockConfigDefinitionRegistry, keyof typeof this.typeGroups>;
 
 	private renderedWires: BasePart[] = [];
 	private renderedMarkers: Marker[] = [];
@@ -161,10 +165,7 @@ export default class WireTool extends ToolBase {
 				this.eventHandler.subscribe(button.MouseButton1Click, async () => {
 					if (!this.startMarker.get()) return;
 
-					if (
-						marker.dataType === this.startMarker.get()!.dataType &&
-						marker.blockData !== this.startMarker.get()!.blockData
-					) {
+					if (this.canConnect(marker, this.startMarker.get()!)) {
 						this.hoverMarker = marker;
 						this.finishDragging();
 					}
@@ -182,6 +183,15 @@ export default class WireTool extends ToolBase {
 				});
 			}
 		});
+	}
+
+	private canConnect(marker1: Marker, marker2: Marker) {
+		return (
+			marker1 &&
+			marker1.markerType === "input" &&
+			WireTool.groups[marker1.dataType] === WireTool.groups[marker2.dataType] &&
+			marker1.blockData !== marker2.blockData
+		);
 	}
 
 	protected prepareDesktop(): void {
@@ -219,12 +229,7 @@ export default class WireTool extends ToolBase {
 			this.eventHandler.subscribe(button.MouseEnter, () => {
 				if (!this.startMarker.get()) return;
 
-				if (
-					marker &&
-					marker.markerType === "input" &&
-					marker.dataType === this.startMarker.get()!.dataType &&
-					marker.blockData !== this.startMarker.get()!.blockData
-				) {
+				if (this.canConnect(marker, this.startMarker.get()!)) {
 					this.hoverMarker = marker;
 				}
 			});
@@ -465,7 +470,7 @@ export default class WireTool extends ToolBase {
 								? "connected_input"
 								: markerType,
 						dataType: config.type,
-						color: WireTool.colors[config.type],
+						color: WireTool.typeGroups[WireTool.groups[config.type]].color,
 						name: config.displayName,
 					};
 

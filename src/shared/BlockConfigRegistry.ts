@@ -122,10 +122,8 @@ const rope = {
 			min: 2,
 			max: 50,
 			step: 1,
-			default: 15,
-			config: {
-				value: 15 as number,
-			},
+			default: 15 as number,
+			config: 15 as number,
 		},
 	},
 	output: {},
@@ -158,9 +156,7 @@ const servomotorblock = {
 			max: 50,
 			step: 1,
 			default: 15 as number,
-			config: {
-				value: 15 as number,
-			},
+			config: 15 as number,
 		},
 		angle: {
 			displayName: "Target angle",
@@ -169,9 +165,7 @@ const servomotorblock = {
 			max: 180,
 			step: 1,
 			default: 0 as number,
-			config: {
-				value: 0 as number,
-			},
+			config: 0 as number,
 		},
 		/*switch: {
 			displayName: "Switch",
@@ -196,40 +190,32 @@ const tnt = {
 		radius: {
 			displayName: "Explosion radius",
 			type: "clampedNumber",
-			default: 12,
+			default: 12 as number,
 			min: 1,
 			max: 12,
 			step: 1,
-			config: {
-				value: 2500 as number,
-			},
+			config: 2500 as number,
 		},
 		pressure: {
 			displayName: "Explosion pressure",
 			type: "clampedNumber",
-			default: 2500,
+			default: 2500 as number,
 			min: 0,
 			max: 2500,
 			step: 1,
-			config: {
-				value: 2500 as number,
-			},
+			config: 2500 as number,
 		},
 		flammable: {
 			displayName: "Flammable",
 			type: "bool",
-			default: true,
-			config: {
-				value: true as boolean,
-			},
+			default: true as boolean,
+			config: true as boolean,
 		},
 		impact: {
 			displayName: "Impact",
 			type: "bool",
-			default: true,
-			config: {
-				value: true as boolean,
-			},
+			default: true as boolean,
+			config: true as boolean,
 		},
 	},
 	output: {},
@@ -241,9 +227,7 @@ const lamp = {
 			displayName: "Enabled",
 			type: "bool",
 			default: false as boolean,
-			config: {
-				value: false,
-			},
+			config: false as boolean,
 		},
 	},
 	output: {},
@@ -254,35 +238,29 @@ const suspensionblock = {
 		damping: {
 			displayName: "Damping",
 			type: "clampedNumber",
-			default: 30,
+			default: 30 as number,
 			min: 0,
 			max: 100,
 			step: 0.01,
-			config: {
-				value: 30 as number,
-			},
+			config: 30 as number,
 		},
 		stiffness: {
 			displayName: "Stiffness",
 			type: "clampedNumber",
-			default: 20,
+			default: 20 as number,
 			min: 0,
 			max: 1000,
 			step: 0.01,
-			config: {
-				value: 20 as number,
-			},
+			config: 20 as number,
 		},
 		free_length: {
 			displayName: "Free Length",
 			type: "clampedNumber",
-			default: 4.5,
+			default: 4.5 as number,
 			min: 0,
 			max: 10,
 			step: 0.01,
-			config: {
-				value: 4.5 as number,
-			},
+			config: 4 as number,
 		},
 	},
 	output: {},
@@ -295,9 +273,7 @@ const vehicleseat = {
 			displayName: "Occupied",
 			type: "bool",
 			default: false as boolean,
-			config: {
-				value: false as boolean,
-			},
+			config: false as boolean,
 		},
 	},
 } as const satisfies BlockConfigBothDefinitions;
@@ -308,9 +284,7 @@ const booleanProcessing = {
 			displayName: "Value",
 			type: "bool",
 			default: false as boolean,
-			config: {
-				value: false as boolean,
-			},
+			config: false as boolean,
 		},
 	},
 	output: {
@@ -318,9 +292,7 @@ const booleanProcessing = {
 			displayName: "Result",
 			type: "bool",
 			default: false as boolean,
-			config: {
-				value: false as boolean,
-			},
+			config: false as boolean,
 		},
 	},
 } as const satisfies BlockConfigBothDefinitions;
@@ -331,9 +303,7 @@ const numberProcessing = {
 			displayName: "Value",
 			type: "number",
 			default: 0 as number,
-			config: {
-				value: 0 as number,
-			},
+			config: 0 as number,
 		},
 	},
 	output: {
@@ -341,9 +311,7 @@ const numberProcessing = {
 			displayName: "Result",
 			type: "number",
 			default: 0 as number,
-			config: {
-				value: 0 as number,
-			},
+			config: 0 as number,
 		},
 	},
 } as const satisfies BlockConfigBothDefinitions;
@@ -354,18 +322,14 @@ const twoNumberInputsOneNumberOutput = {
 			displayName: "Value 1",
 			type: "number",
 			default: 0 as number,
-			config: {
-				value: 0 as number,
-			},
+			config: 0 as number,
 		},
 
 		value2: {
 			displayName: "Value 2",
 			type: "number",
 			default: 0 as number,
-			config: {
-				value: 0 as number,
-			},
+			config: 0 as number,
 		},
 	},
 	output: {
@@ -373,9 +337,7 @@ const twoNumberInputsOneNumberOutput = {
 			displayName: "Result",
 			type: "number",
 			default: 0 as number,
-			config: {
-				value: 0 as number,
-			},
+			config: 0 as number,
 		},
 	},
 } as const satisfies BlockConfigBothDefinitions;
@@ -386,18 +348,14 @@ const twoBooleanInputsOneBooleanOutput = {
 			displayName: "Value 1",
 			type: "bool",
 			default: false as boolean,
-			config: {
-				value: false as boolean,
-			},
+			config: false as boolean,
 		},
 
 		value2: {
 			displayName: "Value 2",
 			type: "bool",
 			default: false as boolean,
-			config: {
-				value: false as boolean,
-			},
+			config: false as boolean,
 		},
 	},
 	output: {
@@ -405,9 +363,7 @@ const twoBooleanInputsOneBooleanOutput = {
 			displayName: "Result",
 			type: "bool",
 			default: false as boolean,
-			config: {
-				value: false as boolean,
-			},
+			config: false as boolean,
 		},
 	},
 } as const satisfies BlockConfigBothDefinitions;
@@ -418,27 +374,21 @@ const multiplexer = {
 			displayName: "Value",
 			type: "bool",
 			default: false as boolean,
-			config: {
-				value: false as boolean,
-			},
+			config: false as boolean,
 		},
 
 		truenumber: {
 			displayName: "True number",
 			type: "number",
 			default: 0 as number,
-			config: {
-				value: 0 as number,
-			},
+			config: 0 as number,
 		},
 
 		falsenumber: {
 			displayName: "False number",
 			type: "number",
 			default: 0 as number,
-			config: {
-				value: 0 as number,
-			},
+			config: 0 as number,
 		},
 	},
 	output: {
@@ -446,9 +396,7 @@ const multiplexer = {
 			displayName: "Result",
 			type: "number",
 			default: 0 as number,
-			config: {
-				value: 0 as number,
-			},
+			config: 0 as number,
 		},
 	},
 } as const satisfies BlockConfigBothDefinitions;

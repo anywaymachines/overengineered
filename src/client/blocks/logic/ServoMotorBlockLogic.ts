@@ -13,8 +13,8 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<typeof 
 		super(block, ServoMotorBlockLogic.getConfigDefinition());
 
 		// Configuration
-		this.speed = this.config.speed;
-		this.angle = this.config.angle * -1;
+		this.speed = this.input.speed.value.get();
+		this.angle = this.input.angle.value.get() * -1;
 		this.isSwitch = false; //this.config.switch;
 		this.event.subscribeObservable(
 			this.input.angle.value,
