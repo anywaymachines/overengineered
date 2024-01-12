@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
+import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import SoundController from "client/controller/SoundController";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { UnreliableRemotes } from "shared/Remotes";
@@ -26,9 +26,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 	private readonly particleEmitter;
 	private readonly sound;
 
-	// Configuration
-	private readonly isSwitch;
-
 	// Math
 	private readonly multiplier;
 	private readonly power = 30_000;
@@ -37,24 +34,14 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 	private readonly maxSoundVolume = 0.5;
 	private readonly maxParticlesAcceleration = 120;
 
-	// hz
-	private torque = 0;
-	private movingUp = false;
-	private movingDown = false;
-
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.smallrocketengine);
 
 		this.onDescendantDestroyed(() => {
-			this.torque = 0;
-			this.movingUp = false;
-			this.movingDown = false;
+			this.input.thrust.value.set(0);
 			this.update();
 			this.disable();
 		});
-
-		// Configuration
-		this.isSwitch = false; // this.config.switchmode;
 
 		// Instances
 		const effectEmitter = this.instance.EffectEmitter;
@@ -77,86 +64,29 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 
 		this.event.subscribeObservable(this.input.thrust.value, (thrust) => {
-			this.torque = thrust;
 			this.update();
 		});
 	}
 
-	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.smallrocketengine.input> {
-		return {
-			thrust_add: {
-				conflicts: "thrust_sub",
-				keyDown: () => {
-					if (this.movingUp) return;
-
-					if (this.isSwitch) {
-						this.torque = 100;
-						this.update();
-					} else {
-						this.movingUp = true;
-						this.start(true);
-					}
-				},
-				keyUp: () => {
-					this.movingUp = false;
-				},
-			},
-			thrust_sub: {
-				conflicts: "thrust_add",
-				keyDown: () => {
-					if (this.movingDown) return;
-
-					if (this.isSwitch) {
-						this.torque = 0;
-						this.update();
-					} else {
-						this.movingDown = true;
-						this.start(false);
-					}
-				},
-				keyUp: () => {
-					this.movingDown = false;
-				},
-			},
-		};
-	}
-
-	private start(up: boolean) {
-		spawn(() => {
-			while (up ? this.movingUp : this.movingDown) {
-				/*if (this.movingUp && this.movingDown) {
-					wait(0.05);
-					continue;
-				}*/
-
-				const p = up ? 1 : -1;
-				if (this.torque + p >= 0 && this.torque + p <= 100) {
-					this.torque += p;
-					this.update();
-				}
-
-				wait(0.05);
-			}
-		});
-	}
-
 	private update() {
+		const torque = this.input.thrust.value.get();
+
 		// Force
-		this.vectorForce.Force = new Vector3((this.power * this.multiplier * this.torque * -1) / 100, 0, 0);
+		this.vectorForce.Force = new Vector3((this.power * this.multiplier * torque * -1) / 100, 0, 0);
 
 		// Particles
-		const newParticleEmitterState = this.torque !== 0;
-		const newParticleEmitterAcceleration = new Vector3((this.maxParticlesAcceleration / 100) * this.torque, 0, 0);
+		const newParticleEmitterState = torque !== 0;
+		const newParticleEmitterAcceleration = new Vector3((this.maxParticlesAcceleration / 100) * torque, 0, 0);
 		const particleEmmiterHasDifference =
 			this.particleEmitter.Enabled !== newParticleEmitterState ||
 			math.abs(this.particleEmitter.Acceleration.X - newParticleEmitterAcceleration.X) > 1;
 
 		this.particleEmitter.Enabled = newParticleEmitterState;
-		this.particleEmitter.Acceleration = new Vector3((this.maxParticlesAcceleration / 100) * this.torque, 0, 0);
+		this.particleEmitter.Acceleration = new Vector3((this.maxParticlesAcceleration / 100) * torque, 0, 0);
 
 		// Sound
-		const newSoundState = this.torque !== 0;
-		const newVolume = SoundController.getWorldVolume((this.maxSoundVolume / 100) * this.torque);
+		const newSoundState = torque !== 0;
+		const newVolume = SoundController.getWorldVolume((this.maxSoundVolume / 100) * torque);
 		const volumeHasDifference =
 			newSoundState !== this.sound.Playing || math.abs(this.sound.Volume - newVolume) > 0.005;
 		this.sound.Playing = newSoundState;
@@ -175,6 +105,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 	}
 
 	public getTorque() {
-		return this.torque;
+		return this.input.thrust.value.get();
 	}
 }

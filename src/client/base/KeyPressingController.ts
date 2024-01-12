@@ -1,10 +1,12 @@
 import Signal from "@rbxts/signal";
+import Objects from "shared/_fixes_/objects";
+import ComponentBase from "./ComponentBase";
 
 /*
 	When a key is pressed, invoke keyDown()
 	When a key is released, invoke keyUp()
 */
-export default class KeyPressingController<TKeys extends string> {
+export default class KeyPressingController<TKeys extends KeyCode> {
 	public readonly onKeyDown = new Signal<(key: TKeys) => void>();
 	public readonly onKeyUp = new Signal<(key: TKeys) => void>();
 	private readonly pressed: TKeys[] = [];
@@ -39,18 +41,18 @@ export default class KeyPressingController<TKeys extends string> {
 	When a key is pressed,
 		if `def.conflicts` is not null,
 		and `def.conflicts` key is pressed,
-            invoke keyUp() on the conflicted key
-        else
-            super()
+			invoke keyUp() on the conflicted key
+		else
+			super()
 	
 	When a key is released,
 		if `def.conflicts` is not null,
 		and `def.conflicts` key is pressed,
-            invoke keyDown() on the conflicted key
-        else
-            super()
+			invoke keyDown() on the conflicted key
+		else
+			super()
 */
-export class KeyPressingConflictingController<TKeys extends string> extends KeyPressingController<TKeys> {
+export class KeyPressingConflictingController<TKeys extends KeyCode> extends KeyPressingController<TKeys> {
 	private readonly definitions;
 	private readonly holding: TKeys[] = [];
 
@@ -90,5 +92,43 @@ export class KeyPressingConflictingController<TKeys extends string> extends KeyP
 	releaseAll() {
 		this.holding.clear();
 		super.releaseAll();
+	}
+}
+
+type KeyDefinition<TKeys extends string> = {
+	key: KeyCode;
+	keyDown?: () => void;
+	keyUp?: () => void;
+	conflicts?: TKeys;
+};
+type KeyDefinitions<TKeys extends string> = { readonly [k in TKeys]: KeyDefinition<TKeys> };
+
+export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> extends ComponentBase {
+	private readonly controller;
+	private readonly btnmap;
+
+	constructor(definitions: T) {
+		super();
+
+		this.controller = new KeyPressingConflictingController(definitions);
+		this.btnmap = new Map(Objects.entries(definitions).map((e) => [e[1].key, e[0]] as const));
+
+		this.onDisabled.Connect(() => this.controller.releaseAll());
+
+		this.event.subscribe(this.controller.onKeyDown, (key) => {
+			definitions[this.btnmap.get(key)!]?.keyDown?.();
+		});
+		this.event.subscribe(this.controller.onKeyUp, (key) => {
+			definitions[this.btnmap.get(key)!]?.keyUp?.();
+		});
+
+		this.event.onInputBegin((input) => {
+			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
+			this.controller.keyDown(input.KeyCode.Name);
+		});
+		this.event.onInputEnd((input) => {
+			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
+			this.controller.keyUp(input.KeyCode.Name);
+		});
 	}
 }

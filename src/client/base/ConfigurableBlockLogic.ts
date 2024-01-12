@@ -13,7 +13,7 @@ import ObservableValue from "shared/event/ObservableValue";
 import BlockLogic from "./BlockLogic";
 import { KeyPressingConflictingController } from "./KeyPressingController";
 
-type KeyMembers<TDef extends BlockConfigDefinitions> = ExtractKeys<TDef, { type: "key" | "keybool" }> & string;
+type KeyMembers<TDef extends BlockConfigDefinitions> = ExtractKeys<TDef, { type: "key" | "keybool" }> & KeyCode;
 export type KeyDefinition<TDef extends BlockConfigDefinitions> = {
 	keyDown?: () => void;
 	keyUp?: () => void;
@@ -43,15 +43,22 @@ export default abstract class ConfigurableBlockLogic<
 
 		this.config = BlockConfig.deserialize(this.block, configDefinition.input);
 
+		const controlsEnabled = new ObservableValue(false);
 		const createInput = (key: string, definition: BlockConfigDefinition) => {
 			return this.added(
 				new blockConfigRegistryClient[definition.type].input(
 					this.config[key] as never,
 					definition as never,
 					block.connections[key as keyof typeof block.connections] !== undefined,
+					controlsEnabled,
 				),
 			);
 		};
+		this.event.onPrepare(() => {
+			this.eventHandler.subscribe(this.machine!.seat.occupiedByLocalPlayer.changed, (occupied) =>
+				controlsEnabled.set(occupied),
+			);
+		});
 
 		this.input = Objects.fromEntries(
 			Objects.entries(configDefinition.input).map((d) => [d[0], createInput(d[0], d[1])] as const),
@@ -64,7 +71,7 @@ export default abstract class ConfigurableBlockLogic<
 		) as typeof this.output;
 
 		this.keysDefinition = this.getKeysDefinition();
-		this.keyController = new KeyPressingConflictingController<KeyMembers<TDef["input"]>>(this.keysDefinition);
+		this.keyController = new KeyPressingConflictingController(this.keysDefinition);
 
 		this.btnmap = new Map<KeyCode, KeyMembers<TDef["input"]>>();
 

@@ -1,4 +1,4 @@
-import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
+import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Remotes from "shared/Remotes";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -6,22 +6,19 @@ import { PlacedBlockData } from "shared/building/BlockManager";
 export default class DisconnectBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.disconnectblock> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.disconnectblock);
+
+		this.event.subscribeObservable(this.input.disconnect.value, (disconnect) => {
+			if (!disconnect) return;
+			this.disconnect();
+		});
 	}
 
-	static getConfigDefinition() {
-		return blockConfigRegistry.disconnectblock;
-	}
+	private disconnect() {
+		Remotes.Client.GetNamespace("Blocks")
+			.GetNamespace("DisconnectBlock")
+			.Get("Disconnect")
+			.SendToServer(this.instance);
 
-	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.disconnectblock.input> {
-		return {
-			disconnect: {
-				keyDown: () => {
-					Remotes.Client.GetNamespace("Blocks")
-						.GetNamespace("DisconnectBlock")
-						.Get("Disconnect")
-						.SendToServer(this.instance);
-				},
-			},
-		};
+		this.disable();
 	}
 }

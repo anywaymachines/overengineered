@@ -71,7 +71,12 @@ const smallrocketengine = {
 			displayName: "Thrust",
 			type: "thrust",
 			default: 0 as number,
-			config: {},
+			config: {
+				keyUp: "W",
+				keyDown: "S",
+				isSwitch: false as boolean,
+			},
+			canBeSwitch: true as boolean,
 		},
 		/*thrust_add: {
 			conflicts: "thrust_sub",

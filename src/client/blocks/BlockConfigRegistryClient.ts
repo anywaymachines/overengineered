@@ -1,11 +1,12 @@
-import ComponentBase from "client/base/ComponentBase";
+import ComponentContainer from "client/base/ComponentContainer";
+import { KeyPressingDefinitionsController } from "client/base/KeyPressingController";
 import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
 import NumberObservableValue from "shared/event/NumberObservableValue";
-import ObservableValue from "shared/event/ObservableValue";
+import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 export abstract class ConfigLogicValueBase<
 	T extends BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry],
-> extends ComponentBase {
+> extends ComponentContainer {
 	readonly value: ObservableValue<T["default"]>;
 	protected readonly definition: T;
 	protected readonly config: T["config"];
@@ -13,7 +14,12 @@ export abstract class ConfigLogicValueBase<
 	/** True if this value is being controlled by another logic node */
 	protected readonly connected: boolean;
 
-	constructor(config: T["config"], definition: T, connected: boolean) {
+	constructor(
+		config: T["config"],
+		definition: T,
+		connected: boolean,
+		controlsEnabled?: ReadonlyObservableValue<boolean>,
+	) {
 		super();
 
 		this.config = config;
@@ -104,11 +110,75 @@ class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefinitionR
 		config: BlockConfigDefinitionRegistry["thrust"]["config"],
 		definition: BlockConfigDefinitionRegistry["thrust"],
 		connected: boolean,
+		controlsEnabled: ReadonlyObservableValue<boolean>,
 	) {
 		super(config, definition, connected);
 
 		if (!this.connected) {
 			this.value.set(0);
+			let torque = 0;
+			let movingUp = false;
+			let movingDown = false;
+
+			const update = () => this.value.set(torque);
+			const start = (up: boolean) => {
+				spawn(() => {
+					while (up ? movingUp : movingDown) {
+						const p = up ? 1 : -1;
+						if (torque + p >= 0 && torque + p <= 100) {
+							torque += p;
+							update();
+						}
+
+						wait(0.05);
+					}
+				});
+			};
+
+			const controller = new KeyPressingDefinitionsController({
+				thrustAdd: {
+					key: config.keyUp,
+					conflicts: "down",
+					keyDown: () => {
+						if (movingUp) return;
+
+						if (definition.canBeSwitch && config.isSwitch) {
+							torque = 100;
+							update();
+						} else {
+							movingUp = true;
+							start(true);
+						}
+					},
+					keyUp: () => {
+						movingUp = false;
+					},
+				},
+				thrustSub: {
+					key: config.keyDown,
+					conflicts: "up",
+					keyDown: () => {
+						if (movingDown) return;
+
+						if (definition.canBeSwitch && config.isSwitch) {
+							torque = 0;
+							update();
+						} else {
+							movingDown = true;
+							start(false);
+						}
+					},
+					keyUp: () => {
+						movingDown = false;
+					},
+				},
+			});
+
+			this.add(controller);
+			this.event.subscribeObservable(controlsEnabled, (enabled) =>
+				enabled ? controller.enable() : controller.disable(),
+			);
+			this.event.subscribeObservable(controlsEnabled, (enabled) => print("enabled? " + enabled));
 		}
 	}
 

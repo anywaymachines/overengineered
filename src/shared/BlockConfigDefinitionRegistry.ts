@@ -29,7 +29,12 @@ type clampedNumber = {
 type thrust = {
 	type: "thrust";
 	default: number;
-	config: {};
+	config: {
+		keyUp: KeyCode;
+		keyDown: KeyCode;
+		isSwitch: boolean;
+	};
+	canBeSwitch: boolean;
 };
 type motorRotationSpeed = {
 	type: "motorRotationSpeed";

@@ -1,13 +1,11 @@
-import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
+import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Remotes from "shared/Remotes";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.tnt> {
-	private exploded = false;
-
 	constructor(block: PlacedBlockData) {
-		super(block, TNTBlockLogic.getConfigDefinition());
+		super(block, blockConfigRegistry.tnt);
 
 		this.event.subscribe(this.instance.PrimaryPart!.Touched, (part) => {
 			if (!this.input.impact.value.get()) return;
@@ -26,22 +24,7 @@ export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockCo
 		});
 	}
 
-	static getConfigDefinition() {
-		return blockConfigRegistry.tnt;
-	}
-
-	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.tnt.input> {
-		return {
-			explode: {
-				keyDown: () => {},
-			},
-		};
-	}
-
 	private explode() {
-		if (this.exploded) return;
-		this.exploded = true;
-
 		Remotes.Client.GetNamespace("Blocks")
 			.GetNamespace("TNTBlock")
 			.Get("Explode")

@@ -85,7 +85,17 @@ export default class ComponentEventHolder {
 	}
 
 	onInput(callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
-		return this.subscribe(UserInputService.InputBegan, (input, gameProcessedEvent) => {
+		this.onInputBegin(callback, allowGameProcessedEvents);
+		this.onInputEnd(callback, allowGameProcessedEvents);
+	}
+	onInputBegin(callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
+		this.subscribe(UserInputService.InputBegan, (input, gameProcessedEvent) => {
+			if (gameProcessedEvent && !allowGameProcessedEvents) return;
+			callback(input);
+		});
+	}
+	onInputEnd(callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
+		this.subscribe(UserInputService.InputEnded, (input, gameProcessedEvent) => {
 			if (gameProcessedEvent && !allowGameProcessedEvents) return;
 			callback(input);
 		});
