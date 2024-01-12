@@ -45,7 +45,7 @@ export default abstract class ConfigurableBlockLogic<TDef extends BlockConfigBot
 				new blockConfigRegistryClient[definition.type].input(
 					this.config[key] as never,
 					definition as never,
-					false,
+					block.connections[key as keyof typeof block.connections] !== undefined,
 				),
 			);
 		};
