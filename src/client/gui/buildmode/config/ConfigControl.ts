@@ -1,5 +1,6 @@
 import Signal from "@rbxts/signal";
 import Control from "client/base/Control";
+import GuiController from "client/controller/GuiController";
 import BlockConfigDefinitionRegistry, {
 	BlockConfigDefinitions,
 	BlockConfigDefinitionsToConfig,
@@ -157,13 +158,15 @@ type Templates = {
 	number: () => ConfigPartDefinition<NumberTextBoxControlDefinition>;
 	thrust: () => ConfigPartDefinition<GuiObject>;
 };
-export type ConfigControlDefinition = ScrollingFrame & {
+
+type Template = {
 	CheckboxTemplate: ConfigPartDefinition<CheckBoxControlDefinition>;
 	KeyTemplate: ConfigPartDefinition<KeyChooserControlDefinition>;
 	SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 	NumberTemplate: ConfigPartDefinition<NumberTextBoxControlDefinition>;
 	ThrustTemplate: ConfigPartDefinition<GuiObject>;
 };
+export type ConfigControlDefinition = ScrollingFrame;
 
 export default class ConfigControl extends Control<ConfigControlDefinition> {
 	readonly configUpdated = new Signal<
@@ -179,11 +182,12 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 	constructor(gui: ConfigControlDefinition) {
 		super(gui);
 
-		this.checkboxTemplate = Control.asTemplate(this.gui.CheckboxTemplate);
-		this.keyTemplate = Control.asTemplate(this.gui.KeyTemplate);
-		this.sliderTemplate = Control.asTemplate(this.gui.SliderTemplate);
-		this.numberTemplate = Control.asTemplate(this.gui.NumberTemplate);
-		this.thrustTemplate = Control.asTemplate(this.gui.ThrustTemplate);
+		const templates = GuiController.getGameUI<{ Templates: { Configuration: Template } }>().Templates.Configuration;
+		this.checkboxTemplate = Control.asTemplate(templates.CheckboxTemplate);
+		this.keyTemplate = Control.asTemplate(templates.KeyTemplate);
+		this.sliderTemplate = Control.asTemplate(templates.SliderTemplate);
+		this.numberTemplate = Control.asTemplate(templates.NumberTemplate);
+		this.thrustTemplate = Control.asTemplate(templates.ThrustTemplate);
 	}
 
 	set<TDef extends BlockConfigDefinitions>(config: BlockConfigDefinitionsToConfig<TDef>, definition: TDef) {

@@ -1,6 +1,5 @@
 import Control from "client/base/Control";
 import BuildTool2 from "client/tools/BuildTool2";
-import { blockList, categoriesRegistry } from "shared/Registry";
 import GuiAnimator from "../../GuiAnimator";
 import BlockSelectionControl, { BlockSelectionControlDefinition } from "../BlockSelection";
 import MaterialChooserControl from "../MaterialChooser";
@@ -28,7 +27,7 @@ export default class BuildTool2Scene extends Control<BuildToolSceneDefinition> {
 		super(gui);
 		this.tool = tool;
 
-		this.blockSelector = new BlockSelectionControl(gui.BlockSelection, blockList, categoriesRegistry);
+		this.blockSelector = new BlockSelectionControl(gui.BlockSelection);
 		this.blockSelector.show();
 		this.add(this.blockSelector);
 

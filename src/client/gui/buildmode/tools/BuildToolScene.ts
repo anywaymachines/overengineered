@@ -1,22 +1,18 @@
 import Control from "client/base/Control";
 import InputController from "client/controller/InputController";
 import BuildTool from "client/tools/BuildTool";
-import { blockList, categoriesRegistry } from "shared/Registry";
 import GuiAnimator from "../../GuiAnimator";
 import BlockSelectionControl, { BlockSelectionControlDefinition } from "../BlockSelection";
 import MaterialChooserControl from "../MaterialChooser";
-import { MaterialPreviewEditControl, MaterialPreviewEditDefinition } from "../MaterialPreviewEditControl";
-import { MirrorEditorControlDefinition } from "../MirrorEditorControl";
 
 export type BuildToolSceneDefinition = GuiObject & {
-	BlockSelection: BlockSelectionControlDefinition;
-	Mirrors: MirrorEditorControlDefinition;
-	Preview: MaterialPreviewEditDefinition;
-	TouchControls: Frame & {
-		PlaceButton: TextButton;
-		RotateRButton: TextButton;
-		RotateTButton: TextButton;
-		RotateYButton: TextButton;
+	readonly Inventory: BlockSelectionControlDefinition;
+	//readonly Mirrors: MirrorEditorControlDefinition;
+	readonly TouchControls: Frame & {
+		readonly PlaceButton: TextButton;
+		readonly RotateRButton: TextButton;
+		readonly RotateTButton: TextButton;
+		readonly RotateYButton: TextButton;
 	};
 };
 
@@ -28,15 +24,15 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 		super(gui);
 		this.tool = tool;
 
-		this.gui.Mirrors.Visible = false;
+		//this.gui.Mirrors.Visible = false;
 
-		this.blockSelector = new BlockSelectionControl(gui.BlockSelection, blockList, categoriesRegistry);
+		this.blockSelector = new BlockSelectionControl(gui.Inventory);
 		this.blockSelector.show();
 		this.add(this.blockSelector);
 
 		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => this.tool.setSelectedBlock(block));
 
-		this.add(new MaterialPreviewEditControl(this.gui.Preview, tool.selectedMaterial, tool.selectedColor));
+		//this.add(new MaterialPreviewEditControl(this.gui.Preview, tool.selectedMaterial, tool.selectedColor));
 
 		MaterialChooserControl.instance.selectedMaterial.bindTo(tool.selectedMaterial);
 		MaterialChooserControl.instance.selectedColor.bindTo(tool.selectedColor);
@@ -72,7 +68,6 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 	public show() {
 		super.show();
 
-		GuiAnimator.transition(this.gui.BlockSelection, 0.2, "right");
-		GuiAnimator.transition(this.gui.Preview, 0.2, "right");
+		GuiAnimator.transition(this.gui.Inventory, 0.2, "right");
 	}
 }
