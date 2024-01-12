@@ -1,6 +1,7 @@
 import { Players } from "@rbxts/services";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
+import { PlacedBlockData } from "shared/building/BlockManager";
 import ObservableValue from "shared/event/ObservableValue";
 
 export default class VehicleSeatBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.vehicleseat> {
@@ -8,10 +9,10 @@ export default class VehicleSeatBlockLogic extends ConfigurableBlockLogic<typeof
 	public readonly vehicleSeat;
 	private readonly occupant;
 
-	constructor(block: BlockModel) {
+	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.vehicleseat);
 
-		this.vehicleSeat = block.WaitForChild("VehicleSeat") as VehicleSeat;
+		this.vehicleSeat = this.instance.WaitForChild("VehicleSeat") as VehicleSeat;
 		this.occupant = this.event.observableFromGuiParam(this.vehicleSeat, "Occupant");
 
 		const update = (force = false) => {

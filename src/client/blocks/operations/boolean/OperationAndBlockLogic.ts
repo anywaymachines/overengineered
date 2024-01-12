@@ -1,8 +1,9 @@
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
+import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class OperationAndBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationand> {
-	constructor(block: BlockModel) {
+	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationand);
 
 		this.event.subscribeObservable(this.input.value1.value, () => this.update());

@@ -1,6 +1,7 @@
 import { UserInputService } from "@rbxts/services";
 import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
+import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.motorblock> {
 	private readonly hingeConstraint;
@@ -8,14 +9,16 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof block
 	private readonly speed;
 	private readonly isSwitch;
 
-	constructor(block: BlockModel) {
+	constructor(block: PlacedBlockData) {
 		super(block, MotorBlockLogic.getConfigDefinition());
 
 		// Configuration
 		this.speed = 0; //this.config.speed;
 		this.isSwitch = false; //this.config.switch;
 
-		this.hingeConstraint = block.FindFirstChild("Base")?.FindFirstChild("HingeConstraint") as HingeConstraint;
+		this.hingeConstraint = this.instance
+			.FindFirstChild("Base")
+			?.FindFirstChild("HingeConstraint") as HingeConstraint;
 
 		this.event.subscribeObservable(this.input.rotationSpeed.value, (speed) => {
 			this.hingeConstraint.AngularVelocity = speed;

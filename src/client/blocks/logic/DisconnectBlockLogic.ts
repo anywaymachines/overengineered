@@ -1,9 +1,10 @@
 import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Remotes from "shared/Remotes";
+import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class DisconnectBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.disconnectblock> {
-	constructor(block: BlockModel) {
+	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.disconnectblock);
 	}
 
@@ -18,7 +19,7 @@ export default class DisconnectBlockLogic extends ConfigurableBlockLogic<typeof 
 					Remotes.Client.GetNamespace("Blocks")
 						.GetNamespace("DisconnectBlock")
 						.Get("Disconnect")
-						.SendToServer(this.block);
+						.SendToServer(this.instance);
 				},
 			},
 		};

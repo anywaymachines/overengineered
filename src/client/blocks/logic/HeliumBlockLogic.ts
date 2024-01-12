@@ -1,15 +1,16 @@
 import { Workspace } from "@rbxts/services";
 import BlockLogic from "client/base/BlockLogic";
 import GameEnvironmentController from "client/controller/GameEnvironmentController";
+import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class HeliumBlockLogic extends BlockLogic {
 	private part: BasePart;
 	private vectorForce: VectorForce;
 
-	constructor(block: BlockModel) {
+	constructor(block: PlacedBlockData) {
 		super(block);
 
-		this.part = block.FindFirstChild("Part") as BasePart;
+		this.part = this.instance.FindFirstChild("Part") as BasePart;
 		this.vectorForce = this.part.FindFirstChild("VectorForce") as VectorForce;
 	}
 

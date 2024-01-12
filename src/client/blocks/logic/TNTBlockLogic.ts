@@ -1,17 +1,18 @@
 import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Remotes from "shared/Remotes";
+import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.tnt> {
 	private exploded = false;
 
-	constructor(block: BlockModel) {
+	constructor(block: PlacedBlockData) {
 		super(block, TNTBlockLogic.getConfigDefinition());
 
-		this.event.subscribe(this.block.PrimaryPart!.Touched, (part) => {
+		this.event.subscribe(this.instance.PrimaryPart!.Touched, (part) => {
 			if (!this.input.impact.value.get()) return;
 
-			const velocity1 = this.block.PrimaryPart!.AssemblyLinearVelocity.Magnitude;
+			const velocity1 = this.instance.PrimaryPart!.AssemblyLinearVelocity.Magnitude;
 			const velocity2 = part.AssemblyLinearVelocity.Magnitude;
 
 			if (velocity1 > (velocity2 + 1) * 10) {
@@ -45,7 +46,7 @@ export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockCo
 			.GetNamespace("TNTBlock")
 			.Get("Explode")
 			.SendToServer(
-				this.block,
+				this.instance,
 				this.input.radius.value.get(),
 				this.input.pressure.value.get(),
 				this.input.flammable.value.get(),

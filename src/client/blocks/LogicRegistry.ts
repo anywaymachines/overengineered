@@ -1,4 +1,5 @@
 import BlockLogic from "client/base/BlockLogic";
+import { PlacedBlockData } from "shared/building/BlockManager";
 import AnchorBlockLogic from "./logic/AnchorBlockLogic";
 import DisconnectBlockLogic from "./logic/DisconnectBlockLogic";
 import HeliumBlockLogic from "./logic/HeliumBlockLogic";
@@ -20,8 +21,11 @@ import OperationXnorBlockLogic from "./operations/boolean/OperationXnorBlockLogi
 import OperationXorBlockLogic from "./operations/boolean/OperationXorBlockLogic";
 import Multiplexer from "./operations/number/Multiplexer";
 import OperationAddBlockLogic from "./operations/number/OperationAddBlockLogic";
+import OperationDivBlockLogic from "./operations/number/OperationDivBlockLogic";
+import OperationMulBlockLogic from "./operations/number/OperationMulBlockLogic";
+import OperationSubBlockLogic from "./operations/number/OperationSubBlockLogic";
 
-const logicRegistry: Readonly<Record<string, { new (block: BlockModel): BlockLogic } | undefined>> = {
+const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): BlockLogic } | undefined>> = {
 	vehicleseat: VehicleSeatBlockLogic,
 	disconnectblock: DisconnectBlockLogic,
 	wing1x1: WingLogic,
@@ -50,6 +54,9 @@ const logicRegistry: Readonly<Record<string, { new (block: BlockModel): BlockLog
 	operationnor: OperationNorBlockLogic,
 
 	operationadd: OperationAddBlockLogic,
+	operationdiv: OperationDivBlockLogic,
+	operationsub: OperationSubBlockLogic,
+	operationmul: OperationMulBlockLogic,
 };
 
 export default logicRegistry;

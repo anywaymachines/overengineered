@@ -1,6 +1,7 @@
 import { RunService } from "@rbxts/services";
 import BlockLogic from "client/base/BlockLogic";
 import RobloxUnit from "shared/RobloxUnit";
+import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class WingLogic extends BlockLogic {
 	private wingSurface: BasePart;
@@ -8,17 +9,14 @@ export default class WingLogic extends BlockLogic {
 
 	private surface: Vector3;
 
-	constructor(block: BlockModel) {
+	constructor(block: PlacedBlockData) {
 		super(block);
 
-		this.wingSurface = block.WaitForChild("WingSurface") as BasePart;
+		this.wingSurface = this.instance.WaitForChild("WingSurface") as BasePart;
 		this.vectorForce = this.wingSurface.WaitForChild("VectorForce") as VectorForce;
 		this.surface = this.findSurface(this.wingSurface);
 
-		const material =
-			Enum.Material.GetEnumItems().find((value) => value.Value === (block.GetAttribute("material") as number)) ??
-			Enum.Material.Plastic;
-		const density = math.max(0.7, RobloxUnit.GetMaterialPhysicalProperties(material).Density / 2);
+		const density = math.max(0.7, RobloxUnit.GetMaterialPhysicalProperties(block.material).Density / 2);
 		this.wingSurface.CustomPhysicalProperties = new PhysicalProperties(density, 0.3, 0.5, 1, 1);
 	}
 

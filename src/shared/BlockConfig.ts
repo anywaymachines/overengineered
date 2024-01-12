@@ -5,15 +5,16 @@ import {
 } from "./BlockConfigDefinitionRegistry";
 import JSON from "./_fixes_/Json";
 import Objects from "./_fixes_/objects";
+import { PlacedBlockData } from "./building/BlockManager";
 
 export default class BlockConfig {
 	static deserialize<TDef extends Readonly<Record<string, BlockConfigDefinition>>>(
-		block: BlockModel,
+		block: PlacedBlockData,
 		definition: TDef,
 	): BlockConfigDefinitionsToConfig<TDef> {
 		return this.addDefaults(
 			JSON.deserialize(
-				(block.GetAttribute("config") as string | undefined) ?? "{}",
+				(block.instance.GetAttribute("config") as string | undefined) ?? "{}",
 			) as BlockConfigDefinitionsToConfig<TDef>,
 			definition,
 		);

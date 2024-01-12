@@ -8,6 +8,7 @@ import {
 	BlockConfigDefinitionsToConfig,
 } from "shared/BlockConfigDefinitionRegistry";
 import Objects from "shared/_fixes_/objects";
+import { PlacedBlockData } from "shared/building/BlockManager";
 import ObservableValue from "shared/event/ObservableValue";
 import BlockLogic from "./BlockLogic";
 import { KeyPressingConflictingController } from "./KeyPressingController";
@@ -34,10 +35,10 @@ export default abstract class ConfigurableBlockLogic<TDef extends BlockConfigBot
 	private readonly btnmap;
 	private readonly keyController;
 
-	constructor(block: BlockModel, configDefinition: TDef) {
+	constructor(block: PlacedBlockData, configDefinition: TDef) {
 		super(block);
 
-		this.config = BlockConfig.deserialize(block, configDefinition.input);
+		this.config = BlockConfig.deserialize(this.block, configDefinition.input);
 
 		const createInput = (key: string, definition: BlockConfigDefinition) => {
 			return this.added(

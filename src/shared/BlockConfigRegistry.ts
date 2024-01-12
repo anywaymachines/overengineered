@@ -425,6 +425,9 @@ const blockConfigRegistry = {
 	operationnor: twoBooleanInputsOneBooleanOutput,
 
 	operationadd: twoNumberInputsOneNumberOutput,
+	operationsub: twoNumberInputsOneNumberOutput,
+	operationmul: twoNumberInputsOneNumberOutput,
+	operationdiv: twoNumberInputsOneNumberOutput,
 } as const satisfies Record<string, BlockConfigBothDefinitions>;
 
 export default blockConfigRegistry;

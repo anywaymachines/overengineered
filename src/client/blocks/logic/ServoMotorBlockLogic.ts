@@ -1,6 +1,7 @@
 import { UserInputService } from "@rbxts/services";
 import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
+import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.servomotorblock> {
 	private readonly hingeConstraint;
@@ -9,7 +10,7 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<typeof 
 	private readonly angle;
 	private readonly isSwitch;
 
-	constructor(block: BlockModel) {
+	constructor(block: PlacedBlockData) {
 		super(block, ServoMotorBlockLogic.getConfigDefinition());
 
 		// Configuration
@@ -20,7 +21,9 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<typeof 
 			this.hingeConstraint.TargetAngle = targetAngle;
 		});
 
-		this.hingeConstraint = block.FindFirstChild("Base")?.FindFirstChild("HingeConstraint") as HingeConstraint;
+		this.hingeConstraint = this.instance
+			.FindFirstChild("Base")
+			?.FindFirstChild("HingeConstraint") as HingeConstraint;
 	}
 
 	protected prepare() {

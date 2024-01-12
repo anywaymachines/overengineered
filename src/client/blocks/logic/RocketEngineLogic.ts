@@ -4,6 +4,7 @@ import SoundController from "client/controller/SoundController";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { UnreliableRemotes } from "shared/Remotes";
 import RobloxUnit from "shared/RobloxUnit";
+import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.smallrocketengine> {
 	// Instances
@@ -28,7 +29,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 	private movingUp = false;
 	private movingDown = false;
 
-	constructor(block: BlockModel) {
+	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.smallrocketengine);
 
 		this.onDescendantDestroyed(() => {
@@ -43,14 +44,14 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 		this.isSwitch = false; // this.config.switchmode;
 
 		// Instances
-		const effectEmitter = block.WaitForChild("EffectEmitter") as Part;
-		this.engine = block.WaitForChild("Engine")!;
+		const effectEmitter = this.instance.WaitForChild("EffectEmitter") as Part;
+		this.engine = this.instance.WaitForChild("Engine")!;
 		this.vectorForce = this.engine.WaitForChild("VectorForce") as VectorForce;
 		this.sound = this.engine.WaitForChild("Sound") as Sound;
 		this.particleEmitter = effectEmitter.WaitForChild("Fire") as ParticleEmitter;
 
 		// Math
-		const colbox = block.WaitForChild("ColBox") as Part;
+		const colbox = this.instance.WaitForChild("ColBox") as Part;
 		this.multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16;
 
 		if (this.multiplier !== 1) {
@@ -58,10 +59,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 		}
 
 		// The strength depends on the material
-		const material =
-			Enum.Material.GetEnumItems().find((value) => value.Value === (block.GetAttribute("material") as number)) ??
-			Enum.Material.Plastic;
-		this.multiplier *= math.max(1, RobloxUnit.GetMaterialPhysicalProperties(material).Density / 2);
+		this.multiplier *= math.max(1, RobloxUnit.GetMaterialPhysicalProperties(block.material).Density / 2);
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 

@@ -1,14 +1,15 @@
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
+import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class SuspensionLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.suspensionblock> {
 	private springSide: BasePart;
 	private springConstraint: SpringConstraint;
 
-	constructor(block: BlockModel) {
+	constructor(block: PlacedBlockData) {
 		super(block, SuspensionLogic.getConfigDefinition());
 
-		this.springSide = block.FindFirstChild("SpringSide") as BasePart;
+		this.springSide = this.instance.FindFirstChild("SpringSide") as BasePart;
 		this.springConstraint = this.springSide.FindFirstChild("Spring") as SpringConstraint;
 	}
 

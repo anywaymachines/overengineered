@@ -78,7 +78,7 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 		});
 	}
 
-	public add(instance: BlockLogic<BlockModel>) {
+	public add(instance: BlockLogic) {
 		instance.machine = this;
 		super.add(instance);
 	}
@@ -108,7 +108,7 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 				continue;
 			}
 
-			const logic = new ctor(block.instance);
+			const logic = new ctor(block);
 			logicmap.set(block, logic);
 			logics.push(logic);
 		}

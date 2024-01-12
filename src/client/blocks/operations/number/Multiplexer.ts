@@ -1,8 +1,9 @@
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
+import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class Multiplexer extends ConfigurableBlockLogic<typeof blockConfigRegistry.multiplexer> {
-	constructor(block: BlockModel) {
+	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.multiplexer);
 
 		this.event.subscribeObservable(this.input.falsenumber.value, () => this.update());
