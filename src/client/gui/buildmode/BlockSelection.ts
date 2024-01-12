@@ -11,6 +11,32 @@ type CategoryControlDefinition = GuiButton & {
 	TextLabel: TextLabel;
 };
 
+class BlockPreviewControl extends Control<ViewportFrame> {
+	private readonly block: BlockModel;
+
+	constructor(gui: ViewportFrame, block: Block) {
+		super(gui);
+
+		this.gui.ClearAllChildren();
+
+		this.block = block.model.Clone();
+		this.block.Parent = this.gui;
+
+		const size = this.block.GetExtentsSize();
+		this.block.PivotTo(new CFrame(new Vector3(0, 0.2, -2 - math.max(size.X, size.Y, size.Z))));
+
+		spawn(() => {
+			const tr = true;
+			while (tr) {
+				task.wait();
+				this.block.PivotTo(
+					this.block.GetPivot().mul(CFrame.fromEulerAnglesXYZ(math.pi / 180 / 3, math.pi / 180 / 2, 0)),
+				);
+			}
+		});
+	}
+}
+
 /** Category button */
 class CategoryControl extends TextButtonControl<CategoryControlDefinition> {
 	constructor(template: CategoryControlDefinition, text: string) {
@@ -28,10 +54,11 @@ type BlockControlDefinition = GuiButton & {
 
 /** Block button */
 class BlockControl extends TextButtonControl<BlockControlDefinition> {
-	constructor(template: BlockControlDefinition, text: string) {
+	constructor(template: BlockControlDefinition, block: Block) {
 		super(template);
 
-		this.text.set(text);
+		this.text.set(block.displayName);
+		this.add(new BlockPreviewControl(template.ViewportFrame, block));
 
 		// TODO
 		this.gui.AmountLabel.Visible = false;
@@ -76,8 +103,8 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		return control;
 	}
 
-	public createBlockButton(text: string, activated: () => void) {
-		const control = new BlockControl(this.blockTemplate(), text);
+	public createBlockButton(block: Block, activated: () => void) {
+		const control = new BlockControl(this.blockTemplate(), block);
 		control.activated.Connect(activated);
 		this.list.add(control);
 
@@ -87,6 +114,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 	private create(selected: readonly Category[]) {
 		this.list.clear();
 
+		// Back button
 		if (selected.size() !== 0) {
 			this.createCategoryButton("←", () => {
 				this.selectedCategory.set(selected.filter((_, i) => i !== selected.size() - 1));
@@ -94,14 +122,16 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 			});
 		}
 
+		// Category buttons
 		for (const category of Objects.values(selected.reduce((acc, val) => acc[val].sub, categoriesRegistry))) {
 			this.createCategoryButton(category.name, () => this.selectedCategory.set([...selected, category.name]));
 		}
 
+		// Block buttons
 		let prev: BlockControl | CategoryControl | undefined;
 		for (const block of blockList) {
 			if (block.category === this.selectedCategory.get()[this.selectedCategory.get().size() - 1]) {
-				const button = this.createBlockButton(block.displayName, () => this.selectedBlock.set(block));
+				const button = this.createBlockButton(block, () => this.selectedBlock.set(block));
 
 				if (prev) {
 					button.getGui().NextSelectionUp = prev.getGui();
@@ -129,6 +159,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 			}
 		}
 
+		// TODO
 		this.gui.NoResultsLabel.Visible = false;
 
 		// Gamepad selection improvements

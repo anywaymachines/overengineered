@@ -85,8 +85,8 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 		this.toolbar = new ToolbarControl(tools, gui.ToolbarGui);
 		this.add(this.toolbar);
 
-		const bt2 = this.gui.Tools.BuildToolGui.Clone();
-		bt2.Parent = this.gui.Tools.BuildToolGui.Parent;
+		//const bt2 = this.gui.Tools.BuildToolGui.Clone();
+		//bt2.Parent = this.gui.Tools.BuildToolGui.Parent;
 
 		this.scenes.set(tools.buildTool, new BuildToolScene(this.gui.Tools.BuildToolGui, tools.buildTool));
 		this.scenes.set(tools.deleteTool, new DeleteToolScene(this.gui.Tools.DeleteToolGui, tools.deleteTool));
