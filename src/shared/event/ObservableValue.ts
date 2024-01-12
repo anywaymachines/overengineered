@@ -86,4 +86,14 @@ export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 
 		return observable;
 	}
+
+	static fromSignal<TSignal extends Signal<(arg: unknown) => void>>(
+		signal: TSignal,
+		defaultValue: TSignal extends Signal<(arg: infer T) => void> ? T : never,
+	) {
+		const observable = new ObservableValue(defaultValue);
+		signal.Connect((arg) => observable.set(arg as typeof defaultValue));
+
+		return observable;
+	}
 }
