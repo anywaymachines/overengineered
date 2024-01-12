@@ -25,12 +25,14 @@ function readCategory(folder: Folder, prev: Categories) {
 function readBlock(categoryBlock: BlockModel, categoryName: string) {
 	const id = categoryBlock.Name.lower();
 	const name = (categoryBlock.GetAttribute("name") as string | undefined) ?? categoryBlock.Name;
+	const info = (categoryBlock.GetAttribute("info") as string | undefined) ?? "";
 	const required = (categoryBlock.GetAttribute("required") as boolean | undefined) ?? false;
 	const limit = (categoryBlock.GetAttribute("limit") as number | undefined) ?? 2000;
 
 	const block: Block = {
 		id,
 		displayName: name,
+		info: info,
 		model: categoryBlock as BlockModel,
 		category: categoryName,
 		required,

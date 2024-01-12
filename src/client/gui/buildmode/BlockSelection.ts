@@ -1,4 +1,4 @@
-import { GuiService } from "@rbxts/services";
+import { GuiService, LocalizationService, Players } from "@rbxts/services";
 import Control from "client/base/Control";
 import { blockList, categoriesRegistry } from "shared/Registry";
 import Objects from "shared/_fixes_/objects";
@@ -66,6 +66,7 @@ class BlockControl extends TextButtonControl<BlockControlDefinition> {
 }
 
 export type BlockSelectionControlDefinition = GuiObject & {
+	SearchTextBox: TextLabel;
 	NoResultsLabel: TextLabel;
 	ScrollingFrame: ScrollingFrame & {
 		BlockButtonTemplate: BlockControlDefinition;
@@ -93,6 +94,9 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		this.categoryTemplate = Control.asTemplate(this.gui.ScrollingFrame.CategoryButtonTemplate);
 
 		this.event.subscribeObservable(this.selectedCategory, (category) => this.create(category), true);
+		this.event.subscribe(this.gui.SearchTextBox.GetPropertyChangedSignal("Text"), () => {
+			this.create([]);
+		});
 	}
 
 	public createCategoryButton(text: string, activated: () => void) {
@@ -111,6 +115,15 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		return control;
 	}
 
+	private translate(text: string) {
+		try {
+			const translator = LocalizationService.GetTranslatorForLocaleAsync(Players.LocalPlayer.LocaleId);
+			return translator.Translate(game, text);
+		} catch {
+			return text;
+		}
+	}
+
 	private create(selected: readonly Category[]) {
 		this.list.clear();
 
@@ -123,14 +136,20 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		}
 
 		// Category buttons
-		for (const category of Objects.values(selected.reduce((acc, val) => acc[val].sub, categoriesRegistry))) {
-			this.createCategoryButton(category.name, () => this.selectedCategory.set([...selected, category.name]));
+		if (this.gui.SearchTextBox.Text === "") {
+			for (const category of Objects.values(selected.reduce((acc, val) => acc[val].sub, categoriesRegistry))) {
+				this.createCategoryButton(category.name, () => this.selectedCategory.set([...selected, category.name]));
+			}
 		}
 
 		// Block buttons
 		let prev: BlockControl | CategoryControl | undefined;
 		for (const block of blockList) {
-			if (block.category === this.selectedCategory.get()[this.selectedCategory.get().size() - 1]) {
+			if (
+				block.category === this.selectedCategory.get()[this.selectedCategory.get().size() - 1] ||
+				(this.gui.SearchTextBox.Text !== "" &&
+					this.translate(block.displayName).lower().find(this.gui.SearchTextBox.Text.lower())[0])
+			) {
 				const button = this.createBlockButton(block, () => this.selectedBlock.set(block));
 
 				if (prev) {
