@@ -8,7 +8,6 @@ export default class Multiplexer extends ConfigurableBlockLogic<typeof blockConf
 		this.event.subscribeObservable(this.input.falsenumber.value, () => this.update());
 		this.event.subscribeObservable(this.input.truenumber.value, () => this.update());
 		this.event.subscribeObservable(this.input.value.value, () => this.update());
-		this.update();
 	}
 
 	private update() {

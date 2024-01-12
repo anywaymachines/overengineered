@@ -20,6 +20,8 @@ export abstract class ConfigLogicValueBase<
 		this.definition = definition;
 		this.connected = connected;
 		this.value = this.createObservable();
+
+		this.event.onPrepare(() => this.value.triggerChanged());
 	}
 
 	protected createObservable(): ObservableValue<T["default"]> {

@@ -65,14 +65,10 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 
-		this.event.subscribeObservable(
-			this.input.thrust.value,
-			(thrust) => {
-				this.torque = thrust;
-				this.update();
-			},
-			true,
-		);
+		this.event.subscribeObservable(this.input.thrust.value, (thrust) => {
+			this.torque = thrust;
+			this.update();
+		});
 	}
 
 	public getKeysDefinition(): KeyDefinitions<typeof blockConfigRegistry.smallrocketengine.input> {

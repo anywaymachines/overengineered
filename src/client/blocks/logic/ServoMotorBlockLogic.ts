@@ -16,13 +16,9 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<typeof 
 		this.speed = this.input.speed.value.get();
 		this.angle = this.input.angle.value.get() * -1;
 		this.isSwitch = false; //this.config.switch;
-		this.event.subscribeObservable(
-			this.input.angle.value,
-			(targetAngle) => {
-				this.hingeConstraint.TargetAngle = targetAngle;
-			},
-			true,
-		);
+		this.event.subscribeObservable(this.input.angle.value, (targetAngle) => {
+			this.hingeConstraint.TargetAngle = targetAngle;
+		});
 
 		this.hingeConstraint = block.FindFirstChild("Base")?.FindFirstChild("HingeConstraint") as HingeConstraint;
 	}

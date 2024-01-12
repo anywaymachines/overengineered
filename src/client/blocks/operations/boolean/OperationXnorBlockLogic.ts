@@ -7,7 +7,6 @@ export default class OperationXnorBlockLogic extends ConfigurableBlockLogic<type
 
 		this.event.subscribeObservable(this.input.value1.value, () => this.update());
 		this.event.subscribeObservable(this.input.value2.value, () => this.update());
-		this.update();
 	}
 
 	private update() {

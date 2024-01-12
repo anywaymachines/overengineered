@@ -14,14 +14,14 @@ export default class VehicleSeatBlockLogic extends ConfigurableBlockLogic<typeof
 		this.vehicleSeat = block.WaitForChild("VehicleSeat") as VehicleSeat;
 		this.occupant = this.event.observableFromGuiParam(this.vehicleSeat, "Occupant");
 
-		const update = () => {
+		const update = (force = false) => {
 			const occupant = this.occupant.get();
 
-			this.occupiedByLocalPlayer.set(occupant === Players.LocalPlayer.Character!.WaitForChild("Humanoid"));
-			this.output.occupied.set(occupant !== undefined);
+			this.occupiedByLocalPlayer.set(occupant === Players.LocalPlayer.Character!.WaitForChild("Humanoid"), force);
+			this.output.occupied.set(occupant !== undefined, force);
 		};
 
 		this.occupant.subscribe(() => update(), true);
-		this.event.onPrepare(() => update());
+		this.event.onPrepare(() => update(true));
 	}
 }
