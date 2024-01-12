@@ -23,7 +23,10 @@ export type KeyDefinitions<TDef extends BlockConfigDefinitions> = Partial<
 	Record<KeyMembers<TDef>, KeyDefinition<TDef>>
 >;
 
-export default abstract class ConfigurableBlockLogic<TDef extends BlockConfigBothDefinitions> extends BlockLogic {
+export default abstract class ConfigurableBlockLogic<
+	TDef extends BlockConfigBothDefinitions,
+	T extends BlockModel = BlockModel,
+> extends BlockLogic<T> {
 	readonly config: BlockConfigDefinitionsToConfig<TDef["input"]>;
 	readonly input: {
 		readonly [k in keyof TDef["input"]]: ConfigLogicValueBase<TDef["input"][k]>;

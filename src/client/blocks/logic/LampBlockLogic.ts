@@ -7,7 +7,7 @@ export default class LampBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		super(block, blockConfigRegistry.lamp);
 
 		this.event.subscribeObservable(this.input.enabled.value, (enabled) => {
-			const part = this.instance.PrimaryPart as BasePart;
+			const part = this.instance.PrimaryPart!;
 
 			if (enabled) {
 				part.Color = Color3.fromRGB(255, 255, 255);

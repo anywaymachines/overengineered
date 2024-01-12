@@ -3,7 +3,12 @@ import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/Configurable
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.motorblock> {
+type MotorBlock = BlockModel & {
+	readonly Base: {
+		readonly HingeConstraint: HingeConstraint;
+	};
+};
+export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.motorblock, MotorBlock> {
 	private readonly hingeConstraint;
 
 	private readonly speed;
@@ -16,9 +21,7 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof block
 		this.speed = 0; //this.config.speed;
 		this.isSwitch = false; //this.config.switch;
 
-		this.hingeConstraint = this.instance
-			.FindFirstChild("Base")
-			?.FindFirstChild("HingeConstraint") as HingeConstraint;
+		this.hingeConstraint = this.instance.Base.HingeConstraint;
 
 		this.event.subscribeObservable(this.input.rotationSpeed.value, (speed) => {
 			this.hingeConstraint.AngularVelocity = speed;

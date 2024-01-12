@@ -6,7 +6,20 @@ import { UnreliableRemotes } from "shared/Remotes";
 import RobloxUnit from "shared/RobloxUnit";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.smallrocketengine> {
+type RocketEngine = BlockModel & {
+	readonly EffectEmitter: Part & {
+		readonly Fire: ParticleEmitter;
+	};
+	readonly Engine: Instance & {
+		readonly VectorForce: VectorForce;
+		readonly Sound: Sound;
+	};
+	readonly ColBox: Part;
+};
+export default class RocketEngineLogic extends ConfigurableBlockLogic<
+	typeof blockConfigRegistry.smallrocketengine,
+	RocketEngine
+> {
 	// Instances
 	private readonly engine;
 	private readonly vectorForce;
@@ -44,14 +57,14 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<typeof blo
 		this.isSwitch = false; // this.config.switchmode;
 
 		// Instances
-		const effectEmitter = this.instance.WaitForChild("EffectEmitter") as Part;
-		this.engine = this.instance.WaitForChild("Engine")!;
-		this.vectorForce = this.engine.WaitForChild("VectorForce") as VectorForce;
-		this.sound = this.engine.WaitForChild("Sound") as Sound;
-		this.particleEmitter = effectEmitter.WaitForChild("Fire") as ParticleEmitter;
+		const effectEmitter = this.instance.EffectEmitter;
+		this.engine = this.instance.Engine;
+		this.vectorForce = this.engine.VectorForce;
+		this.sound = this.engine.Sound;
+		this.particleEmitter = effectEmitter.Fire;
 
 		// Math
-		const colbox = this.instance.WaitForChild("ColBox") as Part;
+		const colbox = this.instance.ColBox;
 		this.multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16;
 
 		if (this.multiplier !== 1) {

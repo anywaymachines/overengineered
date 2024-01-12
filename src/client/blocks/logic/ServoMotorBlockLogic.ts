@@ -3,7 +3,15 @@ import ConfigurableBlockLogic, { KeyDefinitions } from "client/base/Configurable
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.servomotorblock> {
+type ServoMotor = BlockModel & {
+	readonly Base: {
+		readonly HingeConstraint: HingeConstraint;
+	};
+};
+export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<
+	typeof blockConfigRegistry.servomotorblock,
+	ServoMotor
+> {
 	private readonly hingeConstraint;
 
 	private readonly speed;
@@ -21,9 +29,7 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<typeof 
 			this.hingeConstraint.TargetAngle = targetAngle;
 		});
 
-		this.hingeConstraint = this.instance
-			.FindFirstChild("Base")
-			?.FindFirstChild("HingeConstraint") as HingeConstraint;
+		this.hingeConstraint = this.instance.Base.HingeConstraint;
 	}
 
 	protected prepare() {

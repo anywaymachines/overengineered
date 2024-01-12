@@ -4,7 +4,13 @@ import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import ObservableValue from "shared/event/ObservableValue";
 
-export default class VehicleSeatBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.vehicleseat> {
+type _VehicleSeat = BlockModel & {
+	readonly VehicleSeat: VehicleSeat;
+};
+export default class VehicleSeatBlockLogic extends ConfigurableBlockLogic<
+	typeof blockConfigRegistry.vehicleseat,
+	_VehicleSeat
+> {
 	public readonly occupiedByLocalPlayer = new ObservableValue(false);
 	public readonly vehicleSeat;
 	private readonly occupant;
@@ -12,7 +18,7 @@ export default class VehicleSeatBlockLogic extends ConfigurableBlockLogic<typeof
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.vehicleseat);
 
-		this.vehicleSeat = this.instance.WaitForChild("VehicleSeat") as VehicleSeat;
+		this.vehicleSeat = this.instance.VehicleSeat;
 		this.occupant = this.event.observableFromGuiParam(this.vehicleSeat, "Occupant");
 
 		const update = (force = false) => {

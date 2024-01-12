@@ -8,8 +8,8 @@ export type PlacedBlockDataConnection = {
 	readonly connectionName: BlockConnectionName;
 };
 
-export type PlacedBlockData = {
-	readonly instance: BlockModel;
+export type PlacedBlockData<T extends BlockModel = BlockModel> = {
+	readonly instance: T;
 	readonly cframe: CFrame;
 	readonly color: Color3;
 	readonly material: Enum.Material;

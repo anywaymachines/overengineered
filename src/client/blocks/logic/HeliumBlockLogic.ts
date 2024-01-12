@@ -3,15 +3,20 @@ import BlockLogic from "client/base/BlockLogic";
 import GameEnvironmentController from "client/controller/GameEnvironmentController";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default class HeliumBlockLogic extends BlockLogic {
-	private part: BasePart;
-	private vectorForce: VectorForce;
+type HeliumBlock = BlockModel & {
+	readonly Part: BasePart & {
+		readonly VectorForce: VectorForce;
+	};
+};
+export default class HeliumBlockLogic extends BlockLogic<HeliumBlock> {
+	private readonly part;
+	private readonly vectorForce;
 
 	constructor(block: PlacedBlockData) {
 		super(block);
 
-		this.part = this.instance.FindFirstChild("Part") as BasePart;
-		this.vectorForce = this.part.FindFirstChild("VectorForce") as VectorForce;
+		this.part = this.instance.Part;
+		this.vectorForce = this.part.VectorForce;
 	}
 
 	protected prepare() {

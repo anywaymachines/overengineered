@@ -3,17 +3,22 @@ import BlockLogic from "client/base/BlockLogic";
 import RobloxUnit from "shared/RobloxUnit";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default class WingLogic extends BlockLogic {
-	private wingSurface: BasePart;
-	private vectorForce: VectorForce;
+type Wing = BlockModel & {
+	readonly WingSurface: BasePart & {
+		readonly VectorForce: VectorForce;
+	};
+};
+export default class WingLogic extends BlockLogic<Wing> {
+	private wingSurface;
+	private vectorForce;
 
 	private surface: Vector3;
 
 	constructor(block: PlacedBlockData) {
 		super(block);
 
-		this.wingSurface = this.instance.WaitForChild("WingSurface") as BasePart;
-		this.vectorForce = this.wingSurface.WaitForChild("VectorForce") as VectorForce;
+		this.wingSurface = this.instance.WingSurface;
+		this.vectorForce = this.wingSurface.VectorForce;
 		this.surface = this.findSurface(this.wingSurface);
 
 		const density = math.max(0.7, RobloxUnit.GetMaterialPhysicalProperties(block.material).Density / 2);
