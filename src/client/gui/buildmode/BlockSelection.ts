@@ -4,7 +4,8 @@ import { blockList, categoriesRegistry } from "shared/Registry";
 import Objects from "shared/_fixes_/objects";
 import ObservableValue from "shared/event/ObservableValue";
 import GuiAnimator from "../GuiAnimator";
-import { TextButtonControl } from "../controls/Button";
+import { ButtonControl, TextButtonControl } from "../controls/Button";
+import MaterialChooserControl from "./MaterialChooser";
 
 type CategoryControlDefinition = GuiButton & {
 	ViewportFrame: ViewportFrame;
@@ -72,6 +73,10 @@ export type BlockSelectionControlDefinition = GuiObject & {
 		BlockButtonTemplate: BlockControlDefinition;
 		CategoryButtonTemplate: CategoryControlDefinition;
 	};
+	Buttons: {
+		Material: TextButton;
+		Mirror: TextButton;
+	};
 };
 
 /** Block chooser control */
@@ -97,6 +102,8 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		this.event.subscribe(this.gui.SearchTextBox.GetPropertyChangedSignal("Text"), () => {
 			this.create([]);
 		});
+
+		this.add(new ButtonControl(this.gui.Buttons.Material, () => MaterialChooserControl.instance.show()));
 	}
 
 	public createCategoryButton(text: string, activated: () => void) {

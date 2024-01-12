@@ -6,6 +6,10 @@ import BlockSelectionControl, { BlockSelectionControlDefinition } from "../Block
 import MaterialChooserControl from "../MaterialChooser";
 
 export type BuildToolSceneDefinition = GuiObject & {
+	readonly BlockInfo: {
+		ViewportFrame: ViewportFrame;
+		DescriptionLabel: TextLabel;
+	};
 	readonly Inventory: BlockSelectionControlDefinition;
 	//readonly Mirrors: MirrorEditorControlDefinition;
 	readonly TouchControls: Frame & {
