@@ -5,38 +5,13 @@ import Objects from "shared/_fixes_/objects";
 import ObservableValue from "shared/event/ObservableValue";
 import GuiAnimator from "../GuiAnimator";
 import { ButtonControl, TextButtonControl } from "../controls/Button";
+import BlockPreviewControl from "./BlockPreviewControl";
 import MaterialChooserControl from "./MaterialChooser";
 
 type CategoryControlDefinition = GuiButton & {
 	ViewportFrame: ViewportFrame;
 	TextLabel: TextLabel;
 };
-
-class BlockPreviewControl extends Control<ViewportFrame> {
-	private readonly block: BlockModel;
-
-	constructor(gui: ViewportFrame, block: Block) {
-		super(gui);
-
-		this.gui.ClearAllChildren();
-
-		this.block = block.model.Clone();
-		this.block.Parent = this.gui;
-
-		const size = this.block.GetExtentsSize();
-		this.block.PivotTo(new CFrame(new Vector3(0, 0.2, -2 - math.max(size.X, size.Y, size.Z))));
-
-		spawn(() => {
-			const tr = true;
-			while (tr) {
-				task.wait();
-				this.block.PivotTo(
-					this.block.GetPivot().mul(CFrame.fromEulerAnglesXYZ(math.pi / 180 / 3, math.pi / 180 / 2, 0)),
-				);
-			}
-		});
-	}
-}
 
 /** Category button */
 class CategoryControl extends TextButtonControl<CategoryControlDefinition> {

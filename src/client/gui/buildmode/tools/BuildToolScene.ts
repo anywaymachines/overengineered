@@ -3,13 +3,15 @@ import InputController from "client/controller/InputController";
 import BuildTool from "client/tools/BuildTool";
 import Registry, { categoriesRegistry } from "shared/Registry";
 import GuiAnimator from "../../GuiAnimator";
+import BlockPreviewControl from "../BlockPreviewControl";
 import BlockSelectionControl, { BlockSelectionControlDefinition } from "../BlockSelection";
 import MaterialChooserControl from "../MaterialChooser";
 
 export type BuildToolSceneDefinition = GuiObject & {
-	readonly BlockInfo: {
+	readonly BlockInfo: Frame & {
 		ViewportFrame: ViewportFrame;
 		DescriptionLabel: TextLabel;
+		NameLabel: TextLabel;
 	};
 	readonly Inventory: BlockSelectionControlDefinition;
 	//readonly Mirrors: MirrorEditorControlDefinition;
@@ -25,6 +27,8 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 	readonly tool;
 	readonly blockSelector;
 
+	blockInfoPreviewControl: BlockPreviewControl | undefined;
+
 	constructor(gui: BuildToolSceneDefinition, tool: BuildTool) {
 		super(gui);
 		this.tool = tool;
@@ -36,15 +40,30 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 		this.add(this.blockSelector);
 
 		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => this.tool.setSelectedBlock(block));
-		this.event.subscribeObservable(this.tool.selectedBlock, (block) => {
-			if (!block) return;
-			if (this.blockSelector.getGui().SearchTextBox.Text === "") return;
+		this.event.subscribeObservable(
+			this.tool.selectedBlock,
+			(block) => {
+				this.blockInfoPreviewControl?.clear();
+				this.blockInfoPreviewControl = undefined;
+				this.gui.BlockInfo.NameLabel.Text = "";
+				this.gui.BlockInfo.DescriptionLabel.Text = "";
 
-			this.blockSelector.selectedBlock.set(block);
-			this.blockSelector.selectedCategory.set(
-				Registry.findCategoryPath(categoriesRegistry, block.category) ?? [],
-			);
-		});
+				if (!block) return;
+
+				this.blockInfoPreviewControl = new BlockPreviewControl(this.gui.BlockInfo.ViewportFrame, block);
+				this.gui.BlockInfo.NameLabel.Text = block.displayName;
+				this.gui.BlockInfo.DescriptionLabel.Text = block.info;
+				GuiAnimator.transition(this.gui.BlockInfo, 0.2, "down");
+
+				if (this.blockSelector.getGui().SearchTextBox.Text === "") return;
+
+				this.blockSelector.selectedBlock.set(block);
+				this.blockSelector.selectedCategory.set(
+					Registry.findCategoryPath(categoriesRegistry, block.category) ?? [],
+				);
+			},
+			true,
+		);
 
 		MaterialChooserControl.instance.selectedMaterial.bindTo(tool.selectedMaterial);
 		MaterialChooserControl.instance.selectedColor.bindTo(tool.selectedColor);
