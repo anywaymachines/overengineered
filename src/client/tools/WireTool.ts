@@ -385,6 +385,7 @@ export default class WireTool extends ToolBase {
 		wire.Material = Enum.Material.SmoothPlastic;
 		wire.Transparency = 0.1;
 		wire.Color = color;
+		wire.Shape = Enum.PartType.Cylinder;
 
 		wire.Parent = this.viewportFrame;
 
@@ -397,8 +398,10 @@ export default class WireTool extends ToolBase {
 
 	private updateWire(wire: BasePart, firstPoint: Vector3, secondPoint: Vector3) {
 		const distance = secondPoint.sub(firstPoint).Magnitude;
-		wire.Size = new Vector3(0.1, 0.1, distance - 0.4);
-		wire.CFrame = new CFrame(firstPoint, secondPoint).mul(new CFrame(0, 0, -distance / 2));
+		wire.Size = new Vector3(distance - 0.4, 0.1, 0.1);
+		wire.CFrame = new CFrame(firstPoint, secondPoint)
+			.mul(new CFrame(0, 0, -distance / 2))
+			.mul(CFrame.Angles(0, math.rad(90), 0));
 	}
 
 	private clearWires() {
