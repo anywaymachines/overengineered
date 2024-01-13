@@ -1,10 +1,25 @@
 import { ReplicatedStorage } from "@rbxts/services";
+import Objects from "./_fixes_/objects";
 
 export type Categories = Readonly<Record<Category, { readonly name: string; readonly sub: Categories }>>;
 
 export const blockRegistry = new Map<string, Block>() as ReadonlyMap<string, Block>;
 export const blockList: readonly Block[] = [];
 export const categoriesRegistry: Categories = {};
+
+export default class Registry {
+	static findCategoryPath(categories: Categories, key: string): string[] | undefined {
+		for (const category of Objects.keys(categories)) {
+			if (category === key) {
+				return [category];
+			}
+			const subPath = this.findCategoryPath(categories[category].sub, key);
+			if (subPath) {
+				return [category, ...subPath];
+			}
+		}
+	}
+}
 
 function readCategory(folder: Folder, prev: Categories) {
 	const name = folder.Name;

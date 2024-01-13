@@ -1,6 +1,6 @@
 import { GuiService, LocalizationService, Players } from "@rbxts/services";
 import Control from "client/base/Control";
-import { blockList, categoriesRegistry } from "shared/Registry";
+import Registry, { blockList, categoriesRegistry } from "shared/Registry";
 import Objects from "shared/_fixes_/objects";
 import ObservableValue from "shared/event/ObservableValue";
 import GuiAnimator from "../GuiAnimator";
@@ -140,13 +140,15 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		// Back button
 		if (selected.size() !== 0) {
 			this.createCategoryButton("←", () => {
+				this.gui.SearchTextBox.Text = "";
+
 				this.selectedCategory.set(selected.filter((_, i) => i !== selected.size() - 1));
 				this.selectedBlock.set(undefined);
 			});
 		}
 
-		// Category buttons
 		if (this.gui.SearchTextBox.Text === "") {
+			// Category buttons
 			for (const category of Objects.values(selected.reduce((acc, val) => acc[val].sub, categoriesRegistry))) {
 				this.createCategoryButton(category.name, () => this.selectedCategory.set([...selected, category.name]));
 			}
@@ -160,7 +162,13 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 				(this.gui.SearchTextBox.Text !== "" &&
 					this.translate(block.displayName).lower().find(this.gui.SearchTextBox.Text.lower())[0])
 			) {
-				const button = this.createBlockButton(block, () => this.selectedBlock.set(block));
+				const button = this.createBlockButton(block, () => {
+					if (this.gui.SearchTextBox.Text !== "") {
+						this.gui.SearchTextBox.Text = "";
+						this.selectedCategory.set(Registry.findCategoryPath(categoriesRegistry, block.category) ?? []);
+					}
+					this.selectedBlock.set(block);
+				});
 
 				if (prev) {
 					button.getGui().NextSelectionUp = prev.getGui();
@@ -188,8 +196,8 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 			}
 		}
 
-		// TODO
-		this.gui.NoResultsLabel.Visible = false;
+		this.gui.NoResultsLabel.Visible = this.gui.SearchTextBox.Text !== "" && this.list.getChildren().size() === 0;
+		GuiAnimator.transition(this.gui.NoResultsLabel, 0.2, "down", 10);
 
 		// Gamepad selection improvements
 		const isSelected = GuiService.SelectedObject !== undefined;
