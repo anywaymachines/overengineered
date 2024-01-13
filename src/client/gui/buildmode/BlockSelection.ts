@@ -196,6 +196,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 			}
 		}
 
+		// No results label for searching menu
 		this.gui.NoResultsLabel.Visible = this.gui.SearchTextBox.Text !== "" && this.list.getChildren().size() === 0;
 		GuiAnimator.transition(this.gui.NoResultsLabel, 0.2, "down", 10);
 

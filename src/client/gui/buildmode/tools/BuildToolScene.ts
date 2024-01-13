@@ -1,6 +1,7 @@
 import Control from "client/base/Control";
 import InputController from "client/controller/InputController";
 import BuildTool from "client/tools/BuildTool";
+import Registry, { categoriesRegistry } from "shared/Registry";
 import GuiAnimator from "../../GuiAnimator";
 import BlockSelectionControl, { BlockSelectionControlDefinition } from "../BlockSelection";
 import MaterialChooserControl from "../MaterialChooser";
@@ -35,8 +36,15 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 		this.add(this.blockSelector);
 
 		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => this.tool.setSelectedBlock(block));
+		this.event.subscribeObservable(this.tool.selectedBlock, (block) => {
+			if (!block) return;
+			if (this.blockSelector.getGui().SearchTextBox.Text !== "") return;
 
-		//this.add(new MaterialPreviewEditControl(this.gui.Preview, tool.selectedMaterial, tool.selectedColor));
+			this.blockSelector.selectedBlock.set(block);
+			this.blockSelector.selectedCategory.set(
+				Registry.findCategoryPath(categoriesRegistry, block.category) ?? [],
+			);
+		});
 
 		MaterialChooserControl.instance.selectedMaterial.bindTo(tool.selectedMaterial);
 		MaterialChooserControl.instance.selectedColor.bindTo(tool.selectedColor);
