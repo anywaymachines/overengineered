@@ -100,6 +100,9 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 
 		this.event.subscribeObservable(this.selectedCategory, (category) => this.create(category), true);
 		this.event.subscribe(this.gui.SearchTextBox.GetPropertyChangedSignal("Text"), () => {
+			this.selectedCategory.set([]);
+			this.selectedBlock.set(undefined);
+
 			this.create([]);
 		});
 
