@@ -38,7 +38,7 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => this.tool.setSelectedBlock(block));
 		this.event.subscribeObservable(this.tool.selectedBlock, (block) => {
 			if (!block) return;
-			if (this.blockSelector.getGui().SearchTextBox.Text !== "") return;
+			if (this.blockSelector.getGui().SearchTextBox.Text === "") return;
 
 			this.blockSelector.selectedBlock.set(block);
 			this.blockSelector.selectedCategory.set(
