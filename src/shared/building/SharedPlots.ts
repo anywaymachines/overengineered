@@ -77,16 +77,9 @@ export default class SharedPlots {
 	}
 
 	public static getPlotBlocks(plot: PlotModel): PlotBlocks {
-		let model = plot.Blocks;
-
-		if (!model) {
-			model = new Instance("Model") as PlotBlocks;
-			model.Name = "Blocks";
-			model.Parent = plot;
-		}
-
-		return model;
+		return plot.WaitForChild("Blocks") as PlotBlocks;
 	}
+
 	public static getPlotBlockDatas(plot: PlotModel): readonly PlacedBlockData[] {
 		return this.getPlotBlocks(plot)
 			.GetChildren(undefined)

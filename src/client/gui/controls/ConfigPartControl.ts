@@ -2,7 +2,7 @@ import Control from "client/base/Control";
 import { BlockConfigDefinition } from "shared/BlockConfigDefinitionRegistry";
 import { JsonSerializablePrimitive } from "shared/_fixes_/Json";
 import ObservableValue from "shared/event/ObservableValue";
-import { ConfigPartDefinition } from "../buildmode/config/ConfigControl";
+import { ConfigPartDefinition } from "../popup/SettingsPopup";
 
 export default class ConfigPartControl<
 	TControl extends Control<TDef>,

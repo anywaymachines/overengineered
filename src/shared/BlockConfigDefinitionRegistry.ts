@@ -3,6 +3,11 @@ type bool = {
 	default: boolean;
 	config: boolean;
 };
+type key = {
+	type: "key";
+	default: KeyCode;
+	config: KeyCode;
+};
 type keybool = {
 	type: "keybool";
 	default: boolean;
@@ -30,16 +35,22 @@ type thrust = {
 	type: "thrust";
 	default: number;
 	config: {
-		keyUp: KeyCode;
-		keyDown: KeyCode;
-		isSwitch: boolean;
+		thrust_add: KeyCode;
+		thrust_sub: KeyCode;
+		switchmode: boolean;
+		strength: number;
 	};
 	canBeSwitch: boolean;
 };
 type motorRotationSpeed = {
 	type: "motorRotationSpeed";
 	default: number;
-	config: {};
+	config: {
+		rotate_add: KeyCode;
+		rotate_sub: KeyCode;
+		speed: number;
+		switchmode: boolean;
+	};
 	maxSpeed: number;
 };
 
@@ -48,6 +59,7 @@ type BlockConfigDefinitionRegistry = {
 	bool: bool;
 	number: _number;
 	clampedNumber: clampedNumber;
+	key: key;
 	keybool: keybool;
 	thrust: thrust;
 	motorRotationSpeed: motorRotationSpeed;

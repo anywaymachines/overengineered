@@ -21,7 +21,12 @@ const motorblock = {
 			displayName: "Rotation speed",
 			type: "motorRotationSpeed",
 			default: 0 as number,
-			config: {},
+			config: {
+				rotate_add: "R" as KeyCode,
+				rotate_sub: "F" as KeyCode,
+				speed: 15 as number,
+				switchmode: false as boolean,
+			},
 			maxSpeed: 10000 as number,
 		},
 		/*rotate_add: {
@@ -72,9 +77,10 @@ const smallrocketengine = {
 			type: "thrust",
 			default: 0 as number,
 			config: {
-				keyUp: "W",
-				keyDown: "S",
-				isSwitch: false as boolean,
+				thrust_add: "W" as KeyCode,
+				thrust_sub: "S" as KeyCode,
+				switchmode: false as boolean,
+				strength: 0 as number,
 			},
 			canBeSwitch: true as boolean,
 		},

@@ -37,6 +37,7 @@ export default class WireTool extends ToolBase {
 
 	private static readonly groups = {
 		bool: "bool",
+		key: "bool",
 		keybool: "bool",
 		number: "number",
 		clampedNumber: "number",

@@ -6,10 +6,10 @@ import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Remotes from "shared/Remotes";
-import JSON, { JsonSerializablePrimitive } from "shared/_fixes_/Json";
+import JSON from "shared/_fixes_/Json";
 import ObservableValue from "shared/event/ObservableValue";
 import GuiAnimator from "../../GuiAnimator";
-import ConfigControl, { ConfigControlDefinition } from "../config/ConfigControl";
+import ConfigControl, { ConfigControlDefinition } from "../ConfigControl";
 
 export type ConfigToolSceneDefinition = GuiObject & {
 	ParamsSelection: Frame & {
@@ -78,10 +78,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				if (!defs) return undefined!;
 
 				const jsonstr = (blockmodel.GetAttribute("config") as string | undefined) ?? "{}";
-				const config = BlockConfig.addDefaults(
-					JSON.deserialize<Record<string, JsonSerializablePrimitive>>(jsonstr),
-					defs,
-				);
+				const config = BlockConfig.addDefaults(JSON.deserialize<Record<string, number>>(jsonstr), defs);
 
 				return [blockmodel, config] as const;
 			})

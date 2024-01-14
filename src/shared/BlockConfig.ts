@@ -29,7 +29,7 @@ export default class BlockConfig {
 				config[key] = {
 					...((def.config as object) ?? {}),
 					...(config[key] ?? {}),
-				};
+				} as (typeof config)[typeof key];
 			} else config[key] ??= def.config;
 		}
 

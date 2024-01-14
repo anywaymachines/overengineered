@@ -1,5 +1,6 @@
 import { UserInputService } from "@rbxts/services";
-import blockConfigRegistryClient, { ConfigLogicValueBase } from "client/blocks/BlockConfigRegistryClient";
+import blockConfigRegistryClient from "client/blocks/config/BlockConfigRegistryClient";
+import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
 import BlockConfig from "shared/BlockConfig";
 import {
 	BlockConfigBothDefinitions,
