@@ -1,4 +1,5 @@
 import { GuiService, HttpService, Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
+import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
@@ -36,6 +37,9 @@ export default class BuildTool extends ToolBase {
 	private lastMouseHit?: CFrame;
 	private lastMouseTarget?: BasePart;
 	private lastMouseSurface?: Enum.NormalId;
+
+	// Signals
+	public pickSignal = new Signal<(block: Block) => void>();
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -270,8 +274,9 @@ export default class BuildTool extends ToolBase {
 		const id = model.GetAttribute("id") as string | undefined;
 		if (id === undefined) return;
 
-		this.setSelectedBlock(blockRegistry.get(id));
+		this.pickSignal.Fire(blockRegistry.get(id)!);
 
+		// Color & Material
 		const mat = Serializer.EnumMaterialSerializer.deserialize(model.GetAttribute("material") as SerializedEnum);
 		const col = Serializer.Color3Serializer.deserialize(
 			HttpService.JSONDecode(model.GetAttribute("color") as string) as SerializedColor,
@@ -279,6 +284,7 @@ export default class BuildTool extends ToolBase {
 		this.setSelectedMaterial(mat);
 		this.setSelectedColor(col);
 
+		// Same rotation
 		this.rotateFineTune(model.GetPivot().Rotation);
 	}
 

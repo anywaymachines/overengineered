@@ -39,30 +39,40 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 		this.blockSelector.show();
 		this.add(this.blockSelector);
 
-		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => this.tool.setSelectedBlock(block));
-		this.event.subscribeObservable(
-			this.tool.selectedBlock,
-			(block) => {
-				this.blockInfoPreviewControl?.clear();
-				this.blockInfoPreviewControl = undefined;
-				this.gui.BlockInfo.NameLabel.Text = "";
-				this.gui.BlockInfo.DescriptionLabel.Text = "";
+		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => {
+			this.tool.setSelectedBlock(block);
 
-				if (!block) return;
+			// Clear block info
+			this.blockInfoPreviewControl?.clear();
+			this.blockInfoPreviewControl = undefined;
+			this.gui.BlockInfo.NameLabel.Text = "";
+			this.gui.BlockInfo.DescriptionLabel.Text = "";
+
+			// Set block info
+			if (block) {
+				this.blockInfoPreviewControl = new BlockPreviewControl(this.gui.BlockInfo.ViewportFrame, block);
+				this.gui.BlockInfo.NameLabel.Text = block.displayName;
+				this.gui.BlockInfo.DescriptionLabel.Text = block.info;
 
 				this.blockInfoPreviewControl = new BlockPreviewControl(this.gui.BlockInfo.ViewportFrame, block);
 				this.gui.BlockInfo.NameLabel.Text = block.displayName;
 				this.gui.BlockInfo.DescriptionLabel.Text = block.info;
-				GuiAnimator.transition(this.gui.BlockInfo, 0.2, "down");
+				GuiAnimator.transition(this.gui.BlockInfo, 0.2, "right");
+			}
+		});
 
-				this.blockSelector.selectedBlock.set(block);
-				const targetCategory = Registry.findCategoryPath(categoriesRegistry, block.category) ?? [];
-				if (targetCategory !== this.blockSelector.selectedCategory.get()) {
-					this.blockSelector.selectedCategory.set(targetCategory);
-				}
-			},
-			true,
-		);
+		this.event.subscribe(this.tool.pickSignal, (block) => {
+			const targetCategory = Registry.findCategoryPath(categoriesRegistry, block.category)!;
+
+			if (
+				this.blockSelector.selectedCategory.get()[this.blockSelector.selectedCategory.get().size() - 1] !==
+				targetCategory[targetCategory.size() - 1]
+			) {
+				this.blockSelector.selectedCategory.set(targetCategory);
+			}
+
+			this.blockSelector.selectedBlock.set(block);
+		});
 
 		MaterialChooserControl.instance.selectedMaterial.bindTo(tool.selectedMaterial);
 		MaterialChooserControl.instance.selectedColor.bindTo(tool.selectedColor);

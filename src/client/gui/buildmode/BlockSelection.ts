@@ -73,12 +73,15 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		this.blockTemplate = Control.asTemplate(this.gui.ScrollingFrame.BlockButtonTemplate);
 		this.categoryTemplate = Control.asTemplate(this.gui.ScrollingFrame.CategoryButtonTemplate);
 
-		this.event.subscribeObservable(this.selectedCategory, (category) => this.create(category), true);
+		this.event.subscribeObservable(this.selectedCategory, (category) => this.create(category, true), true);
+
+		// might be useful
+		// const searchText = this.event.observableFromGuiParam(this.gui.SearchTextBox, "Text");
 		this.event.subscribe(this.gui.SearchTextBox.GetPropertyChangedSignal("Text"), () => {
 			this.selectedCategory.set([]);
 			this.selectedBlock.set(undefined);
 
-			this.create([]);
+			this.create([], false);
 		});
 
 		this.add(new ButtonControl(this.gui.Buttons.Material, () => MaterialChooserControl.instance.show()));
@@ -109,7 +112,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		}
 	}
 
-	private create(selected: readonly Category[]) {
+	private create(selected: readonly Category[], animated: boolean) {
 		this.list.clear();
 
 		// Back button
@@ -173,12 +176,14 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 
 		// No results label for searching menu
 		this.gui.NoResultsLabel.Visible = this.gui.SearchTextBox.Text !== "" && this.list.getChildren().size() === 0;
-		GuiAnimator.transition(this.gui.NoResultsLabel, 0.2, "down", 10);
 
 		// Gamepad selection improvements
 		const isSelected = GuiService.SelectedObject !== undefined;
 		GuiService.SelectedObject = isSelected ? this.list.getChildren()[0].getGui() : undefined;
 
-		GuiAnimator.transition(this.gui.ScrollingFrame, 0.2, "up", 10);
+		if (animated && this.gui.SearchTextBox.Text === "") {
+			GuiAnimator.transition(this.gui.ScrollingFrame, 0.2, "up", 10);
+			GuiAnimator.transition(this.gui.NoResultsLabel, 0.2, "down", 10);
+		}
 	}
 }
