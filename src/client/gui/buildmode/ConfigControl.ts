@@ -252,6 +252,54 @@ export class MotorRotationSpeedConfigValueControl extends ConfigValueControl<Con
 	}
 }
 
+export class ServoMotorAngleConfigValueControl extends ConfigValueControl<ConfigControlDefinition> {
+	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["servoMotorAngle"]["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: BlockConfigDefinitionRegistry["servoMotorAngle"]["config"],
+		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["servoMotorAngle"]>,
+	) {
+		super(templates.thrust(), definition.displayName);
+
+		const control = this.added(new ConfigControl(this.gui.Control));
+		this.event.subscribe(control.configUpdated, (key, value) => this.submitted.Fire({ ...config, [key]: value }));
+
+		const def = {
+			rotate_add: {
+				displayName: "Rotate +",
+				type: "key",
+				default: "R" as KeyCode,
+				config: "R" as KeyCode,
+			},
+			rotate_sub: {
+				displayName: "Rotate -",
+				type: "key",
+				default: "F" as KeyCode,
+				config: "F" as KeyCode,
+			},
+			switchmode: {
+				displayName: "Switch",
+				type: "bool",
+				default: false as boolean,
+				config: false as boolean,
+			},
+			angle: {
+				displayName: "Angle",
+				type: "clampedNumber",
+				default: -180 as number,
+				min: 0,
+				max: 359,
+				step: 0.01,
+				config: -180 as number,
+			},
+		} as const satisfies BlockConfigDefinitions;
+		const _compilecheck: BlockConfigDefinitionsToConfig<typeof def> = config;
+
+		control.set(config, def);
+	}
+}
+
 //
 
 export const configControls = {
@@ -262,6 +310,7 @@ export const configControls = {
 	clampedNumber: SliderConfigValueControl,
 	thrust: ThrustConfigValueControl,
 	motorRotationSpeed: MotorRotationSpeedConfigValueControl,
+	servoMotorAngle: ServoMotorAngleConfigValueControl,
 } as const satisfies {
 	readonly [k in keyof BlockConfigDefinitionRegistry]: {
 		new (

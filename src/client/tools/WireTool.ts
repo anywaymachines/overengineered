@@ -41,8 +41,9 @@ export default class WireTool extends ToolBase {
 		keybool: "bool",
 		number: "number",
 		clampedNumber: "number",
-		motorRotationSpeed: "number",
 		thrust: "number",
+		motorRotationSpeed: "number",
+		servoMotorAngle: "number",
 	} as const satisfies Record<keyof BlockConfigDefinitionRegistry, keyof typeof this.typeGroups>;
 
 	private renderedWires: BasePart[] = [];

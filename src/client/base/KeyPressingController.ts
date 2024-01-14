@@ -6,7 +6,7 @@ import ComponentBase from "./ComponentBase";
 	When a key is pressed, invoke keyDown()
 	When a key is released, invoke keyUp()
 */
-export default class KeyPressingController<TKeys extends KeyCode> {
+export default class KeyPressingController<TKeys extends string> {
 	public readonly onKeyDown = new Signal<(key: TKeys) => void>();
 	public readonly onKeyUp = new Signal<(key: TKeys) => void>();
 	private readonly pressed: TKeys[] = [];
@@ -52,7 +52,7 @@ export default class KeyPressingController<TKeys extends KeyCode> {
 		else
 			super()
 */
-export class KeyPressingConflictingController<TKeys extends KeyCode> extends KeyPressingController<TKeys> {
+export class KeyPressingConflictingController<TKeys extends string> extends KeyPressingController<TKeys> {
 	private readonly definitions;
 	private readonly holding: TKeys[] = [];
 
@@ -95,13 +95,13 @@ export class KeyPressingConflictingController<TKeys extends KeyCode> extends Key
 	}
 }
 
-type KeyDefinition<TKeys extends string> = {
+export type KeyDefinition<TKeys extends string> = {
 	key: KeyCode;
 	keyDown?: () => void;
 	keyUp?: () => void;
 	conflicts?: TKeys;
 };
-type KeyDefinitions<TKeys extends string> = { readonly [k in TKeys]: KeyDefinition<TKeys> };
+export type KeyDefinitions<TKeys extends string> = { readonly [k in TKeys]: KeyDefinition<TKeys> };
 
 export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> extends ComponentBase {
 	private readonly controller;
@@ -110,25 +110,25 @@ export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> 
 	constructor(definitions: T) {
 		super();
 
-		this.controller = new KeyPressingConflictingController(definitions);
-		this.btnmap = new Map(Objects.entries(definitions).map((e) => [e[1].key, e[0]] as const));
+		this.controller = new KeyPressingConflictingController<keyof T & string>(definitions);
+		this.btnmap = new Map(Objects.entries(definitions).map((e) => [e[1].key, e[0] as keyof T & string] as const));
 
 		this.onDisabled.Connect(() => this.controller.releaseAll());
 
 		this.event.subscribe(this.controller.onKeyDown, (key) => {
-			definitions[this.btnmap.get(key)!]?.keyDown?.();
+			definitions[key]?.keyDown?.();
 		});
 		this.event.subscribe(this.controller.onKeyUp, (key) => {
-			definitions[this.btnmap.get(key)!]?.keyUp?.();
+			definitions[key]?.keyUp?.();
 		});
 
 		this.event.onInputBegin((input) => {
 			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
-			this.controller.keyDown(input.KeyCode.Name);
+			this.controller.keyDown(this.btnmap.get(input.KeyCode.Name)!);
 		});
 		this.event.onInputEnd((input) => {
 			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
-			this.controller.keyUp(input.KeyCode.Name);
+			this.controller.keyUp(this.btnmap.get(input.KeyCode.Name)!);
 		});
 	}
 }

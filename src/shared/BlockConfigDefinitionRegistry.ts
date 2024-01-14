@@ -53,6 +53,16 @@ type motorRotationSpeed = {
 	};
 	maxSpeed: number;
 };
+type servoMotorAngle = {
+	type: "servoMotorAngle";
+	default: number;
+	config: {
+		rotate_add: KeyCode;
+		rotate_sub: KeyCode;
+		switchmode: boolean;
+		angle: number;
+	};
+};
 
 export default BlockConfigDefinitionRegistry;
 type BlockConfigDefinitionRegistry = {
@@ -63,6 +73,7 @@ type BlockConfigDefinitionRegistry = {
 	keybool: keybool;
 	thrust: thrust;
 	motorRotationSpeed: motorRotationSpeed;
+	servoMotorAngle: servoMotorAngle;
 };
 
 //

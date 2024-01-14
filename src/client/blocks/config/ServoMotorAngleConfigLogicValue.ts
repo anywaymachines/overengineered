@@ -3,12 +3,12 @@ import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry"
 import { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
-export class MotorRotationSpeedConfigLogicValue extends ConfigLogicValueBase<
-	BlockConfigDefinitionRegistry["motorRotationSpeed"]
+export class ServoMotorAngleConfigLogicValue extends ConfigLogicValueBase<
+	BlockConfigDefinitionRegistry["servoMotorAngle"]
 > {
 	constructor(
-		config: BlockConfigDefinitionRegistry["motorRotationSpeed"]["config"],
-		definition: BlockConfigDefinitionRegistry["motorRotationSpeed"],
+		config: BlockConfigDefinitionRegistry["servoMotorAngle"]["config"],
+		definition: BlockConfigDefinitionRegistry["servoMotorAngle"],
 		connected: boolean,
 		controlsEnabled: ReadonlyObservableValue<boolean>,
 	) {
@@ -20,32 +20,32 @@ export class MotorRotationSpeedConfigLogicValue extends ConfigLogicValueBase<
 			const def = {
 				thrustAdd: {
 					key: config.rotate_add,
-					conflicts: "thrustAdd",
+					conflicts: "thrustSub",
 					keyDown: () => {
-						if (config.switchmode) {
-							this.value.set(config.speed);
+						if (!config.switchmode) {
+							this.value.set(config.angle);
 						} else {
-							this.value.set(this.value.get() === config.speed ? 0 : config.speed);
+							this.value.set(this.value.get() === config.angle ? 0 : config.angle);
 						}
 					},
 					keyUp: () => {
-						if (config.switchmode) {
+						if (!config.switchmode) {
 							this.value.set(0);
 						}
 					},
 				},
 				thrustSub: {
 					key: config.rotate_sub,
-					conflicts: "thrustSub",
+					conflicts: "thrustAdd",
 					keyDown: () => {
-						if (config.switchmode) {
-							this.value.set(-config.speed);
+						if (!config.switchmode) {
+							this.value.set(-config.angle);
 						} else {
-							this.value.set(this.value.get() === -config.speed ? 0 : -config.speed);
+							this.value.set(this.value.get() === -config.angle ? 0 : -config.angle);
 						}
 					},
 					keyUp: () => {
-						if (config.switchmode) {
+						if (!config.switchmode) {
 							this.value.set(0);
 						}
 					},

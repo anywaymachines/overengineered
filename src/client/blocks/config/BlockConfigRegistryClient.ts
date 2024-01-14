@@ -8,6 +8,7 @@ import { KeyBoolConfigLogicValue } from "./KeyBoolConfigLogicValue";
 import { KeyConfigLogicValue } from "./KeyConfigLogicValue";
 import { MotorRotationSpeedConfigLogicValue } from "./MotorRotationSpeedConfigLogicValue";
 import { NumberConfigLogicValue } from "./NumberConfigLogicValue";
+import { ServoMotorAngleConfigLogicValue } from "./ServoMotorAngleConfigLogicValue";
 import { ThrustConfigLogicValue } from "./ThrustConfigLogicValue";
 
 export type blockConfigRegistryClient = {
@@ -58,6 +59,12 @@ const blockConfigRegistryClient = {
 	},
 	motorRotationSpeed: {
 		input: MotorRotationSpeedConfigLogicValue,
+		output: (definition) => {
+			return new ObservableValue(definition.default);
+		},
+	},
+	servoMotorAngle: {
+		input: ServoMotorAngleConfigLogicValue,
 		output: (definition) => {
 			return new ObservableValue(definition.default);
 		},

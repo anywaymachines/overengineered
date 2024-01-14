@@ -1,4 +1,4 @@
-import { KeyPressingDefinitionsController } from "client/base/KeyPressingController";
+import { KeyDefinitions, KeyPressingDefinitionsController } from "client/base/KeyPressingController";
 import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
 import NumberObservableValue from "shared/event/NumberObservableValue";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
@@ -34,10 +34,10 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefi
 				});
 			};
 
-			const controller = new KeyPressingDefinitionsController({
+			const def = {
 				thrustAdd: {
 					key: config.thrust_add,
-					conflicts: "down",
+					conflicts: "thrustSub",
 					keyDown: () => {
 						if (movingUp) return;
 
@@ -55,7 +55,7 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefi
 				},
 				thrustSub: {
 					key: config.thrust_sub,
-					conflicts: "up",
+					conflicts: "thrustAdd",
 					keyDown: () => {
 						if (movingDown) return;
 
@@ -71,11 +71,15 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefi
 						movingDown = false;
 					},
 				},
-			});
+			} as const satisfies KeyDefinitions<"thrustAdd" | "thrustSub">;
+
+			const controller = new KeyPressingDefinitionsController(def);
 
 			this.add(controller);
-			this.event.subscribeObservable(controlsEnabled, (enabled) =>
-				enabled ? controller.enable() : controller.disable(),
+			this.event.subscribeObservable(
+				controlsEnabled,
+				(enabled) => (enabled ? controller.enable() : controller.disable()),
+				true,
 			);
 			this.event.subscribeObservable(controlsEnabled, (enabled) => print("enabled? " + enabled));
 		}

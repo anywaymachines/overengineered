@@ -29,43 +29,6 @@ const motorblock = {
 			},
 			maxSpeed: 10000 as number,
 		},
-		/*rotate_add: {
-			conflicts: "rotate_sub",
-			displayName: "Rotate +",
-			type: "key",
-			default: {
-				Desktop: "R",
-				Gamepad: "ButtonR1",
-			},
-		},
-		rotate_sub: {
-			conflicts: "rotate_add",
-			displayName: "Rotate -",
-			type: "key",
-			default: {
-				Desktop: "F",
-				Gamepad: "ButtonL1",
-			},
-		},
-		speed: {
-			displayName: "Max. speed",
-			type: "clampedNumber",
-			min: 0,
-			max: 50,
-			step: 1,
-			default: 15,
-			config: {
-				value: 0,
-			},
-		},
-		switch: {
-			displayName: "Switch",
-			type: "bool",
-			default: false as boolean,
-			config: {
-				value: false,
-			},
-		},*/
 	},
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
@@ -84,43 +47,6 @@ const smallrocketengine = {
 			},
 			canBeSwitch: true as boolean,
 		},
-		/*thrust_add: {
-			conflicts: "thrust_sub",
-			displayName: "Thrust +",
-			type: "key",
-			default: {
-				Desktop: "W",
-				Gamepad: "ButtonR2",
-			},
-		},
-		thrust_sub: {
-			conflicts: "thrust_add",
-			displayName: "Thrust -",
-			type: "key",
-			default: {
-				Desktop: "S",
-				Gamepad: "ButtonL2",
-			},
-		},
-		switchmode: {
-			displayName: "Toggle Mode",
-			type: "bool",
-			default: {
-				Desktop: false,
-				Gamepad: false,
-			},
-		},
-		strength: {
-			displayName: "Strength %",
-			type: "clampedNumber",
-			min: 0,
-			max: 100,
-			step: 1,
-			default: 100,
-			config: {
-				value: 100 as number,
-			},
-		},*/
 	},
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
@@ -142,26 +68,8 @@ const rope = {
 
 const servomotorblock = {
 	input: {
-		/*rotate_add: {
-			conflicts: "rotate_sub",
-			displayName: "Rotate +",
-			type: "key",
-			default: {
-				Desktop: "Q",
-				Gamepad: "ButtonR2",
-			},
-		},
-		rotate_sub: {
-			conflicts: "rotate_add",
-			displayName: "Rotate -",
-			type: "key",
-			default: {
-				Desktop: "E",
-				Gamepad: "ButtonL2",
-			},
-		},*/
 		speed: {
-			displayName: "Max. speed",
+			displayName: "Speed",
 			type: "clampedNumber",
 			min: 0,
 			max: 50,
@@ -171,18 +79,15 @@ const servomotorblock = {
 		},
 		angle: {
 			displayName: "Target angle",
-			type: "clampedNumber",
-			min: -180,
-			max: 180,
-			step: 1,
+			type: "servoMotorAngle",
 			default: 0 as number,
-			config: 0 as number,
+			config: {
+				rotate_add: "R" as KeyCode,
+				rotate_sub: "F" as KeyCode,
+				switchmode: false as boolean,
+				angle: 45 as number,
+			},
 		},
-		/*switch: {
-			displayName: "Switch",
-			type: "bool",
-			default: false as boolean,
-		},*/
 	},
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
