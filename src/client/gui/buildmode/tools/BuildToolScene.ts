@@ -55,12 +55,11 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 				this.gui.BlockInfo.DescriptionLabel.Text = block.info;
 				GuiAnimator.transition(this.gui.BlockInfo, 0.2, "down");
 
-				if (this.blockSelector.getGui().SearchTextBox.Text === "") return;
-
 				this.blockSelector.selectedBlock.set(block);
-				this.blockSelector.selectedCategory.set(
-					Registry.findCategoryPath(categoriesRegistry, block.category) ?? [],
-				);
+				const targetCategory = Registry.findCategoryPath(categoriesRegistry, block.category) ?? [];
+				if (targetCategory !== this.blockSelector.selectedCategory.get()) {
+					this.blockSelector.selectedCategory.set(targetCategory);
+				}
 			},
 			true,
 		);
