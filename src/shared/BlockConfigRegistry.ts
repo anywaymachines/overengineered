@@ -195,6 +195,18 @@ const vehicleseat = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const speedometer = {
+	input: {},
+	output: {
+		result: {
+			displayName: "Speed m/s",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const booleanProcessing = {
 	input: {
 		value: {
@@ -331,6 +343,8 @@ const blockConfigRegistry = {
 	vehicleseat,
 
 	multiplexer,
+
+	speedometer,
 
 	operationnot: booleanProcessing,
 	operationand: twoBooleanInputsOneBooleanOutput,

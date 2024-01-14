@@ -12,6 +12,7 @@ import SuspensionLogic from "./logic/SuspensionLogic";
 import TNTBlockLogic from "./logic/TNTBlockLogic";
 import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 import WingLogic from "./logic/WingLogic";
+import SpeedometerBlockLogic from "./operations/Speedometer";
 import OperationAndBlockLogic from "./operations/boolean/OperationAndBlockLogic";
 import OperationNandBlockLogic from "./operations/boolean/OperationNandBlockLogic";
 import OperationNorBlockLogic from "./operations/boolean/OperationNorBlockLogic";
@@ -44,6 +45,8 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 	anchorblock: AnchorBlockLogic,
 
 	multiplexer: Multiplexer,
+
+	speedometer: SpeedometerBlockLogic,
 
 	operationnot: OperationNotBlockLogic,
 	operationand: OperationAndBlockLogic,
