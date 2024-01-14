@@ -165,9 +165,9 @@ export class ThrustConfigValueControl extends ConfigValueControl<ThrustConfigVal
 		super(templates.thrust(), definition.displayName);
 
 		const control = this.added(new ConfigControl(this.gui.Control));
-		this.event.subscribe(control.configUpdated, (key, value) => {
-			this.submitted.Fire({ ...config, [key]: value });
-		});
+		this.event.subscribe(control.configUpdated, (key, value) =>
+			this.submitted.Fire((config = { ...config, [key]: value })),
+		);
 
 		const def = {
 			thrust_add: {
@@ -215,7 +215,9 @@ export class MotorRotationSpeedConfigValueControl extends ConfigValueControl<Con
 		super(templates.thrust(), definition.displayName);
 
 		const control = this.added(new ConfigControl(this.gui.Control));
-		this.event.subscribe(control.configUpdated, (key, value) => this.submitted.Fire({ ...config, [key]: value }));
+		this.event.subscribe(control.configUpdated, (key, value) =>
+			this.submitted.Fire((config = { ...config, [key]: value })),
+		);
 
 		const def = {
 			rotate_add: {
@@ -263,7 +265,9 @@ export class ServoMotorAngleConfigValueControl extends ConfigValueControl<Config
 		super(templates.thrust(), definition.displayName);
 
 		const control = this.added(new ConfigControl(this.gui.Control));
-		this.event.subscribe(control.configUpdated, (key, value) => this.submitted.Fire({ ...config, [key]: value }));
+		this.event.subscribe(control.configUpdated, (key, value) =>
+			this.submitted.Fire((config = { ...config, [key]: value })),
+		);
 
 		const def = {
 			rotate_add: {
