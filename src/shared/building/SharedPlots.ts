@@ -77,7 +77,7 @@ export default class SharedPlots {
 	}
 
 	public static getPlotBlocks(plot: PlotModel): PlotBlocks {
-		return plot.WaitForChild("Blocks") as PlotBlocks;
+		return plot.FindFirstChild("Blocks") as PlotBlocks;
 	}
 
 	public static getPlotBlockDatas(plot: PlotModel): readonly PlacedBlockData[] {

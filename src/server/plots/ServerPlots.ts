@@ -28,9 +28,9 @@ export default class ServerPlots {
 	private static createBlocksFolder(parent: Instance) {
 		const blocks = new Instance("Model");
 		blocks.Name = "Blocks";
-		blocks.Parent = parent;
 		blocks.ModelStreamingMode = Enum.ModelStreamingMode.PersistentPerPlayer;
-		blocks.Destroying.Once(() => {
+		blocks.Parent = parent;
+		blocks.GetPropertyChangedSignal("Parent").Once(() => {
 			this.createBlocksFolder(parent);
 		});
 	}
