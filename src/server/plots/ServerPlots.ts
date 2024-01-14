@@ -25,9 +25,20 @@ export default class ServerPlots {
 		plot.SetAttribute("data", HttpService.JSONEncode(plotData));
 	}
 
+	private static createBlocksFolder(parent: Instance) {
+		const blocks = new Instance("Model");
+		blocks.Name = "Blocks";
+		blocks.Parent = parent;
+		blocks.ModelStreamingMode = Enum.ModelStreamingMode.PersistentPerPlayer;
+		blocks.Destroying.Once(() => {
+			this.createBlocksFolder(parent);
+		});
+	}
+
 	/** Initialization part */
 	private static initializePlots(): void {
 		SharedPlots.plots.forEach((plot) => {
+			this.createBlocksFolder(plot);
 			this.writePlotData(plot, this.createDefaultPlotData());
 		});
 	}
