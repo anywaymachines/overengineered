@@ -6,6 +6,7 @@ import BuildingController from "client/controller/BuildingController";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Serializer from "shared/Serializer";
+import JSON from "shared/_fixes_/Json";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
@@ -48,9 +49,7 @@ export default class DeleteTool extends ToolBase {
 			material: Serializer.EnumMaterialSerializer.deserialize(
 				block.GetAttribute("material") as number as SerializedEnum,
 			),
-			config: HttpService.JSONDecode((block.GetAttribute("config") as string | undefined) ?? "{}") as Readonly<
-				Record<string, string>
-			>,
+			config: JSON.deserialize<object>((block.GetAttribute("config") as string | undefined) ?? "{}"),
 		};
 
 		return info;

@@ -1,8 +1,10 @@
 import { HttpService } from "@rbxts/services";
 import BuildingWrapper from "server/BuildingWrapper";
+import blockConfigRegistry, { BlockConfigRegistry } from "shared/BlockConfigRegistry";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
+import JSON from "shared/_fixes_/Json";
 import Objects from "shared/_fixes_/objects";
 import { PlacedBlockDataConnection } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
@@ -13,11 +15,11 @@ type SerializedBlocks<TBlocks extends SerializedBlockV0> = {
 };
 
 interface SerializedBlockV0 {
-	readonly id: string;
+	readonly id: keyof BlockConfigRegistry & string;
 	readonly mat: SerializedEnum;
 	readonly col: SerializedColor;
 	readonly loc: SerializedCFrame;
-	readonly config?: object;
+	readonly config: object | undefined;
 }
 interface SerializedBlockV2 extends SerializedBlockV0 {
 	readonly uuid: string;
@@ -160,11 +162,11 @@ const read = {
 		const connectionsattr = block.GetAttribute("connections") as string | undefined;
 
 		return {
-			id: block.GetAttribute("id") as string, // Block ID
+			id: block.GetAttribute("id") as SerializedBlockV0["id"], // Block ID
 			mat: block.GetAttribute("material") as SerializedEnum, // Material
 			col: HttpService.JSONDecode(block.GetAttribute("color") as string) as SerializedColor, // Color
 			loc: Serializer.CFrameSerializer.serialize(buildingCenter.ToObjectSpace(block.GetPivot())), // Position
-			config: configattr === undefined ? undefined : (HttpService.JSONDecode(configattr as string) as object),
+			config: configattr === undefined ? undefined : JSON.deserialize<object>(configattr as string),
 			uuid: block.GetAttribute("uuid") as string,
 			connections:
 				connectionsattr === undefined
@@ -200,9 +202,6 @@ const place = {
 		};
 
 		const response = BuildingWrapper.placeBlock(deserializedData);
-		if (response.success && response.model && blockData.config) {
-			response.model.SetAttribute("config", HttpService.JSONEncode(blockData.config));
-		}
 		if (response.success && response.model && blockData.connections) {
 			response.model.SetAttribute("connections", HttpService.JSONEncode(blockData.connections));
 		}
@@ -267,7 +266,7 @@ const v6: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 };
 
 // changed serialization to actual JSON
-const v7: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v6> = {
+const v7: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v6> = {
 	version: 7,
 
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
@@ -288,6 +287,156 @@ const v7: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>,
 			),
 		};
 	},
+};
+
+// updated block config layout
+const v8: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v7> = {
+	version: 8,
+
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		type reg = typeof blockConfigRegistry;
+		type partial<T extends object> = {
+			readonly [k in keyof T]?: T[k] extends object ? partial<T[k]> : T[k];
+		};
+
+		const update = (block: SerializedBlockV3) => {
+			if (block.id === "servomotorblock") {
+				type config = partial<{
+					readonly [k in keyof reg["servomotorblock"]["input"]]: reg["servomotorblock"]["input"][k]["config"];
+				}>;
+
+				const cfg = block.config as
+					| {
+							speed?: number;
+							rotate_add?: KeyCode;
+							rotate_sub?: KeyCode;
+							switch?: boolean;
+							angle?: number;
+					  }
+					| undefined;
+
+				const config: config = {
+					speed: cfg?.speed,
+					angle: {
+						rotate_add: cfg?.rotate_add,
+						rotate_sub: cfg?.rotate_sub,
+						switchmode: cfg?.switch,
+						angle: cfg?.angle,
+					},
+				};
+
+				return config;
+			}
+			if (block.id === "smallrocketengine" || block.id === "rocketengine") {
+				type config = partial<{
+					readonly [k in keyof reg["rocketengine"]["input"]]: reg["rocketengine"]["input"][k]["config"];
+				}>;
+
+				const cfg = block.config as
+					| {
+							thrust_add?: KeyCode;
+							thrust_sub?: KeyCode;
+							switchmode?: boolean;
+							strength?: number;
+					  }
+					| undefined;
+
+				const config: config = {
+					thrust: {
+						thrust_add: cfg?.thrust_add,
+						thrust_sub: cfg?.thrust_sub,
+						switchmode: cfg?.switchmode,
+						strength: cfg?.strength,
+					},
+				};
+
+				return config;
+			}
+			if (block.id === "motorblock") {
+				type config = partial<{
+					readonly [k in keyof reg["motorblock"]["input"]]: reg["motorblock"]["input"][k]["config"];
+				}>;
+
+				const cfg = block.config as
+					| {
+							speed?: number;
+							rotate_add?: KeyCode;
+							rotate_sub?: KeyCode;
+							switch?: boolean;
+					  }
+					| undefined;
+
+				const config: config = {
+					rotationSpeed: {
+						rotate_add: cfg?.rotate_add,
+						rotate_sub: cfg?.rotate_sub,
+						switchmode: cfg?.switch,
+						speed: cfg?.speed,
+					},
+				};
+
+				return config;
+			}
+			if (block.id === "disconnectblock") {
+				type config = partial<{
+					readonly [k in keyof reg["disconnectblock"]["input"]]: reg["disconnectblock"]["input"][k]["config"];
+				}>;
+
+				const cfg = block.config as
+					| {
+							disconnect?: KeyCode;
+					  }
+					| undefined;
+
+				const config: config = {
+					disconnect: {
+						key: cfg?.disconnect,
+					},
+				};
+
+				return config;
+			}
+			if (block.id === "tnt") {
+				type config = partial<{
+					readonly [k in keyof reg["tnt"]["input"]]: reg["tnt"]["input"][k]["config"];
+				}>;
+
+				const cfg = block.config as
+					| {
+							explode?: KeyCode;
+							radius?: number;
+							pressure?: number;
+							flammable?: boolean;
+							impact?: boolean;
+					  }
+					| undefined;
+
+				const config: config = {
+					explode: {
+						key: cfg?.explode,
+					},
+					flammable: cfg?.flammable,
+					radius: cfg?.radius,
+					impact: cfg?.impact,
+					pressure: cfg?.pressure,
+				};
+
+				return config;
+			}
+
+			return block.config;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(
+				(b): SerializedBlockV3 => ({
+					...b,
+					config: update(b),
+				}),
+			),
+		};
+	},
 
 	read(plot: PlotModel): SerializedBlocks<SerializedBlockV3> {
 		return {
@@ -303,7 +452,7 @@ const v7: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>,
 
 //
 
-const versions = [undefined!, undefined!, undefined!, undefined!, v4, v5, v6, v7] as const;
+const versions = [undefined!, undefined!, undefined!, undefined!, v4, v5, v6, v7, v8] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const BlocksSerializer = {

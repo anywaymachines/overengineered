@@ -18,25 +18,9 @@ export class ServoMotorAngleConfigLogicValue extends ConfigLogicValueBase<
 			this.value.set(0);
 
 			const def = {
-				thrustAdd: {
+				add: {
 					key: config.rotate_add,
-					conflicts: "thrustSub",
-					keyDown: () => {
-						if (!config.switchmode) {
-							this.value.set(config.angle);
-						} else {
-							this.value.set(this.value.get() === config.angle ? 0 : config.angle);
-						}
-					},
-					keyUp: () => {
-						if (!config.switchmode) {
-							this.value.set(0);
-						}
-					},
-				},
-				thrustSub: {
-					key: config.rotate_sub,
-					conflicts: "thrustAdd",
+					conflicts: "sub",
 					keyDown: () => {
 						if (!config.switchmode) {
 							this.value.set(-config.angle);
@@ -50,7 +34,23 @@ export class ServoMotorAngleConfigLogicValue extends ConfigLogicValueBase<
 						}
 					},
 				},
-			} as const satisfies KeyDefinitions<"thrustAdd" | "thrustSub">;
+				sub: {
+					key: config.rotate_sub,
+					conflicts: "add",
+					keyDown: () => {
+						if (!config.switchmode) {
+							this.value.set(config.angle);
+						} else {
+							this.value.set(this.value.get() === config.angle ? 0 : config.angle);
+						}
+					},
+					keyUp: () => {
+						if (!config.switchmode) {
+							this.value.set(0);
+						}
+					},
+				},
+			} as const satisfies KeyDefinitions<"add" | "sub">;
 
 			const controller = this.added(new KeyPressingDefinitionsController(def));
 			this.event.subscribeObservable(controlsEnabled, (enabled) =>

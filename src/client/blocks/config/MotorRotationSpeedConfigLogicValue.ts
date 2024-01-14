@@ -18,39 +18,39 @@ export class MotorRotationSpeedConfigLogicValue extends ConfigLogicValueBase<
 			this.value.set(0);
 
 			const def = {
-				thrustAdd: {
+				add: {
 					key: config.rotate_add,
-					conflicts: "thrustAdd",
+					conflicts: "sub",
 					keyDown: () => {
-						if (config.switchmode) {
+						if (!config.switchmode) {
 							this.value.set(config.speed);
 						} else {
 							this.value.set(this.value.get() === config.speed ? 0 : config.speed);
 						}
 					},
 					keyUp: () => {
-						if (config.switchmode) {
+						if (!config.switchmode) {
 							this.value.set(0);
 						}
 					},
 				},
-				thrustSub: {
+				sub: {
 					key: config.rotate_sub,
-					conflicts: "thrustSub",
+					conflicts: "add",
 					keyDown: () => {
-						if (config.switchmode) {
+						if (!config.switchmode) {
 							this.value.set(-config.speed);
 						} else {
 							this.value.set(this.value.get() === -config.speed ? 0 : -config.speed);
 						}
 					},
 					keyUp: () => {
-						if (config.switchmode) {
+						if (!config.switchmode) {
 							this.value.set(0);
 						}
 					},
 				},
-			} as const satisfies KeyDefinitions<"thrustAdd" | "thrustSub">;
+			} as const satisfies KeyDefinitions<"add" | "sub">;
 
 			const controller = this.added(new KeyPressingDefinitionsController(def));
 			this.event.subscribeObservable(controlsEnabled, (enabled) =>

@@ -35,9 +35,9 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefi
 			};
 
 			const def = {
-				thrustAdd: {
+				add: {
 					key: config.thrust_add,
-					conflicts: "thrustSub",
+					conflicts: "sub",
 					keyDown: () => {
 						if (movingUp) return;
 
@@ -53,9 +53,9 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefi
 						movingUp = false;
 					},
 				},
-				thrustSub: {
+				sub: {
 					key: config.thrust_sub,
-					conflicts: "thrustAdd",
+					conflicts: "add",
 					keyDown: () => {
 						if (movingDown) return;
 
@@ -71,7 +71,7 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefi
 						movingDown = false;
 					},
 				},
-			} as const satisfies KeyDefinitions<"thrustAdd" | "thrustSub">;
+			} as const satisfies KeyDefinitions<"add" | "sub">;
 
 			const controller = new KeyPressingDefinitionsController(def);
 

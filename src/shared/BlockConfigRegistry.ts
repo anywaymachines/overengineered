@@ -7,8 +7,8 @@ const disconnectblock = {
 			type: "keybool",
 			default: false as boolean,
 			config: {
-				key: "F",
-				switch: false,
+				key: "F" as KeyCode,
+				switch: false as boolean,
 			},
 		},
 	},
@@ -99,8 +99,8 @@ const tnt = {
 			type: "keybool",
 			default: false as boolean as boolean,
 			config: {
-				key: "B",
-				switch: false,
+				key: "B" as KeyCode,
+				switch: false as boolean,
 			},
 			canBeSwitch: false,
 		},
@@ -111,7 +111,7 @@ const tnt = {
 			min: 1,
 			max: 12,
 			step: 1,
-			config: 2500 as number,
+			config: 12 as number,
 		},
 		pressure: {
 			displayName: "Explosion pressure",

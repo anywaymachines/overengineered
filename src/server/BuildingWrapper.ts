@@ -251,7 +251,7 @@ export default class BuildingWrapper {
 		model.SetAttribute("material", Serializer.EnumMaterialSerializer.serialize(data.material));
 		model.SetAttribute("color", HttpService.JSONEncode(Serializer.Color3Serializer.serialize(data.color)));
 		if (data.config && Objects.keys(data.config).size() !== 0) {
-			model.SetAttribute("config", HttpService.JSONEncode(data.config));
+			model.SetAttribute("config", JSON.serialize(data.config));
 		}
 
 		model.SetAttribute("uuid", data.uuid ?? HttpService.GenerateGUID(false));
