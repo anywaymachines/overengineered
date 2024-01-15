@@ -43,7 +43,7 @@ const smallrocketengine = {
 				thrust_add: "W" as KeyCode,
 				thrust_sub: "S" as KeyCode,
 				switchmode: false as boolean,
-				strength: 0 as number,
+				strength: 100 as number,
 			},
 			canBeSwitch: true as boolean,
 		},
