@@ -20,6 +20,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 
 	private readonly checkboxTemplate;
 	private readonly keyTemplate;
+	private readonly multiKeyTemplate;
 	private readonly sliderTemplate;
 	private readonly numberTemplate;
 	private readonly thrustTemplate;
@@ -30,6 +31,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 		const templates = GuiController.getGameUI<{ Templates: { Configuration: Template } }>().Templates.Configuration;
 		this.checkboxTemplate = Control.asTemplate(templates.CheckboxTemplate, false);
 		this.keyTemplate = Control.asTemplate(templates.KeyTemplate, false);
+		this.multiKeyTemplate = Control.asTemplate(templates.MultiKeyTemplate, false);
 		this.sliderTemplate = Control.asTemplate(templates.SliderTemplate, false);
 		this.numberTemplate = Control.asTemplate(templates.NumberTemplate, false);
 		this.thrustTemplate = Control.asTemplate(templates.ThrustTemplate, false);
@@ -43,6 +45,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 				{
 					checkbox: this.checkboxTemplate,
 					key: this.keyTemplate,
+					multikey: this.multiKeyTemplate,
 					number: this.numberTemplate,
 					slider: this.sliderTemplate,
 					thrust: this.thrustTemplate,
@@ -101,7 +104,13 @@ export class KeyBoolConfigValueControl extends ConfigValueControl<KeyChooserCont
 }
 
 export class KeyConfigValueControl extends ConfigValueControl<KeyChooserControlDefinition> {
-	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["key"]["config"]) => void>();
+	readonly submitted = new Signal<
+		(
+			config: BlockConfigDefinitionRegistry["key"]["config"],
+			prev: BlockConfigDefinitionRegistry["key"]["config"],
+		) => void
+	>();
+	readonly value;
 
 	constructor(
 		templates: Templates,
@@ -111,9 +120,47 @@ export class KeyConfigValueControl extends ConfigValueControl<KeyChooserControlD
 		super(templates.key(), definition.displayName);
 
 		const control = this.added(new KeyChooserControl(this.gui.Control));
+		this.value = control.value;
 		control.value.set(config);
 
-		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
+		this.event.subscribe(control.submitted, (value, prev) => this.submitted.Fire(value, prev));
+	}
+}
+
+export type MultiKeyConfigValueControlDefinition = ConfigControlDefinition;
+export class MultiKeyConfigValueControl extends ConfigValueControl<MultiKeyConfigValueControlDefinition> {
+	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["multikey"]["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: BlockConfigDefinitionRegistry["multikey"]["config"],
+		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["multikey"]>,
+	) {
+		super(templates.multikey(), definition.displayName);
+
+		const controls = new Map<string, KeyConfigValueControl>();
+
+		const list = this.added(new Control<GuiObject, KeyConfigValueControl>(this.gui.Control));
+		for (const name of Objects.keys(definition.default)) {
+			const control = new KeyConfigValueControl(templates, config[name], definition.keyDefinitions[name]);
+			list.add(control);
+			controls.set(name, control);
+			control.value.set(config[name] ?? "P");
+
+			this.event.subscribe(control.submitted, (value, prev) => {
+				for (const child of list.getChildren()) {
+					if (child === control) continue;
+
+					if (child.value.get() === value) {
+						child.value.set(prev);
+					}
+				}
+
+				this.submitted.Fire(
+					(config = Objects.fromEntries([...controls].map((c) => [c[0], c[1].value.get()] as const))),
+				);
+			});
+		}
 	}
 }
 
@@ -170,17 +217,31 @@ export class ThrustConfigValueControl extends ConfigValueControl<ThrustConfigVal
 		);
 
 		const def = {
-			thrust_add: {
-				displayName: "Thrust +",
-				type: "key",
-				default: "W" as KeyCode,
-				config: "W" as KeyCode,
-			},
-			thrust_sub: {
-				displayName: "Thrust -",
-				type: "key",
-				default: "S" as KeyCode,
-				config: "S" as KeyCode,
+			thrust: {
+				displayName: "Thrust",
+				type: "multikey",
+				default: {
+					add: "W" as KeyCode,
+					sub: "S" as KeyCode,
+				},
+				config: {
+					add: "W" as KeyCode,
+					sub: "S" as KeyCode,
+				},
+				keyDefinitions: {
+					add: {
+						displayName: "Thrust +",
+						type: "key",
+						default: "W",
+						config: "W",
+					},
+					sub: {
+						displayName: "Thrust -",
+						type: "key",
+						default: "S",
+						config: "S",
+					},
+				},
 			},
 			switchmode: {
 				displayName: "Toggle Mode",
@@ -309,6 +370,7 @@ export class ServoMotorAngleConfigValueControl extends ConfigValueControl<Config
 export const configControls = {
 	bool: BoolConfigValueControl,
 	key: KeyConfigValueControl,
+	multikey: MultiKeyConfigValueControl,
 	keybool: KeyBoolConfigValueControl,
 	number: NumberConfigValueControl,
 	clampedNumber: SliderConfigValueControl,
@@ -337,6 +399,7 @@ export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 export type Templates = {
 	checkbox: () => ConfigPartDefinition<CheckBoxControlDefinition>;
 	key: () => ConfigPartDefinition<KeyChooserControlDefinition>;
+	multikey: () => ConfigPartDefinition<MultiKeyConfigValueControlDefinition>;
 	slider: () => ConfigPartDefinition<SliderControlDefinition>;
 	number: () => ConfigPartDefinition<NumberTextBoxControlDefinition>;
 	thrust: () => ConfigPartDefinition<ThrustConfigValueControlDefinition>;
@@ -345,6 +408,7 @@ export type Templates = {
 export type Template = {
 	CheckboxTemplate: ConfigPartDefinition<CheckBoxControlDefinition>;
 	KeyTemplate: ConfigPartDefinition<KeyChooserControlDefinition>;
+	MultiKeyTemplate: ConfigPartDefinition<MultiKeyConfigValueControlDefinition>;
 	SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 	NumberTemplate: ConfigPartDefinition<NumberTextBoxControlDefinition>;
 	ThrustTemplate: ConfigPartDefinition<ThrustConfigValueControlDefinition>;

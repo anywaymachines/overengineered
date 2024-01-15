@@ -9,7 +9,7 @@ export type KeyChooserControlDefinition = TextButton;
 
 /** Control that represents a key */
 export default class KeyChooserControl extends Control<KeyChooserControlDefinition> {
-	public readonly submitted = new Signal<(value: KeyCode) => void>();
+	public readonly submitted = new Signal<(value: KeyCode, prev: KeyCode) => void>();
 	public readonly value = new ObservableValue<KeyCode>("P");
 
 	private readonly color = Color3.fromRGB(48, 62, 87);
@@ -25,16 +25,18 @@ export default class KeyChooserControl extends Control<KeyChooserControlDefiniti
 			if (InputController.inputType.get() === "Touch") {
 				SelectButtonPopup.instance.showPopup(
 					(key) => {
+						const prev = this.value.get();
 						this.value.set(key);
-						this.submitted.Fire(key);
+						this.submitted.Fire(key, prev);
 					},
 					() => {},
 				);
 			} else {
 				this.gui.BackgroundColor3 = this.activeColor;
 				this.eventHandler.subscribeOnce(UserInputService.InputBegan, (input) => {
+					const prev = this.value.get();
 					this.value.set(input.KeyCode.Name);
-					this.submitted.Fire(input.KeyCode.Name);
+					this.submitted.Fire(input.KeyCode.Name, prev);
 					this.gui.BackgroundColor3 = this.color;
 				});
 			}

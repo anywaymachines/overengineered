@@ -36,7 +36,7 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefi
 
 			const def = {
 				add: {
-					key: config.thrust_add,
+					key: config.thrust.add,
 					conflicts: "sub",
 					keyDown: () => {
 						if (movingUp) return;
@@ -54,7 +54,7 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefi
 					},
 				},
 				sub: {
-					key: config.thrust_sub,
+					key: config.thrust.sub,
 					conflicts: "add",
 					keyDown: () => {
 						if (movingDown) return;

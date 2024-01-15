@@ -40,8 +40,10 @@ const smallrocketengine = {
 			type: "thrust",
 			default: 0 as number,
 			config: {
-				thrust_add: "W" as KeyCode,
-				thrust_sub: "S" as KeyCode,
+				thrust: {
+					add: "W" as KeyCode,
+					sub: "S" as KeyCode,
+				},
 				switchmode: false as boolean,
 				strength: 100 as number,
 			},

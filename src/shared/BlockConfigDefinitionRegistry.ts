@@ -8,6 +8,12 @@ type key = {
 	default: KeyCode;
 	config: KeyCode;
 };
+type multikey<TKeys extends string = string> = {
+	type: "multikey";
+	default: Readonly<Record<TKeys, KeyCode>>;
+	config: Readonly<Record<TKeys, KeyCode>>;
+	keyDefinitions: BlockConfigRegsToDefinitions<Readonly<Record<TKeys, key>>>;
+};
 type keybool = {
 	type: "keybool";
 	default: boolean;
@@ -35,8 +41,10 @@ type thrust = {
 	type: "thrust";
 	default: number;
 	config: {
-		thrust_add: KeyCode;
-		thrust_sub: KeyCode;
+		thrust: {
+			add: KeyCode;
+			sub: KeyCode;
+		};
 		switchmode: boolean;
 		strength: number;
 	};
@@ -70,6 +78,7 @@ type BlockConfigDefinitionRegistry = {
 	number: _number;
 	clampedNumber: clampedNumber;
 	key: key;
+	multikey: multikey;
 	keybool: keybool;
 	thrust: thrust;
 	motorRotationSpeed: motorRotationSpeed;
