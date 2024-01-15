@@ -16,7 +16,7 @@ const initializeHideInterfaceController = (playModeController: PlayModeControlle
 			const gui = GuiController.getGameUI();
 
 			// Hide core gui (excluding backpack)
-			StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.All, gui.Enabled);
+			StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.All, !gui.Enabled);
 			StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
 			// Hide screen gui
