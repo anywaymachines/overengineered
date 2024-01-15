@@ -86,6 +86,56 @@ export class BoolConfigValueControl extends ConfigValueControl<CheckBoxControlDe
 	}
 }
 
+export type Vector3ConfigValueControlDefinition = ConfigControlDefinition;
+export class Vector3ConfigValueControl extends ConfigValueControl<Vector3ConfigValueControlDefinition> {
+	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["vector3"]["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: BlockConfigDefinitionRegistry["vector3"]["config"],
+		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["vector3"]>,
+	) {
+		super(templates.multikey(), definition.displayName);
+
+		const defs = {
+			X: {
+				displayName: "X",
+				type: "number",
+				default: 0,
+				config: 0,
+			},
+			Y: {
+				displayName: "Y",
+				type: "number",
+				default: 0,
+				config: 0,
+			},
+			Z: {
+				displayName: "Z",
+				type: "number",
+				default: 0,
+				config: 0,
+			},
+		} satisfies Record<string, BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["number"]>>;
+
+		const list = this.added(new Control<GuiObject, NumberConfigValueControl>(this.gui.Control));
+		const create = (key: keyof typeof defs) => {
+			const control = new NumberConfigValueControl(templates, config[key], defs[key]);
+			list.add(control);
+
+			this.event.subscribe(control.submitted, () =>
+				this.submitted.Fire((config = new Vector3(x.value.get(), y.value.get(), z.value.get()))),
+			);
+
+			return control;
+		};
+
+		const x = create("X");
+		const y = create("Y");
+		const z = create("Z");
+	}
+}
+
 export class KeyBoolConfigValueControl extends ConfigValueControl<KeyChooserControlDefinition> {
 	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["keybool"]["config"]) => void>();
 
@@ -145,7 +195,6 @@ export class MultiKeyConfigValueControl extends ConfigValueControl<MultiKeyConfi
 			const control = new KeyConfigValueControl(templates, config[name], definition.keyDefinitions[name]);
 			list.add(control);
 			controls.set(name, control);
-			control.value.set(config[name] ?? "P");
 
 			this.event.subscribe(control.submitted, (value, prev) => {
 				for (const child of list.getChildren()) {
@@ -166,6 +215,7 @@ export class MultiKeyConfigValueControl extends ConfigValueControl<MultiKeyConfi
 
 export class NumberConfigValueControl extends ConfigValueControl<NumberTextBoxControlDefinition> {
 	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["number"]["config"]) => void>();
+	readonly value;
 
 	constructor(
 		templates: Templates,
@@ -175,6 +225,7 @@ export class NumberConfigValueControl extends ConfigValueControl<NumberTextBoxCo
 		super(templates.number(), definition.displayName);
 
 		const control = this.added(new NumberTextBoxControl(this.gui.Control));
+		this.value = control.value;
 		control.value.set(config);
 
 		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
@@ -369,6 +420,7 @@ export class ServoMotorAngleConfigValueControl extends ConfigValueControl<Config
 
 export const configControls = {
 	bool: BoolConfigValueControl,
+	vector3: Vector3ConfigValueControl,
 	key: KeyConfigValueControl,
 	multikey: MultiKeyConfigValueControl,
 	keybool: KeyBoolConfigValueControl,

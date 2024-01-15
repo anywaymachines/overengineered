@@ -3,6 +3,11 @@ type bool = {
 	default: boolean;
 	config: boolean;
 };
+type vector3 = {
+	type: "vector3";
+	default: Vector3;
+	config: Vector3;
+};
 type key = {
 	type: "key";
 	default: KeyCode;
@@ -75,6 +80,7 @@ type servoMotorAngle = {
 export default BlockConfigDefinitionRegistry;
 type BlockConfigDefinitionRegistry = {
 	bool: bool;
+	vector3: vector3;
 	number: _number;
 	clampedNumber: clampedNumber;
 	key: key;

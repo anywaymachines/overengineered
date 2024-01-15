@@ -11,6 +11,7 @@ import { MultiKeyConfigLogicValue } from "./MultiKeyConfigLogicValue";
 import { NumberConfigLogicValue } from "./NumberConfigLogicValue";
 import { ServoMotorAngleConfigLogicValue } from "./ServoMotorAngleConfigLogicValue";
 import { ThrustConfigLogicValue } from "./ThrustConfigLogicValue";
+import { Vector3ConfigLogicValue } from "./Vector3ConfigLogicValue";
 
 export type blockConfigRegistryClient = {
 	[k in keyof BlockConfigDefinitionRegistry]: {
@@ -24,6 +25,12 @@ export type blockConfigRegistryClient = {
 const blockConfigRegistryClient = {
 	bool: {
 		input: BoolConfigLogicValue,
+		output: (definition) => {
+			return new ObservableValue(definition.default);
+		},
+	},
+	vector3: {
+		input: Vector3ConfigLogicValue,
 		output: (definition) => {
 			return new ObservableValue(definition.default);
 		},

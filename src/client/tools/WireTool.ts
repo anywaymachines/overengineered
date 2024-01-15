@@ -27,11 +27,14 @@ type Marker = MarkerData & { readonly instance: BillboardGui & { Adornee: BlockM
 /** A tool for wiring */
 export default class WireTool extends ToolBase {
 	private static readonly typeGroups = {
-		number: {
-			color: Color3.fromRGB(81, 202, 21),
-		},
 		bool: {
 			color: Color3.fromRGB(255, 170, 0),
+		},
+		vector3: {
+			color: Color3.fromRGB(244, 142, 255),
+		},
+		number: {
+			color: Color3.fromRGB(81, 202, 21),
 		},
 		never: {
 			color: Color3.fromRGB(0, 0, 0),
@@ -40,6 +43,7 @@ export default class WireTool extends ToolBase {
 
 	private static readonly groups = {
 		bool: "bool",
+		vector3: "vector3",
 		keybool: "bool",
 		number: "number",
 		clampedNumber: "number",
