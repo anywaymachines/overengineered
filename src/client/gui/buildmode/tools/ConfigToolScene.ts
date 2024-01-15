@@ -64,6 +64,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 	}
 
 	private updateConfigs(selected: readonly (SelectionBox & { Parent: BlockModel })[]) {
+		this.gui.Visible = selected.size() !== 0;
 		if (selected.size() === 0) return;
 
 		this.gui.ParamsSelection.Title.HeadingLabel.Text = `CONFIGURATION (${selected.size()})`;
