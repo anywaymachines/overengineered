@@ -1,4 +1,10 @@
-import { BlockConfigBothDefinitions } from "./BlockConfigDefinitionRegistry";
+import {
+	BlockConfigBothDefinitions,
+	BlockConfigRegToDefinition,
+	BlockConfigValueTypeBool,
+	BlockConfigValueTypeNumber,
+	BlockConfigValueTypeOr,
+} from "./BlockConfigDefinitionRegistry";
 
 const disconnectblock = {
 	input: {
@@ -247,7 +253,7 @@ const numberProcessing = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const twoNumberInputsOneNumberOutput = {
+const twoNumberInputsNumberOutput = {
 	input: {
 		value1: {
 			displayName: "Value 1",
@@ -332,6 +338,153 @@ const multiplexer = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const connectors = {
+	boolOrNumber(
+		name: string,
+		group?: string,
+	): BlockConfigRegToDefinition<BlockConfigValueTypeOr<[BlockConfigValueTypeBool, BlockConfigValueTypeNumber]>> {
+		return {
+			displayName: name,
+			type: "or",
+			default: {
+				type: "number",
+				value: 0 as number,
+			},
+			config: {
+				type: "number",
+				value: 0 as number,
+			},
+			group,
+			types: [
+				{
+					type: "bool",
+					config: false as boolean,
+					default: false as boolean,
+				},
+				{
+					type: "number",
+					default: 0 as number,
+					config: 0 as number,
+				},
+			],
+		};
+	},
+} as const;
+
+const twoNumbersOrBooleansInputBooleanOutput = {
+	input: {
+		value1: connectors.boolOrNumber("Value 1", "1"),
+		value2: connectors.boolOrNumber("Value 2", "1"),
+	},
+	output: {
+		result: {
+			displayName: "Result",
+			type: "bool",
+			config: false as boolean,
+			default: false as boolean,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
+const twoNumbersInputBooleanOutput = {
+	input: {
+		value1: {
+			displayName: "Value 1",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		value2: {
+			displayName: "Value 2",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+	output: {
+		result: {
+			displayName: "Result",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
+const operationvec3combiner = {
+	input: {
+		value_x: {
+			displayName: "X",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		value_y: {
+			displayName: "Y",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		value_z: {
+			displayName: "Z",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+	output: {
+		result: {
+			displayName: "Vector",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
+const operationvec3splitter = {
+	input: {
+		value: {
+			displayName: "Vector",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+	},
+	output: {
+		result_x: {
+			displayName: "X",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		result_y: {
+			displayName: "Y",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		result_z: {
+			displayName: "Z",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
+const anglesensor = {
+	input: {},
+	output: {
+		result: {
+			displayName: "Angle",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const blockConfigRegistry = {
 	disconnectblock,
 	motorblock,
@@ -347,6 +500,7 @@ const blockConfigRegistry = {
 	multiplexer,
 
 	speedometer,
+	anglesensor,
 
 	operationnot: booleanProcessing,
 	operationand: twoBooleanInputsOneBooleanOutput,
@@ -356,10 +510,20 @@ const blockConfigRegistry = {
 	operationxnor: twoBooleanInputsOneBooleanOutput,
 	operationnor: twoBooleanInputsOneBooleanOutput,
 
-	operationadd: twoNumberInputsOneNumberOutput,
-	operationsub: twoNumberInputsOneNumberOutput,
-	operationmul: twoNumberInputsOneNumberOutput,
-	operationdiv: twoNumberInputsOneNumberOutput,
+	operationequals: twoNumbersOrBooleansInputBooleanOutput,
+	operationgreaterthan: twoNumbersInputBooleanOutput,
+	operationround: numberProcessing,
+
+	operationadd: twoNumberInputsNumberOutput,
+	operationsub: twoNumberInputsNumberOutput,
+	operationmul: twoNumberInputsNumberOutput,
+	operationdiv: twoNumberInputsNumberOutput,
+
+	operationrad: numberProcessing,
+	operationdeg: numberProcessing,
+
+	operationvec3splitter,
+	operationvec3combiner,
 } as const satisfies Record<string, BlockConfigBothDefinitions>;
 
 export default blockConfigRegistry;

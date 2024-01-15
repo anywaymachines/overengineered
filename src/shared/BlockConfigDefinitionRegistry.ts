@@ -1,25 +1,25 @@
-type bool = {
+export type BlockConfigValueTypeBool = {
 	type: "bool";
 	default: boolean;
 	config: boolean;
 };
-type vector3 = {
+export type BlockConfigValueTypeVector3 = {
 	type: "vector3";
 	default: Vector3;
 	config: Vector3;
 };
-type key = {
+export type BlockConfigValueTypeKey = {
 	type: "key";
 	default: KeyCode;
 	config: KeyCode;
 };
-type multikey<TKeys extends string = string> = {
+export type BlockConfigValueTypeMultiKey<TKeys extends string = string> = {
 	type: "multikey";
 	default: Readonly<Record<TKeys, KeyCode>>;
 	config: Readonly<Record<TKeys, KeyCode>>;
-	keyDefinitions: BlockConfigRegsToDefinitions<Readonly<Record<TKeys, key>>>;
+	keyDefinitions: BlockConfigRegsToDefinitions<Readonly<Record<TKeys, BlockConfigValueTypeKey>>>;
 };
-type keybool = {
+export type BlockConfigValueTypeKeyBool = {
 	type: "keybool";
 	default: boolean;
 	config: {
@@ -29,12 +29,12 @@ type keybool = {
 
 	canBeSwitch?: boolean;
 };
-type _number = {
+export type BlockConfigValueTypeNumber = {
 	type: "number";
 	default: number;
 	config: number;
 };
-type clampedNumber = {
+export type BlockConfigValueTypeClampedNumber = {
 	type: "clampedNumber";
 	default: number;
 	config: number;
@@ -42,7 +42,7 @@ type clampedNumber = {
 	max: number;
 	step: number;
 };
-type thrust = {
+export type BlockConfigValueTypeThrust = {
 	type: "thrust";
 	default: number;
 	config: {
@@ -55,7 +55,7 @@ type thrust = {
 	};
 	canBeSwitch: boolean;
 };
-type motorRotationSpeed = {
+export type BlockConfigValueTypeMotorRotationSpeed = {
 	type: "motorRotationSpeed";
 	default: number;
 	config: {
@@ -66,7 +66,7 @@ type motorRotationSpeed = {
 	};
 	maxSpeed: number;
 };
-type servoMotorAngle = {
+export type BlockConfigValueTypeServoMotorAngle = {
 	type: "servoMotorAngle";
 	default: number;
 	config: {
@@ -77,18 +77,36 @@ type servoMotorAngle = {
 	};
 };
 
+type OrConfigType<TType extends keyof BlockConfigDefinitionRegistry> = {
+	type: TType;
+	value: BlockConfigDefinitionRegistry[TType]["default"];
+};
+export type BlockConfigValueTypeOr<
+	T extends readonly BlockConfigDefinitionRegistry[Exclude<
+		keyof BlockConfigDefinitionRegistry,
+		"or"
+	>][] = readonly BlockConfigDefinitionRegistry[Exclude<keyof BlockConfigDefinitionRegistry, "or">][],
+> = {
+	type: "or";
+	types: T;
+	default: OrConfigType<T[number]["type"]>;
+	config: OrConfigType<T[number]["type"]>;
+	group?: string;
+};
+
 export default BlockConfigDefinitionRegistry;
 type BlockConfigDefinitionRegistry = {
-	bool: bool;
-	vector3: vector3;
-	number: _number;
-	clampedNumber: clampedNumber;
-	key: key;
-	multikey: multikey;
-	keybool: keybool;
-	thrust: thrust;
-	motorRotationSpeed: motorRotationSpeed;
-	servoMotorAngle: servoMotorAngle;
+	bool: BlockConfigValueTypeBool;
+	vector3: BlockConfigValueTypeVector3;
+	number: BlockConfigValueTypeNumber;
+	clampedNumber: BlockConfigValueTypeClampedNumber;
+	key: BlockConfigValueTypeKey;
+	multikey: BlockConfigValueTypeMultiKey;
+	keybool: BlockConfigValueTypeKeyBool;
+	thrust: BlockConfigValueTypeThrust;
+	motorRotationSpeed: BlockConfigValueTypeMotorRotationSpeed;
+	servoMotorAngle: BlockConfigValueTypeServoMotorAngle;
+	or: BlockConfigValueTypeOr;
 };
 
 //

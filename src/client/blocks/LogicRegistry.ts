@@ -12,7 +12,6 @@ import SuspensionLogic from "./logic/SuspensionLogic";
 import TNTBlockLogic from "./logic/TNTBlockLogic";
 import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 import WingLogic from "./logic/WingLogic";
-import SpeedometerBlockLogic from "./operations/Speedometer";
 import OperationAndBlockLogic from "./operations/boolean/OperationAndBlockLogic";
 import OperationNandBlockLogic from "./operations/boolean/OperationNandBlockLogic";
 import OperationNorBlockLogic from "./operations/boolean/OperationNorBlockLogic";
@@ -23,8 +22,16 @@ import OperationXorBlockLogic from "./operations/boolean/OperationXorBlockLogic"
 import Multiplexer from "./operations/number/Multiplexer";
 import OperationAddBlockLogic from "./operations/number/OperationAddBlockLogic";
 import OperationDivBlockLogic from "./operations/number/OperationDivBlockLogic";
+import OperationEqualsBlockLogic from "./operations/number/OperationEqualsBlockLogic";
+import OperationGreaterThanBlockLogic from "./operations/number/OperationGreaterThanBlockLogic";
 import OperationMulBlockLogic from "./operations/number/OperationMulBlockLogic";
+import OperationRoundBlockLogic from "./operations/number/OperationRoundBlockLogic";
 import OperationSubBlockLogic from "./operations/number/OperationSubBlockLogic";
+import OperationDegBlockLogic from "./operations/number/trigonometry/OperationDegBlockLogic";
+import OperationRadBlockLogic from "./operations/number/trigonometry/OperationRadBlockLogic";
+import AngleSensorBlockLogic from "./operations/sensors/AngleSensor";
+import SpeedometerBlockLogic from "./operations/sensors/Speedometer";
+import OperationVec3SplitterBlockLogic from "./operations/vector/OperationVec3SplitterBlockLogic";
 
 const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): BlockLogic } | undefined>> = {
 	vehicleseat: VehicleSeatBlockLogic,
@@ -47,6 +54,7 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 	multiplexer: Multiplexer,
 
 	speedometer: SpeedometerBlockLogic,
+	anglesensor: AngleSensorBlockLogic,
 
 	operationnot: OperationNotBlockLogic,
 	operationand: OperationAndBlockLogic,
@@ -60,6 +68,14 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 	operationdiv: OperationDivBlockLogic,
 	operationsub: OperationSubBlockLogic,
 	operationmul: OperationMulBlockLogic,
+	operationvec3splitter: OperationVec3SplitterBlockLogic,
+
+	operationequals: OperationEqualsBlockLogic,
+	operationgreaterthan: OperationGreaterThanBlockLogic,
+	operationround: OperationRoundBlockLogic,
+
+	operationdeg: OperationDegBlockLogic,
+	operationrad: OperationRadBlockLogic,
 };
 
 export default logicRegistry;

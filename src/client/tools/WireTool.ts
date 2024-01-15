@@ -50,6 +50,7 @@ export default class WireTool extends ToolBase {
 		thrust: "number",
 		motorRotationSpeed: "number",
 		servoMotorAngle: "number",
+		or: "number",
 		key: "never",
 		multikey: "never",
 	} as const satisfies Record<keyof BlockConfigDefinitionRegistry, keyof typeof this.typeGroups>;

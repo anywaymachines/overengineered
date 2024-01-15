@@ -9,6 +9,7 @@ import { KeyConfigLogicValue } from "./KeyConfigLogicValue";
 import { MotorRotationSpeedConfigLogicValue } from "./MotorRotationSpeedConfigLogicValue";
 import { MultiKeyConfigLogicValue } from "./MultiKeyConfigLogicValue";
 import { NumberConfigLogicValue } from "./NumberConfigLogicValue";
+import { OrMotorAngleConfigLogicValue } from "./OrConfigLogicValue";
 import { ServoMotorAngleConfigLogicValue } from "./ServoMotorAngleConfigLogicValue";
 import { ThrustConfigLogicValue } from "./ThrustConfigLogicValue";
 import { Vector3ConfigLogicValue } from "./Vector3ConfigLogicValue";
@@ -79,6 +80,12 @@ const blockConfigRegistryClient = {
 	},
 	servoMotorAngle: {
 		input: ServoMotorAngleConfigLogicValue,
+		output: (definition) => {
+			return new ObservableValue(definition.default);
+		},
+	},
+	or: {
+		input: OrMotorAngleConfigLogicValue,
 		output: (definition) => {
 			return new ObservableValue(definition.default);
 		},

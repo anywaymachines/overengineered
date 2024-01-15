@@ -416,6 +416,36 @@ export class ServoMotorAngleConfigValueControl extends ConfigValueControl<Config
 	}
 }
 
+export class OrConfigValueControl extends ConfigValueControl<ConfigControlDefinition> {
+	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["or"]["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: BlockConfigDefinitionRegistry["or"]["config"],
+		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["or"]>,
+	) {
+		super(templates.thrust(), definition.displayName);
+
+		const control = this.added(new ConfigControl(this.gui.Control));
+		this.event.subscribe(control.configUpdated, (key, value) =>
+			this.submitted.Fire(
+				(config = {
+					type: key as Exclude<keyof BlockConfigDefinitionRegistry, "or">,
+					value: value as BlockConfigDefinitionRegistry[Exclude<
+						keyof BlockConfigDefinitionRegistry,
+						"or"
+					>]["default"],
+				}),
+			),
+		);
+
+		const def = Objects.fromEntries(
+			definition.types.map((t) => [t.type, { ...t, displayName: definition.displayName }] as const),
+		);
+		control.set(config.value as BlockConfigDefinitionsToConfig<typeof def>, def);
+	}
+}
+
 //
 
 export const configControls = {
@@ -429,6 +459,7 @@ export const configControls = {
 	thrust: ThrustConfigValueControl,
 	motorRotationSpeed: MotorRotationSpeedConfigValueControl,
 	servoMotorAngle: ServoMotorAngleConfigValueControl,
+	or: OrConfigValueControl,
 } as const satisfies {
 	readonly [k in keyof BlockConfigDefinitionRegistry]: {
 		new (
