@@ -111,21 +111,18 @@ export default class WireTool extends ToolBase {
 	} as const;
 
 	private static readonly groups = {
-		bool: () => "bool",
-		vector3: () => "vector3",
-		keybool: () => "bool",
-		number: () => "number",
-		clampedNumber: () => "number",
-		thrust: () => "number",
-		motorRotationSpeed: () => "number",
-		servoMotorAngle: () => "number",
-		or: () => "number",
-		key: () => "never",
-		multikey: () => "never",
-	} as const satisfies Record<
-		keyof BlockConfigDefinitionRegistry,
-		(config?: BlockConfigDefinition) => keyof typeof this.typeGroups
-	>;
+		bool: "bool",
+		vector3: "vector3",
+		keybool: "bool",
+		number: "number",
+		clampedNumber: "number",
+		thrust: "number",
+		motorRotationSpeed: "number",
+		servoMotorAngle: "number",
+		or: "number",
+		key: "never",
+		multikey: "never",
+	} as const satisfies Record<keyof BlockConfigDefinitionRegistry, keyof typeof this.typeGroups>;
 
 	private renderedWires: BasePart[] = [];
 	private renderedTooltips: BillboardGui[] = [];
@@ -592,7 +589,7 @@ export default class WireTool extends ToolBase {
 								? "connected_input"
 								: markerType,
 						dataType: config.type,
-						colors: allowed.map((a) => WireTool.typeGroups[WireTool.groups[a]()].color),
+						colors: allowed.map((a) => WireTool.typeGroups[WireTool.groups[a]].color),
 						name: config.displayName,
 					};
 

@@ -12,10 +12,7 @@ export type PopupControllerDefinition = ScreenGui & {
 };
 
 export default class PopupController extends Component<PopupControllerDefinition> {
-	static readonly instance = new PopupController(
-		GuiController.getPlayerGui().WaitForChild("Popups") as PopupControllerDefinition,
-	);
-
+	static readonly instance = new PopupController(GuiController.getPopupUI<PopupControllerDefinition>());
 	private readonly confirmGui;
 
 	constructor(gui: PopupControllerDefinition) {
