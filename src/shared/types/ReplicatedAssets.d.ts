@@ -16,9 +16,9 @@ interface ReplicatedStorage {
 			RankLabel: TextLabel;
 		};
 		Wires: Folder & {
-			WireMarkerInput: BillboardGui;
-			WireMarkerInputConnected: BillboardGui;
-			WireMarkerOutput: BillboardGui;
+			WireMarkerInput: BillboardGui & { readonly TextButton: GuiButton };
+			WireMarkerInputConnected: BillboardGui & { readonly TextButton: GuiButton };
+			WireMarkerOutput: BillboardGui & { readonly TextButton: GuiButton };
 			WireInfo: BillboardGui & {
 				TextLabel: TextLabel;
 			};

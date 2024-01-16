@@ -278,13 +278,13 @@ export class ThrustConfigValueControl extends ConfigValueControl<ThrustConfigVal
 				},
 				keyDefinitions: {
 					add: {
-						displayName: "Thrust +",
+						displayName: "+",
 						type: "key",
 						default: "W",
 						config: "W",
 					},
 					sub: {
-						displayName: "Thrust -",
+						displayName: "-",
 						type: "key",
 						default: "S",
 						config: "S",

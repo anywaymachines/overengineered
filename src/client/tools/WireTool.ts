@@ -1,10 +1,12 @@
 import { GamepadService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import Component from "client/base/Component";
+import ComponentContainer from "client/base/ComponentContainer";
 import ToolBase from "client/base/ToolBase";
 import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
-import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
+import BlockConfigDefinitionRegistry, { BlockConfigDefinition } from "shared/BlockConfigDefinitionRegistry";
 import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/BlockConfigRegistry";
 import Remotes from "shared/Remotes";
 import Objects from "shared/_fixes_/objects";
@@ -18,11 +20,78 @@ type MarkerData = {
 	readonly blockData: PlacedBlockData;
 	readonly dataType: keyof BlockConfigDefinitionRegistry;
 	readonly markerType: "input" | "connected_input" | "output";
-	readonly color: Color3;
+	readonly colors: readonly Color3[];
 	readonly name: string;
 };
 
-type Marker = MarkerData & { readonly instance: BillboardGui & { Adornee: BlockModel } };
+type MarkerComponentDefinition = BillboardGui;
+class MarkerComponent extends Component<MarkerComponentDefinition> {
+	readonly instance;
+	readonly data;
+
+	constructor(gui: MarkerComponentDefinition, data: MarkerData) {
+		super(gui);
+
+		this.instance = gui;
+		this.data = data;
+
+		if (this.data.colors.size() > 1) {
+			const button = this.instance.FindFirstChildWhichIsA("TextButton") as TextButton;
+			let i = 0;
+			spawn(() => {
+				const tru = true;
+				while (tru) {
+					task.wait(1);
+					button.BackgroundColor3 = this.data.colors[(i = (i + 1) % this.data.colors.size())];
+				}
+			});
+		}
+	}
+
+	protected prepareDesktop() {
+		let tooltip: BillboardGui | undefined;
+		this.onDisabled.Connect(() => {
+			tooltip?.Destroy();
+			tooltip = undefined;
+		});
+
+		const button = this.instance.FindFirstChildWhichIsA("TextButton") as TextButton;
+
+		// Show tooltip on hover
+		this.eventHandler.subscribe(button.MouseEnter, () => {
+			tooltip = this.createTooltip();
+			this.eventHandler.subscribeOnce(button.MouseLeave, () => {
+				tooltip?.Destroy();
+				tooltip = undefined;
+			});
+		});
+	}
+	protected prepareTouch() {
+		// Always show the tooltip
+		this.createTooltip();
+	}
+
+	/** Creates text above the marker with a dot signature with its name */
+	private createTooltip() {
+		const gui = ReplicatedStorage.Assets.Wires.WireInfo.Clone();
+		gui.TextLabel.Text = this.data.name;
+		gui.TextLabel.TextColor3 = this.data.colors[0];
+		gui.StudsOffsetWorldSpace = this.instance.StudsOffsetWorldSpace.add(new Vector3(0, 1, 0));
+		gui.Adornee = this.instance.Adornee;
+		gui.Parent = this.instance.Parent;
+
+		if (InputController.inputType.get() === "Gamepad") {
+			gui.Size = new UDim2(
+				gui.Size.X.Scale * 1.5,
+				gui.Size.X.Offset * 1.5,
+				gui.Size.Y.Scale * 1.5,
+				gui.Size.Y.Offset * 1.5,
+			);
+		}
+
+		return gui;
+	}
+}
 
 /** A tool for wiring */
 export default class WireTool extends ToolBase {
@@ -42,31 +111,39 @@ export default class WireTool extends ToolBase {
 	} as const;
 
 	private static readonly groups = {
-		bool: "bool",
-		vector3: "vector3",
-		keybool: "bool",
-		number: "number",
-		clampedNumber: "number",
-		thrust: "number",
-		motorRotationSpeed: "number",
-		servoMotorAngle: "number",
-		or: "number",
-		key: "never",
-		multikey: "never",
-	} as const satisfies Record<keyof BlockConfigDefinitionRegistry, keyof typeof this.typeGroups>;
+		bool: () => "bool",
+		vector3: () => "vector3",
+		keybool: () => "bool",
+		number: () => "number",
+		clampedNumber: () => "number",
+		thrust: () => "number",
+		motorRotationSpeed: () => "number",
+		servoMotorAngle: () => "number",
+		or: () => "number",
+		key: () => "never",
+		multikey: () => "never",
+	} as const satisfies Record<
+		keyof BlockConfigDefinitionRegistry,
+		(config?: BlockConfigDefinition) => keyof typeof this.typeGroups
+	>;
 
 	private renderedWires: BasePart[] = [];
-	private renderedMarkers: Marker[] = [];
 	private renderedTooltips: BillboardGui[] = [];
 
 	private draggingWire: BasePart | undefined;
-	private hoverMarker: Marker | undefined;
-	public startMarker = new ObservableValue<Marker | undefined>(undefined);
+	private hoverMarker: MarkerComponent | undefined;
+	public startMarker = new ObservableValue<MarkerComponent | undefined>(undefined);
 
 	private readonly viewportFrame;
 
+	private readonly markers;
+
 	constructor(mode: BuildingMode) {
 		super(mode);
+
+		this.markers = new ComponentContainer<MarkerComponent>();
+		this.onEnabled.Connect(() => this.markers.enable());
+		this.onDisabled.Connect(() => this.markers.disable());
 
 		// Wire rendering
 		this.viewportFrame = new Instance("ViewportFrame");
@@ -143,10 +220,10 @@ export default class WireTool extends ToolBase {
 		if (this.hoverMarker) {
 			await Remotes.Client.GetNamespace("Building").Get("UpdateLogicConnectionRequest").CallServerAsync({
 				operation: "connect",
-				outputBlock: this.startMarker.get()!.blockData.instance,
-				outputConnection: this.startMarker.get()!.id,
-				inputBlock: this.hoverMarker.blockData.instance,
-				inputConnection: this.hoverMarker.id,
+				outputBlock: this.startMarker.get()!.data.blockData.instance,
+				outputConnection: this.startMarker.get()!.data.id,
+				inputBlock: this.hoverMarker.data.blockData.instance,
+				inputConnection: this.hoverMarker.data.id,
 			});
 			this.updateVisual();
 		}
@@ -160,19 +237,16 @@ export default class WireTool extends ToolBase {
 	}
 
 	protected prepareTouch(): void {
-		this.renderedMarkers.forEach((marker) => {
+		this.markers.getChildren().forEach((marker) => {
 			const button = marker.instance.FindFirstChildWhichIsA("TextButton") as TextButton;
 
-			// Always show tooltips
-			this.createTooltip(marker);
-
-			if (marker.markerType === "output") {
+			if (marker.data.markerType === "output") {
 				this.eventHandler.subscribe(button.MouseButton1Click, () => {
 					if (this.startMarker.get()) return;
 
 					this.startMarker.set(marker);
 				});
-			} else if (marker.markerType === "input") {
+			} else if (marker.data.markerType === "input") {
 				this.eventHandler.subscribe(button.MouseButton1Click, async () => {
 					if (!this.startMarker.get()) return;
 
@@ -181,14 +255,14 @@ export default class WireTool extends ToolBase {
 						this.finishDragging();
 					}
 				});
-			} else if (marker.markerType === "connected_input") {
+			} else if (marker.data.markerType === "connected_input") {
 				this.eventHandler.subscribe(button.MouseButton1Click, async () => {
 					if (this.startMarker.get()) return;
 
 					await Remotes.Client.GetNamespace("Building").Get("UpdateLogicConnectionRequest").CallServerAsync({
 						operation: "disconnect",
-						inputBlock: marker.blockData.instance,
-						inputConnection: marker.id,
+						inputBlock: marker.data.blockData.instance,
+						inputConnection: marker.data.id,
 					});
 					this.updateVisual();
 				});
@@ -196,41 +270,52 @@ export default class WireTool extends ToolBase {
 		});
 	}
 
-	private canConnect(marker1: Marker, marker2: Marker) {
+	private canConnect(marker1: MarkerComponent, marker2: MarkerComponent) {
+		if (!marker1 || marker1.data.markerType !== "input") {
+			return false;
+		}
+
+		const type1 = this.getAllowedTypes(
+			marker1.data.blockData,
+			SharedPlots.getPlotBlockDatas(SharedPlots.getPlotByBlock(marker1.data.blockData.instance)!),
+			marker1.data.id,
+			(blockConfigRegistry as BlockConfigRegistryNonGeneric)[marker1.data.blockData.id]!.input[marker1.data.id],
+		);
+		const type2 = this.getAllowedTypes(
+			marker2.data.blockData,
+			SharedPlots.getPlotBlockDatas(SharedPlots.getPlotByBlock(marker2.data.blockData.instance)!),
+			marker2.data.id,
+			(blockConfigRegistry as BlockConfigRegistryNonGeneric)[marker2.data.blockData.id]!.output[marker2.data.id],
+		);
+
+		if (type1.find((t) => type2.includes(t))) {
+			return true;
+		}
+
 		return (
-			marker1 &&
-			marker1.markerType === "input" &&
-			WireTool.groups[marker1.dataType] === WireTool.groups[marker2.dataType] &&
-			marker1.blockData !== marker2.blockData
+			WireTool.groups[marker1.data.dataType] === WireTool.groups[marker2.data.dataType] &&
+			marker1.data.blockData !== marker2.data.blockData
 		);
 	}
 
 	protected prepareDesktop(): void {
-		this.renderedMarkers.forEach((marker) => {
+		this.markers.getChildren().forEach((marker) => {
 			const button = marker.instance.FindFirstChildWhichIsA("TextButton") as TextButton;
 
-			// Show tooltip on hover
-			this.eventHandler.subscribe(button.MouseEnter, () => {
-				const gui = this.createTooltip(marker);
-				this.eventHandler.subscribeOnce(button.MouseLeave, () => {
-					gui.Destroy();
-				});
-			});
-
-			if (marker.markerType === "output") {
+			if (marker.data.markerType === "output") {
 				this.eventHandler.subscribe(button.MouseButton1Down, () => {
 					if (this.startMarker.get()) return;
 
 					this.startMarker.set(marker);
 				});
-			} else if (marker.markerType === "connected_input") {
+			} else if (marker.data.markerType === "connected_input") {
 				this.eventHandler.subscribe(button.MouseButton1Click, async () => {
 					if (this.startMarker.get()) return;
 
 					await Remotes.Client.GetNamespace("Building").Get("UpdateLogicConnectionRequest").CallServerAsync({
 						operation: "disconnect",
-						inputBlock: marker.blockData.instance,
-						inputConnection: marker.id,
+						inputBlock: marker.data.blockData.instance,
+						inputConnection: marker.data.id,
 					});
 					this.updateVisual();
 				});
@@ -268,7 +353,7 @@ export default class WireTool extends ToolBase {
 
 			// Create new wire
 			if (!this.draggingWire) {
-				this.draggingWire = this.createWire(startPosition, startPosition, marker.color);
+				this.draggingWire = this.createWire(startPosition, startPosition, marker.data.colors[0]);
 			}
 
 			// Get position of hover marker / mouse hit
@@ -303,30 +388,7 @@ export default class WireTool extends ToolBase {
 		this.prepareTouch();
 	}
 
-	/** Creates text above the marker with a dot signature with its name */
-	private createTooltip(marker: Marker) {
-		const gui = ReplicatedStorage.Assets.Wires.WireInfo.Clone();
-		gui.TextLabel.Text = marker.name;
-		gui.TextLabel.TextColor3 = marker.color;
-		gui.StudsOffsetWorldSpace = marker.instance.StudsOffsetWorldSpace.add(new Vector3(0, 1, 0));
-		gui.Adornee = marker.instance.Adornee;
-		gui.Parent = marker.instance.Parent;
-
-		if (InputController.inputType.get() === "Gamepad") {
-			gui.Size = new UDim2(
-				gui.Size.X.Scale * 1.5,
-				gui.Size.X.Offset * 1.5,
-				gui.Size.Y.Scale * 1.5,
-				gui.Size.Y.Offset * 1.5,
-			);
-		}
-
-		this.renderedTooltips.push(gui);
-
-		return gui;
-	}
-
-	private createMarker(part: BasePart, markerData: MarkerData, offset: Vector3 = Vector3.zero): Marker {
+	private createMarker(part: BasePart, markerData: MarkerData, offset: Vector3 = Vector3.zero): MarkerComponent {
 		let markerInstance;
 
 		if (markerData.markerType === "output") {
@@ -355,23 +417,19 @@ export default class WireTool extends ToolBase {
 		PartUtils.applyToAllDescendantsOfType("TextButton", markerInstance, (button) => {
 			if (button.BackgroundColor3 === Color3.fromRGB(255, 0, 255)) {
 				button.Name = markerData.name;
-				button.BackgroundColor3 = markerData.color;
+				button.BackgroundColor3 = markerData.colors[0];
 			}
 		});
 
 		PartUtils.applyToAllDescendantsOfType("Frame", markerInstance, (button) => {
 			if (button.BackgroundColor3 === Color3.fromRGB(255, 0, 255)) {
 				button.Name = markerData.name;
-				button.BackgroundColor3 = markerData.color;
+				button.BackgroundColor3 = markerData.colors[0];
 			}
 		});
 
-		const marker = {
-			...markerData,
-			instance: markerInstance,
-		} as Marker;
-
-		this.renderedMarkers.push(marker);
+		const marker = new MarkerComponent(markerInstance, markerData);
+		this.markers.add(marker);
 
 		return marker;
 	}
@@ -423,10 +481,7 @@ export default class WireTool extends ToolBase {
 	}
 
 	private clearMarkers() {
-		this.renderedMarkers.forEach((element) => {
-			element.instance.Destroy();
-		});
-		this.renderedMarkers.clear();
+		this.markers.clear();
 	}
 
 	private clearTooltips() {
@@ -441,8 +496,8 @@ export default class WireTool extends ToolBase {
 		super.enable();
 	}
 
-	private getMarkerAbsolutePosition(marker: Marker): Vector3 {
-		return marker.blockData.instance.GetPivot().PointToWorldSpace(marker.instance.StudsOffsetWorldSpace);
+	private getMarkerAbsolutePosition(marker: MarkerComponent): Vector3 {
+		return marker.data.blockData.instance.GetPivot().PointToWorldSpace(marker.instance.StudsOffsetWorldSpace);
 	}
 
 	private updateVisual(prepare: boolean = true) {
@@ -461,6 +516,57 @@ export default class WireTool extends ToolBase {
 		}
 	}
 
+	private getConnectedTo(
+		block: PlacedBlockData,
+		blocks: readonly PlacedBlockData[],
+		key: BlockConnectionName,
+		config: BlockConfigDefinition,
+	): keyof BlockConfigDefinitionRegistry | undefined {
+		if (config.type !== "or") return config.type;
+
+		const connectedTo = block.connections[key as BlockConnectionName];
+		if (connectedTo) {
+			const connectedToBlock = blocks.find((b) => b.uuid === connectedTo.blockUuid);
+
+			if (connectedToBlock) {
+				const a = (blockConfigRegistry as BlockConfigRegistryNonGeneric)[connectedToBlock.id]?.output[
+					connectedTo.connectionName
+				];
+
+				if (a) return a.type;
+			}
+		}
+	}
+
+	private getAllowedTypes(
+		block: PlacedBlockData,
+		blocks: readonly PlacedBlockData[],
+		key: BlockConnectionName,
+		config: BlockConfigDefinition,
+	): readonly (keyof BlockConfigDefinitionRegistry)[] {
+		if (config.type !== "or") return [config.type];
+
+		const connected = this.getConnectedTo(block, blocks, key, config);
+		if (connected !== undefined) return [connected];
+
+		if (config.group !== undefined) {
+			for (const [samekey, same] of Objects.entries(block.connections)) {
+				if (key === samekey) continue;
+				for (const [k, a] of Objects.entries(
+					(blockConfigRegistry as BlockConfigRegistryNonGeneric)[block.id]!.input,
+				)) {
+					if (a.type !== "or") continue;
+					if (a.group !== config.group) continue;
+
+					const pos = this.getConnectedTo(block, blocks, k as BlockConnectionName, a);
+					if (pos !== undefined) return [pos];
+				}
+			}
+		}
+
+		return config.types.map((t) => t.type);
+	}
+
 	private createPlotWires(plot: PlotModel) {
 		const blocks = SharedPlots.getPlotBlockDatas(plot);
 
@@ -471,6 +577,8 @@ export default class WireTool extends ToolBase {
 			const markers: MarkerData[] = [];
 			for (const markerType of ["output", "input"] as const) {
 				for (const [key, config] of Objects.entries(configDef[markerType])) {
+					const allowed = this.getAllowedTypes(block, blocks, key as BlockConnectionName, config);
+
 					const marker: MarkerData = {
 						id: key as BlockConnectionName,
 						blockData: block,
@@ -484,7 +592,7 @@ export default class WireTool extends ToolBase {
 								? "connected_input"
 								: markerType,
 						dataType: config.type,
-						color: WireTool.typeGroups[WireTool.groups[config.type]].color,
+						colors: allowed.map((a) => WireTool.typeGroups[WireTool.groups[a]()].color),
 						name: config.displayName,
 					};
 
@@ -497,15 +605,20 @@ export default class WireTool extends ToolBase {
 
 		for (const block of blocks) {
 			for (const [connector, connection] of Objects.entries(block.connections)) {
-				const input = this.renderedMarkers.find((m) => m.blockData.uuid === block.uuid && m.id === connector)!;
-				const output = this.renderedMarkers.find(
-					(m) => m.blockData.uuid === connection.blockUuid && m.id === connection.connectionName,
-				)!;
+				const input = this.markers
+					.getChildren()
+					.find((m) => m.data.blockData.uuid === block.uuid && m.data.id === connector)!;
+				const output = this.markers
+					.getChildren()
+					.find(
+						(m) =>
+							m.data.blockData.uuid === connection.blockUuid && m.data.id === connection.connectionName,
+					)!;
 
 				this.createWire(
 					this.getMarkerAbsolutePosition(output),
 					this.getMarkerAbsolutePosition(input),
-					input?.color,
+					input?.data.colors[0],
 				);
 			}
 		}
