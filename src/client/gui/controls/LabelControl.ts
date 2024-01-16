@@ -7,10 +7,21 @@ export type LabelControlDefinition = TextLabel;
 export default class LabelControl extends Control<LabelControlDefinition> {
 	readonly value;
 
-	constructor(gui: LabelControlDefinition) {
+	constructor(gui: LabelControlDefinition, autoSize?: number) {
 		super(gui);
 
 		this.value = new ObservableValue("");
 		this.event.subscribeObservable(this.value, (value) => (this.gui.Text = tostring(value)), true);
+
+		if (autoSize !== undefined) {
+			this.event.subscribeObservable(
+				this.event.observableFromGuiParam(this.gui, "AbsoluteSize"),
+				() => {
+					this.gui.TextScaled = false;
+					this.gui.TextSize = autoSize;
+				},
+				true,
+			);
+		}
 	}
 }

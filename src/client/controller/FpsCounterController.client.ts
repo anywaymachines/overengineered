@@ -1,7 +1,7 @@
 import { RunService } from "@rbxts/services";
 import GuiController from "./GuiController";
 
-const gui = GuiController.getGameUI<{ Fps: TextLabel }>().Fps;
+const gui = GuiController.getUnscaledGameUI<{ Fps: TextLabel }>().Fps;
 gui.Visible = true;
 
 let fps = 0;

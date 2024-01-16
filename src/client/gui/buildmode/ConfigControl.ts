@@ -20,7 +20,6 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 
 	private readonly checkboxTemplate;
 	private readonly keyTemplate;
-	private readonly multiKeyTemplate;
 	private readonly sliderTemplate;
 	private readonly numberTemplate;
 	private readonly thrustTemplate;
@@ -31,10 +30,9 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 		const templates = GuiController.getGameUI<{ Templates: { Configuration: Template } }>().Templates.Configuration;
 		this.checkboxTemplate = Control.asTemplate(templates.CheckboxTemplate, false);
 		this.keyTemplate = Control.asTemplate(templates.KeyTemplate, false);
-		this.multiKeyTemplate = Control.asTemplate(templates.MultiKeyTemplate, false);
 		this.sliderTemplate = Control.asTemplate(templates.SliderTemplate, false);
 		this.numberTemplate = Control.asTemplate(templates.NumberTemplate, false);
-		this.thrustTemplate = Control.asTemplate(templates.ThrustTemplate, false);
+		this.thrustTemplate = Control.asTemplate(templates.MultiTemplate, false);
 	}
 
 	set<TDef extends BlockConfigDefinitions>(config: BlockConfigDefinitionsToConfig<TDef>, definition: TDef) {
@@ -45,10 +43,9 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 				{
 					checkbox: this.checkboxTemplate,
 					key: this.keyTemplate,
-					multikey: this.multiKeyTemplate,
 					number: this.numberTemplate,
 					slider: this.sliderTemplate,
-					thrust: this.thrustTemplate,
+					multi: this.thrustTemplate,
 				},
 				config[id] as never,
 				def as never,
@@ -95,7 +92,7 @@ export class Vector3ConfigValueControl extends ConfigValueControl<Vector3ConfigV
 		config: BlockConfigDefinitionRegistry["vector3"]["config"],
 		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["vector3"]>,
 	) {
-		super(templates.multikey(), definition.displayName);
+		super(templates.multi(), definition.displayName);
 
 		const defs = {
 			X: {
@@ -186,7 +183,7 @@ export class MultiKeyConfigValueControl extends ConfigValueControl<MultiKeyConfi
 		config: BlockConfigDefinitionRegistry["multikey"]["config"],
 		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["multikey"]>,
 	) {
-		super(templates.multikey(), definition.displayName);
+		super(templates.multi(), definition.displayName);
 
 		const controls = new Map<string, KeyConfigValueControl>();
 
@@ -260,7 +257,7 @@ export class ThrustConfigValueControl extends ConfigValueControl<ThrustConfigVal
 		config: BlockConfigDefinitionRegistry["thrust"]["config"],
 		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["thrust"]>,
 	) {
-		super(templates.thrust(), definition.displayName);
+		super(templates.multi(), definition.displayName);
 
 		const control = this.added(new ConfigControl(this.gui.Control));
 		this.event.subscribe(control.configUpdated, (key, value) =>
@@ -324,7 +321,7 @@ export class MotorRotationSpeedConfigValueControl extends ConfigValueControl<Con
 		config: BlockConfigDefinitionRegistry["motorRotationSpeed"]["config"],
 		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["motorRotationSpeed"]>,
 	) {
-		super(templates.thrust(), definition.displayName);
+		super(templates.multi(), definition.displayName);
 
 		const control = this.added(new ConfigControl(this.gui.Control));
 		this.event.subscribe(control.configUpdated, (key, value) =>
@@ -374,7 +371,7 @@ export class ServoMotorAngleConfigValueControl extends ConfigValueControl<Config
 		config: BlockConfigDefinitionRegistry["servoMotorAngle"]["config"],
 		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["servoMotorAngle"]>,
 	) {
-		super(templates.thrust(), definition.displayName);
+		super(templates.multi(), definition.displayName);
 
 		const control = this.added(new ConfigControl(this.gui.Control));
 		this.event.subscribe(control.configUpdated, (key, value) =>
@@ -424,7 +421,7 @@ export class OrConfigValueControl extends ConfigValueControl<ConfigControlDefini
 		config: BlockConfigDefinitionRegistry["or"]["config"],
 		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["or"]>,
 	) {
-		super(templates.thrust(), definition.displayName);
+		super(templates.multi(), definition.displayName);
 
 		const control = this.added(new ConfigControl(this.gui.Control));
 		this.event.subscribe(control.configUpdated, (key, value) =>
@@ -482,17 +479,15 @@ export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 export type Templates = {
 	checkbox: () => ConfigPartDefinition<CheckBoxControlDefinition>;
 	key: () => ConfigPartDefinition<KeyChooserControlDefinition>;
-	multikey: () => ConfigPartDefinition<MultiKeyConfigValueControlDefinition>;
 	slider: () => ConfigPartDefinition<SliderControlDefinition>;
 	number: () => ConfigPartDefinition<NumberTextBoxControlDefinition>;
-	thrust: () => ConfigPartDefinition<ThrustConfigValueControlDefinition>;
+	multi: () => ConfigPartDefinition<ConfigControlDefinition>;
 };
 
 export type Template = {
 	CheckboxTemplate: ConfigPartDefinition<CheckBoxControlDefinition>;
 	KeyTemplate: ConfigPartDefinition<KeyChooserControlDefinition>;
-	MultiKeyTemplate: ConfigPartDefinition<MultiKeyConfigValueControlDefinition>;
 	SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 	NumberTemplate: ConfigPartDefinition<NumberTextBoxControlDefinition>;
-	ThrustTemplate: ConfigPartDefinition<ThrustConfigValueControlDefinition>;
+	MultiTemplate: ConfigPartDefinition<ConfigControlDefinition>;
 };
