@@ -221,6 +221,7 @@ const keysensor = {
 		key: {
 			displayName: "Key",
 			type: "keybool",
+			connectorHidden: true,
 			default: false as boolean,
 			config: {
 				key: "F" as KeyCode,

@@ -574,8 +574,9 @@ export default class WireTool extends ToolBase {
 			const markers: MarkerData[] = [];
 			for (const markerType of ["output", "input"] as const) {
 				for (const [key, config] of Objects.entries(configDef[markerType])) {
-					const allowed = this.getAllowedTypes(block, blocks, key as BlockConnectionName, config);
+					if (config.connectorHidden) continue;
 
+					const allowed = this.getAllowedTypes(block, blocks, key as BlockConnectionName, config);
 					const marker: MarkerData = {
 						id: key as BlockConnectionName,
 						blockData: block,

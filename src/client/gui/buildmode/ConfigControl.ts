@@ -39,6 +39,8 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 		this.clear();
 
 		for (const [id, def] of Objects.entries(definition)) {
+			if (def.configHidden) continue;
+
 			const control = new configControls[def.type](
 				{
 					checkbox: this.checkboxTemplate,
