@@ -3,7 +3,6 @@ import { PlacedBlockData } from "shared/building/BlockManager";
 import AnchorBlockLogic from "./logic/AnchorBlockLogic";
 import DisconnectBlockLogic from "./logic/DisconnectBlockLogic";
 import HeliumBlockLogic from "./logic/HeliumBlockLogic";
-import LampBlockLogic from "./logic/LampBlockLogic";
 import MotorBlockLogic from "./logic/MotorBlockLogic";
 import RocketEngineLogic from "./logic/RocketEngineLogic";
 import RopeLogic from "./logic/RopeLogic";
@@ -29,6 +28,9 @@ import OperationRoundBlockLogic from "./operations/number/OperationRoundBlockLog
 import OperationSubBlockLogic from "./operations/number/OperationSubBlockLogic";
 import OperationDegBlockLogic from "./operations/number/trigonometry/OperationDegBlockLogic";
 import OperationRadBlockLogic from "./operations/number/trigonometry/OperationRadBlockLogic";
+import LampBlockLogic from "./operations/output/LampBlockLogic";
+import ScreenBlockLogic from "./operations/output/ScreenBlockLogic";
+import AltimeterBlockLogic from "./operations/sensors/AltimeterBlockLogic";
 import AngleSensorBlockLogic from "./operations/sensors/AngleSensorBlockLogic";
 import KeySensorBlockLogic from "./operations/sensors/KeySensorBlockLogic";
 import SpeedometerBlockLogic from "./operations/sensors/SpeedometerBlockLogic";
@@ -48,15 +50,18 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 	rope: RopeLogic,
 	heliumblock: HeliumBlockLogic,
 	tnt: TNTBlockLogic,
-	lamp: LampBlockLogic,
 	suspensionblock: SuspensionLogic,
 	anchorblock: AnchorBlockLogic,
+
+	lamp: LampBlockLogic,
+	screen: ScreenBlockLogic,
 
 	multiplexer: Multiplexer,
 
 	speedometer: SpeedometerBlockLogic,
 	anglesensor: AngleSensorBlockLogic,
 	keysensor: KeySensorBlockLogic,
+	altimeter: AltimeterBlockLogic,
 
 	operationnot: OperationNotBlockLogic,
 	operationand: OperationAndBlockLogic,

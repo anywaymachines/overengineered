@@ -16,6 +16,7 @@ const disconnectblock = {
 				key: "F" as KeyCode,
 				switch: false as boolean,
 			},
+			canBeSwitch: false,
 		},
 	},
 	output: {},
@@ -225,6 +226,7 @@ const keysensor = {
 				key: "F" as KeyCode,
 				switch: false as boolean,
 			},
+			canBeSwitch: true,
 		},
 	},
 	output: {
@@ -408,6 +410,13 @@ const twoNumbersOrBooleansInputBooleanOutput = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const screen = {
+	input: {
+		data: connectors.boolOrNumber("Data", "1"),
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
 const twoNumbersInputBooleanOutput = {
 	input: {
 		value1: {
@@ -507,6 +516,18 @@ const anglesensor = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const altimeter = {
+	input: {},
+	output: {
+		result: {
+			displayName: "Height",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const blockConfigRegistry = {
 	disconnectblock,
 	motorblock,
@@ -515,15 +536,18 @@ const blockConfigRegistry = {
 	rope,
 	servomotorblock,
 	tnt,
-	lamp,
 	suspensionblock,
 	vehicleseat,
+
+	lamp,
+	screen,
 
 	multiplexer,
 
 	speedometer,
 	anglesensor,
 	keysensor,
+	altimeter,
 
 	operationnot: booleanProcessing,
 	operationand: twoBooleanInputsOneBooleanOutput,

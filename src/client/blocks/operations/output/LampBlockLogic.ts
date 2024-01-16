@@ -16,6 +16,8 @@ export default class LampBlockLogic extends ConfigurableBlockLogic<typeof blockC
 				part.Color = Color3.fromRGB(0, 0, 0);
 				part.Material = Enum.Material.SmoothPlastic;
 			}
+
+			// TODO: Sync data with other players
 		});
 	}
 }

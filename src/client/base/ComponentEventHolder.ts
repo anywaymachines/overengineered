@@ -101,7 +101,7 @@ export default class ComponentEventHolder {
 		});
 	}
 	onKeyDown(key: KeyCode, callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
-		return this.onInput((input) => {
+		return this.onInputBegin((input) => {
 			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
 			if (input.KeyCode.Name !== key) return;
 
@@ -109,7 +109,7 @@ export default class ComponentEventHolder {
 		}, allowGameProcessedEvents);
 	}
 	onKeyUp(key: KeyCode, callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
-		return this.onInput((input) => {
+		return this.onInputEnd((input) => {
 			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
 			if (input.KeyCode.Name !== key) return;
 

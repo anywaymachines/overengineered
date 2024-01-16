@@ -1,3 +1,14 @@
+type BlockConfigValueType<TName extends string, TDefault, TConfig, TAdditional extends object = {}> = {
+	readonly type: TName;
+	readonly default: TDefault;
+	readonly config: TConfig;
+} & TAdditional;
+type BlockConfigPrimitiveValueType<
+	TName extends string,
+	TDefault,
+	TAdditional extends object = {},
+> = BlockConfigValueType<TName, TDefault, TDefault, TAdditional>;
+
 export type BlockConfigValueTypeBool = {
 	type: "bool";
 	default: boolean;
@@ -27,7 +38,7 @@ export type BlockConfigValueTypeKeyBool = {
 		switch: boolean;
 	};
 
-	canBeSwitch?: boolean;
+	canBeSwitch: boolean;
 };
 export type BlockConfigValueTypeNumber = {
 	type: "number";

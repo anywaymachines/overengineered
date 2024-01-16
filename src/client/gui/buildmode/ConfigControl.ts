@@ -133,7 +133,7 @@ export class Vector3ConfigValueControl extends ConfigValueControl<Vector3ConfigV
 	}
 }
 
-export class KeyBoolConfigValueControl extends ConfigValueControl<KeyChooserControlDefinition> {
+export class KeyBoolConfigValueControl extends ConfigValueControl<ConfigControlDefinition> {
 	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["keybool"]["config"]) => void>();
 
 	constructor(
@@ -141,12 +141,29 @@ export class KeyBoolConfigValueControl extends ConfigValueControl<KeyChooserCont
 		config: BlockConfigDefinitionRegistry["keybool"]["config"],
 		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["keybool"]>,
 	) {
-		super(templates.key(), definition.displayName);
+		super(templates.multi(), definition.displayName);
 
-		const control = this.added(new KeyChooserControl(this.gui.Control));
-		control.value.set(config.key);
+		const def = {
+			key: {
+				displayName: "Key",
+				type: "key",
+				config: config.key,
+				default: config.key,
+			},
+			switch: {
+				displayName: "Toggle mode",
+				type: "bool",
+				config: config.switch,
+				default: config.switch,
+			},
+		} satisfies BlockConfigDefinitions;
 
-		this.event.subscribe(control.submitted, (value) => this.submitted.Fire({ key: value, switch: false }));
+		const control = this.added(new ConfigControl(this.gui.Control));
+		control.set(config, def);
+
+		this.event.subscribe(control.configUpdated, (key, value) =>
+			this.submitted.Fire((config = { ...config, [key]: value })),
+		);
 	}
 }
 
