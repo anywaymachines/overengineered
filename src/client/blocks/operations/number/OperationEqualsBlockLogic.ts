@@ -13,6 +13,6 @@ export default class OperationEqualsBlockLogic extends ConfigurableBlockLogic<
 	}
 
 	private update() {
-		this.output.result.set(this.input.value1.value.get().value === this.input.value2.value.get().value);
+		this.output.result.set(this.input.value1.value.get() === this.input.value2.value.get());
 	}
 }

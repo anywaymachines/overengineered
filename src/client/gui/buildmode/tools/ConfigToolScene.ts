@@ -7,6 +7,8 @@ import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Remotes from "shared/Remotes";
 import JSON from "shared/_fixes_/Json";
+import Objects from "shared/_fixes_/objects";
+import BlockManager from "shared/building/BlockManager";
 import ObservableValue from "shared/event/ObservableValue";
 import GuiAnimator from "../../GuiAnimator";
 import ConfigControl, { ConfigControlDefinition } from "../ConfigControl";
@@ -81,7 +83,11 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				const jsonstr = (blockmodel.GetAttribute("config") as string | undefined) ?? "{}";
 				const config = BlockConfig.addDefaults(JSON.deserialize<Record<string, number>>(jsonstr), defs);
 
-				return [blockmodel, config] as const;
+				return [
+					blockmodel,
+					config,
+					Objects.keys(BlockManager.getBlockDataByBlockModel(blockmodel).connections),
+				] as const;
 			})
 			.filter((x) => x !== undefined);
 
@@ -90,6 +96,6 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
 			.input as BlockConfigDefinitions;
 
-		this.configControl.set(configs[0][1], onedef);
+		this.configControl.set(configs[0][1], onedef, configs[0][2]);
 	}
 }

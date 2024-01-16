@@ -18,6 +18,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 		(key: string, value: BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry]["config"]) => void
 	>();
 
+	private readonly connectedTemplate;
 	private readonly checkboxTemplate;
 	private readonly keyTemplate;
 	private readonly sliderTemplate;
@@ -28,6 +29,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 		super(gui);
 
 		const templates = GuiController.getGameUI<{ Templates: { Configuration: Template } }>().Templates.Configuration;
+		this.connectedTemplate = Control.asTemplate(templates.ConnectedTemplate, false);
 		this.checkboxTemplate = Control.asTemplate(templates.CheckboxTemplate, false);
 		this.keyTemplate = Control.asTemplate(templates.KeyTemplate, false);
 		this.sliderTemplate = Control.asTemplate(templates.SliderTemplate, false);
@@ -35,11 +37,19 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 		this.thrustTemplate = Control.asTemplate(templates.MultiTemplate, false);
 	}
 
-	set<TDef extends BlockConfigDefinitions>(config: BlockConfigDefinitionsToConfig<TDef>, definition: TDef) {
+	set<TDef extends BlockConfigDefinitions>(
+		config: BlockConfigDefinitionsToConfig<TDef>,
+		definition: TDef,
+		connected: readonly (keyof TDef)[] = [],
+	) {
 		this.clear();
 
 		for (const [id, def] of Objects.entries(definition)) {
 			if (def.configHidden) continue;
+			if (connected.includes(id)) {
+				this.add(new ConnectedValueControl(this.connectedTemplate(), def.displayName));
+				continue;
+			}
 
 			const control = new configControls[def.type](
 				{
@@ -65,6 +75,8 @@ export abstract class ConfigValueControl<TGui extends GuiObject> extends Control
 		this.gui.HeadingLabel.Text = name;
 	}
 }
+
+class ConnectedValueControl extends ConfigValueControl<GuiObject> {}
 
 //
 
@@ -440,25 +452,23 @@ export class OrConfigValueControl extends ConfigValueControl<ConfigControlDefini
 		config: BlockConfigDefinitionRegistry["or"]["config"],
 		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["or"]>,
 	) {
+		throw "Not implemented (waiting for dropdown implementation)";
 		super(templates.multi(), definition.displayName);
 
 		const control = this.added(new ConfigControl(this.gui.Control));
 		this.event.subscribe(control.configUpdated, (key, value) =>
 			this.submitted.Fire(
-				(config = {
-					type: key as Exclude<keyof BlockConfigDefinitionRegistry, "or">,
-					value: value as BlockConfigDefinitionRegistry[Exclude<
-						keyof BlockConfigDefinitionRegistry,
-						"or"
-					>]["default"],
-				}),
+				(config = value as BlockConfigDefinitionRegistry[Exclude<
+					keyof BlockConfigDefinitionRegistry,
+					"or"
+				>]["default"]),
 			),
 		);
 
 		const def = Objects.fromEntries(
 			definition.types.map((t) => [t.type, { ...t, displayName: definition.displayName }] as const),
 		);
-		control.set(config.value as BlockConfigDefinitionsToConfig<typeof def>, def);
+		control.set(config as BlockConfigDefinitionsToConfig<typeof def>, def);
 	}
 }
 
@@ -504,6 +514,7 @@ export type Templates = {
 };
 
 export type Template = {
+	ConnectedTemplate: ConfigPartDefinition<GuiObject>;
 	CheckboxTemplate: ConfigPartDefinition<CheckBoxControlDefinition>;
 	KeyTemplate: ConfigPartDefinition<KeyChooserControlDefinition>;
 	SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;

@@ -371,14 +371,8 @@ const connectors = {
 		return {
 			displayName: name,
 			type: "or",
-			default: {
-				type: "number",
-				value: 0 as number,
-			},
-			config: {
-				type: "number",
-				value: 0 as number,
-			},
+			default: 0 as number,
+			config: 0 as number,
 			group,
 			types: [
 				{

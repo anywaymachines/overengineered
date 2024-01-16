@@ -82,10 +82,7 @@ export type BlockConfigValueTypeServoMotorAngle = BlockConfigValueType<
 	}
 >;
 
-type OrConfigType<TType extends keyof BlockConfigDefinitionRegistry> = {
-	readonly type: TType;
-	readonly value: BlockConfigDefinitionRegistry[TType]["default"];
-};
+type OrConfigType<TType extends keyof BlockConfigDefinitionRegistry> = BlockConfigDefinitionRegistry[TType]["default"];
 export type BlockConfigValueTypeOr<
 	T extends readonly BlockConfigDefinitionRegistry[Exclude<
 		keyof BlockConfigDefinitionRegistry,
