@@ -215,6 +215,28 @@ const speedometer = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const keysensor = {
+	input: {
+		key: {
+			displayName: "Key",
+			type: "keybool",
+			default: false as boolean,
+			config: {
+				key: "F" as KeyCode,
+				switch: false as boolean,
+			},
+		},
+	},
+	output: {
+		result: {
+			displayName: "Pressed",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const booleanProcessing = {
 	input: {
 		value: {
@@ -501,6 +523,7 @@ const blockConfigRegistry = {
 
 	speedometer,
 	anglesensor,
+	keysensor,
 
 	operationnot: booleanProcessing,
 	operationand: twoBooleanInputsOneBooleanOutput,

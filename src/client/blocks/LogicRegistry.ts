@@ -29,8 +29,9 @@ import OperationRoundBlockLogic from "./operations/number/OperationRoundBlockLog
 import OperationSubBlockLogic from "./operations/number/OperationSubBlockLogic";
 import OperationDegBlockLogic from "./operations/number/trigonometry/OperationDegBlockLogic";
 import OperationRadBlockLogic from "./operations/number/trigonometry/OperationRadBlockLogic";
-import AngleSensorBlockLogic from "./operations/sensors/AngleSensor";
-import SpeedometerBlockLogic from "./operations/sensors/Speedometer";
+import AngleSensorBlockLogic from "./operations/sensors/AngleSensorBlockLogic";
+import KeySensorBlockLogic from "./operations/sensors/KeySensorBlockLogic";
+import SpeedometerBlockLogic from "./operations/sensors/SpeedometerBlockLogic";
 import OperationVec3SplitterBlockLogic from "./operations/vector/OperationVec3SplitterBlockLogic";
 
 const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): BlockLogic } | undefined>> = {
@@ -55,6 +56,7 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 
 	speedometer: SpeedometerBlockLogic,
 	anglesensor: AngleSensorBlockLogic,
+	keysensor: KeySensorBlockLogic,
 
 	operationnot: OperationNotBlockLogic,
 	operationand: OperationAndBlockLogic,
