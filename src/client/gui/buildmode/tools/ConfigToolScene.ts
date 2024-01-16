@@ -67,7 +67,15 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 
 	private updateConfigs(selected: readonly (SelectionBox & { Parent: BlockModel })[]) {
 		this.gui.Visible = selected.size() !== 0;
-		if (selected.size() === 0) return;
+		if (!this.gui.Visible) return;
+
+		const blockmodel = selected[0].Parent;
+		const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
+		const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
+			.input as BlockConfigDefinitions;
+
+		this.gui.Visible = Objects.keys(onedef).size() !== 0;
+		if (!this.gui.Visible) return;
 
 		this.gui.ParamsSelection.Title.HeadingLabel.Text = `CONFIGURATION (${selected.size()})`;
 
@@ -90,11 +98,6 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				] as const;
 			})
 			.filter((x) => x !== undefined);
-
-		const blockmodel = selected[0].Parent;
-		const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
-		const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
-			.input as BlockConfigDefinitions;
 
 		this.configControl.set(configs[0][1], onedef, configs[0][2]);
 	}
