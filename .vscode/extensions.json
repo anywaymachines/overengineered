@@ -1,3 +1,6 @@
 {
-	"recommendations": ["roblox-ts.vscode-roblox-ts", "dbaeumer.vscode-eslint"]
+	"recommendations": [
+		"roblox-ts.vscode-roblox-ts",
+		"dbaeumer.vscode-eslint"
+	]
 }

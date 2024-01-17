@@ -282,7 +282,7 @@ const v7: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 									Objects.entries(b.config).map(
 										(e) => [e[0], e[1] === "Y" ? true : e[1] === "N" ? false : e[1]] as const,
 									),
-							  ),
+								),
 				}),
 			),
 		};

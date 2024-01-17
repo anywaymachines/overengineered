@@ -40,16 +40,16 @@ export type JsonSerializable<T> = T extends JsonSerializablePrimitive
 	: T extends
 				| CheckableTypes[Exclude<keyof CheckableTypes, keyof CheckablePrimitives>]
 				| CreatableInstances[keyof CreatableInstances]
-	  ? never
-	  : T extends () => void
-	    ? never
-	    : T extends unknown[]
-	      ? T
-	      : T extends object
-	        ? T extends Readonly<Record<string, JsonSerializable<infer _>>>
+		? never
+		: T extends () => void
+			? never
+			: T extends unknown[]
+				? T
+				: T extends object
+					? T extends Readonly<Record<string, JsonSerializable<infer _>>>
 						? T
 						: never
-	        : never;
+					: never;
 
 //
 
