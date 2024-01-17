@@ -5,12 +5,8 @@ export class KeyConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefinit
 	constructor(
 		config: BlockConfigDefinitionRegistry["key"]["config"],
 		definition: BlockConfigDefinitionRegistry["key"],
-		connected: boolean,
 	) {
-		super(config, definition, connected);
-
-		if (!this.connected) {
-			this.value.set(config);
-		}
+		super(config, definition);
+		this.value.set(config);
 	}
 }

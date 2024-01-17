@@ -12,6 +12,11 @@ export default class GuiController {
 		return this.getPlayerGui().WaitForChild("Unscaled") as T;
 	}
 
+	/** Receives PlayerGui.GameUI.Templates */
+	static getTemplates<T>() {
+		return this.getGameUI<{ Templates: T }>().Templates;
+	}
+
 	/** Receives Popups from the PlayerGui */
 	static getPopupUI<T extends ScreenGui>() {
 		return this.getPlayerGui().WaitForChild("Popups") as T;

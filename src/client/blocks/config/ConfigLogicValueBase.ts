@@ -1,6 +1,6 @@
 import ComponentContainer from "client/base/ComponentContainer";
 import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
-import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import ObservableValue from "shared/event/ObservableValue";
 
 export abstract class ConfigLogicValueBase<
 	T extends BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry],
@@ -9,20 +9,11 @@ export abstract class ConfigLogicValueBase<
 	protected readonly definition: T;
 	protected readonly config: T["config"];
 
-	/** True if this value is being controlled by another logic node */
-	protected readonly connected: boolean;
-
-	constructor(
-		config: T["config"],
-		definition: T,
-		connected: boolean,
-		controlsEnabled?: ReadonlyObservableValue<boolean>,
-	) {
+	constructor(config: T["config"], definition: T) {
 		super();
 
 		this.config = config;
 		this.definition = definition;
-		this.connected = connected;
 		this.value = this.createObservable();
 
 		this.event.onPrepare(() => this.value.triggerChanged());

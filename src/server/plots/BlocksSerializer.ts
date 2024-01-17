@@ -344,8 +344,8 @@ const v8: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>,
 				const config: config = {
 					thrust: {
 						thrust: {
-							add: cfg?.thrust_add,
-							sub: cfg?.thrust_sub,
+							add: cfg?.thrust_add ?? "W",
+							sub: cfg?.thrust_sub ?? "S",
 						},
 						switchmode: cfg?.switchmode,
 						strength: cfg?.strength,

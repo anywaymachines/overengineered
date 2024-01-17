@@ -8,15 +8,15 @@ export default class OperationVec3SplitterBlockLogic extends ConfigurableBlockLo
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationvec3combiner);
 
-		this.event.subscribeObservable(this.input.value_x.value, () => this.update());
-		this.event.subscribeObservable(this.input.value_y.value, () => this.update());
-		this.event.subscribeObservable(this.input.value_z.value, () => this.update());
+		this.event.subscribeObservable(this.input.value_x, () => this.update());
+		this.event.subscribeObservable(this.input.value_y, () => this.update());
+		this.event.subscribeObservable(this.input.value_z, () => this.update());
 	}
 
 	private update() {
-		const x = this.input.value_x.value.get();
-		const y = this.input.value_y.value.get();
-		const z = this.input.value_z.value.get();
+		const x = this.input.value_x.get();
+		const y = this.input.value_y.get();
+		const z = this.input.value_z.get();
 		this.output.result.set(new Vector3(x, y, z));
 	}
 }

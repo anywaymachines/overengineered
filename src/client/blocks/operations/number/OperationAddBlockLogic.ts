@@ -6,11 +6,11 @@ export default class OperationAddBlockLogic extends ConfigurableBlockLogic<typeo
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationadd);
 
-		this.event.subscribeObservable(this.input.value1.value, () => this.update());
-		this.event.subscribeObservable(this.input.value2.value, () => this.update());
+		this.event.subscribeObservable(this.input.value1, () => this.update());
+		this.event.subscribeObservable(this.input.value2, () => this.update());
 	}
 
 	private update() {
-		this.output.result.set(this.input.value1.value.get() + this.input.value2.value.get());
+		this.output.result.set(this.input.value1.get() + this.input.value2.get());
 	}
 }

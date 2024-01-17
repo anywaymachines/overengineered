@@ -6,10 +6,10 @@ export default class OperationRadBlockLogic extends ConfigurableBlockLogic<typeo
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationrad);
 
-		this.event.subscribeObservable(this.input.value.value, () => this.update());
+		this.event.subscribeObservable(this.input.value, () => this.update());
 	}
 
 	private update() {
-		this.output.result.set(math.rad(this.input.value.value.get()));
+		this.output.result.set(math.rad(this.input.value.get()));
 	}
 }

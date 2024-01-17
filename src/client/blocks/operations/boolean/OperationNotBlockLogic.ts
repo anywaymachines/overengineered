@@ -6,6 +6,6 @@ export default class OperationNotBlockLogic extends ConfigurableBlockLogic<typeo
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationnot);
 
-		this.event.subscribeObservable(this.input.value.value, (value) => this.output.result.set(value === false));
+		this.event.subscribeObservable(this.input.value, (value) => this.output.result.set(value === false));
 	}
 }

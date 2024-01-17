@@ -5,12 +5,8 @@ export class Vector3ConfigLogicValue extends ConfigLogicValueBase<BlockConfigDef
 	constructor(
 		config: BlockConfigDefinitionRegistry["vector3"]["config"],
 		definition: BlockConfigDefinitionRegistry["vector3"],
-		connected: boolean,
 	) {
-		super(config, definition, connected);
-
-		if (!this.connected) {
-			this.value.set(config);
-		}
+		super(config, definition);
+		this.value.set(config);
 	}
 }

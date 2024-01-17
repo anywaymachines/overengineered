@@ -5,12 +5,8 @@ export class NumberConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefi
 	constructor(
 		config: BlockConfigDefinitionRegistry["number"]["config"],
 		definition: BlockConfigDefinitionRegistry["number"],
-		connected: boolean,
 	) {
-		super(config, definition, connected);
-
-		if (!this.connected) {
-			this.value.set(config);
-		}
+		super(config, definition);
+		this.value.set(config);
 	}
 }

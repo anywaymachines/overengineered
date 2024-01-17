@@ -1,5 +1,4 @@
 import blockConfigRegistryClient from "client/blocks/config/BlockConfigRegistryClient";
-import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
 import BlockConfig from "shared/BlockConfig";
 import {
 	BlockConfigBothDefinitions,
@@ -9,7 +8,7 @@ import {
 } from "shared/BlockConfigDefinitionRegistry";
 import Objects from "shared/_fixes_/objects";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import ObservableValue from "shared/event/ObservableValue";
+import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import BlockLogic from "./BlockLogic";
 
 type KeyMembers<TDef extends BlockConfigDefinitions> = ExtractKeys<TDef, { type: "key" | "keybool" }> & KeyCode;
@@ -28,7 +27,7 @@ export default abstract class ConfigurableBlockLogic<
 > extends BlockLogic<T> {
 	readonly config: BlockConfigDefinitionsToConfig<TDef["input"]>;
 	readonly input: {
-		readonly [k in keyof TDef["input"]]: ConfigLogicValueBase<TDef["input"][k]>;
+		readonly [k in keyof TDef["input"]]: ReadonlyObservableValue<TDef["input"][k]["default"]>;
 	};
 	readonly output: {
 		readonly [k in keyof TDef["output"]]: ObservableValue<TDef["output"][k]["default"]>;
@@ -41,14 +40,14 @@ export default abstract class ConfigurableBlockLogic<
 
 		const controlsEnabled = new ObservableValue(false);
 		const createInput = (key: string, definition: BlockConfigDefinition) => {
-			return this.added(
-				new blockConfigRegistryClient[definition.type].input(
-					this.config[key] as never,
-					definition as never,
-					block.connections[key as keyof typeof block.connections] !== undefined,
-					controlsEnabled,
-				),
-			);
+			const connected = block.connections[key as keyof typeof block.connections] !== undefined;
+			if (connected) {
+				return blockConfigRegistryClient[definition.type].output(this.config[key] as never);
+			}
+
+			return this.add(
+				new blockConfigRegistryClient[definition.type].input(this.config[key] as never, definition as never),
+			).value;
 		};
 		this.event.onPrepare(() => {
 			this.eventHandler.subscribe(this.machine!.seat.occupiedByLocalPlayer.changed, (occupied) =>

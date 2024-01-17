@@ -5,12 +5,8 @@ export class MultiKeyConfigLogicValue extends ConfigLogicValueBase<BlockConfigDe
 	constructor(
 		config: BlockConfigDefinitionRegistry["multikey"]["config"],
 		definition: BlockConfigDefinitionRegistry["multikey"],
-		connected: boolean,
 	) {
-		super(config, definition, connected);
-
-		if (!this.connected) {
-			this.value.set(config);
-		}
+		super(config, definition);
+		this.value.set(config);
 	}
 }

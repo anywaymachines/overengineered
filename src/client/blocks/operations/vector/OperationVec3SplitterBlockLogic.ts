@@ -8,11 +8,11 @@ export default class OperationVec3SplitterBlockLogic extends ConfigurableBlockLo
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationvec3splitter);
 
-		this.event.subscribeObservable(this.input.value.value, () => this.update());
+		this.event.subscribeObservable(this.input.value, () => this.update());
 	}
 
 	private update() {
-		const vector = this.input.value.value.get();
+		const vector = this.input.value.get();
 		this.output.result_x.set(vector.X);
 		this.output.result_y.set(vector.Y);
 		this.output.result_z.set(vector.Z);

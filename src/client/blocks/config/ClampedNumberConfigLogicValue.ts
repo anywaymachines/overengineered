@@ -8,13 +8,9 @@ export class ClampedNumberConfigLogicValue extends ConfigLogicValueBase<
 	constructor(
 		config: BlockConfigDefinitionRegistry["clampedNumber"]["config"],
 		definition: BlockConfigDefinitionRegistry["clampedNumber"],
-		connected: boolean,
 	) {
-		super(config, definition, connected);
-
-		if (!this.connected) {
-			this.value.set(config);
-		}
+		super(config, definition);
+		this.value.set(config);
 	}
 
 	protected createObservable() {

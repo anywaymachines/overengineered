@@ -1,20 +1,16 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
-import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Control from "client/base/Control";
 import Machine from "client/blocks/logic/Machine";
 import RocketEngineLogic from "client/blocks/logic/RocketEngineLogic";
 import InputController from "client/controller/InputController";
 import PopupController from "client/controller/PopupController";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
-import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
 import Remotes from "shared/Remotes";
 import RobloxUnit from "shared/RobloxUnit";
-import SlotsMeta from "shared/SlotsMeta";
-import Objects from "shared/_fixes_/objects";
 import EventHandler from "shared/event/EventHandler";
-import { ButtonControl, TextButtonControl, TextButtonDefinition } from "../controls/Button";
+import { ButtonControl, TextButtonDefinition } from "../controls/Button";
 import { DictionaryControl } from "../controls/DictionaryControl";
 import FormattedLabelControl from "../controls/FormattedLabelControl";
 import ProgressBarControl, { ProgressBarControlDefinition } from "../controls/ProgressBarControl";
@@ -227,9 +223,24 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			else this.hide();
 		}, true);
 
+		/*
+		const inputType = InputController.inputType.get();
+		for (const logic of machine.getChildren()) {
+			if (!(logic instanceof ConfigurableBlockLogic)) continue;
+
+			for (const input of Objects.values(logic.input)) {
+				const gui = input.getRideModeGui(inputType);
+				if (!gui) continue;
+
+				this.add(input);
+			}
+		}
+		*/
+
+		/*
 		let pos = 0;
 		const map: Record<string, ConfigurableBlockLogic<BlockConfigBothDefinitions>[]> = {};
-
+		
 		for (const block of machine.getChildren()) {
 			if (!(block instanceof ConfigurableBlockLogic)) {
 				continue;
@@ -294,7 +305,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 				this.resetControl(btn, pos);
 				pos++;
 			}
-		}
+		}*/
 	}
 }
 

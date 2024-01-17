@@ -34,11 +34,15 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 	private readonly maxSoundVolume = 0.5;
 	private readonly maxParticlesAcceleration = 120;
 
+	private thrust = 0;
+
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.smallrocketengine);
 
+		this.event.subscribeObservable(this.input.thrust, (thrust) => (this.thrust = thrust), true);
+
 		this.onDescendantDestroyed(() => {
-			this.input.thrust.value.set(0);
+			this.thrust = 0;
 			this.update();
 			this.disable();
 		});
@@ -63,13 +67,13 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 
-		this.event.subscribeObservable(this.input.thrust.value, (thrust) => {
+		this.event.subscribeObservable(this.input.thrust, (thrust) => {
 			this.update();
 		});
 	}
 
 	private update() {
-		const torque = this.input.thrust.value.get();
+		const torque = this.thrust;
 
 		// Force
 		this.vectorForce.Force = new Vector3((this.power * this.multiplier * torque * -1) / 100, 0, 0);
@@ -105,6 +109,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 	}
 
 	public getTorque() {
-		return this.input.thrust.value.get();
+		return this.input.thrust.get();
 	}
 }

@@ -5,6 +5,6 @@ import { PlacedBlockData } from "shared/building/BlockManager";
 export default class KeySensorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.keysensor> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.keysensor);
-		this.input.key.value.autoSet(this.output.result);
+		this.input.key.autoSet(this.output.result);
 	}
 }

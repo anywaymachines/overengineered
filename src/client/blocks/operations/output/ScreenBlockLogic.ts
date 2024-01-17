@@ -11,7 +11,7 @@ export default class ScreenBlockLogic extends ConfigurableBlockLogic<typeof bloc
 			?.FindFirstChild("SurfaceGui")
 			?.FindFirstChild("TextLabel") as TextLabel;
 
-		this.event.subscribeObservable(this.input.data.value, (data) => {
+		this.event.subscribeObservable(this.input.data, (data) => {
 			textLabel.Text = tostring(data);
 
 			// TODO: Sync data with other players

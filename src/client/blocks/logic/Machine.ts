@@ -12,6 +12,7 @@ import { blockRegistry } from "shared/Registry";
 import Objects from "shared/_fixes_/objects";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
+import ObservableValue from "shared/event/ObservableValue";
 import logicRegistry from "../LogicRegistry";
 import VehicleSeatBlockLogic from "./VehicleSeatBlockLogic";
 
@@ -131,7 +132,11 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 					throw "Connecting block is not configurable: " + connection.blockUuid;
 				}
 
-				outputLogic.output[connection.connectionName].autoSet(inputLogic.input[connectionFrom].value);
+				outputLogic.output[connection.connectionName].autoSet(
+					inputLogic.input[connectionFrom] as ObservableValue<
+						ReturnType<(typeof inputLogic.input)[typeof connectionFrom]["get"]>
+					>,
+				);
 			}
 		}
 

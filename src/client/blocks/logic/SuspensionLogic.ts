@@ -21,9 +21,9 @@ export default class SuspensionLogic extends ConfigurableBlockLogic<
 	protected prepare() {
 		super.prepare();
 
-		this.springConstraint.Damping = this.input.damping.value.get();
-		this.springConstraint.Stiffness = this.input.stiffness.value.get();
-		this.springConstraint.FreeLength = this.input.free_length.value.get();
+		this.springConstraint.Damping = this.input.damping.get();
+		this.springConstraint.Stiffness = this.input.stiffness.get();
+		this.springConstraint.FreeLength = this.input.free_length.get();
 	}
 
 	static getConfigDefinition() {

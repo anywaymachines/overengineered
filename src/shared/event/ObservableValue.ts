@@ -7,6 +7,9 @@ export interface ReadonlyObservableValue<T> {
 
 	subscribe(func: (value: T, prev: T) => void): void;
 	subscribe(func: (value: T, prev: T) => void, executeImmediately: boolean | undefined): void;
+
+	/** Automatically sets the provided ObservableValue value to the current one. */
+	autoSet(observable: ObservableValue<T>, funcProvider?: (value: T) => T): void;
 }
 
 /** Stores a value and provides and event of it being changed */

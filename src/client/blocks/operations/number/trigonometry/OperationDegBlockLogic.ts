@@ -6,10 +6,10 @@ export default class OperationDegBlockLogic extends ConfigurableBlockLogic<typeo
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationdeg);
 
-		this.event.subscribeObservable(this.input.value.value, () => this.update());
+		this.event.subscribeObservable(this.input.value, () => this.update());
 	}
 
 	private update() {
-		this.output.result.set(math.deg(this.input.value.value.get()));
+		this.output.result.set(math.deg(this.input.value.get()));
 	}
 }

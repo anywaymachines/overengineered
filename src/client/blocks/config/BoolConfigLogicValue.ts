@@ -5,12 +5,8 @@ export class BoolConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefini
 	constructor(
 		config: BlockConfigDefinitionRegistry["bool"]["config"],
 		definition: BlockConfigDefinitionRegistry["bool"],
-		connected: boolean,
 	) {
-		super(config, definition, connected);
-
-		if (!this.connected) {
-			this.value.set(config);
-		}
+		super(config, definition);
+		this.value.set(config);
 	}
 }

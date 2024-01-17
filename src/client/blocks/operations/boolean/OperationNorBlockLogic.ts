@@ -6,11 +6,11 @@ export default class OperationNorBlockLogic extends ConfigurableBlockLogic<typeo
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationnor);
 
-		this.event.subscribeObservable(this.input.value1.value, () => this.update());
-		this.event.subscribeObservable(this.input.value2.value, () => this.update());
+		this.event.subscribeObservable(this.input.value1, () => this.update());
+		this.event.subscribeObservable(this.input.value2, () => this.update());
 	}
 
 	private update() {
-		this.output.result.set(!(this.input.value1.value.get() === true || this.input.value2.value.get() === true));
+		this.output.result.set(!(this.input.value1.get() === true || this.input.value2.get() === true));
 	}
 }
