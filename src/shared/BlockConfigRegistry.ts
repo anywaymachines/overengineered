@@ -4,6 +4,7 @@ import {
 	BlockConfigValueTypeBool,
 	BlockConfigValueTypeNumber,
 	BlockConfigValueTypeOr,
+	BlockConfigValueTypeVector3,
 } from "./BlockConfigDefinitionRegistry";
 
 const disconnectblock = {
@@ -364,6 +365,45 @@ const multiplexer = {
 } as const satisfies BlockConfigBothDefinitions;
 
 const connectors = {
+	boolOrNumberOrVector(
+		name: string,
+		group?: string,
+		additional?: Partial<
+			BlockConfigRegToDefinition<
+				BlockConfigValueTypeOr<
+					[BlockConfigValueTypeBool, BlockConfigValueTypeNumber, BlockConfigValueTypeVector3]
+				>
+			>
+		>,
+	): BlockConfigRegToDefinition<
+		BlockConfigValueTypeOr<[BlockConfigValueTypeBool, BlockConfigValueTypeNumber, BlockConfigValueTypeVector3]>
+	> {
+		return {
+			displayName: name,
+			type: "or",
+			default: 0 as number,
+			config: 0 as number,
+			group,
+			types: [
+				{
+					type: "bool",
+					config: false as boolean,
+					default: false as boolean,
+				},
+				{
+					type: "number",
+					default: 0 as number,
+					config: 0 as number,
+				},
+				{
+					type: "vector3",
+					default: Vector3.zero as Vector3,
+					config: Vector3.zero as Vector3,
+				},
+			],
+			...(additional ?? {}),
+		};
+	},
 	boolOrNumber(
 		name: string,
 		group?: string,
@@ -523,6 +563,28 @@ const altimeter = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const constant = {
+	input: {
+		//connectors.boolOrNumberOrVector("Value", "1", { connectorHidden: true }),
+		value: {
+			displayName: "Hidden",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+			connectorHidden: true,
+		},
+	},
+	output: {
+		//connectors.boolOrNumberOrVector("Value", "1"),
+		result: {
+			displayName: "Value",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const blockConfigRegistry = {
 	disconnectblock,
 	motorblock,
@@ -543,6 +605,8 @@ const blockConfigRegistry = {
 	anglesensor,
 	keysensor,
 	altimeter,
+
+	constant,
 
 	operationnot: booleanProcessing,
 	operationand: twoBooleanInputsOneBooleanOutput,
