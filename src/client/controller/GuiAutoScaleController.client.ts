@@ -15,7 +15,8 @@ class ScaledScreenGui<T extends ScreenGui> extends Component<T> {
 		this.event.subscribeObservable(
 			this.event.observableFromGuiParam(gui as ScreenGui, "AbsoluteSize"),
 			(asize) => {
-				scale!.Scale = math.min(asize.Y / 1080, asize.X / 1920);
+				// scale!.Scale = math.min(asize.Y / 1080, asize.X / 1920);
+				scale!.Scale = math.min(asize.Y / 1080, 9999999);
 				Logger.info("GUI scaling set to " + scale!.Scale);
 			},
 			true,
