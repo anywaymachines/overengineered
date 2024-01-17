@@ -4,7 +4,6 @@ import PlayerDataStorage from "./PlayerDataStorage";
 import ComponentContainer from "./base/ComponentContainer";
 import BeaconController from "./controller/BeaconController";
 import GameEnvironmentController from "./controller/GameEnvironmentController";
-import initializeHideInterfaceController from "./controller/HideInterfaceController";
 import LocalPlayerController from "./controller/LocalPlayerController";
 import PlayModeController from "./controller/PlayModeController";
 import SoundController from "./controller/SoundController";
@@ -35,8 +34,6 @@ const root = new ComponentContainer();
 const playModeController = new PlayModeController();
 root.add(playModeController);
 root.enable();
-
-initializeHideInterfaceController(playModeController);
 
 Players.LocalPlayer.CameraMaxZoomDistance = 512;
 
