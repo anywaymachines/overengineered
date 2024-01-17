@@ -27,16 +27,16 @@ export default class Component<
 	}
 
 	/** Get an attribute value on the Instance */
-	public getAttribute<T extends AttributeValue>(name: string) {
+	getAttribute<T extends AttributeValue>(name: string) {
 		return this.instance.GetAttribute(name) as T | undefined;
 	}
 
-	public getInstance() {
+	getInstance() {
 		return this.instance;
 	}
 
 	/** Add a child */
-	public add(instance: TChild) {
+	add<T extends TChild>(instance: T) {
 		super.add(instance);
 
 		if (
@@ -46,10 +46,12 @@ export default class Component<
 		) {
 			instance.getInstance().Parent = this.instance;
 		}
+
+		return instance;
 	}
 
 	/** Disable component events, destroy the Instance and free the memory */
-	public destroy() {
+	destroy() {
 		super.destroy();
 
 		try {

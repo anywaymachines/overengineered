@@ -8,10 +8,10 @@ export default class Control<
 	TChild extends ComponentBase = ComponentBase,
 > extends Component<T, TChild> {
 	/** Signal that fires when this element is shown */
-	public readonly onShow = new Signal<() => void>();
+	readonly onShow = new Signal<() => void>();
 
 	/** Signal that fires when this element is hidden */
-	public readonly onHide = new Signal<() => void>();
+	readonly onHide = new Signal<() => void>();
 
 	private visible;
 	protected readonly gui: T;
@@ -23,29 +23,22 @@ export default class Control<
 		this.visible = gui.Visible;
 	}
 
-	/*public withGuiProps(properties: Partial<T>) {
-		//Objects.assign(this.gui, properties);
-		return this;
-	}*/
-	public when() {
-		return this.gui;
-	}
-	public getGui() {
+	getGui() {
 		return this.gui;
 	}
 
-	public enable() {
+	enable() {
 		if (!this.isVisible()) return;
 		super.enable();
 	}
 
 	/** Is control visible */
-	public isVisible() {
+	isVisible() {
 		return this.visible;
 	}
 
 	/** Show the control and enable it with the children */
-	public show() {
+	show() {
 		this.visible = true;
 		this.instance.Visible = true;
 
@@ -54,7 +47,7 @@ export default class Control<
 	}
 
 	/** Hide the control and disable it with the children */
-	public hide() {
+	hide() {
 		this.visible = false;
 		this.instance.Visible = false;
 

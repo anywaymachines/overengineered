@@ -7,6 +7,7 @@ type SigConnection = { Disconnect(): void };
 type Sig<T> = { Connect(callback: T): SigConnection };
 type Sub<T> = readonly [signal: Sig<T>, callback: T];
 
+/** Event handler with the ability to disable event processing */
 export default class ComponentEventHolder {
 	private readonly prepareEvents: ((inputType: InputType) => void)[] = [];
 	private readonly events: Partial<Record<Keys, Sub<unknown>[]>> = {};
@@ -15,20 +16,41 @@ export default class ComponentEventHolder {
 
 	private enabled = false;
 
-	public isEnabled(): boolean {
+	/** @returns Is event processing enabled */
+	isEnabled(): boolean {
 		return this.enabled;
 	}
 
-	public enable(): void {
+	/** Enable the event processing */
+	enable(): void {
 		if (this.enabled) return;
 
 		this.enabled = true;
 		this.inputTypeChanged(InputController.inputType.get());
 	}
 
+	/** Disable the event processing */
+	disable(): void {
+		if (!this.enabled) return;
+
+		this.enabled = false;
+		this.disconnect();
+	}
+
+	/** Add event to the event list */
 	private connect(sub: Sub<unknown>): void {
 		this.subscribed.push(sub[0].Connect(sub[1]));
 	}
+
+	/** Unsubscribe from all subscribed events */
+	private disconnect(): void {
+		for (const sub of this.subscribed) {
+			sub.Disconnect();
+		}
+
+		this.subscribed.clear();
+	}
+
 	private inputTypeChanged(inputType: InputType): void {
 		if (!this.enabled) return;
 		this.disconnect();
@@ -49,20 +71,8 @@ export default class ComponentEventHolder {
 		reg(inputType);
 	}
 
-	public disable(): void {
-		if (!this.enabled) return;
-
-		this.enabled = false;
-		this.disconnect();
-	}
-
-	private disconnect(): void {
-		for (const sub of this.subscribed) sub.Disconnect();
-		this.subscribed.clear();
-	}
-
 	/** Register an event that fires on enable and input type change */
-	public onPrepare(callback: (inputType: InputType) => void, executeImmediately = false): void {
+	onPrepare(callback: (inputType: InputType) => void, executeImmediately = false): void {
 		this.prepareEvents.push(callback);
 		if (executeImmediately) callback(InputController.inputType.get());
 	}
@@ -75,31 +85,35 @@ export default class ComponentEventHolder {
 	}
 
 	/** Register an event */
-	public subscribe<T extends Callback = Callback>(signal: Sig<T>, callback: T, inputType: Keys = "All"): void {
+	subscribe<T extends Callback = Callback>(signal: Sig<T>, callback: T, inputType: Keys = "All"): void {
 		this.sub(this.events, inputType, [signal, callback]);
 	}
 
 	/** Register an event that fires once */
-	public subscribeOnce<T extends Callback = Callback>(signal: Sig<T>, callback: T, inputType: Keys = "All"): void {
+	subscribeOnce<T extends Callback = Callback>(signal: Sig<T>, callback: T, inputType: Keys = "All"): void {
 		this.sub(this.eventsOnce, inputType, [signal, callback]);
 	}
 
+	/** Register an InputBegan and InputEnded event */
 	onInput(callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
 		this.onInputBegin(callback, allowGameProcessedEvents);
 		this.onInputEnd(callback, allowGameProcessedEvents);
 	}
+	/** Register an InputBegan event */
 	onInputBegin(callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
 		this.subscribe(UserInputService.InputBegan, (input, gameProcessedEvent) => {
 			if (gameProcessedEvent && !allowGameProcessedEvents) return;
 			callback(input);
 		});
 	}
+	/** Register an InputEnded event */
 	onInputEnd(callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
 		this.subscribe(UserInputService.InputEnded, (input, gameProcessedEvent) => {
 			if (gameProcessedEvent && !allowGameProcessedEvents) return;
 			callback(input);
 		});
 	}
+	/** Register an InputBegan event, filtered by a keyboard key */
 	onKeyDown(key: KeyCode, callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
 		return this.onInputBegin((input) => {
 			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
@@ -108,6 +122,7 @@ export default class ComponentEventHolder {
 			callback(input);
 		}, allowGameProcessedEvents);
 	}
+	/** Register an InputEnded event, filtered by a keyboard key */
 	onKeyUp(key: KeyCode, callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
 		return this.onInputEnd((input) => {
 			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
@@ -118,7 +133,7 @@ export default class ComponentEventHolder {
 	}
 
 	/** Subscribe to an observable value changed event */
-	public subscribeObservable<T>(
+	subscribeObservable<T>(
 		observable: ReadonlyObservableValue<T>,
 		callback: (value: T, prev: T) => void,
 		executeImmediately = false,
@@ -130,7 +145,8 @@ export default class ComponentEventHolder {
 		}
 	}
 
-	public observableFromGuiParam<TInstance extends Instance, TParam extends InstancePropertyNames<TInstance>>(
+	/** Create an `ObservableValue` from an `Instance` property */
+	observableFromGuiParam<TInstance extends Instance, TParam extends InstancePropertyNames<TInstance>>(
 		instance: TInstance,
 		param: TParam,
 	): ObservableValue<TInstance[TParam]> {
@@ -141,7 +157,8 @@ export default class ComponentEventHolder {
 	}
 
 	/* eslint-disable @typescript-eslint/no-this-alias */
-	public destroy(): void {
+	/** Disable this event holder and remove all event subscriptions */
+	destroy(): void {
 		this.disable();
 
 		const tis = this;

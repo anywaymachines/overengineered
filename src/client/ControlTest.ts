@@ -332,7 +332,7 @@ const createPopup = () => {
 				PaddingTop: new UDim(0.033, 0),
 			}),
 			ConfirmButton: confirmButton.getGui(),
-			CancelButton: cancelButton.when(),
+			CancelButton: cancelButton.getGui(),
 			/*TextButton2: createElement(
 				"TextButton",
 				{

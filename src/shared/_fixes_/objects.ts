@@ -17,6 +17,10 @@ export default class Objects {
 		return result;
 	}
 
+	public static pairs<T extends object>(object: T) {
+		return pairs(object);
+	}
+
 	public static entries<T extends object>(object: T): (readonly [keyof T, Exclude<T[keyof T], undefined>])[] {
 		const result: [keyof T, Exclude<T[keyof T], undefined>][] = [];
 		for (const [key, value] of pairs(object)) {

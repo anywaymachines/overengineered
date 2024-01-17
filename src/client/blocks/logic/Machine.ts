@@ -78,9 +78,9 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 		});
 	}
 
-	public add(instance: BlockLogic) {
+	public add<T extends BlockLogic>(instance: T) {
 		instance.machine = this;
-		super.add(instance);
+		return super.add(instance);
 	}
 
 	public destroy() {

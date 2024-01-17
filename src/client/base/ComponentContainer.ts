@@ -4,21 +4,13 @@ import ComponentBase from "./ComponentBase";
 export default class ComponentContainer<TChild extends ComponentBase = ComponentBase> extends ComponentBase {
 	private readonly children: TChild[] = [];
 
-	/** Checks if the child exists on an Instance */
-	protected static exists<T extends Instance, TKey extends keyof T & string>(
-		gui: T,
-		name: TKey,
-	): gui is T & { [key in TKey]: (typeof gui)[TKey] & defined } {
-		return gui.FindFirstChild(name) !== undefined;
-	}
-
 	/** Returns a list of added children */
-	public getChildren(): readonly TChild[] {
+	getChildren(): readonly TChild[] {
 		return this.children;
 	}
 
 	/** Enable component events, for self and every child */
-	public enable() {
+	enable() {
 		super.enable();
 
 		for (const child of this.getChildren()) {
@@ -26,7 +18,7 @@ export default class ComponentContainer<TChild extends ComponentBase = Component
 		}
 	}
 	/** Disable component events, for self and every child */
-	public disable() {
+	disable() {
 		for (const child of this.getChildren()) {
 			child.disable();
 		}
@@ -34,7 +26,7 @@ export default class ComponentContainer<TChild extends ComponentBase = Component
 		super.disable();
 	}
 	/** Disable component events, destroy the Instance and free the memory, for self and every child */
-	public destroy() {
+	destroy() {
 		for (const child of this.getChildren()) {
 			child.destroy();
 		}
@@ -42,20 +34,26 @@ export default class ComponentContainer<TChild extends ComponentBase = Component
 		super.destroy();
 	}
 
+	/**
+	 * Add a child and return it
+	 * @deprecated Use `add` instead
+	 */
+	added<T extends TChild>(instance: T) {
+		return this.add(instance);
+	}
+
 	/** Add a child and return it */
-	protected added<T extends TChild>(instance: T) {
-		this.add(instance);
+	add<T extends TChild>(instance: T) {
+		this.children.push(instance);
+		if (this.isEnabled()) {
+			instance.enable();
+		}
+
 		return instance;
 	}
 
-	/** Add a child */
-	public add(instance: TChild) {
-		this.children.push(instance);
-		if (this.isEnabled()) instance.enable();
-	}
-
 	/** Remove and destroy a child */
-	public remove(child: TChild) {
+	remove(child: TChild) {
 		const index = this.children.indexOf(child);
 		if (index === -1) return;
 
@@ -67,7 +65,7 @@ export default class ComponentContainer<TChild extends ComponentBase = Component
 	 * Clear all added children.
 	 * Removes only children that have been added using this.add()
 	 */
-	public clear() {
+	clear() {
 		[...this.children].forEach((child) => this.remove(child));
 	}
 }
