@@ -7,14 +7,8 @@
 		"sourceType": "module",
 		"project": "./tsconfig.json"
 	},
-	"ignorePatterns": [
-		"/out"
-	],
-	"plugins": [
-		"@typescript-eslint",
-		"roblox-ts",
-		"prettier"
-	],
+	"ignorePatterns": ["/out"],
+	"plugins": ["@typescript-eslint", "roblox-ts", "prettier"],
 	"extends": [
 		"eslint:recommended",
 		"plugin:@typescript-eslint/recommended",

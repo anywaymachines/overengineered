@@ -1,33 +1,33 @@
 {
-  "name": "game",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "build": "rbxtsc",
-    "watch": "rbxtsc -w"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@rbxts/compiler-types": "^2.2.0-types.0",
-    "@rbxts/types": "^1.0.720",
-    "@typescript-eslint/eslint-plugin": "^6.7.5",
-    "@typescript-eslint/parser": "^6.7.5",
-    "eslint": "^8.51.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-prettier": "^5.0.1",
-    "eslint-plugin-roblox-ts": "^0.0.36",
-    "prettier": "^3.0.3",
-    "roblox-ts": "^2.2.0",
-    "typescript": "^5.2.2"
-  },
-  "dependencies": {
-    "@rbxts/crypto": "^1.2.1",
-    "@rbxts/net": "^3.0.7",
-    "@rbxts/services": "^1.5.1",
-    "@rbxts/signal": "^1.1.1",
-    "@rbxts/visualize": "^1.1.1"
-  }
+	"name": "game",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"build": "rbxtsc",
+		"watch": "rbxtsc -w"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@rbxts/compiler-types": "^2.2.0-types.0",
+		"@rbxts/types": "^1.0.720",
+		"@typescript-eslint/eslint-plugin": "^6.7.5",
+		"@typescript-eslint/parser": "^6.7.5",
+		"eslint": "^8.51.0",
+		"eslint-config-prettier": "^9.0.0",
+		"eslint-plugin-prettier": "^5.0.1",
+		"eslint-plugin-roblox-ts": "^0.0.36",
+		"prettier": "^3.0.3",
+		"roblox-ts": "^2.2.0",
+		"typescript": "^5.2.2"
+	},
+	"dependencies": {
+		"@rbxts/crypto": "^1.2.1",
+		"@rbxts/net": "^3.0.7",
+		"@rbxts/services": "^1.5.1",
+		"@rbxts/signal": "^1.1.1",
+		"@rbxts/visualize": "^1.1.1"
+	}
 }

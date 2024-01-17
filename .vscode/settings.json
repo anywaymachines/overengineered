@@ -15,6 +15,6 @@
 	"editor.codeActionsOnSave": {
 		"source.organizeImports": "explicit"
 	},
-	
-	"discord.removeRemoteRepository": true,
+
+	"discord.removeRemoteRepository": true
 }
