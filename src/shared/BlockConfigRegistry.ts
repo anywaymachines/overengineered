@@ -30,8 +30,10 @@ const motorblock = {
 			type: "motorRotationSpeed",
 			default: 0 as number,
 			config: {
-				rotate_add: "R" as KeyCode,
-				rotate_sub: "F" as KeyCode,
+				rotation: {
+					add: "R" as KeyCode,
+					sub: "F" as KeyCode,
+				},
 				speed: 15 as number,
 				switchmode: false as boolean,
 			},
@@ -92,8 +94,10 @@ const servomotorblock = {
 			type: "servoMotorAngle",
 			default: 0 as number,
 			config: {
-				rotate_add: "R" as KeyCode,
-				rotate_sub: "F" as KeyCode,
+				rotation: {
+					add: "R" as KeyCode,
+					sub: "F" as KeyCode,
+				},
 				switchmode: false as boolean,
 				angle: 45 as number,
 			},

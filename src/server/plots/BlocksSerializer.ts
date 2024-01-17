@@ -315,7 +315,7 @@ const v8: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>,
 					  }
 					| undefined;
 
-				const config: config = {
+				const config: object = {
 					speed: cfg?.speed,
 					angle: {
 						rotate_add: cfg?.rotate_add,
@@ -368,7 +368,7 @@ const v8: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>,
 					  }
 					| undefined;
 
-				const config: config = {
+				const config: object = {
 					rotationSpeed: {
 						rotate_add: cfg?.rotate_add,
 						rotate_sub: cfg?.rotate_sub,
@@ -452,9 +452,108 @@ const v8: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>,
 	},
 };
 
+// updated block config layout
+const v9: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v8> = {
+	version: 9,
+
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		type reg = typeof blockConfigRegistry;
+		type partial<T extends object> = {
+			readonly [k in keyof T]?: T[k] extends object ? partial<T[k]> : T[k];
+		};
+
+		const update = (block: SerializedBlockV3) => {
+			if (block.id === "motorblock") {
+				type config = partial<{
+					readonly [k in keyof reg["motorblock"]["input"]]: reg["motorblock"]["input"][k]["config"];
+				}>;
+
+				const cfg = block.config as
+					| {
+							rotationSpeed: {
+								rotate_add?: KeyCode;
+								rotate_sub?: KeyCode;
+								switchmode?: boolean;
+								speed?: number;
+							};
+					  }
+					| undefined;
+
+				const config: config = {
+					rotationSpeed: {
+						rotation: {
+							add: cfg?.rotationSpeed.rotate_add,
+							sub: cfg?.rotationSpeed.rotate_sub,
+						},
+						switchmode: cfg?.rotationSpeed.switchmode,
+						speed: cfg?.rotationSpeed.speed,
+					},
+				};
+
+				return config;
+			}
+			if (block.id === "servomotorblock") {
+				type config = partial<{
+					readonly [k in keyof reg["servomotorblock"]["input"]]: reg["servomotorblock"]["input"][k]["config"];
+				}>;
+
+				const cfg = block.config as
+					| {
+							speed: number;
+							angle: {
+								speed?: number;
+								rotate_add?: KeyCode;
+								rotate_sub?: KeyCode;
+								switch?: boolean;
+								angle?: number;
+							};
+					  }
+					| undefined;
+
+				const config: config = {
+					speed: cfg?.speed,
+					angle: {
+						rotation: {
+							add: cfg?.angle.rotate_add,
+							sub: cfg?.angle.rotate_sub,
+						},
+						switchmode: cfg?.angle.switch,
+						angle: cfg?.angle.angle,
+					},
+				};
+
+				return config;
+			}
+
+			return block.config;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(
+				(b): SerializedBlockV3 => ({
+					...b,
+					config: update(b),
+				}),
+			),
+		};
+	},
+
+	read(plot: PlotModel): SerializedBlocks<SerializedBlockV3> {
+		return {
+			version: this.version,
+			blocks: read.blocksFromPlot(plot, read.blockV3),
+		};
+	},
+	place(data: SerializedBlocks<SerializedBlockV3>, plot: PlotModel): number {
+		place.blocksOnPlot(plot, data.blocks, place.blockOnPlotV3);
+		return data.blocks.size();
+	},
+};
+
 //
 
-const versions = [undefined!, undefined!, undefined!, undefined!, v4, v5, v6, v7, v8] as const;
+const versions = [undefined!, undefined!, undefined!, undefined!, v4, v5, v6, v7, v8, v9] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const BlocksSerializer = {

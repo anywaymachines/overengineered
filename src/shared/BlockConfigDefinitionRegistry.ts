@@ -62,8 +62,10 @@ export type BlockConfigValueTypeMotorRotationSpeed = BlockConfigValueType<
 	"motorRotationSpeed",
 	number,
 	{
-		readonly rotate_add: KeyCode;
-		readonly rotate_sub: KeyCode;
+		readonly rotation: {
+			readonly add: KeyCode;
+			readonly sub: KeyCode;
+		};
 		readonly speed: number;
 		readonly switchmode: boolean;
 	},
@@ -75,8 +77,10 @@ export type BlockConfigValueTypeServoMotorAngle = BlockConfigValueType<
 	"servoMotorAngle",
 	number,
 	{
-		readonly rotate_add: KeyCode;
-		readonly rotate_sub: KeyCode;
+		readonly rotation: {
+			readonly add: KeyCode;
+			readonly sub: KeyCode;
+		};
 		readonly switchmode: boolean;
 		readonly angle: number;
 	}

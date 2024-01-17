@@ -354,23 +354,37 @@ export class MotorRotationSpeedConfigValueControl extends ConfigValueControl<Con
 	) {
 		super(templates.multi(), definition.displayName);
 
-		const control = this.added(new ConfigControl(this.gui.Control));
+		const control = this.add(new ConfigControl(this.gui.Control));
 		this.event.subscribe(control.configUpdated, (key, value) =>
 			this.submitted.Fire((config = { ...config, [key]: value })),
 		);
 
 		const def = {
-			rotate_add: {
-				displayName: "Rotate +",
-				type: "key",
-				default: "R" as KeyCode,
-				config: "R" as KeyCode,
-			},
-			rotate_sub: {
-				displayName: "Rotate -",
-				type: "key",
-				default: "F" as KeyCode,
-				config: "F" as KeyCode,
+			rotation: {
+				displayName: "Rotation",
+				type: "multikey",
+				config: {
+					add: "R" as KeyCode,
+					sub: "F" as KeyCode,
+				},
+				default: {
+					add: "R" as KeyCode,
+					sub: "F" as KeyCode,
+				},
+				keyDefinitions: {
+					add: {
+						displayName: "+",
+						type: "key",
+						default: "R" as KeyCode,
+						config: "R" as KeyCode,
+					},
+					sub: {
+						displayName: "-",
+						type: "key",
+						default: "F" as KeyCode,
+						config: "F" as KeyCode,
+					},
+				},
 			},
 			speed: {
 				displayName: "Max. speed",
@@ -410,17 +424,31 @@ export class ServoMotorAngleConfigValueControl extends ConfigValueControl<Config
 		);
 
 		const def = {
-			rotate_add: {
-				displayName: "Rotate +",
-				type: "key",
-				default: "R" as KeyCode,
-				config: "R" as KeyCode,
-			},
-			rotate_sub: {
-				displayName: "Rotate -",
-				type: "key",
-				default: "F" as KeyCode,
-				config: "F" as KeyCode,
+			rotation: {
+				displayName: "Rotation",
+				type: "multikey",
+				config: {
+					add: "R" as KeyCode,
+					sub: "F" as KeyCode,
+				},
+				default: {
+					add: "R" as KeyCode,
+					sub: "F" as KeyCode,
+				},
+				keyDefinitions: {
+					add: {
+						displayName: "+",
+						type: "key",
+						default: "R" as KeyCode,
+						config: "R" as KeyCode,
+					},
+					sub: {
+						displayName: "-",
+						type: "key",
+						default: "F" as KeyCode,
+						config: "F" as KeyCode,
+					},
+				},
 			},
 			switchmode: {
 				displayName: "Switch",

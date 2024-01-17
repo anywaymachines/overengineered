@@ -14,7 +14,7 @@ export class ServoMotorAngleConfigLogicValue extends ConfigLogicValueBase<
 
 		const def = {
 			add: {
-				key: config.rotate_add,
+				key: config.rotation.add,
 				conflicts: "sub",
 				keyDown: () => {
 					if (!config.switchmode) {
@@ -30,7 +30,7 @@ export class ServoMotorAngleConfigLogicValue extends ConfigLogicValueBase<
 				},
 			},
 			sub: {
-				key: config.rotate_sub,
+				key: config.rotation.sub,
 				conflicts: "add",
 				keyDown: () => {
 					if (!config.switchmode) {
