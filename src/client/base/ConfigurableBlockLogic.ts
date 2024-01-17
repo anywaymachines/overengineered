@@ -42,7 +42,7 @@ export default abstract class ConfigurableBlockLogic<
 		const createInput = (key: string, definition: BlockConfigDefinition) => {
 			const connected = block.connections[key as keyof typeof block.connections] !== undefined;
 			if (connected) {
-				return blockConfigRegistryClient[definition.type].output(this.config[key] as never);
+				return blockConfigRegistryClient[definition.type].output(definition as never);
 			}
 
 			return this.add(
