@@ -8,6 +8,7 @@ import { ButtonControl } from "../controls/Button";
 import SavePopup from "../popup/SavePopup";
 import SettingsPopup from "../popup/SettingsPopup";
 import ToolbarControl, { ToolbarControlDefinition } from "./ToolbarControl";
+import BuildTool2Scene, { BuildTool2SceneDefinition } from "./tools/BuildTool2Scene";
 import BuildToolScene, { BuildToolSceneDefinition } from "./tools/BuildToolScene";
 import ConfigToolScene, { ConfigToolSceneDefinition } from "./tools/ConfigToolScene";
 import DeleteToolScene, { DeleteToolSceneDefinition } from "./tools/DeleteToolScene";
@@ -48,6 +49,7 @@ export type BuildingModeSceneDefinition = GuiObject & {
 	ToolbarGui: ToolbarControlDefinition;
 	Tools: {
 		BuildToolGui: BuildToolSceneDefinition;
+		BuildTool2Gui: BuildTool2SceneDefinition;
 		DeleteToolGui: DeleteToolSceneDefinition;
 		ConfigToolGui: ConfigToolSceneDefinition;
 		PaintToolGui: PaintToolSceneDefinition;
@@ -85,14 +87,11 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 		this.toolbar = new ToolbarControl(tools, gui.ToolbarGui);
 		this.add(this.toolbar);
 
-		//const bt2 = this.gui.Tools.BuildToolGui.Clone();
-		//bt2.Parent = this.gui.Tools.BuildToolGui.Parent;
-
 		this.scenes.set(tools.buildTool, new BuildToolScene(this.gui.Tools.BuildToolGui, tools.buildTool));
 		this.scenes.set(tools.deleteTool, new DeleteToolScene(this.gui.Tools.DeleteToolGui, tools.deleteTool));
 		this.scenes.set(tools.configTool, new ConfigToolScene(this.gui.Tools.ConfigToolGui, tools.configTool));
 		this.scenes.set(tools.paintTool, new PaintToolScene(this.gui.Tools.PaintToolGui, tools.paintTool));
-		//this.scenes.set(tools.buildTool2, new BuildTool2Scene(bt2, tools.buildTool2));
+		this.scenes.set(tools.buildTool2, new BuildTool2Scene(this.gui.Tools.BuildTool2Gui, tools.buildTool2));
 		this.scenes.set(tools.wiretool, new WireToolScene(this.gui.Tools.WireToolGui, tools.wiretool));
 
 		this.scenes.forEach((scene) => this.add(scene));

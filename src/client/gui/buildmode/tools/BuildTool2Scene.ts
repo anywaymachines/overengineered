@@ -3,31 +3,36 @@ import BuildTool2 from "client/tools/BuildTool2";
 import GuiAnimator from "../../GuiAnimator";
 import BlockSelectionControl, { BlockSelectionControlDefinition } from "../BlockSelection";
 import MaterialChooserControl from "../MaterialChooser";
-import { MaterialPreviewEditControl, MaterialPreviewEditDefinition } from "../MaterialPreviewEditControl";
+import { MaterialPreviewDefinition } from "../MaterialPreviewControl";
 import MirrorEditorControl, { MirrorEditorControlDefinition } from "../MirrorEditorControl";
 
-export type BuildToolSceneDefinition = GuiObject & {
-	BlockSelection: BlockSelectionControlDefinition;
-	Mirrors: MirrorEditorControlDefinition;
-	Preview: MaterialPreviewEditDefinition;
-	TouchControls: Frame & {
-		PlaceButton: TextButton;
-		RotateRButton: TextButton;
-		RotateTButton: TextButton;
-		RotateYButton: TextButton;
+export type BuildTool2SceneDefinition = GuiObject & {
+	readonly BlockInfo: Frame & {
+		ViewportFrame: MaterialPreviewDefinition;
+		DescriptionLabel: TextLabel;
+		NameLabel: TextLabel;
 	};
+	readonly Inventory: BlockSelectionControlDefinition;
+	//readonly Mirrors: MirrorEditorControlDefinition;
+	readonly TouchControls: Frame & {
+		readonly PlaceButton: TextButton;
+		readonly RotateRButton: TextButton;
+		readonly RotateTButton: TextButton;
+		readonly RotateYButton: TextButton;
+	};
+	readonly Mirrors: MirrorEditorControlDefinition;
 };
 
-export default class BuildTool2Scene extends Control<BuildToolSceneDefinition> {
+export default class BuildTool2Scene extends Control<BuildTool2SceneDefinition> {
 	readonly tool;
 	readonly blockSelector;
 	readonly mirrors;
 
-	constructor(gui: BuildToolSceneDefinition, tool: BuildTool2) {
+	constructor(gui: BuildTool2SceneDefinition, tool: BuildTool2) {
 		super(gui);
 		this.tool = tool;
 
-		this.blockSelector = new BlockSelectionControl(gui.BlockSelection);
+		this.blockSelector = new BlockSelectionControl(gui.Inventory);
 		this.blockSelector.show();
 		this.add(this.blockSelector);
 
@@ -38,8 +43,6 @@ export default class BuildTool2Scene extends Control<BuildToolSceneDefinition> {
 		this.tool.selectedBlock.bindTo(this.blockSelector.selectedBlock);
 
 		this.event.onPrepare((inputType) => (this.gui.TouchControls.Visible = inputType === "Touch"), true);
-
-		this.add(new MaterialPreviewEditControl(this.gui.Preview, tool.selectedMaterial, tool.selectedColor));
 
 		MaterialChooserControl.instance.selectedMaterial.bindTo(tool.selectedMaterial);
 		MaterialChooserControl.instance.selectedColor.bindTo(tool.selectedColor);
@@ -71,12 +74,5 @@ export default class BuildTool2Scene extends Control<BuildToolSceneDefinition> {
 		this.eventHandler.subscribe(this.gui.TouchControls.RotateYButton.MouseButton1Click, () =>
 			this.tool.rotateBlock("z", true),
 		);
-	}
-
-	public show() {
-		super.show();
-
-		GuiAnimator.transition(this.gui.BlockSelection, 0.2, "right");
-		GuiAnimator.transition(this.gui.Preview, 0.2, "right");
 	}
 }
