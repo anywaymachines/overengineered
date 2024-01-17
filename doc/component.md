@@ -37,6 +37,13 @@ Only use `this.eventHolder` and `this.inputHandler` anywhere else.
 # ComponentContainer
 A `ComponentBase` that has children.
 
+Usage:
+```ts
+const container = new ComponentContaier();
+const child = new ComponentBase();
+container.add(child);
+container.remove(child);
+```
 All the children of this component are automatically enabled/disabled/destroyed with this one.
 
 # Component
