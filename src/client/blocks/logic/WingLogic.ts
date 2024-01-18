@@ -2,9 +2,11 @@ import BlockLogic from "client/base/BlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
 type Wing = BlockModel & {
-	readonly WingSurface: BasePart & {
-		readonly VectorForce: VectorForce;
-	};
+	readonly WingSurface:
+		| BasePart
+		| (UnionOperation & {
+				readonly VectorForce: VectorForce;
+		  });
 };
 
 export default class WingLogic extends BlockLogic<Wing> {

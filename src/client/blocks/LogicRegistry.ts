@@ -35,15 +35,20 @@ import AltimeterBlockLogic from "./operations/sensors/AltimeterBlockLogic";
 import AngleSensorBlockLogic from "./operations/sensors/AngleSensorBlockLogic";
 import KeySensorBlockLogic from "./operations/sensors/KeySensorBlockLogic";
 import SpeedometerBlockLogic from "./operations/sensors/SpeedometerBlockLogic";
+import OperationVec3CombinerBlockLogic from "./operations/vector/OperationVec3CombinerBlockLogic";
 import OperationVec3SplitterBlockLogic from "./operations/vector/OperationVec3SplitterBlockLogic";
 
 const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): BlockLogic } | undefined>> = {
-	vehicleseat: VehicleSeatBlockLogic,
-	disconnectblock: DisconnectBlockLogic,
 	wing1x1: WingLogic,
 	wing1x2: WingLogic,
 	wing1x3: WingLogic,
 	wing1x4: WingLogic,
+	wingrounding: WingLogic,
+	wingsharpening: WingLogic,
+
+	vehicleseat: VehicleSeatBlockLogic,
+	disconnectblock: DisconnectBlockLogic,
+
 	smallrocketengine: RocketEngineLogic,
 	rocketengine: RocketEngineLogic,
 	motorblock: MotorBlockLogic,
@@ -79,6 +84,7 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 	operationsub: OperationSubBlockLogic,
 	operationmul: OperationMulBlockLogic,
 	operationvec3splitter: OperationVec3SplitterBlockLogic,
+	operationvec3combiner: OperationVec3CombinerBlockLogic,
 
 	operationequals: OperationEqualsBlockLogic,
 	operationgreaterthan: OperationGreaterThanBlockLogic,

@@ -2,7 +2,7 @@ import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default class OperationVec3SplitterBlockLogic extends ConfigurableBlockLogic<
+export default class OperationVec3CombinerBlockLogic extends ConfigurableBlockLogic<
 	typeof blockConfigRegistry.operationvec3combiner
 > {
 	constructor(block: PlacedBlockData) {

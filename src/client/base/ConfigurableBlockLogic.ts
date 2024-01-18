@@ -4,7 +4,6 @@ import {
 	BlockConfigBothDefinitions,
 	BlockConfigDefinition,
 	BlockConfigDefinitions,
-	BlockConfigDefinitionsToConfig,
 } from "shared/BlockConfigDefinitionRegistry";
 import Objects from "shared/_fixes_/objects";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -26,7 +25,6 @@ export default abstract class ConfigurableBlockLogic<
 	T extends BlockModel = BlockModel,
 > extends BlockLogic<T> {
 	readonly enableControls = new ObservableValue(false);
-	readonly config: BlockConfigDefinitionsToConfig<TDef["input"]>;
 	readonly input: {
 		readonly [k in keyof TDef["input"]]: ReadonlyObservableValue<TDef["input"][k]["default"]>;
 	};
@@ -37,8 +35,7 @@ export default abstract class ConfigurableBlockLogic<
 	constructor(block: PlacedBlockData, configDefinition: TDef) {
 		super(block);
 
-		this.config = BlockConfig.deserialize(this.block, configDefinition.input);
-
+		const config = BlockConfig.deserialize(this.block, configDefinition.input);
 		const createInput = (key: string, definition: BlockConfigDefinition) => {
 			const connected = block.connections[key as keyof typeof block.connections] !== undefined;
 			if (connected) {
@@ -46,7 +43,7 @@ export default abstract class ConfigurableBlockLogic<
 			}
 
 			const input = this.add(
-				new blockConfigRegistryClient[definition.type].input(this.config[key] as never, definition as never),
+				new blockConfigRegistryClient[definition.type].input(config[key] as never, definition as never),
 			);
 
 			this.event.subscribeObservable(

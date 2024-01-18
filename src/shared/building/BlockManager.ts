@@ -1,5 +1,6 @@
 import { HttpService } from "@rbxts/services";
 import Serializer from "shared/Serializer";
+import JSON from "shared/_fixes_/Json";
 
 export type PlacedBlockDataConnection = {
 	/** OUTPUT block uiid */
@@ -16,6 +17,7 @@ export type PlacedBlockData<T extends BlockModel = BlockModel> = {
 	readonly id: string;
 	readonly uuid: BlockUuid;
 	readonly displayName: string | undefined;
+	readonly config: object;
 
 	/** Connections to the INPUT connectors */
 	readonly connections: Readonly<Record<BlockConnectionName, PlacedBlockDataConnection>>;
@@ -50,6 +52,7 @@ export default class BlockManager {
 			connections: HttpService.JSONDecode(
 				(model.GetAttribute("connections") as string | undefined) ?? "{}",
 			) as PlacedBlockData["connections"],
+			config: JSON.deserialize<object>((model.GetAttribute("config") as string | undefined) ?? "{}"),
 		};
 	}
 }

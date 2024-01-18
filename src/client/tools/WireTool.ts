@@ -219,8 +219,6 @@ export default class WireTool extends ToolBase {
 		if (!this.startMarker.get()) return;
 
 		if (this.hoverMarker) {
-			this.updateVisual();
-
 			await Remotes.Client.GetNamespace("Building").Get("UpdateLogicConnectionRequest").CallServerAsync({
 				operation: "connect",
 				outputBlock: this.startMarker.get()!.data.blockData.instance,

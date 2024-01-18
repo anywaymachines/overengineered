@@ -17,8 +17,8 @@ import logicRegistry from "../LogicRegistry";
 import VehicleSeatBlockLogic from "./VehicleSeatBlockLogic";
 
 export default class Machine extends ComponentContainer<BlockLogic> {
-	public readonly destroyed = new Signal<() => void>();
-	public readonly seat: VehicleSeatBlockLogic;
+	readonly destroyed = new Signal<() => void>();
+	readonly seat: VehicleSeatBlockLogic;
 
 	constructor(logics: readonly BlockLogic[]) {
 		super();
@@ -38,12 +38,14 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 				);
 			}
 		}
+	}
 
-		// TODO: Option OR isPVP
-		if (PlayerDataStorage.config.get().impact_destruction) {
-			ImpactController.initializeBlocks();
-		}
+	destroy() {
+		this.destroyed.Fire();
+		super.destroy();
+	}
 
+	initializeSpeedLimiter() {
 		this.event.subscribe(RunService.Heartbeat, () => {
 			// Angular speed limit
 			const currentAngularVelocity = this.seat.vehicleSeat.AssemblyAngularVelocity;
@@ -87,12 +89,7 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 		});
 	}
 
-	public destroy() {
-		this.destroyed.Fire();
-		super.destroy();
-	}
-
-	public static fromBlocks() {
+	static fromBlocks() {
 		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
 		const blockdatas = SharedPlots.getPlotBlockDatas(plot);
 		const blocksmap = new Map(blockdatas.map((b) => [b.uuid, b] as const));
@@ -144,8 +141,12 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 		}
 
 		const machine = new Machine(logics);
-		machine.enable();
+		machine.initializeSpeedLimiter();
+		if (PlayerDataStorage.config.get().impact_destruction) {
+			ImpactController.initializeBlocks();
+		}
 
+		machine.enable();
 		return machine;
 	}
 }

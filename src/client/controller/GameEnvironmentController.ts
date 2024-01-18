@@ -5,7 +5,7 @@ import EventHandler from "shared/event/EventHandler";
 export default class GameEnvironmentController {
 	// Const
 	public static readonly EarthGravity = 180;
-	public static readonly EarthAirDensity = 0.3;
+	public static readonly EarthAirDensity = 0.2;
 
 	public static readonly ZeroGravityHeight = 15000;
 	public static readonly ZeroAirHeight = 10000;

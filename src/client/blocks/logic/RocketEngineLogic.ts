@@ -66,10 +66,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 		this.multiplier *= math.max(1, RobloxUnit.GetMaterialPhysicalProperties(block.material).Density / 2);
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
-
-		this.event.subscribeObservable(this.input.thrust, (thrust) => {
-			this.update();
-		});
+		this.event.subscribeObservable(this.input.thrust, () => this.update(), true);
 	}
 
 	private update() {

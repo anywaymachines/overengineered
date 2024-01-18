@@ -9,7 +9,7 @@ export default class BuildingWelder {
 			for (const side of sides) {
 				const diff = Vector3.FromNormalId(side);
 
-				const offset = 0.1;
+				const offset = 0.01;
 				const push = (x: number, y: number, z: number) => {
 					ret.push([
 						part.CFrame.PointToWorldSpace(new Vector3(x, y, z).sub(part.Size.div(2))),

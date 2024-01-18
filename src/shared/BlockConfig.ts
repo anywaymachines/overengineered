@@ -1,14 +1,10 @@
-import {
-	BlockConfigDefinition,
-	BlockConfigDefinitions,
-	BlockConfigDefinitionsToConfig,
-} from "./BlockConfigDefinitionRegistry";
+import { BlockConfigDefinitions, BlockConfigDefinitionsToConfig } from "./BlockConfigDefinitionRegistry";
 import JSON from "./_fixes_/Json";
 import Objects from "./_fixes_/objects";
 import { PlacedBlockData } from "./building/BlockManager";
 
 export default class BlockConfig {
-	static deserialize<TDef extends Readonly<Record<string, BlockConfigDefinition>>>(
+	static deserialize<TDef extends BlockConfigDefinitions>(
 		block: PlacedBlockData,
 		definition: TDef,
 	): BlockConfigDefinitionsToConfig<TDef> {
