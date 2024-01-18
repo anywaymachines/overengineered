@@ -16,6 +16,7 @@ const disconnectblock = {
 			config: {
 				key: "F" as KeyCode,
 				switch: false as boolean,
+				touchName: "Disconnect" as string,
 			},
 			canBeSwitch: false,
 		},
@@ -115,6 +116,7 @@ const tnt = {
 			config: {
 				key: "B" as KeyCode,
 				switch: false as boolean,
+				touchName: "Explode" as string,
 			},
 			canBeSwitch: false,
 		},
@@ -231,6 +233,7 @@ const keysensor = {
 			config: {
 				key: "F" as KeyCode,
 				switch: false as boolean,
+				touchName: "Key" as string,
 			},
 			canBeSwitch: true,
 		},

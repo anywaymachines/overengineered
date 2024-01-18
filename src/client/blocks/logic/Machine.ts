@@ -29,6 +29,14 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 
 		for (const logic of logics) {
 			this.add(logic);
+
+			if (logic instanceof ConfigurableBlockLogic) {
+				this.event.subscribeObservable(
+					this.seat.occupiedByLocalPlayer,
+					(enabled) => logic.enableControls.set(enabled),
+					true,
+				);
+			}
 		}
 
 		// TODO: Option OR isPVP
@@ -77,11 +85,6 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 				),
 			);
 		});
-	}
-
-	public add<T extends BlockLogic>(instance: T) {
-		instance.machine = this;
-		return super.add(instance);
 	}
 
 	public destroy() {

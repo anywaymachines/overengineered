@@ -17,7 +17,6 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<
 		super(block, blockConfigRegistry.servomotorblock);
 
 		this.hingeConstraint = this.instance.Base.HingeConstraint;
-
 		this.event.subscribeObservable(this.input.speed, (speed) => {
 			this.hingeConstraint.AngularSpeed = speed;
 		});

@@ -25,6 +25,7 @@ export default abstract class ConfigurableBlockLogic<
 	TDef extends BlockConfigBothDefinitions,
 	T extends BlockModel = BlockModel,
 > extends BlockLogic<T> {
+	readonly enableControls = new ObservableValue(false);
 	readonly config: BlockConfigDefinitionsToConfig<TDef["input"]>;
 	readonly input: {
 		readonly [k in keyof TDef["input"]]: ReadonlyObservableValue<TDef["input"][k]["default"]>;
@@ -38,22 +39,27 @@ export default abstract class ConfigurableBlockLogic<
 
 		this.config = BlockConfig.deserialize(this.block, configDefinition.input);
 
-		const controlsEnabled = new ObservableValue(false);
 		const createInput = (key: string, definition: BlockConfigDefinition) => {
 			const connected = block.connections[key as keyof typeof block.connections] !== undefined;
 			if (connected) {
-				return blockConfigRegistryClient[definition.type].output(definition as never);
+				return blockConfigRegistryClient[definition.type].createObservable(definition as never);
 			}
 
-			return this.add(
+			const input = this.add(
 				new blockConfigRegistryClient[definition.type].input(this.config[key] as never, definition as never),
-			).value;
-		};
-		this.event.onPrepare(() => {
-			this.eventHandler.subscribe(this.machine!.seat.occupiedByLocalPlayer.changed, (occupied) =>
-				controlsEnabled.set(occupied),
 			);
-		});
+
+			this.event.subscribeObservable(
+				this.enableControls,
+				(enabled) => {
+					if (enabled) input.enable();
+					else input.disable();
+				},
+				true,
+			);
+
+			return input.value;
+		};
 
 		this.input = Objects.fromEntries(
 			Objects.entries(configDefinition.input).map((d) => [d[0], createInput(d[0], d[1])] as const),
@@ -61,7 +67,7 @@ export default abstract class ConfigurableBlockLogic<
 
 		this.output = Objects.fromEntries(
 			Objects.entries(configDefinition.output).map(
-				(d) => [d[0], blockConfigRegistryClient[d[1].type].output(d[1] as never)] as const,
+				(d) => [d[0], blockConfigRegistryClient[d[1].type].createObservable(d[1] as never)] as const,
 			),
 		) as typeof this.output;
 	}

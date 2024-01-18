@@ -15,6 +15,7 @@ export type BlockConfigValueTypeBool = BlockConfigPrimitiveValueType<"bool", boo
 export type BlockConfigValueTypeVector3 = BlockConfigPrimitiveValueType<"vector3", Vector3>;
 export type BlockConfigValueTypeKey = BlockConfigPrimitiveValueType<"key", KeyCode>;
 export type BlockConfigValueTypeNumber = BlockConfigPrimitiveValueType<"number", number>;
+export type BlockConfigValueTypeString = BlockConfigPrimitiveValueType<"string", string>;
 
 export type BlockConfigValueTypeMultiKey<TKeys extends string = string> = BlockConfigPrimitiveValueType<
 	"multikey",
@@ -29,6 +30,7 @@ export type BlockConfigValueTypeKeyBool = BlockConfigValueType<
 	{
 		readonly key: KeyCode;
 		readonly switch: boolean;
+		readonly touchName: string;
 	},
 	{
 		readonly canBeSwitch: boolean;
@@ -106,6 +108,7 @@ type BlockConfigDefinitionRegistry = {
 	readonly bool: BlockConfigValueTypeBool;
 	readonly vector3: BlockConfigValueTypeVector3;
 	readonly number: BlockConfigValueTypeNumber;
+	readonly string: BlockConfigValueTypeString;
 	readonly clampedNumber: BlockConfigValueTypeClampedNumber;
 	readonly key: BlockConfigValueTypeKey;
 	readonly multikey: BlockConfigValueTypeMultiKey;

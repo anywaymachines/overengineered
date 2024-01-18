@@ -15,11 +15,14 @@ export abstract class ConfigLogicValueBase<
 		this.config = config;
 		this.definition = definition;
 		this.value = this.createObservable();
+	}
 
-		this.event.onPrepare(() => this.value.triggerChanged());
+	enable() {
+		super.enable();
+		this.value.triggerChanged();
 	}
 
 	protected createObservable(): ObservableValue<T["default"]> {
-		return new ObservableValue(this.definition.default);
+		return new ObservableValue(undefined!);
 	}
 }

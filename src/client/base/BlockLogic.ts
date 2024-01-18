@@ -1,11 +1,9 @@
-import Machine from "client/blocks/logic/Machine";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import PartUtils from "shared/utils/PartUtils";
 import Component from "./Component";
 
 export default abstract class BlockLogic<T extends BlockModel = BlockModel> extends Component<T> {
 	readonly block: PlacedBlockData<T>;
-	public machine?: Machine;
 
 	constructor(block: PlacedBlockData) {
 		super(block.instance as T);

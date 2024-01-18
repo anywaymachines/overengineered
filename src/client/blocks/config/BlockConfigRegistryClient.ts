@@ -11,84 +11,75 @@ import { MultiKeyConfigLogicValue } from "./MultiKeyConfigLogicValue";
 import { NumberConfigLogicValue } from "./NumberConfigLogicValue";
 import { OrMotorAngleConfigLogicValue } from "./OrConfigLogicValue";
 import { ServoMotorAngleConfigLogicValue } from "./ServoMotorAngleConfigLogicValue";
+import { StringConfigLogicValue } from "./StringConfigLogicValue";
 import { ThrustConfigLogicValue } from "./ThrustConfigLogicValue";
 import { Vector3ConfigLogicValue } from "./Vector3ConfigLogicValue";
 
 export type blockConfigRegistryClient = {
 	[k in keyof BlockConfigDefinitionRegistry]: {
 		readonly input: typeof ConfigLogicValueBase<BlockConfigDefinitionRegistry[k]>;
-		readonly output: (
+		readonly createObservable: (
 			definition: BlockConfigDefinitionRegistry[k],
 		) => ObservableValue<BlockConfigDefinitionRegistry[k]["default"]>;
 	};
 };
 
+const createObservable = <TDef extends BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry]>(
+	definition: TDef,
+): ObservableValue<TDef["default"]> => {
+	return new ObservableValue(undefined!);
+};
+
 const blockConfigRegistryClient = {
 	bool: {
 		input: BoolConfigLogicValue,
-		output: (definition) => {
-			return new ObservableValue(definition.default);
-		},
+		createObservable,
 	},
 	vector3: {
 		input: Vector3ConfigLogicValue,
-		output: (definition) => {
-			return new ObservableValue(definition.default);
-		},
+		createObservable,
 	},
 	key: {
 		input: KeyConfigLogicValue,
-		output: (definition) => {
-			return new ObservableValue(definition.default);
-		},
+		createObservable,
 	},
 	multikey: {
 		input: MultiKeyConfigLogicValue,
-		output: (definition) => {
-			return new ObservableValue(definition.default);
-		},
+		createObservable,
 	},
 	keybool: {
 		input: KeyBoolConfigLogicValue,
-		output: (definition) => {
-			return new ObservableValue(definition.default);
-		},
+		createObservable,
 	},
 	number: {
 		input: NumberConfigLogicValue,
-		output: (definition) => {
-			return new ObservableValue(definition.default);
-		},
+		createObservable,
+	},
+	string: {
+		input: StringConfigLogicValue,
+		createObservable,
 	},
 	clampedNumber: {
 		input: ClampedNumberConfigLogicValue,
-		output: (definition) => {
-			return new NumberObservableValue(definition.default, definition.min, definition.max, definition.step);
+		createObservable: (definition) => {
+			return new NumberObservableValue(undefined!, definition.min, definition.max, definition.step);
 		},
 	},
 	thrust: {
 		input: ThrustConfigLogicValue,
-		output: (definition) => {
-			return new ObservableValue(definition.default);
-		},
+		createObservable,
 	},
 	motorRotationSpeed: {
 		input: MotorRotationSpeedConfigLogicValue,
-		output: (definition) => {
-			return new ObservableValue(definition.default);
-		},
+		createObservable,
 	},
 	servoMotorAngle: {
 		input: ServoMotorAngleConfigLogicValue,
-		output: (definition) => {
-			return new ObservableValue(definition.default);
-		},
+		createObservable,
 	},
 	or: {
 		input: OrMotorAngleConfigLogicValue,
-		output: (definition) => {
-			return new ObservableValue(definition.default);
-		},
+		createObservable,
 	},
 } as const satisfies blockConfigRegistryClient;
 

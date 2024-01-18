@@ -7,7 +7,6 @@ import { PlacedBlockData } from "shared/building/BlockManager";
 export default class AltimeterBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.altimeter> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.altimeter);
-
 		this.event.subscribe(RunService.Heartbeat, () => this.update());
 	}
 

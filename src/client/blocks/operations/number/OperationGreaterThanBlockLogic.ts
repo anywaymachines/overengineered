@@ -13,6 +13,7 @@ export default class OperationGreaterThanBlockLogic extends ConfigurableBlockLog
 	}
 
 	private update() {
+		if (this.input.value1.get() === undefined || this.input.value2.get() === undefined) return;
 		this.output.result.set(this.input.value1.get() > this.input.value2.get());
 	}
 }

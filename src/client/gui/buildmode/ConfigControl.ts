@@ -6,11 +6,13 @@ import KeyChooserControl, { KeyChooserControlDefinition } from "client/gui/contr
 import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import SliderControl, { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import BlockConfigDefinitionRegistry, {
+	BlockConfigDefinition,
 	BlockConfigDefinitions,
 	BlockConfigDefinitionsToConfig,
 	BlockConfigRegToDefinition,
 } from "shared/BlockConfigDefinitionRegistry";
 import Objects from "shared/_fixes_/objects";
+import TextBoxControl, { TextBoxControlDefinition } from "../controls/TextBoxControl";
 
 export type ConfigControlDefinition = GuiObject;
 export default class ConfigControl extends Control<ConfigControlDefinition> {
@@ -23,6 +25,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 	private readonly keyTemplate;
 	private readonly sliderTemplate;
 	private readonly numberTemplate;
+	private readonly stringTemplate;
 	private readonly thrustTemplate;
 
 	constructor(gui: ConfigControlDefinition) {
@@ -34,6 +37,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 		this.keyTemplate = Control.asTemplate(templates.KeyTemplate, false);
 		this.sliderTemplate = Control.asTemplate(templates.SliderTemplate, false);
 		this.numberTemplate = Control.asTemplate(templates.NumberTemplate, false);
+		this.stringTemplate = Control.asTemplate(templates.NumberTemplate, false);
 		this.thrustTemplate = Control.asTemplate(templates.MultiTemplate, false);
 	}
 
@@ -56,6 +60,66 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 					checkbox: this.checkboxTemplate,
 					key: this.keyTemplate,
 					number: this.numberTemplate,
+					string: this.stringTemplate,
+					slider: this.sliderTemplate,
+					multi: this.thrustTemplate,
+				},
+				config[id] as never,
+				def as never,
+			);
+			this.add(control);
+
+			control.submitted.Connect((value) => this.configUpdated.Fire(id as string, value));
+		}
+	}
+}
+
+type ConfigControl2Definition = GuiObject;
+type ConfigUpdatedCallback<TDef extends BlockConfigDefinitions, TKey extends keyof TDef> = (
+	key: TKey,
+	valeu: TDef[TKey]["config"],
+) => void;
+class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control<ConfigControl2Definition> {
+	readonly configUpdated = new Signal<ConfigUpdatedCallback<TDef, keyof TDef>>();
+
+	private readonly connectedTemplate;
+	private readonly checkboxTemplate;
+	private readonly keyTemplate;
+	private readonly sliderTemplate;
+	private readonly numberTemplate;
+	private readonly stringTemplate;
+	private readonly thrustTemplate;
+
+	constructor(
+		gui: ConfigControl2Definition,
+		config: BlockConfigDefinitionsToConfig<TDef>,
+		definition: Partial<TDef>,
+		connected: readonly (keyof TDef)[] = [],
+	) {
+		super(gui);
+
+		const templates = GuiController.getGameUI<{ Templates: { Configuration: Template } }>().Templates.Configuration;
+		this.connectedTemplate = Control.asTemplate(templates.ConnectedTemplate, false);
+		this.checkboxTemplate = Control.asTemplate(templates.CheckboxTemplate, false);
+		this.keyTemplate = Control.asTemplate(templates.KeyTemplate, false);
+		this.sliderTemplate = Control.asTemplate(templates.SliderTemplate, false);
+		this.numberTemplate = Control.asTemplate(templates.NumberTemplate, false);
+		this.stringTemplate = Control.asTemplate(templates.StringTemplate, false);
+		this.thrustTemplate = Control.asTemplate(templates.MultiTemplate, false);
+
+		for (const [id, def] of Objects.entries(definition)) {
+			if (def.configHidden) continue;
+			if (connected.includes(id)) {
+				this.add(new ConnectedValueControl(this.connectedTemplate(), def.displayName));
+				continue;
+			}
+
+			const control = new configControls[def.type](
+				{
+					checkbox: this.checkboxTemplate,
+					key: this.keyTemplate,
+					number: this.numberTemplate,
+					string: this.stringTemplate,
 					slider: this.sliderTemplate,
 					multi: this.thrustTemplate,
 				},
@@ -157,27 +221,59 @@ export class KeyBoolConfigValueControl extends ConfigValueControl<ConfigControlD
 	) {
 		super(templates.multi(), definition.displayName);
 
-		const def = {
-			key: {
-				displayName: "Key",
-				type: "key",
-				config: config.key,
-				default: config.key,
-			},
-			switch: {
-				displayName: "Toggle mode",
-				type: "bool",
-				config: config.switch,
-				default: config.switch,
-			},
-		} satisfies BlockConfigDefinitions;
+		const desktop = () => {
+			const def = {
+				key: {
+					displayName: "Key",
+					type: "key",
+					config: config.key,
+					default: config.key,
+				},
+				switch: {
+					displayName: "Toggle mode",
+					type: "bool",
+					config: config.switch,
+					default: config.switch,
+				},
+			} satisfies Partial<
+				Record<keyof BlockConfigDefinitionRegistry["keybool"]["config"], BlockConfigDefinition>
+			>;
 
-		const control = this.added(new ConfigControl(this.gui.Control));
-		control.set(config, def);
+			const control = this.add(new ConfigControl2(this.gui.Control, config, def));
+			this.eventHandler.subscribe(control.configUpdated, (key, value) => {
+				this.submitted.Fire((config = { ...config, [key]: value }));
+			});
+		};
+		const touch = () => {
+			const def = {
+				touchName: {
+					displayName: "Name",
+					type: "string",
+					config: config.touchName,
+					default: config.touchName,
+				},
+				switch: {
+					displayName: "Toggle mode",
+					type: "bool",
+					config: config.switch,
+					default: config.switch,
+				},
+			} satisfies Partial<
+				Record<keyof BlockConfigDefinitionRegistry["keybool"]["config"], BlockConfigDefinition>
+			>;
 
-		this.event.subscribe(control.configUpdated, (key, value) =>
-			this.submitted.Fire((config = { ...config, [key]: value })),
-		);
+			const control = this.add(new ConfigControl2(this.gui.Control, config, def));
+			this.eventHandler.subscribe(control.configUpdated, (key, value) =>
+				this.submitted.Fire((config = { ...config, [key]: value })),
+			);
+		};
+
+		this.event.onPrepare((input) => {
+			this.clear();
+
+			if (input === "Desktop") desktop();
+			else if (input === "Touch") touch();
+		});
 	}
 }
 
@@ -255,6 +351,25 @@ export class NumberConfigValueControl extends ConfigValueControl<NumberTextBoxCo
 		const control = this.added(new NumberTextBoxControl(this.gui.Control));
 		this.value = control.value;
 		control.value.set(config);
+
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
+	}
+}
+
+export class StringConfigValueControl extends ConfigValueControl<TextBoxControlDefinition> {
+	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["string"]["config"]) => void>();
+	readonly value;
+
+	constructor(
+		templates: Templates,
+		config: BlockConfigDefinitionRegistry["string"]["config"],
+		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["string"]>,
+	) {
+		super(templates.number(), definition.displayName);
+
+		const control = this.add(new TextBoxControl(this.gui.Control));
+		this.value = control.text;
+		control.text.set(config);
 
 		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
 	}
@@ -509,6 +624,7 @@ export const configControls = {
 	multikey: MultiKeyConfigValueControl,
 	keybool: KeyBoolConfigValueControl,
 	number: NumberConfigValueControl,
+	string: StringConfigValueControl,
 	clampedNumber: SliderConfigValueControl,
 	thrust: ThrustConfigValueControl,
 	motorRotationSpeed: MotorRotationSpeedConfigValueControl,
@@ -538,6 +654,7 @@ export type Templates = {
 	key: () => ConfigPartDefinition<KeyChooserControlDefinition>;
 	slider: () => ConfigPartDefinition<SliderControlDefinition>;
 	number: () => ConfigPartDefinition<NumberTextBoxControlDefinition>;
+	string: () => ConfigPartDefinition<TextBoxControlDefinition>;
 	multi: () => ConfigPartDefinition<ConfigControlDefinition>;
 };
 
@@ -547,5 +664,6 @@ export type Template = {
 	KeyTemplate: ConfigPartDefinition<KeyChooserControlDefinition>;
 	SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 	NumberTemplate: ConfigPartDefinition<NumberTextBoxControlDefinition>;
+	StringTemplate: ConfigPartDefinition<TextBoxControlDefinition>;
 	MultiTemplate: ConfigPartDefinition<ConfigControlDefinition>;
 };

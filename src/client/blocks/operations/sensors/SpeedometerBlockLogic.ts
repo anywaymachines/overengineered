@@ -7,7 +7,6 @@ import { PlacedBlockData } from "shared/building/BlockManager";
 export default class SpeedometerBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.speedometer> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.speedometer);
-
 		this.event.subscribe(RunService.Heartbeat, () => this.update());
 	}
 

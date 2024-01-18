@@ -105,6 +105,9 @@ export default class WireTool extends ToolBase {
 		number: {
 			color: Color3.fromRGB(81, 202, 21),
 		},
+		string: {
+			color: Color3.fromRGB(120, 18, 120),
+		},
 		never: {
 			color: Color3.fromRGB(0, 0, 0),
 		},
@@ -120,6 +123,7 @@ export default class WireTool extends ToolBase {
 		motorRotationSpeed: "number",
 		servoMotorAngle: "number",
 		or: "number",
+		string: "string",
 		key: "never",
 		multikey: "never",
 	} as const satisfies Record<keyof BlockConfigDefinitionRegistry, keyof typeof this.typeGroups>;
@@ -215,6 +219,8 @@ export default class WireTool extends ToolBase {
 		if (!this.startMarker.get()) return;
 
 		if (this.hoverMarker) {
+			this.updateVisual();
+
 			await Remotes.Client.GetNamespace("Building").Get("UpdateLogicConnectionRequest").CallServerAsync({
 				operation: "connect",
 				outputBlock: this.startMarker.get()!.data.blockData.instance,

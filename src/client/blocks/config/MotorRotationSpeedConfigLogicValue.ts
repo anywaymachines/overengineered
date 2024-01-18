@@ -10,7 +10,6 @@ export class MotorRotationSpeedConfigLogicValue extends ConfigLogicValueBase<
 		definition: BlockConfigDefinitionRegistry["motorRotationSpeed"],
 	) {
 		super(config, definition);
-
 		this.value.set(0);
 
 		const def = {

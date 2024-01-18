@@ -504,7 +504,7 @@ const v9: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>,
 								speed?: number;
 								rotate_add?: KeyCode;
 								rotate_sub?: KeyCode;
-								switch?: boolean;
+								switchmode?: boolean;
 								angle?: number;
 							};
 					  }
@@ -517,7 +517,7 @@ const v9: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>,
 							add: cfg?.angle.rotate_add,
 							sub: cfg?.angle.rotate_sub,
 						},
-						switchmode: cfg?.angle.switch,
+						switchmode: cfg?.angle.switchmode,
 						angle: cfg?.angle.angle,
 					},
 				};
