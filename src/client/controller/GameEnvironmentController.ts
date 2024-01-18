@@ -4,11 +4,13 @@ import EventHandler from "shared/event/EventHandler";
 
 export default class GameEnvironmentController {
 	// Const
-	public static readonly NoSoundHeight = 10000;
+	public static readonly EarthGravity = 180;
+	public static readonly EarthAirDensity = 0.3;
+
+	public static readonly ZeroGravityHeight = 15000;
+	public static readonly ZeroAirHeight = 10000;
+
 	public static readonly MinSoundValue = 0.01;
-	public static readonly WeightlessnessHeight = 15000;
-	public static readonly NormalGravity = 180;
-	public static readonly NoGravityGravity = 0.001;
 
 	// Vars
 	public static currentHeight = 0;
@@ -35,9 +37,12 @@ export default class GameEnvironmentController {
 
 		this.currentHeight = position.Y;
 
+		Workspace.AirDensity = math.max(
+			this.EarthAirDensity - this.currentHeight * (this.EarthAirDensity / this.ZeroAirHeight),
+		);
 		Workspace.Gravity = math.max(
-			this.NormalGravity - this.currentHeight * (this.NormalGravity / this.WeightlessnessHeight),
-			this.NoGravityGravity,
+			this.EarthGravity - this.currentHeight * (this.EarthGravity / this.ZeroGravityHeight),
+			0,
 		);
 	}
 }

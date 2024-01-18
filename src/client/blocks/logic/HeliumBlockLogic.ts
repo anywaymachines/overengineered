@@ -31,7 +31,7 @@ export default class HeliumBlockLogic extends BlockLogic<HeliumBlock> {
 			Workspace.Gravity *
 				this.part.Mass *
 				1.2 *
-				(1 - GameEnvironmentController.currentHeight / GameEnvironmentController.WeightlessnessHeight),
+				(1 - GameEnvironmentController.currentHeight / GameEnvironmentController.ZeroGravityHeight),
 			0,
 		);
 	}

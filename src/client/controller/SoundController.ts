@@ -77,7 +77,7 @@ export default class SoundController {
 	private static applyPropagationPhysics(currentLevel: number) {
 		const volumePercentage = math.clamp(
 			1 -
-				(GameEnvironmentController.currentHeight / GameEnvironmentController.NoSoundHeight) *
+				(GameEnvironmentController.currentHeight / GameEnvironmentController.ZeroAirHeight) *
 					(1 - GameEnvironmentController.MinSoundValue),
 			GameEnvironmentController.MinSoundValue,
 			1,

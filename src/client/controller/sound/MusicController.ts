@@ -1,6 +1,5 @@
 import { StarterGui, Workspace } from "@rbxts/services";
 import PlayerDataStorage from "client/PlayerDataStorage";
-import GameEnvironmentController from "../GameEnvironmentController";
 import MusicPlaylist from "./MusicPlaylist";
 
 export default class MusicController {
@@ -23,12 +22,12 @@ export default class MusicController {
 		Workspace.GetPropertyChangedSignal("Gravity").Connect(() => {
 			if (!PlayerDataStorage.config.get().music) return;
 
-			if (Workspace.Gravity <= GameEnvironmentController.NoGravityGravity * 2 && !this.playlist.currentSound) {
+			if (Workspace.Gravity <= 0 && !this.playlist.currentSound) {
 				this.playlist.play();
 				return;
 			}
 
-			if (Workspace.Gravity > GameEnvironmentController.NoGravityGravity * 2 && this.playlist.currentSound) {
+			if (Workspace.Gravity > 0 && this.playlist.currentSound) {
 				this.playlist.stop();
 				return;
 			}
