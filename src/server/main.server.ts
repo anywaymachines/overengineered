@@ -97,6 +97,10 @@ class RemoteHandlers {
 
 		const vehicleSeatModel = blocks.find((model) => model.GetAttribute("id") === "vehicleseat") as Model;
 		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
+		if (vehicleSeat.Occupant) {
+			vehicleSeat.Occupant.Sit = false;
+		}
+
 		vehicleSeat.Sit(hrp);
 	}
 }
