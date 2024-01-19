@@ -5,7 +5,7 @@ const gui = GuiController.getUnscaledGameUI<{ Fps: TextLabel }>().Fps;
 gui.Visible = true;
 
 let fps = 0;
-RunService.Heartbeat.Connect((dt) => {
+RunService.RenderStepped.Connect((dt) => {
 	fps = (fps + 1 / dt) / 2;
 });
 
