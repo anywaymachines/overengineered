@@ -6,6 +6,7 @@ gui.Visible = true;
 
 let fps = 0;
 RunService.RenderStepped.Connect((dt) => {
+	if (fps === math.huge) fps = 0;
 	fps = (fps + 1 / dt) / 2;
 });
 
