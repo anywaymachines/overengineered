@@ -29,7 +29,10 @@ export default class SoundController {
 		MusicController.initialize();
 
 		Signals.CAMERA.MOVED.Connect(() => {
-			this.underwater = Workspace.CurrentCamera!.CFrame.Y <= TerrainDataInfo.getData().waterHeight - 5;
+			const newState = Workspace.CurrentCamera!.CFrame.Y <= TerrainDataInfo.getData().waterHeight - 5;
+			if (newState === this.underwater) return;
+
+			this.underwater = newState;
 			this.updateAllSounds();
 		});
 

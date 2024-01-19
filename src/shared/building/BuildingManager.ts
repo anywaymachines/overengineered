@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import SharedPlots from "shared/building/SharedPlots";
 import VectorUtils from "shared/utils/VectorUtils";
 
@@ -30,6 +31,7 @@ export default class BuildingManager {
 
 	/** Returns the block or nothing that is set on (or near) the given vector
 	 * @param vector The vector to check
+	 * @deprecated slow method
 	 */
 	public static getBlockByPosition(vector: Vector3): BlockModel | undefined {
 		const plot = SharedPlots.getPlotByPosition(vector);
@@ -63,11 +65,13 @@ export default class BuildingManager {
 			return false;
 		}
 
-		// Check is given coordinate occupied by another block
-		const collideBlock = this.getBlockByPosition(position);
-		if (collideBlock !== undefined) {
-			// Occupied coordinates
-			return false;
+		if (RunService.IsClient()) {
+			// Check is given coordinate occupied by another block
+			const collideBlock = this.getBlockByPosition(position);
+			if (collideBlock !== undefined) {
+				// Occupied coordinates
+				return false;
+			}
 		}
 
 		// OK
