@@ -34,6 +34,8 @@ const motorblock = {
 				rotation: {
 					add: "R" as KeyCode,
 					sub: "F" as KeyCode,
+					addTouchName: "R" as KeyCode,
+					subTouchName: "F" as KeyCode,
 				},
 				speed: 15 as number,
 				switchmode: false as boolean,
@@ -54,6 +56,8 @@ const smallrocketengine = {
 				thrust: {
 					add: "W" as KeyCode,
 					sub: "S" as KeyCode,
+					addTouchName: "W" as KeyCode,
+					subTouchName: "S" as KeyCode,
 				},
 				switchmode: false as boolean,
 				strength: 100 as number,
@@ -98,6 +102,8 @@ const servomotorblock = {
 				rotation: {
 					add: "R" as KeyCode,
 					sub: "F" as KeyCode,
+					addTouchName: "R" as KeyCode,
+					subTouchName: "F" as KeyCode,
 				},
 				switchmode: false as boolean,
 				angle: 45 as number,

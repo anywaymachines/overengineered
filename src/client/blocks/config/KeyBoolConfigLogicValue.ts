@@ -18,8 +18,18 @@ export class KeyBoolConfigLogicValue extends ConfigLogicValueBase<BlockConfigDef
 		}
 	}
 
-	getRideModeGui(inputType: InputType): Control | undefined {
-		if (inputType !== "Touch") return undefined;
-		return TouchModeButtonControl.create();
+	getRideModeGuis(inputType: InputType): readonly Control[] {
+		if (inputType !== "Touch") return super.getRideModeGuis(inputType);
+
+		const control = TouchModeButtonControl.create();
+		control.text.set(this.config.touchName);
+		control.subscribe(
+			() => this.value.set(true),
+			() => this.value.set(false),
+			() => this.value.get(),
+			this.definition.canBeSwitch && this.config.switch,
+		);
+
+		return [control];
 	}
 }

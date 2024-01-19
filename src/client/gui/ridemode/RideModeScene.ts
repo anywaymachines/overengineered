@@ -1,6 +1,7 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
+import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Control from "client/base/Control";
 import Machine from "client/blocks/logic/Machine";
 import RocketEngineLogic from "client/blocks/logic/RocketEngineLogic";
@@ -98,17 +99,15 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 	}
 
 	resetControl(btn: Control, pos: number) {
-		const size = btn.getGui().Size;
+		const size = btn.getGui().AbsoluteSize;
 
-		let x = 0.95;
-		let y = 1 - size.Y.Scale * pos - 0.01 * pos;
+		let x = 0;
+		let y = size.Y * pos + 20 * pos;
 
-		while (y < 0.05) {
-			y += 0.95;
-			x -= 0.05;
-		}
+		x += (size.X + 20) * math.floor(y / this.gui.AbsoluteSize.Y);
+		y %= this.gui.AbsoluteSize.Y;
 
-		btn.getGui().Position = new UDim2(x, 0, y, 0);
+		btn.getGui().Position = new UDim2(0.95, -x, 0.95, -y);
 	}
 	resetControls() {
 		let pos = 0;
@@ -223,22 +222,24 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			else this.hide();
 		}, true);
 
-		/*
 		const inputType = InputController.inputType.get();
 		for (const logic of machine.getChildren()) {
 			if (!(logic instanceof ConfigurableBlockLogic)) continue;
 
-			for (const [, input] of Objects.pairs(logic.input)) {
-				const gui = input.getRideModeGui(inputType);
-				if (!gui) continue;
-
-				this.add(input);
+			for (const value of logic.getChildren()) {
+				for (const control of value.getRideModeGuis(inputType)) {
+					this.add(control);
+				}
 			}
 		}
-		*/
+
+		let pos = 0;
+		for (const control of this.getChildren()) {
+			this.resetControl(control, pos);
+			pos++;
+		}
 
 		/*
-		let pos = 0;
 		const map: Record<string, ConfigurableBlockLogic<BlockConfigBothDefinitions>[]> = {};
 		
 		for (const block of machine.getChildren()) {

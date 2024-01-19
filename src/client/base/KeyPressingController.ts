@@ -104,7 +104,7 @@ export type KeyDefinition<TKeys extends string> = {
 export type KeyDefinitions<TKeys extends string> = { readonly [k in TKeys]: KeyDefinition<TKeys> };
 
 export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> extends ComponentBase {
-	private readonly controller;
+	readonly controller;
 	private readonly btnmap;
 
 	constructor(definitions: T) {

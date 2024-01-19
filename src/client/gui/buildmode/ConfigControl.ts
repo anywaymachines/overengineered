@@ -221,6 +221,8 @@ export class KeyBoolConfigValueControl extends ConfigValueControl<ConfigControlD
 	) {
 		super(templates.multi(), definition.displayName);
 
+		const controlTemplate = Control.asTemplate(this.gui.Control);
+
 		const desktop = () => {
 			const def = {
 				key: {
@@ -239,7 +241,7 @@ export class KeyBoolConfigValueControl extends ConfigValueControl<ConfigControlD
 				Record<keyof BlockConfigDefinitionRegistry["keybool"]["config"], BlockConfigDefinition>
 			>;
 
-			const control = this.add(new ConfigControl2(this.gui.Control, config, def));
+			const control = this.add(new ConfigControl2(controlTemplate(), config, def));
 			this.eventHandler.subscribe(control.configUpdated, (key, value) => {
 				this.submitted.Fire((config = { ...config, [key]: value }));
 			});
@@ -262,7 +264,7 @@ export class KeyBoolConfigValueControl extends ConfigValueControl<ConfigControlD
 				Record<keyof BlockConfigDefinitionRegistry["keybool"]["config"], BlockConfigDefinition>
 			>;
 
-			const control = this.add(new ConfigControl2(this.gui.Control, config, def));
+			const control = this.add(new ConfigControl2(controlTemplate(), config, def));
 			this.eventHandler.subscribe(control.configUpdated, (key, value) =>
 				this.submitted.Fire((config = { ...config, [key]: value })),
 			);

@@ -1,10 +1,14 @@
+import Control from "client/base/Control";
 import { KeyDefinitions, KeyPressingDefinitionsController } from "client/base/KeyPressingController";
+import TouchModeButtonControl from "client/gui/ridemode/TouchModeButtonControl";
 import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
 import NumberObservableValue from "shared/event/NumberObservableValue";
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
 export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefinitionRegistry["thrust"]> {
+	private readonly controller;
+
 	constructor(
 		config: BlockConfigDefinitionRegistry["thrust"]["config"],
 		definition: BlockConfigDefinitionRegistry["thrust"],
@@ -70,7 +74,31 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefi
 			},
 		} as const satisfies KeyDefinitions<"add" | "sub">;
 
-		this.add(new KeyPressingDefinitionsController(def));
+		this.add((this.controller = new KeyPressingDefinitionsController(def)));
+	}
+
+	getRideModeGuis(inputType: InputType): readonly Control[] {
+		if (inputType !== "Touch") return super.getRideModeGuis(inputType);
+
+		const add = TouchModeButtonControl.create();
+		add.text.set(this.config.thrust.addTouchName);
+		add.subscribe(
+			() => this.controller.controller.keyDown("add"),
+			() => this.controller.controller.keyUp("add"),
+			() => this.controller.controller.isDown("add"),
+			this.definition.canBeSwitch && this.config.switchmode,
+		);
+
+		const sub = TouchModeButtonControl.create();
+		sub.text.set(this.config.thrust.subTouchName);
+		sub.subscribe(
+			() => this.controller.controller.keyDown("sub"),
+			() => this.controller.controller.keyUp("sub"),
+			() => this.controller.controller.isDown("sub"),
+			this.definition.canBeSwitch && this.config.switchmode,
+		);
+
+		return [add, sub];
 	}
 
 	protected createObservable(): ObservableValue<number> {

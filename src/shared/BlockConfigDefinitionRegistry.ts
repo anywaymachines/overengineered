@@ -52,6 +52,8 @@ export type BlockConfigValueTypeThrust = BlockConfigValueType<
 		readonly thrust: {
 			readonly add: KeyCode;
 			readonly sub: KeyCode;
+			readonly addTouchName: KeyCode;
+			readonly subTouchName: KeyCode;
 		};
 		readonly switchmode: boolean;
 		readonly strength: number;
@@ -67,6 +69,8 @@ export type BlockConfigValueTypeMotorRotationSpeed = BlockConfigValueType<
 		readonly rotation: {
 			readonly add: KeyCode;
 			readonly sub: KeyCode;
+			readonly addTouchName: KeyCode;
+			readonly subTouchName: KeyCode;
 		};
 		readonly speed: number;
 		readonly switchmode: boolean;
@@ -82,6 +86,8 @@ export type BlockConfigValueTypeServoMotorAngle = BlockConfigValueType<
 		readonly rotation: {
 			readonly add: KeyCode;
 			readonly sub: KeyCode;
+			readonly addTouchName: KeyCode;
+			readonly subTouchName: KeyCode;
 		};
 		readonly switchmode: boolean;
 		readonly angle: number;

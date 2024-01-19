@@ -1,4 +1,8 @@
-import { BlockConfigDefinitions, BlockConfigDefinitionsToConfig } from "shared/BlockConfigDefinitionRegistry";
+import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
+import BlockConfigDefinitionRegistry, {
+	BlockConfigDefinitions,
+	BlockConfigDefinitionsToConfig,
+} from "shared/BlockConfigDefinitionRegistry";
 import { PlacedBlockDataConnection } from "shared/building/BlockManager";
 import PartUtils from "shared/utils/PartUtils";
 import Component from "./Component";
@@ -11,7 +15,10 @@ export interface BlockLogicData<TDef extends BlockConfigDefinitions, TBlock exte
 	/** Connections to this block INPUT from other blocks OUTPUTs and INPUTs */
 	readonly connections: Readonly<Partial<Record<keyof TDef & BlockConnectionName, PlacedBlockDataConnection>>>;
 }
-export default class BlockLogic<T extends BlockModel = BlockModel> extends Component<T> {
+export default class BlockLogic<T extends BlockModel = BlockModel> extends Component<
+	T,
+	ConfigLogicValueBase<BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry]>
+> {
 	readonly block: BlockLogicData<BlockConfigDefinitions, T>;
 	readonly instance: T;
 

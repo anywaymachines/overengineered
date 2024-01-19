@@ -1,6 +1,8 @@
 import ComponentContainer from "client/base/ComponentContainer";
+import Control from "client/base/Control";
 import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
 import ObservableValue from "shared/event/ObservableValue";
+import GuiCreator from "./GuiCreator";
 
 export abstract class ConfigLogicValueBase<
 	T extends BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry],
@@ -20,6 +22,13 @@ export abstract class ConfigLogicValueBase<
 	enable() {
 		super.enable();
 		this.value.triggerChanged();
+	}
+
+	getRideModeGuis(inputType: InputType): readonly Control[] {
+		return [];
+	}
+	getRideModeGuiCreators(inputType: InputType): readonly GuiCreator[] {
+		return [];
 	}
 
 	protected createObservable(): ObservableValue<T["default"]> {

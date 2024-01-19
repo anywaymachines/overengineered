@@ -26,6 +26,15 @@ export default class BlockConfig {
 					...((def.config as object) ?? {}),
 					...(config[key] ?? {}),
 				} as (typeof config)[typeof key];
+
+				for (const [k, v] of Objects.entries(config[key]!)) {
+					if (!typeIs(v, "table")) continue;
+
+					config[key]![k] = {
+						...(def.config[k as keyof typeof def.config] as object),
+						...(v ?? {}),
+					};
+				}
 			} else config[key] ??= def.config;
 		}
 
