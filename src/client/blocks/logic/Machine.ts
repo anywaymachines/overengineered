@@ -28,6 +28,11 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 		super.add(instance);
 		if (instance instanceof ConfigurableBlockLogic) {
 			this.childMap.set(instance.block.uuid, instance);
+			this.event.subscribeObservable(
+				this.occupiedByLocalPlayer,
+				(occupied) => instance.enableControls.set(occupied),
+				true,
+			);
 
 			if (instance instanceof VehicleSeatBlockLogic) {
 				this.event.subscribeObservable(
