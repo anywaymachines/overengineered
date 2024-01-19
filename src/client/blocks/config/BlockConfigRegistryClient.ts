@@ -27,7 +27,7 @@ export type blockConfigRegistryClient = {
 const createObservable = <TDef extends BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry]>(
 	definition: TDef,
 ): ObservableValue<TDef["default"]> => {
-	return new ObservableValue(undefined!);
+	return new ObservableValue(definition.default);
 };
 
 const blockConfigRegistryClient = {

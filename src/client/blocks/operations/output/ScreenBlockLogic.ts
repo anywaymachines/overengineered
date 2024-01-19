@@ -2,19 +2,27 @@ import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default class ScreenBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.screen> {
+type Screen = BlockModel & {
+	readonly Part: BasePart & {
+		readonly SurfaceGui: SurfaceGui & {
+			readonly TextLabel: TextLabel;
+		};
+	};
+};
+
+export default class ScreenBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.screen, Screen> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.screen);
 
-		const textLabel = this.block.instance
-			.FindFirstChild("Part")
-			?.FindFirstChild("SurfaceGui")
-			?.FindFirstChild("TextLabel") as TextLabel;
+		const textLabel = this.block.instance.Part.SurfaceGui.TextLabel;
+		this.event.subscribeObservable(
+			this.input.data,
+			(data) => {
+				textLabel.Text = tostring(data);
 
-		this.event.subscribeObservable(this.input.data, (data) => {
-			textLabel.Text = tostring(data);
-
-			// TODO: Sync data with other players
-		});
+				// TODO: Sync data with other players
+			},
+			true,
+		);
 	}
 }

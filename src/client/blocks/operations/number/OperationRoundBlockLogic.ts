@@ -7,8 +7,7 @@ export default class OperationRoundBlockLogic extends ConfigurableBlockLogic<
 > {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationround);
-
-		this.event.subscribeObservable(this.input.value, () => this.update());
+		this.input.value.subscribe(() => this.update());
 	}
 
 	private update() {

@@ -5,8 +5,7 @@ import { PlacedBlockData } from "shared/building/BlockManager";
 export default class OperationRadBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationrad> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationrad);
-
-		this.event.subscribeObservable(this.input.value, () => this.update());
+		this.input.value.subscribe(() => this.update());
 	}
 
 	private update() {

@@ -5,7 +5,6 @@ import { PlacedBlockData } from "shared/building/BlockManager";
 export default class OperationNotBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationnot> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationnot);
-
-		this.event.subscribeObservable(this.input.value, (value) => this.output.result.set(value === false));
+		this.input.value.subscribe((value) => this.output.result.set(!value));
 	}
 }

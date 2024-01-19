@@ -12,7 +12,6 @@ import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
 import DebugControl from "./gui/static/DebugControl";
 import LogControl from "./gui/static/LogControl";
 import TooltipsControl from "./gui/static/TooltipsControl";
-import LogicTest1 from "./test/LogicTest1";
 
 (async () => await PlayerDataStorage.init())();
 
@@ -44,8 +43,3 @@ while (!plot) {
 	wait(0.1);
 }
 new BeaconController(plot!, "Plot");
-
-const test = true;
-if (Players.LocalPlayer.Name === "i3ymm" && test) {
-	LogicTest1.start();
-}

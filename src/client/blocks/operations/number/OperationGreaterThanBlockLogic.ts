@@ -8,8 +8,8 @@ export default class OperationGreaterThanBlockLogic extends ConfigurableBlockLog
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationgreaterthan);
 
-		this.event.subscribeObservable(this.input.value1, () => this.update());
-		this.event.subscribeObservable(this.input.value2, () => this.update());
+		this.input.value1.subscribe(() => this.update());
+		this.input.value2.subscribe(() => this.update());
 	}
 
 	private update() {

@@ -7,10 +7,14 @@ export default class DisconnectBlockLogic extends ConfigurableBlockLogic<typeof 
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.disconnectblock);
 
-		this.event.subscribeObservable(this.input.disconnect, (disconnect) => {
-			if (!disconnect) return;
-			this.disconnect();
-		});
+		this.event.subscribeObservable(
+			this.input.disconnect,
+			(disconnect) => {
+				if (!disconnect) return;
+				this.disconnect();
+			},
+			true,
+		);
 	}
 
 	private disconnect() {

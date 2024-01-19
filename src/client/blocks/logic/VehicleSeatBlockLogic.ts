@@ -11,7 +11,7 @@ export default class VehicleSeatBlockLogic extends ConfigurableBlockLogic<
 	typeof blockConfigRegistry.vehicleseat,
 	_VehicleSeat
 > {
-	public readonly occupiedByLocalPlayer = new ObservableValue(false);
+	public readonly occupiedByLocalPlayer = new ObservableValue(true);
 	public readonly vehicleSeat;
 	private readonly occupant;
 
@@ -28,7 +28,7 @@ export default class VehicleSeatBlockLogic extends ConfigurableBlockLogic<
 			this.output.occupied.set(occupant !== undefined, force);
 		};
 
-		this.occupant.subscribe(() => update(), true);
+		this.occupant.subscribe(() => update());
 		this.event.onPrepare(() => update(true));
 	}
 }

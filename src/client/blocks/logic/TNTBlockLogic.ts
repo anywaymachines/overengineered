@@ -18,10 +18,14 @@ export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockCo
 			}
 		});
 
-		this.event.subscribeObservable(this.input.explode, (explode) => {
-			if (!explode) return;
-			this.explode();
-		});
+		this.event.subscribeObservable(
+			this.input.explode,
+			(explode) => {
+				if (!explode) return;
+				this.explode();
+			},
+			true,
+		);
 	}
 
 	private explode() {

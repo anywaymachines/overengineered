@@ -5,8 +5,7 @@ import { PlacedBlockData } from "shared/building/BlockManager";
 export default class OperationDegBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationdeg> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationdeg);
-
-		this.event.subscribeObservable(this.input.value, () => this.update());
+		this.input.value.subscribe(() => this.update());
 	}
 
 	private update() {

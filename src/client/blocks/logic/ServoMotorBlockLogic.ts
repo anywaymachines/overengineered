@@ -20,12 +20,20 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<
 		super(block, blockConfigRegistry.servomotorblock);
 
 		this.hingeConstraint = this.instance.Base.HingeConstraint;
-		this.event.subscribeObservable(this.input.speed, (speed) => {
-			this.hingeConstraint.AngularSpeed = speed;
-		});
-		this.event.subscribeObservable(this.input.angle, (targetAngle) => {
-			this.hingeConstraint.TargetAngle = targetAngle;
-		});
+		this.event.subscribeObservable(
+			this.input.speed,
+			(speed) => {
+				this.hingeConstraint.AngularSpeed = speed;
+			},
+			true,
+		);
+		this.event.subscribeObservable(
+			this.input.angle,
+			(targetAngle) => {
+				this.hingeConstraint.TargetAngle = targetAngle;
+			},
+			true,
+		);
 
 		this.event.subscribe(RunService.Heartbeat, () => {
 			if (this.block.instance.Attach.Position.sub(this.block.instance.Base.Position).Magnitude > 3) {

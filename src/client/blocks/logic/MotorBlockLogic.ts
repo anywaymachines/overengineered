@@ -17,9 +17,13 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof block
 		super(block, blockConfigRegistry.motorblock);
 
 		this.hingeConstraint = this.instance.Base.HingeConstraint;
-		this.event.subscribeObservable(this.input.rotationSpeed, (speed) => {
-			this.hingeConstraint.AngularVelocity = speed;
-		});
+		this.event.subscribeObservable(
+			this.input.rotationSpeed,
+			(speed) => {
+				this.hingeConstraint.AngularVelocity = speed;
+			},
+			true,
+		);
 
 		this.event.subscribe(RunService.Heartbeat, () => {
 			if (this.block.instance.Attach.Position.sub(this.block.instance.Base.Position).Magnitude > 3) {
