@@ -274,8 +274,6 @@ export default class BuildTool extends ToolBase {
 		const id = model.GetAttribute("id") as string | undefined;
 		if (id === undefined) return;
 
-		if (this.selectedBlock.get()?.id === id) return;
-
 		this.pickSignal.Fire(blockRegistry.get(id)!);
 
 		// Color & Material
