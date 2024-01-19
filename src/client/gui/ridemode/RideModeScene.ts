@@ -218,7 +218,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 	start(machine: Machine) {
 		this.clear();
 		machine.destroyed.Connect(() => this.clear());
-		machine.seat.occupiedByLocalPlayer.subscribe((occupied) => {
+		machine.occupiedByLocalPlayer.subscribe((occupied) => {
 			if (occupied) this.show();
 			else this.hide();
 		}, true);

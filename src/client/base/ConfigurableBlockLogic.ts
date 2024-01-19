@@ -1,29 +1,14 @@
 import blockConfigRegistryClient from "client/blocks/config/BlockConfigRegistryClient";
 import BlockConfig from "shared/BlockConfig";
-import {
-	BlockConfigBothDefinitions,
-	BlockConfigDefinition,
-	BlockConfigDefinitions,
-} from "shared/BlockConfigDefinitionRegistry";
+import { BlockConfigBothDefinitions, BlockConfigDefinition } from "shared/BlockConfigDefinitionRegistry";
 import Objects from "shared/_fixes_/objects";
-import { PlacedBlockData } from "shared/building/BlockManager";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import BlockLogic from "./BlockLogic";
+import BlockLogic, { BlockLogicData } from "./BlockLogic";
 
-type KeyMembers<TDef extends BlockConfigDefinitions> = ExtractKeys<TDef, { type: "key" | "keybool" }> & KeyCode;
-export type KeyDefinition<TDef extends BlockConfigDefinitions> = {
-	keyDown?: () => void;
-	keyUp?: () => void;
-	conflicts?: KeyMembers<TDef>;
-};
-export type KeyDefinitions<TDef extends BlockConfigDefinitions> = Partial<
-	Record<KeyMembers<TDef>, KeyDefinition<TDef>>
->;
-
-export default abstract class ConfigurableBlockLogic<
+export default class ConfigurableBlockLogic<
 	TDef extends BlockConfigBothDefinitions,
-	T extends BlockModel = BlockModel,
-> extends BlockLogic<T> {
+	TBlock extends BlockModel = BlockModel,
+> extends BlockLogic {
 	readonly enableControls = new ObservableValue(false);
 	readonly input: {
 		readonly [k in keyof TDef["input"]]: ReadonlyObservableValue<TDef["input"][k]["default"]>;
@@ -31,13 +16,17 @@ export default abstract class ConfigurableBlockLogic<
 	readonly output: {
 		readonly [k in keyof TDef["output"]]: ObservableValue<TDef["output"][k]["default"]>;
 	};
+	readonly block: BlockLogicData<TDef["input"], TBlock>;
+	readonly instance: TBlock;
 
-	constructor(block: PlacedBlockData, configDefinition: TDef) {
+	constructor(block: BlockLogicData<TDef["input"]>, configDefinition: TDef) {
 		super(block);
+		this.block = block as typeof this.block;
+		this.instance = this.block.instance;
 
-		const config = BlockConfig.deserialize(this.block, configDefinition.input);
+		const config = BlockConfig.addDefaults(block.config, configDefinition.input);
 		const createInput = (key: string, definition: BlockConfigDefinition) => {
-			const connected = block.connections[key as keyof typeof block.connections] !== undefined;
+			const connected = key in block.connections;
 			if (connected) {
 				return blockConfigRegistryClient[definition.type].createObservable(definition as never);
 			}
@@ -67,12 +56,5 @@ export default abstract class ConfigurableBlockLogic<
 				(d) => [d[0], blockConfigRegistryClient[d[1].type].createObservable(d[1] as never)] as const,
 			),
 		) as typeof this.output;
-	}
-
-	tryTriggerKeycodeDown(key: KeyCode) {}
-	tryTriggerKeycodeUp(key: KeyCode) {}
-
-	getKeysDefinition(): KeyDefinitions<TDef["input"]> {
-		return {};
 	}
 }

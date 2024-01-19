@@ -10,34 +10,35 @@ import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Objects from "shared/_fixes_/objects";
-import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import logicRegistry from "../LogicRegistry";
 import VehicleSeatBlockLogic from "./VehicleSeatBlockLogic";
 
 export default class Machine extends ComponentContainer<BlockLogic> {
+	readonly occupiedByLocalPlayer = new ObservableValue(true);
 	readonly destroyed = new Signal<() => void>();
-	readonly seat: VehicleSeatBlockLogic;
+	private readonly childMap = new Map<BlockUuid, ConfigurableBlockLogic<BlockConfigBothDefinitions>>();
 
-	constructor(logics: readonly BlockLogic[]) {
+	constructor() {
 		super();
+	}
 
-		const seat = logics.find((l) => l instanceof VehicleSeatBlockLogic) as VehicleSeatBlockLogic | undefined;
-		if (!seat) throw "No seat found";
-		this.seat = seat;
+	add<T extends BlockLogic>(instance: T) {
+		super.add(instance);
+		if (instance instanceof ConfigurableBlockLogic) {
+			this.childMap.set(instance.block.uuid, instance);
 
-		for (const logic of logics) {
-			this.add(logic);
-
-			if (logic instanceof ConfigurableBlockLogic) {
+			if (instance instanceof VehicleSeatBlockLogic) {
 				this.event.subscribeObservable(
-					this.seat.occupiedByLocalPlayer,
-					(enabled) => logic.enableControls.set(enabled),
+					instance.occupiedByLocalPlayer,
+					(occupied) => this.occupiedByLocalPlayer.set(occupied),
 					true,
 				);
 			}
 		}
+
+		return instance;
 	}
 
 	destroy() {
@@ -46,10 +47,15 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 	}
 
 	initializeSpeedLimiter() {
+		const seat = this.getChildren().find((c) => c instanceof VehicleSeatBlockLogic) as
+			| VehicleSeatBlockLogic
+			| undefined;
+		if (!seat) throw "No vehicle seat";
+
 		this.event.subscribe(RunService.Heartbeat, () => {
 			// Angular speed limit
-			const currentAngularVelocity = this.seat.vehicleSeat.AssemblyAngularVelocity;
-			this.seat.vehicleSeat.AssemblyAngularVelocity = new Vector3(
+			const currentAngularVelocity = seat.vehicleSeat.AssemblyAngularVelocity;
+			seat.vehicleSeat.AssemblyAngularVelocity = new Vector3(
 				math.clamp(
 					currentAngularVelocity.X,
 					-GameDefinitions.MAX_ANGULAR_SPEED,
@@ -68,8 +74,8 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 			);
 
 			// Linear speed limit
-			const currentLinearVelocity = this.seat.vehicleSeat.AssemblyLinearVelocity;
-			this.seat.vehicleSeat.AssemblyLinearVelocity = new Vector3(
+			const currentLinearVelocity = seat.vehicleSeat.AssemblyLinearVelocity;
+			seat.vehicleSeat.AssemblyLinearVelocity = new Vector3(
 				math.clamp(
 					currentLinearVelocity.X,
 					-GameDefinitions.MAX_LINEAR_SPEED,
@@ -88,15 +94,33 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 			);
 		});
 	}
+	initializeBlockConnections() {
+		for (const inputLogic of this.getChildren()) {
+			if (!(inputLogic instanceof ConfigurableBlockLogic)) continue;
+
+			for (const [connectionFrom, connection] of Objects.pairs(inputLogic.block.connections)) {
+				const outputLogic = this.childMap.get(connection.blockUuid);
+				if (!outputLogic) {
+					throw "No logic found for connecting block " + connection.blockUuid;
+				}
+				if (!(outputLogic instanceof ConfigurableBlockLogic)) {
+					throw "Connecting block is not configurable: " + connection.blockUuid;
+				}
+
+				outputLogic.output[connection.connectionName].autoSet(
+					inputLogic.input[connectionFrom as BlockConnectionName] as ObservableValue<
+						ReturnType<(typeof inputLogic.input)[BlockConnectionName]["get"]>
+					>,
+				);
+			}
+		}
+	}
 
 	static fromBlocks() {
 		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
-		const blockdatas = SharedPlots.getPlotBlockDatas(plot);
-		const blocksmap = new Map(blockdatas.map((b) => [b.uuid, b] as const));
-		const logicmap = new Map<PlacedBlockData, BlockLogic | ConfigurableBlockLogic<BlockConfigBothDefinitions>>();
-		const logics: BlockLogic[] = [];
+		const machine = new Machine();
 
-		for (const block of blockdatas) {
+		for (const block of SharedPlots.getPlotBlockDatas(plot)) {
 			const id = block.id;
 
 			if (!blockRegistry.get(id)) {
@@ -110,38 +134,11 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 			}
 
 			const logic = new ctor(block);
-			logicmap.set(block, logic);
-			logics.push(logic);
+			machine.add(logic);
 		}
 
-		// initialize connections
-		for (const [inputBlock, inputLogic] of logicmap) {
-			if (!("input" in inputLogic)) continue;
-
-			for (const [connectionFrom, connection] of Objects.pairs(inputBlock.connections)) {
-				const outputBlock = blocksmap.get(connection.blockUuid);
-				if (!outputBlock) {
-					throw "Unknown block to connect: " + connection.blockUuid;
-				}
-
-				const outputLogic = logicmap.get(outputBlock);
-				if (!outputLogic) {
-					throw "No logic found for connecting block " + connection.blockUuid;
-				}
-				if (!("input" in outputLogic)) {
-					throw "Connecting block is not configurable: " + connection.blockUuid;
-				}
-
-				outputLogic.output[connection.connectionName].autoSet(
-					inputLogic.input[connectionFrom] as ObservableValue<
-						ReturnType<(typeof inputLogic.input)[typeof connectionFrom]["get"]>
-					>,
-				);
-			}
-		}
-
-		const machine = new Machine(logics);
 		machine.initializeSpeedLimiter();
+		machine.initializeBlockConnections();
 		if (PlayerDataStorage.config.get().impact_destruction) {
 			ImpactController.initializeBlocks();
 		}
