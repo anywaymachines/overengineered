@@ -94,7 +94,7 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 		const config = PlayerDataStorage.config.get();
 		this.list.clear();
 
-		for (const [id, def] of Objects.entries(GameDefinitions.PLAYER_SETTINGS_DEFINITION)) {
+		for (const [id, def] of Objects.pairs(GameDefinitions.PLAYER_SETTINGS_DEFINITION)) {
 			if (def.type === "bool") {
 				const control = new ConfigPartControl(
 					this.checkboxTemplate(),

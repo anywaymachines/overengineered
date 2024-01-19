@@ -149,8 +149,8 @@ const shouldBeLoaded = (chunkX: number, chunkZ: number, centerX: number, centerZ
 };
 
 const UnloadChunks = (centerX: number, centerZ: number) => {
-	for (const [chunkX, data] of Objects.entries(loadedChunks)) {
-		for (const chunkZ of Objects.keys(data)) {
+	for (const [chunkX, data] of Objects.pairs(loadedChunks)) {
+		for (const [chunkZ, _] of Objects.pairs(data)) {
 			if (shouldBeLoaded(chunkX, chunkZ, centerX, centerZ)) continue;
 			UnloadChunk(chunkX, chunkZ);
 		}

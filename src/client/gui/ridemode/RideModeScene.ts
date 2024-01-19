@@ -228,7 +228,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		for (const logic of machine.getChildren()) {
 			if (!(logic instanceof ConfigurableBlockLogic)) continue;
 
-			for (const input of Objects.values(logic.input)) {
+			for (const [, input] of Objects.pairs(logic.input)) {
 				const gui = input.getRideModeGui(inputType);
 				if (!gui) continue;
 
@@ -247,7 +247,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			}
 
 			const config = block.config;
-			for (const id of Objects.keys(block.getKeysDefinition())) {
+			for (const [id, ] of Objects.pairs(block.getKeysDefinition())) {
 				const keycode = config.get(id) as KeyCode;
 				map[keycode] ??= [];
 				map[keycode].push(block);
@@ -260,7 +260,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			controlsInfo = SlotsMeta.get(slots, PlayerDataStorage.loadedSlot.get() ?? -1)?.touchControls;
 		}
 
-		for (const [keycode, blocks] of Objects.entries(map)) {
+		for (const [keycode, blocks] of Objects.pairs(map)) {
 			const btn = new TextButtonControl(this.buttonTemplate());
 			btn.text.set(keycode);
 			this.addKeyed(keycode, btn);

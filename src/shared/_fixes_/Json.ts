@@ -187,7 +187,7 @@ const JSON = {
 
 			if (typeIs(obj, "table")) {
 				const toserialize: Partial<Record<keyof T, JsonSerializedProperty>> = {};
-				for (const [key, value] of Objects.entries(obj)) {
+				for (const [key, value] of Objects.pairs(obj)) {
 					toserialize[key as keyof typeof toserialize] = process(value as JsonSerializedProperty);
 				}
 
@@ -217,7 +217,7 @@ const JSON = {
 
 			if (typeIs(obj, "table")) {
 				const toserialize: Partial<Record<keyof T, unknown>> = {};
-				for (const [key, value] of Objects.entries(obj)) {
+				for (const [key, value] of Objects.pairs(obj)) {
 					if (key === "__v") continue;
 					toserialize[key as keyof T] = process(value);
 				}

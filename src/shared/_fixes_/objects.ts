@@ -1,8 +1,8 @@
 export default class Objects {
 	public static keys<T extends object>(object: T): (keyof T)[] {
 		const result: (keyof T)[] = [];
-		for (const [key] of pairs(object)) {
-			result.push(key as keyof T);
+		for (const [key] of Objects.pairs(object)) {
+			result.push(key);
 		}
 
 		return result;
@@ -10,21 +10,23 @@ export default class Objects {
 
 	public static values<T extends object>(object: T): (T[keyof T] & defined)[] {
 		const result: (T[keyof T] & defined)[] = [];
-		for (const [_, value] of pairs(object)) {
-			result.push(value as T[keyof T] & defined);
+		for (const [_, value] of Objects.pairs(object)) {
+			result.push(value);
 		}
 
 		return result;
 	}
 
-	public static pairs<T extends object>(object: T) {
-		return pairs(object);
+	public static pairs<T extends object>(
+		object: T,
+	): IterableFunction<LuaTuple<[keyof T, Exclude<T[keyof T], undefined> & defined]>> {
+		return pairs(object) as IterableFunction<LuaTuple<[keyof T, Exclude<T[keyof T], undefined> & defined]>>;
 	}
 
 	public static entries<T extends object>(object: T): (readonly [keyof T, Exclude<T[keyof T], undefined>])[] {
 		const result: [keyof T, Exclude<T[keyof T], undefined>][] = [];
-		for (const [key, value] of pairs(object)) {
-			result.push([key as keyof T, value as Exclude<T[keyof T], undefined>]);
+		for (const [key, value] of Objects.pairs(object)) {
+			result.push([key, value]);
 		}
 
 		return result;

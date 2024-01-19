@@ -16,7 +16,7 @@ const createElement = <T extends keyof CreatableInstances, const TChildren exten
 	}
 
 	if (children) {
-		for (const [name, child] of Objects.entries(children)) {
+		for (const [name, child] of Objects.pairs(children)) {
 			child.Name = name as string;
 			child.Parent = instance;
 		}

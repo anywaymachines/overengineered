@@ -48,7 +48,7 @@ export abstract class DbBase<T> {
 
 	/** Clears tha cache */
 	public freeAll() {
-		for (const key of Objects.keys(this.cache)) {
+		for (const [key, _] of Objects.pairs(this.cache)) {
 			delete this.cache[key];
 		}
 	}
@@ -64,7 +64,7 @@ export abstract class DbBase<T> {
 	}
 
 	public saveChanged() {
-		for (const [key, value] of Objects.entries(this.cache)) {
+		for (const [key, value] of Objects.pairs(this.cache)) {
 			if (!value.changed) continue;
 
 			// delay between saves?

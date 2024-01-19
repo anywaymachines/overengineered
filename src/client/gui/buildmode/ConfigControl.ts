@@ -48,7 +48,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 	) {
 		this.clear();
 
-		for (const [id, def] of Objects.entries(definition)) {
+		for (const [id, def] of Objects.pairs(definition)) {
 			if (def.configHidden) continue;
 			if (connected.includes(id)) {
 				this.add(new ConnectedValueControl(this.connectedTemplate(), def.displayName));
@@ -107,7 +107,7 @@ class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control<Config
 		this.stringTemplate = Control.asTemplate(templates.StringTemplate, false);
 		this.thrustTemplate = Control.asTemplate(templates.MultiTemplate, false);
 
-		for (const [id, def] of Objects.entries(definition)) {
+		for (const [id, def] of Objects.pairs(definition)) {
 			if (def.configHidden) continue;
 			if (connected.includes(id)) {
 				this.add(new ConnectedValueControl(this.connectedTemplate(), def.displayName));
@@ -315,7 +315,7 @@ export class MultiKeyConfigValueControl extends ConfigValueControl<MultiKeyConfi
 		const controls = new Map<string, KeyConfigValueControl>();
 
 		const list = this.added(new Control<GuiObject, KeyConfigValueControl>(this.gui.Control));
-		for (const name of Objects.keys(definition.default)) {
+		for (const [name, _] of Objects.pairs(definition.default)) {
 			const control = new KeyConfigValueControl(templates, config[name], definition.keyDefinitions[name]);
 			list.add(control);
 			controls.set(name, control);

@@ -138,7 +138,7 @@ export default class BuildingWrapper {
 
 		const data = BlockManager.getBlockDataByBlockModel(block);
 		for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
-			for (const [connector, connection] of Objects.entries(otherblock.connections)) {
+			for (const [connector, connection] of Objects.pairs(otherblock.connections)) {
 				if (connection.blockUuid !== data.uuid) continue;
 
 				BuildingWrapper.updateLogicConnection({
@@ -220,7 +220,7 @@ export default class BuildingWrapper {
 		
 		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;
 		const mirrorPositions = BuildingManager.getMirrorBlocksCFrames(plot, data.location.Position, data.mirrors);
-		for (const pos of Objects.values(mirrorPositions)) {
+		for (const [, pos] of Objects.pairs(mirrorPositions)) {
 			const result = BuildingWrapper.placeSingleBlockAsPlayer(player, {
 				...data,
 				location: pos,

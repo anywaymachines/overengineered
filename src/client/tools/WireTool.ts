@@ -551,9 +551,9 @@ export default class WireTool extends ToolBase {
 		if (connected !== undefined) return [connected];
 
 		if (config.group !== undefined) {
-			for (const [samekey, same] of Objects.entries(block.connections)) {
+			for (const [samekey, same] of Objects.pairs(block.connections)) {
 				if (key === samekey) continue;
-				for (const [k, a] of Objects.entries(
+				for (const [k, a] of Objects.pairs(
 					(blockConfigRegistry as BlockConfigRegistryNonGeneric)[block.id]!.input,
 				)) {
 					if (a.type !== "or") continue;
@@ -577,7 +577,7 @@ export default class WireTool extends ToolBase {
 
 			const markers: MarkerData[] = [];
 			for (const markerType of ["output", "input"] as const) {
-				for (const [key, config] of Objects.entries(configDef[markerType])) {
+				for (const [key, config] of Objects.pairs(configDef[markerType])) {
 					if (config.connectorHidden) continue;
 
 					const allowed = this.getAllowedTypes(block, blocks, key as BlockConnectionName, config);
@@ -606,7 +606,7 @@ export default class WireTool extends ToolBase {
 		}
 
 		for (const block of blocks) {
-			for (const [connector, connection] of Objects.entries(block.connections)) {
+			for (const [connector, connection] of Objects.pairs(block.connections)) {
 				const input = this.markers
 					.getChildren()
 					.find((m) => m.data.blockData.uuid === block.uuid && m.data.id === connector)!;

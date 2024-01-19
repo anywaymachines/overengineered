@@ -33,7 +33,7 @@ export default class PlayModeController extends ComponentBase {
 			ride: new RideMode(),
 		} as const;
 
-		for (const mode of Objects.values(this.modes)) {
+		for (const [_, mode] of Objects.pairs(this.modes)) {
 			mode.disable();
 		}
 

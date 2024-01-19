@@ -118,7 +118,7 @@ export default class Machine extends ComponentContainer<BlockLogic> {
 		for (const [inputBlock, inputLogic] of logicmap) {
 			if (!("input" in inputLogic)) continue;
 
-			for (const [connectionFrom, connection] of Objects.entries(inputBlock.connections)) {
+			for (const [connectionFrom, connection] of Objects.pairs(inputBlock.connections)) {
 				const outputBlock = blocksmap.get(connection.blockUuid);
 				if (!outputBlock) {
 					throw "Unknown block to connect: " + connection.blockUuid;

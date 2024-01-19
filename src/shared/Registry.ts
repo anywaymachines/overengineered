@@ -9,7 +9,7 @@ export const categoriesRegistry: Categories = {};
 
 export default class Registry {
 	static findCategoryPath(categories: Categories, key: string): string[] | undefined {
-		for (const category of Objects.keys(categories)) {
+		for (const [category, _] of Objects.pairs(categories)) {
 			if (category === key) {
 				return [category];
 			}

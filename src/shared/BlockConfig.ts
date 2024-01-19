@@ -20,7 +20,7 @@ export default class BlockConfig {
 		config: Partial<BlockConfigDefinitionsToConfig<TDef>>,
 		definition: TDef,
 	): BlockConfigDefinitionsToConfig<TDef> {
-		for (const [key, def] of Objects.entries(definition)) {
+		for (const [key, def] of Objects.pairs(definition)) {
 			if (typeIs(config[key], "table") || typeIs(def.config, "table")) {
 				config[key] = {
 					...((def.config as object) ?? {}),

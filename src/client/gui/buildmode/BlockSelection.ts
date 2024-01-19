@@ -127,7 +127,9 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 
 		if (this.gui.SearchTextBox.Text === "") {
 			// Category buttons
-			for (const category of Objects.values(selected.reduce((acc, val) => acc[val].sub, categoriesRegistry))) {
+			for (const [_, category] of Objects.pairs(
+				selected.reduce((acc, val) => acc[val].sub, categoriesRegistry),
+			)) {
 				this.createCategoryButton(category.name, () => this.selectedCategory.set([...selected, category.name]));
 			}
 		}
