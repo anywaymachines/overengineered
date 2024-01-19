@@ -174,18 +174,13 @@ export const initializeBoxSelection = (
 		highlights.clear();
 	};
 
-	const selectionGui = new Instance("ScreenGui");
-	selectionGui.Name = "BoxSelection";
-	selectionGui.DisplayOrder = 2;
-	selectionGui.Parent = GuiController.getPlayerGui();
-
 	const start = () => {
 		if (InputController.inputType.get() === "Desktop") {
 			const startpos = new UDim2(0, mouse.X, 0, mouse.Y);
 
 			const selection = template();
 			selection.Position = startpos;
-			selection.Parent = selectionGui;
+			selection.Parent = GuiController.getUnscaledGameUI();
 			selection.Visible = true;
 			selection.Size = new UDim2(0, 0, 0, 0);
 
