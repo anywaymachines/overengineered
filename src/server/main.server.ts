@@ -97,7 +97,7 @@ class RemoteHandlers {
 
 		const vehicleSeatModel = blocks.find((model) => model.GetAttribute("id") === "vehicleseat") as Model;
 		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
-		if (vehicleSeat.Occupant) {
+		if (vehicleSeat.Occupant && vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
 			vehicleSeat.Occupant.Sit = false;
 		}
 

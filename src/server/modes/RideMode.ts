@@ -44,7 +44,7 @@ export default class RideMode implements PlayModeBase {
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
 		const vehicleSeatModel = blocksChildren.find((model) => model.GetAttribute("id") === "vehicleseat") as Model;
 		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
-		if (vehicleSeat.Occupant) {
+		if (vehicleSeat.Occupant && vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
 			vehicleSeat.Occupant.Sit = false;
 		}
 
