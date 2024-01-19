@@ -6,9 +6,9 @@ import VectorUtils from "shared/utils/VectorUtils";
 import GuiController from "./GuiController";
 
 type BeaconBillboardGui = GuiObject & {
-	Title: TextLabel;
-	Distance: TextLabel;
-	ImageLabel: ImageLabel;
+	readonly Title: TextLabel;
+	readonly Distance: TextLabel;
+	readonly ImageLabel: ImageLabel;
 };
 
 export default class BeaconController {
@@ -23,14 +23,9 @@ export default class BeaconController {
 			gui.ZIndex = -1;
 		});
 
-		this.billboard.Parent = part;
-
-		const frame = this.billboard;
-		frame.Position = new UDim2(0, 1, 0, 1);
-
-		// get gui point by object point
-		frame.Parent = GuiController.getGameUI();
-		frame.Title.Text = name;
+		this.billboard.Position = new UDim2(0, 1, 0, 1);
+		this.billboard.Parent = GuiController.getUnscaledGameUI();
+		this.billboard.Title.Text = name;
 
 		RunService.RenderStepped.Connect(() => {
 			if (!PlayerDataStorage.config.get().beacons) {
@@ -64,7 +59,7 @@ export default class BeaconController {
 			this.billboard.Distance.Text = distancestr;
 			const [screenPos, isVisible] = Workspace.CurrentCamera!.WorldToViewportPoint(part.GetPivot().Position);
 			const screenSize = Workspace.CurrentCamera!.ViewportSize;
-			const adjustableOffset = frame.AbsoluteSize.X / 2;
+			const adjustableOffset = this.billboard.AbsoluteSize.X / 2;
 			let [pos_x, pos_y] = [screenPos.X, screenPos.Y];
 
 			const halfScreenX = screenSize.X / 2;
@@ -99,7 +94,7 @@ export default class BeaconController {
 				pos_y = math.clamp(pos_y, adjustableOffset, screenSize.Y - adjustableOffset);
 			}
 
-			frame.Position = new UDim2(0, pos_x, 0, pos_y);
+			this.billboard.Position = new UDim2(0, pos_x, 0, pos_y);
 		});
 	}
 }
