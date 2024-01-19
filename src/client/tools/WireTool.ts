@@ -271,7 +271,7 @@ export default class WireTool extends ToolBase {
 		});
 	}
 
-	private canConnect(marker1: MarkerComponent, marker2: MarkerComponent) {
+	private canConnect(marker1: MarkerComponent | undefined, marker2: MarkerComponent) {
 		if (!marker1 || marker1.data.markerType !== "input") {
 			return false;
 		}

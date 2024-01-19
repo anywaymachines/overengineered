@@ -4,10 +4,12 @@ import PartUtils from "shared/utils/PartUtils";
 import Component from "./Component";
 
 export interface BlockLogicData<TDef extends BlockConfigDefinitions, TBlock extends BlockModel = BlockModel> {
+	readonly instance: TBlock;
 	readonly uuid: BlockUuid;
 	readonly config: Partial<BlockConfigDefinitionsToConfig<TDef>>;
+
+	/** Connections to this block INPUT from other blocks OUTPUTs and INPUTs */
 	readonly connections: Readonly<Partial<Record<keyof TDef & BlockConnectionName, PlacedBlockDataConnection>>>;
-	readonly instance: TBlock;
 }
 export default class BlockLogic<T extends BlockModel = BlockModel> extends Component<T> {
 	readonly block: BlockLogicData<BlockConfigDefinitions, T>;
