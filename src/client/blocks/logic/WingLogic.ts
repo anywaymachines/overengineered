@@ -36,7 +36,10 @@ export default class WingLogic extends BlockLogic<Wing> {
 			const surface = this.findSurface(this.wingSurface);
 			const vectorForce = this.wingSurface.FindFirstChild("VectorForce") as VectorForce;
 
-			const density = math.max(0.7, RobloxUnit.GetMaterialPhysicalProperties(this.block.material).Density / 2);
+			const density = math.max(
+				0.7,
+				RobloxUnit.GetMaterialPhysicalProperties(this.block.material ?? Enum.Material.Plastic).Density / 2,
+			);
 			this.wingSurface.CustomPhysicalProperties = new PhysicalProperties(density, 0.3, 0.5, 1, 1);
 
 			if (!vectorForce) return;
