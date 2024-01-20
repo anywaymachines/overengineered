@@ -155,12 +155,12 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 					prev.getGui().NextSelectionDown = button.getGui();
 				}
 
-				this.event.subscribe(button.activated, () => {
+				button.event.subscribe(button.activated, () => {
 					// Gamepad selection improvements
 					GuiService.SelectedObject = undefined;
 				});
 
-				this.event.subscribeObservable(
+				button.event.subscribeObservable(
 					this.selectedBlock,
 					(newblock) => {
 						button.getGui().BackgroundColor3 =
