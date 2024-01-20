@@ -13,7 +13,15 @@ export default class InputHandler {
 	private readonly touchTapCallbacks: TouchCallback[] = [];
 	private readonly events: InputCallback[] = [];
 
-	constructor() {
+	private isKeyPressed(): boolean {
+		if (UserInputService.GetFocusedTextBox()) {
+			return false;
+		}
+
+		return true;
+	}
+
+	private registerCallbacksIfNeeded() {
 		this.eventHandler.subscribe(UserInputService.InputBegan, (input: InputObject, gameProcessedEvent: boolean) => {
 			if (!this.isKeyPressed()) return;
 
@@ -44,14 +52,6 @@ export default class InputHandler {
 		});
 	}
 
-	private isKeyPressed(): boolean {
-		if (UserInputService.GetFocusedTextBox()) {
-			return false;
-		}
-
-		return true;
-	}
-
 	public onKeyUp(keyCode: Enum.KeyCode, callback: InputCallback) {
 		return this.onKeysUp((input, gameProcessedEvent) => {
 			if (input.KeyCode !== keyCode) return;
@@ -60,6 +60,7 @@ export default class InputHandler {
 		});
 	}
 	public onKeysUp(callback: InputCallback) {
+		this.registerCallbacksIfNeeded();
 		return this.releaseKeycodes.push(callback);
 	}
 
@@ -74,10 +75,13 @@ export default class InputHandler {
 	}
 
 	public onKeysDown(callback: InputCallback) {
+		this.registerCallbacksIfNeeded();
 		return this.listenableKeycodes.push(callback);
 	}
 
 	public onMouseButton1Down(callback: InputCallback) {
+		this.registerCallbacksIfNeeded();
+
 		return this.events.push((input, gameProcessedEvent) => {
 			if (input.UserInputState !== Enum.UserInputState.Begin) return;
 			if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
@@ -86,6 +90,8 @@ export default class InputHandler {
 	}
 
 	public onMouseButton1Up(callback: InputCallback) {
+		this.registerCallbacksIfNeeded();
+
 		return this.events.push((input, gameProcessedEvent) => {
 			if (input.UserInputState !== Enum.UserInputState.End) return;
 			if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
@@ -94,6 +100,7 @@ export default class InputHandler {
 	}
 
 	public onTouchTap(callback: TouchCallback) {
+		this.registerCallbacksIfNeeded();
 		return this.touchTapCallbacks.push(callback);
 	}
 
