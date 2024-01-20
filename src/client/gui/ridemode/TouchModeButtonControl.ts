@@ -1,9 +1,18 @@
 import Signal from "@rbxts/signal";
 import Control from "client/base/Control";
+import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
 import GuiController from "client/controller/GuiController";
+import Arrays from "shared/_fixes_/Arrays";
 import ObservableValue from "shared/event/ObservableValue";
 import { TextButtonDefinition } from "../controls/Button";
 
+export type TouchModeButtonData = {
+	readonly name: string;
+	readonly press: () => void;
+	readonly release: () => void;
+	readonly isPressed: () => boolean;
+	readonly toggleMode: boolean;
+};
 export type TouchModeButtonControlDefinition = TextButtonDefinition;
 export default class TouchModeButtonControl extends Control<TouchModeButtonControlDefinition> {
 	//implements GroupableControl
@@ -36,13 +45,6 @@ export default class TouchModeButtonControl extends Control<TouchModeButtonContr
 		});
 	}
 
-	/*groupWith(controls: readonly GroupableControl[]): Control {
-		const control = new TouchModeButtonControl();
-		control.text.set(this.text.get());
-
-		return control;
-	}*/
-
 	subscribe(press: () => void, unpress: () => void, isPressed: () => boolean, switchmode: boolean) {
 		if (switchmode) {
 			this.event.subscribe(this.pressed, () => (isPressed() ? unpress() : press()));
@@ -58,5 +60,29 @@ export default class TouchModeButtonControl extends Control<TouchModeButtonContr
 		}>().RideMode.TouchControlButton;
 
 		return new TouchModeButtonControl(template.Clone());
+	}
+
+	static fromBlocks(
+		inputType: InputType,
+		logics: readonly ConfigLogicValueBase[],
+	): readonly TouchModeButtonControl[] {
+		if (inputType !== "Touch") return [];
+
+		const createButton = (key: string, group: readonly TouchModeButtonData[]) => {
+			const button = this.create();
+			button.text.set(key);
+
+			for (const data of group) {
+				button.subscribe(data.press, data.release, data.isPressed, data.toggleMode);
+			}
+
+			return button;
+		};
+
+		const grouped = Arrays.groupBy(
+			Arrays.flatmap(logics, (logic) => logic.getTouchButtonDatas()),
+			(logic) => logic.name,
+		);
+		return Arrays.map(grouped, createButton);
 	}
 }

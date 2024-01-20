@@ -278,7 +278,7 @@ export default class BuildTool2 extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Build tool 2 (test)";
+		return "Build tool 2 (test, use on your own risk lmao)";
 	}
 	getImageID(): string {
 		return "rbxassetid://12539295858";

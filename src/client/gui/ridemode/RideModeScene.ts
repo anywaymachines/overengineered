@@ -8,13 +8,17 @@ import RocketEngineLogic from "client/blocks/logic/RocketEngineLogic";
 import InputController from "client/controller/InputController";
 import PopupController from "client/controller/PopupController";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
+import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
 import Remotes from "shared/Remotes";
 import RobloxUnit from "shared/RobloxUnit";
+import SlotsMeta from "shared/SlotsMeta";
+import Arrays from "shared/_fixes_/Arrays";
 import EventHandler from "shared/event/EventHandler";
 import { ButtonControl, TextButtonDefinition } from "../controls/Button";
 import { DictionaryControl } from "../controls/DictionaryControl";
 import FormattedLabelControl from "../controls/FormattedLabelControl";
 import ProgressBarControl, { ProgressBarControlDefinition } from "../controls/ProgressBarControl";
+import TouchModeButtonControl from "./TouchModeButtonControl";
 
 export type ActionBarControlDefinition = GuiObject & {
 	Stop: GuiButton;
@@ -99,15 +103,17 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 	}
 
 	resetControl(btn: Control, pos: number) {
-		const size = btn.getGui().AbsoluteSize;
+		const size = btn.getGui().Size;
 
-		let x = 0;
-		let y = size.Y * pos + 20 * pos;
+		let x = 0.95;
+		let y = 1 - size.Y.Scale * pos - 0.01 * pos;
 
-		x += (size.X + 20) * math.floor(y / this.gui.AbsoluteSize.Y);
-		y %= this.gui.AbsoluteSize.Y;
+		while (y < 0.05) {
+			y += 0.95;
+			x -= 0.05;
+		}
 
-		btn.getGui().Position = new UDim2(0.95, -x, 0.95, -y);
+		btn.getGui().Position = new UDim2(x, 0, y, 0);
 	}
 	resetControls() {
 		let pos = 0;
@@ -223,20 +229,50 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		}, true);
 
 		const inputType = InputController.inputType.get();
-		for (const logic of machine.getChildren()) {
-			if (!(logic instanceof ConfigurableBlockLogic)) continue;
 
-			for (const value of logic.getChildren()) {
-				for (const control of value.getRideModeGuis(inputType)) {
-					this.add(control);
-				}
-			}
+		const configurable = Arrays.ofType(machine.getChildren(), ConfigurableBlockLogic<BlockConfigBothDefinitions>);
+		const inputLogics = Arrays.flatmap(configurable, (c) => c.getChildren());
+
+		const controls = [
+			...TouchModeButtonControl.fromBlocks(inputType, inputLogics),
+			//
+		];
+
+		let controlsInfo: TouchControlInfo | undefined;
+		const slots = PlayerDataStorage.slots.get();
+		if (slots) {
+			controlsInfo = SlotsMeta.get(slots, PlayerDataStorage.loadedSlot.get() ?? -1)?.touchControls;
 		}
 
 		let pos = 0;
-		for (const control of this.getChildren()) {
-			this.resetControl(control, pos);
-			pos++;
+		for (const control of controls) {
+			this.addKeyed(control.text.get(), control);
+
+			const keycode = control.text.get() as KeyCode;
+
+			const doload =
+				controlsInfo !== undefined &&
+				controlsInfo[keycode] !== undefined &&
+				controlsInfo[keycode].pos[0] >= control.getGui().AbsoluteSize.X / this.gui.AbsoluteSize.X &&
+				controlsInfo[keycode].pos[0] <= 1 &&
+				controlsInfo[keycode].pos[1] >= control.getGui().AbsoluteSize.Y / this.gui.AbsoluteSize.Y &&
+				controlsInfo[keycode].pos[1] <= 1;
+
+			if (doload) {
+				const kc = controlsInfo?.[keycode];
+				if (kc) {
+					if (kc.pos[0] <= 1) {
+						// relative position
+						control.getGui().Position = new UDim2(kc.pos[0], 0, kc.pos[1], 0);
+					} else {
+						// pixel position
+						control.getGui().Position = new UDim2(0, kc.pos[0], 0, kc.pos[1]);
+					}
+				}
+			} else {
+				this.resetControl(control, pos);
+				pos++;
+			}
 		}
 
 		/*
