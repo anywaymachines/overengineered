@@ -11,7 +11,7 @@ import DisconnectBlockLogic from "./blocks/logic/DisconnectBlockLogic";
 import TNTBlockLogic from "./blocks/logic/TNTBlockLogic";
 import PlayModeController from "./modes/PlayModeController";
 import { registerOnRemoteEvent, registerOnRemoteFunction } from "./network/event/RemoteHandler";
-import ReplicateRemoteHandler from "./network/event/ReplicateRemoteHandler";
+import UnreliableRemoteHandler from "./network/event/UnreliableRemoteHandler";
 import BlocksSerializer from "./plots/BlocksSerializer";
 import ServerPlots from "./plots/ServerPlots";
 
@@ -120,7 +120,7 @@ registerOnRemoteFunction("Building", "UpdateLogicConnectionRequest", BuildingWra
 registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSetting);
 registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
-ReplicateRemoteHandler.init();
+UnreliableRemoteHandler.init();
 
 AnchorBlockLogic.init();
 DisconnectBlockLogic.init();

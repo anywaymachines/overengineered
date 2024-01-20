@@ -3,7 +3,7 @@ import SpreadingFireController from "server/SpreadingFireController";
 import { UnreliableRemotes } from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 
-export default class ReplicateRemoteHandler {
+export default class UnreliableRemoteHandler {
 	private static materialSounds: { [key: string]: Instance[] } = {
 		Default: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
 
@@ -96,11 +96,11 @@ export default class ReplicateRemoteHandler {
 			return;
 		}
 
-		if (block.GetNetworkOwner() !== player) {
+		if (block.GetAttribute("broken") === true) {
 			return;
 		}
 
-		if (block.GetAttribute("broken") === true) {
+		if (block.GetNetworkOwner() !== player) {
 			return;
 		}
 
@@ -132,11 +132,11 @@ export default class ReplicateRemoteHandler {
 			return;
 		}
 
-		if (block.GetNetworkOwner() !== player) {
+		if (block.GetAttribute("broken") === true) {
 			return;
 		}
 
-		if (block.GetAttribute("broken") === true) {
+		if (block.GetNetworkOwner() !== player) {
 			return;
 		}
 
