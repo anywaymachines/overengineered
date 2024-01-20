@@ -55,7 +55,7 @@ export default class Component<
 		super.destroy();
 
 		try {
-			this.instance.Parent = undefined;
+			this.instance.Destroy();
 		} catch {
 			// empty
 		}
