@@ -1,5 +1,6 @@
 import { RunService } from "@rbxts/services";
 import BlockLogic from "client/base/BlockLogic";
+import RobloxUnit from "shared/RobloxUnit";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
 type Wing = BlockModel & {
@@ -34,6 +35,9 @@ export default class WingLogic extends BlockLogic<Wing> {
 		} else {
 			const surface = this.findSurface(this.wingSurface);
 			const vectorForce = this.wingSurface.FindFirstChild("VectorForce") as VectorForce;
+
+			const density = math.max(0.7, RobloxUnit.GetMaterialPhysicalProperties(this.block.material).Density / 2);
+			this.wingSurface.CustomPhysicalProperties = new PhysicalProperties(density, 0.3, 0.5, 1, 1);
 
 			if (!vectorForce) return;
 

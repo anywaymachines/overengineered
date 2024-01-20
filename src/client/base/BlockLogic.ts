@@ -11,6 +11,8 @@ export interface BlockLogicData<TDef extends BlockConfigDefinitions, TBlock exte
 	readonly instance: TBlock;
 	readonly uuid: BlockUuid;
 	readonly config: Partial<BlockConfigDefinitionsToConfig<TDef>>;
+	readonly color: Color3;
+	readonly material: Enum.Material;
 
 	/** Connections to this block INPUT from other blocks OUTPUTs and INPUTs */
 	readonly connections: Readonly<Partial<Record<keyof TDef & BlockConnectionName, PlacedBlockDataConnection>>>;
