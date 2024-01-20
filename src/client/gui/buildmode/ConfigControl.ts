@@ -223,6 +223,27 @@ export class KeyBoolConfigValueControl extends ConfigValueControl<ConfigControlD
 
 		const controlTemplate = Control.asTemplate(this.gui.Control);
 
+		const def = {
+			key: {
+				displayName: "Key",
+				type: "key",
+				config: config.key,
+				default: config.key,
+			},
+			switch: {
+				displayName: "Toggle mode",
+				type: "bool",
+				config: config.switch,
+				default: config.switch,
+			},
+		} satisfies Partial<Record<keyof BlockConfigDefinitionRegistry["keybool"]["config"], BlockConfigDefinition>>;
+
+		const control = this.add(new ConfigControl2(controlTemplate(), config, def));
+		this.event.subscribe(control.configUpdated, (key, value) => {
+			this.submitted.Fire((config = { ...config, [key]: value }));
+		});
+		return;
+
 		const desktop = () => {
 			const def = {
 				key: {
