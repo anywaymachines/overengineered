@@ -9,6 +9,6 @@ const banlist: { [key: number]: string } = {
 Players.PlayerAdded.Connect((player) => {
 	if (banlist[player.UserId] !== undefined) {
 		player.Kick(banlist[player.UserId]);
-		DiscordWebhook.log(`${player.Name} tried to join but was rejected by AntiRickje protection`);
+		DiscordWebhook.log(`${player.Name} tried to join but was kicked by AntiRickje protection`);
 	}
 });
