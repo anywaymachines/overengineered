@@ -39,8 +39,6 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.smallrocketengine);
 
-		this.event.subscribeObservable(this.input.thrust, (thrust) => (this.thrust = thrust), true);
-
 		this.onDescendantDestroyed(() => {
 			this.thrust = 0;
 			this.update();
@@ -66,7 +64,14 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 		this.multiplier *= math.max(1, RobloxUnit.GetMaterialPhysicalProperties(block.material).Density / 2);
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
-		this.event.subscribeObservable(this.input.thrust, () => this.update(), true);
+		this.event.subscribeObservable(
+			this.input.thrust,
+			(value) => {
+				this.thrust = value;
+				this.update();
+			},
+			true,
+		);
 	}
 
 	private update() {
