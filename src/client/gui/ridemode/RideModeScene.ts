@@ -8,13 +8,16 @@ import RocketEngineLogic from "client/blocks/logic/RocketEngineLogic";
 import InputController from "client/controller/InputController";
 import PopupController from "client/controller/PopupController";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
+import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
 import Remotes from "shared/Remotes";
 import RobloxUnit from "shared/RobloxUnit";
+import Arrays from "shared/_fixes_/Arrays";
 import EventHandler from "shared/event/EventHandler";
 import { ButtonControl, TextButtonDefinition } from "../controls/Button";
 import { DictionaryControl } from "../controls/DictionaryControl";
 import FormattedLabelControl from "../controls/FormattedLabelControl";
 import ProgressBarControl, { ProgressBarControlDefinition } from "../controls/ProgressBarControl";
+import TouchModeButtonControl from "./TouchModeButtonControl";
 
 export type ActionBarControlDefinition = GuiObject & {
 	Stop: GuiButton;
@@ -223,18 +226,18 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		}, true);
 
 		const inputType = InputController.inputType.get();
-		for (const logic of machine.getChildren()) {
-			if (!(logic instanceof ConfigurableBlockLogic)) continue;
 
-			for (const value of logic.getChildren()) {
-				for (const control of value.getRideModeGuis(inputType)) {
-					this.add(control);
-				}
-			}
-		}
+		const configurable = Arrays.ofType(machine.getChildren(), ConfigurableBlockLogic<BlockConfigBothDefinitions>);
+		const inputLogics = Arrays.flatmap(configurable, (c) => c.getChildren());
+
+		const controls = [
+			...TouchModeButtonControl.fromBlocks(inputType, inputLogics),
+			//
+		];
 
 		let pos = 0;
-		for (const control of this.getChildren()) {
+		for (const control of controls) {
+			this.add(control);
 			this.resetControl(control, pos);
 			pos++;
 		}

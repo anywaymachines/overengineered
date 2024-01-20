@@ -273,8 +273,9 @@ export class KeyBoolConfigValueControl extends ConfigValueControl<ConfigControlD
 		this.event.onPrepare((input) => {
 			this.clear();
 
-			if (input === "Desktop") desktop();
-			else if (input === "Touch") touch();
+			desktop();
+			// if (input === "Desktop") desktop();
+			// else if (input === "Touch") touch();
 		});
 	}
 }

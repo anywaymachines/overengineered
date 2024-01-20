@@ -1,6 +1,5 @@
-import Control from "client/base/Control";
 import { KeyDefinitions, KeyPressingDefinitionsController } from "client/base/KeyPressingController";
-import TouchModeButtonControl from "client/gui/ridemode/TouchModeButtonControl";
+import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
 import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
@@ -54,27 +53,22 @@ export class MotorRotationSpeedConfigLogicValue extends ConfigLogicValueBase<
 		this.add((this.controller = new KeyPressingDefinitionsController(def)));
 	}
 
-	getRideModeGuis(inputType: InputType): readonly Control[] {
-		if (inputType !== "Touch") return super.getRideModeGuis(inputType);
-
-		const add = TouchModeButtonControl.create();
-		add.text.set(this.config.rotation.addTouchName);
-		add.subscribe(
-			() => this.controller.controller.keyDown("add"),
-			() => this.controller.controller.keyUp("add"),
-			() => this.controller.controller.isDown("add"),
-			this.config.switchmode,
-		);
-
-		const sub = TouchModeButtonControl.create();
-		sub.text.set(this.config.rotation.subTouchName);
-		sub.subscribe(
-			() => this.controller.controller.keyDown("sub"),
-			() => this.controller.controller.keyUp("sub"),
-			() => this.controller.controller.isDown("sub"),
-			this.config.switchmode,
-		);
-
-		return [add, sub];
+	getTouchButtonDatas(): readonly TouchModeButtonData[] {
+		return [
+			{
+				name: this.config.rotation.add,
+				press: () => this.controller.controller.keyDown("add"),
+				release: () => this.controller.controller.keyUp("add"),
+				isPressed: () => this.controller.controller.isDown("add"),
+				toggleMode: this.config.switchmode,
+			},
+			{
+				name: this.config.rotation.sub,
+				press: () => this.controller.controller.keyDown("sub"),
+				release: () => this.controller.controller.keyUp("sub"),
+				isPressed: () => this.controller.controller.isDown("sub"),
+				toggleMode: this.config.switchmode,
+			},
+		];
 	}
 }

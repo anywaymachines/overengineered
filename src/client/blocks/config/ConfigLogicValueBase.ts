@@ -1,11 +1,12 @@
 import ComponentContainer from "client/base/ComponentContainer";
 import Control from "client/base/Control";
+import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
 import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
 import ObservableValue from "shared/event/ObservableValue";
-import GuiCreator from "./GuiCreator";
 
 export abstract class ConfigLogicValueBase<
-	T extends BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry],
+	T extends
+		BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry] = BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry],
 > extends ComponentContainer {
 	readonly value: ObservableValue<T["default"]>;
 	protected readonly definition: T;
@@ -24,10 +25,12 @@ export abstract class ConfigLogicValueBase<
 		this.value.triggerChanged();
 	}
 
-	getRideModeGuis(inputType: InputType): readonly Control[] {
+	getTouchButtonDatas(): readonly TouchModeButtonData[] {
 		return [];
 	}
-	getRideModeGuiCreators(inputType: InputType): readonly GuiCreator[] {
+
+	/** @deprecated */
+	getRideModeGuis(inputType: InputType): readonly Control[] {
 		return [];
 	}
 
