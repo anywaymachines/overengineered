@@ -44,7 +44,7 @@ export default class PaintTool extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Paint Mode";
+		return "Paint Mode (DOESNT WORK)";
 	}
 	getShortDescription(): string {
 		return "Paint your build";

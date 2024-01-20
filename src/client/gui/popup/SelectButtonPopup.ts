@@ -101,16 +101,16 @@ export default class SelectButtonPopup extends Popup<SelectButtonPopupDefinition
 
 		eh.subscribeOnce(this.buttonPressed, (key) => {
 			eh.unsubscribeAll();
+			this.hide();
 			SoundController.getSounds().Click.Play();
 			confirmFunc(key);
-			this.hide();
 		});
 
 		eh.subscribeOnce(this.cancelButton.activated, () => {
 			eh.unsubscribeAll();
+			this.hide();
 			SoundController.getSounds().Click.Play();
 			cancelFunc();
-			this.hide();
 		});
 	}
 
