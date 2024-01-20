@@ -100,6 +100,7 @@ export default class InputHandler {
 	public unsubscribeAll() {
 		this.listenableKeycodes.clear();
 		this.touchTapCallbacks.clear();
+		this.eventHandler.unsubscribeAll();
 		this.events.clear();
 	}
 }
