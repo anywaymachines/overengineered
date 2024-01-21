@@ -1,10 +1,18 @@
-type ConfigUpdateRequest = {
-	readonly blocks: readonly BlockModel[];
-	readonly data: {
-		readonly key: string;
-		readonly value: string;
-	};
-};
+type ConfigUpdateRequest =
+	| {
+			readonly blocks: readonly BlockModel[];
+			readonly data: {
+				readonly key: string;
+				readonly value: string;
+			};
+	  }
+	| {
+			readonly configs: readonly {
+				readonly block: BlockModel;
+				readonly key: string;
+				readonly value: string;
+			}[];
+	  };
 
 type UpdateLogicConnectionRequest =
 	| {

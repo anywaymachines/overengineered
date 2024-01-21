@@ -133,3 +133,6 @@ if (RunService.IsStudio()) {
 		Remotes.Server.GetNamespace("Debug").Get("DisplayLine").SendToAllPlayers(text, false, isError);
 	});
 }
+
+print(new Vector2(1, 2));
+print({ ...new Vector2(1, 2), ["X"]: 2 });

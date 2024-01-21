@@ -12,12 +12,20 @@ import BlockConfigDefinitionRegistry, {
 	BlockConfigRegToDefinition,
 } from "shared/BlockConfigDefinitionRegistry";
 import Objects from "shared/_fixes_/objects";
+import { DictionaryControl } from "../controls/DictionaryControl";
 import TextBoxControl, { TextBoxControlDefinition } from "../controls/TextBoxControl";
+
+type PartialIfObject<T> = T extends CheckableTypes[Exclude<keyof CheckableTypes, keyof CheckablePrimitives>]
+	? T
+	: Partial<T>;
 
 export type ConfigControlDefinition = GuiObject;
 export default class ConfigControl extends Control<ConfigControlDefinition> {
 	readonly configUpdated = new Signal<
-		(key: string, value: BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry]["config"]) => void
+		(
+			key: string,
+			value: PartialIfObject<BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry]["config"]>,
+		) => void
 	>();
 
 	private readonly connectedTemplate;
@@ -77,7 +85,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 type ConfigControl2Definition = GuiObject;
 type ConfigUpdatedCallback<TDef extends BlockConfigDefinitions, TKey extends keyof TDef> = (
 	key: TKey,
-	valeu: TDef[TKey]["config"],
+	value: PartialIfObject<TDef[TKey]["config"]>,
 ) => void;
 class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control<ConfigControl2Definition> {
 	readonly configUpdated = new Signal<ConfigUpdatedCallback<TDef, keyof TDef>>();
@@ -128,7 +136,9 @@ class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control<Config
 			);
 			this.add(control);
 
-			control.submitted.Connect((value) => this.configUpdated.Fire(id as string, value));
+			control.submitted.Connect((value) =>
+				this.configUpdated.Fire(id as string, value as PartialIfObject<TDef[keyof TDef]["config"]>),
+			);
 		}
 	}
 }
@@ -139,7 +149,6 @@ export abstract class ConfigValueControl<TGui extends GuiObject> extends Control
 		this.gui.HeadingLabel.Text = name;
 	}
 }
-
 class ConnectedValueControl extends ConfigValueControl<GuiObject> {}
 
 //
@@ -154,7 +163,7 @@ export class BoolConfigValueControl extends ConfigValueControl<CheckBoxControlDe
 	) {
 		super(templates.checkbox(), definition.displayName);
 
-		const control = this.added(new CheckBoxControl(this.gui.Control));
+		const control = this.add(new CheckBoxControl(this.gui.Control));
 		control.value.set(config);
 
 		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
@@ -193,7 +202,7 @@ export class Vector3ConfigValueControl extends ConfigValueControl<Vector3ConfigV
 			},
 		} satisfies Record<string, BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["number"]>>;
 
-		const list = this.added(new Control<GuiObject, NumberConfigValueControl>(this.gui.Control));
+		const list = this.add(new Control<GuiObject, NumberConfigValueControl>(this.gui.Control));
 		const create = (key: keyof typeof defs) => {
 			const control = new NumberConfigValueControl(templates, config[key], defs[key]);
 			list.add(control);
@@ -317,7 +326,7 @@ export class KeyConfigValueControl extends ConfigValueControl<KeyChooserControlD
 	) {
 		super(templates.key(), definition.displayName);
 
-		const control = this.added(new KeyChooserControl(this.gui.Control));
+		const control = this.add(new KeyChooserControl(this.gui.Control));
 		this.value = control.value;
 		control.value.set(config);
 
@@ -327,7 +336,7 @@ export class KeyConfigValueControl extends ConfigValueControl<KeyChooserControlD
 
 export type MultiKeyConfigValueControlDefinition = ConfigControlDefinition;
 export class MultiKeyConfigValueControl extends ConfigValueControl<MultiKeyConfigValueControlDefinition> {
-	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["multikey"]["config"]) => void>();
+	readonly submitted = new Signal<(config: Partial<BlockConfigDefinitionRegistry["multikey"]["config"]>) => void>();
 
 	constructor(
 		templates: Templates,
@@ -336,26 +345,27 @@ export class MultiKeyConfigValueControl extends ConfigValueControl<MultiKeyConfi
 	) {
 		super(templates.multi(), definition.displayName);
 
-		const controls = new Map<string, KeyConfigValueControl>();
-
-		const list = this.added(new Control<GuiObject, KeyConfigValueControl>(this.gui.Control));
+		const list = this.add(new DictionaryControl<GuiObject, string, KeyConfigValueControl>(this.gui.Control));
 		for (const [name, _] of Objects.pairs(definition.default)) {
 			const control = new KeyConfigValueControl(templates, config[name], definition.keyDefinitions[name]);
-			list.add(control);
-			controls.set(name, control);
+			list.addKeyed(name, control);
 
 			this.event.subscribe(control.submitted, (value, prev) => {
-				for (const child of list.getChildren()) {
+				const changed: (keyof typeof config)[] = [name];
+
+				for (const [key, child] of list.getKeyedChildren()) {
 					if (child === control) continue;
 
 					if (child.value.get() === value) {
 						child.value.set(prev);
+						changed.push(key);
 					}
 				}
 
-				this.submitted.Fire(
-					(config = Objects.fromEntries([...controls].map((c) => [c[0], c[1].value.get()] as const))),
-				);
+				const update = Objects.fromEntries(changed.map((c) => [c, list.getChild(c)!.value.get()] as const));
+				config = { ...config, ...update };
+
+				this.submitted.Fire(update);
 			});
 		}
 	}
@@ -372,7 +382,7 @@ export class NumberConfigValueControl extends ConfigValueControl<NumberTextBoxCo
 	) {
 		super(templates.number(), definition.displayName);
 
-		const control = this.added(new NumberTextBoxControl(this.gui.Control));
+		const control = this.add(new NumberTextBoxControl(this.gui.Control));
 		this.value = control.value;
 		control.value.set(config);
 
@@ -409,9 +419,7 @@ export class SliderConfigValueControl extends ConfigValueControl<SliderControlDe
 	) {
 		super(templates.slider(), definition.displayName);
 
-		const control = this.added(
-			new SliderControl(this.gui.Control, definition.min, definition.max, definition.step),
-		);
+		const control = this.add(new SliderControl(this.gui.Control, definition.min, definition.max, definition.step));
 		control.value.set(config);
 
 		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
@@ -420,7 +428,7 @@ export class SliderConfigValueControl extends ConfigValueControl<SliderControlDe
 
 export type ThrustConfigValueControlDefinition = ConfigControlDefinition;
 export class ThrustConfigValueControl extends ConfigValueControl<ThrustConfigValueControlDefinition> {
-	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["thrust"]["config"]) => void>();
+	readonly submitted = new Signal<(config: Partial<BlockConfigDefinitionRegistry["thrust"]["config"]>) => void>();
 
 	constructor(
 		templates: Templates,
@@ -429,10 +437,11 @@ export class ThrustConfigValueControl extends ConfigValueControl<ThrustConfigVal
 	) {
 		super(templates.multi(), definition.displayName);
 
-		const control = this.added(new ConfigControl(this.gui.Control));
-		this.event.subscribe(control.configUpdated, (key, value) =>
-			this.submitted.Fire((config = { ...config, [key]: value })),
-		);
+		const control = this.add(new ConfigControl(this.gui.Control));
+		this.event.subscribe(control.configUpdated, (key, value) => {
+			this.submitted.Fire({ [key]: value });
+			config = { ...config, [key]: value };
+		});
 
 		const def = {
 			thrust: {
@@ -484,7 +493,9 @@ export class ThrustConfigValueControl extends ConfigValueControl<ThrustConfigVal
 }
 
 export class MotorRotationSpeedConfigValueControl extends ConfigValueControl<ConfigControlDefinition> {
-	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["motorRotationSpeed"]["config"]) => void>();
+	readonly submitted = new Signal<
+		(config: Partial<BlockConfigDefinitionRegistry["motorRotationSpeed"]["config"]>) => void
+	>();
 
 	constructor(
 		templates: Templates,
@@ -494,9 +505,10 @@ export class MotorRotationSpeedConfigValueControl extends ConfigValueControl<Con
 		super(templates.multi(), definition.displayName);
 
 		const control = this.add(new ConfigControl(this.gui.Control));
-		this.event.subscribe(control.configUpdated, (key, value) =>
-			this.submitted.Fire((config = { ...config, [key]: value })),
-		);
+		this.event.subscribe(control.configUpdated, (key, value) => {
+			this.submitted.Fire({ [key]: value });
+			config = { ...config, [key]: value };
+		});
 
 		const def = {
 			rotation: {
@@ -548,7 +560,9 @@ export class MotorRotationSpeedConfigValueControl extends ConfigValueControl<Con
 }
 
 export class ServoMotorAngleConfigValueControl extends ConfigValueControl<ConfigControlDefinition> {
-	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["servoMotorAngle"]["config"]) => void>();
+	readonly submitted = new Signal<
+		(config: Partial<BlockConfigDefinitionRegistry["servoMotorAngle"]["config"]>) => void
+	>();
 
 	constructor(
 		templates: Templates,
@@ -557,7 +571,7 @@ export class ServoMotorAngleConfigValueControl extends ConfigValueControl<Config
 	) {
 		super(templates.multi(), definition.displayName);
 
-		const control = this.added(new ConfigControl(this.gui.Control));
+		const control = this.add(new ConfigControl(this.gui.Control));
 		this.event.subscribe(control.configUpdated, (key, value) =>
 			this.submitted.Fire((config = { ...config, [key]: value })),
 		);
@@ -622,7 +636,7 @@ export class OrConfigValueControl extends ConfigValueControl<ConfigControlDefini
 		throw "Not implemented (waiting for dropdown implementation)";
 		super(templates.multi(), definition.displayName);
 
-		const control = this.added(new ConfigControl(this.gui.Control));
+		const control = this.add(new ConfigControl(this.gui.Control));
 		this.event.subscribe(control.configUpdated, (key, value) =>
 			this.submitted.Fire(
 				(config = value as BlockConfigDefinitionRegistry[Exclude<
@@ -658,7 +672,7 @@ export const configControls = {
 	readonly [k in keyof BlockConfigDefinitionRegistry]: {
 		new (
 			templates: Templates,
-			config: BlockConfigDefinitionRegistry[k]["config"],
+			config: BlockConfigDefinitionRegistry[k]["config"] & defined,
 			definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry[k]>,
 		): ConfigValueControl<GuiObject> & {
 			submitted: Signal<(value: BlockConfigDefinitionRegistry[k]["config"]) => void>;

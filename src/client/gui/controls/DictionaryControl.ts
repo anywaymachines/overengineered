@@ -8,6 +8,10 @@ export class DictionaryControl<T extends GuiObject, TKey, TValue extends Control
 		super(gui);
 	}
 
+	getChild(key: TKey): TValue | undefined {
+		return this.keyedChildren.get(key);
+	}
+
 	/** Returns a list of added children */
 	getKeyedChildren(): ReadonlyMap<TKey, TValue> {
 		return this.keyedChildren;

@@ -288,19 +288,77 @@ export default class BuildingWrapper {
 	}
 
 	public static updateConfigAsPlayer(this: void, player: Player, data: ConfigUpdateRequest): Response {
-		for (const block of data.blocks) {
-			const plot = BuildingWrapper.tryGetValidPlotByBlock(player, block);
-			if (!plot.success) return plot;
+		if ("configs" in data) {
+			for (const config of data.configs) {
+				const plot = BuildingWrapper.tryGetValidPlotByBlock(player, config.block);
+				if (!plot.success) return plot;
+			}
+		} else {
+			for (const block of data.blocks) {
+				const plot = BuildingWrapper.tryGetValidPlotByBlock(player, block);
+				if (!plot.success) return plot;
+			}
 		}
 
 		return BuildingWrapper.updateConfig(data);
 	}
 	public static updateConfig(this: void, data: ConfigUpdateRequest): Response {
-		for (const block of data.blocks) {
-			const dataTag = block.GetAttribute("config") as string | undefined;
-			const currentData = HttpService.JSONDecode(dataTag ?? "{}") as { [key: string]: JsonSerializablePrimitive };
-			currentData[data.data.key] = JSON.deserialize(data.data.value);
-			block.SetAttribute("config", HttpService.JSONEncode(currentData));
+		/**
+		 * Assign only values, recursively.
+		 * @example assignValues({ a: { b: 'foo' } }, 'a', { c: 'bar' })
+		 * // returns:
+		 * { a: { b: 'foo', c: 'bar' } }
+		 */
+		const withValues = <T extends Record<string, JsonSerializablePrimitive | object>>(
+			object: T,
+			value: Partial<T>,
+		): object => {
+			const setobj = <T extends Record<string, JsonSerializablePrimitive | object>, TKey extends keyof T>(
+				object: T,
+				key: TKey,
+				value: T[TKey],
+			) => {
+				if (!typeIs(value, "table")) {
+					return { ...object, [key]: value };
+				}
+
+				return withValues(object, value);
+			};
+
+			const ret: Record<string, JsonSerializablePrimitive | object> = { ...object };
+			for (const [key, val] of Objects.pairs(value as Record<string, JsonSerializablePrimitive | object>)) {
+				const rk = ret[key];
+
+				if (!typeIs(rk, "table")) {
+					ret[key] = val;
+				} else {
+					ret[key] = setobj(rk as Record<string, JsonSerializablePrimitive | object>, key, val);
+				}
+			}
+
+			return ret;
+		};
+
+		if ("configs" in data) {
+			for (const config of data.configs) {
+				const dataTag = config.block.GetAttribute("config") as string | undefined;
+				const currentData = HttpService.JSONDecode(dataTag ?? "{}") as Record<
+					string,
+					JsonSerializablePrimitive
+				>;
+
+				const newData = withValues(currentData, { [config.key]: JSON.deserialize(config.value) });
+				config.block.SetAttribute("config", HttpService.JSONEncode(newData));
+			}
+		} else {
+			for (const block of data.blocks) {
+				const dataTag = block.GetAttribute("config") as string | undefined;
+				const currentData = HttpService.JSONDecode(dataTag ?? "{}") as {
+					[key: string]: JsonSerializablePrimitive;
+				};
+				const newData = withValues(currentData, { [data.data.key]: JSON.deserialize(data.data.value) });
+				block.SetAttribute("config", HttpService.JSONEncode(newData));
+			}
 		}
 
 		return { success: true };
