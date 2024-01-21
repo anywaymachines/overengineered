@@ -574,7 +574,7 @@ const constant = {
 	input: {
 		//connectors.boolOrNumberOrVector("Value", "1", { connectorHidden: true }),
 		value: {
-			displayName: "Hidden",
+			displayName: "Value",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
