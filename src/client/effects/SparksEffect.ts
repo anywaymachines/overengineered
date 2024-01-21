@@ -4,7 +4,7 @@ import ClientEffectBase from "./EffectBase";
 
 export default class ClientSparksEffect extends ClientEffectBase<SparksEffectArgs> {
 	constructor() {
-		super(UnreliableRemotes.CreateSparks);
+		super(UnreliableRemotes.SparksEffect);
 	}
 
 	public create(part: BasePart, share: boolean = true, args?: SparksEffectArgs): void {

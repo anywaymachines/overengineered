@@ -1,5 +1,5 @@
-import { ReplicatedStorage } from "@rbxts/services";
 import BlockManager from "shared/building/BlockManager";
+import ServerEffects from "./effects/ServerEffects";
 
 const explosionBase = new Instance("Explosion");
 explosionBase.BlastPressure = 0;
@@ -34,32 +34,13 @@ export default class SpreadingFireController {
 		const color = Color3.fromRGB(rand_rgb, rand_rgb, rand_rgb);
 		part.Color = color;
 
+		const duration = math.random(15, 30);
+
 		// Apply fire effect
-		const effects = ReplicatedStorage.Assets.Fire.GetChildren();
-		const appliedEffects: Instance[] = [];
-		effects.forEach((value) => {
-			const obj = value.Clone();
-			obj.Parent = part;
-
-			if (obj.IsA("Sound")) {
-				if (math.random(1, 4) === 1) {
-					obj.Play();
-				} else {
-					obj.Destroy();
-					return;
-				}
-			}
-
-			appliedEffects.push(obj);
-		});
+		ServerEffects.Fire.create(part, { duration: duration });
 
 		spawn(() => {
-			wait(math.random(15, 30));
-
-			// Remove effects
-			appliedEffects.forEach((value) => {
-				value.Destroy();
-			});
+			wait(duration);
 
 			// Break joints with a chance
 			if (math.random(1, 4) === 1) {

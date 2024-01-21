@@ -11,7 +11,7 @@ export default class ClientImpactSoundEffect extends ClientEffectBase<ImpactSoun
 	};
 
 	constructor() {
-		super(UnreliableRemotes.ImpactSound);
+		super(UnreliableRemotes.ImpactSoundEffect);
 	}
 
 	public create(part: BasePart, share: boolean, { index }: ImpactSoundEffectArgs): void {

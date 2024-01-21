@@ -77,12 +77,15 @@ export const UnreliableRemotes = {
 	ImpactExplode: ReplicatedStorage.FindFirstChild("ImpactExplode") as unknown as _UnreliableRemoteEvent<
 		(part: BasePart, blastRadius: number) => void
 	>,
-	ImpactSound: ReplicatedStorage.FindFirstChild("ImpactSound") as unknown as _UnreliableRemoteEvent<
-		(part: BasePart) => void
-	>,
 
 	Burn: ReplicatedStorage.FindFirstChild("Burn") as unknown as _UnreliableRemoteEvent<(part: BasePart) => void>,
-	CreateSparks: ReplicatedStorage.FindFirstChild("CreateSparks") as unknown as _UnreliableRemoteEvent<
+	SparksEffect: ReplicatedStorage.FindFirstChild("SparksEffect") as unknown as _UnreliableRemoteEvent<
+		(part: BasePart) => void
+	>,
+	FireEffect: ReplicatedStorage.FindFirstChild("FireEffect") as unknown as _UnreliableRemoteEvent<
+		(part: BasePart) => void
+	>,
+	ImpactSoundEffect: ReplicatedStorage.FindFirstChild("ImpactSoundEffect") as unknown as _UnreliableRemoteEvent<
 		(part: BasePart) => void
 	>,
 };

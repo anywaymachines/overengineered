@@ -1,8 +1,8 @@
 import { UnreliableRemotes } from "shared/Remotes";
 import ServerEffectBase from "./ServerEffectBase";
 
-export default class ServerSparksEffect extends ServerEffectBase<SparksEffectArgs> {
+export default class ServerFireEffect extends ServerEffectBase<FireEffectArgs> {
 	constructor() {
-		super(UnreliableRemotes.SparksEffect);
+		super(UnreliableRemotes.FireEffect);
 	}
 }
