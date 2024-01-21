@@ -38,8 +38,17 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 			await Remotes.Client.GetNamespace("Building")
 				.Get("UpdateConfigRequest")
 				.CallServerAsync({
-					blocks: selected.get().map((p) => p.Parent),
-					data: { key, value: JSON.serialize(value) },
+					configs: selected
+						.get()
+						.map((p) => p.Parent)
+						.map(
+							(b) =>
+								({
+									block: b,
+									key,
+									value: JSON.serialize(value),
+								}) satisfies ConfigUpdateRequest["configs"][number],
+						),
 				});
 		});
 

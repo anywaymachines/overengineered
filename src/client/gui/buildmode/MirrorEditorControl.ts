@@ -2,11 +2,11 @@ import { Players } from "@rbxts/services";
 import Control from "client/base/Control";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
-import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
 import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "../controls/NumberTextBoxControl";
+import ToggleControl, { ToggleControlDefinition } from "../controls/ToggleControl";
 
 export type MirrorEditorSingleControlDefinition = GuiObject & {
-	Checkbox: CheckBoxControlDefinition;
+	Checkbox: ToggleControlDefinition;
 	TextBox: NumberTextBoxControlDefinition;
 };
 export class MirrorEditorSingleControl extends Control<MirrorEditorSingleControlDefinition> {
@@ -18,7 +18,7 @@ export class MirrorEditorSingleControl extends Control<MirrorEditorSingleControl
 	constructor(gui: MirrorEditorSingleControlDefinition) {
 		super(gui);
 
-		this.enabled = this.added(new CheckBoxControl(this.gui.Checkbox));
+		this.enabled = this.added(new ToggleControl(this.gui.Checkbox));
 
 		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId).GetBoundingBox()[1];
 		this.position = this.added(new NumberTextBoxControl(this.gui.TextBox, -plot.X / 2, plot.X / 2, 1));

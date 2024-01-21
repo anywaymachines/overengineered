@@ -8,7 +8,7 @@ import { JsonSerializablePrimitive } from "shared/_fixes_/Json";
 import Objects from "shared/_fixes_/objects";
 import ObservableValue from "shared/event/ObservableValue";
 import { ButtonControl } from "../controls/Button";
-import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
+import ToggleControl, { ToggleControlDefinition } from "../controls/ToggleControl";
 
 class ConfigPartControl<
 	TControl extends Control<TDef>,
@@ -44,7 +44,7 @@ export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 };
 
 export type SettingsDefinition = GuiObject & {
-	CheckboxTemplate: ConfigPartDefinition<CheckBoxControlDefinition>;
+	CheckboxTemplate: ConfigPartDefinition<ToggleControlDefinition>;
 };
 
 export type SettingsPopupDefinition = GuiObject & {
@@ -98,7 +98,7 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 			if (def.type === "bool") {
 				const control = new ConfigPartControl(
 					this.checkboxTemplate(),
-					(cb) => new CheckBoxControl(cb),
+					(cb) => new ToggleControl(cb),
 					[config],
 					def,
 					id,

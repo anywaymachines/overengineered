@@ -148,6 +148,20 @@ export abstract class ConfigValueControl<TGui extends GuiObject> extends Control
 		super(gui);
 		this.gui.HeadingLabel.Text = name;
 	}
+
+	protected sameOrUndefined<T>(configs: readonly T[]) {
+		let value: T | undefined;
+		for (const config of configs) {
+			if (value !== undefined && value !== config) {
+				value = undefined;
+				break;
+			}
+
+			value = config;
+		}
+
+		return value;
+	}
 }
 class ConnectedValueControl extends ConfigValueControl<GuiObject> {}
 

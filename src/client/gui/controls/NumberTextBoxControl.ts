@@ -6,7 +6,9 @@ import ObservableValue from "shared/event/ObservableValue";
 export type NumberTextBoxControlDefinition = TextBox;
 
 /** Control that represents a number via a text input */
-export default class NumberTextBoxControl extends Control<NumberTextBoxControlDefinition> {
+export default class NumberTextBoxControl<
+	T extends number | undefined = number,
+> extends Control<NumberTextBoxControlDefinition> {
 	public readonly submitted = new Signal<(value: number) => void>();
 	public readonly value;
 
@@ -16,34 +18,39 @@ export default class NumberTextBoxControl extends Control<NumberTextBoxControlDe
 		super(gui);
 
 		if (min !== undefined && max !== undefined && step !== undefined) {
-			this.value = new NumberObservableValue(0, min, max, step);
+			this.value = new NumberObservableValue<T>(0 as T, min, max, step);
 		} else {
-			this.value = new ObservableValue(0);
+			this.value = new ObservableValue<T>(0 as T);
 		}
 
-		this.event.subscribeObservable(this.value, (value) => (this.gui.Text = tostring(value)), true);
+		this.event.subscribeObservable(this.value, (value) => (this.gui.Text = tostring(value ?? "")), true);
 
-		this.event.subscribe(this.gui.FocusLost, () => this.commit());
-		this.event.subscribe(this.gui.ReturnPressedFromOnScreenKeyboard, () => this.commit());
+		this.event.subscribe(this.gui.FocusLost, () => this.commit(true));
+		this.event.subscribe(this.gui.ReturnPressedFromOnScreenKeyboard, () => this.commit(false));
 	}
 
-	private commit() {
+	private commit(byLostFocus: boolean) {
 		const text = this.gui.Text.gsub("[^-0123456789.]", "")[0];
 
 		let num = tonumber(text);
 		if (num === undefined) {
+			if (byLostFocus) {
+				this.gui.Text = tostring(this.value.get() ?? "");
+				return;
+			}
+
 			this.gui.Text = "0";
 			num = 0;
 		}
 		if (num === this.value.get()) return;
 
 		this.gui.Text = tostring(num);
-		this.value.set(num);
+		this.value.set(num as T);
 		this.submitted.Fire(num);
 	}
 
 	public destroy() {
-		this.commit();
+		this.commit(true);
 		super.destroy();
 	}
 }

@@ -77,6 +77,7 @@ export default class ImpactController {
 			} else if (magnitudeDiff > allowedMagnitudeDiff) {
 				if (math.random(1, 20) === 1) {
 					UnreliableRemotes.Burn.FireServer(part);
+					event.Disconnect();
 				}
 
 				if (math.random(1, 3) > 1) {
