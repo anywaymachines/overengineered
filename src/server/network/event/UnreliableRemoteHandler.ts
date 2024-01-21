@@ -1,23 +1,10 @@
-import { ReplicatedStorage, Workspace } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
 import SpreadingFireController from "server/SpreadingFireController";
+import ServerEffects from "server/effects/ServerEffects";
 import { UnreliableRemotes } from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 
 export default class UnreliableRemoteHandler {
-	private static materialSounds: { [key: string]: Instance[] } = {
-		Default: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
-
-		Metal: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
-		Wood: ReplicatedStorage.Assets.Sounds.Impact.Materials.Wood.GetChildren(),
-	};
-
-	private static materialImpactSounds = {
-		Default: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal,
-
-		Wood: ReplicatedStorage.Assets.Sounds.Impact.Materials.Wood,
-		Metal: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal,
-	};
-
 	static init() {
 		UnreliableRemotes.ReplicateSound.OnServerEvent.Connect((player, sound, isPlaying, volume) =>
 			this.replicateSoundEvent(player, sound, isPlaying, volume),
@@ -32,7 +19,6 @@ export default class UnreliableRemoteHandler {
 			this.impactExplodeEvent(player, part, blastRadius),
 		);
 		UnreliableRemotes.Burn.OnServerEvent.Connect((player, part) => this.burnEvent(player, part));
-		UnreliableRemotes.CreateSparks.OnServerEvent.Connect((player, part) => this.createSparksEvent(player, part));
 	}
 
 	static replicateSoundEvent(player: Player, sound: Sound, isPlaying: boolean, volume: number) {
@@ -143,14 +129,8 @@ export default class UnreliableRemoteHandler {
 		block.BreakJoints();
 		block.SetAttribute("broken", true);
 
-		const soundsFolder = this.materialSounds[block.Material.Name] ?? this.materialSounds["Default"];
-		const randomSound = soundsFolder[math.random(0, soundsFolder.size() - 1)] as Sound;
-		const sound = randomSound.Clone();
-		sound.RollOffMaxDistance = 1000;
-		sound.Volume = 0.5;
-		sound.Parent = block;
-		sound.Play();
-		game.GetService("Debris").AddItem(sound, sound.TimeLength);
+		// Play sounds
+		ServerEffects.ImpactSound.create(block, { index: undefined });
 	}
 
 	static burnEvent(player: Player, block: BasePart) {
@@ -167,23 +147,5 @@ export default class UnreliableRemoteHandler {
 		}
 
 		SpreadingFireController.burn(block);
-	}
-
-	static createSparksEvent(player: Player, block: BasePart) {
-		if (!block || !block.Parent) {
-			return;
-		}
-
-		if (!block.IsDescendantOf(Workspace)) {
-			return;
-		}
-
-		if (block.GetNetworkOwner() !== player) {
-			return;
-		}
-
-		const sparks = ReplicatedStorage.Assets.Sparks.Clone();
-		sparks.Parent = block;
-		game.GetService("Debris").AddItem(sparks, 1.5);
 	}
 }

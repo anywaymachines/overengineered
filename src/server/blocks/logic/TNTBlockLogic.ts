@@ -67,6 +67,7 @@ export default class TNTBlockLogic {
 			sound.Play();
 			sound.Ended.Once(() => {
 				sound.Destroy();
+				block.Destroy();
 			});
 		});
 	}

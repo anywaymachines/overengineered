@@ -43,6 +43,12 @@ export default class GameDefinitions {
 			default: true as boolean,
 			config: true as boolean,
 		},
+		others_gfx: {
+			displayName: "Other people's effects and sounds",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
 	} as const satisfies BlockConfigDefinitions;
 
 	static isAdmin(player: Player) {

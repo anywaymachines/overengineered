@@ -1,5 +1,6 @@
 import { Players } from "@rbxts/services";
 import TerrainDataInfo from "client/TerrainDataInfo";
+import ClientEffects from "client/effects/ClientEffects";
 import { UnreliableRemotes } from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
@@ -83,7 +84,7 @@ export default class ImpactController {
 					event.Disconnect();
 				}
 			} else if (magnitudeDiff + allowedMagnitudeDiff * 0.2 > allowedMagnitudeDiff) {
-				UnreliableRemotes.CreateSparks.FireServer(part);
+				ClientEffects.Sparks.create(part);
 			}
 		});
 	}

@@ -54,8 +54,14 @@ const Remotes = Net.Definitions.Create({
 	}),
 });
 
-type _UnreliableRemoteEvent<T extends Callback> = Omit<UnreliableRemoteEvent<T>, "OnServerEvent"> & {
+export type _UnreliableRemoteEvent<T extends Callback> = Omit<
+	UnreliableRemoteEvent<T>,
+	"OnServerEvent" | "OnClientEvent" | "FireServer"
+> & {
 	readonly OnServerEvent: RBXScriptSignal<(player: Player, ...args: Parameters<T>) => ReturnType<T>>;
+	readonly OnClientEvent: RBXScriptSignal<T>;
+
+	FireServer(...args: Parameters<T>): void;
 };
 export const UnreliableRemotes = {
 	ReplicateSound: ReplicatedStorage.FindFirstChild("ReplicateSound") as unknown as _UnreliableRemoteEvent<
@@ -70,6 +76,9 @@ export const UnreliableRemotes = {
 	>,
 	ImpactExplode: ReplicatedStorage.FindFirstChild("ImpactExplode") as unknown as _UnreliableRemoteEvent<
 		(part: BasePart, blastRadius: number) => void
+	>,
+	ImpactSound: ReplicatedStorage.FindFirstChild("ImpactSound") as unknown as _UnreliableRemoteEvent<
+		(part: BasePart) => void
 	>,
 
 	Burn: ReplicatedStorage.FindFirstChild("Burn") as unknown as _UnreliableRemoteEvent<(part: BasePart) => void>,

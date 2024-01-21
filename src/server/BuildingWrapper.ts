@@ -288,16 +288,9 @@ export default class BuildingWrapper {
 	}
 
 	public static updateConfigAsPlayer(this: void, player: Player, data: ConfigUpdateRequest): Response {
-		if ("configs" in data) {
-			for (const config of data.configs) {
-				const plot = BuildingWrapper.tryGetValidPlotByBlock(player, config.block);
-				if (!plot.success) return plot;
-			}
-		} else {
-			for (const block of data.blocks) {
-				const plot = BuildingWrapper.tryGetValidPlotByBlock(player, block);
-				if (!plot.success) return plot;
-			}
+		for (const config of data.configs) {
+			const plot = BuildingWrapper.tryGetValidPlotByBlock(player, config.block);
+			if (!plot.success) return plot;
 		}
 
 		return BuildingWrapper.updateConfig(data);
@@ -339,26 +332,12 @@ export default class BuildingWrapper {
 			return ret;
 		};
 
-		if ("configs" in data) {
-			for (const config of data.configs) {
-				const dataTag = config.block.GetAttribute("config") as string | undefined;
-				const currentData = HttpService.JSONDecode(dataTag ?? "{}") as Record<
-					string,
-					JsonSerializablePrimitive
-				>;
+		for (const config of data.configs) {
+			const dataTag = config.block.GetAttribute("config") as string | undefined;
+			const currentData = HttpService.JSONDecode(dataTag ?? "{}") as Record<string, JsonSerializablePrimitive>;
 
-				const newData = withValues(currentData, { [config.key]: JSON.deserialize(config.value) });
-				config.block.SetAttribute("config", HttpService.JSONEncode(newData));
-			}
-		} else {
-			for (const block of data.blocks) {
-				const dataTag = block.GetAttribute("config") as string | undefined;
-				const currentData = HttpService.JSONDecode(dataTag ?? "{}") as {
-					[key: string]: JsonSerializablePrimitive;
-				};
-				const newData = withValues(currentData, { [data.data.key]: JSON.deserialize(data.data.value) });
-				block.SetAttribute("config", HttpService.JSONEncode(newData));
-			}
+			const newData = withValues(currentData, { [config.key]: JSON.deserialize(config.value) });
+			config.block.SetAttribute("config", HttpService.JSONEncode(newData));
 		}
 
 		return { success: true };
