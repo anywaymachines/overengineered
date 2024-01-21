@@ -1,68 +1,14 @@
-import { Players, RunService, Workspace } from "@rbxts/services";
-import { BlockLogicData } from "client/base/BlockLogic";
+import { Players, Workspace } from "@rbxts/services";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Machine from "client/blocks/logic/Machine";
+import ConstantBlockLogic from "client/blocks/operations/ConstantBlockLogic";
+import AltimeterBlockLogic from "client/blocks/operations/sensors/AltimeterBlockLogic";
+import OperationVec3CombinerBlockLogic from "client/blocks/operations/vector/OperationVec3CombinerBlockLogic";
+import OperationVec3SplitterBlockLogic from "client/blocks/operations/vector/OperationVec3SplitterBlockLogic";
 import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
-import blockConfigRegistry from "shared/BlockConfigRegistry";
 import RobloxUnit from "shared/RobloxUnit";
 import Objects from "shared/_fixes_/objects";
 import Test from "./Test";
-
-class OperationVec3Combiner extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationvec3combiner> {
-	constructor(block: BlockLogicData<typeof blockConfigRegistry.operationvec3combiner.input>) {
-		super(block, blockConfigRegistry.operationvec3combiner);
-
-		this.input.value_x.subscribe(() => this.update());
-		this.input.value_y.subscribe(() => this.update());
-		this.input.value_z.subscribe(() => this.update());
-	}
-
-	private update() {
-		const x = this.input.value_x.get();
-		const y = this.input.value_y.get();
-		const z = this.input.value_z.get();
-		this.output.result.set(new Vector3(x, y, z));
-	}
-}
-
-class OperationVec3Splitter extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationvec3splitter> {
-	constructor(block: BlockLogicData<typeof blockConfigRegistry.operationvec3splitter.input>) {
-		super(block, blockConfigRegistry.operationvec3splitter);
-		this.input.value.subscribe(() => this.update());
-	}
-
-	private update() {
-		const value = this.input.value.get();
-		this.output.result_x.set(value.X);
-		this.output.result_y.set(value.Y);
-		this.output.result_z.set(value.Z);
-	}
-}
-
-class Constant extends ConfigurableBlockLogic<typeof blockConfigRegistry.constant> {
-	constructor(block: BlockLogicData<typeof blockConfigRegistry.constant.input>) {
-		super(block, blockConfigRegistry.constant);
-		this.input.value.subscribe(() => this.update(), true);
-	}
-
-	private update() {
-		this.output.result.set(this.input.value.get());
-	}
-}
-
-class AltimeterBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.altimeter> {
-	constructor(block: BlockLogicData<typeof blockConfigRegistry.altimeter.input>) {
-		super(block, blockConfigRegistry.altimeter);
-
-		const update = () => {
-			this.output.result.set(RobloxUnit.Studs_To_Meters(block.instance.GetPivot().Position.Y));
-		};
-
-		this.event.subscribe(RunService.Heartbeat, update);
-	}
-}
-
-//
 
 const parent = new Instance("Folder");
 parent.Parent = Workspace;
@@ -88,7 +34,7 @@ const LogicTest1 = {
 			config: {},
 			connections: {},
 		});
-		const combiner = new OperationVec3Combiner({
+		const combiner = new OperationVec3CombinerBlockLogic({
 			uuid: "1" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: { value_x: 1 },
@@ -116,7 +62,7 @@ const LogicTest1 = {
 		machine.destroy();
 	},
 	size1() {
-		const combiner = new OperationVec3Combiner({
+		const combiner = new OperationVec3CombinerBlockLogic({
 			uuid: "0" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: { value_x: 1 },
@@ -135,13 +81,13 @@ const LogicTest1 = {
 		machine.destroy();
 	},
 	size2() {
-		const constant = new Constant({
+		const constant = new ConstantBlockLogic({
 			uuid: "0" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: { value: 2 },
 			connections: {},
 		});
-		const combiner = new OperationVec3Combiner({
+		const combiner = new OperationVec3CombinerBlockLogic({
 			uuid: "1" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: { value_x: 1 },
@@ -165,13 +111,13 @@ const LogicTest1 = {
 		machine.destroy();
 	},
 	size3() {
-		const constant = new Constant({
+		const constant = new ConstantBlockLogic({
 			uuid: "0" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: { value: 7 },
 			connections: {},
 		});
-		const combiner = new OperationVec3Combiner({
+		const combiner = new OperationVec3CombinerBlockLogic({
 			uuid: "1" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: { value_x: 1 },
@@ -182,7 +128,7 @@ const LogicTest1 = {
 				},
 			},
 		});
-		const splitter = new OperationVec3Splitter({
+		const splitter = new OperationVec3SplitterBlockLogic({
 			uuid: "2" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: {},

@@ -1,14 +1,13 @@
+import { BlockLogicData } from "client/base/BlockLogic";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class OperationVec3SplitterBlockLogic extends ConfigurableBlockLogic<
 	typeof blockConfigRegistry.operationvec3splitter
 > {
-	constructor(block: PlacedBlockData) {
+	constructor(block: BlockLogicData<typeof blockConfigRegistry.operationvec3splitter.input>) {
 		super(block, blockConfigRegistry.operationvec3splitter);
-
-		this.event.subscribeObservable(this.input.value, () => this.update());
+		this.input.value.subscribe(() => this.update());
 	}
 
 	private update() {
