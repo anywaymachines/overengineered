@@ -12,7 +12,7 @@ export default class LampBlockLogic extends ConfigurableBlockLogic<typeof blockC
 				const part = this.instance.PrimaryPart!;
 
 				if (enabled) {
-					part.Color = Color3.fromRGB(255, 255, 255);
+					part.Color = this.block.color ?? Color3.fromRGB(255, 255, 255);
 					part.Material = Enum.Material.Neon;
 				} else {
 					part.Color = Color3.fromRGB(0, 0, 0);
