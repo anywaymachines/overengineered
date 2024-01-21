@@ -1,6 +1,32 @@
 import { ReplicatedStorage, StarterGui, UserInputService, Workspace } from "@rbxts/services";
 import GuiController from "./GuiController";
 
+let enabled = true;
+const guis = [GuiController.getGameUI(), GuiController.getUnscaledGameUI()];
+const toggle = () => {
+	enabled = !enabled;
+
+	// hide screen guis
+	for (const ui of guis) {
+		ui.Enabled = enabled;
+	}
+
+	// Hide core gui (excluding backpack)
+	StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.All, !enabled);
+	StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
+
+	// Hide mouse cursor
+	UserInputService.MouseIconEnabled = enabled;
+
+	// Plot owner gui hide
+	Workspace.Plots.GetChildren().forEach((plot) => {
+		const ownerGui = plot.FindFirstChild(ReplicatedStorage.Assets.PlotOwnerGui.Name) as BillboardGui | undefined;
+		if (ownerGui) {
+			ownerGui.Enabled = enabled;
+		}
+	});
+};
+
 UserInputService.InputBegan.Connect((input) => {
 	if (input.UserInputType !== Enum.UserInputType.Keyboard) {
 		return;
@@ -9,30 +35,6 @@ UserInputService.InputBegan.Connect((input) => {
 	if (UserInputService.GetFocusedTextBox()) {
 		return;
 	}
-
-	const toggle = () => {
-		const gui = GuiController.getGameUI();
-
-		// Hide core gui (excluding backpack)
-		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.All, !gui.Enabled);
-		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
-
-		// Hide screen gui
-		gui.Enabled = !gui.Enabled;
-
-		// Hide mouse cursor
-		UserInputService.MouseIconEnabled = gui.Enabled;
-
-		// Plot owner gui hide
-		Workspace.Plots.GetChildren().forEach((plot) => {
-			const ownerGui = plot.FindFirstChild(ReplicatedStorage.Assets.PlotOwnerGui.Name) as
-				| BillboardGui
-				| undefined;
-			if (ownerGui) {
-				ownerGui.Enabled = gui.Enabled;
-			}
-		});
-	};
 
 	if (input.IsModifierKeyDown("Shift") && UserInputService.IsKeyDown(Enum.KeyCode.G)) {
 		toggle();
