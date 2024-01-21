@@ -17,7 +17,7 @@ export default abstract class ServerEffectBase<T> {
 	}
 
 	// TODO: Move away
-	private isGFXEnabledForPlayer(player: Player) {
+	private isGFXEnabledForPlayer(player: Player): boolean {
 		return (
 			PlayerDatabase.instance.get(tostring(player.UserId)).settings?.others_gfx ??
 			GameDefinitions.PLAYER_SETTINGS_DEFINITION.others_gfx.default
@@ -45,9 +45,9 @@ export default abstract class ServerEffectBase<T> {
 	}
 
 	/** Creating an effect on the client side and sending it to the server so that other clients can see the effect */
-	public create(part: BasePart, arg: T): void {
+	public create(part: BasePart, force: boolean, arg: T): void {
 		Players.GetPlayers().forEach((plr) => {
-			if (this.isGFXEnabledForPlayer(plr)) {
+			if (force || this.isGFXEnabledForPlayer(plr)) {
 				this.remote.FireClient(plr, part, arg);
 			}
 		});

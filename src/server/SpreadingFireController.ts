@@ -37,7 +37,7 @@ export default class SpreadingFireController {
 		const duration = math.random(15, 30);
 
 		// Apply fire effect
-		ServerEffects.Fire.create(part, { duration: duration });
+		ServerEffects.Fire.create(part, true, { duration: duration });
 
 		spawn(() => {
 			wait(duration);
