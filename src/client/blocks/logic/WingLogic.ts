@@ -33,6 +33,8 @@ export default class WingLogic extends BlockLogic<Wing> {
 		if (RunService.IsStudio()) {
 			this.wingSurface.EnableFluidForces = true;
 		} else {
+			this.wingSurface.EnableFluidForces = false;
+
 			const surface = this.findSurface(this.wingSurface);
 			const vectorForce = this.wingSurface.FindFirstChild("VectorForce") as VectorForce;
 
