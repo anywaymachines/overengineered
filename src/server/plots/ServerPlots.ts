@@ -4,6 +4,8 @@ import SharedPlots from "shared/building/SharedPlots";
 
 /** A class that is designed to manage **Plots** where players can build */
 export default class ServerPlots {
+	private static ownerGuiList: { [userId: number]: Instance };
+
 	public static initialize(): void {
 		this.initializePlots();
 		this.initializeEvents();
@@ -90,6 +92,8 @@ export default class ServerPlots {
 					gui.RankLabel.TextColor3 = rankData.color;
 				}
 			}
+
+			this.ownerGuiList[player.UserId] = gui;
 		} catch {
 			player.Kick("No free plot found, try again later");
 		}
@@ -119,7 +123,7 @@ export default class ServerPlots {
 			blocks.RemovePersistentPlayer(player);
 
 			// Remove gui
-			plot.FindFirstChild(ReplicatedStorage.Assets.PlotOwnerGui.Name)?.Destroy();
+			this.ownerGuiList[player.UserId]?.Destroy();
 		} catch {
 			// empty
 		}
