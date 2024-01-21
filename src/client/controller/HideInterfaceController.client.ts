@@ -12,7 +12,7 @@ const toggle = () => {
 	}
 
 	// Hide core gui (excluding backpack)
-	StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.All, !enabled);
+	StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.All, enabled);
 	StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
 	// Hide mouse cursor
