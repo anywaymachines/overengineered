@@ -140,32 +140,41 @@ class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> 
 		const sat = createSlider(this.gui.Saturation, 1);
 		const bri = createSlider(this.gui.Brightness, 2);
 
-		for (const slider of [hue, sat, bri]) {
-			slider.value.triggerChanged();
-		}
+		const updateHue = (h: number | undefined, s: number | undefined, v: number | undefined) => {
+			const hsv = this.selectedColor.get().ToHSV();
+			h ??= hsv[0];
+			s ??= hsv[1];
+			v ??= hsv[2];
 
-		const r = new NumberTextBoxControl(this.gui.ManualRed, 0, 255, 1);
-		this.add(r);
-		this.event.subscribeObservable(r.value, (r) => {
+			sat.getGui().UIGradient.Color = new ColorSequence(Color3.fromHSV(h, 0, v), Color3.fromHSV(h, 1, v));
+			bri.getGui().UIGradient.Color = new ColorSequence(
+				bri.getGui().UIGradient.Color.Keypoints[0].Value,
+				Color3.fromHSV(h, s, 1),
+			);
+		};
+		hue.visualValue.subscribe((h) => updateHue(h, undefined, undefined), true);
+		sat.visualValue.subscribe((s) => updateHue(undefined, s, undefined), true);
+		bri.visualValue.subscribe((v) => updateHue(undefined, undefined, v), true);
+
+		const rtext = this.add(new NumberTextBoxControl(this.gui.ManualRed, 0, 255, 1));
+		this.event.subscribeObservable(rtext.value, (r) => {
 			const color = this.selectedColor.get();
 			this.selectedColor.set(new Color3(r / 255, color.G, color.B));
 		});
 
-		const g = new NumberTextBoxControl(this.gui.ManualGreen, 0, 255, 1);
-		this.add(g);
-		this.event.subscribeObservable(g.value, (g) => {
+		const gtext = this.add(new NumberTextBoxControl(this.gui.ManualGreen, 0, 255, 1));
+		this.event.subscribeObservable(gtext.value, (g) => {
 			const color = this.selectedColor.get();
 			this.selectedColor.set(new Color3(color.R, g / 255, color.B));
 		});
 
-		const b = new NumberTextBoxControl(this.gui.ManualBlue, 0, 255, 1);
-		this.add(b);
-		this.event.subscribeObservable(b.value, (b) => {
+		const btext = this.add(new NumberTextBoxControl(this.gui.ManualBlue, 0, 255, 1));
+		this.event.subscribeObservable(btext.value, (b) => {
 			const color = this.selectedColor.get();
 			this.selectedColor.set(new Color3(color.R, color.G, b / 255));
 		});
 
-		for (const text of [r, g, b]) {
+		for (const text of [rtext, gtext, btext]) {
 			text.submitted.Connect(() => {
 				[hue, sat, bri].map((slider, i) => slider.visualValue.set(this.selectedColor.get().ToHSV()[i]));
 			});
@@ -176,18 +185,9 @@ class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> 
 			(color) => {
 				this.gui.Preview.BackgroundColor3 = this.selectedColor.get();
 
-				const [h, s, v] = color.ToHSV();
-
-				sat.getGui().UIGradient.Color = new ColorSequence(Color3.fromHSV(h, 0, v), Color3.fromHSV(h, 1, v));
-
-				bri.getGui().UIGradient.Color = new ColorSequence(
-					bri.getGui().UIGradient.Color.Keypoints[0].Value,
-					Color3.fromHSV(h, s, 1),
-				);
-
-				r.value.set(math.floor(color.R * 255));
-				g.value.set(math.floor(color.G * 255));
-				b.value.set(math.floor(color.B * 255));
+				rtext.value.set(math.floor(color.R * 255));
+				gtext.value.set(math.floor(color.G * 255));
+				btext.value.set(math.floor(color.B * 255));
 			},
 			true,
 		);
