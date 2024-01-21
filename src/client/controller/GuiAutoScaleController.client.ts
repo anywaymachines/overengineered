@@ -25,3 +25,4 @@ class ScaledScreenGui<T extends ScreenGui> extends Component<T> {
 }
 
 new ScaledScreenGui(GuiController.getGameUI()).enable();
+new ScaledScreenGui(GuiController.getPopupUI()).enable();
