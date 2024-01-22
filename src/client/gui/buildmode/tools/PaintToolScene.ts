@@ -1,5 +1,6 @@
 import { Players } from "@rbxts/services";
 import Control from "client/base/Control";
+import ToggleControl, { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import PaintTool from "client/tools/PaintTool";
 import SharedPlots from "shared/building/SharedPlots";
 import GuiAnimator from "../../GuiAnimator";
@@ -8,8 +9,14 @@ import MaterialChooserControl from "../MaterialChooser";
 import { MaterialPreviewEditControl, MaterialPreviewEditDefinition } from "../MaterialPreviewEditControl";
 
 export type PaintToolSceneDefinition = GuiObject & {
-	PaintEverythingButton: GuiButton;
-	Material: MaterialPreviewEditDefinition;
+	readonly PaintEverythingButton: GuiButton;
+	readonly Material: MaterialPreviewEditDefinition;
+	readonly EnableMaterial: Frame & {
+		readonly Toggle: ToggleControlDefinition;
+	};
+	readonly EnableColor: Frame & {
+		readonly Toggle: ToggleControlDefinition;
+	};
 };
 
 export default class PaintToolScene extends Control<PaintToolSceneDefinition> {
@@ -21,6 +28,13 @@ export default class PaintToolScene extends Control<PaintToolSceneDefinition> {
 
 		this.add(new ButtonControl(this.gui.PaintEverythingButton, () => this.paintEverything()));
 		this.add(new MaterialPreviewEditControl(this.gui.Material, tool.selectedMaterial, tool.selectedColor));
+
+		const materialEnabler = this.add(new ToggleControl(this.gui.EnableMaterial.Toggle));
+		materialEnabler.value.set(tool.enableMaterial.get());
+		this.event.subscribeObservable(materialEnabler.value, (value) => tool.enableMaterial.set(value));
+		const colorEnabler = this.add(new ToggleControl(this.gui.EnableColor.Toggle));
+		colorEnabler.value.set(tool.enableColor.get());
+		this.event.subscribeObservable(colorEnabler.value, (value) => tool.enableColor.set(value));
 
 		MaterialChooserControl.instance.selectedMaterial.bindTo(tool.selectedMaterial);
 		MaterialChooserControl.instance.selectedColor.bindTo(tool.selectedColor);

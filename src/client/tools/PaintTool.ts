@@ -11,6 +11,8 @@ import MovingSelector from "./selectors/MovingSelector";
 export default class PaintTool extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
+	readonly enableMaterial = new ObservableValue(true);
+	readonly enableColor = new ObservableValue(true);
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -41,24 +43,28 @@ export default class PaintTool extends ToolBase {
 	async paintClientSide(block: BlockModel) {
 		SharedBuilding.paint({
 			blocks: [block],
-			material: this.selectedMaterial.get(),
-			color: this.selectedColor.get(),
+			material: this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
+			color: this.enableColor.get() ? this.selectedColor.get() : undefined,
 		});
 	}
 
 	async paintEverything(plot: PlotModel) {
-		await Remotes.Client.GetNamespace("Building").Get("Paint").CallServerAsync({
-			plot,
-			color: this.selectedColor.get(),
-			material: this.selectedMaterial.get(),
-		});
+		await Remotes.Client.GetNamespace("Building")
+			.Get("Paint")
+			.CallServerAsync({
+				plot,
+				color: this.enableColor.get() ? this.selectedColor.get() : undefined,
+				material: this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
+			});
 	}
 	async paint(blocks: readonly BlockModel[]) {
-		await Remotes.Client.GetNamespace("Building").Get("Paint").CallServerAsync({
-			blocks,
-			color: this.selectedColor.get(),
-			material: this.selectedMaterial.get(),
-		});
+		await Remotes.Client.GetNamespace("Building")
+			.Get("Paint")
+			.CallServerAsync({
+				blocks,
+				color: this.enableColor.get() ? this.selectedColor.get() : undefined,
+				material: this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
+			});
 	}
 
 	protected prepare() {
