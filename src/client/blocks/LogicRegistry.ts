@@ -12,6 +12,7 @@ import TNTBlockLogic from "./logic/TNTBlockLogic";
 import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 import WingLogic from "./logic/WingLogic";
 import ConstantBlockLogic from "./operations/ConstantBlockLogic";
+import DelayBlockLogic from "./operations/DelayBlockLogic";
 import OperationAndBlockLogic from "./operations/boolean/OperationAndBlockLogic";
 import OperationNandBlockLogic from "./operations/boolean/OperationNandBlockLogic";
 import OperationNorBlockLogic from "./operations/boolean/OperationNorBlockLogic";
@@ -63,6 +64,7 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 	screen: ScreenBlockLogic,
 
 	constant: ConstantBlockLogic,
+	delayblock: DelayBlockLogic,
 
 	multiplexer: Multiplexer,
 
