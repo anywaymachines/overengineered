@@ -44,7 +44,12 @@ export default class TNTBlockLogic {
 
 			explosion.Parent = Workspace;
 			explosion.Hit.Connect((part, distance) => {
-				if (part.Anchored || !part.IsDescendantOf(Workspace.Plots) || part.GetAttribute("Burn")) {
+				if (
+					part.Anchored ||
+					part.AssemblyRootPart?.Anchored === true ||
+					!part.IsDescendantOf(Workspace.Plots) ||
+					part.GetAttribute("Burn") === true
+				) {
 					return;
 				}
 
