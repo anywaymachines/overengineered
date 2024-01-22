@@ -19,6 +19,7 @@ const Remotes = Net.Definitions.Create({
 			Net.Definitions.ServerAsyncFunction<(data: UpdateLogicConnectionRequest) => Response>(),
 
 		Delete: Net.Definitions.ServerAsyncFunction<(data: PlayerDeleteBlockRequest) => Response>(),
+		Paint: Net.Definitions.ServerAsyncFunction<(data: PaintRequest) => Response>(),
 	}),
 	Slots: Net.Definitions.Namespace({
 		Load: Net.Definitions.ServerAsyncFunction<(index: number) => LoadSlotResponse>([

@@ -5,7 +5,6 @@ import InputController from "client/controller/InputController";
 import InputHandler from "client/event/InputHandler";
 import Signals from "client/event/Signals";
 import BlockManager from "shared/building/BlockManager";
-import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import EventHandler from "shared/event/EventHandler";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -71,7 +70,7 @@ export const initializeSingleBlockSelection = (
 		}
 
 		// wrong plot
-		if (!BuildingManager.isBuildingAllowed(parentPlot, Players.LocalPlayer)) {
+		if (!SharedPlots.isBuildingAllowed(parentPlot, Players.LocalPlayer)) {
 			return;
 		}
 

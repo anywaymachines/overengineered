@@ -3,14 +3,15 @@ interface Workspace {
 }
 
 interface PlotData {
-	ownerID: number;
-	whitelistedPlayerIDs: number[];
-	blacklistedPlayerIDs: number[];
+	readonly ownerID: number;
+	readonly whitelistedPlayerIDs: number[];
+	readonly blacklistedPlayerIDs: number[];
 }
 
 type PlotModel = Model & {
 	___nominal: "plotModel";
 	Blocks: PlotBlocks;
+	PrimaryPart: BasePart;
 };
 
 type PlotBlocks = Model & {

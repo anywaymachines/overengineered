@@ -1,9 +1,9 @@
 import SlotsDatabase from "server/SlotsDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
+import ServerPartUtils from "server/plots/ServerPartUtils";
 import { blockList } from "shared/Registry";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
-import PartUtils from "shared/utils/PartUtils";
 import PlayModeBase from "./PlayModeBase";
 
 export default class RideMode implements PlayModeBase {
@@ -50,8 +50,8 @@ export default class RideMode implements PlayModeBase {
 
 		vehicleSeat.Sit(hrp);
 
-		PartUtils.switchDescendantsAnchor(blocks, false);
-		PartUtils.switchDescendantsNetworkOwner(blocks, player);
+		ServerPartUtils.switchDescendantsAnchor(blocks, false);
+		ServerPartUtils.switchDescendantsNetworkOwner(blocks, player);
 
 		return { success: true };
 	}

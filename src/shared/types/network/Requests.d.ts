@@ -21,6 +21,10 @@ type UpdateLogicConnectionRequest =
 	  };
 
 type PlayerDeleteBlockRequest = readonly BlockModel[] | "all";
+type PaintRequest = ({ readonly blocks: readonly BlockModel[] } | { readonly plot: PlotModel }) & {
+	readonly color?: Color3;
+	readonly material?: Enum.Material;
+};
 
 type PlayerMoveRequest = {
 	readonly vector: Vector3;

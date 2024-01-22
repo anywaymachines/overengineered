@@ -3,7 +3,7 @@ import SharedPlots from "shared/building/SharedPlots";
 import VectorUtils from "shared/utils/VectorUtils";
 
 export default class BuildingManager {
-	public static AllowedMaterials = [
+	static readonly AllowedMaterials = [
 		Enum.Material.Plastic,
 		Enum.Material.Glass,
 		Enum.Material.Wood,
@@ -20,20 +20,11 @@ export default class BuildingManager {
 		Enum.Material.Sand,
 	];
 
-	/** Checks that building for a player on a given Plot is allowed
-	 * @param plot The Plot to check
-	 * @param player The player to check
-	 */
-	public static isBuildingAllowed(plot: PlotModel, player: Player) {
-		const data = SharedPlots.readPlotData(plot);
-		return data.ownerID === player.UserId || data.whitelistedPlayerIDs.includes(player.UserId);
-	}
-
 	/** Returns the block or nothing that is set on (or near) the given vector
 	 * @param vector The vector to check
 	 * @deprecated slow method
 	 */
-	public static getBlockByPosition(vector: Vector3): BlockModel | undefined {
+	static getBlockByPosition(vector: Vector3): BlockModel | undefined {
 		const plot = SharedPlots.getPlotByPosition(vector);
 		if (!plot) {
 			return undefined;
@@ -57,10 +48,10 @@ export default class BuildingManager {
 	 * @param position The position to check
 	 * @param player The player to check
 	 */
-	public static blockCanBePlacedAt(position: Vector3, player: Player): boolean {
+	static blockCanBePlacedAt(position: Vector3, player: Player): boolean {
 		// Checking the plot
 		const plot = SharedPlots.getPlotByPosition(position);
-		if (plot === undefined || !this.isBuildingAllowed(plot, player)) {
+		if (plot === undefined || !SharedPlots.isBuildingAllowed(plot, player)) {
 			// No plot / Building forbidden
 			return false;
 		}
@@ -83,10 +74,10 @@ export default class BuildingManager {
 	 * @param player The player to check
 	 * @deprecated Use blockCanBePlacedAt
 	 */
-	public static vectorAbleToPlayer(position: Vector3, player: Player): boolean {
+	static vectorAbleToPlayer(position: Vector3, player: Player): boolean {
 		// Checking the plot
 		const plot = SharedPlots.getPlotByPosition(position);
-		if (plot === undefined || !this.isBuildingAllowed(plot, player)) {
+		if (plot === undefined || !SharedPlots.isBuildingAllowed(plot, player)) {
 			// No plot / Building forbidden
 			return false;
 		}
@@ -103,11 +94,7 @@ export default class BuildingManager {
 	}
 
 	static time = 0;
-	public static getMirroredBlocksCFrames(
-		plot: Model,
-		cframeToMirror: CFrame,
-		axes: readonly CFrame[],
-	): readonly CFrame[] {
+	static getMirroredBlocksCFrames(plot: Model, cframeToMirror: CFrame, axes: readonly CFrame[]): readonly CFrame[] {
 		const reflect = (cframe: CFrame, mirrorCFrame: CFrame) => {
 			const [X, Y, Z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = mirrorCFrame
 				.ToObjectSpace(cframe)

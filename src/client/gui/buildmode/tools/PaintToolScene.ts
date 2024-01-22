@@ -1,7 +1,6 @@
 import { Players } from "@rbxts/services";
 import Control from "client/base/Control";
 import PaintTool from "client/tools/PaintTool";
-import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import GuiAnimator from "../../GuiAnimator";
 import { ButtonControl } from "../../controls/Button";
@@ -34,7 +33,7 @@ export default class PaintToolScene extends Control<PaintToolSceneDefinition> {
 			plot = SharedPlots.getPlotByPosition(Players.LocalPlayer.Character.GetPivot().Position);
 		}
 
-		if (!plot || BuildingManager.isBuildingAllowed(plot, Players.LocalPlayer)) {
+		if (!plot || SharedPlots.isBuildingAllowed(plot, Players.LocalPlayer)) {
 			plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
 		}
 

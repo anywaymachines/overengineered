@@ -11,9 +11,9 @@ export default class ServerPlots {
 		this.initializeEvents();
 	}
 
-	private static createDefaultPlotData(): PlotData {
+	private static createDefaultPlotData(ownerID = 0): PlotData {
 		return {
-			ownerID: 0,
+			ownerID,
 			whitelistedPlayerIDs: [],
 			blacklistedPlayerIDs: [],
 		};
@@ -54,8 +54,7 @@ export default class ServerPlots {
 	private static assignPlotTo(player: Player): void {
 		try {
 			const plot = this.getFreePlot();
-			const data = this.createDefaultPlotData();
-			data.ownerID = player.UserId;
+			const data = this.createDefaultPlotData(player.UserId);
 			this.writePlotData(plot, data);
 
 			// Add persistant player

@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
 import { registerOnRemoteEvent2 } from "server/network/event/RemoteHandler";
-import PartUtils from "shared/utils/PartUtils";
+import ServerPartUtils from "server/plots/ServerPartUtils";
 
 export default class AnchorBlockLogic {
 	static init() {
@@ -18,7 +18,7 @@ export default class AnchorBlockLogic {
 				return;
 			}
 
-			PartUtils.switchDescendantsAnchor(block, true);
+			ServerPartUtils.switchDescendantsAnchor(block, true);
 		});
 	}
 }

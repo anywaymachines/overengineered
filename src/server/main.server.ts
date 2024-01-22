@@ -112,6 +112,7 @@ ServerPlots.initialize();
 registerOnRemoteFunction("Building", "PlaceBlockRequest", BuildingWrapper.placeBlockAsPlayer);
 registerOnRemoteFunction("Building", "MoveRequest", BuildingWrapper.movePlotAsPlayer);
 registerOnRemoteFunction("Building", "Delete", BuildingWrapper.deleteBlockAsPlayer);
+registerOnRemoteFunction("Building", "Paint", BuildingWrapper.paintAsPlayer);
 registerOnRemoteFunction("Ride", "SetPlayMode", PlayModeController.changeModeForPlayer);
 registerOnRemoteFunction("Slots", "Save", RemoteHandlers.saveSlot);
 registerOnRemoteFunction("Slots", "Load", RemoteHandlers.loadSlot);

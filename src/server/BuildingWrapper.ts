@@ -10,7 +10,21 @@ import SharedPlots from "shared/building/SharedPlots";
 import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
 import BuildingWelder from "./BuildingWelder";
+import ServerPartUtils from "./plots/ServerPartUtils";
 import ServerPlots from "./plots/ServerPlots";
+
+const errorPlotNotFound = (): ErrorResponse => {
+	return {
+		success: false,
+		message: "Building is not permitted",
+	};
+};
+const errorBuildingNotPermitted = (): ErrorResponse => {
+	return {
+		success: false,
+		message: "Building is not permitted",
+	};
+};
 
 export default class BuildingWrapper {
 	public static tryGetValidPlotByBlock(
@@ -22,18 +36,12 @@ export default class BuildingWrapper {
 
 		// No plot?
 		if (plot === undefined) {
-			return {
-				success: false,
-				message: "Plot not found",
-			};
+			return errorPlotNotFound();
 		}
 
 		// Plot is forbidden
-		if (!BuildingManager.isBuildingAllowed(plot, player)) {
-			return {
-				success: false,
-				message: "Building is not permitted",
-			};
+		if (!SharedPlots.isBuildingAllowed(plot, player)) {
+			return errorBuildingNotPermitted();
 		}
 
 		return {
@@ -109,7 +117,7 @@ export default class BuildingWrapper {
 			}
 
 			// Plot is forbidden
-			if (!BuildingManager.isBuildingAllowed(plot, player)) {
+			if (!SharedPlots.isBuildingAllowed(plot, player)) {
 				return {
 					success: false,
 					message: "Building is not permitted",
@@ -248,21 +256,12 @@ export default class BuildingWrapper {
 		model.Parent = plot.FindFirstChild("Blocks");
 
 		// Set material & color
-		model.SetAttribute("material", Serializer.EnumMaterialSerializer.serialize(data.material));
-		model.SetAttribute("color", HttpService.JSONEncode(Serializer.Color3Serializer.serialize(data.color)));
 		if (data.config && Objects.keys(data.config).size() !== 0) {
 			model.SetAttribute("config", JSON.serialize(data.config));
 		}
 
 		model.SetAttribute("uuid", data.uuid ?? HttpService.GenerateGUID(false));
-
-		PartUtils.switchDescendantsMaterial(model, data.material);
-		PartUtils.switchDescendantsColor(model, data.color);
-
-		// Make transparent glass material
-		if (data.material === Enum.Material.Glass) {
-			PartUtils.switchDescendantsTransparency(model, 0.3);
-		}
+		BuildingWrapper.paint({ blocks: [model], color: data.color, material: data.material }, true);
 
 		// Custom physical properties
 		const customPhysProp =
@@ -384,5 +383,42 @@ export default class BuildingWrapper {
 			success: false,
 			message: "Invalid operation",
 		};
+	}
+
+	static paintAsPlayer(this: void, player: Player, data: PaintRequest): Response {
+		if ("blocks" in data) {
+			for (const block of data.blocks) {
+				const plot = BuildingWrapper.tryGetValidPlotByBlock(player, block);
+				if (!plot.success) return plot;
+			}
+		} else {
+			if (!SharedPlots.isBuildingAllowed(data.plot, player)) {
+				return errorBuildingNotPermitted();
+			}
+		}
+
+		return BuildingWrapper.paint(data);
+	}
+	static paint(this: void, data: PaintRequest, byBuild = false): Response {
+		const blocks = "blocks" in data ? data.blocks : data.plot.Blocks.GetChildren(undefined);
+		for (const block of blocks) {
+			if (data.material) {
+				block.SetAttribute("material", Serializer.EnumMaterialSerializer.serialize(data.material));
+				PartUtils.switchDescendantsMaterial(block, data.material);
+				// Make glass material transparent
+				if (data.material === Enum.Material.Glass) {
+					ServerPartUtils.switchDescendantsTransparency(block, 0.3);
+				} else if (!byBuild) {
+					ServerPartUtils.switchDescendantsTransparency(block, 0);
+				}
+			}
+
+			if (data.color) {
+				block.SetAttribute("color", HttpService.JSONEncode(Serializer.Color3Serializer.serialize(data.color)));
+				PartUtils.switchDescendantsColor(block, data.color);
+			}
+		}
+
+		return { success: true };
 	}
 }

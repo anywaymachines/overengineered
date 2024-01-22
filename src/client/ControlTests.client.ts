@@ -5,7 +5,7 @@ import GuiController from "./controller/GuiController";
 import MultiConfigControl from "./gui/config/MultiConfigControl";
 
 const me = Players.LocalPlayer.Name === "i3ymm";
-const launch = true && RunService.IsStudio() && me;
+const launch = false && RunService.IsStudio() && me;
 if (!launch) new Signal<() => void>().Wait();
 
 task.wait(0.5); // wait for the controls to enable

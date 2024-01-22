@@ -1,5 +1,6 @@
 import ToolBase from "client/base/ToolBase";
 import BuildingMode from "client/controller/modes/BuildingMode";
+import Remotes from "shared/Remotes";
 import ObservableValue from "shared/event/ObservableValue";
 import PartUtils from "shared/utils/PartUtils";
 import { initializeBoxSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
@@ -12,16 +13,24 @@ export default class PaintTool extends ToolBase {
 		super(mode);
 	}
 
-	paintEverything(plot: Model) {
-		for (const block of plot.GetChildren()) {
-			if (!block.IsA("Model")) continue;
-
-			this.paintBlock(block);
-		}
-	}
-	paintBlock(block: Model) {
+	async paintClientSide(block: BlockModel) {
 		PartUtils.switchDescendantsMaterial(block, this.selectedMaterial.get());
 		PartUtils.switchDescendantsColor(block, this.selectedColor.get());
+	}
+
+	async paintEverything(plot: PlotModel) {
+		await Remotes.Client.GetNamespace("Building").Get("Paint").CallServerAsync({
+			plot,
+			color: this.selectedColor.get(),
+			material: this.selectedMaterial.get(),
+		});
+	}
+	async paint(blocks: readonly BlockModel[]) {
+		await Remotes.Client.GetNamespace("Building").Get("Paint").CallServerAsync({
+			blocks,
+			color: this.selectedColor.get(),
+			material: this.selectedMaterial.get(),
+		});
 	}
 
 	protected prepare() {
@@ -33,18 +42,16 @@ export default class PaintTool extends ToolBase {
 			() => {},
 			(model) => {
 				if (!model) return;
-				this.paintBlock(model);
+				this.paint([model]);
 			},
 		);
 		initializeBoxSelection(this.eventHandler, (blocks) => {
-			for (const block of blocks) {
-				this.paintBlock(block);
-			}
+			this.paint(blocks);
 		});
 	}
 
 	getDisplayName(): string {
-		return "Paint Mode (DOESNT WORK)";
+		return "Paint Mode";
 	}
 	getShortDescription(): string {
 		return "Paint your build";
