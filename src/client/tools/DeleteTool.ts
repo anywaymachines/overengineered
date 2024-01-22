@@ -10,7 +10,8 @@ import JSON from "shared/_fixes_/Json";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
-import { initializeBoxSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
+import { initializeBoxSelection } from "./selectors/BoxSelector";
+import { initializeSingleBlockSelection } from "./selectors/SingleBlockSelector";
 
 export default class DeleteTool extends ToolBase {
 	public readonly onClearAllRequested = new Signal<() => void>();

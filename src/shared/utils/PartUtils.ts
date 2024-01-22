@@ -39,6 +39,14 @@ export default class PartUtils {
 		});
 	}
 
+	static switchDescendantsTransparency(model: Instance, transparency: number) {
+		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
+			if (part.GetAttribute("static_material") === true) return;
+			if (part.Transparency === 1) return;
+			part.Transparency = transparency;
+		});
+	}
+
 	static applyToAllDescendantsOfType<T extends keyof Instances>(
 		typeName: T,
 		parent: Instance,

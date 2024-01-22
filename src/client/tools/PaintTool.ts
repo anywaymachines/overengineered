@@ -1,9 +1,12 @@
 import ToolBase from "client/base/ToolBase";
 import BuildingMode from "client/controller/modes/BuildingMode";
 import Remotes from "shared/Remotes";
+import BlockManager from "shared/building/BlockManager";
+import { SharedBuilding } from "shared/building/SharedBuilding";
 import ObservableValue from "shared/event/ObservableValue";
-import PartUtils from "shared/utils/PartUtils";
-import { initializeBoxSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
+import { initializeBoxSelection } from "./selectors/BoxSelector";
+import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
+import MovingSelector from "./selectors/MovingSelector";
 
 export default class PaintTool extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
@@ -11,11 +14,36 @@ export default class PaintTool extends ToolBase {
 
 	constructor(mode: BuildingMode) {
 		super(mode);
+
+		this.add(new HoveredBlockHighlighter((block) => {}));
+
+		{
+			const selected = new Set<BlockModel>();
+
+			this.add(
+				new MovingSelector(
+					(part) => {
+						const block = BlockManager.getBlockDataByPart(part);
+						if (!block) return;
+
+						this.paintClientSide(block.instance);
+						selected.add(block.instance);
+					},
+					() => {
+						this.paint([...selected]);
+						selected.clear();
+					},
+				),
+			);
+		}
 	}
 
 	async paintClientSide(block: BlockModel) {
-		PartUtils.switchDescendantsMaterial(block, this.selectedMaterial.get());
-		PartUtils.switchDescendantsColor(block, this.selectedColor.get());
+		SharedBuilding.paint({
+			blocks: [block],
+			material: this.selectedMaterial.get(),
+			color: this.selectedColor.get(),
+		});
 	}
 
 	async paintEverything(plot: PlotModel) {
@@ -36,15 +64,6 @@ export default class PaintTool extends ToolBase {
 	protected prepare() {
 		super.prepare();
 
-		initializeSingleBlockSelection(
-			this.eventHandler,
-			this.inputHandler,
-			() => {},
-			(model) => {
-				if (!model) return;
-				this.paint([model]);
-			},
-		);
 		initializeBoxSelection(this.eventHandler, (blocks) => {
 			this.paint(blocks);
 		});

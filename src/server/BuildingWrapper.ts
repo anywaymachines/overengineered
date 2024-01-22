@@ -1,16 +1,15 @@
 import { HttpService } from "@rbxts/services";
 import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
 import { blockRegistry } from "shared/Registry";
-import Serializer from "shared/Serializer";
 import JSON, { JsonSerializablePrimitive } from "shared/_fixes_/Json";
 import Objects from "shared/_fixes_/objects";
 import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
+import { SharedBuilding } from "shared/building/SharedBuilding";
 import SharedPlots from "shared/building/SharedPlots";
 import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
 import BuildingWelder from "./BuildingWelder";
-import ServerPartUtils from "./plots/ServerPartUtils";
 import ServerPlots from "./plots/ServerPlots";
 
 const errorPlotNotFound = (): ErrorResponse => {
@@ -261,7 +260,7 @@ export default class BuildingWrapper {
 		}
 
 		model.SetAttribute("uuid", data.uuid ?? HttpService.GenerateGUID(false));
-		BuildingWrapper.paint({ blocks: [model], color: data.color, material: data.material }, true);
+		SharedBuilding.paint({ blocks: [model], color: data.color, material: data.material }, true);
 
 		// Custom physical properties
 		const customPhysProp =
@@ -397,28 +396,6 @@ export default class BuildingWrapper {
 			}
 		}
 
-		return BuildingWrapper.paint(data);
-	}
-	static paint(this: void, data: PaintRequest, byBuild = false): Response {
-		const blocks = "blocks" in data ? data.blocks : data.plot.Blocks.GetChildren(undefined);
-		for (const block of blocks) {
-			if (data.material) {
-				block.SetAttribute("material", Serializer.EnumMaterialSerializer.serialize(data.material));
-				PartUtils.switchDescendantsMaterial(block, data.material);
-				// Make glass material transparent
-				if (data.material === Enum.Material.Glass) {
-					ServerPartUtils.switchDescendantsTransparency(block, 0.3);
-				} else if (!byBuild) {
-					ServerPartUtils.switchDescendantsTransparency(block, 0);
-				}
-			}
-
-			if (data.color) {
-				block.SetAttribute("color", HttpService.JSONEncode(Serializer.Color3Serializer.serialize(data.color)));
-				PartUtils.switchDescendantsColor(block, data.color);
-			}
-		}
-
-		return { success: true };
+		return SharedBuilding.paint(data);
 	}
 }

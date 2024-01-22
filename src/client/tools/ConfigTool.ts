@@ -4,7 +4,8 @@ import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
-import { initializeBoxSelection, initializeSingleBlockSelection } from "./MultiBlockSelector";
+import { initializeBoxSelection } from "./selectors/BoxSelector";
+import { initializeSingleBlockSelection } from "./selectors/SingleBlockSelector";
 
 export default class ConfigTool extends ToolBase {
 	public readonly selectedBlocksChanged = new Signal<(selected: (SelectionBox & { Parent: BlockModel })[]) => void>();
