@@ -141,10 +141,9 @@ class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> 
 		const bri = createSlider(this.gui.Brightness, 2);
 
 		const updateHue = (h: number | undefined, s: number | undefined, v: number | undefined) => {
-			const hsv = this.selectedColor.get().ToHSV();
-			h ??= hsv[0];
-			s ??= hsv[1];
-			v ??= hsv[2];
+			h ??= hue.value.get();
+			s ??= sat.value.get();
+			v ??= bri.value.get();
 
 			sat.getGui().UIGradient.Color = new ColorSequence(Color3.fromHSV(h, 0, v), Color3.fromHSV(h, 1, v));
 			bri.getGui().UIGradient.Color = new ColorSequence(

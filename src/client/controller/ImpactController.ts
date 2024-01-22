@@ -39,6 +39,12 @@ export default class ImpactController {
 		}
 
 		const event = part.Touched.Connect((secondPart: BasePart) => {
+			// Optimization (no impact for non-connected blocks)
+			if (part.AssemblyMass === part.Mass) {
+				event.Disconnect();
+				return;
+			}
+
 			if (secondPart.IsA("BasePart") && !secondPart.CanCollide) {
 				return;
 			}
