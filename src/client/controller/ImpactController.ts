@@ -39,12 +39,13 @@ export default class ImpactController {
 		}
 
 		const event = part.Touched.Connect((secondPart: BasePart) => {
-			// Optimization (no impact for non-connected blocks)
+			// Optimization (do nothing for non-connected blocks)
 			if (part.AssemblyMass === part.Mass) {
 				event.Disconnect();
 				return;
 			}
 
+			// Do nothing for non-collidable blocks
 			if (secondPart.IsA("BasePart") && !secondPart.CanCollide) {
 				return;
 			}
@@ -77,6 +78,7 @@ export default class ImpactController {
 			allowedMagnitudeDiff = math.round(allowedMagnitudeDiff);
 
 			const magnitudeDiff = math.round(math.abs(partMagnitude - secondPartMagnitude));
+
 			if (magnitudeDiff > allowedMagnitudeDiff * 5) {
 				UnreliableRemotes.ImpactExplode.FireServer(part, 1 + magnitudeDiff / (2 * allowedMagnitudeDiff * 5));
 				event.Disconnect();
