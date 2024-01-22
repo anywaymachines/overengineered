@@ -28,8 +28,11 @@ export const SharedBuilding = {
 					MaterialPhysicalProperties.Properties.Default;
 
 				PartUtils.applyToAllDescendantsOfType("BasePart", block, (part) => {
-					if (!part.CustomPhysicalProperties) {
-						const currentPhysProp = part.CurrentPhysicalProperties;
+					if (!byBuild || !part.CustomPhysicalProperties) {
+						const currentPhysProp = !byBuild
+							? new PhysicalProperties(data.material!)
+							: part.CurrentPhysicalProperties;
+
 						part.CustomPhysicalProperties = new PhysicalProperties(
 							customPhysProp.Density ?? currentPhysProp.Density,
 							customPhysProp.Friction ?? currentPhysProp.Friction,

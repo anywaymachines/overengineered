@@ -1,5 +1,4 @@
 import { HttpService } from "@rbxts/services";
-import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
 import { blockRegistry } from "shared/Registry";
 import JSON, { JsonSerializablePrimitive } from "shared/_fixes_/Json";
 import Objects from "shared/_fixes_/objects";
@@ -261,23 +260,6 @@ export default class BuildingWrapper {
 
 		model.SetAttribute("uuid", data.uuid ?? HttpService.GenerateGUID(false));
 		SharedBuilding.paint({ blocks: [model], color: data.color, material: data.material }, true);
-
-		// Custom physical properties
-		const customPhysProp =
-			MaterialPhysicalProperties.Properties[data.material.Name] ?? MaterialPhysicalProperties.Properties.Default;
-
-		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
-			if (!part.CustomPhysicalProperties) {
-				const currentPhysProp = part.CurrentPhysicalProperties;
-				part.CustomPhysicalProperties = new PhysicalProperties(
-					customPhysProp.Density ?? currentPhysProp.Density,
-					customPhysProp.Friction ?? currentPhysProp.Friction,
-					customPhysProp.Elasticity ?? currentPhysProp.Elasticity,
-					customPhysProp.FrictionWeight ?? currentPhysProp.FrictionWeight,
-					customPhysProp.ElasticityWeight ?? currentPhysProp.ElasticityWeight,
-				);
-			}
-		});
 
 		// Weld block
 		BuildingWelder.weld(model, plot);
