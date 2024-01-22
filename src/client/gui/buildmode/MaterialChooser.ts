@@ -115,21 +115,21 @@ type MaterialColorChooseDefinition = GuiObject & {
 };
 /** Material color chooser */
 class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> {
-	public readonly selectedColor;
+	public readonly selectedColor = new ObservableValue<Color3>(new Color3(1, 1, 1));
 
 	constructor(gui: MaterialColorChooseDefinition) {
 		super(gui);
 
-		this.selectedColor = new ObservableValue<Color3>(new Color3(1, 1, 1));
-
+		let settingBySlider = false;
 		const createSlider = <T extends SliderControlDefinition>(gui: T, hsvIndex: number) => {
 			const slider = new SliderControl(gui, 0, 1, 1 / 255);
 			slider.value.set(this.selectedColor.get().ToHSV()[hsvIndex]);
 			slider.value.subscribe((val) => {
-				const hsv = this.selectedColor.get().ToHSV();
-				hsv[hsvIndex] = val;
+				if (settingBySlider) return;
 
-				this.selectedColor.set(Color3.fromHSV(hsv[0], hsv[1], hsv[2]));
+				settingBySlider = true;
+				this.selectedColor.set(Color3.fromHSV(hue.value.get(), sat.value.get(), bri.value.get()));
+				settingBySlider = false;
 			});
 			this.add(slider);
 
@@ -140,7 +140,20 @@ class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> 
 		const sat = createSlider(this.gui.Saturation, 1);
 		const bri = createSlider(this.gui.Brightness, 2);
 
-		const updateHue = (h: number | undefined, s: number | undefined, v: number | undefined) => {
+		this.event.subscribeObservable(
+			this.selectedColor,
+			(color) => {
+				if (settingBySlider) return;
+
+				const [h, s, v] = color.ToHSV();
+				hue.value.set(h);
+				sat.value.set(s);
+				bri.value.set(v);
+			},
+			true,
+		);
+
+		const updateColorBySlider = (h: number | undefined, s: number | undefined, v: number | undefined) => {
 			h ??= hue.value.get();
 			s ??= sat.value.get();
 			v ??= bri.value.get();
@@ -151,9 +164,9 @@ class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> 
 				Color3.fromHSV(h, s, 1),
 			);
 		};
-		hue.visualValue.subscribe((h) => updateHue(h, undefined, undefined), true);
-		sat.visualValue.subscribe((s) => updateHue(undefined, s, undefined), true);
-		bri.visualValue.subscribe((v) => updateHue(undefined, undefined, v), true);
+		hue.value.subscribe((h) => updateColorBySlider(h, undefined, undefined), true);
+		sat.value.subscribe((s) => updateColorBySlider(undefined, s, undefined), true);
+		bri.value.subscribe((v) => updateColorBySlider(undefined, undefined, v), true);
 
 		const rtext = this.add(new NumberTextBoxControl(this.gui.ManualRed, 0, 255, 1));
 		this.event.subscribeObservable(rtext.value, (r) => {
@@ -172,12 +185,6 @@ class MaterialColorChooseControl extends Control<MaterialColorChooseDefinition> 
 			const color = this.selectedColor.get();
 			this.selectedColor.set(new Color3(color.R, color.G, b / 255));
 		});
-
-		for (const text of [rtext, gtext, btext]) {
-			text.submitted.Connect(() => {
-				[hue, sat, bri].map((slider, i) => slider.visualValue.set(this.selectedColor.get().ToHSV()[i]));
-			});
-		}
 
 		this.event.subscribeObservable(
 			this.selectedColor,
