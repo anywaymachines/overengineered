@@ -8,6 +8,10 @@ export default class ClientFireEffect extends ClientEffectBase<FireEffectArgs> {
 	}
 
 	public create(part: BasePart, share: boolean = true, args: FireEffectArgs): void {
+		if (!part || !part.Parent) {
+			return;
+		}
+
 		super.create(part, share, args);
 
 		const effects = ReplicatedStorage.Assets.Fire.GetChildren();

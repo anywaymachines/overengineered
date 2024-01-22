@@ -17,6 +17,10 @@ export default class ClientImpactSoundEffect extends ClientEffectBase<ImpactSoun
 	public create(part: BasePart, share: boolean, { index }: ImpactSoundEffectArgs): void {
 		//super.create(part, share);
 
+		if (!part || !part.Parent) {
+			return;
+		}
+
 		const soundsFolder = this.materialSounds[part.Material.Name] ?? this.materialSounds["Default"];
 		const soundIndex = index ?? math.random(0, soundsFolder.size() - 1);
 		const sound = soundsFolder[soundIndex].Clone() as Sound;

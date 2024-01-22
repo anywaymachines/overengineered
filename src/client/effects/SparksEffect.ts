@@ -8,6 +8,10 @@ export default class ClientSparksEffect extends ClientEffectBase<SparksEffectArg
 	}
 
 	public create(part: BasePart, share: boolean = true, args?: SparksEffectArgs): void {
+		if (!part || !part.Parent) {
+			return;
+		}
+
 		super.create(part, share, args);
 
 		const sparks = ReplicatedStorage.Assets.Sparks.Clone();
