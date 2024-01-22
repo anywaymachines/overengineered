@@ -1,6 +1,5 @@
 import { HttpService } from "@rbxts/services";
 import { blockRegistry } from "shared/Registry";
-import Arrays from "shared/_fixes_/Arrays";
 import JSON, { JsonSerializablePrimitive } from "shared/_fixes_/Json";
 import Objects from "shared/_fixes_/objects";
 import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
@@ -156,11 +155,7 @@ export default class BuildingWrapper {
 			}
 		}
 
-		const unwelded = BuildingWelder.unweld(block);
-		for (const [root] of Arrays.groupBySet(unwelded, (p) => p.AssemblyRootPart!)) {
-			root.Anchored = true;
-		}
-
+		BuildingWelder.unweld(block);
 		block.Destroy();
 
 		return { success: true };
@@ -267,25 +262,7 @@ export default class BuildingWrapper {
 		SharedBuilding.paint({ blocks: [model], color: data.color, material: data.material }, true);
 
 		// Weld block
-		const newJoints = BuildingWelder.weld(model, plot);
-		if (newJoints.size() !== 0) {
-			PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
-				if (part.Name.lower() === "colbox") return;
-				part.Anchored = false;
-			});
-
-			for (const part of newJoints) {
-				if (part.AssemblyRootPart?.Parent === model) continue;
-
-				PartUtils.applyToAllDescendantsOfType("BasePart", part.AssemblyRootPart!.Parent!, (part) => {
-					part.Anchored = false;
-				});
-			}
-
-			if (!model.PrimaryPart!.AssemblyRootPart!.Anchored) {
-				model.PrimaryPart!.Anchored = true;
-			}
-		}
+		BuildingWelder.weld(model, plot);
 
 		return { success: true, model: model };
 	}
