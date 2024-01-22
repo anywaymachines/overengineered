@@ -4,7 +4,7 @@ import SharedPlots from "shared/building/SharedPlots";
 
 /** A class that is designed to manage **Plots** where players can build */
 export default class ServerPlots {
-	private static ownerGuiList: { [userId: number]: Instance };
+	private static ownerGuiList: { [userId: number]: Instance } = {};
 
 	public static initialize(): void {
 		this.initializePlots();
