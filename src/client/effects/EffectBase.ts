@@ -10,7 +10,7 @@ export default abstract class ClientEffectBase<T> {
 	}
 
 	protected listenServer() {
-		this.remote.OnClientEvent.Connect((part, arg) => this.create(part, false, arg));
+		this.remote.OnClientEvent.Connect((part, arg) => spawn(() => this.create(part, false, arg)));
 	}
 
 	/** Creating an effect on the client side and sending it to the server so that other clients can see the effect */

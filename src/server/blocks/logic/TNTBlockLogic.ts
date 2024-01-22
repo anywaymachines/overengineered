@@ -1,6 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import SpreadingFireController from "server/SpreadingFireController";
 import { registerOnRemoteEvent2 } from "server/network/event/RemoteHandler";
+import ServerPartUtils from "server/plots/ServerPartUtils";
 import PartUtils from "shared/utils/PartUtils";
 
 export default class TNTBlockLogic {
@@ -48,7 +49,7 @@ export default class TNTBlockLogic {
 				}
 
 				if (math.random(1, 2) === 1) {
-					part.BreakJoints();
+					ServerPartUtils.BreakJoints(part);
 				}
 
 				part.Velocity = new Vector3(

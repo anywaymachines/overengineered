@@ -12,4 +12,11 @@ export default class ServerPartUtils {
 			part.SetNetworkOwner(owner);
 		});
 	}
+
+	static BreakJoints(part: BasePart) {
+		const joints = part.GetJoints();
+		joints.forEach((constraint) => {
+			constraint.Destroy();
+		});
+	}
 }

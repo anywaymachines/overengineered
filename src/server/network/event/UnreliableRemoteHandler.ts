@@ -1,6 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import SpreadingFireController from "server/SpreadingFireController";
 import ServerEffects from "server/effects/ServerEffects";
+import ServerPartUtils from "server/plots/ServerPartUtils";
 import { UnreliableRemotes } from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 
@@ -126,7 +127,7 @@ export default class UnreliableRemoteHandler {
 			return;
 		}
 
-		block.BreakJoints();
+		ServerPartUtils.BreakJoints(block);
 		block.SetAttribute("broken", true);
 
 		// Play sounds

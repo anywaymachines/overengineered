@@ -6,6 +6,15 @@ export default class Arrays {
 		return array.filter((e) => e instanceof filterfunbc) as TFilter[];
 	}
 
+	static mapSet<TValue, TOut extends defined>(array: ReadonlySet<TValue>, mapfunc: (value: TValue) => TOut): TOut[] {
+		const result: TOut[] = [];
+		for (const value of array) {
+			result.push(mapfunc(value));
+		}
+
+		return result;
+	}
+
 	static map<TKey, TValue, TOut extends defined>(
 		array: ReadonlyMap<TKey, TValue>,
 		mapfunc: (key: TKey, value: TValue) => TOut,
@@ -32,6 +41,19 @@ export default class Arrays {
 		return result;
 	}
 
+	static groupBySet<T extends defined, TOut>(values: ReadonlySet<T>, keyfunc: (value: T) => TOut) {
+		const groups = new Map<TOut, T[]>();
+		for (const value of values) {
+			const key = keyfunc(value);
+			if (!groups.get(key)) {
+				groups.set(key, []);
+			}
+
+			groups.get(key)?.push(value);
+		}
+
+		return groups;
+	}
 	static groupBy<T extends defined>(values: readonly T[], keyfunc: (value: T) => string) {
 		const groups = new Map<string, T[]>();
 		for (const value of values) {
