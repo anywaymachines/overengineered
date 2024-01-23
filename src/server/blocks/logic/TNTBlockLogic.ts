@@ -2,6 +2,7 @@ import { Workspace } from "@rbxts/services";
 import SpreadingFireController from "server/SpreadingFireController";
 import { registerOnRemoteEvent2 } from "server/network/event/RemoteHandler";
 import ServerPartUtils from "server/plots/ServerPartUtils";
+import BlockManager from "shared/building/BlockManager";
 import PartUtils from "shared/utils/PartUtils";
 
 export default class TNTBlockLogic {
@@ -44,12 +45,7 @@ export default class TNTBlockLogic {
 
 			explosion.Parent = Workspace;
 			explosion.Hit.Connect((part, distance) => {
-				if (
-					part.Anchored ||
-					part.AssemblyRootPart?.Anchored === true ||
-					!part.IsDescendantOf(Workspace.Plots) ||
-					part.GetAttribute("Burn") === true
-				) {
+				if (!BlockManager.isActiveBlockPart(part)) {
 					return;
 				}
 

@@ -25,6 +25,9 @@ export default class PlayerDatabase {
 
 	private prepare() {
 		Players.PlayerRemoving.Connect((plr) => {
+			// Roblox Stuido Local Server
+			if (plr.UserId <= 0) return;
+
 			const key = tostring(plr.UserId);
 			this.db.save(key);
 		});

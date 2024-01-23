@@ -24,6 +24,18 @@ export type PlacedBlockData<T extends BlockModel = BlockModel> = {
 };
 
 export default class BlockManager {
+	static isActiveBlockPart(part: BasePart): boolean {
+		if (
+			part.AssemblyRootPart?.Anchored ||
+			part.Anchored ||
+			!this.isBlockPart(part) ||
+			part.GetAttribute("Burn") === true
+		)
+			return false;
+
+		return true;
+	}
+
 	static isBlockPart(part: BasePart): part is BasePart & { Parent: BlockModel } {
 		const isBlockPart =
 			part && part.Parent && part.Parent.IsA("Model") && (part.Parent as Model).GetAttribute("id") !== undefined;

@@ -27,6 +27,9 @@ export default class SlotsDatabase {
 
 	private prepare() {
 		Players.PlayerRemoving.Connect((plr) => {
+			// Roblox Stuido Local Server
+			if (plr.UserId <= 0) return;
+
 			const id = tostring(plr.UserId);
 
 			for (const [key] of this.blocksdb.loadedUnsavedEntries()) {

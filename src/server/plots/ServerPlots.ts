@@ -112,19 +112,19 @@ export default class ServerPlots {
 	}
 
 	private static resetPlotOf(player: Player): void {
-		try {
-			const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-			this.clearAllBlocks(plot);
-			this.writePlotData(plot, this.createDefaultPlotData());
+		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
+		const blocks = plot.FindFirstChild("Blocks") as Model;
 
-			// Remove persistant player
-			const blocks = plot.FindFirstChild("Blocks") as Model;
-			blocks.RemovePersistentPlayer(player);
+		this.clearAllBlocks(plot);
+		this.writePlotData(plot, this.createDefaultPlotData());
 
-			// Remove gui
-			this.ownerGuiList[player.UserId]?.Destroy();
-		} catch {
-			// empty
+		// Remove persistant player
+		if (blocks.GetPersistentPlayers().includes(player)) blocks.RemovePersistentPlayer(player);
+
+		// Remove gui
+		if (this.ownerGuiList[player.UserId]) {
+			this.ownerGuiList[player.UserId].Destroy();
+			delete this.ownerGuiList[player.UserId];
 		}
 	}
 }

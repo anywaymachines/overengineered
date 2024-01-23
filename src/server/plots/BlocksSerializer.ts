@@ -290,7 +290,7 @@ const v7: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 };
 
 // updated block config layout
-const v8: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v7> = {
+const v8: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v7> = {
 	version: 8,
 
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
@@ -439,21 +439,10 @@ const v8: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>,
 			),
 		};
 	},
-
-	read(plot: PlotModel): SerializedBlocks<SerializedBlockV3> {
-		return {
-			version: this.version,
-			blocks: read.blocksFromPlot(plot, read.blockV3),
-		};
-	},
-	place(data: SerializedBlocks<SerializedBlockV3>, plot: PlotModel): number {
-		place.blocksOnPlot(plot, data.blocks, place.blockOnPlotV3);
-		return data.blocks.size();
-	},
 };
 
 // updated block config layout
-const v9: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v8> = {
+const v9: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v8> = {
 	version: 9,
 
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
@@ -538,6 +527,29 @@ const v9: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>,
 			),
 		};
 	},
+};
+
+// fix blocks not aligned with the grid
+const v10: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v9> = {
+	version: 10,
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
+			const cf = Serializer.CFrameSerializer.deserialize(block.loc);
+			const pos = cf.Position;
+			const fixedpos = new Vector3(math.round(pos.X), math.round(pos.Y), math.round(pos.Z));
+			const newcf = cf.Rotation.add(fixedpos);
+
+			return {
+				...block,
+				loc: Serializer.CFrameSerializer.serialize(newcf),
+			};
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
 
 	read(plot: PlotModel): SerializedBlocks<SerializedBlockV3> {
 		return {
@@ -553,7 +565,7 @@ const v9: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>,
 
 //
 
-const versions = [undefined!, undefined!, undefined!, undefined!, v4, v5, v6, v7, v8, v9] as const;
+const versions = [undefined!, undefined!, undefined!, undefined!, v4, v5, v6, v7, v8, v9, v10] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const BlocksSerializer = {
