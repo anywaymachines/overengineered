@@ -10,27 +10,22 @@ type Operation = {
 };
 
 export default class ActionController extends ComponentBase {
-	public static readonly instance = new ActionController();
+	static readonly instance = new ActionController();
 
-	public readonly onUndo = new Signal<(operation: Operation) => void>();
+	readonly onUndo = new Signal<(operation: Operation) => void>();
 	private readonly history: Operation[] = [];
 	private readonly redoHistory: Operation[] = [];
 
 	constructor() {
 		super();
-	}
 
-	protected prepare() {
-		super.prepare();
-
-		this.inputHandler.onKeyDown(Enum.KeyCode.Z, () => {
+		this.event.onKeyDown("Z", () => {
 			if (InputController.isCtrlPressed()) {
 				ActionController.instance.undo();
 				return true;
 			}
 		});
-
-		this.inputHandler.onKeyDown(Enum.KeyCode.Y, () => {
+		this.event.onKeyDown("Y", () => {
 			if (InputController.isCtrlPressed()) {
 				ActionController.instance.redo();
 				return true;
@@ -38,7 +33,7 @@ export default class ActionController extends ComponentBase {
 		});
 	}
 
-	public async executeOperation<TInfo, TResult extends Response>(
+	async executeOperation<TInfo, TResult extends Response>(
 		description: string,
 		undo: Operation["undo"],
 		info: TInfo,
@@ -58,11 +53,11 @@ export default class ActionController extends ComponentBase {
 		return result;
 	}
 
-	public appendOperation(operation: Operation) {
+	appendOperation(operation: Operation) {
 		this.history.push(operation);
 	}
 
-	public redo() {
+	redo() {
 		const operation = this.redoHistory.pop();
 		if (!operation) return false;
 
@@ -72,7 +67,7 @@ export default class ActionController extends ComponentBase {
 		return true;
 	}
 
-	public undo() {
+	undo() {
 		const operation = this.history.pop();
 		if (!operation) return false;
 
