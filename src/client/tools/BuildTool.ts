@@ -67,6 +67,7 @@ export default class BuildTool extends ToolBase {
 
 	public setSelectedBlock(block: Block | undefined) {
 		this.selectedBlock.set(block);
+		this.previewBlockRotation = CFrame.identity;
 		this.prepareVisual();
 	}
 
@@ -89,9 +90,6 @@ export default class BuildTool extends ToolBase {
 		// Spawning a new block
 		this.previewBlock = selected.model.Clone();
 		this.previewBlock.Parent = Workspace;
-
-		// Reset rotation
-		this.previewBlockRotation = new CFrame();
 
 		// Customizing
 		this.addAxisModel();
@@ -218,22 +216,27 @@ export default class BuildTool extends ToolBase {
 	}
 
 	public async placeBlock() {
+		// Non-alive players bypass
+		if (!PlayerUtils.isAlive(Players.LocalPlayer)) return;
+
 		// ERROR: Block is not selected
 		if (this.selectedBlock.get() === undefined) {
 			LogControl.instance.addLine("Block is not selected!");
+
 			return;
 		}
 
 		// ERROR: Nothing to place
 		if (!this.previewBlock || !this.previewBlock.PrimaryPart) return;
 
-		// Non-alive players bypass
-		if (!PlayerUtils.isAlive(Players.LocalPlayer)) return;
-
 		// Client limitations
 		const plot = SharedPlots.getPlotByPosition(this.previewBlock.PrimaryPart.Position) as PlotModel | undefined;
 		if (!plot) {
 			LogControl.instance.addLine("Out of bounds!");
+
+			// Play sound
+			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
+
 			return;
 		}
 
@@ -246,6 +249,11 @@ export default class BuildTool extends ToolBase {
 			)
 		) {
 			LogControl.instance.addLine("Can't be placed here!");
+
+			// Play sound
+			SoundController.getSounds().BuildingMode.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().BuildingMode.BlockPlace.Play();
+
 			return;
 		}
 
@@ -409,9 +417,7 @@ export default class BuildTool extends ToolBase {
 
 	public disable() {
 		super.disable();
-
 		this.previewBlock?.Destroy();
-		this.previewBlockRotation = new CFrame();
 	}
 
 	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
