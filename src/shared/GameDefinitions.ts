@@ -38,7 +38,7 @@ export default class GameDefinitions {
 			config: true as boolean,
 		},
 		others_gfx: {
-			displayName: "Other people's effects and sounds",
+			displayName: "Other's effects & sounds",
 			type: "bool",
 			default: true as boolean,
 			config: true as boolean,
@@ -57,6 +57,10 @@ export default class GameDefinitions {
 	}
 
 	static RANKS: { [rank: number]: { name: string; color?: Color3; rainbow?: boolean } } = {
+		255: {
+			name: "UNREAL",
+			color: Color3.fromRGB(0, 0, 0),
+		},
 		254: {
 			name: "Developer",
 			rainbow: true,
