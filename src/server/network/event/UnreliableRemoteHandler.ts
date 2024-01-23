@@ -131,7 +131,7 @@ export default class UnreliableRemoteHandler {
 		block.SetAttribute("broken", true);
 
 		// Play sounds
-		ServerEffects.ImpactSound.create(block, false, { index: undefined });
+		ServerEffects.ImpactSound.create(block, player, { index: undefined });
 	}
 
 	static burnEvent(player: Player, block: BasePart) {

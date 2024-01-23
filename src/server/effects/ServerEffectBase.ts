@@ -45,9 +45,9 @@ export default abstract class ServerEffectBase<T> {
 	}
 
 	/** Creating an effect on the client side and sending it to the server so that other clients can see the effect */
-	public create(part: BasePart, force: boolean, arg: T): void {
+	public create(part: BasePart, forcePlayer: Player | "everyone", arg: T): void {
 		Players.GetPlayers().forEach((plr) => {
-			if (force || this.isGFXEnabledForPlayer(plr)) {
+			if (forcePlayer === "everyone" || forcePlayer === plr || this.isGFXEnabledForPlayer(plr)) {
 				this.remote.FireClient(plr, part, arg);
 			}
 		});
