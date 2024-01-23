@@ -181,6 +181,23 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 					)
 						return;
 
+					{
+						let abs = new Vector2(
+							child.getGui().Position.X.Scale * this.gui.AbsoluteSize.X,
+							child.getGui().Position.Y.Scale * this.gui.AbsoluteSize.Y,
+						);
+
+						const grid = child.getGui().AbsoluteSize.div(4);
+						abs = new Vector2(math.round(abs.X / grid.X) * grid.X, math.round(abs.Y / grid.Y) * grid.Y);
+
+						child.getGui().Position = new UDim2(
+							abs.X / this.gui.AbsoluteSize.X,
+							0,
+							abs.Y / this.gui.AbsoluteSize.Y,
+							0,
+						);
+					}
+
 					eh.unsubscribeAll();
 					ehandlers.remove(ehandlers.indexOf(eh));
 					inputting = false;
@@ -274,75 +291,6 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 				pos++;
 			}
 		}
-
-		/*
-		const map: Record<string, ConfigurableBlockLogic<BlockConfigBothDefinitions>[]> = {};
-		
-		for (const block of machine.getChildren()) {
-			if (!(block instanceof ConfigurableBlockLogic)) {
-				continue;
-			}
-
-			const config = block.config;
-			for (const [id, ] of Objects.pairs(block.getKeysDefinition())) {
-				const keycode = config.get(id) as KeyCode;
-				map[keycode] ??= [];
-				map[keycode].push(block);
-			}
-		}
-
-		let controlsInfo: TouchControlInfo | undefined;
-		const slots = PlayerDataStorage.slots.get();
-		if (slots) {
-			controlsInfo = SlotsMeta.get(slots, PlayerDataStorage.loadedSlot.get() ?? -1)?.touchControls;
-		}
-
-		for (const [keycode, blocks] of Objects.pairs(map)) {
-			const btn = new TextButtonControl(this.buttonTemplate());
-			btn.text.set(keycode);
-			this.addKeyed(keycode, btn);
-
-			this.event.subscribe(btn.getGui().InputBegan, (input) => {
-				if (
-					input.UserInputType === Enum.UserInputType.MouseButton1 ||
-					input.UserInputType === Enum.UserInputType.Touch
-				) {
-					if (!machine.seat.occupiedByLocalPlayer.get()) return;
-
-					for (const block of blocks) {
-						block.tryTriggerKeycodeDown(keycode as never);
-					}
-				}
-			});
-			this.event.subscribe(btn.getGui().InputEnded, (input) => {
-				if (
-					input.UserInputType === Enum.UserInputType.MouseButton1 ||
-					input.UserInputType === Enum.UserInputType.Touch
-				) {
-					if (!machine.seat.occupiedByLocalPlayer.get()) return;
-
-					for (const block of blocks) {
-						block.tryTriggerKeycodeUp(keycode as never);
-					}
-				}
-			});
-
-			const doload =
-				controlsInfo !== undefined &&
-				controlsInfo[keycode] !== undefined &&
-				controlsInfo[keycode].pos[0] >= btn.getGui().AbsoluteSize.X / this.gui.AbsoluteSize.X &&
-				controlsInfo[keycode].pos[0] <= 1 &&
-				controlsInfo[keycode].pos[1] >= btn.getGui().AbsoluteSize.Y / this.gui.AbsoluteSize.Y &&
-				controlsInfo[keycode].pos[1] <= 1;
-
-			if (doload) {
-				const kc = controlsInfo?.[keycode];
-				if (kc) btn.getGui().Position = new UDim2(kc.pos[0], 0, kc.pos[1], 0);
-			} else {
-				this.resetControl(btn, pos);
-				pos++;
-			}
-		}*/
 	}
 }
 
