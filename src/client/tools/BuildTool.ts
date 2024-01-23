@@ -251,8 +251,7 @@ export default class BuildTool extends ToolBase {
 			LogControl.instance.addLine("Can't be placed here!");
 
 			// Play sound
-			SoundController.getSounds().BuildingMode.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().BuildingMode.BlockPlace.Play();
+			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
 
 			return;
 		}
