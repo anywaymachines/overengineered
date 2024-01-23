@@ -536,7 +536,11 @@ const v10: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			const cf = Serializer.CFrameSerializer.deserialize(block.loc);
 			const pos = cf.Position;
-			const fixedpos = new Vector3(math.round(pos.X), math.round(pos.Y), math.round(pos.Z));
+			const fixedpos = new Vector3(
+				math.round(pos.X * 2) / 2,
+				math.round(pos.Y * 2) / 2,
+				math.round(pos.Z * 2) / 2,
+			);
 			const newcf = cf.Rotation.add(fixedpos);
 
 			return {
