@@ -1,5 +1,4 @@
-type Category = string;
-
+type CategoryName = string & { readonly ___nominal: "CategoryName" };
 type BlockConnectionName = string & { readonly ___nominal: "ConnectionName" };
 type BlockUuid = string & { readonly ___nominal: "BlockUuid" };
 

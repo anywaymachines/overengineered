@@ -232,7 +232,7 @@ export default class BuildTool extends ToolBase {
 		// Client limitations
 		const plot = SharedPlots.getPlotByPosition(this.previewBlock.PrimaryPart.Position) as PlotModel | undefined;
 		if (!plot) {
-			LogControl.instance.addLine("Out of bounds!");
+			LogControl.instance.addLine("Out of bounds!", Color3.fromRGB(255, 100, 100));
 
 			// Play sound
 			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();

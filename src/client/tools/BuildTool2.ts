@@ -240,19 +240,24 @@ export default class BuildTool2 extends ToolBase {
 	async placeBlock() {
 		const selected = this.selectedBlock.get();
 
-		// ERROR: Block is not selected
-		if (!selected) {
-			LogControl.instance.addLine("Block is not selected!");
-			return;
-		}
-
 		// Non-alive players bypass
 		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
 			return;
 		}
 
+		// ERROR: Block is not selected
+		if (!selected) {
+			LogControl.instance.addLine("Block is not selected!");
+
+			return;
+		}
+
 		if (!this.targetPlot.get()) {
-			LogControl.instance.addLine("Out of bounds.");
+			LogControl.instance.addLine("Out of bounds!", Color3.fromRGB(255, 100, 100));
+
+			// Play sound
+			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
+
 			return;
 		}
 

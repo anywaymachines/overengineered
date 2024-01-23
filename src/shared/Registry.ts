@@ -1,14 +1,18 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import Objects from "./_fixes_/objects";
 
-export type Categories = Readonly<Record<Category, { readonly name: string; readonly sub: Categories }>>;
+export type Category = {
+	readonly name: CategoryName;
+	readonly sub: Categories;
+};
+export type Categories = Readonly<Record<CategoryName, Category>>;
 
 export const blockRegistry = new Map<string, Block>() as ReadonlyMap<string, Block>;
 export const blockList: readonly Block[] = [];
 export const categoriesRegistry: Categories = {};
 
 export default class Registry {
-	static findCategoryPath(categories: Categories, key: string): string[] | undefined {
+	static findCategoryPath(categories: Categories, key: string): CategoryName[] | undefined {
 		for (const [category, _] of Objects.pairs(categories)) {
 			if (category === key) {
 				return [category];
@@ -22,7 +26,7 @@ export default class Registry {
 }
 
 function readCategory(folder: Folder, prev: Categories) {
-	const name = folder.Name;
+	const name = folder.Name as CategoryName;
 	(prev as Writable<typeof prev>)[name] = {
 		name: name,
 		sub: {},

@@ -61,7 +61,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 
 	private readonly list;
 
-	public selectedCategory = new ObservableValue<readonly Category[]>([]);
+	public selectedCategory = new ObservableValue<readonly CategoryName[]>([]);
 	public selectedBlock = new ObservableValue<Block | undefined>(undefined);
 
 	constructor(template: BlockSelectionControlDefinition) {
@@ -112,7 +112,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		}
 	}
 
-	private create(selected: readonly Category[], animated: boolean) {
+	private create(selected: readonly CategoryName[], animated: boolean) {
 		this.list.clear();
 
 		// Back button

@@ -39,9 +39,15 @@ export default class ToolController extends ComponentBase {
 		this.buildTool2 = new BuildTool2(mode);
 		this.wiretool = new WireTool(mode);
 
-		const tools: ToolBase[] = [this.buildTool, this.moveTool, this.deleteTool, this.configTool, this.paintTool];
-		tools.push(this.wiretool);
-		tools.push(this.buildTool2);
+		const tools: ToolBase[] = [
+			this.buildTool,
+			this.moveTool,
+			this.deleteTool,
+			this.configTool,
+			this.paintTool,
+			this.wiretool,
+			this.buildTool2,
+		];
 
 		this.tools = tools;
 		this.selectedTool.subscribe((tool) => TooltipsControl.instance.updateControlTooltips(tool));
