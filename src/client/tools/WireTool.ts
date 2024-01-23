@@ -600,7 +600,7 @@ export default class WireTool extends ToolBase {
 			}
 
 			this.createMarkers(block.instance.PrimaryPart!, markers);
-			if (math.random(1, 2) === 1) task.wait();
+			//if (math.random(1, 2) === 1) task.wait();
 
 			if (!this.event.isEnabled()) return;
 		}
@@ -624,7 +624,7 @@ export default class WireTool extends ToolBase {
 					input?.data.colors[0],
 				);
 
-				if (math.random(1, 2) === 1) task.wait();
+				//if (math.random(1, 2) === 1) task.wait();
 			}
 		}
 	}
