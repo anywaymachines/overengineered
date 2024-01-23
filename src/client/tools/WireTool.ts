@@ -159,10 +159,6 @@ export default class WireTool extends ToolBase {
 		this.viewportFrame.LightColor = Color3.fromRGB(255, 255, 255);
 	}
 
-	isProModeOnly() {
-		return true;
-	}
-
 	getDisplayName(): string {
 		return "Wire Tool";
 	}
