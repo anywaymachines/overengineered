@@ -159,6 +159,10 @@ export default class WireTool extends ToolBase {
 		this.viewportFrame.LightColor = Color3.fromRGB(255, 255, 255);
 	}
 
+	isProModeOnly() {
+		return true;
+	}
+
 	getDisplayName(): string {
 		return "Wire Tool";
 	}
@@ -494,11 +498,6 @@ export default class WireTool extends ToolBase {
 		this.renderedTooltips.clear();
 	}
 
-	public enable(): void {
-		this.updateVisual();
-		super.enable();
-	}
-
 	private getMarkerAbsolutePosition(marker: MarkerComponent): Vector3 {
 		return marker.data.blockData.instance.GetPivot().PointToWorldSpace(marker.instance.StudsOffsetWorldSpace);
 	}
@@ -605,8 +604,12 @@ export default class WireTool extends ToolBase {
 			}
 
 			this.createMarkers(block.instance.PrimaryPart!, markers);
+			if (math.random(1, 2) === 1) task.wait();
+
+			if (!this.event.isEnabled()) return;
 		}
 
+		// Wires
 		for (const block of blocks) {
 			for (const [connector, connection] of Objects.pairs(block.connections)) {
 				const input = this.markers
@@ -624,6 +627,8 @@ export default class WireTool extends ToolBase {
 					this.getMarkerAbsolutePosition(input),
 					input?.data.colors[0],
 				);
+
+				if (math.random(1, 2) === 1) task.wait();
 			}
 		}
 	}
