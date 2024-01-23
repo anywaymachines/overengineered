@@ -15,7 +15,7 @@ import ObservableValue from "shared/event/ObservableValue";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 
-type BlockGhost = { readonly model: Model; readonly highlight: Highlight };
+type BlockGhost = { readonly model: BlockModel; readonly highlight: Highlight };
 
 /** A tool for building in the world with blocks */
 export default class BuildTool2 extends ToolBase {
@@ -30,7 +30,7 @@ export default class BuildTool2 extends ToolBase {
 	private readonly mirroredGhosts: BlockGhost[] = [];
 	private blockRotation = CFrame.identity;
 
-	private readonly targetPlot = new ObservableValue<Model | undefined>(undefined);
+	private readonly targetPlot = new ObservableValue<PlotModel | undefined>(undefined);
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -114,6 +114,23 @@ export default class BuildTool2 extends ToolBase {
 		if (!selected) return;
 
 		const getMouseTargetBlockPosition = () => {
+			const g = (
+				this.gameUI as ScreenGui & {
+					BuildingMode: {
+						Tools: {
+							BuildTool2Gui: {
+								Debug: {
+									Label1: TextLabel;
+									Label2: TextLabel;
+									Label3: TextLabel;
+									Label4: TextLabel;
+								};
+							};
+						};
+					};
+				}
+			).BuildingMode.Tools.BuildTool2Gui.Debug;
+
 			const constrainPositionToGrid = (pos: Vector3) => {
 				const constrain = math.round;
 				return new Vector3(constrain(pos.X), constrain(pos.Y), constrain(pos.Z));
@@ -130,6 +147,11 @@ export default class BuildTool2 extends ToolBase {
 
 			const globalMouseHitPos = mouseHit.PointToWorldSpace(Vector3.zero);
 			const normal = Vector3.FromNormalId(mouseSurface);
+
+			g.Label1.Text = `Target: ${mouseTarget}`;
+			g.Label2.Text = `Hit: ${mouseHit}`;
+			g.Label3.Text = `Normal: ${mouseSurface} ${normal}`;
+			g.Label4.Text = `Block size mnd: ${selected.model.GetBoundingBox()[1].mul(normal).div(2)}`;
 
 			let targetPosition = globalMouseHitPos;
 			targetPosition = addBlockSize(targetPosition);
@@ -172,7 +194,13 @@ export default class BuildTool2 extends ToolBase {
 
 		const canBePlaced =
 			[...this.mirroredGhosts, this.mainGhost].find(
-				(ghost) => !BuildingManager.blockCanBePlacedAt(ghost.model.GetPivot().Position, Players.LocalPlayer),
+				(ghost) =>
+					!BuildingManager.blockCanBePlacedAt(
+						this.targetPlot.get()!,
+						ghost.model,
+						ghost.model.GetPivot(),
+						Players.LocalPlayer,
+					),
 			) === undefined;
 
 		PartUtils.ghostModel(this.mainGhost.model, canBePlaced ? this.allowedColor : this.forbiddenColor);
@@ -223,6 +251,11 @@ export default class BuildTool2 extends ToolBase {
 			return;
 		}
 
+		if (!this.targetPlot.get()) {
+			LogControl.instance.addLine("Out of bounds.");
+			return;
+		}
+
 		const mainGhost = this.mainGhost;
 		if (!mainGhost || !mainGhost.model.PrimaryPart) {
 			return;
@@ -248,12 +281,15 @@ export default class BuildTool2 extends ToolBase {
 
 				if (blocks.size() !== 0) await BuildingController.deleteBlock(blocks!);
 			},
-			[mainGhost, ...this.mirroredGhosts].map((g) => ({
-				id: selected.id,
-				color: this.selectedColor.get(),
-				material: this.selectedMaterial.get(),
-				location: g.model.PrimaryPart!.CFrame,
-			})),
+			[mainGhost, ...this.mirroredGhosts].map(
+				(g): PlaceBlockRequest => ({
+					id: selected.id,
+					color: this.selectedColor.get(),
+					material: this.selectedMaterial.get(),
+					location: g.model.PrimaryPart!.CFrame,
+					plot: this.targetPlot.get()!,
+				}),
+			),
 			async (infos) => {
 				for (const info of infos) {
 					const result = await BuildingController.placeBlock(info);

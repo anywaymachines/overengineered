@@ -1,6 +1,5 @@
 import { HttpService } from "@rbxts/services";
 import { blockRegistry } from "shared/Registry";
-import Arrays from "shared/_fixes_/Arrays";
 import JSON, { JsonSerializablePrimitive } from "shared/_fixes_/Json";
 import Objects from "shared/_fixes_/objects";
 import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
@@ -15,7 +14,7 @@ import ServerPlots from "./plots/ServerPlots";
 const errorPlotNotFound = (): ErrorResponse => {
 	return {
 		success: false,
-		message: "Building is not permitted",
+		message: "Plot not found",
 	};
 };
 const errorBuildingNotPermitted = (): ErrorResponse => {
@@ -157,9 +156,9 @@ export default class BuildingWrapper {
 		}
 
 		const unwelded = BuildingWelder.unweld(block);
-		for (const [root] of Arrays.groupBySet(unwelded, (p) => p.AssemblyRootPart!)) {
+		/*for (const [root] of Arrays.groupBySet(unwelded, (p) => p.AssemblyRootPart!)) {
 			root.Anchored = true;
-		}
+		}*/
 
 		block.Destroy();
 
@@ -172,23 +171,15 @@ export default class BuildingWrapper {
 		data: ExcludeMembers<PlaceBlockRequest, "mirrors">,
 	): BuildResponse {
 		// Check is in plot
-		if (!BuildingManager.blockCanBePlacedAt(data.location.Position, player)) {
+		if (!BuildingManager.blockCanBePlacedAt(data.plot, blockRegistry.get(data.id)!.model, data.location, player)) {
 			return {
 				success: false,
 				message: "Out of bounds",
 			};
 		}
 
-		// Check is limit exceeded
-		const plot = SharedPlots.getPlotByPosition(data.location.Position);
-		if (!plot)
-			return {
-				success: false,
-				message: "Out of bounds",
-			};
-
 		const block = blockRegistry.get(data.id)!;
-		const placedBlocks = SharedPlots.getPlotBlocks(plot)
+		const placedBlocks = SharedPlots.getPlotBlocks(data.plot)
 			.GetChildren()
 			.filter((placed_block) => {
 				return placed_block.GetAttribute("id") === data.id;
@@ -268,7 +259,7 @@ export default class BuildingWrapper {
 
 		// Weld block
 		const newJoints = BuildingWelder.weld(model, plot);
-		if (newJoints.size() !== 0) {
+		/*if (newJoints.size() !== 0) {
 			PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
 				if (part.Name.lower() === "colbox") return;
 				part.Anchored = false;
@@ -285,7 +276,7 @@ export default class BuildingWrapper {
 			if (!model.PrimaryPart!.AssemblyRootPart!.Anchored) {
 				model.PrimaryPart!.Anchored = true;
 			}
-		}
+		}*/
 
 		return { success: true, model: model };
 	}

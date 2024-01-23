@@ -199,6 +199,7 @@ const place = {
 			location: buildingCenter.ToWorldSpace(Serializer.CFrameSerializer.deserialize(blockData.loc)),
 			config: (blockData.config ?? {}) as Readonly<Record<string, string>>,
 			uuid: blockData.uuid,
+			plot,
 		};
 
 		const response = BuildingWrapper.placeBlock(deserializedData);

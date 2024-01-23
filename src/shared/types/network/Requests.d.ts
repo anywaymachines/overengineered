@@ -31,6 +31,7 @@ type PlayerMoveRequest = {
 };
 
 type PlaceBlockRequest = {
+	readonly plot: PlotModel;
 	readonly id: string;
 	readonly color: Color3;
 	readonly material: Enum.Material;

@@ -18,11 +18,12 @@ export default class BuildingManager {
 		Enum.Material.Foil,
 		Enum.Material.Ice,
 		Enum.Material.Sand,
+		Enum.Material.Sandstone,
 	];
 
 	/** Returns the block or nothing that is set on (or near) the given vector
 	 * @param vector The vector to check
-	 * @deprecated slow method
+	 * @deprecated slow & stupid
 	 */
 	static getBlockByPosition(vector: Vector3): BlockModel | undefined {
 		const plot = SharedPlots.getPlotByPosition(vector);
@@ -48,45 +49,30 @@ export default class BuildingManager {
 	 * @param position The position to check
 	 * @param player The player to check
 	 */
-	static blockCanBePlacedAt(position: Vector3, player: Player): boolean {
+	static blockCanBePlacedAt(plot: PlotModel, block: BlockModel, cframe: CFrame, player: Player): boolean {
+		const plotRegion = SharedPlots.getPlotBuildingRegion(plot);
+
+		const halfSize = block.PrimaryPart!.Size.div(2);
+		const minPoint = cframe.Rotation.mul(halfSize.mul(-1)).add(cframe.Position);
+		const maxPoint = cframe.Rotation.mul(halfSize).add(cframe.Position);
+		const blockRegion = new Region3(minPoint, maxPoint);
+
 		// Checking the plot
-		const plot = SharedPlots.getPlotByPosition(position);
-		if (plot === undefined || !SharedPlots.isBuildingAllowed(plot, player)) {
+		if (!SharedPlots.isBuildingAllowed(plot, player)) {
 			// No plot / Building forbidden
 			return false;
 		}
 
+		// Not in plot
+		if (!VectorUtils.isRegion3InRegion3(blockRegion, plotRegion)) return false;
+
 		if (RunService.IsClient()) {
 			// Check is given coordinate occupied by another block
-			const collideBlock = this.getBlockByPosition(position);
+			const collideBlock = this.getBlockByPosition(cframe.Position);
 			if (collideBlock !== undefined) {
 				// Occupied coordinates
 				return false;
 			}
-		}
-
-		// OK
-		return true;
-	}
-
-	/** Check that the position for a given player is a permitted position
-	 * @param position The position to check
-	 * @param player The player to check
-	 * @deprecated Use blockCanBePlacedAt
-	 */
-	static vectorAbleToPlayer(position: Vector3, player: Player): boolean {
-		// Checking the plot
-		const plot = SharedPlots.getPlotByPosition(position);
-		if (plot === undefined || !SharedPlots.isBuildingAllowed(plot, player)) {
-			// No plot / Building forbidden
-			return false;
-		}
-
-		// Check is given coordinate occupied by another block
-		const collideBlock = this.getBlockByPosition(position);
-		if (collideBlock !== undefined) {
-			// Occupied coordinates
-			return false;
 		}
 
 		// OK

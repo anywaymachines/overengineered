@@ -13,6 +13,7 @@ import LogControl from "client/gui/static/LogControl";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
+import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -224,12 +225,27 @@ export default class BuildTool extends ToolBase {
 		}
 
 		// ERROR: Nothing to place
-		if (!this.previewBlock || !this.previewBlock.PrimaryPart) {
+		if (!this.previewBlock || !this.previewBlock.PrimaryPart) return;
+
+		// Non-alive players bypass
+		if (!PlayerUtils.isAlive(Players.LocalPlayer)) return;
+
+		// Client limitations
+		const plot = SharedPlots.getPlotByPosition(this.previewBlock.PrimaryPart.Position) as PlotModel | undefined;
+		if (!plot) {
+			LogControl.instance.addLine("Out of bounds!");
 			return;
 		}
 
-		// Non-alive players bypass
-		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
+		if (
+			!BuildingManager.blockCanBePlacedAt(
+				plot,
+				this.selectedBlock.get()!.model,
+				this.previewBlock.PrimaryPart.CFrame,
+				Players.LocalPlayer,
+			)
+		) {
+			LogControl.instance.addLine("Can't be placed here!");
 			return;
 		}
 
@@ -245,6 +261,7 @@ export default class BuildTool extends ToolBase {
 				color: this.selectedColor.get(),
 				material: this.selectedMaterial.get(),
 				location: this.previewBlock.PrimaryPart.CFrame,
+				plot: plot,
 			},
 			(info) => BuildingController.placeBlock(info),
 		);
@@ -323,7 +340,16 @@ export default class BuildTool extends ToolBase {
 		assert(this.previewBlock.PrimaryPart);
 
 		// Colorizing
-		if (BuildingManager.vectorAbleToPlayer(this.previewBlock.PrimaryPart.Position, Players.LocalPlayer)) {
+		const plot = SharedPlots.getPlotByPosition(this.previewBlock.PrimaryPart.Position) as PlotModel | undefined;
+		if (
+			plot &&
+			BuildingManager.blockCanBePlacedAt(
+				plot,
+				this.selectedBlock.get()!.model,
+				this.previewBlock.PrimaryPart.CFrame,
+				Players.LocalPlayer,
+			)
+		) {
 			PartUtils.ghostModel(this.previewBlock, this.allowedColor);
 		} else {
 			PartUtils.ghostModel(this.previewBlock, this.forbiddenColor);

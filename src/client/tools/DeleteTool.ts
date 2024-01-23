@@ -51,6 +51,7 @@ export default class DeleteTool extends ToolBase {
 				block.GetAttribute("material") as number as SerializedEnum,
 			),
 			config: JSON.deserialize<object>((block.GetAttribute("config") as string | undefined) ?? "{}"),
+			plot: SharedPlots.getPlotByPosition(block.PrimaryPart!.Position)!,
 		};
 
 		return info;

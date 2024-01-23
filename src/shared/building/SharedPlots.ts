@@ -42,7 +42,9 @@ export default class SharedPlots {
 		return plot;
 	}
 
-	/** Returns the plot by position inside it, if exists */
+	/** Returns the plot by position inside it, if exists
+	 * @deprecated slow
+	 */
 	static getPlotByPosition(position: Vector3): PlotModel | undefined {
 		return this.plots.find((p) => VectorUtils.isInRegion3(this.getPlotBuildingRegion(p), position));
 	}
@@ -81,14 +83,14 @@ export default class SharedPlots {
 
 		return new Region3(
 			new Vector3(
-				buildingPlane.Position.X - buildingPlane.Size.X / 2 + 1,
-				buildingPlane.Position.Y + buildingPlane.Size.Y / 2 + 1,
-				buildingPlane.Position.Z - buildingPlane.Size.Z / 2 + 1,
+				buildingPlane.Position.X - buildingPlane.Size.X / 2,
+				buildingPlane.Position.Y - buildingPlane.Size.Y / 2,
+				buildingPlane.Position.Z - buildingPlane.Size.Z / 2,
 			),
 			new Vector3(
-				buildingPlane.Position.X + buildingPlane.Size.X / 2 - 1,
+				buildingPlane.Position.X + buildingPlane.Size.X / 2,
 				buildingPlane.Position.Y + GameDefinitions.BUILD_HEIGHT_LIMIT,
-				buildingPlane.Position.Z + buildingPlane.Size.Z / 2 - 1,
+				buildingPlane.Position.Z + buildingPlane.Size.Z / 2,
 			),
 		);
 	}
