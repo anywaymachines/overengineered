@@ -66,6 +66,7 @@ class MarkerComponent extends Component<MarkerComponentDefinition> {
 			});
 		});
 	}
+
 	protected prepareTouch() {
 		// Always show the tooltip
 		this.createTooltip();
@@ -79,6 +80,7 @@ class MarkerComponent extends Component<MarkerComponentDefinition> {
 		gui.StudsOffsetWorldSpace = this.instance.StudsOffsetWorldSpace.add(new Vector3(0, 1, 0));
 		gui.Adornee = this.instance.Adornee;
 		gui.Parent = this.instance.Parent;
+		this.add(new Component(gui));
 
 		if (InputController.inputType.get() === "Gamepad") {
 			gui.Size = new UDim2(
