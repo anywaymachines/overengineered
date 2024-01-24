@@ -5,10 +5,13 @@ import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import BlockManager from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
+import ObservableValue from "shared/event/ObservableValue";
 import PlayerUtils from "shared/utils/PlayerUtils";
 
 export default class HoveredBlockHighlighter extends ComponentBase {
-	constructor(blockHighlighted = (block: BlockModel | undefined) => {}, filter = (block: BlockModel) => true) {
+	readonly highlightedBlock = new ObservableValue<BlockModel | undefined>(undefined);
+
+	constructor(filter = (block: BlockModel) => true) {
 		super();
 
 		const mouse = Players.LocalPlayer.GetMouse();
@@ -18,7 +21,7 @@ export default class HoveredBlockHighlighter extends ComponentBase {
 			highlight?.Destroy();
 			highlight = undefined;
 
-			blockHighlighted(undefined);
+			this.highlightedBlock.set(undefined);
 		};
 
 		const updatePosition = () => {
@@ -76,11 +79,11 @@ export default class HoveredBlockHighlighter extends ComponentBase {
 			destroyHighlight();
 
 			highlight = new Instance("Highlight") as typeof highlight & defined;
-			highlight.Parent = target.Parent as BlockModel;
+			highlight.Parent = target.Parent;
 			highlight.Adornee = target.Parent;
 			highlight.DepthMode = Enum.HighlightDepthMode.Occluded;
 
-			blockHighlighted(highlight.Parent as BlockModel);
+			this.highlightedBlock.set(highlight.Parent);
 		};
 
 		const prepare = () => {

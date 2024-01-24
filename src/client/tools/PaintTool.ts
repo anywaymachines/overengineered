@@ -4,7 +4,7 @@ import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import ObservableValue from "shared/event/ObservableValue";
-import { initializeBoxSelection } from "./selectors/BoxSelector";
+import BoxSelector from "./selectors/BoxSelector";
 import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
 import MovingSelector from "./selectors/MovingSelector";
 
@@ -17,7 +17,7 @@ export default class PaintTool extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		this.add(new HoveredBlockHighlighter((block) => {}));
+		this.add(new HoveredBlockHighlighter());
 
 		{
 			const selected = new Set<BlockModel>();
@@ -38,6 +38,9 @@ export default class PaintTool extends ToolBase {
 				),
 			);
 		}
+
+		const boxSelector = this.add(new BoxSelector());
+		this.event.subscribe(boxSelector.submitted, async (blocks) => await this.paint(blocks));
 	}
 
 	async paintClientSide(block: BlockModel) {
@@ -65,14 +68,6 @@ export default class PaintTool extends ToolBase {
 				color: this.enableColor.get() ? this.selectedColor.get() : undefined,
 				material: this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
 			});
-	}
-
-	protected prepare() {
-		super.prepare();
-
-		initializeBoxSelection(this.eventHandler, (blocks) => {
-			this.paint(blocks);
-		});
 	}
 
 	getDisplayName(): string {

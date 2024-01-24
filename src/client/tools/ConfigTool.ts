@@ -1,43 +1,41 @@
 import Signal from "@rbxts/signal";
 import ToolBase from "client/base/ToolBase";
 import InputController from "client/controller/InputController";
+import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
+import { BlockConfigDefinition } from "shared/BlockConfigDefinitionRegistry";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
-import { initializeBoxSelection } from "./selectors/BoxSelector";
-import { initializeSingleBlockSelection } from "./selectors/SingleBlockSelector";
+import Objects from "shared/_fixes_/objects";
+import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
 
 export default class ConfigTool extends ToolBase {
 	public readonly selectedBlocksChanged = new Signal<(selected: (SelectionBox & { Parent: BlockModel })[]) => void>();
 	private readonly selected: (SelectionBox & { Parent: BlockModel })[] = [];
 
-	protected prepare() {
-		super.prepare();
+	constructor(mode: BuildingMode) {
+		super(mode);
 
-		initializeSingleBlockSelection(
-			this.eventHandler,
-			this.inputHandler,
-			() => {},
-			(block) => {
-				if (!block) return;
-				// if (InputController.inputType.get() !== "Desktop")  return;
-				this.selectBlockByClick(block);
-			},
-			(target: Model) =>
-				blockConfigRegistry[target.GetAttribute("id") as keyof typeof blockConfigRegistry] !== undefined,
-		);
-		initializeBoxSelection(
-			this.eventHandler,
-			(blocks) => {
-				for (const block of blocks) {
-					this.selectBlock(block);
-				}
-			},
-			(target: Model) =>
-				blockConfigRegistry[target.GetAttribute("id") as keyof typeof blockConfigRegistry] !== undefined,
-		);
+		const hoverSelector = this.add(new HoveredBlockHighlighter((block) => this.canBeSelected(block)));
+		this.event.subscribe(this.mouse.Button1Down, () => {
+			if (InputController.inputType.get() !== "Desktop") return;
 
-		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, (model) => {
+			const block = hoverSelector.highlightedBlock.get();
+			if (!block) return;
+			this.selectBlockByClick(block);
+		});
+
+		// removed because doesnt follow the "single block type" rule
+		/*
+		const boxSelector = this.add(new BoxSelector(filter));
+		this.event.subscribe(boxSelector.submitted, (blocks) => {
+			for (const block of blocks) {
+				this.trySelectBlock(block);
+			}
+		});
+		*/
+
+		this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, (model) => {
 			const removed = this.selected.filter((sel) => sel.Parent === model);
 
 			for (const sel of removed) {
@@ -49,6 +47,28 @@ export default class ConfigTool extends ToolBase {
 		});
 	}
 
+	private canBeSelected(block: BlockModel): boolean {
+		const config = blockConfigRegistry[block.GetAttribute("id") as keyof typeof blockConfigRegistry];
+		if (!config) return false;
+
+		if (!Objects.values(config.input).find((v) => !(v as BlockConfigDefinition).configHidden)) {
+			return false;
+		}
+
+		const differentId = this.selected.find(
+			(s) => (s.Parent.GetAttribute("id") as string) !== (block.GetAttribute("id") as string),
+		);
+
+		return differentId === undefined;
+	}
+	private trySelectBlock(block: BlockModel) {
+		if (!this.canBeSelected(block)) {
+			LogControl.instance.addLine("Could not select different blocks");
+			return;
+		}
+
+		this.selectBlock(block);
+	}
 	private selectBlock(block: BlockModel) {
 		const instance = new Instance("SelectionBox") as SelectionBox & { Parent: BlockModel };
 		instance.Parent = block;
@@ -82,16 +102,7 @@ export default class ConfigTool extends ToolBase {
 				this.selected.remove(existing);
 				this.selectedBlocksChanged.Fire(this.selected);
 			} else {
-				const differentId = this.selected.find(
-					(s) => ((s.Parent as Model).GetAttribute("id") as string) !== (block.GetAttribute("id") as string),
-				);
-
-				if (differentId !== undefined) {
-					LogControl.instance.addLine("Could not select different blocks");
-					return;
-				}
-
-				this.selectBlock(block);
+				this.trySelectBlock(block);
 			}
 		};
 

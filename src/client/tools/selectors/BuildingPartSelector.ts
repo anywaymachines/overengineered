@@ -26,9 +26,7 @@ export default class BuildingPartSelector extends ComponentContainer {
 
 		const selected: Model[] = [];
 
-		const hoverHighlighter = new HoveredBlockHighlighter((block) => {
-			//
-		});
+		const hoverHighlighter = new HoveredBlockHighlighter();
 		this.add(hoverHighlighter);
 	}
 }

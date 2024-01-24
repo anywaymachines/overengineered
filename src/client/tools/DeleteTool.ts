@@ -5,35 +5,34 @@ import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
+import BuildingMode from "client/controller/modes/BuildingMode";
 import Serializer from "shared/Serializer";
 import JSON from "shared/_fixes_/Json";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
-import { initializeBoxSelection } from "./selectors/BoxSelector";
-import { initializeSingleBlockSelection } from "./selectors/SingleBlockSelector";
+import BoxSelector from "./selectors/BoxSelector";
+import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
 
 export default class DeleteTool extends ToolBase {
 	public readonly onClearAllRequested = new Signal<() => void>();
-	public readonly highlightedBlock = new ObservableValue<Model | undefined>(undefined);
+	public readonly highlightedBlock = new ObservableValue<BlockModel | undefined>(undefined);
 
-	protected prepare() {
-		super.prepare();
+	constructor(mode: BuildingMode) {
+		super(mode);
 
-		initializeSingleBlockSelection(
-			this.eventHandler,
-			this.inputHandler,
-			(block) => this.highlightedBlock.set(block),
-			async (block) => {
-				if (!block) return;
-				if (InputController.inputType.get() !== "Desktop") return;
-				await this.deleteBlocks([block]);
-			},
-			() => true,
-		);
-		initializeBoxSelection(this.eventHandler, async (blocks) => {
-			await this.deleteBlocks(blocks);
+		const hoverSelector = this.add(new HoveredBlockHighlighter());
+		hoverSelector.highlightedBlock.autoSet(this.highlightedBlock);
+		this.event.subscribe(this.mouse.Button1Down, async () => {
+			if (InputController.inputType.get() !== "Desktop") return;
+
+			const block = hoverSelector.highlightedBlock.get();
+			if (!block) return;
+			await this.deleteBlocks([block]);
 		});
+
+		const boxSelector = this.add(new BoxSelector());
+		this.event.subscribe(boxSelector.submitted, async (blocks) => await this.deleteBlocks(blocks));
 	}
 
 	protected prepareGamepad(): void {
