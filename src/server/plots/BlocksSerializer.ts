@@ -530,9 +530,17 @@ const v9: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 	},
 };
 
-// fix blocks not aligned with the grid
-const v10: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v9> = {
+// fix blocks not aligned with the grid (disabled due to v11 doing the same again)
+const v10: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v9> = {
 	version: 10,
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		return prev;
+	},
+};
+
+// fix blocks not aligned with the grid
+const v11: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v10> = {
+	version: 11,
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			const cf = Serializer.CFrameSerializer.deserialize(block.loc);
@@ -570,8 +578,10 @@ const v10: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 
 //
 
-const versions = [undefined!, undefined!, undefined!, undefined!, v4, v5, v6, v7, v8, v9, v10] as const;
+const versions = [v4, v5, v6, v7, v8, v9, v10, v11] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
+
+const getVersion = (version: number) => versions.find((v) => v.version === version);
 
 const BlocksSerializer = {
 	version: current.version,
@@ -584,8 +594,9 @@ const BlocksSerializer = {
 		Logger.info(`Loaded a slot using savev${deserialized.version}`);
 
 		const version = deserialized.version;
-		for (let i = version + 1; i < versions.size(); i++) {
-			const version = versions[i];
+		for (let i = version + 1; i <= current.version; i++) {
+			const version = getVersion(i);
+			if (!version) continue;
 			if (!("upgradeFrom" in version)) continue;
 
 			deserialized = version.upgradeFrom(data, deserialized);
