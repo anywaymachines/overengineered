@@ -46,6 +46,7 @@ export default class RideMode implements PlayModeBase {
 		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
 		if (vehicleSeat.Occupant && vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
 			vehicleSeat.Occupant.Sit = false;
+			task.wait(0.5);
 		}
 
 		vehicleSeat.Sit(hrp);
