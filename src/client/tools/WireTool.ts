@@ -190,12 +190,12 @@ export default class WireTool extends ToolBase {
 		const averageSize = (part.Size.X + part.Size.Y + part.Size.Z) / 3;
 		const halfSize = averageSize / 2;
 		const order = [
-			new Vector3(halfSize, 0, 0),
 			new Vector3(-halfSize, 0, 0),
-			new Vector3(0, 0, halfSize),
+			new Vector3(halfSize, 0, 0),
 			new Vector3(0, 0, -halfSize),
-			new Vector3(0, halfSize, 0),
+			new Vector3(0, 0, halfSize),
 			new Vector3(0, -halfSize, 0),
+			new Vector3(0, halfSize, 0),
 			new Vector3(0, 0, 0),
 		];
 
