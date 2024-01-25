@@ -55,19 +55,17 @@ export default class ConfigTool extends ToolBase {
 			return false;
 		}
 
+		return true;
+	}
+	private canBeSelectedConsideringCurrentSelection(block: BlockModel): boolean {
+		if (!this.canBeSelected(block)) {
+			return false;
+		}
+
 		const differentId = this.selected.find(
 			(s) => (s.Parent.GetAttribute("id") as string) !== (block.GetAttribute("id") as string),
 		);
-
 		return differentId === undefined;
-	}
-	private trySelectBlock(block: BlockModel) {
-		if (!this.canBeSelected(block)) {
-			LogControl.instance.addLine("Could not select different blocks");
-			return;
-		}
-
-		this.selectBlock(block);
 	}
 	private selectBlock(block: BlockModel) {
 		const instance = new Instance("SelectionBox") as SelectionBox & { Parent: BlockModel };
@@ -102,7 +100,12 @@ export default class ConfigTool extends ToolBase {
 				this.selected.remove(existing);
 				this.selectedBlocksChanged.Fire(this.selected);
 			} else {
-				this.trySelectBlock(block);
+				if (!this.canBeSelectedConsideringCurrentSelection(block)) {
+					LogControl.instance.addLine("Could not select different blocks");
+					return;
+				}
+
+				this.selectBlock(block);
 			}
 		};
 
