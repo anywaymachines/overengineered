@@ -23,12 +23,26 @@ export default class DeleteTool extends ToolBase {
 
 		const hoverSelector = this.add(new HoveredBlockHighlighter());
 		hoverSelector.highlightedBlock.autoSet(this.highlightedBlock);
-		this.event.subscribe(this.mouse.Button1Down, async () => {
+
+		const fireSelected = async () => {
 			if (InputController.inputType.get() !== "Desktop") return;
 
 			const block = hoverSelector.highlightedBlock.get();
 			if (!block) return;
 			await this.deleteBlocks([block]);
+		};
+		this.event.onPrepare((input) => {
+			if (input === "Desktop") {
+				this.eventHandler.subscribe(this.mouse.Button1Down, () => {
+					if (!InputController.isCtrlPressed()) {
+						fireSelected();
+					}
+				});
+			} else if (input === "Gamepad") {
+				this.inputHandler.onKeyDown(Enum.KeyCode.ButtonX, fireSelected);
+			} else if (input === "Touch") {
+				this.inputHandler.onTouchTap(fireSelected);
+			}
 		});
 
 		const boxSelector = this.add(new BoxSelector());

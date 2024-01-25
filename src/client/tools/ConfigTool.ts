@@ -17,12 +17,24 @@ export default class ConfigTool extends ToolBase {
 		super(mode);
 
 		const hoverSelector = this.add(new HoveredBlockHighlighter((block) => this.canBeSelected(block)));
-		this.event.subscribe(this.mouse.Button1Down, () => {
-			if (InputController.inputType.get() !== "Desktop") return;
-
+		const fireSelected = () => {
 			const block = hoverSelector.highlightedBlock.get();
 			if (!block) return;
 			this.selectBlockByClick(block);
+		};
+
+		this.event.onPrepare((input) => {
+			if (input === "Desktop") {
+				this.eventHandler.subscribe(this.mouse.Button1Down, () => {
+					if (!InputController.isCtrlPressed()) {
+						fireSelected();
+					}
+				});
+			} else if (input === "Gamepad") {
+				this.inputHandler.onKeyDown(Enum.KeyCode.ButtonX, fireSelected);
+			} else if (input === "Touch") {
+				this.inputHandler.onTouchTap(fireSelected);
+			}
 		});
 
 		// removed because doesnt follow the "single block type" rule
