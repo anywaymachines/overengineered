@@ -89,8 +89,9 @@ export default class MoveTool extends ToolBase {
 			return;
 		}
 
-		this.ZHandles.Visible = this.getDirection() === 0 || math.abs(this.getDirection()) === 180 ? true : false;
-		this.YHandles.Visible = math.abs(this.getDirection()) === 90 ? true : false;
+		const direction = this.getDirection();
+		this.ZHandles.Visible = direction === 0 || math.abs(direction) === 180;
+		this.YHandles.Visible = math.abs(direction) === 90;
 	}
 
 	private getDirection() {
@@ -107,6 +108,54 @@ export default class MoveTool extends ToolBase {
 		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.createHandles());
 		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.createHandles());
 		this.eventHandler.subscribe(Signals.BLOCKS.BLOCKS_MOVED, () => this.createHandles());
+
+		/*
+		{
+			const eh = new EventHandler();
+			let prevLocation: Vector2 | undefined = undefined;
+			let direction: Vector3 | undefined = undefined;
+
+			const startmove = () => {
+				prevLocation = UserInputService.GetMouseLocation();
+
+				eh.subscribe(RunService.Heartbeat, () => {
+					if (!prevLocation) return;
+
+					const loc = UserInputService.GetMouseLocation();
+					if (loc === prevLocation) return;
+
+					const delta = prevLocation.sub(loc);
+
+					const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
+					for (const block of plot.Blocks.GetChildren(undefined)) {
+						block.PivotTo(block.GetPivot().add(direction!.mul(-delta.X / 50)));
+					}
+
+					prevLocation = loc;
+				});
+				eh.subscribe(this.mouse.Button1Up, () => {
+					prevLocation = undefined;
+					direction = undefined;
+					eh.unsubscribeAll();
+				});
+			};
+
+			this.eventHandler.subscribe(this.XHandles!.MouseButton1Down, (face: Enum.NormalId) => {
+				direction = Vector3.FromNormalId(face);
+				startmove();
+			});
+			this.eventHandler.subscribe(this.YHandles!.MouseButton1Down, (face: Enum.NormalId) => {
+				direction = Vector3.FromNormalId(face);
+				startmove();
+			});
+			this.eventHandler.subscribe(this.ZHandles!.MouseButton1Down, (face: Enum.NormalId) => {
+				direction = Vector3.FromNormalId(face);
+				startmove();
+			});
+
+			this.eventHandler.allUnsibscribed.Once(() => eh.unsubscribeAll());
+		}
+		*/
 	}
 
 	public disable() {
