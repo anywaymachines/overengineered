@@ -583,6 +583,24 @@ const anglesensor = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const accelerometer = {
+	input: {},
+	output: {
+		linear: {
+			displayName: "Linear",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+		angular: {
+			displayName: "Angular",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const altimeter = {
 	input: {},
 	output: {
@@ -637,6 +655,7 @@ const blockConfigRegistry = {
 	anglesensor,
 	keysensor,
 	altimeter,
+	accelerometer,
 
 	constant,
 	delayblock: delayBlock,

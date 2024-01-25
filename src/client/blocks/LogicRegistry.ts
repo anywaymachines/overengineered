@@ -32,6 +32,7 @@ import OperationDegBlockLogic from "./operations/number/trigonometry/OperationDe
 import OperationRadBlockLogic from "./operations/number/trigonometry/OperationRadBlockLogic";
 import LampBlockLogic from "./operations/output/LampBlockLogic";
 import ScreenBlockLogic from "./operations/output/ScreenBlockLogic";
+import AccelerometerBlockLogic from "./operations/sensors/AccelerometerBlockLogic";
 import AltimeterBlockLogic from "./operations/sensors/AltimeterBlockLogic";
 import AngleSensorBlockLogic from "./operations/sensors/AngleSensorBlockLogic";
 import KeySensorBlockLogic from "./operations/sensors/KeySensorBlockLogic";
@@ -72,6 +73,7 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 	anglesensor: AngleSensorBlockLogic,
 	keysensor: KeySensorBlockLogic,
 	altimeter: AltimeterBlockLogic,
+	accelerometer: AccelerometerBlockLogic,
 
 	operationnot: OperationNotBlockLogic,
 	operationand: OperationAndBlockLogic,
