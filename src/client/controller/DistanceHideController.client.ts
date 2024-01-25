@@ -3,7 +3,7 @@ import Logger from "shared/Logger";
 import RobloxUnit from "shared/RobloxUnit";
 
 // wait for everything to spawn
-task.wait(8);
+task.wait(1);
 
 const parts: Instance[] = [
 	Workspace.WaitForChild("Baseplate"),
