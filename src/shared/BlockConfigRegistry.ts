@@ -613,6 +613,37 @@ const altimeter = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const operationclamp = {
+	input: {
+		value: {
+			displayName: "Value",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		min: {
+			displayName: "Min",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		max: {
+			displayName: "Max",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+	output: {
+		result: {
+			displayName: "Height",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const constant = {
 	input: {
 		//connectors.boolOrNumberOrVector("Value", "1", { connectorHidden: true }),
@@ -679,6 +710,9 @@ const blockConfigRegistry = {
 
 	operationrad: numberProcessing,
 	operationdeg: numberProcessing,
+
+	operationclamp,
+	operationabs: numberProcessing,
 
 	operationvec3splitter,
 	operationvec3combiner,

@@ -21,7 +21,9 @@ import OperationOrBlockLogic from "./operations/boolean/OperationOrBlockLogic";
 import OperationXnorBlockLogic from "./operations/boolean/OperationXnorBlockLogic";
 import OperationXorBlockLogic from "./operations/boolean/OperationXorBlockLogic";
 import Multiplexer from "./operations/number/Multiplexer";
+import OperationAbsBlockLogic from "./operations/number/OperationAbsBlockLogic";
 import OperationAddBlockLogic from "./operations/number/OperationAddBlockLogic";
+import OperationClampBlockLogic from "./operations/number/OperationClampBlockLogic";
 import OperationDivBlockLogic from "./operations/number/OperationDivBlockLogic";
 import OperationEqualsBlockLogic from "./operations/number/OperationEqualsBlockLogic";
 import OperationGreaterThanBlockLogic from "./operations/number/OperationGreaterThanBlockLogic";
@@ -96,6 +98,9 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 
 	operationdeg: OperationDegBlockLogic,
 	operationrad: OperationRadBlockLogic,
+
+	operationclamp: OperationClampBlockLogic,
+	operationabs: OperationAbsBlockLogic,
 };
 
 export default logicRegistry;
