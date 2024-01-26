@@ -67,7 +67,9 @@ const blockConfigRegistryClient = {
 	},
 	thrust: {
 		input: ThrustConfigLogicValue,
-		createObservable,
+		createObservable: (definition) => {
+			return new NumberObservableValue(undefined!, 0, 100, 0.01);
+		},
 	},
 	motorRotationSpeed: {
 		input: MotorRotationSpeedConfigLogicValue,
