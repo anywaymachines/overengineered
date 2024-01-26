@@ -50,13 +50,12 @@ export default class WingLogic extends BlockLogic<Wing> {
 				const force = surface
 					.mul(
 						this.wingSurface.CFrame.PointToObjectSpace(
-							this.wingSurface.Position.add(this.wingSurface.Velocity),
+							this.wingSurface.Position.add(this.wingSurface.Velocity.add(Workspace.GlobalWind)),
 						).mul(-1),
 					)
 					.mul(21)
 					.add(vectorForce.Force)
-					.div(2)
-					.add(Workspace.GlobalWind);
+					.div(2);
 				vectorForce.Force = force;
 			});
 		}
