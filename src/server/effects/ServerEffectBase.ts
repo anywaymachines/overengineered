@@ -1,7 +1,8 @@
-import { Players, Workspace } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import PlayerDatabase from "server/PlayerDatabase";
 import GameDefinitions from "shared/GameDefinitions";
 import { _UnreliableRemoteEvent } from "shared/Remotes";
+import BlockManager from "shared/building/BlockManager";
 
 export default abstract class ServerEffectBase<T> {
 	protected readonly remote: _UnreliableRemoteEvent<(part: BasePart, args: T) => void>;
@@ -25,12 +26,10 @@ export default abstract class ServerEffectBase<T> {
 	}
 
 	protected redirect(player: Player, part: BasePart, share: boolean, arg: T) {
-		if (!part || !part.Parent) {
+		if (!BlockManager.isActiveBlockPart(part)) {
 			return;
 		}
-		if (!part.IsDescendantOf(Workspace)) {
-			return;
-		}
+
 		if (part.GetNetworkOwner() !== player) {
 			return;
 		}
