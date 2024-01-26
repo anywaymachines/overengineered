@@ -10,8 +10,10 @@ export default class VectorUtils {
 	}
 
 	static normalizeVector2(vector: Vector2) {
-		const vectorLength = math.abs(math.sqrt(vector.X ** 2 + vector.Y ** 2));
-		return vector.div(vectorLength);
+		return vector.Unit;
+	}
+	static normalizeVector3(vector: Vector3) {
+		return vector.Unit;
 	}
 
 	static roundVectorToBase(vector: Vector3, base: number): Vector3 {

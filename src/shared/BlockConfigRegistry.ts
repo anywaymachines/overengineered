@@ -107,12 +107,38 @@ const servomotorblock = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
+const magnet = {
+	input: {
+		strength: {
+			displayName: "Strength",
+			type: "clampedNumber",
+			min: 0,
+			max: 100,
+			step: 0.01,
+			default: 100 as number,
+			config: 100 as number,
+		},
+		invertPolarity: {
+			displayName: "Invert polarity",
+			type: "keybool",
+			default: false as boolean,
+			config: {
+				key: "G" as KeyCode,
+				switch: false as boolean,
+				touchName: "Invert polarity" as string,
+			},
+			canBeSwitch: true,
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
 const tnt = {
 	input: {
 		explode: {
 			displayName: "Explode",
 			type: "keybool",
-			default: false as boolean as boolean,
+			default: false as boolean,
 			config: {
 				key: "B" as KeyCode,
 				switch: false as boolean,
@@ -695,6 +721,7 @@ const blockConfigRegistry = {
 	tnt,
 	suspensionblock,
 	vehicleseat,
+	magnet,
 
 	lamp,
 	screen,
@@ -706,6 +733,7 @@ const blockConfigRegistry = {
 	keysensor,
 	altimeter,
 	accelerometer,
+	ultrasonicsensor,
 
 	constant,
 	delayblock: delayBlock,

@@ -3,6 +3,7 @@ import { PlacedBlockData } from "shared/building/BlockManager";
 import AnchorBlockLogic from "./logic/AnchorBlockLogic";
 import DisconnectBlockLogic from "./logic/DisconnectBlockLogic";
 import HeliumBlockLogic from "./logic/HeliumBlockLogic";
+import MagnetBlockLogic from "./logic/MagnetBlockLogic";
 import MotorBlockLogic from "./logic/MotorBlockLogic";
 import RocketEngineLogic from "./logic/RocketEngineLogic";
 import RopeLogic from "./logic/RopeLogic";
@@ -40,6 +41,7 @@ import AltimeterBlockLogic from "./operations/sensors/AltimeterBlockLogic";
 import AngleSensorBlockLogic from "./operations/sensors/AngleSensorBlockLogic";
 import KeySensorBlockLogic from "./operations/sensors/KeySensorBlockLogic";
 import SpeedometerBlockLogic from "./operations/sensors/SpeedometerBlockLogic";
+import UltrasonicSensorBlockLogic from "./operations/sensors/UltrasonicSensorBlockLogic";
 import OperationVec3CombinerBlockLogic from "./operations/vector/OperationVec3CombinerBlockLogic";
 import OperationVec3SplitterBlockLogic from "./operations/vector/OperationVec3SplitterBlockLogic";
 
@@ -63,6 +65,7 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 	tnt: TNTBlockLogic,
 	suspensionblock: SuspensionLogic,
 	anchorblock: AnchorBlockLogic,
+	magnet: MagnetBlockLogic,
 
 	lamp: LampBlockLogic,
 	screen: ScreenBlockLogic,
@@ -77,6 +80,7 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 	keysensor: KeySensorBlockLogic,
 	altimeter: AltimeterBlockLogic,
 	accelerometer: AccelerometerBlockLogic,
+	ultrasonicsensor: UltrasonicSensorBlockLogic,
 
 	operationnot: OperationNotBlockLogic,
 	operationand: OperationAndBlockLogic,
