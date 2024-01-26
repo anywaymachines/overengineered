@@ -7,6 +7,7 @@ import GameEnvironmentController from "./controller/GameEnvironmentController";
 import LocalPlayerController from "./controller/LocalPlayerController";
 import PlayModeController from "./controller/PlayModeController";
 import SoundController from "./controller/SoundController";
+import WindController from "./controller/WindController";
 import WorldController from "./controller/WorldController";
 import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
 import DebugControl from "./gui/static/DebugControl";
@@ -20,6 +21,7 @@ GameEnvironmentController.initialize();
 TooltipsControl.instance.show();
 LogControl.instance.show();
 WorldController.generate();
+WindController.initialize();
 
 LocalPlayerController.initialize();
 InputTypeChangeEvent.subscribe();
