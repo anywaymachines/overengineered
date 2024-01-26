@@ -29,6 +29,7 @@ import OperationEqualsBlockLogic from "./operations/number/OperationEqualsBlockL
 import OperationGreaterThanBlockLogic from "./operations/number/OperationGreaterThanBlockLogic";
 import OperationMulBlockLogic from "./operations/number/OperationMulBlockLogic";
 import OperationRoundBlockLogic from "./operations/number/OperationRoundBlockLogic";
+import OperationSignBlockLogic from "./operations/number/OperationSignBlockLogic";
 import OperationSubBlockLogic from "./operations/number/OperationSubBlockLogic";
 import OperationDegBlockLogic from "./operations/number/trigonometry/OperationDegBlockLogic";
 import OperationRadBlockLogic from "./operations/number/trigonometry/OperationRadBlockLogic";
@@ -101,6 +102,7 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 
 	operationclamp: OperationClampBlockLogic,
 	operationabs: OperationAbsBlockLogic,
+	operationsign: OperationSignBlockLogic,
 };
 
 export default logicRegistry;

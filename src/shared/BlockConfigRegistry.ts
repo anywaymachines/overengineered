@@ -713,6 +713,7 @@ const blockConfigRegistry = {
 
 	operationclamp,
 	operationabs: numberProcessing,
+	operationsign: numberProcessing,
 
 	operationvec3splitter,
 	operationvec3combiner,
