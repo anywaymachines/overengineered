@@ -1,4 +1,3 @@
-import { Workspace } from "@rbxts/services";
 import SpreadingFireController from "server/SpreadingFireController";
 import ServerEffects from "server/effects/ServerEffects";
 import ServerPartUtils from "server/plots/ServerPartUtils";
@@ -23,21 +22,7 @@ export default class UnreliableRemoteHandler {
 	}
 
 	static replicateSoundEvent(player: Player, sound: Sound, isPlaying: boolean, volume: number) {
-		if (!sound) {
-			return;
-		}
-
-		if (!sound.Parent) {
-			return;
-		}
-
-		if (!sound.Parent.IsDescendantOf(Workspace)) {
-			return;
-		}
-
-		if ((sound.Parent as Part).GetNetworkOwner() !== player) {
-			return;
-		}
+		if (!BlockManager.isActiveBlockPart(sound.Parent as BasePart)) return;
 
 		if (volume > 1) {
 			// Probably exploiting
@@ -54,40 +39,16 @@ export default class UnreliableRemoteHandler {
 		isEnabled: boolean,
 		acceleration: Vector3,
 	) {
-		if (!particle || !particle.Parent) {
-			return;
-		}
-
-		if (!particle.Parent.IsDescendantOf(Workspace)) {
-			return;
-		}
-
-		if ((particle.Parent as Part).GetNetworkOwner() !== player) {
-			return;
-		}
+		if (!BlockManager.isActiveBlockPart(particle.Parent as BasePart)) return;
 
 		particle.Enabled = isEnabled;
 		particle.Acceleration = acceleration;
 	}
 
 	static impactExplodeEvent(player: Player, block: BasePart, blastRadius: number) {
-		if (!block || !block.Parent) {
-			return;
-		}
-
-		if (!block.IsDescendantOf(Workspace)) {
-			return;
-		}
-
-		if (block.Anchored || block.AssemblyRootPart?.Anchored) {
-			return;
-		}
+		if (!BlockManager.isActiveBlockPart(block)) return;
 
 		if (block.GetAttribute("broken") === true) {
-			return;
-		}
-
-		if (block.GetNetworkOwner() !== player) {
 			return;
 		}
 
@@ -107,25 +68,9 @@ export default class UnreliableRemoteHandler {
 	}
 
 	static impactBreakEvent(player: Player, block: BasePart) {
-		if (!block || !block.Parent) {
-			return;
-		}
+		if (!BlockManager.isActiveBlockPart(block)) return;
 
-		if (!BlockManager.isBlockPart(block)) {
-			return;
-		}
-
-		if (block.Anchored || block.AssemblyRootPart?.Anchored) {
-			return;
-		}
-
-		if (block.GetAttribute("broken") === true) {
-			return;
-		}
-
-		if (block.GetNetworkOwner() !== player) {
-			return;
-		}
+		if (block.GetAttribute("broken") === true) return;
 
 		ServerPartUtils.BreakJoints(block);
 		block.SetAttribute("broken", true);
@@ -135,17 +80,7 @@ export default class UnreliableRemoteHandler {
 	}
 
 	static burnEvent(player: Player, block: BasePart) {
-		if (!block || !block.Parent) {
-			return;
-		}
-
-		if (!block.IsDescendantOf(Workspace)) {
-			return;
-		}
-
-		if (block.GetNetworkOwner() !== player) {
-			return;
-		}
+		if (!BlockManager.isActiveBlockPart(block)) return;
 
 		SpreadingFireController.burn(block);
 	}
