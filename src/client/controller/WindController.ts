@@ -2,23 +2,8 @@ import { TweenService, Workspace } from "@rbxts/services";
 import GameEnvironmentController from "./GameEnvironmentController";
 
 export default class WindController {
-	static updateWater() {
-		const coefficientWWSpeed = 1; // changes the scale of how much you want wind to affect WaterWaveSpeed
-
-		const currentWind = Workspace.GlobalWind.add(new Vector3(0.1, 0.1, 0.1));
-		Workspace.Terrain.WaterWaveSpeed =
-			6 + (coefficientWWSpeed * currentWind.X ** ((2 + currentWind.Z) ** 2)) ** 0.5;
-
-		const WWsize = 0.1 + currentWind.X ** ((2 + currentWind.Z) ** (2 ** (0.5 ** 0.85))) / 75;
-		Workspace.Terrain.WaterWaveSize = WWsize;
-	}
-
 	static initialize() {
 		Workspace.GetAttributeChangedSignal("GlobalWindValue").Connect(() => this.updateWind());
-
-		Workspace.GetPropertyChangedSignal("GlobalWind").Connect(() => {
-			this.updateWater();
-		});
 
 		this.updateWind();
 	}
