@@ -27,6 +27,7 @@ type PaintRequest = ({ readonly blocks: readonly BlockModel[] } | { readonly plo
 };
 
 type PlayerMoveRequest = {
+	readonly blocks: readonly BlockModel[] | "all";
 	readonly vector: Vector3;
 };
 

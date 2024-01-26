@@ -2,7 +2,7 @@ import { HttpService, Players, ReplicatedStorage } from "@rbxts/services";
 import GameDefinitions from "shared/GameDefinitions";
 import SharedPlots from "shared/building/SharedPlots";
 
-/** A class that is designed to manage **Plots** where players can build */
+/** Methods to edit plots information */
 export default class ServerPlots {
 	private static ownerGuiList: { [userId: number]: Instance } = {};
 

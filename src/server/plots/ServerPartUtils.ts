@@ -1,5 +1,6 @@
 import PartUtils from "shared/utils/PartUtils";
 
+/** Methods to edit block part information */
 export default class ServerPartUtils {
 	static switchDescendantsAnchor(model: Instance, isAnchored: boolean) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {

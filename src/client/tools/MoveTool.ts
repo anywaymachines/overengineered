@@ -4,15 +4,25 @@ import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
+import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
+import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 
 /** A tool for moving the entire building as a whole */
 export default class MoveTool extends ToolBase {
+	private targetModel: Model & {
+		GetChildren(undefined: undefined): readonly BlockModel[];
+	} & ({} | { Parent: PlotModel });
 	private MoveExtent?: MoveHandles;
 	private XHandles?: Handles;
 	private YHandles?: Handles;
 	private ZHandles?: Handles;
+
+	constructor(mode: BuildingMode) {
+		super(mode);
+		this.targetModel = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId).Blocks;
+	}
 
 	getDisplayName(): string {
 		return "Moving Mode";
@@ -40,18 +50,17 @@ export default class MoveTool extends ToolBase {
 			return;
 		}
 
-		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
-		const blocks = plot.FindFirstChild("Blocks") as Model;
-
-		if (blocks.GetChildren().isEmpty()) {
+		if (this.targetModel.GetChildren().size() === 0) {
 			return;
 		}
 
 		this.MoveExtent = ReplicatedStorage.Assets.MoveHandles.Clone();
 		this.MoveExtent.Parent = Workspace;
 
-		this.MoveExtent.Size = blocks.GetExtentsSize();
-		this.MoveExtent.SelectionBox.Adornee = blocks;
+		this.MoveExtent.SelectionBox.Adornee = this.targetModel;
+		const aabb = BuildingManager.getModelAABB(this.targetModel);
+		this.MoveExtent.Position = aabb.CFrame.Position;
+		this.MoveExtent.Size = aabb.Size;
 
 		this.XHandles = this.MoveExtent.XHandles;
 		this.YHandles = this.MoveExtent.YHandles;
@@ -75,9 +84,6 @@ export default class MoveTool extends ToolBase {
 			this.ZHandles.MouseButton1Down,
 			async (face: Enum.NormalId) => await this.move(face),
 		);
-
-		this.MoveExtent.Position = blocks.GetBoundingBox()[0].Position;
-		this.MoveExtent.Size = blocks.GetExtentsSize();
 	}
 
 	private updateVisibility() {
@@ -111,49 +117,33 @@ export default class MoveTool extends ToolBase {
 
 		/*
 		{
-			const eh = new EventHandler();
-			let prevLocation: Vector2 | undefined = undefined;
 			let direction: Vector3 | undefined = undefined;
+			let currentPos: Vector3 | undefined = undefined;
 
-			const startmove = () => {
-				prevLocation = UserInputService.GetMouseLocation();
-
-				eh.subscribe(RunService.Heartbeat, () => {
-					if (!prevLocation) return;
-
-					const loc = UserInputService.GetMouseLocation();
-					if (loc === prevLocation) return;
-
-					const delta = prevLocation.sub(loc);
-
-					const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
-					for (const block of plot.Blocks.GetChildren(undefined)) {
-						block.PivotTo(block.GetPivot().add(direction!.mul(-delta.X / 50)));
-					}
-
-					prevLocation = loc;
-				});
-				eh.subscribe(this.mouse.Button1Up, () => {
-					prevLocation = undefined;
-					direction = undefined;
-					eh.unsubscribeAll();
-				});
+			const start = (face: Enum.NormalId) => {
+				direction = Vector3.FromNormalId(face);
 			};
+			const move = (delta: Vector2, mousePos: Vector2) => {
+				currentPos ??= Vector3.zero;
+				direction ??= Vector3.xAxis;
+				currentPos = currentPos.add(direction.mul(delta.X / 50));
 
-			this.eventHandler.subscribe(this.XHandles!.MouseButton1Down, (face: Enum.NormalId) => {
-				direction = Vector3.FromNormalId(face);
-				startmove();
-			});
-			this.eventHandler.subscribe(this.YHandles!.MouseButton1Down, (face: Enum.NormalId) => {
-				direction = Vector3.FromNormalId(face);
-				startmove();
-			});
-			this.eventHandler.subscribe(this.ZHandles!.MouseButton1Down, (face: Enum.NormalId) => {
-				direction = Vector3.FromNormalId(face);
-				startmove();
-			});
+				const roundedPos = new Vector3(
+					math.round(currentPos.X),
+					math.round(currentPos.Y),
+					math.round(currentPos.Z),
+				);
 
-			this.eventHandler.allUnsibscribed.Once(() => eh.unsubscribeAll());
+				const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
+				for (const block of plot.Blocks.GetChildren(undefined)) {
+					block.PivotTo(block.GetPivot().add(roundedPos));
+				}
+			};
+			const stop = () => {};
+
+			Dragger.initialize(this.eventHandler, this.XHandles!, move, start, stop);
+			Dragger.initialize(this.eventHandler, this.YHandles!, move, start, stop);
+			Dragger.initialize(this.eventHandler, this.ZHandles!, move, start, stop);
 		}
 		*/
 	}
@@ -173,12 +163,16 @@ export default class MoveTool extends ToolBase {
 		else if (face === Enum.NormalId.Left) vector = new Vector3(-2, 0, 0);
 		else if (face === Enum.NormalId.Right) vector = new Vector3(2, 0, 0);
 
+		const blocks = SharedPlots.isPlot(this.targetModel.Parent)
+			? ("all" as const)
+			: this.targetModel.GetChildren(undefined);
+
 		const response = await ActionController.instance.executeOperation(
 			"Move block",
 			async () => {
-				await BuildingController.moveBlock({ vector: vector.mul(-1) });
+				await BuildingController.moveBlock({ blocks, vector: vector.mul(-1) });
 			},
-			{ vector: vector },
+			{ blocks, vector: vector },
 			(info) => BuildingController.moveBlock(info),
 		);
 

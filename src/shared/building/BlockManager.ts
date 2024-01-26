@@ -23,6 +23,7 @@ export type PlacedBlockData<T extends BlockModel = BlockModel> = {
 	readonly connections: Readonly<Record<BlockConnectionName, PlacedBlockDataConnection>>;
 };
 
+/** Methods for reading information about a block */
 export default class BlockManager {
 	static isActiveBlockPart(part: BasePart): boolean {
 		if (

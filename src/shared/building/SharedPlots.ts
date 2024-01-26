@@ -3,11 +3,12 @@ import GameDefinitions from "shared/GameDefinitions";
 import VectorUtils from "shared/utils/VectorUtils";
 import BlockManager, { PlacedBlockData } from "./BlockManager";
 
+/** Methods for reading the plots data */
 export default class SharedPlots {
 	static readonly plots = Workspace.Plots.GetChildren() as unknown as readonly PlotModel[];
 
 	/** Checks if the provided `Instance` is a plot model */
-	static isPlot(model: Instance): model is PlotModel {
+	static isPlot(model: Instance | undefined): model is PlotModel {
 		return model?.Parent === Workspace.Plots;
 	}
 

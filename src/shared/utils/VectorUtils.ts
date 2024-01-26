@@ -1,4 +1,14 @@
 export default class VectorUtils {
+	static apply(vector: Vector3, func: (num: number) => number): Vector3;
+	static apply(vector: Vector2, func: (num: number) => number): Vector2;
+	static apply(vector: Vector2 | Vector3, func: (num: number) => number): Vector2 | Vector3 {
+		if (typeIs(vector, "Vector3")) {
+			return new Vector3(func(vector.X), func(vector.Y), func(vector.Z));
+		}
+
+		return new Vector2(func(vector.X), func(vector.Y));
+	}
+
 	static normalizeVector2(vector: Vector2) {
 		const vectorLength = math.abs(math.sqrt(vector.X ** 2 + vector.Y ** 2));
 		return vector.div(vectorLength);

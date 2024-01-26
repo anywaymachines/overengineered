@@ -583,6 +583,7 @@ const current = versions[versions.size() - 1] as typeof versions extends readonl
 
 const getVersion = (version: number) => versions.find((v) => v.version === version);
 
+/** Methods to save and load buildings */
 const BlocksSerializer = {
 	version: current.version,
 

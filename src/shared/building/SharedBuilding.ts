@@ -3,6 +3,7 @@ import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
 import Serializer from "shared/Serializer";
 import PartUtils from "shared/utils/PartUtils";
 
+/** Methods for editing the building */
 export const SharedBuilding = {
 	/**
 	 * Set the block material and color
