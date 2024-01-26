@@ -211,6 +211,25 @@ const vehicleseat = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const ultrasonicsensor = {
+	input: {
+		max_distance: {
+			displayName: "Max distance",
+			type: "number",
+			default: 100 as number,
+			config: 100 as number,
+		},
+	},
+	output: {
+		distance: {
+			displayName: "Distance",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const speedometer = {
 	input: {},
 	output: {
