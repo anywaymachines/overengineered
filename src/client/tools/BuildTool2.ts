@@ -193,14 +193,10 @@ export default class BuildTool2 extends ToolBase {
 		}
 
 		const canBePlaced =
+			plot &&
 			[...this.mirroredGhosts, this.mainGhost].find(
 				(ghost) =>
-					!BuildingManager.blockCanBePlacedAt(
-						this.targetPlot.get()!,
-						ghost.model,
-						ghost.model.GetPivot(),
-						Players.LocalPlayer,
-					),
+					!BuildingManager.blockCanBePlacedAt(plot, ghost.model, ghost.model.GetPivot(), Players.LocalPlayer),
 			) === undefined;
 
 		PartUtils.ghostModel(this.mainGhost.model, canBePlaced ? this.allowedColor : this.forbiddenColor);
