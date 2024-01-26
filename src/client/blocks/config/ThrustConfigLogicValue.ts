@@ -1,8 +1,8 @@
 import { KeyDefinitions, KeyPressingDefinitionsController } from "client/base/KeyPressingController";
 import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
 import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
+import NumberObservableValue from "shared/event/NumberObservableValue";
 import ObservableValue from "shared/event/ObservableValue";
-import blockConfigRegistryClient from "./BlockConfigRegistryClient";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
 export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefinitionRegistry["thrust"]> {
@@ -96,6 +96,6 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefi
 	}
 
 	protected createObservable(): ObservableValue<number> {
-		return blockConfigRegistryClient["thrust"].createObservable(this.definition);
+		return new NumberObservableValue(0, 0, 100, 0.01);
 	}
 }
