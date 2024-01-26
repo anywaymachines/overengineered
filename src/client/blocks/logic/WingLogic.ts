@@ -1,4 +1,4 @@
-import { RunService } from "@rbxts/services";
+import { RunService, Workspace } from "@rbxts/services";
 import BlockLogic from "client/base/BlockLogic";
 import RobloxUnit from "shared/RobloxUnit";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -55,7 +55,8 @@ export default class WingLogic extends BlockLogic<Wing> {
 					)
 					.mul(21)
 					.add(vectorForce.Force)
-					.div(2);
+					.div(2)
+					.add(Workspace.GlobalWind);
 				vectorForce.Force = force;
 			});
 		}
