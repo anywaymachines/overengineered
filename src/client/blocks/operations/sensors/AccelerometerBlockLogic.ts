@@ -14,11 +14,15 @@ export default class AccelerometerBlockLogic extends ConfigurableBlockLogic<type
 		const linearVelocity = this.block.instance.PrimaryPart!.AssemblyLinearVelocity;
 		const angularVelocity = this.block.instance.PrimaryPart!.AssemblyAngularVelocity;
 		this.output.linear.set(
-			new Vector3(
-				RobloxUnit.Studs_To_Meters(linearVelocity.X),
-				RobloxUnit.Studs_To_Meters(linearVelocity.Y),
-				RobloxUnit.Studs_To_Meters(linearVelocity.Z),
-			),
+			this.block.instance
+				.GetPivot()
+				.Rotation.mul(
+					new Vector3(
+						RobloxUnit.Studs_To_Meters(linearVelocity.X),
+						RobloxUnit.Studs_To_Meters(linearVelocity.Y),
+						RobloxUnit.Studs_To_Meters(linearVelocity.Z),
+					),
+				),
 		);
 		this.output.angular.set(
 			new Vector3(
