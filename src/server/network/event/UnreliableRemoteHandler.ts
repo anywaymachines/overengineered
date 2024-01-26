@@ -39,7 +39,9 @@ export default class UnreliableRemoteHandler {
 		isEnabled: boolean,
 		acceleration: Vector3,
 	) {
-		if (!BlockManager.isActiveBlockPart(particle.Parent as BasePart)) return;
+		const part = particle.Parent as BasePart;
+		if (!BlockManager.isActiveBlockPart(part)) return;
+		if (part.GetNetworkOwner() !== player) return;
 
 		particle.Enabled = isEnabled;
 		particle.Acceleration = acceleration;
