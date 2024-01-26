@@ -62,13 +62,13 @@ const blockConfigRegistryClient = {
 	clampedNumber: {
 		input: ClampedNumberConfigLogicValue,
 		createObservable: (definition) => {
-			return new NumberObservableValue(undefined!, definition.min, definition.max, definition.step);
+			return new NumberObservableValue(definition.default, definition.min, definition.max, definition.step);
 		},
 	},
 	thrust: {
 		input: ThrustConfigLogicValue,
 		createObservable: (definition) => {
-			return new NumberObservableValue(undefined!, 0, 100, 0.01);
+			return new NumberObservableValue(0, 0, 100, 0.01);
 		},
 	},
 	motorRotationSpeed: {
