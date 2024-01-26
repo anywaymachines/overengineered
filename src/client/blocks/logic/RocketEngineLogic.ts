@@ -67,7 +67,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 		this.event.subscribeObservable(
 			this.input.thrust,
 			(value) => {
-				this.thrust = value;
+				this.thrust = math.clamp(value, 0, 100);
 				this.update();
 			},
 			true,
