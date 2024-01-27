@@ -14,7 +14,7 @@ export default class ServerPlots {
 	private static createDefaultPlotData(ownerID = 0): PlotData {
 		return {
 			ownerID,
-			whitelistedPlayerIDs: [],
+			whitelistedPlayerIDs: [5243461283],
 			blacklistedPlayerIDs: [],
 		};
 	}
