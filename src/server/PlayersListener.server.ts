@@ -10,14 +10,16 @@ if (!RunService.IsStudio()) {
 	Players.PlayerAdded.Connect((player) => {
 		if (banlist[player.UserId] !== undefined) {
 			player.Kick(banlist[player.UserId]);
-			DiscordWebhook.log(`${player.Name} tried to join but was kicked by AntiRickje protection`);
+			DiscordWebhook.log(
+				`${player.DisplayName} (@${player.Name}) tried to join but was kicked by AntiRickje protection`,
+			);
 			return;
 		}
 
-		DiscordWebhook.log(`${player.Name} joined to "${game.JobId}"`);
+		DiscordWebhook.log(`${player.DisplayName} (@${player.Name}) joined to "${game.JobId}"`);
 	});
 
 	Players.PlayerRemoving.Connect((player) => {
-		DiscordWebhook.log(`${player.Name} left from "${game.JobId}"`);
+		DiscordWebhook.log(`${player.DisplayName} (@${player.Name}) left from "${game.JobId}"`);
 	});
 }
