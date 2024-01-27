@@ -41,7 +41,7 @@ import AltimeterBlockLogic from "./operations/sensors/AltimeterBlockLogic";
 import AngleSensorBlockLogic from "./operations/sensors/AngleSensorBlockLogic";
 import KeySensorBlockLogic from "./operations/sensors/KeySensorBlockLogic";
 import SpeedometerBlockLogic from "./operations/sensors/SpeedometerBlockLogic";
-import UltrasonicSensorBlockLogic from "./operations/sensors/UltrasonicSensorBlockLogic";
+import LidarSensorBlockLogic from "./operations/sensors/UltrasonicSensorBlockLogic";
 import OperationVec3CombinerBlockLogic from "./operations/vector/OperationVec3CombinerBlockLogic";
 import OperationVec3SplitterBlockLogic from "./operations/vector/OperationVec3SplitterBlockLogic";
 
@@ -80,7 +80,7 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 	keysensor: KeySensorBlockLogic,
 	altimeter: AltimeterBlockLogic,
 	accelerometer: AccelerometerBlockLogic,
-	ultrasonicsensor: UltrasonicSensorBlockLogic,
+	lidarsensor: LidarSensorBlockLogic,
 
 	operationnot: OperationNotBlockLogic,
 	operationand: OperationAndBlockLogic,

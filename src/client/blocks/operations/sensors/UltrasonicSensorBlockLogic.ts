@@ -4,14 +4,12 @@ import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import RobloxUnit from "shared/RobloxUnit";
 
-export default class UltrasonicSensorBlockLogic extends ConfigurableBlockLogic<
-	typeof blockConfigRegistry.ultrasonicsensor
-> {
+export default class LidarSensorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.lidarsensor> {
 	private raycastParams;
 	private ray;
 
-	constructor(block: BlockLogicData<typeof blockConfigRegistry.ultrasonicsensor.input>) {
-		super(block, blockConfigRegistry.ultrasonicsensor);
+	constructor(block: BlockLogicData<typeof blockConfigRegistry.lidarsensor.input>) {
+		super(block, blockConfigRegistry.lidarsensor);
 		this.event.subscribe(RunService.Heartbeat, () => this.update());
 
 		this.ray = this.block.instance.FindFirstChild("Ray") as BasePart;

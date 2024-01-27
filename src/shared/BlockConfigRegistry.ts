@@ -237,7 +237,7 @@ const vehicleseat = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const ultrasonicsensor = {
+const lidarsensor = {
 	input: {
 		max_distance: {
 			displayName: "Max distance",
@@ -733,7 +733,7 @@ const blockConfigRegistry = {
 	keysensor,
 	altimeter,
 	accelerometer,
-	ultrasonicsensor,
+	lidarsensor,
 
 	constant,
 	delayblock: delayBlock,
