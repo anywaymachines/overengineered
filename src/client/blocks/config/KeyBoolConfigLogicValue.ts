@@ -8,7 +8,7 @@ export class KeyBoolConfigLogicValue extends ConfigLogicValueBase<BlockConfigDef
 		definition: BlockConfigDefinitionRegistry["keybool"],
 	) {
 		super(config, definition);
-		this.value.set(!config.reversed);
+		this.value.set(config.reversed);
 
 		if (this.definition.canBeSwitch && this.config.switch) {
 			this.event.onKeyDown(this.config.key, () => this.value.set(!this.value.get()));
