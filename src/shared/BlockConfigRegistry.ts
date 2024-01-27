@@ -67,8 +67,8 @@ const rocketengine = {
 			min: 0,
 			max: 100,
 			step: 0.01,
-			default: 15 as number,
-			config: 15 as number,
+			default: 100 as number,
+			config: 100 as number,
 		},
 	},
 	output: {},
@@ -213,7 +213,7 @@ const suspensionblock = {
 			type: "clampedNumber",
 			default: 250 as number,
 			min: 0,
-			max: 1000,
+			max: 10_000,
 			step: 0.01,
 			config: 250 as number,
 		},
@@ -697,7 +697,7 @@ const operationclamp = {
 	},
 	output: {
 		result: {
-			displayName: "Height",
+			displayName: "Result",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
