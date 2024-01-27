@@ -349,7 +349,6 @@ const v8: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 							sub: cfg?.thrust_sub ?? "S",
 						},
 						switchmode: cfg?.switchmode,
-						strength: cfg?.strength,
 					},
 				};
 

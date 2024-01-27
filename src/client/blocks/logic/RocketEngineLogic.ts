@@ -78,21 +78,35 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 		const torque = this.thrust;
 
 		// Force
-		this.vectorForce.Force = new Vector3((this.power * this.multiplier * torque * -1) / 100, 0, 0);
+		this.vectorForce.Force = new Vector3(
+			(((this.power * this.multiplier * torque * -1) / 100) * this.input.strength.get()) / 100,
+			0,
+			0,
+		);
 
 		// Particles
 		const newParticleEmitterState = torque !== 0;
-		const newParticleEmitterAcceleration = new Vector3((this.maxParticlesAcceleration / 100) * torque, 0, 0);
+		const newParticleEmitterAcceleration = new Vector3(
+			((this.maxParticlesAcceleration / 100) * torque * this.input.strength.get()) / 100,
+			0,
+			0,
+		);
 		const particleEmmiterHasDifference =
 			this.particleEmitter.Enabled !== newParticleEmitterState ||
 			math.abs(this.particleEmitter.Acceleration.X - newParticleEmitterAcceleration.X) > 1;
 
 		this.particleEmitter.Enabled = newParticleEmitterState;
-		this.particleEmitter.Acceleration = new Vector3((this.maxParticlesAcceleration / 100) * torque, 0, 0);
+		this.particleEmitter.Acceleration = new Vector3(
+			((this.maxParticlesAcceleration / 100) * torque * this.input.strength.get()) / 100,
+			0,
+			0,
+		);
 
 		// Sound
 		const newSoundState = torque !== 0;
-		const newVolume = SoundController.getWorldVolume((this.maxSoundVolume / 100) * torque);
+		const newVolume = SoundController.getWorldVolume(
+			((this.maxSoundVolume / 100) * torque * this.input.strength.get()) / 100,
+		);
 		const volumeHasDifference =
 			newSoundState !== this.sound.Playing || math.abs(this.sound.Volume - newVolume) > 0.005;
 		this.sound.Playing = newSoundState;

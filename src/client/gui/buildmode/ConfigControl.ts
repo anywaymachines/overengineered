@@ -444,15 +444,6 @@ export class ThrustConfigValueControl extends ConfigValueControl<ThrustConfigVal
 				default: false as boolean,
 				config: false as boolean,
 			},
-			strength: {
-				displayName: "Strength %",
-				type: "clampedNumber",
-				min: 0,
-				max: 100,
-				step: 1,
-				default: 100 as number,
-				config: 100 as number,
-			},
 		} as const satisfies BlockConfigDefinitions;
 		const _compilecheck: BlockConfigDefinitionsToConfig<typeof def> = config;
 

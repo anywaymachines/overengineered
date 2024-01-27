@@ -56,7 +56,6 @@ export type BlockConfigValueTypeThrust = BlockConfigValueType<
 			readonly sub: KeyCode;
 		};
 		readonly switchmode: boolean;
-		readonly strength: number;
 	},
 	{
 		readonly canBeSwitch: boolean;

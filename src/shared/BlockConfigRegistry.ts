@@ -46,7 +46,7 @@ const motorblock = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
-const smallrocketengine = {
+const rocketengine = {
 	input: {
 		thrust: {
 			displayName: "Thrust",
@@ -58,9 +58,17 @@ const smallrocketengine = {
 					sub: "S" as KeyCode,
 				},
 				switchmode: false as boolean,
-				strength: 100 as number,
 			},
 			canBeSwitch: true as boolean,
+		},
+		strength: {
+			displayName: "Strength",
+			type: "clampedNumber",
+			min: 0,
+			max: 100,
+			step: 0.01,
+			default: 15 as number,
+			config: 15 as number,
 		},
 	},
 	output: {},
@@ -203,29 +211,29 @@ const suspensionblock = {
 		damping: {
 			displayName: "Damping",
 			type: "clampedNumber",
-			default: 30 as number,
+			default: 250 as number,
 			min: 0,
-			max: 100,
+			max: 1000,
 			step: 0.01,
-			config: 30 as number,
+			config: 250 as number,
 		},
 		stiffness: {
 			displayName: "Stiffness",
 			type: "clampedNumber",
-			default: 20 as number,
+			default: 75_000 as number,
 			min: 0,
-			max: 1000,
+			max: 100_000,
 			step: 0.01,
-			config: 20 as number,
+			config: 75_000 as number,
 		},
 		free_length: {
 			displayName: "Free Length",
 			type: "clampedNumber",
 			default: 4.5 as number,
-			min: 0,
+			min: 1,
 			max: 10,
 			step: 0.01,
-			config: 4 as number,
+			config: 4.5 as number,
 		},
 	},
 	output: {},
@@ -722,8 +730,8 @@ const constant = {
 const blockConfigRegistry = {
 	disconnectblock,
 	motorblock,
-	smallrocketengine,
-	rocketengine: smallrocketengine,
+	smallrocketengine: rocketengine,
+	rocketengine: rocketengine,
 	rope,
 	servomotorblock,
 	tnt,
