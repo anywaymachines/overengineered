@@ -22,7 +22,11 @@ export default class UnreliableRemoteHandler {
 	}
 
 	static replicateSoundEvent(player: Player, sound: Sound, isPlaying: boolean, volume: number) {
-		if (!BlockManager.isActiveBlockPart(sound.Parent as BasePart)) return;
+		if (!sound || !sound.Parent) return;
+
+		const part = sound.Parent as BasePart;
+		if (!BlockManager.isActiveBlockPart(part)) return;
+		if (part.GetNetworkOwner() !== player) return;
 
 		if (volume > 1) {
 			// Probably exploiting
@@ -39,6 +43,8 @@ export default class UnreliableRemoteHandler {
 		isEnabled: boolean,
 		acceleration: Vector3,
 	) {
+		if (!particle || !particle.Parent) return;
+
 		const part = particle.Parent as BasePart;
 		if (!BlockManager.isActiveBlockPart(part)) return;
 		if (part.GetNetworkOwner() !== player) return;
