@@ -262,66 +262,18 @@ export class KeyBoolConfigValueControl extends ConfigValueControl<ConfigControlD
 				default: config.switch,
 			};
 		}
+		if (definition.canBeReversed) {
+			def.reversed = {
+				displayName: "Inverted",
+				type: "bool",
+				config: config.reversed,
+				default: config.reversed,
+			};
+		}
 
 		const control = this.add(new ConfigControl2(controlTemplate(), config, def));
 		this.event.subscribe(control.configUpdated, (key, value) => {
 			this.submitted.Fire((config = { ...config, [key]: value }));
-		});
-		return;
-
-		const desktop = () => {
-			const def = {
-				key: {
-					displayName: "Key",
-					type: "key",
-					config: config.key,
-					default: config.key,
-				},
-				switch: {
-					displayName: "Toggle mode",
-					type: "bool",
-					config: config.switch,
-					default: config.switch,
-				},
-			} satisfies Partial<
-				Record<keyof BlockConfigDefinitionRegistry["keybool"]["config"], BlockConfigDefinition>
-			>;
-
-			const control = this.add(new ConfigControl2(controlTemplate(), config, def));
-			this.eventHandler.subscribe(control.configUpdated, (key, value) => {
-				this.submitted.Fire((config = { ...config, [key]: value }));
-			});
-		};
-		const touch = () => {
-			const def = {
-				touchName: {
-					displayName: "Name",
-					type: "string",
-					config: config.touchName,
-					default: config.touchName,
-				},
-				switch: {
-					displayName: "Toggle mode",
-					type: "bool",
-					config: config.switch,
-					default: config.switch,
-				},
-			} satisfies Partial<
-				Record<keyof BlockConfigDefinitionRegistry["keybool"]["config"], BlockConfigDefinition>
-			>;
-
-			const control = this.add(new ConfigControl2(controlTemplate(), config, def));
-			this.eventHandler.subscribe(control.configUpdated, (key, value) =>
-				this.submitted.Fire((config = { ...config, [key]: value })),
-			);
-		};
-
-		this.event.onPrepare((input) => {
-			this.clear();
-
-			desktop();
-			// if (input === "Desktop") desktop();
-			// else if (input === "Touch") touch();
 		});
 	}
 }

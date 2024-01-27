@@ -31,9 +31,11 @@ export type BlockConfigValueTypeKeyBool = BlockConfigValueType<
 		readonly key: KeyCode;
 		readonly switch: boolean;
 		readonly touchName: string;
+		readonly reversed: boolean;
 	},
 	{
 		readonly canBeSwitch: boolean;
+		readonly canBeReversed: boolean;
 	}
 >;
 export type BlockConfigValueTypeClampedNumber = BlockConfigPrimitiveValueType<
