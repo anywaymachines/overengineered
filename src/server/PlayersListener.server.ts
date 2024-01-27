@@ -11,8 +11,13 @@ if (!RunService.IsStudio()) {
 		if (banlist[player.UserId] !== undefined) {
 			player.Kick(banlist[player.UserId]);
 			DiscordWebhook.log(`${player.Name} tried to join but was kicked by AntiRickje protection`);
-		} else {
-			DiscordWebhook.log(`${player.Name} joined`);
+			return;
 		}
+
+		DiscordWebhook.log(`${player.Name} joined to "${game.JobId}"`);
+	});
+
+	Players.PlayerRemoving.Connect((player) => {
+		DiscordWebhook.log(`${player.Name} left from "${game.JobId}"`);
 	});
 }
