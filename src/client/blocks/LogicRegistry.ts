@@ -28,6 +28,7 @@ import OperationClampBlockLogic from "./operations/number/OperationClampBlockLog
 import OperationDivBlockLogic from "./operations/number/OperationDivBlockLogic";
 import OperationEqualsBlockLogic from "./operations/number/OperationEqualsBlockLogic";
 import OperationGreaterThanBlockLogic from "./operations/number/OperationGreaterThanBlockLogic";
+import OperationModBlockLogic from "./operations/number/OperationModBlockLogic";
 import OperationMulBlockLogic from "./operations/number/OperationMulBlockLogic";
 import OperationRoundBlockLogic from "./operations/number/OperationRoundBlockLogic";
 import OperationSignBlockLogic from "./operations/number/OperationSignBlockLogic";
@@ -94,6 +95,8 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 	operationdiv: OperationDivBlockLogic,
 	operationsub: OperationSubBlockLogic,
 	operationmul: OperationMulBlockLogic,
+	operationmod: OperationModBlockLogic,
+
 	operationvec3splitter: OperationVec3SplitterBlockLogic,
 	operationvec3combiner: OperationVec3CombinerBlockLogic,
 
