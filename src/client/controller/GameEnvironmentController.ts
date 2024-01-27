@@ -20,6 +20,7 @@ export default class GameEnvironmentController {
 
 	public static initialize() {
 		this.eventHandler.subscribe(Signals.PLAYER.SPAWN, () => {
+			Players.LocalPlayer.CharacterAppearanceLoaded.Wait();
 			this.hrp = Players.LocalPlayer.Character!.WaitForChild("HumanoidRootPart") as Part;
 		});
 
