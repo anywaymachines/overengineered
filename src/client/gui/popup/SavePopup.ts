@@ -4,6 +4,7 @@ import PlayerDataStorage from "client/PlayerDataStorage";
 import Control from "client/base/Control";
 import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
+import PopupController from "client/controller/PopupController";
 import GameDefinitions from "shared/GameDefinitions";
 import Serializer from "shared/Serializer";
 import SlotsMeta from "shared/SlotsMeta";
@@ -111,21 +112,27 @@ class SavePreview extends Control<SavePreviewDefinition> {
 		const loadButton = this.added(new ButtonControl(this.gui.LoadButton));
 
 		this.event.subscribe(saveButton.activated, () => {
-			try {
-				saveButton.disable();
+			PopupController.instance.showConfirmation(
+				"Save to this slot?",
+				() => {
+					try {
+						saveButton.disable();
 
-				const index = this.selectedSlotIndex.get();
-				if (index === undefined) return;
+						const index = this.selectedSlotIndex.get();
+						if (index === undefined) return;
 
-				PlayerDataStorage.sendPlayerSlot({
-					index,
-					save: true,
-				});
+						PlayerDataStorage.sendPlayerSlot({
+							index,
+							save: true,
+						});
 
-				this.onSave.Fire();
-			} finally {
-				saveButton.enable();
-			}
+						this.onSave.Fire();
+					} finally {
+						saveButton.enable();
+					}
+				},
+				() => {},
+			);
 		});
 
 		this.event.subscribe(loadButton.activated, async () => {
