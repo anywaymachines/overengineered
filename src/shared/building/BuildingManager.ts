@@ -58,6 +58,19 @@ const BuildingManager = {
 		return region;
 	},
 
+	/** Returns the block by its uuid */
+	getBlockByUuid(plot: PlotModel, uuid: BlockUuid): BlockModel | undefined {
+		return plot.Blocks.FindFirstChild(uuid) as BlockModel | undefined;
+	},
+
+	/** Returns the block by its uuid, checks every plot */
+	getBlockByUuidOnAnyPlot(uuid: BlockUuid): BlockModel | undefined {
+		const plot = SharedPlots.plots.find((plot) => this.getBlockByUuid(plot, uuid) !== undefined);
+		if (!plot) return undefined;
+
+		return this.getBlockByUuid(plot, uuid);
+	},
+
 	/** Returns the block or nothing that is set on (or near) the given vector
 	 * @param vector The vector to check
 	 * @deprecated slow & stupid

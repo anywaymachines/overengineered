@@ -53,7 +53,7 @@ export default class DeleteTool extends ToolBase {
 		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonY, () => this.onClearAllRequested.Fire());
 	}
 
-	private blockToUndoRequest(block: Model) {
+	private blockToUndoRequest(block: BlockModel) {
 		const info: PlaceBlockRequest = {
 			location: block.PrimaryPart!.CFrame,
 			id: block.GetAttribute("id") as string,
@@ -70,12 +70,12 @@ export default class DeleteTool extends ToolBase {
 		return info;
 	}
 
-	public async deleteBlocks(blocks: readonly Model[] | "all") {
+	public async deleteBlocks(blocks: readonly BlockModel[] | "all") {
 		const getDeletedBlocks = () => {
 			if (blocks === "all") {
-				return SharedPlots.getPlotBlocks(
-					SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId),
-				).GetChildren() as Model[];
+				return SharedPlots.getPlotBlocks(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId)).GetChildren(
+					undefined,
+				);
 			}
 
 			return blocks;
@@ -91,10 +91,10 @@ export default class DeleteTool extends ToolBase {
 					await BuildingController.placeBlock(undo);
 				}
 			},
-			blocks === "all" ? ("all" as const) : deletedBlocks.map((block) => block.GetPivot().Position),
+			blocks === "all" ? ("all" as const) : deletedBlocks.map((block) => block.GetAttribute("uuid") as BlockUuid),
 			(info) =>
 				BuildingController.deleteBlock(
-					info === "all" ? "all" : info.map((pos) => BuildingManager.getBlockByPosition(pos)!),
+					info === "all" ? "all" : info.map((uuid) => BuildingManager.getBlockByUuidOnAnyPlot(uuid)!),
 				),
 		);
 

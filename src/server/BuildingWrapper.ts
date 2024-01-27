@@ -256,7 +256,10 @@ export default class BuildingWrapper {
 			model.SetAttribute("config", JSON.serialize(data.config));
 		}
 
-		model.SetAttribute("uuid", data.uuid ?? HttpService.GenerateGUID(false));
+		const uuid = data.uuid ?? HttpService.GenerateGUID(false);
+		model.SetAttribute("uuid", uuid);
+		model.Name = uuid;
+
 		SharedBuilding.paint({ blocks: [model], color: data.color, material: data.material }, true);
 
 		// Weld block
