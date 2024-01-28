@@ -12,6 +12,7 @@ export default class InputHandler {
 	private readonly releaseKeycodes: InputCallback[] = [];
 	private readonly touchTapCallbacks: TouchCallback[] = [];
 	private readonly events: InputCallback[] = [];
+	private registered = false;
 
 	private isKeyPressed(): boolean {
 		if (UserInputService.GetFocusedTextBox()) {
@@ -112,5 +113,7 @@ export default class InputHandler {
 		this.touchTapCallbacks.clear();
 		this.eventHandler.unsubscribeAll();
 		this.events.clear();
+
+		this.registered = false;
 	}
 }
