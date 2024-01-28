@@ -1,4 +1,4 @@
-import { Players, RunService, UserInputService } from "@rbxts/services";
+import { Players, RunService, UserInputService, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
@@ -399,6 +399,14 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 				const alt = RobloxUnit.Studs_To_Meters(player.Position.Y);
 
 				control.slider.value.set(alt);
+				control.text.value.set(alt);
+			});
+		}
+
+		{
+			init("Gravity", "%d m/s²", this.infoTextTemplate(), 0, 55, 0.1, (control) => {
+				const alt = RobloxUnit.Studs_To_Meters(Workspace.Gravity);
+
 				control.text.value.set(alt);
 			});
 		}

@@ -1,6 +1,5 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
 import Signals from "client/event/Signals";
-import EventHandler from "shared/event/EventHandler";
 
 export default class GameEnvironmentController {
 	// Const
@@ -14,17 +13,14 @@ export default class GameEnvironmentController {
 
 	// Vars
 	public static currentHeight = 0;
-	private static hrp: Part;
-
-	private static eventHandler = new EventHandler();
+	private static hrp: BasePart;
 
 	public static initialize() {
-		this.eventHandler.subscribe(Signals.PLAYER.SPAWN, () => {
-			Players.LocalPlayer.CharacterAppearanceLoaded.Wait();
-			this.hrp = Players.LocalPlayer.Character!.WaitForChild("HumanoidRootPart") as Part;
+		Signals.PLAYER.SPAWN.Connect(() => {
+			this.hrp = Players.LocalPlayer.Character!.FindFirstChild("HumanoidRootPart") as BasePart;
 		});
 
-		this.eventHandler.subscribe(RunService.Heartbeat, () => this.update());
+		RunService.Heartbeat.Connect(() => this.update());
 	}
 
 	public static update() {
