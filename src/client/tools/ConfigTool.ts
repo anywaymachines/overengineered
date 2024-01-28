@@ -23,7 +23,7 @@ export default class ConfigTool extends ToolBase {
 			this.selectBlockByClick(block);
 		};
 
-		this.event.onPrepare((input) => {
+		this.onPrepare((input) => {
 			if (input === "Desktop") {
 				this.eventHandler.subscribe(this.mouse.Button1Down, () => {
 					if (!InputController.isCtrlPressed()) {
@@ -31,7 +31,7 @@ export default class ConfigTool extends ToolBase {
 					}
 				});
 			} else if (input === "Gamepad") {
-				this.inputHandler.onKeyDown(Enum.KeyCode.ButtonX, fireSelected);
+				this.inputHandler.onKeyDown("ButtonX", fireSelected);
 			} else if (input === "Touch") {
 				this.inputHandler.onTouchTap(fireSelected);
 			}

@@ -1,119 +1,120 @@
-import { UserInputService } from "@rbxts/services";
-import EventHandler from "shared/event/EventHandler";
+import GlobalInputHandler from "./GlobalInputHandler";
+import { ISignalWrapper, ThinSignalWrapper } from "./SignalWrapper";
 
-type InputCallback = (input: InputObject, gameProcessedEvent: boolean) => boolean | unknown;
-type TouchCallback = () => boolean | unknown;
+type InputCallback = (input: InputObject, gameProcessedEvent: boolean) => void;
+type TouchCallback = (inputPositions: readonly Vector2[], gameProcessedEvent: boolean) => void;
 
-/** A class similar to EventHandler, but created to listen to player input, instead of events */
+const filterKeyboard = (callback: InputCallback): InputCallback => {
+	return (input, gameProcessedEvent) => {
+		if (gameProcessedEvent) return;
+		if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
+		callback(input, gameProcessedEvent);
+	};
+};
+const filterMouse1 = (callback: InputCallback): InputCallback => {
+	return (input, gameProcessedEvent) => {
+		if (gameProcessedEvent) return;
+		if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
+		callback(input, gameProcessedEvent);
+	};
+};
+
+const keyPressed = new Map<KeyCode, Map<InputHandler, Callback[]>>();
+const keyReleased = new Map<KeyCode, Map<InputHandler, Callback[]>>();
+const maps = new Set<Map<InputHandler, Callback[]>>();
+
+const inputBegan = GlobalInputHandler.inputBegan;
+const inputChanged = GlobalInputHandler.inputChanged;
+const inputEnded = GlobalInputHandler.inputEnded;
+const touchTap = GlobalInputHandler.touchTap;
+
+{
+	const subKeys = (
+		signal: ISignalWrapper<[input: InputObject, gameProcessedEvent: boolean]>,
+		map: ReadonlyMap<KeyCode, Map<InputHandler, Callback[]>>,
+	) => {
+		signal.subscribe((input, gameProcessedEvent) => {
+			if (gameProcessedEvent) return;
+			if (input.KeyCode === Enum.KeyCode.Unknown) return;
+
+			const eventmap = map.get(input.KeyCode.Name);
+			if (!eventmap) return;
+
+			for (const [_, events] of eventmap) {
+				for (const event of events) {
+					event(input, gameProcessedEvent);
+				}
+			}
+		});
+	};
+	subKeys(inputBegan, keyPressed);
+	subKeys(inputEnded, keyReleased);
+}
+
 export default class InputHandler {
-	private readonly eventHandler: EventHandler = new EventHandler();
+	private inputBegan?: ThinSignalWrapper<Parameters<InputCallback>>;
+	private inputChanged?: ThinSignalWrapper<Parameters<InputCallback>>;
+	private inputEnded?: ThinSignalWrapper<Parameters<InputCallback>>;
+	private touchTap?: ThinSignalWrapper<Parameters<TouchCallback>>;
 
-	private readonly listenableKeycodes: InputCallback[] = [];
-	private readonly releaseKeycodes: InputCallback[] = [];
-	private readonly touchTapCallbacks: TouchCallback[] = [];
-	private readonly events: InputCallback[] = [];
-	private registered = false;
+	onInputBegan(callback: InputCallback) {
+		(this.inputBegan ??= new ThinSignalWrapper(inputBegan)).subscribe(callback);
+	}
+	onInputChanged(callback: InputCallback) {
+		(this.inputChanged ??= new ThinSignalWrapper(inputChanged)).subscribe(callback);
+	}
+	onInputEnded(callback: InputCallback) {
+		(this.inputEnded ??= new ThinSignalWrapper(inputEnded)).subscribe(callback);
+	}
+	onTouchTap(callback: TouchCallback) {
+		(this.touchTap ??= new ThinSignalWrapper(touchTap)).subscribe(callback);
+	}
 
-	private isKeyPressed(): boolean {
-		if (UserInputService.GetFocusedTextBox()) {
-			return false;
+	onKeysDown(callback: InputCallback) {
+		this.onInputBegan(filterKeyboard(callback));
+	}
+	onKeyDown(key: KeyCode, callback: InputCallback) {
+		let map = keyPressed.get(key);
+		if (!map) keyPressed.set(key, (map = new Map()));
+		maps.add(map);
+
+		let selfmap = map.get(this);
+		if (!selfmap) map.set(this, (selfmap = []));
+
+		selfmap.push(callback);
+	}
+	onKeysUp(callback: InputCallback) {
+		this.onInputEnded(filterKeyboard(callback));
+	}
+	onKeyUp(key: KeyCode, callback: InputCallback) {
+		let map = keyReleased.get(key);
+		if (!map) keyReleased.set(key, (map = new Map()));
+		maps.add(map);
+
+		let selfmap = map.get(this);
+		if (!selfmap) map.set(this, (selfmap = []));
+
+		selfmap.push(callback);
+	}
+
+	onMouse1Down(callback: InputCallback) {
+		this.onInputBegan(filterMouse1(callback));
+	}
+	onMouse1Up(callback: InputCallback) {
+		this.onInputEnded(filterMouse1(callback));
+	}
+
+	unsubscribeAll() {
+		for (const map of maps) {
+			map.delete(this);
 		}
-
-		return true;
 	}
 
-	private registerCallbacksIfNeeded() {
-		if (this.registered) return;
-		this.registered = true;
+	destroy() {
+		this.unsubscribeAll();
 
-		this.eventHandler.subscribe(UserInputService.InputBegan, (input: InputObject, gameProcessedEvent: boolean) => {
-			if (!this.isKeyPressed()) return;
-
-			for (const callback of this.listenableKeycodes) {
-				if (callback(input, gameProcessedEvent) === true) break;
-			}
-		});
-		this.eventHandler.subscribe(UserInputService.InputEnded, (input: InputObject, gameProcessedEvent: boolean) => {
-			if (!this.isKeyPressed()) return;
-
-			for (const callback of this.releaseKeycodes) {
-				if (callback(input, gameProcessedEvent) === true) break;
-			}
-		});
-		this.eventHandler.subscribe(UserInputService.TouchTap, (_) => {
-			if (!this.isKeyPressed()) return;
-
-			this.touchTapCallbacks.forEach((callback) => {
-				callback();
-			});
-		});
-
-		this.eventHandler.subscribe(UserInputService.InputBegan, (input: InputObject, gameProcessedEvent: boolean) => {
-			this.events.forEach((callback) => callback(input, gameProcessedEvent));
-		});
-		this.eventHandler.subscribe(UserInputService.InputEnded, (input: InputObject, gameProcessedEvent: boolean) => {
-			this.events.forEach((callback) => callback(input, gameProcessedEvent));
-		});
-	}
-
-	public onKeyUp(keyCode: Enum.KeyCode, callback: InputCallback) {
-		return this.onKeysUp((input, gameProcessedEvent) => {
-			if (input.KeyCode !== keyCode) return;
-
-			return callback(input, gameProcessedEvent);
-		});
-	}
-	public onKeysUp(callback: InputCallback) {
-		this.registerCallbacksIfNeeded();
-		return this.releaseKeycodes.push(callback);
-	}
-
-	public onKeyDown(keyCode: Enum.KeyCode | KeyCode, callback: InputCallback) {
-		return this.onKeysDown((input, gameProcessedEvent) => {
-			if (input.KeyCode !== keyCode && input.KeyCode.Name !== keyCode) {
-				return;
-			}
-
-			return callback(input, gameProcessedEvent);
-		});
-	}
-
-	public onKeysDown(callback: InputCallback) {
-		this.registerCallbacksIfNeeded();
-		return this.listenableKeycodes.push(callback);
-	}
-
-	public onMouseButton1Down(callback: InputCallback) {
-		this.registerCallbacksIfNeeded();
-
-		return this.events.push((input, gameProcessedEvent) => {
-			if (input.UserInputState !== Enum.UserInputState.Begin) return;
-			if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
-			callback(input, gameProcessedEvent);
-		});
-	}
-
-	public onMouseButton1Up(callback: InputCallback) {
-		this.registerCallbacksIfNeeded();
-
-		return this.events.push((input, gameProcessedEvent) => {
-			if (input.UserInputState !== Enum.UserInputState.End) return;
-			if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
-			callback(input, gameProcessedEvent);
-		});
-	}
-
-	public onTouchTap(callback: TouchCallback) {
-		this.registerCallbacksIfNeeded();
-		return this.touchTapCallbacks.push(callback);
-	}
-
-	public unsubscribeAll() {
-		this.listenableKeycodes.clear();
-		this.touchTapCallbacks.clear();
-		this.eventHandler.unsubscribeAll();
-		this.events.clear();
-
-		this.registered = false;
+		this.inputBegan?.destroy();
+		this.inputChanged?.destroy();
+		this.inputEnded?.destroy();
 	}
 }

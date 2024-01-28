@@ -375,9 +375,9 @@ export default class BuildTool extends ToolBase {
 
 	protected prepareDesktop(): void {
 		// Keyboard controls
-		this.inputHandler.onKeyDown(Enum.KeyCode.T, () => this.rotate("x"));
-		this.inputHandler.onKeyDown(Enum.KeyCode.R, () => this.rotate("y"));
-		this.inputHandler.onKeyDown(Enum.KeyCode.Y, () => {
+		this.inputHandler.onKeyDown("T", () => this.rotate("x"));
+		this.inputHandler.onKeyDown("R", () => this.rotate("y"));
+		this.inputHandler.onKeyDown("Y", () => {
 			if (InputController.isCtrlPressed()) return;
 			this.rotate("z");
 		});
@@ -400,13 +400,13 @@ export default class BuildTool extends ToolBase {
 
 	protected prepareGamepad(): void {
 		// Gamepad button controls
-		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonX, () => this.placeBlock());
+		this.inputHandler.onKeyDown("ButtonX", () => this.placeBlock());
 
 		// Gamepad DPAD controls
-		this.inputHandler.onKeyDown(Enum.KeyCode.DPadLeft, () => this.rotate("x", false));
-		this.inputHandler.onKeyDown(Enum.KeyCode.DPadUp, () => this.rotate("y", false));
-		this.inputHandler.onKeyDown(Enum.KeyCode.DPadDown, () => this.rotate("y", false));
-		this.inputHandler.onKeyDown(Enum.KeyCode.DPadRight, () => this.rotate("z", false));
+		this.inputHandler.onKeyDown("DPadLeft", () => this.rotate("x", false));
+		this.inputHandler.onKeyDown("DPadUp", () => this.rotate("y", false));
+		this.inputHandler.onKeyDown("DPadDown", () => this.rotate("y", false));
+		this.inputHandler.onKeyDown("DPadRight", () => this.rotate("z", false));
 
 		// Block movement
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updatePosition());

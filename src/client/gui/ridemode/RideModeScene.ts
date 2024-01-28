@@ -36,7 +36,7 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 		const controlResetButton = this.added(new ButtonControl(this.gui.ControlReset));
 		controlResetButton.hide();
 
-		this.event.onPrepare((input) => {
+		this.onPrepare((input) => {
 			if (input === "Touch") {
 				controlSettingsButton.show();
 			} else {

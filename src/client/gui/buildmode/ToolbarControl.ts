@@ -131,17 +131,7 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 	}
 
 	protected prepareDesktop() {
-		const keycodes = [
-			Enum.KeyCode.One,
-			Enum.KeyCode.Two,
-			Enum.KeyCode.Three,
-			Enum.KeyCode.Four,
-			Enum.KeyCode.Five,
-			Enum.KeyCode.Six,
-			Enum.KeyCode.Seven,
-			Enum.KeyCode.Eight,
-			Enum.KeyCode.Nine,
-		] as const;
+		const keycodes: readonly KeyCode[] = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
 
 		this.tools.tools.forEach((tool, i) => {
 			this.inputHandler.onKeyDown(keycodes[i], () =>
@@ -151,8 +141,8 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 	}
 
 	protected prepareGamepad() {
-		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonB, () => this.tools.selectedTool.set(undefined));
-		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonR1, () => this.gamepadSelectTool(true));
-		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonL1, () => this.gamepadSelectTool(false));
+		this.inputHandler.onKeyDown("ButtonB", () => this.tools.selectedTool.set(undefined));
+		this.inputHandler.onKeyDown("ButtonR1", () => this.gamepadSelectTool(true));
+		this.inputHandler.onKeyDown("ButtonL1", () => this.gamepadSelectTool(false));
 	}
 }

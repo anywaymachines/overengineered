@@ -31,7 +31,7 @@ export default class DeleteTool extends ToolBase {
 			if (!block) return;
 			await this.deleteBlocks([block]);
 		};
-		this.event.onPrepare((input) => {
+		this.onPrepare((input) => {
 			if (input === "Desktop") {
 				this.eventHandler.subscribe(this.mouse.Button1Down, () => {
 					if (!InputController.isCtrlPressed()) {
@@ -39,7 +39,7 @@ export default class DeleteTool extends ToolBase {
 					}
 				});
 			} else if (input === "Gamepad") {
-				this.inputHandler.onKeyDown(Enum.KeyCode.ButtonX, fireSelected);
+				this.inputHandler.onKeyDown("ButtonX", fireSelected);
 			} else if (input === "Touch") {
 				this.inputHandler.onTouchTap(fireSelected);
 			}
@@ -50,7 +50,7 @@ export default class DeleteTool extends ToolBase {
 	}
 
 	protected prepareGamepad(): void {
-		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonY, () => this.onClearAllRequested.Fire());
+		this.inputHandler.onKeyDown("ButtonY", () => this.onClearAllRequested.Fire());
 	}
 
 	private blockToUndoRequest(block: BlockModel) {

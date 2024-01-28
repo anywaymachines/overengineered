@@ -343,7 +343,7 @@ export default class WireTool extends ToolBase {
 		});
 
 		// Dragging end
-		this.inputHandler.onMouseButton1Up(() => {
+		this.inputHandler.onMouse1Up(() => {
 			if (!this.startMarker.get()) return;
 			this.finishDragging();
 		});
@@ -375,7 +375,7 @@ export default class WireTool extends ToolBase {
 
 	protected prepareGamepad(): void {
 		// Selection mode
-		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonY, () => {
+		this.inputHandler.onKeyDown("ButtonY", () => {
 			if (GamepadService.GamepadCursorEnabled) {
 				GamepadService.DisableGamepadCursor();
 			} else {
@@ -384,7 +384,7 @@ export default class WireTool extends ToolBase {
 		});
 
 		// Cancel
-		this.inputHandler.onKeyDown(Enum.KeyCode.ButtonX, () => {
+		this.inputHandler.onKeyDown("ButtonX", () => {
 			this.startMarker.set(undefined);
 		});
 

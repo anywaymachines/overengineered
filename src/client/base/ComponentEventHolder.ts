@@ -1,18 +1,16 @@
-import { UserInputService } from "@rbxts/services";
-import InputController from "client/controller/InputController";
+import InputHandler from "client/event/InputHandler";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
-type Keys = InputType | "All";
-type SigConnection = { Disconnect(): void };
-type Sig<T> = { Connect(callback: T): SigConnection };
-type Sub<T> = readonly [signal: Sig<T>, callback: T];
+type Sub<T extends Callback> = readonly [signal: RBXScriptSignal<T>, callback: T];
 
 /** Event handler with the ability to disable event processing */
 export default class ComponentEventHolder {
-	private readonly prepareEvents: ((inputType: InputType) => void)[] = [];
-	private readonly events: Partial<Record<Keys, Sub<unknown>[]>> = {};
-	private readonly eventsOnce: Partial<Record<Keys, Sub<unknown>[]>> = {};
-	private readonly subscribed: SigConnection[] = [];
+	private readonly prepareEvents: (() => void)[] = [];
+	private readonly events: Sub<Callback>[] = [];
+	private readonly eventsOnce: Sub<Callback>[] = [];
+	private readonly subscribed: RBXScriptConnection[] = [];
+
+	private readonly inputHandler = new InputHandler();
 
 	private enabled = false;
 
@@ -26,7 +24,15 @@ export default class ComponentEventHolder {
 		if (this.enabled) return;
 
 		this.enabled = true;
-		this.inputTypeChanged(InputController.inputType.get());
+		this.disconnect();
+
+		for (const event of this.prepareEvents) {
+			event();
+		}
+
+		this.events.forEach((e) => this.connect(e));
+		this.eventsOnce.forEach((e) => this.connect(e));
+		this.eventsOnce.clear();
 	}
 
 	/** Disable the event processing */
@@ -38,7 +44,7 @@ export default class ComponentEventHolder {
 	}
 
 	/** Add event to the event list */
-	private connect(sub: Sub<unknown>): void {
+	private connect(sub: Sub<Callback>): void {
 		this.subscribed.push(sub[0].Connect(sub[1]));
 	}
 
@@ -48,88 +54,46 @@ export default class ComponentEventHolder {
 			sub.Disconnect();
 		}
 
+		this.inputHandler.unsubscribeAll();
 		this.subscribed.clear();
 	}
 
-	private inputTypeChanged(inputType: InputType): void {
-		if (!this.enabled) return;
-		this.disconnect();
-		this.subscribeOnce(InputController.inputType.changed, (inputType) => this.inputTypeChanged(inputType));
-
-		for (const event of this.prepareEvents) {
-			event(inputType);
-		}
-
-		const reg = (key: Keys) => {
-			this.events[key]?.forEach((e) => this.connect(e));
-
-			this.eventsOnce[key]?.forEach((e) => this.connect(e));
-			this.eventsOnce[key]?.clear();
-		};
-
-		reg("All");
-		reg(inputType);
-	}
-
 	/** Register an event that fires on enable and input type change */
-	onPrepare(callback: (inputType: InputType) => void, executeImmediately = false): void {
+	onPrepare(callback: () => void, executeImmediately = false): void {
 		this.prepareEvents.push(callback);
-		if (executeImmediately) callback(InputController.inputType.get());
+		if (executeImmediately) callback();
 	}
 
-	private sub(events: Partial<Record<Keys, Sub<unknown>[]>>, inputType: Keys, sub: Sub<unknown>): void {
-		events[inputType] ??= [];
-		events[inputType]!.push(sub);
-
+	private sub(events: Sub<Callback>[], sub: Sub<Callback>): void {
+		events.push(sub);
 		if (this.enabled) this.connect(sub);
 	}
 
 	/** Register an event */
-	subscribe<T extends Callback = Callback>(signal: Sig<T>, callback: T, inputType: Keys = "All"): void {
-		this.sub(this.events, inputType, [signal, callback]);
+	subscribe<T extends Callback = Callback>(signal: RBXScriptSignal<T>, callback: T): void {
+		this.sub(this.events, [signal, callback]);
 	}
 
 	/** Register an event that fires once */
-	subscribeOnce<T extends Callback = Callback>(signal: Sig<T>, callback: T, inputType: Keys = "All"): void {
-		this.sub(this.eventsOnce, inputType, [signal, callback]);
+	subscribeOnce<T extends Callback = Callback>(signal: RBXScriptSignal<T>, callback: T): void {
+		this.sub(this.eventsOnce, [signal, callback]);
 	}
 
-	/** Register an InputBegan and InputEnded event */
-	onInput(callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
-		this.onInputBegin(callback, allowGameProcessedEvents);
-		this.onInputEnd(callback, allowGameProcessedEvents);
-	}
 	/** Register an InputBegan event */
-	onInputBegin(callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
-		this.subscribe(UserInputService.InputBegan, (input, gameProcessedEvent) => {
-			if (gameProcessedEvent && !allowGameProcessedEvents) return;
-			callback(input);
-		});
+	onInputBegin(callback: (input: InputObject) => void) {
+		this.onPrepare(() => this.inputHandler.onInputBegan(callback));
 	}
 	/** Register an InputEnded event */
-	onInputEnd(callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
-		this.subscribe(UserInputService.InputEnded, (input, gameProcessedEvent) => {
-			if (gameProcessedEvent && !allowGameProcessedEvents) return;
-			callback(input);
-		});
+	onInputEnd(callback: (input: InputObject) => void) {
+		this.onPrepare(() => this.inputHandler.onInputEnded(callback));
 	}
 	/** Register an InputBegan event, filtered by a keyboard key */
-	onKeyDown(key: KeyCode, callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
-		return this.onInputBegin((input) => {
-			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
-			if (input.KeyCode.Name !== key) return;
-
-			callback(input);
-		}, allowGameProcessedEvents);
+	onKeyDown(key: KeyCode, callback: (input: InputObject) => void) {
+		this.onPrepare(() => this.inputHandler.onKeyDown(key, callback));
 	}
 	/** Register an InputEnded event, filtered by a keyboard key */
-	onKeyUp(key: KeyCode, callback: (input: InputObject) => void, allowGameProcessedEvents = false) {
-		return this.onInputEnd((input) => {
-			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
-			if (input.KeyCode.Name !== key) return;
-
-			callback(input);
-		}, allowGameProcessedEvents);
+	onKeyUp(key: KeyCode, callback: (input: InputObject) => void) {
+		this.onPrepare(() => this.inputHandler.onKeyUp(key, callback));
 	}
 
 	/** Subscribe to an observable value changed event */
@@ -137,9 +101,8 @@ export default class ComponentEventHolder {
 		observable: ReadonlyObservableValue<T>,
 		callback: (value: T, prev: T) => void,
 		executeImmediately = false,
-		inputType: Keys = "All",
 	): void {
-		this.subscribe(observable.changed, callback, inputType);
+		this.subscribe(observable.changed, callback);
 		if (executeImmediately) {
 			this.onPrepare(() => callback(observable.get(), observable.get()), true);
 		}
@@ -160,6 +123,7 @@ export default class ComponentEventHolder {
 	/** Disable this event holder and remove all event subscriptions */
 	destroy(): void {
 		this.disable();
+		this.inputHandler.destroy();
 
 		const tis = this;
 		delete (this as unknown as { prepareEvents?: typeof tis.prepareEvents }).prepareEvents;

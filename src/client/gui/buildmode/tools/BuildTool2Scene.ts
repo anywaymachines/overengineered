@@ -1,4 +1,5 @@
 import Control from "client/base/Control";
+import InputController from "client/controller/InputController";
 import BuildTool2 from "client/tools/BuildTool2";
 import GuiAnimator from "../../GuiAnimator";
 import BlockSelectionControl, { BlockSelectionControlDefinition } from "../BlockSelection";
@@ -42,7 +43,7 @@ export default class BuildTool2Scene extends Control<BuildTool2SceneDefinition> 
 
 		this.tool.selectedBlock.bindTo(this.blockSelector.selectedBlock);
 
-		this.event.onPrepare((inputType) => (this.gui.TouchControls.Visible = inputType === "Touch"), true);
+		this.onPrepare((inputType) => (this.gui.TouchControls.Visible = inputType === "Touch"), true);
 
 		MaterialChooserControl.instance.selectedMaterial.bindTo(tool.selectedMaterial);
 		MaterialChooserControl.instance.selectedColor.bindTo(tool.selectedColor);
@@ -50,6 +51,8 @@ export default class BuildTool2Scene extends Control<BuildTool2SceneDefinition> 
 		this.event.subscribeObservable(
 			tool.selectedBlock,
 			(block) => {
+				if (InputController.inputType.get() !== "Touch") return;
+
 				const visible = block !== undefined;
 				this.gui.TouchControls.Visible = visible;
 
@@ -58,7 +61,6 @@ export default class BuildTool2Scene extends Control<BuildTool2SceneDefinition> 
 				}
 			},
 			false,
-			"Touch",
 		);
 	}
 

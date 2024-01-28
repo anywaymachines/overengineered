@@ -60,7 +60,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 			tool.unselectAll();
 		});
 
-		this.event.onPrepare((inputType) => {
+		this.onPrepare((inputType) => {
 			this.gui.DeselectAllButton.Visible = inputType !== "Gamepad";
 		}, true);
 	}

@@ -1,6 +1,6 @@
-import ObservableValue from "shared/event/ObservableValue";
-import Control from "client/base/Control";
 import Signal from "@rbxts/signal";
+import Control from "client/base/Control";
+import ObservableValue from "shared/event/ObservableValue";
 
 export type TextBoxControlDefinition = TextBox;
 

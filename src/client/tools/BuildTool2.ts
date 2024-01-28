@@ -40,7 +40,7 @@ export default class BuildTool2 extends ToolBase {
 		this.selectedMaterial.bindTo(MaterialChooserControl.instance.selectedMaterial);
 		this.selectedColor.bindTo(MaterialChooserControl.instance.selectedColor);
 
-		this.event.onPrepare((input) => {
+		this.onPrepare((input) => {
 			if (input !== "Touch") return;
 
 			this.inputHandler.onTouchTap(() => this.updateBlockPosition());
@@ -55,9 +55,9 @@ export default class BuildTool2 extends ToolBase {
 		this.event.subscribe(this.mouse.Button1Down, () => this.placeBlock());
 
 		this.event.onPrepare(() => {
-			this.inputHandler.onKeyDown(Enum.KeyCode.T, () => this.rotateBlock("x"));
-			this.inputHandler.onKeyDown(Enum.KeyCode.R, () => this.rotateBlock("y"));
-			this.inputHandler.onKeyDown(Enum.KeyCode.Y, () => {
+			this.inputHandler.onKeyDown("T", () => this.rotateBlock("x"));
+			this.inputHandler.onKeyDown("R", () => this.rotateBlock("y"));
+			this.inputHandler.onKeyDown("Y", () => {
 				if (InputController.isCtrlPressed()) return;
 				this.rotateBlock("z");
 			});

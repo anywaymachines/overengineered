@@ -105,14 +105,10 @@ export type KeyDefinitions<TKeys extends string> = { readonly [k in TKeys]: KeyD
 
 export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> extends ComponentBase {
 	readonly controller;
-	private readonly btnmap;
 
 	constructor(definitions: T) {
 		super();
-
 		this.controller = new KeyPressingConflictingController<keyof T & string>(definitions);
-		this.btnmap = new Map(Objects.entries(definitions).map((e) => [e[1].key, e[0] as keyof T & string] as const));
-
 		this.onDisabled.Connect(() => this.controller.releaseAll());
 
 		this.event.subscribe(this.controller.onKeyDown, (key) => {
@@ -122,13 +118,9 @@ export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> 
 			definitions[key]?.keyUp?.();
 		});
 
-		this.event.onInputBegin((input) => {
-			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
-			this.controller.keyDown(this.btnmap.get(input.KeyCode.Name)!);
-		});
-		this.event.onInputEnd((input) => {
-			if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
-			this.controller.keyUp(this.btnmap.get(input.KeyCode.Name)!);
-		});
+		for (const [key, def] of Objects.pairs(definitions)) {
+			this.event.onKeyDown(def.key, () => this.controller.keyDown(key as keyof T & string));
+			this.event.onKeyUp(def.key, () => this.controller.keyUp(key as keyof T & string));
+		}
 	}
 }

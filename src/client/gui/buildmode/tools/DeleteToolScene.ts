@@ -50,13 +50,13 @@ export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> 
 
 		//const aboba = e(this.gui.TouchControls);
 
-		this.event.onPrepare((inputType) => {
+		this.onPrepare((inputType) => {
 			//if (inputType === "Touch") aboba.hide();
 			//else aboba.show();
 
 			this.gui.TouchControls.Visible = false;
 		}, true);
-		this.event.onPrepare((inputType) => {
+		this.onPrepare((inputType) => {
 			this.gui.DeleteAllButton.Visible = inputType !== "Gamepad";
 		}, true);
 

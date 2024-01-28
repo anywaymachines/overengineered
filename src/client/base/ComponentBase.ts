@@ -23,6 +23,10 @@ export default class ComponentBase {
 
 	constructor() {
 		this.event.onPrepare(() => this.prepare());
+		this.event.subscribe(InputController.inputType.changed, () => {
+			this.event.disable();
+			this.event.enable();
+		});
 	}
 
 	/** Return a function that returns a copy of the provided Instance; Destroys the Instance if specified */
@@ -31,6 +35,10 @@ export default class ComponentBase {
 		if (destroyOriginal) object.Destroy();
 
 		return () => template.Clone();
+	}
+
+	protected onPrepare(callback: (inputType: InputType) => void, executeImmediately = false) {
+		this.event.onPrepare(() => callback(InputController.inputType.get()), executeImmediately);
 	}
 
 	/** Are component events enabled */
@@ -56,6 +64,7 @@ export default class ComponentBase {
 	destroy(): void {
 		this.disable();
 		this.event.destroy();
+		this.inputHandler.destroy();
 	}
 
 	/** Prepare the functionality for Desktop */

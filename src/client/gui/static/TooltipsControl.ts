@@ -49,7 +49,7 @@ export default class TooltipsControl extends Control<
 		this.keyboardTooltipTemplate = Control.asTemplate(this.gui.KeyboardTemplate);
 		this.gamepadTooltipTemplate = Control.asTemplate(this.gui.GamepadTemplate);
 
-		this.event.onPrepare((inputType) => {
+		this.onPrepare((inputType) => {
 			this.simpleTooltips.forEach((element) => this.processTooltip(element, inputType));
 		});
 	}
