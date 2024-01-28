@@ -11,7 +11,7 @@ export default class AngleSensorBlockLogic extends ConfigurableBlockLogic<typeof
 
 	private update() {
 		const [x, y, z] = this.block.instance.GetPivot().Rotation.ToEulerAnglesYXZ();
-		this.output.result.set(new Vector3(x, y, z));
+		this.output.result.set(new Vector3(x + 180, y + 180, z + 180));
 
 		return;
 	}
