@@ -179,7 +179,10 @@ export default class BuildTool extends ToolBase {
 
 		// Positioning Stage 3
 		const MouseHitObjectSpace = mouseTarget.CFrame.PointToObjectSpace(mouseHit.Position);
-		const moveRangeStuds = 1; // TODO: Make this configurable (probably)
+
+		const blockSize = this.selectedBlock.get()!.model.GetExtentsSize();
+		const moveRangeStuds = math.clamp(math.min(blockSize?.X, blockSize.Y, blockSize.Z) / 2, 0.5, 1); // TODO: Make this configurable (probably)
+
 		const offset = VectorUtils.roundVectorToBase(
 			MouseHitObjectSpace.sub(
 				new Vector3(
