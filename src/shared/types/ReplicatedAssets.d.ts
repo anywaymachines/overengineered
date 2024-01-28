@@ -27,6 +27,7 @@ interface ReplicatedStorage {
 			Impact: Folder & {
 				Materials: Folder & {
 					Metal: SoundGroup;
+					Glass: SoundGroup;
 					Wood: SoundGroup;
 				};
 			};
