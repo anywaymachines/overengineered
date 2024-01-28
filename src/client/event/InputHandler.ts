@@ -22,6 +22,9 @@ export default class InputHandler {
 	}
 
 	private registerCallbacksIfNeeded() {
+		if (this.registered) return;
+		this.registered = true;
+
 		this.eventHandler.subscribe(UserInputService.InputBegan, (input: InputObject, gameProcessedEvent: boolean) => {
 			if (!this.isKeyPressed()) return;
 
