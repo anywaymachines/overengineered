@@ -3,6 +3,7 @@ import SharedPlots from "shared/building/SharedPlots";
 import PlayerDataStorage from "./PlayerDataStorage";
 import ComponentContainer from "./base/ComponentContainer";
 import BeaconController from "./controller/BeaconController";
+import CharacterController from "./controller/CharacterController";
 import GameEnvironmentController from "./controller/GameEnvironmentController";
 import LocalPlayerController from "./controller/LocalPlayerController";
 import PlayModeController from "./controller/PlayModeController";
@@ -24,6 +25,7 @@ WorldController.generate();
 WindController.initialize();
 
 LocalPlayerController.initialize();
+CharacterController.initialize();
 InputTypeChangeEvent.subscribe();
 
 if (RunService.IsStudio()) {
