@@ -538,7 +538,7 @@ const v10: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 };
 
 // fix blocks not aligned with the grid
-const v11: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v10> = {
+const v11: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v10> = {
 	version: 11,
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
@@ -562,6 +562,28 @@ const v11: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 			blocks: prev.blocks.map(update),
 		};
 	},
+};
+
+// rename ultrasonic to lidar
+const v12: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v11> = {
+	version: 12,
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
+			if ((block.id as string) === "ultrasonicsensor") {
+				return {
+					...block,
+					id: "lidarsensor",
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
 
 	read(plot: PlotModel): SerializedBlocks<SerializedBlockV3> {
 		return {
@@ -577,7 +599,7 @@ const v11: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 
 //
 
-const versions = [v4, v5, v6, v7, v8, v9, v10, v11] as const;
+const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const getVersion = (version: number) => versions.find((v) => v.version === version);
