@@ -161,7 +161,6 @@ export default class PlayerController {
 
 	/** The Controller determines the type of locomotion && physics behavior; setting the humanoid state is just so animations will play, required */
 	static updateStateAndActiveController() {
-		print(this.humanoid.GetState());
 		if (this.humanoid.Health <= 0) {
 			this.humanoid.ChangeState(Enum.HumanoidStateType.Ragdoll);
 		} else if (this.humanoid.Sit) {
