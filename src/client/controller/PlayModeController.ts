@@ -1,11 +1,11 @@
 import { GuiService, StarterGui } from "@rbxts/services";
+import PlayerController from "client/PlayerController";
 import ComponentBase from "client/base/ComponentBase";
 import Popup from "client/base/Popup";
 import Signals from "client/event/Signals";
 import Remotes from "shared/Remotes";
 import Objects from "shared/_fixes_/objects";
 import ObservableValue from "shared/event/ObservableValue";
-import LocalPlayerController from "./LocalPlayerController";
 import BuildingMode from "./modes/BuildingMode";
 import RideMode from "./modes/RideMode";
 
@@ -37,7 +37,7 @@ export default class PlayModeController extends ComponentBase {
 			mode.disable();
 		}
 
-		const controls = LocalPlayerController.getPlayerModule().GetControls();
+		const controls = PlayerController.getPlayerModule().GetControls();
 		this.event.subscribe(Popup.onAnyShow, () => {
 			controls.Disable();
 
