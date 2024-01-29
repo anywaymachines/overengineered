@@ -63,6 +63,8 @@ export default class PlayerController {
 
 		this.setupCharacter();
 		this.removeFluidForces();
+
+		Signals.PLAYER.SPAWN.Fire();
 	}
 
 	static getPlayerModuleInstance(): ModuleScript {
@@ -221,8 +223,6 @@ export default class PlayerController {
 
 	/** Main character update loop  */
 	static stepController() {
-		if (!this.humanoidRootPart) return;
-
 		this.updateMovementDirection();
 
 		this.updateStateAndActiveController();
