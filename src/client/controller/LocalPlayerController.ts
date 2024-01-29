@@ -4,12 +4,12 @@ import { PlayerModule } from "client/types/PlayerModule";
 import PartUtils from "shared/utils/PartUtils";
 
 export default class LocalPlayerController {
-	static isRunning: boolean;
 	static humanoid: Humanoid | undefined;
 
 	static initialize() {
 		Players.LocalPlayer.CharacterAdded.Connect((_) => {
-			Players.LocalPlayer.CharacterAppearanceLoaded.Wait();
+			if (!Players.LocalPlayer.HasAppearanceLoaded()) Players.LocalPlayer.CharacterAppearanceLoaded.Wait();
+
 			this.onPlayerAdded();
 		});
 
@@ -17,27 +17,29 @@ export default class LocalPlayerController {
 	}
 
 	private static onPlayerAdded() {
-		PartUtils.applyToAllDescendantsOfType("BasePart", Players.LocalPlayer.Character!, (part) => {
-			part.EnableFluidForces = false;
-		});
-
 		this.humanoid = Players.LocalPlayer.Character!.WaitForChild("Humanoid") as Humanoid;
 
 		this.humanoid.Died.Once(() => {
 			Signals.PLAYER.DIED.Fire();
 		});
 
-		this.humanoid.Running.Connect((speed) => {
-			this.isRunning = speed > (this.humanoid!.WalkSpeed as number) / 2;
-		});
+		this.disableCharacterFluidForces();
 
 		Signals.PLAYER.SPAWN.Fire();
 	}
 
-	static getPlayerModuleInstance(): ModuleScript {
+	/** By default, character has `EnableFluidForces`, but because of the huge `Workspace.AirDensity`, it just flies like a feather */
+	private static disableCharacterFluidForces() {
+		PartUtils.applyToAllDescendantsOfType("BasePart", Players.LocalPlayer.Character!, (part) => {
+			part.EnableFluidForces = false;
+		});
+	}
+
+	private static getPlayerModuleInstance(): ModuleScript {
 		return Players.LocalPlayer.WaitForChild("PlayerScripts").WaitForChild("PlayerModule") as ModuleScript;
 	}
 
+	/** Native `PlayerModule` library */
 	static getPlayerModule(): PlayerModule {
 		return require(this.getPlayerModuleInstance()) as PlayerModule;
 	}
