@@ -9,6 +9,7 @@ const Remotes = Net.Definitions.Create({
 				<TKey extends keyof PlayerConfig>(key: TKey, value: PlayerConfig[TKey]) => Response
 			>(),
 		FetchData: Net.Definitions.ServerAsyncFunction<() => PlayerDataResponse>(),
+		ResetCharacter: Net.Definitions.ClientToServerEvent<[]>(),
 	}),
 	Building: Net.Definitions.Namespace({
 		PlaceBlockRequest: Net.Definitions.ServerAsyncFunction<(data: PlaceBlockRequest) => BuildResponse>(),

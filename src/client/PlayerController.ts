@@ -1,4 +1,6 @@
 import { ContextActionService, Players, RunService } from "@rbxts/services";
+import Remotes from "shared/Remotes";
+import EventHandler from "shared/event/EventHandler";
 import PartUtils from "shared/utils/PartUtils";
 import Signals from "./event/Signals";
 import { PlayerModule } from "./types/PlayerModule";
@@ -21,6 +23,8 @@ export default class PlayerController {
 	private static groundSensor: ControllerPartSensor;
 	private static climbSensor: ControllerPartSensor;
 
+	private static eventHandler = new EventHandler();
+
 	// Other
 	static isRunning: boolean;
 
@@ -29,26 +33,35 @@ export default class PlayerController {
 			this.characterAdded();
 		});
 		this.characterAdded();
+	}
 
-		ContextActionService.BindAction("Jump", (a, b, c) => this.doJump(a, b, c), true, Enum.KeyCode.Space);
-		RunService.PreAnimation.Connect(() => this.stepController());
+	static terminate() {
+		print("DEATH");
+		this.eventHandler.unsubscribeAll();
+		ContextActionService.UnbindAction("Jump");
+
+		this.humanoid.EvaluateStateMachine = true;
+		task.wait();
+		Remotes.Client.GetNamespace("Player").Get("ResetCharacter").SendToServer();
+
+		Signals.PLAYER.DIED.Fire();
 	}
 
 	static characterAdded() {
+		print("SPAWN");
 		if (!Players.LocalPlayer.HasAppearanceLoaded()) Players.LocalPlayer.CharacterAppearanceLoaded.Wait();
 
 		this.character = Players.LocalPlayer.Character as Model;
 		this.humanoid = this.character.WaitForChild("Humanoid") as Humanoid;
-		this.humanoidRootPart = this.humanoid.RootPart as Part;
+		this.humanoidRootPart = this.character.WaitForChild("HumanoidRootPart") as Part;
 
 		// Switch to native code when player died
-		this.humanoid.Died.Once(() => {
-			this.humanoid.EvaluateStateMachine = true;
-			Signals.PLAYER.DIED.Fire();
+		this.eventHandler.subscribe(this.humanoid.GetPropertyChangedSignal("Health"), () => {
+			if (this.humanoid.Health <= 0) this.terminate();
 		});
 
 		// Running state
-		this.humanoid.Running.Connect((speed) => {
+		this.eventHandler.subscribe(this.humanoid.Running, (speed) => {
 			this.isRunning = speed > this.controllerManager.BaseMoveSpeed / 2;
 		});
 
@@ -63,6 +76,11 @@ export default class PlayerController {
 
 		this.setupCharacter();
 		this.removeFluidForces();
+
+		ContextActionService.BindAction("Jump", (a, b, c) => this.doJump(a, b, c), true, Enum.KeyCode.Space);
+		this.eventHandler.subscribe(RunService.PreAnimation, () => this.stepController());
+
+		Signals.PLAYER.SPAWN.Fire();
 	}
 
 	static getPlayerModuleInstance(): ModuleScript {
@@ -159,9 +177,7 @@ export default class PlayerController {
 
 	/** The Controller determines the type of locomotion && physics behavior; setting the humanoid state is just so animations will play, required */
 	static updateStateAndActiveController() {
-		if (this.humanoid.Health <= 0) {
-			this.humanoid.ChangeState(Enum.HumanoidStateType.Ragdoll);
-		} else if (this.humanoid.Sit) {
+		if (this.humanoid.Sit) {
 			this.humanoid.ChangeState(Enum.HumanoidStateType.Seated);
 		} else if (this.checkSwimmingState()) {
 			this.controllerManager.ActiveController = this.swimController;
