@@ -50,7 +50,7 @@ export default class MagnetBlockLogic extends ConfigurableBlockLogic<typeof bloc
 				attractedTo = attractedTo.add(value);
 			}
 
-			const result = VectorUtils.apply(attractedTo.mul(strength), (num) => math.clamp(num, -100, 100));
+			const result = VectorUtils.apply(attractedTo.mul(strength * 5), (num) => math.clamp(num, -100, 100));
 			this.part.ApplyImpulseAtPosition(result, this.part.Position);
 		});
 	}
