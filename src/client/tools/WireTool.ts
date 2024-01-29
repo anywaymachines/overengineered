@@ -346,7 +346,7 @@ export default class WireTool extends ToolBase {
 		this.inputHandler.onMouse1Up(() => {
 			if (!this.startMarker.get()) return;
 			this.finishDragging();
-		});
+		}, true);
 
 		const updateWire = () => {
 			const marker = this.startMarker.get();

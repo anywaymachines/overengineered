@@ -1,21 +1,22 @@
 import GlobalInputHandler from "./GlobalInputHandler";
 import { ISignalWrapper, ThinSignalWrapper } from "./SignalWrapper";
 
-type InputCallback = (input: InputObject, gameProcessedEvent: boolean) => void;
+type InputCallback = (input: InputObject) => void;
+type FullInputCallback = (input: InputObject, gameProcessedEvent: boolean) => void;
 type TouchCallback = (inputPositions: readonly Vector2[], gameProcessedEvent: boolean) => void;
 
-const filterKeyboard = (callback: InputCallback): InputCallback => {
+const filterKeyboard = (callback: InputCallback, allowGameProcessedEvents: boolean): FullInputCallback => {
 	return (input, gameProcessedEvent) => {
-		if (gameProcessedEvent) return;
+		if (!allowGameProcessedEvents && gameProcessedEvent) return;
 		if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
-		callback(input, gameProcessedEvent);
+		callback(input);
 	};
 };
-const filterMouse1 = (callback: InputCallback): InputCallback => {
+const filterMouse1 = (callback: InputCallback, allowGameProcessedEvents: boolean): FullInputCallback => {
 	return (input, gameProcessedEvent) => {
-		if (gameProcessedEvent) return;
+		if (!allowGameProcessedEvents && gameProcessedEvent) return;
 		if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
-		callback(input, gameProcessedEvent);
+		callback(input);
 	};
 };
 
@@ -52,26 +53,26 @@ const touchTap = GlobalInputHandler.touchTap;
 }
 
 export default class InputHandler {
-	private inputBegan?: ThinSignalWrapper<Parameters<InputCallback>>;
-	private inputChanged?: ThinSignalWrapper<Parameters<InputCallback>>;
-	private inputEnded?: ThinSignalWrapper<Parameters<InputCallback>>;
+	private inputBegan?: ThinSignalWrapper<Parameters<FullInputCallback>>;
+	private inputChanged?: ThinSignalWrapper<Parameters<FullInputCallback>>;
+	private inputEnded?: ThinSignalWrapper<Parameters<FullInputCallback>>;
 	private touchTap?: ThinSignalWrapper<Parameters<TouchCallback>>;
 
-	onInputBegan(callback: InputCallback) {
+	onInputBegan(callback: FullInputCallback) {
 		(this.inputBegan ??= new ThinSignalWrapper(inputBegan)).subscribe(callback);
 	}
-	onInputChanged(callback: InputCallback) {
+	onInputChanged(callback: FullInputCallback) {
 		(this.inputChanged ??= new ThinSignalWrapper(inputChanged)).subscribe(callback);
 	}
-	onInputEnded(callback: InputCallback) {
+	onInputEnded(callback: FullInputCallback) {
 		(this.inputEnded ??= new ThinSignalWrapper(inputEnded)).subscribe(callback);
 	}
 	onTouchTap(callback: TouchCallback) {
 		(this.touchTap ??= new ThinSignalWrapper(touchTap)).subscribe(callback);
 	}
 
-	onKeysDown(callback: InputCallback) {
-		this.onInputBegan(filterKeyboard(callback));
+	onKeysDown(callback: InputCallback, allowGameProcessedEvents = true) {
+		this.onInputBegan(filterKeyboard(callback, allowGameProcessedEvents));
 	}
 	onKeyDown(key: KeyCode, callback: InputCallback) {
 		let map = keyPressed.get(key);
@@ -83,8 +84,8 @@ export default class InputHandler {
 
 		selfmap.push(callback);
 	}
-	onKeysUp(callback: InputCallback) {
-		this.onInputEnded(filterKeyboard(callback));
+	onKeysUp(callback: InputCallback, allowGameProcessedEvents = true) {
+		this.onInputEnded(filterKeyboard(callback, allowGameProcessedEvents));
 	}
 	onKeyUp(key: KeyCode, callback: InputCallback) {
 		let map = keyReleased.get(key);
@@ -97,11 +98,11 @@ export default class InputHandler {
 		selfmap.push(callback);
 	}
 
-	onMouse1Down(callback: InputCallback) {
-		this.onInputBegan(filterMouse1(callback));
+	onMouse1Down(callback: InputCallback, allowGameProcessedEvents = true) {
+		this.onInputBegan(filterMouse1(callback, allowGameProcessedEvents));
 	}
-	onMouse1Up(callback: InputCallback) {
-		this.onInputEnded(filterMouse1(callback));
+	onMouse1Up(callback: InputCallback, allowGameProcessedEvents = true) {
+		this.onInputEnded(filterMouse1(callback, allowGameProcessedEvents));
 	}
 
 	unsubscribeAll() {
