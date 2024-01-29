@@ -1,5 +1,5 @@
-import { RunService, Workspace } from "@rbxts/services";
-import PlayerController from "client/PlayerController";
+import { Players, RunService, Workspace } from "@rbxts/services";
+import Signals from "client/event/Signals";
 
 export default class GameEnvironmentController {
 	// Const
@@ -13,15 +13,20 @@ export default class GameEnvironmentController {
 
 	// Vars
 	public static currentHeight = 0;
+	private static hrp: BasePart;
 
 	public static initialize() {
+		Signals.PLAYER.SPAWN.Connect(() => {
+			this.hrp = Players.LocalPlayer.Character!.FindFirstChild("HumanoidRootPart") as BasePart;
+		});
+
 		RunService.Heartbeat.Connect(() => this.update());
 	}
 
 	public static update() {
-		if (!PlayerController.humanoidRootPart) return;
+		if (!this.hrp) return;
 
-		let position = PlayerController.humanoidRootPart.Position;
+		let position = this.hrp.Position;
 
 		if (position.Y <= 0) {
 			position = new Vector3(0, 1, 0);

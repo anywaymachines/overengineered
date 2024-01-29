@@ -1,6 +1,4 @@
-import { ContextActionService } from "@rbxts/services";
-import PlayerController from "client/PlayerController";
-import Signals from "client/event/Signals";
+import { ContextActionService, Players } from "@rbxts/services";
 import ObservableValue from "shared/event/ObservableValue";
 import InputController from "./InputController";
 
@@ -9,11 +7,13 @@ const sprintSpeed = 60;
 
 const sprintmode = new ObservableValue(false);
 sprintmode.subscribe((sprinting) => {
-	if (!PlayerController.controllerManager) return;
+	if (!Players.LocalPlayer.Character) return;
 
-	PlayerController.controllerManager.BaseMoveSpeed = sprinting ? sprintSpeed : walkSpeed;
-}, true);
-Signals.PLAYER.SPAWN.Connect(() => sprintmode.triggerChanged());
+	(Players.LocalPlayer.Character.WaitForChild("Humanoid") as Humanoid).WalkSpeed = sprinting
+		? sprintSpeed
+		: walkSpeed;
+});
+Players.LocalPlayer.CharacterAdded.Connect(() => sprintmode.triggerChanged());
 
 function runEvent(actionName: string, inputState: Enum.UserInputState, inputObject: InputObject) {
 	if (inputState !== Enum.UserInputState.Begin) {

@@ -13,18 +13,12 @@ export default class CharacterController {
 	public static preparePlayer(plr: Player) {
 		if (plr === Players.LocalPlayer) return;
 
-		// Other's spawning
 		plr.CharacterAdded.Connect(() => {
-			if (!plr.HasAppearanceLoaded()) {
-				print("need load cc");
-				plr.CharacterAppearanceLoaded.Wait();
-				print("loaded cc");
-			}
+			plr.CharacterAppearanceLoaded.Wait();
 
 			this.updateCharacter(plr);
 		});
 
-		// Other's update exist
 		if (plr.Character) this.updateCharacter(plr);
 	}
 
