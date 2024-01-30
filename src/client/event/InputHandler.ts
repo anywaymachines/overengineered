@@ -106,6 +106,11 @@ export default class InputHandler {
 	}
 
 	unsubscribeAll() {
+		this.inputBegan?.unsubscribeAll();
+		this.inputChanged?.unsubscribeAll();
+		this.inputEnded?.unsubscribeAll();
+		this.touchTap?.unsubscribeAll();
+
 		for (const map of maps) {
 			map.delete(this);
 		}
@@ -117,5 +122,6 @@ export default class InputHandler {
 		this.inputBegan?.destroy();
 		this.inputChanged?.destroy();
 		this.inputEnded?.destroy();
+		this.touchTap?.destroy();
 	}
 }
