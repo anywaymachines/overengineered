@@ -43,15 +43,7 @@ export default class BlockLogic<T extends BlockModel = BlockModel> extends Compo
 	}
 
 	protected subscribeOnImpactBreak(instance: BasePart, func: () => void) {
-		const update = () => {
-			if (!instance.CanTouch) return;
-			if (instance.Parent && instance.GetAttribute("IMPACT_BROKEN") === undefined) return;
-
-			func();
-		};
-
-		instance.GetAttributeChangedSignal("IMPACT_BROKEN").Connect(update);
-		instance.GetPropertyChangedSignal("Parent").Connect(update);
+		instance.GetAttributeChangedSignal("IMPACT_BROKEN").Connect(func);
 	}
 
 	protected onImpactBreak(func: () => void) {
