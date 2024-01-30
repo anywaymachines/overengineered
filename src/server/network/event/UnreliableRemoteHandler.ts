@@ -56,7 +56,7 @@ export default class UnreliableRemoteHandler {
 	static impactExplodeEvent(player: Player, block: BasePart, blastRadius: number) {
 		if (!BlockManager.isActiveBlockPart(block)) return;
 
-		if (block.GetAttribute("broken") === true) {
+		if (block.GetAttribute("IMPACT_BROKEN") === true) {
 			return;
 		}
 
@@ -78,10 +78,10 @@ export default class UnreliableRemoteHandler {
 	static impactBreakEvent(player: Player, block: BasePart) {
 		if (!BlockManager.isActiveBlockPart(block)) return;
 
-		if (block.GetAttribute("broken") === true) return;
+		if (block.GetAttribute("IMPACT_BROKEN") === true) return;
 
 		ServerPartUtils.BreakJoints(block);
-		block.SetAttribute("broken", true);
+		block.SetAttribute("IMPACT_BROKEN", true);
 
 		// Play sounds
 		ServerEffects.ImpactSound.create(block, player, { index: undefined });

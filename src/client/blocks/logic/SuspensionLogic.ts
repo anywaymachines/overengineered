@@ -5,6 +5,7 @@ import { PlacedBlockData } from "shared/building/BlockManager";
 type Suspension = BlockModel & {
 	readonly SpringSide: BasePart & {
 		readonly Spring: SpringConstraint;
+		readonly Beam: Beam;
 	};
 };
 export default class SuspensionLogic extends ConfigurableBlockLogic<
@@ -24,6 +25,11 @@ export default class SuspensionLogic extends ConfigurableBlockLogic<
 		this.springConstraint.Damping = this.input.damping.get();
 		this.springConstraint.Stiffness = this.input.stiffness.get();
 		this.springConstraint.FreeLength = this.input.free_length.get();
+
+		this.onImpactBreak(() => {
+			this.instance.SpringSide.Beam.Destroy();
+			this.disable();
+		});
 	}
 
 	static getConfigDefinition() {

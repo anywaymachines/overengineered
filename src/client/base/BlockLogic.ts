@@ -33,13 +33,31 @@ export default class BlockLogic<T extends BlockModel = BlockModel> extends Compo
 	protected subscribeOnDestroyed(instance: BasePart, func: () => void) {
 		const update = () => {
 			if (!instance.CanTouch) return;
-			if (instance.Parent && instance.GetAttribute("broken") === undefined) return;
+			if (instance.Parent && instance.GetAttribute("IMPACT_BROKEN")) return;
 
 			func();
 		};
 
 		instance.AttributeChanged.Connect(update);
 		instance.GetPropertyChangedSignal("Parent").Connect(update);
+	}
+
+	protected subscribeOnImpactBreak(instance: BasePart, func: () => void) {
+		const update = () => {
+			if (!instance.CanTouch) return;
+			if (instance.Parent && instance.GetAttribute("IMPACT_BROKEN") === undefined) return;
+
+			func();
+		};
+
+		instance.GetAttributeChangedSignal("IMPACT_BROKEN").Connect(update);
+		instance.GetPropertyChangedSignal("Parent").Connect(update);
+	}
+
+	protected onImpactBreak(func: () => void) {
+		PartUtils.applyToAllDescendantsOfType("BasePart", this.instance, (part) =>
+			this.subscribeOnImpactBreak(part, func),
+		);
 	}
 
 	protected onDescendantDestroyed(func: () => void) {
