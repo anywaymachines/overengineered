@@ -18,9 +18,12 @@ export default class ConfigTool extends ToolBase {
 
 		const hoverSelector = this.add(new HoveredBlockHighlighter((block) => this.canBeSelected(block)));
 		const fireSelected = () => {
-			const block = hoverSelector.highlightedBlock.get();
-			if (!block) return;
-			this.selectBlockByClick(block);
+			spawn(() => {
+				task.wait();
+				const block = hoverSelector.highlightedBlock.get();
+				if (!block) return;
+				this.selectBlockByClick(block);
+			});
 		};
 
 		this.onPrepare((input) => {
