@@ -16,6 +16,7 @@ declare type Sounds = {
 		RideStart: Sound;
 	};
 	Click: Sound;
+	ActionRequired: Sound;
 	Music: {
 		Space: Folder & { [key: string]: Sound };
 	};

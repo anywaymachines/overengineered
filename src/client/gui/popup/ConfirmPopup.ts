@@ -29,6 +29,8 @@ export default class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
 	}
 
 	showPopup(text: string, okFunc: () => void, noFunc: () => void) {
+		SoundController.getSounds().ActionRequired.Play();
+
 		if (this.isVisible()) throw "Popup is already visible";
 		super.show();
 
