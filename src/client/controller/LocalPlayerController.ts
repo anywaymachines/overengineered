@@ -91,5 +91,7 @@ export default class LocalPlayerController {
 		});
 
 		this.playerSpawned();
+
+		Players.LocalPlayer.CameraMaxZoomDistance = 512;
 	}
 }

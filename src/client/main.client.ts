@@ -38,8 +38,6 @@ const playModeController = new PlayModeController();
 root.add(playModeController);
 root.enable();
 
-Players.LocalPlayer.CameraMaxZoomDistance = 512;
-
 let plot: PlotModel | undefined;
 while (!plot) {
 	plot = SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId);
