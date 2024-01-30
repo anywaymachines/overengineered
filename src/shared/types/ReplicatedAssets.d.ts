@@ -15,6 +15,11 @@ interface ReplicatedStorage {
 			UsernameLabel: TextLabel;
 			RankLabel: TextLabel;
 		};
+		UsernameGui: BillboardGui & {
+			DisplaynameLabel: TextLabel;
+			UsernameLabel: TextLabel;
+			RankLabel: TextLabel;
+		};
 		Wires: Folder & {
 			WireMarkerInput: BillboardGui & { readonly TextButton: GuiButton };
 			WireMarkerInputConnected: BillboardGui & { readonly TextButton: GuiButton };
