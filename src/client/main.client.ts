@@ -1,10 +1,11 @@
-import { Players, RunService } from "@rbxts/services";
+import { MarketplaceService, Players, RunService } from "@rbxts/services";
 import SharedPlots from "shared/building/SharedPlots";
 import PlayerDataStorage from "./PlayerDataStorage";
 import ComponentContainer from "./base/ComponentContainer";
 import BeaconController from "./controller/BeaconController";
 import CharacterController from "./controller/CharacterController";
 import GameEnvironmentController from "./controller/GameEnvironmentController";
+import GuiController from "./controller/GuiController";
 import LocalPlayerController from "./controller/LocalPlayerController";
 import PlayModeController from "./controller/PlayModeController";
 import SoundController from "./controller/SoundController";
@@ -47,3 +48,8 @@ while (!plot) {
 	wait(0.1);
 }
 new BeaconController(plot!, "Plot");
+
+spawn(() => {
+	const updated = MarketplaceService.GetProductInfo(game.PlaceId).Updated;
+	GuiController.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `DEVTEST | v${game.PlaceVersion} | ${updated}`;
+});
