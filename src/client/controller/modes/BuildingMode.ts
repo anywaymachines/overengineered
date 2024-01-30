@@ -3,6 +3,7 @@ import BuildingModeScene, { BuildingModeSceneDefinition } from "client/gui/build
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import GuiController from "../GuiController";
+import LocalPlayerController from "../LocalPlayerController";
 import MirrorVisualizer from "../MirrorVisualizer";
 import ToolController from "../ToolController";
 import PlayMode from "./PlayMode";
@@ -39,15 +40,14 @@ export default class BuildingMode extends PlayMode {
 	public onSwitchToNext(mode: PlayModes | undefined) {}
 	public onSwitchFromPrev(prev: PlayModes | undefined) {
 		const tp = () => {
-			if (!Players.LocalPlayer.Character) return;
+			if (!LocalPlayerController.rootPart) return;
 
 			const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
 			const pos = plot.GetPivot().Position.add(new Vector3(plot.GetExtentsSize().X / 2 + 2, 10, 0));
-			const hrp = Players.LocalPlayer.Character.WaitForChild("HumanoidRootPart") as Part;
-			hrp.CFrame = new CFrame(pos);
 
-			hrp.AssemblyLinearVelocity = Vector3.zero;
-			hrp.AssemblyAngularVelocity = Vector3.zero;
+			LocalPlayerController.rootPart.CFrame = new CFrame(pos);
+			LocalPlayerController.rootPart.AssemblyLinearVelocity = Vector3.zero;
+			LocalPlayerController.rootPart.AssemblyAngularVelocity = Vector3.zero;
 		};
 
 		delay(0.1, tp);

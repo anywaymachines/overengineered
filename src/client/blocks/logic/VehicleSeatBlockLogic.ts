@@ -1,5 +1,5 @@
-import { Players } from "@rbxts/services";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
+import LocalPlayerController from "client/controller/LocalPlayerController";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import ObservableValue from "shared/event/ObservableValue";
@@ -24,7 +24,7 @@ export default class VehicleSeatBlockLogic extends ConfigurableBlockLogic<
 		const update = (force = false) => {
 			const occupant = this.occupant.get();
 
-			this.occupiedByLocalPlayer.set(occupant === Players.LocalPlayer.Character!.WaitForChild("Humanoid"), force);
+			this.occupiedByLocalPlayer.set(occupant === LocalPlayerController.humanoid, force);
 			this.output.occupied.set(occupant !== undefined, force);
 		};
 

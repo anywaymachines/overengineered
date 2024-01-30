@@ -7,6 +7,7 @@ import InputController from "./InputController";
 
 export default class LocalPlayerController {
 	static humanoid: Humanoid | undefined;
+	static rootPart: BasePart | undefined;
 
 	// Player settings
 	private static readonly WALKSPEED_DEFAULT = 20;
@@ -18,6 +19,7 @@ export default class LocalPlayerController {
 	private static playerSpawned() {
 		const character = Players.LocalPlayer.Character!;
 		this.humanoid = character.FindFirstChild("Humanoid") as Humanoid;
+		this.rootPart = this.humanoid.RootPart;
 
 		// Death signal event
 		this.humanoid.Died.Once(() => Signals.PLAYER.DIED.Fire());

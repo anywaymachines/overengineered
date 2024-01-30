@@ -1,4 +1,4 @@
-import { Players, RunService, UserInputService, Workspace } from "@rbxts/services";
+import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
@@ -6,6 +6,7 @@ import Control from "client/base/Control";
 import Machine from "client/blocks/logic/Machine";
 import RocketEngineLogic from "client/blocks/logic/RocketEngineLogic";
 import InputController from "client/controller/InputController";
+import LocalPlayerController from "client/controller/LocalPlayerController";
 import PopupController from "client/controller/PopupController";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
 import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
@@ -361,14 +362,15 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 			this.info.add(control);
 		};
 
-		const player = Players.LocalPlayer.Character!.WaitForChild("HumanoidRootPart") as Part;
-
 		{
 			const maxSpdShow = RobloxUnit.getSpeedFromMagnitude(800, "MetersPerSecond");
 
 			init("Speed", "%d m/s", this.infoTemplate(), 0, maxSpdShow, 0.1, (control) => {
+				if (!LocalPlayerController.rootPart) return;
+
 				const spd = RobloxUnit.getSpeedFromMagnitude(
-					player.GetVelocityAtPosition(player.Position).Magnitude,
+					LocalPlayerController.rootPart.GetVelocityAtPosition(LocalPlayerController.rootPart.Position)
+						.Magnitude,
 					"MetersPerSecond",
 				);
 
@@ -396,7 +398,9 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		{
 			const maxAltitude = RobloxUnit.Studs_To_Meters(1500);
 			init("Altitude", "%d m", this.infoTextTemplate(), 0, maxAltitude, 0.1, (control) => {
-				const alt = RobloxUnit.Studs_To_Meters(player.Position.Y);
+				if (!LocalPlayerController.rootPart) return;
+
+				const alt = RobloxUnit.Studs_To_Meters(LocalPlayerController.rootPart.Position.Y);
 
 				control.slider.value.set(alt);
 				control.text.value.set(alt);
@@ -413,10 +417,12 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		{
 			init("Position", "%s m", this.infoTextTemplate(), 0, 1, 1, (control) => {
+				if (!LocalPlayerController.rootPart) return;
+
 				control.text.value.set(
-					math.floor(RobloxUnit.Studs_To_Meters(player.Position.X)) +
+					math.floor(RobloxUnit.Studs_To_Meters(LocalPlayerController.rootPart.Position.X)) +
 						" m " +
-						math.floor(RobloxUnit.Studs_To_Meters(player.Position.Z)),
+						math.floor(RobloxUnit.Studs_To_Meters(LocalPlayerController.rootPart.Position.Z)),
 				);
 			});
 		}
