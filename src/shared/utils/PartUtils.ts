@@ -26,7 +26,7 @@ export default class PartUtils {
 
 	static switchDescendantsMaterial(model: Instance, material: Enum.Material) {
 		this.applyToAllDescendantsOfType("BasePart", model, (part) => {
-			if (part.GetAttribute("static_material") === true) return;
+			if (part.HasTag("STATIC_MATERIAL")) return;
 			if (part.Transparency === 1) return;
 			part.Material = material;
 		});
@@ -34,14 +34,14 @@ export default class PartUtils {
 
 	static switchDescendantsColor(model: Instance, color: Color3) {
 		this.applyToAllDescendantsOfType("BasePart", model, (part) => {
-			if (part.GetAttribute("static_color") === true) return;
+			if (part.HasTag("STATIC_COLOR")) return;
 			part.Color = color;
 		});
 	}
 
 	static switchDescendantsTransparency(model: Instance, transparency: number) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
-			if (part.GetAttribute("static_material") === true) return;
+			if (part.HasTag("STATIC_MATERIAL")) return;
 			if (part.Transparency === 1) return;
 			part.Transparency = transparency;
 		});
