@@ -13,5 +13,5 @@ RunService.RenderStepped.Connect((dt) => {
 const tru = true;
 while (tru) {
 	task.wait(0.5);
-	gui.Text = math.round(fps) + " fps";
+	gui.Text = math.round(fps) + " FPS";
 }
