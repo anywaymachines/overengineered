@@ -111,7 +111,7 @@ export default class BoxSelector extends ComponentBase {
 			}
 		};
 
-		this.onDisabled.Connect(() => {
+		this.event.onDisable(() => {
 			clearHighlights();
 			eh.unsubscribeAll();
 		});

@@ -96,7 +96,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		this.buttonTemplate = Control.asTemplate(this.gui.Button);
 		this.overlayTemplate = Control.asTemplate(this.gui.Overlay);
 
-		this.onDisabled.Connect(() => {
+		this.event.onDisable(() => {
 			if (this.quitSettingsMode) {
 				this.toggleSettingsMode();
 			}

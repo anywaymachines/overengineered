@@ -17,11 +17,6 @@ export default class HeliumBlockLogic extends BlockLogic<HeliumBlock> {
 
 		this.part = this.instance.Part;
 		this.vectorForce = this.part.VectorForce;
-	}
-
-	protected prepare() {
-		super.prepare();
-
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 	}
 

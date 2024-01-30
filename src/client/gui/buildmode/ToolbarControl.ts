@@ -4,7 +4,6 @@ import ToolBase from "client/base/ToolBase";
 import SoundController from "client/controller/SoundController";
 import ToolController from "client/controller/ToolController";
 import GuiAnimator from "../GuiAnimator";
-import TooltipsControl from "../static/TooltipsControl";
 
 export type ToolbarButtonControlDefinition = TextButton & {
 	ImageLabel: ImageLabel;
@@ -59,30 +58,62 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
 		const template = Control.asTemplate(this.gui.Buttons.Template);
-		const toolButtons = new Control(this.gui.Buttons);
+		const toolButtons = new Control<GuiObject, ToolbarButtonControl>(this.gui.Buttons);
 		this.add(toolButtons);
 
 		// Creating buttons
-		tools.tools.forEach((tool, i) => {
+		for (const tool of tools.tools) {
 			const button = new ToolbarButtonControl(template(), tools, tool);
 			toolButtons.add(button);
+		}
 
-			TooltipsControl.instance.addSimpleTooltip({
-				isEnabled: (inputType) => inputType === "Desktop",
-				gui: button.getGui().KeyboardNumberLabel,
+		this.event.onPrepare((inputType) => {
+			const tween = (element: GuiObject, enabled: boolean) => {
+				if (enabled) {
+					GuiAnimator.tweenTransparency(element, 0, 0.2);
+					GuiAnimator.transition(element, 0.2, "up");
+				} else {
+					GuiAnimator.tweenTransparency(element, 1, 0.2);
+				}
+			};
+
+			for (const button of toolButtons.getChildren()) {
+				tween(button.getGui().KeyboardNumberLabel, inputType === "Desktop");
+			}
+
+			tween(this.gui.GamepadBack, inputType === "Gamepad");
+			tween(this.gui.GamepadNext, inputType === "Gamepad");
+		});
+
+		this.event.onPrepareGamepad(() => {
+			this.gui.GamepadBack.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonL1);
+			this.gui.GamepadNext.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
+		});
+
+		this.event.onPrepareDesktop(() => {
+			const keycodes: readonly KeyCode[] = [
+				"One",
+				"Two",
+				"Three",
+				"Four",
+				"Five",
+				"Six",
+				"Seven",
+				"Eight",
+				"Nine",
+			];
+
+			this.tools.tools.forEach((tool, i) => {
+				this.inputHandler.onKeyDown(keycodes[i], () =>
+					this.tools.selectedTool.set(tool === this.tools.selectedTool.get() ? undefined : tool),
+				);
 			});
 		});
 
-		for (const gamepadbtn of [this.gui.GamepadBack, this.gui.GamepadNext]) {
-			TooltipsControl.instance.addSimpleTooltip({
-				isEnabled: (inputType) => inputType === "Gamepad",
-				gui: gamepadbtn,
-			});
-		}
-
-		this.event.onPrepare(() => {
-			this.gui.GamepadBack.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonL1);
-			this.gui.GamepadNext.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
+		this.event.onPrepareGamepad(() => {
+			this.inputHandler.onKeyDown("ButtonB", () => this.tools.selectedTool.set(undefined));
+			this.inputHandler.onKeyDown("ButtonR1", () => this.gamepadSelectTool(true));
+			this.inputHandler.onKeyDown("ButtonL1", () => this.gamepadSelectTool(false));
 		});
 
 		this.event.subscribeObservable(tools.selectedTool, (tool) => this.toolChanged(tool));
@@ -128,21 +159,5 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 		}
 
 		this.tools.selectedTool.set(tools[newIndex]);
-	}
-
-	protected prepareDesktop() {
-		const keycodes: readonly KeyCode[] = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
-
-		this.tools.tools.forEach((tool, i) => {
-			this.inputHandler.onKeyDown(keycodes[i], () =>
-				this.tools.selectedTool.set(tool === this.tools.selectedTool.get() ? undefined : tool),
-			);
-		});
-	}
-
-	protected prepareGamepad() {
-		this.inputHandler.onKeyDown("ButtonB", () => this.tools.selectedTool.set(undefined));
-		this.inputHandler.onKeyDown("ButtonR1", () => this.gamepadSelectTool(true));
-		this.inputHandler.onKeyDown("ButtonL1", () => this.gamepadSelectTool(false));
 	}
 }

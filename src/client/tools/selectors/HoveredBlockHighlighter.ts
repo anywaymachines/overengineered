@@ -103,6 +103,6 @@ export default class HoveredBlockHighlighter extends ComponentBase {
 		};
 
 		this.event.onPrepare(prepare);
-		this.onDisabled.Connect(destroyHighlight);
+		this.event.onDisable(destroyHighlight);
 	}
 }

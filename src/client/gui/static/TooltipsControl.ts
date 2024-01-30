@@ -41,17 +41,11 @@ export default class TooltipsControl extends Control<
 	private readonly gamepadTooltipTemplate;
 	private readonly keyboardTooltipTemplate;
 
-	private readonly simpleTooltips: SimpleTooltip[] = [];
-
 	constructor(gui: TooltipsControlDefinition) {
 		super(gui);
 
 		this.keyboardTooltipTemplate = Control.asTemplate(this.gui.KeyboardTemplate);
 		this.gamepadTooltipTemplate = Control.asTemplate(this.gui.GamepadTemplate);
-
-		this.onPrepare((inputType) => {
-			this.simpleTooltips.forEach((element) => this.processTooltip(element, inputType));
-		});
 	}
 
 	public updateControlTooltips(tool: ToolBase | undefined) {
@@ -88,25 +82,5 @@ export default class TooltipsControl extends Control<
 		}
 
 		GuiAnimator.transition(this.gui, 0.2, "up");
-	}
-
-	private processTooltip(tooltip: SimpleTooltip, inputType: InputType) {
-		if (tooltip.updateFunc) tooltip.updateFunc(inputType, tooltip);
-		else this.defaultTween(inputType, tooltip);
-	}
-
-	private defaultTween(inputType: InputType, element: SimpleTooltip) {
-		if (element.isEnabled(inputType)) {
-			GuiAnimator.tweenTransparency(element.gui, 0, 0.2);
-			GuiAnimator.transition(element.gui, 0.2, "up");
-		} else {
-			GuiAnimator.tweenTransparency(element.gui, 1, 0.2);
-		}
-	}
-
-	// Simple tooltips
-	public addSimpleTooltip(tooltip: SimpleTooltip) {
-		this.simpleTooltips.push(tooltip);
-		this.processTooltip(tooltip, InputController.inputType.get());
 	}
 }

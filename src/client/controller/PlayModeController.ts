@@ -19,7 +19,7 @@ export default class PlayModeController extends ComponentBase {
 		this.event.onPrepare(() => {
 			GuiService.SetGameplayPausedNotificationEnabled(false);
 			StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
-		}, true);
+		});
 
 		Remotes.Client.GetNamespace("Ride")
 			.Get("SetPlayModeOnClient")

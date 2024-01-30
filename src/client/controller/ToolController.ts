@@ -51,7 +51,7 @@ export default class ToolController extends ComponentBase {
 
 		this.tools = tools;
 		this.selectedTool.subscribe((tool) => TooltipsControl.instance.updateControlTooltips(tool));
-		this.event.onPrepare(() => TooltipsControl.instance.updateControlTooltips(this.selectedTool.get()), true);
+		this.event.onPrepare(() => TooltipsControl.instance.updateControlTooltips(this.selectedTool.get()));
 	}
 
 	public enable() {

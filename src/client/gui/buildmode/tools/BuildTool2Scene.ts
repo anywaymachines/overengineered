@@ -43,7 +43,7 @@ export default class BuildTool2Scene extends Control<BuildTool2SceneDefinition> 
 
 		this.tool.selectedBlock.bindTo(this.blockSelector.selectedBlock);
 
-		this.onPrepare((inputType) => (this.gui.TouchControls.Visible = inputType === "Touch"), true);
+		this.onPrepare((inputType) => (this.gui.TouchControls.Visible = inputType === "Touch"));
 
 		MaterialChooserControl.instance.selectedMaterial.bindTo(tool.selectedMaterial);
 		MaterialChooserControl.instance.selectedColor.bindTo(tool.selectedColor);

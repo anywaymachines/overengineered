@@ -55,10 +55,10 @@ export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> 
 			//else aboba.show();
 
 			this.gui.TouchControls.Visible = false;
-		}, true);
+		});
 		this.onPrepare((inputType) => {
 			this.gui.DeleteAllButton.Visible = inputType !== "Gamepad";
-		}, true);
+		});
 
 		this.event.subscribe(this.tool.onClearAllRequested, () => this.suggestClearAll());
 

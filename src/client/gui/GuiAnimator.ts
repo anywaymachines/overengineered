@@ -126,7 +126,8 @@ export default class GuiAnimator {
 		converter: (value: TValue) => Partial<ExtractMembers<T, Tweenable>>,
 		tweenInfo: TweenInfo,
 	) {
-		event.onPrepare(() => Objects.assign(gui, converter(value.get())), true);
+		event.onPrepare(() => Objects.assign(gui, converter(value.get())));
+		Objects.assign(gui, converter(value.get()));
 		event.subscribeObservable(value, (value) => GuiAnimator.tween(gui, converter(value), tweenInfo));
 	}
 }

@@ -33,7 +33,7 @@ export default class MovingSelector extends ComponentBase {
 			prevTarget = undefined;
 		};
 
-		this.onDisabled.Connect(stop);
+		this.event.onDisable(stop);
 		this.event.subscribe(mouse.Button1Down, start);
 		this.event.subscribe(mouse.Button1Up, stop);
 	}

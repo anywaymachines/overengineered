@@ -109,7 +109,7 @@ export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> 
 	constructor(definitions: T) {
 		super();
 		this.controller = new KeyPressingConflictingController<keyof T & string>(definitions);
-		this.onDisabled.Connect(() => this.controller.releaseAll());
+		this.event.onDisable(() => this.controller.releaseAll());
 
 		this.event.subscribe(this.controller.onKeyDown, (key) => {
 			definitions[key]?.keyDown?.();

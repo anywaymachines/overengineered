@@ -28,6 +28,7 @@ type MarkerComponentDefinition = BillboardGui;
 class MarkerComponent extends Component<MarkerComponentDefinition> {
 	readonly instance;
 	readonly data;
+	private tooltip?: BillboardGui;
 
 	constructor(gui: MarkerComponentDefinition, data: MarkerData) {
 		super(gui);
@@ -49,20 +50,15 @@ class MarkerComponent extends Component<MarkerComponentDefinition> {
 	}
 
 	protected prepareDesktop() {
-		let tooltip: BillboardGui | undefined;
-		this.onDisabled.Connect(() => {
-			tooltip?.Destroy();
-			tooltip = undefined;
-		});
-
+		this.tooltip?.Destroy();
 		const button = this.instance.FindFirstChildWhichIsA("TextButton") as TextButton;
 
 		// Show tooltip on hover
 		this.eventHandler.subscribe(button.MouseEnter, () => {
-			tooltip = this.createTooltip();
+			this.tooltip = this.createTooltip();
 			this.eventHandler.subscribeOnce(button.MouseLeave, () => {
-				tooltip?.Destroy();
-				tooltip = undefined;
+				this.tooltip?.Destroy();
+				this.tooltip = undefined;
 			});
 		});
 	}
@@ -74,6 +70,9 @@ class MarkerComponent extends Component<MarkerComponentDefinition> {
 
 	/** Creates text above the marker with a dot signature with its name */
 	private createTooltip() {
+		this.tooltip?.Destroy();
+		this.tooltip = undefined;
+
 		const gui = ReplicatedStorage.Assets.Wires.WireInfo.Clone();
 		gui.TextLabel.Text = this.data.name;
 		gui.TextLabel.TextColor3 = this.data.colors[0];
@@ -145,8 +144,8 @@ export default class WireTool extends ToolBase {
 		super(mode);
 
 		this.markers = new ComponentContainer<MarkerComponent>();
-		this.onEnabled.Connect(() => this.markers.enable());
-		this.onDisabled.Connect(() => this.markers.disable());
+		this.event.onEnable(() => this.markers.enable());
+		this.event.onDisable(() => this.markers.disable());
 
 		// Wire rendering
 		this.viewportFrame = new Instance("ViewportFrame");

@@ -1,6 +1,6 @@
-import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import InputHandler from "client/event/InputHandler";
+import SharedComponentBase from "shared/component/SharedComponentBase";
 import EventHandler from "shared/event/EventHandler";
 import ComponentEventHolder from "./ComponentEventHolder";
 
@@ -8,10 +8,7 @@ import ComponentEventHolder from "./ComponentEventHolder";
  * Base of any component.
  * Handles events and signals which can be enabled or disabled.
  */
-export default class ComponentBase {
-	readonly onEnabled = new Signal<() => void>();
-	readonly onDisabled = new Signal<() => void>();
-
+export default class ComponentBase extends SharedComponentBase {
 	/** Main event handler. Does not register events until enabled and reregisters events when input type changes. */
 	readonly event: ComponentEventHolder = new ComponentEventHolder();
 
@@ -22,11 +19,8 @@ export default class ComponentBase {
 	protected readonly inputHandler: InputHandler = new InputHandler();
 
 	constructor() {
+		super();
 		this.event.onPrepare(() => this.prepare());
-		this.event.subscribe(InputController.inputType.changed, () => {
-			this.event.disable();
-			this.event.enable();
-		});
 	}
 
 	/** Return a function that returns a copy of the provided Instance; Destroys the Instance if specified */
@@ -37,8 +31,8 @@ export default class ComponentBase {
 		return () => template.Clone();
 	}
 
-	protected onPrepare(callback: (inputType: InputType) => void, executeImmediately = false) {
-		this.event.onPrepare(() => callback(InputController.inputType.get()), executeImmediately);
+	protected onPrepare(callback: (inputType: InputType) => void) {
+		this.event.onPrepare(() => callback(InputController.inputType.get()));
 	}
 
 	/** Are component events enabled */
@@ -48,13 +42,11 @@ export default class ComponentBase {
 
 	/** Enable component events */
 	enable(): void {
-		this.onEnabled.Fire();
 		this.event.enable();
 	}
 
 	/** Disable component events */
 	disable(): void {
-		this.onDisabled.Fire();
 		this.event.disable();
 		this.inputHandler.unsubscribeAll();
 		this.eventHandler.unsubscribeAll();
@@ -78,7 +70,6 @@ export default class ComponentBase {
 	protected prepare(): void {
 		// Terminate exist events
 		this.inputHandler.unsubscribeAll();
-		this.eventHandler.unsubscribeAll();
 
 		const inputType = InputController.inputType.get();
 		if (inputType === "Desktop") this.prepareDesktop();
