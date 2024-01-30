@@ -17,6 +17,11 @@ export default class SuspensionLogic extends ConfigurableBlockLogic<
 	constructor(block: PlacedBlockData) {
 		super(block, SuspensionLogic.getConfigDefinition());
 		this.springConstraint = this.instance.SpringSide.Spring;
+
+		this.onImpactBreak(() => {
+			this.instance.SpringSide.Beam.Destroy();
+			this.disable();
+		});
 	}
 
 	protected prepare() {
@@ -25,11 +30,6 @@ export default class SuspensionLogic extends ConfigurableBlockLogic<
 		this.springConstraint.Damping = this.input.damping.get();
 		this.springConstraint.Stiffness = this.input.stiffness.get();
 		this.springConstraint.FreeLength = this.input.free_length.get();
-
-		this.onImpactBreak(() => {
-			this.instance.SpringSide.Beam.Destroy();
-			this.disable();
-		});
 	}
 
 	static getConfigDefinition() {
