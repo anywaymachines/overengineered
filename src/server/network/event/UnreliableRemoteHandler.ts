@@ -1,8 +1,8 @@
 import SpreadingFireController from "server/SpreadingFireController";
-import ServerEffects from "server/effects/ServerEffects";
 import ServerPartUtils from "server/plots/ServerPartUtils";
 import { UnreliableRemotes } from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
+import Effects from "shared/effects/Effects";
 
 export default class UnreliableRemoteHandler {
 	static init() {
@@ -84,7 +84,7 @@ export default class UnreliableRemoteHandler {
 		block.SetAttribute("IMPACT_BROKEN", true);
 
 		// Play sounds
-		ServerEffects.ImpactSound.create(block, player, { index: undefined });
+		Effects.ImpactSound.send(block, { index: undefined }, player);
 	}
 
 	static burnEvent(player: Player, block: BasePart) {

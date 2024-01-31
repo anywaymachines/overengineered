@@ -1,23 +1,18 @@
-import { ReplicatedStorage } from "@rbxts/services";
+import { Debris, ReplicatedStorage } from "@rbxts/services";
 import { UnreliableRemotes } from "shared/Remotes";
-import ClientEffectBase from "./EffectBase";
+import EffectBase from "./EffectBase";
 
-export default class ClientSparksEffect extends ClientEffectBase<SparksEffectArgs> {
+type SparksEffectArgs = undefined;
+export default class SparksEffect extends EffectBase<SparksEffectArgs> {
 	constructor() {
 		super(UnreliableRemotes.SparksEffect);
 	}
 
-	public create(part: BasePart, share: boolean = true, args?: SparksEffectArgs): void {
-		if (!part || !part.Parent) {
-			return;
-		}
-
-		super.create(part, share, args);
-
+	justCreate(part: BasePart, arg?: SparksEffectArgs): void {
 		const sparks = ReplicatedStorage.Assets.Sparks.Clone();
 		sparks.Parent = part;
 
 		// Delete effect
-		game.GetService("Debris").AddItem(sparks, 1.5);
+		Debris.AddItem(sparks, 1.5);
 	}
 }

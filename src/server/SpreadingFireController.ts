@@ -1,5 +1,5 @@
 import BlockManager from "shared/building/BlockManager";
-import ServerEffects from "./effects/ServerEffects";
+import Effects from "shared/effects/Effects";
 import ServerPartUtils from "./plots/ServerPartUtils";
 
 const explosionBase = new Instance("Explosion");
@@ -33,7 +33,7 @@ export default class SpreadingFireController {
 		const duration = math.random(15, 30);
 
 		// Apply fire effect
-		ServerEffects.Fire.create(part, part.GetNetworkOwner() || "everyone", { duration: duration });
+		Effects.Fire.send(part, { duration }, part.GetNetworkOwner() ?? "everyone");
 
 		spawn(() => {
 			wait(duration);

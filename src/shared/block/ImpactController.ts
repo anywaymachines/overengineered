@@ -1,9 +1,7 @@
-import { Players } from "@rbxts/services";
 import { UnreliableRemotes } from "shared/Remotes";
 import TerrainDataInfo from "shared/TerrainDataInfo";
-import BlockManager from "shared/building/BlockManager";
-import SharedPlots from "shared/building/SharedPlots";
-import ClientEffects from "shared/effects/ClientEffects";
+import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
+import Effects from "shared/effects/Effects";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 
@@ -16,13 +14,9 @@ export default class ImpactController {
 	static readonly WATER_DIFF_MULTIPLIER = 3 as const;
 	static readonly PLAYER_CHARACTER_DIFF_MULTIPLIER = 4 as const;
 
-	static initializeBlocks() {
-		const blocks = SharedPlots.getPlotBlocks(
-			SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId),
-		).GetChildren();
-
+	static initializeBlocks(blocks: readonly PlacedBlockData[]) {
 		blocks.forEach((value) => {
-			PartUtils.applyToAllDescendantsOfType("BasePart", value, (part) => {
+			PartUtils.applyToAllDescendantsOfType("BasePart", value.instance, (part) => {
 				if (!part.CanTouch || part.Transparency === 1 || part.IsA("VehicleSeat")) {
 					return;
 				}
@@ -93,7 +87,7 @@ export default class ImpactController {
 					event.Disconnect();
 				}
 			} else if (magnitudeDiff + allowedMagnitudeDiff * 0.2 > allowedMagnitudeDiff) {
-				ClientEffects.Sparks.create(part);
+				Effects.Sparks.send(part, undefined);
 			}
 		});
 	}

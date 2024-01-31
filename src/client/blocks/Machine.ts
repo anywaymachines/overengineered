@@ -6,6 +6,7 @@ import Objects from "shared/_fixes_/objects";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import ImpactController from "shared/block/ImpactController";
 import SharedMachine from "shared/block/SharedMachine";
+import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedComponentContainer from "shared/component/SharedComponentContainer";
 import blockConfigRegistryClient from "./config/BlockConfigRegistryClient";
 import { ConfigLogicValueBase } from "./config/ConfigLogicValueBase";
@@ -20,14 +21,14 @@ export default class Machine extends SharedMachine {
 		this.add(this.logicInputs);
 	}
 
-	protected initialize() {
-		super.initialize();
+	protected initialize(blocks: readonly PlacedBlockData[]) {
+		super.initialize(blocks);
 		this.initializeControls();
 	}
-	protected initializeDestructionIfNeeded() {
+	protected initializeDestructionIfNeeded(blocks: readonly PlacedBlockData[]) {
 		// no super
 		if (PlayerDataStorage.config.get().impact_destruction) {
-			ImpactController.initializeBlocks();
+			ImpactController.initializeBlocks(blocks);
 		}
 	}
 
@@ -64,9 +65,5 @@ export default class Machine extends SharedMachine {
 				);
 			}
 		}
-	}
-
-	static fromBlocks(): Machine {
-		return super.create(Machine);
 	}
 }

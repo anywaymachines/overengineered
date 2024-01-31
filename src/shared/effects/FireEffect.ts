@@ -1,19 +1,16 @@
-import { ReplicatedStorage } from "@rbxts/services";
+import { Debris, ReplicatedStorage } from "@rbxts/services";
 import { UnreliableRemotes } from "shared/Remotes";
-import ClientEffectBase from "./EffectBase";
+import EffectBase from "./EffectBase";
 
-export default class ClientFireEffect extends ClientEffectBase<FireEffectArgs> {
+type FireEffectArgs = {
+	readonly duration?: number;
+};
+export default class FireEffect extends EffectBase<FireEffectArgs> {
 	constructor() {
 		super(UnreliableRemotes.FireEffect);
 	}
 
-	public create(part: BasePart, share: boolean = true, args: FireEffectArgs): void {
-		if (!part || !part.Parent) {
-			return;
-		}
-
-		super.create(part, share, args);
-
+	justCreate(part: BasePart, arg: FireEffectArgs): void {
 		const effects = ReplicatedStorage.Assets.Fire.GetChildren();
 		effects.forEach((value) => {
 			const obj = value.Clone();
@@ -29,7 +26,7 @@ export default class ClientFireEffect extends ClientEffectBase<FireEffectArgs> {
 			}
 
 			// Delete effect
-			game.GetService("Debris").AddItem(obj, args.duration);
+			Debris.AddItem(obj, arg.duration);
 		});
 	}
 }

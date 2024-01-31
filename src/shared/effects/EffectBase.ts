@@ -1,23 +1,29 @@
+import { Players } from "@rbxts/services";
 import { _UnreliableRemoteEvent } from "shared/Remotes";
+import { EffectsInvoker } from "./EffectsInvoker";
 
-export default abstract class ClientEffectBase<T> {
-	protected readonly remote: _UnreliableRemoteEvent<(part: BasePart, args: T) => void>;
+type EffectEventType<T> = _UnreliableRemoteEvent<(part: BasePart, arg: T) => void>;
+export default abstract class EffectBase<T> {
+	readonly event: EffectEventType<T>;
 
-	constructor(createRemote: _UnreliableRemoteEvent<(part: BasePart, args: T) => void>) {
-		this.remote = createRemote;
-
-		this.listenServer();
+	constructor(event: EffectEventType<T>) {
+		this.event = event;
 	}
 
-	protected listenServer() {
-		this.remote.OnClientEvent.Connect((part, arg) => spawn(() => this.create(part, false, arg)));
-	}
+	/** Create the effect. */
+	abstract justCreate(part: BasePart, arg: T): void;
 
-	/** Creating an effect on the client side and sending it to the server so that other clients can see the effect */
-	public create(part: BasePart, share: boolean, arg: T): void {
-		// Share effect with others
-		if (share) {
-			this.remote.FireServer(part, arg);
-		}
+	/** Create the effect locally and send it to the other players.
+	 * @client
+	 */
+	send(part: BasePart, arg: T): void;
+
+	/** Send the effect to the other players
+	 * @server
+	 */
+	send(part: BasePart, arg: T, forcePlayer: Player | "everyone"): void;
+
+	send(part: BasePart, arg: T, forcePlayer?: Player | "everyone" | undefined): void {
+		EffectsInvoker.invoke(part, arg, forcePlayer ?? Players.LocalPlayer, this.event);
 	}
 }

@@ -1,11 +1,11 @@
-import { Players, RunService } from "@rbxts/services";
+import { RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
 import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Objects from "shared/_fixes_/objects";
-import SharedPlots from "shared/building/SharedPlots";
+import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedComponentBase from "shared/component/SharedComponentBase";
 import SharedComponentContainer from "shared/component/SharedComponentContainer";
 import ObservableValue from "shared/event/ObservableValue";
@@ -21,13 +21,35 @@ export default class SharedMachine extends SharedComponentContainer {
 	readonly destroyed = new Signal<() => void>();
 	private readonly childMap = new Map<BlockUuid, ConfigurableBlockLogic<BlockConfigBothDefinitions>>();
 
-	protected initialize() {
+	/** Add blocks to the machine, initialize it and start */
+	init(blocks: readonly PlacedBlockData[]) {
+		for (const block of blocks) {
+			const id = block.id;
+
+			if (!blockRegistry.get(id)) {
+				Logger.error(`Unknown block id ${id}`);
+				continue;
+			}
+
+			const ctor = logicRegistry[id];
+			if (!ctor) {
+				continue;
+			}
+
+			const logic = new ctor(block);
+			this.add(logic);
+		}
+
+		this.initialize(blocks);
+		this.enable();
+	}
+	protected initialize(blocks: readonly PlacedBlockData[]) {
 		this.initializeSpeedLimiter();
 		this.initializeBlockConnections();
-		this.initializeDestructionIfNeeded();
+		this.initializeDestructionIfNeeded(blocks);
 	}
-	protected initializeDestructionIfNeeded() {
-		ImpactController.initializeBlocks();
+	protected initializeDestructionIfNeeded(blocks: readonly PlacedBlockData[]) {
+		ImpactController.initializeBlocks(blocks);
 	}
 
 	add<T extends SharedComponentBase>(instance: T) {
@@ -131,31 +153,5 @@ export default class SharedMachine extends SharedComponentContainer {
 				outputLogic.event.subscribeObservable(output, (value) => input.set(value), true);
 			}
 		}
-	}
-
-	protected static create<T extends SharedMachine>(ctor: new () => T): T {
-		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
-		const machine = new ctor();
-
-		for (const block of SharedPlots.getPlotBlockDatas(plot)) {
-			const id = block.id;
-
-			if (!blockRegistry.get(id)) {
-				Logger.error(`Unknown block id ${id}`);
-				continue;
-			}
-
-			const ctor = logicRegistry[id];
-			if (!ctor) {
-				continue;
-			}
-
-			const logic = new ctor(block);
-			machine.add(logic);
-		}
-
-		machine.initialize();
-		machine.enable();
-		return machine;
 	}
 }
