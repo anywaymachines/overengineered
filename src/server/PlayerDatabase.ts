@@ -20,10 +20,7 @@ export default class PlayerDatabase {
 			(data) => HttpService.JSONEncode(data),
 			(data) => HttpService.JSONDecode(data) as PlayerData,
 		);
-		this.prepare();
-	}
 
-	private prepare() {
 		Players.PlayerRemoving.Connect((plr) => {
 			// Roblox Stuido Local Server
 			if (plr.UserId <= 0) return;

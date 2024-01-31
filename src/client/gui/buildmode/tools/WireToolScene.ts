@@ -22,12 +22,7 @@ export default class WireToolScene extends Control<WireToolSceneDefinition> {
 
 		this.tool.startMarker.subscribe(() => this.update(), true);
 		this.event.subscribe(GuiService.GetPropertyChangedSignal("SelectedObject"), () => this.update());
-	}
-
-	prepare() {
-		super.prepare();
-
-		this.update();
+		this.onPrepare(() => this.update());
 	}
 
 	private update() {

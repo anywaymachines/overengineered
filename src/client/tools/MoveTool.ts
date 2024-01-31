@@ -22,6 +22,11 @@ export default class MoveTool extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 		this.targetModel = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId).Blocks;
+
+		this.event.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.createHandles());
+		this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.createHandles());
+		this.event.subscribe(Signals.BLOCKS.BLOCKS_MOVED, () => this.createHandles());
+		this.event.onEnable(() => this.createHandles());
 	}
 
 	getDisplayName(): string {
@@ -107,46 +112,40 @@ export default class MoveTool extends ToolBase {
 		return direction;
 	}
 
-	prepare() {
-		super.prepare();
-		this.createHandles();
+	/*
+	void prepare()
+	{
+		super.prepare()
 
-		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.createHandles());
-		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.createHandles());
-		this.eventHandler.subscribe(Signals.BLOCKS.BLOCKS_MOVED, () => this.createHandles());
+		let direction: Vector3 | undefined = undefined;
+		let currentPos: Vector3 | undefined = undefined;
 
-		/*
-		{
-			let direction: Vector3 | undefined = undefined;
-			let currentPos: Vector3 | undefined = undefined;
+		const start = (face: Enum.NormalId) => {
+			direction = Vector3.FromNormalId(face);
+		};
+		const move = (delta: Vector2, mousePos: Vector2) => {
+			currentPos ??= Vector3.zero;
+			direction ??= Vector3.xAxis;
+			currentPos = currentPos.add(direction.mul(delta.X / 50));
 
-			const start = (face: Enum.NormalId) => {
-				direction = Vector3.FromNormalId(face);
-			};
-			const move = (delta: Vector2, mousePos: Vector2) => {
-				currentPos ??= Vector3.zero;
-				direction ??= Vector3.xAxis;
-				currentPos = currentPos.add(direction.mul(delta.X / 50));
+			const roundedPos = new Vector3(
+				math.round(currentPos.X),
+				math.round(currentPos.Y),
+				math.round(currentPos.Z),
+			);
 
-				const roundedPos = new Vector3(
-					math.round(currentPos.X),
-					math.round(currentPos.Y),
-					math.round(currentPos.Z),
-				);
+			const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
+			for (const block of plot.Blocks.GetChildren(undefined)) {
+				block.PivotTo(block.GetPivot().add(roundedPos));
+			}
+		};
+		const stop = () => {};
 
-				const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
-				for (const block of plot.Blocks.GetChildren(undefined)) {
-					block.PivotTo(block.GetPivot().add(roundedPos));
-				}
-			};
-			const stop = () => {};
-
-			Dragger.initialize(this.eventHandler, this.XHandles!, move, start, stop);
-			Dragger.initialize(this.eventHandler, this.YHandles!, move, start, stop);
-			Dragger.initialize(this.eventHandler, this.ZHandles!, move, start, stop);
-		}
-		*/
+		Dragger.initialize(this.eventHandler, this.XHandles!, move, start, stop);
+		Dragger.initialize(this.eventHandler, this.YHandles!, move, start, stop);
+		Dragger.initialize(this.eventHandler, this.ZHandles!, move, start, stop);
 	}
+	*/
 
 	public disable() {
 		super.disable();

@@ -22,10 +22,6 @@ export default class SlotsDatabase {
 			(data) => data,
 		);
 
-		this.prepare();
-	}
-
-	private prepare() {
 		Players.PlayerRemoving.Connect((plr) => {
 			// Roblox Stuido Local Server
 			if (plr.UserId <= 0) return;

@@ -11,17 +11,9 @@ export default class RopeLogic extends ConfigurableBlockLogic<typeof blockConfig
 	private ropeConstraint;
 
 	constructor(block: PlacedBlockData) {
-		super(block, RopeLogic.getConfigDefinition());
+		super(block, blockConfigRegistry.rope);
 		this.ropeConstraint = this.instance.RopeSide.RopeConstraint;
-	}
 
-	protected prepare() {
-		super.prepare();
-
-		this.ropeConstraint.Length = this.input.length.get();
-	}
-
-	static getConfigDefinition() {
-		return blockConfigRegistry.rope;
+		this.event.subscribeObservable(this.input.length, (v) => (this.ropeConstraint.Length = v), true);
 	}
 }

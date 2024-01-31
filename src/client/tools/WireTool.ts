@@ -156,6 +156,8 @@ export default class WireTool extends ToolBase {
 		this.viewportFrame.Parent = GuiController.getGameUI();
 		this.viewportFrame.Ambient = Color3.fromRGB(255, 255, 255);
 		this.viewportFrame.LightColor = Color3.fromRGB(255, 255, 255);
+
+		this.onPrepare(() => this.updateVisual(false));
 	}
 
 	getDisplayName(): string {
@@ -232,11 +234,6 @@ export default class WireTool extends ToolBase {
 		}
 
 		this.stopDragging();
-	}
-
-	protected prepare(): void {
-		this.updateVisual(false);
-		super.prepare();
 	}
 
 	protected prepareTouch(): void {

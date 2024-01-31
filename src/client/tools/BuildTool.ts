@@ -51,6 +51,9 @@ export default class BuildTool extends ToolBase {
 		MaterialChooserControl.instance.selectedColor.subscribe((color) => {
 			this.setSelectedColor(color);
 		}, true);
+
+		this.event.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.updatePosition());
+		this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.updatePosition());
 	}
 
 	getDisplayName(): string {
@@ -364,13 +367,6 @@ export default class BuildTool extends ToolBase {
 		} else {
 			PartUtils.ghostModel(this.previewBlock, this.forbiddenColor);
 		}
-	}
-
-	protected prepare(): void {
-		super.prepare();
-
-		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.updatePosition());
-		this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.updatePosition());
 	}
 
 	protected prepareDesktop(): void {
