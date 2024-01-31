@@ -156,8 +156,6 @@ export default class WireTool extends ToolBase {
 		this.viewportFrame.Parent = GuiController.getGameUI();
 		this.viewportFrame.Ambient = Color3.fromRGB(255, 255, 255);
 		this.viewportFrame.LightColor = Color3.fromRGB(255, 255, 255);
-
-		this.onPrepare(() => this.updateVisual(false));
 	}
 
 	getDisplayName(): string {
@@ -386,6 +384,11 @@ export default class WireTool extends ToolBase {
 
 		// It works
 		this.prepareTouch();
+	}
+
+	protected prepare() {
+		this.updateVisual(false);
+		super.prepare();
 	}
 
 	private createMarker(part: BasePart, markerData: MarkerData, offset: Vector3 = Vector3.zero): MarkerComponent {
