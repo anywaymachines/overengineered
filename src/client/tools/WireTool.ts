@@ -186,6 +186,9 @@ export default class WireTool extends ToolBase {
 	}
 
 	private createMarkers(part: BasePart, markers: readonly MarkerData[]) {
+		// TODO: this fixes error if this tries to create a wire to a destroyed block of an OTHER player in ride mode
+		if (!part) return;
+
 		const averageSize = (part.Size.X + part.Size.Y + part.Size.Z) / 3;
 		const halfSize = averageSize / 2;
 		const offset = 0.25;
