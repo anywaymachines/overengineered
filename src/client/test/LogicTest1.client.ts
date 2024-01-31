@@ -1,13 +1,13 @@
 import { Players, Workspace } from "@rbxts/services";
-import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
-import Machine from "client/blocks/logic/Machine";
-import ConstantBlockLogic from "client/blocks/operations/ConstantBlockLogic";
-import AltimeterBlockLogic from "client/blocks/operations/sensors/AltimeterBlockLogic";
-import OperationVec3CombinerBlockLogic from "client/blocks/operations/vector/OperationVec3CombinerBlockLogic";
-import OperationVec3SplitterBlockLogic from "client/blocks/operations/vector/OperationVec3SplitterBlockLogic";
+import Machine from "client/blocks/Machine";
 import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
 import RobloxUnit from "shared/RobloxUnit";
 import Objects from "shared/_fixes_/objects";
+import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
+import ConstantBlockLogic from "shared/block/logic/operations/ConstantBlockLogic";
+import AltimeterBlockLogic from "shared/block/logic/operations/sensors/AltimeterBlockLogic";
+import OperationVec3CombinerBlockLogic from "shared/block/logic/operations/vector/OperationVec3CombinerBlockLogic";
+import OperationVec3SplitterBlockLogic from "shared/block/logic/operations/vector/OperationVec3SplitterBlockLogic";
 import Test from "./Test";
 
 const parent = new Instance("Folder");
@@ -29,12 +29,14 @@ const LogicTest1 = {
 		altimeterInstance.Parent = parent;
 
 		const altimeter = new AltimeterBlockLogic({
+			id: "id",
 			instance: altimeterInstance,
 			uuid: "0" as BlockUuid,
 			config: {},
 			connections: {},
 		});
 		const combiner = new OperationVec3CombinerBlockLogic({
+			id: "id",
 			uuid: "1" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: { value_x: 1 },
@@ -63,6 +65,7 @@ const LogicTest1 = {
 	},
 	size1() {
 		const combiner = new OperationVec3CombinerBlockLogic({
+			id: "id",
 			uuid: "0" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: { value_x: 1 },
@@ -82,12 +85,14 @@ const LogicTest1 = {
 	},
 	size2() {
 		const constant = new ConstantBlockLogic({
+			id: "id",
 			uuid: "0" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: { value: 2 },
 			connections: {},
 		});
 		const combiner = new OperationVec3CombinerBlockLogic({
+			id: "id",
 			uuid: "1" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: { value_x: 1 },
@@ -112,12 +117,14 @@ const LogicTest1 = {
 	},
 	size3() {
 		const constant = new ConstantBlockLogic({
+			id: "id",
 			uuid: "0" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: { value: 7 },
 			connections: {},
 		});
 		const combiner = new OperationVec3CombinerBlockLogic({
+			id: "id",
 			uuid: "1" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: { value_x: 1 },
@@ -129,6 +136,7 @@ const LogicTest1 = {
 			},
 		});
 		const splitter = new OperationVec3SplitterBlockLogic({
+			id: "id",
 			uuid: "2" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
 			config: {},

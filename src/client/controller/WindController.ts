@@ -1,4 +1,5 @@
 import { TweenService, Workspace } from "@rbxts/services";
+import GameEnvironment from "shared/GameEnvironment";
 import GameEnvironmentController from "./GameEnvironmentController";
 
 export default class WindController {
@@ -13,7 +14,7 @@ export default class WindController {
 		const smoothTime = (Workspace.GetAttribute("GlobalWindSmoothTime") as number | undefined) ?? 0;
 
 		const percentage = math.clamp(
-			1 - GameEnvironmentController.currentHeight / GameEnvironmentController.ZeroAirHeight,
+			1 - GameEnvironmentController.currentHeight / GameEnvironment.ZeroAirHeight,
 			0,
 			1,
 		);

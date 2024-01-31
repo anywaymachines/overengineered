@@ -1,4 +1,4 @@
-import Machine from "client/blocks/logic/Machine";
+import Machine from "client/blocks/Machine";
 import RideModeScene, { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
 import GuiController from "../GuiController";
 import SoundController from "../SoundController";

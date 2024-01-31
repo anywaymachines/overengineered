@@ -1,6 +1,6 @@
 import { ReplicatedFirst, ReplicatedStorage, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import { TerrainData, TerrainInfo } from "./TerrainDataInfo";
+import { TerrainData, TerrainInfo } from "../shared/TerrainDataInfo";
 
 const folder = ReplicatedFirst.WaitForChild("Terrain") as Folder & TerrainInfo;
 const terrainChild = folder.Data.TerrainData;

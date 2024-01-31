@@ -12,12 +12,12 @@ export abstract class ConfigLogicValueBase<
 	protected readonly definition: T;
 	protected readonly config: T["config"];
 
-	constructor(config: T["config"], definition: T) {
+	constructor(observable: ObservableValue<T["default"]>, config: T["config"], definition: T) {
 		super();
 
 		this.config = config;
 		this.definition = definition;
-		this.value = this.createObservable();
+		this.value = observable;
 	}
 
 	enable() {
@@ -32,9 +32,5 @@ export abstract class ConfigLogicValueBase<
 	/** @deprecated */
 	getRideModeGuis(inputType: InputType): readonly Control[] {
 		return [];
-	}
-
-	protected createObservable(): ObservableValue<T["default"]> {
-		return new ObservableValue(undefined!);
 	}
 }

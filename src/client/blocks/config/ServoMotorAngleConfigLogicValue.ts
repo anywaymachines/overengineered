@@ -1,6 +1,7 @@
 import { KeyDefinitions, KeyPressingDefinitionsController } from "client/base/KeyPressingController";
 import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
 import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
+import ObservableValue from "shared/event/ObservableValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
 export class ServoMotorAngleConfigLogicValue extends ConfigLogicValueBase<
@@ -9,10 +10,11 @@ export class ServoMotorAngleConfigLogicValue extends ConfigLogicValueBase<
 	private readonly controller;
 
 	constructor(
+		observable: ObservableValue<BlockConfigDefinitionRegistry["servoMotorAngle"]["default"]>,
 		config: BlockConfigDefinitionRegistry["servoMotorAngle"]["config"],
 		definition: BlockConfigDefinitionRegistry["servoMotorAngle"],
 	) {
-		super(config, definition);
+		super(observable, config, definition);
 		this.value.set(0);
 
 		const def = {

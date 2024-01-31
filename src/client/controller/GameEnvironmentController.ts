@@ -1,17 +1,8 @@
 import { RunService, Workspace } from "@rbxts/services";
+import GameEnvironment from "shared/GameEnvironment";
 import LocalPlayerController from "./LocalPlayerController";
 
 export default class GameEnvironmentController {
-	// Const
-	public static readonly EarthGravity = 180;
-	public static readonly EarthAirDensity = 0.2;
-
-	public static readonly ZeroGravityHeight = 15000;
-	public static readonly ZeroAirHeight = 10000;
-
-	public static readonly MinSoundValue = 0.01;
-
-	// Vars
 	public static currentHeight = 0;
 
 	public static initialize() {
@@ -30,10 +21,12 @@ export default class GameEnvironmentController {
 		this.currentHeight = position.Y;
 
 		Workspace.AirDensity = math.max(
-			this.EarthAirDensity - this.currentHeight * (this.EarthAirDensity / this.ZeroAirHeight),
+			GameEnvironment.EarthAirDensity -
+				this.currentHeight * (GameEnvironment.EarthAirDensity / GameEnvironment.ZeroAirHeight),
 		);
 		Workspace.Gravity = math.max(
-			this.EarthGravity - this.currentHeight * (this.EarthGravity / this.ZeroGravityHeight),
+			GameEnvironment.EarthGravity -
+				this.currentHeight * (GameEnvironment.EarthGravity / GameEnvironment.ZeroGravityHeight),
 			0,
 		);
 	}

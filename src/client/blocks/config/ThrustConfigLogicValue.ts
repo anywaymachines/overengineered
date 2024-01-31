@@ -9,10 +9,11 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefi
 	private readonly controller;
 
 	constructor(
+		observable: ObservableValue<BlockConfigDefinitionRegistry["thrust"]["default"]>,
 		config: BlockConfigDefinitionRegistry["thrust"]["config"],
 		definition: BlockConfigDefinitionRegistry["thrust"],
 	) {
-		super(config, definition);
+		super(observable, config, definition);
 
 		this.value.set(0);
 		let torque = 0;

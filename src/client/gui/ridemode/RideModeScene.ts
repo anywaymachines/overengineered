@@ -1,19 +1,16 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
-import ConfigurableBlockLogic from "client/base/ConfigurableBlockLogic";
 import Control from "client/base/Control";
-import Machine from "client/blocks/logic/Machine";
-import RocketEngineLogic from "client/blocks/logic/RocketEngineLogic";
+import Machine from "client/blocks/Machine";
 import InputController from "client/controller/InputController";
 import LocalPlayerController from "client/controller/LocalPlayerController";
 import PopupController from "client/controller/PopupController";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
-import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
 import Remotes from "shared/Remotes";
 import RobloxUnit from "shared/RobloxUnit";
 import SlotsMeta from "shared/SlotsMeta";
-import Arrays from "shared/_fixes_/Arrays";
+import RocketEngineLogic from "shared/block/logic/RocketEngineLogic";
 import EventHandler from "shared/event/EventHandler";
 import { ButtonControl, TextButtonDefinition } from "../controls/Button";
 import { DictionaryControl } from "../controls/DictionaryControl";
@@ -248,9 +245,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 		const inputType = InputController.inputType.get();
 
-		const configurable = Arrays.ofType(machine.getChildren(), ConfigurableBlockLogic<BlockConfigBothDefinitions>);
-		const inputLogics = Arrays.flatmap(configurable, (c) => c.getChildren());
-
+		const inputLogics = machine.logicInputs.getChildren();
 		const controls = [
 			...TouchModeButtonControl.fromBlocks(inputType, inputLogics),
 			//
