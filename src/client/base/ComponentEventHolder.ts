@@ -4,7 +4,7 @@ import SharedComponentEventHolder from "shared/component/SharedComponentEventHol
 
 /** @inheritdoc */
 export default class ComponentEventHolder extends SharedComponentEventHolder {
-	private readonly inputHandler = new InputHandler();
+	readonly inputHandler = new InputHandler();
 
 	/** Register an event that fires on enable and input type change */
 	onPrepare(callback: (inputType: InputType) => void): void {

@@ -52,6 +52,7 @@ const touchTap = GlobalInputHandler.touchTap;
 	subKeys(inputEnded, keyReleased);
 }
 
+export type ReadonlyInputHandler = Pick<InputHandler, Exclude<keyof InputHandler, "destroy" | "unsubscribeAll">>;
 export default class InputHandler {
 	private inputBegan?: ThinSignalWrapper<Parameters<FullInputCallback>>;
 	private inputChanged?: ThinSignalWrapper<Parameters<FullInputCallback>>;

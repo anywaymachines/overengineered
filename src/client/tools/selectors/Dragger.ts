@@ -1,4 +1,3 @@
-import { RunService, UserInputService } from "@rbxts/services";
 import EventHandler from "shared/event/EventHandler";
 
 export default class Dragger {
@@ -9,6 +8,7 @@ export default class Dragger {
 		starting?: (...rest: TCallbackData) => void,
 		stopping?: () => void,
 	) {
+		/*
 		const eh = new EventHandler();
 		let prevLocation: Vector2 | undefined = undefined;
 
@@ -39,5 +39,6 @@ export default class Dragger {
 
 		eventHandler.subscribe(instance.MouseButton1Down, startmove);
 		eventHandler.allUnsibscribed.Once(stop);
+		*/
 	}
 }

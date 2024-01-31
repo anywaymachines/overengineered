@@ -1,11 +1,13 @@
 import SharedComponentBase from "./SharedComponentBase";
 import SharedComponentContainer from "./SharedComponentContainer";
+import SharedComponentEventHolder from "./SharedComponentEventHolder";
 
 /** A component that controls an Instance and has children. */
 export default class SharedComponent<
 	T extends Instance = Instance,
 	TChild extends SharedComponentBase = SharedComponentBase,
-> extends SharedComponentContainer<TChild> {
+	TEventHolder extends SharedComponentEventHolder = SharedComponentEventHolder,
+> extends SharedComponentContainer<TChild, TEventHolder> {
 	protected readonly instance: T;
 
 	constructor(instance: T) {

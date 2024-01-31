@@ -5,15 +5,20 @@ import SharedComponentEventHolder from "./SharedComponentEventHolder";
  * Base of any component.
  * Handles events and signals which can be enabled or disabled.
  */
-export default class SharedComponentBase {
+export default class SharedComponentBase<TEventHolder extends SharedComponentEventHolder = SharedComponentEventHolder> {
 	/** Main event handler. Does not register events until enabled and reregisters events when input type changes. */
-	readonly event: SharedComponentEventHolder = new SharedComponentEventHolder();
+	readonly event: TEventHolder;
 
 	/** Event handler for use in prepare***() */
-	protected readonly eventHandler: EventHandler = new EventHandler();
+	protected readonly eventHandler: EventHandler;
 
 	constructor() {
-		this.event.onEnable(() => this.eventHandler.unsubscribeAll());
+		this.event = this.createEventHolder();
+		this.eventHandler = this.event.eventHandler;
+	}
+
+	protected createEventHolder(): TEventHolder {
+		return new SharedComponentEventHolder() as TEventHolder;
 	}
 
 	/** Return a function that returns a copy of the provided Instance; Destroys the Instance if specified */
@@ -22,11 +27,6 @@ export default class SharedComponentBase {
 		if (destroyOriginal) object.Destroy();
 
 		return () => template.Clone();
-	}
-
-	/** Are component events enabled */
-	isEnabled(): boolean {
-		return this.event.isEnabled();
 	}
 
 	/** Enable component events */
@@ -44,11 +44,5 @@ export default class SharedComponentBase {
 	destroy(): void {
 		this.disable();
 		this.event.destroy();
-	}
-
-	/** Prepare the functionality (**Unsubscribes from every event and input handler**) */
-	protected prepare(): void {
-		// Terminate exist events
-		this.eventHandler.unsubscribeAll();
 	}
 }

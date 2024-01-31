@@ -1,3 +1,4 @@
+import EventHandler from "shared/event/EventHandler";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import SlimSignal from "shared/event/SlimSignal";
 
@@ -7,8 +8,8 @@ type Sub<T extends Callback> = readonly [signal: RBXScriptSignal<T>, callback: T
 export default class SharedComponentEventHolder {
 	readonly onEnabled = new SlimSignal();
 	readonly onDisabled = new SlimSignal();
+	readonly eventHandler = new EventHandler();
 	private readonly events: Sub<Callback>[] = [];
-	private readonly subscribed: RBXScriptConnection[] = [];
 
 	private enabled = false;
 
@@ -39,16 +40,12 @@ export default class SharedComponentEventHolder {
 
 	/** Add event to the event list */
 	private connect(sub: Sub<Callback>): void {
-		this.subscribed.push(sub[0].Connect(sub[1]));
+		this.eventHandler.subscribe(sub[0], sub[1]);
 	}
 
 	/** Unsubscribe from all subscribed events */
 	protected disconnect(): void {
-		for (const sub of this.subscribed) {
-			sub.Disconnect();
-		}
-
-		this.subscribed.clear();
+		this.eventHandler.unsubscribeAll();
 	}
 
 	/** Register an event that fires on enable */
@@ -114,9 +111,9 @@ export default class SharedComponentEventHolder {
 
 		this.onEnabled.unsubscribeAll();
 		this.onDisabled.unsubscribeAll();
+		this.eventHandler.unsubscribeAll();
 
 		const tis = this;
 		delete (this as unknown as { events?: typeof tis.events }).events;
-		delete (this as unknown as { subscribed?: typeof tis.subscribed }).subscribed;
 	}
 }

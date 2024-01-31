@@ -1,71 +1,43 @@
-import ComponentBase from "./ComponentBase";
+import InputController from "client/controller/InputController";
+import { ReadonlyInputHandler } from "client/event/InputHandler";
+import SharedComponentBase from "shared/component/SharedComponentBase";
+import SharedComponentContainer from "shared/component/SharedComponentContainer";
+import ComponentEventHolder from "./ComponentEventHolder";
 
 /** A component that has children. */
-export default class ComponentContainer<TChild extends ComponentBase = ComponentBase> extends ComponentBase {
-	private readonly children: TChild[] = [];
+export default class ComponentContainer<
+	TChild extends SharedComponentBase = SharedComponentBase,
+> extends SharedComponentContainer<TChild, ComponentEventHolder> {
+	/** Input handler for use in prepare***() */
+	protected readonly inputHandler: ReadonlyInputHandler;
 
-	/** Returns a list of added children */
-	getChildren(): readonly TChild[] {
-		return this.children;
+	constructor() {
+		super();
+
+		this.inputHandler = this.event.inputHandler;
+		this.event.onPrepare(() => this.prepare());
 	}
 
-	/** Enable component events, for self and every child */
-	enable() {
-		super.enable();
-
-		for (const child of this.getChildren()) {
-			child.enable();
-		}
-	}
-	/** Disable component events, for self and every child */
-	disable() {
-		for (const child of this.getChildren()) {
-			child.disable();
-		}
-
-		super.disable();
-	}
-	/** Disable component events, destroy the Instance and free the memory, for self and every child */
-	destroy() {
-		for (const child of this.getChildren()) {
-			child.destroy();
-		}
-
-		super.destroy();
+	protected createEventHolder(): ComponentEventHolder {
+		return new ComponentEventHolder();
 	}
 
-	/**
-	 * Add a child and return it
-	 * @deprecated Use `add` instead
-	 */
-	added<T extends TChild>(instance: T) {
-		return this.add(instance);
+	protected onPrepare(callback: (inputType: InputType) => void) {
+		this.event.onPrepare(callback);
 	}
 
-	/** Add a child and return it */
-	add<T extends TChild>(instance: T) {
-		this.children.push(instance);
-		if (this.isEnabled()) {
-			instance.enable();
-		}
+	/** Prepare the functionality for Desktop */
+	protected prepareDesktop(): void {}
+	/** Prepare the functionality for Touch */
+	protected prepareTouch(): void {}
+	/** Prepare the functionality for Gamepad */
+	protected prepareGamepad(): void {}
 
-		return instance;
-	}
-
-	/** Remove and destroy a child */
-	remove(child: TChild) {
-		const index = this.children.indexOf(child);
-		if (index === -1) return;
-
-		this.children.remove(index);
-		child.destroy();
-	}
-
-	/**
-	 * Clear all added children.
-	 * Removes only children that have been added using this.add()
-	 */
-	clear() {
-		[...this.children].forEach((child) => this.remove(child));
+	/** Prepare the functionality (**Unsubscribes from every event and input handler**) */
+	protected prepare(): void {
+		const inputType = InputController.inputType.get();
+		if (inputType === "Desktop") this.prepareDesktop();
+		else if (inputType === "Touch") this.prepareTouch();
+		else if (inputType === "Gamepad") this.prepareGamepad();
 	}
 }

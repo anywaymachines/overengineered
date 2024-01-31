@@ -1,63 +1,44 @@
-import ComponentBase from "./ComponentBase";
-import ComponentContainer from "./ComponentContainer";
+import InputController from "client/controller/InputController";
+import { ReadonlyInputHandler } from "client/event/InputHandler";
+import SharedComponent from "shared/component/SharedComponent";
+import SharedComponentBase from "shared/component/SharedComponentBase";
+import ComponentEventHolder from "./ComponentEventHolder";
 
 /** A component that controls an Instance and has children. */
 export default class Component<
 	T extends Instance = Instance,
-	TChild extends ComponentBase = ComponentBase,
-> extends ComponentContainer<TChild> {
-	protected readonly instance: T;
+	TChild extends SharedComponentBase = SharedComponentBase,
+> extends SharedComponent<T, TChild, ComponentEventHolder> {
+	/** Input handler for use in prepare***() */
+	protected readonly inputHandler: ReadonlyInputHandler;
 
 	constructor(instance: T) {
-		super();
-		this.instance = instance;
+		super(instance);
 
-		(this.instance as Instance).GetPropertyChangedSignal("Parent").Connect(() => {
-			if (this.instance.Parent) return;
-			this.destroy();
-		});
+		this.inputHandler = this.event.inputHandler;
+		this.event.onPrepare(() => this.prepare());
 	}
 
-	/** Checks if the child exists on an Instance */
-	protected static exists<T extends Instance, TKey extends keyof T & string>(
-		gui: T,
-		name: TKey,
-	): gui is T & { [key in TKey]: (typeof gui)[TKey] & defined } {
-		return gui.FindFirstChild(name) !== undefined;
+	protected createEventHolder(): ComponentEventHolder {
+		return new ComponentEventHolder();
 	}
 
-	/** Get an attribute value on the Instance */
-	getAttribute<T extends AttributeValue>(name: string) {
-		return this.instance.GetAttribute(name) as T | undefined;
+	protected onPrepare(callback: (inputType: InputType) => void) {
+		this.event.onPrepare(callback);
 	}
 
-	getInstance() {
-		return this.instance;
-	}
+	/** Prepare the functionality for Desktop */
+	protected prepareDesktop(): void {}
+	/** Prepare the functionality for Touch */
+	protected prepareTouch(): void {}
+	/** Prepare the functionality for Gamepad */
+	protected prepareGamepad(): void {}
 
-	/** Add a child */
-	add<T extends TChild>(instance: T) {
-		super.add(instance);
-
-		if (
-			instance instanceof Component &&
-			instance.getInstance() !== this.instance &&
-			instance.getInstance().Parent === undefined
-		) {
-			instance.getInstance().Parent = this.instance;
-		}
-
-		return instance;
-	}
-
-	/** Disable component events, destroy the Instance and free the memory */
-	destroy() {
-		super.destroy();
-
-		try {
-			this.instance.Destroy();
-		} catch {
-			// empty
-		}
+	/** Prepare the functionality (**Unsubscribes from every event and input handler**) */
+	protected prepare(): void {
+		const inputType = InputController.inputType.get();
+		if (inputType === "Desktop") this.prepareDesktop();
+		else if (inputType === "Touch") this.prepareTouch();
+		else if (inputType === "Gamepad") this.prepareGamepad();
 	}
 }

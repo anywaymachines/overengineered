@@ -1,9 +1,11 @@
 import SharedComponentBase from "./SharedComponentBase";
+import SharedComponentEventHolder from "./SharedComponentEventHolder";
 
 /** A component that has children. */
 export default class SharedComponentContainer<
 	TChild extends SharedComponentBase = SharedComponentBase,
-> extends SharedComponentBase {
+	TEventHolder extends SharedComponentEventHolder = SharedComponentEventHolder,
+> extends SharedComponentBase<TEventHolder> {
 	private readonly children: TChild[] = [];
 
 	/** Returns a list of added children */
@@ -47,7 +49,7 @@ export default class SharedComponentContainer<
 	/** Add a child and return it */
 	add<T extends TChild>(instance: T) {
 		this.children.push(instance);
-		if (this.isEnabled()) {
+		if (this.event.isEnabled()) {
 			instance.enable();
 		}
 

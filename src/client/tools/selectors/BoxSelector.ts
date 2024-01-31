@@ -54,6 +54,7 @@ export default class BoxSelector extends ComponentBase {
 		};
 
 		const eh = new EventHandler();
+		let selection: GuiObject | undefined;
 		const highlights: (SelectionBox & { Parent: BlockModel })[] = [];
 		const clearHighlights = () => {
 			for (const highlight of highlights) {
@@ -66,7 +67,7 @@ export default class BoxSelector extends ComponentBase {
 			if (InputController.inputType.get() === "Desktop") {
 				const startpos = new UDim2(0, mouse.X, 0, mouse.Y);
 
-				const selection = template();
+				selection = template();
 				selection.Position = startpos;
 				selection.Parent = GuiController.getUnscaledGameUI();
 				selection.Visible = true;
@@ -81,9 +82,8 @@ export default class BoxSelector extends ComponentBase {
 						new Vector2(mouse.X, mouse.Y),
 					).filter(filter);
 
-				eh.allUnsibscribed.Connect(() => selection.Destroy());
 				eh.subscribe(mouse.Move, () => {
-					selection.Size = new UDim2(0, mouse.X, 0, mouse.Y).sub(startpos);
+					selection!.Size = new UDim2(0, mouse.X, 0, mouse.Y).sub(startpos);
 
 					const inside = searchBlocks();
 					clearHighlights();
@@ -99,7 +99,7 @@ export default class BoxSelector extends ComponentBase {
 					}
 				});
 				eh.subscribeOnce(mouse.Button1Up, () => {
-					selection.Destroy();
+					selection?.Destroy();
 					eh.unsubscribeAll();
 					clearHighlights();
 
@@ -113,6 +113,7 @@ export default class BoxSelector extends ComponentBase {
 
 		this.event.onDisable(() => {
 			clearHighlights();
+			selection?.Destroy();
 			eh.unsubscribeAll();
 		});
 		this.event.subscribe(mouse.Button1Down, () => {

@@ -1,11 +1,11 @@
 import Signal from "@rbxts/signal";
+import SharedComponentBase from "shared/component/SharedComponentBase";
 import Component from "./Component";
-import ComponentBase from "./ComponentBase";
 
 /** A component that is a GUI element */
 export default class Control<
 	T extends GuiObject = GuiObject,
-	TChild extends ComponentBase = ComponentBase,
+	TChild extends SharedComponentBase = SharedComponentBase,
 > extends Component<T, TChild> {
 	/** Signal that fires when this element is shown */
 	readonly onShow = new Signal<() => void>();
