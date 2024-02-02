@@ -1,8 +1,8 @@
-import ActionController from "client/controller/ActionController";
-import ToolController from "client/controller/ToolController";
-import { requestMode } from "client/controller/modes/PlayModeRequest";
 import Control from "client/gui/Control";
+import { requestMode } from "client/modes/PlayModeRequest";
+import ActionController from "client/modes/build/ActionController";
 import ToolBase from "client/tools/ToolBase";
+import ToolController from "client/tools/ToolController";
 import GuiAnimator from "../GuiAnimator";
 import { ButtonControl } from "../controls/Button";
 import SavePopup from "../popup/SavePopup";

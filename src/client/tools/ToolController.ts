@@ -5,11 +5,11 @@ import PaintTool from "client/tools/PaintTool";
 import ToolBase from "client/tools/ToolBase";
 import WireTool from "client/tools/WireTool";
 import ObservableValue from "shared/event/ObservableValue";
-import BuildTool from "../tools/BuildTool";
-import ConfigTool from "../tools/ConfigTool";
-import DeleteTool from "../tools/DeleteTool";
-import MoveTool from "../tools/MoveTool";
-import BuildingMode from "./modes/BuildingMode";
+import BuildingMode from "../modes/build/BuildingMode";
+import BuildTool from "./BuildTool";
+import ConfigTool from "./ConfigTool";
+import DeleteTool from "./DeleteTool";
+import MoveTool from "./MoveTool";
 
 export default class ToolController extends ComponentBase {
 	public readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);

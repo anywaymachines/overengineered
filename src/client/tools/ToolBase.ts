@@ -1,6 +1,6 @@
 import { Players } from "@rbxts/services";
-import BuildingMode from "client/controller/modes/BuildingMode";
 import Gui from "client/gui/Gui";
+import BuildingMode from "client/modes/build/BuildingMode";
 import ObservableValue from "shared/event/ObservableValue";
 import ComponentContainer from "../component/ComponentContainer";
 

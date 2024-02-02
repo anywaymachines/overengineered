@@ -1,4 +1,4 @@
-import BuildingMode from "client/controller/modes/BuildingMode";
+import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";

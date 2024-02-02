@@ -7,7 +7,6 @@ import BeaconController from "./controller/BeaconController";
 import CharacterController from "./controller/CharacterController";
 import GameEnvironmentController from "./controller/GameEnvironmentController";
 import LocalPlayerController from "./controller/LocalPlayerController";
-import PlayModeController from "./controller/PlayModeController";
 import SoundController from "./controller/SoundController";
 import WindController from "./controller/WindController";
 import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
@@ -15,6 +14,7 @@ import Gui from "./gui/Gui";
 import DebugControl from "./gui/static/DebugControl";
 import LogControl from "./gui/static/LogControl";
 import TooltipsControl from "./gui/static/TooltipsControl";
+import PlayModeController from "./modes/PlayModeController";
 
 (async () => await PlayerDataStorage.init())();
 

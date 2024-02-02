@@ -2,9 +2,9 @@ import { GamepadService, Players, ReplicatedStorage, Workspace } from "@rbxts/se
 import Component from "client/component/Component";
 import ComponentContainer from "client/component/ComponentContainer";
 import InputController from "client/controller/InputController";
-import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
 import Gui from "client/gui/Gui";
+import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import Remotes from "shared/Remotes";
 import BlockConfigDefinitionRegistry, { BlockConfigDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";

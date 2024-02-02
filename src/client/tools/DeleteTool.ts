@@ -1,10 +1,10 @@
 import { HttpService, Players } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import ActionController from "client/controller/ActionController";
-import BuildingController from "client/controller/BuildingController";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
-import BuildingMode from "client/controller/modes/BuildingMode";
+import ActionController from "client/modes/build/ActionController";
+import BuildingController from "client/modes/build/BuildingController";
+import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";

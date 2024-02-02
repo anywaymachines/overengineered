@@ -1,14 +1,14 @@
 import { GuiService, HttpService, Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import ActionController from "client/controller/ActionController";
-import BuildingController from "client/controller/BuildingController";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
-import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
 import Gui from "client/gui/Gui";
 import MaterialChooserControl from "client/gui/buildmode/MaterialChooser";
 import LogControl from "client/gui/static/LogControl";
+import ActionController from "client/modes/build/ActionController";
+import BuildingController from "client/modes/build/BuildingController";
+import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";

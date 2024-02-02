@@ -5,9 +5,9 @@ import Popup from "client/gui/Popup";
 import Remotes from "shared/Remotes";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
-import LocalPlayerController from "./LocalPlayerController";
-import BuildingMode from "./modes/BuildingMode";
-import RideMode from "./modes/RideMode";
+import LocalPlayerController from "../controller/LocalPlayerController";
+import BuildingMode from "./build/BuildingMode";
+import RideMode from "./ride/RideMode";
 
 export default class PlayModeController extends ComponentBase {
 	public readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);

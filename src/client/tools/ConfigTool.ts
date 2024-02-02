@@ -1,8 +1,8 @@
 import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
-import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
+import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import { BlockConfigDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";

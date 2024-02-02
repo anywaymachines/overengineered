@@ -1,7 +1,7 @@
 import LogControl from "client/gui/static/LogControl";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
-import SoundController from "../SoundController";
+import SoundController from "../controller/SoundController";
 
 export const requestMode = async (mode: PlayModes) => {
 	const response = await Remotes.Client.GetNamespace("Ride").Get("SetPlayMode").CallServerAsync(mode);
