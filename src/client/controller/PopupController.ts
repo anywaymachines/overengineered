@@ -1,5 +1,5 @@
-import Component from "client/base/Component";
-import Control from "client/base/Control";
+import Component from "client/component/Component";
+import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
 import ConfirmPopup, { ConfirmPopupDefinition } from "client/gui/popup/ConfirmPopup";
 import GuiController from "./GuiController";

@@ -1,12 +1,12 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
-import Control from "client/base/Control";
 import Machine from "client/blocks/Machine";
 import InputController from "client/controller/InputController";
 import LocalPlayerController from "client/controller/LocalPlayerController";
 import PopupController from "client/controller/PopupController";
 import { requestMode } from "client/controller/modes/PlayModeRequest";
+import Control from "client/gui/Control";
 import Remotes from "shared/Remotes";
 import RobloxUnit from "shared/RobloxUnit";
 import SlotsMeta from "shared/SlotsMeta";

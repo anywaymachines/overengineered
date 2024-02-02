@@ -1,5 +1,5 @@
 import { GuiService, LocalizationService, Players } from "@rbxts/services";
-import Control from "client/base/Control";
+import Control from "client/gui/Control";
 import Registry, { blockList, categoriesRegistry } from "shared/Registry";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";

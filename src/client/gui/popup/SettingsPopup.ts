@@ -1,7 +1,7 @@
 import PlayerDataStorage from "client/PlayerDataStorage";
-import Control from "client/base/Control";
-import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
+import Control from "client/gui/Control";
+import Popup from "client/gui/Popup";
 import { BlockConfigDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
 import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";

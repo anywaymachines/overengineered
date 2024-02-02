@@ -1,8 +1,8 @@
 import { UserInputService } from "@rbxts/services";
-import Control from "client/base/Control";
-import ToolBase from "client/base/ToolBase";
 import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
+import Control from "client/gui/Control";
+import ToolBase from "client/tools/ToolBase";
 import GuiAnimator from "../GuiAnimator";
 
 export type SimpleTooltip = {

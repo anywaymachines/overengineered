@@ -1,6 +1,6 @@
 import { StarterGui } from "@rbxts/services";
 import Objects from "shared/fixes/objects";
-import Control from "./base/Control";
+import Control from "./gui/Control";
 import { CheckBoxControlDefinition } from "./gui/controls/CheckBoxControl";
 
 const createElement = <T extends keyof CreatableInstances, const TChildren extends Readonly<Record<string, Instance>>>(

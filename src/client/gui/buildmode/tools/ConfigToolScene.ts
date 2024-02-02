@@ -1,4 +1,4 @@
-import Control from "client/base/Control";
+import Control from "client/gui/Control";
 import ConfigTool from "client/tools/ConfigTool";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";

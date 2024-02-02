@@ -1,6 +1,6 @@
 import Signal from "@rbxts/signal";
 import Objects from "shared/fixes/objects";
-import ComponentBase from "./ComponentBase";
+import ComponentBase from "../component/ComponentBase";
 
 /*
 	When a key is pressed, invoke keyDown()

@@ -1,6 +1,6 @@
 import { GamepadService, GuiService } from "@rbxts/services";
-import Control from "client/base/Control";
 import InputController from "client/controller/InputController";
+import Control from "client/gui/Control";
 import WireTool from "client/tools/WireTool";
 import GuiAnimator from "../../GuiAnimator";
 import { ButtonControl } from "../../controls/Button";

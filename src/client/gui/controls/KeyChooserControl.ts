@@ -1,7 +1,7 @@
 import { UserInputService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import Control from "client/base/Control";
 import InputController from "client/controller/InputController";
+import Control from "client/gui/Control";
 import ObservableValue from "shared/event/ObservableValue";
 import SelectButtonPopup from "../popup/SelectButtonPopup";
 

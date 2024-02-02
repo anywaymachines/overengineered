@@ -1,5 +1,4 @@
 import { Players, Workspace } from "@rbxts/services";
-import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
 import InputController from "client/controller/InputController";
@@ -8,6 +7,7 @@ import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
 import MaterialChooserControl from "client/gui/buildmode/MaterialChooser";
 import LogControl from "client/gui/static/LogControl";
+import ToolBase from "client/tools/ToolBase";
 import Logger from "shared/Logger";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";

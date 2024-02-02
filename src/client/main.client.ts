@@ -2,7 +2,7 @@ import { MarketplaceService, Players, RunService } from "@rbxts/services";
 import RemoteEvents from "shared/RemoteEvents";
 import SharedPlots from "shared/building/SharedPlots";
 import PlayerDataStorage from "./PlayerDataStorage";
-import ComponentContainer from "./base/ComponentContainer";
+import ComponentContainer from "./component/ComponentContainer";
 import BeaconController from "./controller/BeaconController";
 import CharacterController from "./controller/CharacterController";
 import GameEnvironmentController from "./controller/GameEnvironmentController";

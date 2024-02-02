@@ -1,5 +1,5 @@
-import Control from "client/base/Control";
 import GuiController from "client/controller/GuiController";
+import Control from "client/gui/Control";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import GuiAnimator from "../GuiAnimator";

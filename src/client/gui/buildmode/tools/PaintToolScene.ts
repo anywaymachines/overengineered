@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import Control from "client/base/Control";
+import Control from "client/gui/Control";
 import ToggleControl, { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import PaintTool from "client/tools/PaintTool";
 import SharedPlots from "shared/building/SharedPlots";

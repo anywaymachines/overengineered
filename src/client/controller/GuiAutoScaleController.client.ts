@@ -1,4 +1,4 @@
-import Component from "client/base/Component";
+import Component from "client/component/Component";
 import Logger from "shared/Logger";
 import GuiController from "./GuiController";
 

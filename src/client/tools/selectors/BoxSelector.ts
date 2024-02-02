@@ -1,9 +1,9 @@
 import { Players, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import ComponentBase from "client/base/ComponentBase";
-import Control from "client/base/Control";
+import ComponentBase from "client/component/ComponentBase";
 import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
+import Control from "client/gui/Control";
 import SharedPlots from "shared/building/SharedPlots";
 import EventHandler from "shared/event/EventHandler";
 

@@ -1,10 +1,10 @@
 import { Players } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
-import Control from "client/base/Control";
-import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
 import PopupController from "client/controller/PopupController";
+import Control from "client/gui/Control";
+import Popup from "client/gui/Popup";
 import Serializer from "shared/Serializer";
 import SlotsMeta from "shared/SlotsMeta";
 import GameDefinitions from "shared/data/GameDefinitions";

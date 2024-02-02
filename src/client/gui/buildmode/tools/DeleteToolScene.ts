@@ -1,5 +1,5 @@
-import Control from "client/base/Control";
 import PopupController from "client/controller/PopupController";
+import Control from "client/gui/Control";
 import DeleteTool from "client/tools/DeleteTool";
 import GuiAnimator from "../../GuiAnimator";
 import { ButtonControl } from "../../controls/Button";

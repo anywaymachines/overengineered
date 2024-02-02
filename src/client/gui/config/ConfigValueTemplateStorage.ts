@@ -1,5 +1,5 @@
-import Control from "client/base/Control";
 import GuiController from "client/controller/GuiController";
+import Control from "client/gui/Control";
 import { ConfigControlDefinition } from "../buildmode/ConfigControl";
 import { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
 import { KeyChooserControlDefinition } from "../controls/KeyChooserControl";

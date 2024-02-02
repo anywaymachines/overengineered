@@ -1,7 +1,7 @@
 import { GuiService, StarterGui } from "@rbxts/services";
-import ComponentBase from "client/base/ComponentBase";
-import Popup from "client/base/Popup";
+import ComponentBase from "client/component/ComponentBase";
 import Signals from "client/event/Signals";
+import Popup from "client/gui/Popup";
 import Remotes from "shared/Remotes";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";

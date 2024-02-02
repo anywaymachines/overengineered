@@ -1,4 +1,4 @@
-import ComponentContainer from "client/base/ComponentContainer";
+import ComponentContainer from "client/component/ComponentContainer";
 import HoveredBlockHighlighter from "./HoveredBlockHighlighter";
 
 export default class BuildingPartSelector extends ComponentContainer {

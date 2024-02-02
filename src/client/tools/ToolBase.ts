@@ -2,7 +2,7 @@ import { Players } from "@rbxts/services";
 import GuiController from "client/controller/GuiController";
 import BuildingMode from "client/controller/modes/BuildingMode";
 import ObservableValue from "shared/event/ObservableValue";
-import ComponentContainer from "./ComponentContainer";
+import ComponentContainer from "../component/ComponentContainer";
 
 /** An abstract class of tools for working with the world */
 export default abstract class ToolBase extends ComponentContainer {

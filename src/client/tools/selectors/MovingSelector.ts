@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import ComponentBase from "client/base/ComponentBase";
+import ComponentBase from "client/component/ComponentBase";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import EventHandler from "shared/event/EventHandler";

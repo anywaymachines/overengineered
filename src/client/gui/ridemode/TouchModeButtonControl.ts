@@ -1,7 +1,7 @@
 import Signal from "@rbxts/signal";
-import Control from "client/base/Control";
 import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
 import GuiController from "client/controller/GuiController";
+import Control from "client/gui/Control";
 import ObservableValue from "shared/event/ObservableValue";
 import Arrays from "shared/fixes/Arrays";
 import { TextButtonDefinition } from "../controls/Button";

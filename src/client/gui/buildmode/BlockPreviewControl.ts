@@ -1,5 +1,5 @@
 import { RunService } from "@rbxts/services";
-import Control from "client/base/Control";
+import Control from "client/gui/Control";
 
 export default class BlockPreviewControl extends Control<ViewportFrame> {
 	private readonly block: BlockModel;

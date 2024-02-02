@@ -1,4 +1,4 @@
-import Control from "client/base/Control";
+import Control from "client/gui/Control";
 import Objects from "shared/fixes/objects";
 import { ConfigPartDefinition } from "../popup/SettingsPopup";
 

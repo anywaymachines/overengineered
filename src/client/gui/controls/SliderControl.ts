@@ -1,6 +1,6 @@
 import { Players, UserInputService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import Control from "client/base/Control";
+import Control from "client/gui/Control";
 import EventHandler from "shared/event/EventHandler";
 import NumberObservableValue from "shared/event/NumberObservableValue";
 import NumberTextBoxControl from "./NumberTextBoxControl";

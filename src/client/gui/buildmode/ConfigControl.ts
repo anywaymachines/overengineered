@@ -1,15 +1,15 @@
 import Signal from "@rbxts/signal";
-import Control from "client/base/Control";
 import GuiController from "client/controller/GuiController";
+import Control from "client/gui/Control";
 import CheckBoxControl, { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import KeyChooserControl, { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import SliderControl, { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import BlockConfigDefinitionRegistry, {
-    BlockConfigDefinition,
-    BlockConfigDefinitions,
-    BlockConfigDefinitionsToConfig,
-    BlockConfigRegToDefinition,
+	BlockConfigDefinition,
+	BlockConfigDefinitions,
+	BlockConfigDefinitionsToConfig,
+	BlockConfigRegToDefinition,
 } from "shared/block/config/BlockConfigDefinitionRegistry";
 import Objects from "shared/fixes/objects";
 import { DictionaryControl } from "../controls/DictionaryControl";

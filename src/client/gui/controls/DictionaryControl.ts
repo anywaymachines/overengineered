@@ -1,4 +1,4 @@
-import Control from "client/base/Control";
+import Control from "client/gui/Control";
 
 /** Control that has its children keyed by some value */
 export class DictionaryControl<T extends GuiObject, TKey, TValue extends Control = Control> extends Control<T, TValue> {

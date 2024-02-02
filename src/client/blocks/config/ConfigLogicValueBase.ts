@@ -1,5 +1,5 @@
-import ComponentContainer from "client/base/ComponentContainer";
-import Control from "client/base/Control";
+import ComponentContainer from "client/component/ComponentContainer";
+import Control from "client/gui/Control";
 import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
 import BlockConfigDefinitionRegistry from "shared/block/config/BlockConfigDefinitionRegistry";
 import ObservableValue from "shared/event/ObservableValue";

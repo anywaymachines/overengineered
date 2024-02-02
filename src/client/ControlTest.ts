@@ -1,7 +1,7 @@
 import { StarterGui } from "@rbxts/services";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
-import Control from "./base/Control";
+import Control from "./gui/Control";
 import { ButtonControl } from "./gui/controls/Button";
 
 const createElement = <T extends keyof CreatableInstances, const TChildren extends Readonly<Record<string, Instance>>>(

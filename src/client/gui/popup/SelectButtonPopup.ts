@@ -1,9 +1,9 @@
 import { GuiService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import Control from "client/base/Control";
-import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
+import Control from "client/gui/Control";
+import Popup from "client/gui/Popup";
 import EventHandler from "shared/event/EventHandler";
 import { ButtonControl, TextButtonControl, TextButtonDefinition } from "../controls/Button";
 

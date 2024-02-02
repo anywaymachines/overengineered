@@ -1,5 +1,5 @@
 import Signal from "@rbxts/signal";
-import Control from "client/base/Control";
+import Control from "client/gui/Control";
 import ObservableValue from "shared/event/ObservableValue";
 import GuiAnimator from "../GuiAnimator";
 

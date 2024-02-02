@@ -1,7 +1,7 @@
 import Signal from "@rbxts/signal";
-import Control from "client/base/Control";
-import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
+import Control from "client/gui/Control";
+import Popup from "client/gui/Popup";
 import BuildingManager from "shared/building/BuildingManager";
 import ObservableValue from "shared/event/ObservableValue";
 import { TextButtonControl } from "../controls/Button";

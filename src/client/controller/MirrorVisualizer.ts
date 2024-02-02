@@ -1,6 +1,6 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import ComponentBase from "client/base/ComponentBase";
-import Control from "client/base/Control";
+import ComponentBase from "client/component/ComponentBase";
+import Control from "client/gui/Control";
 import ObservableValue from "shared/event/ObservableValue";
 
 export default class MirrorVisualizer extends ComponentBase {

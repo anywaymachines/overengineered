@@ -1,4 +1,4 @@
-import Control from "client/base/Control";
+import Control from "client/gui/Control";
 import { BlockConfigDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
 import ObservableValue from "shared/event/ObservableValue";
 import { JsonSerializablePrimitive } from "shared/fixes/Json";

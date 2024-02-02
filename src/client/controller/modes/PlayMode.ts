@@ -1,5 +1,5 @@
-import ComponentContainer from "client/base/ComponentContainer";
-import Control from "client/base/Control";
+import ComponentContainer from "client/component/ComponentContainer";
+import Control from "client/gui/Control";
 
 export default abstract class PlayMode extends ComponentContainer {
 	public abstract getName(): PlayModes;

@@ -1,4 +1,4 @@
-import Control from "client/base/Control";
+import Control from "client/gui/Control";
 import ObservableValue from "shared/event/ObservableValue";
 
 export type LabelControlDefinition = TextLabel;

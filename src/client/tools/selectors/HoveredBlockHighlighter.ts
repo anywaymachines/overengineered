@@ -1,5 +1,5 @@
 import { GuiService, Players } from "@rbxts/services";
-import ComponentBase from "client/base/ComponentBase";
+import ComponentBase from "client/component/ComponentBase";
 import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";

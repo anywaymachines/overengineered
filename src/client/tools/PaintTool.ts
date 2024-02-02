@@ -1,5 +1,5 @@
-import ToolBase from "client/base/ToolBase";
 import BuildingMode from "client/controller/modes/BuildingMode";
+import ToolBase from "client/tools/ToolBase";
 import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";

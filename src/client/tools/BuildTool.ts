@@ -1,6 +1,5 @@
 import { GuiService, HttpService, Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import ToolBase from "client/base/ToolBase";
 import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
 import GuiController from "client/controller/GuiController";
@@ -10,6 +9,7 @@ import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
 import MaterialChooserControl from "client/gui/buildmode/MaterialChooser";
 import LogControl from "client/gui/static/LogControl";
+import ToolBase from "client/tools/ToolBase";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";

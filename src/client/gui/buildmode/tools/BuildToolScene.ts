@@ -1,5 +1,5 @@
-import Control from "client/base/Control";
 import InputController from "client/controller/InputController";
+import Control from "client/gui/Control";
 import BuildTool from "client/tools/BuildTool";
 import Registry, { categoriesRegistry } from "shared/Registry";
 import GuiAnimator from "../../GuiAnimator";

@@ -1,4 +1,4 @@
-import Control from "client/base/Control";
+import Control from "client/gui/Control";
 import { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import { ButtonControl } from "../controls/Button";
 import MaterialChooserControl from "./MaterialChooser";
