@@ -7,7 +7,9 @@ import Gui from "client/gui/Gui";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import Remotes from "shared/Remotes";
-import BlockConfigDefinitionRegistry, { BlockConfigDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
+import BlockConfigDefinitionRegistry, {
+	BlockConfigDefinition,
+} from "shared/block/config/BlockConfigDefinitionRegistry";
 import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
@@ -156,6 +158,7 @@ export default class WireTool extends ToolBase {
 		this.viewportFrame.Parent = Gui.getGameUI();
 		this.viewportFrame.Ambient = Color3.fromRGB(255, 255, 255);
 		this.viewportFrame.LightColor = Color3.fromRGB(255, 255, 255);
+		this.viewportFrame.ZIndex = -1000;
 	}
 
 	getDisplayName(): string {
@@ -456,9 +459,10 @@ export default class WireTool extends ToolBase {
 		wire.CanCollide = false;
 		wire.CanQuery = false;
 		wire.CanTouch = false;
+		wire.CastShadow = false;
 
-		wire.Material = Enum.Material.SmoothPlastic;
-		wire.Transparency = 0.1;
+		wire.Material = Enum.Material.Neon;
+		wire.Transparency = 0.4;
 		wire.Color = color;
 		wire.Shape = Enum.PartType.Cylinder;
 
@@ -473,7 +477,7 @@ export default class WireTool extends ToolBase {
 
 	private updateWire(wire: BasePart, firstPoint: Vector3, secondPoint: Vector3) {
 		const distance = secondPoint.sub(firstPoint).Magnitude;
-		wire.Size = new Vector3(distance - 0.4, 0.1, 0.1);
+		wire.Size = new Vector3(distance - 0.4, 0.15, 0.15);
 		wire.CFrame = new CFrame(firstPoint, secondPoint)
 			.mul(new CFrame(0, 0, -distance / 2))
 			.mul(CFrame.Angles(0, math.rad(90), 0));
