@@ -50,13 +50,13 @@ export default class SharedComponentEventHolder {
 
 	/** Register an event that fires on enable */
 	onEnable(callback: () => void, executeImmediately = false): void {
-		this.onEnabled.subscribe(callback);
+		this.onEnabled.Connect(callback);
 		if (executeImmediately) callback();
 	}
 
 	/** Register an event that fires on disable */
 	onDisable(callback: () => void, executeImmediately = false): void {
-		this.onDisabled.subscribe(callback);
+		this.onDisabled.Connect(callback);
 		if (executeImmediately) callback();
 	}
 
