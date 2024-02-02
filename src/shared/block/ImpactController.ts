@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import { UnreliableRemotes } from "shared/Remotes";
 import TerrainDataInfo from "shared/TerrainDataInfo";
 import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
@@ -87,7 +88,8 @@ export default class ImpactController {
 					event.Disconnect();
 				}
 			} else if (magnitudeDiff + allowedMagnitudeDiff * 0.2 > allowedMagnitudeDiff) {
-				Effects.Sparks.send(part, undefined);
+				const owner = RunService.IsServer() ? part.GetNetworkOwner() : undefined;
+				Effects.Sparks.send(owner ? [owner] : "everyone", { part });
 			}
 		});
 	}

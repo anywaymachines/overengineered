@@ -1,11 +1,11 @@
 import { Debris, ReplicatedStorage } from "@rbxts/services";
-import { UnreliableRemotes } from "shared/Remotes";
-import EffectBase from "./EffectBase";
+import S2CRemoteEvent from "shared/event/S2CRemoteEvent";
 
-type ImpactSoundEffectArgs = {
+type Args = {
+	readonly part: BasePart;
 	readonly index?: number;
 };
-export default class ImpactSoundEffect extends EffectBase<ImpactSoundEffectArgs> {
+export default class ImpactSoundEffect extends S2CRemoteEvent<Args> {
 	private readonly materialSounds: { [key: string]: Instance[] } = {
 		Default: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
 
@@ -15,12 +15,12 @@ export default class ImpactSoundEffect extends EffectBase<ImpactSoundEffectArgs>
 	};
 
 	constructor() {
-		super(UnreliableRemotes.ImpactSoundEffect);
+		super("impact_sound_effect");
 	}
 
-	justCreate(part: BasePart, args: ImpactSoundEffectArgs): void {
+	justRun({ part, index }: Args): void {
 		const soundsFolder = this.materialSounds[part.Material.Name] ?? this.materialSounds["Default"];
-		const soundIndex = args.index ?? math.random(0, soundsFolder.size() - 1);
+		const soundIndex = index ?? math.random(0, soundsFolder.size() - 1);
 		const sound = soundsFolder[soundIndex].Clone() as Sound;
 
 		sound.RollOffMaxDistance = 1000;

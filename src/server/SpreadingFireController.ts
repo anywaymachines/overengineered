@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import BlockManager from "shared/building/BlockManager";
 import Effects from "shared/effects/Effects";
 import ServerPartUtils from "./plots/ServerPartUtils";
@@ -33,7 +34,8 @@ export default class SpreadingFireController {
 		const duration = math.random(15, 30);
 
 		// Apply fire effect
-		Effects.Fire.send(part, { duration }, part.GetNetworkOwner() ?? "everyone");
+		const owner = RunService.IsServer() ? part.GetNetworkOwner() : undefined;
+		Effects.Fire.send(owner ? [owner] : "everyone", { part, duration });
 
 		spawn(() => {
 			wait(duration);

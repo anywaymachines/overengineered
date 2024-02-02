@@ -1,16 +1,16 @@
 import { Debris, ReplicatedStorage } from "@rbxts/services";
-import { UnreliableRemotes } from "shared/Remotes";
-import EffectBase from "./EffectBase";
+import S2CRemoteEvent from "shared/event/S2CRemoteEvent";
 
-type FireEffectArgs = {
+type Args = {
+	readonly part: BasePart;
 	readonly duration?: number;
 };
-export default class FireEffect extends EffectBase<FireEffectArgs> {
+export default class FireEffect extends S2CRemoteEvent<Args> {
 	constructor() {
-		super(UnreliableRemotes.FireEffect);
+		super("fire_effect");
 	}
 
-	justCreate(part: BasePart, arg: FireEffectArgs): void {
+	justRun({ part, duration }: Args): void {
 		const effects = ReplicatedStorage.Assets.Fire.GetChildren();
 		effects.forEach((value) => {
 			const obj = value.Clone();
@@ -26,7 +26,7 @@ export default class FireEffect extends EffectBase<FireEffectArgs> {
 			}
 
 			// Delete effect
-			Debris.AddItem(obj, arg.duration);
+			Debris.AddItem(obj, duration);
 		});
 	}
 }

@@ -1,14 +1,15 @@
 import { Debris, ReplicatedStorage } from "@rbxts/services";
-import { UnreliableRemotes } from "shared/Remotes";
-import EffectBase from "./EffectBase";
+import S2CRemoteEvent from "shared/event/S2CRemoteEvent";
 
-type SparksEffectArgs = undefined;
-export default class SparksEffect extends EffectBase<SparksEffectArgs> {
+type Args = {
+	readonly part: BasePart;
+};
+export default class SparksEffect extends S2CRemoteEvent<Args> {
 	constructor() {
-		super(UnreliableRemotes.SparksEffect);
+		super("sparks_effect");
 	}
 
-	justCreate(part: BasePart, arg?: SparksEffectArgs): void {
+	justRun({ part }: Args): void {
 		const sparks = ReplicatedStorage.Assets.Sparks.Clone();
 		sparks.Parent = part;
 

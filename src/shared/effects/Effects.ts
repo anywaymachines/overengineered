@@ -7,6 +7,4 @@ const Effects = {
 	ImpactSound: new ImpactSoundEffect(),
 	Fire: new FireEffect(),
 } as const;
-
 export default Effects;
-export type ClientEffects = typeof Effects;

@@ -75,16 +75,16 @@ export default class UnreliableRemoteHandler {
 		});
 	}
 
-	static impactBreakEvent(player: Player, block: BasePart) {
-		if (!BlockManager.isActiveBlockPart(block)) return;
+	static impactBreakEvent(player: Player, part: BasePart) {
+		if (!BlockManager.isActiveBlockPart(part)) return;
 
-		if (block.GetAttribute("IMPACT_BROKEN") === true) return;
+		if (part.GetAttribute("IMPACT_BROKEN") === true) return;
 
-		ServerPartUtils.BreakJoints(block);
-		block.SetAttribute("IMPACT_BROKEN", true);
+		ServerPartUtils.BreakJoints(part);
+		part.SetAttribute("IMPACT_BROKEN", true);
 
 		// Play sounds
-		Effects.ImpactSound.send(block, { index: undefined }, player);
+		Effects.ImpactSound.send([player], { part, index: undefined });
 	}
 
 	static burnEvent(player: Player, block: BasePart) {
