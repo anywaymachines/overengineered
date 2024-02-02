@@ -1,4 +1,4 @@
-import SlotsDatabase from "server/SlotsDatabase";
+import SlotDatabase from "server/database/SlotDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
 import ServerPartUtils from "server/plots/ServerPartUtils";
 import { blockList } from "shared/Registry";
@@ -35,7 +35,7 @@ export default class RideMode implements PlayModeBase {
 			}
 		}
 
-		SlotsDatabase.instance.setBlocks(
+		SlotDatabase.instance.setBlocks(
 			player.UserId,
 			SlotsMeta.autosaveSlotIndex,
 			BlocksSerializer.serialize(plot),
@@ -66,7 +66,7 @@ export default class RideMode implements PlayModeBase {
 
 		blocks.ClearAllChildren();
 
-		const blocksToLoad = SlotsDatabase.instance.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
+		const blocksToLoad = SlotDatabase.instance.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
 		if (blocksToLoad !== undefined) {
 			BlocksSerializer.deserialize(blocksToLoad, plot);
 		}

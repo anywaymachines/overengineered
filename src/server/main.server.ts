@@ -5,11 +5,11 @@ import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
 import BuildingWrapper from "./BuildingWrapper";
-import PlayerDatabase from "./PlayerDatabase";
-import SlotsDatabase from "./SlotsDatabase";
 import AnchorBlockLogic from "./blocks/logic/AnchorBlockLogic";
 import DisconnectBlockLogic from "./blocks/logic/DisconnectBlockLogic";
 import TNTBlockLogic from "./blocks/logic/TNTBlockLogic";
+import PlayerDatabase from "./database/PlayerDatabase";
+import SlotDatabase from "./database/SlotDatabase";
 import PlayModeController from "./modes/PlayModeController";
 import { registerOnRemoteEvent, registerOnRemoteFunction } from "./network/event/RemoteHandler";
 import UnreliableRemoteHandler from "./network/event/UnreliableRemoteHandler";
@@ -18,7 +18,7 @@ import ServerPlots from "./plots/ServerPlots";
 
 class RemoteHandlers {
 	static loadSlot(this: void, player: Player, index: number): LoadSlotResponse {
-		const blocks = SlotsDatabase.instance.getBlocks(player.UserId, index);
+		const blocks = SlotDatabase.instance.getBlocks(player.UserId, index);
 		if (blocks === undefined || blocks.size() === 0) {
 			return {
 				success: false,
@@ -69,7 +69,7 @@ class RemoteHandlers {
 	static saveSlot(this: void, player: Player, data: PlayerSaveSlotRequest): SaveSlotResponse {
 		Logger.info(`Saving ${player.Name}'s slot ${data.index}`);
 
-		const output = SlotsDatabase.instance.update(
+		const output = SlotDatabase.instance.update(
 			player.UserId,
 			data.index,
 			(meta) => {

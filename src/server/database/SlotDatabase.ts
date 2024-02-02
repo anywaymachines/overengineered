@@ -2,14 +2,14 @@ import { DataStoreService, Players } from "@rbxts/services";
 import Logger from "shared/Logger";
 import SharedPlots from "shared/building/SharedPlots";
 import GameDefinitions from "shared/data/GameDefinitions";
-import SlotsMeta from "../shared/SlotsMeta";
+import SlotsMeta from "../../shared/SlotsMeta";
+import BlocksSerializer from "../plots/BlocksSerializer";
+import ServerPlots from "../plots/ServerPlots";
 import { Db } from "./Database";
 import PlayerDatabase from "./PlayerDatabase";
-import BlocksSerializer from "./plots/BlocksSerializer";
-import ServerPlots from "./plots/ServerPlots";
 
-export default class SlotsDatabase {
-	public static readonly instance = new SlotsDatabase();
+export default class SlotDatabase {
+	public static readonly instance = new SlotDatabase();
 
 	private readonly datastore: DataStore = DataStoreService.GetDataStore("slots");
 	private readonly blocksdb;
