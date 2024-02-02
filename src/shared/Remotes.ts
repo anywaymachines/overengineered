@@ -36,20 +36,6 @@ const Remotes = Net.Definitions.Create({
 		SetPlayModeOnClient: Net.Definitions.ClientAsyncFunction<(mode: PlayModes | undefined) => Response>(),
 		Sit: Net.Definitions.ClientToServerEvent<[]>(),
 	}),
-	Blocks: Net.Definitions.Namespace({
-		DisconnectBlock: Net.Definitions.Namespace({
-			Disconnect: Net.Definitions.ClientToServerEvent<[block: Model]>(),
-		}),
-		TNTBlock: Net.Definitions.Namespace({
-			Explode:
-				Net.Definitions.ClientToServerEvent<
-					[block: Model, radius: number, pressure: number, isFlammable: boolean]
-				>(),
-		}),
-		AnchorBlock: Net.Definitions.Namespace({
-			Anchor: Net.Definitions.ClientToServerEvent<[block: Model]>(),
-		}),
-	}),
 	Debug: Net.Definitions.Namespace({
 		DisplayLine: Net.Definitions.ServerToClientEvent<[text: string, isClient: boolean, isError: boolean]>(),
 	}),

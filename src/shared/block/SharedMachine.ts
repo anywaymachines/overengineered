@@ -12,7 +12,7 @@ import Objects from "shared/fixes/objects";
 import BlockLogic from "./BlockLogic";
 import ConfigurableBlockLogic from "./ConfigurableBlockLogic";
 import ImpactController from "./ImpactController";
-import logicRegistry from "./LogicRegistry";
+import logicRegistry, { LogicRegistry } from "./LogicRegistry";
 import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 
 export default class SharedMachine extends SharedComponentContainer {
@@ -31,7 +31,7 @@ export default class SharedMachine extends SharedComponentContainer {
 				continue;
 			}
 
-			const ctor = logicRegistry[id];
+			const ctor = (logicRegistry as LogicRegistry)[id];
 			if (!ctor) {
 				continue;
 			}

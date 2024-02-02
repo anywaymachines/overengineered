@@ -4,7 +4,7 @@ import Objects from "shared/fixes/objects";
 import BlockLogic, { BlockLogicData } from "./BlockLogic";
 import BlockConfigValueRegistry from "./config/BlockConfigValueRegistry";
 
-export default class ConfigurableBlockLogic<
+export default abstract class ConfigurableBlockLogic<
 	TDef extends BlockConfigBothDefinitions,
 	TBlock extends BlockModel = BlockModel,
 > extends BlockLogic {

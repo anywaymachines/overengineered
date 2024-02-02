@@ -1,25 +1,17 @@
 import { Workspace } from "@rbxts/services";
 import SpreadingFireController from "server/SpreadingFireController";
-import { registerOnRemoteEvent2 } from "server/network/event/RemoteHandler";
 import ServerPartUtils from "server/plots/ServerPartUtils";
+import TNTBlockLogic from "shared/block/logic/TNTBlockLogic";
 import BlockManager from "shared/building/BlockManager";
 import PartUtils from "shared/utils/PartUtils";
+import ServerBlockLogic from "../ServerBlockLogic";
 
-export default class TNTBlockLogic {
-	static init() {
-		registerOnRemoteEvent2("Blocks", "TNTBlock", "Explode", (player, block, radius, pressure, isFlammable) => {
-			if (!block) {
-				return;
-			}
+export default class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBlockLogic> {
+	constructor(logic: typeof TNTBlockLogic) {
+		super(logic);
 
-			if (!block.IsDescendantOf(Workspace)) {
-				return;
-			}
-
-			if (block.PrimaryPart!.GetNetworkOwner() !== player) {
-				player.Kick();
-				return;
-			}
+		logic.events.explode.invoked.Connect((player, { block, isFlammable, pressure, radius }) => {
+			if (!this.isValidBlock(block, player)) return;
 
 			// temporary until block configuration moved to shared
 			radius = math.clamp(radius, 0, 12);

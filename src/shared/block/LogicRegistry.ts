@@ -46,7 +46,7 @@ import LidarSensorBlockLogic from "./logic/operations/sensors/UltrasonicSensorBl
 import OperationVec3CombinerBlockLogic from "./logic/operations/vector/OperationVec3CombinerBlockLogic";
 import OperationVec3SplitterBlockLogic from "./logic/operations/vector/OperationVec3SplitterBlockLogic";
 
-const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): BlockLogic } | undefined>> = {
+const logicRegistry = {
 	wing1x1: WingLogic,
 	wing1x2: WingLogic,
 	wing1x3: WingLogic,
@@ -110,6 +110,6 @@ const logicRegistry: Readonly<Record<string, { new (block: PlacedBlockData): Blo
 	operationclamp: OperationClampBlockLogic,
 	operationabs: OperationAbsBlockLogic,
 	operationsign: OperationSignBlockLogic,
-};
-
+} as const;
 export default logicRegistry;
+export type LogicRegistry = Readonly<Record<string, { new (block: PlacedBlockData): BlockLogic } | undefined>>;
