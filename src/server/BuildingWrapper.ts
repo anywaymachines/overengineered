@@ -1,11 +1,11 @@
 import { HttpService } from "@rbxts/services";
 import { blockRegistry } from "shared/Registry";
-import JSON, { JsonSerializablePrimitive } from "shared/_fixes_/Json";
-import Objects from "shared/_fixes_/objects";
 import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import SharedPlots from "shared/building/SharedPlots";
+import JSON, { JsonSerializablePrimitive } from "shared/fixes/Json";
+import Objects from "shared/fixes/objects";
 import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
 import BuildingWelder from "./BuildingWelder";

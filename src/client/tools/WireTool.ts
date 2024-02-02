@@ -9,10 +9,10 @@ import Signals from "client/event/Signals";
 import BlockConfigDefinitionRegistry, { BlockConfigDefinition } from "shared/BlockConfigDefinitionRegistry";
 import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/BlockConfigRegistry";
 import Remotes from "shared/Remotes";
-import Objects from "shared/_fixes_/objects";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
+import Objects from "shared/fixes/objects";
 import PartUtils from "shared/utils/PartUtils";
 
 type MarkerData = {

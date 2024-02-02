@@ -1,10 +1,10 @@
 import { Players } from "@rbxts/services";
 import PlayerDatabase from "server/PlayerDatabase";
 import GameDefinitions from "shared/GameDefinitions";
-import Objects from "shared/_fixes_/objects";
 import BlockManager from "shared/building/BlockManager";
 import Effects from "shared/effects/Effects";
 import { EffectsInvoker } from "shared/effects/EffectsInvoker";
+import Objects from "shared/fixes/objects";
 
 // TODO: Move away
 const isGFXEnabledForPlayer = (player: Player): boolean => {

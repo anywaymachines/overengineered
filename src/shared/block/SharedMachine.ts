@@ -4,11 +4,11 @@ import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry
 import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
-import Objects from "shared/_fixes_/objects";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedComponentBase from "shared/component/SharedComponentBase";
 import SharedComponentContainer from "shared/component/SharedComponentContainer";
 import ObservableValue from "shared/event/ObservableValue";
+import Objects from "shared/fixes/objects";
 import BlockLogic from "./BlockLogic";
 import ConfigurableBlockLogic from "./ConfigurableBlockLogic";
 import ImpactController from "./ImpactController";

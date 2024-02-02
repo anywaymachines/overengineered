@@ -1,7 +1,7 @@
 import { Players } from "@rbxts/services";
-import Objects from "shared/_fixes_/objects";
 import Effects from "shared/effects/Effects";
 import { EffectsInvoker } from "shared/effects/EffectsInvoker";
+import Objects from "shared/fixes/objects";
 
 for (const [_, effect] of Objects.pairs(Effects)) {
 	effect.event.OnClientEvent.Connect((part, arg) => spawn(() => effect.justCreate(part, arg as never)));

@@ -1,7 +1,7 @@
 import Control from "client/base/Control";
 import { BlockConfigDefinition } from "shared/BlockConfigDefinitionRegistry";
-import { JsonSerializablePrimitive } from "shared/_fixes_/Json";
 import ObservableValue from "shared/event/ObservableValue";
+import { JsonSerializablePrimitive } from "shared/fixes/Json";
 import { ConfigPartDefinition } from "../popup/SettingsPopup";
 
 export default class ConfigPartControl<

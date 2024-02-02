@@ -1,6 +1,6 @@
 import { HttpService } from "@rbxts/services";
 import Serializer from "shared/Serializer";
-import JSON from "shared/_fixes_/Json";
+import JSON from "shared/fixes/Json";
 
 export type PlacedBlockDataConnection = {
 	/** OUTPUT block uiid */

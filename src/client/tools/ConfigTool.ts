@@ -6,7 +6,7 @@ import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
 import { BlockConfigDefinition } from "shared/BlockConfigDefinitionRegistry";
 import blockConfigRegistry from "shared/BlockConfigRegistry";
-import Objects from "shared/_fixes_/objects";
+import Objects from "shared/fixes/objects";
 import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
 
 export default class ConfigTool extends ToolBase {

@@ -1,6 +1,6 @@
 import { Players, ReplicatedFirst, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import Objects from "shared/_fixes_/objects";
+import Objects from "shared/fixes/objects";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import TerrainDataInfo from "../shared/TerrainDataInfo";
 import PlayerDataStorage from "./PlayerDataStorage";

@@ -4,10 +4,10 @@ import blockConfigRegistry, { BlockConfigRegistry } from "shared/BlockConfigRegi
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
-import JSON from "shared/_fixes_/Json";
-import Objects from "shared/_fixes_/objects";
 import { PlacedBlockDataConnection } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
+import JSON from "shared/fixes/Json";
+import Objects from "shared/fixes/objects";
 
 type SerializedBlocks<TBlocks extends SerializedBlockV0> = {
 	readonly version: number;

@@ -2,12 +2,12 @@ import { Players, Workspace } from "@rbxts/services";
 import Machine from "client/blocks/Machine";
 import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
 import RobloxUnit from "shared/RobloxUnit";
-import Objects from "shared/_fixes_/objects";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import ConstantBlockLogic from "shared/block/logic/operations/ConstantBlockLogic";
 import AltimeterBlockLogic from "shared/block/logic/operations/sensors/AltimeterBlockLogic";
 import OperationVec3CombinerBlockLogic from "shared/block/logic/operations/vector/OperationVec3CombinerBlockLogic";
 import OperationVec3SplitterBlockLogic from "shared/block/logic/operations/vector/OperationVec3SplitterBlockLogic";
+import Objects from "shared/fixes/objects";
 import Test from "./Test";
 
 const parent = new Instance("Folder");

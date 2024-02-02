@@ -1,8 +1,8 @@
 import { GuiService, LocalizationService, Players } from "@rbxts/services";
 import Control from "client/base/Control";
 import Registry, { blockList, categoriesRegistry } from "shared/Registry";
-import Objects from "shared/_fixes_/objects";
 import ObservableValue from "shared/event/ObservableValue";
+import Objects from "shared/fixes/objects";
 import GuiAnimator from "../GuiAnimator";
 import { ButtonControl, TextButtonControl } from "../controls/Button";
 import BlockPreviewControl from "./BlockPreviewControl";

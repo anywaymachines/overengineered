@@ -1,6 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import JSON from "shared/_fixes_/Json";
+import JSON from "shared/fixes/Json";
 import GuiController from "./controller/GuiController";
 import MultiConfigControl from "./gui/config/MultiConfigControl";
 

@@ -1,5 +1,5 @@
 import Control from "client/base/Control";
-import Objects from "shared/_fixes_/objects";
+import Objects from "shared/fixes/objects";
 import { ConfigPartDefinition } from "../popup/SettingsPopup";
 
 export class ConfigValueControl<TGui extends GuiObject> extends Control<ConfigPartDefinition<TGui>> {

@@ -11,7 +11,7 @@ import BlockConfigDefinitionRegistry, {
 	BlockConfigDefinitionsToConfig,
 	BlockConfigRegToDefinition,
 } from "shared/BlockConfigDefinitionRegistry";
-import Objects from "shared/_fixes_/objects";
+import Objects from "shared/fixes/objects";
 import { DictionaryControl } from "../controls/DictionaryControl";
 import TextBoxControl, { TextBoxControlDefinition } from "../controls/TextBoxControl";
 

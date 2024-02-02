@@ -1,6 +1,6 @@
 import { StarterGui } from "@rbxts/services";
-import Objects from "shared/_fixes_/objects";
 import ObservableValue from "shared/event/ObservableValue";
+import Objects from "shared/fixes/objects";
 import Control from "./base/Control";
 import { ButtonControl } from "./gui/controls/Button";
 

@@ -1,7 +1,7 @@
 import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
 import BlockConfigValueRegistry from "shared/BlockConfigValueRegistry";
-import Objects from "shared/_fixes_/objects";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import Objects from "shared/fixes/objects";
 import BlockLogic, { BlockLogicData } from "./BlockLogic";
 
 export default class ConfigurableBlockLogic<

@@ -1,5 +1,5 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import Objects from "./_fixes_/objects";
+import Objects from "./fixes/objects";
 
 export type Category = {
 	readonly name: CategoryName;

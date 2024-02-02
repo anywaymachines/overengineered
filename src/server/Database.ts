@@ -1,5 +1,5 @@
 import Logger from "shared/Logger";
-import Objects from "shared/_fixes_/objects";
+import Objects from "shared/fixes/objects";
 
 export abstract class DbBase<T> {
 	private readonly datastore;

@@ -6,10 +6,10 @@ import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Remotes from "shared/Remotes";
-import JSON from "shared/_fixes_/Json";
-import Objects from "shared/_fixes_/objects";
 import BlockManager from "shared/building/BlockManager";
 import ObservableValue from "shared/event/ObservableValue";
+import JSON from "shared/fixes/Json";
+import Objects from "shared/fixes/objects";
 import GuiAnimator from "../../GuiAnimator";
 import ConfigControl, { ConfigControlDefinition } from "../ConfigControl";
 

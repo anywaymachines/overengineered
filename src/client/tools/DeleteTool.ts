@@ -7,10 +7,10 @@ import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import BuildingMode from "client/controller/modes/BuildingMode";
 import Serializer from "shared/Serializer";
-import JSON from "shared/_fixes_/Json";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
+import JSON from "shared/fixes/Json";
 import BoxSelector from "./selectors/BoxSelector";
 import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
 

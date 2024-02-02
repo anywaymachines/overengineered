@@ -4,9 +4,9 @@ import Popup from "client/base/Popup";
 import GuiController from "client/controller/GuiController";
 import { BlockConfigDefinition } from "shared/BlockConfigDefinitionRegistry";
 import GameDefinitions from "shared/GameDefinitions";
-import { JsonSerializablePrimitive } from "shared/_fixes_/Json";
-import Objects from "shared/_fixes_/objects";
 import ObservableValue from "shared/event/ObservableValue";
+import { JsonSerializablePrimitive } from "shared/fixes/Json";
+import Objects from "shared/fixes/objects";
 import { ButtonControl } from "../controls/Button";
 import ToggleControl, { ToggleControlDefinition } from "../controls/ToggleControl";
 

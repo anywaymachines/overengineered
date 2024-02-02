@@ -1,5 +1,5 @@
 import { StarterGui } from "@rbxts/services";
-import Objects from "shared/_fixes_/objects";
+import Objects from "shared/fixes/objects";
 import Control from "./base/Control";
 import { CheckBoxControlDefinition } from "./gui/controls/CheckBoxControl";
 

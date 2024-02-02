@@ -1,5 +1,5 @@
 import Signal from "@rbxts/signal";
-import Objects from "shared/_fixes_/objects";
+import Objects from "shared/fixes/objects";
 import ComponentBase from "./ComponentBase";
 
 /*
