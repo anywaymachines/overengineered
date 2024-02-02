@@ -1,5 +1,6 @@
 import { RunService } from "@rbxts/services";
 import Logger from "shared/Logger";
+import RemoteEvents from "shared/RemoteEvents";
 import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
@@ -129,6 +130,7 @@ DisconnectBlockLogic.init();
 TNTBlockLogic.init();
 
 PlayModeController.init();
+RemoteEvents.initialize();
 
 if (RunService.IsStudio()) {
 	Logger.onLog.Connect((text, isError) => {

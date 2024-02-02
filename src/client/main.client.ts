@@ -1,4 +1,5 @@
 import { MarketplaceService, Players, RunService } from "@rbxts/services";
+import RemoteEvents from "shared/RemoteEvents";
 import SharedPlots from "shared/building/SharedPlots";
 import PlayerDataStorage from "./PlayerDataStorage";
 import ComponentContainer from "./base/ComponentContainer";
@@ -26,6 +27,7 @@ WindController.initialize();
 LocalPlayerController.initialize();
 CharacterController.initialize();
 InputTypeChangeEvent.subscribe();
+RemoteEvents.initialize();
 
 if (RunService.IsStudio()) {
 	DebugControl.instance.show();
