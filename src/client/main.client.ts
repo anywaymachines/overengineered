@@ -1,4 +1,4 @@
-import { MarketplaceService, Players, RunService } from "@rbxts/services";
+import { MarketplaceService, Players, ReplicatedStorage, RunService } from "@rbxts/services";
 import RemoteEvents from "shared/RemoteEvents";
 import SharedPlots from "shared/building/SharedPlots";
 import PlayerDataStorage from "./PlayerDataStorage";
@@ -15,6 +15,9 @@ import DebugControl from "./gui/static/DebugControl";
 import LogControl from "./gui/static/LogControl";
 import TooltipsControl from "./gui/static/TooltipsControl";
 import PlayModeController from "./modes/PlayModeController";
+
+// wait for assets to be copied
+ReplicatedStorage.WaitForChild("Assets");
 
 (async () => await PlayerDataStorage.init())();
 
