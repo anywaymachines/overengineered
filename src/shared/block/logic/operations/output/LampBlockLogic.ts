@@ -1,11 +1,11 @@
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import { AutoS2CRemoteEvent } from "shared/event/S2CRemoteEvent";
+import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
 
 export default class LampBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.lamp> {
-	static readonly clientEvents = {
-		update: new AutoS2CRemoteEvent<{
+	static readonly events = {
+		update: new AutoC2SRemoteEvent<{
 			readonly block: BlockModel;
 			readonly state: boolean;
 			readonly color: Color3 | undefined;
@@ -18,7 +18,7 @@ export default class LampBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		this.event.subscribeObservable(
 			this.input.enabled,
 			(enabled) => {
-				LampBlockLogic.clientEvents.update.invoked.Fire({
+				LampBlockLogic.events.update.send({
 					block: this.instance,
 					state: enabled,
 					color: this.block.color,

@@ -1,12 +1,12 @@
 import LampBlockLogic from "shared/block/logic/operations/output/LampBlockLogic";
-import ClientBlockLogic from "../ClientBlockLogic";
+import ServerBlockLogic from "../ServerBlockLogic";
 
-export default class LampClientLogic extends ClientBlockLogic<typeof LampBlockLogic> {
+export default class LampServerLogic extends ServerBlockLogic<typeof LampBlockLogic> {
 	constructor(logic: typeof LampBlockLogic) {
 		super(logic);
 
-		logic.clientEvents.update.invoked.Connect(({ block, state, color }) => {
-			if (!this.isValidBlock(block)) return;
+		logic.events.update.invoked.Connect((player, { block, state, color }) => {
+			if (!this.isValidBlock(block, player)) return;
 
 			const part = block.PrimaryPart;
 			if (!part) return;

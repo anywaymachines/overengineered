@@ -1,6 +1,7 @@
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
+import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
 
 type Screen = BlockModel & {
 	readonly Part: BasePart & {
@@ -11,16 +12,23 @@ type Screen = BlockModel & {
 };
 
 export default class ScreenBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.screen, Screen> {
+	static readonly events = {
+		update: new AutoC2SRemoteEvent<{
+			readonly block: Screen;
+			readonly text: string;
+		}>("screen_update"),
+	} as const;
+
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.screen);
 
-		const textLabel = this.block.instance.Part.SurfaceGui.TextLabel;
 		this.event.subscribeObservable(
 			this.input.data,
 			(data) => {
-				textLabel.Text = tostring(data);
-
-				// TODO: Sync data with other players
+				ScreenBlockLogic.events.update.send({
+					block: this.instance,
+					text: tostring(data),
+				});
 			},
 			true,
 		);

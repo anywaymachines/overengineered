@@ -4,6 +4,8 @@ import Objects from "shared/fixes/objects";
 import ServerBlockLogic from "./ServerBlockLogic";
 import AnchorBlockServerLogic from "./logic/AnchorBlockServerLogic";
 import DisconnectBlockServerLogic from "./logic/DisconnectBlockServerLogic";
+import LampServerLogic from "./logic/LampServerLogic";
+import ScreenServerLogic from "./logic/ScreenServerLogic";
 import TNTServerBlockLogic from "./logic/TNTServerLogic";
 
 type ShareableLogic = ExtractMembers<typeof logicRegistry, { readonly events: Record<string, unknown> }>;
@@ -15,6 +17,8 @@ const serverBlockLogicRegistry: ServerBlockLogicRegistry = {
 	tnt: TNTServerBlockLogic,
 	disconnectblock: DisconnectBlockServerLogic,
 	anchorblock: AnchorBlockServerLogic,
+	lamp: LampServerLogic,
+	screen: ScreenServerLogic,
 };
 
 //
