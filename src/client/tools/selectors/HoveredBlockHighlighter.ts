@@ -1,8 +1,8 @@
 import { GuiService, Players } from "@rbxts/services";
 import ComponentBase from "client/component/ComponentBase";
-import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
+import Gui from "client/gui/Gui";
 import BlockManager from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
@@ -36,7 +36,7 @@ export default class HoveredBlockHighlighter extends ComponentBase {
 			}
 
 			// ignore if over a GUI element
-			if (GuiController.isCursorOnVisibleGui()) {
+			if (Gui.isCursorOnVisibleGui()) {
 				destroyHighlight();
 				return;
 			}

@@ -1,8 +1,8 @@
 import { ReplicatedStorage, StarterGui, UserInputService, Workspace } from "@rbxts/services";
-import GuiController from "./GuiController";
+import Gui from "./Gui";
 
 let enabled = true;
-const guis = [GuiController.getGameUI(), GuiController.getUnscaledGameUI()];
+const guis = [Gui.getGameUI(), Gui.getUnscaledGameUI()];
 const toggle = () => {
 	enabled = !enabled;
 

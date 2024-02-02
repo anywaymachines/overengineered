@@ -1,7 +1,7 @@
 import { UserInputService } from "@rbxts/services";
-import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import Control from "client/gui/Control";
+import Gui from "client/gui/Gui";
 import ToolBase from "client/tools/ToolBase";
 import GuiAnimator from "../GuiAnimator";
 
@@ -31,7 +31,7 @@ export default class TooltipsControl extends Control<
 	Control<TooltipsControlDefinition["GamepadTemplate"] | TooltipsControlDefinition["KeyboardTemplate"]>
 > {
 	public static readonly instance = new TooltipsControl(
-		GuiController.getGameUI<{
+		Gui.getGameUI<{
 			Static: {
 				ControlTooltips: TooltipsControlDefinition;
 			};

@@ -1,6 +1,6 @@
 import { Players } from "@rbxts/services";
-import GuiController from "client/controller/GuiController";
 import BuildingMode from "client/controller/modes/BuildingMode";
+import Gui from "client/gui/Gui";
 import ObservableValue from "shared/event/ObservableValue";
 import ComponentContainer from "../component/ComponentContainer";
 
@@ -18,7 +18,7 @@ export default abstract class ToolBase extends ComponentContainer {
 		this.mode = mode;
 		this.mirrorMode.bindTo(mode.mirrorMode);
 
-		this.gameUI = GuiController.getGameUI<ScreenGui>();
+		this.gameUI = Gui.getGameUI<ScreenGui>();
 		this.mouse = Players.LocalPlayer.GetMouse();
 	}
 

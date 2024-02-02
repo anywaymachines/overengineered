@@ -2,7 +2,7 @@ import { Players } from "@rbxts/services";
 import Machine from "client/blocks/Machine";
 import RideModeScene, { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
 import SharedPlots from "shared/building/SharedPlots";
-import GuiController from "../GuiController";
+import Gui from "../../gui/Gui";
 import SoundController from "../SoundController";
 import PlayMode from "./PlayMode";
 
@@ -14,7 +14,7 @@ export default class RideMode extends PlayMode {
 		super();
 
 		this.rideModeScene = new RideModeScene(
-			GuiController.getGameUI<{ RideMode: RideModeSceneDefinition }>().RideMode,
+			Gui.getGameUI<{ RideMode: RideModeSceneDefinition }>().RideMode,
 		);
 		this.add(this.rideModeScene);
 	}

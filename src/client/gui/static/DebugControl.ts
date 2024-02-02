@@ -1,5 +1,5 @@
-import GuiController from "client/controller/GuiController";
 import Control from "client/gui/Control";
+import Gui from "client/gui/Gui";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import GuiAnimator from "../GuiAnimator";
@@ -9,7 +9,7 @@ export type DebugControlDefinition = LogControlDefinition;
 
 export default class DebugControl extends Control<DebugControlDefinition> {
 	public static readonly instance = new DebugControl(
-		GuiController.getGameUI<{
+		Gui.getGameUI<{
 			Static: {
 				DebugGui: DebugControlDefinition;
 			};

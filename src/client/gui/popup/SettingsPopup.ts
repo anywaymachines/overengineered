@@ -1,6 +1,6 @@
 import PlayerDataStorage from "client/PlayerDataStorage";
-import GuiController from "client/controller/GuiController";
 import Control from "client/gui/Control";
+import Gui from "client/gui/Gui";
 import Popup from "client/gui/Popup";
 import { BlockConfigDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
 import GameDefinitions from "shared/data/GameDefinitions";
@@ -59,7 +59,7 @@ export type SettingsPopupDefinition = GuiObject & {
 
 export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 	public static readonly instance = new SettingsPopup(
-		GuiController.getGameUI<{
+		Gui.getGameUI<{
 			Popup: {
 				SettingsGui: SettingsPopupDefinition;
 			};

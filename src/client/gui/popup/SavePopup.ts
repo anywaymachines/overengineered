@@ -1,15 +1,15 @@
 import { Players } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
-import GuiController from "client/controller/GuiController";
-import PopupController from "client/controller/PopupController";
 import Control from "client/gui/Control";
+import Gui from "client/gui/Gui";
 import Popup from "client/gui/Popup";
 import Serializer from "shared/Serializer";
 import SlotsMeta from "shared/SlotsMeta";
 import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
 import GuiAnimator from "../GuiAnimator";
+import PopupController from "../PopupController";
 import { ButtonControl } from "../controls/Button";
 import TextBoxControl from "../controls/TextBoxControl";
 
@@ -242,7 +242,7 @@ export type SavePopupDefinition = GuiObject & {
 
 export default class SavePopup extends Popup<SavePopupDefinition> {
 	public static readonly instance = new SavePopup(
-		GuiController.getGameUI<{
+		Gui.getGameUI<{
 			Popup: {
 				SlotsGui: SavePopupDefinition;
 			};

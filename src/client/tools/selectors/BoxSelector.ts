@@ -1,9 +1,9 @@
 import { Players, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import ComponentBase from "client/component/ComponentBase";
-import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import Control from "client/gui/Control";
+import Gui from "client/gui/Gui";
 import SharedPlots from "shared/building/SharedPlots";
 import EventHandler from "shared/event/EventHandler";
 
@@ -15,7 +15,7 @@ export default class BoxSelector extends ComponentBase {
 
 		const camera = Workspace.CurrentCamera!;
 		const mouse = Players.LocalPlayer.GetMouse();
-		const template = Control.asTemplate(GuiController.getGameUI<{ Selection: GuiObject }>().Selection, false);
+		const template = Control.asTemplate(Gui.getGameUI<{ Selection: GuiObject }>().Selection, false);
 
 		const search = (objects: readonly BlockModel[], p1: Vector2, p2: Vector2) => {
 			const to3dSpace = (pos: Vector2) => {
@@ -69,7 +69,7 @@ export default class BoxSelector extends ComponentBase {
 
 				selection = template();
 				selection.Position = startpos;
-				selection.Parent = GuiController.getUnscaledGameUI();
+				selection.Parent = Gui.getUnscaledGameUI();
 				selection.Visible = true;
 				selection.Size = new UDim2(0, 0, 0, 0);
 

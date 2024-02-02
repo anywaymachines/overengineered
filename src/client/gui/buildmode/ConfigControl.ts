@@ -1,6 +1,6 @@
 import Signal from "@rbxts/signal";
-import GuiController from "client/controller/GuiController";
 import Control from "client/gui/Control";
+import Gui from "client/gui/Gui";
 import CheckBoxControl, { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import KeyChooserControl, { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
@@ -39,7 +39,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 	constructor(gui: ConfigControlDefinition) {
 		super(gui);
 
-		const templates = GuiController.getGameUI<{ Templates: { Configuration: Template } }>().Templates.Configuration;
+		const templates = Gui.getGameUI<{ Templates: { Configuration: Template } }>().Templates.Configuration;
 		this.connectedTemplate = Control.asTemplate(templates.ConnectedTemplate, false);
 		this.checkboxTemplate = Control.asTemplate(templates.CheckboxTemplate, false);
 		this.keyTemplate = Control.asTemplate(templates.KeyTemplate, false);
@@ -106,7 +106,7 @@ class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control<Config
 	) {
 		super(gui);
 
-		const templates = GuiController.getGameUI<{ Templates: { Configuration: Template } }>().Templates.Configuration;
+		const templates = Gui.getGameUI<{ Templates: { Configuration: Template } }>().Templates.Configuration;
 		this.connectedTemplate = Control.asTemplate(templates.ConnectedTemplate, false);
 		this.checkboxTemplate = Control.asTemplate(templates.CheckboxTemplate, false);
 		this.keyTemplate = Control.asTemplate(templates.KeyTemplate, false);

@@ -1,6 +1,6 @@
 import Signal from "@rbxts/signal";
-import GuiController from "client/controller/GuiController";
 import Control from "client/gui/Control";
+import Gui from "client/gui/Gui";
 import Popup from "client/gui/Popup";
 import BuildingManager from "shared/building/BuildingManager";
 import ObservableValue from "shared/event/ObservableValue";
@@ -211,7 +211,7 @@ export type MaterialChooserControlDefinition = GuiObject & {
 /** Material choose & preview control */
 export default class MaterialChooserControl extends Popup<MaterialChooserControlDefinition> {
 	public static readonly instance = new MaterialChooserControl(
-		GuiController.getGameUI<{
+		Gui.getGameUI<{
 			Popup: {
 				MaterialGui: MaterialChooserControlDefinition;
 			};

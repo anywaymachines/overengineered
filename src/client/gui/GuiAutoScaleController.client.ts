@@ -1,6 +1,6 @@
 import Component from "client/component/Component";
 import Logger from "shared/Logger";
-import GuiController from "./GuiController";
+import Gui from "./Gui";
 
 class ScaledScreenGui<T extends ScreenGui> extends Component<T> {
 	constructor(gui: T) {
@@ -24,5 +24,5 @@ class ScaledScreenGui<T extends ScreenGui> extends Component<T> {
 	}
 }
 
-new ScaledScreenGui(GuiController.getGameUI()).enable();
-new ScaledScreenGui(GuiController.getPopupUI()).enable();
+new ScaledScreenGui(Gui.getGameUI()).enable();
+new ScaledScreenGui(Gui.getPopupUI()).enable();

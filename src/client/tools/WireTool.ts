@@ -1,10 +1,10 @@
 import { GamepadService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import Component from "client/component/Component";
 import ComponentContainer from "client/component/ComponentContainer";
-import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
+import Gui from "client/gui/Gui";
 import ToolBase from "client/tools/ToolBase";
 import Remotes from "shared/Remotes";
 import BlockConfigDefinitionRegistry, { BlockConfigDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
@@ -153,7 +153,7 @@ export default class WireTool extends ToolBase {
 		this.viewportFrame.Size = UDim2.fromScale(1, 1);
 		this.viewportFrame.CurrentCamera = Workspace.CurrentCamera;
 		this.viewportFrame.Transparency = 1;
-		this.viewportFrame.Parent = GuiController.getGameUI();
+		this.viewportFrame.Parent = Gui.getGameUI();
 		this.viewportFrame.Ambient = Color3.fromRGB(255, 255, 255);
 		this.viewportFrame.LightColor = Color3.fromRGB(255, 255, 255);
 	}
@@ -408,7 +408,7 @@ export default class WireTool extends ToolBase {
 		}
 
 		markerInstance.Adornee = part;
-		markerInstance.Parent = GuiController.getGameUI();
+		markerInstance.Parent = Gui.getGameUI();
 		markerInstance.StudsOffsetWorldSpace = part.CFrame.PointToObjectSpace(part.CFrame.PointToWorldSpace(offset));
 
 		if (InputController.inputType.get() === "Gamepad") {

@@ -1,5 +1,5 @@
-import GuiController from "client/controller/GuiController";
 import Control from "client/gui/Control";
+import Gui from "client/gui/Gui";
 import GuiAnimator from "../GuiAnimator";
 
 export type LogControlDefinition = GuiObject & {
@@ -10,7 +10,7 @@ export type LogControlDefinition = GuiObject & {
 
 export default class LogControl extends Control<LogControlDefinition> {
 	public static readonly instance = new LogControl(
-		GuiController.getGameUI<{
+		Gui.getGameUI<{
 			Static: {
 				LogGui: LogControlDefinition;
 			};

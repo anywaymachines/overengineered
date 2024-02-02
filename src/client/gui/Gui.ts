@@ -1,7 +1,6 @@
 import { Players } from "@rbxts/services";
 
-/** Basic class for interfaces control */
-export default class GuiController {
+export default class Gui {
 	/** Receives GameUI from the PlayerGui */
 	static getGameUI<T = ScreenGui>() {
 		return this.getPlayerGui().WaitForChild("GameUI") as T;

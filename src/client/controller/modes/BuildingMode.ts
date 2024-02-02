@@ -2,7 +2,7 @@ import { Players } from "@rbxts/services";
 import BuildingModeScene, { BuildingModeSceneDefinition } from "client/gui/buildmode/BuildingModeScene";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
-import GuiController from "../GuiController";
+import Gui from "../../gui/Gui";
 import LocalPlayerController from "../LocalPlayerController";
 import MirrorVisualizer from "../MirrorVisualizer";
 import ToolController from "../ToolController";
@@ -27,7 +27,7 @@ export default class BuildingMode extends PlayMode {
 		this.add(tools);
 
 		const scene = new BuildingModeScene(
-			GuiController.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode,
+			Gui.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode,
 			tools,
 		);
 		this.add(scene);

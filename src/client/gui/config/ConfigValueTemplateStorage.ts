@@ -1,5 +1,5 @@
-import GuiController from "client/controller/GuiController";
 import Control from "client/gui/Control";
+import Gui from "client/gui/Gui";
 import { ConfigControlDefinition } from "../buildmode/ConfigControl";
 import { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
 import { KeyChooserControlDefinition } from "../controls/KeyChooserControl";
@@ -23,7 +23,7 @@ type Templates = {
 	readonly StringTemplate: ConfigPartDefinition<TextBoxControlDefinition>;
 	readonly MultiTemplate: ConfigPartDefinition<ConfigControlDefinition>;
 };
-const templates = GuiController.getGameUI<{ Templates: { Configuration: Templates } }>().Templates.Configuration;
+const templates = Gui.getGameUI<{ Templates: { Configuration: Templates } }>().Templates.Configuration;
 
 export const configValueTemplateStorage = {
 	connected: Control.asTemplate(templates.ConnectedTemplate, false),

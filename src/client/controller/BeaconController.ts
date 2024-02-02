@@ -3,7 +3,7 @@ import PlayerDataStorage from "client/PlayerDataStorage";
 import RobloxUnit from "shared/RobloxUnit";
 import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
-import GuiController from "./GuiController";
+import Gui from "../gui/Gui";
 
 type BeaconBillboardGui = GuiObject & {
 	readonly Title: TextLabel;
@@ -24,7 +24,7 @@ export default class BeaconController {
 		});
 
 		this.billboard.Position = new UDim2(0, 1, 0, 1);
-		this.billboard.Parent = GuiController.getUnscaledGameUI();
+		this.billboard.Parent = Gui.getUnscaledGameUI();
 		this.billboard.Title.Text = name;
 
 		RunService.RenderStepped.Connect(() => {

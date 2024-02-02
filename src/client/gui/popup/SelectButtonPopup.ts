@@ -1,8 +1,8 @@
 import { GuiService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import GuiController from "client/controller/GuiController";
 import SoundController from "client/controller/SoundController";
 import Control from "client/gui/Control";
+import Gui from "client/gui/Gui";
 import Popup from "client/gui/Popup";
 import EventHandler from "shared/event/EventHandler";
 import { ButtonControl, TextButtonControl, TextButtonDefinition } from "../controls/Button";
@@ -26,7 +26,7 @@ export type SelectButtonPopupDefinition = GuiObject & {
 
 export default class SelectButtonPopup extends Popup<SelectButtonPopupDefinition> {
 	static readonly instance = new SelectButtonPopup(
-		GuiController.getGameUI<{
+		Gui.getGameUI<{
 			Popup: {
 				SelectButtonGui: SelectButtonPopupDefinition;
 			};

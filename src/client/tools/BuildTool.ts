@@ -2,11 +2,11 @@ import { GuiService, HttpService, Players, ReplicatedStorage, UserInputService, 
 import Signal from "@rbxts/signal";
 import ActionController from "client/controller/ActionController";
 import BuildingController from "client/controller/BuildingController";
-import GuiController from "client/controller/GuiController";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import BuildingMode from "client/controller/modes/BuildingMode";
 import Signals from "client/event/Signals";
+import Gui from "client/gui/Gui";
 import MaterialChooserControl from "client/gui/buildmode/MaterialChooser";
 import LogControl from "client/gui/static/LogControl";
 import ToolBase from "client/tools/ToolBase";
@@ -139,7 +139,7 @@ export default class BuildTool extends ToolBase {
 			!this.previewBlock.PrimaryPart ||
 			GuiService.MenuIsOpen ||
 			!PlayerUtils.isAlive(Players.LocalPlayer) ||
-			(GuiController.isCursorOnVisibleGui() && !savePosition)
+			(Gui.isCursorOnVisibleGui() && !savePosition)
 		);
 	}
 

@@ -1,8 +1,8 @@
 import { Players, RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import JSON from "shared/fixes/Json";
-import GuiController from "./controller/GuiController";
-import MultiConfigControl from "./gui/config/MultiConfigControl";
+import Gui from "../gui/Gui";
+import MultiConfigControl from "../gui/config/MultiConfigControl";
 
 const me = Players.LocalPlayer.Name === "i3ymm";
 const launch = false && RunService.IsStudio() && me;
@@ -13,7 +13,7 @@ task.wait(0.5); // wait for the controls to enable
 const frame = new Instance("Frame");
 frame.Position = new UDim2(0.3, 0, 0.033, 0);
 frame.Size = new UDim2(0, 324, 0, 1107);
-frame.Parent = GuiController.getGameUI();
+frame.Parent = Gui.getGameUI();
 new Instance("UIListLayout").Parent = frame;
 
 const mcc = new MultiConfigControl(

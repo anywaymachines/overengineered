@@ -2,7 +2,7 @@ import Component from "client/component/Component";
 import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
 import ConfirmPopup, { ConfirmPopupDefinition } from "client/gui/popup/ConfirmPopup";
-import GuiController from "./GuiController";
+import Gui from "./Gui";
 
 export type PopupControllerDefinition = ScreenGui & {
 	readonly Background: Frame;
@@ -12,7 +12,7 @@ export type PopupControllerDefinition = ScreenGui & {
 };
 
 export default class PopupController extends Component<PopupControllerDefinition> {
-	static readonly instance = new PopupController(GuiController.getPopupUI<PopupControllerDefinition>());
+	static readonly instance = new PopupController(Gui.getPopupUI<PopupControllerDefinition>());
 	private readonly confirmGui;
 
 	constructor(gui: PopupControllerDefinition) {
