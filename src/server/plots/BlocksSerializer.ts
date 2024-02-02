@@ -1,9 +1,9 @@
 import { HttpService } from "@rbxts/services";
 import BuildingWrapper from "server/BuildingWrapper";
-import blockConfigRegistry, { BlockConfigRegistry } from "shared/BlockConfigRegistry";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
+import blockConfigRegistry, { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockDataConnection } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import JSON from "shared/fixes/Json";

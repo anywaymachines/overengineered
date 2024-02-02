@@ -1,7 +1,7 @@
 import ComponentContainer from "client/base/ComponentContainer";
 import Control from "client/base/Control";
 import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
-import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
+import BlockConfigDefinitionRegistry from "shared/block/config/BlockConfigDefinitionRegistry";
 import ObservableValue from "shared/event/ObservableValue";
 
 export abstract class ConfigLogicValueBase<

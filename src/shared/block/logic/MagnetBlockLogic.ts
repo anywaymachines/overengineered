@@ -1,5 +1,5 @@
 import { RunService } from "@rbxts/services";
-import blockConfigRegistry from "shared/BlockConfigRegistry";
+import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";

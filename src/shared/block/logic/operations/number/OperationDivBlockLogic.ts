@@ -1,6 +1,6 @@
-import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { UnreliableRemotes } from "shared/Remotes";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
+import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class OperationDivBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationdiv> {

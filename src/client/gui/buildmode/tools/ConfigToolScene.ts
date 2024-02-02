@@ -1,11 +1,11 @@
 import Control from "client/base/Control";
 import ConfigTool from "client/tools/ConfigTool";
-import BlockConfig from "shared/BlockConfig";
-import { BlockConfigDefinitions } from "shared/BlockConfigDefinitionRegistry";
-import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Remotes from "shared/Remotes";
+import BlockConfig from "shared/block/config/BlockConfig";
+import { BlockConfigDefinitions } from "shared/block/config/BlockConfigDefinitionRegistry";
+import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import BlockManager from "shared/building/BlockManager";
 import ObservableValue from "shared/event/ObservableValue";
 import JSON from "shared/fixes/Json";

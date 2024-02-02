@@ -1,4 +1,4 @@
-import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
+import BlockConfigDefinitionRegistry from "shared/block/config/BlockConfigDefinitionRegistry";
 import { BoolConfigLogicValue } from "./BoolConfigLogicValue";
 import { ClampedNumberConfigLogicValue } from "./ClampedNumberConfigLogicValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";

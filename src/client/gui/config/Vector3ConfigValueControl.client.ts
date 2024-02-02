@@ -1,6 +1,6 @@
 import Signal from "@rbxts/signal";
 import Control from "client/base/Control";
-import BlockConfigDefinitionRegistry, { BlockConfigRegToDefinition } from "shared/BlockConfigDefinitionRegistry";
+import BlockConfigDefinitionRegistry, { BlockConfigRegToDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
 import { ConfigControlDefinition } from "../buildmode/ConfigControl";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";

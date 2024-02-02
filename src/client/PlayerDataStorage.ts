@@ -1,9 +1,9 @@
 import { HttpService, Players, Workspace } from "@rbxts/services";
-import BlockConfig from "shared/BlockConfig";
 import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
+import BlockConfig from "shared/block/config/BlockConfig";
 import ObservableValue from "shared/event/ObservableValue";
 
 type NonNullableFields<T> = {

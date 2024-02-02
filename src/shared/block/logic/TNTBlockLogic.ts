@@ -1,5 +1,5 @@
-import blockConfigRegistry from "shared/BlockConfigRegistry";
 import Remotes from "shared/Remotes";
+import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import ConfigurableBlockLogic from "../ConfigurableBlockLogic";
 

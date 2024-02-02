@@ -2,9 +2,9 @@ import Net from "@rbxts/net";
 import { DefinitionsCreateResult } from "@rbxts/net/out/definitions/Types";
 import { Players, RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import { BlockConfigDefinitions, BlockConfigDefinitionsToConfig } from "shared/BlockConfigDefinitionRegistry";
 import { PlacedBlockDataConnection } from "shared/building/BlockManager";
 import Objects from "shared/fixes/objects";
+import { BlockConfigDefinitions, BlockConfigDefinitionsToConfig } from "./config/BlockConfigDefinitionRegistry";
 
 type EventAfter<TArgs extends readonly unknown[]> = {
 	readonly received: Signal<(...args: TArgs) => void>;

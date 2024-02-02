@@ -1,4 +1,4 @@
-import { BlockConfigDefinitions } from "./BlockConfigDefinitionRegistry";
+import { BlockConfigDefinitions } from "./block/config/BlockConfigDefinitionRegistry";
 import RobloxUnit from "./RobloxUnit";
 
 export default class GameDefinitions {

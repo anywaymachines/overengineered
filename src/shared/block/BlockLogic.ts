@@ -1,4 +1,4 @@
-import { BlockConfigDefinitions, BlockConfigDefinitionsToConfig } from "shared/BlockConfigDefinitionRegistry";
+import { BlockConfigDefinitions, BlockConfigDefinitionsToConfig } from "shared/block/config/BlockConfigDefinitionRegistry";
 import { PlacedBlockDataConnection } from "shared/building/BlockManager";
 import SharedComponent from "shared/component/SharedComponent";
 import PartUtils from "shared/utils/PartUtils";

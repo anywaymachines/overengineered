@@ -1,6 +1,6 @@
 import { KeyDefinitions, KeyPressingDefinitionsController } from "client/base/KeyPressingController";
 import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
-import BlockConfigDefinitionRegistry from "shared/BlockConfigDefinitionRegistry";
+import BlockConfigDefinitionRegistry from "shared/block/config/BlockConfigDefinitionRegistry";
 import NumberObservableValue from "shared/event/NumberObservableValue";
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";

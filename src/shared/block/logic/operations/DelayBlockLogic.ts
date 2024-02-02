@@ -1,6 +1,6 @@
 import { BlockLogicData } from "shared/block/BlockLogic";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/BlockConfigRegistry";
+import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 
 export default class DelayBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.delayblock> {
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.delayblock.input>) {

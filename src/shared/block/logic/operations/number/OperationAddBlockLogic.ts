@@ -1,5 +1,5 @@
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/BlockConfigRegistry";
+import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class OperationAddBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationadd> {

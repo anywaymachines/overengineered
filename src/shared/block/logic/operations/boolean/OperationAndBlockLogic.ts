@@ -1,4 +1,4 @@
-import blockConfigRegistry from "shared/BlockConfigRegistry";
+import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
 

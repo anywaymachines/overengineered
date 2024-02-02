@@ -1,8 +1,8 @@
-import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
-import BlockConfigValueRegistry from "shared/BlockConfigValueRegistry";
+import { BlockConfigBothDefinitions } from "shared/block/config/BlockConfigDefinitionRegistry";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
 import BlockLogic, { BlockLogicData } from "./BlockLogic";
+import BlockConfigValueRegistry from "./config/BlockConfigValueRegistry";
 
 export default class ConfigurableBlockLogic<
 	TDef extends BlockConfigBothDefinitions,

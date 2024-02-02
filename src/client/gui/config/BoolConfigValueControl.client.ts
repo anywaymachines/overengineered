@@ -1,5 +1,5 @@
 import Signal from "@rbxts/signal";
-import BlockConfigDefinitionRegistry, { BlockConfigRegToDefinition } from "shared/BlockConfigDefinitionRegistry";
+import BlockConfigDefinitionRegistry, { BlockConfigRegToDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
 import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";

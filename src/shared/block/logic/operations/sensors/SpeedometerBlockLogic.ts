@@ -1,7 +1,7 @@
 import { RunService } from "@rbxts/services";
-import blockConfigRegistry from "shared/BlockConfigRegistry";
 import RobloxUnit from "shared/RobloxUnit";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
+import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class SpeedometerBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.speedometer> {

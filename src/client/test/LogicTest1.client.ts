@@ -1,8 +1,8 @@
 import { Players, Workspace } from "@rbxts/services";
 import Machine from "client/blocks/Machine";
-import { BlockConfigBothDefinitions } from "shared/BlockConfigDefinitionRegistry";
 import RobloxUnit from "shared/RobloxUnit";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
+import { BlockConfigBothDefinitions } from "shared/block/config/BlockConfigDefinitionRegistry";
 import ConstantBlockLogic from "shared/block/logic/operations/ConstantBlockLogic";
 import AltimeterBlockLogic from "shared/block/logic/operations/sensors/AltimeterBlockLogic";
 import OperationVec3CombinerBlockLogic from "shared/block/logic/operations/vector/OperationVec3CombinerBlockLogic";

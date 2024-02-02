@@ -1,6 +1,6 @@
+import NumberObservableValue from "../../event/NumberObservableValue";
+import ObservableValue from "../../event/ObservableValue";
 import BlockConfigDefinitionRegistry from "./BlockConfigDefinitionRegistry";
-import NumberObservableValue from "./event/NumberObservableValue";
-import ObservableValue from "./event/ObservableValue";
 
 export type BlockConfigValueRegistry = {
 	readonly [k in keyof BlockConfigDefinitionRegistry]: (

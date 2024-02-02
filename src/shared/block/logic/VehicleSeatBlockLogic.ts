@@ -1,5 +1,5 @@
 import { Players, RunService } from "@rbxts/services";
-import blockConfigRegistry from "shared/BlockConfigRegistry";
+import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import ObservableValue from "shared/event/ObservableValue";
 import ConfigurableBlockLogic from "../ConfigurableBlockLogic";

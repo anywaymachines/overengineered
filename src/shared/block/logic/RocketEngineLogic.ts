@@ -1,8 +1,8 @@
 import { Workspace } from "@rbxts/services";
-import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { UnreliableRemotes } from "shared/Remotes";
 import RobloxUnit from "shared/RobloxUnit";
 import Sound from "shared/Sound";
+import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import ConfigurableBlockLogic from "../ConfigurableBlockLogic";
 

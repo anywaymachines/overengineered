@@ -1,6 +1,6 @@
 import { RunService } from "@rbxts/services";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/BlockConfigRegistry";
+import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
 export default class AngleSensorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.anglesensor> {

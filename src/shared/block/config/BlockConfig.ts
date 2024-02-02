@@ -1,7 +1,7 @@
+import { PlacedBlockData } from "../../building/BlockManager";
+import JSON from "../../fixes/Json";
+import Objects from "../../fixes/objects";
 import { BlockConfigDefinitions, BlockConfigDefinitionsToConfig } from "./BlockConfigDefinitionRegistry";
-import { PlacedBlockData } from "./building/BlockManager";
-import JSON from "./fixes/Json";
-import Objects from "./fixes/objects";
 
 export default class BlockConfig {
 	static deserialize<TDef extends BlockConfigDefinitions>(

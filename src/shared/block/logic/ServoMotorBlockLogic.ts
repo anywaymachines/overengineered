@@ -1,6 +1,6 @@
 import { RunService } from "@rbxts/services";
-import blockConfigRegistry from "shared/BlockConfigRegistry";
 import { UnreliableRemotes } from "shared/Remotes";
+import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import ConfigurableBlockLogic from "../ConfigurableBlockLogic";
 

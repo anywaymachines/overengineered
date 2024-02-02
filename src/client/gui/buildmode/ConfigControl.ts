@@ -6,11 +6,11 @@ import KeyChooserControl, { KeyChooserControlDefinition } from "client/gui/contr
 import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import SliderControl, { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import BlockConfigDefinitionRegistry, {
-	BlockConfigDefinition,
-	BlockConfigDefinitions,
-	BlockConfigDefinitionsToConfig,
-	BlockConfigRegToDefinition,
-} from "shared/BlockConfigDefinitionRegistry";
+    BlockConfigDefinition,
+    BlockConfigDefinitions,
+    BlockConfigDefinitionsToConfig,
+    BlockConfigRegToDefinition,
+} from "shared/block/config/BlockConfigDefinitionRegistry";
 import Objects from "shared/fixes/objects";
 import { DictionaryControl } from "../controls/DictionaryControl";
 import TextBoxControl, { TextBoxControlDefinition } from "../controls/TextBoxControl";

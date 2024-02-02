@@ -1,5 +1,5 @@
 import Signal from "@rbxts/signal";
-import BlockConfigDefinitionRegistry, { BlockConfigRegToDefinition } from "shared/BlockConfigDefinitionRegistry";
+import BlockConfigDefinitionRegistry, { BlockConfigRegToDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";
 
 type Ctor<TKey extends keyof BlockConfigDefinitionRegistry> = {
