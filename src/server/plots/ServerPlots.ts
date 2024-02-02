@@ -1,6 +1,6 @@
 import { HttpService, Players, ReplicatedStorage } from "@rbxts/services";
-import GameDefinitions from "shared/GameDefinitions";
 import SharedPlots from "shared/building/SharedPlots";
+import GameDefinitions from "shared/data/GameDefinitions";
 
 /** Methods to edit plots information */
 export default class ServerPlots {

@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
-import GameEnvironment from "shared/GameEnvironment";
 import { PlacedBlockData } from "shared/building/BlockManager";
+import GameEnvironment from "shared/data/GameEnvironment";
 import BlockLogic from "../BlockLogic";
 
 type HeliumBlock = BlockModel & {

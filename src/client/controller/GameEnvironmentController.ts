@@ -1,5 +1,5 @@
 import { RunService, Workspace } from "@rbxts/services";
-import GameEnvironment from "shared/GameEnvironment";
+import GameEnvironment from "shared/data/GameEnvironment";
 import LocalPlayerController from "./LocalPlayerController";
 
 export default class GameEnvironmentController {

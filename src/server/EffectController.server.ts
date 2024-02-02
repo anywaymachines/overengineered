@@ -1,7 +1,7 @@
 import { Players } from "@rbxts/services";
 import PlayerDatabase from "server/PlayerDatabase";
-import GameDefinitions from "shared/GameDefinitions";
 import BlockManager from "shared/building/BlockManager";
+import GameDefinitions from "shared/data/GameDefinitions";
 import Effects from "shared/effects/Effects";
 import { EffectsInvoker } from "shared/effects/EffectsInvoker";
 import Objects from "shared/fixes/objects";

@@ -1,6 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import GameDefinitions from "./GameDefinitions";
+import GameDefinitions from "./data/GameDefinitions";
 
 export default class Logger {
 	public static readonly onLog = new Signal<(text: string, error: boolean) => void>();

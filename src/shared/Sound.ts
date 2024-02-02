@@ -1,4 +1,4 @@
-import GameEnvironment from "./GameEnvironment";
+import GameEnvironment from "./data/GameEnvironment";
 
 const Sound = {
 	getWorldVolume(height: number) {

@@ -1,7 +1,7 @@
 import { DataStoreService, Players } from "@rbxts/services";
-import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import SharedPlots from "shared/building/SharedPlots";
+import GameDefinitions from "shared/data/GameDefinitions";
 import SlotsMeta from "../shared/SlotsMeta";
 import { Db } from "./Database";
 import PlayerDatabase from "./PlayerDatabase";

@@ -1,5 +1,5 @@
 import { HttpService } from "@rbxts/services";
-import MaterialPhysicalProperties from "shared/MaterialPhysicalProperties";
+import MaterialData from "shared/data/MaterialData";
 import Serializer from "shared/Serializer";
 import PartUtils from "shared/utils/PartUtils";
 
@@ -24,9 +24,7 @@ export const SharedBuilding = {
 				}
 
 				// Custom physical properties
-				const customPhysProp =
-					MaterialPhysicalProperties.Properties[data.material.Name] ??
-					MaterialPhysicalProperties.Properties.Default;
+				const customPhysProp = MaterialData.Properties[data.material.Name] ?? MaterialData.Properties.Default;
 
 				PartUtils.applyToAllDescendantsOfType("BasePart", block, (part) => {
 					if (!byBuild || !part.CustomPhysicalProperties) {

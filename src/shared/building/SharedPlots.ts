@@ -1,5 +1,5 @@
 import { HttpService, Workspace } from "@rbxts/services";
-import GameDefinitions from "shared/GameDefinitions";
+import GameDefinitions from "shared/data/GameDefinitions";
 import VectorUtils from "shared/utils/VectorUtils";
 import BlockManager, { PlacedBlockData } from "./BlockManager";
 

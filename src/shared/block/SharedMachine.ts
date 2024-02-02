@@ -1,12 +1,12 @@
 import { RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import GameDefinitions from "shared/GameDefinitions";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import { BlockConfigBothDefinitions } from "shared/block/config/BlockConfigDefinitionRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedComponentBase from "shared/component/SharedComponentBase";
 import SharedComponentContainer from "shared/component/SharedComponentContainer";
+import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
 import BlockLogic from "./BlockLogic";

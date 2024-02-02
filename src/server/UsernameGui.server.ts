@@ -1,5 +1,5 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
-import GameDefinitions from "shared/GameDefinitions";
+import GameDefinitions from "shared/data/GameDefinitions";
 
 Players.PlayerAdded.Connect((player) => {
 	player.CharacterAdded.Connect((character) => {
