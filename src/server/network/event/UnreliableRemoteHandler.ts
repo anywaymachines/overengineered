@@ -1,59 +1,26 @@
 import SpreadingFireController from "server/SpreadingFireController";
+import PlayerDatabase from "server/database/PlayerDatabase";
 import ServerPartUtils from "server/plots/ServerPartUtils";
-import { UnreliableRemotes } from "shared/Remotes";
+import RemoteEvents from "shared/RemoteEvents";
 import BlockManager from "shared/building/BlockManager";
+import GameDefinitions from "shared/data/GameDefinitions";
+import EffectBase from "shared/effects/EffectBase";
 import Effects from "shared/effects/Effects";
 
-export default class UnreliableRemoteHandler {
-	static init() {
-		UnreliableRemotes.ReplicateSound.OnServerEvent.Connect((player, sound, isPlaying, volume) =>
-			this.replicateSoundEvent(player, sound, isPlaying, volume),
-		);
+const UnreliableRemoteHandler = {
+	init() {
+		EffectBase.staticMustSendToPlayer = (player) =>
+			PlayerDatabase.instance.get(tostring(player.UserId)).settings?.others_gfx ??
+			GameDefinitions.PLAYER_SETTINGS_DEFINITION.others_gfx.default;
 
-		UnreliableRemotes.ReplicateParticle.OnServerEvent.Connect((player, particle, isEnabled, acceleration) =>
-			this.replicateParticleEvent(player, particle, isEnabled, acceleration),
-		);
-
-		UnreliableRemotes.ImpactBreak.OnServerEvent.Connect((player, part) => this.impactBreakEvent(player, part));
-		UnreliableRemotes.ImpactExplode.OnServerEvent.Connect((player, part, blastRadius) =>
+		RemoteEvents.ImpactBreak.invoked.Connect((player, part) => this.impactBreakEvent(player, part));
+		RemoteEvents.ImpactExplode.invoked.Connect((player, { part, blastRadius }) =>
 			this.impactExplodeEvent(player, part, blastRadius),
 		);
-		UnreliableRemotes.Burn.OnServerEvent.Connect((player, part) => this.burnEvent(player, part));
-	}
+		RemoteEvents.Burn.invoked.Connect((_, part) => this.burnEvent(part));
+	},
 
-	static replicateSoundEvent(player: Player, sound: Sound, isPlaying: boolean, volume: number) {
-		if (!sound || !sound.Parent) return;
-
-		const part = sound.Parent as BasePart;
-		if (!BlockManager.isActiveBlockPart(part)) return;
-		if (part.GetNetworkOwner() !== player) return;
-
-		if (volume > 1) {
-			// Probably exploiting
-			return;
-		}
-
-		sound.Playing = isPlaying;
-		sound.Volume = volume;
-	}
-
-	static replicateParticleEvent(
-		player: Player,
-		particle: ParticleEmitter,
-		isEnabled: boolean,
-		acceleration: Vector3,
-	) {
-		if (!particle || !particle.Parent) return;
-
-		const part = particle.Parent as BasePart;
-		if (!BlockManager.isActiveBlockPart(part)) return;
-		if (part.GetNetworkOwner() !== player) return;
-
-		particle.Enabled = isEnabled;
-		particle.Acceleration = acceleration;
-	}
-
-	static impactExplodeEvent(player: Player, block: BasePart, blastRadius: number) {
+	impactExplodeEvent(player: Player | undefined, block: BasePart, blastRadius: number) {
 		if (!BlockManager.isActiveBlockPart(block)) return;
 
 		if (block.GetAttribute("IMPACT_BROKEN") === true) {
@@ -73,9 +40,8 @@ export default class UnreliableRemoteHandler {
 				this.impactBreakEvent(player, part);
 			}
 		});
-	}
-
-	static impactBreakEvent(player: Player, part: BasePart) {
+	},
+	impactBreakEvent(player: Player | undefined, part: BasePart) {
 		if (!BlockManager.isActiveBlockPart(part)) return;
 
 		if (part.GetAttribute("IMPACT_BROKEN") === true) return;
@@ -84,12 +50,12 @@ export default class UnreliableRemoteHandler {
 		part.SetAttribute("IMPACT_BROKEN", true);
 
 		// Play sounds
-		Effects.ImpactSound.send([player], { part, index: undefined });
-	}
-
-	static burnEvent(player: Player, block: BasePart) {
+		Effects.ImpactSound.send(player ? [player] : "everyone", { part, index: undefined });
+	},
+	burnEvent(block: BasePart) {
 		if (!BlockManager.isActiveBlockPart(block)) return;
 
 		SpreadingFireController.burn(block);
-	}
-}
+	},
+};
+export default UnreliableRemoteHandler;

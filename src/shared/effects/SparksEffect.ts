@@ -1,10 +1,10 @@
 import { Debris, ReplicatedStorage } from "@rbxts/services";
-import S2CRemoteEvent from "shared/event/S2CRemoteEvent";
+import EffectBase from "./EffectBase";
 
 type Args = {
 	readonly part: BasePart;
 };
-export default class SparksEffect extends S2CRemoteEvent<Args> {
+export default class SparksEffect extends EffectBase<Args> {
 	constructor() {
 		super("sparks_effect");
 	}

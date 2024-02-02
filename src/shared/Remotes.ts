@@ -1,5 +1,4 @@
 import Net from "@rbxts/net";
-import { ReplicatedStorage } from "@rbxts/services";
 
 const Remotes = Net.Definitions.Create({
 	Player: Net.Definitions.Namespace({
@@ -55,41 +54,4 @@ const Remotes = Net.Definitions.Create({
 		DisplayLine: Net.Definitions.ServerToClientEvent<[text: string, isClient: boolean, isError: boolean]>(),
 	}),
 });
-
-export type _UnreliableRemoteEvent<T extends Callback> = Omit<
-	UnreliableRemoteEvent<T>,
-	"OnServerEvent" | "OnClientEvent" | "FireServer"
-> & {
-	readonly OnServerEvent: RBXScriptSignal<(player: Player, ...args: Parameters<T>) => ReturnType<T>>;
-	readonly OnClientEvent: RBXScriptSignal<T>;
-
-	FireServer(...args: Parameters<T>): void;
-};
-export const UnreliableRemotes = {
-	ReplicateSound: ReplicatedStorage.FindFirstChild("ReplicateSound") as unknown as _UnreliableRemoteEvent<
-		(sound: Sound, isPlaying: boolean, volume: number) => void
-	>,
-	ReplicateParticle: ReplicatedStorage.FindFirstChild("ReplicateParticle") as unknown as _UnreliableRemoteEvent<
-		(particle: ParticleEmitter, isEnabled: boolean, acceleration: Vector3) => void
-	>,
-
-	ImpactBreak: ReplicatedStorage.FindFirstChild("ImpactBreak") as unknown as _UnreliableRemoteEvent<
-		(part: BasePart) => void
-	>,
-	ImpactExplode: ReplicatedStorage.FindFirstChild("ImpactExplode") as unknown as _UnreliableRemoteEvent<
-		(part: BasePart, blastRadius: number) => void
-	>,
-
-	Burn: ReplicatedStorage.FindFirstChild("Burn") as unknown as _UnreliableRemoteEvent<(part: BasePart) => void>,
-	SparksEffect: ReplicatedStorage.FindFirstChild("SparksEffect") as unknown as _UnreliableRemoteEvent<
-		(part: BasePart) => void
-	>,
-	FireEffect: ReplicatedStorage.FindFirstChild("FireEffect") as unknown as _UnreliableRemoteEvent<
-		(part: BasePart) => void
-	>,
-	ImpactSoundEffect: ReplicatedStorage.FindFirstChild("ImpactSoundEffect") as unknown as _UnreliableRemoteEvent<
-		(part: BasePart) => void
-	>,
-};
-
 export default Remotes;

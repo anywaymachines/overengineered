@@ -1,9 +1,10 @@
 import { Workspace } from "@rbxts/services";
-import { UnreliableRemotes } from "shared/Remotes";
+import RemoteEvents from "shared/RemoteEvents";
 import RobloxUnit from "shared/RobloxUnit";
 import Sound from "shared/Sound";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
+import Effects from "shared/effects/Effects";
 import ConfigurableBlockLogic from "../ConfigurableBlockLogic";
 
 type RocketEngine = BlockModel & {
@@ -115,14 +116,18 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 		this.sound.Volume = newVolume;
 
 		if (volumeHasDifference) {
-			UnreliableRemotes.ReplicateSound.FireServer(this.sound, this.sound.Playing, this.sound.Volume);
+			Effects.Sound.sendToNetworkOwnerOrEveryone(this.instance.PrimaryPart, {
+				sound: this.sound,
+				isPlaying: this.sound.Playing,
+				volume: this.sound.Volume,
+			});
 		}
 		if (particleEmmiterHasDifference) {
-			UnreliableRemotes.ReplicateParticle.FireServer(
-				this.particleEmitter,
-				this.particleEmitter.Enabled,
-				this.particleEmitter.Acceleration,
-			);
+			RemoteEvents.Particle.sendToNetworkOwnerOrEveryone(this.instance.PrimaryPart, {
+				particle: this.particleEmitter,
+				isEnabled: this.particleEmitter.Enabled,
+				acceleration: this.particleEmitter.Acceleration,
+			});
 		}
 	}
 

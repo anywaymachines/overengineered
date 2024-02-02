@@ -1,5 +1,5 @@
 import { RunService } from "@rbxts/services";
-import { UnreliableRemotes } from "shared/Remotes";
+import RemoteEvents from "shared/RemoteEvents";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import ConfigurableBlockLogic from "../ConfigurableBlockLogic";
@@ -31,7 +31,7 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof block
 			}
 
 			if (this.block.instance.Attach.Position.sub(this.block.instance.Base.Position).Magnitude > 3) {
-				UnreliableRemotes.ImpactBreak.FireServer(this.block.instance.Base);
+				RemoteEvents.ImpactBreak.send(this.block.instance.Base);
 
 				this.disable();
 			}

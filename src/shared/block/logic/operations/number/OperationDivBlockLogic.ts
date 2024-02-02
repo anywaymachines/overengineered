@@ -1,4 +1,4 @@
-import { UnreliableRemotes } from "shared/Remotes";
+import RemoteEvents from "shared/RemoteEvents";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -16,7 +16,10 @@ export default class OperationDivBlockLogic extends ConfigurableBlockLogic<typeo
 		const v2 = this.input.value2.get();
 
 		if (v2 === 0) {
-			UnreliableRemotes.Burn.FireServer(this.instance.PrimaryPart!);
+			if (this.instance.PrimaryPart) {
+				RemoteEvents.Burn.send(this.instance.PrimaryPart);
+			}
+
 			this.disable();
 		}
 		this.output.result.set(v1 / v2);

@@ -25,7 +25,7 @@ export type PlacedBlockData<T extends BlockModel = BlockModel> = {
 
 /** Methods for reading information about a block */
 export default class BlockManager {
-	static isActiveBlockPart(part: BasePart): boolean {
+	static isActiveBlockPart(part: Instance): boolean {
 		if (
 			!this.isBlockPart(part) ||
 			part.AssemblyRootPart?.Anchored ||
@@ -37,7 +37,7 @@ export default class BlockManager {
 		return true;
 	}
 
-	static isBlockPart(part: BasePart): part is BasePart & { Parent: BlockModel } {
+	static isBlockPart(part: Instance): part is BasePart & { Parent: BlockModel } {
 		if (
 			!part ||
 			!part.Parent ||

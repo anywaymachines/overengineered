@@ -1,5 +1,4 @@
-import { RunService } from "@rbxts/services";
-import { UnreliableRemotes } from "shared/Remotes";
+import RemoteEvents from "shared/RemoteEvents";
 import TerrainDataInfo from "shared/TerrainDataInfo";
 import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
 import Effects from "shared/effects/Effects";
@@ -75,21 +74,23 @@ export default class ImpactController {
 			const magnitudeDiff = math.round(math.abs(partMagnitude - secondPartMagnitude));
 
 			if (magnitudeDiff > allowedMagnitudeDiff * 5) {
-				UnreliableRemotes.ImpactExplode.FireServer(part, 1 + magnitudeDiff / (2 * allowedMagnitudeDiff * 5));
+				RemoteEvents.ImpactExplode.send({
+					part,
+					blastRadius: 1 + magnitudeDiff / (2 * allowedMagnitudeDiff * 5),
+				});
 				event.Disconnect();
 			} else if (magnitudeDiff > allowedMagnitudeDiff) {
 				if (math.random(1, 20) === 1) {
-					UnreliableRemotes.Burn.FireServer(part);
+					RemoteEvents.Burn.send(part);
 					event.Disconnect();
 				}
 
 				if (math.random(1, 3) > 1) {
-					UnreliableRemotes.ImpactBreak.FireServer(part);
+					RemoteEvents.ImpactBreak.send(part);
 					event.Disconnect();
 				}
 			} else if (magnitudeDiff + allowedMagnitudeDiff * 0.2 > allowedMagnitudeDiff) {
-				const owner = RunService.IsServer() ? part.GetNetworkOwner() : undefined;
-				Effects.Sparks.send(owner ? [owner] : "everyone", { part });
+				Effects.Sparks.sendToNetworkOwnerOrEveryone(part, { part });
 			}
 		});
 	}

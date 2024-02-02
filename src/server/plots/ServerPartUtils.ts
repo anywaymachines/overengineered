@@ -8,7 +8,7 @@ export default class ServerPartUtils {
 		});
 	}
 
-	static switchDescendantsNetworkOwner(model: Instance, owner: Player) {
+	static switchDescendantsNetworkOwner(model: Instance, owner: Player | undefined) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
 			part.SetNetworkOwner(owner);
 		});

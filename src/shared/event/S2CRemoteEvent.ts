@@ -1,50 +1,52 @@
-import { Players, ReplicatedStorage, RunService } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import SlimSignal from "shared/event/SlimSignal";
+import RemoteEventBase, { CreatableRemoteEvents } from "./RemoteEventBase";
 
-type _UnreliableRemoteEvent<T extends Callback> = Omit<
-	UnreliableRemoteEvent<T>,
-	"OnServerEvent" | "OnClientEvent" | "FireServer"
-> & {
+type CustomRemoteEvent<T extends Callback> = Instance & {
 	readonly OnServerEvent: RBXScriptSignal<
 		(player: Player, ...args: [...Parameters<T>, forcePlayers: readonly Player[] | "everyone"]) => ReturnType<T>
 	>;
 	readonly OnClientEvent: RBXScriptSignal<T>;
 
 	FireServer(...args: [...Parameters<T>, forcePlayers: readonly Player[] | "everyone"]): void;
-	FireClient(player: Player, ...args: [...Parameters<T>, forcePlayers: readonly Player[] | "everyone"]): void;
+	FireClient(player: Player, ...args: Parameters<T>): void;
 };
 
 /** Event which:
  * On client, runs and sends it to all specified clients;
  * On server, sends it to all specified clients.
  */
-export default abstract class S2CRemoteEvent<T> {
-	readonly invoked = new SlimSignal<(arg: T) => void>();
-	readonly event: _UnreliableRemoteEvent<(arg: T) => void>;
+export default abstract class S2CRemoteEvent<T> extends RemoteEventBase<
+	TweenInfo,
+	CustomRemoteEvent<(arg: T) => void>
+> {
+	constructor(name: string, eventType: CreatableRemoteEvents = "UnreliableRemoteEvent") {
+		super(name, eventType);
 
-	constructor(name: string);
-	constructor(event: _UnreliableRemoteEvent<(arg: T) => void>);
-	constructor(event: string | _UnreliableRemoteEvent<(arg: T) => void>) {
-		if (typeIs(event, "string")) {
-			if (RunService.IsServer()) {
-				const name = event;
-				event = new Instance("UnreliableRemoteEvent");
-				event.Name = name;
-				event.Parent = ReplicatedStorage;
-			} else {
-				event = ReplicatedStorage.WaitForChild(event) as UnreliableRemoteEvent;
-			}
+		if (RunService.IsServer()) {
+			this.event.OnServerEvent.Connect((player, arg, players) => {
+				this.sendToPlayers(player, players, arg);
+			});
 		}
-
-		this.event = event;
-
 		if (RunService.IsClient()) {
-			event.OnClientEvent.Connect((arg) => this.justRun(arg));
+			this.event.OnClientEvent.Connect((arg) => {
+				this.justRun(arg);
+			});
 		}
 	}
 
-	abstract justRun(arg: T): void;
+	protected abstract justRun(arg: T): void;
 
+	sendToNetworkOwnerOrEveryone(part: BasePart | undefined, arg: T) {
+		if (!part) return; // TODO: idk whats the best action
+
+		const owner = RunService.IsServer() ? part.GetNetworkOwner() : Players.LocalPlayer;
+		this.send(owner ? [owner] : "everyone", arg);
+	}
+
+	protected mustSendToPlayer(player: Player): boolean {
+		return false;
+	}
 	send(players: readonly Player[] | "everyone", arg: T) {
 		if (RunService.IsClient()) {
 			this.justRun(arg);
@@ -52,13 +54,23 @@ export default abstract class S2CRemoteEvent<T> {
 		}
 
 		if (RunService.IsServer()) {
-			const player = Players.LocalPlayer;
-			for (const plr of players === "everyone" ? Players.GetPlayers() : players) {
-				if (plr === player) continue;
-				if (players !== "everyone" && !players.includes(plr)) continue;
-
-				this.event.FireClient(plr, arg);
-			}
+			this.sendToPlayers(undefined, players, arg);
 		}
+	}
+
+	private sendToPlayers(player: Player | undefined, players: readonly Player[] | "everyone", arg: T) {
+		for (const plr of Players.GetPlayers()) {
+			if (plr === player) continue;
+			if (players !== "everyone" && !players.includes(plr) && !this.mustSendToPlayer(plr)) continue;
+
+			this.event.FireClient(plr, arg);
+		}
+	}
+}
+export class AutoS2CRemoteEvent<T> extends S2CRemoteEvent<T> {
+	readonly invoked = new SlimSignal<(arg: T) => void>();
+
+	justRun(arg: T): void {
+		this.invoked.Fire(arg);
 	}
 }

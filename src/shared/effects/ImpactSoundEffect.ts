@@ -1,12 +1,14 @@
 import { Debris, ReplicatedStorage } from "@rbxts/services";
-import S2CRemoteEvent from "shared/event/S2CRemoteEvent";
+import EffectBase from "./EffectBase";
+
+ReplicatedStorage.WaitForChild("Assets");
 
 type Args = {
 	readonly part: BasePart;
 	readonly index?: number;
 };
-export default class ImpactSoundEffect extends S2CRemoteEvent<Args> {
-	private readonly materialSounds: { [key: string]: Instance[] } = {
+export default class ImpactSoundEffect extends EffectBase<Args> {
+	private readonly materialSounds: { readonly [key: string]: Instance[] } = {
 		Default: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
 
 		Metal: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
