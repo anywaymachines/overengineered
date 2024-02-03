@@ -50,7 +50,7 @@ export default class BeaconController {
 			this.billboard.Title.TextTransparency = transparency;
 			this.billboard.Distance.TextTransparency = transparency;
 
-			if (transparency >= transparencyMultiplier) return;
+			if (transparency >= 1) return;
 
 			let distancestr: string;
 			if (distance > 1000) distancestr = `${math.floor(distance / 100) / 10} km`;
