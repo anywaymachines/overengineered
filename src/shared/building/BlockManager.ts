@@ -37,7 +37,7 @@ export default class BlockManager {
 		return true;
 	}
 
-	static isBlockPart(part: Instance): part is BasePart & { Parent: BlockModel } {
+	static isBlockPart(part: Instance | undefined): part is BasePart & { Parent: BlockModel } {
 		if (
 			!part ||
 			!part.Parent ||

@@ -8,16 +8,19 @@ import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
+import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
 
 /** A tool for moving the entire building as a whole */
 export default class MoveTool extends ToolBase {
-	private targetModel: Model & {
+	private targetModel: PlotBlocks | BlockModel; /* Model & {
 		GetChildren(undefined: undefined): readonly BlockModel[];
-	} & ({} | { Parent: PlotModel });
+	} & ({} | { Parent: PlotModel });*/
 	private MoveExtent?: MoveHandles;
 	private XHandles?: Handles;
 	private YHandles?: Handles;
 	private ZHandles?: Handles;
+
+	private mouseOnHandles = false;
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -27,6 +30,17 @@ export default class MoveTool extends ToolBase {
 		this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.createHandles());
 		this.event.subscribe(Signals.BLOCKS.BLOCKS_MOVED, () => this.createHandles());
 		this.event.onEnable(() => this.createHandles());
+
+		const highlighter = this.add(new HoveredBlockHighlighter(() => !this.mouseOnHandles));
+		this.event.onInputBegin((input) => {
+			if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
+
+			const highlighted = highlighter.highlightedBlock.get();
+			if (!highlighted) return;
+
+			this.targetModel = highlighted;
+			this.createHandles();
+		});
 	}
 
 	getDisplayName(): string {
@@ -39,6 +53,11 @@ export default class MoveTool extends ToolBase {
 
 	getShortDescription(): string {
 		return "Move your contraption";
+	}
+
+	selectPlot(plot: PlotModel) {
+		this.targetModel = plot.Blocks;
+		this.createHandles();
 	}
 
 	private destroyHandles() {
@@ -55,7 +74,7 @@ export default class MoveTool extends ToolBase {
 			return;
 		}
 
-		if (this.targetModel.GetChildren().size() === 0) {
+		if (SharedPlots.isPlotBlocks(this.targetModel) && this.targetModel.GetChildren().size() === 0) {
 			return;
 		}
 
@@ -70,6 +89,11 @@ export default class MoveTool extends ToolBase {
 		this.XHandles = this.MoveExtent.XHandles;
 		this.YHandles = this.MoveExtent.YHandles;
 		this.ZHandles = this.MoveExtent.ZHandles;
+
+		for (const handle of [this.XHandles, this.YHandles, this.ZHandles]) {
+			handle.MouseEnter.Connect(() => (this.mouseOnHandles = true));
+			handle.MouseLeave.Connect(() => (this.mouseOnHandles = false));
+		}
 
 		this.XHandles.Parent = this.gameUI;
 		this.YHandles.Parent = this.gameUI;
@@ -162,10 +186,7 @@ export default class MoveTool extends ToolBase {
 		else if (face === Enum.NormalId.Left) vector = new Vector3(-2, 0, 0);
 		else if (face === Enum.NormalId.Right) vector = new Vector3(2, 0, 0);
 
-		const blocks = SharedPlots.isPlot(this.targetModel.Parent)
-			? ("all" as const)
-			: this.targetModel.GetChildren(undefined);
-
+		const blocks = SharedPlots.isPlotBlocks(this.targetModel) ? ("all" as const) : [this.targetModel];
 		const response = await ActionController.instance.executeOperation(
 			"Move block",
 			async () => {

@@ -12,6 +12,11 @@ export default class SharedPlots {
 		return model?.Parent === Workspace.Plots;
 	}
 
+	/** Checks if the provided `Instance` is a plot model blocks */
+	static isPlotBlocks(model: Instance | undefined): model is PlotBlocks {
+		return model !== undefined && this.isPlot(model?.Parent) && model.Name === "Blocks";
+	}
+
 	/** Read encoded plot data inside `Model` */
 	static readPlotData(plot: PlotModel | PlotData): PlotData {
 		return "IsA" in plot ? (HttpService.JSONDecode(plot.GetAttribute("data") as string) as PlotData) : plot;

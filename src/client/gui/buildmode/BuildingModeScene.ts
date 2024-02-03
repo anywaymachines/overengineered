@@ -12,6 +12,7 @@ import BuildTool2Scene, { BuildTool2SceneDefinition } from "./tools/BuildTool2Sc
 import BuildToolScene, { BuildToolSceneDefinition } from "./tools/BuildToolScene";
 import ConfigToolScene, { ConfigToolSceneDefinition } from "./tools/ConfigToolScene";
 import DeleteToolScene, { DeleteToolSceneDefinition } from "./tools/DeleteToolScene";
+import MoveToolScene, { MoveToolSceneDefinition } from "./tools/MoveToolScene";
 import PaintToolScene, { PaintToolSceneDefinition } from "./tools/PaintToolScene";
 import WireToolScene, { WireToolSceneDefinition } from "./tools/WireToolScene";
 
@@ -49,6 +50,7 @@ export type BuildingModeSceneDefinition = GuiObject & {
 	ToolbarGui: ToolbarControlDefinition;
 	Tools: {
 		BuildToolGui: BuildToolSceneDefinition;
+		MoveToolGui: MoveToolSceneDefinition;
 		BuildTool2Gui: BuildTool2SceneDefinition;
 		DeleteToolGui: DeleteToolSceneDefinition;
 		ConfigToolGui: ConfigToolSceneDefinition;
@@ -88,6 +90,7 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 		this.add(this.toolbar);
 
 		this.scenes.set(tools.buildTool, new BuildToolScene(this.gui.Tools.BuildToolGui, tools.buildTool));
+		this.scenes.set(tools.moveTool, new MoveToolScene(this.gui.Tools.MoveToolGui, tools.moveTool));
 		this.scenes.set(tools.deleteTool, new DeleteToolScene(this.gui.Tools.DeleteToolGui, tools.deleteTool));
 		this.scenes.set(tools.configTool, new ConfigToolScene(this.gui.Tools.ConfigToolGui, tools.configTool));
 		this.scenes.set(tools.paintTool, new PaintToolScene(this.gui.Tools.PaintToolGui, tools.paintTool));

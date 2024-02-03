@@ -54,9 +54,8 @@ export default class BuildingWrapper {
 	}
 
 	public static movePlot(this: void, plot: PlotModel, data: PlayerMoveRequest): Response {
-		const blocks = plot.Blocks;
-
 		if (data.blocks === "all") {
+			const blocks = plot.Blocks;
 			const pivot = blocks.GetBoundingBox()[0];
 			const size = blocks.GetExtentsSize();
 
@@ -91,7 +90,44 @@ export default class BuildingWrapper {
 
 			blocks.PivotTo(blocks.GetPivot().add(data.vector));
 		} else {
-			//
+			const blocks = data.blocks;
+			const pivot = blocks[0].GetPivot();
+			const size = BuildingManager.getBlocksAABB(blocks).Size;
+
+			const gridRound = (value: number) => math.round(value * 2) / 2;
+
+			const p1 = pivot.PointToWorldSpace(size.div(2).mul(-1));
+			const p2 = pivot.PointToWorldSpace(size.div(2));
+
+			const min = new Vector3(
+				gridRound(math.min(p1.X, p2.X)),
+				gridRound(math.min(p1.Y, p2.Y)),
+				gridRound(math.min(p1.Z, p2.Z)),
+			)
+				.add(data.vector)
+				.add(Vector3.one);
+			const max = new Vector3(
+				gridRound(math.max(p1.X, p2.X)),
+				gridRound(math.max(p1.Y, p2.Y)),
+				gridRound(math.max(p1.Z, p2.Z)),
+			)
+				.add(data.vector)
+				.sub(Vector3.one);
+
+			const blocksRegion = new Region3(min, max);
+
+			if (!VectorUtils.isRegion3InRegion3(blocksRegion, SharedPlots.getPlotBuildingRegion(plot))) {
+				return {
+					success: false,
+					message: "Out of bounds!",
+				};
+			}
+
+			for (const block of blocks) {
+				BuildingWelder.unweld(block);
+				block.PivotTo(block.GetPivot().add(data.vector));
+				BuildingWelder.weld(block, plot);
+			}
 		}
 
 		return {
