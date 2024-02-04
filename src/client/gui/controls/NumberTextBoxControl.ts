@@ -23,7 +23,11 @@ export default class NumberTextBoxControl<
 			this.value = new ObservableValue<T>(0 as T);
 		}
 
-		this.event.subscribeObservable(this.value, (value) => (this.gui.Text = tostring(value ?? "")), true);
+		this.event.subscribeObservable(
+			this.value,
+			(value) => (this.gui.Text = tostring(value ?? "").sub(1, tostring((step ?? 1) * (max ?? 1)).size())),
+			true,
+		);
 
 		this.event.subscribe(this.gui.FocusLost, () => this.commit(true));
 		this.event.subscribe(this.gui.ReturnPressedFromOnScreenKeyboard, () => this.commit(false));
