@@ -7,17 +7,15 @@ import GameEnvironmentController from "./GameEnvironmentController";
 import MusicController from "./sound/MusicController";
 
 declare type Sounds = {
-	BuildingMode: {
+	Build: {
 		BlockPlace: Sound;
 		BlockPlaceError: Sound;
 		BlockRotate: Sound;
 		BlockDelete: Sound;
 	};
-	RideMode: {
-		RideStart: Sound;
-	};
+	Start: Sound;
 	Click: Sound;
-	ActionRequired: Sound;
+	Warning: Sound;
 	Music: {
 		Space: Folder & { [key: string]: Sound };
 	};

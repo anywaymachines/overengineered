@@ -15,7 +15,10 @@ export default class BoxSelector extends ComponentBase {
 
 		const camera = Workspace.CurrentCamera!;
 		const mouse = Players.LocalPlayer.GetMouse();
-		const template = Control.asTemplate(Gui.getGameUI<{ Selection: GuiObject }>().Selection, false);
+		const template = Control.asTemplate(
+			Gui.getGameUI<{ Templates: { Selection: GuiObject } }>().Templates.Selection,
+			false,
+		);
 
 		const search = (objects: readonly BlockModel[], p1: Vector2, p2: Vector2) => {
 			const to3dSpace = (pos: Vector2) => {

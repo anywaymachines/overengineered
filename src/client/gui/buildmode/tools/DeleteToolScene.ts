@@ -1,8 +1,8 @@
 import Control from "client/gui/Control";
-import PopupController from "client/gui/PopupController";
+import GuiAnimator from "client/gui/GuiAnimator";
+import { ButtonControl } from "client/gui/controls/Button";
+import ConfirmPopup from "client/gui/popup/ConfirmPopup";
 import DeleteTool from "client/tools/DeleteTool";
-import GuiAnimator from "../../GuiAnimator";
-import { ButtonControl } from "../../controls/Button";
 
 export type DeleteToolSceneDefinition = GuiObject & {
 	TouchControls: Frame & {
@@ -72,8 +72,9 @@ export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> 
 	}
 
 	private suggestClearAll() {
-		PopupController.instance.showConfirmation(
+		ConfirmPopup.instance.showPopup(
 			"Are you sure you want to delete all blocks?",
+			"It will be impossible to undo this action",
 			() => this.tool.deleteBlocks("all"),
 			() => {},
 		);

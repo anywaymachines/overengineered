@@ -4,23 +4,15 @@ import SoundController from "client/controller/SoundController";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import Popup from "client/gui/Popup";
+import { ButtonControl, TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import EventHandler from "shared/event/EventHandler";
-import { ButtonControl, TextButtonControl, TextButtonDefinition } from "../controls/Button";
 
 export type SelectButtonPopupDefinition = GuiObject & {
-	Body: GuiObject & {
-		ScrollingFrame: ScrollingFrame & {
-			ButtonTemplate: TextButtonDefinition;
+	readonly Body: GuiObject & {
+		readonly ScrollingFrame: ScrollingFrame & {
+			readonly ButtonTemplate: TextButtonDefinition;
 		};
-		Title: TextLabel & {
-			HeadingLabel: TextLabel;
-		};
-		ConfirmButton: GuiButton & {
-			TextLabel: TextLabel;
-		};
-		CancelButton: GuiButton & {
-			TextLabel: TextLabel;
-		};
+		readonly CancelButton: GuiButton;
 	};
 };
 
@@ -28,20 +20,16 @@ export default class SelectButtonPopup extends Popup<SelectButtonPopupDefinition
 	static readonly instance = new SelectButtonPopup(
 		Gui.getGameUI<{
 			Popup: {
-				SelectButtonGui: SelectButtonPopupDefinition;
+				MobileSelectButton: SelectButtonPopupDefinition;
 			};
-		}>().Popup.SelectButtonGui,
+		}>().Popup.MobileSelectButton,
 	);
 
 	private readonly buttonPressed = new Signal<(key: KeyCode) => void>();
-
-	private readonly confirmButton;
 	private readonly cancelButton;
 
 	constructor(gui: SelectButtonPopupDefinition) {
 		super(gui);
-
-		this.confirmButton = this.added(new ButtonControl(gui.Body.ConfirmButton));
 		this.cancelButton = this.added(new ButtonControl(gui.Body.CancelButton));
 
 		const list = new Control(gui.Body.ScrollingFrame);

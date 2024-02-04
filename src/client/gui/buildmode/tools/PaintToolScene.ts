@@ -1,22 +1,27 @@
 import { Players } from "@rbxts/services";
 import Control from "client/gui/Control";
+import GuiAnimator from "client/gui/GuiAnimator";
+import MaterialColorEditControl, {
+	MaterialColorEditControlDefinition,
+} from "client/gui/buildmode/MaterialColorEditControl";
 import ToggleControl, { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import PaintTool from "client/tools/PaintTool";
 import SharedPlots from "shared/building/SharedPlots";
-import GuiAnimator from "../../GuiAnimator";
-import { ButtonControl } from "../../controls/Button";
-import MaterialChooserControl from "../MaterialChooser";
-import { MaterialPreviewEditControl, MaterialPreviewEditDefinition } from "../MaterialPreviewEditControl";
 
 export type PaintToolSceneDefinition = GuiObject & {
-	readonly PaintEverythingButton: GuiButton;
-	readonly Material: MaterialPreviewEditDefinition;
-	readonly EnableMaterial: Frame & {
-		readonly Toggle: ToggleControlDefinition;
+	readonly Bottom: MaterialColorEditControlDefinition & {
+		readonly Material: {
+			readonly Header: {
+				readonly EnabledToggle: ToggleControlDefinition;
+			};
+		};
+		readonly Color: {
+			readonly Header: {
+				readonly EnabledToggle: ToggleControlDefinition;
+			};
+		};
 	};
-	readonly EnableColor: Frame & {
-		readonly Toggle: ToggleControlDefinition;
-	};
+	//readonly PaintEverythingButton: GuiButton;
 };
 
 export default class PaintToolScene extends Control<PaintToolSceneDefinition> {
@@ -26,18 +31,15 @@ export default class PaintToolScene extends Control<PaintToolSceneDefinition> {
 		super(gui);
 		this.tool = tool;
 
-		this.add(new ButtonControl(this.gui.PaintEverythingButton, () => this.paintEverything()));
-		this.add(new MaterialPreviewEditControl(this.gui.Material, tool.selectedMaterial, tool.selectedColor));
+		//this.add(new ButtonControl(this.gui.PaintEverythingButton, () => this.paintEverything()));
+		this.add(new MaterialColorEditControl(this.gui.Bottom, tool.selectedMaterial, tool.selectedColor));
 
-		const materialEnabler = this.add(new ToggleControl(this.gui.EnableMaterial.Toggle));
+		const materialEnabler = this.add(new ToggleControl(this.gui.Bottom.Material.Header.EnabledToggle));
 		materialEnabler.value.set(tool.enableMaterial.get());
 		this.event.subscribeObservable(materialEnabler.value, (value) => tool.enableMaterial.set(value));
-		const colorEnabler = this.add(new ToggleControl(this.gui.EnableColor.Toggle));
+		const colorEnabler = this.add(new ToggleControl(this.gui.Bottom.Color.Header.EnabledToggle));
 		colorEnabler.value.set(tool.enableColor.get());
 		this.event.subscribeObservable(colorEnabler.value, (value) => tool.enableColor.set(value));
-
-		MaterialChooserControl.instance.selectedMaterial.bindTo(tool.selectedMaterial);
-		MaterialChooserControl.instance.selectedColor.bindTo(tool.selectedColor);
 	}
 
 	private paintEverything() {
@@ -57,7 +59,7 @@ export default class PaintToolScene extends Control<PaintToolSceneDefinition> {
 	public show() {
 		super.show();
 
-		GuiAnimator.transition(this.gui.Material, 0.2, "right");
-		GuiAnimator.transition(this.gui.PaintEverythingButton, 0.2, "right");
+		GuiAnimator.transition(this.gui.Bottom, 0.2, "right");
+		//GuiAnimator.transition(this.gui.PaintEverythingButton, 0.2, "right");
 	}
 }

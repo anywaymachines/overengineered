@@ -4,7 +4,6 @@ import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
 import Gui from "client/gui/Gui";
-import MaterialChooserControl from "client/gui/buildmode/MaterialChooser";
 import LogControl from "client/gui/static/LogControl";
 import ActionController from "client/modes/build/ActionController";
 import BuildingController from "client/modes/build/BuildingController";
@@ -45,27 +44,16 @@ export default class BuildTool extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		MaterialChooserControl.instance.selectedMaterial.subscribe((material) => {
-			this.setSelectedMaterial(material);
-		}, true);
-		MaterialChooserControl.instance.selectedColor.subscribe((color) => {
-			this.setSelectedColor(color);
-		}, true);
-
 		this.event.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.updatePosition());
 		this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.updatePosition());
 	}
 
 	getDisplayName(): string {
-		return "Building Mode";
+		return "Build";
 	}
 
 	getImageID(): string {
 		return "rbxassetid://12539295858";
-	}
-
-	getShortDescription(): string {
-		return "Place blocks in the world";
 	}
 
 	public setSelectedBlock(block: Block | undefined) {
@@ -241,7 +229,7 @@ export default class BuildTool extends ToolBase {
 			LogControl.instance.addLine("Out of bounds!", Color3.fromRGB(255, 100, 100));
 
 			// Play sound
-			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
+			SoundController.getSounds().Build.BlockPlaceError.Play();
 
 			return;
 		}
@@ -257,7 +245,7 @@ export default class BuildTool extends ToolBase {
 			LogControl.instance.addLine("Can't be placed here!");
 
 			// Play sound
-			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
+			SoundController.getSounds().Build.BlockPlaceError.Play();
 
 			return;
 		}
@@ -281,13 +269,13 @@ export default class BuildTool extends ToolBase {
 
 		if (response.success) {
 			// Play sound
-			SoundController.getSounds().BuildingMode.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().BuildingMode.BlockPlace.Play();
+			SoundController.getSounds().Build.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().Build.BlockPlace.Play();
 
 			task.wait();
 			this.updatePosition(true);
 		} else {
-			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
+			SoundController.getSounds().Build.BlockPlaceError.Play();
 		}
 	}
 
@@ -344,8 +332,8 @@ export default class BuildTool extends ToolBase {
 		this.previewBlockRotation = rotation.mul(this.previewBlockRotation);
 		this.updatePosition(true);
 
-		SoundController.getSounds().BuildingMode.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
-		SoundController.getSounds().BuildingMode.BlockRotate.Play();
+		SoundController.getSounds().Build.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
+		SoundController.getSounds().Build.BlockRotate.Play();
 	}
 
 	private colorizePreviewBlock() {
@@ -379,7 +367,7 @@ export default class BuildTool extends ToolBase {
 		});
 
 		this.eventHandler.subscribe(this.mouse.Move, () => this.updatePosition());
-		this.eventHandler.subscribe(this.mouse.Button1Down, async () => await this.placeBlock());
+		this.inputHandler.onMouse1Down(() => async () => await this.placeBlock());
 		this.eventHandler.subscribe(UserInputService.InputBegan, async (input) => {
 			if (input.UserInputType === Enum.UserInputType.MouseButton3) {
 				this.pickBlock();

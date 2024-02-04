@@ -39,7 +39,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 	constructor(gui: ConfigControlDefinition) {
 		super(gui);
 
-		const templates = Gui.getGameUI<{ Templates: { Configuration: Template } }>().Templates.Configuration;
+		const templates = Gui.getGameUI<{ Templates: { Config: Template } }>().Templates.Config;
 		this.connectedTemplate = Control.asTemplate(templates.ConnectedTemplate, false);
 		this.checkboxTemplate = Control.asTemplate(templates.CheckboxTemplate, false);
 		this.keyTemplate = Control.asTemplate(templates.KeyTemplate, false);
@@ -87,7 +87,7 @@ type ConfigUpdatedCallback<TDef extends BlockConfigDefinitions, TKey extends key
 	key: TKey,
 	value: PartialIfObject<TDef[TKey]["config"]>,
 ) => void;
-class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control<ConfigControl2Definition> {
+export class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control<ConfigControl2Definition> {
 	readonly configUpdated = new Signal<ConfigUpdatedCallback<TDef, keyof TDef>>();
 
 	private readonly connectedTemplate;
@@ -106,7 +106,7 @@ class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control<Config
 	) {
 		super(gui);
 
-		const templates = Gui.getGameUI<{ Templates: { Configuration: Template } }>().Templates.Configuration;
+		const templates = Gui.getGameUI<{ Templates: { Config: Template } }>().Templates.Config;
 		this.connectedTemplate = Control.asTemplate(templates.ConnectedTemplate, false);
 		this.checkboxTemplate = Control.asTemplate(templates.CheckboxTemplate, false);
 		this.keyTemplate = Control.asTemplate(templates.KeyTemplate, false);

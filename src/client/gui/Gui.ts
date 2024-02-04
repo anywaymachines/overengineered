@@ -22,8 +22,8 @@ export default class Gui {
 	}
 
 	/** Receives PlayerGui from the client */
-	static getPlayerGui() {
-		return Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
+	static getPlayerGui<T = PlayerGui>() {
+		return Players.LocalPlayer.WaitForChild("PlayerGui") as T;
 	}
 
 	public static isCursorOnVisibleGui(): boolean {

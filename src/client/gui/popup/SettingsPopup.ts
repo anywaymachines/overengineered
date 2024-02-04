@@ -2,13 +2,13 @@ import PlayerDataStorage from "client/PlayerDataStorage";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import Popup from "client/gui/Popup";
+import { ButtonControl } from "client/gui/controls/Button";
+import ToggleControl, { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import { BlockConfigDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
 import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
 import { JsonSerializablePrimitive } from "shared/fixes/Json";
 import Objects from "shared/fixes/objects";
-import { ButtonControl } from "../controls/Button";
-import ToggleControl, { ToggleControlDefinition } from "../controls/ToggleControl";
 
 class ConfigPartControl<
 	TControl extends Control<TDef>,
@@ -39,31 +39,31 @@ class ConfigPartControl<
 }
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
-	HeadingLabel: TextLabel;
-	Control: T;
+	readonly HeadingLabel: TextLabel;
+	readonly Control: T;
 };
 
 export type SettingsDefinition = GuiObject & {
-	CheckboxTemplate: ConfigPartDefinition<ToggleControlDefinition>;
+	readonly CheckboxTemplate: ConfigPartDefinition<ToggleControlDefinition>;
 };
 
 export type SettingsPopupDefinition = GuiObject & {
-	Body: GuiObject & {
-		Body: GuiObject & {
-			ScrollingFrame: SettingsDefinition;
-			CancelButton: GuiButton;
-			CloseButton: GuiButton;
+	readonly Body: GuiObject & {
+		readonly ScrollingFrame: SettingsDefinition;
+		readonly CancelButton: GuiButton;
+		readonly Head: {
+			readonly CloseButton: GuiButton;
 		};
 	};
 };
 
 export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
-	public static readonly instance = new SettingsPopup(
+	static readonly instance = new SettingsPopup(
 		Gui.getGameUI<{
 			Popup: {
-				SettingsGui: SettingsPopupDefinition;
+				Settings: SettingsPopupDefinition;
 			};
-		}>().Popup.SettingsGui,
+		}>().Popup.Settings,
 	);
 
 	private readonly checkboxTemplate;
@@ -72,12 +72,12 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 	constructor(gui: SettingsPopupDefinition) {
 		super(gui);
 
-		this.checkboxTemplate = Control.asTemplate(this.gui.Body.Body.ScrollingFrame.CheckboxTemplate);
+		this.checkboxTemplate = Control.asTemplate(this.gui.Body.ScrollingFrame.CheckboxTemplate);
 
-		this.list = new Control(this.gui.Body.Body.ScrollingFrame);
+		this.list = new Control(this.gui.Body.ScrollingFrame);
 		this.add(this.list);
 
-		const closeButton = this.added(new ButtonControl(this.gui.Body.Body.CloseButton));
+		const closeButton = this.add(new ButtonControl(this.gui.Body.Head.CloseButton));
 		this.event.subscribe(closeButton.activated, () => this.hide());
 
 		this.event.subscribeObservable(

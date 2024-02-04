@@ -2,7 +2,6 @@ import Net from "@rbxts/net";
 
 const Remotes = Net.Definitions.Create({
 	Player: Net.Definitions.Namespace({
-		SendChatMessage: Net.Definitions.ServerToClientEvent<[text: string, color: Color3]>(),
 		InputTypeInfo: Net.Definitions.ClientToServerEvent<[inputType: InputType]>(),
 		UpdateSettings:
 			Net.Definitions.ServerAsyncFunction<

@@ -32,10 +32,8 @@ export default class TooltipsControl extends Control<
 > {
 	public static readonly instance = new TooltipsControl(
 		Gui.getGameUI<{
-			Static: {
-				ControlTooltips: TooltipsControlDefinition;
-			};
-		}>().Static.ControlTooltips,
+			ControlsInfo: TooltipsControlDefinition;
+		}>().ControlsInfo,
 	);
 
 	private readonly gamepadTooltipTemplate;

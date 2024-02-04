@@ -5,24 +5,24 @@ import Machine from "client/blocks/Machine";
 import InputController from "client/controller/InputController";
 import LocalPlayerController from "client/controller/LocalPlayerController";
 import Control from "client/gui/Control";
+import { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import { DictionaryControl } from "client/gui/controls/DictionaryControl";
+import FormattedLabelControl from "client/gui/controls/FormattedLabelControl";
+import ProgressBarControl, { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
+import ConfirmPopup from "client/gui/popup/ConfirmPopup";
+import TouchModeButtonControl from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
 import Remotes from "shared/Remotes";
 import RobloxUnit from "shared/RobloxUnit";
 import SlotsMeta from "shared/SlotsMeta";
 import RocketEngineLogic from "shared/block/logic/RocketEngineLogic";
 import EventHandler from "shared/event/EventHandler";
-import PopupController from "../PopupController";
-import { ButtonControl, TextButtonDefinition } from "../controls/Button";
-import { DictionaryControl } from "../controls/DictionaryControl";
-import FormattedLabelControl from "../controls/FormattedLabelControl";
-import ProgressBarControl, { ProgressBarControlDefinition } from "../controls/ProgressBarControl";
-import TouchModeButtonControl from "./TouchModeButtonControl";
 
 export type ActionBarControlDefinition = GuiObject & {
-	Stop: GuiButton;
-	Sit: GuiButton;
-	ControlSettings: GuiButton;
-	ControlReset: GuiButton;
+	readonly Stop: GuiButton;
+	readonly Sit: GuiButton;
+	readonly ControlSettings: GuiButton;
+	readonly ControlReset: GuiButton;
 };
 export class ActionBarControl extends Control<ActionBarControlDefinition> {
 	constructor(gui: ActionBarControlDefinition, controls: RideModeControls) {
@@ -55,8 +55,9 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 		});
 
 		this.event.subscribe(controlResetButton.activated, async () => {
-			PopupController.instance.showConfirmation(
+			ConfirmPopup.instance.showPopup(
 				"Reset the controls?",
+				"It will be impossible to undo this action",
 				() => controls.resetControls(),
 				() => {},
 			);
@@ -76,8 +77,8 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 }
 
 type RideModeControlsDefinition = GuiObject & {
-	Overlay: GuiObject;
-	Button: TextButtonDefinition;
+	readonly Overlay: GuiObject;
+	readonly Button: TextButtonDefinition;
 };
 export class RideModeControls extends DictionaryControl<RideModeControlsDefinition, string, Control> {
 	readonly onEnterSettingsMode = new Signal<() => void>();
@@ -304,11 +305,11 @@ export class RideModeInfoControl extends Control<RideModeInfoControlDefinition> 
 }
 
 export type RideModeSceneDefinition = GuiObject & {
-	ActionBarGui: ActionBarControlDefinition;
-	Controls: RideModeControlsDefinition;
-	Info: GuiObject & {
-		Template: RideModeInfoControlDefinition & { Title: TextLabel };
-		TextTemplate: RideModeInfoControlDefinition & { Title: TextLabel };
+	readonly ActionBar: ActionBarControlDefinition;
+	readonly Controls: RideModeControlsDefinition;
+	readonly Info: GuiObject & {
+		readonly Template: RideModeInfoControlDefinition & { Title: TextLabel };
+		readonly TextTemplate: RideModeInfoControlDefinition & { Title: TextLabel };
 	};
 };
 
@@ -326,7 +327,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		this.controls = new RideModeControls(this.gui.Controls);
 		this.add(this.controls);
 
-		this.actionbar = new ActionBarControl(gui.ActionBarGui, this.controls);
+		this.actionbar = new ActionBarControl(gui.ActionBar, this.controls);
 		this.add(this.actionbar);
 		this.actionbar.show();
 

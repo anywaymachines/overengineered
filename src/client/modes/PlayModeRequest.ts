@@ -8,7 +8,7 @@ export const requestMode = async (mode: PlayModes) => {
 	if (!response.success) {
 		Logger.error(response.message);
 		LogControl.instance.addLine(response.message!, Color3.fromRGB(255, 100, 100));
-		SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
+		SoundController.getSounds().Build.BlockPlaceError.Play();
 
 		return;
 	}

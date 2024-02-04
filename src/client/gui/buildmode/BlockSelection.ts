@@ -1,19 +1,13 @@
 import { GuiService, LocalizationService, Players } from "@rbxts/services";
 import Control from "client/gui/Control";
+import GuiAnimator from "client/gui/GuiAnimator";
+import BlockPreviewControl from "client/gui/buildmode/BlockPreviewControl";
+import { TextButtonControl } from "client/gui/controls/Button";
 import Registry, { blockList, categoriesRegistry } from "shared/Registry";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
-import GuiAnimator from "../GuiAnimator";
-import { ButtonControl, TextButtonControl } from "../controls/Button";
-import BlockPreviewControl from "./BlockPreviewControl";
-import MaterialChooserControl from "./MaterialChooser";
 
-type CategoryControlDefinition = GuiButton & {
-	ViewportFrame: ViewportFrame;
-	TextLabel: TextLabel;
-};
-
-/** Category button */
+type CategoryControlDefinition = TextButton;
 class CategoryControl extends TextButtonControl<CategoryControlDefinition> {
 	constructor(template: CategoryControlDefinition, text: string) {
 		super(template);
@@ -23,34 +17,25 @@ class CategoryControl extends TextButtonControl<CategoryControlDefinition> {
 }
 
 type BlockControlDefinition = GuiButton & {
-	ViewportFrame: ViewportFrame;
-	AmountLabel: TextLabel;
-	TextLabel: TextLabel;
+	readonly ViewportFrame: ViewportFrame;
+	readonly TextLabel: TextLabel;
 };
-
-/** Block button */
 class BlockControl extends TextButtonControl<BlockControlDefinition> {
 	constructor(template: BlockControlDefinition, block: Block) {
 		super(template);
 
 		this.text.set(block.displayName);
 		this.add(new BlockPreviewControl(template.ViewportFrame, block));
-
-		// TODO
-		this.gui.AmountLabel.Visible = false;
 	}
 }
 
 export type BlockSelectionControlDefinition = GuiObject & {
-	SearchTextBox: TextLabel;
-	NoResultsLabel: TextLabel;
-	ScrollingFrame: ScrollingFrame & {
-		BlockButtonTemplate: BlockControlDefinition;
-		CategoryButtonTemplate: CategoryControlDefinition;
-	};
-	Buttons: {
-		Material: TextButton;
-		Mirror: TextButton;
+	readonly SearchTextBox: TextBox;
+	readonly NoResultsLabel: TextLabel;
+	readonly PathTextLabel: TextLabel;
+	readonly ScrollingFrame: ScrollingFrame & {
+		readonly BlockButtonTemplate: BlockControlDefinition;
+		readonly CategoryButtonTemplate: CategoryControlDefinition;
 	};
 };
 
@@ -58,7 +43,6 @@ export type BlockSelectionControlDefinition = GuiObject & {
 export default class BlockSelectionControl extends Control<BlockSelectionControlDefinition> {
 	private readonly blockTemplate;
 	private readonly categoryTemplate;
-
 	private readonly list;
 
 	public selectedCategory = new ObservableValue<readonly CategoryName[]>([]);
@@ -67,7 +51,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 	constructor(template: BlockSelectionControlDefinition) {
 		super(template);
 
-		this.list = this.added(new Control<ScrollingFrame, BlockControl | CategoryControl>(this.gui.ScrollingFrame));
+		this.list = this.add(new Control<ScrollingFrame, BlockControl | CategoryControl>(this.gui.ScrollingFrame));
 
 		// Prepare templates
 		this.blockTemplate = Control.asTemplate(this.gui.ScrollingFrame.BlockButtonTemplate);
@@ -83,8 +67,6 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 
 			this.create([], false);
 		});
-
-		this.add(new ButtonControl(this.gui.Buttons.Material, () => MaterialChooserControl.instance.show()));
 	}
 
 	public createCategoryButton(text: string, activated: () => void) {
@@ -114,6 +96,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 
 	private create(selected: readonly CategoryName[], animated: boolean) {
 		this.list.clear();
+		this.gui.PathTextLabel.Text = selected.join(" > ");
 
 		// Back button
 		if (selected.size() !== 0) {

@@ -38,7 +38,7 @@ export default class RideMode extends PlayMode {
 				SharedPlots.getPlotBlockDatas(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId)),
 			);
 
-			SoundController.getSounds().RideMode.RideStart.Play();
+			SoundController.getSounds().Start.Play();
 			this.rideModeScene.start(this.currentMachine);
 		}
 	}

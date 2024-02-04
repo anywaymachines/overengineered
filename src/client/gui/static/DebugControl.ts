@@ -10,10 +10,8 @@ export type DebugControlDefinition = LogControlDefinition;
 export default class DebugControl extends Control<DebugControlDefinition> {
 	public static readonly instance = new DebugControl(
 		Gui.getGameUI<{
-			Static: {
-				DebugGui: DebugControlDefinition;
-			};
-		}>().Static.DebugGui,
+			Debug: DebugControlDefinition;
+		}>().Debug,
 	);
 
 	private readonly lineTemplate;
@@ -34,8 +32,8 @@ export default class DebugControl extends Control<DebugControlDefinition> {
 					isError
 						? Color3.fromRGB(255, 0, 0)
 						: isClient
-						  ? Color3.fromRGB(52, 154, 213)
-						  : Color3.fromRGB(0, 204, 103),
+							? Color3.fromRGB(52, 154, 213)
+							: Color3.fromRGB(0, 204, 103),
 				);
 			});
 	}

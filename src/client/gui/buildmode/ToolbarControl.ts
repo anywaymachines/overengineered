@@ -1,19 +1,21 @@
 import { StarterGui, UserInputService } from "@rbxts/services";
 import SoundController from "client/controller/SoundController";
 import Control from "client/gui/Control";
+import GuiAnimator from "client/gui/GuiAnimator";
 import ToolBase from "client/tools/ToolBase";
 import ToolController from "client/tools/ToolController";
-import GuiAnimator from "../GuiAnimator";
 
 export type ToolbarButtonControlDefinition = TextButton & {
-	ImageLabel: ImageLabel;
-	KeyboardNumberLabel: TextLabel;
+	readonly ImageLabel: ImageLabel;
+	readonly KeyboardNumberLabel: TextLabel;
 };
 
 export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition> {
 	// Colors
-	private readonly activeColor = Color3.fromHex("#3c4250");
-	private readonly inactiveColor = Color3.fromHex("#2c303d");
+	private readonly activeColor = Color3.fromRGB(85, 170, 255);
+	private readonly inactiveColor = Color3.fromRGB(18, 18, 31);
+	private readonly activeImageColor = Color3.fromRGB(0, 0, 0);
+	private readonly inactiveImageColor = Color3.fromRGB(220, 220, 255);
 
 	constructor(gui: ToolbarButtonControlDefinition, tools: ToolController, tool: ToolBase) {
 		super(gui);
@@ -29,8 +31,21 @@ export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition
 			tools.selectedTool,
 			(newtool) => {
 				// Update GUI
-				if (newtool === tool) GuiAnimator.tweenColor(this.gui, this.activeColor, 0.2);
-				else GuiAnimator.tweenColor(this.gui, this.inactiveColor, 0.2);
+				if (newtool === tool) {
+					GuiAnimator.tweenColor(this.gui, this.activeColor, 0.2);
+					GuiAnimator.tween(
+						this.gui.ImageLabel,
+						{ ImageColor3: this.activeImageColor },
+						new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					);
+				} else {
+					GuiAnimator.tweenColor(this.gui, this.inactiveColor, 0.2);
+					GuiAnimator.tween(
+						this.gui.ImageLabel,
+						{ ImageColor3: this.inactiveImageColor },
+						new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+					);
+				}
 			},
 			true,
 		);
@@ -38,13 +53,14 @@ export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition
 }
 
 export type ToolbarControlDefinition = GuiObject & {
-	Buttons: GuiObject & {
-		Template: ToolbarButtonControlDefinition;
+	readonly Buttons: GuiObject & {
+		readonly Template: ToolbarButtonControlDefinition;
 	};
-	NameLabel: TextLabel;
-	DescriptionLabel: TextLabel;
-	GamepadBack: ImageLabel;
-	GamepadNext: ImageLabel;
+	readonly Info: {
+		readonly NameLabel: TextLabel;
+	};
+	readonly GamepadBack: ImageLabel;
+	readonly GamepadNext: ImageLabel;
 };
 
 export default class ToolbarControl extends Control<ToolbarControlDefinition> {
@@ -122,11 +138,9 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 
 	private toolChanged(tool: ToolBase | undefined) {
 		if (tool) {
-			this.getGui().NameLabel.Text = tool.getDisplayName();
-			this.getGui().DescriptionLabel.Text = tool.getShortDescription();
+			this.getGui().Info.NameLabel.Text = tool.getDisplayName();
 
-			GuiAnimator.transition(this.getGui().NameLabel, 0.2, "up", 25);
-			GuiAnimator.transition(this.getGui().DescriptionLabel, 0.2, "up", 25);
+			GuiAnimator.transition(this.getGui().Info.NameLabel, 0.2, "up", 25);
 		} else {
 			this.resetLabels();
 		}
@@ -136,8 +150,7 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 	}
 
 	private resetLabels() {
-		this.getGui().NameLabel.Text = "";
-		this.getGui().DescriptionLabel.Text = "";
+		this.getGui().Info.NameLabel.Text = "";
 	}
 
 	private gamepadSelectTool(isRight: boolean) {

@@ -1,4 +1,4 @@
-import { RunService } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import Control from "client/gui/Control";
 
 export default class BlockPreviewControl extends Control<ViewportFrame> {
@@ -15,8 +15,7 @@ export default class BlockPreviewControl extends Control<ViewportFrame> {
 		const size = this.block.GetExtentsSize();
 		this.block.PivotTo(new CFrame(new Vector3(0, 0.2, -2 - math.max(size.X, size.Y, size.Z))));
 
-		const gcmode = false;
-
+		const gcmode = Players.LocalPlayer.Name === "i3ymm";
 		if (!gcmode) {
 			this.event.subscribe(RunService.Heartbeat, (dt) => {
 				this.block.PivotTo(

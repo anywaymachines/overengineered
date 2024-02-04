@@ -1,42 +1,46 @@
 import { GuiService } from "@rbxts/services";
 import SoundController from "client/controller/SoundController";
+import Gui from "client/gui/Gui";
 import Popup from "client/gui/Popup";
+import { ButtonControl } from "client/gui/controls/Button";
 import EventHandler from "shared/event/EventHandler";
-import { ButtonControl } from "../controls/Button";
 
 export type ConfirmPopupDefinition = GuiObject & {
-	HeadingLabel: TextLabel;
-	Title: TextLabel & {
-		HeadingLabel: TextLabel;
-	};
-	ConfirmButton: GuiButton & {
-		TextLabel: TextLabel;
-	};
-	CancelButton: GuiButton & {
-		TextLabel: TextLabel;
+	readonly Body: {
+		readonly Content: Frame & {
+			readonly TextLabel1: TextLabel;
+			readonly TextLabel2: TextLabel;
+		};
+		readonly AcceptButton: TextButton;
+		readonly CancelButton: TextButton;
 	};
 };
 
 export default class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
+	static readonly instance = new ConfirmPopup(
+		Gui.getGameUI<{ Popup: { Confirm: ConfirmPopupDefinition } }>().Popup.Confirm,
+	);
+
 	private readonly confirmButton;
 	private readonly cancelButton;
 
 	constructor(gui: ConfirmPopupDefinition) {
 		super(gui);
 
-		this.confirmButton = this.added(new ButtonControl(gui.ConfirmButton));
-		this.cancelButton = this.added(new ButtonControl(gui.CancelButton));
+		this.confirmButton = this.added(new ButtonControl(gui.Body.AcceptButton));
+		this.cancelButton = this.added(new ButtonControl(gui.Body.CancelButton));
 	}
 
-	showPopup(text: string, okFunc: () => void, noFunc: () => void) {
-		SoundController.getSounds().ActionRequired.Play();
+	showPopup(text: string, ps: string = "", okFunc: () => void, noFunc: () => void) {
+		SoundController.getSounds().Warning.Play();
 
 		if (this.isVisible()) throw "Popup is already visible";
 		super.show();
 
 		const eh = new EventHandler();
 
-		this.gui.HeadingLabel.Text = text;
+		this.gui.Body.Content.TextLabel1.Text = text;
+		this.gui.Body.Content.TextLabel2.Text = ps;
 		eh.subscribeOnce(this.confirmButton.activated, () => {
 			eh.unsubscribeAll();
 			SoundController.getSounds().Click.Play();
@@ -52,6 +56,6 @@ export default class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
 	}
 
 	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.gui.CancelButton;
+		GuiService.SelectedObject = this.gui.Body.CancelButton;
 	}
 }

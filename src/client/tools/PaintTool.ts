@@ -1,12 +1,12 @@
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
+import BoxSelector from "client/tools/selectors/BoxSelector";
+import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
+import MovingSelector from "client/tools/selectors/MovingSelector";
 import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import ObservableValue from "shared/event/ObservableValue";
-import BoxSelector from "./selectors/BoxSelector";
-import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
-import MovingSelector from "./selectors/MovingSelector";
 
 export default class PaintTool extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
@@ -71,10 +71,7 @@ export default class PaintTool extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Paint Mode";
-	}
-	getShortDescription(): string {
-		return "Paint your build";
+		return "Paint";
 	}
 	getImageID(): string {
 		return "http://www.roblox.com/asset/?id=15895846447";

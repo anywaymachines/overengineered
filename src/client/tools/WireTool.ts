@@ -162,15 +162,11 @@ export default class WireTool extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Wire Tool";
+		return "Wire";
 	}
 
 	getImageID(): string {
 		return "http://www.roblox.com/asset/?id=15895880948";
-	}
-
-	getShortDescription(): string {
-		return "Connecting blocks";
 	}
 
 	public getGamepadTooltips(): readonly { key: Enum.KeyCode; text: string }[] {

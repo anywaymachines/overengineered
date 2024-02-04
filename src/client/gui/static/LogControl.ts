@@ -11,10 +11,8 @@ export type LogControlDefinition = GuiObject & {
 export default class LogControl extends Control<LogControlDefinition> {
 	public static readonly instance = new LogControl(
 		Gui.getGameUI<{
-			Static: {
-				LogGui: LogControlDefinition;
-			};
-		}>().Static.LogGui,
+			Log: LogControlDefinition;
+		}>().Log,
 	);
 
 	private readonly lineTemplate;

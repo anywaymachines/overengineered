@@ -4,10 +4,10 @@ import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
+import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
 import { BlockConfigDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import Objects from "shared/fixes/objects";
-import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
 
 export default class ConfigTool extends ToolBase {
 	public readonly selectedBlocksChanged = new Signal<(selected: (SelectionBox & { Parent: BlockModel })[]) => void>();
@@ -138,15 +138,11 @@ export default class ConfigTool extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Configuration Mode";
+		return "Configure";
 	}
 
 	getImageID(): string {
 		return "http://www.roblox.com/asset/?id=15414751900";
-	}
-
-	getShortDescription(): string {
-		return "Configure blocks";
 	}
 
 	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {

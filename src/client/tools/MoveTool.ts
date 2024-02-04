@@ -6,9 +6,9 @@ import ActionController from "client/modes/build/ActionController";
 import BuildingController from "client/modes/build/BuildingController";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
+import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
-import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
 
 /** A tool for moving the entire building as a whole */
 export default class MoveTool extends ToolBase {
@@ -44,15 +44,11 @@ export default class MoveTool extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Moving Mode";
+		return "Move";
 	}
 
 	getImageID(): string {
 		return "rbxassetid://12539306575";
-	}
-
-	getShortDescription(): string {
-		return "Move your contraption";
 	}
 
 	selectPlot(plot: PlotModel) {
@@ -200,7 +196,7 @@ export default class MoveTool extends ToolBase {
 		if (response.success) {
 			// Move success
 		} else {
-			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
+			SoundController.getSounds().Build.BlockPlaceError.Play();
 		}
 
 		this.createHandles();

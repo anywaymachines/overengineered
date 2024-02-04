@@ -39,7 +39,7 @@ export default class GuiAnimator {
 		const offsetPosition = offsets[direction];
 
 		const newPosition = defaultPosition.add(offsetPosition);
-		frame.TweenPosition(newPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, duration);
+		if (!frame.TweenPosition(newPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, duration)) return;
 		spawn(() => {
 			wait(duration);
 			frame.Visible = false;
@@ -76,7 +76,9 @@ export default class GuiAnimator {
 
 		const newPosition = defaultPosition.add(offsetPosition);
 		frame.Position = defaultPosition;
-		frame.TweenPosition(newPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, duration);
+		if (!frame.TweenPosition(newPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, duration)) return;
+		task.wait(duration);
+		frame.Position = defaultPosition;
 	}
 
 	/** Animation for changing GUI colors */

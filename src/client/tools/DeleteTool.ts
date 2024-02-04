@@ -6,13 +6,13 @@ import ActionController from "client/modes/build/ActionController";
 import BuildingController from "client/modes/build/BuildingController";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
+import BoxSelector from "client/tools/selectors/BoxSelector";
+import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
 import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import JSON from "shared/fixes/Json";
-import BoxSelector from "./selectors/BoxSelector";
-import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
 
 export default class DeleteTool extends ToolBase {
 	public readonly onClearAllRequested = new Signal<() => void>();
@@ -103,20 +103,16 @@ export default class DeleteTool extends ToolBase {
 			// Block removed
 			task.wait();
 
-			SoundController.getSounds().BuildingMode.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().BuildingMode.BlockDelete.Play();
+			SoundController.getSounds().Build.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().Build.BlockDelete.Play();
 		}
 	}
 	getDisplayName(): string {
-		return "Deleting Mode";
+		return "Delete";
 	}
 
 	getImageID(): string {
 		return "rbxassetid://12539349041";
-	}
-
-	getShortDescription(): string {
-		return "Remove unnecessary blocks";
 	}
 
 	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {

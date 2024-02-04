@@ -1,10 +1,8 @@
 import Signal from "@rbxts/signal";
 import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
-import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
-import ObservableValue from "shared/event/ObservableValue";
 import Arrays from "shared/fixes/Arrays";
-import { TextButtonDefinition } from "../controls/Button";
+import { TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 
 export type TouchModeButtonData = {
 	readonly name: string;
@@ -14,16 +12,13 @@ export type TouchModeButtonData = {
 	readonly toggleMode: boolean;
 };
 export type TouchModeButtonControlDefinition = TextButtonDefinition;
-export default class TouchModeButtonControl extends Control<TouchModeButtonControlDefinition> {
+export default class TouchModeButtonControl extends TextButtonControl {
 	//implements GroupableControl
 	readonly pressed = new Signal<() => void>();
 	readonly released = new Signal<() => void>();
-	readonly text = new ObservableValue("");
 
 	constructor(gui: TouchModeButtonControlDefinition) {
 		super(gui);
-
-		this.event.subscribeObservable(this.text, (text) => (this.gui.TextLabel.Text = text), true);
 
 		this.event.subscribe(this.gui.InputBegan, (input) => {
 			if (

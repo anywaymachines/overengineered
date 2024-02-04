@@ -13,7 +13,8 @@
 	"plugins": [
 		"@typescript-eslint",
 		"roblox-ts",
-		"prettier"
+		"prettier",
+		"no-relative-import-paths"
 	],
 	"extends": [
 		"eslint:recommended",
@@ -32,6 +33,12 @@
 				"tabWidth": 4,
 				"useTabs": true,
 				"endOfLine": "lf"
+			}
+		], "no-relative-import-paths/no-relative-import-paths": [
+			"warn",
+			{
+				"rootDir": "src",
+				"allowSameFolder": false
 			}
 		]
 	}

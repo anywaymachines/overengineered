@@ -23,14 +23,20 @@ export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extend
 	}
 }
 
-export type TextButtonDefinition = GuiButton & {
-	readonly TextLabel: TextLabel;
-};
+export type TextButtonDefinition = (GuiButton & { readonly TextLabel: TextLabel }) | TextButton;
 export class TextButtonControl<T extends TextButtonDefinition = TextButtonDefinition> extends ButtonControl<T> {
 	public readonly text = new ObservableValue("");
 
 	constructor(gui: T) {
 		super(gui);
-		this.event.subscribeObservable(this.text, (value) => (this.gui.TextLabel!.Text = value), true);
+
+		const isTextButton = (button: TextButtonDefinition): button is TextButton =>
+			!button.FindFirstChild("TextLabel");
+
+		this.event.subscribeObservable(
+			this.text,
+			(value) => (isTextButton(this.gui) ? (this.gui.Text = value) : (this.gui.TextLabel!.Text = value)),
+			true,
+		);
 	}
 }

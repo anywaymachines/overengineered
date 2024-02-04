@@ -2,7 +2,6 @@ import { Players, Workspace } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
-import MaterialChooserControl from "client/gui/buildmode/MaterialChooser";
 import LogControl from "client/gui/static/LogControl";
 import ActionController from "client/modes/build/ActionController";
 import BuildingController from "client/modes/build/BuildingController";
@@ -36,9 +35,6 @@ export default class BuildTool2 extends ToolBase {
 		super(mode);
 
 		this.targetPlot.subscribe((plot) => mode.mirrorVisualizer.plot.set(plot));
-
-		this.selectedMaterial.bindTo(MaterialChooserControl.instance.selectedMaterial);
-		this.selectedColor.bindTo(MaterialChooserControl.instance.selectedColor);
 
 		this.onPrepare((input) => {
 			if (input !== "Touch") return;
@@ -222,8 +218,8 @@ export default class BuildTool2 extends ToolBase {
 			rotation = CFrame.fromEulerAnglesXYZ(rotation.X, rotation.Y, rotation.Z);
 		}
 
-		SoundController.getSounds().BuildingMode.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
-		SoundController.getSounds().BuildingMode.BlockRotate.Play();
+		SoundController.getSounds().Build.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
+		SoundController.getSounds().Build.BlockRotate.Play();
 
 		if (this.mainGhost) {
 			this.mainGhost.model.PivotTo(this.mainGhost.model.GetPivot().mul(this.blockRotation));
@@ -252,7 +248,7 @@ export default class BuildTool2 extends ToolBase {
 			LogControl.instance.addLine("Out of bounds!", Color3.fromRGB(255, 100, 100));
 
 			// Play sound
-			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
+			SoundController.getSounds().Build.BlockPlaceError.Play();
 
 			return;
 		}
@@ -303,25 +299,22 @@ export default class BuildTool2 extends ToolBase {
 
 		if (response.success) {
 			// Play sound
-			SoundController.getSounds().BuildingMode.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().BuildingMode.BlockPlace.Play();
+			SoundController.getSounds().Build.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().Build.BlockPlace.Play();
 
 			task.wait();
 			this.updateBlockPosition();
 		} else {
 			Logger.error(response.message);
-			SoundController.getSounds().BuildingMode.BlockPlaceError.Play();
+			SoundController.getSounds().Build.BlockPlaceError.Play();
 		}
 	}
 
 	getDisplayName(): string {
-		return "Build tool 2 (test, use on your own risk lmao)";
+		return "Building (TEST)";
 	}
 	getImageID(): string {
 		return "rbxassetid://12539295858";
-	}
-	getShortDescription(): string {
-		return "Place blocks in the world";
 	}
 
 	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {

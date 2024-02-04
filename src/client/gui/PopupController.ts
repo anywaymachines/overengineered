@@ -1,26 +1,21 @@
 import Component from "client/component/Component";
 import Control from "client/gui/Control";
+import Gui from "client/gui/Gui";
 import GuiAnimator from "client/gui/GuiAnimator";
-import ConfirmPopup, { ConfirmPopupDefinition } from "client/gui/popup/ConfirmPopup";
-import Gui from "./Gui";
 
 export type PopupControllerDefinition = ScreenGui & {
 	readonly Background: Frame;
-	readonly ConfirmGui: ConfirmPopupDefinition;
-	//readonly MaterialGui: MaterialChooserControlDefinition;
+	// readonly ConfirmGui: ConfirmPopupDefinition;
+	// readonly MaterialGui: MaterialChooserControlDefinition;
 	// readonly SettingsGui: SettingsDefinition;
 };
 
 export default class PopupController extends Component<PopupControllerDefinition> {
 	static readonly instance = new PopupController(Gui.getPopupUI<PopupControllerDefinition>());
-	private readonly confirmGui;
 
 	constructor(gui: PopupControllerDefinition) {
 		super(gui);
 		this.disable();
-
-		this.confirmGui = this.added(new ConfirmPopup(gui.ConfirmGui));
-		this.confirmGui.hide();
 	}
 
 	private showAnimated(gui: Control) {
@@ -45,15 +40,6 @@ export default class PopupController extends Component<PopupControllerDefinition
 
 		GuiAnimator.transition(gui.getGui(), 0.2, "up");
 		delay(0.1, () => this.disable());
-	}
-
-	showConfirmation(text: string, okFunc: () => void, noFunc: () => void) {
-		this.showAnimated(this.confirmGui);
-		this.confirmGui.showPopup(text, okFunc, noFunc);
-
-		this.confirmGui.onHide.Once(() => {
-			this.hideAnimated(this.confirmGui);
-		});
 	}
 
 	enable() {
