@@ -34,6 +34,7 @@ export default class MaterialColorEditControl extends Control<MaterialColorEditC
 		this.event.subscribeObservable(selectedMaterial, (value) => material.value.set(value));
 
 		const materialbtn = this.add(new TextButtonControl(this.gui.MaterialButton));
+		this.event.subscribeObservable(material.value, (value) => materialbtn.text.set(value.Name), true);
 		this.event.subscribe(materialbtn.activated, () => {
 			if (materialGui.isVisible()) {
 				GuiAnimator.revTransition(this.gui.Material, 0.05, "down", 20);
@@ -45,6 +46,8 @@ export default class MaterialColorEditControl extends Control<MaterialColorEditC
 		});
 
 		const colorbtn = this.add(new TextButtonControl(this.gui.ColorButton));
+		this.event.subscribeObservable(color.value, (value) => colorbtn.text.set("#" + value.ToHex().upper()), true);
+		this.event.subscribeObservable(color.value, (value) => (colorbtn.getGui().TextColor3 = value), true);
 		this.event.subscribe(colorbtn.activated, () => {
 			if (color.isVisible()) {
 				GuiAnimator.revTransition(this.gui.Color, 0.05, "down", 20);

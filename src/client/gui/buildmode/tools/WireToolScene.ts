@@ -1,14 +1,16 @@
 import { GamepadService, GuiService } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import Control from "client/gui/Control";
+import GuiAnimator from "client/gui/GuiAnimator";
+import { ButtonControl } from "client/gui/controls/Button";
 import WireTool from "client/tools/WireTool";
-import GuiAnimator from "../../GuiAnimator";
-import { ButtonControl } from "../../controls/Button";
 
 export type WireToolSceneDefinition = GuiObject & {
-	CancelButton: GuiButton;
-	TextLabel: TextLabel;
-	NameLabel: TextLabel;
+	readonly Bottom: {
+		readonly CancelButton: GuiButton;
+	};
+	readonly NameLabel: TextLabel;
+	readonly TextLabel: TextLabel;
 };
 
 export default class WireToolScene extends Control<WireToolSceneDefinition> {
@@ -18,7 +20,7 @@ export default class WireToolScene extends Control<WireToolSceneDefinition> {
 		super(gui);
 		this.tool = tool;
 
-		this.add(new ButtonControl(this.gui.CancelButton, () => this.cancel()));
+		this.add(new ButtonControl(this.gui.Bottom.CancelButton, () => this.cancel()));
 
 		this.tool.startMarker.subscribe(() => this.update(), true);
 		this.event.subscribe(GuiService.GetPropertyChangedSignal("SelectedObject"), () => this.update());
@@ -26,7 +28,7 @@ export default class WireToolScene extends Control<WireToolSceneDefinition> {
 	}
 
 	private update() {
-		this.gui.CancelButton.Visible = false;
+		this.gui.Bottom.CancelButton.Visible = false;
 		this.gui.TextLabel.Visible = false;
 		this.gui.NameLabel.Visible = false;
 
@@ -36,11 +38,11 @@ export default class WireToolScene extends Control<WireToolSceneDefinition> {
 
 			if (!this.tool.startMarker.get()) {
 				this.gui.TextLabel.Text = "Select the first marker";
-				this.gui.CancelButton.Visible = false;
+				this.gui.Bottom.CancelButton.Visible = false;
 			} else {
 				this.gui.TextLabel.Text = "Select the second marker";
 				if (InputController.inputType.get() !== "Gamepad") {
-					this.gui.CancelButton.Visible = true;
+					this.gui.Bottom.CancelButton.Visible = true;
 				}
 			}
 		}

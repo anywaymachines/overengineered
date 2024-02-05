@@ -1,7 +1,13 @@
 import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
 import ToolbarControl, { ToolbarControlDefinition } from "client/gui/buildmode/ToolbarControl";
+import BuildTool2Scene, { BuildTool2SceneDefinition } from "client/gui/buildmode/tools/BuildTool2Scene";
 import BuildToolScene, { BuildToolSceneDefinition } from "client/gui/buildmode/tools/BuildToolScene";
+import ConfigToolScene, { ConfigToolSceneDefinition } from "client/gui/buildmode/tools/ConfigToolScene";
+import DeleteToolScene, { DeleteToolSceneDefinition } from "client/gui/buildmode/tools/DeleteToolScene";
+import MoveToolScene, { MoveToolSceneDefinition } from "client/gui/buildmode/tools/MoveToolScene";
+import PaintToolScene, { PaintToolSceneDefinition } from "client/gui/buildmode/tools/PaintToolScene";
+import WireToolScene, { WireToolSceneDefinition } from "client/gui/buildmode/tools/WireToolScene";
 import { ButtonControl } from "client/gui/controls/Button";
 import SavePopup from "client/gui/popup/SavePopup";
 import SettingsPopup from "client/gui/popup/SettingsPopup";
@@ -44,12 +50,12 @@ export type BuildingModeSceneDefinition = GuiObject & {
 	readonly Hotbar: ToolbarControlDefinition;
 	readonly Tools: {
 		readonly Build: BuildToolSceneDefinition;
-		//readonly Move: MoveToolSceneDefinition;
-		//readonly Build2: BuildTool2SceneDefinition;
-		//readonly Delete: DeleteToolSceneDefinition;
-		//readonly Config: ConfigToolSceneDefinition;
-		//readonly Paint: PaintToolSceneDefinition;
-		//readonly Wire: WireToolSceneDefinition;
+		readonly Move: MoveToolSceneDefinition;
+		readonly Build2: BuildTool2SceneDefinition;
+		readonly Delete: DeleteToolSceneDefinition;
+		readonly Config: ConfigToolSceneDefinition;
+		readonly Paint: PaintToolSceneDefinition;
+		readonly Wire: WireToolSceneDefinition;
 	};
 };
 export default class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
@@ -84,12 +90,12 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 		this.add(this.toolbar);
 
 		this.scenes.set(tools.buildTool, new BuildToolScene(this.gui.Tools.Build, tools.buildTool));
-		// this.scenes.set(tools.moveTool, new MoveToolScene(this.gui.Tools.Move, tools.moveTool));
-		// this.scenes.set(tools.deleteTool, new DeleteToolScene(this.gui.Tools.Delete, tools.deleteTool));
-		// this.scenes.set(tools.configTool, new ConfigToolScene(this.gui.Tools.Config, tools.configTool));
-		// this.scenes.set(tools.paintTool, new PaintToolScene(this.gui.Tools.Paint, tools.paintTool));
-		// this.scenes.set(tools.buildTool2, new BuildTool2Scene(this.gui.Tools.Build2, tools.buildTool2));
-		// this.scenes.set(tools.wiretool, new WireToolScene(this.gui.Tools.Wire, tools.wiretool));
+		this.scenes.set(tools.moveTool, new MoveToolScene(this.gui.Tools.Move, tools.moveTool));
+		this.scenes.set(tools.deleteTool, new DeleteToolScene(this.gui.Tools.Delete, tools.deleteTool));
+		this.scenes.set(tools.configTool, new ConfigToolScene(this.gui.Tools.Config, tools.configTool));
+		this.scenes.set(tools.paintTool, new PaintToolScene(this.gui.Tools.Paint, tools.paintTool));
+		this.scenes.set(tools.buildTool2, new BuildTool2Scene(this.gui.Tools.Build2, tools.buildTool2));
+		this.scenes.set(tools.wiretool, new WireToolScene(this.gui.Tools.Wire, tools.wiretool));
 
 		this.scenes.forEach((scene) => this.add(scene));
 

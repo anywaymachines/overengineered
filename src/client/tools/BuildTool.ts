@@ -1,4 +1,4 @@
-import { GuiService, HttpService, Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
+import { GuiService, HttpService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
@@ -367,11 +367,14 @@ export default class BuildTool extends ToolBase {
 		});
 
 		this.eventHandler.subscribe(this.mouse.Move, () => this.updatePosition());
-		this.inputHandler.onMouse1Down(() => async () => await this.placeBlock());
-		this.eventHandler.subscribe(UserInputService.InputBegan, async (input) => {
-			if (input.UserInputType === Enum.UserInputType.MouseButton3) {
-				this.pickBlock();
-			}
+		this.inputHandler.onMouse1Down(async () => {
+			if (Gui.isCursorOnVisibleGui()) return;
+			await this.placeBlock();
+		}, false);
+		this.inputHandler.onInputBegan(async (input) => {
+			if (Gui.isCursorOnVisibleGui()) return;
+			if (input.UserInputType !== Enum.UserInputType.MouseButton3) return;
+			this.pickBlock();
 		});
 
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updatePosition());

@@ -1,7 +1,6 @@
 import Signal from "@rbxts/signal";
 import SoundController from "client/controller/SoundController";
 import Control from "client/gui/Control";
-import ObservableValue from "shared/event/ObservableValue";
 
 export type ButtonDefinition = GuiButton;
 export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extends Control<T> {
@@ -25,7 +24,7 @@ export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extend
 
 export type TextButtonDefinition = (GuiButton & { readonly TextLabel: TextLabel }) | TextButton;
 export class TextButtonControl<T extends TextButtonDefinition = TextButtonDefinition> extends ButtonControl<T> {
-	public readonly text = new ObservableValue("");
+	public readonly text;
 
 	constructor(gui: T) {
 		super(gui);
@@ -33,10 +32,9 @@ export class TextButtonControl<T extends TextButtonDefinition = TextButtonDefini
 		const isTextButton = (button: TextButtonDefinition): button is TextButton =>
 			!button.FindFirstChild("TextLabel");
 
-		this.event.subscribeObservable(
-			this.text,
-			(value) => (isTextButton(this.gui) ? (this.gui.Text = value) : (this.gui.TextLabel!.Text = value)),
-			true,
+		this.text = this.event.observableFromInstanceParam(
+			isTextButton(this.gui) ? (this.gui as TextButton) : this.gui.TextLabel!,
+			"Text",
 		);
 	}
 }

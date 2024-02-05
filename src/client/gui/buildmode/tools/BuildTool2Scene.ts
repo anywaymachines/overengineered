@@ -8,9 +8,9 @@ import MaterialColorEditControl, {
 } from "client/gui/buildmode/MaterialColorEditControl";
 import BuildTool2 from "client/tools/BuildTool2";
 
-export type BuildToolSceneDefinition = GuiObject & {
+export type BuildTool2SceneDefinition = GuiObject & {
 	readonly Bottom: MaterialColorEditControlDefinition;
-	readonly BlockInfo: Frame & {
+	readonly Info: Frame & {
 		readonly ViewportFrame: ViewportFrame;
 		readonly DescriptionLabel: TextLabel;
 		readonly NameLabel: TextLabel;
@@ -24,13 +24,13 @@ export type BuildToolSceneDefinition = GuiObject & {
 	};
 };
 
-export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
+export default class BuildTool2Scene extends Control<BuildTool2SceneDefinition> {
 	readonly tool;
 	readonly blockSelector;
 
 	private blockInfoPreviewControl?: BlockPreviewControl;
 
-	constructor(gui: BuildToolSceneDefinition, tool: BuildTool2) {
+	constructor(gui: BuildTool2SceneDefinition, tool: BuildTool2) {
 		super(gui);
 		this.tool = tool;
 
@@ -48,18 +48,16 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 				this.blockInfoPreviewControl = undefined;
 			}
 
-			this.gui.BlockInfo.NameLabel.Text = "";
-			this.gui.BlockInfo.DescriptionLabel.Text = "";
+			this.gui.Info.NameLabel.Text = "";
+			this.gui.Info.DescriptionLabel.Text = "";
 
 			// Set block info
 			if (block) {
-				this.blockInfoPreviewControl = this.add(
-					new BlockPreviewControl(this.gui.BlockInfo.ViewportFrame, block),
-				);
-				this.gui.BlockInfo.NameLabel.Text = block.displayName;
-				this.gui.BlockInfo.DescriptionLabel.Text = block.info;
+				this.blockInfoPreviewControl = this.add(new BlockPreviewControl(this.gui.Info.ViewportFrame, block));
+				this.gui.Info.NameLabel.Text = block.displayName;
+				this.gui.Info.DescriptionLabel.Text = block.info;
 
-				GuiAnimator.transition(this.gui.BlockInfo, 0.2, "right");
+				GuiAnimator.transition(this.gui.Info, 0.2, "right");
 			}
 		});
 

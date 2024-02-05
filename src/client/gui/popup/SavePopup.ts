@@ -95,8 +95,8 @@ type SavePreviewDefinition = GuiButton & {
 	readonly LoadButton: GuiButton;
 	readonly SaveButton: GuiButton;
 	readonly TextBox: TextBox;
-	readonly ImageButton: ImageButton;
-	readonly HeadingLabel: TextLabel;
+	readonly ImageLabel: ImageLabel;
+	readonly HeaderLabel: TextLabel;
 };
 
 class SavePreview extends Control<SavePreviewDefinition> {
@@ -108,8 +108,8 @@ class SavePreview extends Control<SavePreviewDefinition> {
 	constructor(gui: SavePreviewDefinition) {
 		super(gui);
 
-		const saveButton = this.added(new ButtonControl(this.gui.SaveButton));
-		const loadButton = this.added(new ButtonControl(this.gui.LoadButton));
+		const saveButton = this.add(new ButtonControl(this.gui.SaveButton));
+		const loadButton = this.add(new ButtonControl(this.gui.LoadButton));
 
 		this.event.subscribe(saveButton.activated, () => {
 			ConfirmPopup.instance.showPopup(
@@ -182,13 +182,13 @@ class SavePreview extends Control<SavePreviewDefinition> {
 			this.gui.Visible = true;
 			const slot = SlotsMeta.get(slots, slotIndex);
 
-			this.gui.ImageButton.ImageColor3 = Serializer.Color3Serializer.deserialize(slot.color);
+			this.gui.ImageLabel.ImageColor3 = Serializer.Color3Serializer.deserialize(slot.color);
 			textbox.text.set(slot.name);
 
 			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
-				this.gui.HeadingLabel.Text = `Blocks: ${slot.blocks}; Size: ${slot.size}b`;
+				this.gui.HeaderLabel.Text = `Blocks: ${slot.blocks}; Size: ${slot.size}b`;
 			} else {
-				this.gui.HeadingLabel.Text = `Blocks: ${slot.blocks}`;
+				this.gui.HeaderLabel.Text = `Blocks: ${slot.blocks}`;
 			}
 
 			// lock

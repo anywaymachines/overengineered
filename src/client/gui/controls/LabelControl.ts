@@ -15,7 +15,7 @@ export default class LabelControl extends Control<LabelControlDefinition> {
 
 		if (autoSize !== undefined) {
 			this.event.subscribeObservable(
-				this.event.observableFromGuiParam(this.gui, "AbsoluteSize"),
+				this.event.readonlyObservableFromInstanceParam(this.gui, "AbsoluteSize"),
 				() => {
 					this.gui.TextScaled = false;
 					this.gui.TextSize = autoSize;

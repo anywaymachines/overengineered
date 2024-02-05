@@ -82,6 +82,17 @@ export default class SharedComponentEventHolder {
 		}
 	}
 
+	/** Create an `ReadonlyObservableValue` from an `Instance` property */
+	readonlyObservableFromInstanceParam<TInstance extends Instance, TParam extends InstancePropertyNames<TInstance>>(
+		instance: TInstance,
+		param: TParam,
+	): ReadonlyObservableValue<TInstance[TParam]> {
+		const observable = new ObservableValue<TInstance[TParam]>(instance[param]);
+		this.subscribe(instance.GetPropertyChangedSignal(param), () => observable.set(instance[param]));
+
+		return observable;
+	}
+
 	/** Create an `ObservableValue` from an `Instance` property */
 	observableFromInstanceParam<TInstance extends Instance, TParam extends InstancePropertyNames<TInstance>>(
 		instance: TInstance,
@@ -89,19 +100,9 @@ export default class SharedComponentEventHolder {
 	): ObservableValue<TInstance[TParam]> {
 		const observable = new ObservableValue<TInstance[TParam]>(instance[param]);
 		this.subscribe(instance.GetPropertyChangedSignal(param), () => observable.set(instance[param]));
+		this.subscribeObservable(observable, (value) => (instance[param] = value), true);
 
 		return observable;
-	}
-
-	/**
-	 * Create an `ObservableValue` from an `Instance` property
-	 * @deprecated Use observableFromInstanceParam instead
-	 */
-	observableFromGuiParam<TInstance extends Instance, TParam extends InstancePropertyNames<TInstance>>(
-		instance: TInstance,
-		param: TParam,
-	): ObservableValue<TInstance[TParam]> {
-		return this.observableFromInstanceParam(instance, param);
 	}
 
 	/* eslint-disable @typescript-eslint/no-this-alias */

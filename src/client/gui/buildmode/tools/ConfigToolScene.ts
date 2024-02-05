@@ -1,4 +1,6 @@
 import Control from "client/gui/Control";
+import GuiAnimator from "client/gui/GuiAnimator";
+import ConfigControl, { ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
 import ConfigTool from "client/tools/ConfigTool";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
@@ -10,17 +12,16 @@ import BlockManager from "shared/building/BlockManager";
 import ObservableValue from "shared/event/ObservableValue";
 import JSON from "shared/fixes/Json";
 import Objects from "shared/fixes/objects";
-import GuiAnimator from "../../GuiAnimator";
-import ConfigControl, { ConfigControlDefinition } from "../ConfigControl";
 
 export type ConfigToolSceneDefinition = GuiObject & {
-	ParamsSelection: Frame & {
-		Buttons: ConfigControlDefinition;
-		Title: GuiObject & {
-			HeadingLabel: TextLabel;
-		};
+	readonly ParamsSelection: Frame & {
+		readonly Buttons: ConfigControlDefinition;
+		readonly HeaderLabel: TextLabel;
 	};
-	DeselectAllButton: TextButton;
+	readonly Bottom: {
+		readonly DeselectButton: TextButton;
+		readonly ResetButton: TextButton;
+	};
 };
 
 export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> {
@@ -56,12 +57,12 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 			this.updateConfigs(selected);
 		});
 
-		this.gui.DeselectAllButton.Activated.Connect(() => {
+		this.gui.Bottom.DeselectButton.Activated.Connect(() => {
 			tool.unselectAll();
 		});
 
 		this.onPrepare((inputType) => {
-			this.gui.DeselectAllButton.Visible = inputType !== "Gamepad";
+			this.gui.Bottom.DeselectButton.Visible = inputType !== "Gamepad";
 		});
 	}
 
@@ -69,7 +70,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		super.show();
 
 		GuiAnimator.transition(this.gui.ParamsSelection, 0.2, "right");
-		GuiAnimator.transition(this.gui.DeselectAllButton, 0.22, "down");
+		GuiAnimator.transition(this.gui.Bottom.DeselectButton, 0.22, "down");
 
 		this.updateConfigs([]);
 	}
@@ -86,7 +87,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		this.gui.Visible = Objects.keys(onedef).size() !== 0;
 		if (!this.gui.Visible) return;
 
-		this.gui.ParamsSelection.Title.HeadingLabel.Text = `CONFIGURATION (${selected.size()})`;
+		this.gui.ParamsSelection.HeaderLabel.Text = `CONFIGURATION (${selected.size()})`;
 
 		const configs = selected
 			.map((selected) => {

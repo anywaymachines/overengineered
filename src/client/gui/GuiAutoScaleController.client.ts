@@ -1,6 +1,6 @@
 import Component from "client/component/Component";
 import Logger from "shared/Logger";
-import Gui from "./Gui";
+import Gui from "client/gui/Gui";
 
 class ScaledScreenGui<T extends ScreenGui> extends Component<T> {
 	constructor(gui: T) {
@@ -13,7 +13,7 @@ class ScaledScreenGui<T extends ScreenGui> extends Component<T> {
 		}
 
 		this.event.subscribeObservable(
-			this.event.observableFromGuiParam(gui as ScreenGui, "AbsoluteSize"),
+			this.event.readonlyObservableFromInstanceParam(gui as ScreenGui, "AbsoluteSize"),
 			(asize) => {
 				// scale!.Scale = math.min(asize.Y / 1080, asize.X / 1920);
 				scale!.Scale = math.min(asize.Y / 1080, 9999999);

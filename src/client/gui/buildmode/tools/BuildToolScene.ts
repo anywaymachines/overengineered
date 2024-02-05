@@ -11,7 +11,7 @@ import Registry, { categoriesRegistry } from "shared/Registry";
 
 export type BuildToolSceneDefinition = GuiObject & {
 	readonly Bottom: MaterialColorEditControlDefinition;
-	readonly BlockInfo: Frame & {
+	readonly Info: Frame & {
 		readonly ViewportFrame: ViewportFrame;
 		readonly DescriptionLabel: TextLabel;
 		readonly NameLabel: TextLabel;
@@ -49,18 +49,16 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 				this.blockInfoPreviewControl = undefined;
 			}
 
-			this.gui.BlockInfo.NameLabel.Text = "";
-			this.gui.BlockInfo.DescriptionLabel.Text = "";
+			this.gui.Info.NameLabel.Text = "";
+			this.gui.Info.DescriptionLabel.Text = "";
 
 			// Set block info
 			if (block) {
-				this.blockInfoPreviewControl = this.add(
-					new BlockPreviewControl(this.gui.BlockInfo.ViewportFrame, block),
-				);
-				this.gui.BlockInfo.NameLabel.Text = block.displayName;
-				this.gui.BlockInfo.DescriptionLabel.Text = block.info;
+				this.blockInfoPreviewControl = this.add(new BlockPreviewControl(this.gui.Info.ViewportFrame, block));
+				this.gui.Info.NameLabel.Text = block.displayName;
+				this.gui.Info.DescriptionLabel.Text = block.info;
 
-				GuiAnimator.transition(this.gui.BlockInfo, 0.2, "right");
+				GuiAnimator.transition(this.gui.Info, 0.2, "right");
 			}
 		});
 

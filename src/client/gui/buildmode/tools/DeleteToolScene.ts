@@ -5,10 +5,12 @@ import ConfirmPopup from "client/gui/popup/ConfirmPopup";
 import DeleteTool from "client/tools/DeleteTool";
 
 export type DeleteToolSceneDefinition = GuiObject & {
-	TouchControls: Frame & {
-		DeleteButton: TextButton;
+	readonly TouchControls: Frame & {
+		readonly DeleteButton: TextButton;
 	};
-	DeleteAllButton: GuiButton;
+	readonly Bottom: {
+		readonly DeleteAllButton: GuiButton;
+	};
 };
 
 export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> {
@@ -57,18 +59,18 @@ export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> 
 			this.gui.TouchControls.Visible = false;
 		});
 		this.onPrepare((inputType) => {
-			this.gui.DeleteAllButton.Visible = inputType !== "Gamepad";
+			this.gui.Bottom.DeleteAllButton.Visible = inputType !== "Gamepad";
 		});
 
 		this.event.subscribe(this.tool.onClearAllRequested, () => this.suggestClearAll());
 
-		const deleteAllButton = this.added(new ButtonControl(this.gui.DeleteAllButton));
+		const deleteAllButton = this.added(new ButtonControl(this.gui.Bottom.DeleteAllButton));
 		this.event.subscribe(deleteAllButton.activated, () => this.suggestClearAll());
 	}
 
 	public show() {
 		super.show();
-		GuiAnimator.transition(this.gui.DeleteAllButton, 0.2, "down");
+		GuiAnimator.transition(this.gui.Bottom.DeleteAllButton, 0.2, "down");
 	}
 
 	private suggestClearAll() {

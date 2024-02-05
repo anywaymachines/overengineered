@@ -1,7 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import GameEnvironment from "shared/data/GameEnvironment";
-import BlockLogic from "../BlockLogic";
+import BlockLogic from "shared/block/BlockLogic";
 
 type HeliumBlock = BlockModel & {
 	readonly Part: BasePart & {
@@ -18,7 +18,7 @@ export default class HeliumBlockLogic extends BlockLogic<HeliumBlock> {
 		this.part = this.instance.Part;
 		this.vectorForce = this.part.VectorForce;
 
-		this.event.observableFromInstanceParam(Workspace, "Gravity").subscribe(() => this.update());
+		this.event.readonlyObservableFromInstanceParam(Workspace, "Gravity").subscribe(() => this.update());
 		this.event.onEnable(() => this.update());
 	}
 

@@ -1,6 +1,6 @@
+import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import ConfigurableBlockLogic from "../ConfigurableBlockLogic";
 
 type Suspension = BlockModel & {
 	readonly SpringSide: BasePart & {
@@ -19,7 +19,10 @@ export default class SuspensionLogic extends ConfigurableBlockLogic<
 		this.springConstraint = this.instance.SpringSide.Spring;
 
 		this.onImpactBreak(() => {
-			this.instance.SpringSide.Beam.Destroy();
+			if (this.instance.SpringSide.FindFirstChild("Beam")) {
+				this.instance.SpringSide.Beam.Destroy();
+			}
+
 			this.disable();
 		});
 

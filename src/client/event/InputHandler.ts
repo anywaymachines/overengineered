@@ -1,5 +1,5 @@
-import GlobalInputHandler from "./GlobalInputHandler";
-import { ISignalWrapper, ThinSignalWrapper } from "./SignalWrapper";
+import GlobalInputHandler from "client/event/GlobalInputHandler";
+import { ISignalWrapper, ThinSignalWrapper } from "client/event/SignalWrapper";
 
 type InputCallback = (input: InputObject) => void;
 type FullInputCallback = (input: InputObject, gameProcessedEvent: boolean) => void;

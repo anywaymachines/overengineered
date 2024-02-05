@@ -114,7 +114,7 @@ export default class BuildTool2 extends ToolBase {
 				this.gameUI as ScreenGui & {
 					BuildingMode: {
 						Tools: {
-							BuildTool2Gui: {
+							Build2: {
 								Debug: {
 									Label1: TextLabel;
 									Label2: TextLabel;
@@ -125,7 +125,7 @@ export default class BuildTool2 extends ToolBase {
 						};
 					};
 				}
-			).BuildingMode.Tools.BuildTool2Gui.Debug;
+			).BuildingMode.Tools.Build2.Debug;
 
 			const constrainPositionToGrid = (pos: Vector3) => {
 				const constrain = math.round;

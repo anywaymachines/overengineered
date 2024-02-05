@@ -2,7 +2,7 @@ import { Players, RunService } from "@rbxts/services";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import ObservableValue from "shared/event/ObservableValue";
-import ConfigurableBlockLogic from "../ConfigurableBlockLogic";
+import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 
 type _VehicleSeat = BlockModel & {
 	readonly VehicleSeat: VehicleSeat;
@@ -19,7 +19,7 @@ export default class VehicleSeatBlockLogic extends ConfigurableBlockLogic<
 		super(block, blockConfigRegistry.vehicleseat);
 
 		this.vehicleSeat = this.instance.VehicleSeat;
-		this.occupant = this.event.observableFromInstanceParam(this.vehicleSeat, "Occupant");
+		this.occupant = this.event.readonlyObservableFromInstanceParam(this.vehicleSeat, "Occupant");
 
 		const update = (force = false) => {
 			const occupant = this.occupant.get();
