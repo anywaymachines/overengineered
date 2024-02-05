@@ -1,6 +1,7 @@
-import SharedComponentBase from "./SharedComponentBase";
-import SharedComponentContainer from "./SharedComponentContainer";
-import SharedComponentEventHolder from "./SharedComponentEventHolder";
+import SharedComponentBase from "shared/component/SharedComponentBase";
+import SharedComponentContainer from "shared/component/SharedComponentContainer";
+import SharedComponentEventHolder from "shared/component/SharedComponentEventHolder";
+import { TransformContainer } from "shared/component/Transform";
 
 /** A component that controls an Instance and has children. */
 export default class SharedComponent<
@@ -9,6 +10,7 @@ export default class SharedComponent<
 	TEventHolder extends SharedComponentEventHolder = SharedComponentEventHolder,
 > extends SharedComponentContainer<TChild, TEventHolder> {
 	protected readonly instance: T;
+	private transforms?: TransformContainer<T>;
 
 	constructor(instance: T) {
 		super();
@@ -26,6 +28,18 @@ export default class SharedComponent<
 		name: TKey,
 	): gui is T & { [key in TKey]: (typeof gui)[TKey] & defined } {
 		return gui.FindFirstChild(name) !== undefined;
+	}
+
+	/** Initializes and returns the transform component */
+	transform(): TransformContainer<T> {
+		if (!this.transforms) {
+			this.transforms = new TransformContainer(this.instance);
+			this.event.onEnable(() => this.transforms?.enable());
+			this.event.onDisable(() => this.transforms?.disable());
+			this.event.onDestroy(() => this.transforms?.destroy());
+		}
+
+		return this.transforms;
 	}
 
 	/** Get an attribute value on the Instance */

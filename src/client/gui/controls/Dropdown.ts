@@ -1,6 +1,6 @@
 import Control from "client/gui/Control";
 import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
-import { TransformDirection } from "client/gui/Transform";
+import { TransformDirection } from "shared/component/Transform";
 
 export default class Dropdown extends Control<GuiObject> {
 	readonly button;

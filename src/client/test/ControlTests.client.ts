@@ -1,9 +1,9 @@
 import { RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import Component from "client/component/Component";
 import ColorWheel, { ColorWheelDefinition } from "client/gui/ColorWheel";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
-import { Transform } from "client/gui/Transform";
 import { ConfigControl2 } from "client/gui/buildmode/ConfigControl";
 import MultiConfigControl from "client/gui/config/MultiConfigControl";
 import BlockPipetteButton from "client/gui/controls/BlockPipetteButton";
@@ -99,10 +99,9 @@ parent.add(new ColorWheel(Gui.getGameUI<{ Templates: { Color: ColorWheelDefiniti
 		tweenable.Text = "instant transparency";
 		tweenable.Parent = frame;
 
-		tweenable.Activated.Connect(() => {
-			tweenable.Transparency = 0;
-			new Transform(tweenable).transform("Transparency", 0.9).enable();
-		});
+		const component = new Component(tweenable);
+		component.enable();
+		component.transform().run((t) => t.func(() => (tweenable.Transparency = 0)).transform("Transparency", 0.9));
 	}
 
 	{
@@ -112,10 +111,11 @@ parent.add(new ColorWheel(Gui.getGameUI<{ Templates: { Color: ColorWheelDefiniti
 		tweenable.Text = "transparency over 1sec";
 		tweenable.Parent = frame;
 
-		tweenable.Activated.Connect(() => {
-			tweenable.Transparency = 0;
-			new Transform(tweenable).transform("Transparency", 0.9, { duration: 1 }).enable();
-		});
+		const component = new Component(tweenable);
+		component.enable();
+		component
+			.transform()
+			.run((t) => t.save("Transparency").transform("Transparency", 0.9, { duration: 1 }).then().restore());
 	}
 
 	{
@@ -125,10 +125,13 @@ parent.add(new ColorWheel(Gui.getGameUI<{ Templates: { Color: ColorWheelDefiniti
 		tweenable.Text = "transparency over 1sec after 1sec";
 		tweenable.Parent = frame;
 
-		tweenable.Activated.Connect(() => {
-			tweenable.Transparency = 0;
-			new Transform(tweenable).transform("Transparency", 0.9, { delay: 1, duration: 1 }).enable();
-		});
+		const component = new Component(tweenable);
+		component.enable();
+		component
+			.transform()
+			.run((t) =>
+				t.save("Transparency").wait(1).transform("Transparency", 0.9, { duration: 1 }).then().restore(),
+			);
 	}
 
 	{
@@ -139,23 +142,28 @@ parent.add(new ColorWheel(Gui.getGameUI<{ Templates: { Color: ColorWheelDefiniti
 		tweenable.Text = "multiple";
 		tweenable.Parent = frame;
 
+		const component = new Component(tweenable);
+		component.enable();
+
 		const anim = 1 as number;
 		if (anim === 0) {
-			tweenable.Activated.Connect(() => {
-				tweenable.Transparency = 0;
-				new Transform(tweenable)
+			component.transform().run((t) =>
+				t
+					.save("Transparency")
+					.func(() => (tweenable.Transparency = 0))
 					.wait(1)
 					.transform("Transparency", 0.9, { duration: 1 })
 					.transform("Size", new UDim2(0, 80, 0, 10), { duration: 1 })
 					.then()
 					.transform("Transparency", 0, { duration: 1 })
 					.transform("Size", new UDim2(0, 100, 0, 30), { duration: 1 })
-					.enable();
-			});
+					.then()
+					.restore(),
+			);
 		} else if (anim === 1) {
-			tweenable.Activated.Connect(() => {
-				tweenable.Transparency = 0;
-				new Transform(tweenable)
+			component.transform().run((t) =>
+				t
+					.func(() => (tweenable.Transparency = 0))
 					.save("Position", "Size")
 					.resizeRelative(new UDim2(0, -4, 0, -4), { duration: 0.05 })
 					.moveRelative(new UDim2(0, -5, 0, 0), { duration: 0.1 })
@@ -169,9 +177,8 @@ parent.add(new ColorWheel(Gui.getGameUI<{ Templates: { Color: ColorWheelDefiniti
 					.moveRelative(new UDim2(0, -5, 0, 0), { duration: 0.1 })
 					.resizeRelative(new UDim2(0, 4, 0, 4), { duration: 0.05 })
 					.then()
-					.restore()
-					.enable();
-			});
+					.restore(),
+			);
 		}
 	}
 }

@@ -8,6 +8,7 @@ type Sub<T extends Callback> = readonly [signal: RBXScriptSignal<T>, callback: T
 export default class SharedComponentEventHolder {
 	readonly onEnabled = new SlimSignal();
 	readonly onDisabled = new SlimSignal();
+	readonly onDestroyed = new SlimSignal();
 	readonly eventHandler = new EventHandler();
 	private readonly events: Sub<Callback>[] = [];
 
@@ -60,6 +61,11 @@ export default class SharedComponentEventHolder {
 		if (executeImmediately) callback();
 	}
 
+	/** Register an event that fires on destroy */
+	onDestroy(callback: () => void): void {
+		this.onDestroyed.Connect(callback);
+	}
+
 	private sub(events: Sub<Callback>[], sub: Sub<Callback>): void {
 		events.push(sub);
 		if (this.enabled) this.connect(sub);
@@ -108,10 +114,12 @@ export default class SharedComponentEventHolder {
 	/* eslint-disable @typescript-eslint/no-this-alias */
 	/** Disable this event holder and remove all event subscriptions */
 	destroy(): void {
+		this.onDestroyed.Fire();
 		this.disable();
 
 		this.onEnabled.unsubscribeAll();
 		this.onDisabled.unsubscribeAll();
+		this.onDestroyed.unsubscribeAll();
 		this.eventHandler.unsubscribeAll();
 
 		const tis = this;
