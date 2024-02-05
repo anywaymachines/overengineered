@@ -29,7 +29,7 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 	readonly tool;
 	readonly blockSelector;
 
-	private blockInfoPreviewControl?: BlockPreviewControl;
+	private readonly blockInfoPreviewControl: BlockPreviewControl;
 
 	constructor(gui: BuildToolSceneDefinition, tool: BuildTool) {
 		super(gui);
@@ -39,22 +39,20 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 		this.blockSelector.show();
 		this.add(this.blockSelector);
 
+		this.blockInfoPreviewControl = this.add(new BlockPreviewControl(this.gui.Info.ViewportFrame));
+		this.gui.Info.Visible = false;
+
 		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => {
+			this.gui.Info.Visible = block !== undefined;
+			this.blockInfoPreviewControl.set(block);
 			this.tool.setSelectedBlock(block);
 
 			// Clear block info
-			if (this.blockInfoPreviewControl) {
-				this.blockInfoPreviewControl.clear();
-				this.remove(this.blockInfoPreviewControl);
-				this.blockInfoPreviewControl = undefined;
-			}
-
 			this.gui.Info.NameLabel.Text = "";
 			this.gui.Info.DescriptionLabel.Text = "";
 
 			// Set block info
 			if (block) {
-				this.blockInfoPreviewControl = this.add(new BlockPreviewControl(this.gui.Info.ViewportFrame, block));
 				this.gui.Info.NameLabel.Text = block.displayName;
 				this.gui.Info.DescriptionLabel.Text = block.info;
 
@@ -75,7 +73,25 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 			this.blockSelector.selectedBlock.set(block);
 		});
 
-		this.add(new MaterialColorEditControl(this.gui.Bottom, tool.selectedMaterial, tool.selectedColor));
+		const enable = () => {
+			// to not place a block
+			task.wait();
+
+			this.tool.enable();
+		};
+		const disable = () => {
+			this.tool.disable();
+		};
+
+		const materialColorEditor = this.add(
+			new MaterialColorEditControl(this.gui.Bottom, tool.selectedMaterial, tool.selectedColor),
+		);
+		materialColorEditor.materialPipette.onStart.Connect(disable);
+		materialColorEditor.materialPipette.onEnd.Connect(enable);
+		materialColorEditor.colorPipette.onStart.Connect(disable);
+		materialColorEditor.colorPipette.onEnd.Connect(enable);
+		this.blockSelector.pipette.onStart.Connect(disable);
+		this.blockSelector.pipette.onEnd.Connect(enable);
 
 		const updateTouchControls = () => {
 			const visible =

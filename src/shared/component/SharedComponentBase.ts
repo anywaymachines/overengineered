@@ -1,5 +1,5 @@
+import SharedComponentEventHolder from "shared/component/SharedComponentEventHolder";
 import EventHandler from "shared/event/EventHandler";
-import SharedComponentEventHolder from "./SharedComponentEventHolder";
 
 /**
  * Base of any component.
@@ -27,6 +27,12 @@ export default class SharedComponentBase<TEventHolder extends SharedComponentEve
 		if (destroyOriginal) object.Destroy();
 
 		return () => template.Clone();
+	}
+
+	/** Invoke a function and return `this`, for chaining functions */
+	with(func: (self: this) => void) {
+		func(this);
+		return this;
 	}
 
 	/** Enable component events */

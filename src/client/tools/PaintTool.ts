@@ -51,13 +51,13 @@ export default class PaintTool extends ToolBase {
 		});
 	}
 
-	async paintEverything(plot: PlotModel) {
+	async paintEverything(plot: PlotModel, enableColor?: boolean, enableMaterial?: boolean) {
 		await Remotes.Client.GetNamespace("Building")
 			.Get("Paint")
 			.CallServerAsync({
 				plot,
-				color: this.enableColor.get() ? this.selectedColor.get() : undefined,
-				material: this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
+				color: enableColor || this.enableColor.get() ? this.selectedColor.get() : undefined,
+				material: enableMaterial || this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
 			});
 	}
 	async paint(blocks: readonly BlockModel[]) {

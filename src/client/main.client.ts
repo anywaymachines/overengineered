@@ -1,20 +1,20 @@
 import { MarketplaceService, Players, ReplicatedStorage, RunService } from "@rbxts/services";
+import PlayerDataStorage from "client/PlayerDataStorage";
+import ComponentContainer from "client/component/ComponentContainer";
+import BeaconController from "client/controller/BeaconController";
+import CharacterController from "client/controller/CharacterController";
+import GameEnvironmentController from "client/controller/GameEnvironmentController";
+import LocalPlayerController from "client/controller/LocalPlayerController";
+import SoundController from "client/controller/SoundController";
+import WindController from "client/controller/WindController";
+import InputTypeChangeEvent from "client/event/InputTypeChangeEvent";
+import Gui from "client/gui/Gui";
+import DebugControl from "client/gui/static/DebugControl";
+import LogControl from "client/gui/static/LogControl";
+import TooltipsControl from "client/gui/static/TooltipsControl";
+import PlayModeController from "client/modes/PlayModeController";
 import RemoteEvents from "shared/RemoteEvents";
 import SharedPlots from "shared/building/SharedPlots";
-import PlayerDataStorage from "./PlayerDataStorage";
-import ComponentContainer from "./component/ComponentContainer";
-import BeaconController from "./controller/BeaconController";
-import CharacterController from "./controller/CharacterController";
-import GameEnvironmentController from "./controller/GameEnvironmentController";
-import LocalPlayerController from "./controller/LocalPlayerController";
-import SoundController from "./controller/SoundController";
-import WindController from "./controller/WindController";
-import InputTypeChangeEvent from "./event/InputTypeChangeEvent";
-import Gui from "./gui/Gui";
-import DebugControl from "./gui/static/DebugControl";
-import LogControl from "./gui/static/LogControl";
-import TooltipsControl from "./gui/static/TooltipsControl";
-import PlayModeController from "./modes/PlayModeController";
 
 // wait for assets to be copied
 ReplicatedStorage.WaitForChild("Assets");

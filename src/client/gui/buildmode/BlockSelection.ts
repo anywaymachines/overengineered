@@ -2,8 +2,9 @@ import { GuiService, LocalizationService, Players } from "@rbxts/services";
 import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
 import BlockPreviewControl from "client/gui/buildmode/BlockPreviewControl";
+import BlockPipetteButton from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
-import Registry, { blockList, categoriesRegistry } from "shared/Registry";
+import Registry, { blockList, blockRegistry, categoriesRegistry } from "shared/Registry";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
 
@@ -37,6 +38,9 @@ export type BlockSelectionControlDefinition = GuiObject & {
 		readonly BlockButtonTemplate: BlockControlDefinition;
 		readonly CategoryButtonTemplate: CategoryControlDefinition;
 	};
+	readonly Header: {
+		readonly Pipette: GuiButton;
+	};
 };
 
 /** Block chooser control */
@@ -45,8 +49,10 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 	private readonly categoryTemplate;
 	private readonly list;
 
-	public selectedCategory = new ObservableValue<readonly CategoryName[]>([]);
-	public selectedBlock = new ObservableValue<Block | undefined>(undefined);
+	readonly selectedCategory = new ObservableValue<readonly CategoryName[]>([]);
+	readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
+
+	readonly pipette;
 
 	constructor(template: BlockSelectionControlDefinition) {
 		super(template);
@@ -58,6 +64,15 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		this.categoryTemplate = Control.asTemplate(this.gui.ScrollingFrame.CategoryButtonTemplate);
 
 		this.event.subscribeObservable(this.selectedCategory, (category) => this.create(category, true), true);
+
+		this.pipette = this.add(
+			BlockPipetteButton.forBlockId(this.gui.Header.Pipette, (id) => {
+				this.selectedBlock.set(blockRegistry.get(id)!);
+				this.selectedCategory.set(
+					Registry.findCategoryPath(categoriesRegistry, this.selectedBlock.get()!.category) ?? [],
+				);
+			}),
+		);
 
 		// might be useful
 		// const searchText = this.event.observableFromGuiParam(this.gui.SearchTextBox, "Text");
@@ -147,7 +162,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 					this.selectedBlock,
 					(newblock) => {
 						button.getGui().BackgroundColor3 =
-							newblock === block ? Color3.fromRGB(56, 61, 74) : Color3.fromRGB(86, 94, 114);
+							newblock === block ? Color3.fromRGB(58, 58, 100) : Color3.fromRGB(18, 18, 31);
 
 						// Gamepad selection improvements
 						button.getGui().SelectionOrder = newblock === block ? 0 : 1;

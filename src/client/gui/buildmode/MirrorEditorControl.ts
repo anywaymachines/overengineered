@@ -2,8 +2,8 @@ import { Players } from "@rbxts/services";
 import Control from "client/gui/Control";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
-import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "../controls/NumberTextBoxControl";
-import ToggleControl, { ToggleControlDefinition } from "../controls/ToggleControl";
+import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
+import ToggleControl, { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 
 export type MirrorEditorSingleControlDefinition = GuiObject & {
 	Checkbox: ToggleControlDefinition;

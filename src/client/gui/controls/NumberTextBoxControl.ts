@@ -25,7 +25,7 @@ export default class NumberTextBoxControl<
 
 		this.event.subscribeObservable(
 			this.value,
-			(value) => (this.gui.Text = tostring(value ?? "").sub(1, tostring((step ?? 1) * (max ?? 1)).size())),
+			(value) => (this.gui.Text = tostring(value ?? "").sub(1, tostring((step ?? 0) + (max ?? 1)).size())),
 			true,
 		);
 

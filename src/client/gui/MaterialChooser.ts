@@ -1,4 +1,5 @@
 import Control from "client/gui/Control";
+import { ButtonControl } from "client/gui/controls/Button";
 import ObservableValue from "shared/event/ObservableValue";
 
 export type MaterialChooserDefinition = GuiObject & {
@@ -17,9 +18,8 @@ export default class MaterialChooser extends Control<MaterialChooserDefinition> 
 			const material = Enum.Material.GetEnumItems().find((m) => m.Name === instance.Name);
 			if (!material) throw `Unknown material ${instance.Name}`;
 
-			this.event.subscribe(instance.Activated, () => {
-				this.value.set(material);
-			});
+			const btn = this.add(new ButtonControl(instance));
+			this.event.subscribe(btn.activated, () => this.value.set(material));
 		}
 	}
 }

@@ -41,7 +41,7 @@ export class SignalWrapper<TArgs extends readonly unknown[]>
 
 	subscribe(callback: CallbackOf<TArgs>): SignalWrapperConnection {
 		this.connection ??= this.signal.subscribe((...args) => {
-			for (const [_, event] of this.events) {
+			for (const [_, event] of [...this.events]) {
 				event(...args);
 			}
 		});

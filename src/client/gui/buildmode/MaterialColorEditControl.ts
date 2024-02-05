@@ -2,20 +2,35 @@ import ColorWheel, { ColorWheelDefinition } from "client/gui/ColorWheel";
 import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
 import MaterialChooser, { MaterialChooserDefinition } from "client/gui/MaterialChooser";
+import BlockPipetteButton from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
 import ObservableValue from "shared/event/ObservableValue";
 
 export type MaterialColorEditControlDefinition = GuiObject & {
 	readonly Material: GuiObject & {
 		readonly ScrollingFrame: MaterialChooserDefinition;
+		readonly Header: {
+			readonly Pipette: GuiButton;
+		};
 	};
-	readonly Color: ColorWheelDefinition;
-	readonly MaterialButton: TextButton;
-	readonly ColorButton: TextButton;
+	readonly Color: ColorWheelDefinition & {
+		readonly Header: {
+			readonly Pipette: GuiButton;
+		};
+	};
+	readonly MaterialButton: TextButton & {
+		readonly Material: ImageLabel;
+	};
+	readonly ColorButton: TextButton & {
+		readonly Color: Frame;
+	};
 };
 
 /** Material preview with an edit button */
 export default class MaterialColorEditControl extends Control<MaterialColorEditControlDefinition> {
+	readonly materialPipette;
+	readonly colorPipette;
+
 	constructor(
 		gui: MaterialColorEditControlDefinition,
 		selectedMaterial: ObservableValue<Enum.Material>,
@@ -34,7 +49,17 @@ export default class MaterialColorEditControl extends Control<MaterialColorEditC
 		this.event.subscribeObservable(selectedMaterial, (value) => material.value.set(value));
 
 		const materialbtn = this.add(new TextButtonControl(this.gui.MaterialButton));
-		this.event.subscribeObservable(material.value, (value) => materialbtn.text.set(value.Name), true);
+		this.event.subscribeObservable(
+			material.value,
+			(value) => {
+				const imgl = this.gui.Material.ScrollingFrame.FindFirstChild(value.Name) as ImageLabel & {
+					readonly TextLabel: TextLabel;
+				};
+				this.gui.MaterialButton.Material.Image = imgl.Image;
+				materialbtn.text.set(imgl.TextLabel.Text);
+			},
+			true,
+		);
 		this.event.subscribe(materialbtn.activated, () => {
 			if (materialGui.isVisible()) {
 				GuiAnimator.revTransition(this.gui.Material, 0.05, "down", 20);
@@ -47,7 +72,11 @@ export default class MaterialColorEditControl extends Control<MaterialColorEditC
 
 		const colorbtn = this.add(new TextButtonControl(this.gui.ColorButton));
 		this.event.subscribeObservable(color.value, (value) => colorbtn.text.set("#" + value.ToHex().upper()), true);
-		this.event.subscribeObservable(color.value, (value) => (colorbtn.getGui().TextColor3 = value), true);
+		this.event.subscribeObservable(
+			color.value,
+			(value) => (this.gui.ColorButton.Color.BackgroundColor3 = value),
+			true,
+		);
 		this.event.subscribe(colorbtn.activated, () => {
 			if (color.isVisible()) {
 				GuiAnimator.revTransition(this.gui.Color, 0.05, "down", 20);
@@ -56,6 +85,18 @@ export default class MaterialColorEditControl extends Control<MaterialColorEditC
 				GuiAnimator.transition(this.gui.Color, 0.2, "up");
 				color.show();
 			}
+		});
+
+		this.materialPipette = this.add(
+			BlockPipetteButton.forMaterial(this.gui.Material.Header.Pipette, (m) => material.value.set(m)),
+		);
+		this.colorPipette = this.add(
+			BlockPipetteButton.forColor(this.gui.Color.Header.Pipette, (c) => color.value.set(c)),
+		);
+
+		this.event.onDisable(() => {
+			materialGui.hide();
+			color.hide();
 		});
 	}
 }

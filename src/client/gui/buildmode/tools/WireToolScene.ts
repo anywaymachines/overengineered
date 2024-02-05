@@ -37,10 +37,10 @@ export default class WireToolScene extends Control<WireToolSceneDefinition> {
 			this.gui.TextLabel.Visible = true;
 
 			if (!this.tool.startMarker.get()) {
-				this.gui.TextLabel.Text = "Select the first marker";
+				this.gui.TextLabel.Text = "CLICK ON THE FIRST POINT";
 				this.gui.Bottom.CancelButton.Visible = false;
 			} else {
-				this.gui.TextLabel.Text = "Select the second marker";
+				this.gui.TextLabel.Text = "CLICK ON THE SECOND POINT";
 				if (InputController.inputType.get() !== "Gamepad") {
 					this.gui.Bottom.CancelButton.Visible = true;
 				}
@@ -68,6 +68,6 @@ export default class WireToolScene extends Control<WireToolSceneDefinition> {
 	public show() {
 		super.show();
 
-		GuiAnimator.transition(this.gui, 0.2, "down");
+		GuiAnimator.transition(this.gui.TextLabel, 0.2, "down");
 	}
 }

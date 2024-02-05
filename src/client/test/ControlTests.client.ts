@@ -5,8 +5,10 @@ import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import { ConfigControl2 } from "client/gui/buildmode/ConfigControl";
 import MultiConfigControl from "client/gui/config/MultiConfigControl";
+import BlockPipetteButton from "client/gui/controls/BlockPipetteButton";
 import BlockConfig from "shared/block/config/BlockConfig";
 import { BlockConfigDefinitions } from "shared/block/config/BlockConfigDefinitionRegistry";
+import BlockManager from "shared/building/BlockManager";
 
 const launch = false && RunService.IsStudio();
 if (!launch) new Signal<() => void>().Wait();
@@ -20,6 +22,69 @@ frame.Size = new UDim2(1, 0, 1, 0);
 frame.Parent = Gui.getGameUI();
 
 const parent = new Control(frame);
+
+// close button
+{
+	const closeButton = new Instance("TextButton");
+	closeButton.Size = new UDim2(0, 100, 0, 30);
+	closeButton.Position = new UDim2(0, 0, 0, 100);
+	closeButton.Text = "CLOSE TEST GUI";
+	closeButton.Parent = frame;
+	closeButton.Activated.Connect(() => frame.Destroy());
+}
+
+// pipettes
+{
+	{
+		const pipette = new Instance("TextButton");
+		pipette.Size = new UDim2(0, 200, 0, 30);
+		pipette.Position = new UDim2(0, 0, 0, 200);
+		pipette.Text = "MEGA PIPETTE";
+		pipette.Parent = frame;
+
+		const control = parent.add(new BlockPipetteButton(pipette));
+		control.onSelect.Connect((part) => {
+			if (part.IsA("BasePart")) {
+				pipette.Text = `${part.Material.Name} #${part.Color.ToHex().upper()}`;
+			} else {
+				const data = BlockManager.getBlockDataByBlockModel(part);
+				pipette.Text = `${data.id} ${data.material.Name} #${data.color.ToHex().upper()}`;
+			}
+
+			return true;
+		});
+	}
+
+	{
+		const pipette = new Instance("TextButton");
+		pipette.Size = new UDim2(0, 200, 0, 30);
+		pipette.Position = new UDim2(0, 0, 0, 230);
+		pipette.Text = "BLOCK ID PIPETTE";
+		pipette.Parent = frame;
+
+		parent.add(BlockPipetteButton.forBlockId(pipette, (id) => (pipette.Text = id)));
+	}
+
+	{
+		const pipette = new Instance("TextButton");
+		pipette.Size = new UDim2(0, 200, 0, 30);
+		pipette.Position = new UDim2(0, 0, 0, 260);
+		pipette.Text = "MATERIAL PIPETTE";
+		pipette.Parent = frame;
+
+		parent.add(BlockPipetteButton.forMaterial(pipette, (material) => (pipette.Text = material.Name)));
+	}
+
+	{
+		const pipette = new Instance("TextButton");
+		pipette.Size = new UDim2(0, 200, 0, 30);
+		pipette.Position = new UDim2(0, 0, 0, 290);
+		pipette.Text = "COLOR PIPETTE";
+		pipette.Parent = frame;
+
+		parent.add(BlockPipetteButton.forColor(pipette, (color) => (pipette.Text = "#" + color.ToHex().upper())));
+	}
+}
 
 //
 

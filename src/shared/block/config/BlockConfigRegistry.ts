@@ -5,7 +5,7 @@ import {
 	BlockConfigValueTypeNumber,
 	BlockConfigValueTypeOr,
 	BlockConfigValueTypeVector3,
-} from "./BlockConfigDefinitionRegistry";
+} from "shared/block/config/BlockConfigDefinitionRegistry";
 
 const disconnectblock = {
 	input: {
@@ -112,6 +112,16 @@ const servomotorblock = {
 				switchmode: false as boolean,
 				angle: 45 as number,
 			},
+		},
+		stiffness: {
+			displayName: "Stiffness",
+			type: "clampedNumber",
+			min: 0,
+			max: 100,
+			step: 1,
+			default: 45 as number,
+			config: 45 as number,
+			connectorHidden: true,
 		},
 	},
 	output: {},

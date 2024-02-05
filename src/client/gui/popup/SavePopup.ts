@@ -5,7 +5,7 @@ import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import GuiAnimator from "client/gui/GuiAnimator";
 import Popup from "client/gui/Popup";
-import { ButtonControl } from "client/gui/controls/Button";
+import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
 import TextBoxControl from "client/gui/controls/TextBoxControl";
 import ConfirmPopup from "client/gui/popup/ConfirmPopup";
 import Serializer from "shared/Serializer";
@@ -235,6 +235,9 @@ export type SavePopupDefinition = GuiObject & {
 	readonly Slots: GuiObject & {
 		readonly ScrollingFrame: SaveSlotsDefinition;
 		readonly CancelButton: GuiButton;
+		readonly Head: {
+			readonly CloseButton: ButtonDefinition;
+		};
 	};
 	readonly Slot: SavePreviewDefinition;
 };
@@ -263,8 +266,8 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 
 		this.event.subscribe(this.preview.onLoad, () => this.hide());
 
-		const cancelButton = this.added(new ButtonControl(this.gui.Slots.CancelButton));
-		this.event.subscribe(cancelButton.activated, () => this.hide());
+		this.add(new ButtonControl(this.gui.Slots.CancelButton, () => this.hide()));
+		this.add(new ButtonControl(this.gui.Slots.Head.CloseButton, () => this.hide()));
 	}
 
 	async show() {

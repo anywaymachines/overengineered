@@ -1,10 +1,9 @@
 import { GuiService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import SoundController from "client/controller/SoundController";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import Popup from "client/gui/Popup";
-import { ButtonControl, TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import { ButtonControl, ButtonDefinition, TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import EventHandler from "shared/event/EventHandler";
 
 export type SelectButtonPopupDefinition = GuiObject & {
@@ -13,6 +12,9 @@ export type SelectButtonPopupDefinition = GuiObject & {
 			readonly ButtonTemplate: TextButtonDefinition;
 		};
 		readonly CancelButton: GuiButton;
+		readonly Head: {
+			readonly CloseButton: ButtonDefinition;
+		};
 	};
 };
 
@@ -27,10 +29,12 @@ export default class SelectButtonPopup extends Popup<SelectButtonPopupDefinition
 
 	private readonly buttonPressed = new Signal<(key: KeyCode) => void>();
 	private readonly cancelButton;
+	private readonly closeButton;
 
 	constructor(gui: SelectButtonPopupDefinition) {
 		super(gui);
-		this.cancelButton = this.added(new ButtonControl(gui.Body.CancelButton));
+		this.cancelButton = this.add(new ButtonControl(gui.Body.CancelButton));
+		this.closeButton = this.add(new ButtonControl(gui.Body.Head.CloseButton));
 
 		const list = new Control(gui.Body.ScrollingFrame);
 		this.add(list);
@@ -90,14 +94,16 @@ export default class SelectButtonPopup extends Popup<SelectButtonPopupDefinition
 		eh.subscribeOnce(this.buttonPressed, (key) => {
 			eh.unsubscribeAll();
 			this.hide();
-			SoundController.getSounds().Click.Play();
 			confirmFunc(key);
 		});
-
 		eh.subscribeOnce(this.cancelButton.activated, () => {
 			eh.unsubscribeAll();
 			this.hide();
-			SoundController.getSounds().Click.Play();
+			cancelFunc();
+		});
+		eh.subscribeOnce(this.closeButton.activated, () => {
+			eh.unsubscribeAll();
+			this.hide();
 			cancelFunc();
 		});
 	}

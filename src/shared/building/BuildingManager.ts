@@ -23,7 +23,7 @@ const BuildingManager = {
 		Enum.Material.Sand,
 		Enum.Material.Slate,
 		Enum.Material.Wood,
-	],
+	] as readonly Enum.Material[],
 
 	/** Get an axis-aligned bounding box of a model */
 	getModelAABB(block: Model): Region3 {
@@ -143,9 +143,7 @@ const BuildingManager = {
 			const reflectedCFrame = mirrorCFrame.ToWorldSpace(reflection);
 			const [x, y, z] = reflectedCFrame.ToOrientation();
 
-			return CFrame.fromOrientation(x, y, z)
-				.add(reflectedCFrame.Position)
-				.mul(CFrame.fromEulerAnglesXYZ(0, math.pi / 2, 0));
+			return CFrame.fromOrientation(x, y, z).add(reflectedCFrame.Position);
 		};
 
 		const plotframe = plot.GetPivot();
