@@ -13,10 +13,16 @@ export default class SharedComponentEventHolder {
 	private readonly events: Sub<Callback>[] = [];
 
 	private enabled = false;
+	private destroyed = false;
 
 	/** @returns Is event processing enabled */
 	isEnabled(): boolean {
 		return this.enabled;
+	}
+
+	/** @returns Is destroyed */
+	isDestroyed(): boolean {
+		return this.destroyed;
 	}
 
 	/** Enable the event processing */
@@ -124,5 +130,7 @@ export default class SharedComponentEventHolder {
 
 		const tis = this;
 		delete (this as unknown as { events?: typeof tis.events }).events;
+
+		this.destroyed = true;
 	}
 }

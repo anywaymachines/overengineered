@@ -1,6 +1,7 @@
 import Signal from "@rbxts/signal";
 import SoundController from "client/controller/SoundController";
 import Control from "client/gui/Control";
+import { Element, ElementProperties } from "client/gui/Element";
 
 export type ButtonDefinition = GuiButton;
 export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extends Control<T> {
@@ -36,5 +37,10 @@ export class TextButtonControl<T extends TextButtonDefinition = TextButtonDefini
 			isTextButton(this.gui) ? (this.gui as TextButton) : this.gui.TextLabel!,
 			"Text",
 		);
+	}
+
+	static create(props: ElementProperties<TextButton>) {
+		const gui = Element.create("TextButton", props);
+		return new TextButtonControl(gui);
 	}
 }

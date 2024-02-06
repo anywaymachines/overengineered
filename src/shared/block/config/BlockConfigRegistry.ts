@@ -226,6 +226,7 @@ const suspensionblock = {
 			max: 10_000,
 			step: 0.01,
 			config: 250 as number,
+			connectorHidden: true,
 		},
 		stiffness: {
 			displayName: "Stiffness",
@@ -235,6 +236,7 @@ const suspensionblock = {
 			max: 100_000,
 			step: 0.01,
 			config: 75_000 as number,
+			connectorHidden: true,
 		},
 		free_length: {
 			displayName: "Free Length",

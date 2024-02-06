@@ -1,8 +1,8 @@
 import Signal from "@rbxts/signal";
 import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
 import Gui from "client/gui/Gui";
-import Arrays from "shared/fixes/Arrays";
 import { TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import Arrays from "shared/fixes/Arrays";
 
 export type TouchModeButtonData = {
 	readonly name: string;
@@ -49,7 +49,7 @@ export default class TouchModeButtonControl extends TextButtonControl {
 		}
 	}
 
-	static create() {
+	static fromTemplate() {
 		const template = Gui.getTemplates<{
 			readonly RideMode: { readonly TouchControlButton: TouchModeButtonControlDefinition };
 		}>().RideMode.TouchControlButton;
@@ -64,7 +64,7 @@ export default class TouchModeButtonControl extends TextButtonControl {
 		if (inputType !== "Touch") return [];
 
 		const createButton = (key: string, group: readonly TouchModeButtonData[]) => {
-			const button = this.create();
+			const button = this.fromTemplate();
 			button.text.set(key);
 
 			for (const data of group) {

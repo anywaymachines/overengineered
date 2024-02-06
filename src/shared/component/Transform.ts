@@ -1,11 +1,15 @@
 import { RunService, TweenService } from "@rbxts/services";
-import SharedComponent from "shared/component/SharedComponent";
 import SharedComponentContainer from "shared/component/SharedComponentContainer";
+import SlimSignal from "shared/event/SlimSignal";
 import Objects from "shared/fixes/objects";
+import SharedComponentBase from "./SharedComponentBase";
 
 interface Transform {
 	/** @returns True if completed */
 	runFrame(time: number, dt: number): boolean;
+
+	/** Finish a transform immediately */
+	finish(): void;
 }
 
 class FuncTransform implements Transform {
@@ -15,6 +19,9 @@ class FuncTransform implements Transform {
 		this.func();
 		return true;
 	}
+	finish(): void {
+		this.func();
+	}
 }
 class DelayTransform implements Transform {
 	constructor(private readonly delay: number) {}
@@ -22,13 +29,14 @@ class DelayTransform implements Transform {
 	runFrame(time: number, dt: number): boolean {
 		return time > this.delay;
 	}
+	finish(): void {}
 }
 
 type TransformParams = {
 	readonly duration?: number;
 	readonly easing?: TransformEasing;
 };
-type Transformable = number | UDim2;
+type Transformable = number | UDim2 | Color3;
 export type TransformEasing = "OutQuad" | "InQuad";
 export type TransformDirection = "up" | "down" | "left" | "right";
 
@@ -72,6 +80,10 @@ class TweenTransform<T extends Instance, TKey extends keyof ExtractMembers<T, Tr
 				) as T;
 			}
 
+			if (typeIs(from, "Color3") && typeIs(to, "Color3")) {
+				return new Color3(interpolate(from.R, to.R), interpolate(from.G, to.G), interpolate(from.B, to.B)) as T;
+			}
+
 			throw "Untweenable type";
 		};
 
@@ -83,7 +95,7 @@ class TweenTransform<T extends Instance, TKey extends keyof ExtractMembers<T, Tr
 	runFrame(time: number, dt: number): boolean {
 		if (time < 0) return false;
 		if (time > this.duration) {
-			this.instance[this.key] = this.value;
+			this.finish();
 			return true;
 		}
 
@@ -98,60 +110,109 @@ class TweenTransform<T extends Instance, TKey extends keyof ExtractMembers<T, Tr
 
 		return false;
 	}
+
+	finish(): void {
+		this.instance[this.key] = this.value;
+	}
 }
+class TransformSequence implements Transform {
+	private readonly sequence: Transform[];
+	private time = 0;
 
-class TransformSequence extends SharedComponentContainer {
-	private readonly sequence: (readonly (() => Transform)[])[];
-
-	constructor(sequence: readonly (readonly (() => Transform)[])[]) {
-		super();
+	constructor(sequence: readonly Transform[]) {
 		this.sequence = [...sequence];
 	}
 
-	enable() {
-		super.enable();
+	runFrame(_: never, dt: number): boolean {
+		if (this.sequence.size() === 0) {
+			return true;
+		}
 
-		const createTransformSequence = (sequence: readonly Transform[]) => {
-			sequence = [...sequence];
-			let time = 0;
-
-			return (dt: number): boolean => {
-				if (sequence.size() === 0) {
-					return true;
-				}
-
-				time += dt;
-				for (const transform of [...sequence]) {
-					const completed = transform.runFrame(time, dt);
-					if (completed) {
-						(sequence as Transform[]).remove(sequence.indexOf(transform));
-					}
-				}
-
-				return false;
-			};
-		};
-
-		let currentSequence: ((dt: number) => boolean) | undefined;
-		const run = (dt: number) => {
-			if (!currentSequence) {
-				if (this.sequence.size() === 0) {
-					this.destroy();
-					return;
-				}
-
-				currentSequence = createTransformSequence(this.sequence[0].map((s) => s()));
-				this.sequence.remove(0);
-			}
-
-			const completed = currentSequence(dt);
+		this.time += dt;
+		for (const transform of [...this.sequence]) {
+			const completed = transform.runFrame(this.time, dt);
 			if (completed) {
-				currentSequence = undefined;
+				this.sequence.remove(this.sequence.indexOf(transform));
 			}
+		}
+
+		return false;
+	}
+
+	finish(): void {
+		for (const transform of this.sequence) {
+			transform.finish();
+		}
+
+		this.sequence.clear();
+	}
+}
+class TransformDoubleSequence implements Transform {
+	private readonly sequence: (readonly (() => Transform)[])[];
+	private current?: TransformSequence;
+
+	constructor(sequence: readonly (readonly (() => Transform)[])[]) {
+		this.sequence = [...sequence];
+	}
+
+	runFrame(_: never, dt: number): boolean {
+		if (!this.current) {
+			if (this.sequence.size() === 0) {
+				return true;
+			}
+
+			this.current = new TransformSequence(this.sequence[0].map((s) => s()));
+			this.sequence.remove(0);
+		}
+
+		const completed = this.current.runFrame(0 as never, dt);
+		if (completed) {
+			this.current = undefined;
+		}
+
+		return false;
+	}
+
+	finish() {
+		if (this.current) {
+			this.current.finish();
+			this.sequence.remove(0);
+		}
+
+		for (const seq of this.sequence) {
+			new TransformSequence(seq.map((s) => s())).finish();
+		}
+	}
+}
+
+class RunningTransform extends SharedComponentBase {
+	readonly completed = new SlimSignal();
+	private readonly sequence: TransformDoubleSequence;
+
+	constructor(sequence: readonly (readonly (() => Transform)[])[]) {
+		super();
+		this.sequence = new TransformDoubleSequence(sequence);
+
+		const run = (dt: number) => {
+			const completed = this.sequence.runFrame(0 as never, dt);
+			if (!completed) return;
+
+			this.completed.Fire();
+			this.disable();
 		};
 
-		run(0);
+		let firstTime = true;
+		this.event.onEnable(() => {
+			if (!firstTime) return;
+
+			firstTime = false;
+			run(0);
+		});
 		this.event.subscribe(RunService.Heartbeat, run);
+	}
+
+	finish() {
+		this.sequence.finish();
 	}
 }
 
@@ -209,6 +270,30 @@ export class TransformBuilder<T extends Instance> {
 		return this;
 	}
 
+	/** Adds a transform that runs multiple transforms in parallel */
+	parallel(...funcs: ((transform: TransformBuilder<T>) => void)[]): this {
+		for (const func of funcs) {
+			const f = new TransformBuilder(this.instance);
+			func(f);
+
+			this.push(() => new TransformDoubleSequence(f.sequence));
+		}
+
+		return this;
+	}
+
+	/** Adds a transform that runs the provided transform N times */
+	repeat(times: number, func: (transform: TransformBuilder<T>) => void): this {
+		const f = new TransformBuilder(this.instance);
+		for (let i = 0; i < times; i++) {
+			func(f);
+			f.then();
+		}
+
+		this.push(() => new TransformDoubleSequence(f.sequence));
+		return this;
+	}
+
 	/** Adds a transform that changes a value of an `Instance` over time */
 	transform<TKey extends keyof ExtractMembers<T, Transformable>, TValue extends T[TKey]>(
 		key: TKey,
@@ -258,16 +343,29 @@ export class TransformBuilder<T extends Instance> {
 	}
 }
 
-export class TransformContainer<T extends Instance> extends SharedComponent<T, TransformSequence> {
+export class TransformContainer<T extends Instance> extends SharedComponentContainer<RunningTransform> {
+	readonly instance;
+
 	constructor(instance: T) {
-		super(instance);
+		super();
+		this.instance = instance;
 	}
 
-	run(setup: (transform: TransformBuilder<T>) => void): void {
-		const transform = new TransformBuilder(this.instance);
-		setup(transform);
+	run(setup: (transform: TransformBuilder<T>, instance: T) => void): void {
+		this.finish();
 
-		this.add(new TransformSequence(transform.sequence));
+		const transform = new TransformBuilder(this.instance);
+		setup(transform, this.instance);
+
+		const sequence = this.add(new RunningTransform(transform.sequence));
+		sequence.completed.Connect(() => this.remove(sequence));
+	}
+	finish() {
+		for (const transform of this.getChildren()) {
+			transform.finish();
+		}
+
+		this.stop();
 	}
 	stop() {
 		this.clear();

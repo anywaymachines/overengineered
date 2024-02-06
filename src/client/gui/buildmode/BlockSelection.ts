@@ -7,6 +7,7 @@ import { TextButtonControl } from "client/gui/controls/Button";
 import Registry, { blockList, blockRegistry, categoriesRegistry } from "shared/Registry";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
+import Colors from "client/gui/Colors";
 
 type CategoryControlDefinition = TextButton;
 class CategoryControl extends TextButtonControl<CategoryControlDefinition> {
@@ -161,8 +162,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 				button.event.subscribeObservable(
 					this.selectedBlock,
 					(newblock) => {
-						button.getGui().BackgroundColor3 =
-							newblock === block ? Color3.fromRGB(58, 58, 100) : Color3.fromRGB(18, 18, 31);
+						button.getGui().BackgroundColor3 = newblock === block ? Colors.accent : Colors.staticBackground;
 
 						// Gamepad selection improvements
 						button.getGui().SelectionOrder = newblock === block ? 0 : 1;

@@ -16,7 +16,7 @@ export default class SlotsMeta {
 			return {
 				...def,
 				name: "Autosave",
-				color: "00FFFF",
+				color: "55aaff",
 			};
 		}
 

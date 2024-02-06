@@ -119,7 +119,6 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 				"Nine",
 			];
 
-			print("!!!!!!!!!!!!!!!!!! prepare desktop ");
 			this.tools.tools.forEach((tool, i) => {
 				this.inputHandler.onKeyDown(keycodes[i], () =>
 					this.tools.selectedTool.set(tool === this.tools.selectedTool.get() ? undefined : tool),

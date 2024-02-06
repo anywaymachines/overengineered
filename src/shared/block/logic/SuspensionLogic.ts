@@ -26,8 +26,8 @@ export default class SuspensionLogic extends ConfigurableBlockLogic<
 			this.disable();
 		});
 
-		this.event.subscribeObservable(this.input.damping, (v) => (this.springConstraint.Damping = v), true);
-		this.event.subscribeObservable(this.input.stiffness, (v) => (this.springConstraint.Stiffness = v), true);
+		this.springConstraint.Damping = this.input.damping.get();
+		this.springConstraint.Stiffness = this.input.stiffness.get();
 		this.event.subscribeObservable(this.input.free_length, (v) => (this.springConstraint.FreeLength = v), true);
 	}
 }

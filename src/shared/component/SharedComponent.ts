@@ -37,6 +37,7 @@ export default class SharedComponent<
 			this.event.onEnable(() => this.transforms?.enable());
 			this.event.onDisable(() => this.transforms?.disable());
 			this.event.onDestroy(() => this.transforms?.destroy());
+			if (this.event.isEnabled()) this.transforms.enable();
 		}
 
 		return this.transforms;

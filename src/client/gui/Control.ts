@@ -1,6 +1,6 @@
 import Signal from "@rbxts/signal";
+import Component from "client/component/Component";
 import SharedComponentBase from "shared/component/SharedComponentBase";
-import Component from "../component/Component";
 
 /** A component that is a GUI element */
 export default class Control<

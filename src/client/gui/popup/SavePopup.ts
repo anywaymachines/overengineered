@@ -37,20 +37,18 @@ class SaveItem extends ButtonControl<SaveItemDefinition> {
 		);
 
 		this.selected.subscribe((selected) => {
-			this.gui.BackgroundColor3 = selected ? Color3.fromRGB(63, 70, 88) : Color3.fromRGB(44, 48, 61);
+			this.gui.BackgroundColor3 = selected ? Color3.fromRGB(58, 58, 100) : Color3.fromRGB(12, 12, 20);
 		}, true);
 	}
 }
 
 type SaveSlotsDefinition = ScrollingFrame & {
 	readonly Template: SaveItemDefinition;
-	readonly BuyNewTemplate: GuiButton;
 };
 
 class SaveSlots extends Control<SaveSlotsDefinition> {
 	readonly selectedSlot = new ObservableValue<number | undefined>(undefined);
 
-	private readonly buyNewTemplate;
 	private readonly template;
 
 	private readonly slots;
@@ -59,7 +57,6 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 		super(gui);
 
 		this.template = Control.asTemplate(this.gui.Template);
-		this.buyNewTemplate = Control.asTemplate(this.gui.BuyNewTemplate);
 
 		this.slots = new Control<SaveSlotsDefinition, SaveItem>(this.gui);
 		this.add(this.slots);

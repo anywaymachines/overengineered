@@ -38,7 +38,7 @@
 			"warn",
 			{
 				"rootDir": "src",
-				"allowSameFolder": false
+				"allowSameFolder": true
 			}
 		]
 	}
