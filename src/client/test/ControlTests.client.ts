@@ -1,5 +1,6 @@
 import { RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import Component from "client/component/Component";
 import ColorWheel, { ColorWheelDefinition } from "client/gui/ColorWheel";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
@@ -10,7 +11,7 @@ import BlockConfig from "shared/block/config/BlockConfig";
 import { BlockConfigDefinitions } from "shared/block/config/BlockConfigDefinitionRegistry";
 import BlockManager from "shared/building/BlockManager";
 
-const launch = false && RunService.IsStudio();
+const launch = true && RunService.IsStudio();
 if (!launch) new Signal<() => void>().Wait();
 
 task.wait(0.5); // wait for the controls to enable
@@ -89,6 +90,98 @@ const parent = new Control(frame);
 //
 
 parent.add(new ColorWheel(Gui.getGameUI<{ Templates: { Color: ColorWheelDefinition } }>().Templates.Color.Clone()));
+
+{
+	{
+		const tweenable = new Instance("TextButton");
+		tweenable.Size = new UDim2(0, 100, 0, 30);
+		tweenable.Position = new UDim2(0, 0, 0, 400);
+		tweenable.Text = "instant transparency";
+		tweenable.Parent = frame;
+
+		const component = new Component(tweenable);
+		component.enable();
+		component.transform().run((t) => t.func(() => (tweenable.Transparency = 0)).transform("Transparency", 0.9));
+	}
+
+	{
+		const tweenable = new Instance("TextButton");
+		tweenable.Size = new UDim2(0, 100, 0, 30);
+		tweenable.Position = new UDim2(0, 0, 0, 430);
+		tweenable.Text = "transparency over 1sec";
+		tweenable.Parent = frame;
+
+		const component = new Component(tweenable);
+		component.enable();
+		component
+			.transform()
+			.run((t) => t.save("Transparency").transform("Transparency", 0.9, { duration: 1 }).then().restore());
+	}
+
+	{
+		const tweenable = new Instance("TextButton");
+		tweenable.Size = new UDim2(0, 100, 0, 30);
+		tweenable.Position = new UDim2(0, 0, 0, 460);
+		tweenable.Text = "transparency over 1sec after 1sec";
+		tweenable.Parent = frame;
+
+		const component = new Component(tweenable);
+		component.enable();
+		component
+			.transform()
+			.run((t) =>
+				t.save("Transparency").wait(1).transform("Transparency", 0.9, { duration: 1 }).then().restore(),
+			);
+	}
+
+	{
+		const tweenable = new Instance("TextButton");
+		tweenable.AnchorPoint = new Vector2(0.5, 0.5);
+		tweenable.Size = new UDim2(0, 100, 0, 30);
+		tweenable.Position = new UDim2(0, 0 + 50, 0, 490 + 15);
+		tweenable.Text = "multiple";
+		tweenable.Parent = frame;
+
+		const component = new Component(tweenable);
+		component.enable();
+
+		const anim = 1 as number;
+		if (anim === 0) {
+			component.transform().run((t) =>
+				t
+					.save("Transparency")
+					.func(() => (tweenable.Transparency = 0))
+					.wait(1)
+					.transform("Transparency", 0.9, { duration: 1 })
+					.transform("Size", new UDim2(0, 80, 0, 10), { duration: 1 })
+					.then()
+					.transform("Transparency", 0, { duration: 1 })
+					.transform("Size", new UDim2(0, 100, 0, 30), { duration: 1 })
+					.then()
+					.restore(),
+			);
+		} else if (anim === 1) {
+			component.transform().run((t) =>
+				t
+					.func(() => (tweenable.Transparency = 0))
+					.save("Position", "Size")
+					.resizeRelative(new UDim2(0, -4, 0, -4), { duration: 0.05 })
+					.moveRelative(new UDim2(0, -5, 0, 0), { duration: 0.1 })
+					.then()
+					.moveRelative(new UDim2(0, 10, 0, 0), { duration: 0.1 })
+					.then()
+					.moveRelative(new UDim2(0, -10, 0, 0), { duration: 0.1 })
+					.then()
+					.moveRelative(new UDim2(0, 10, 0, 0), { duration: 0.1 })
+					.then()
+					.moveRelative(new UDim2(0, -5, 0, 0), { duration: 0.1 })
+					.resizeRelative(new UDim2(0, 4, 0, 4), { duration: 0.05 })
+					.then()
+					.restore(),
+			);
+		}
+	}
+}
 
 {
 	const multidef: BlockConfigDefinitions = {
