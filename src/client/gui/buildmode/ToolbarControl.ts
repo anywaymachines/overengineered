@@ -65,6 +65,7 @@ export type ToolbarControlDefinition = GuiObject & {
 
 export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 	private readonly tools;
+	private readonly nameLabel;
 
 	constructor(tools: ToolController, gui: ToolbarControlDefinition) {
 		super(gui);
@@ -76,6 +77,8 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 		const template = Control.asTemplate(this.gui.Buttons.Template);
 		const toolButtons = new Control<GuiObject, ToolbarButtonControl>(this.gui.Buttons);
 		this.add(toolButtons);
+
+		this.nameLabel = this.add(new Control(this.gui.Info.NameLabel));
 
 		// Creating buttons
 		for (const tool of tools.tools) {
@@ -123,7 +126,6 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 				this.inputHandler.onKeyDown(keycodes[i], () =>
 					this.tools.selectedTool.set(tool === this.tools.selectedTool.get() ? undefined : tool),
 				);
-				this.inputHandler.onKeyDown(keycodes[i], () => print("set setool " + this.tools.selectedTool.get()));
 			});
 		});
 
@@ -133,18 +135,33 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 			this.inputHandler.onKeyDown("ButtonL1", () => this.gamepadSelectTool(false));
 		});
 
-		this.event.subscribeObservable(tools.selectedTool, (tool) => this.toolChanged(tool));
+		this.event.subscribeObservable(tools.selectedTool, (tool, prev) => this.toolChanged(tool, prev));
 		this.resetLabels();
 	}
 
-	private toolChanged(tool: ToolBase | undefined) {
-		if (tool) {
-			this.getGui().Info.NameLabel.Text = tool.getDisplayName();
+	private toolChanged(tool: ToolBase | undefined, prev: ToolBase | undefined) {
+		const duration = tool && prev ? 0.07 : 0.15;
 
-			GuiAnimator.transition(this.getGui().Info.NameLabel, 0.2, "up", 25);
-		} else {
-			this.resetLabels();
-		}
+		this.nameLabel.transform().stop();
+		this.nameLabel.transform().run((transform) => {
+			if (prev) {
+				transform
+					.moveY(new UDim(0, 0), { duration })
+					.transform("TextTransparency", 1, { duration: duration * 0.8 });
+			}
+
+			transform.then().func(() => (this.getGui().Info.NameLabel.Text = tool?.getDisplayName() ?? ""));
+
+			if (tool) {
+				transform
+					.then()
+					.moveY(new UDim(1, 0))
+					.transform("TextTransparency", 1)
+					.moveY(new UDim(0.5, 0), { duration })
+					.transform("TextTransparency", 0, { duration: duration * 0.8 })
+					.then();
+			}
+		});
 
 		// Play sound
 		SoundController.getSounds().Click.Play();

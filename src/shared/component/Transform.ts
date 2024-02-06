@@ -94,7 +94,7 @@ class TweenTransform<T extends Instance, TKey extends keyof ExtractMembers<T, Tr
 	/** @returns True if completed */
 	runFrame(time: number, dt: number): boolean {
 		if (time < 0) return false;
-		if (time > this.duration) {
+		if (this.duration === 0 || time > this.duration) {
 			this.finish();
 			return true;
 		}
@@ -299,7 +299,7 @@ export class TransformBuilder<T extends Instance> {
 		key: TKey,
 		value: TValue | (() => TValue),
 		params?: TransformParams,
-	) {
+	): TransformBuilder<T> {
 		const toStyle = (
 			easing: TransformEasing,
 		): readonly [direction: Enum.EasingDirection, style: Enum.EasingStyle] => {
@@ -325,21 +325,42 @@ export class TransformBuilder<T extends Instance> {
 	}
 
 	/** Move the `GuiObject` */
-	move(this: TransformBuilder<GuiObject>, position: UDim2, params?: TransformParams) {
-		return this.transform("Position", position, params);
+	move(this: TransformBuilder<GuiObject>, position: UDim2, params?: TransformParams): TransformBuilder<T> {
+		return this.transform("Position", position, params) as unknown as TransformBuilder<T>;
 	}
+	/** Move the `GuiObject` by X */
+	moveX(this: TransformBuilder<GuiObject>, position: UDim, params?: TransformParams): TransformBuilder<T> {
+		return this.transform(
+			"Position",
+			() => new UDim2(position, this.instance.Position.Y),
+			params,
+		) as unknown as TransformBuilder<T>;
+	}
+	/** Move the `GuiObject` by Y */
+	moveY(this: TransformBuilder<GuiObject>, position: UDim, params?: TransformParams): TransformBuilder<T> {
+		return this.transform(
+			"Position",
+			() => new UDim2(this.instance.Position.X, position),
+			params,
+		) as unknown as TransformBuilder<T>;
+	}
+
 	/** Resize the `GuiObject` */
-	resize(this: TransformBuilder<GuiObject>, size: UDim2, params?: TransformParams) {
-		return this.transform("Size", size, params);
+	resize(this: TransformBuilder<GuiObject>, size: UDim2, params?: TransformParams): TransformBuilder<T> {
+		return this.transform("Size", size, params) as unknown as TransformBuilder<T>;
 	}
 
 	/** Relatively move the `GuiObject` */
 	moveRelative(this: TransformBuilder<GuiObject>, offset: UDim2, params?: TransformParams) {
-		return this.transform("Position", () => this.instance.Position.add(offset), params);
+		return this.transform(
+			"Position",
+			() => this.instance.Position.add(offset),
+			params,
+		) as unknown as TransformBuilder<T>;
 	}
 	/** Relatively resize the `GuiObject` */
-	resizeRelative(this: TransformBuilder<GuiObject>, offset: UDim2, params?: TransformParams) {
-		return this.transform("Size", () => this.instance.Size.add(offset), params);
+	resizeRelative(this: TransformBuilder<GuiObject>, offset: UDim2, params?: TransformParams): TransformBuilder<T> {
+		return this.transform("Size", () => this.instance.Size.add(offset), params) as unknown as TransformBuilder<T>;
 	}
 }
 
