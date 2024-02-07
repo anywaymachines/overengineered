@@ -1,7 +1,7 @@
 import SharedComponentBase from "shared/component/SharedComponentBase";
 import SharedComponentContainer from "shared/component/SharedComponentContainer";
 import SharedComponentEventHolder from "shared/component/SharedComponentEventHolder";
-import { TransformContainer } from "shared/component/Transform";
+import { TransformContainer } from "./Transform";
 
 /** A component that controls an Instance and has children. */
 export default class SharedComponent<

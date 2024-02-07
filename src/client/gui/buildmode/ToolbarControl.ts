@@ -142,7 +142,7 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 	private toolChanged(tool: ToolBase | undefined, prev: ToolBase | undefined) {
 		const duration = tool && prev ? 0.07 : 0.15;
 
-		this.nameLabel.transform().stop();
+		this.nameLabel.transform().cancel();
 		this.nameLabel.transform().run((transform) => {
 			if (prev) {
 				transform

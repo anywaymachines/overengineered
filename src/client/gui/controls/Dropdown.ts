@@ -1,12 +1,16 @@
 import Control from "client/gui/Control";
 import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
-import { TransformDirection } from "shared/component/Transform";
 
 export default class Dropdown extends Control<GuiObject> {
 	readonly button;
 	readonly contents;
 
-	constructor(gui: GuiObject, button: ButtonDefinition, contents: GuiObject, direction: TransformDirection) {
+	constructor(
+		gui: GuiObject,
+		button: ButtonDefinition,
+		contents: GuiObject,
+		direction: "up" | "down" | "left" | "right",
+	) {
 		super(gui);
 
 		this.button = this.add(new ButtonControl(button));
