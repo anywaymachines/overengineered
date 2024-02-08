@@ -4,42 +4,46 @@ import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import Popup from "client/gui/Popup";
 import { ButtonControl, ButtonDefinition, TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
-import EventHandler from "shared/event/EventHandler";
 
 export type SelectButtonPopupDefinition = GuiObject & {
-	readonly Body: GuiObject & {
+	readonly Content: {
 		readonly ScrollingFrame: ScrollingFrame & {
 			readonly ButtonTemplate: TextButtonDefinition;
 		};
+	};
+	readonly Buttons: {
 		readonly CancelButton: GuiButton;
-		readonly Head: {
-			readonly CloseButton: ButtonDefinition;
-		};
+	};
+	readonly Head: {
+		readonly CloseButton: ButtonDefinition;
 	};
 };
 
 export default class SelectButtonPopup extends Popup<SelectButtonPopupDefinition> {
-	static readonly instance = new SelectButtonPopup(
-		Gui.getGameUI<{
-			Popup: {
-				MobileSelectButton: SelectButtonPopupDefinition;
-			};
-		}>().Popup.MobileSelectButton,
-	);
-
 	private readonly buttonPressed = new Signal<(key: KeyCode) => void>();
 	private readonly cancelButton;
 	private readonly closeButton;
 
-	constructor(gui: SelectButtonPopupDefinition) {
-		super(gui);
-		this.cancelButton = this.add(new ButtonControl(gui.Body.CancelButton));
-		this.closeButton = this.add(new ButtonControl(gui.Body.Head.CloseButton));
+	static showPopup(confirmFunc: (key: KeyCode) => void, cancelFunc: () => void) {
+		const popup = new SelectButtonPopup(
+			Gui.getGameUI<{
+				Popup: { MobileSelectButton: SelectButtonPopupDefinition };
+			}>().Popup.MobileSelectButton.Clone(),
+			confirmFunc,
+			cancelFunc,
+		);
 
-		const list = new Control(gui.Body.ScrollingFrame);
+		popup.show();
+	}
+	constructor(gui: SelectButtonPopupDefinition, confirmFunc: (key: KeyCode) => void, cancelFunc: () => void) {
+		super(gui);
+		this.cancelButton = this.add(new ButtonControl(gui.Buttons.CancelButton));
+		this.closeButton = this.add(new ButtonControl(gui.Head.CloseButton));
+
+		const list = new Control(gui.Content.ScrollingFrame);
 		this.add(list);
 
-		const template = Control.asTemplate(this.gui.Body.ScrollingFrame.ButtonTemplate);
+		const template = Control.asTemplate(this.gui.Content.ScrollingFrame.ButtonTemplate);
 
 		const keys = Enum.KeyCode.GetEnumItems().filter((value) => {
 			// numbers
@@ -83,32 +87,22 @@ export default class SelectButtonPopup extends Popup<SelectButtonPopupDefinition
 				this.hide();
 			});
 		}
-	}
 
-	showPopup(confirmFunc: (key: KeyCode) => void, cancelFunc: () => void) {
-		if (this.isVisible()) throw "Popup is already visible";
-		super.show();
-
-		const eh = new EventHandler();
-
-		eh.subscribeOnce(this.buttonPressed, (key) => {
-			eh.unsubscribeAll();
+		this.event.subscribe(this.buttonPressed, (key) => {
 			this.hide();
 			confirmFunc(key);
 		});
-		eh.subscribeOnce(this.cancelButton.activated, () => {
-			eh.unsubscribeAll();
+		this.event.subscribe(this.cancelButton.activated, () => {
 			this.hide();
 			cancelFunc();
 		});
-		eh.subscribeOnce(this.closeButton.activated, () => {
-			eh.unsubscribeAll();
+		this.event.subscribe(this.closeButton.activated, () => {
 			this.hide();
 			cancelFunc();
 		});
 	}
 
 	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.gui.Body.CancelButton;
+		GuiService.SelectedObject = this.cancelButton.getGui();
 	}
 }

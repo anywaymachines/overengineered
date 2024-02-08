@@ -1,11 +1,23 @@
 import { Lighting, TweenService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import Control from "./Control";
+import { Element } from "./Element";
+import Gui from "./Gui";
 
 export default class Popup<T extends GuiObject = GuiObject> extends Control<T> {
-	public static blur = Lighting.WaitForChild("Blur") as BlurEffect;
-	public static readonly onAnyShow = new Signal<() => void>();
-	public static readonly onAnyHide = new Signal<() => void>();
+	static readonly onAnyShow = new Signal<() => void>();
+	static readonly onAnyHide = new Signal<() => void>();
+	static readonly onAllHide = new Signal<() => void>();
+	private static readonly popupsScreenGui = Gui.getPopupUI();
+	private static readonly blur = Lighting.WaitForChild("Blur") as BlurEffect;
+
+	static {
+		Popup.onAnyShow.Connect(() => Popup.tweenBlur(12));
+		Popup.onAllHide.Connect(() => Popup.tweenBlur(0));
+	}
+	constructor(gui: T) {
+		super(gui);
+	}
 
 	private static tweenBlur(size: number) {
 		TweenService.Create(Popup.blur, new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
@@ -13,17 +25,31 @@ export default class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 		}).Play();
 	}
 
-	public show() {
+	show() {
 		super.show();
 		Popup.onAnyShow.Fire();
 
-		Popup.tweenBlur(12);
+		Element.create(
+			"ScreenGui",
+			{ Name: tostring(this), Parent: Popup.popupsScreenGui, IgnoreGuiInset: true },
+			{
+				bg: Element.create("Frame", {
+					Size: new UDim2(1, 0, 1, 0),
+					BackgroundColor3: Color3.fromRGB(0, 0, 0),
+					BackgroundTransparency: 0.5,
+				}),
+				popup: this.instance,
+			},
+		);
 	}
-
-	public hide() {
+	hide() {
 		super.hide();
 		Popup.onAnyHide.Fire();
+		this.instance.Parent?.Destroy();
 
-		Popup.tweenBlur(0);
+		// 1 for UIScale
+		if (Popup.popupsScreenGui.GetChildren().size() === 1) {
+			Popup.onAllHide.Fire();
+		}
 	}
 }

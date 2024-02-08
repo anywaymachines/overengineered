@@ -74,7 +74,7 @@ export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> 
 	}
 
 	private suggestClearAll() {
-		ConfirmPopup.instance.showPopup(
+		ConfirmPopup.showPopup(
 			"Are you sure you want to delete all blocks?",
 			"It will be impossible to undo this action",
 			() => this.tool.deleteBlocks("all"),

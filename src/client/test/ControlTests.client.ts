@@ -7,6 +7,7 @@ import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
 import SharedComponent from "shared/component/SharedComponent";
 import { ColorWheelTest } from "./control/ColorWheelTest";
 import { ConfigTest } from "./control/ConfigTest";
+import { PopupTest } from "./control/PopupTest";
 import { TransformTest } from "./control/TransformTest";
 import { WorldPipetteTest } from "./control/WorldPipetteTest";
 
@@ -101,6 +102,7 @@ const tests: readonly (readonly [name: string, test: Control])[] = [
 	...WorldPipetteTest.createTests(),
 	...TransformTest.createTests(),
 	...ConfigTest.createTests(),
+	...PopupTest.createTests(),
 ];
 for (const [name, content] of tests) {
 	content.hide();

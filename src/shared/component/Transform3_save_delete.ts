@@ -6,14 +6,26 @@ import SharedComponentBase from "./SharedComponentBase";
 import SharedComponentContainer from "./SharedComponentContainer";
 
 interface Transform {
+	/**
+	 * Group of the transform.
+	 * If, when creating a transform, an existing one with the same group already exists, it will be canceled (unless the group is `undefined`).
+	 */
+	readonly group: string | undefined;
+
 	/** @returns True if completed */
 	runFrame(time: number): boolean;
 
 	/** Immediately finish a transform */
 	finish(): void;
 }
+interface MultiTransform extends Transform {
+	/** Get all containing transforms */
+	getChildren(): readonly Transform[];
+}
 
 class FuncTransform implements Transform {
+	readonly group = undefined;
+
 	private readonly func: () => void;
 
 	constructor(func: () => void) {
@@ -29,6 +41,8 @@ class FuncTransform implements Transform {
 	}
 }
 class DelayTransform implements Transform {
+	readonly group = undefined;
+
 	private readonly delay: number;
 
 	constructor(delay: number) {
@@ -41,13 +55,15 @@ class DelayTransform implements Transform {
 	finish() {}
 }
 
-export type TweenableProperties<T> = ExtractKeys<T, Easable>;
-export type TransformProps = {
+type TweenableProperties<T> = ExtractKeys<T, Easable>;
+type TransformParams = {
 	readonly duration?: number;
 	readonly style?: EasingStyle;
 	readonly direction?: EasingDirection;
 };
-class TweenTransform<T, TKey extends TweenableProperties<T>> implements Transform {
+class TweenTransform<T, TKey extends TweenableProperties<T> & string> implements Transform {
+	readonly group;
+
 	constructor(
 		private readonly instance: T,
 		private readonly key: TKey,
@@ -59,6 +75,8 @@ class TweenTransform<T, TKey extends TweenableProperties<T>> implements Transfor
 		this.instance = instance;
 		this.key = key;
 		this.value = value;
+
+		this.group = key;
 	}
 
 	private startValue?: T[TKey];
@@ -89,11 +107,16 @@ class TweenTransform<T, TKey extends TweenableProperties<T>> implements Transfor
 	}
 }
 
-class ParallelTransformSequence implements Transform {
+class ParallelTransformSequence implements MultiTransform {
+	readonly group = undefined;
 	private readonly sequence: Transform[];
 
 	constructor(sequence: readonly Transform[]) {
 		this.sequence = [...sequence];
+	}
+
+	getChildren(): readonly Transform[] {
+		return this.sequence;
 	}
 
 	runFrame(time: number): boolean {
@@ -124,12 +147,18 @@ class ParallelTransformSequence implements Transform {
 	}
 }
 
-class TransformSequence implements Transform {
+class TransformSequence implements MultiTransform {
+	readonly group = undefined;
 	private readonly sequence: Transform[];
+	private current?: Transform;
 	private timeOffset = 0;
 
 	constructor(sequence: readonly Transform[]) {
 		this.sequence = [...sequence];
+	}
+
+	getChildren(): readonly Transform[] {
+		return this.sequence;
 	}
 
 	runFrame(time: number): boolean {
@@ -137,10 +166,14 @@ class TransformSequence implements Transform {
 			return true;
 		}
 
-		const completed = this.sequence[0].runFrame(time - this.timeOffset);
-		if (completed) {
-			this.sequence.remove(0);
+		if (!this.current) {
 			this.timeOffset = time;
+			this.current = this.sequence[this.sequence.size() - 1];
+		}
+
+		const completed = this.current.runFrame(time - this.timeOffset);
+		if (completed) {
+			this.sequence.remove(this.sequence.indexOf(this.current));
 
 			if (this.sequence.size() === 0) {
 				return true;
@@ -178,17 +211,10 @@ class TransformRunner extends SharedComponentBase {
 			}
 		};
 
+		run();
 		this.event.subscribe(RunService.Heartbeat, (dt) => {
 			this.time += dt;
 			run();
-		});
-
-		let firstRan = false;
-		this.event.onEnable(() => {
-			if (firstRan) return;
-
-			run();
-			firstRan = true;
 		});
 	}
 
@@ -204,23 +230,9 @@ class TransformRunner extends SharedComponentBase {
 	}
 }
 
-//
-
-type Direction = "top" | "bottom" | "left" | "right";
-const directionToOffset = (direction: Direction, power: number) => {
-	const offsets: Record<Direction, UDim2> = {
-		top: new UDim2(0, 0, 0, power),
-		bottom: new UDim2(0, 0, 0, -power),
-		left: new UDim2(0, power, 0, 0),
-		right: new UDim2(0, -power, 0, 0),
-	};
-
-	return offsets[direction];
-};
-
 export class TransformBuilder<T extends object> {
-	readonly instance;
 	private readonly transforms: Transform[][] = [[]];
+	private readonly instance;
 	private savedProperties?: Partial<T>;
 
 	constructor(instance: T) {
@@ -258,7 +270,7 @@ export class TransformBuilder<T extends object> {
 	/** Adds a transform that restores all previously saved (via `this.save()`) properties */
 	restore(): this {
 		return this.func(() => {
-			if (this.savedProperties === undefined) return;
+			if (!this.savedProperties) return;
 
 			Objects.assign(this.instance, this.savedProperties);
 			this.savedProperties = undefined;
@@ -270,7 +282,7 @@ export class TransformBuilder<T extends object> {
 	}
 
 	wait(delay: number): this {
-		return this.push(new DelayTransform(delay)).then();
+		return this.push(new DelayTransform(delay));
 	}
 
 	parallel(...funcs: ((transform: TransformBuilder<T>) => void)[]): this {
@@ -294,10 +306,10 @@ export class TransformBuilder<T extends object> {
 		return this.push(transform.buildSequence());
 	}
 
-	transform<TKey extends TweenableProperties<T>>(
+	transform<TKey extends TweenableProperties<T> & string>(
 		key: TKey,
 		value: T[TKey] | (() => T[TKey]),
-		params?: TransformProps,
+		params?: TransformParams,
 	) {
 		return this.push(
 			new TweenTransform(
@@ -312,11 +324,11 @@ export class TransformBuilder<T extends object> {
 	}
 
 	/** Move the `GuiObject` */
-	move(this: TransformBuilder<GuiObject>, position: UDim2, params?: TransformProps): TransformBuilder<T> {
+	move(this: TransformBuilder<GuiObject>, position: UDim2, params?: TransformParams): TransformBuilder<T> {
 		return this.transform("Position", position, params) as unknown as TransformBuilder<T>;
 	}
 	/** Move the `GuiObject` by X */
-	moveX(this: TransformBuilder<GuiObject>, position: UDim, params?: TransformProps): TransformBuilder<T> {
+	moveX(this: TransformBuilder<GuiObject>, position: UDim, params?: TransformParams): TransformBuilder<T> {
 		return this.transform(
 			"Position",
 			() => new UDim2(position, this.instance.Position.Y),
@@ -324,7 +336,7 @@ export class TransformBuilder<T extends object> {
 		) as unknown as TransformBuilder<T>;
 	}
 	/** Move the `GuiObject` by Y */
-	moveY(this: TransformBuilder<GuiObject>, position: UDim, params?: TransformProps): TransformBuilder<T> {
+	moveY(this: TransformBuilder<GuiObject>, position: UDim, params?: TransformParams): TransformBuilder<T> {
 		return this.transform(
 			"Position",
 			() => new UDim2(this.instance.Position.X, position),
@@ -333,12 +345,12 @@ export class TransformBuilder<T extends object> {
 	}
 
 	/** Resize the `GuiObject` */
-	resize(this: TransformBuilder<GuiObject>, size: UDim2, params?: TransformProps): TransformBuilder<T> {
+	resize(this: TransformBuilder<GuiObject>, size: UDim2, params?: TransformParams): TransformBuilder<T> {
 		return this.transform("Size", size, params) as unknown as TransformBuilder<T>;
 	}
 
 	/** Relatively move the `GuiObject` */
-	moveRelative(this: TransformBuilder<GuiObject>, offset: UDim2, params?: TransformProps) {
+	moveRelative(this: TransformBuilder<GuiObject>, offset: UDim2, params?: TransformParams) {
 		return this.transform(
 			"Position",
 			() => this.instance.Position.add(offset),
@@ -346,50 +358,15 @@ export class TransformBuilder<T extends object> {
 		) as unknown as TransformBuilder<T>;
 	}
 	/** Relatively resize the `GuiObject` */
-	resizeRelative(this: TransformBuilder<GuiObject>, offset: UDim2, params?: TransformProps): TransformBuilder<T> {
+	resizeRelative(this: TransformBuilder<GuiObject>, offset: UDim2, params?: TransformParams): TransformBuilder<T> {
 		return this.transform("Size", () => this.instance.Size.add(offset), params) as unknown as TransformBuilder<T>;
-	}
-
-	slideIn(this: TransformBuilder<GuiObject>, from: Direction, power: number, props?: TransformProps) {
-		return this.moveRelative(new UDim2().sub(directionToOffset(from, power)))
-			.transform("Transparency", 1)
-			.move(this.instance.Position, { duration: 0.5, style: "Quad", direction: "Out", ...props })
-			.transform("Transparency", 0, {
-				duration: 0.4,
-				style: "Quad",
-				direction: "Out",
-				...props,
-			}) as unknown as TransformBuilder<T>;
-	}
-	slideOut(this: TransformBuilder<GuiObject>, direction: Direction, power: number, props?: TransformProps) {
-		return this.move(this.instance.Position, { duration: 0.5, style: "Quad", direction: "Out", ...props })
-			.transform("Transparency", 0, { duration: 0.4, style: "Quad", direction: "Out", ...props })
-			.moveRelative(directionToOffset(direction, power))
-			.transform("Transparency", 1) as unknown as TransformBuilder<T>;
-	}
-	flash<TKey extends TweenableProperties<T>>(
-		this: TransformBuilder<T>,
-		value: T[TKey],
-		property: TKey,
-		props?: TransformProps,
-	) {
-		return this.transform(property, value, { style: "Quad", direction: "Out", ...props }) //
-			.transform(property, this.instance[property], { duration: 0.4, style: "Quad", direction: "Out", ...props });
-	}
-
-	flashColor<TKey extends ExtractKeys<T & GuiObject, Color3>>(
-		this: TransformBuilder<GuiObject>,
-		color: Color3,
-		property: TKey | "BackgroundColor3" = "BackgroundColor3",
-		props?: TransformProps,
-	) {
-		return this.flash(color as never, property as never, props) as unknown as TransformBuilder<T>;
 	}
 }
 
 //
 
 export class TransformContainer<T extends Instance> extends SharedComponentContainer<TransformRunner> {
+	private readonly groups = new Map<string, Transform>();
 	private readonly instance;
 
 	constructor(instance: T) {
@@ -403,13 +380,32 @@ export class TransformContainer<T extends Instance> extends SharedComponentConta
 		const transform = new TransformBuilder(this.instance);
 		setup(transform, this.instance);
 
-		const sequence = transform.build();
-		sequence.completed.Connect(() => {
-			// spawn is to not call this.remove() right inside this.add()
-			spawn(() => this.remove(sequence));
-		});
+		const sequence = this.add(transform.build());
+		sequence.completed.Connect(() => this.remove(sequence));
 
-		this.add(sequence);
+		/** Add groups and remove already existing */
+		/*
+        const processGroups = () => {
+			const getTransforms = (transform: Transform | MultiTransform): readonly Transform[] => {
+				if ("getAll" in transform) {
+					return Arrays.flatmap(transform.getChildren(), getTransforms);
+				}
+
+				return [transform];
+			};
+
+			const transforms = getTransforms(sequence.transform);
+			for (const transform of transforms) {
+				if (!transform.group) continue;
+
+				const existing = this.groups.get(transform.group);
+				if (existing) this.remove(existing);
+
+				this.groups.set(transform.group, transform);
+			}
+		};
+		processGroups();
+        */
 	}
 
 	finish() {

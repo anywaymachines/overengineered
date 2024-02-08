@@ -36,11 +36,11 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 		});
 
 		this.event.subscribe(saveButton.activated, async () => {
-			SavePopup.instance.show();
+			SavePopup.showPopup();
 		});
 
 		this.event.subscribe(settingsButton.activated, async () => {
-			SettingsPopup.instance.show();
+			SettingsPopup.showPopup();
 		});
 	}
 }

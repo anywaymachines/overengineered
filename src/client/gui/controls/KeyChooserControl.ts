@@ -3,7 +3,7 @@ import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import Control from "client/gui/Control";
 import ObservableValue from "shared/event/ObservableValue";
-import SelectButtonPopup from "../popup/SelectButtonPopup";
+import SelectButtonPopup from "client/gui/popup/SelectButtonPopup";
 
 export type KeyChooserControlDefinition = TextButton;
 
@@ -23,7 +23,7 @@ export default class KeyChooserControl extends Control<KeyChooserControlDefiniti
 
 		this.gui.Activated.Connect(() => {
 			if (InputController.inputType.get() === "Touch") {
-				SelectButtonPopup.instance.showPopup(
+				SelectButtonPopup.showPopup(
 					(key) => {
 						const prev = this.value.get();
 						this.value.set(key);

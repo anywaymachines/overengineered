@@ -55,7 +55,7 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 		});
 
 		this.event.subscribe(controlResetButton.activated, async () => {
-			ConfirmPopup.instance.showPopup(
+			ConfirmPopup.showPopup(
 				"Reset the controls?",
 				"It will be impossible to undo this action",
 				() => controls.resetControls(),

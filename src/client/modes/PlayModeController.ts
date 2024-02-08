@@ -5,7 +5,7 @@ import Popup from "client/gui/Popup";
 import Remotes from "shared/Remotes";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
-import LocalPlayerController from "../controller/LocalPlayerController";
+import LocalPlayerController from "client/controller/LocalPlayerController";
 import BuildingMode from "./build/BuildingMode";
 import RideMode from "./ride/RideMode";
 
@@ -44,7 +44,7 @@ export default class PlayModeController extends ComponentBase {
 			const active = this.playmode.get();
 			if (active) this.modes[active].disable();
 		});
-		this.event.subscribe(Popup.onAnyHide, () => {
+		this.event.subscribe(Popup.onAllHide, () => {
 			controls.Enable();
 
 			const active = this.playmode.get();

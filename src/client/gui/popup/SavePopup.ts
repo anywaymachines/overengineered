@@ -88,12 +88,16 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 }
 
 type SavePreviewDefinition = GuiButton & {
-	readonly Colors: GuiObject;
-	readonly LoadButton: GuiButton;
-	readonly SaveButton: GuiButton;
-	readonly TextBox: TextBox;
-	readonly ImageLabel: ImageLabel;
-	readonly HeaderLabel: TextLabel;
+	readonly Buttons: {
+		readonly LoadButton: GuiButton;
+		readonly SaveButton: GuiButton;
+	};
+	readonly Content: {
+		readonly TextBox: TextBox;
+		readonly Colors: GuiObject;
+		readonly ImageLabel: ImageLabel;
+		readonly HeaderLabel: TextLabel;
+	};
 };
 
 class SavePreview extends Control<SavePreviewDefinition> {
@@ -105,11 +109,11 @@ class SavePreview extends Control<SavePreviewDefinition> {
 	constructor(gui: SavePreviewDefinition) {
 		super(gui);
 
-		const saveButton = this.add(new ButtonControl(this.gui.SaveButton));
-		const loadButton = this.add(new ButtonControl(this.gui.LoadButton));
+		const saveButton = this.add(new ButtonControl(this.gui.Buttons.SaveButton));
+		const loadButton = this.add(new ButtonControl(this.gui.Buttons.LoadButton));
 
 		this.event.subscribe(saveButton.activated, () => {
-			ConfirmPopup.instance.showPopup(
+			ConfirmPopup.showPopup(
 				"Save to this slot?",
 				"It will be impossible to undo this action",
 				() => {
@@ -149,7 +153,7 @@ class SavePreview extends Control<SavePreviewDefinition> {
 			}
 		});
 
-		const textbox = new TextBoxControl(this.gui.TextBox);
+		const textbox = new TextBoxControl(this.gui.Content.TextBox);
 		this.add(textbox);
 
 		const send = async (slotData: Readonly<Partial<SlotMeta>>) => {
@@ -179,13 +183,13 @@ class SavePreview extends Control<SavePreviewDefinition> {
 			this.gui.Visible = true;
 			const slot = SlotsMeta.get(slots, slotIndex);
 
-			this.gui.ImageLabel.ImageColor3 = Serializer.Color3Serializer.deserialize(slot.color);
+			this.gui.Content.ImageLabel.ImageColor3 = Serializer.Color3Serializer.deserialize(slot.color);
 			textbox.text.set(slot.name);
 
 			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
-				this.gui.HeaderLabel.Text = `Blocks: ${slot.blocks}; Size: ${slot.size}b`;
+				this.gui.Content.HeaderLabel.Text = `Blocks: ${slot.blocks}; Size: ${slot.size}b`;
 			} else {
-				this.gui.HeaderLabel.Text = `Blocks: ${slot.blocks}`;
+				this.gui.Content.HeaderLabel.Text = `Blocks: ${slot.blocks}`;
 			}
 
 			// lock
@@ -199,8 +203,8 @@ class SavePreview extends Control<SavePreviewDefinition> {
 				}
 			};
 
-			setControlActive(this.gui.TextBox);
-			setControlActive(this.gui.SaveButton);
+			setControlActive(this.gui.Content.TextBox);
+			setControlActive(this.gui.Buttons.SaveButton);
 
 			for (const child of buttons) {
 				setControlActive(child.getGui());
@@ -212,7 +216,7 @@ class SavePreview extends Control<SavePreviewDefinition> {
 		update();
 
 		const buttons: ButtonControl[] = [];
-		for (const child of this.gui.Colors.GetChildren()) {
+		for (const child of this.gui.Content.Colors.GetChildren()) {
 			if (child.IsA("GuiButton")) {
 				const button = this.added(new ButtonControl(child));
 				buttons.push(button);
@@ -230,8 +234,12 @@ class SavePreview extends Control<SavePreviewDefinition> {
 
 export type SavePopupDefinition = GuiObject & {
 	readonly Slots: GuiObject & {
-		readonly ScrollingFrame: SaveSlotsDefinition;
-		readonly CancelButton: GuiButton;
+		readonly Content: {
+			readonly ScrollingFrame: SaveSlotsDefinition;
+		};
+		readonly Buttons: {
+			readonly CancelButton: GuiButton;
+		};
 		readonly Head: {
 			readonly CloseButton: ButtonDefinition;
 		};
@@ -240,21 +248,24 @@ export type SavePopupDefinition = GuiObject & {
 };
 
 export default class SavePopup extends Popup<SavePopupDefinition> {
-	static readonly instance = new SavePopup(
-		Gui.getGameUI<{
-			Popup: {
-				Slots: SavePopupDefinition;
-			};
-		}>().Popup.Slots,
-	);
-
 	private readonly slots;
 	private readonly preview;
 
+	static showPopup() {
+		const popup = new SavePopup(
+			Gui.getGameUI<{
+				Popup: {
+					Slots: SavePopupDefinition;
+				};
+			}>().Popup.Slots.Clone(),
+		);
+
+		popup.show();
+	}
 	constructor(gui: SavePopupDefinition) {
 		super(gui);
 
-		this.slots = new SaveSlots(this.gui.Slots.ScrollingFrame);
+		this.slots = new SaveSlots(this.gui.Slots.Content.ScrollingFrame);
 		this.add(this.slots);
 
 		this.preview = new SavePreview(this.gui.Slot);
@@ -263,12 +274,13 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 
 		this.event.subscribe(this.preview.onLoad, () => this.hide());
 
-		this.add(new ButtonControl(this.gui.Slots.CancelButton, () => this.hide()));
+		this.add(new ButtonControl(this.gui.Slots.Buttons.CancelButton, () => this.hide()));
 		this.add(new ButtonControl(this.gui.Slots.Head.CloseButton, () => this.hide()));
 	}
 
 	async show() {
 		super.show();
+		//this.transform().run((transform) => transform.slideIn("bottom", 50, {duration:0.2}));
 		GuiAnimator.transition(this.gui.Slots, 0.2, "down");
 	}
 }

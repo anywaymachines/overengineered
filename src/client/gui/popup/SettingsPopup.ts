@@ -48,37 +48,42 @@ export type SettingsDefinition = GuiObject & {
 };
 
 export type SettingsPopupDefinition = GuiObject & {
-	readonly Body: GuiObject & {
+	readonly Content: {
 		readonly ScrollingFrame: SettingsDefinition;
+	};
+	readonly Buttons: {
 		readonly CancelButton: GuiButton;
-		readonly Head: {
-			readonly CloseButton: GuiButton;
-		};
+	};
+	readonly Head: {
+		readonly CloseButton: GuiButton;
 	};
 };
 
 export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
-	static readonly instance = new SettingsPopup(
-		Gui.getGameUI<{
-			Popup: {
-				Settings: SettingsPopupDefinition;
-			};
-		}>().Popup.Settings,
-	);
-
 	private readonly checkboxTemplate;
 	private readonly list;
 
+	static showPopup() {
+		const popup = new SettingsPopup(
+			Gui.getGameUI<{
+				Popup: {
+					Settings: SettingsPopupDefinition;
+				};
+			}>().Popup.Settings.Clone(),
+		);
+
+		popup.show();
+	}
 	constructor(gui: SettingsPopupDefinition) {
 		super(gui);
 
-		this.checkboxTemplate = Control.asTemplate(this.gui.Body.ScrollingFrame.CheckboxTemplate);
+		this.checkboxTemplate = Control.asTemplate(this.gui.Content.ScrollingFrame.CheckboxTemplate);
 
-		this.list = new Control(this.gui.Body.ScrollingFrame);
+		this.list = new Control(this.gui.Content.ScrollingFrame);
 		this.add(this.list);
 
-		const closeButton = this.add(new ButtonControl(this.gui.Body.Head.CloseButton));
-		this.event.subscribe(closeButton.activated, () => this.hide());
+		this.add(new ButtonControl(this.gui.Buttons.CancelButton, () => this.hide()));
+		this.add(new ButtonControl(this.gui.Head.CloseButton, () => this.hide()));
 
 		this.event.subscribeObservable(
 			PlayerDataStorage.config,

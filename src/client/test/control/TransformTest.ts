@@ -102,17 +102,44 @@ export const TransformTest: ControlTest = {
 								transform.repeat(4, (transform) =>
 									transform
 										.func(() => (instance.BackgroundColor3 = Color3.fromHSV(0, 1, 1)))
-										.transform("BackgroundColor3", Color3.fromHSV(0.33, 1, 1), { duration: 0.33 })
+										.transform("BackgroundColor3", Color3.fromHSV(0.33, 1, 1), {
+											duration: 0.33,
+											style: "Linear",
+										})
 										.then()
-										.transform("BackgroundColor3", Color3.fromHSV(0.66, 1, 1), { duration: 0.33 })
+										.transform("BackgroundColor3", Color3.fromHSV(0.66, 1, 1), {
+											duration: 0.33,
+											style: "Linear",
+										})
 										.then()
-										.transform("BackgroundColor3", Color3.fromHSV(1, 1, 1), { duration: 0.34 })
+										.transform("BackgroundColor3", Color3.fromHSV(1, 1, 1), {
+											duration: 0.34,
+											style: "Linear",
+										})
 										.then(),
 								),
 						),
 					);
 				}
 			});
+		}
+
+		{
+			const tweenable = newbtn("flash color", 4);
+			const component = list.add(new ButtonControl(tweenable));
+			component.enable();
+			component.activated.Connect(() =>
+				component.transform().run((t) => t.flashColor(Color3.fromRGB(255, 0, 0))),
+			);
+		}
+
+		{
+			const tweenable = newbtn("flash position", 5);
+			const component = list.add(new ButtonControl(tweenable));
+			component.enable();
+			component.activated.Connect(() =>
+				component.transform().run((t) => t.flash(new UDim2(0, 200, 0, 200), "Position")),
+			);
 		}
 
 		return [["Transforms", list]];
