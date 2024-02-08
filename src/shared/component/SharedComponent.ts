@@ -1,7 +1,7 @@
 import SharedComponentBase from "shared/component/SharedComponentBase";
 import SharedComponentContainer from "shared/component/SharedComponentContainer";
 import SharedComponentEventHolder from "shared/component/SharedComponentEventHolder";
-import { TransformContainer } from "./Transform";
+import { TransformBuilder, TransformContainer } from "./Transform";
 
 /** A component that controls an Instance and has children. */
 export default class SharedComponent<
@@ -30,8 +30,21 @@ export default class SharedComponent<
 		return gui.FindFirstChild(name) !== undefined;
 	}
 
+	/** Transform the provided instance */
+	runTransform<T extends Instance>(instance: T, setup: (transform: TransformBuilder<T>, instance: T) => void) {
+		const builder = new TransformBuilder(instance);
+		setup(builder, instance);
+
+		return builder.build();
+	}
+
+	/** Transorm the current instance */
+	transform(build: (transform: TransformBuilder<T>, instance: T) => void) {
+		this.getTransform().run(build);
+	}
+
 	/** Initializes and returns the transform component */
-	transform(): TransformContainer<T> {
+	getTransform(): TransformContainer<T> {
 		if (!this.transforms) {
 			this.transforms = new TransformContainer(this.instance);
 			this.event.onEnable(() => this.transforms?.enable());

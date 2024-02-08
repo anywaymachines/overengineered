@@ -70,7 +70,7 @@ export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> 
 
 	public show() {
 		super.show();
-		GuiAnimator.transition(this.gui.Bottom.DeleteAllButton, 0.2, "down");
+		GuiAnimator.transition(this.gui.Bottom.DeleteAllButton, 0.2, "up");
 	}
 
 	private suggestClearAll() {

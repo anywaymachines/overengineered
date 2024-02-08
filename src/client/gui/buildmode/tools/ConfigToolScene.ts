@@ -61,6 +61,10 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 			tool.unselectAll();
 		});
 
+		this.gui.Bottom.ResetButton.Activated.Connect(() => {
+			tool.reset();
+		});
+
 		this.onPrepare((inputType) => {
 			this.gui.Bottom.DeselectButton.Visible = inputType !== "Gamepad";
 		});
@@ -76,9 +80,12 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 	}
 
 	private updateConfigs(selected: readonly (SelectionBox & { Parent: BlockModel })[]) {
+		const wasVisible = this.gui.Visible;
+
 		this.gui.Visible = selected.size() !== 0;
 		if (!this.gui.Visible) return;
 
+		if (!wasVisible) GuiAnimator.transition(this.gui, 0.2, "up");
 		const blockmodel = selected[0].Parent;
 		const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
 		const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]

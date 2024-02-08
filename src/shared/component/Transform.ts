@@ -351,21 +351,25 @@ export class TransformBuilder<T extends object> {
 	}
 
 	slideIn(this: TransformBuilder<GuiObject>, from: Direction, power: number, props?: TransformProps) {
-		return this.moveRelative(new UDim2().sub(directionToOffset(from, power)))
-			.transform("Transparency", 1)
-			.move(this.instance.Position, { duration: 0.5, style: "Quad", direction: "Out", ...props })
-			.transform("Transparency", 0, {
-				duration: 0.4,
+		return this.func(() => (this.instance.Visible = true))
+			.moveRelative(new UDim2().sub(directionToOffset(from, power)))
+			.move(this.instance.Position, {
+				duration: 0.5,
 				style: "Quad",
 				direction: "Out",
 				...props,
 			}) as unknown as TransformBuilder<T>;
 	}
 	slideOut(this: TransformBuilder<GuiObject>, direction: Direction, power: number, props?: TransformProps) {
-		return this.move(this.instance.Position, { duration: 0.5, style: "Quad", direction: "Out", ...props })
-			.transform("Transparency", 0, { duration: 0.4, style: "Quad", direction: "Out", ...props })
-			.moveRelative(directionToOffset(direction, power))
-			.transform("Transparency", 1) as unknown as TransformBuilder<T>;
+		return this.moveRelative(new UDim2().sub(directionToOffset(direction, power)), {
+			duration: 0.5,
+			style: "Quad",
+			direction: "Out",
+			...props,
+		})
+			.then()
+			.func(() => (this.instance.Visible = false))
+			.move(this.instance.Position) as unknown as TransformBuilder<T>;
 	}
 	flash<TKey extends TweenableProperties<T>>(
 		this: TransformBuilder<T>,

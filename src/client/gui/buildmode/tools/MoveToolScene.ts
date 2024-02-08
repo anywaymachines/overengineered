@@ -1,9 +1,9 @@
 import { Players } from "@rbxts/services";
 import Control from "client/gui/Control";
-import MoveTool from "client/tools/MoveTool";
-import SharedPlots from "shared/building/SharedPlots";
 import GuiAnimator from "client/gui/GuiAnimator";
 import { ButtonControl } from "client/gui/controls/Button";
+import MoveTool from "client/tools/MoveTool";
+import SharedPlots from "shared/building/SharedPlots";
 
 export type MoveToolSceneDefinition = GuiObject & {
 	readonly Bottom: {
@@ -28,6 +28,6 @@ export default class MoveToolScene extends Control<MoveToolSceneDefinition> {
 	public show() {
 		super.show();
 
-		GuiAnimator.transition(this.gui.Bottom.SelectAllButton, 0.2, "right");
+		GuiAnimator.transition(this.gui.Bottom.SelectAllButton, 0.2, "up");
 	}
 }

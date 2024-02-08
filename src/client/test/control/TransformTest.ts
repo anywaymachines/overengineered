@@ -21,7 +21,7 @@ export const TransformTest: ControlTest = {
 			component.enable();
 			component.activated.Connect(() =>
 				component
-					.transform()
+					.getTransform()
 					.run((t) => t.func(() => (tweenable.Transparency = 0)).transform("Transparency", 0.9)),
 			);
 		}
@@ -32,7 +32,7 @@ export const TransformTest: ControlTest = {
 			component.enable();
 			component.activated.Connect(() =>
 				component
-					.transform()
+					.getTransform()
 					.run((t) =>
 						t.save("Transparency").transform("Transparency", 0.9, { duration: 1 }).then().restore(),
 					),
@@ -45,7 +45,7 @@ export const TransformTest: ControlTest = {
 			component.enable();
 			component.activated.Connect(() =>
 				component
-					.transform()
+					.getTransform()
 					.run((t) =>
 						t.save("Transparency").wait(1).transform("Transparency", 0.9, { duration: 1 }).then().restore(),
 					),
@@ -65,7 +65,7 @@ export const TransformTest: ControlTest = {
 			component.activated.Connect(() => {
 				const anim = 1 as number;
 				if (anim === 0) {
-					component.transform().run((transform, instance) =>
+					component.getTransform().run((transform, instance) =>
 						transform
 							.save("Transparency")
 							.func(() => (instance.Transparency = 0))
@@ -79,7 +79,7 @@ export const TransformTest: ControlTest = {
 							.restore(),
 					);
 				} else if (anim === 1) {
-					component.transform().run((transform, instance) =>
+					component.getTransform().run((transform, instance) =>
 						transform.parallel(
 							(transform) =>
 								transform
@@ -129,7 +129,7 @@ export const TransformTest: ControlTest = {
 			const component = list.add(new ButtonControl(tweenable));
 			component.enable();
 			component.activated.Connect(() =>
-				component.transform().run((t) => t.flashColor(Color3.fromRGB(255, 0, 0))),
+				component.getTransform().run((t) => t.flashColor(Color3.fromRGB(255, 0, 0))),
 			);
 		}
 
@@ -138,7 +138,7 @@ export const TransformTest: ControlTest = {
 			const component = list.add(new ButtonControl(tweenable));
 			component.enable();
 			component.activated.Connect(() =>
-				component.transform().run((t) => t.flash(new UDim2(0, 200, 0, 200), "Position")),
+				component.getTransform().run((t) => t.flash(new UDim2(0, 200, 0, 200), "Position")),
 			);
 		}
 

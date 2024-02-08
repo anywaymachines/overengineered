@@ -3,7 +3,6 @@ import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
-import GuiAnimator from "client/gui/GuiAnimator";
 import Popup from "client/gui/Popup";
 import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
 import TextBoxControl from "client/gui/controls/TextBoxControl";
@@ -285,7 +284,14 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 
 	async show() {
 		super.show();
-		//this.transform().run((transform) => transform.slideIn("bottom", 50, {duration:0.2}));
-		GuiAnimator.transition(this.gui.Slots, 0.2, "down");
+		this.transform((transform) => transform.slideIn("top", 50, { duration: 0.2 }));
+	}
+	hide() {
+		this.transform((transform) =>
+			transform
+				.slideOut("bottom", 1000, { duration: 0.08 })
+				.then()
+				.func(() => super.hide()),
+		);
 	}
 }

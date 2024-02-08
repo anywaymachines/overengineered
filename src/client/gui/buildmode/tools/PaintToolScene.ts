@@ -82,7 +82,7 @@ export default class PaintToolScene extends Control<PaintToolSceneDefinition> {
 	public show() {
 		super.show();
 
-		GuiAnimator.transition(this.gui.Bottom, 0.2, "right");
-		//GuiAnimator.transition(this.gui.PaintEverythingButton, 0.2, "right");
+		GuiAnimator.transition(this.gui.Bottom, 0.2, "up");
+		//GuiAnimator.transition(this.gui.PaintEverythingButton, 0.2, "up");
 	}
 }

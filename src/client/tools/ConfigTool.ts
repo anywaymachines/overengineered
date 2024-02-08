@@ -10,7 +10,7 @@ import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import Objects from "shared/fixes/objects";
 
 export default class ConfigTool extends ToolBase {
-	public readonly selectedBlocksChanged = new Signal<(selected: (SelectionBox & { Parent: BlockModel })[]) => void>();
+	readonly selectedBlocksChanged = new Signal<(selected: (SelectionBox & { Parent: BlockModel })[]) => void>();
 	private readonly selected: (SelectionBox & { Parent: BlockModel })[] = [];
 
 	constructor(mode: BuildingMode) {
@@ -100,7 +100,8 @@ export default class ConfigTool extends ToolBase {
 			for (const sel of this.selected) sel.Destroy();
 
 			this.selected.clear();
-			this.selectedBlocksChanged.Fire(this.selected);
+
+			if (!block) this.selectedBlocksChanged.Fire(this.selected);
 		}
 
 		if (!block) {
@@ -131,7 +132,15 @@ export default class ConfigTool extends ToolBase {
 		}
 	}
 
-	public unselectAll() {
+	reset() {
+		for (const sel of this.selected) {
+			sel.Parent.SetAttribute("config", "{}");
+		}
+
+		this.selectedBlocksChanged.Fire(this.selected);
+	}
+
+	unselectAll() {
 		this.selected.forEach((element) => element.Destroy());
 		this.selected.clear();
 		this.selectedBlocksChanged.Fire(this.selected);
@@ -145,15 +154,15 @@ export default class ConfigTool extends ToolBase {
 		return "http://www.roblox.com/asset/?id=15414751900";
 	}
 
-	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
+	getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
 		return [];
 	}
 
-	public getKeyboardTooltips() {
+	getKeyboardTooltips() {
 		return [];
 	}
 
-	public disable() {
+	disable() {
 		super.disable();
 		this.unselectAll();
 	}

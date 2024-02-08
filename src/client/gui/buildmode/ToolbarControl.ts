@@ -142,8 +142,8 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 	private toolChanged(tool: ToolBase | undefined, prev: ToolBase | undefined) {
 		const duration = tool && prev ? 0.07 : 0.15;
 
-		this.nameLabel.transform().cancel();
-		this.nameLabel.transform().run((transform) => {
+		this.nameLabel.getTransform().cancel();
+		this.nameLabel.getTransform().run((transform) => {
 			if (prev) {
 				transform
 					.moveY(new UDim(0, 0), { duration })
