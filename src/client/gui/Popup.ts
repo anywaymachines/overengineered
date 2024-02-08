@@ -3,6 +3,7 @@ import Signal from "@rbxts/signal";
 import Control from "./Control";
 import { Element } from "./Element";
 import Gui from "./Gui";
+import { ScaledScreenGui } from "./GuiScale";
 
 export default class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 	static readonly onAnyShow = new Signal<() => void>();
@@ -29,18 +30,20 @@ export default class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 		super.show();
 		Popup.onAnyShow.Fire();
 
-		Element.create(
-			"ScreenGui",
-			{ Name: tostring(this), Parent: Popup.popupsScreenGui, IgnoreGuiInset: true },
-			{
-				bg: Element.create("Frame", {
-					Size: new UDim2(1, 0, 1, 0),
-					BackgroundColor3: Color3.fromRGB(0, 0, 0),
-					BackgroundTransparency: 0.5,
-				}),
-				popup: this.instance,
-			},
-		);
+		new ScaledScreenGui(
+			Element.create(
+				"ScreenGui",
+				{ Name: tostring(this), Parent: Popup.popupsScreenGui, IgnoreGuiInset: true },
+				{
+					bg: Element.create("Frame", {
+						Size: new UDim2(1, 0, 1, 0),
+						BackgroundColor3: Color3.fromRGB(0, 0, 0),
+						BackgroundTransparency: 0.5,
+					}),
+					popup: this.instance,
+				},
+			),
+		).enable();
 	}
 	hide() {
 		super.hide();
