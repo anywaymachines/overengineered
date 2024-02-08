@@ -47,14 +47,18 @@ type SaveSlotsDefinition = ScrollingFrame & {
 };
 
 class SaveSlots extends Control<SaveSlotsDefinition> {
+	private static staticSelected?: number;
 	readonly selectedSlot = new ObservableValue<number | undefined>(undefined);
 
 	private readonly template;
-
 	private readonly slots;
 
 	constructor(gui: SaveSlotsDefinition) {
 		super(gui);
+
+		const alreadySelected = SaveSlots.staticSelected;
+		this.event.onEnable(() => this.selectedSlot.set(alreadySelected));
+		this.selectedSlot.subscribe((value) => (SaveSlots.staticSelected = value));
 
 		this.template = Control.asTemplate(this.gui.Template);
 
@@ -273,6 +277,7 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 		this.preview.selectedSlotIndex.bindTo(this.slots.selectedSlot);
 
 		this.event.subscribe(this.preview.onLoad, () => this.hide());
+		this.onShow.Connect(() => this.preview.selectedSlotIndex.triggerChanged());
 
 		this.add(new ButtonControl(this.gui.Slots.Buttons.CancelButton, () => this.hide()));
 		this.add(new ButtonControl(this.gui.Slots.Head.CloseButton, () => this.hide()));
