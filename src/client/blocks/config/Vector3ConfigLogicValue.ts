@@ -1,12 +1,11 @@
-import BlockConfigDefinitionRegistry from "shared/block/config/BlockConfigDefinitionRegistry";
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
-export class Vector3ConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefinitionRegistry["vector3"]> {
+export class Vector3ConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.Vec3> {
 	constructor(
-		observable: ObservableValue<BlockConfigDefinitionRegistry["vector3"]["default"]>,
-		config: BlockConfigDefinitionRegistry["vector3"]["config"],
-		definition: BlockConfigDefinitionRegistry["vector3"],
+		observable: ObservableValue<BlockConfigTypes.Vec3["default"]>,
+		config: BlockConfigTypes.Vec3["config"],
+		definition: BlockConfigTypes.Vec3,
 	) {
 		super(observable, config, definition);
 		this.value.set(config);

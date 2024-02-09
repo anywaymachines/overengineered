@@ -1,12 +1,11 @@
-import BlockConfigDefinitionRegistry from "shared/block/config/BlockConfigDefinitionRegistry";
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
-export class KeyConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefinitionRegistry["key"]> {
+export class KeyConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.Key> {
 	constructor(
-		observable: ObservableValue<BlockConfigDefinitionRegistry["key"]["default"]>,
-		config: BlockConfigDefinitionRegistry["key"]["config"],
-		definition: BlockConfigDefinitionRegistry["key"],
+		observable: ObservableValue<BlockConfigTypes.Key["default"]>,
+		config: BlockConfigTypes.Key["config"],
+		definition: BlockConfigTypes.Key,
 	) {
 		super(observable, config, definition);
 		this.value.set(config);

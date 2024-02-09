@@ -5,7 +5,7 @@ import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
 import BuildingWrapper from "./BuildingWrapper";
-import PlayerDatabase from "./database/PlayerDatabase";
+import PlayerDatabase, { PlayerData } from "./database/PlayerDatabase";
 import SlotDatabase from "./database/SlotDatabase";
 import PlayModeController from "./modes/PlayModeController";
 import { registerOnRemoteEvent, registerOnRemoteFunction } from "./network/event/RemoteHandler";
@@ -40,7 +40,7 @@ class RemoteHandlers {
 	): Response {
 		const playerData = PlayerDatabase.instance.get(tostring(player.UserId));
 
-		const newPlayerData = {
+		const newPlayerData: PlayerData = {
 			...playerData,
 			settings: {
 				...(playerData.settings ?? {}),

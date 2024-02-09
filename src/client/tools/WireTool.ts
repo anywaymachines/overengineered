@@ -7,9 +7,6 @@ import Gui from "client/gui/Gui";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import Remotes from "shared/Remotes";
-import BlockConfigDefinitionRegistry, {
-	BlockConfigDefinition,
-} from "shared/block/config/BlockConfigDefinitionRegistry";
 import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
@@ -20,7 +17,7 @@ import PartUtils from "shared/utils/PartUtils";
 type MarkerData = {
 	readonly id: BlockConnectionName;
 	readonly blockData: PlacedBlockData;
-	readonly dataType: keyof BlockConfigDefinitionRegistry;
+	readonly dataType: keyof BlockConfigTypes.Types;
 	readonly markerType: "input" | "connected_input" | "output";
 	readonly colors: readonly Color3[];
 	readonly name: string;
@@ -129,7 +126,7 @@ export default class WireTool extends ToolBase {
 		string: "string",
 		key: "never",
 		multikey: "never",
-	} as const satisfies Record<keyof BlockConfigDefinitionRegistry, keyof typeof this.typeGroups>;
+	} as const satisfies Record<keyof BlockConfigTypes.Types, keyof typeof this.typeGroups>;
 
 	private renderedWires: BasePart[] = [];
 	private renderedTooltips: BillboardGui[] = [];
@@ -521,8 +518,8 @@ export default class WireTool extends ToolBase {
 		block: PlacedBlockData,
 		blocks: readonly PlacedBlockData[],
 		key: BlockConnectionName,
-		config: BlockConfigDefinition,
-	): keyof BlockConfigDefinitionRegistry | undefined {
+		config: BlockConfigTypes.Definition,
+	): keyof BlockConfigTypes.Types | undefined {
 		if (config.type !== "or") return config.type;
 
 		const connectedTo = block.connections[key as BlockConnectionName];
@@ -543,8 +540,8 @@ export default class WireTool extends ToolBase {
 		block: PlacedBlockData,
 		blocks: readonly PlacedBlockData[],
 		key: BlockConnectionName,
-		config: BlockConfigDefinition,
-	): readonly (keyof BlockConfigDefinitionRegistry)[] {
+		config: BlockConfigTypes.Definition,
+	): readonly (keyof BlockConfigTypes.Types)[] {
 		if (config.type !== "or") return [config.type];
 
 		const connected = this.getConnectedTo(block, blocks, key, config);

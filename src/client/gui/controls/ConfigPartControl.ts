@@ -1,8 +1,7 @@
 import Control from "client/gui/Control";
-import { BlockConfigDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
+import { ConfigPartDefinition } from "client/gui/popup/SettingsPopup";
 import ObservableValue from "shared/event/ObservableValue";
 import { JsonSerializablePrimitive } from "shared/fixes/Json";
-import { ConfigPartDefinition } from "../popup/SettingsPopup";
 
 export default class ConfigPartControl<
 	TControl extends Control<TDef>,
@@ -15,9 +14,9 @@ export default class ConfigPartControl<
 
 	constructor(
 		gui: ConfigPartDefinition<TDef>,
-		ctor: (gui: TDef) => TControl & { value: ObservableValue<TValue> },
-		configs: Readonly<Record<string, unknown>>[],
-		definition: BlockConfigDefinition,
+		ctor: (gui: TDef) => TControl & { readonly value: ObservableValue<TValue> },
+		configs: readonly Readonly<Record<string, unknown>>[],
+		definition: ConfigTypeToDefinition<UnknownConfigType>,
 		key: string,
 	) {
 		super(gui);

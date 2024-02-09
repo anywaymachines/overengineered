@@ -2,7 +2,6 @@ import { Players, Workspace } from "@rbxts/services";
 import Machine from "client/blocks/Machine";
 import RobloxUnit from "shared/RobloxUnit";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import { BlockConfigBothDefinitions } from "shared/block/config/BlockConfigDefinitionRegistry";
 import ConstantBlockLogic from "shared/block/logic/operations/ConstantBlockLogic";
 import AltimeterBlockLogic from "shared/block/logic/operations/sensors/AltimeterBlockLogic";
 import OperationVec3CombinerBlockLogic from "shared/block/logic/operations/vector/OperationVec3CombinerBlockLogic";
@@ -13,7 +12,7 @@ import Test from "./Test";
 const parent = new Instance("Folder");
 parent.Parent = Workspace;
 
-const subChanged = (block: ConfigurableBlockLogic<BlockConfigBothDefinitions>, blockname?: string) => {
+const subChanged = (block: ConfigurableBlockLogic<BlockConfigTypes.BothDefinitions>, blockname?: string) => {
 	for (const [name, input] of Objects.pairs(block.input)) {
 		input.subscribe((value, prev) => print(`[in ${blockname + " "}${name}] ${prev} -> ${value}`));
 	}

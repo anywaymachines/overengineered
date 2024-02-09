@@ -1,12 +1,11 @@
-import BlockConfigDefinitionRegistry from "shared/block/config/BlockConfigDefinitionRegistry";
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
-export class MultiKeyConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefinitionRegistry["multikey"]> {
+export class MultiKeyConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.MultiKey> {
 	constructor(
-		observable: ObservableValue<BlockConfigDefinitionRegistry["multikey"]["default"]>,
-		config: BlockConfigDefinitionRegistry["multikey"]["config"],
-		definition: BlockConfigDefinitionRegistry["multikey"],
+		observable: ObservableValue<BlockConfigTypes.MultiKey["default"]>,
+		config: BlockConfigTypes.MultiKey["config"],
+		definition: BlockConfigTypes.MultiKey,
 	) {
 		super(observable, config, definition);
 		this.value.set(config);

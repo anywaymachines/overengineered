@@ -2,8 +2,7 @@ import Control from "client/gui/Control";
 import { Element } from "client/gui/Element";
 import { ConfigControl2 } from "client/gui/buildmode/ConfigControl";
 import MultiConfigControl from "client/gui/config/MultiConfigControl";
-import BlockConfig from "shared/block/config/BlockConfig";
-import { BlockConfigDefinitions } from "shared/block/config/BlockConfigDefinitionRegistry";
+import { Config } from "shared/config/Config";
 import { ControlTest } from "./ControlTest";
 
 export const ConfigTest: ControlTest = {
@@ -26,7 +25,7 @@ export const ConfigTest: ControlTest = {
 
 		// multiconfig
 		{
-			const multidef: BlockConfigDefinitions = {
+			const multidef: BlockConfigTypes.Definitions = {
 				a: {
 					displayName: "TRU",
 					type: "bool",
@@ -107,7 +106,7 @@ export const ConfigTest: ControlTest = {
 
 		// config
 		{
-			const def: BlockConfigDefinitions = {
+			const def: BlockConfigTypes.Definitions = {
 				vector: {
 					displayName: "Vector3",
 					type: "vector3",
@@ -206,7 +205,7 @@ export const ConfigTest: ControlTest = {
 
 			const list = control.add(new Control(frame));
 
-			const mcc = new ConfigControl2(frame, BlockConfig.addDefaults({}, def), def);
+			const mcc = new ConfigControl2(frame, Config.addDefaults({}, def), def);
 			list.add(mcc);
 		}
 

@@ -1,18 +1,15 @@
 import { KeyDefinitions, KeyPressingDefinitionsController } from "client/controller/KeyPressingController";
 import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
-import BlockConfigDefinitionRegistry from "shared/block/config/BlockConfigDefinitionRegistry";
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
-export class MotorRotationSpeedConfigLogicValue extends ConfigLogicValueBase<
-	BlockConfigDefinitionRegistry["motorRotationSpeed"]
-> {
+export class MotorRotationSpeedConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.MotorRotationSpeed> {
 	private readonly controller;
 
 	constructor(
-		observable: ObservableValue<BlockConfigDefinitionRegistry["number"]["default"]>,
-		config: BlockConfigDefinitionRegistry["motorRotationSpeed"]["config"],
-		definition: BlockConfigDefinitionRegistry["motorRotationSpeed"],
+		observable: ObservableValue<BlockConfigTypes.MotorRotationSpeed["default"]>,
+		config: BlockConfigTypes.MotorRotationSpeed["config"],
+		definition: BlockConfigTypes.MotorRotationSpeed,
 	) {
 		super(observable, config, definition);
 		this.value.set(0);

@@ -5,7 +5,6 @@ import LogControl from "client/gui/static/LogControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
-import { BlockConfigDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import Objects from "shared/fixes/objects";
 
@@ -66,7 +65,7 @@ export default class ConfigTool extends ToolBase {
 		const config = blockConfigRegistry[block.GetAttribute("id") as keyof typeof blockConfigRegistry];
 		if (!config) return false;
 
-		if (!Objects.values(config.input).find((v) => !(v as BlockConfigDefinition).configHidden)) {
+		if (!Objects.values(config.input).find((v) => !(v as BlockConfigTypes.Definition).configHidden)) {
 			return false;
 		}
 

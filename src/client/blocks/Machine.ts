@@ -2,18 +2,17 @@ import PlayerDataStorage from "client/PlayerDataStorage";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import ImpactController from "shared/block/ImpactController";
 import SharedMachine from "shared/block/SharedMachine";
-import BlockConfig from "shared/block/config/BlockConfig";
-import BlockConfigDefinitionRegistry from "shared/block/config/BlockConfigDefinitionRegistry";
 import blockConfigRegistry, { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedComponentContainer from "shared/component/SharedComponentContainer";
+import { Config } from "shared/config/Config";
 import Objects from "shared/fixes/objects";
 import blockConfigRegistryClient from "./config/BlockConfigRegistryClient";
 import { ConfigLogicValueBase } from "./config/ConfigLogicValueBase";
 
 export default class Machine extends SharedMachine {
 	readonly logicInputs = new SharedComponentContainer<
-		ConfigLogicValueBase<BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry]>
+		ConfigLogicValueBase<BlockConfigTypes.Types[keyof BlockConfigTypes.Types]>
 	>();
 
 	constructor() {
@@ -39,7 +38,7 @@ export default class Machine extends SharedMachine {
 			const configDef = (blockConfigRegistry as BlockConfigRegistry)[
 				logic.block.id as keyof typeof blockConfigRegistry
 			];
-			const config = BlockConfig.addDefaults(logic.block.config, configDef.input);
+			const config = Config.addDefaults(logic.block.config, configDef.input);
 
 			for (const [key, observable] of Objects.pairs(logic.input)) {
 				// if already connected

@@ -1,6 +1,5 @@
 import Signal from "@rbxts/signal";
 import Control from "client/gui/Control";
-import { BlockConfigDefinitions, BlockConfigDefinitionsToConfig } from "shared/block/config/BlockConfigDefinitionRegistry";
 import Objects from "shared/fixes/objects";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";
@@ -11,19 +10,19 @@ type PartialIfObject<T> = T extends CheckableTypes[Exclude<keyof CheckableTypes,
 	: Partial<T>;
 
 type MultiConfigControlDefinition = GuiObject;
-type ConfigUpdatedCallback<TDef extends BlockConfigDefinitions, TKey extends keyof TDef> = (
+type ConfigUpdatedCallback<TDef extends BlockConfigTypes.Definitions, TKey extends keyof TDef> = (
 	key: TKey,
 	value: Readonly<Record<BlockUuid, PartialIfObject<TDef[TKey]["config"]>>>,
 ) => void;
 
 export default class MultiConfigControl<
-	TDef extends BlockConfigDefinitions,
+	TDef extends BlockConfigTypes.Definitions,
 > extends Control<MultiConfigControlDefinition> {
 	readonly configUpdated = new Signal<ConfigUpdatedCallback<TDef, keyof TDef>>();
 
 	constructor(
 		gui: MultiConfigControlDefinition,
-		configs: Readonly<Record<BlockUuid, BlockConfigDefinitionsToConfig<TDef>>>,
+		configs: Readonly<Record<BlockUuid, ConfigDefinitionsToConfig<keyof TDef, TDef>>>,
 		definition: Partial<TDef>,
 		connected: readonly (keyof TDef)[] = [],
 	) {

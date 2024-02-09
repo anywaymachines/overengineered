@@ -1,4 +1,3 @@
-import BlockConfigDefinitionRegistry from "shared/block/config/BlockConfigDefinitionRegistry";
 import { BoolConfigLogicValue } from "./BoolConfigLogicValue";
 import { ClampedNumberConfigLogicValue } from "./ClampedNumberConfigLogicValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
@@ -14,7 +13,7 @@ import { ThrustConfigLogicValue } from "./ThrustConfigLogicValue";
 import { Vector3ConfigLogicValue } from "./Vector3ConfigLogicValue";
 
 export type blockConfigRegistryClient = {
-	[k in keyof BlockConfigDefinitionRegistry]: typeof ConfigLogicValueBase<BlockConfigDefinitionRegistry[k]>;
+	[k in keyof BlockConfigTypes.Types]: typeof ConfigLogicValueBase<BlockConfigTypes.Types[k]>;
 };
 
 const blockConfigRegistryClient = {

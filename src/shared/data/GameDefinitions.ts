@@ -1,5 +1,4 @@
-import { BlockConfigDefinitions } from "../block/config/BlockConfigDefinitionRegistry";
-import RobloxUnit from "../RobloxUnit";
+import RobloxUnit from "shared/RobloxUnit";
 
 const GameDefinitions = {
 	GROUP: 1088368,
@@ -25,39 +24,6 @@ const GameDefinitions = {
 
 	MAX_LINEAR_SPEED: RobloxUnit.Meters_To_Studs(1000),
 	MAX_ANGULAR_SPEED: 40,
-
-	PLAYER_SETTINGS_DEFINITION: {
-		betterCamera: {
-			displayName: "Better camera",
-			type: "bool",
-			default: true as boolean,
-			config: true as boolean,
-		},
-		music: {
-			displayName: "Music",
-			type: "bool",
-			default: true as boolean,
-			config: true as boolean,
-		},
-		beacons: {
-			displayName: "Beacons",
-			type: "bool",
-			default: true as boolean,
-			config: true as boolean,
-		},
-		impact_destruction: {
-			displayName: "Impact destruction",
-			type: "bool",
-			default: true as boolean,
-			config: true as boolean,
-		},
-		others_gfx: {
-			displayName: "Other's effects & sounds",
-			type: "bool",
-			default: true as boolean,
-			config: true as boolean,
-		},
-	} as const satisfies BlockConfigDefinitions,
 
 	isAdmin(player: Player) {
 		return player.IsInGroup(GameDefinitions.GROUP) && player.GetRankInGroup(GameDefinitions.GROUP) > 250;

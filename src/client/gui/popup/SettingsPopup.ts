@@ -1,55 +1,215 @@
+import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import Popup from "client/gui/Popup";
 import { ButtonControl } from "client/gui/controls/Button";
+import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
+import SliderControl, { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import ToggleControl, { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
-import { BlockConfigDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
-import GameDefinitions from "shared/data/GameDefinitions";
-import ObservableValue from "shared/event/ObservableValue";
-import { JsonSerializablePrimitive } from "shared/fixes/Json";
+import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import Objects from "shared/fixes/objects";
 
-class ConfigPartControl<
-	TControl extends Control<TDef>,
-	TDef extends GuiObject,
-	TValue extends JsonSerializablePrimitive,
-> extends Control<ConfigPartDefinition<TDef>> {
-	readonly control: TControl & { value: ObservableValue<TValue> };
-	readonly key;
-	readonly definition;
+export type Templates = {
+	toggle: () => ConfigPartDefinition<ToggleControlDefinition>;
+	number: () => ConfigPartDefinition<NumberTextBoxControlDefinition>;
+	slider: () => ConfigPartDefinition<SliderControlDefinition>;
+	multi: () => ConfigPartDefinition<MultiTemplate>;
+};
 
-	constructor(
-		gui: ConfigPartDefinition<TDef>,
-		ctor: (gui: TDef) => TControl & { value: ObservableValue<TValue> },
-		configs: readonly Record<string, unknown>[],
-		definition: BlockConfigDefinition,
-		key: string,
-	) {
+type Template = {
+	readonly ToggleTemplate: ConfigPartDefinition<ToggleControlDefinition>;
+	readonly NumberTemplate: ConfigPartDefinition<NumberTextBoxControlDefinition>;
+	readonly SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
+	readonly MultiTemplate: ConfigPartDefinition<MultiTemplate>;
+};
+
+type ConfigControlDefinition = GuiObject;
+class ConfigControl<TDef extends PlayerConfigTypes.Definitions> extends Control<ConfigControlDefinition> {
+	readonly configUpdated = new Signal<
+		(key: keyof TDef, value: PlayerConfigTypes.Types[keyof PlayerConfigTypes.Types]["config"]) => void
+	>();
+
+	private readonly toggleTemplate;
+	private readonly numberTemplate;
+	private readonly sliderTemplate;
+	private readonly dayCycleTemplate;
+
+	constructor(gui: ConfigControlDefinition);
+	constructor(gui: ConfigControlDefinition, config: ConfigDefinitionsToConfig<keyof TDef, TDef>, definition: TDef);
+	constructor(gui: ConfigControlDefinition, config?: ConfigDefinitionsToConfig<keyof TDef, TDef>, definition?: TDef) {
 		super(gui);
-		this.key = key;
-		this.definition = definition;
 
-		this.gui.HeadingLabel.Text = definition.displayName;
-		this.control = ctor(this.gui.Control);
-		this.control.value.set(configs[0][key] as TValue);
+		const templates = Gui.getGameUI<{ Templates: { PlayerConfig: Template } }>().Templates.PlayerConfig;
+		this.toggleTemplate = Control.asTemplate(templates.ToggleTemplate, false);
+		this.numberTemplate = Control.asTemplate(templates.NumberTemplate, false);
+		this.sliderTemplate = Control.asTemplate(templates.SliderTemplate, false);
+		this.dayCycleTemplate = Control.asTemplate(templates.MultiTemplate, false);
 
-		this.add(this.control);
+		if (config && definition) {
+			this.set(config, definition);
+		}
+	}
+
+	set(config: ConfigDefinitionsToConfig<keyof TDef, TDef>, definition: TDef) {
+		this.clear();
+
+		for (const [id, def] of Objects.pairs(definition)) {
+			const control = new configControls[def.type](
+				{
+					toggle: this.toggleTemplate,
+					number: this.numberTemplate,
+					slider: this.sliderTemplate,
+					multi: this.dayCycleTemplate,
+				},
+				config[id] as never,
+				def as never,
+			);
+			this.add(control);
+
+			control.submitted.Connect((value) => this.configUpdated.Fire(id as string, value));
+		}
 	}
 }
+
+export abstract class ConfigValueControl<TGui extends GuiObject> extends Control<ConfigPartDefinition<TGui>> {
+	constructor(gui: ConfigPartDefinition<TGui>, name: string) {
+		super(gui);
+		this.gui.HeadingLabel.Text = name;
+	}
+
+	protected sameOrUndefined<T>(configs: readonly T[]) {
+		let value: T | undefined;
+		for (const config of configs) {
+			if (value !== undefined && value !== config) {
+				value = undefined;
+				break;
+			}
+
+			value = config;
+		}
+
+		return value;
+	}
+}
+
+//
+
+export class BoolConfigValueControl extends ConfigValueControl<ToggleControlDefinition> {
+	readonly submitted = new Signal<(config: PlayerConfigTypes.Bool["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: PlayerConfigTypes.Bool["config"],
+		definition: ConfigTypeToDefinition<PlayerConfigTypes.Bool>,
+	) {
+		super(templates.toggle(), definition.displayName);
+
+		const control = this.add(new ToggleControl(this.gui.Control));
+		control.value.set(config);
+
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
+	}
+}
+
+export class NumberConfigValueControl extends ConfigValueControl<NumberTextBoxControlDefinition> {
+	readonly submitted = new Signal<(config: PlayerConfigTypes.Number["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: PlayerConfigTypes.Number["config"],
+		definition: ConfigTypeToDefinition<PlayerConfigTypes.Number>,
+	) {
+		super(templates.number(), definition.displayName);
+
+		const control = this.add(new NumberTextBoxControl(this.gui.Control));
+		control.value.set(config);
+
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
+	}
+}
+
+export class ClampedNumberConfigValueControl extends ConfigValueControl<SliderControlDefinition> {
+	readonly submitted = new Signal<(config: PlayerConfigTypes.ClampedNumber["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: PlayerConfigTypes.ClampedNumber["config"],
+		definition: ConfigTypeToDefinition<PlayerConfigTypes.ClampedNumber>,
+	) {
+		super(templates.slider(), definition.displayName);
+
+		const control = this.add(new SliderControl(this.gui.Control, definition.min, definition.max, definition.step));
+		control.value.set(config);
+
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
+	}
+}
+
+type MultiTemplate = GuiObject & {};
+export class DayCycleValueControl extends ConfigValueControl<MultiTemplate> {
+	readonly submitted = new Signal<(config: PlayerConfigTypes.DayCycle["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: PlayerConfigTypes.DayCycle["config"],
+		definition: ConfigTypeToDefinition<PlayerConfigTypes.DayCycle>,
+	) {
+		super(templates.multi(), definition.displayName);
+
+		const def = {
+			automatic: {
+				displayName: "Automatic",
+				type: "bool",
+				config: true as boolean,
+			},
+			manual: {
+				displayName: "Manual time (hours)",
+				type: "clampedNumber",
+				config: 0 as number,
+				min: 0,
+				max: 24,
+				step: 0.1,
+			},
+		} as const satisfies PlayerConfigTypes.Definitions;
+		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
+
+		const control = this.add(new ConfigControl(this.gui.Control, config, def));
+		this.event.subscribe(control.configUpdated, (key, value) => {
+			this.submitted.Fire((config = { ...config, [key]: value }));
+		});
+	}
+}
+
+//
+
+export const configControls = {
+	bool: BoolConfigValueControl,
+	number: NumberConfigValueControl,
+	clampedNumber: ClampedNumberConfigValueControl,
+	dayCycle: DayCycleValueControl,
+} as const satisfies {
+	readonly [k in keyof PlayerConfigTypes.Types]: {
+		new (
+			templates: Templates,
+			config: PlayerConfigTypes.Types[k]["config"] & defined,
+			definition: ConfigTypeToDefinition<PlayerConfigTypes.Types[k]>,
+		): ConfigValueControl<GuiObject> & {
+			submitted: Signal<(value: PlayerConfigTypes.Types[k]["config"]) => void>;
+		};
+	};
+};
+
+//
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	readonly HeadingLabel: TextLabel;
 	readonly Control: T;
 };
 
-export type SettingsDefinition = GuiObject & {
-	readonly CheckboxTemplate: ConfigPartDefinition<ToggleControlDefinition>;
-};
-
 export type SettingsPopupDefinition = GuiObject & {
 	readonly Content: {
-		readonly ScrollingFrame: SettingsDefinition;
+		readonly ScrollingFrame: ScrollingFrame;
 	};
 	readonly Buttons: {
 		readonly CancelButton: GuiButton;
@@ -60,8 +220,7 @@ export type SettingsPopupDefinition = GuiObject & {
 };
 
 export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
-	private readonly checkboxTemplate;
-	private readonly list;
+	private readonly config;
 
 	static showPopup() {
 		const popup = new SettingsPopup(
@@ -77,10 +236,11 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 	constructor(gui: SettingsPopupDefinition) {
 		super(gui);
 
-		this.checkboxTemplate = Control.asTemplate(this.gui.Content.ScrollingFrame.CheckboxTemplate);
+		this.config = this.add(new ConfigControl<PlayerConfigDefinition>(this.gui.Content.ScrollingFrame));
 
-		this.list = new Control(this.gui.Content.ScrollingFrame);
-		this.add(this.list);
+		this.event.subscribe(this.config.configUpdated, async (key, value) => {
+			await PlayerDataStorage.sendPlayerConfigValue(key, value as PlayerConfig[keyof PlayerConfig]);
+		});
 
 		this.add(new ButtonControl(this.gui.Buttons.CancelButton, () => this.hide()));
 		this.add(new ButtonControl(this.gui.Head.CloseButton, () => this.hide()));
@@ -89,51 +249,9 @@ export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
 			PlayerDataStorage.config,
 			(config) => {
 				if (!config) return;
-				this.create();
+				this.config.set(PlayerDataStorage.config.get(), PlayerConfigDefinition);
 			},
 			true,
 		);
-	}
-
-	private create() {
-		const config = PlayerDataStorage.config.get();
-		this.list.clear();
-
-		for (const [id, def] of Objects.pairs(GameDefinitions.PLAYER_SETTINGS_DEFINITION)) {
-			if (def.type === "bool") {
-				const control = new ConfigPartControl(
-					this.checkboxTemplate(),
-					(cb) => new ToggleControl(cb),
-					[config],
-					def,
-					id,
-				);
-				this.list.add(control);
-
-				control.control.submitted.Connect((value) => PlayerDataStorage.sendPlayerConfigValue(id, value));
-			} /* else if (def.type === "key") {
-					const control = new ConfigPartControl(
-						this.keyTemplate(),
-						(kb) => new KeyChooserControl(kb),
-						config,
-						def,
-						id,
-					);
-					this.list.add(control);
-	
-					control.control.submitted.Connect((value) => send(id, value));
-				} else if (def.type === "number") {
-					const control = new ConfigPartControl(
-						this.sliderTemplate(),
-						(cb) => new SliderControl(cb, def.min, def.max, def.step),
-						config,
-						def,
-						id,
-					);
-					this.list.add(control);
-	
-					control.control.submitted.Connect((value) => send(id, value));
-				}*/
-		}
 	}
 }

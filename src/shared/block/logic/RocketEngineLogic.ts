@@ -2,10 +2,10 @@ import { Workspace } from "@rbxts/services";
 import RemoteEvents from "shared/RemoteEvents";
 import RobloxUnit from "shared/RobloxUnit";
 import Sound from "shared/Sound";
+import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import Effects from "shared/effects/Effects";
-import ConfigurableBlockLogic from "../ConfigurableBlockLogic";
 
 type RocketEngine = BlockModel & {
 	readonly EffectEmitter: Part & {

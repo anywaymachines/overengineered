@@ -1,20 +1,17 @@
 import Signal from "@rbxts/signal";
 import Control from "client/gui/Control";
-import BlockConfigDefinitionRegistry, { BlockConfigRegToDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
-import { ConfigControlDefinition } from "../buildmode/ConfigControl";
+import { ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
 
 type Vector3ConfigValueControlDefinition = ConfigControlDefinition;
 class Vector3ConfigValueControl extends ConfigValueControl<Vector3ConfigValueControlDefinition> {
-	readonly submitted = new Signal<
-		(config: Readonly<Record<BlockUuid, BlockConfigDefinitionRegistry["vector3"]["config"]>>) => void
-	>();
+	readonly submitted = new Signal<(config: Readonly<Record<BlockUuid, BlockConfigTypes.Vec3["config"]>>) => void>();
 
 	constructor(
-		configs: Readonly<Record<BlockUuid, BlockConfigDefinitionRegistry["vector3"]["config"]>>,
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["vector3"]>,
+		configs: Readonly<Record<BlockUuid, BlockConfigTypes.Vec3["config"]>>,
+		definition: ConfigTypeToDefinition<BlockConfigTypes.Vec3>,
 	) {
 		super(configValueTemplateStorage.multi(), definition.displayName);
 
@@ -37,7 +34,7 @@ class Vector3ConfigValueControl extends ConfigValueControl<Vector3ConfigValueCon
 				default: 0,
 				config: 0,
 			},
-		} satisfies Record<string, BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["number"]>>;
+		} satisfies Record<string, ConfigTypeToDefinition<BlockConfigTypes.Number>>;
 
 		const withval = (vec: Vector3, value: number, key: keyof typeof defs) => {
 			if (key === "X") return new Vector3(value, vec.Y, vec.Z);

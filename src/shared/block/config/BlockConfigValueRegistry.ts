@@ -1,14 +1,13 @@
-import NumberObservableValue from "../../event/NumberObservableValue";
-import ObservableValue from "../../event/ObservableValue";
-import BlockConfigDefinitionRegistry from "./BlockConfigDefinitionRegistry";
+import NumberObservableValue from "shared/event/NumberObservableValue";
+import ObservableValue from "shared/event/ObservableValue";
 
 export type BlockConfigValueRegistry = {
-	readonly [k in keyof BlockConfigDefinitionRegistry]: (
-		definition: BlockConfigDefinitionRegistry[k],
-	) => ObservableValue<BlockConfigDefinitionRegistry[k]["default"]>;
+	readonly [k in keyof BlockConfigTypes.Types]: (
+		definition: BlockConfigTypes.Types[k],
+	) => ObservableValue<BlockConfigTypes.Types[k]["default"]>;
 };
 
-const createObservable = <TDef extends BlockConfigDefinitionRegistry[keyof BlockConfigDefinitionRegistry]>(
+const createObservable = <TDef extends BlockConfigTypes.Types[keyof BlockConfigTypes.Types]>(
 	definition: TDef,
 ): ObservableValue<TDef["default"]> => {
 	return new ObservableValue(definition.default);

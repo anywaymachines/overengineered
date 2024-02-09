@@ -1,43 +1,17 @@
-import { PlacedBlockData } from "../../building/BlockManager";
-import JSON from "../../fixes/Json";
-import Objects from "../../fixes/objects";
-import { BlockConfigDefinitions, BlockConfigDefinitionsToConfig } from "./BlockConfigDefinitionRegistry";
+import { PlacedBlockData } from "shared/building/BlockManager";
+import { Config } from "shared/config/Config";
+import JSON from "shared/fixes/Json";
 
-export default class BlockConfig {
-	static deserialize<TDef extends BlockConfigDefinitions>(
+export const BlockConfig = {
+	deserialize: <TDef extends BlockConfigTypes.Definitions>(
 		block: PlacedBlockData,
 		definition: TDef,
-	): BlockConfigDefinitionsToConfig<TDef> {
-		return this.addDefaults(
+	): ConfigDefinitionsToConfig<keyof TDef, TDef> => {
+		return Config.addDefaults(
 			JSON.deserialize(
 				(block.instance.GetAttribute("config") as string | undefined) ?? "{}",
-			) as BlockConfigDefinitionsToConfig<TDef>,
+			) as ConfigDefinitionsToConfig<keyof TDef, TDef>,
 			definition,
 		);
-	}
-
-	static addDefaults<TDef extends BlockConfigDefinitions>(
-		config: Partial<BlockConfigDefinitionsToConfig<TDef>>,
-		definition: TDef,
-	): BlockConfigDefinitionsToConfig<TDef> {
-		for (const [key, def] of Objects.pairs(definition)) {
-			if (typeIs(config[key], "table") || typeIs(def.config, "table")) {
-				config[key] = {
-					...((def.config as object) ?? {}),
-					...(config[key] ?? {}),
-				} as (typeof config)[typeof key];
-
-				for (const [k, v] of Objects.entries(config[key]!)) {
-					if (!typeIs(v, "table")) continue;
-
-					config[key]![k] = {
-						...(def.config[k as keyof typeof def.config] as object),
-						...(v ?? {}),
-					};
-				}
-			} else config[key] ??= def.config;
-		}
-
-		return config as BlockConfigDefinitionsToConfig<TDef>;
-	}
-}
+	},
+} as const;

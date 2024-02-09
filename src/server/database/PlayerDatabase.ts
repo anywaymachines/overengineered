@@ -3,7 +3,7 @@ import { Db } from "./Database";
 
 export type PlayerData = {
 	readonly purchasedSlots?: number;
-	readonly settings?: PlayerConfig;
+	readonly settings?: Partial<PlayerConfig>;
 	readonly slots?: readonly SlotMeta[];
 };
 

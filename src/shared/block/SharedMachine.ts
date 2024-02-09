@@ -2,7 +2,6 @@ import { RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
-import { BlockConfigBothDefinitions } from "shared/block/config/BlockConfigDefinitionRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedComponentBase from "shared/component/SharedComponentBase";
 import SharedComponentContainer from "shared/component/SharedComponentContainer";
@@ -19,7 +18,7 @@ export default class SharedMachine extends SharedComponentContainer {
 	readonly blocks: BlockLogic[] = [];
 	readonly occupiedByLocalPlayer = new ObservableValue(true);
 	readonly destroyed = new Signal<() => void>();
-	private readonly childMap = new Map<BlockUuid, ConfigurableBlockLogic<BlockConfigBothDefinitions>>();
+	private readonly childMap = new Map<BlockUuid, ConfigurableBlockLogic<BlockConfigTypes.BothDefinitions>>();
 
 	/** Add blocks to the machine, initialize it and start */
 	init(blocks: readonly PlacedBlockData[]) {

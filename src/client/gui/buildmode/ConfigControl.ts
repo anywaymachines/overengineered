@@ -2,22 +2,19 @@ import Signal from "@rbxts/signal";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import CheckBoxControl, { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
+import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import KeyChooserControl, { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import SliderControl, { SliderControlDefinition } from "client/gui/controls/SliderControl";
-import BlockConfigDefinitionRegistry, {
-	BlockConfigDefinition,
-	BlockConfigDefinitions,
-	BlockConfigDefinitionsToConfig,
-	BlockConfigRegToDefinition,
-} from "shared/block/config/BlockConfigDefinitionRegistry";
+import TextBoxControl, { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
 import Objects from "shared/fixes/objects";
-import { DictionaryControl } from "../controls/DictionaryControl";
-import TextBoxControl, { TextBoxControlDefinition } from "../controls/TextBoxControl";
 
 type PartialIfObject<T> = T extends CheckableTypes[Exclude<keyof CheckableTypes, keyof CheckablePrimitives>]
 	? T
 	: Partial<T>;
+
+type BlockConfigDefinitionRegistry = BlockConfigTypes.Types;
+type BlockConfigDefinitions = BlockConfigTypes.Definitions;
 
 export type ConfigControlDefinition = GuiObject;
 export default class ConfigControl extends Control<ConfigControlDefinition> {
@@ -50,7 +47,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 	}
 
 	set<TDef extends BlockConfigDefinitions>(
-		config: BlockConfigDefinitionsToConfig<TDef>,
+		config: ConfigDefinitionsToConfig<keyof TDef, TDef>,
 		definition: TDef,
 		connected: readonly (keyof TDef)[] = [],
 	) {
@@ -100,7 +97,7 @@ export class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control
 
 	constructor(
 		gui: ConfigControl2Definition,
-		config: BlockConfigDefinitionsToConfig<TDef>,
+		config: ConfigDefinitionsToConfig<keyof TDef, TDef>,
 		definition: Partial<TDef>,
 		connected: readonly (keyof TDef)[] = [],
 	) {
@@ -173,7 +170,7 @@ export class BoolConfigValueControl extends ConfigValueControl<CheckBoxControlDe
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["bool"]["config"],
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["bool"]>,
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["bool"]>,
 	) {
 		super(templates.checkbox(), definition.displayName);
 
@@ -191,7 +188,7 @@ export class Vector3ConfigValueControl extends ConfigValueControl<Vector3ConfigV
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["vector3"]["config"],
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["vector3"]>,
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["vector3"]>,
 	) {
 		super(templates.multi(), definition.displayName);
 
@@ -214,7 +211,7 @@ export class Vector3ConfigValueControl extends ConfigValueControl<Vector3ConfigV
 				default: 0,
 				config: 0,
 			},
-		} satisfies Record<string, BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["number"]>>;
+		} satisfies Record<string, ConfigTypeToDefinition<BlockConfigDefinitionRegistry["number"]>>;
 
 		const list = this.add(new Control<GuiObject, NumberConfigValueControl>(this.gui.Control));
 		const create = (key: keyof typeof defs) => {
@@ -240,13 +237,15 @@ export class KeyBoolConfigValueControl extends ConfigValueControl<ConfigControlD
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["keybool"]["config"],
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["keybool"]>,
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["keybool"]>,
 	) {
 		super(templates.multi(), definition.displayName);
 
 		const controlTemplate = Control.asTemplate(this.gui.Control);
 
-		const def: Partial<Record<keyof BlockConfigDefinitionRegistry["keybool"]["config"], BlockConfigDefinition>> = {
+		const def: Partial<
+			Record<keyof BlockConfigDefinitionRegistry["keybool"]["config"], BlockConfigTypes.Definition>
+		> = {
 			key: {
 				displayName: "Key",
 				type: "key",
@@ -290,7 +289,7 @@ export class KeyConfigValueControl extends ConfigValueControl<KeyChooserControlD
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["key"]["config"],
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["key"]>,
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["key"]>,
 	) {
 		super(templates.key(), definition.displayName);
 
@@ -309,7 +308,7 @@ export class MultiKeyConfigValueControl extends ConfigValueControl<MultiKeyConfi
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["multikey"]["config"],
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["multikey"]>,
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["multikey"]>,
 	) {
 		super(templates.multi(), definition.displayName);
 
@@ -346,7 +345,7 @@ export class NumberConfigValueControl extends ConfigValueControl<NumberTextBoxCo
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["number"]["config"],
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["number"]>,
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["number"]>,
 	) {
 		super(templates.number(), definition.displayName);
 
@@ -365,7 +364,7 @@ export class StringConfigValueControl extends ConfigValueControl<TextBoxControlD
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["string"]["config"],
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["string"]>,
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["string"]>,
 	) {
 		super(templates.number(), definition.displayName);
 
@@ -383,7 +382,7 @@ export class SliderConfigValueControl extends ConfigValueControl<SliderControlDe
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["clampedNumber"]["config"],
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["clampedNumber"]>,
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["clampedNumber"]>,
 	) {
 		super(templates.slider(), definition.displayName);
 
@@ -401,7 +400,7 @@ export class ThrustConfigValueControl extends ConfigValueControl<ThrustConfigVal
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["thrust"]["config"],
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["thrust"]>,
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["thrust"]>,
 	) {
 		super(templates.multi(), definition.displayName);
 
@@ -445,7 +444,7 @@ export class ThrustConfigValueControl extends ConfigValueControl<ThrustConfigVal
 				config: false as boolean,
 			},
 		} as const satisfies BlockConfigDefinitions;
-		const _compilecheck: BlockConfigDefinitionsToConfig<typeof def> = config;
+		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
 		control.set(config, def);
 	}
@@ -459,7 +458,7 @@ export class MotorRotationSpeedConfigValueControl extends ConfigValueControl<Con
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["motorRotationSpeed"]["config"],
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["motorRotationSpeed"]>,
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["motorRotationSpeed"]>,
 	) {
 		super(templates.multi(), definition.displayName);
 
@@ -512,7 +511,7 @@ export class MotorRotationSpeedConfigValueControl extends ConfigValueControl<Con
 				config: false as boolean,
 			},
 		} as const satisfies BlockConfigDefinitions;
-		const _compilecheck: BlockConfigDefinitionsToConfig<typeof def> = config;
+		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
 		control.set(config, def);
 	}
@@ -526,7 +525,7 @@ export class ServoMotorAngleConfigValueControl extends ConfigValueControl<Config
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["servoMotorAngle"]["config"],
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["servoMotorAngle"]>,
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["servoMotorAngle"]>,
 	) {
 		super(templates.multi(), definition.displayName);
 
@@ -578,7 +577,7 @@ export class ServoMotorAngleConfigValueControl extends ConfigValueControl<Config
 				config: -180 as number,
 			},
 		} as const satisfies BlockConfigDefinitions;
-		const _compilecheck: BlockConfigDefinitionsToConfig<typeof def> = config;
+		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
 		control.set(config, def);
 	}
@@ -590,7 +589,7 @@ export class OrConfigValueControl extends ConfigValueControl<ConfigControlDefini
 	constructor(
 		templates: Templates,
 		config: BlockConfigDefinitionRegistry["or"]["config"],
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["or"]>,
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["or"]>,
 	) {
 		throw "Not implemented (waiting for dropdown implementation)";
 		super(templates.multi(), definition.displayName);
@@ -608,13 +607,13 @@ export class OrConfigValueControl extends ConfigValueControl<ConfigControlDefini
 		const def = Objects.fromEntries(
 			definition.types.map((t) => [t.type, { ...t, displayName: definition.displayName }] as const),
 		);
-		control.set(config as BlockConfigDefinitionsToConfig<typeof def>, def);
+		control.set(config as ConfigDefinitionsToConfig<keyof typeof def, typeof def>, def);
 	}
 }
 
 //
 
-export const configControls = {
+const configControls = {
 	bool: BoolConfigValueControl,
 	vector3: Vector3ConfigValueControl,
 	key: KeyConfigValueControl,
@@ -632,7 +631,7 @@ export const configControls = {
 		new (
 			templates: Templates,
 			config: BlockConfigDefinitionRegistry[k]["config"] & defined,
-			definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry[k]>,
+			definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry[k]>,
 		): ConfigValueControl<GuiObject> & {
 			submitted: Signal<(value: BlockConfigDefinitionRegistry[k]["config"]) => void>;
 		};

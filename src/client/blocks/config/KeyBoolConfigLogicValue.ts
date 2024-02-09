@@ -1,13 +1,12 @@
 import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
-import BlockConfigDefinitionRegistry from "shared/block/config/BlockConfigDefinitionRegistry";
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
-export class KeyBoolConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefinitionRegistry["keybool"]> {
+export class KeyBoolConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.KeyBool> {
 	constructor(
-		observable: ObservableValue<BlockConfigDefinitionRegistry["bool"]["default"]>,
-		config: BlockConfigDefinitionRegistry["keybool"]["config"],
-		definition: BlockConfigDefinitionRegistry["keybool"],
+		observable: ObservableValue<BlockConfigTypes.KeyBool["default"]>,
+		config: BlockConfigTypes.KeyBool["config"],
+		definition: BlockConfigTypes.KeyBool,
 	) {
 		super(observable, config, definition);
 		this.value.set(config.reversed);

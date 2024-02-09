@@ -1,12 +1,3 @@
-import {
-	BlockConfigBothDefinitions,
-	BlockConfigRegToDefinition,
-	BlockConfigValueTypeBool,
-	BlockConfigValueTypeNumber,
-	BlockConfigValueTypeOr,
-	BlockConfigValueTypeVector3,
-} from "shared/block/config/BlockConfigDefinitionRegistry";
-
 const disconnectblock = {
 	input: {
 		disconnect: {
@@ -474,14 +465,12 @@ const connectors = {
 		name: string,
 		group?: string,
 		additional?: Partial<
-			BlockConfigRegToDefinition<
-				BlockConfigValueTypeOr<
-					[BlockConfigValueTypeBool, BlockConfigValueTypeNumber, BlockConfigValueTypeVector3]
-				>
+			ConfigTypeToDefinition<
+				BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
 			>
 		>,
-	): BlockConfigRegToDefinition<
-		BlockConfigValueTypeOr<[BlockConfigValueTypeBool, BlockConfigValueTypeNumber, BlockConfigValueTypeVector3]>
+	): ConfigTypeToDefinition<
+		BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
 	> {
 		return {
 			displayName: name,
@@ -491,16 +480,19 @@ const connectors = {
 			group,
 			types: [
 				{
+					displayName: "Boolean",
 					type: "bool",
 					config: false as boolean,
 					default: false as boolean,
 				},
 				{
+					displayName: "Number",
 					type: "number",
 					default: 0 as number,
 					config: 0 as number,
 				},
 				{
+					displayName: "Vector3",
 					type: "vector3",
 					default: Vector3.zero as Vector3,
 					config: Vector3.zero as Vector3,
@@ -512,7 +504,7 @@ const connectors = {
 	boolOrNumber(
 		name: string,
 		group?: string,
-	): BlockConfigRegToDefinition<BlockConfigValueTypeOr<[BlockConfigValueTypeBool, BlockConfigValueTypeNumber]>> {
+	): ConfigTypeToDefinition<BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number]>> {
 		return {
 			displayName: name,
 			type: "or",
@@ -521,11 +513,13 @@ const connectors = {
 			group,
 			types: [
 				{
+					displayName: "Boolean",
 					type: "bool",
 					config: false as boolean,
 					default: false as boolean,
 				},
 				{
+					displayName: "Number",
 					type: "number",
 					default: 0 as number,
 					config: 0 as number,
@@ -796,6 +790,12 @@ const blockConfigRegistry = {
 } as const satisfies Record<string, BlockConfigBothDefinitions>;
 
 export default blockConfigRegistry;
+
+type BlockConfigDefinitions = ConfigTypesToDefinition<keyof BlockConfigTypes.Types, BlockConfigTypes.Types>;
+type BlockConfigBothDefinitions = {
+	readonly input: BlockConfigDefinitions;
+	readonly output: BlockConfigDefinitions;
+};
 
 export type BlockConfigRegistry = Readonly<Record<keyof typeof blockConfigRegistry, BlockConfigBothDefinitions>>;
 export type BlockConfigRegistryNonGeneric = Readonly<Record<string, BlockConfigBothDefinitions | undefined>>;

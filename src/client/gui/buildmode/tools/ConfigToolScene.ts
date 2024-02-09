@@ -5,10 +5,9 @@ import ConfigTool from "client/tools/ConfigTool";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Remotes from "shared/Remotes";
-import BlockConfig from "shared/block/config/BlockConfig";
-import { BlockConfigDefinitions } from "shared/block/config/BlockConfigDefinitionRegistry";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import BlockManager from "shared/building/BlockManager";
+import { Config } from "shared/config/Config";
 import ObservableValue from "shared/event/ObservableValue";
 import JSON from "shared/fixes/Json";
 import Objects from "shared/fixes/objects";
@@ -89,7 +88,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		const blockmodel = selected[0].Parent;
 		const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
 		const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
-			.input as BlockConfigDefinitions;
+			.input as BlockConfigTypes.Definitions;
 
 		this.gui.Visible = Objects.keys(onedef).size() !== 0;
 		if (!this.gui.Visible) return;
@@ -102,11 +101,11 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 				const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
 
 				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
-					.input as BlockConfigDefinitions;
+					.input as BlockConfigTypes.Definitions;
 				if (!defs) return undefined!;
 
 				const jsonstr = (blockmodel.GetAttribute("config") as string | undefined) ?? "{}";
-				const config = BlockConfig.addDefaults(JSON.deserialize<Record<string, number>>(jsonstr), defs);
+				const config = Config.addDefaults(JSON.deserialize<Record<string, number>>(jsonstr), defs);
 
 				return [
 					blockmodel,

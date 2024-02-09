@@ -3,7 +3,7 @@ import PlayerDatabase from "server/database/PlayerDatabase";
 import ServerPartUtils from "server/plots/ServerPartUtils";
 import RemoteEvents from "shared/RemoteEvents";
 import BlockManager from "shared/building/BlockManager";
-import GameDefinitions from "shared/data/GameDefinitions";
+import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import EffectBase from "shared/effects/EffectBase";
 import Effects from "shared/effects/Effects";
 
@@ -11,7 +11,7 @@ const UnreliableRemoteHandler = {
 	init() {
 		EffectBase.staticMustSendToPlayer = (player) =>
 			PlayerDatabase.instance.get(tostring(player.UserId)).settings?.others_gfx ??
-			GameDefinitions.PLAYER_SETTINGS_DEFINITION.others_gfx.default;
+			PlayerConfigDefinition.others_gfx.config;
 
 		RemoteEvents.ImpactBreak.invoked.Connect((player, part) => this.impactBreakEvent(player, part));
 		RemoteEvents.ImpactExplode.invoked.Connect((player, { part, blastRadius }) =>

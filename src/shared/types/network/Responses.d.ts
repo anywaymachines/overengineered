@@ -25,7 +25,7 @@ type FetchSlotsResponse = Response<{
 
 type PlayerDataResponse = {
 	readonly purchasedSlots: number | undefined;
-	readonly settings: PlayerConfig | undefined;
+	readonly settings: Partial<PlayerConfig> | undefined;
 	readonly slots: readonly SlotMeta[] | undefined;
 };
 

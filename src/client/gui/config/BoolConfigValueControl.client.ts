@@ -1,18 +1,15 @@
 import Signal from "@rbxts/signal";
-import BlockConfigDefinitionRegistry, { BlockConfigRegToDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
-import CheckBoxControl, { CheckBoxControlDefinition } from "../controls/CheckBoxControl";
+import CheckBoxControl, { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
 
 class BoolConfigValueControl extends ConfigValueControl<CheckBoxControlDefinition> {
-	readonly submitted = new Signal<
-		(config: Readonly<Record<BlockUuid, BlockConfigDefinitionRegistry["bool"]["config"]>>) => void
-	>();
+	readonly submitted = new Signal<(config: Readonly<Record<BlockUuid, BlockConfigTypes.Bool["config"]>>) => void>();
 
 	constructor(
-		configs: Readonly<Record<BlockUuid, BlockConfigDefinitionRegistry["bool"]["config"]>>,
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["bool"]>,
+		configs: Readonly<Record<BlockUuid, BlockConfigTypes.Bool["config"]>>,
+		definition: ConfigTypeToDefinition<BlockConfigTypes.Bool>,
 	) {
 		super(configValueTemplateStorage.checkbox(), definition.displayName);
 

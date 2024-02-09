@@ -2,9 +2,11 @@ import { HttpService, Players, Workspace } from "@rbxts/services";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
-import BlockConfig from "shared/block/config/BlockConfig";
+import { Config } from "shared/config/Config";
+import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
+import JSON, { JsonSerializablePrimitive } from "shared/fixes/Json";
 
 type NonNullableFields<T> = {
 	[P in keyof T]: NonNullable<T[P]>;
@@ -14,7 +16,10 @@ export default class PlayerDataStorage {
 	public static readonly loadedSlot = new ObservableValue<number | undefined>(undefined);
 
 	public static readonly data = new ObservableValue<NonNullableFields<PlayerDataResponse> | undefined>(undefined);
-	public static readonly config = this.data.createChild("settings", {}) as ObservableValue<Required<PlayerConfig>>;
+	public static readonly config = this.data.createChild(
+		"settings",
+		Config.addDefaults({}, PlayerConfigDefinition),
+	) as ObservableValue<Required<PlayerConfig>>;
 	public static readonly slots = this.data.createChild("slots", []);
 
 	static async init() {
@@ -30,7 +35,7 @@ export default class PlayerDataStorage {
 		const data = await Remotes.Client.GetNamespace("Player").Get("FetchData").CallServerAsync();
 		this.data.set({
 			purchasedSlots: data.purchasedSlots ?? 0,
-			settings: BlockConfig.addDefaults(data.settings ?? {}, GameDefinitions.PLAYER_SETTINGS_DEFINITION),
+			settings: Config.addDefaults(data.settings ?? {}, PlayerConfigDefinition),
 			slots: SlotsMeta.getAll(
 				data.slots ?? [],
 				GameDefinitions.getMaxSlots(Players.LocalPlayer, data.purchasedSlots ?? 0),
@@ -44,7 +49,7 @@ export default class PlayerDataStorage {
 		key: TKey,
 		value: PlayerConfig[TKey] & defined,
 	) {
-		Logger.info("Setting config value " + key + " to " + value);
+		Logger.info(`Setting player config value ${key} to ${JSON.serialize(value as JsonSerializablePrimitive)}`);
 		await Remotes.Client.GetNamespace("Player").Get("UpdateSettings").CallServerAsync(key, value);
 
 		this.config.set({

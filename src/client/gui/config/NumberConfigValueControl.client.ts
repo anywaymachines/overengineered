@@ -1,7 +1,6 @@
 import Signal from "@rbxts/signal";
 import Control from "client/gui/Control";
-import BlockConfigDefinitionRegistry, { BlockConfigRegToDefinition } from "shared/block/config/BlockConfigDefinitionRegistry";
-import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "../controls/NumberTextBoxControl";
+import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
@@ -21,13 +20,11 @@ class ConfigNumberControl extends Control<NumberTextBoxControlDefinition> {
 }
 
 class NumberConfigValueControl extends ConfigValueControl<NumberTextBoxControlDefinition> {
-	readonly submitted = new Signal<
-		(config: Readonly<Record<BlockUuid, BlockConfigDefinitionRegistry["number"]["config"]>>) => void
-	>();
+	readonly submitted = new Signal<(config: Readonly<Record<BlockUuid, BlockConfigTypes.Number["config"]>>) => void>();
 
 	constructor(
-		configs: Readonly<Record<BlockUuid, BlockConfigDefinitionRegistry["number"]["config"]>>,
-		definition: BlockConfigRegToDefinition<BlockConfigDefinitionRegistry["number"]>,
+		configs: Readonly<Record<BlockUuid, BlockConfigTypes.Number["config"]>>,
+		definition: ConfigTypeToDefinition<BlockConfigTypes.Number>,
 	) {
 		super(configValueTemplateStorage.number(), definition.displayName);
 

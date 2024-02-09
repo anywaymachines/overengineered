@@ -4,7 +4,6 @@ import { Players, RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import { PlacedBlockDataConnection } from "shared/building/BlockManager";
 import Objects from "shared/fixes/objects";
-import { BlockConfigDefinitions, BlockConfigDefinitionsToConfig } from "./config/BlockConfigDefinitionRegistry";
 
 type EventAfter<TArgs extends readonly unknown[]> = {
 	readonly received: Signal<(...args: TArgs) => void>;
@@ -18,10 +17,10 @@ export type BlockLogicRemotes = {
 	readonly [k in string]: BlockLogicEventServerToClient<readonly unknown[]>;
 };
 
-export interface BlockLogicData<TDef extends BlockConfigDefinitions, TBlock extends BlockModel = BlockModel> {
+export interface BlockLogicData<TDef extends BlockConfigTypes.Definitions, TBlock extends BlockModel = BlockModel> {
 	readonly instance: TBlock;
 	readonly uuid: BlockUuid;
-	readonly config: Partial<BlockConfigDefinitionsToConfig<TDef>>;
+	readonly config: Partial<ConfigDefinitionsToConfig<keyof TDef, TDef>>;
 	readonly color?: Color3;
 	readonly material?: Enum.Material;
 
@@ -29,13 +28,13 @@ export interface BlockLogicData<TDef extends BlockConfigDefinitions, TBlock exte
 	readonly connections: Readonly<Partial<Record<keyof TDef & BlockConnectionName, PlacedBlockDataConnection>>>;
 }
 export default abstract class SharedBlockLogic<
-	TDef extends BlockConfigDefinitions,
+	TDef extends BlockConfigTypes.Definitions,
 	TRemotes extends BlockLogicRemotes,
 	TBlock extends BlockModel = BlockModel,
 > {
 	private readonly remotes;
 
-	constructor(block: BlockLogicData<BlockConfigDefinitions>) {
+	constructor(block: BlockLogicData<BlockConfigTypes.Definitions>) {
 		//
 		//Net.Definitions.Create();
 

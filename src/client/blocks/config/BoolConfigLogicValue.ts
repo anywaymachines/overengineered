@@ -1,12 +1,11 @@
-import BlockConfigDefinitionRegistry from "shared/block/config/BlockConfigDefinitionRegistry";
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
-export class BoolConfigLogicValue extends ConfigLogicValueBase<BlockConfigDefinitionRegistry["bool"]> {
+export class BoolConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.Bool> {
 	constructor(
-		observable: ObservableValue<BlockConfigDefinitionRegistry["bool"]["default"]>,
-		config: BlockConfigDefinitionRegistry["bool"]["config"],
-		definition: BlockConfigDefinitionRegistry["bool"],
+		observable: ObservableValue<BlockConfigTypes.Bool["default"]>,
+		config: BlockConfigTypes.Bool["config"],
+		definition: BlockConfigTypes.Bool,
 	) {
 		super(observable, config, definition);
 		this.value.set(config);
