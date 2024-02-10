@@ -6,7 +6,7 @@ const getMinutesAfterMidnightTime = () => {
 	const config = PlayerDataStorage.config.get().dayCycle;
 
 	if (config.automatic) {
-		return ((os.time() % timePerDayCycle) / timePerDayCycle) * (60 * 24);
+		return (((DateTime.now().UnixTimestampMillis / 1000) % timePerDayCycle) / timePerDayCycle) * (60 * 24);
 	}
 
 	return config.manual * 60;
@@ -14,5 +14,5 @@ const getMinutesAfterMidnightTime = () => {
 
 while (true as boolean) {
 	Lighting.SetMinutesAfterMidnight(getMinutesAfterMidnightTime());
-	task.wait(0.2);
+	task.wait(1 / 4); // no need to update faster
 }
