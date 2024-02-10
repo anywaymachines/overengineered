@@ -17,6 +17,7 @@ Players.PlayerAdded.Connect((player) => {
 	player.CharacterAdded.Connect(() => createPlayerBeacon(player));
 });
 for (const player of Players.GetPlayers()) {
+	if (player === Players.LocalPlayer) continue;
 	createPlayerBeacon(player);
 }
 
