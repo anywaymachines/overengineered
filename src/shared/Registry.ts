@@ -69,3 +69,5 @@ const placeable = ReplicatedStorage.WaitForChild("Assets")
 for (const child of placeable) {
 	readCategory(child, categoriesRegistry);
 }
+
+(blockList as Block[]).sort((left, right) => left.id < right.id);

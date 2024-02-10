@@ -1,4 +1,5 @@
 import { GuiService, LocalizationService, Players } from "@rbxts/services";
+import Colors from "client/gui/Colors";
 import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
 import BlockPreviewControl from "client/gui/buildmode/BlockPreviewControl";
@@ -7,7 +8,6 @@ import { TextButtonControl } from "client/gui/controls/Button";
 import Registry, { blockList, blockRegistry, categoriesRegistry } from "shared/Registry";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
-import Colors from "client/gui/Colors";
 
 type CategoryControlDefinition = TextButton;
 class CategoryControl extends TextButtonControl<CategoryControlDefinition> {
@@ -85,22 +85,6 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		});
 	}
 
-	public createCategoryButton(text: string, activated: () => void) {
-		const control = new CategoryControl(this.categoryTemplate(), text);
-		control.activated.Connect(activated);
-		this.list.add(control);
-
-		return control;
-	}
-
-	public createBlockButton(block: Block, activated: () => void) {
-		const control = new BlockControl(this.blockTemplate(), block);
-		control.activated.Connect(activated);
-		this.list.add(control);
-
-		return control;
-	}
-
 	private translate(text: string) {
 		try {
 			const translator = LocalizationService.GetTranslatorForLocaleAsync(Players.LocalPlayer.LocaleId);
@@ -111,12 +95,31 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 	}
 
 	private create(selected: readonly CategoryName[], animated: boolean) {
+		let idx = 0;
+
+		const createCategoryButton = (text: string, activated: () => void) => {
+			const control = new CategoryControl(this.categoryTemplate(), text);
+			control.activated.Connect(activated);
+			this.list.add(control);
+
+			control.getGui().LayoutOrder = idx++;
+			return control;
+		};
+		const createBlockButton = (block: Block, activated: () => void) => {
+			const control = new BlockControl(this.blockTemplate(), block);
+			control.activated.Connect(activated);
+			this.list.add(control);
+
+			control.getGui().LayoutOrder = idx++;
+			return control;
+		};
+
 		this.list.clear();
 		this.gui.PathTextLabel.Text = selected.join(" > ");
 
 		// Back button
 		if (selected.size() !== 0) {
-			this.createCategoryButton("←", () => {
+			createCategoryButton("←", () => {
 				this.gui.SearchTextBox.Text = "";
 
 				this.selectedCategory.set(selected.filter((_, i) => i !== selected.size() - 1));
@@ -129,7 +132,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 			for (const [_, category] of Objects.pairs(
 				selected.reduce((acc, val) => acc[val].sub, categoriesRegistry),
 			)) {
-				this.createCategoryButton(category.name, () => this.selectedCategory.set([...selected, category.name]));
+				createCategoryButton(category.name, () => this.selectedCategory.set([...selected, category.name]));
 			}
 		}
 
@@ -141,7 +144,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 				(this.gui.SearchTextBox.Text !== "" &&
 					this.translate(block.displayName).lower().find(this.gui.SearchTextBox.Text.lower())[0])
 			) {
-				const button = this.createBlockButton(block, () => {
+				const button = createBlockButton(block, () => {
 					if (this.gui.SearchTextBox.Text !== "") {
 						this.gui.SearchTextBox.Text = "";
 						this.selectedCategory.set(Registry.findCategoryPath(categoriesRegistry, block.category) ?? []);

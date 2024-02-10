@@ -54,7 +54,9 @@ class ConfigControl<TDef extends PlayerConfigTypes.Definitions> extends Control<
 	set(config: ConfigDefinitionsToConfig<keyof TDef, TDef>, definition: TDef) {
 		this.clear();
 
-		for (const [id, def] of Objects.pairs(definition)) {
+		for (const [id, def] of Objects.entries(definition).sort(
+			(left, right) => tostring(left[0]) < tostring(right[0]),
+		)) {
 			const control = new configControls[def.type](
 				{
 					toggle: this.toggleTemplate,

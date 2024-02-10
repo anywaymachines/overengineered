@@ -23,6 +23,19 @@ export default class Control<
 		this.visible = gui.Visible;
 	}
 
+	/** @inheritdoc */
+	add<T extends TChild>(instance: T) {
+		super.add(instance);
+
+		if (instance instanceof Control) {
+			if (instance.getGui().Parent === this.gui) {
+				instance.getGui().LayoutOrder = this.getChildren().size();
+			}
+		}
+
+		return instance;
+	}
+
 	getGui() {
 		return this.gui;
 	}
