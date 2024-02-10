@@ -16,10 +16,7 @@ export default class SharedComponent<
 		super();
 		this.instance = instance;
 
-		(this.instance as Instance).GetPropertyChangedSignal("Parent").Connect(() => {
-			if (this.instance.Parent) return;
-			this.destroy();
-		});
+		(this.instance as Instance).Destroying.Connect(() => this.destroy());
 	}
 
 	/** Checks if the child exists on an Instance */
