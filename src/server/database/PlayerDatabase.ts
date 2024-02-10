@@ -1,4 +1,5 @@
 import { DataStoreService, HttpService, Players } from "@rbxts/services";
+import { PlayerConfigUpdater } from "server/PlayerConfigVersioning";
 import { Db } from "./Database";
 
 export type PlayerData = {
@@ -18,7 +19,13 @@ export default class PlayerDatabase {
 			this.datastore,
 			() => ({}),
 			(data) => HttpService.JSONEncode(data),
-			(data) => HttpService.JSONDecode(data) as PlayerData,
+			(data) => {
+				const pdata = HttpService.JSONDecode(data) as PlayerData;
+				return {
+					...pdata,
+					settings: pdata.settings === undefined ? undefined : PlayerConfigUpdater.update(pdata.settings),
+				};
+			},
 		);
 
 		Players.PlayerRemoving.Connect((plr) => {
