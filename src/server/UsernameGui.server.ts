@@ -1,4 +1,5 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
+import Logger from "shared/Logger";
 import GameDefinitions from "shared/data/GameDefinitions";
 
 Players.PlayerAdded.Connect((player) => {
@@ -17,7 +18,12 @@ Players.PlayerAdded.Connect((player) => {
 		gui.Parent = head;
 		gui.PlayerToHideFrom = player;
 
-		const rank = player.GetRankInGroup(GameDefinitions.GROUP);
+		let rank = 0;
+		try {
+			rank = player.GetRankInGroup(GameDefinitions.GROUP);
+		} catch {
+			Logger.error("Unable to get player rank");
+		}
 		const rankData = GameDefinitions.RANKS[rank];
 		if (rankData) {
 			gui.RankLabel.Text = rankData.name;

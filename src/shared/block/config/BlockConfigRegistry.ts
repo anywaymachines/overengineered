@@ -108,7 +108,7 @@ const servomotorblock = {
 			displayName: "Stiffness",
 			type: "clampedNumber",
 			min: 0,
-			max: 100,
+			max: 200,
 			step: 1,
 			default: 45 as number,
 			config: 45 as number,
@@ -530,7 +530,9 @@ const connectors = {
 	any(
 		name: string,
 		group?: string,
-	): ConfigTypeToDefinition<BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>> {
+	): ConfigTypeToDefinition<
+		BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
+	> {
 		return {
 			displayName: name,
 			type: "or",

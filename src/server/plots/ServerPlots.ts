@@ -1,4 +1,5 @@
 import { HttpService, Players, ReplicatedStorage } from "@rbxts/services";
+import Logger from "shared/Logger";
 import SharedPlots from "shared/building/SharedPlots";
 import GameDefinitions from "shared/data/GameDefinitions";
 
@@ -73,7 +74,13 @@ export default class ServerPlots {
 			gui.Parent = plot;
 			gui.Adornee = plot.FindFirstChild("BuildingArea") as BasePart;
 
-			const rank = player.GetRankInGroup(GameDefinitions.GROUP);
+			let rank = 0;
+			try {
+				rank = player.GetRankInGroup(GameDefinitions.GROUP);
+			} catch {
+				Logger.error("Unable to get player rank");
+			}
+
 			const rankData = GameDefinitions.RANKS[rank];
 			if (rankData) {
 				gui.RankLabel.Text = rankData.name;

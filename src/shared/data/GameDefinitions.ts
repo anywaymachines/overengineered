@@ -26,7 +26,13 @@ const GameDefinitions = {
 	MAX_ANGULAR_SPEED: 40,
 
 	isAdmin(player: Player) {
-		return player.IsInGroup(GameDefinitions.GROUP) && player.GetRankInGroup(GameDefinitions.GROUP) > 250;
+		let rank = 0;
+		try {
+			rank = player.GetRankInGroup(GameDefinitions.GROUP);
+		} catch {
+			// uh
+		}
+		return rank > 250;
 	},
 
 	getMaxSlots(player: Player, additional: number) {
