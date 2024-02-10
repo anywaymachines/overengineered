@@ -15,6 +15,7 @@ import WingLogic from "./logic/WingLogic";
 import ConstantBlockLogic from "./logic/operations/ConstantBlockLogic";
 import DelayBlockLogic from "./logic/operations/DelayBlockLogic";
 import OperationAndBlockLogic from "./logic/operations/boolean/OperationAndBlockLogic";
+import OperationBufferBlockLogic from "./logic/operations/boolean/OperationBufferBlockLogic";
 import OperationNandBlockLogic from "./logic/operations/boolean/OperationNandBlockLogic";
 import OperationNorBlockLogic from "./logic/operations/boolean/OperationNorBlockLogic";
 import OperationNotBlockLogic from "./logic/operations/boolean/OperationNotBlockLogic";
@@ -83,6 +84,7 @@ const logicRegistry = {
 	accelerometer: AccelerometerBlockLogic,
 	lidarsensor: LidarSensorBlockLogic,
 
+	operationbuffer: OperationBufferBlockLogic,
 	operationnot: OperationNotBlockLogic,
 	operationand: OperationAndBlockLogic,
 	operationnand: OperationNandBlockLogic,

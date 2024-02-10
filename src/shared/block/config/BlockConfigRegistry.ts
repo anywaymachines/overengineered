@@ -527,6 +527,38 @@ const connectors = {
 			],
 		};
 	},
+	any(
+		name: string,
+		group?: string,
+	): ConfigTypeToDefinition<BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>> {
+		return {
+			displayName: name,
+			type: "or",
+			default: 0 as number,
+			config: 0 as number,
+			group,
+			types: [
+				{
+					displayName: "Boolean",
+					type: "bool",
+					config: false as boolean,
+					default: false as boolean,
+				},
+				{
+					displayName: "Number",
+					type: "number",
+					default: 0 as number,
+					config: 0 as number,
+				},
+				{
+					displayName: "Vector",
+					type: "vector3",
+					default: Vector3.zero,
+					config: Vector3.zero,
+				},
+			],
+		};
+	},
 } as const;
 
 const twoNumbersOrBooleansInputBooleanOutput = {
@@ -541,6 +573,15 @@ const twoNumbersOrBooleansInputBooleanOutput = {
 			config: false as boolean,
 			default: false as boolean,
 		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
+const anyProcessing = {
+	input: {
+		value: connectors.any("Value", "1"),
+	},
+	output: {
+		result: connectors.any("Result", "1"),
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
@@ -760,6 +801,7 @@ const blockConfigRegistry = {
 	constant,
 	delayblock: delayBlock,
 
+	operationbuffer: anyProcessing,
 	operationnot: booleanProcessing,
 	operationand: twoBooleanInputsOneBooleanOutput,
 	operationnand: twoBooleanInputsOneBooleanOutput,
