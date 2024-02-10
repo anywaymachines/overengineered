@@ -14,5 +14,5 @@ const getMinutesAfterMidnightTime = () => {
 
 while (true as boolean) {
 	Lighting.SetMinutesAfterMidnight(getMinutesAfterMidnightTime());
-	task.wait(1);
+	task.wait(0.2);
 }
