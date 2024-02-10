@@ -1,5 +1,6 @@
 import { StarterGui, UserInputService } from "@rbxts/services";
 import SoundController from "client/controller/SoundController";
+import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
 import ToolBase from "client/tools/ToolBase";
@@ -12,10 +13,10 @@ export type ToolbarButtonControlDefinition = TextButton & {
 
 export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition> {
 	// Colors
-	private readonly activeColor = Color3.fromRGB(85, 170, 255);
-	private readonly inactiveColor = Color3.fromRGB(18, 18, 31);
-	private readonly activeImageColor = Color3.fromRGB(0, 0, 0);
-	private readonly inactiveImageColor = Color3.fromRGB(220, 220, 255);
+	private readonly activeColor = Colors.accent;
+	private readonly inactiveColor = Colors.staticBackground;
+	private readonly activeImageColor = Colors.black;
+	private readonly inactiveImageColor = Colors.accentLight;
 
 	constructor(gui: ToolbarButtonControlDefinition, tools: ToolController, tool: ToolBase) {
 		super(gui);

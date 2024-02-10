@@ -1,4 +1,5 @@
 import { UserInputService } from "@rbxts/services";
+import { Colors } from "client/gui/Colors";
 import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
 import HoveredPartHighlighter from "client/tools/selectors/HoveredPartHighlighter";
 import BlockManager from "shared/building/BlockManager";
@@ -27,7 +28,7 @@ export default class BlockPipetteButton extends ButtonControl {
 			}
 
 			this.onStart.Fire();
-			this.gui.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+			this.gui.BackgroundColor3 = Colors.accentLight;
 
 			const visualizer = this.add(
 				new HoveredPartHighlighter((part) => {

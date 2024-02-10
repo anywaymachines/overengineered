@@ -2,6 +2,7 @@ import { Players, Workspace } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
+import { Colors } from "client/gui/Colors";
 import LogControl from "client/gui/static/LogControl";
 import ActionController from "client/modes/build/ActionController";
 import BuildingController from "client/modes/build/BuildingController";
@@ -22,8 +23,8 @@ export default class BuildTool2 extends ToolBase {
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
 
-	private readonly allowedColor = Color3.fromRGB(194, 217, 255);
-	private readonly forbiddenColor = Color3.fromRGB(255, 189, 189);
+	private readonly allowedColor = Colors.blue;
+	private readonly forbiddenColor = Colors.red;
 
 	private mainGhost?: BlockGhost;
 	private readonly mirroredGhosts: BlockGhost[] = [];
@@ -245,7 +246,7 @@ export default class BuildTool2 extends ToolBase {
 		}
 
 		if (!this.targetPlot.get()) {
-			LogControl.instance.addLine("Out of bounds!", Color3.fromRGB(255, 100, 100));
+			LogControl.instance.addLine("Out of bounds!", Colors.red);
 
 			// Play sound
 			SoundController.getSounds().Build.BlockPlaceError.Play();

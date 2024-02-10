@@ -1,8 +1,9 @@
+import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
+import GuiAnimator from "client/gui/GuiAnimator";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
-import GuiAnimator from "../GuiAnimator";
 import { LogControlDefinition } from "./LogControl";
 
 export type DebugControlDefinition = LogControlDefinition;
@@ -21,24 +22,17 @@ export default class DebugControl extends Control<DebugControlDefinition> {
 		this.lineTemplate = Control.asTemplate(this.gui.Template);
 
 		this.event.subscribe(Logger.onLog, (text, isError) => {
-			this.addLine(`■ [DEBUG] ${text}`, isError ? Color3.fromRGB(255, 0, 0) : Color3.fromRGB(52, 154, 213));
+			this.addLine(`■ [DEBUG] ${text}`, isError ? Colors.red : Colors.blue);
 		});
 
 		Remotes.Client.GetNamespace("Debug")
 			.Get("DisplayLine")
 			.Connect((text: string, isClient: boolean, isError: boolean) => {
-				this.addLine(
-					`■ [DEBUG] ${text}`,
-					isError
-						? Color3.fromRGB(255, 0, 0)
-						: isClient
-							? Color3.fromRGB(52, 154, 213)
-							: Color3.fromRGB(0, 204, 103),
-				);
+				this.addLine(`■ [DEBUG] ${text}`, isError ? Colors.red : isClient ? Colors.blue : Colors.green);
 			});
 	}
 
-	public addLine(text: string, color: Color3 = Color3.fromRGB(255, 255, 255)) {
+	public addLine(text: string, color: Color3 = Colors.white) {
 		const line = this.lineTemplate();
 		line.TextLabel.Text = text;
 		line.TextLabel.TextColor3 = color;

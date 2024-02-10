@@ -1,9 +1,10 @@
 import { UserInputService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
+import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
-import ObservableValue from "shared/event/ObservableValue";
 import SelectButtonPopup from "client/gui/popup/SelectButtonPopup";
+import ObservableValue from "shared/event/ObservableValue";
 
 export type KeyChooserControlDefinition = TextButton;
 
@@ -12,8 +13,8 @@ export default class KeyChooserControl extends Control<KeyChooserControlDefiniti
 	public readonly submitted = new Signal<(value: KeyCode, prev: KeyCode) => void>();
 	public readonly value = new ObservableValue<KeyCode>("P");
 
-	private readonly color = Color3.fromRGB(48, 62, 87);
-	private readonly activeColor = Color3.fromRGB(13, 150, 255);
+	private readonly color = Colors.accentDark;
+	private readonly activeColor = Colors.accent;
 
 	constructor(gui: KeyChooserControlDefinition) {
 		super(gui);

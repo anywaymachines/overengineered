@@ -1,7 +1,8 @@
 import Signal from "@rbxts/signal";
 import Control from "client/gui/Control";
 import ObservableValue from "shared/event/ObservableValue";
-import GuiAnimator from "../GuiAnimator";
+import { Colors } from "client/gui/Colors";
+import GuiAnimator from "client/gui/GuiAnimator";
 
 export type ToggleControlDefinition = TextButton & {
 	readonly Circle: TextButton;
@@ -12,8 +13,8 @@ export default class ToggleControl extends Control<ToggleControlDefinition> {
 	public readonly submitted = new Signal<(value: boolean) => void>();
 	public readonly value = new ObservableValue(false);
 
-	private readonly color = Color3.fromRGB(48, 62, 87);
-	private readonly activeColor = Color3.fromRGB(13, 150, 255);
+	private readonly color = Colors.accentDark;
+	private readonly activeColor = Colors.accent;
 
 	constructor(gui: ToggleControlDefinition) {
 		super(gui);

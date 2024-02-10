@@ -1,6 +1,7 @@
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
-import GuiAnimator from "../GuiAnimator";
+import { Colors } from "client/gui/Colors";
+import GuiAnimator from "client/gui/GuiAnimator";
 
 export type LogControlDefinition = GuiObject & {
 	Template: Frame & {
@@ -22,7 +23,7 @@ export default class LogControl extends Control<LogControlDefinition> {
 		this.lineTemplate = Control.asTemplate(this.gui.Template);
 	}
 
-	public addLine(text: string, color: Color3 = Color3.fromRGB(255, 255, 255)) {
+	public addLine(text: string, color: Color3 = Colors.white) {
 		const line = this.lineTemplate();
 		line.TextLabel.Text = text;
 		line.TextLabel.TextColor3 = color;

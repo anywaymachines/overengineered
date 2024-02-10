@@ -1,6 +1,7 @@
 import { Players } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
+import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import Popup from "client/gui/Popup";
@@ -36,7 +37,7 @@ class SaveItem extends ButtonControl<SaveItemDefinition> {
 		);
 
 		this.selected.subscribe((selected) => {
-			this.gui.BackgroundColor3 = selected ? Color3.fromRGB(58, 58, 100) : Color3.fromRGB(12, 12, 20);
+			this.gui.BackgroundColor3 = selected ? Colors.accentDark : Colors.accentBlack;
 		}, true);
 	}
 }

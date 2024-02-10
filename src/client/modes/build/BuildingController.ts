@@ -1,4 +1,5 @@
 import Signals from "client/event/Signals";
+import { Colors } from "client/gui/Colors";
 import LogControl from "client/gui/static/LogControl";
 import Remotes from "shared/Remotes";
 
@@ -14,7 +15,7 @@ export default class BuildingController {
 			Signals.BLOCKS.BLOCK_ADDED.Fire(response.model);
 			return { success: true, position: response.model.GetPivot().Position } as const;
 		} else {
-			LogControl.instance.addLine("Placement failed: " + response.message, Color3.fromRGB(255, 100, 100));
+			LogControl.instance.addLine("Placement failed: " + response.message, Colors.red);
 			return response;
 		}
 	}
@@ -30,7 +31,7 @@ export default class BuildingController {
 			}
 		} else {
 			// Block not removed
-			LogControl.instance.addLine("Delete failed: " + response.message, Color3.fromRGB(255, 100, 100));
+			LogControl.instance.addLine("Delete failed: " + response.message, Colors.red);
 		}
 
 		return response;
@@ -40,7 +41,7 @@ export default class BuildingController {
 		const response = await Remotes.Client.GetNamespace("Building").Get("MoveRequest").CallServerAsync(request);
 
 		if (response.success) Signals.BLOCKS.BLOCKS_MOVED.Fire(request.vector);
-		else LogControl.instance.addLine("Move failed: " + response.message, Color3.fromRGB(255, 100, 100));
+		else LogControl.instance.addLine("Move failed: " + response.message, Colors.red);
 
 		return response;
 	}

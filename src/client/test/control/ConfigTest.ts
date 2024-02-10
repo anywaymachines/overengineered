@@ -1,3 +1,4 @@
+import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import { Element } from "client/gui/Element";
 import { ConfigControl2 } from "client/gui/buildmode/ConfigControl";
@@ -12,7 +13,7 @@ export const ConfigTest: ControlTest = {
 			{
 				Position: new UDim2(0.3, 0, 0.033, 0),
 				Size: new UDim2(0, 324, 0, 1107),
-				BackgroundColor3: Color3.fromRGB(18, 18, 31),
+				BackgroundColor3: Colors.staticBackground,
 				Transparency: 1,
 			},
 			{
@@ -69,7 +70,7 @@ export const ConfigTest: ControlTest = {
 				{
 					Position: new UDim2(0.3, 0, 0.033, 0),
 					Size: new UDim2(0, 324, 0, 1107),
-					BackgroundColor3: Color3.fromRGB(18, 18, 31),
+					BackgroundColor3: Colors.staticBackground,
 					Transparency: 0.2,
 				},
 				{
@@ -197,7 +198,7 @@ export const ConfigTest: ControlTest = {
 				{
 					Position: new UDim2(0.6, 0, 0.033, 0),
 					Size: new UDim2(0, 324, 0, 1107),
-					BackgroundColor3: Color3.fromRGB(18, 18, 31),
+					BackgroundColor3: Colors.staticBackground,
 					Transparency: 0.2,
 				},
 				{ list: Element.create("UIListLayout") },

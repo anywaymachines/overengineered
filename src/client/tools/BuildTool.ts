@@ -3,6 +3,7 @@ import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
+import { Colors } from "client/gui/Colors";
 import Gui from "client/gui/Gui";
 import LogControl from "client/gui/static/LogControl";
 import ActionController from "client/modes/build/ActionController";
@@ -26,8 +27,8 @@ export default class BuildTool extends ToolBase {
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 
 	// Const
-	private readonly allowedColor: Color3 = Color3.fromRGB(151, 235, 255);
-	private readonly forbiddenColor: Color3 = Color3.fromRGB(255, 156, 158);
+	private readonly allowedColor: Color3 = Colors.blue;
+	private readonly forbiddenColor: Color3 = Colors.red;
 
 	// Block
 	private previewBlock?: Model;
@@ -226,7 +227,7 @@ export default class BuildTool extends ToolBase {
 		// Client limitations
 		const plot = SharedPlots.getPlotByPosition(this.previewBlock.PrimaryPart.Position) as PlotModel | undefined;
 		if (!plot) {
-			LogControl.instance.addLine("Out of bounds!", Color3.fromRGB(255, 100, 100));
+			LogControl.instance.addLine("Out of bounds!", Colors.red);
 
 			// Play sound
 			SoundController.getSounds().Build.BlockPlaceError.Play();

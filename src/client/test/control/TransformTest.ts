@@ -1,3 +1,4 @@
+import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import { Element } from "client/gui/Element";
 import { ButtonControl } from "client/gui/controls/Button";
@@ -101,18 +102,18 @@ export const TransformTest: ControlTest = {
 							(transform) =>
 								transform.repeat(4, (transform) =>
 									transform
-										.func(() => (instance.BackgroundColor3 = Color3.fromHSV(0, 1, 1)))
-										.transform("BackgroundColor3", Color3.fromHSV(0.33, 1, 1), {
+										.func(() => (instance.BackgroundColor3 = Colors.red))
+										.transform("BackgroundColor3", Colors.green, {
 											duration: 0.33,
 											style: "Linear",
 										})
 										.then()
-										.transform("BackgroundColor3", Color3.fromHSV(0.66, 1, 1), {
+										.transform("BackgroundColor3", Colors.blue, {
 											duration: 0.33,
 											style: "Linear",
 										})
 										.then()
-										.transform("BackgroundColor3", Color3.fromHSV(1, 1, 1), {
+										.transform("BackgroundColor3", Colors.red, {
 											duration: 0.34,
 											style: "Linear",
 										})
@@ -128,9 +129,7 @@ export const TransformTest: ControlTest = {
 			const tweenable = newbtn("flash color", 4);
 			const component = list.add(new ButtonControl(tweenable));
 			component.enable();
-			component.activated.Connect(() =>
-				component.getTransform().run((t) => t.flashColor(Color3.fromRGB(255, 0, 0))),
-			);
+			component.activated.Connect(() => component.getTransform().run((t) => t.flashColor(Colors.red)));
 		}
 
 		{

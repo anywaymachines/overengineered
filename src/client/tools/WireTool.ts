@@ -3,6 +3,7 @@ import Component from "client/component/Component";
 import ComponentContainer from "client/component/ComponentContainer";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
+import { Colors } from "client/gui/Colors";
 import Gui from "client/gui/Gui";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
@@ -97,19 +98,19 @@ class MarkerComponent extends Component<MarkerComponentDefinition> {
 export default class WireTool extends ToolBase {
 	private static readonly typeGroups = {
 		bool: {
-			color: Color3.fromRGB(255, 170, 0),
+			color: Colors.yellow,
 		},
 		vector3: {
-			color: Color3.fromRGB(244, 142, 255),
+			color: Colors.pink,
 		},
 		number: {
-			color: Color3.fromRGB(81, 202, 21),
+			color: Colors.green,
 		},
 		string: {
-			color: Color3.fromRGB(120, 18, 120),
+			color: Colors.purple,
 		},
 		never: {
-			color: Color3.fromRGB(0, 0, 0),
+			color: Colors.black,
 		},
 	} as const;
 
@@ -153,8 +154,8 @@ export default class WireTool extends ToolBase {
 		this.viewportFrame.CurrentCamera = Workspace.CurrentCamera;
 		this.viewportFrame.Transparency = 1;
 		this.viewportFrame.Parent = Gui.getGameUI();
-		this.viewportFrame.Ambient = Color3.fromRGB(255, 255, 255);
-		this.viewportFrame.LightColor = Color3.fromRGB(255, 255, 255);
+		this.viewportFrame.Ambient = Colors.white;
+		this.viewportFrame.LightColor = Colors.white;
 		this.viewportFrame.ZIndex = -1000;
 	}
 

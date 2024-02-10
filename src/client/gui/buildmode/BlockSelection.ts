@@ -1,5 +1,5 @@
 import { GuiService, LocalizationService, Players } from "@rbxts/services";
-import Colors from "client/gui/Colors";
+import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
 import BlockPreviewControl from "client/gui/buildmode/BlockPreviewControl";
@@ -165,7 +165,8 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 				button.event.subscribeObservable(
 					this.selectedBlock,
 					(newblock) => {
-						button.getGui().BackgroundColor3 = newblock === block ? Colors.accent : Colors.staticBackground;
+						button.getGui().BackgroundColor3 =
+							newblock === block ? Colors.accentDark : Colors.staticBackground;
 
 						// Gamepad selection improvements
 						button.getGui().SelectionOrder = newblock === block ? 0 : 1;

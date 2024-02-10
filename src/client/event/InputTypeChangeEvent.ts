@@ -1,5 +1,6 @@
 import { UserInputService } from "@rbxts/services";
 import InputController from "client/controller/InputController";
+import { Colors } from "client/gui/Colors";
 import LogControl from "client/gui/static/LogControl";
 import Remotes from "shared/Remotes";
 
@@ -28,7 +29,7 @@ export default class InputTypeChangeEvent {
 			InputController.inputType.set(newInputType);
 			this.share();
 
-			LogControl.instance.addLine("New input type set to " + newInputType, Color3.fromRGB(252, 252, 145));
+			LogControl.instance.addLine("New input type set to " + newInputType, Colors.yellow);
 		}
 	}
 

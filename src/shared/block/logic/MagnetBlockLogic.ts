@@ -1,14 +1,14 @@
 import { RunService } from "@rbxts/services";
+import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
-import ConfigurableBlockLogic from "../ConfigurableBlockLogic";
 
 export default class MagnetBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.magnet> {
 	private static readonly magnetsMap = new Map<string, MagnetBlockLogic>();
-	private static readonly partColor1 = Color3.fromRGB(0x80, 0x80, 0xf0);
-	private static readonly partColor2 = Color3.fromRGB(0xf0, 0x80, 0x80);
+	private static readonly partColor1 = Color3.fromRGB(128, 128, 240);
+	private static readonly partColor2 = Color3.fromRGB(240, 128, 128);
 
 	private polarity: boolean = false;
 	private readonly part;

@@ -1,6 +1,7 @@
 import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import ComponentBase from "client/component/ComponentBase";
 import Signals from "client/event/Signals";
+import { Colors } from "client/gui/Colors";
 import Gui from "client/gui/Gui";
 import SharedPlots from "shared/building/SharedPlots";
 
@@ -17,8 +18,8 @@ export default class CenterOfMassController extends ComponentBase {
 		this.viewportFrame.CurrentCamera = Workspace.CurrentCamera;
 		this.viewportFrame.Transparency = 1;
 		this.viewportFrame.Parent = Gui.getGameUI();
-		this.viewportFrame.Ambient = Color3.fromRGB(255, 255, 255);
-		this.viewportFrame.LightColor = Color3.fromRGB(255, 255, 255);
+		this.viewportFrame.Ambient = Colors.white;
+		this.viewportFrame.LightColor = Colors.white;
 		this.viewportFrame.ZIndex = -1000;
 
 		const update = () => {
