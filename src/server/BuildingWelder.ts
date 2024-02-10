@@ -142,6 +142,45 @@ export default class BuildingWelder {
 		return connected;
 	}
 
+	static unweldFromOtherBlocks(model: BlockModel): Set<BasePart> {
+		const connected = new Set<BasePart>();
+
+		const modelParts = model.GetChildren().filter((value) => value.IsA("BasePart") && value.CanCollide);
+		for (let i = 0; i < modelParts.size(); i++) {
+			const modelPart = modelParts[i] as BasePart;
+			const welds = modelPart.GetJoints();
+			print("welds " + welds.join(", "));
+			welds.forEach((element) => {
+				if (element.IsA("Constraint")) {
+					if (
+						element.Attachment0?.Parent?.IsDescendantOf(model) &&
+						element.Attachment1?.Parent?.IsDescendantOf(model)
+					) {
+						return;
+					}
+
+					if (element.Attachment0?.Parent?.IsA("BasePart")) {
+						connected.add(element.Attachment0.Parent);
+					}
+					if (element.Attachment1?.Parent?.IsA("BasePart")) {
+						connected.add(element.Attachment1.Parent);
+					}
+				} else {
+					if (element.Part0?.IsDescendantOf(model) && element.Part1?.IsDescendantOf(model)) {
+						return;
+					}
+
+					if (element.Part0) connected.add(element.Part0);
+					if (element.Part1) connected.add(element.Part1);
+				}
+
+				element.Destroy();
+			});
+		}
+
+		return connected;
+	}
+
 	static weld(model: BlockModel, plot: PlotModel): Set<BasePart> {
 		const newJoints = new Set<BasePart>();
 		const modelParts = model.GetChildren().filter((value) => value.IsA("BasePart") && value.CanCollide);

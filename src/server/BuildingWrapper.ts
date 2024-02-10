@@ -124,7 +124,7 @@ export default class BuildingWrapper {
 			}
 
 			for (const block of blocks) {
-				BuildingWelder.unweld(block);
+				BuildingWelder.unweldFromOtherBlocks(block);
 				block.PivotTo(block.GetPivot().add(data.vector));
 				BuildingWelder.weld(block, plot);
 			}
