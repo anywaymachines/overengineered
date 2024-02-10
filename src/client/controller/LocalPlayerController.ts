@@ -19,7 +19,7 @@ export default class LocalPlayerController {
 	private static playerSpawned() {
 		const character = Players.LocalPlayer.Character!;
 		this.humanoid = character.WaitForChild("Humanoid") as Humanoid;
-		this.rootPart = this.humanoid.RootPart;
+		this.rootPart = character.WaitForChild("HumanoidRootPart") as Part;
 
 		// Death signal event
 		this.humanoid.Died.Once(() => Signals.PLAYER.DIED.Fire());
