@@ -3,6 +3,10 @@ declare global {
 		readonly automatic: boolean;
 		readonly manual: number;
 	};
+	type BeaconsConfiguration = {
+		readonly plot: boolean;
+		readonly players: boolean;
+	};
 
 	namespace PlayerConfigTypes {
 		export type Bool = ConfigType<"bool", boolean>;
@@ -13,12 +17,14 @@ declare global {
 			readonly step: number;
 		};
 		export type DayCycle = ConfigType<"dayCycle", DayCycleConfiguration>;
+		export type Beacons = ConfigType<"beacons", BeaconsConfiguration>;
 
 		export interface Types {
 			readonly bool: Bool;
 			readonly number: Number;
 			readonly clampedNumber: ClampedNumber;
 			readonly dayCycle: DayCycle;
+			readonly beacons: Beacons;
 		}
 
 		export type Definitions = ConfigTypesToDefinition<keyof Types, Types>;
@@ -42,8 +48,11 @@ export const PlayerConfigDefinition = {
 	},
 	beacons: {
 		displayName: "Beacons",
-		type: "bool",
-		config: true as boolean,
+		type: "beacons",
+		config: {
+			plot: true as boolean,
+			players: false as boolean,
+		},
 	},
 	impact_destruction: {
 		displayName: "Impact destruction",

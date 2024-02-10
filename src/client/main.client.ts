@@ -1,7 +1,6 @@
-import { MarketplaceService, Players, ReplicatedStorage, RunService } from "@rbxts/services";
+import { MarketplaceService, ReplicatedStorage, RunService } from "@rbxts/services";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import ComponentContainer from "client/component/ComponentContainer";
-import BeaconController from "client/controller/BeaconController";
 import CharacterController from "client/controller/CharacterController";
 import GameEnvironmentController from "client/controller/GameEnvironmentController";
 import LocalPlayerController from "client/controller/LocalPlayerController";
@@ -14,7 +13,6 @@ import LogControl from "client/gui/static/LogControl";
 import TooltipsControl from "client/gui/static/TooltipsControl";
 import PlayModeController from "client/modes/PlayModeController";
 import RemoteEvents from "shared/RemoteEvents";
-import SharedPlots from "shared/building/SharedPlots";
 
 // wait for assets to be copied
 ReplicatedStorage.WaitForChild("Assets");
@@ -42,13 +40,6 @@ const root = new ComponentContainer();
 const playModeController = new PlayModeController();
 root.add(playModeController);
 root.enable();
-
-let plot: PlotModel | undefined;
-while (!plot) {
-	plot = SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId);
-	wait(0.1);
-}
-new BeaconController(plot!, "Plot");
 
 spawn(() => {
 	const updated = MarketplaceService.GetProductInfo(game.PlaceId).Updated;

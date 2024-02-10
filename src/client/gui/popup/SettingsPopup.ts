@@ -181,6 +181,37 @@ export class DayCycleValueControl extends ConfigValueControl<MultiTemplate> {
 	}
 }
 
+export class BeaconsValueControl extends ConfigValueControl<MultiTemplate> {
+	readonly submitted = new Signal<(config: PlayerConfigTypes.Beacons["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: PlayerConfigTypes.Beacons["config"],
+		definition: ConfigTypeToDefinition<PlayerConfigTypes.Beacons>,
+	) {
+		super(templates.multi(), definition.displayName);
+
+		const def = {
+			plot: {
+				displayName: "Plot",
+				type: "bool",
+				config: true as boolean,
+			},
+			players: {
+				displayName: "Players",
+				type: "bool",
+				config: false as boolean,
+			},
+		} as const satisfies PlayerConfigTypes.Definitions;
+		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
+
+		const control = this.add(new ConfigControl(this.gui.Control, config, def));
+		this.event.subscribe(control.configUpdated, (key, value) => {
+			this.submitted.Fire((config = { ...config, [key]: value }));
+		});
+	}
+}
+
 //
 
 export const configControls = {
@@ -188,6 +219,7 @@ export const configControls = {
 	number: NumberConfigValueControl,
 	clampedNumber: ClampedNumberConfigValueControl,
 	dayCycle: DayCycleValueControl,
+	beacons: BeaconsValueControl,
 } as const satisfies {
 	readonly [k in keyof PlayerConfigTypes.Types]: {
 		new (

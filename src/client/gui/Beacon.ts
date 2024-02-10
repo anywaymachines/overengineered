@@ -1,9 +1,10 @@
 import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import PlayerDataStorage from "client/PlayerDataStorage";
+import Gui from "client/gui/Gui";
 import RobloxUnit from "shared/RobloxUnit";
+import SharedComponent from "shared/component/SharedComponent";
 import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
-import Gui from "../gui/Gui";
 
 type BeaconBillboardGui = GuiObject & {
 	readonly Title: TextLabel;
@@ -11,10 +12,12 @@ type BeaconBillboardGui = GuiObject & {
 	readonly ImageLabel: ImageLabel;
 };
 
-export default class BeaconController {
-	readonly billboard;
+export default class Beacon extends SharedComponent<BasePart | Model> {
+	private readonly billboard;
 
-	constructor(part: BasePart | Model, name: string) {
+	constructor(part: BasePart | Model, name: string, config: keyof BeaconsConfiguration) {
+		super(part);
+
 		this.billboard = (
 			ReplicatedStorage.Assets as unknown as { BeaconBillboardGui: BeaconBillboardGui }
 		).BeaconBillboardGui.Clone();
@@ -27,8 +30,8 @@ export default class BeaconController {
 		this.billboard.Parent = Gui.getUnscaledGameUI();
 		this.billboard.Title.Text = name;
 
-		RunService.RenderStepped.Connect(() => {
-			if (!PlayerDataStorage.config.get().beacons) {
+		this.event.subscribe(RunService.RenderStepped, () => {
+			if (!PlayerDataStorage.config.get().beacons[config]) {
 				this.billboard.ImageLabel.ImageTransparency = 1;
 				this.billboard.Title.TextTransparency = 1;
 				this.billboard.Distance.TextTransparency = 1;
@@ -96,5 +99,14 @@ export default class BeaconController {
 
 			this.billboard.Position = new UDim2(0, pos_x, 0, pos_y);
 		});
+	}
+
+	enable(): void {
+		super.enable();
+		this.billboard.Visible = true;
+	}
+	disable(): void {
+		super.disable();
+		this.billboard.Visible = false;
 	}
 }
