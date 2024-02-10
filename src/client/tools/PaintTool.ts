@@ -56,8 +56,8 @@ export default class PaintTool extends ToolBase {
 			.Get("Paint")
 			.CallServerAsync({
 				plot,
-				color: enableColor || this.enableColor.get() ? this.selectedColor.get() : undefined,
-				material: enableMaterial || this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
+				color: enableColor ?? this.enableColor.get() ? this.selectedColor.get() : undefined,
+				material: enableMaterial ?? this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
 			});
 	}
 	async paint(blocks: readonly BlockModel[]) {

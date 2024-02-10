@@ -35,9 +35,9 @@ export default class PaintToolScene extends Control<PaintToolSceneDefinition> {
 		this.tool = tool;
 
 		this.add(
-			new ButtonControl(this.gui.Bottom.Material.SetMaterialsButton, () => this.paintEverything(undefined, true)),
+			new ButtonControl(this.gui.Bottom.Material.SetMaterialsButton, () => this.paintEverything(false, true)),
 		);
-		this.add(new ButtonControl(this.gui.Bottom.Color.SetColorsButton, () => this.paintEverything(true, undefined)));
+		this.add(new ButtonControl(this.gui.Bottom.Color.SetColorsButton, () => this.paintEverything(true, false)));
 
 		const enable = () => {
 			// to not paint a block
