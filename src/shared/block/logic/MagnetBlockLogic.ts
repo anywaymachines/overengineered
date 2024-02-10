@@ -33,24 +33,18 @@ export default class MagnetBlockLogic extends ConfigurableBlockLogic<typeof bloc
 		);
 
 		this.event.subscribe(RunService.Heartbeat, () => {
-			const strength = this.input.strength.get();
+			const magicNumber = 5;
+			const strength = this.input.strength.get() * magicNumber;
 			if (strength === 0) return;
-
 			let attractedTo = Vector3.zero;
 			for (const [uuid, someMagnet] of MagnetBlockLogic.magnetsMap) {
 				if (uuid === this.block.uuid) continue;
-				if (
-					someMagnet.instance.PrimaryPart?.AssemblyRootPart !== undefined &&
-					someMagnet.instance.PrimaryPart?.AssemblyRootPart ===
-						this.block.instance.PrimaryPart?.AssemblyRootPart
-				)
-					continue;
-
-				const value = MagnetBlockLogic.calculateForce(this, someMagnet);
-				attractedTo = attractedTo.add(value);
+				//const distanceBetween = this.instance.GetPivot().Position.sub(someMagnet.instance.GetPivot().Position).Magnitude;
+				const calculatedForce: Vector3 = MagnetBlockLogic.calculateForce(this, someMagnet);
+				attractedTo = attractedTo.add(calculatedForce);
 			}
 
-			const result = VectorUtils.apply(attractedTo.mul(strength * 5), (num) => math.clamp(num, -100, 100));
+			const result = attractedTo.mul(strength);
 			this.part.ApplyImpulseAtPosition(result, this.part.Position);
 		});
 	}
@@ -67,7 +61,7 @@ export default class MagnetBlockLogic extends ConfigurableBlockLogic<typeof bloc
 		const distance = difference.Magnitude;
 		if (distance > 10) return Vector3.zero;
 
-		const invSqrt = 1 / math.pow(distance, 1 / 2);
+		const invSqrt = 1 / (1 + math.pow(distance, 1 / 2));
 		const isAttracted = block1.polarity === block2.polarity;
 		const result = VectorUtils.normalizeVector3(difference).mul(isAttracted ? invSqrt : -invSqrt);
 
