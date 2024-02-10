@@ -7,7 +7,11 @@ const createPlayerBeacon = (player: Player) => {
 		task.wait(0.1);
 	}
 
-	new Beacon((player.Character!.WaitForChild("Humanoid") as Humanoid).RootPart!, player.Name, "players").enable();
+	new Beacon(
+		(player.Character!.WaitForChild("Humanoid") as Humanoid).RootPart!,
+		player.DisplayName,
+		"players",
+	).enable();
 };
 Players.PlayerAdded.Connect((player) => {
 	player.CharacterAdded.Connect(() => createPlayerBeacon(player));
