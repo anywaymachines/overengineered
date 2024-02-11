@@ -57,7 +57,7 @@ class MarkerComponent extends Component<MarkerComponentDefinition> {
 		this.eventHandler.subscribe(button.MouseEnter, () => {
 			this.tooltip = this.createTooltip();
 			this.eventHandler.subscribeOnce(button.MouseLeave, () => {
-				this.tooltip?.Destroy();
+				this.clear();
 				this.tooltip = undefined;
 			});
 		});
@@ -143,7 +143,7 @@ export default class WireTool extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		this.markers = new ComponentContainer<MarkerComponent>();
+		this.markers = this.add(new ComponentContainer<MarkerComponent>());
 		this.event.onEnable(() => this.markers.enable());
 		this.event.onDisable(() => this.markers.disable());
 
