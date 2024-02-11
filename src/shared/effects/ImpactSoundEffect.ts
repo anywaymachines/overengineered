@@ -21,6 +21,8 @@ export default class ImpactSoundEffect extends EffectBase<Args> {
 	}
 
 	justRun({ part, index }: Args): void {
+		if (!part) return;
+
 		const soundsFolder = this.materialSounds[part.Material.Name] ?? this.materialSounds["Default"];
 		const soundIndex = index ?? math.random(0, soundsFolder.size() - 1);
 		const sound = soundsFolder[soundIndex].Clone() as Sound;
