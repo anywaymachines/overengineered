@@ -13,10 +13,14 @@ export default class SharedComponent<
 	private transforms?: TransformContainer<T>;
 
 	constructor(instance: T) {
+		if (!instance) {
+			throw "Trying to create a component with a null instance";
+		}
+
 		super();
 		this.instance = instance;
 
-		(this.instance as Instance).Destroying.Connect(() => this.destroy());
+		this.instance.Destroying.Connect(() => this.destroy());
 	}
 
 	/** Checks if the child exists on an Instance */
