@@ -119,7 +119,6 @@ const update = () => {
 		component: SharedComponentBase | { getDebugChildren(): readonly SharedComponentBase[] },
 		tree: TreeControl,
 	) => {
-		print("adding root " + component);
 		const childtree = tree.childContainer.add(
 			TreeControl.createChildList(
 				Element.create("TextButton", {
