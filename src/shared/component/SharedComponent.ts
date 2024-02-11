@@ -20,7 +20,15 @@ export default class SharedComponent<
 		super();
 		this.instance = instance;
 
-		this.instance.Destroying.Connect(() => this.destroy());
+		{
+			let selfDestroying = false;
+			this.instance.Destroying.Connect(() => {
+				if (selfDestroying) return;
+
+				selfDestroying = true;
+				this.destroy();
+			});
+		}
 	}
 
 	/** Checks if the child exists on an Instance */
