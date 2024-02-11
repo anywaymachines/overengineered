@@ -1,11 +1,12 @@
 import { GuiService, StarterGui } from "@rbxts/services";
 import ComponentBase from "client/component/ComponentBase";
+import LocalPlayerController from "client/controller/LocalPlayerController";
 import Signals from "client/event/Signals";
 import Popup from "client/gui/Popup";
 import Remotes from "shared/Remotes";
+import SharedComponentBase from "shared/component/SharedComponentBase";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
-import LocalPlayerController from "client/controller/LocalPlayerController";
 import BuildingMode from "./build/BuildingMode";
 import RideMode from "./ride/RideMode";
 
@@ -55,6 +56,10 @@ export default class PlayModeController extends ComponentBase {
 		this.event.subscribe(Signals.PLAYER.DIED, () => this.setMode(undefined, this.playmode.get()));
 
 		this.setMode(this.playmode.get(), undefined);
+	}
+
+	getDebugChildren(): readonly SharedComponentBase[] {
+		return Objects.values(this.modes);
 	}
 
 	private async setMode(mode: PlayModes | undefined, prev: PlayModes | undefined) {

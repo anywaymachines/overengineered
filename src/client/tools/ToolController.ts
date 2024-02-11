@@ -1,15 +1,16 @@
 import ComponentBase from "client/component/ComponentBase";
 import TooltipsControl from "client/gui/static/TooltipsControl";
-import BuildTool2 from "client/tools/BuildTool2";
-import PaintTool from "client/tools/PaintTool";
-import ToolBase from "client/tools/ToolBase";
-import WireTool from "client/tools/WireTool";
-import ObservableValue from "shared/event/ObservableValue";
 import BuildingMode from "client/modes/build/BuildingMode";
 import BuildTool from "client/tools/BuildTool";
+import BuildTool2 from "client/tools/BuildTool2";
 import ConfigTool from "client/tools/ConfigTool";
 import DeleteTool from "client/tools/DeleteTool";
 import MoveTool from "client/tools/MoveTool";
+import PaintTool from "client/tools/PaintTool";
+import ToolBase from "client/tools/ToolBase";
+import WireTool from "client/tools/WireTool";
+import SharedComponentBase from "shared/component/SharedComponentBase";
+import ObservableValue from "shared/event/ObservableValue";
 
 export default class ToolController extends ComponentBase {
 	public readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);
@@ -52,6 +53,10 @@ export default class ToolController extends ComponentBase {
 		this.tools = tools;
 		this.selectedTool.subscribe((tool) => TooltipsControl.instance.updateControlTooltips(tool));
 		this.event.onPrepare(() => TooltipsControl.instance.updateControlTooltips(this.selectedTool.get()));
+	}
+
+	getDebugChildren(): readonly SharedComponentBase[] {
+		return this.tools;
 	}
 
 	public enable() {

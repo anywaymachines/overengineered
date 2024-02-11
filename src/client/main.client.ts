@@ -13,6 +13,7 @@ import LogControl from "client/gui/static/LogControl";
 import TooltipsControl from "client/gui/static/TooltipsControl";
 import PlayModeController from "client/modes/PlayModeController";
 import RemoteEvents from "shared/RemoteEvents";
+import { rootComponents } from "./test/RootComponents";
 
 // wait for assets to be copied
 ReplicatedStorage.WaitForChild("Assets");
@@ -37,6 +38,7 @@ if (RunService.IsStudio()) {
 SoundController.initialize();
 
 const root = new ComponentContainer();
+rootComponents.push(root);
 const playModeController = new PlayModeController();
 root.add(playModeController);
 root.enable();
