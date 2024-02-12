@@ -14,6 +14,7 @@ import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 import WingLogic from "./logic/WingLogic";
 import ConstantBlockLogic from "./logic/operations/ConstantBlockLogic";
 import DelayBlockLogic from "./logic/operations/DelayBlockLogic";
+import LogicMemoryBlockLogic from "./logic/operations/boolean/LogicMemoryBlockLogic";
 import OperationAndBlockLogic from "./logic/operations/boolean/OperationAndBlockLogic";
 import OperationBufferBlockLogic from "./logic/operations/boolean/OperationBufferBlockLogic";
 import OperationNandBlockLogic from "./logic/operations/boolean/OperationNandBlockLogic";
@@ -83,6 +84,8 @@ const logicRegistry = {
 	altimeter: AltimeterBlockLogic,
 	accelerometer: AccelerometerBlockLogic,
 	lidarsensor: LidarSensorBlockLogic,
+
+	logicmemory: LogicMemoryBlockLogic,
 
 	operationbuffer: OperationBufferBlockLogic,
 	operationnot: OperationNotBlockLogic,

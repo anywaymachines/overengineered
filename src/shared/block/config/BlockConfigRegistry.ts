@@ -723,6 +723,22 @@ const altimeter = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const logicmemory = {
+	input: {
+		set: {
+			displayName: "Set",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+			configHidden: true
+		},
+		value: connectors.any("Value", "1"),
+	},
+	output: {
+		result: connectors.any("Result", "1"),
+	},
+}as const satisfies BlockConfigBothDefinitions;
+
 const operationclamp = {
 	input: {
 		value: {
@@ -803,6 +819,7 @@ const blockConfigRegistry = {
 	constant,
 	delayblock: delayBlock,
 
+	logicmemory,
 	operationbuffer: anyProcessing,
 	operationnot: booleanProcessing,
 	operationand: twoBooleanInputsOneBooleanOutput,
