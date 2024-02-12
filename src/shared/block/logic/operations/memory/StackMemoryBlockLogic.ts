@@ -15,7 +15,7 @@ export default class StackMemoryBlockLogic extends ConfigurableBlockLogic<typeof
 	}
 
 	private pushValue() {
-		if (this.internalMemory.size() > this.size) {
+		if (this.internalMemory.size() >= this.size) {
 			this.burn();
 			return;
 		}
