@@ -1,11 +1,10 @@
 import { Workspace } from "@rbxts/services";
 import SpreadingFireController from "server/SpreadingFireController";
-import ServerBlockLogic from "server/blocks/ServerBlockLogic";
 import ServerPartUtils from "server/plots/ServerPartUtils";
-import RemoteEvents from "shared/RemoteEvents";
 import TNTBlockLogic from "shared/block/logic/TNTBlockLogic";
 import BlockManager from "shared/building/BlockManager";
 import PartUtils from "shared/utils/PartUtils";
+import ServerBlockLogic from "../ServerBlockLogic";
 
 export default class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBlockLogic> {
 	constructor(logic: typeof TNTBlockLogic) {
@@ -15,7 +14,7 @@ export default class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBloc
 			if (!this.isValidBlock(block, player)) return;
 
 			// temporary until block configuration moved to shared
-			radius = math.clamp(radius, 0, 16);
+			radius = math.clamp(radius, 0, 12);
 			pressure = math.clamp(pressure, 0, 2500);
 
 			// Explosion
@@ -32,9 +31,7 @@ export default class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBloc
 				flameExplosion.BlastRadius *= 1.5;
 				flameExplosion.Parent = Workspace;
 				flameExplosion.Hit.Connect((part, distance) => {
-					if (math.random(1, 4) === 1) {
-						SpreadingFireController.burn(part);
-					}
+					SpreadingFireController.burn(part);
 				});
 			}
 
@@ -48,13 +45,11 @@ export default class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBloc
 					ServerPartUtils.BreakJoints(part);
 				}
 
-				RemoteEvents.Impulse.send([part.GetNetworkOwner()!], {
-					part,
-					impulse: part.Position.sub(explosion.Position).Unit.mul(
-						pressure * math.random(1, 2) * ((radius - distance) / radius),
-					),
-					position: part.Position,
-				});
+				part.Velocity = new Vector3(
+					math.random(0, pressure / 100),
+					math.random(0, pressure / 100),
+					math.random(0, pressure / 100),
+				);
 			});
 
 			PartUtils.applyToAllDescendantsOfType("Decal", block.PrimaryPart!, (decal) => {
