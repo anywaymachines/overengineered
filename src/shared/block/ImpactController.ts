@@ -17,7 +17,12 @@ export default class ImpactController {
 	static initializeBlocks(blocks: readonly PlacedBlockData[]) {
 		blocks.forEach((value) => {
 			PartUtils.applyToAllDescendantsOfType("BasePart", value.instance, (part) => {
-				if (!part.CanTouch || part.Transparency === 1 || part.IsA("VehicleSeat")) {
+				if (
+					!part.CanTouch ||
+					part.Transparency === 1 ||
+					part.IsA("VehicleSeat") ||
+					math.max(part.Size.X, part.Size.Y, part.Size.Z) < 2
+				) {
 					return;
 				}
 				this.initializeBlock(part);
@@ -32,17 +37,18 @@ export default class ImpactController {
 			return;
 		}
 
-		const event = part.Touched.Connect((secondPart: BasePart) => {
+		const event = part.Touched.Connect((secondPart: BasePart | Terrain) => {
+			// Do nothing for non-collidable blocks
+			if (!secondPart.CanCollide) return;
+
 			// Optimization (do nothing for non-connected blocks)
 			if (part.AssemblyMass === part.Mass) {
 				event.Disconnect();
 				return;
 			}
 
-			// Do nothing for non-collidable blocks
-			if (secondPart.IsA("BasePart") && !secondPart.CanCollide) {
+			if (secondPart.IsA("BasePart") && math.max(secondPart.Size.X, secondPart.Size.Y, secondPart.Size.Z) < 2)
 				return;
-			}
 
 			// Default diff
 			let allowedMagnitudeDiff: number = this.STRONG_BLOCKS.includes(blockData.id)
