@@ -350,31 +350,6 @@ const numberProcessing = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const delayBlock = {
-	input: {
-		value: {
-			displayName: "Value",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-		duration: {
-			displayName: "Duration",
-			type: "number",
-			default: 2 as number,
-			config: 2 as number,
-		},
-	},
-	output: {
-		result: {
-			displayName: "Result",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const twoNumberInputsNumberOutput = {
 	input: {
 		value1: {
@@ -730,14 +705,29 @@ const logicmemory = {
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
-			configHidden: true
+			configHidden: true,
 		},
 		value: connectors.any("Value", "1"),
 	},
 	output: {
 		result: connectors.any("Result", "1"),
 	},
-}as const satisfies BlockConfigBothDefinitions;
+} as const satisfies BlockConfigBothDefinitions;
+
+const delayBlock = {
+	input: {
+		value: connectors.any("Value", "1"),
+		duration: {
+			displayName: "Duration",
+			type: "number",
+			default: 2 as number,
+			config: 2 as number,
+		},
+	},
+	output: {
+		result: connectors.any("Result", "1"),
+	},
+} as const satisfies BlockConfigBothDefinitions;
 
 const operationclamp = {
 	input: {
