@@ -1,3 +1,106 @@
+const connectors = {
+	boolOrNumberOrVector(
+		name: string,
+		group?: string,
+		additional?: Partial<
+			ConfigTypeToDefinition<
+				BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
+			>
+		>,
+	): ConfigTypeToDefinition<
+		BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
+	> {
+		return {
+			displayName: name,
+			type: "or",
+			default: 0 as number,
+			config: 0 as number,
+			group,
+			types: [
+				{
+					displayName: "Boolean",
+					type: "bool",
+					config: false as boolean,
+					default: false as boolean,
+				},
+				{
+					displayName: "Number",
+					type: "number",
+					default: 0 as number,
+					config: 0 as number,
+				},
+				{
+					displayName: "Vector3",
+					type: "vector3",
+					default: Vector3.zero as Vector3,
+					config: Vector3.zero as Vector3,
+				},
+			],
+			...(additional ?? {}),
+		};
+	},
+	boolOrNumber(
+		name: string,
+		group?: string,
+	): ConfigTypeToDefinition<BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number]>> {
+		return {
+			displayName: name,
+			type: "or",
+			default: 0 as number,
+			config: 0 as number,
+			group,
+			types: [
+				{
+					displayName: "Boolean",
+					type: "bool",
+					config: false as boolean,
+					default: false as boolean,
+				},
+				{
+					displayName: "Number",
+					type: "number",
+					default: 0 as number,
+					config: 0 as number,
+				},
+			],
+		};
+	},
+	any(
+		name: string,
+		group?: string,
+	): ConfigTypeToDefinition<
+		BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
+	> {
+		return {
+			displayName: name,
+			type: "or",
+			default: 0 as number,
+			config: 0 as number,
+			group,
+			types: [
+				{
+					displayName: "Boolean",
+					type: "bool",
+					config: false as boolean,
+					default: false as boolean,
+				},
+				{
+					displayName: "Number",
+					type: "number",
+					default: 0 as number,
+					config: 0 as number,
+				},
+				{
+					displayName: "Vector",
+					type: "vector3",
+					default: Vector3.zero,
+					config: Vector3.zero,
+				},
+			],
+		};
+	},
+} as const;
+
 const disconnectblock = {
 	input: {
 		disconnect: {
@@ -435,108 +538,21 @@ const multiplexer = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const connectors = {
-	boolOrNumberOrVector(
-		name: string,
-		group?: string,
-		additional?: Partial<
-			ConfigTypeToDefinition<
-				BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
-			>
-		>,
-	): ConfigTypeToDefinition<
-		BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
-	> {
-		return {
-			displayName: name,
-			type: "or",
-			default: 0 as number,
-			config: 0 as number,
-			group,
-			types: [
-				{
-					displayName: "Boolean",
-					type: "bool",
-					config: false as boolean,
-					default: false as boolean,
-				},
-				{
-					displayName: "Number",
-					type: "number",
-					default: 0 as number,
-					config: 0 as number,
-				},
-				{
-					displayName: "Vector3",
-					type: "vector3",
-					default: Vector3.zero as Vector3,
-					config: Vector3.zero as Vector3,
-				},
-			],
-			...(additional ?? {}),
-		};
+const relay = {
+	input: {
+		value: connectors.any("Value", "1"),
+
+		state: {
+			displayName: "State",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+		},
 	},
-	boolOrNumber(
-		name: string,
-		group?: string,
-	): ConfigTypeToDefinition<BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number]>> {
-		return {
-			displayName: name,
-			type: "or",
-			default: 0 as number,
-			config: 0 as number,
-			group,
-			types: [
-				{
-					displayName: "Boolean",
-					type: "bool",
-					config: false as boolean,
-					default: false as boolean,
-				},
-				{
-					displayName: "Number",
-					type: "number",
-					default: 0 as number,
-					config: 0 as number,
-				},
-			],
-		};
+	output: {
+		result: connectors.any("Output", "1"),
 	},
-	any(
-		name: string,
-		group?: string,
-	): ConfigTypeToDefinition<
-		BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
-	> {
-		return {
-			displayName: name,
-			type: "or",
-			default: 0 as number,
-			config: 0 as number,
-			group,
-			types: [
-				{
-					displayName: "Boolean",
-					type: "bool",
-					config: false as boolean,
-					default: false as boolean,
-				},
-				{
-					displayName: "Number",
-					type: "number",
-					default: 0 as number,
-					config: 0 as number,
-				},
-				{
-					displayName: "Vector",
-					type: "vector3",
-					default: Vector3.zero,
-					config: Vector3.zero,
-				},
-			],
-		};
-	},
-} as const;
+} as const satisfies BlockConfigBothDefinitions;
 
 const twoNumbersOrBooleansInputBooleanOutput = {
 	input: {
@@ -714,6 +730,70 @@ const logicmemory = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const stackmemory = {
+	input: {
+		push: {
+			displayName: "Push",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+			configHidden: true,
+		},
+		pop: {
+			displayName: "Pop",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+			configHidden: true,
+		},
+		value: connectors.any("Input", "1"),
+	},
+	output: {
+		size: {
+			displayName: "Size",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		result: connectors.any("Output", "1"),
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
+const randomaccessmemory = {
+	input: {
+		mode: {
+			displayName: "Read/Write",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+			configHidden: true,
+		},
+		enabled: {
+			displayName: "Enable",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+			configHidden: true,
+		},
+		address: {
+			displayName: "Address",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		value: connectors.any("Input", "1"),
+	},
+	output: {
+		size: {
+			displayName: "Size",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		result: connectors.any("Output", "1"),
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const delayBlock = {
 	input: {
 		value: connectors.any("Value", "1"),
@@ -798,6 +878,7 @@ const blockConfigRegistry = {
 	screen,
 
 	multiplexer,
+	relay,
 
 	speedometer,
 	anglesensor,
@@ -810,6 +891,8 @@ const blockConfigRegistry = {
 	delayblock: delayBlock,
 
 	logicmemory,
+	stackmemory,
+	randomaccessmemory,
 	operationbuffer: anyProcessing,
 	operationnot: booleanProcessing,
 	operationand: twoBooleanInputsOneBooleanOutput,

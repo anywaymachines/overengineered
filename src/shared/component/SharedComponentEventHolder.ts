@@ -117,6 +117,26 @@ export default class SharedComponentEventHolder {
 		return observable;
 	}
 
+	/** Create an infinite loop that would only loop when this event holder is enabled
+	 * @returns Function that stops the loop
+	 */
+	loop(interval: number, func: () => void) {
+		let stop = false;
+
+		spawn(() => {
+			while (true as boolean) {
+				task.wait(interval);
+				if (this.isDestroyed()) return;
+				if (stop) return;
+				if (!this.isEnabled()) continue;
+
+				func();
+			}
+		});
+
+		return () => (stop = true);
+	}
+
 	/* eslint-disable @typescript-eslint/no-this-alias */
 	/** Disable this event holder and remove all event subscriptions */
 	destroy(): void {
