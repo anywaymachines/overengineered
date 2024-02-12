@@ -64,6 +64,11 @@ export const PlayerConfigDefinition = {
 		type: "bool",
 		config: true as boolean,
 	},
+	terrainFoliage: {
+		displayName: "TODO: maks",
+		type: "bool",
+		config: true as boolean,
+	},
 	dayCycle: {
 		displayName: "Day cycle",
 		type: "dayCycle",

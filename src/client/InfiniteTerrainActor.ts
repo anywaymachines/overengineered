@@ -1,6 +1,6 @@
 import { ReplicatedFirst, ReplicatedStorage, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import { TerrainData, TerrainInfo } from "../shared/TerrainDataInfo";
+import { TerrainData, TerrainInfo } from "shared/TerrainDataInfo";
 
 const folder = ReplicatedFirst.WaitForChild("Terrain") as Folder & TerrainInfo;
 const terrainChild = folder.Data.TerrainData;
@@ -83,12 +83,12 @@ const GetHeight = (x: number, z: number) => {
 };
 
 const infterrainActor = {
-	Load: new Signal<(chunkX: number, chunkZ: number) => void>(),
+	Load: new Signal<(chunkX: number, chunkZ: number, loadFoliage: boolean) => void>(),
 	Loaded: new Signal<(chunkX: number, chunkZ: number) => void>(),
 	Unload: new Signal<(chunkX: number, chunkZ: number) => void>(),
 } as const;
 
-infterrainActor.Load.ConnectParallel((chunkX: number, chunkZ: number) => {
+infterrainActor.Load.ConnectParallel((chunkX: number, chunkZ: number, loadFoliage: boolean) => {
 	const startX = chunkX * chunkSize;
 	const startZ = chunkZ * chunkSize;
 	const endX = startX + chunkSize - 1;
@@ -153,120 +153,124 @@ infterrainActor.Load.ConnectParallel((chunkX: number, chunkZ: number) => {
 				}
 			}
 
-			for (const modelData of terrainData.models) {
-				if (math.fmod(voxelX, modelData[2]) !== 0 || math.fmod(voxelZ, modelData[2]) !== 0) {
-					continue;
-				}
-				if (height < modelData[3] || height >= modelData[4]) {
-					continue;
-				}
-				if (slope < modelData[5] || slope >= modelData[6]) {
-					continue;
-				}
-				let load = true;
-				let offset = new Vector3(0, 0, 0);
-				let scale = new Vector3(1, 1, 1);
-				let rotation = new Vector3(0, 0, 0);
-				for (const data of modelData[7]) {
-					if (data[1] === 1) {
-						const noise = math.noise(voxelX * data[3], data[2], voxelZ * data[3]);
-						if (noise < data[4] || noise >= data[5]) {
-							load = false;
-							break;
-						}
-					} else if (data[1] === 2) {
-						offset = offset.add(
-							new Vector3(
-								data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-								0,
-								0,
-							),
-						);
-					} else if (data[1] === 3) {
-						offset = offset.add(
-							new Vector3(
-								0,
-								data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-								0,
-							),
-						);
-					} else if (data[1] === 4) {
-						offset = offset.add(
-							new Vector3(
-								0,
-								0,
-								data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-							),
-						);
-					} else if (data[1] === 5) {
-						scale = scale.mul(data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5]);
-					} else if (data[1] === 6) {
-						scale = scale.mul(
-							new Vector3(
-								data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-								1,
-								1,
-							),
-						);
-					} else if (data[1] === 7) {
-						scale = scale.mul(
-							new Vector3(
-								1,
-								data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-								1,
-							),
-						);
-					} else if (data[1] === 8) {
-						scale = scale.mul(
-							new Vector3(
-								1,
-								1,
-								data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-							),
-						);
-					} else if (data[1] === 9) {
-						rotation = rotation.add(
-							new Vector3(
-								data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-								0,
-								0,
-							),
-						);
-					} else if (data[1] === 10) {
-						rotation = rotation.add(
-							new Vector3(
-								0,
-								data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-								0,
-							),
-						);
-					} else if (data[1] === 11) {
-						rotation = rotation.add(
-							new Vector3(
-								0,
-								0,
-								data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-							),
-						);
+			if (loadFoliage) {
+				for (const modelData of terrainData.models) {
+					if (math.fmod(voxelX, modelData[2]) !== 0 || math.fmod(voxelZ, modelData[2]) !== 0) {
+						continue;
 					}
-				}
-				if (!load) {
-					continue;
-				}
-				if (scale.X <= 0 || scale.Y <= 0 || scale.Z <= 0) {
-					continue;
-				}
+					if (height < modelData[3] || height >= modelData[4]) {
+						continue;
+					}
+					if (slope < modelData[5] || slope >= modelData[6]) {
+						continue;
+					}
+					let load = true;
+					let offset = new Vector3(0, 0, 0);
+					let scale = new Vector3(1, 1, 1);
+					let rotation = new Vector3(0, 0, 0);
+					for (const data of modelData[7]) {
+						if (data[1] === 1) {
+							const noise = math.noise(voxelX * data[3], data[2], voxelZ * data[3]);
+							if (noise < data[4] || noise >= data[5]) {
+								load = false;
+								break;
+							}
+						} else if (data[1] === 2) {
+							offset = offset.add(
+								new Vector3(
+									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+									0,
+									0,
+								),
+							);
+						} else if (data[1] === 3) {
+							offset = offset.add(
+								new Vector3(
+									0,
+									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+									0,
+								),
+							);
+						} else if (data[1] === 4) {
+							offset = offset.add(
+								new Vector3(
+									0,
+									0,
+									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+								),
+							);
+						} else if (data[1] === 5) {
+							scale = scale.mul(
+								data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+							);
+						} else if (data[1] === 6) {
+							scale = scale.mul(
+								new Vector3(
+									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+									1,
+									1,
+								),
+							);
+						} else if (data[1] === 7) {
+							scale = scale.mul(
+								new Vector3(
+									1,
+									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+									1,
+								),
+							);
+						} else if (data[1] === 8) {
+							scale = scale.mul(
+								new Vector3(
+									1,
+									1,
+									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+								),
+							);
+						} else if (data[1] === 9) {
+							rotation = rotation.add(
+								new Vector3(
+									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+									0,
+									0,
+								),
+							);
+						} else if (data[1] === 10) {
+							rotation = rotation.add(
+								new Vector3(
+									0,
+									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+									0,
+								),
+							);
+						} else if (data[1] === 11) {
+							rotation = rotation.add(
+								new Vector3(
+									0,
+									0,
+									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+								),
+							);
+						}
+					}
+					if (!load) {
+						continue;
+					}
+					if (scale.X <= 0 || scale.Y <= 0 || scale.Z <= 0) {
+						continue;
+					}
 
-				const data = {
-					1: ReplicatedStorage.FindFirstChild("TerrainModels")!.FindFirstChild(modelData[1]) as Model,
-					2: new CFrame(new Vector3(voxelX * 4, height, voxelZ * 4).add(offset)).mul(
-						CFrame.fromOrientation(math.rad(rotation.X), math.rad(rotation.Y), math.rad(rotation.Z)),
-					),
-					3: scale,
-				} as const;
-				models.push(data);
+					const data = {
+						1: ReplicatedStorage.FindFirstChild("TerrainModels")!.FindFirstChild(modelData[1]) as Model,
+						2: new CFrame(new Vector3(voxelX * 4, height, voxelZ * 4).add(offset)).mul(
+							CFrame.fromOrientation(math.rad(rotation.X), math.rad(rotation.Y), math.rad(rotation.Z)),
+						),
+						3: scale,
+					} as const;
+					models.push(data);
 
-				break;
+					break;
+				}
 			}
 
 			for (let y = 0; y < materials.Size.Y; y++) {

@@ -37,7 +37,20 @@ const v2: UpdatablePlayerConfigVersion<PlayerConfigV2, PlayerConfigV1> = {
 	},
 };
 
-const versions = [v1, v2] as const;
+type PlayerConfigV3 = PlayerConfigV2 & { readonly terrainFoliage: boolean };
+const v3: UpdatablePlayerConfigVersion<PlayerConfigV3, PlayerConfigV2> = {
+	version: 3,
+
+	update(prev: Partial<PlayerConfigV2>): Partial<PlayerConfigV3> {
+		return {
+			...prev,
+			version: this.version,
+			terrainFoliage: true,
+		};
+	},
+};
+
+const versions = [v1, v2, v3] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 export const PlayerConfigUpdater = {

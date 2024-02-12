@@ -1,8 +1,8 @@
 import { Players, ReplicatedFirst, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import TerrainDataInfo from "shared/TerrainDataInfo";
 import Objects from "shared/fixes/objects";
 import PlayerUtils from "shared/utils/PlayerUtils";
-import TerrainDataInfo from "../shared/TerrainDataInfo";
 import PlayerDataStorage from "./PlayerDataStorage";
 
 if (!game.IsLoaded()) {
@@ -18,7 +18,7 @@ const work = true;
 const folder = TerrainDataInfo.getInfo();
 
 type TerrainActor = {
-	Load: Signal<(chunkX: number, chunkZ: number) => void>;
+	Load: Signal<(chunkX: number, chunkZ: number, loadFoliage: boolean) => void>;
 	Unload: Signal<(chunkX: number, chunkZ: number) => void>;
 	Loaded: Signal<(chunkX: number, chunkZ: number) => void>;
 };
@@ -121,7 +121,7 @@ const LoadChunk = (chunkX: number, chunkZ: number) => {
 	loadedChunks[chunkX][chunkZ] = true;
 
 	actorSemaphore.wait();
-	findAvailableActor().Load.Fire(chunkX, chunkZ);
+	findAvailableActor().Load.Fire(chunkX, chunkZ, PlayerDataStorage.config.get().terrainFoliage);
 };
 
 const UnloadChunk = (chunkX: number, chunkZ: number) => {
