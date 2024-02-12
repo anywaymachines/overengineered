@@ -153,8 +153,8 @@ export default class BuildingWelder {
 			welds.forEach((element) => {
 				if (element.IsA("Constraint")) {
 					if (
-						element.Attachment0?.Parent?.IsDescendantOf(model) &&
-						element.Attachment1?.Parent?.IsDescendantOf(model)
+						(element.Attachment0?.Parent?.IsDescendantOf(model) ?? true) &&
+						(element.Attachment1?.Parent?.IsDescendantOf(model) ?? true)
 					) {
 						return;
 					}
@@ -166,7 +166,10 @@ export default class BuildingWelder {
 						connected.add(element.Attachment1.Parent);
 					}
 				} else {
-					if (element.Part0?.IsDescendantOf(model) && element.Part1?.IsDescendantOf(model)) {
+					if (
+						(element.Part0?.IsDescendantOf(model) ?? true) &&
+						(element.Part1?.IsDescendantOf(model) ?? true)
+					) {
 						return;
 					}
 
