@@ -20,7 +20,7 @@ export default class MusicController {
 
 	public static initialize() {
 		Workspace.GetPropertyChangedSignal("Gravity").Connect(() => {
-			if (!PlayerDataStorage.config.get().music) return;
+			if (PlayerDataStorage.config.get().music === false) return;
 
 			if (Workspace.Gravity <= 0 && !this.playlist.currentSound) {
 				this.playlist.play();
