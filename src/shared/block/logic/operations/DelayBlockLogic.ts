@@ -6,12 +6,16 @@ export default class DelayBlockLogic extends ConfigurableBlockLogic<typeof block
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.delayblock.input>) {
 		super(block, blockConfigRegistry.delayblock);
 
-		this.event.subscribeObservable(this.input.value, (value) => {
-			spawn(() => {
-				task.wait(this.input.duration.get());
+		this.event.subscribeObservable(
+			this.input.value,
+			(value) => {
+				spawn(() => {
+					task.wait(this.input.duration.get());
 
-				this.output.result.set(value);
-			});
-		});
+					this.output.result.set(value);
+				});
+			},
+			true,
+		);
 	}
 }
