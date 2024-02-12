@@ -41,6 +41,7 @@ const UnreliableRemoteHandler = {
 			}
 		});
 	},
+
 	impactBreakEvent(player: Player | undefined, part: BasePart) {
 		if (!BlockManager.isActiveBlockPart(part)) return;
 
@@ -52,6 +53,7 @@ const UnreliableRemoteHandler = {
 		// Play sounds
 		Effects.ImpactSound.send(player ? [player] : "everyone", { part, index: undefined });
 	},
+
 	burnEvent(block: BasePart) {
 		if (!BlockManager.isActiveBlockPart(block)) return;
 

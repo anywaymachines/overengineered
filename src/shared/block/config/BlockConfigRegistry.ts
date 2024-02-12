@@ -166,7 +166,7 @@ const tnt = {
 			type: "clampedNumber",
 			default: 12 as number,
 			min: 1,
-			max: 12,
+			max: 16,
 			step: 1,
 			config: 12 as number,
 		},
