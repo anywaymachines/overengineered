@@ -1,3 +1,4 @@
+import Gui from "client/gui/Gui";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import BoxSelector from "client/tools/selectors/BoxSelector";
@@ -41,6 +42,23 @@ export default class PaintTool extends ToolBase {
 
 		const boxSelector = this.add(new BoxSelector());
 		this.event.subscribe(boxSelector.submitted, async (blocks) => await this.paint(blocks));
+
+		this.event.onInputBegin(async (input) => {
+			if (Gui.isCursorOnVisibleGui()) return;
+			if (input.UserInputType !== Enum.UserInputType.MouseButton3) return;
+			this.pick();
+		});
+	}
+
+	private pick() {
+		const target = this.mouse.Target;
+		if (!target) return;
+
+		const block = BlockManager.getBlockDataByPart(target);
+		if (!block) return;
+
+		this.selectedMaterial.set(block.material);
+		this.selectedColor.set(block.color);
 	}
 
 	async paintClientSide(block: BlockModel) {
