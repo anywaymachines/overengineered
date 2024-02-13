@@ -82,10 +82,7 @@ export default class SelectButtonPopup extends Popup<SelectButtonPopupDefinition
 			btn.text.set(keyToName(key.Name));
 			list.add(btn);
 
-			this.event.subscribe(btn.activated, () => {
-				this.buttonPressed.Fire(key.Name);
-				this.hide();
-			});
+			this.event.subscribe(btn.activated, () => this.buttonPressed.Fire(key.Name));
 		}
 
 		this.event.subscribe(this.buttonPressed, (key) => {
