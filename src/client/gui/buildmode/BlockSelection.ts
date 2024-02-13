@@ -147,6 +147,8 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 				const button = createBlockButton(block, () => {
 					if (this.gui.SearchTextBox.Text !== "") {
 						this.gui.SearchTextBox.Text = "";
+
+						task.wait(); // waiting to trigger the Text event
 						this.selectedCategory.set(Registry.findCategoryPath(categoriesRegistry, block.category) ?? []);
 					}
 					this.selectedBlock.set(block);
