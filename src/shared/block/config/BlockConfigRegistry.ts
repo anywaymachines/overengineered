@@ -69,7 +69,9 @@ const connectors = {
 		name: string,
 		group?: string,
 	): ConfigTypeToDefinition<
-		BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
+		BlockConfigTypes.Or<
+			[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3, BlockConfigTypes.String]
+		>
 	> {
 		return {
 			displayName: name,
@@ -95,6 +97,12 @@ const connectors = {
 					type: "vector3",
 					default: Vector3.zero,
 					config: Vector3.zero,
+				},
+				{
+					displayName: "String",
+					type: "string",
+					default: "" as string,
+					config: "" as string,
 				},
 			],
 		};
@@ -580,7 +588,7 @@ const anyProcessing = {
 
 const screen = {
 	input: {
-		data: connectors.boolOrNumber("Data", "1"),
+		data: connectors.any("Data", "1"),
 	},
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
