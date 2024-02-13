@@ -23,10 +23,6 @@ const UnreliableRemoteHandler = {
 	impactExplodeEvent(player: Player | undefined, block: BasePart, blastRadius: number) {
 		if (!BlockManager.isActiveBlockPart(block)) return;
 
-		if (block.GetAttribute("IMPACT_BROKEN") === true) {
-			return;
-		}
-
 		const explosion = new Instance("Explosion");
 		explosion.BlastPressure = 2000;
 		explosion.BlastRadius = blastRadius;
@@ -42,12 +38,9 @@ const UnreliableRemoteHandler = {
 		});
 	},
 	impactBreakEvent(player: Player | undefined, part: BasePart) {
-		if (!BlockManager.isActiveBlockPart(part)) return;
-
-		if (part.GetAttribute("IMPACT_BROKEN") === true) return;
+		if (!BlockManager.isActiveBlockPart(part)) return
 
 		ServerPartUtils.BreakJoints(part);
-		part.SetAttribute("IMPACT_BROKEN", true);
 
 		// Play sounds
 		Effects.ImpactSound.send(player ? [player] : "everyone", { part, index: undefined });

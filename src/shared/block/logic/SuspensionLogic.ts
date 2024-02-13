@@ -18,14 +18,6 @@ export default class SuspensionLogic extends ConfigurableBlockLogic<
 		super(block, blockConfigRegistry.suspensionblock);
 		this.springConstraint = this.instance.SpringSide.Spring;
 
-		this.onImpactBreak(() => {
-			if (this.instance.SpringSide.FindFirstChild("Beam")) {
-				this.instance.SpringSide.Beam.Destroy();
-			}
-
-			this.disable();
-		});
-
 		this.springConstraint.Damping = this.input.damping.get();
 		this.springConstraint.Stiffness = this.input.stiffness.get();
 		this.event.subscribeObservable(this.input.free_length, (v) => (this.springConstraint.FreeLength = v), true);

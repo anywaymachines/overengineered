@@ -75,9 +75,7 @@ export default class ImpactController {
 
 			// Material protection
 			allowedMagnitudeDiff *= math.max(0.5, part.CurrentPhysicalProperties.Density / 3.5);
-			allowedMagnitudeDiff = math.round(allowedMagnitudeDiff);
-
-			const magnitudeDiff = math.round(math.abs(partMagnitude - secondPartMagnitude));
+			const magnitudeDiff = math.abs(partMagnitude - secondPartMagnitude);
 
 			if (magnitudeDiff > allowedMagnitudeDiff * 5) {
 				RemoteEvents.ImpactExplode.send({
