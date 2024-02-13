@@ -808,6 +808,39 @@ const randomaccessmemory = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const counter = {
+	input: {
+		value: {
+			displayName: "New value",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+			configHidden: true,
+		},
+		triggerStep: {
+			displayName: "Step",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+			configHidden: true,
+		},
+		step: {
+			displayName: "Step value",
+			type: "number",
+			default: 1 as number,
+			config: 1 as number,
+		},
+	},
+	output: {
+		value: {
+			displayName: "Output",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const delayBlock = {
 	input: {
 		value: connectors.any("Value", "1"),
@@ -904,6 +937,7 @@ const blockConfigRegistry = {
 	constant,
 	delayblock: delayBlock,
 
+	counter,
 	logicmemory,
 	stackmemory,
 	randomaccessmemory,
