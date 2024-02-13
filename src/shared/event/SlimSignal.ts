@@ -14,6 +14,6 @@ export default class SlimSignal<T extends (...args: never[]) => void = () => voi
 	}
 
 	unsubscribeAll() {
-		this.subscribed?.clear();
+		this.subscribed = undefined;
 	}
 }

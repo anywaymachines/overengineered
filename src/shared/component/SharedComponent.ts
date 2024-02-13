@@ -95,8 +95,8 @@ export default class SharedComponent<
 
 		try {
 			this.instance.Destroy();
-		} catch {
-			// empty
+		} catch (error) {
+			print(`Could not destroy instance ${this}: ${error}`);
 		}
 	}
 }

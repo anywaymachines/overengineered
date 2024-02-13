@@ -19,6 +19,8 @@ export default class Arrays {
 		array: ReadonlyMap<TKey, TValue>,
 		mapfunc: (key: TKey, value: TValue) => TOut,
 	): TOut[] {
+		if (array.size() === 0) return [];
+
 		const result: TOut[] = [];
 		for (const [key, value] of array) {
 			result.push(mapfunc(key, value));

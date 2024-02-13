@@ -59,7 +59,7 @@ export default class ComponentEventHolder extends SharedComponentEventHolder {
 
 	/** @inheritdoc */
 	destroy(): void {
-		super.disable();
+		super.destroy();
 		this.inputHandler.destroy();
 	}
 }

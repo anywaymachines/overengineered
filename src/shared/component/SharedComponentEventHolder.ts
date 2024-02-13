@@ -94,6 +94,19 @@ export default class SharedComponentEventHolder {
 		}
 	}
 
+	/** Subscribe to an observable value changed event */
+	subscribeObservable2<T>(
+		observable: ReadonlyObservableValue<T>,
+		callback: (value: T, prev: T) => void,
+		executeOnEnable = false,
+		executeImmediately = false,
+	): void {
+		this.subscribe(observable.changed, callback);
+		if (executeOnEnable) {
+			this.onEnable(() => callback(observable.get(), observable.get()), executeImmediately);
+		}
+	}
+
 	/** Create an `ReadonlyObservableValue` from an `Instance` property */
 	readonlyObservableFromInstanceParam<TInstance extends Instance, TParam extends InstancePropertyNames<TInstance>>(
 		instance: TInstance,
@@ -125,12 +138,14 @@ export default class SharedComponentEventHolder {
 
 		spawn(() => {
 			while (true as boolean) {
-				task.wait(interval);
 				if (this.isDestroyed()) return;
 				if (stop) return;
-				if (!this.isEnabled()) continue;
 
-				func();
+				if (this.isEnabled()) {
+					func();
+				}
+
+				task.wait(interval);
 			}
 		});
 
