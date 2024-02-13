@@ -761,8 +761,15 @@ const stackmemory = {
 
 const randomaccessmemory = {
 	input: {
-		mode: {
-			displayName: "Read/Write",
+		read: {
+			displayName: "Read",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+			configHidden: true,
+		},
+		write: {
+			displayName: "Write",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
@@ -773,7 +780,6 @@ const randomaccessmemory = {
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
-			configHidden: true,
 		},
 		address: {
 			displayName: "Address",

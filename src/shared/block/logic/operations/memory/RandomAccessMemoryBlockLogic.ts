@@ -6,23 +6,19 @@ import RemoteEvents from "shared/RemoteEvents";
 export default class RandomAccessMemoryBlockLogic extends ConfigurableBlockLogic<
 	typeof blockConfigRegistry.randomaccessmemory
 > {
-	private readonly size = 256;
+	private readonly size = 0xff;
 	private readonly internalMemory: ReturnType<typeof this.output.result.get>[] = [];
 
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.randomaccessmemory);
 
-		this.input.mode.subscribe((v) => (v ? undefined : this.readValue()));
-		this.input.value.subscribe((v) => (this.input.mode ? this.writeValue() : undefined));
+		this.input.write.subscribe((v) => (v ? this.writeValue() : undefined));
+		this.input.read.subscribe((v) => (v ? this.readValue() : undefined));
 	}
 
 	private writeValue() {
 		if (!this.input.enabled.get()) return;
-		if (this.input.address.get() > this.size) {
-			this.burn();
-			return;
-		}
-		if (this.input.address.get() < 0) {
+		if (this.input.address.get() >= this.size || this.input.address.get() < 0) {
 			this.burn();
 			return;
 		}
@@ -33,11 +29,7 @@ export default class RandomAccessMemoryBlockLogic extends ConfigurableBlockLogic
 
 	private readValue() {
 		if (!this.input.enabled.get()) return;
-		if (this.input.address.get() > this.size) {
-			this.burn();
-			return;
-		}
-		if (this.input.address.get() < 0) {
+		if (this.input.address.get() >= this.size || this.input.address.get() < 0) {
 			this.burn();
 			return;
 		}
