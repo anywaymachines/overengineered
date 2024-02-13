@@ -65,7 +65,7 @@ export const PlayerConfigDefinition = {
 		config: true as boolean,
 	},
 	terrainFoliage: {
-		displayName: "TODO: maks",
+		displayName: "Terrain Foliage",
 		type: "bool",
 		config: true as boolean,
 	},
