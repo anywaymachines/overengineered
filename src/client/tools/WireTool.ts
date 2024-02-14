@@ -278,13 +278,13 @@ export default class WireTool extends ToolBase {
 			SharedPlots.getPlotBlockDatas(SharedPlots.getPlotByBlock(marker1.data.blockData.instance)!),
 			marker1.data.id,
 			(blockConfigRegistry as BlockConfigRegistryNonGeneric)[marker1.data.blockData.id]!.input[marker1.data.id],
-		);
+		).map((t) => WireTool.groups[t]);
 		const type2 = this.getAllowedTypes(
 			marker2.data.blockData,
 			SharedPlots.getPlotBlockDatas(SharedPlots.getPlotByBlock(marker2.data.blockData.instance)!),
 			marker2.data.id,
 			(blockConfigRegistry as BlockConfigRegistryNonGeneric)[marker2.data.blockData.id]!.output[marker2.data.id],
-		);
+		).map((t) => WireTool.groups[t]);
 
 		if (type1.find((t) => type2.includes(t))) {
 			return true;
