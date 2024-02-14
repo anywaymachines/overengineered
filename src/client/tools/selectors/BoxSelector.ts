@@ -1,13 +1,13 @@
 import { Players, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import ComponentBase from "client/component/ComponentBase";
+import { ClientComponentBase } from "client/component/ClientComponentBase";
 import InputController from "client/controller/InputController";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import SharedPlots from "shared/building/SharedPlots";
 import EventHandler from "shared/event/EventHandler";
 
-export default class BoxSelector extends ComponentBase {
+export default class BoxSelector extends ClientComponentBase {
 	readonly submitted = new Signal<(blocks: readonly BlockModel[]) => void>();
 
 	constructor(filter = (block: BlockModel) => true) {

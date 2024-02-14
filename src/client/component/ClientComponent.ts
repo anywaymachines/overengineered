@@ -3,8 +3,8 @@ import { ReadonlyInputHandler } from "client/event/InputHandler";
 import SharedComponent from "shared/component/SharedComponent";
 import { ClientComponentEvents } from "./ClientComponentEvents";
 
-/** A component that controls an Instance and has children. */
-export default class Component<
+/** @inheritdoc */
+export class ClientComponent<
 	T extends Instance = Instance,
 	TChild extends IComponent = IComponent,
 > extends SharedComponent<T, TChild> {

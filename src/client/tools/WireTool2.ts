@@ -1,5 +1,5 @@
 import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import Component from "client/component/Component";
+import { ClientComponent } from "client/component/ClientComponent";
 import { Colors } from "client/gui/Colors";
 import { Element } from "client/gui/Element";
 import Gui from "client/gui/Gui";
@@ -85,7 +85,7 @@ type MarkerComponentDefinition = BillboardGui & {
 		readonly Filled: Frame;
 	};
 };
-abstract class MarkerComponent extends Component<MarkerComponentDefinition> {
+abstract class MarkerComponent extends ClientComponent<MarkerComponentDefinition> {
 	private static getPartMarkerPositions(part: BasePart): Vector3[] {
 		const averageSize = (part.Size.X + part.Size.Y + part.Size.Z) / 3;
 		const halfSize = averageSize / 2;
@@ -247,7 +247,7 @@ class OutputMarkerComponent extends MarkerComponent {
 }
 
 type WireComponentDefinition = Part;
-class WireComponent extends Component<WireComponentDefinition> {
+class WireComponent extends ClientComponent<WireComponentDefinition> {
 	static createInstance(): WireComponentDefinition {
 		return Element.create("Part", {
 			Anchored: true,
@@ -330,7 +330,7 @@ const canConnect = (output: OutputMarkerComponent, input: InputMarkerComponent):
 
 class WireToolDesktopController extends SharedComponentContainer {
 	constructor(markers: readonly MarkerComponent[], wireParent: ViewportFrame) {
-		class WireMover extends Component<WireComponentDefinition> {
+		class WireMover extends ClientComponent<WireComponentDefinition> {
 			readonly marker;
 
 			constructor(instance: WireComponentDefinition, marker: OutputMarkerComponent) {

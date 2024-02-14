@@ -1,6 +1,5 @@
 import { MarketplaceService, ReplicatedStorage, RunService } from "@rbxts/services";
 import PlayerDataStorage from "client/PlayerDataStorage";
-import ComponentContainer from "client/component/ComponentContainer";
 import CharacterController from "client/controller/CharacterController";
 import GameEnvironmentController from "client/controller/GameEnvironmentController";
 import LocalPlayerController from "client/controller/LocalPlayerController";
@@ -13,6 +12,7 @@ import LogControl from "client/gui/static/LogControl";
 import TooltipsControl from "client/gui/static/TooltipsControl";
 import PlayModeController from "client/modes/PlayModeController";
 import RemoteEvents from "shared/RemoteEvents";
+import { ClientComponentContainer } from "./component/ClientComponentContainer";
 import { rootComponents } from "./test/RootComponents";
 
 // wait for assets to be copied
@@ -37,7 +37,7 @@ if (RunService.IsStudio()) {
 
 SoundController.initialize();
 
-const root = new ComponentContainer();
+const root = new ClientComponentContainer();
 rootComponents.push(root);
 const playModeController = new PlayModeController();
 root.add(playModeController);

@@ -1,6 +1,6 @@
 import Signal from "@rbxts/signal";
+import { ClientComponentBase } from "client/component/ClientComponentBase";
 import Objects from "shared/fixes/objects";
-import ComponentBase from "../component/ComponentBase";
 
 /*
 	When a key is pressed, invoke keyDown()
@@ -103,7 +103,7 @@ export type KeyDefinition<TKeys extends string> = {
 };
 export type KeyDefinitions<TKeys extends string> = { readonly [k in TKeys]: KeyDefinition<TKeys> };
 
-export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> extends ComponentBase {
+export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> extends ClientComponentBase {
 	readonly controller;
 
 	constructor(definitions: T) {

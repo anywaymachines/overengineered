@@ -1,6 +1,6 @@
 import { GamepadService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
-import Component from "client/component/Component";
-import ComponentContainer from "client/component/ComponentContainer";
+import { ClientComponent } from "client/component/ClientComponent";
+import { ClientComponentContainer } from "client/component/ClientComponentContainer";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
@@ -30,7 +30,7 @@ type MarkerComponentDefinition = BillboardGui & {
 		readonly Filled: Frame;
 	};
 };
-class MarkerComponent extends Component<MarkerComponentDefinition> {
+class MarkerComponent extends ClientComponent<MarkerComponentDefinition> {
 	static create(origin: BasePart, data: MarkerData, offset: Vector3): MarkerComponent {
 		const markerInstance = ReplicatedStorage.Assets.Wires.WireMarker.Clone();
 
@@ -125,7 +125,7 @@ class MarkerComponent extends Component<MarkerComponentDefinition> {
 		gui.StudsOffsetWorldSpace = this.instance.StudsOffsetWorldSpace.add(new Vector3(0, 1, 0));
 		gui.Adornee = this.instance.Adornee;
 		gui.Parent = this.instance.Parent;
-		this.add(new Component(gui));
+		this.add(new ClientComponent(gui));
 
 		if (InputController.inputType.get() === "Gamepad") {
 			gui.Size = new UDim2(
@@ -161,7 +161,7 @@ class OutputMarkerComponent extends MarkerComponent {
 }
 
 type WireComponentDefinition = BasePart;
-class WireComponent extends Component<WireComponentDefinition> {
+class WireComponent extends ClientComponent<WireComponentDefinition> {
 	static createInstance(color: Color3): WireComponentDefinition {
 		return Element.create("Part", {
 			Anchored: true,
@@ -260,8 +260,8 @@ export default class WireTool2 extends ToolBase {
 		this.viewportFrame.LightColor = Colors.white;
 		this.viewportFrame.ZIndex = -1000;
 
-		this.markers = this.add(new ComponentContainer<MarkerComponent>());
-		this.wires = this.add(new Component<ViewportFrame, WireComponent>(this.viewportFrame));
+		this.markers = this.add(new ClientComponentContainer<MarkerComponent>());
+		this.wires = this.add(new ClientComponent<ViewportFrame, WireComponent>(this.viewportFrame));
 	}
 
 	getDisplayName(): string {

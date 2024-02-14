@@ -1,5 +1,5 @@
 import { GamepadService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
-import ComponentContainer from "client/component/ComponentContainer";
+import { ClientComponentContainer } from "client/component/ClientComponentContainer";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
@@ -143,7 +143,7 @@ export default class WireTool extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		this.markers = this.add(new ComponentContainer<MarkerComponent>());
+		this.markers = this.add(new ClientComponentContainer<MarkerComponent>());
 		this.event.onEnable(() => this.markers.enable());
 		this.event.onDisable(() => this.markers.disable());
 

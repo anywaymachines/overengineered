@@ -1,4 +1,4 @@
-import ComponentBase from "client/component/ComponentBase";
+import { ClientComponentBase } from "client/component/ClientComponentBase";
 import TooltipsControl from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import BuildTool from "client/tools/BuildTool";
@@ -13,7 +13,7 @@ import SharedComponentBase from "shared/component/SharedComponentBase";
 import ObservableValue from "shared/event/ObservableValue";
 import WireTool2 from "./WireTool2";
 
-export default class ToolController extends ComponentBase {
+export default class ToolController extends ClientComponentBase {
 	public readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);
 	public readonly tools: readonly ToolBase[];
 

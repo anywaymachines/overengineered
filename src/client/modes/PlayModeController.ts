@@ -1,5 +1,5 @@
 import { GuiService, StarterGui } from "@rbxts/services";
-import ComponentBase from "client/component/ComponentBase";
+import { ClientComponentBase } from "client/component/ClientComponentBase";
 import LocalPlayerController from "client/controller/LocalPlayerController";
 import Signals from "client/event/Signals";
 import Popup from "client/gui/Popup";
@@ -10,7 +10,7 @@ import Objects from "shared/fixes/objects";
 import BuildingMode from "./build/BuildingMode";
 import RideMode from "./ride/RideMode";
 
-export default class PlayModeController extends ComponentBase {
+export default class PlayModeController extends ClientComponentBase {
 	public readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
 	public readonly modes;
 

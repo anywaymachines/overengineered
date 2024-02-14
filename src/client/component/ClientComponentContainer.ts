@@ -4,9 +4,7 @@ import SharedComponentContainer from "shared/component/SharedComponentContainer"
 import { ClientComponentEvents } from "./ClientComponentEvents";
 
 /** A component that has children. */
-export default class ComponentContainer<
-	TChild extends IComponent = IComponent,
-> extends SharedComponentContainer<TChild> {
+export class ClientComponentContainer<TChild extends IComponent = IComponent> extends SharedComponentContainer<TChild> {
 	readonly event = new ClientComponentEvents(this);
 
 	/** Input handler for use in prepare***() */

@@ -1,5 +1,5 @@
 import { GuiService, Players } from "@rbxts/services";
-import ComponentBase from "client/component/ComponentBase";
+import { ClientComponentBase } from "client/component/ClientComponentBase";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import Gui from "client/gui/Gui";
@@ -8,7 +8,7 @@ import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import PlayerUtils from "shared/utils/PlayerUtils";
 
-export default class HoveredBlockHighlighter extends ComponentBase {
+export default class HoveredBlockHighlighter extends ClientComponentBase {
 	readonly highlightedBlock = new ObservableValue<BlockModel | undefined>(undefined);
 
 	constructor(filter = (block: BlockModel) => true) {

@@ -3,7 +3,7 @@ import SharedComponentBase from "shared/component/SharedComponentBase";
 import { ClientComponentEvents } from "./ClientComponentEvents";
 
 /** @inheritdoc */
-export default class ComponentBase extends SharedComponentBase {
+export class ClientComponentBase extends SharedComponentBase {
 	protected readonly event = new ClientComponentEvents(this);
 
 	/** Input handler for use in prepare***() */

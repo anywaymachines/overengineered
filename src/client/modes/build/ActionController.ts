@@ -1,5 +1,5 @@
 import Signal from "@rbxts/signal";
-import ComponentBase from "client/component/ComponentBase";
+import { ClientComponentBase } from "client/component/ClientComponentBase";
 import LogControl from "client/gui/static/LogControl";
 import InputController from "../../controller/InputController";
 
@@ -9,7 +9,7 @@ type Operation = {
 	readonly redo?: () => Promise<void>;
 };
 
-export default class ActionController extends ComponentBase {
+export default class ActionController extends ClientComponentBase {
 	static readonly instance = new ActionController();
 
 	readonly onUndo = new Signal<(operation: Operation) => void>();
