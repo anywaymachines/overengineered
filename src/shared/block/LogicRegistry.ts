@@ -22,6 +22,7 @@ import OperationNotBlockLogic from "./logic/operations/boolean/OperationNotBlock
 import OperationOrBlockLogic from "./logic/operations/boolean/OperationOrBlockLogic";
 import OperationXnorBlockLogic from "./logic/operations/boolean/OperationXnorBlockLogic";
 import OperationXorBlockLogic from "./logic/operations/boolean/OperationXorBlockLogic";
+import CounterBlockLogic from "./logic/operations/memory/CounterBlockLogic";
 import LogicMemoryBlockLogic from "./logic/operations/memory/LogicMemoryBlockLogic";
 import RandomAccessMemoryBlockLogic from "./logic/operations/memory/RandomAccessMemoryBlockLogic";
 import StackMemoryBlockLogic from "./logic/operations/memory/StackMemoryBlockLogic";
@@ -77,6 +78,7 @@ const logicRegistry = {
 
 	constant: ConstantBlockLogic,
 	delayblock: DelayBlockLogic,
+	counter: CounterBlockLogic,
 
 	multiplexer: Multiplexer,
 
