@@ -1,12 +1,11 @@
 import Signal from "@rbxts/signal";
 import Component from "client/component/Component";
-import SharedComponentBase from "shared/component/SharedComponentBase";
 
 /** A component that is a GUI element */
-export default class Control<
-	T extends GuiObject = GuiObject,
-	TChild extends SharedComponentBase = SharedComponentBase,
-> extends Component<T, TChild> {
+export default class Control<T extends GuiObject = GuiObject, TChild extends IComponent = IComponent> extends Component<
+	T,
+	TChild
+> {
 	/** Signal that fires when this element is shown */
 	readonly onShow = new Signal<() => void>();
 
@@ -21,19 +20,12 @@ export default class Control<
 
 		this.gui = gui;
 		this.visible = gui.Visible;
-	}
 
-	/** @inheritdoc */
-	add<T extends TChild>(instance: T) {
-		super.add(instance);
-
-		if (instance instanceof Control) {
-			if (instance.getGui().Parent === this.gui) {
+		this.children.onAdded.Connect((instance) => {
+			if (instance instanceof Control && instance.getGui().Parent === this.gui) {
 				instance.getGui().LayoutOrder = this.getChildren().size();
 			}
-		}
-
-		return instance;
+		});
 	}
 
 	getGui() {

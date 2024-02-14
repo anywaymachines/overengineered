@@ -1,75 +1,24 @@
-import SharedComponentBase from "./SharedComponentBase";
-import SharedComponentEventHolder from "./SharedComponentEventHolder";
+import { ComponentChildren } from "./ComponentChildren";
+import ComponentBase from "./SharedComponentBase";
 
-/** A component that has children. */
-export default class SharedComponentContainer<
-	TChild extends SharedComponentBase = SharedComponentBase,
-	TEventHolder extends SharedComponentEventHolder = SharedComponentEventHolder,
-> extends SharedComponentBase<TEventHolder> {
-	private readonly children: TChild[] = [];
+/** Component with children */
+export default class ContainerComponent<TChild extends IComponent = IComponent> extends ComponentBase {
+	readonly children: ComponentChildren<TChild> = new ComponentChildren(this);
 
 	/** Returns a list of added children */
-	getChildren(): readonly TChild[] {
-		return this.children;
-	}
+	readonly getChildren = () => this.children.getAll();
 
-	/** Enable component events, for self and every child */
-	enable() {
-		super.enable();
-
-		for (const child of this.getChildren()) {
-			child.enable();
-		}
-	}
-	/** Disable component events, for self and every child */
-	disable() {
-		for (const child of this.getChildren()) {
-			child.disable();
-		}
-
-		super.disable();
-	}
-	/** Disable component events, destroy the Instance and free the memory, for self and every child */
-	destroy() {
-		for (const child of this.getChildren()) {
-			child.destroy();
-		}
-
-		super.destroy();
-	}
-
-	/**
-	 * Add a child and return it
+	/** Add a child and return it
 	 * @deprecated Use `add` instead
 	 */
-	added<T extends TChild>(instance: T) {
-		return this.add(instance);
-	}
+	readonly added = <T extends TChild>(instance: T) => this.add(instance);
 
 	/** Add a child and return it */
-	add<T extends TChild>(instance: T) {
-		this.children.push(instance);
-		if (this.event.isEnabled()) {
-			instance.enable();
-		}
-
-		return instance;
-	}
+	readonly add = <T extends TChild>(instance: T) => this.children.add(instance);
 
 	/** Remove and destroy a child */
-	remove(child: TChild) {
-		const index = this.children.indexOf(child);
-		if (index === -1) return;
+	readonly remove = (child: TChild) => this.children.remove(child);
 
-		this.children.remove(index);
-		child.destroy();
-	}
-
-	/**
-	 * Clear all added children.
-	 * Removes only children that have been added using this.add()
-	 */
-	clear() {
-		[...this.children].forEach((child) => this.remove(child));
-	}
+	/** Clear all added children. Removes only children that have been added using this.add() */
+	readonly clear = () => this.children.clear();
 }

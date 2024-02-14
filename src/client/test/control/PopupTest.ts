@@ -35,8 +35,7 @@ export const PopupTest: ControlTest = {
 										),
 									),
 								)
-								.with((b) => b.enable())
-								.getInstance(),
+								.with((b) => b.enable()).instance,
 							b2: TextButtonControl.create({
 								Text: "Multi Confirmation",
 								Size: new UDim2(0, 200, 0, 30),
@@ -58,8 +57,7 @@ export const PopupTest: ControlTest = {
 										),
 									),
 								)
-								.with((b) => b.enable())
-								.getInstance(),
+								.with((b) => b.enable()).instance,
 							b3: TextButtonControl.create({
 								Text: "Key Selection",
 								Size: new UDim2(0, 200, 0, 30),
@@ -72,22 +70,19 @@ export const PopupTest: ControlTest = {
 										),
 									),
 								)
-								.with((b) => b.enable())
-								.getInstance(),
+								.with((b) => b.enable()).instance,
 							b4: TextButtonControl.create({
 								Text: "Settings",
 								Size: new UDim2(0, 200, 0, 30),
 							})
 								.with((b) => b.activated.Connect(() => SettingsPopup.showPopup()))
-								.with((b) => b.enable())
-								.getInstance(),
+								.with((b) => b.enable()).instance,
 							b5: TextButtonControl.create({
 								Text: "Saves",
 								Size: new UDim2(0, 200, 0, 30),
 							})
 								.with((b) => b.activated.Connect(() => SavePopup.showPopup()))
-								.with((b) => b.enable())
-								.getInstance(),
+								.with((b) => b.enable()).instance,
 						},
 					),
 				),

@@ -1,9 +1,7 @@
 import { RunService } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import SharedComponentBase from "shared/component/SharedComponentBase";
 import SharedComponentContainer from "shared/component/SharedComponentContainer";
 import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
@@ -17,8 +15,34 @@ import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 export default class SharedMachine extends SharedComponentContainer {
 	readonly blocks: BlockLogic[] = [];
 	readonly occupiedByLocalPlayer = new ObservableValue(true);
-	readonly destroyed = new Signal<() => void>();
 	private readonly childMap = new Map<BlockUuid, ConfigurableBlockLogic<BlockConfigTypes.BothDefinitions>>();
+
+	constructor() {
+		super();
+
+		this.children.onAdded.Connect((child) => {
+			if (child instanceof BlockLogic) {
+				(this.blocks as Writable<typeof this.blocks>).push(child);
+			}
+
+			if (child instanceof ConfigurableBlockLogic) {
+				this.childMap.set(child.block.uuid, child);
+				this.event.subscribeObservable(
+					this.occupiedByLocalPlayer,
+					(occupied) => child.enableControls.set(occupied),
+					true,
+				);
+
+				if (child instanceof VehicleSeatBlockLogic) {
+					this.event.subscribeObservable(
+						child.occupiedByLocalPlayer,
+						(occupied) => this.occupiedByLocalPlayer.set(occupied),
+						true,
+					);
+				}
+			}
+		});
+	}
 
 	/** Add blocks to the machine, initialize it and start */
 	init(blocks: readonly PlacedBlockData[]) {
@@ -49,38 +73,6 @@ export default class SharedMachine extends SharedComponentContainer {
 	}
 	protected initializeDestructionIfNeeded(blocks: readonly PlacedBlockData[]) {
 		ImpactController.initializeBlocks(blocks);
-	}
-
-	add<T extends SharedComponentBase>(instance: T) {
-		super.add(instance);
-
-		if (instance instanceof BlockLogic) {
-			(this.blocks as Writable<typeof this.blocks>).push(instance);
-		}
-
-		if (instance instanceof ConfigurableBlockLogic) {
-			this.childMap.set(instance.block.uuid, instance);
-			this.event.subscribeObservable(
-				this.occupiedByLocalPlayer,
-				(occupied) => instance.enableControls.set(occupied),
-				true,
-			);
-
-			if (instance instanceof VehicleSeatBlockLogic) {
-				this.event.subscribeObservable(
-					instance.occupiedByLocalPlayer,
-					(occupied) => this.occupiedByLocalPlayer.set(occupied),
-					true,
-				);
-			}
-		}
-
-		return instance;
-	}
-
-	destroy() {
-		this.destroyed.Fire();
-		super.destroy();
 	}
 
 	initializeSpeedLimiter() {
@@ -149,7 +141,7 @@ export default class SharedMachine extends SharedComponentContainer {
 				>;
 				const output = outputLogic.output[connection.connectionName];
 
-				outputLogic.event.subscribeObservable(output, (value) => input.set(value), true);
+				outputLogic.getEvent().subscribeObservable(output, (value) => input.set(value), true);
 			}
 		}
 	}

@@ -61,4 +61,8 @@ export default abstract class ConfigurableBlockLogic<
 			),
 		) as typeof this.output;
 	}
+
+	getEvent() {
+		return this.event;
+	}
 }

@@ -11,6 +11,7 @@ import ToolBase from "client/tools/ToolBase";
 import WireTool from "client/tools/WireTool";
 import SharedComponentBase from "shared/component/SharedComponentBase";
 import ObservableValue from "shared/event/ObservableValue";
+import WireTool2 from "./WireTool2";
 
 export default class ToolController extends ComponentBase {
 	public readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);
@@ -23,6 +24,7 @@ export default class ToolController extends ComponentBase {
 	public readonly paintTool;
 	public readonly buildTool2;
 	public readonly wiretool;
+	public readonly wiretool2;
 
 	constructor(mode: BuildingMode) {
 		super();
@@ -39,6 +41,7 @@ export default class ToolController extends ComponentBase {
 		this.paintTool = new PaintTool(mode);
 		this.buildTool2 = new BuildTool2(mode);
 		this.wiretool = new WireTool(mode);
+		this.wiretool2 = new WireTool2(mode);
 
 		const tools: ToolBase[] = [
 			this.buildTool,
@@ -48,6 +51,7 @@ export default class ToolController extends ComponentBase {
 			this.paintTool,
 			this.wiretool,
 			this.buildTool2,
+			this.wiretool2,
 		];
 
 		this.tools = tools;

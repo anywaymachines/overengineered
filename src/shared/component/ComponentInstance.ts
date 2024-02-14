@@ -1,0 +1,21 @@
+/** Handles the destruction of the provided instance, along with the component. */
+export const ComponentInstance = {
+	init<T extends Instance>(state: IComponent, instance: T | undefined) {
+		if (!instance) throw "The provided instance is nil";
+
+		instance.Destroying.Connect(() => {
+			instance = undefined;
+			state.destroy();
+		});
+
+		state.onDestroy(() => {
+			if (!instance) return;
+
+			try {
+				instance.Destroy();
+			} catch (error) {
+				print(`Could not destroy instance ${this}: ${error}`);
+			}
+		});
+	},
+} as const;

@@ -1,10 +1,16 @@
 import InputController from "client/controller/InputController";
 import InputHandler from "client/event/InputHandler";
-import SharedComponentEventHolder from "shared/component/SharedComponentEventHolder";
+import { ComponentEvents } from "shared/component/ComponentEvents";
 
-/** @inheritdoc */
-export default class ComponentEventHolder extends SharedComponentEventHolder {
+export class ClientComponentEvents extends ComponentEvents {
 	readonly inputHandler = new InputHandler();
+
+	constructor(state: IComponent) {
+		super(state);
+
+		state.onDisable(() => this.inputHandler.unsubscribeAll());
+		state.onDestroy(() => this.inputHandler.destroy());
+	}
 
 	/** Register an event that fires on enable and input type change */
 	onPrepare(callback: (inputType: InputType) => void): void {
@@ -50,16 +56,7 @@ export default class ComponentEventHolder extends SharedComponentEventHolder {
 	onKeyUp(key: KeyCode, callback: (input: InputObject) => void) {
 		this.onPrepare(() => this.inputHandler.onKeyUp(key, callback));
 	}
-
-	/** @inheritdoc */
-	protected disconnect(): void {
-		super.disconnect();
-		this.inputHandler.unsubscribeAll();
-	}
-
-	/** @inheritdoc */
-	destroy(): void {
-		super.destroy();
-		this.inputHandler.destroy();
+	subInput(setup: (inputHandler: InputHandler) => void) {
+		this.onPrepare(() => setup(this.inputHandler));
 	}
 }

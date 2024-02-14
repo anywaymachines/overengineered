@@ -317,12 +317,12 @@ export class MultiKeyConfigValueControl extends ConfigValueControl<MultiKeyConfi
 		const list = this.add(new DictionaryControl<GuiObject, string, KeyConfigValueControl>(this.gui.Control));
 		for (const [name, _] of Objects.pairs(definition.default)) {
 			const control = new KeyConfigValueControl(templates, config[name], definition.keyDefinitions[name]);
-			list.addKeyed(name, control);
+			list.keyedChildren.add(name, control);
 
 			this.event.subscribe(control.submitted, (value, prev) => {
 				const changed: (keyof typeof config)[] = [name];
 
-				for (const [key, child] of list.getKeyedChildren()) {
+				for (const [key, child] of list.keyedChildren.getAll()) {
 					if (child === control) continue;
 
 					if (child.value.get() === value) {
@@ -331,7 +331,9 @@ export class MultiKeyConfigValueControl extends ConfigValueControl<MultiKeyConfi
 					}
 				}
 
-				const update = Objects.fromEntries(changed.map((c) => [c, list.getChild(c)!.value.get()] as const));
+				const update = Objects.fromEntries(
+					changed.map((c) => [c, list.keyedChildren.get(c)!.value.get()] as const),
+				);
 				config = { ...config, ...update };
 
 				this.submitted.Fire(update);

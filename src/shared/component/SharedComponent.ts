@@ -1,34 +1,30 @@
-import SharedComponentBase from "shared/component/SharedComponentBase";
-import SharedComponentContainer from "shared/component/SharedComponentContainer";
-import SharedComponentEventHolder from "shared/component/SharedComponentEventHolder";
-import { TransformBuilder, TransformContainer } from "./Transform";
+import { TransformBuilder, TransformContainer } from "shared/component/Transform";
+import { ComponentInstance } from "./ComponentInstance";
+import ContainerComponent from "./SharedComponentContainer";
 
-/** A component that controls an Instance and has children. */
-export default class SharedComponent<
-	T extends Instance = Instance,
-	TChild extends SharedComponentBase = SharedComponentBase,
-	TEventHolder extends SharedComponentEventHolder = SharedComponentEventHolder,
-> extends SharedComponentContainer<TChild, TEventHolder> {
-	protected readonly instance: T;
-	private transforms?: TransformContainer<T>;
+/** Component with an `Instance` and children */
+export default class InstanceComponent<
+	T extends Instance,
+	TChild extends IComponent = IComponent,
+> extends ContainerComponent<TChild> {
+	readonly instance;
 
 	constructor(instance: T) {
-		if (!instance) {
-			throw "Trying to create a component with a null instance";
-		}
-
 		super();
 		this.instance = instance;
 
-		{
-			let selfDestroying = false;
-			this.instance.Destroying.Connect(() => {
-				if (selfDestroying) return;
+		ComponentInstance.init(this, instance);
 
-				selfDestroying = true;
-				this.destroy();
-			});
-		}
+		this.children.onAdded.Connect((child) => {
+			if (
+				child instanceof InstanceComponent &&
+				typeIs(child.instance, "Instance") &&
+				child.instance !== this.instance &&
+				child.instance.Parent === undefined
+			) {
+				child.instance.Parent = this.instance;
+			}
+		});
 	}
 
 	/** Checks if the child exists on an Instance */
@@ -38,6 +34,15 @@ export default class SharedComponent<
 	): gui is T & { [key in TKey]: (typeof gui)[TKey] & defined } {
 		return gui.FindFirstChild(name) !== undefined;
 	}
+
+	/** Get an attribute value on the Instance */
+	getAttribute<T extends AttributeValue>(name: string) {
+		return this.instance.GetAttribute(name) as T | undefined;
+	}
+
+	//
+
+	private transforms?: TransformContainer<T>;
 
 	/** Transform the provided instance */
 	runTransform<T extends Instance>(instance: T, setup: (transform: TransformBuilder<T>, instance: T) => void) {
@@ -56,47 +61,12 @@ export default class SharedComponent<
 	getTransform(): TransformContainer<T> {
 		if (!this.transforms) {
 			this.transforms = new TransformContainer(this.instance);
-			this.event.onEnable(() => this.transforms?.enable());
-			this.event.onDisable(() => this.transforms?.disable());
-			this.event.onDestroy(() => this.transforms?.destroy());
-			if (this.event.isEnabled()) this.transforms.enable();
+			this.onEnable(() => this.transforms?.enable());
+			this.onDisable(() => this.transforms?.disable());
+			this.onDestroy(() => this.transforms?.destroy());
+			if (this.isEnabled()) this.transforms.enable();
 		}
 
 		return this.transforms;
-	}
-
-	/** Get an attribute value on the Instance */
-	getAttribute<T extends AttributeValue>(name: string) {
-		return this.instance.GetAttribute(name) as T | undefined;
-	}
-
-	getInstance(): T {
-		return this.instance;
-	}
-
-	/** Add a child */
-	add<T extends TChild>(instance: T) {
-		super.add(instance);
-
-		if (
-			instance instanceof SharedComponent &&
-			instance.getInstance() !== this.instance &&
-			instance.getInstance().Parent === undefined
-		) {
-			instance.getInstance().Parent = this.instance;
-		}
-
-		return instance;
-	}
-
-	/** Disable component events, destroy the Instance and free the memory */
-	destroy() {
-		super.destroy();
-
-		try {
-			this.instance.Destroy();
-		} catch (error) {
-			print(`Could not destroy instance ${this}: ${error}`);
-		}
 	}
 }

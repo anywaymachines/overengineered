@@ -1,7 +1,7 @@
-import Component from "client/component/Component";
 import Logger from "shared/Logger";
+import SharedComponent from "shared/component/SharedComponent";
 
-export class ScaledScreenGui<T extends ScreenGui> extends Component<T> {
+export class ScaledScreenGui<T extends ScreenGui> extends SharedComponent<T> {
 	constructor(gui: T) {
 		super(gui);
 

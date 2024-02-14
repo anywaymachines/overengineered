@@ -1,24 +1,60 @@
-import SharedComponentEventHolder from "shared/component/SharedComponentEventHolder";
-import EventHandler from "shared/event/EventHandler";
+import SlimSignal from "shared/event/SlimSignal";
+import { ComponentEvents } from "./ComponentEvents";
 
-/**
- * Base of any component.
- * Handles events and signals which can be enabled or disabled.
- */
-export default class SharedComponentBase<TEventHolder extends SharedComponentEventHolder = SharedComponentEventHolder> {
-	/** Main event handler. Does not register events until enabled and reregisters events when input type changes. */
-	readonly event: TEventHolder;
+class ComponentBaseBase implements IComponent {
+	private readonly onEnabled = new SlimSignal();
+	private readonly onDisabled = new SlimSignal();
+	private readonly onDestroyed = new SlimSignal();
 
-	/** Event handler for use in prepare***() */
-	protected readonly eventHandler: EventHandler;
+	private selfEnabled = false;
+	private selfDisabled = false;
 
-	constructor() {
-		this.event = this.createEventHolder();
-		this.eventHandler = this.event.eventHandler;
+	isEnabled(): boolean {
+		return this.selfEnabled;
+	}
+	isDestroyed(): boolean {
+		return this.selfDisabled;
 	}
 
-	protected createEventHolder(): TEventHolder {
-		return new SharedComponentEventHolder() as TEventHolder;
+	onEnable(func: () => void): void {
+		this.onEnabled.Connect(func);
+	}
+	onDisable(func: () => void): void {
+		this.onDisabled.Connect(func);
+	}
+	onDestroy(func: () => void): void {
+		this.onDestroyed.Connect(func);
+	}
+
+	enable(): void {
+		if (this.selfDisabled || this.selfEnabled) return;
+
+		this.selfEnabled = true;
+		this.onEnabled.Fire();
+	}
+	disable(): void {
+		if (this.selfDisabled || !this.selfEnabled) return;
+
+		this.selfEnabled = false;
+		this.onDisabled.Fire();
+	}
+	destroy(): void {
+		if (this.selfDisabled) return;
+
+		this.disable();
+
+		this.selfDisabled = true;
+		this.onDestroyed.Fire();
+	}
+}
+
+/** Base of any component. Handles events and signals which can be enabled or disabled. */
+export default class ComponentBase extends ComponentBaseBase {
+	protected readonly event = new ComponentEvents(this);
+	protected readonly eventHandler = this.event.eventHandler;
+
+	constructor() {
+		super();
 	}
 
 	/** Return a function that returns a copy of the provided Instance; Destroys the Instance if specified */
@@ -29,26 +65,8 @@ export default class SharedComponentBase<TEventHolder extends SharedComponentEve
 		return () => template.Clone();
 	}
 
-	/** Invoke a function and return `this`, for chaining functions */
-	with(func: (self: this) => void) {
+	with(func: (tis: this) => void): this {
 		func(this);
 		return this;
-	}
-
-	/** Enable component events */
-	enable(): void {
-		this.event.enable();
-	}
-
-	/** Disable component events */
-	disable(): void {
-		this.event.disable();
-		this.eventHandler.unsubscribeAll();
-	}
-
-	/** Disable component events and free the memory */
-	destroy(): void {
-		this.disable();
-		this.event.destroy();
 	}
 }

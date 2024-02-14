@@ -1,13 +1,14 @@
 import InputController from "client/controller/InputController";
 import { ReadonlyInputHandler } from "client/event/InputHandler";
-import SharedComponentBase from "shared/component/SharedComponentBase";
 import SharedComponentContainer from "shared/component/SharedComponentContainer";
-import ComponentEventHolder from "./ComponentEventHolder";
+import { ClientComponentEvents } from "./ClientComponentEvents";
 
 /** A component that has children. */
 export default class ComponentContainer<
-	TChild extends SharedComponentBase = SharedComponentBase,
-> extends SharedComponentContainer<TChild, ComponentEventHolder> {
+	TChild extends IComponent = IComponent,
+> extends SharedComponentContainer<TChild> {
+	readonly event = new ClientComponentEvents(this);
+
 	/** Input handler for use in prepare***() */
 	protected readonly inputHandler: ReadonlyInputHandler;
 
@@ -16,10 +17,6 @@ export default class ComponentContainer<
 
 		this.inputHandler = this.event.inputHandler;
 		this.event.onPrepare(() => this.prepare());
-	}
-
-	protected createEventHolder(): ComponentEventHolder {
-		return new ComponentEventHolder();
 	}
 
 	protected onPrepare(callback: (inputType: InputType) => void) {

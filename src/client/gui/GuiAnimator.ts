@@ -1,5 +1,5 @@
 import { TweenService } from "@rbxts/services";
-import ComponentEventHolder from "client/component/ComponentEventHolder";
+import { ComponentEvents } from "shared/component/ComponentEvents";
 import { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
 
@@ -122,13 +122,13 @@ export default class GuiAnimator {
 	 * Also immediately sets the properties on prepare.
 	 */
 	static value<T extends Instance, TValue>(
-		event: ComponentEventHolder,
+		event: ComponentEvents,
 		gui: T,
 		value: ReadonlyObservableValue<TValue>,
 		converter: (value: TValue) => Partial<ExtractMembers<T, Tweenable>>,
 		tweenInfo: TweenInfo,
 	) {
-		event.onPrepare(() => Objects.assign(gui, converter(value.get())));
+		event.onEnable(() => Objects.assign(gui, converter(value.get())));
 		Objects.assign(gui, converter(value.get()));
 		event.subscribeObservable(value, (value) => GuiAnimator.tween(gui, converter(value), tweenInfo));
 	}

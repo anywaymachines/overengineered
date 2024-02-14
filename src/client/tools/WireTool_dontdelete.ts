@@ -1,8 +1,10 @@
 import { GamepadService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import Component from "client/component/Component";
 import ComponentContainer from "client/component/ComponentContainer";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
+import { Element } from "client/gui/Element";
 import Gui from "client/gui/Gui";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
@@ -10,10 +12,8 @@ import Remotes from "shared/Remotes";
 import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
-import SharedComponent from "shared/component/SharedComponent";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
-import PartUtils from "shared/utils/PartUtils";
 
 type MarkerData = {
 	readonly id: BlockConnectionName;
@@ -24,29 +24,61 @@ type MarkerData = {
 	readonly name: string;
 };
 
-type MarkerComponentDefinition = BillboardGui;
-class MarkerComponent extends SharedComponent<MarkerComponentDefinition> {
+type MarkerComponentDefinition = BillboardGui & {
+	readonly TextButton: GuiButton & {
+		readonly White: Frame;
+		readonly Filled: Frame;
+	};
+};
+class MarkerComponent extends Component<MarkerComponentDefinition> {
+	static create(origin: BasePart, data: MarkerData, offset: Vector3): MarkerComponent {
+		const markerInstance = ReplicatedStorage.Assets.Wires.WireMarker.Clone();
+
+		markerInstance.Adornee = origin;
+		markerInstance.Parent = Gui.getGameUI();
+		markerInstance.StudsOffsetWorldSpace = origin.CFrame.PointToObjectSpace(
+			origin.CFrame.PointToWorldSpace(offset),
+		);
+
+		return new MarkerComponent(markerInstance, data);
+	}
+
+	readonly connected: WireComponent[] = [];
 	readonly instance;
 	readonly data;
+	readonly position;
+
+	private readonly colors: readonly Color3[];
 	private tooltip?: BillboardGui;
 
-	constructor(gui: MarkerComponentDefinition, data: MarkerData) {
-		super(gui);
+	constructor(instance: MarkerComponentDefinition, data: MarkerData) {
+		super(instance);
 
-		this.instance = gui;
+		this.instance = instance;
 		this.data = data;
+		this.position = data.blockData.instance.GetPivot().PointToWorldSpace(instance.StudsOffsetWorldSpace);
+		this.colors = data.colors;
 
-		if (this.data.colors.size() > 1) {
-			const button = this.instance.FindFirstChildWhichIsA("TextButton") as TextButton;
+		{
 			let i = 0;
-			spawn(() => {
-				const tru = true;
-				while (tru) {
-					task.wait(1);
-					button.BackgroundColor3 = this.data.colors[(i = (i + 1) % this.data.colors.size())];
-				}
+			this.event.loop(1, () => {
+				this.instance.TextButton.BackgroundColor3 = this.instance.TextButton.Filled.BackgroundColor3 =
+					this.connected[0]?.instance.Color ?? this.data.colors[(i = (i + 1) % this.data.colors.size())];
 			});
 		}
+
+		this.setMarkerType(data.markerType);
+
+		this.onPrepare((inputType) => {
+			if (inputType === "Gamepad") {
+				this.instance.Size = new UDim2(
+					this.instance.Size.X.Scale * 1.5,
+					this.instance.Size.X.Offset * 1.5,
+					this.instance.Size.Y.Scale * 1.5,
+					this.instance.Size.Y.Offset * 1.5,
+				);
+			}
+		});
 	}
 
 	protected prepareDesktop() {
@@ -62,10 +94,24 @@ class MarkerComponent extends SharedComponent<MarkerComponentDefinition> {
 			});
 		});
 	}
-
 	protected prepareTouch() {
 		// Always show the tooltip
 		this.createTooltip();
+	}
+
+	setMarkerType(markerType: MarkerData["markerType"]) {
+		if (markerType === "output") {
+			this.instance.TextButton.White.Visible = false;
+			this.instance.TextButton.Filled.Visible = false;
+		} else if (markerType === "connected_input") {
+			this.instance.TextButton.White.Visible = true;
+			this.instance.TextButton.Filled.Visible = true;
+		} else if (markerType === "input") {
+			this.instance.TextButton.White.Visible = true;
+			this.instance.TextButton.Filled.Visible = false;
+		} else {
+			throw `Unknown marker type ${markerType}`;
+		}
 	}
 
 	/** Creates text above the marker with a dot signature with its name */
@@ -79,7 +125,7 @@ class MarkerComponent extends SharedComponent<MarkerComponentDefinition> {
 		gui.StudsOffsetWorldSpace = this.instance.StudsOffsetWorldSpace.add(new Vector3(0, 1, 0));
 		gui.Adornee = this.instance.Adornee;
 		gui.Parent = this.instance.Parent;
-		this.add(new SharedComponent(gui));
+		this.add(new Component(gui));
 
 		if (InputController.inputType.get() === "Gamepad") {
 			gui.Size = new UDim2(
@@ -94,8 +140,70 @@ class MarkerComponent extends SharedComponent<MarkerComponentDefinition> {
 	}
 }
 
+class InputMarkerComponent extends MarkerComponent {
+	readonly connected: WireComponent[] = [];
+
+	disconnect(marker: OutputMarkerComponent) {
+		//
+	}
+	connect(marker: OutputMarkerComponent) {
+		//
+	}
+}
+
+class OutputMarkerComponent extends MarkerComponent {
+	disconnect(marker: InputMarkerComponent) {
+		//
+	}
+	connect(marker: InputMarkerComponent) {
+		//
+	}
+}
+
+type WireComponentDefinition = BasePart;
+class WireComponent extends Component<WireComponentDefinition> {
+	static createInstance(color: Color3): WireComponentDefinition {
+		return Element.create("Part", {
+			Anchored: true,
+			CanCollide: false,
+			CanQuery: false,
+			CanTouch: false,
+			CastShadow: false,
+
+			Material: Enum.Material.Neon,
+			Transparency: 0.4,
+			Color: color,
+			Shape: Enum.PartType.Cylinder,
+		});
+	}
+	static create(from: MarkerComponent, to: Vector3 | MarkerComponent, color: Color3): WireComponent {
+		return new WireComponent(this.createInstance(color), from, to);
+	}
+
+	readonly from: MarkerComponent;
+	readonly to: Vector3 | MarkerComponent;
+
+	constructor(instance: WireComponentDefinition, from: MarkerComponent, to: MarkerComponent | Vector3) {
+		super(instance);
+		this.from = from;
+		this.to = to;
+
+		this.setPosition(from.position, typeIs(to, "Vector3") ? to : to.position);
+	}
+
+	setPosition(from: Vector3, to: Vector3) {
+		WireComponent.staticSetPosition(this.instance, from, to);
+	}
+	static staticSetPosition(wire: WireComponentDefinition, from: Vector3, to: Vector3) {
+		const distance = to.sub(from).Magnitude;
+
+		wire.Size = new Vector3(distance - 0.4, 0.15, 0.15);
+		wire.CFrame = new CFrame(from, to).mul(new CFrame(0, 0, -distance / 2)).mul(CFrame.Angles(0, math.rad(90), 0));
+	}
+}
+
 /** A tool for wiring */
-export default class WireTool extends ToolBase {
+export default class WireTool2 extends ToolBase {
 	private static readonly typeGroups = {
 		bool: {
 			color: Colors.yellow,
@@ -129,23 +237,17 @@ export default class WireTool extends ToolBase {
 		multikey: "never",
 	} as const satisfies Record<keyof BlockConfigTypes.Types, keyof typeof this.typeGroups>;
 
-	private renderedWires: BasePart[] = [];
-	private renderedTooltips: BillboardGui[] = [];
-
-	private draggingWire: BasePart | undefined;
+	private draggingWire?: WireComponent;
 	private hoverMarker: MarkerComponent | undefined;
 	public startMarker = new ObservableValue<MarkerComponent | undefined>(undefined);
 
 	private readonly viewportFrame;
 
 	private readonly markers;
+	private readonly wires;
 
 	constructor(mode: BuildingMode) {
 		super(mode);
-
-		this.markers = this.add(new ComponentContainer<MarkerComponent>());
-		this.event.onEnable(() => this.markers.enable());
-		this.event.onDisable(() => this.markers.disable());
 
 		// Wire rendering
 		this.viewportFrame = new Instance("ViewportFrame");
@@ -157,6 +259,9 @@ export default class WireTool extends ToolBase {
 		this.viewportFrame.Ambient = Colors.white;
 		this.viewportFrame.LightColor = Colors.white;
 		this.viewportFrame.ZIndex = -1000;
+
+		this.markers = this.add(new ComponentContainer<MarkerComponent>());
+		this.wires = this.add(new Component<ViewportFrame, WireComponent>(this.viewportFrame));
 	}
 
 	getDisplayName(): string {
@@ -199,19 +304,14 @@ export default class WireTool extends ToolBase {
 			new Vector3(0, 0, 0),
 		];
 
-		if (markers.size() === 1) {
-			this.createMarker(part, markers[0], Vector3.zero);
-			return;
-		}
-
 		for (let i = 0; i < markers.size(); i++) {
-			this.createMarker(part, markers[i], order[i]);
+			this.markers.add(MarkerComponent.create(part, markers[i], markers.size() === 1 ? Vector3.zero : order[i]));
 		}
 	}
 
 	public stopDragging() {
 		GamepadService.DisableGamepadCursor();
-		this.draggingWire?.Destroy();
+		this.draggingWire?.destroy();
 		this.draggingWire = undefined;
 		this.hoverMarker = undefined;
 		this.startMarker.set(undefined);
@@ -221,17 +321,34 @@ export default class WireTool extends ToolBase {
 		if (!this.startMarker.get()) return;
 
 		if (this.hoverMarker) {
+			const from = this.startMarker.get()!;
+			const to = this.hoverMarker;
+
+			this.createWire(from, to, from.data.colors[0]);
+			to.setMarkerType("connected_input");
+			this.stopDragging();
+
 			await Remotes.Client.GetNamespace("Building").Get("UpdateLogicConnectionRequest").CallServerAsync({
 				operation: "connect",
-				outputBlock: this.startMarker.get()!.data.blockData.instance,
-				outputConnection: this.startMarker.get()!.data.id,
-				inputBlock: this.hoverMarker.data.blockData.instance,
-				inputConnection: this.hoverMarker.data.id,
+				outputBlock: from.data.blockData.instance,
+				outputConnection: from.data.id,
+				inputBlock: to.data.blockData.instance,
+				inputConnection: to.data.id,
 			});
-			this.updateVisual();
 		}
+	}
+	private async disconnect(marker: MarkerComponent) {
+		marker.setMarkerType("input");
+		for (const wire of marker.connected) {
+			this.wires.remove(wire);
+		}
+		marker.connected.clear();
 
-		this.stopDragging();
+		await Remotes.Client.GetNamespace("Building").Get("UpdateLogicConnectionRequest").CallServerAsync({
+			operation: "disconnect",
+			inputBlock: marker.data.blockData.instance,
+			inputConnection: marker.data.id,
+		});
 	}
 
 	protected prepareTouch(): void {
@@ -256,13 +373,7 @@ export default class WireTool extends ToolBase {
 			} else if (marker.data.markerType === "connected_input") {
 				this.eventHandler.subscribe(button.MouseButton1Click, async () => {
 					if (this.startMarker.get()) return;
-
-					await Remotes.Client.GetNamespace("Building").Get("UpdateLogicConnectionRequest").CallServerAsync({
-						operation: "disconnect",
-						inputBlock: marker.data.blockData.instance,
-						inputConnection: marker.data.id,
-					});
-					this.updateVisual();
+					this.disconnect(marker);
 				});
 			}
 		});
@@ -278,20 +389,20 @@ export default class WireTool extends ToolBase {
 			SharedPlots.getPlotBlockDatas(SharedPlots.getPlotByBlock(marker1.data.blockData.instance)!),
 			marker1.data.id,
 			(blockConfigRegistry as BlockConfigRegistryNonGeneric)[marker1.data.blockData.id]!.input[marker1.data.id],
-		).map((t) => WireTool.groups[t]);
+		);
 		const type2 = this.getAllowedTypes(
 			marker2.data.blockData,
 			SharedPlots.getPlotBlockDatas(SharedPlots.getPlotByBlock(marker2.data.blockData.instance)!),
 			marker2.data.id,
 			(blockConfigRegistry as BlockConfigRegistryNonGeneric)[marker2.data.blockData.id]!.output[marker2.data.id],
-		).map((t) => WireTool.groups[t]);
+		);
 
 		if (type1.find((t) => type2.includes(t))) {
 			return true;
 		}
 
 		return (
-			WireTool.groups[marker1.data.dataType] === WireTool.groups[marker2.data.dataType] &&
+			WireTool2.groups[marker1.data.dataType] === WireTool2.groups[marker2.data.dataType] &&
 			marker1.data.blockData !== marker2.data.blockData
 		);
 	}
@@ -309,13 +420,7 @@ export default class WireTool extends ToolBase {
 			} else if (marker.data.markerType === "connected_input") {
 				this.eventHandler.subscribe(button.MouseButton1Click, async () => {
 					if (this.startMarker.get()) return;
-
-					await Remotes.Client.GetNamespace("Building").Get("UpdateLogicConnectionRequest").CallServerAsync({
-						operation: "disconnect",
-						inputBlock: marker.data.blockData.instance,
-						inputConnection: marker.data.id,
-					});
-					this.updateVisual();
+					this.disconnect(marker);
 				});
 			}
 
@@ -346,12 +451,9 @@ export default class WireTool extends ToolBase {
 			const marker = this.startMarker.get();
 			if (!marker) return;
 
-			// Get absolute position of marker
-			const startPosition = this.getMarkerAbsolutePosition(marker);
-
 			// Create new wire
 			if (!this.draggingWire) {
-				this.draggingWire = this.createWire(startPosition, startPosition, marker.data.colors[0]);
+				this.draggingWire = this.createWire(marker, marker.position, marker.data.colors[0]);
 			}
 
 			// Get position of hover marker / mouse hit
@@ -359,7 +461,7 @@ export default class WireTool extends ToolBase {
 				? this.getMarkerAbsolutePosition(this.hoverMarker)
 				: this.mouse.Hit.Position;
 
-			this.updateWire(this.draggingWire, startPosition, endPosition);
+			this.draggingWire.setPosition(marker.position, endPosition);
 		};
 
 		// Update wire on movement
@@ -391,108 +493,18 @@ export default class WireTool extends ToolBase {
 		super.prepare();
 	}
 
-	private createMarker(part: BasePart, markerData: MarkerData, offset: Vector3 = Vector3.zero): MarkerComponent {
-		let markerInstance;
-
-		if (markerData.markerType === "output") {
-			markerInstance = ReplicatedStorage.Assets.Wires.WireMarkerOutput.Clone();
-		} else if (markerData.markerType === "connected_input") {
-			markerInstance = ReplicatedStorage.Assets.Wires.WireMarkerInputConnected.Clone();
-		} else if (markerData.markerType === "input") {
-			markerInstance = ReplicatedStorage.Assets.Wires.WireMarkerInput.Clone();
-		} else {
-			throw "No marker";
-		}
-
-		markerInstance.Adornee = part;
-		markerInstance.Parent = Gui.getGameUI();
-		markerInstance.StudsOffsetWorldSpace = part.CFrame.PointToObjectSpace(part.CFrame.PointToWorldSpace(offset));
-
-		if (InputController.inputType.get() === "Gamepad") {
-			markerInstance.Size = new UDim2(
-				markerInstance.Size.X.Scale * 1.5,
-				markerInstance.Size.X.Offset * 1.5,
-				markerInstance.Size.Y.Scale * 1.5,
-				markerInstance.Size.Y.Offset * 1.5,
-			);
-		}
-
-		PartUtils.applyToAllDescendantsOfType("TextButton", markerInstance, (button) => {
-			if (button.BackgroundColor3 === Color3.fromRGB(255, 0, 255)) {
-				button.Name = markerData.name;
-				button.BackgroundColor3 = markerData.colors[0];
-			}
-		});
-
-		PartUtils.applyToAllDescendantsOfType("Frame", markerInstance, (button) => {
-			if (button.BackgroundColor3 === Color3.fromRGB(255, 0, 255)) {
-				button.Name = markerData.name;
-				button.BackgroundColor3 = markerData.colors[0];
-			}
-		});
-
-		const marker = new MarkerComponent(markerInstance, markerData);
-		this.markers.add(marker);
-
-		return marker;
-	}
-
 	/**
 	 * Creates a wire that is highlighted and that is on top of all objects. It is not deleted until the cleanup is called
-	 * @param firstPoint The origin vector
-	 * @param secondPoint The end vector
+	 * @param from The origin vector
+	 * @param to The end vector
 	 * @param color Wire color
 	 */
 	private createWire(
-		firstPoint: Vector3,
-		secondPoint: Vector3,
+		from: MarkerComponent,
+		to: Vector3 | MarkerComponent,
 		color: Color3 = Color3.fromRGB(255, 0, 255),
-	): BasePart {
-		const wire = new Instance("Part");
-		wire.Anchored = true;
-		wire.CanCollide = false;
-		wire.CanQuery = false;
-		wire.CanTouch = false;
-		wire.CastShadow = false;
-
-		wire.Material = Enum.Material.Neon;
-		wire.Transparency = 0.4;
-		wire.Color = color;
-		wire.Shape = Enum.PartType.Cylinder;
-
-		wire.Parent = this.viewportFrame;
-
-		this.updateWire(wire, firstPoint, secondPoint);
-
-		this.renderedWires.push(wire);
-
-		return wire;
-	}
-
-	private updateWire(wire: BasePart, firstPoint: Vector3, secondPoint: Vector3) {
-		const distance = secondPoint.sub(firstPoint).Magnitude;
-		wire.Size = new Vector3(distance - 0.4, 0.15, 0.15);
-		wire.CFrame = new CFrame(firstPoint, secondPoint)
-			.mul(new CFrame(0, 0, -distance / 2))
-			.mul(CFrame.Angles(0, math.rad(90), 0));
-	}
-
-	private clearWires() {
-		this.renderedWires.forEach((element) => {
-			element.Destroy();
-		});
-		this.renderedWires.clear();
-	}
-
-	private clearMarkers() {
-		this.markers.clear();
-	}
-
-	private clearTooltips() {
-		this.renderedTooltips.forEach((element) => {
-			element.Destroy();
-		});
-		this.renderedTooltips.clear();
+	): WireComponent {
+		return this.wires.add(WireComponent.create(from, to, color));
 	}
 
 	private getMarkerAbsolutePosition(marker: MarkerComponent): Vector3 {
@@ -501,9 +513,8 @@ export default class WireTool extends ToolBase {
 
 	private updateVisual(prepare: boolean = true) {
 		// Cleanup
-		this.clearWires();
-		this.clearMarkers();
-		this.clearTooltips();
+		this.wires.clear();
+		this.markers.clear();
 		this.stopDragging();
 
 		for (const plot of SharedPlots.getAllowedPlots(Players.LocalPlayer)) {
@@ -592,7 +603,7 @@ export default class WireTool extends ToolBase {
 								? "connected_input"
 								: markerType,
 						dataType: config.type,
-						colors: allowed.map((a) => WireTool.typeGroups[WireTool.groups[a]].color),
+						colors: allowed.map((a) => WireTool2.typeGroups[WireTool2.groups[a]].color),
 						name: config.displayName,
 					};
 
@@ -619,13 +630,9 @@ export default class WireTool extends ToolBase {
 							m.data.blockData.uuid === connection.blockUuid && m.data.id === connection.connectionName,
 					)!;
 
-				this.createWire(
-					this.getMarkerAbsolutePosition(output),
-					this.getMarkerAbsolutePosition(input),
-					input?.data.colors[0],
-				);
+				this.createWire(output, input, input?.data.colors[0]);
 
-				//if (math.random(1, 2) === 1) task.wait();
+				if (math.random(1, 10) === 1) task.wait();
 			}
 		}
 	}
@@ -635,9 +642,8 @@ export default class WireTool extends ToolBase {
 		this.stopDragging();
 
 		// Cleanup
-		this.clearWires();
-		this.clearMarkers();
-		this.clearTooltips();
+		this.wires.clear();
+		this.markers.clear();
 
 		GamepadService.DisableGamepadCursor();
 	}

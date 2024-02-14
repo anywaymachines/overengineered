@@ -1,48 +1,31 @@
 import EventHandler from "shared/event/EventHandler";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import SlimSignal from "shared/event/SlimSignal";
 
 type Sub<T extends Callback> = readonly [signal: RBXScriptSignal<T>, callback: T];
 
 /** Event handler with the ability to disable event processing */
-export default class SharedComponentEventHolder {
-	readonly onEnabled = new SlimSignal();
-	readonly onDisabled = new SlimSignal();
-	readonly onDestroyed = new SlimSignal();
+export class ComponentEvents {
 	readonly eventHandler = new EventHandler();
 	private readonly events: Sub<Callback>[] = [];
+	private readonly state: IComponent;
 
-	private enabled = false;
-	private destroyed = false;
+	constructor(state: IComponent) {
+		this.state = state;
 
-	/** @returns Is event processing enabled */
-	isEnabled(): boolean {
-		return this.enabled;
+		state.onEnable(() => this.enable());
+		state.onDisable(() => this.disable());
+		state.onDestroy(() => this.destroy());
 	}
 
-	/** @returns Is destroyed */
-	isDestroyed(): boolean {
-		return this.destroyed;
-	}
-
-	/** Enable the event processing */
-	enable(): void {
-		if (this.enabled) return;
-
-		this.enabled = true;
-		this.disconnect();
-
-		this.onEnabled.Fire();
+	private enable() {
 		this.events.forEach((e) => this.connect(e));
 	}
-
-	/** Disable the event processing */
-	disable(): void {
-		if (!this.enabled) return;
-
-		this.enabled = false;
-		this.onDisabled.Fire();
-		this.disconnect();
+	private disable() {
+		this.eventHandler.unsubscribeAll();
+	}
+	private destroy() {
+		this.disable();
+		this.events.clear();
 	}
 
 	/** Add event to the event list */
@@ -50,31 +33,21 @@ export default class SharedComponentEventHolder {
 		this.eventHandler.subscribe(sub[0], sub[1]);
 	}
 
-	/** Unsubscribe from all subscribed events */
-	protected disconnect(): void {
-		this.eventHandler.unsubscribeAll();
-	}
-
-	/** Register an event that fires on enable */
-	onEnable(callback: () => void, executeImmediately = false): void {
-		this.onEnabled.Connect(callback);
-		if (executeImmediately) callback();
-	}
-
-	/** Register an event that fires on disable */
-	onDisable(callback: () => void, executeImmediately = false): void {
-		this.onDisabled.Connect(callback);
-		if (executeImmediately) callback();
-	}
-
-	/** Register an event that fires on destroy */
-	onDestroy(callback: () => void): void {
-		this.onDestroyed.Connect(callback);
-	}
-
 	private sub(events: Sub<Callback>[], sub: Sub<Callback>): void {
 		events.push(sub);
-		if (this.enabled) this.connect(sub);
+		if (this.state.isEnabled()) {
+			this.connect(sub);
+		}
+	}
+
+	onEnable(func: (eventHandler: EventHandler) => void, executeImmediately = false) {
+		this.state.onEnable(() => func(this.eventHandler));
+		if (executeImmediately) {
+			func(this.eventHandler);
+		}
+	}
+	onDisable(func: (eventHandler: EventHandler) => void) {
+		this.state.onDisable(() => func(this.eventHandler));
 	}
 
 	/** Register an event */
@@ -138,10 +111,10 @@ export default class SharedComponentEventHolder {
 
 		spawn(() => {
 			while (true as boolean) {
-				if (this.isDestroyed()) return;
+				if (this.state.isDestroyed()) return;
 				if (stop) return;
 
-				if (this.isEnabled()) {
+				if (this.state.isEnabled()) {
 					func();
 				}
 
@@ -150,22 +123,5 @@ export default class SharedComponentEventHolder {
 		});
 
 		return () => (stop = true);
-	}
-
-	/* eslint-disable @typescript-eslint/no-this-alias */
-	/** Disable this event holder and remove all event subscriptions */
-	destroy(): void {
-		this.onDestroyed.Fire();
-		this.disable();
-
-		this.onEnabled.unsubscribeAll();
-		this.onDisabled.unsubscribeAll();
-		this.onDestroyed.unsubscribeAll();
-		this.eventHandler.unsubscribeAll();
-
-		const tis = this;
-		delete (this as unknown as { events?: typeof tis.events }).events;
-
-		this.destroyed = true;
 	}
 }

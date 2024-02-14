@@ -116,7 +116,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 	}
 	resetControls() {
 		let pos = 0;
-		for (const [key, btn] of this.getKeyedChildren()) {
+		for (const [key, btn] of this.keyedChildren.getAll()) {
 			this.resetControl(btn, pos);
 			pos++;
 		}
@@ -134,7 +134,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		const ehandlers: EventHandler[] = [];
 		let inputting = false;
 
-		for (const [_, child] of this.getKeyedChildren()) {
+		for (const [_, child] of this.keyedChildren.getAll()) {
 			if (child === overlay) continue;
 
 			const instance = this.overlayTemplate();
@@ -222,7 +222,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			}
 
 			const touchControls: Record<string, TouchControlInfo[string]> = {};
-			for (const [keycode, child] of this.getKeyedChildren()) {
+			for (const [keycode, child] of this.keyedChildren.getAll()) {
 				touchControls[keycode] = {
 					pos: [child.getGui().Position.X.Scale, child.getGui().Position.Y.Scale],
 				};
@@ -238,7 +238,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 	start(machine: Machine) {
 		this.clear();
-		machine.destroyed.Connect(() => this.clear());
+		machine.onDestroy(() => this.clear());
 		machine.occupiedByLocalPlayer.subscribe((occupied) => {
 			if (occupied) this.show();
 			else this.hide();
@@ -260,7 +260,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 		let pos = 0;
 		for (const control of controls) {
-			this.addKeyed(control.text.get(), control);
+			this.keyedChildren.add(control.text.get(), control);
 
 			const keycode = control.text.get() as KeyCode;
 
