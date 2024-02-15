@@ -9,6 +9,7 @@ import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/block
 import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
+import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 import SharedComponentContainer from "shared/component/SharedComponentContainer";
 import ObservableValue from "shared/event/ObservableValue";
 import Arrays from "shared/fixes/Arrays";
@@ -393,7 +394,7 @@ class WireToolDesktopController extends SharedComponentContainer {
 /** A tool for wiring */
 export default class WireTool2 extends ToolBase {
 	readonly wireParent;
-	private readonly keyedChildren = new Map<string, MarkerComponent>();
+	private readonly markers = this.parent(new ComponentKeyedChildren<string, MarkerComponent>(this, true));
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -412,13 +413,11 @@ export default class WireTool2 extends ToolBase {
 		this.event.onEnable(() => this.createEverything());
 
 		{
-			const cic = new ComponentChild(this);
+			const cic = new ComponentChild(this, true);
 			this.event.onPrepareDesktop(() =>
 				cic.set(
 					new WireToolDesktopController(
-						this.getChildren().filter(
-							(c) => c instanceof MarkerComponent,
-						) as unknown as readonly MarkerComponent[],
+						[...this.markers.getAll()].map((e) => e[1]),
 						this.wireParent,
 					),
 				),
@@ -427,8 +426,6 @@ export default class WireTool2 extends ToolBase {
 	}
 
 	private createEverything() {
-		this.clear();
-
 		for (const plot of SharedPlots.getAllowedPlots(Players.LocalPlayer)) {
 			for (const block of SharedPlots.getPlotBlockDatas(plot)) {
 				const configDef = (blockConfigRegistry as BlockConfigRegistryNonGeneric)[block.id];
@@ -451,16 +448,15 @@ export default class WireTool2 extends ToolBase {
 								? new InputMarkerComponent(markerInstance, data)
 								: new OutputMarkerComponent(markerInstance, data);
 
-						this.add(marker);
-						this.keyedChildren.set(block.uuid + key, marker);
+						this.markers.add(block.uuid + key, marker);
 					}
 				}
 			}
 
 			for (const block of SharedPlots.getPlotBlockDatas(plot)) {
 				for (const [connectionName, connection] of Objects.entries(block.connections)) {
-					const from = this.keyedChildren.get(block.uuid + connectionName) as InputMarkerComponent;
-					const to = this.keyedChildren.get(
+					const from = this.markers.get(block.uuid + connectionName) as InputMarkerComponent;
+					const to = this.markers.get(
 						connection.blockUuid + connection.connectionName,
 					) as OutputMarkerComponent;
 
@@ -494,9 +490,7 @@ export default class WireTool2 extends ToolBase {
 	}
 
 	public disable(): void {
-		this.clear();
-		this.keyedChildren.clear();
-
+		this.markers.clear();
 		super.disable();
 	}
 }

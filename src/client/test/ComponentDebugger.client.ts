@@ -5,8 +5,6 @@ import Control from "client/gui/Control";
 import { Element } from "client/gui/Element";
 import Gui from "client/gui/Gui";
 import { ButtonControl } from "client/gui/controls/Button";
-import SharedComponentBase from "shared/component/SharedComponentBase";
-import SharedComponentContainer from "shared/component/SharedComponentContainer";
 import { rootComponents } from "./RootComponents";
 
 type TreeControlDefinition = GuiObject & {
@@ -115,10 +113,7 @@ let tree: TreeControl | undefined;
 const update = () => {
 	if (!tree) throw "what";
 
-	const add = (
-		component: SharedComponentBase | { getDebugChildren(): readonly SharedComponentBase[] },
-		tree: TreeControl,
-	) => {
+	const add = (component: IDebuggableComponent, tree: TreeControl) => {
 		const childtree = tree.childContainer.add(
 			TreeControl.createChildList(
 				Element.create("TextButton", {
@@ -131,14 +126,8 @@ const update = () => {
 			),
 		);
 
-		if (component instanceof SharedComponentContainer) {
-			for (const child of component.getChildren()) {
-				add(child, childtree);
-			}
-		} else if ("getDebugChildren" in component) {
-			for (const child of component.getDebugChildren()) {
-				add(child, childtree);
-			}
+		for (const child of component.getDebugChildren()) {
+			add(child, childtree);
 		}
 	};
 

@@ -21,4 +21,8 @@ export default class ContainerComponent<TChild extends IComponent = IComponent> 
 
 	/** Clear all added children. Removes only children that have been added using this.add() */
 	readonly clear = () => this.children.clear();
+
+	getDebugChildren(): readonly IDebuggableComponent[] {
+		return [...super.getDebugChildren(), ...this.children.getDebugChildren()];
+	}
 }

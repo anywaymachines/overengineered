@@ -31,7 +31,7 @@ export default class MoveTool extends ToolBase {
 		this.event.subscribe(Signals.BLOCKS.BLOCKS_MOVED, () => this.createHandles());
 		this.event.onEnable(() => this.createHandles());
 
-		const highlighter = this.add(new HoveredBlockHighlighter(() => !this.mouseOnHandles));
+		const highlighter = this.parent(new HoveredBlockHighlighter(() => !this.mouseOnHandles));
 		this.event.onInputBegin((input) => {
 			if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
 

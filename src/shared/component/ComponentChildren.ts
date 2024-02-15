@@ -1,7 +1,7 @@
 import SlimSignal from "shared/event/SlimSignal";
 
 /** Stores components. Handles its enabling, disabling and destroying. */
-export class ComponentChildren<T extends IComponent = IComponent> {
+export class ComponentChildren<T extends IComponent = IComponent> implements IDebuggableComponent {
 	private static readonly empty: [] = [];
 
 	readonly onAdded = new SlimSignal<(child: T) => void>();
@@ -12,7 +12,7 @@ export class ComponentChildren<T extends IComponent = IComponent> {
 	private children?: T[];
 	private clearing = false;
 
-	constructor(state: IComponent) {
+	constructor(state: IComponent, clearOnDisable = false) {
 		this.state = state;
 
 		state.onEnable(() => {
@@ -22,14 +22,23 @@ export class ComponentChildren<T extends IComponent = IComponent> {
 				child.enable();
 			}
 		});
-		state.onDisable(() => {
-			if (!this.children) return;
-
-			for (const child of this.children) {
-				child.disable();
-			}
-		});
 		state.onDestroy(() => this.clear());
+
+		if (!clearOnDisable) {
+			state.onDisable(() => {
+				if (!this.children) return;
+
+				for (const child of this.children) {
+					child.disable();
+				}
+			});
+		} else {
+			state.onDisable(() => this.clear());
+		}
+	}
+
+	getDebugChildren(): readonly T[] {
+		return this.getAll();
 	}
 
 	getAll(): readonly T[] {

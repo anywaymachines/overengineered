@@ -15,7 +15,7 @@ export default class ConfigTool extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		const hoverSelector = this.add(new HoveredBlockHighlighter((block) => this.canBeSelected(block)));
+		const hoverSelector = this.parent(new HoveredBlockHighlighter((block) => this.canBeSelected(block)));
 		const fireSelected = () => {
 			spawn(() => {
 				task.wait();

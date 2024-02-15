@@ -1,19 +1,31 @@
 /** Stores a single component (or zero). Handles its enabling, disabling and destroying. */
-export class ComponentChild<T extends IComponent = IComponent> {
+export class ComponentChild<T extends IComponent = IComponent> implements IDebuggableComponent {
 	private readonly state: IComponent;
 	private child?: T;
 
-	constructor(state: IComponent, clearingOnDisable = false) {
+	/** Subscribe a child to a parent state. */
+	static init(state: IComponent, child: IComponent) {
+		state.onEnable(() => child.enable());
+		state.onDisable(() => child.disable());
+		state.onDestroy(() => child.destroy());
+
+		if (state.isEnabled()) child.enable();
+	}
+	constructor(state: IComponent, clearOnDisable = false) {
 		this.state = state;
 
 		state.onEnable(() => this.child?.enable());
 		state.onDestroy(() => this.clear());
 
-		if (!clearingOnDisable) {
+		if (!clearOnDisable) {
 			state.onDisable(() => this.child?.disable());
 		} else {
 			state.onDisable(() => this.clear());
 		}
+	}
+
+	getDebugChildren(): readonly T[] {
+		return this.child ? [this.child] : [];
 	}
 
 	get() {

@@ -4,7 +4,6 @@ import LocalPlayerController from "client/controller/LocalPlayerController";
 import Signals from "client/event/Signals";
 import Popup from "client/gui/Popup";
 import Remotes from "shared/Remotes";
-import SharedComponentBase from "shared/component/SharedComponentBase";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
 import BuildingMode from "./build/BuildingMode";
@@ -58,8 +57,8 @@ export default class PlayModeController extends ClientComponentBase {
 		this.setMode(this.playmode.get(), undefined);
 	}
 
-	getDebugChildren(): readonly SharedComponentBase[] {
-		return Objects.values(this.modes);
+	getDebugChildren(): readonly IDebuggableComponent[] {
+		return [...super.getDebugChildren(), ...Objects.values(this.modes)];
 	}
 
 	private async setMode(mode: PlayModes | undefined, prev: PlayModes | undefined) {

@@ -21,4 +21,8 @@ export class DictionaryControl<
 			}
 		});
 	}
+
+	getDebugChildren(): readonly IDebuggableComponent[] {
+		return [...super.getDebugChildren(), ...[...this.keyedChildren.getAll()].map((c) => c[1])];
+	}
 }

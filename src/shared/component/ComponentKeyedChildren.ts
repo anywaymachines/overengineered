@@ -1,8 +1,11 @@
 import SlimSignal from "shared/event/SlimSignal";
 
 /** Stores keyed components. Handles its enabling, disabling and destroying. */
-export class ComponentKeyedChildren<TKey extends string, T extends IComponent = IComponent> {
+export class ComponentKeyedChildren<TKey extends string, T extends IComponent = IComponent>
+	implements IDebuggableComponent
+{
 	private static readonly empty: ReadonlyMap<string, IComponent> = new Map<string, IComponent>();
+	private static readonly emptyarr: [] = [];
 
 	readonly onAdded = new SlimSignal<(key: TKey, child: T) => void>();
 	readonly onRemoved = new SlimSignal<(key: TKey, child: T) => void>();
@@ -12,7 +15,7 @@ export class ComponentKeyedChildren<TKey extends string, T extends IComponent = 
 	private children?: Map<TKey, T>;
 	private clearing = false;
 
-	constructor(state: IComponent) {
+	constructor(state: IComponent, clearOnDisable = false) {
 		this.state = state;
 
 		state.onEnable(() => {
@@ -22,14 +25,27 @@ export class ComponentKeyedChildren<TKey extends string, T extends IComponent = 
 				child.enable();
 			}
 		});
-		state.onDisable(() => {
-			if (!this.children) return;
-
-			for (const [_, child] of this.children) {
-				child.disable();
-			}
-		});
 		state.onDestroy(() => this.clear());
+
+		if (!clearOnDisable) {
+			state.onDisable(() => {
+				if (!this.children) return;
+
+				for (const [_, child] of this.children) {
+					child.disable();
+				}
+			});
+		} else {
+			state.onDisable(() => this.clear());
+		}
+	}
+
+	getDebugChildren(): readonly T[] {
+		if (!this.children) {
+			return ComponentKeyedChildren.emptyarr;
+		}
+
+		return [...this.children].map((e) => e[1]);
 	}
 
 	getAll(): ReadonlyMap<TKey, T> {

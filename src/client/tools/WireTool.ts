@@ -143,7 +143,7 @@ export default class WireTool extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		this.markers = this.add(new ClientComponentContainer<MarkerComponent>());
+		this.markers = this.parent(new ClientComponentContainer<MarkerComponent>());
 		this.event.onEnable(() => this.markers.enable());
 		this.event.onDisable(() => this.markers.disable());
 
@@ -157,6 +157,8 @@ export default class WireTool extends ToolBase {
 		this.viewportFrame.Ambient = Colors.white;
 		this.viewportFrame.LightColor = Colors.white;
 		this.viewportFrame.ZIndex = -1000;
+
+		this.onPrepare(() => this.updateVisual(false));
 	}
 
 	getDisplayName(): string {
@@ -386,11 +388,6 @@ export default class WireTool extends ToolBase {
 		this.prepareTouch();
 	}
 
-	protected prepare() {
-		this.updateVisual(false);
-		super.prepare();
-	}
-
 	private createMarker(part: BasePart, markerData: MarkerData, offset: Vector3 = Vector3.zero): MarkerComponent {
 		let markerInstance;
 
@@ -511,7 +508,8 @@ export default class WireTool extends ToolBase {
 		}
 
 		if (prepare) {
-			this.prepare();
+			this.disable();
+			this.enable();
 		}
 	}
 

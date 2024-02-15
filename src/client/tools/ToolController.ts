@@ -9,7 +9,6 @@ import MoveTool from "client/tools/MoveTool";
 import PaintTool from "client/tools/PaintTool";
 import ToolBase from "client/tools/ToolBase";
 import WireTool from "client/tools/WireTool";
-import SharedComponentBase from "shared/component/SharedComponentBase";
 import ObservableValue from "shared/event/ObservableValue";
 import WireTool2 from "./WireTool2";
 
@@ -59,8 +58,8 @@ export default class ToolController extends ClientComponentBase {
 		this.event.onPrepare(() => TooltipsControl.instance.updateControlTooltips(this.selectedTool.get()));
 	}
 
-	getDebugChildren(): readonly SharedComponentBase[] {
-		return this.tools;
+	getDebugChildren(): readonly IDebuggableComponent[] {
+		return [...super.getDebugChildren(), ...this.tools];
 	}
 
 	public enable() {

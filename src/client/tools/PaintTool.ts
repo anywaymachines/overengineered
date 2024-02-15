@@ -18,12 +18,12 @@ export default class PaintTool extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		this.add(new HoveredBlockHighlighter());
+		this.parent(new HoveredBlockHighlighter());
 
 		{
 			const selected = new Set<BlockModel>();
 
-			this.add(
+			this.parent(
 				new MovingSelector(
 					(part) => {
 						const block = BlockManager.getBlockDataByPart(part);
@@ -40,7 +40,7 @@ export default class PaintTool extends ToolBase {
 			);
 		}
 
-		const boxSelector = this.add(new BoxSelector());
+		const boxSelector = this.parent(new BoxSelector());
 		this.event.subscribe(boxSelector.submitted, async (blocks) => await this.paint(blocks));
 
 		this.event.onInputBegin(async (input) => {

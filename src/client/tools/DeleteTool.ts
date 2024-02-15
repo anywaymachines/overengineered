@@ -21,7 +21,7 @@ export default class DeleteTool extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		const hoverSelector = this.add(new HoveredBlockHighlighter());
+		const hoverSelector = this.parent(new HoveredBlockHighlighter());
 		hoverSelector.highlightedBlock.autoSet(this.highlightedBlock);
 
 		const fireSelected = async () => {
@@ -45,7 +45,7 @@ export default class DeleteTool extends ToolBase {
 			}
 		});
 
-		const boxSelector = this.add(new BoxSelector());
+		const boxSelector = this.parent(new BoxSelector());
 		this.event.subscribe(boxSelector.submitted, async (blocks) => await this.deleteBlocks(blocks));
 	}
 

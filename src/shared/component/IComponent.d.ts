@@ -1,4 +1,4 @@
-interface IComponent {
+interface IComponent extends IDebuggableComponent {
 	isEnabled(): boolean;
 	isDestroyed(): boolean;
 
@@ -9,4 +9,8 @@ interface IComponent {
 	enable(): void;
 	disable(): void;
 	destroy(): void;
+}
+
+interface IDebuggableComponent {
+	getDebugChildren(): readonly IDebuggableComponent[];
 }

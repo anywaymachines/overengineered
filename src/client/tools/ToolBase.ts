@@ -1,11 +1,11 @@
 import { Players } from "@rbxts/services";
-import { ClientComponentContainer } from "client/component/ClientComponentContainer";
+import { ClientComponentBase } from "client/component/ClientComponentBase";
 import Gui from "client/gui/Gui";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ObservableValue from "shared/event/ObservableValue";
 
 /** An abstract class of tools for working with the world */
-export default abstract class ToolBase extends ClientComponentContainer {
+export default abstract class ToolBase extends ClientComponentBase {
 	readonly mirrorMode = new ObservableValue<readonly CFrame[]>([]);
 
 	protected readonly gameUI;
