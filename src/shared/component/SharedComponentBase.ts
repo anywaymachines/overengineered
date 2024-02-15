@@ -76,9 +76,9 @@ export default class ComponentBase extends ComponentBaseBase implements ICompone
 	/** Subscribe a child to this component state. Return the child. */
 	protected parent<T extends IDebuggableComponent | (IComponent & IDebuggableComponent)>(child: T): T {
 		this.parented ??= [];
+		this.parented.push(child);
 
-		this.parented!.push(child);
-		if ("isDestroyed" in child) {
+		if ("isDestroyed" in child || child instanceof ComponentBase) {
 			ComponentChild.init(this, child);
 		}
 

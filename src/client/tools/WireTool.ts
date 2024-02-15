@@ -1,4 +1,5 @@
 import { GamepadService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { ClientComponent } from "client/component/ClientComponent";
 import { ClientComponentContainer } from "client/component/ClientComponentContainer";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
@@ -25,7 +26,7 @@ type MarkerData = {
 };
 
 type MarkerComponentDefinition = BillboardGui;
-class MarkerComponent extends SharedComponent<MarkerComponentDefinition> {
+class MarkerComponent extends ClientComponent<MarkerComponentDefinition> {
 	readonly instance;
 	readonly data;
 	private tooltip?: BillboardGui;
@@ -142,10 +143,7 @@ export default class WireTool extends ToolBase {
 
 	constructor(mode: BuildingMode) {
 		super(mode);
-
 		this.markers = this.parent(new ClientComponentContainer<MarkerComponent>());
-		this.event.onEnable(() => this.markers.enable());
-		this.event.onDisable(() => this.markers.disable());
 
 		// Wire rendering
 		this.viewportFrame = new Instance("ViewportFrame");
@@ -157,8 +155,6 @@ export default class WireTool extends ToolBase {
 		this.viewportFrame.Ambient = Colors.white;
 		this.viewportFrame.LightColor = Colors.white;
 		this.viewportFrame.ZIndex = -1000;
-
-		this.onPrepare(() => this.updateVisual(false));
 	}
 
 	getDisplayName(): string {
@@ -388,6 +384,11 @@ export default class WireTool extends ToolBase {
 		this.prepareTouch();
 	}
 
+	protected prepare() {
+		this.updateVisual(false);
+		super.prepare();
+	}
+
 	private createMarker(part: BasePart, markerData: MarkerData, offset: Vector3 = Vector3.zero): MarkerComponent {
 		let markerInstance;
 
@@ -508,8 +509,7 @@ export default class WireTool extends ToolBase {
 		}
 
 		if (prepare) {
-			this.disable();
-			this.enable();
+			this.prepare();
 		}
 	}
 
