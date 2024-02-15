@@ -1,8 +1,8 @@
 import { RunService } from "@rbxts/services";
 import RemoteEvents from "shared/RemoteEvents";
+import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 
 type ServoMotor = BlockModel & {
 	readonly Base: Part & {
@@ -21,7 +21,9 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<
 
 		this.hingeConstraint = this.instance.Base.HingeConstraint;
 
-		this.hingeConstraint.AngularResponsiveness = this.input.stiffness.get();
+		this.input.stiffness.subscribe((value, prev) => {
+			this.hingeConstraint.AngularResponsiveness = value
+		}, true)
 
 		this.event.subscribeObservable(
 			this.input.speed,

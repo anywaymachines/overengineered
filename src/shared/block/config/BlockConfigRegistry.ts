@@ -219,7 +219,7 @@ const servomotorblock = {
 			displayName: "Stiffness",
 			type: "clampedNumber",
 			min: 0,
-			max: 200,
+			max: 100,
 			step: 1,
 			default: 45 as number,
 			config: 45 as number,
