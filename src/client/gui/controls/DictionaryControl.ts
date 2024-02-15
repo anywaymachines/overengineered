@@ -1,5 +1,7 @@
 import Control from "client/gui/Control";
+import { ComponentInstance } from "shared/component/ComponentInstance";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
+import InstanceComponent from "shared/component/SharedComponent";
 
 /** Control that has its children keyed by some value */
 export class DictionaryControl<
@@ -11,6 +13,12 @@ export class DictionaryControl<
 
 	constructor(gui: T) {
 		super(gui);
+
 		this.children.onClear.Connect(() => this.keyedChildren.clear());
+		this.keyedChildren.onAdded.Connect((_, child) => {
+			if (child instanceof InstanceComponent && typeIs(child.instance, "Instance")) {
+				ComponentInstance.setParentIfNeeded(child.instance, this.instance);
+			}
+		});
 	}
 }

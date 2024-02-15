@@ -18,4 +18,9 @@ export const ComponentInstance = {
 			}
 		});
 	},
+	setParentIfNeeded(instance: Instance, parent: Instance) {
+		if (instance !== parent && instance.Parent === undefined) {
+			instance.Parent = parent;
+		}
+	},
 } as const;

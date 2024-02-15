@@ -16,13 +16,8 @@ export default class InstanceComponent<
 		ComponentInstance.init(this, instance);
 
 		this.children.onAdded.Connect((child) => {
-			if (
-				child instanceof InstanceComponent &&
-				typeIs(child.instance, "Instance") &&
-				child.instance !== this.instance &&
-				child.instance.Parent === undefined
-			) {
-				child.instance.Parent = this.instance;
+			if (child instanceof InstanceComponent && typeIs(child.instance, "Instance")) {
+				ComponentInstance.setParentIfNeeded(child.instance, this.instance);
 			}
 		});
 	}
