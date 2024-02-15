@@ -38,6 +38,7 @@ import OperationMulBlockLogic from "./logic/operations/number/OperationMulBlockL
 import OperationRoundBlockLogic from "./logic/operations/number/OperationRoundBlockLogic";
 import OperationSignBlockLogic from "./logic/operations/number/OperationSignBlockLogic";
 import OperationSubBlockLogic from "./logic/operations/number/OperationSubBlockLogic";
+import RelayBlockLogic from "./logic/operations/number/RelayBlockLogic";
 import OperationDegBlockLogic from "./logic/operations/number/trigonometry/OperationDegBlockLogic";
 import OperationRadBlockLogic from "./logic/operations/number/trigonometry/OperationRadBlockLogic";
 import LampBlockLogic from "./logic/operations/output/LampBlockLogic";
@@ -79,6 +80,7 @@ const logicRegistry = {
 	constant: ConstantBlockLogic,
 	delayblock: DelayBlockLogic,
 	counter: CounterBlockLogic,
+	relay: RelayBlockLogic,
 
 	multiplexer: Multiplexer,
 
