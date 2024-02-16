@@ -1,4 +1,4 @@
-import { RunService } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import InputHandler from "client/event/InputHandler";
@@ -8,6 +8,7 @@ import Gui from "client/gui/Gui";
 import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
 import { WireToolTests } from "client/tools/WireTool2";
 import SharedComponent from "shared/component/SharedComponent";
+import GameDefinitions from "shared/data/GameDefinitions";
 import Objects from "shared/fixes/objects";
 import { ComponentTests } from "./ComponentTests";
 import { LogicTest1 } from "./LogicTest1";
@@ -18,8 +19,8 @@ import { PopupTest } from "./control/PopupTest";
 import { TransformTest } from "./control/TransformTest";
 import { WorldPipetteTest } from "./control/WorldPipetteTest";
 
-const autostart = true;
-const launch = true && RunService.IsStudio();
+const autostart = RunService.IsStudio();
+const launch = true && GameDefinitions.isAdmin(Players.LocalPlayer);
 if (!launch) new Signal<() => void>().Wait();
 
 task.wait(0.5); // wait for the controls to enable
