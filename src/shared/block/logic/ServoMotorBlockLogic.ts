@@ -40,13 +40,16 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<
 			true,
 		);
 
+		// Stop on motor corruption
+		this.block.instance.Attach.GetPropertyChangedSignal("Parent").Once(() => {
+			this.disable();
+		})
+
+		this.block.instance.Base.GetPropertyChangedSignal("Parent").Once(() => {
+			this.disable();
+		})
+
 		this.event.subscribe(RunService.Heartbeat, () => {
-			if (!this.block.instance.FindFirstChild("Attach")) {
-				this.disable();
-
-				return;
-			}
-
 			if (this.block.instance.Attach.Position.sub(this.block.instance.Base.Position).Magnitude > 3) {
 				RemoteEvents.ImpactBreak.send(this.block.instance.Base);
 

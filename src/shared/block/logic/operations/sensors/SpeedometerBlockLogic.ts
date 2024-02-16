@@ -11,6 +11,11 @@ export default class SpeedometerBlockLogic extends ConfigurableBlockLogic<typeof
 	}
 
 	private update() {
+		if (!this.block.instance.PrimaryPart) {
+			this.disable()
+			return;
+		}
+
 		this.output.result.set(
 			RobloxUnit.Studs_To_Meters(this.block.instance.PrimaryPart!.AssemblyLinearVelocity.Magnitude),
 		);
