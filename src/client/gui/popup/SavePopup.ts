@@ -283,16 +283,8 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 		this.add(new ButtonControl(this.gui.Slots.Head.CloseButton, () => this.hide()));
 	}
 
-	async show() {
+	show() {
 		super.show();
 		this.transform((transform) => transform.slideIn("top", 50, { duration: 0.2 }));
-	}
-	hide() {
-		this.transform((transform) =>
-			transform
-				.slideOut("bottom", 1000, { duration: 0.08 })
-				.then()
-				.func(() => super.hide()),
-		);
 	}
 }
