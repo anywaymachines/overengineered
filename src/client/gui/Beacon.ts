@@ -62,7 +62,10 @@ export default class Beacon extends SharedComponent<BasePart | Model> {
 			this.billboard.Distance.Text = distancestr;
 			const [screenPos, isVisible] = Workspace.CurrentCamera!.WorldToViewportPoint(part.GetPivot().Position);
 			const screenSize = Workspace.CurrentCamera!.ViewportSize;
-			const adjustableOffset = this.billboard.AbsoluteSize.X / 2;
+			const adjustableOffset =
+				this.billboard.AbsoluteSize.Y > this.billboard.AbsoluteSize.X
+					? this.billboard.AbsoluteSize.Y / 2
+					: this.billboard.AbsoluteSize.X / 2;
 			let [pos_x, pos_y] = [screenPos.X, screenPos.Y];
 
 			const halfScreenX = screenSize.X / 2;
