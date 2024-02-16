@@ -9,6 +9,7 @@ import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
 import { WireToolTests } from "client/tools/WireTool2";
 import SharedComponent from "shared/component/SharedComponent";
 import Objects from "shared/fixes/objects";
+import { ComponentTests } from "./ComponentTests";
 import { LogicTest1 } from "./LogicTest1";
 import { ColorWheelTest } from "./control/ColorWheelTest";
 import { ConfigTest } from "./control/ConfigTest";
@@ -162,6 +163,7 @@ const create = () => {
 		...LoadSlotTest.createTests(),
 		wrapNonVisual("Wire Tool", WireToolTests),
 		wrapNonVisual("Logic", LogicTest1),
+		wrapNonVisual("Component", ComponentTests),
 	];
 	for (const [name, content] of tests) {
 		content.hide();
