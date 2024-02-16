@@ -148,7 +148,7 @@ const toggle = () => {
 };
 
 const ih = new InputHandler();
-ih.onKeyDown("F2", () => {
+ih.onKeyDown("F6", () => {
 	if (!InputController.isShiftPressed()) return;
 	toggle();
 });

@@ -1,10 +1,15 @@
 import { RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import InputController from "client/controller/InputController";
+import InputHandler from "client/event/InputHandler";
 import Control from "client/gui/Control";
 import { Element } from "client/gui/Element";
 import Gui from "client/gui/Gui";
 import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
+import { WireToolTests } from "client/tools/WireTool2";
 import SharedComponent from "shared/component/SharedComponent";
+import Objects from "shared/fixes/objects";
+import { LogicTest1 } from "./LogicTest1";
 import { ColorWheelTest } from "./control/ColorWheelTest";
 import { ConfigTest } from "./control/ConfigTest";
 import { LoadSlotTest } from "./control/LoadSlotTest";
@@ -12,26 +17,13 @@ import { PopupTest } from "./control/PopupTest";
 import { TransformTest } from "./control/TransformTest";
 import { WorldPipetteTest } from "./control/WorldPipetteTest";
 
+const autostart = true;
 const launch = true && RunService.IsStudio();
 if (!launch) new Signal<() => void>().Wait();
 
 task.wait(0.5); // wait for the controls to enable
 
 const createElement = Element.create;
-const parent = new SharedComponent(createElement("ScreenGui", { Name: "TestScreenGui", Parent: Gui.getPlayerGui() }));
-
-// close button
-{
-	const closebtn = parent.add(
-		TextButtonControl.create({
-			Text: "Close the test GUI",
-			Size: new UDim2(0, 100, 0, 30),
-			Position: new UDim2(0, 0, 0, 100),
-		}),
-	);
-	closebtn.show();
-	closebtn.activated.Connect(() => parent.destroy());
-}
 
 type TestEnvironmentDefinition = Frame & {
 	readonly Tabs: ScrollingFrame;
@@ -95,20 +87,90 @@ class TestEnvironment extends Control<TestEnvironmentDefinition> {
 	}
 }
 
-const testenv = TestEnvironment.create();
-parent.add(testenv);
+//
 
-const tests: readonly (readonly [name: string, test: Control])[] = [
-	...ColorWheelTest.createTests(),
-	...WorldPipetteTest.createTests(),
-	...TransformTest.createTests(),
-	...ConfigTest.createTests(),
-	...PopupTest.createTests(),
-	...LoadSlotTest.createTests(),
-];
-for (const [name, content] of tests) {
-	content.hide();
-	testenv.addTab(name, content);
+let destroy: (() => void) | undefined;
+const ih = new InputHandler();
+ih.onKeyDown("F7", () => {
+	if (!InputController.isShiftPressed()) return;
+
+	if (destroy) destroy();
+	else create();
+});
+if (autostart) {
+	spawn(() => create());
 }
 
-parent.enable();
+const create = () => {
+	const parent = new SharedComponent(
+		createElement("ScreenGui", { Name: "TestScreenGui", Parent: Gui.getPlayerGui() }),
+	);
+	// close button
+	{
+		const closebtn = parent.add(
+			TextButtonControl.create({
+				Text: "Close the test GUI",
+				Size: new UDim2(0, 100, 0, 30),
+				Position: new UDim2(0, 0, 0, 200),
+			}),
+		);
+		closebtn.show();
+		closebtn.activated.Connect(() => parent.destroy());
+	}
+
+	const testenv = TestEnvironment.create();
+	parent.add(testenv);
+
+	const wrapNonVisual = (
+		name: string,
+		tests: Readonly<Record<string, () => void>>,
+	): readonly [name: string, test: Control] => {
+		const frame = Element.create(
+			"Frame",
+			{
+				Size: new UDim2(1, 0, 1, 0),
+				BackgroundTransparency: 1,
+			},
+			{
+				list: Element.create("UIListLayout", {
+					FillDirection: Enum.FillDirection.Vertical,
+				}),
+			},
+		);
+		const control = new Control(frame);
+
+		for (const [name, test] of Objects.entries(tests)) {
+			const button = TextButtonControl.create({
+				Text: name,
+				AutomaticSize: Enum.AutomaticSize.XY,
+				TextSize: 16,
+			});
+			button.activated.Connect(test);
+
+			control.add(button);
+		}
+
+		return [name, control];
+	};
+
+	const tests: readonly (readonly [name: string, test: Control])[] = [
+		...ColorWheelTest.createTests(),
+		...WorldPipetteTest.createTests(),
+		...TransformTest.createTests(),
+		...ConfigTest.createTests(),
+		...PopupTest.createTests(),
+		...LoadSlotTest.createTests(),
+		wrapNonVisual("Wire Tool", WireToolTests),
+		wrapNonVisual("Logic", LogicTest1),
+	];
+	for (const [name, content] of tests) {
+		content.hide();
+		testenv.addTab(name, content);
+	}
+
+	parent.enable();
+	destroy = () => {
+		destroy = undefined;
+		parent.destroy();
+	};
+};

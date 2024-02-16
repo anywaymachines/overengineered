@@ -4,13 +4,14 @@ import { Colors } from "client/gui/Colors";
 import { Element } from "client/gui/Element";
 import Gui from "client/gui/Gui";
 import BuildingMode from "client/modes/build/BuildingMode";
+import { Assert } from "client/test/Assert";
 import ToolBase from "client/tools/ToolBase";
 import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
-import SharedComponentContainer from "shared/component/SharedComponentContainer";
+import ComponentBase from "shared/component/SharedComponentBase";
 import ObservableValue from "shared/event/ObservableValue";
 import Arrays from "shared/fixes/Arrays";
 import Objects from "shared/fixes/objects";
@@ -51,8 +52,12 @@ type DataType = keyof typeof typeGroups;
 type MarkerData = {
 	//readonly name: string;
 	//readonly id: BlockConnectionName;
-	readonly blockData: PlacedBlockData;
+	readonly blockData: {
+		readonly uuid: BlockUuid;
+		readonly instance: PVInstance;
+	};
 	readonly dataTypes: readonly DataType[];
+	readonly group: string | undefined;
 };
 const intersectTypes = (types: readonly (readonly DataType[])[]): readonly DataType[] => {
 	if (types.size() === 1) {
@@ -78,6 +83,77 @@ const intersectTypes = (types: readonly (readonly DataType[])[]): readonly DataT
 	}
 
 	return result;
+};
+
+class MarkerGroupController {
+	readonly types = new ObservableValue<readonly DataType[]>([]);
+	readonly markers: Set<MarkerComponent>;
+	private readonly connected = new Set<MarkerGroupController>();
+
+	constructor(markers?: Set<MarkerComponent>) {
+		this.markers = markers ?? new Set();
+	}
+
+	static groupMarkers(markers: readonly MarkerComponent[]) {
+		const groupedMarkers = Arrays.groupBy(markers, (m) => m.data.group + " " + m.data.blockData.uuid);
+		for (const marker of markers) {
+			marker.sameGroupMarkers = groupedMarkers.get(marker.data.group + " " + marker.data.blockData.uuid);
+
+			if (marker.sameGroupMarkers) {
+				marker.selfGroup = new MarkerGroupController(new Set(marker.sameGroupMarkers));
+			}
+		}
+	}
+	static connectMarkers(
+		blocks: readonly PlacedBlockData[],
+		markers: ReadonlyMap<string, MarkerComponent>,
+		wireParent: ViewportFrame,
+	) {
+		for (const block of blocks) {
+			for (const [connectionName, connection] of Objects.entries(block.connections)) {
+				const from = markers.get(block.uuid + connectionName) as InputMarkerComponent;
+				const to = markers.get(connection.blockUuid + connection.connectionName) as OutputMarkerComponent;
+
+				this.connect(from, to, wireParent);
+			}
+		}
+	}
+
+	static connect(from: InputMarkerComponent, to: OutputMarkerComponent, wireParent: ViewportFrame) {
+		from.selfGroup ??= new MarkerGroupController();
+		to.selfGroup ??= new MarkerGroupController();
+
+		from.selfGroup.connected.add(to.selfGroup);
+		to.selfGroup.connected.add(from.selfGroup);
+
+		const types = intersectTypes([from.selfGroup.types.get(), to.selfGroup.types.get()]);
+		from.availableTypes.set(types);
+		to.availableTypes.set(types);
+	}
+
+	private calculateTypes(): readonly DataType[] {
+		return intersectTypes(Arrays.mapSet(this.markers, (m) => m.data.dataTypes));
+	}
+
+	add(marker: MarkerComponent) {
+		this.markers.add(marker);
+		marker.group.set(this);
+	}
+	remove(marker: MarkerComponent) {
+		this.markers.delete(marker);
+
+		if (marker instanceof InputMarkerComponent) {
+			marker.group.set(marker.sameGroupMarkers?.[0]?.group.get());
+		} else if (marker instanceof OutputMarkerComponent) {
+			//
+		}
+
+		this.types.set(this.calculateTypes());
+	}
+}
+type MarkerGroup = {
+	readonly types: ObservableValue<DataType[]>;
+	readonly markers: Set<MarkerComponent>;
 };
 
 type MarkerComponentDefinition = BillboardGui & {
@@ -123,6 +199,8 @@ abstract class MarkerComponent extends ClientComponent<MarkerComponentDefinition
 	readonly data;
 	readonly position;
 	readonly availableTypes;
+	sameGroupMarkers?: readonly MarkerComponent[];
+	selfGroup?: MarkerGroupController;
 
 	constructor(instance: MarkerComponentDefinition, data: MarkerData) {
 		super(instance);
@@ -164,16 +242,11 @@ abstract class MarkerComponent extends ClientComponent<MarkerComponentDefinition
 		);
 	}
 
-	private updateColors(types: readonly DataType[], index: number) {
-		// const types = this.getAvailableDataTypes();
-		this.instance.TextButton.BackgroundColor3 = this.instance.TextButton.Filled.BackgroundColor3 =
-			typeGroups[types[index]].color;
-	}
-
-	protected abstract getAvailableDataTypes(): readonly DataType[];
+	abstract narrowDownTypes(): void;
+	abstract widenTypes(): void;
 }
 class InputMarkerComponent extends MarkerComponent {
-	private connected?: {
+	connected?: {
 		readonly marker: OutputMarkerComponent;
 		readonly wire: WireComponent;
 	};
@@ -195,8 +268,15 @@ class InputMarkerComponent extends MarkerComponent {
 
 	onConnected(marker: OutputMarkerComponent, wire: WireComponent) {
 		this.connected = { marker, wire };
-		this.availableTypes.set(this.getAvailableDataTypes());
 		this.updateConnectedVisual(true);
+
+		this.narrowDownTypes();
+		if (this.sameGroupMarkers) {
+			for (const other of this.sameGroupMarkers) {
+				if (other === this) continue;
+				other.narrowDownTypes();
+			}
+		}
 	}
 	disconnect() {
 		if (!this.connected) return;
@@ -204,14 +284,43 @@ class InputMarkerComponent extends MarkerComponent {
 		this.updateConnectedVisual(false);
 		this.connected.marker.onDisconnected(this);
 		this.connected = undefined;
+
+		this.widenTypes();
+		if (this.sameGroupMarkers) {
+			for (const other of this.sameGroupMarkers) {
+				if (other === this) continue;
+				other.widenTypes();
+			}
+		}
 	}
 
-	protected getAvailableDataTypes(): readonly DataType[] {
-		if (!this.connected) {
-			return this.data.dataTypes;
+	narrowDownTypes(): void {
+		if (!this.connected && (!this.sameGroupMarkers || this.sameGroupMarkers.size() < 2)) {
+			this.availableTypes.set(this.data.dataTypes);
+			return;
 		}
 
-		return intersectTypes([this.data.dataTypes, this.connected.marker.data.dataTypes]);
+		this.availableTypes.set(
+			intersectTypes([
+				this.availableTypes.get(),
+				this.connected?.marker.availableTypes.get() ?? this.data.dataTypes,
+				...(this.sameGroupMarkers?.map((m) => m.availableTypes.get()) ?? []),
+			]),
+		);
+	}
+	widenTypes(): void {
+		if (!this.connected && (!this.sameGroupMarkers || this.sameGroupMarkers.size() < 2)) {
+			this.availableTypes.set(this.data.dataTypes);
+			return;
+		}
+
+		this.availableTypes.set(
+			intersectTypes([
+				this.data.dataTypes,
+				this.connected?.marker.data.dataTypes ?? this.data.dataTypes,
+				...(this.sameGroupMarkers?.map((m) => m.data.dataTypes) ?? []),
+			]),
+		);
 	}
 }
 class OutputMarkerComponent extends MarkerComponent {
@@ -229,21 +338,57 @@ class OutputMarkerComponent extends MarkerComponent {
 		this.connected.set(marker, wire);
 
 		marker.onConnected(this, wire);
-		this.availableTypes.set(this.getAvailableDataTypes());
+		this.narrowDownTypes();
+		print(`connect to ${marker}`);
+		if (this.sameGroupMarkers) {
+			for (const other of this.sameGroupMarkers) {
+				if (other === this) continue;
+				print(`check other marker ${other}`);
+				other.narrowDownTypes();
+			}
+		}
 	}
 	onDisconnected(marker: InputMarkerComponent) {
 		const wire = this.connected.get(marker);
 		if (!wire) return;
 
 		this.remove(wire);
+		this.widenTypes();
+		if (this.sameGroupMarkers) {
+			for (const other of this.sameGroupMarkers) {
+				if (other === this) continue;
+				other.widenTypes();
+			}
+		}
 	}
 
-	protected getAvailableDataTypes(): readonly DataType[] {
-		if (this.connected.size() === 0) {
-			return this.data.dataTypes;
+	narrowDownTypes(): void {
+		if (this.connected.size() === 0 && (!this.sameGroupMarkers || this.sameGroupMarkers.size() < 2)) {
+			this.availableTypes.set(this.data.dataTypes);
+			return;
 		}
 
-		return intersectTypes([this.data.dataTypes, ...Arrays.map(this.connected, (c) => c.data.dataTypes)]);
+		this.availableTypes.set(
+			intersectTypes([
+				this.availableTypes.get(),
+				...Arrays.map(this.connected, (c) => c.availableTypes.get()),
+				...(this.sameGroupMarkers?.map((m) => m.availableTypes.get()) ?? []),
+			]),
+		);
+	}
+	widenTypes(): void {
+		if (this.connected.size() === 0 && (!this.sameGroupMarkers || this.sameGroupMarkers.size() < 2)) {
+			this.availableTypes.set(this.data.dataTypes);
+			return;
+		}
+
+		this.availableTypes.set(
+			intersectTypes([
+				this.data.dataTypes,
+				...Arrays.map(this.connected, (m) => m.data.dataTypes),
+				...(this.sameGroupMarkers?.map((m) => m.data.dataTypes) ?? []),
+			]),
+		);
 	}
 }
 
@@ -329,7 +474,7 @@ const canConnect = (output: OutputMarkerComponent, input: InputMarkerComponent):
 	return isNotConnected(input) && areSameType(output, input);
 };
 
-class WireToolDesktopController extends SharedComponentContainer {
+class WireToolDesktopController extends ComponentBase {
 	constructor(markers: readonly MarkerComponent[], wireParent: ViewportFrame) {
 		class WireMover extends ClientComponent<WireComponentDefinition> {
 			readonly marker;
@@ -426,44 +571,41 @@ export default class WireTool2 extends ToolBase {
 	}
 
 	private createEverything() {
-		for (const plot of SharedPlots.getAllowedPlots(Players.LocalPlayer)) {
-			for (const block of SharedPlots.getPlotBlockDatas(plot)) {
-				const configDef = (blockConfigRegistry as BlockConfigRegistryNonGeneric)[block.id];
-				if (!configDef) continue;
+		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId); // for (const plot of SharedPlots.getAllowedPlots(Players.LocalPlayer)) {
+		for (const block of SharedPlots.getPlotBlockDatas(plot)) {
+			const configDef = (blockConfigRegistry as BlockConfigRegistryNonGeneric)[block.id];
+			if (!configDef) continue;
 
-				let index = 0;
-				for (const markerType of ["output", "input"] as const) {
-					for (const [key, config] of Objects.pairs(configDef[markerType])) {
-						if (config.connectorHidden) continue;
+			let index = 0;
+			for (const markerType of ["output", "input"] as const) {
+				for (const [key, config] of Objects.pairs(configDef[markerType])) {
+					if (config.connectorHidden) continue;
 
-						const data: MarkerData = {
-							blockData: block,
-							dataTypes:
-								config.type === "or" ? config.types.map((t) => groups[t.type]) : [groups[config.type]],
-						};
+					const data: MarkerData = {
+						blockData: block,
+						dataTypes:
+							config.type === "or" ? config.types.map((t) => groups[t.type]) : [groups[config.type]],
+						group: config.type === "or" ? config.group : undefined,
+					};
 
-						const markerInstance = MarkerComponent.createInstance(block.instance.PrimaryPart!, index++);
-						const marker =
-							markerType === "input"
-								? new InputMarkerComponent(markerInstance, data)
-								: new OutputMarkerComponent(markerInstance, data);
+					const markerInstance = MarkerComponent.createInstance(block.instance.PrimaryPart!, index++);
+					const marker =
+						markerType === "input"
+							? new InputMarkerComponent(markerInstance, data)
+							: new OutputMarkerComponent(markerInstance, data);
 
-						this.markers.add(block.uuid + key, marker);
-					}
-				}
-			}
-
-			for (const block of SharedPlots.getPlotBlockDatas(plot)) {
-				for (const [connectionName, connection] of Objects.entries(block.connections)) {
-					const from = this.markers.get(block.uuid + connectionName) as InputMarkerComponent;
-					const to = this.markers.get(
-						connection.blockUuid + connection.connectionName,
-					) as OutputMarkerComponent;
-
-					to.connect(from, this.wireParent);
+					this.markers.add(block.uuid + key, marker);
 				}
 			}
 		}
+
+		MarkerGroupController.groupMarkers(Arrays.map(this.markers.getAll(), (k, v) => v));
+		MarkerGroupController.connectMarkers(
+			SharedPlots.getPlotBlockDatas(plot),
+			this.markers.getAll(),
+			this.wireParent,
+		);
+		//}
 	}
 
 	getDisplayName(): string {
@@ -494,3 +636,57 @@ export default class WireTool2 extends ToolBase {
 		super.disable();
 	}
 }
+
+//
+
+export const WireToolTests = {
+	connect() {
+		const wireParent = new Instance("ViewportFrame");
+		const newinstance = () => MarkerComponent.createInstance(new Instance("Part"), 0);
+		const newdata = (uuid: string | number) => ({
+			uuid: tostring(uuid) as BlockUuid,
+			instance: new Instance("Part"),
+		});
+
+		const block1 = newdata(1);
+		const block2 = newdata(2);
+
+		const in1 = new InputMarkerComponent(newinstance(), {
+			blockData: block1,
+			dataTypes: ["bool", "number"],
+			group: "0",
+		});
+		const in2 = new InputMarkerComponent(newinstance(), {
+			blockData: block1,
+			dataTypes: ["bool", "number"],
+			group: "0",
+		});
+
+		const out1 = new OutputMarkerComponent(newinstance(), {
+			blockData: block2,
+			dataTypes: ["bool"],
+			group: "",
+		});
+
+		MarkerGroupController.groupMarkers([in1, in2, out1]);
+
+		Assert.notNull(in1.sameGroupMarkers);
+		Assert.notNull(in2.sameGroupMarkers);
+		Assert.notNull(out1.sameGroupMarkers);
+		Assert.sequenceEquals(in1.sameGroupMarkers, [in1, in2]);
+		Assert.sequenceEquals(in2.sameGroupMarkers, [in1, in2]);
+		Assert.sequenceEquals(out1.sameGroupMarkers, [out1]);
+
+		//
+
+		out1.connect(in1, wireParent);
+
+		print(in1.availableTypes.get().join());
+		print(in2.availableTypes.get().join());
+		print(out1.availableTypes.get().join());
+
+		Assert.sequenceEquals(in1.availableTypes.get(), ["bool"]);
+		Assert.sequenceEquals(in2.availableTypes.get(), ["bool"]);
+		Assert.sequenceEquals(out1.availableTypes.get(), ["bool"]);
+	},
+} as const;

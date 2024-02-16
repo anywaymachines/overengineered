@@ -1,4 +1,4 @@
-import { Players, Workspace } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
 import Machine from "client/blocks/Machine";
 import RobloxUnit from "shared/RobloxUnit";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
@@ -21,7 +21,7 @@ const subChanged = (block: ConfigurableBlockLogic<BlockConfigTypes.BothDefinitio
 	}
 };
 
-const LogicTest1 = {
+export const LogicTest1 = {
 	altimeter() {
 		const altimeterInstance = new Instance("Model") as BlockModel;
 		altimeterInstance.PivotTo(new CFrame(0, 5, 0));
@@ -163,21 +163,3 @@ const LogicTest1 = {
 		machine.destroy();
 	},
 };
-
-const test = true;
-if (Players.LocalPlayer.Name === "i3ymm" && test) {
-	print("--- test ---");
-	for (const [name, test] of pairs(LogicTest1)) {
-		print(`--- Running ${name} ---`);
-
-		try {
-			test();
-		} catch (err) {
-			throw "Error in test " + name + ": " + err;
-		}
-	}
-
-	print("--- test end ---");
-}
-
-parent.Destroy();

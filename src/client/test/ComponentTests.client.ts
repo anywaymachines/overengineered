@@ -1,7 +1,11 @@
+import { RunService } from "@rbxts/services";
+import Signal from "@rbxts/signal";
 import InstanceComponent from "shared/component/SharedComponent";
 import ComponentBase from "shared/component/SharedComponentBase";
 import ContainerComponent from "shared/component/SharedComponentContainer";
 import Objects from "shared/fixes/objects";
+
+if (!RunService.IsStudio()) new Signal().Wait();
 
 const myassert = (part: boolean, message?: string) => {
 	if (part) return;
