@@ -376,14 +376,17 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		{
 			const rockets = machine.getChildren().filter((c) => c instanceof RocketEngineLogic);
 			if (rockets.size() !== 0) {
-				init("Torque", "%.2f %%", this.infoTemplate(), 0, 100, 1, (control) => {
+				init("Torque", "%s %%", this.infoTemplate(), 0, 100, 1, (control) => {
 					const avg: number[] = [];
 					for (const block of machine.getChildren()) {
+						if (!block.isEnabled()) continue;
 						if (!(block instanceof RocketEngineLogic)) continue;
 						avg.push(block.getTorque());
 					}
 
-					control.slider.value.set(avg.reduce((acc, val) => acc + val, 0) / avg.size());
+					control.slider.value.set(
+						avg.size() === 0 ? 0 : avg.reduce((acc, val) => acc + val, 0) / avg.size(),
+					);
 					control.text.value.set(control.slider.value.get());
 				});
 			}
