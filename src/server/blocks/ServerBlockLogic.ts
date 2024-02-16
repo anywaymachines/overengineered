@@ -12,6 +12,7 @@ export default abstract class ServerBlockLogic<T extends new (block: PlacedBlock
 	protected isValidBlock(block: BlockModel | undefined, player: Player | undefined): boolean {
 		if (!block) return false;
 		if (!block.IsDescendantOf(Workspace)) return false;
+		if (block.PrimaryPart?.Anchored || block.PrimaryPart?.AssemblyRootPart?.Anchored) return false;
 
 		if (player && block.PrimaryPart?.GetNetworkOwner() !== player) {
 			player.Kick();

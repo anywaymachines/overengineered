@@ -1,3 +1,4 @@
+import RemoteEvents from "shared/RemoteEvents";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -14,6 +15,12 @@ export default class OperationClampBlockLogic extends ConfigurableBlockLogic<
 	}
 
 	private update() {
+		if (this.input.min.get() > this.input.max.get()) {
+			if (this.instance.PrimaryPart) {
+				RemoteEvents.Burn.send(this.instance.PrimaryPart);
+			}
+			this.disable();
+		}
 		this.output.result.set(math.clamp(this.input.value.get(), this.input.min.get(), this.input.max.get()));
 	}
 }
