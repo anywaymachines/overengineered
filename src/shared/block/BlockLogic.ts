@@ -23,20 +23,22 @@ export default class BlockLogic<T extends BlockModel = BlockModel> extends Share
 		this.instance = this.block.instance;
 	}
 
-	protected subscribeOnDestroyed(instance: BasePart, func: () => void) {
+	protected subscribeOnDestroyed(instance: Instance, func: () => void) {
 		const update = () => {
-			if (!instance.CanTouch) return;
+			if (instance.IsA("BasePart") && !instance.CanTouch) return;
 
 			func();
 		};
 
-		instance.AttributeChanged.Connect(update);
 		instance.GetPropertyChangedSignal("Parent").Connect(update);
 	}
 
 	protected onDescendantDestroyed(func: () => void) {
-		PartUtils.applyToAllDescendantsOfType("BasePart", this.instance, (part) =>
-			this.subscribeOnDestroyed(part, func),
-		);
+		const subscribe = (instance: Instance) => {
+			this.subscribeOnDestroyed(instance, func);
+		};
+
+		PartUtils.applyToAllDescendantsOfType("BasePart", this.instance, (part) => subscribe(part));
+		PartUtils.applyToAllDescendantsOfType("WeldConstraint", this.instance, (part) => subscribe(part));
 	}
 }
