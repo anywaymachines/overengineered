@@ -22,8 +22,8 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<
 		this.hingeConstraint = this.instance.Base.HingeConstraint;
 
 		this.input.stiffness.subscribe((value, prev) => {
-			this.hingeConstraint.AngularResponsiveness = value
-		}, true)
+			this.hingeConstraint.AngularResponsiveness = value;
+		}, true);
 
 		this.event.subscribeObservable(
 			this.input.speed,
@@ -41,13 +41,9 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<
 		);
 
 		// Stop on motor corruption
-		this.block.instance.Attach.GetPropertyChangedSignal("Parent").Once(() => {
+		this.onDescendantDestroyed(() => {
 			this.disable();
-		})
-
-		this.block.instance.Base.GetPropertyChangedSignal("Parent").Once(() => {
-			this.disable();
-		})
+		});
 
 		this.event.subscribe(RunService.Heartbeat, () => {
 			if (this.block.instance.Attach.Position.sub(this.block.instance.Base.Position).Magnitude > 3) {
