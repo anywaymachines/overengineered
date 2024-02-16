@@ -169,6 +169,33 @@ abstract class MarkerComponent extends ClientComponent<MarkerComponentDefinition
 		);
 	}
 
+	narrowDownTypesSelfAndOther(visited: Set<MarkerComponent>): void {
+		visited.add(this);
+		this.narrowDownTypes();
+
+		if (this.sameGroupMarkers) {
+			for (const other of this.sameGroupMarkers) {
+				if (other === this) continue;
+				if (visited.has(other)) continue;
+
+				other.narrowDownTypesSelfAndOther(visited);
+			}
+		}
+	}
+	widenTypesSelfAndOther(visited: Set<MarkerComponent>): void {
+		visited.add(this);
+		this.widenTypes();
+
+		if (this.sameGroupMarkers) {
+			for (const other of this.sameGroupMarkers) {
+				if (other === this) continue;
+				if (visited.has(other)) continue;
+
+				other.widenTypesSelfAndOther(visited);
+			}
+		}
+	}
+
 	abstract narrowDownTypes(): void;
 	abstract widenTypes(): void;
 }
@@ -196,29 +223,15 @@ class InputMarkerComponent extends MarkerComponent {
 	onConnected(marker: OutputMarkerComponent, wire: WireComponent) {
 		this.connected = { marker, wire };
 		this.updateConnectedVisual(true);
-
-		this.narrowDownTypes();
-		if (this.sameGroupMarkers) {
-			for (const other of this.sameGroupMarkers) {
-				if (other === this) continue;
-				other.narrowDownTypes();
-			}
-		}
 	}
 	disconnect() {
 		if (!this.connected) return;
 
 		this.updateConnectedVisual(false);
 		this.connected.marker.onDisconnected(this);
-		this.connected = undefined;
 
-		this.widenTypes();
-		if (this.sameGroupMarkers) {
-			for (const other of this.sameGroupMarkers) {
-				if (other === this) continue;
-				other.widenTypes();
-			}
-		}
+		this.connected = undefined;
+		this.widenTypesSelfAndOther(new Set());
 	}
 
 	narrowDownTypes(): void {
@@ -236,10 +249,10 @@ class InputMarkerComponent extends MarkerComponent {
 		);
 	}
 	widenTypes(): void {
-		if (!this.connected && (!this.sameGroupMarkers || this.sameGroupMarkers.size() < 2)) {
+		/*if (!this.connected && (!this.sameGroupMarkers || this.sameGroupMarkers.size() < 2)) {
 			this.availableTypes.set(this.data.dataTypes);
 			return;
-		}
+		}*/
 
 		this.availableTypes.set(
 			intersectTypes([
@@ -248,6 +261,21 @@ class InputMarkerComponent extends MarkerComponent {
 				...(this.sameGroupMarkers?.map((m) => m.data.dataTypes) ?? []),
 			]),
 		);
+	}
+
+	narrowDownTypesSelfAndOther(visited: Set<MarkerComponent>): void {
+		super.narrowDownTypesSelfAndOther(visited);
+
+		if (this.connected && !visited.has(this.connected.marker)) {
+			this.connected.marker.narrowDownTypesSelfAndOther(visited);
+		}
+	}
+	widenTypesSelfAndOther(visited: Set<MarkerComponent>): void {
+		super.widenTypesSelfAndOther(visited);
+
+		if (this.connected && !visited.has(this.connected.marker)) {
+			this.connected.marker.widenTypesSelfAndOther(visited);
+		}
 	}
 }
 class OutputMarkerComponent extends MarkerComponent {
@@ -263,29 +291,31 @@ class OutputMarkerComponent extends MarkerComponent {
 	connect(marker: InputMarkerComponent, wireParent: ViewportFrame) {
 		const wire = this.add(WireComponent.create(this, marker).with((c) => (c.instance.Parent = wireParent)));
 		this.connected.set(marker, wire);
-
 		marker.onConnected(this, wire);
-		this.narrowDownTypes();
-		print(`connect to ${marker}`);
-		if (this.sameGroupMarkers) {
-			for (const other of this.sameGroupMarkers) {
-				if (other === this) continue;
-				print(`check other marker ${other}`);
-				other.narrowDownTypes();
-			}
-		}
+		this.narrowDownTypesSelfAndOther(new Set());
 	}
 	onDisconnected(marker: InputMarkerComponent) {
 		const wire = this.connected.get(marker);
 		if (!wire) return;
 
 		this.remove(wire);
-		this.widenTypes();
-		if (this.sameGroupMarkers) {
-			for (const other of this.sameGroupMarkers) {
-				if (other === this) continue;
-				other.widenTypes();
-			}
+		this.widenTypesSelfAndOther(new Set([marker]));
+	}
+
+	narrowDownTypesSelfAndOther(visited: Set<MarkerComponent>): void {
+		super.narrowDownTypesSelfAndOther(visited);
+
+		for (const [marker] of this.connected) {
+			if (visited.has(marker)) continue;
+			marker.narrowDownTypesSelfAndOther(visited);
+		}
+	}
+	widenTypesSelfAndOther(visited: Set<MarkerComponent>): void {
+		super.widenTypesSelfAndOther(visited);
+
+		for (const [marker] of this.connected) {
+			if (visited.has(marker)) continue;
+			marker.widenTypesSelfAndOther(visited);
 		}
 	}
 
@@ -500,6 +530,7 @@ export default class WireTool2 extends ToolBase {
 	static groupMarkers(markers: readonly MarkerComponent[]) {
 		const groupedMarkers = Arrays.groupBy(markers, (m) => m.data.group + " " + m.data.blockData.uuid);
 		for (const marker of markers) {
+			if (marker.data.group === undefined) continue;
 			marker.sameGroupMarkers = groupedMarkers.get(marker.data.group + " " + marker.data.blockData.uuid);
 		}
 	}
@@ -547,7 +578,7 @@ export default class WireTool2 extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return 'Wire 2 (DEV TEST | THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.)';
+		return "Wiring (DEV ONLY)";
 	}
 
 	getImageID(): string {
@@ -578,7 +609,7 @@ export default class WireTool2 extends ToolBase {
 //
 
 export const WireToolTests = {
-	connect() {
+	connectThrough1() {
 		const wireParent = new Instance("ViewportFrame");
 		const newinstance = () => MarkerComponent.createInstance(new Instance("Part"), 0);
 		const newdata = (uuid: string | number) => ({
@@ -603,17 +634,16 @@ export const WireToolTests = {
 		const out1 = new OutputMarkerComponent(newinstance(), {
 			blockData: block2,
 			dataTypes: ["bool"],
-			group: "",
+			group: undefined,
 		});
 
 		WireTool2.groupMarkers([in1, in2, out1]);
 
 		Assert.notNull(in1.sameGroupMarkers);
 		Assert.notNull(in2.sameGroupMarkers);
-		Assert.notNull(out1.sameGroupMarkers);
+		Assert.null(out1.sameGroupMarkers);
 		Assert.sequenceEquals(in1.sameGroupMarkers, [in1, in2]);
 		Assert.sequenceEquals(in2.sameGroupMarkers, [in1, in2]);
-		Assert.sequenceEquals(out1.sameGroupMarkers, [out1]);
 
 		//
 
@@ -625,6 +655,64 @@ export const WireToolTests = {
 
 		Assert.sequenceEquals(in1.availableTypes.get(), ["bool"]);
 		Assert.sequenceEquals(in2.availableTypes.get(), ["bool"]);
+		Assert.sequenceEquals(out1.availableTypes.get(), ["bool"]);
+	},
+	connectThrough2() {
+		const wireParent = new Instance("ViewportFrame");
+		const newinstance = () => MarkerComponent.createInstance(new Instance("Part"), 0);
+		const newdata = (uuid: string | number) => ({
+			uuid: tostring(uuid) as BlockUuid,
+			instance: new Instance("Part"),
+		});
+
+		const block1 = newdata(1);
+		const block2 = newdata(2);
+		const block3 = newdata(3);
+
+		const in1 = new InputMarkerComponent(newinstance(), {
+			blockData: block1,
+			dataTypes: ["bool", "number"],
+			group: "0",
+		});
+		const in2 = new InputMarkerComponent(newinstance(), {
+			blockData: block1,
+			dataTypes: ["bool", "number"],
+			group: "0",
+		});
+		const in3 = new InputMarkerComponent(newinstance(), {
+			blockData: block3,
+			dataTypes: ["bool", "number"],
+			group: "1",
+		});
+		const in4 = new InputMarkerComponent(newinstance(), {
+			blockData: block3,
+			dataTypes: ["bool", "number"],
+			group: "1",
+		});
+
+		const out1 = new OutputMarkerComponent(newinstance(), {
+			blockData: block2,
+			dataTypes: ["bool"],
+			group: undefined,
+		});
+
+		WireTool2.groupMarkers([in1, in2, in3, in4, out1]);
+
+		//
+
+		out1.connect(in3, wireParent);
+		out1.connect(in1, wireParent);
+
+		print(in1.availableTypes.get().join());
+		print(in2.availableTypes.get().join());
+		print(in3.availableTypes.get().join());
+		print(in4.availableTypes.get().join());
+		print(out1.availableTypes.get().join());
+
+		Assert.sequenceEquals(in1.availableTypes.get(), ["bool"]);
+		Assert.sequenceEquals(in2.availableTypes.get(), ["bool"]);
+		Assert.sequenceEquals(in3.availableTypes.get(), ["bool"]);
+		Assert.sequenceEquals(in4.availableTypes.get(), ["bool"]);
 		Assert.sequenceEquals(out1.availableTypes.get(), ["bool"]);
 	},
 } as const;
