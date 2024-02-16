@@ -1,6 +1,5 @@
 import { Workspace } from "@rbxts/services";
 import RemoteEvents from "shared/RemoteEvents";
-import RobloxUnit from "shared/RobloxUnit";
 import Sound from "shared/Sound";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
@@ -62,7 +61,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 		}
 
 		// The strength depends on the material
-		this.multiplier *= math.max(1, RobloxUnit.GetMaterialPhysicalProperties(block.material).Density / 2);
+		this.multiplier *= math.max(1, new PhysicalProperties(this.block.material ?? Enum.Material.Plastic).Density / 2);
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 		this.event.subscribeObservable(

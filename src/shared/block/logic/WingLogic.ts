@@ -1,5 +1,4 @@
 import { RunService, Workspace } from "@rbxts/services";
-import RobloxUnit from "shared/RobloxUnit";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import BlockLogic from "../BlockLogic";
 
@@ -40,7 +39,7 @@ export default class WingLogic extends BlockLogic<Wing> {
 
 		const density = math.max(
 			0.7,
-			RobloxUnit.GetMaterialPhysicalProperties(this.block.material ?? Enum.Material.Plastic).Density / 2,
+			new PhysicalProperties(this.block.material ?? Enum.Material.Plastic).Density / 2,
 		);
 		this.wingSurface.CustomPhysicalProperties = new PhysicalProperties(density, 0.3, 0.5, 1, 1);
 

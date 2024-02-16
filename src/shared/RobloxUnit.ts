@@ -40,12 +40,4 @@ export default class RobloxUnit {
 	static SpringDumping_To_NewtonSecondOnMeter(Dumping: number) {
 		return Dumping / 0.0456;
 	}
-
-	static GetMaterialPhysicalProperties(material: Enum.Material) {
-		const part = new Instance("Part");
-		part.Material = material;
-		const data = part.CurrentPhysicalProperties;
-		part.Destroy();
-		return data;
-	}
 }
