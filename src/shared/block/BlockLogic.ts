@@ -30,7 +30,8 @@ export default class BlockLogic<T extends BlockModel = BlockModel> extends Share
 			func();
 		};
 
-		instance.GetPropertyChangedSignal("Parent").Connect(update);
+		instance.GetPropertyChangedSignal("Parent").Once(update);
+		instance.Destroying.Once(update);
 	}
 
 	protected onDescendantDestroyed(func: () => void) {
