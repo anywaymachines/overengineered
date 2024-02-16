@@ -4,6 +4,7 @@ import RemoteEvents from "shared/RemoteEvents";
 import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
+import GameDefinitions from "shared/data/GameDefinitions";
 import BuildingWrapper from "./BuildingWrapper";
 import PlayerDatabase, { PlayerData } from "./database/PlayerDatabase";
 import SlotDatabase from "./database/SlotDatabase";
@@ -15,7 +16,21 @@ import ServerPlots from "./plots/ServerPlots";
 
 class RemoteHandlers {
 	static loadSlot(this: void, player: Player, index: number): LoadSlotResponse {
-		const blocks = SlotDatabase.instance.getBlocks(player.UserId, index);
+		return RemoteHandlers.loadAdminSlot(player, player.UserId, index);
+	}
+	static loadSlotAsAdmin(this: void, player: Player, userid: number, index: number): LoadSlotResponse {
+		if (!GameDefinitions.isAdmin(player)) {
+			return {
+				success: false,
+				message: "Permission denied",
+			};
+		}
+
+		return RemoteHandlers.loadAdminSlot(player, userid, index);
+	}
+
+	static loadAdminSlot(this: void, player: Player, userid: number, index: number): LoadSlotResponse {
+		const blocks = SlotDatabase.instance.getBlocks(userid, index);
 		if (blocks === undefined || blocks.size() === 0) {
 			return {
 				success: false,
@@ -120,6 +135,7 @@ registerOnRemoteFunction("Building", "UpdateLogicConnectionRequest", BuildingWra
 registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSetting);
 registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
+registerOnRemoteEvent("Admin", "LoadSlot", RemoteHandlers.loadSlotAsAdmin);
 UnreliableRemoteHandler.init();
 
 PlayModeController.init();

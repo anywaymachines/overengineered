@@ -38,5 +38,8 @@ const Remotes = Net.Definitions.Create({
 	Debug: Net.Definitions.Namespace({
 		DisplayLine: Net.Definitions.ServerToClientEvent<[text: string, isClient: boolean, isError: boolean]>(),
 	}),
+	Admin: Net.Definitions.Namespace({
+		LoadSlot: Net.Definitions.ClientToServerEvent<[userid: number, slot: number]>(),
+	}),
 });
 export default Remotes;

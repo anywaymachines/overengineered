@@ -565,7 +565,7 @@ const v11: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 };
 
 // rename ultrasonic to lidar
-const v12: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v11> = {
+const v12: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v11> = {
 	version: 12,
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
@@ -573,6 +573,44 @@ const v12: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 				return {
 					...block,
 					id: "lidarsensor",
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+};
+
+// rotate roundwedgeout to 0, -90, 0
+const v13: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v12> = {
+	version: 13,
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
+			if ((block.id as string) === "roundwedgeout") {
+				return {
+					...block,
+					id: "convexprism" as never,
+					loc: Serializer.CFrameSerializer.serialize(
+						Serializer.CFrameSerializer.deserialize(block.loc).mul(
+							CFrame.fromEulerAnglesXYZ(0, math.rad(-90), 0),
+						),
+					),
+				};
+			}
+			if ((block.id as string) === "roundwedgein") {
+				return {
+					...block,
+					id: "concaveprism" as never,
+					loc: Serializer.CFrameSerializer.serialize(
+						Serializer.CFrameSerializer.deserialize(block.loc).mul(
+							CFrame.fromEulerAnglesXYZ(0, math.rad(-90), 0),
+						),
+					),
 				};
 			}
 
@@ -599,7 +637,7 @@ const v12: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 
 //
 
-const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12] as const;
+const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const getVersion = (version: number) => versions.find((v) => v.version === version);
