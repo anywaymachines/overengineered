@@ -40,15 +40,6 @@ export const SharedBuilding = {
 							customPhysProp.ElasticityWeight ?? currentPhysProp.ElasticityWeight,
 						);
 					}
-					// if (part.CustomPhysicalProperties) {
-					// 	part.CustomPhysicalProperties = new PhysicalProperties(
-					// 		customPhysProp.Density ?? currentPhysProp.Density,
-					// 		customPhysProp.Friction ?? currentPhysProp.Friction,
-					// 		customPhysProp.Elasticity ?? currentPhysProp.Elasticity,
-					// 		customPhysProp.FrictionWeight ?? currentPhysProp.FrictionWeight,
-					// 		customPhysProp.ElasticityWeight ?? currentPhysProp.ElasticityWeight,
-					// 	);
-					// }
 				});
 			}
 
