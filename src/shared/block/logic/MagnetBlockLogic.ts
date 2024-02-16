@@ -6,7 +6,7 @@ import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
 
 export default class MagnetBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.magnet> {
-	private static readonly magnetsMap = new Map<string, MagnetBlockLogic>();
+	private static readonly magnets = new Set<MagnetBlockLogic>();
 	private static readonly partColor1 = Color3.fromRGB(128, 128, 240);
 	private static readonly partColor2 = Color3.fromRGB(240, 128, 128);
 
@@ -16,7 +16,7 @@ export default class MagnetBlockLogic extends ConfigurableBlockLogic<typeof bloc
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.magnet);
 
-		MagnetBlockLogic.magnetsMap.set(this.block.uuid, this);
+		MagnetBlockLogic.magnets.add(this);
 		this.part = this.block.instance.WaitForChild("Part") as BasePart;
 
 		this.event.subscribeObservable(
@@ -32,14 +32,14 @@ export default class MagnetBlockLogic extends ConfigurableBlockLogic<typeof bloc
 			true,
 		);
 
+		//mb do not optimize yet
 		this.event.subscribe(RunService.Heartbeat, () => {
 			const magicNumber = 5;
 			const strength = this.input.strength.get() * magicNumber;
 			if (strength === 0) return;
 			let attractedTo = Vector3.zero;
-			for (const [uuid, someMagnet] of MagnetBlockLogic.magnetsMap) {
-				if (uuid === this.block.uuid) continue;
-				//const distanceBetween = this.instance.GetPivot().Position.sub(someMagnet.instance.GetPivot().Position).Magnitude;
+			for (const someMagnet of MagnetBlockLogic.magnets) {
+				if (someMagnet === this) continue;
 				const calculatedForce: Vector3 = MagnetBlockLogic.calculateForce(this, someMagnet);
 				attractedTo = attractedTo.add(calculatedForce);
 			}
@@ -50,7 +50,7 @@ export default class MagnetBlockLogic extends ConfigurableBlockLogic<typeof bloc
 	}
 
 	destroy() {
-		MagnetBlockLogic.magnetsMap.delete(this.block.uuid);
+		MagnetBlockLogic.magnets.delete(this);
 		super.destroy();
 	}
 
