@@ -359,7 +359,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		{
 			const maxSpdShow = RobloxUnit.getSpeedFromMagnitude(800, "MetersPerSecond");
 
-			init("Speed", "%s m/s", this.infoTemplate(), 0, maxSpdShow, 0.1, (control) => {
+			init("Speed", "%.2f m/s", this.infoTemplate(), 0, maxSpdShow, 0.1, (control) => {
 				if (!LocalPlayerController.rootPart) return;
 
 				const spd = RobloxUnit.getSpeedFromMagnitude(
@@ -376,7 +376,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		{
 			const rockets = machine.getChildren().filter((c) => c instanceof RocketEngineLogic);
 			if (rockets.size() !== 0) {
-				init("Torque", "%d %%", this.infoTemplate(), 0, 100, 1, (control) => {
+				init("Torque", "%.2f %%", this.infoTemplate(), 0, 100, 1, (control) => {
 					const avg: number[] = [];
 					for (const block of machine.getChildren()) {
 						if (!(block instanceof RocketEngineLogic)) continue;
@@ -391,7 +391,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		{
 			const maxAltitude = RobloxUnit.Studs_To_Meters(1500);
-			init("Altitude", "%d m", this.infoTextTemplate(), 0, maxAltitude, 0.1, (control) => {
+			init("Altitude", "%.2f m", this.infoTextTemplate(), 0, maxAltitude, 0.1, (control) => {
 				if (!LocalPlayerController.rootPart) return;
 
 				const alt = RobloxUnit.Studs_To_Meters(LocalPlayerController.rootPart.Position.Y);
@@ -402,7 +402,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 
 		{
-			init("Gravity", "%s m/s²", this.infoTextTemplate(), 0, 55, 0.1, (control) => {
+			init("Gravity", "%.2f m/s²", this.infoTextTemplate(), 0, 55, 0.1, (control) => {
 				const alt = RobloxUnit.Studs_To_Meters(Workspace.Gravity);
 
 				control.text.value.set(alt);
