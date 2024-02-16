@@ -359,7 +359,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		{
 			const maxSpdShow = RobloxUnit.getSpeedFromMagnitude(800, "MetersPerSecond");
 
-			init("Speed", "%.2f m/s", this.infoTemplate(), 0, maxSpdShow, 0.1, (control) => {
+			init("Speed", "%.1f m/s", this.infoTemplate(), 0, maxSpdShow, 0.1, (control) => {
 				if (!LocalPlayerController.rootPart) return;
 
 				const spd = RobloxUnit.getSpeedFromMagnitude(
@@ -405,7 +405,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 
 		{
-			init("Gravity", "%.2f m/s²", this.infoTextTemplate(), 0, 55, 0.1, (control) => {
+			init("Gravity", "%.1f m/s²", this.infoTextTemplate(), 0, 55, 0.1, (control) => {
 				const alt = RobloxUnit.Studs_To_Meters(Workspace.Gravity);
 
 				control.text.value.set(alt);
