@@ -7,7 +7,6 @@ import BuildingMode from "client/modes/build/BuildingMode";
 import { Assert } from "client/test/Assert";
 import ToolBase from "client/tools/ToolBase";
 import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
@@ -85,77 +84,6 @@ const intersectTypes = (types: readonly (readonly DataType[])[]): readonly DataT
 	return result;
 };
 
-class MarkerGroupController {
-	readonly types = new ObservableValue<readonly DataType[]>([]);
-	readonly markers: Set<MarkerComponent>;
-	private readonly connected = new Set<MarkerGroupController>();
-
-	constructor(markers?: Set<MarkerComponent>) {
-		this.markers = markers ?? new Set();
-	}
-
-	static groupMarkers(markers: readonly MarkerComponent[]) {
-		const groupedMarkers = Arrays.groupBy(markers, (m) => m.data.group + " " + m.data.blockData.uuid);
-		for (const marker of markers) {
-			marker.sameGroupMarkers = groupedMarkers.get(marker.data.group + " " + marker.data.blockData.uuid);
-
-			if (marker.sameGroupMarkers) {
-				marker.selfGroup = new MarkerGroupController(new Set(marker.sameGroupMarkers));
-			}
-		}
-	}
-	static connectMarkers(
-		blocks: readonly PlacedBlockData[],
-		markers: ReadonlyMap<string, MarkerComponent>,
-		wireParent: ViewportFrame,
-	) {
-		for (const block of blocks) {
-			for (const [connectionName, connection] of Objects.entries(block.connections)) {
-				const from = markers.get(block.uuid + connectionName) as InputMarkerComponent;
-				const to = markers.get(connection.blockUuid + connection.connectionName) as OutputMarkerComponent;
-
-				this.connect(from, to, wireParent);
-			}
-		}
-	}
-
-	static connect(from: InputMarkerComponent, to: OutputMarkerComponent, wireParent: ViewportFrame) {
-		from.selfGroup ??= new MarkerGroupController();
-		to.selfGroup ??= new MarkerGroupController();
-
-		from.selfGroup.connected.add(to.selfGroup);
-		to.selfGroup.connected.add(from.selfGroup);
-
-		const types = intersectTypes([from.selfGroup.types.get(), to.selfGroup.types.get()]);
-		from.availableTypes.set(types);
-		to.availableTypes.set(types);
-	}
-
-	private calculateTypes(): readonly DataType[] {
-		return intersectTypes(Arrays.mapSet(this.markers, (m) => m.data.dataTypes));
-	}
-
-	add(marker: MarkerComponent) {
-		this.markers.add(marker);
-		marker.group.set(this);
-	}
-	remove(marker: MarkerComponent) {
-		this.markers.delete(marker);
-
-		if (marker instanceof InputMarkerComponent) {
-			marker.group.set(marker.sameGroupMarkers?.[0]?.group.get());
-		} else if (marker instanceof OutputMarkerComponent) {
-			//
-		}
-
-		this.types.set(this.calculateTypes());
-	}
-}
-type MarkerGroup = {
-	readonly types: ObservableValue<DataType[]>;
-	readonly markers: Set<MarkerComponent>;
-};
-
 type MarkerComponentDefinition = BillboardGui & {
 	readonly TextButton: GuiButton & {
 		readonly White: Frame;
@@ -200,7 +128,6 @@ abstract class MarkerComponent extends ClientComponent<MarkerComponentDefinition
 	readonly position;
 	readonly availableTypes;
 	sameGroupMarkers?: readonly MarkerComponent[];
-	selfGroup?: MarkerGroupController;
 
 	constructor(instance: MarkerComponentDefinition, data: MarkerData) {
 		super(instance);
@@ -246,7 +173,7 @@ abstract class MarkerComponent extends ClientComponent<MarkerComponentDefinition
 	abstract widenTypes(): void;
 }
 class InputMarkerComponent extends MarkerComponent {
-	connected?: {
+	private connected?: {
 		readonly marker: OutputMarkerComponent;
 		readonly wire: WireComponent;
 	};
@@ -570,6 +497,13 @@ export default class WireTool2 extends ToolBase {
 		}
 	}
 
+	static groupMarkers(markers: readonly MarkerComponent[]) {
+		const groupedMarkers = Arrays.groupBy(markers, (m) => m.data.group + " " + m.data.blockData.uuid);
+		for (const marker of markers) {
+			marker.sameGroupMarkers = groupedMarkers.get(marker.data.group + " " + marker.data.blockData.uuid);
+		}
+	}
+
 	private createEverything() {
 		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId); // for (const plot of SharedPlots.getAllowedPlots(Players.LocalPlayer)) {
 		for (const block of SharedPlots.getPlotBlockDatas(plot)) {
@@ -599,12 +533,16 @@ export default class WireTool2 extends ToolBase {
 			}
 		}
 
-		MarkerGroupController.groupMarkers(Arrays.map(this.markers.getAll(), (k, v) => v));
-		MarkerGroupController.connectMarkers(
-			SharedPlots.getPlotBlockDatas(plot),
-			this.markers.getAll(),
-			this.wireParent,
-		);
+		WireTool2.groupMarkers(Arrays.map(this.markers.getAll(), (k, v) => v));
+
+		for (const block of SharedPlots.getPlotBlockDatas(plot)) {
+			for (const [connectionName, connection] of Objects.entries(block.connections)) {
+				const from = this.markers.get(block.uuid + connectionName) as InputMarkerComponent;
+				const to = this.markers.get(connection.blockUuid + connection.connectionName) as OutputMarkerComponent;
+
+				to.connect(from, this.wireParent);
+			}
+		}
 		//}
 	}
 
@@ -668,7 +606,7 @@ export const WireToolTests = {
 			group: "",
 		});
 
-		MarkerGroupController.groupMarkers([in1, in2, out1]);
+		WireTool2.groupMarkers([in1, in2, out1]);
 
 		Assert.notNull(in1.sameGroupMarkers);
 		Assert.notNull(in2.sameGroupMarkers);
