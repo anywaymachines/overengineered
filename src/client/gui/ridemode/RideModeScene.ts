@@ -84,14 +84,12 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 	readonly onEnterSettingsMode = new Signal<() => void>();
 	readonly onQuitSettingsMode = new Signal<() => void>();
 
-	private readonly buttonTemplate;
 	private readonly overlayTemplate;
 	private quitSettingsMode?: () => void;
 
 	constructor(gui: RideModeControlsDefinition) {
 		super(gui);
 
-		this.buttonTemplate = Control.asTemplate(this.gui.Button);
 		this.overlayTemplate = Control.asTemplate(this.gui.Overlay);
 
 		this.event.onDisable(() => {

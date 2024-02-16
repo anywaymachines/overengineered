@@ -74,6 +74,7 @@ export class ComponentChildren<T extends IComponent = IComponent> implements IDe
 	}
 
 	clear() {
+		this.onClear.Fire();
 		if (!this.children) return;
 
 		this.clearing = true;
@@ -83,7 +84,6 @@ export class ComponentChildren<T extends IComponent = IComponent> implements IDe
 		}
 
 		this.children.clear();
-		this.onClear.Fire();
 		this.clearing = false;
 	}
 }

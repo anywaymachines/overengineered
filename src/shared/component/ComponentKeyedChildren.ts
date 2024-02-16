@@ -89,6 +89,7 @@ export class ComponentKeyedChildren<TKey extends string, T extends IComponent = 
 	}
 
 	clear() {
+		this.onClear.Fire();
 		if (!this.children) return;
 
 		this.clearing = true;
@@ -98,7 +99,6 @@ export class ComponentKeyedChildren<TKey extends string, T extends IComponent = 
 		}
 
 		this.children.clear();
-		this.onClear.Fire();
 		this.clearing = false;
 	}
 }
