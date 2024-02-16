@@ -23,7 +23,7 @@ export default class SpreadingFireController {
 			return;
 		}
 
-		part.SetAttribute("Burn", true);
+		part.AddTag("Burn");
 
 		// Apply color
 		const rand_rgb = math.random(0, 50);
@@ -47,7 +47,7 @@ export default class SpreadingFireController {
 			const explosion = explosionBase.Clone();
 			explosion.Position = part.Position;
 			explosion.Parent = part;
-			explosion.Hit.Connect((part, distance) => {
+			explosion.Hit.Connect((part, _) => {
 				this.burn(part);
 			});
 		});

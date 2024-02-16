@@ -26,12 +26,7 @@ export type PlacedBlockData<T extends BlockModel = BlockModel> = {
 /** Methods for reading information about a block */
 export default class BlockManager {
 	static isActiveBlockPart(part: Instance): boolean {
-		if (
-			!this.isBlockPart(part) ||
-			part.AssemblyRootPart?.Anchored ||
-			part.Anchored ||
-			part.GetAttribute("Burn") === true
-		)
+		if (!this.isBlockPart(part) || part.AssemblyRootPart?.Anchored || part.Anchored || part.HasTag("Burn"))
 			return false;
 
 		return true;
