@@ -20,6 +20,16 @@ import { PopupTest } from "./control/PopupTest";
 import { TransformTest } from "./control/TransformTest";
 import { WorldPipetteTest } from "./control/WorldPipetteTest";
 
+if (!RunService.IsStudio()) {
+	for (let i = 0; i < 10; i++) {
+		if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
+			break;
+		}
+
+		task.wait(i + 1);
+	}
+}
+
 const autostart = RunService.IsStudio();
 const launch = true && GameDefinitions.isAdmin(Players.LocalPlayer);
 if (!launch) new Signal<() => void>().Wait();
