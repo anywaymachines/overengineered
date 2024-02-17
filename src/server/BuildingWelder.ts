@@ -127,7 +127,10 @@ export default class BuildingWelder {
 				return collider.Parent!.Parent!.FindFirstChild(targetstr) as BasePart;
 			}
 
-			return (collider.Parent!.Parent! as Model).PrimaryPart!;
+			return (
+				(collider.Parent!.Parent! as Model).FindFirstChildWhichIsA("BasePart") ??
+				(collider.Parent!.Parent! as Model).PrimaryPart!
+			);
 		};
 
 		const weldedWith = new Map<BasePart, Set<BasePart>>();
