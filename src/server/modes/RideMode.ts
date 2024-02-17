@@ -1,3 +1,4 @@
+import BuildingWelder from "server/BuildingWelder";
 import SlotDatabase from "server/database/SlotDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
 import ServerPartUtils from "server/plots/ServerPartUtils";
@@ -22,7 +23,7 @@ export default class RideMode implements PlayModeBase {
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 		const blocks = SharedPlots.getPlotBlocks(plot);
 
-		const blocksChildren = blocks.GetChildren() as unknown as readonly Model[];
+		const blocksChildren = blocks.GetChildren(undefined);
 
 		const requiredBlocks = blockList.filter((value) => value.required);
 		for (const block of requiredBlocks) {
@@ -53,6 +54,10 @@ export default class RideMode implements PlayModeBase {
 
 		//const currentMachine = new SharedMachine();
 		//currentMachine.init(SharedPlots.getPlotBlockDatas(plot));
+
+		for (const block of blocksChildren) {
+			BuildingWelder.removeWeldCollisions(block);
+		}
 
 		ServerPartUtils.switchDescendantsAnchor(blocks, false);
 		if (true as boolean) {

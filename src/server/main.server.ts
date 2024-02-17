@@ -5,6 +5,7 @@ import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
 import GameDefinitions from "shared/data/GameDefinitions";
+import BuildingWelder from "./BuildingWelder";
 import BuildingWrapper from "./BuildingWrapper";
 import PlayerDatabase, { PlayerData } from "./database/PlayerDatabase";
 import SlotDatabase from "./database/SlotDatabase";
@@ -143,6 +144,8 @@ registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
 registerOnRemoteEvent("Admin", "LoadSlot", RemoteHandlers.loadSlotAsAdmin);
 registerOnRemoteEvent("Admin", "SendMessage", RemoteHandlers.sendMessageAsAdmin);
 UnreliableRemoteHandler.init();
+
+BuildingWelder.initialize();
 
 PlayModeController.init();
 RemoteEvents.initialize();

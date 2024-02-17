@@ -126,7 +126,7 @@ export default class BuildingWrapper {
 			for (const block of blocks) {
 				BuildingWelder.unweldFromOtherBlocks(block);
 				block.PivotTo(block.GetPivot().add(data.vector));
-				BuildingWelder.weld(block, plot);
+				BuildingWelder.weld(block);
 			}
 		}
 
@@ -285,7 +285,6 @@ export default class BuildingWrapper {
 		model.SetAttribute("id", data.id);
 
 		model.PivotTo(data.location);
-		model.Parent = plot.FindFirstChild("Blocks");
 
 		// Set material & color
 		if (data.config && Objects.keys(data.config).size() !== 0) {
@@ -298,8 +297,10 @@ export default class BuildingWrapper {
 
 		SharedBuilding.paint({ blocks: [model], color: data.color, material: data.material }, true);
 
+		model.Parent = plot.FindFirstChild("Blocks");
+
 		// Weld block
-		const newJoints = BuildingWelder.weld(model, plot);
+		const newJoints = BuildingWelder.weld(model);
 		/*if (newJoints.size() !== 0) {
 			PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
 				if (part.Name.lower() === "colbox") return;

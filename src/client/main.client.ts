@@ -1,4 +1,4 @@
-import { MarketplaceService, ReplicatedStorage, RunService } from "@rbxts/services";
+import { MarketplaceService, Players, ReplicatedStorage, RunService } from "@rbxts/services";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import CharacterController from "client/controller/CharacterController";
 import GameEnvironmentController from "client/controller/GameEnvironmentController";
@@ -12,6 +12,7 @@ import LogControl from "client/gui/static/LogControl";
 import TooltipsControl from "client/gui/static/TooltipsControl";
 import PlayModeController from "client/modes/PlayModeController";
 import RemoteEvents from "shared/RemoteEvents";
+import SharedPlots from "shared/building/SharedPlots";
 import { AdminMessageController } from "./AdminMessageController";
 import { ClientComponentContainer } from "./component/ClientComponentContainer";
 import { rootComponents } from "./test/RootComponents";
@@ -38,6 +39,10 @@ if (RunService.IsStudio()) {
 }
 
 SoundController.initialize();
+
+while (!SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)) {
+	task.wait(0.2);
+}
 
 const root = new ClientComponentContainer();
 rootComponents.push(root);

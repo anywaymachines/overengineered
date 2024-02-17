@@ -1,108 +1,163 @@
-import { Workspace } from "@rbxts/services";
+import { ReplicatedStorage } from "@rbxts/services";
+import { Element } from "shared/Element";
 
 export default class BuildingWelder {
-	static getSides(part: BasePart): readonly (readonly [origin: Vector3, normal: Vector3])[] {
-		const get = (sides: readonly Enum.NormalId[]) => {
-			const ret: (readonly [origin: Vector3, normal: Vector3])[] = [];
-			const size = part.Size;
+	private static readonly weldFolderName = "WeldRegions";
 
-			for (const side of sides) {
-				const diff = Vector3.FromNormalId(side);
+	static removeWeldCollisions(block: BlockModel) {
+		block.FindFirstChild(this.weldFolderName)?.Destroy();
+	}
 
-				const offset = 0.01;
-				const push = (x: number, y: number, z: number) => {
-					ret.push([
-						part.CFrame.PointToWorldSpace(new Vector3(x, y, z).sub(part.Size.div(2))),
-						part.CFrame.PointToWorldSpace(diff.mul(offset + 0.15)).sub(part.Position),
-					] as const);
-				};
-
-				if (diff.X !== 0) {
-					const my = math.min(size.Y / 2, 1);
-					const mz = math.min(size.Z / 2, 1);
-
-					for (let y = my; y < size.Y; y += 2) {
-						for (let z = mz; z < size.Z; z += 2) {
-							push(diff.X > 0 ? size.X - offset : offset, y, z);
-
-							push(diff.X > 0 ? size.X - offset : offset, y + my * 0.9, z + mz * 0.9);
-							push(diff.X > 0 ? size.X - offset : offset, y + my * 0.9, z - mz * 0.9);
-							push(diff.X > 0 ? size.X - offset : offset, y - my * 0.9, z + mz * 0.9);
-							push(diff.X > 0 ? size.X - offset : offset, y - my * 0.9, z - mz * 0.9);
-						}
+	static initialize() {
+		const getBlocks = (parent: Instance): readonly BlockModel[] => {
+			const ret: BlockModel[] = [];
+			for (const child of parent.GetChildren()) {
+				if (child.IsA("Folder")) {
+					for (const block of getBlocks(child)) {
+						ret.push(block);
 					}
-				} else if (diff.Y !== 0) {
-					const mx = math.min(size.X / 2, 1);
-					const mz = math.min(size.Z / 2, 1);
-
-					for (let x = mx; x < size.X; x += 2) {
-						for (let z = mz; z < size.Z; z += 2) {
-							push(x, diff.Y > 0 ? size.Y - offset : offset, z);
-
-							push(x + mx * 0.9, diff.Y > 0 ? size.Y - offset : offset, z + mz * 0.9);
-							push(x + mx * 0.9, diff.Y > 0 ? size.Y - offset : offset, z - mz * 0.9);
-							push(x - mx * 0.9, diff.Y > 0 ? size.Y - offset : offset, z + mz * 0.9);
-							push(x - mx * 0.9, diff.Y > 0 ? size.Y - offset : offset, z - mz * 0.9);
-						}
-					}
-				} else if (diff.Z !== 0) {
-					const mx = math.min(size.X / 2, 1);
-					const my = math.min(size.Y / 2, 1);
-
-					for (let x = mx; x < size.X; x += 2) {
-						for (let y = my; y < size.Y; y += 2) {
-							push(x, y, diff.Z > 0 ? size.Z - offset : offset);
-
-							push(x + mx * 0.9, y + my * 0.9, diff.Z > 0 ? size.Z - offset : offset);
-							push(x + mx * 0.9, y - my * 0.9, diff.Z > 0 ? size.Z - offset : offset);
-							push(x - mx * 0.9, y + my * 0.9, diff.Z > 0 ? size.Z - offset : offset);
-							push(x - mx * 0.9, y - my * 0.9, diff.Z > 0 ? size.Z - offset : offset);
-						}
-					}
+				} else if (child.IsA("Model")) {
+					ret.push(child as BlockModel);
 				}
 			}
 
 			return ret;
 		};
 
-		if (part.IsA("Part")) {
-			if (part.Shape === Enum.PartType.CornerWedge) {
-				return get([Enum.NormalId.Right, Enum.NormalId.Bottom, Enum.NormalId.Front]);
-			} else if (part.Shape === Enum.PartType.Wedge) {
-				return get([Enum.NormalId.Left, Enum.NormalId.Right, Enum.NormalId.Bottom, Enum.NormalId.Back]);
-			}
-		}
-
-		return get([
-			Enum.NormalId.Right,
-			Enum.NormalId.Left,
-
-			Enum.NormalId.Top,
-			Enum.NormalId.Bottom,
-
-			Enum.NormalId.Back,
-			Enum.NormalId.Front,
-		]);
+		BuildingWelder.initPartBlockCollisions(
+			getBlocks(ReplicatedStorage.WaitForChild("Assets").WaitForChild("Placeable")),
+		);
 	}
 
-	static getClosestParts(part: BasePart, plot: PlotModel) {
-		const raycastParams = new RaycastParams();
-		raycastParams.CollisionGroup = "BlockWeld";
+	private static initPartBlockCollisions(blocks: readonly BlockModel[]) {
+		const offset = 0.2;
+		const region = (center: Vector3, size: Vector3) => {
+			return new Region3(center.sub(size.div(2)), center.add(size.div(2)));
+		};
 
-		const ret = new Set<BasePart>();
-		for (const [origin, normal] of this.getSides(part)) {
-			const raycastResult = Workspace.Raycast(origin, normal, raycastParams);
-			if (!raycastResult || !raycastResult.Instance) {
+		const createAutomatic = (block: BlockModel): readonly Region3[] | undefined => {
+			if (
+				(block.GetChildren().size() === 1 && block.PrimaryPart!.IsA("Part")) ||
+				block.GetAttribute("shape") === "cube"
+			) {
+				const part = block.FindFirstChildWhichIsA("Part");
+				if (!part) return;
+
+				if (part.Shape === Enum.PartType.Block) {
+					const blockpos = part.Position;
+					const size = part.Size;
+
+					return [
+						region(
+							blockpos.add(new Vector3(-size.X / 2, 0, 0)),
+							new Vector3(offset, size.Y - offset, size.Z - offset),
+						),
+						region(
+							blockpos.add(new Vector3(size.X / 2, 0, 0)),
+							new Vector3(offset, size.Y - offset, size.Z - offset),
+						),
+
+						region(
+							blockpos.add(new Vector3(0, -size.Y / 2, 0)),
+							new Vector3(size.X - offset, offset, size.Z - offset),
+						),
+						region(
+							blockpos.add(new Vector3(0, size.Y / 2, 0)),
+							new Vector3(size.X - offset, offset, size.Z - offset),
+						),
+
+						region(
+							blockpos.add(new Vector3(0, 0, -size.Z / 2)),
+							new Vector3(size.X - offset, size.Y - offset, offset),
+						),
+						region(
+							blockpos.add(new Vector3(0, 0, size.Z / 2)),
+							new Vector3(size.X - offset, size.Y - offset, offset),
+						),
+					];
+				}
+			}
+		};
+
+		const setColliderProperties = (collider: BasePart) => {
+			collider.Transparency = 1;
+			collider.Material = Enum.Material.Plastic;
+			collider.Anchored = true;
+			collider.Massless = true;
+			collider.CollisionGroup = "BlockCollider";
+			collider.CanCollide = true;
+			collider.CanTouch = false;
+			collider.EnableFluidForces = false;
+		};
+
+		for (const block of blocks) {
+			if (block.FindFirstChild(this.weldFolderName)) {
+				const colliders = block
+					.FindFirstChild(this.weldFolderName)
+					?.GetChildren() as unknown as readonly BasePart[];
+
+				for (const collider of colliders) {
+					setColliderProperties(collider);
+				}
+
 				continue;
 			}
-			if (!raycastResult.Instance.IsDescendantOf(plot)) {
-				continue;
+
+			const regions = createAutomatic(block);
+			if (!regions || regions.size() === 0) continue;
+
+			const collision = Element.create("Folder", { Name: this.weldFolderName });
+			for (const region of regions) {
+				const part = Element.create("Part", { Parent: collision, Size: region.Size });
+				setColliderProperties(part);
+				part.PivotTo(region.CFrame);
 			}
 
-			ret.add(raycastResult.Instance);
+			print(`[BLOCKINIT] Adding ${regions.size()} automatic regions to ${block.Name}`);
+			collision.Parent = block;
+		}
+	}
+
+	static getClosestParts(block: BlockModel): ReadonlyMap<BasePart, ReadonlySet<BasePart>> {
+		if (!block.FindFirstChild(this.weldFolderName)) return new Map();
+
+		const getTarget = (collider: BasePart): BasePart => {
+			const targetstr = collider.GetAttribute("target") as string | undefined;
+			if (targetstr !== undefined) {
+				return collider.Parent!.Parent!.FindFirstChild(targetstr) as BasePart;
+			}
+
+			return (collider.Parent!.Parent! as Model).PrimaryPart!;
+		};
+
+		const weldedWith = new Map<BasePart, Set<BasePart>>();
+		const areWeldedTogether = (
+			part: BasePart,
+			anotherPart: BasePart,
+			allWelds: Map<BasePart, Set<BasePart>>,
+		): boolean => {
+			return (allWelds.get(part)?.has(anotherPart) || allWelds.get(anotherPart)?.has(part)) ?? false;
+		};
+
+		const colliders = block.WaitForChild(this.weldFolderName).GetChildren() as unknown as readonly BasePart[];
+		for (const collider of colliders) {
+			const touchingWith = collider.GetTouchingParts().filter((p) => p.Parent?.Name === this.weldFolderName);
+			if (touchingWith.size() === 0) continue;
+
+			const targetPart = getTarget(collider);
+			if (!weldedWith.has(targetPart)) {
+				weldedWith.set(targetPart, new Set<BasePart>());
+			}
+
+			for (const anotherCollider of touchingWith) {
+				const anotherTargetPart = getTarget(anotherCollider);
+				if (!areWeldedTogether(targetPart, anotherTargetPart, weldedWith)) {
+					weldedWith.get(targetPart)!.add(anotherTargetPart);
+				}
+			}
 		}
 
-		return ret;
+		return weldedWith;
 	}
 
 	static makeJoints(part0: BasePart, part1: BasePart) {
@@ -149,7 +204,6 @@ export default class BuildingWelder {
 		for (let i = 0; i < modelParts.size(); i++) {
 			const modelPart = modelParts[i] as BasePart;
 			const welds = modelPart.GetJoints();
-			print("welds " + welds.join(", "));
 			welds.forEach((element) => {
 				if (element.IsA("Constraint")) {
 					if (
@@ -184,19 +238,17 @@ export default class BuildingWelder {
 		return connected;
 	}
 
-	static weld(model: BlockModel, plot: PlotModel): Set<BasePart> {
+	static weld(model: BlockModel): Set<BasePart> {
 		const newJoints = new Set<BasePart>();
-		const modelParts = model.GetChildren().filter((value) => value.IsA("BasePart") && value.CanCollide);
-		for (let i = 0; i < modelParts.size(); i++) {
-			const modelPart = modelParts[i] as BasePart;
-			const closestParts = this.getClosestParts(modelPart, plot);
+		const closestParts = this.getClosestParts(model);
 
-			for (const closestPart of closestParts) {
-				if (closestPart.IsDescendantOf(model)) continue;
+		for (const [left, rights] of closestParts) {
+			for (const right of rights) {
+				if (right.IsDescendantOf(model)) continue;
 
-				this.makeJoints(modelPart, closestPart);
-				newJoints.add(modelPart);
-				newJoints.add(closestPart);
+				this.makeJoints(left, right);
+				newJoints.add(left);
+				newJoints.add(right);
 			}
 		}
 

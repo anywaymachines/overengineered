@@ -35,6 +35,11 @@ export default class SharedPlots {
 
 	/** Returns the player owned plot, if exists */
 	static tryGetPlotByOwnerID(ownerID: number): PlotModel | undefined {
+		if (this.plots.size() === 0) {
+			(this as { plots: readonly PlotModel[] }).plots =
+				Workspace.Plots.GetChildren() as unknown as readonly PlotModel[];
+		}
+
 		return this.plots.find((plot) => {
 			return this.readPlotData(plot).ownerID === ownerID;
 		});
