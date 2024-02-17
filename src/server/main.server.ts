@@ -29,6 +29,11 @@ class RemoteHandlers {
 		return RemoteHandlers.loadAdminSlot(player, userid, index);
 	}
 
+	static sendMessageAsAdmin(this: void, player: Player, text: string) {
+		if (!GameDefinitions.isAdmin(player)) return;
+		Remotes.Server.GetNamespace("Admin").Get("SendMessage").SendToAllPlayers(text);
+	}
+
 	static loadAdminSlot(this: void, player: Player, userid: number, index: number): LoadSlotResponse {
 		const blocks = SlotDatabase.instance.getBlocks(userid, index);
 		if (blocks === undefined || blocks.size() === 0) {
@@ -136,6 +141,7 @@ registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSettin
 registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
 registerOnRemoteEvent("Admin", "LoadSlot", RemoteHandlers.loadSlotAsAdmin);
+registerOnRemoteEvent("Admin", "SendMessage", RemoteHandlers.sendMessageAsAdmin);
 UnreliableRemoteHandler.init();
 
 PlayModeController.init();

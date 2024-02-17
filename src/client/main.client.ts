@@ -12,6 +12,7 @@ import LogControl from "client/gui/static/LogControl";
 import TooltipsControl from "client/gui/static/TooltipsControl";
 import PlayModeController from "client/modes/PlayModeController";
 import RemoteEvents from "shared/RemoteEvents";
+import { AdminMessageController } from "./AdminMessageController";
 import { ClientComponentContainer } from "./component/ClientComponentContainer";
 import { rootComponents } from "./test/RootComponents";
 
@@ -30,6 +31,7 @@ LocalPlayerController.initialize();
 CharacterController.initialize();
 InputTypeChangeEvent.subscribe();
 RemoteEvents.initialize();
+AdminMessageController.initialize();
 
 if (RunService.IsStudio()) {
 	DebugControl.instance.show();

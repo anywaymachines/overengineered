@@ -1,5 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import { AdminMessageController } from "client/AdminMessageController";
 import InputController from "client/controller/InputController";
 import InputHandler from "client/event/InputHandler";
 import Control from "client/gui/Control";
@@ -165,6 +166,10 @@ const create = () => {
 		wrapNonVisual("Wire Tool", WireToolTests),
 		wrapNonVisual("Logic", LogicTest1),
 		wrapNonVisual("Component", ComponentTests),
+		wrapNonVisual("Global message", {
+			restart: () => AdminMessageController.send("Server restart\nSave your builds"),
+			test: () => AdminMessageController.send("MESSAGE TEST THIS IS A WARNING\nNOT"),
+		}),
 	];
 	for (const [name, content] of tests) {
 		content.hide();

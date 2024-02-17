@@ -40,6 +40,7 @@ const Remotes = Net.Definitions.Create({
 	}),
 	Admin: Net.Definitions.Namespace({
 		LoadSlot: Net.Definitions.ClientToServerEvent<[userid: number, slot: number]>(),
+		SendMessage: Net.Definitions.BidirectionalEvent<[text: string], [text: string]>(),
 	}),
 });
 export default Remotes;
