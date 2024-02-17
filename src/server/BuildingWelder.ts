@@ -121,15 +121,18 @@ export default class BuildingWelder {
 	static getClosestParts(block: BlockModel): ReadonlyMap<BasePart, ReadonlySet<BasePart>> {
 		if (!block.FindFirstChild(this.weldFolderName)) return new Map();
 
-		const getTarget = (collider: BasePart): BasePart => {
+		const getTarget = (collider: BasePart): BasePart | undefined => {
+			let part: BasePart | undefined;
+
 			const targetstr = collider.GetAttribute("target") as string | undefined;
 			if (targetstr !== undefined) {
-				return collider.Parent!.Parent!.FindFirstChild(targetstr) as BasePart;
+				part = collider.Parent!.Parent!.FindFirstChild(targetstr) as BasePart | undefined;
 			}
 
 			return (
+				part ??
 				(collider.Parent!.Parent! as Model).FindFirstChildWhichIsA("BasePart") ??
-				(collider.Parent!.Parent! as Model).PrimaryPart!
+				(collider.Parent!.Parent! as Model).PrimaryPart
 			);
 		};
 
@@ -148,12 +151,16 @@ export default class BuildingWelder {
 			if (touchingWith.size() === 0) continue;
 
 			const targetPart = getTarget(collider);
+			if (!targetPart) continue;
+
 			if (!weldedWith.has(targetPart)) {
 				weldedWith.set(targetPart, new Set<BasePart>());
 			}
 
 			for (const anotherCollider of touchingWith) {
 				const anotherTargetPart = getTarget(anotherCollider);
+				if (!anotherTargetPart) continue;
+
 				if (!areWeldedTogether(targetPart, anotherTargetPart, weldedWith)) {
 					weldedWith.get(targetPart)!.add(anotherTargetPart);
 				}
