@@ -169,35 +169,58 @@ abstract class MarkerComponent extends ClientComponent<MarkerComponentDefinition
 		);
 	}
 
-	narrowDownTypesSelfAndOther(visited: Set<MarkerComponent>): void {
-		visited.add(this);
-		this.narrowDownTypes();
+	narrowDownTypesSelfAndOther(): void {
+		const grouped = this.getFullSameGroupTree();
+		const types = intersectTypes(Arrays.mapSet(grouped, (m) => m.availableTypes.get()));
 
-		if (this.sameGroupMarkers) {
-			for (const other of this.sameGroupMarkers) {
-				if (other === this) continue;
-				if (visited.has(other)) continue;
-
-				other.narrowDownTypesSelfAndOther(visited);
-			}
+		this.availableTypes.set(types);
+		for (const marker of grouped) {
+			marker.availableTypes.set(types);
 		}
 	}
-	widenTypesSelfAndOther(visited: Set<MarkerComponent>): void {
-		visited.add(this);
-		this.widenTypes();
+	widenTypesSelfAndOther(): void {
+		const grouped = this.getFullSameGroupTree();
+		const types = intersectTypes(Arrays.mapSet(grouped, (m) => m.data.dataTypes));
 
-		if (this.sameGroupMarkers) {
-			for (const other of this.sameGroupMarkers) {
-				if (other === this) continue;
-				if (visited.has(other)) continue;
-
-				other.widenTypesSelfAndOther(visited);
-			}
+		this.availableTypes.set(types);
+		for (const marker of grouped) {
+			marker.availableTypes.set(types);
 		}
 	}
 
-	abstract narrowDownTypes(): void;
-	abstract widenTypes(): void;
+	getFullSameGroupTree(): ReadonlySet<MarkerComponent> {
+		const set = new Set<MarkerComponent>();
+		const addd = (marker: MarkerComponent) => {
+			if (set.has(marker)) return;
+			set.add(marker);
+
+			for (const m of marker.getConnected()) {
+				addd(m);
+			}
+
+			if (marker.sameGroupMarkers) {
+				for (const m of marker.sameGroupMarkers) {
+					addd(m);
+				}
+			}
+		};
+		const add = (addset: ReadonlySet<MarkerComponent>) => {
+			for (const marker of addset) {
+				if (set.has(marker)) continue;
+
+				set.add(marker);
+				add(marker.getConnected());
+				if (marker.sameGroupMarkers) {
+					add(new Set(marker.sameGroupMarkers));
+				}
+			}
+		};
+
+		addd(this);
+		return set;
+	}
+
+	abstract getConnected(): ReadonlySet<MarkerComponent>;
 }
 class InputMarkerComponent extends MarkerComponent {
 	private connected?: {
@@ -228,54 +251,16 @@ class InputMarkerComponent extends MarkerComponent {
 		if (!this.connected) return;
 
 		this.updateConnectedVisual(false);
-		this.connected.marker.onDisconnected(this);
 
+		const connected = this.connected.marker;
 		this.connected = undefined;
-		this.widenTypesSelfAndOther(new Set());
+
+		connected.onDisconnected(this);
+		this.widenTypesSelfAndOther();
 	}
 
-	narrowDownTypes(): void {
-		if (!this.connected && (!this.sameGroupMarkers || this.sameGroupMarkers.size() < 2)) {
-			this.availableTypes.set(this.data.dataTypes);
-			return;
-		}
-
-		this.availableTypes.set(
-			intersectTypes([
-				this.availableTypes.get(),
-				this.connected?.marker.availableTypes.get() ?? this.data.dataTypes,
-				...(this.sameGroupMarkers?.map((m) => m.availableTypes.get()) ?? []),
-			]),
-		);
-	}
-	widenTypes(): void {
-		/*if (!this.connected && (!this.sameGroupMarkers || this.sameGroupMarkers.size() < 2)) {
-			this.availableTypes.set(this.data.dataTypes);
-			return;
-		}*/
-
-		this.availableTypes.set(
-			intersectTypes([
-				this.data.dataTypes,
-				this.connected?.marker.data.dataTypes ?? this.data.dataTypes,
-				...(this.sameGroupMarkers?.map((m) => m.data.dataTypes) ?? []),
-			]),
-		);
-	}
-
-	narrowDownTypesSelfAndOther(visited: Set<MarkerComponent>): void {
-		super.narrowDownTypesSelfAndOther(visited);
-
-		if (this.connected && !visited.has(this.connected.marker)) {
-			this.connected.marker.narrowDownTypesSelfAndOther(visited);
-		}
-	}
-	widenTypesSelfAndOther(visited: Set<MarkerComponent>): void {
-		super.widenTypesSelfAndOther(visited);
-
-		if (this.connected && !visited.has(this.connected.marker)) {
-			this.connected.marker.widenTypesSelfAndOther(visited);
-		}
+	getConnected(): ReadonlySet<MarkerComponent> {
+		return new Set(this.connected ? [this.connected.marker] : []);
 	}
 }
 class OutputMarkerComponent extends MarkerComponent {
@@ -292,60 +277,19 @@ class OutputMarkerComponent extends MarkerComponent {
 		const wire = this.add(WireComponent.create(this, marker).with((c) => (c.instance.Parent = wireParent)));
 		this.connected.set(marker, wire);
 		marker.onConnected(this, wire);
-		this.narrowDownTypesSelfAndOther(new Set());
+		this.narrowDownTypesSelfAndOther();
 	}
 	onDisconnected(marker: InputMarkerComponent) {
 		const wire = this.connected.get(marker);
 		if (!wire) return;
 
+		this.connected.delete(marker);
 		this.remove(wire);
-		this.widenTypesSelfAndOther(new Set([marker]));
+		this.widenTypesSelfAndOther();
 	}
 
-	narrowDownTypesSelfAndOther(visited: Set<MarkerComponent>): void {
-		super.narrowDownTypesSelfAndOther(visited);
-
-		for (const [marker] of this.connected) {
-			if (visited.has(marker)) continue;
-			marker.narrowDownTypesSelfAndOther(visited);
-		}
-	}
-	widenTypesSelfAndOther(visited: Set<MarkerComponent>): void {
-		super.widenTypesSelfAndOther(visited);
-
-		for (const [marker] of this.connected) {
-			if (visited.has(marker)) continue;
-			marker.widenTypesSelfAndOther(visited);
-		}
-	}
-
-	narrowDownTypes(): void {
-		if (this.connected.size() === 0 && (!this.sameGroupMarkers || this.sameGroupMarkers.size() < 2)) {
-			this.availableTypes.set(this.data.dataTypes);
-			return;
-		}
-
-		this.availableTypes.set(
-			intersectTypes([
-				this.availableTypes.get(),
-				...Arrays.map(this.connected, (c) => c.availableTypes.get()),
-				...(this.sameGroupMarkers?.map((m) => m.availableTypes.get()) ?? []),
-			]),
-		);
-	}
-	widenTypes(): void {
-		if (this.connected.size() === 0 && (!this.sameGroupMarkers || this.sameGroupMarkers.size() < 2)) {
-			this.availableTypes.set(this.data.dataTypes);
-			return;
-		}
-
-		this.availableTypes.set(
-			intersectTypes([
-				this.data.dataTypes,
-				...Arrays.map(this.connected, (m) => m.data.dataTypes),
-				...(this.sameGroupMarkers?.map((m) => m.data.dataTypes) ?? []),
-			]),
-		);
+	getConnected(): ReadonlySet<MarkerComponent> {
+		return new Set(Arrays.map(this.connected, (k) => k));
 	}
 }
 
