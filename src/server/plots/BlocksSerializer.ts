@@ -626,18 +626,13 @@ const v13: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 
 // rotate innercorner -> innerwedge, rotate
 const v14: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v13> = {
-	version: 13,
+	version: 14,
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
-			if ((block.id as string) === "innercorner") {
+			if ((block.id as string) === "innerwedge") {
 				return {
 					...block,
-					id: "innerwedge" as never,
-					loc: Serializer.CFrameSerializer.serialize(
-						Serializer.CFrameSerializer.deserialize(block.loc).mul(
-							CFrame.fromEulerAnglesXYZ(0, math.rad(-90), 0),
-						),
-					),
+					id: "innercorner" as never,
 				};
 			}
 
