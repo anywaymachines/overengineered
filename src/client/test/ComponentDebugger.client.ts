@@ -1,10 +1,12 @@
+import { Players, RunService, UserInputService } from "@rbxts/services";
+import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
-import InputHandler from "client/event/InputHandler";
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import { Element } from "client/gui/Element";
 import Gui from "client/gui/Gui";
 import { ButtonControl } from "client/gui/controls/Button";
+import GameDefinitions from "shared/data/GameDefinitions";
 import { rootComponents } from "./RootComponents";
 
 type TreeControlDefinition = GuiObject & {
@@ -147,8 +149,14 @@ const toggle = () => {
 	}
 };
 
-const ih = new InputHandler();
-ih.onKeyDown("F6", () => {
+const launch = RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer);
+if (!launch) new Signal<() => void>().Wait();
+task.wait(0.5); // wait for the controls to enable
+
+UserInputService.InputBegan.Connect((input) => {
+	if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
+	if (input.KeyCode !== Enum.KeyCode.F6) return;
 	if (!InputController.isShiftPressed()) return;
+
 	toggle();
 });

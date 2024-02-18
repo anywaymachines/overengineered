@@ -16,6 +16,9 @@ export default class ContainerComponent<TChild extends IComponent = IComponent> 
 	/** Add a child and return it */
 	readonly add = <T extends TChild>(instance: T) => this.children.add(instance);
 
+	/** Add a child and return this */
+	readonly withAdded = (instance: TChild) => this.with((c) => c.add(instance));
+
 	/** Remove and destroy a child */
 	readonly remove = (child: TChild) => this.children.remove(child);
 

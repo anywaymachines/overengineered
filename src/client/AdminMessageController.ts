@@ -1,8 +1,11 @@
 import Remotes from "shared/Remotes";
 import { Colors } from "./gui/Colors";
+import Control from "./gui/Control";
 import { Element } from "./gui/Element";
 import Gui from "./gui/Gui";
 import GuiAnimator from "./gui/GuiAnimator";
+import { TextButtonControl } from "./gui/controls/Button";
+import TextBoxControl from "./gui/controls/TextBoxControl";
 
 Remotes.Client.GetNamespace("Admin")
 	.Get("SendMessage")
@@ -29,5 +32,38 @@ export const AdminMessageController = {
 
 	send(text: string) {
 		Remotes.Client.GetNamespace("Admin").Get("SendMessage").SendToServer(text);
+	},
+
+	createControl: () => {
+		const tb = new TextBoxControl(Element.create("TextBox", { Size: new UDim2(0, 500, 0, 30) }));
+
+		return new Control(
+			Element.create(
+				"Frame",
+				{ Size: new UDim2(1, 0, 1, 0), BackgroundTransparency: 1 },
+				{
+					list: Element.create("UIListLayout", {
+						FillDirection: Enum.FillDirection.Vertical,
+						SortOrder: Enum.SortOrder.LayoutOrder,
+					}),
+				},
+			),
+		)
+			.withAdded(
+				TextButtonControl.create({ Text: "test", Size: new UDim2(0, 100, 0, 30) }, () =>
+					AdminMessageController.send("MESSAGE TEST THIS IS A WARNING\nNOT"),
+				),
+			)
+			.withAdded(
+				TextButtonControl.create({ Text: "restart", Size: new UDim2(0, 100, 0, 30) }, () =>
+					AdminMessageController.send("Server restart\nSave your builds"),
+				),
+			)
+			.withAdded(tb)
+			.withAdded(
+				TextButtonControl.create({ Text: "custom", Size: new UDim2(0, 100, 0, 30) }, () =>
+					AdminMessageController.send(tb.text.get()),
+				),
+			);
 	},
 } as const;

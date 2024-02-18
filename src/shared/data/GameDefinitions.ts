@@ -26,13 +26,20 @@ const GameDefinitions = {
 	MAX_ANGULAR_SPEED: 40,
 
 	isAdmin(player: Player) {
-		let rank = 0;
-		try {
-			rank = player.GetRankInGroup(GameDefinitions.GROUP);
-		} catch {
-			// uh
+		if (player.Name === "i3ymm" || player.Name === "3QAXM" || player.Name === "samlovebutter") return true;
+
+		let err: string | undefined;
+		for (let i = 0; i < 3; i++) {
+			try {
+				return player.GetRankInGroup(GameDefinitions.GROUP) > 250;
+			} catch (error) {
+				// eslint-disable-next-line no-ex-assign
+				error = err;
+				task.wait(1 + i);
+			}
 		}
-		return rank > 250;
+
+		return false;
 	},
 
 	getMaxSlots(player: Player, additional: number) {

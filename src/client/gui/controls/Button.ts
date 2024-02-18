@@ -27,8 +27,8 @@ export type TextButtonDefinition = (GuiButton & { readonly TextLabel: TextLabel 
 export class TextButtonControl<T extends TextButtonDefinition = TextButtonDefinition> extends ButtonControl<T> {
 	public readonly text;
 
-	constructor(gui: T) {
-		super(gui);
+	constructor(gui: T, activated?: () => void) {
+		super(gui, activated);
 
 		const isTextButton = (button: TextButtonDefinition): button is TextButton =>
 			!button.FindFirstChild("TextLabel");
@@ -39,8 +39,8 @@ export class TextButtonControl<T extends TextButtonDefinition = TextButtonDefini
 		);
 	}
 
-	static create(props: ElementProperties<TextButton>) {
+	static create(props: ElementProperties<TextButton>, activated?: () => void) {
 		const gui = Element.create("TextButton", props);
-		return new TextButtonControl(gui);
+		return new TextButtonControl(gui, activated);
 	}
 }

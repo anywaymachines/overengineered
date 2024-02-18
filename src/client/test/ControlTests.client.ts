@@ -1,7 +1,7 @@
-import { Players, RunService } from "@rbxts/services";
+import { Players, RunService, UserInputService } from "@rbxts/services";
+import Signal from "@rbxts/signal";
 import { AdminMessageController } from "client/AdminMessageController";
 import InputController from "client/controller/InputController";
-import InputHandler from "client/event/InputHandler";
 import Control from "client/gui/Control";
 import { Element } from "client/gui/Element";
 import Gui from "client/gui/Gui";
@@ -20,9 +20,8 @@ import { TransformTest } from "./control/TransformTest";
 import { WorldPipetteTest } from "./control/WorldPipetteTest";
 
 const autostart = RunService.IsStudio();
-const launch = true && GameDefinitions.isAdmin(Players.LocalPlayer);
-// if (!launch) new Signal<() => void>().Wait();
-
+const launch = RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer);
+if (!launch) new Signal<() => void>().Wait();
 task.wait(0.5); // wait for the controls to enable
 
 const createElement = Element.create;
@@ -92,18 +91,8 @@ class TestEnvironment extends Control<TestEnvironmentDefinition> {
 //
 
 let destroy: (() => void) | undefined;
-const ih = new InputHandler();
-ih.onKeyDown("F7", () => {
-	if (!InputController.isShiftPressed()) return;
-
-	if (destroy) destroy();
-	else create();
-});
-if (autostart) {
-	spawn(() => create());
-}
-
 const create = () => {
+	print("f");
 	const parent = new SharedComponent(
 		createElement("ScreenGui", { Name: "TestScreenGui", Parent: Gui.getPlayerGui() }),
 	);
@@ -165,10 +154,7 @@ const create = () => {
 		wrapNonVisual("Wire Tool", WireToolTests),
 		wrapNonVisual("Logic", LogicTest1),
 		wrapNonVisual("Component", ComponentTests),
-		wrapNonVisual("Global message", {
-			restart: () => AdminMessageController.send("Server restart\nSave your builds"),
-			test: () => AdminMessageController.send("MESSAGE TEST THIS IS A WARNING\nNOT"),
-		}),
+		["Global message", AdminMessageController.createControl()],
 	];
 	for (const [name, content] of tests) {
 		content.hide();
@@ -181,3 +167,15 @@ const create = () => {
 		parent.destroy();
 	};
 };
+
+UserInputService.InputBegan.Connect((input) => {
+	if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
+	if (input.KeyCode !== Enum.KeyCode.F7) return;
+	if (!InputController.isShiftPressed()) return;
+
+	if (destroy) destroy();
+	else create();
+});
+if (autostart) {
+	spawn(() => create());
+}
