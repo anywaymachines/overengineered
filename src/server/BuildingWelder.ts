@@ -45,7 +45,11 @@ export default class BuildingWelder {
 
 				if (part.Shape === Enum.PartType.Block) {
 					const blockpos = part.Position;
-					const size = part.Size;
+					const size = (
+						block.GetChildren().filter((c) => c.IsA("BasePart")) as unknown as readonly BasePart[]
+					)
+						.map((c) => c.Size)
+						.reduce((acc, val) => (acc.Magnitude > val.Magnitude ? acc : val), Vector3.zero);
 
 					return [
 						region(
