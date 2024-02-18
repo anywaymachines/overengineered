@@ -48,7 +48,13 @@ function readBlock(categoryBlock: BlockModel, categoryName: string) {
 	{
 		const desc = BlockDataRegistry[id];
 		if (desc) {
-			categoryBlock.SetAttribute("info", desc.description);
+			const arr = new Set<string>([".", "!", "?", " "]);
+			let description = desc.description;
+			if (!arr.has(desc.description.sub(desc.description.size()))) {
+				description += ".";
+			}
+
+			categoryBlock.SetAttribute("info", description);
 			categoryBlock.SetAttribute("name", desc.name);
 		}
 	}

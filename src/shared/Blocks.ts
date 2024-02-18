@@ -10,15 +10,15 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	altimeter: {
 		name: "Altimeter",
-		description: "Returns current heigth",
+		description: "Returns current height",
 	},
 	anchorblock: {
 		name: "Anchor",
-		description: "Makes your contraption immovable",
+		description: "An immovable block",
 	},
 	anglesensor: {
 		name: "Angle Sensor",
-		description: "Returns angle it's rotated to",
+		description: "Returns it's angle",
 	},
 	ballinsocket: {
 		name: "Ball in Socket",
@@ -30,11 +30,11 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	concavecornerwedge: {
 		name: "Concave Corner Wedge",
-		description: "A corner wedge but concave",
+		description: "The convex corner wedge, but concave",
 	},
 	concaveprism: {
 		name: "Concave Prism",
-		description: "A prism but concave",
+		description: "The convex prism, but concave",
 	},
 	constant: {
 		name: "Constant",
@@ -42,11 +42,11 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	convexcornerwedge: {
 		name: "Convex Corner Wedge",
-		description: "A corner wedge but convex",
+		description: "The concave corner wedge, but convex",
 	},
 	convexprism: {
 		name: "Convex Prism",
-		description: "A prism but convex",
+		description: "The concave prism, but convex",
 	},
 	cornerwedge1x1: {
 		name: "Corner Wedge 1x1",
@@ -74,7 +74,7 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	cylinder1x2: {
 		name: "Cylinder 1x2",
-		description: "A longer cyllinder",
+		description: "A no-so-simple cyllinder",
 	},
 	cylinder2x1: {
 		name: "Cylinder 2x1",
@@ -90,7 +90,7 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	disconnectblock: {
 		name: "Disconnector",
-		description: "Detaches both parts it connected to",
+		description: "Detaches connected parts on a button press",
 	},
 	driveshaft: {
 		name: "Driveshaft",
@@ -114,7 +114,7 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	heliumblock: {
 		name: "Helium",
-		description: "I have no idea how did they manage to pump helium in this block of soap",
+		description: "I still have no idea how did they manage to pump helium into soap",
 	},
 	hingeblock: {
 		name: "Hinge",
@@ -126,11 +126,11 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	innertetra: {
 		name: "Inner Tetra",
-		description: "We chose this name to make the search of this block more inconvenient",
+		description: "This name was chosen just to make the searching more inconvenient",
 	},
 	keysensor: {
 		name: "Key Sensor",
-		description: "Returns true value when the chosen button is pressed",
+		description: "Returns true when the chosen button is pressed",
 	},
 	lamp: {
 		name: "Lamp",
@@ -146,11 +146,11 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	magnet: {
 		name: "Magnet",
-		description: "A magnet. Attracts to different polarity, detracts from same polarity",
+		description: "A magnet. Attracts to different polarity, repels from same polarity",
 	},
 	motorblock: {
 		name: "Motor",
-		description: "Moves things it's attached to",
+		description: "Rotates attached blocks",
 	},
 	multiplexer: {
 		name: "Multiplexer",
@@ -170,11 +170,11 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	operationbuffer: {
 		name: "Buffer",
-		description: "Returns same value it was given. Useful for logic organization",
+		description: "Returns the same value it was given. Useful for logic organization",
 	},
 	operationclamp: {
 		name: "Clamp",
-		description: "Works as buffer but limits output to max/min.",
+		description: "Limits the output between max and min.",
 	},
 	operationdeg: {
 		name: "Degrees",
@@ -194,7 +194,7 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	operationmod: {
 		name: "Mod",
-		description: "Returns the remainder of the division",
+		description: "Returns the remainder of a division",
 	},
 	operationmul: {
 		name: "Multiplication",
@@ -226,7 +226,7 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	operationsign: {
 		name: "Sign",
-		description: "Returns -1 if input value lesser than zero, 1 if greater than zero and zero if equals zero",
+		description: "Returns -1 if input value is less than zero, 1 if greater than zero and zero if equals zero",
 	},
 	operationsub: {
 		name: "Subtraction",
@@ -250,7 +250,7 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	ownerlocator: {
 		name: "Owner Locator",
-		description: "Maks delete this ####",
+		description: "Maks, delete this ####",
 	},
 	passengerseat: {
 		name: "Passenger Seat",
@@ -262,11 +262,11 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	relay: {
 		name: "Relay",
-		description: "Returns an input value when told to",
+		description: "Returns an input value only when told to",
 	},
 	rocketengine: {
 		name: "Rocket Engine",
-		description: "Engines your rocket to the space and beyond",
+		description: "Engines your rocket into the space and onto the ground",
 	},
 	rope: {
 		name: "Rope",
@@ -274,7 +274,7 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	screen: {
 		name: "Screen",
-		description: "Display your data here for everyone to see!",
+		description: "Display all your data for everyone to see!",
 	},
 	servomotorblock: {
 		name: "Servo",
@@ -286,7 +286,7 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	smallgear: {
 		name: "Small Gear",
-		description: "A cog for your machinery",
+		description: "A cog for your machinery. Does it even work?",
 	},
 	smallrocketengine: {
 		name: "Small Rocket Engine",
@@ -294,7 +294,7 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	smallwheel: {
 		name: "Small Wheel",
-		description: "A wheel. Just a smaller one.",
+		description: "smol whel",
 	},
 	speedometer: {
 		name: "Speedometer",
@@ -302,15 +302,15 @@ export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
 	},
 	stackmemory: {
 		name: "Stack",
-		description: "A queue for your data. Allows to store up to 16 values",
+		description: "Storage for your stacked data. Allows to store up to 32 values",
 	},
 	suspensionblock: {
 		name: "Suspension",
-		description: "A spring",
+		description: "Sus pension spring",
 	},
 	tetrahedron: {
 		name: "Tetrahedron",
-		description: "Damn you Maks, I don't like name you gave these blocks!",
+		description: "MAKS STOP NAMING BLOCKS LIKE THAT",
 	},
 	tetraround: {
 		name: "Tetra Round",
