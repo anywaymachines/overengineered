@@ -1,4 +1,5 @@
 import { Players, RunService } from "@rbxts/services";
+import RobloxUnit from "shared/RobloxUnit";
 import { BlockLogicData } from "shared/block/BlockLogic";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
@@ -21,16 +22,20 @@ export default class OwnerLocatorBlockLogic extends ConfigurableBlockLogic<typeo
 		const playerPart = owner.Character?.FindFirstChild("HumanoidRootPart") as Part | undefined;
 		if (!playerPart) return;
 
-		const v1 = this.block.instance.GetPivot().PointToObjectSpace(playerPart.Position);
-		const v2 = Vector3.zero;
+		const localPosition = this.block.instance.GetPivot().PointToObjectSpace(playerPart.Position);
 
-		const xAngle = math.atan2(v2.Y - v1.Y, v2.Z - v1.Z);
-		const yAngle = math.atan2(v2.Z - v1.Z, v2.X - v1.X);
-		const zAngle = math.atan2(v2.X - v1.X, v2.Y - v1.Y);
+		const xa = Vector3.yAxis.Angle(localPosition, Vector3.xAxis);
+		const ya = Vector3.zAxis.Angle(localPosition, Vector3.yAxis);
+		const za = Vector3.yAxis.Angle(localPosition, Vector3.zAxis);
 
-		this.output.linear.set(v1);
-		this.output.angular.set(
-			new Vector3(math.deg(xAngle + math.pi), math.deg(yAngle + math.pi / 2), math.deg(zAngle + math.pi / 2)),
+		this.output.angular.set(new Vector3(math.deg(xa), math.deg(ya), math.deg(za)));
+
+		this.output.linear.set(
+			new Vector3(
+				RobloxUnit.Studs_To_Meters(localPosition.X),
+				RobloxUnit.Studs_To_Meters(localPosition.Y),
+				RobloxUnit.Studs_To_Meters(localPosition.Z),
+			),
 		);
 	}
 }
