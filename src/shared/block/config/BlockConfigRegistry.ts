@@ -710,6 +710,24 @@ const accelerometer = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const ownerlocator = {
+	input: {},
+	output: {
+		linear: {
+			displayName: "Offset",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+		angular: {
+			displayName: "Angular offset",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const altimeter = {
 	input: {},
 	output: {
@@ -927,6 +945,7 @@ const blockConfigRegistry = {
 	multiplexer,
 	relay,
 
+	ownerlocator,
 	speedometer,
 	anglesensor,
 	keysensor,

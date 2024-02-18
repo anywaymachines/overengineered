@@ -5,7 +5,7 @@ import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 
 export default class AccelerometerBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.accelerometer> {
-	constructor(block: BlockLogicData<typeof blockConfigRegistry.altimeter.input>) {
+	constructor(block: BlockLogicData<typeof blockConfigRegistry.accelerometer.input>) {
 		super(block, blockConfigRegistry.accelerometer);
 		this.event.subscribe(RunService.Heartbeat, () => this.update());
 	}

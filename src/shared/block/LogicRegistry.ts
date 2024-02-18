@@ -47,6 +47,7 @@ import AccelerometerBlockLogic from "./logic/operations/sensors/AccelerometerBlo
 import AltimeterBlockLogic from "./logic/operations/sensors/AltimeterBlockLogic";
 import AngleSensorBlockLogic from "./logic/operations/sensors/AngleSensorBlockLogic";
 import KeySensorBlockLogic from "./logic/operations/sensors/KeySensorBlockLogic";
+import OwnerLocatorBlockLogic from "./logic/operations/sensors/OwnerLocatorBlockLogic";
 import SpeedometerBlockLogic from "./logic/operations/sensors/SpeedometerBlockLogic";
 import LidarSensorBlockLogic from "./logic/operations/sensors/UltrasonicSensorBlockLogic";
 import OperationVec3CombinerBlockLogic from "./logic/operations/vector/OperationVec3CombinerBlockLogic";
@@ -83,6 +84,8 @@ const logicRegistry = {
 	relay: RelayBlockLogic,
 
 	multiplexer: Multiplexer,
+
+	ownerlocator: OwnerLocatorBlockLogic,
 
 	speedometer: SpeedometerBlockLogic,
 	anglesensor: AngleSensorBlockLogic,
