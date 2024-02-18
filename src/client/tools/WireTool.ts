@@ -504,9 +504,7 @@ export default class WireTool extends ToolBase {
 		this.clearTooltips();
 		this.stopDragging();
 
-		for (const plot of SharedPlots.getAllowedPlots(Players.LocalPlayer)) {
-			this.createPlotWires(plot);
-		}
+		this.createPlotWires(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId));
 
 		if (prepare) {
 			this.prepare();
