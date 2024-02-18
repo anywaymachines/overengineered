@@ -24,9 +24,9 @@ export default class OwnerLocatorBlockLogic extends ConfigurableBlockLogic<typeo
 
 		const localPosition = this.block.instance.GetPivot().PointToObjectSpace(playerPart.Position);
 
-		const xa = Vector3.yAxis.Angle(localPosition, Vector3.xAxis);
-		const ya = Vector3.zAxis.Angle(localPosition, Vector3.yAxis);
-		const za = Vector3.yAxis.Angle(localPosition, Vector3.zAxis);
+		const xa = Vector3.yAxis.Angle(localPosition.mul(new Vector3(0, 1, 1)), Vector3.xAxis);
+		const ya = Vector3.zAxis.Angle(localPosition.mul(new Vector3(1, 0, 1)), Vector3.yAxis);
+		const za = Vector3.yAxis.Angle(localPosition.mul(new Vector3(1, 1, 0)), Vector3.zAxis);
 
 		this.output.angular.set(new Vector3(math.deg(xa), math.deg(ya), math.deg(za)));
 
