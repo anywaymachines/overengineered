@@ -30,6 +30,12 @@ export default class OwnerLocatorBlockLogic extends ConfigurableBlockLogic<typeo
 		const yAngle = math.atan2(v2.Z - v1.Z, v2.X - v1.X);
 		const zAngle = math.atan2(v2.X - v1.X, v2.Y - v1.Y);
 
-		this.output.angular.set(new Vector3(math.deg(xAngle), math.deg(yAngle + math.pi), math.deg(zAngle) * -1));
+		this.output.angular.set(
+			new Vector3(
+				math.deg(xAngle) > 180 ? math.deg(xAngle) : math.deg(xAngle) - 180,
+				math.deg(yAngle + math.pi) > 180 ? math.deg(yAngle + math.pi) : math.deg(yAngle + math.pi) - 180,
+				math.deg(zAngle) > 180 ? math.deg(zAngle) : math.deg(zAngle) - 180,
+			),
+		);
 	}
 }
