@@ -1,4 +1,5 @@
 import { ReplicatedStorage } from "@rbxts/services";
+import { BlockDataRegistry } from "./Blocks";
 import Objects from "./fixes/objects";
 
 export type Category = {
@@ -43,6 +44,15 @@ function readCategory(folder: Folder, prev: Categories) {
 
 function readBlock(categoryBlock: BlockModel, categoryName: string) {
 	const id = categoryBlock.Name.lower();
+
+	{
+		const desc = BlockDataRegistry[id];
+		if (desc) {
+			categoryBlock.SetAttribute("info", desc.description);
+			categoryBlock.SetAttribute("name", desc.name);
+		}
+	}
+
 	const name = (categoryBlock.GetAttribute("name") as string | undefined) ?? categoryBlock.Name;
 	const info = (categoryBlock.GetAttribute("info") as string | undefined) ?? "No description";
 	const required = (categoryBlock.GetAttribute("required") as boolean | undefined) ?? false;
@@ -71,3 +81,7 @@ for (const child of placeable) {
 }
 
 (blockList as Block[]).sort((left, right) => left.id < right.id);
+
+// don't delete, useful for something
+// prints all blocks in .json format
+// print(`{ ${blockList.map((b) => `"${b.id}":{"name":"${b.displayName.gsub('"', '\\"')[0]}", "description":"${b.info.gsub('"', '\\"')[0]}"}`).join(",")} }`);
