@@ -1,5 +1,7 @@
+import { Players } from "@rbxts/services";
 import Control from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
+import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
 
 export type MaterialChooserDefinition = GuiObject & {
@@ -14,6 +16,10 @@ export default class MaterialChooser extends Control<MaterialChooserDefinition> 
 
 		for (const instance of this.gui.GetChildren(undefined)) {
 			if (!instance.IsA("ImageButton")) continue;
+			if (instance.Name === "Neon" && !GameDefinitions.isAdmin(Players.LocalPlayer)) {
+				instance.Destroy();
+				continue;
+			}
 
 			const material = Enum.Material.GetEnumItems().find((m) => m.Name === instance.Name);
 			if (!material) throw `Unknown material ${instance.Name}`;

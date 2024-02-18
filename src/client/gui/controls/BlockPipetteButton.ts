@@ -1,9 +1,10 @@
-import { UserInputService } from "@rbxts/services";
+import { Players, UserInputService } from "@rbxts/services";
 import { Colors } from "client/gui/Colors";
 import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
 import HoveredPartHighlighter from "client/tools/selectors/HoveredPartHighlighter";
 import BlockManager from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
+import GameDefinitions from "shared/data/GameDefinitions";
 import EventHandler from "shared/event/EventHandler";
 import SlimFilter from "shared/event/SlimFilter";
 import SlimSignal from "shared/event/SlimSignal";
@@ -75,7 +76,9 @@ export default class BlockPipetteButton extends ButtonControl {
 			return BlockManager.getBlockDataByBlockModel(part).material;
 		};
 		pipette.onSelect.Connect((part) => clicked(getMaterial(part)));
-		pipette.filter.add((part) => BuildingManager.AllowedMaterials.includes(getMaterial(part)));
+		if (!GameDefinitions.isAdmin(Players.LocalPlayer)) {
+			pipette.filter.add((part) => BuildingManager.AllowedMaterials.includes(getMaterial(part)));
+		}
 
 		return pipette;
 	}
