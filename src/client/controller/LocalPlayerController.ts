@@ -64,6 +64,8 @@ export default class LocalPlayerController {
 			);
 			ContextActionService.SetImage("Sprint", "rbxassetid://9555118706");
 			ContextActionService.SetDescription("Sprint", "Allows you to move more quickly");
+			ContextActionService.SetPosition("Sprint", new UDim2(0, 20, 0, 50));
+			ContextActionService.SetTitle("Sprint", "Sprint");
 		}, true);
 	}
 
