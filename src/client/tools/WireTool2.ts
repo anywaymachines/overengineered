@@ -1,5 +1,6 @@
-import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { GamepadService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
+import { ClientComponentBase } from "client/component/ClientComponentBase";
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import { Element } from "client/gui/Element";
@@ -9,6 +10,7 @@ import BuildingMode from "client/modes/build/BuildingMode";
 import { Assert } from "client/test/Assert";
 import ToolBase from "client/tools/ToolBase";
 import Remotes from "shared/Remotes";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
 import SharedPlots from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
@@ -129,8 +131,8 @@ namespace Markers {
 
 			const markerInstance = ReplicatedStorage.Assets.Wires.WireMarker.Clone();
 
+			markerInstance.MaxDistance = 200;
 			markerInstance.Adornee = origin;
-			markerInstance.Parent = Gui.getGameUI();
 			markerInstance.StudsOffsetWorldSpace = origin.CFrame.PointToObjectSpace(
 				origin.CFrame.PointToWorldSpace(offset),
 			);
@@ -143,6 +145,7 @@ namespace Markers {
 		readonly position;
 		readonly availableTypes;
 		sameGroupMarkers?: readonly Marker[];
+		protected pauseColors = false;
 
 		constructor(instance: MarkerComponentDefinition, data: MarkerData) {
 			super(instance);
@@ -162,11 +165,18 @@ namespace Markers {
 		private initTooltips() {
 			const tooltipParent = new ComponentChild<Control<TextLabel>>(this, true);
 			const createTooltip = () => {
-				const control = new Control(ReplicatedStorage.Assets.Wires.WireInfo.TextLabel.Clone());
+				const control = new Control(
+					ReplicatedAssets.get<{ Wires: { WireInfoLabel: TextLabel } }>().Wires.WireInfoLabel.Clone(),
+				);
 				control.getGui().Text = this.data.name;
 				control.getGui().Parent = this.instance;
 				control.getGui().AnchorPoint = new Vector2(0.5, 0.98); // can't set Y to 1 because then it doesn't render
 				control.getGui().Position = new UDim2(0.5, 0, 0, 0);
+				control.getGui().Size = new UDim2(2, 0, 1, 0);
+
+				control.getGui().AnchorPoint = new Vector2(0.5, 0.5); // can't set Y to 1 because then it doesn't render
+				control.getGui().Position = new UDim2(0.5, 0, 0.5, 0);
+				control.getGui().Size = new UDim2(1, 0, 1, 0);
 
 				tooltipParent.set(control);
 			};
@@ -214,7 +224,10 @@ namespace Markers {
 						setcolor(typeGroups[types[0]].color);
 					} else {
 						let i = 0;
-						const func = () => setcolor(typeGroups[types[(i = (i + 1) % types.size())]].color);
+						const func = () => {
+							if (this.pauseColors) return;
+							setcolor(typeGroups[types[(i = (i + 1) % types.size())]].color);
+						};
 
 						looped.set(this, func);
 						loop = () => looped.delete(this);
@@ -327,6 +340,15 @@ namespace Markers {
 
 			this.instance.TextButton.White.Visible = false;
 			this.instance.TextButton.Filled.Visible = false;
+		}
+
+		highlight() {
+			this.pauseColors = true;
+			this.instance.TextButton.BackgroundColor3 = Colors.red;
+		}
+		unhighlight() {
+			this.pauseColors = false;
+			this.instance.TextButton.BackgroundColor3 = typeGroups[this.availableTypes.get()[0]].color;
 		}
 
 		hideWires() {
@@ -507,7 +529,7 @@ namespace Controllers {
 		}
 	};
 
-	export class Desktop extends ComponentBase {
+	export class Desktop extends ClientComponentBase {
 		constructor(markers: readonly Markers.Marker[], wireParent: ViewportFrame) {
 			class WireMover extends ClientComponent<WireComponentDefinition> {
 				readonly marker;
@@ -577,11 +599,23 @@ namespace Controllers {
 		constructor(markers: readonly Markers.Marker[], wireParent: ViewportFrame) {
 			super();
 
-			const component = this.parent(new ComponentBase());
 			let startMarker: Markers.Output | undefined;
-			const get = () => {
-				//
+			const set = (marker: Markers.Output) => {
+				startMarker = marker;
+				marker.highlight();
+				hideNonConnectableMarkers(marker, markers);
 			};
+			const unset = (destroying = false) => {
+				if (startMarker?.isDestroyed()) return;
+				startMarker?.unhighlight();
+				startMarker = undefined;
+
+				if (!destroying) {
+					showAllMarkers(markers);
+				}
+			};
+
+			this.onDisable(() => unset(true));
 
 			for (const marker of markers) {
 				if (marker instanceof Markers.Input) {
@@ -592,34 +626,55 @@ namespace Controllers {
 						}
 
 						connectMarkers(startMarker, marker, wireParent);
-						startMarker = undefined;
-						showAllMarkers(markers);
+						unset();
 					});
 				} else if (marker instanceof Markers.Output) {
 					this.event.subscribe(marker.instance.TextButton.Activated, () => {
-						startMarker = marker;
-						hideNonConnectableMarkers(marker, markers);
+						if (startMarker) unset();
+						else set(marker);
 					});
 				}
 			}
+		}
+	}
+	export class Gamepad extends Desktop {
+		constructor(markers: readonly Markers.Marker[], wireParent: ViewportFrame) {
+			super(markers, wireParent);
+
+			this.event.onKeyDown("ButtonY", () => {
+				if (GamepadService.GamepadCursorEnabled) {
+					GamepadService.DisableGamepadCursor();
+				} else {
+					GamepadService.EnableGamepadCursor(undefined);
+				}
+			});
+
+			this.onDisable(() => GamepadService.DisableGamepadCursor());
 		}
 	}
 }
 
 /** A tool for wiring */
 export default class WireTool2 extends ToolBase {
+	readonly markerParent;
 	readonly wireParent;
 	private readonly markers = this.parent(new ComponentKeyedChildren<string, Markers.Marker>(this, true));
 
 	constructor(mode: BuildingMode) {
 		super(mode);
 
+		this.markerParent = Element.create("ScreenGui", {
+			Name: "WireToolMarkers",
+			ScreenInsets: Enum.ScreenInsets.None,
+			IgnoreGuiInset: true,
+			Parent: Gui.getPlayerGui(),
+		});
 		this.wireParent = Element.create("ViewportFrame", {
 			Name: "WireViewportFrame",
 			Size: UDim2.fromScale(1, 1),
 			CurrentCamera: Workspace.CurrentCamera,
 			Transparency: 1,
-			Parent: Gui.getGameUI(),
+			Parent: this.markerParent,
 			Ambient: Colors.white,
 			LightColor: Colors.white,
 			ZIndex: -1,
@@ -685,6 +740,7 @@ export default class WireTool2 extends ToolBase {
 							? new Markers.Input(markerInstance, data)
 							: new Markers.Output(markerInstance, data);
 
+					marker.instance.Parent = this.markerParent;
 					this.markers.add(block.uuid + key, marker);
 				}
 			}
