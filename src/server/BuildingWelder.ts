@@ -135,7 +135,9 @@ export default class BuildingWelder {
 
 			return (
 				part ??
-				(collider.Parent!.Parent! as Model).FindFirstChildWhichIsA("BasePart") ??
+				((collider.Parent!.Parent! as Model)
+					.GetChildren()
+					.find((c) => c.Name.lower() !== "colbox" && c.IsA("BasePart")) as BasePart | undefined) ??
 				(collider.Parent!.Parent! as Model).PrimaryPart
 			);
 		};
