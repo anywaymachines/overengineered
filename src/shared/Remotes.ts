@@ -1,5 +1,18 @@
 import Net from "@rbxts/net";
 
+declare global {
+	interface LogicConnectRequest {
+		readonly outputBlock: BlockModel;
+		readonly outputConnection: BlockConnectionName;
+		readonly inputBlock: BlockModel;
+		readonly inputConnection: BlockConnectionName;
+	}
+	interface LogicDisconnectRequest {
+		readonly inputBlock: BlockModel;
+		readonly inputConnection: BlockConnectionName;
+	}
+}
+
 const Remotes = Net.Definitions.Create({
 	Player: Net.Definitions.Namespace({
 		InputTypeInfo: Net.Definitions.ClientToServerEvent<[inputType: InputType]>(),
@@ -14,8 +27,13 @@ const Remotes = Net.Definitions.Create({
 		MoveRequest: Net.Definitions.ServerAsyncFunction<(data: PlayerMoveRequest) => Response>(),
 
 		UpdateConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
+
+		/** @deprecated */
 		UpdateLogicConnectionRequest:
 			Net.Definitions.ServerAsyncFunction<(data: UpdateLogicConnectionRequest) => Response>(),
+
+		LogicConnect: Net.Definitions.ServerAsyncFunction<(data: LogicConnectRequest) => Response>(),
+		LogicDisconnect: Net.Definitions.ServerAsyncFunction<(data: LogicDisconnectRequest) => Response>(),
 
 		Delete: Net.Definitions.ServerAsyncFunction<(data: PlayerDeleteBlockRequest) => Response>(),
 		Paint: Net.Definitions.ServerAsyncFunction<(data: PaintRequest) => Response>(),

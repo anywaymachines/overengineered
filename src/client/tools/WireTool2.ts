@@ -1,11 +1,14 @@
 import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { Colors } from "client/gui/Colors";
+import Control from "client/gui/Control";
 import { Element } from "client/gui/Element";
 import Gui from "client/gui/Gui";
+import LogControl from "client/gui/static/LogControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import { Assert } from "client/test/Assert";
 import ToolBase from "client/tools/ToolBase";
+import Remotes from "shared/Remotes";
 import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
 import SharedPlots from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
@@ -49,11 +52,11 @@ const groups = {
 
 type DataType = keyof typeof typeGroups;
 type MarkerData = {
-	//readonly name: string;
-	//readonly id: BlockConnectionName;
+	readonly id: BlockConnectionName;
+	readonly name: string;
 	readonly blockData: {
 		readonly uuid: BlockUuid;
-		readonly instance: PVInstance;
+		readonly instance: BlockModel;
 	};
 	readonly dataTypes: readonly DataType[];
 	readonly group: string | undefined;
@@ -84,217 +87,288 @@ const intersectTypes = (types: readonly (readonly DataType[])[]): readonly DataT
 	return result;
 };
 
-type MarkerComponentDefinition = BillboardGui & {
-	readonly TextButton: GuiButton & {
-		readonly White: Frame;
-		readonly Filled: Frame;
+const looped = new Map<Markers.Marker | WireComponent, () => void>();
+spawn(() => {
+	while (true as boolean) {
+		task.wait(0.5);
+
+		for (const [_, value] of looped) {
+			value();
+		}
+	}
+});
+
+namespace Markers {
+	type MarkerComponentDefinition = BillboardGui & {
+		readonly TextButton: GuiButton & {
+			readonly White: Frame;
+			readonly Filled: Frame;
+		};
 	};
-};
-abstract class MarkerComponent extends ClientComponent<MarkerComponentDefinition> {
-	private static getPartMarkerPositions(part: BasePart): Vector3[] {
-		const averageSize = (part.Size.X + part.Size.Y + part.Size.Z) / 3;
-		const halfSize = averageSize / 2;
-		const offset = 0.25;
+	export abstract class Marker extends ClientComponent<MarkerComponentDefinition> {
+		private static getPartMarkerPositions(part: BasePart): Vector3[] {
+			const averageSize = (part.Size.X + part.Size.Y + part.Size.Z) / 3;
+			const halfSize = averageSize / 2;
+			const offset = 0.25;
 
-		return [
-			new Vector3(-halfSize + offset, 0, 0),
-			new Vector3(halfSize - offset, 0, 0),
-			new Vector3(0, 0, -halfSize + offset),
-			new Vector3(0, 0, halfSize - offset),
-			new Vector3(0, -halfSize + offset, 0),
-			new Vector3(0, halfSize - offset, 0),
-			new Vector3(0, 0, 0),
-		];
-	}
-
-	static createInstance(origin: BasePart, offset: Vector3 | number): MarkerComponentDefinition {
-		if (typeIs(offset, "number")) {
-			offset = this.getPartMarkerPositions(origin)[offset];
+			return [
+				new Vector3(-halfSize + offset, 0, 0),
+				new Vector3(halfSize - offset, 0, 0),
+				new Vector3(0, 0, -halfSize + offset),
+				new Vector3(0, 0, halfSize - offset),
+				new Vector3(0, -halfSize + offset, 0),
+				new Vector3(0, halfSize - offset, 0),
+				new Vector3(0, 0, 0),
+			];
 		}
 
-		const markerInstance = ReplicatedStorage.Assets.Wires.WireMarker.Clone();
-
-		markerInstance.Adornee = origin;
-		markerInstance.Parent = Gui.getGameUI();
-		markerInstance.StudsOffsetWorldSpace = origin.CFrame.PointToObjectSpace(
-			origin.CFrame.PointToWorldSpace(offset),
-		);
-
-		return markerInstance;
-	}
-
-	readonly instance;
-	readonly data;
-	readonly position;
-	readonly availableTypes;
-	sameGroupMarkers?: readonly MarkerComponent[];
-
-	constructor(instance: MarkerComponentDefinition, data: MarkerData) {
-		super(instance);
-
-		this.instance = instance;
-		this.data = data;
-		this.position = data.blockData.instance.GetPivot().PointToWorldSpace(instance.StudsOffsetWorldSpace);
-		this.availableTypes = new ObservableValue<readonly DataType[]>(data.dataTypes);
-
-		this.onPrepare((inputType) => {
-			if (inputType === "Gamepad") {
-				this.instance.Size = new UDim2(
-					this.instance.Size.X.Scale * 1.5,
-					this.instance.Size.X.Offset * 1.5,
-					this.instance.Size.Y.Scale * 1.5,
-					this.instance.Size.Y.Offset * 1.5,
-				);
+		static createInstance(origin: BasePart, offset: Vector3 | number): MarkerComponentDefinition {
+			if (typeIs(offset, "number")) {
+				offset = this.getPartMarkerPositions(origin)[offset];
 			}
-		});
 
-		let loop: (() => void) | undefined;
-		this.event.subscribeObservable2(
-			this.availableTypes,
-			(types) => {
-				loop?.();
+			const markerInstance = ReplicatedStorage.Assets.Wires.WireMarker.Clone();
 
-				if (types.size() === 0) {
-					this.instance.TextButton.BackgroundColor3 = this.instance.TextButton.Filled.BackgroundColor3 =
-						typeGroups[types[0]].color;
-				} else {
-					let i = 0;
-					loop = this.event.loop(1, () => {
-						this.instance.TextButton.BackgroundColor3 = this.instance.TextButton.Filled.BackgroundColor3 =
-							typeGroups[types[(i = (i + 1) % types.size())]].color;
-					});
+			markerInstance.Adornee = origin;
+			markerInstance.Parent = Gui.getGameUI();
+			markerInstance.StudsOffsetWorldSpace = origin.CFrame.PointToObjectSpace(
+				origin.CFrame.PointToWorldSpace(offset),
+			);
+
+			return markerInstance;
+		}
+
+		readonly instance;
+		readonly data;
+		readonly position;
+		readonly availableTypes;
+		sameGroupMarkers?: readonly Marker[];
+
+		constructor(instance: MarkerComponentDefinition, data: MarkerData) {
+			super(instance);
+
+			this.onEnable(() => (this.instance.Enabled = true));
+			this.onDisable(() => (this.instance.Enabled = false));
+
+			this.instance = instance;
+			this.data = data;
+			this.position = data.blockData.instance.GetPivot().PointToWorldSpace(instance.StudsOffsetWorldSpace);
+			this.availableTypes = new ObservableValue<readonly DataType[]>(data.dataTypes);
+
+			this.initTooltips();
+			this.initColors();
+		}
+
+		private initTooltips() {
+			const tooltipParent = new ComponentChild<Control<TextLabel>>(this, true);
+			const createTooltip = () => {
+				const control = new Control(ReplicatedStorage.Assets.Wires.WireInfo.TextLabel.Clone());
+				control.getGui().Text = this.data.name;
+				control.getGui().Parent = this.instance;
+				control.getGui().AnchorPoint = new Vector2(0.5, 0.98); // can't set Y to 1 because then it doesn't render
+				control.getGui().Position = new UDim2(0.5, 0, 0, 0);
+
+				tooltipParent.set(control);
+			};
+			const removeTooltip = () => tooltipParent.clear();
+
+			this.onPrepare((inputType) => {
+				if (inputType === "Desktop") {
+					this.eventHandler.subscribe(this.instance.TextButton.MouseEnter, createTooltip);
+					this.eventHandler.subscribe(this.instance.TextButton.MouseLeave, removeTooltip);
+				} else if (inputType === "Touch") {
+					createTooltip();
+				} else if (inputType === "Gamepad") {
+					// TODO:::
 				}
-			},
-			true,
-		);
-	}
 
-	narrowDownTypesSelfAndOther(): void {
-		const grouped = this.getFullSameGroupTree();
-		const types = intersectTypes(Arrays.mapSet(grouped, (m) => m.availableTypes.get()));
-
-		this.availableTypes.set(types);
-		for (const marker of grouped) {
-			marker.availableTypes.set(types);
+				if (inputType === "Gamepad") {
+					this.instance.Size = new UDim2(
+						this.instance.Size.X.Scale * 1.5,
+						this.instance.Size.X.Offset * 1.5,
+						this.instance.Size.Y.Scale * 1.5,
+						this.instance.Size.Y.Offset * 1.5,
+					);
+				}
+			});
 		}
-	}
-	widenTypesSelfAndOther(): void {
-		const grouped = this.getFullSameGroupTree();
-		const types = intersectTypes(Arrays.mapSet(grouped, (m) => m.data.dataTypes));
+		private initColors() {
+			let loop: (() => void) | undefined;
+			this.event.subscribeObservable2(
+				this.availableTypes,
+				(types) => {
+					loop?.();
+					const setcolor = (color: Color3) => {
+						this.instance.TextButton.BackgroundColor3 = color;
+						this.instance.TextButton.Filled.BackgroundColor3 = color;
 
-		this.availableTypes.set(types);
-		for (const marker of grouped) {
-			marker.availableTypes.set(types);
+						/*
+					const nametext = nameParent.get();
+					if (nametext) {
+						nametext.getGui().TextColor3 = color;
+					}
+					*/
+					};
+
+					if (types.size() === 1) {
+						setcolor(typeGroups[types[0]].color);
+					} else {
+						let i = 0;
+						const func = () => setcolor(typeGroups[types[(i = (i + 1) % types.size())]].color);
+
+						looped.set(this, func);
+						loop = () => looped.delete(this);
+					}
+				},
+				true,
+			);
 		}
-	}
 
-	getFullSameGroupTree(): ReadonlySet<MarkerComponent> {
-		const set = new Set<MarkerComponent>();
-		const addd = (marker: MarkerComponent) => {
-			if (set.has(marker)) return;
-			set.add(marker);
+		narrowDownTypesSelfAndOther(): void {
+			const grouped = this.getFullSameGroupTree();
+			const types = intersectTypes(Arrays.mapSet(grouped, (m) => m.availableTypes.get()));
 
-			for (const m of marker.getConnected()) {
-				addd(m);
+			this.availableTypes.set(types);
+			for (const marker of grouped) {
+				marker.availableTypes.set(types);
 			}
+		}
+		widenTypesSelfAndOther(): void {
+			const grouped = this.getFullSameGroupTree();
+			const types = intersectTypes(Arrays.mapSet(grouped, (m) => m.data.dataTypes));
 
-			if (marker.sameGroupMarkers) {
-				for (const m of marker.sameGroupMarkers) {
+			this.availableTypes.set(types);
+			for (const marker of grouped) {
+				marker.availableTypes.set(types);
+			}
+		}
+
+		getFullSameGroupTree(): ReadonlySet<Marker> {
+			const set = new Set<Marker>();
+			const addd = (marker: Marker) => {
+				if (set.has(marker)) return;
+				set.add(marker);
+
+				for (const m of marker.getConnected()) {
 					addd(m);
 				}
-			}
-		};
-		const add = (addset: ReadonlySet<MarkerComponent>) => {
-			for (const marker of addset) {
-				if (set.has(marker)) continue;
 
-				set.add(marker);
-				add(marker.getConnected());
 				if (marker.sameGroupMarkers) {
-					add(new Set(marker.sameGroupMarkers));
+					for (const m of marker.sameGroupMarkers) {
+						addd(m);
+					}
+				}
+			};
+			const add = (addset: ReadonlySet<Marker>) => {
+				for (const marker of addset) {
+					if (set.has(marker)) continue;
+
+					set.add(marker);
+					add(marker.getConnected());
+					if (marker.sameGroupMarkers) {
+						add(new Set(marker.sameGroupMarkers));
+					}
+				}
+			};
+
+			addd(this);
+			return set;
+		}
+
+		abstract getConnected(): ReadonlySet<Marker>;
+	}
+
+	export class Input extends Marker {
+		private connected?: {
+			readonly marker: Output;
+			readonly wire: WireComponent;
+		};
+
+		constructor(gui: MarkerComponentDefinition, data: MarkerData) {
+			super(gui, data);
+
+			this.instance.TextButton.White.Visible = true;
+			this.updateConnectedVisual(false);
+		}
+
+		private updateConnectedVisual(connected: boolean) {
+			this.instance.TextButton.Filled.Visible = connected;
+		}
+
+		isConnected() {
+			return this.connected !== undefined;
+		}
+
+		onConnected(marker: Output, wire: WireComponent) {
+			this.connected = { marker, wire };
+			this.updateConnectedVisual(true);
+		}
+		disconnect() {
+			if (!this.connected) return;
+
+			this.updateConnectedVisual(false);
+
+			const connected = this.connected.marker;
+			this.connected = undefined;
+
+			connected.onDisconnected(this);
+			this.widenTypesSelfAndOther();
+		}
+
+		getConnected(): ReadonlySet<Marker> {
+			return new Set(this.connected ? [this.connected.marker] : []);
+		}
+	}
+	export class Output extends Marker {
+		private readonly connected = new Map<Marker, WireComponent>();
+
+		constructor(gui: MarkerComponentDefinition, data: MarkerData) {
+			super(gui, data);
+
+			this.instance.TextButton.White.Visible = false;
+			this.instance.TextButton.Filled.Visible = false;
+		}
+
+		hideWires() {
+			for (const child of this.children.getAll()) {
+				child.disable();
+			}
+		}
+		enable() {
+			// show hidden wires
+			if (this.isEnabled()) {
+				for (const child of this.children.getAll()) {
+					child.enable();
 				}
 			}
-		};
 
-		addd(this);
-		return set;
-	}
+			super.enable();
+		}
 
-	abstract getConnected(): ReadonlySet<MarkerComponent>;
-}
-class InputMarkerComponent extends MarkerComponent {
-	private connected?: {
-		readonly marker: OutputMarkerComponent;
-		readonly wire: WireComponent;
-	};
+		connect(marker: Input, wireParent: ViewportFrame) {
+			const wire = this.add(WireComponent.create(this, marker).with((c) => (c.instance.Parent = wireParent)));
+			this.connected.set(marker, wire);
+			marker.onConnected(this, wire);
+			this.narrowDownTypesSelfAndOther();
+		}
+		onDisconnected(marker: Input) {
+			const wire = this.connected.get(marker);
+			if (!wire) return;
 
-	constructor(gui: MarkerComponentDefinition, data: MarkerData) {
-		super(gui, data);
+			this.connected.delete(marker);
+			this.remove(wire);
+			this.widenTypesSelfAndOther();
+		}
 
-		this.instance.TextButton.White.Visible = true;
-		this.updateConnectedVisual(false);
-	}
-
-	private updateConnectedVisual(connected: boolean) {
-		this.instance.TextButton.Filled.Visible = connected;
-	}
-
-	isConnected() {
-		return this.connected !== undefined;
-	}
-
-	onConnected(marker: OutputMarkerComponent, wire: WireComponent) {
-		this.connected = { marker, wire };
-		this.updateConnectedVisual(true);
-	}
-	disconnect() {
-		if (!this.connected) return;
-
-		this.updateConnectedVisual(false);
-
-		const connected = this.connected.marker;
-		this.connected = undefined;
-
-		connected.onDisconnected(this);
-		this.widenTypesSelfAndOther();
-	}
-
-	getConnected(): ReadonlySet<MarkerComponent> {
-		return new Set(this.connected ? [this.connected.marker] : []);
-	}
-}
-class OutputMarkerComponent extends MarkerComponent {
-	private readonly connected = new Map<MarkerComponent, WireComponent>();
-
-	constructor(gui: MarkerComponentDefinition, data: MarkerData) {
-		super(gui, data);
-
-		this.instance.TextButton.White.Visible = false;
-		this.instance.TextButton.Filled.Visible = false;
-	}
-
-	connect(marker: InputMarkerComponent, wireParent: ViewportFrame) {
-		const wire = this.add(WireComponent.create(this, marker).with((c) => (c.instance.Parent = wireParent)));
-		this.connected.set(marker, wire);
-		marker.onConnected(this, wire);
-		this.narrowDownTypesSelfAndOther();
-	}
-	onDisconnected(marker: InputMarkerComponent) {
-		const wire = this.connected.get(marker);
-		if (!wire) return;
-
-		this.connected.delete(marker);
-		this.remove(wire);
-		this.widenTypesSelfAndOther();
-	}
-
-	getConnected(): ReadonlySet<MarkerComponent> {
-		return new Set(Arrays.map(this.connected, (k) => k));
+		getConnected(): ReadonlySet<Marker> {
+			return new Set(Arrays.map(this.connected, (k) => k));
+		}
 	}
 }
 
 type WireComponentDefinition = Part;
 class WireComponent extends ClientComponent<WireComponentDefinition> {
+	private static readonly visibleTransparency = 0.4;
 	static createInstance(): WireComponentDefinition {
 		return Element.create("Part", {
 			Anchored: true,
@@ -304,48 +378,55 @@ class WireComponent extends ClientComponent<WireComponentDefinition> {
 			CastShadow: false,
 
 			Material: Enum.Material.Neon,
-			Transparency: 0.4,
+			Transparency: this.visibleTransparency,
 			Shape: Enum.PartType.Cylinder,
 		});
 	}
-	static create(from: OutputMarkerComponent, to: InputMarkerComponent): WireComponent {
+	static create(from: Markers.Output, to: Markers.Input): WireComponent {
 		return new WireComponent(this.createInstance(), from, to);
 	}
 
-	private readonly types = new ObservableValue<readonly DataType[]>(["bool"]);
+	private readonly types;
 
-	readonly from: OutputMarkerComponent;
-	readonly to: InputMarkerComponent;
+	readonly from: Markers.Output;
+	readonly to: Markers.Input;
 
-	constructor(instance: WireComponentDefinition, from: OutputMarkerComponent, to: InputMarkerComponent) {
+	constructor(instance: WireComponentDefinition, from: Markers.Output, to: Markers.Input) {
 		super(instance);
 		this.from = from;
 		this.to = to;
+		this.types = new ObservableValue(from.availableTypes.get());
+
+		this.onEnable(() => (this.instance.Transparency = WireComponent.visibleTransparency));
+		this.onDisable(() => (this.instance.Transparency = 1));
 
 		let loop: (() => void) | undefined;
 		this.event.subscribeObservable(
 			this.types,
 			(types) => {
 				loop?.();
+				const setcolor = (color: Color3) => (this.instance.Color = color);
 
-				let i = 0;
-				loop = this.event.loop(1, () => {
-					this.instance.Color =
-						typeGroups[types[(i = (i + 1) % (types.size() === 0 ? 1 : types.size()))]]?.color ?? Colors.red;
-				});
+				if (types.size() === 1) {
+					setcolor(typeGroups[types[0]].color);
+				} else {
+					let i = 0;
+					const func = () =>
+						setcolor(
+							typeGroups[types[(i = (i + 1) % (types.size() === 0 ? 1 : types.size()))]]?.color ??
+								Colors.red,
+						);
+
+					looped.set(this, func);
+					loop = () => looped.delete(this);
+				}
 			},
 			true,
 		);
-		this.event.subscribeObservable(
-			from.availableTypes,
-			() => this.types.set(intersectTypes([from.availableTypes.get(), to.availableTypes.get()])),
-			true,
-		);
-		this.event.subscribeObservable(
-			to.availableTypes,
-			() => this.types.set(intersectTypes([from.availableTypes.get(), to.availableTypes.get()])),
-			true,
-		);
+
+		// markers share the availableTypes anyways so there's no need to intersect them
+		this.event.subscribeObservable2(from.availableTypes, () => this.types.set(from.availableTypes.get()), true);
+		this.event.subscribeObservable2(to.availableTypes, () => this.types.set(to.availableTypes.get()), true);
 
 		WireComponent.staticSetPosition(this.instance, from.position, to.position);
 	}
@@ -358,80 +439,168 @@ class WireComponent extends ClientComponent<WireComponentDefinition> {
 	}
 }
 
-const canConnect = (output: OutputMarkerComponent, input: InputMarkerComponent): boolean => {
-	const isNotConnected = (input: InputMarkerComponent): boolean => {
+const canConnect = (output: Markers.Output, input: Markers.Input): boolean => {
+	const isNotConnected = (input: Markers.Input): boolean => {
 		return !input.isConnected();
 	};
-	const areSameType = (output: OutputMarkerComponent, input: InputMarkerComponent): boolean => {
+	const areSameType = (output: Markers.Output, input: Markers.Input): boolean => {
 		const intypes = input.availableTypes.get();
 		const outtypes = output.availableTypes.get();
 
 		return (
-			outtypes.filter((t) => intypes.includes(t)) !== undefined &&
-			intypes.filter((t) => outtypes.includes(t)) !== undefined
+			outtypes.find((t) => intypes.includes(t)) !== undefined &&
+			intypes.find((t) => outtypes.includes(t)) !== undefined
 		);
 	};
 
 	return isNotConnected(input) && areSameType(output, input);
 };
 
-class WireToolDesktopController extends ComponentBase {
-	constructor(markers: readonly MarkerComponent[], wireParent: ViewportFrame) {
-		class WireMover extends ClientComponent<WireComponentDefinition> {
-			readonly marker;
+namespace Controllers {
+	const connectMarkers = (from: Markers.Output, to: Markers.Input, wireParent: ViewportFrame) => {
+		from.connect(to, wireParent);
 
-			constructor(instance: WireComponentDefinition, marker: OutputMarkerComponent) {
-				super(instance);
-				this.marker = marker;
+		spawn(async () => {
+			const result = await Remotes.Client.GetNamespace("Building").Get("LogicConnect").CallServerAsync({
+				inputBlock: to.data.blockData.instance,
+				inputConnection: to.data.id,
+				outputBlock: from.data.blockData.instance,
+				outputConnection: from.data.id,
+			});
 
-				this.event.subscribe(RunService.Heartbeat, () => {
-					const endPosition =
-						hoverMarker !== undefined ? hoverMarker.position : Players.LocalPlayer.GetMouse().Hit.Position;
+			if (!result.success) {
+				LogControl.instance.addLine(result.message, Colors.red);
+			}
+		});
+	};
+	const disconnectMarker = (marker: Markers.Input) => {
+		marker.disconnect();
 
-					WireComponent.staticSetPosition(instance, marker.position, endPosition);
-				});
-				this.event.subInput((ih) =>
-					ih.onMouse1Up(() => {
-						if (hoverMarker) {
-							this.marker.connect(hoverMarker, wireParent);
-						}
+		spawn(async () => {
+			const result = await Remotes.Client.GetNamespace("Building").Get("LogicDisconnect").CallServerAsync({
+				inputBlock: marker.data.blockData.instance,
+				inputConnection: marker.data.id,
+			});
 
-						this.destroy();
-					}),
-				);
+			if (!result.success) {
+				LogControl.instance.addLine(result.message, Colors.red);
+			}
+		});
+	};
+	const hideNonConnectableMarkers = (from: Markers.Output, markers: readonly Markers.Marker[]) => {
+		for (const marker of markers) {
+			if (marker === from) {
+				if (marker instanceof Markers.Output) {
+					marker.hideWires();
+				}
+
+				continue;
+			}
+			if (marker instanceof Markers.Output || (marker instanceof Markers.Input && !canConnect(from, marker))) {
+				marker.disable();
 			}
 		}
-
-		super();
-
-		const currentMoverContainer = new ComponentChild<WireMover>(this);
-		let hoverMarker: InputMarkerComponent | undefined;
-
+	};
+	const showAllMarkers = (markers: readonly Markers.Marker[]) => {
 		for (const marker of markers) {
-			if (marker instanceof InputMarkerComponent) {
-				this.event.subscribe(marker.instance.TextButton.Activated, () => {
-					marker.disconnect();
-				});
+			marker.enable();
+		}
+	};
 
-				this.event.subscribe(marker.instance.TextButton.MouseEnter, () => {
-					const currentMove = currentMoverContainer.get();
-					if (!currentMove) return;
-					if (!canConnect(currentMove.marker, marker)) return;
+	export class Desktop extends ComponentBase {
+		constructor(markers: readonly Markers.Marker[], wireParent: ViewportFrame) {
+			class WireMover extends ClientComponent<WireComponentDefinition> {
+				readonly marker;
 
-					hoverMarker = marker;
-				});
-				this.event.subscribe(marker.instance.TextButton.MouseLeave, () => {
-					if (hoverMarker !== marker) return;
-					hoverMarker = undefined;
-				});
-			} else if (marker instanceof OutputMarkerComponent) {
-				this.event.subscribe(marker.instance.TextButton.MouseButton1Down, () => {
-					if (currentMoverContainer.get()) return;
+				constructor(instance: WireComponentDefinition, marker: Markers.Output) {
+					super(instance);
+					this.marker = marker;
 
-					const wire = WireComponent.createInstance();
-					wire.Parent = wireParent;
-					currentMoverContainer.set(new WireMover(wire, marker));
-				});
+					hideNonConnectableMarkers(marker, markers);
+					this.onDestroy(() => showAllMarkers(markers));
+
+					this.event.subscribe(RunService.Heartbeat, () => {
+						const endPosition =
+							hoverMarker !== undefined
+								? hoverMarker.position
+								: Players.LocalPlayer.GetMouse().Hit.Position;
+
+						WireComponent.staticSetPosition(instance, marker.position, endPosition);
+					});
+					this.event.subInput((ih) =>
+						ih.onMouse1Up(() => {
+							if (hoverMarker) {
+								connectMarkers(this.marker, hoverMarker, wireParent);
+							}
+
+							this.destroy();
+						}),
+					);
+				}
+			}
+
+			super();
+
+			const currentMoverContainer = new ComponentChild<WireMover>(this);
+			let hoverMarker: Markers.Input | undefined;
+
+			for (const marker of markers) {
+				if (marker instanceof Markers.Input) {
+					this.event.subscribe(marker.instance.TextButton.Activated, () => {
+						disconnectMarker(marker);
+					});
+
+					this.event.subscribe(marker.instance.TextButton.MouseEnter, () => {
+						const currentMove = currentMoverContainer.get();
+						if (!currentMove) return;
+						if (!canConnect(currentMove.marker, marker)) return;
+
+						hoverMarker = marker;
+					});
+					this.event.subscribe(marker.instance.TextButton.MouseLeave, () => {
+						if (hoverMarker !== marker) return;
+						hoverMarker = undefined;
+					});
+				} else if (marker instanceof Markers.Output) {
+					this.event.subscribe(marker.instance.TextButton.MouseButton1Down, () => {
+						if (currentMoverContainer.get()) return;
+
+						const wire = WireComponent.createInstance();
+						wire.Parent = wireParent;
+						currentMoverContainer.set(new WireMover(wire, marker));
+					});
+				}
+			}
+		}
+	}
+	export class Touch extends ComponentBase {
+		constructor(markers: readonly Markers.Marker[], wireParent: ViewportFrame) {
+			super();
+
+			const component = this.parent(new ComponentBase());
+			let startMarker: Markers.Output | undefined;
+			const get = () => {
+				//
+			};
+
+			for (const marker of markers) {
+				if (marker instanceof Markers.Input) {
+					this.event.subscribe(marker.instance.TextButton.Activated, () => {
+						if (!startMarker) {
+							disconnectMarker(marker);
+							return;
+						}
+
+						connectMarkers(startMarker, marker, wireParent);
+						startMarker = undefined;
+						showAllMarkers(markers);
+					});
+				} else if (marker instanceof Markers.Output) {
+					this.event.subscribe(marker.instance.TextButton.Activated, () => {
+						startMarker = marker;
+						hideNonConnectableMarkers(marker, markers);
+					});
+				}
 			}
 		}
 	}
@@ -440,7 +609,7 @@ class WireToolDesktopController extends ComponentBase {
 /** A tool for wiring */
 export default class WireTool2 extends ToolBase {
 	readonly wireParent;
-	private readonly markers = this.parent(new ComponentKeyedChildren<string, MarkerComponent>(this, true));
+	private readonly markers = this.parent(new ComponentKeyedChildren<string, Markers.Marker>(this, true));
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -456,13 +625,22 @@ export default class WireTool2 extends ToolBase {
 			ZIndex: -1,
 		});
 
-		this.event.onEnable(() => this.createEverything());
+		this.onEnable(() => this.createEverything());
+		this.onDisable(() => this.markers.clear());
 
 		{
 			const cic = new ComponentChild(this, true);
 			this.event.onPrepareDesktop(() =>
 				cic.set(
-					new WireToolDesktopController(
+					new Controllers.Desktop(
+						[...this.markers.getAll()].map((e) => e[1]),
+						this.wireParent,
+					),
+				),
+			);
+			this.event.onPrepareTouch(() =>
+				cic.set(
+					new Controllers.Touch(
 						[...this.markers.getAll()].map((e) => e[1]),
 						this.wireParent,
 					),
@@ -471,7 +649,7 @@ export default class WireTool2 extends ToolBase {
 		}
 	}
 
-	static groupMarkers(markers: readonly MarkerComponent[]) {
+	static groupMarkers(markers: readonly Markers.Marker[]) {
 		const groupedMarkers = Arrays.groupBy(markers, (m) => m.data.group + " " + m.data.blockData.uuid);
 		for (const marker of markers) {
 			if (marker.data.group === undefined) continue;
@@ -480,7 +658,9 @@ export default class WireTool2 extends ToolBase {
 	}
 
 	private createEverything() {
-		const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId); // for (const plot of SharedPlots.getAllowedPlots(Players.LocalPlayer)) {
+		this.createEverythingOnPlot(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId));
+	}
+	private createEverythingOnPlot(plot: PlotModel) {
 		for (const block of SharedPlots.getPlotBlockDatas(plot)) {
 			const configDef = (blockConfigRegistry as BlockConfigRegistryNonGeneric)[block.id];
 			if (!configDef) continue;
@@ -495,13 +675,15 @@ export default class WireTool2 extends ToolBase {
 						dataTypes:
 							config.type === "or" ? config.types.map((t) => groups[t.type]) : [groups[config.type]],
 						group: config.type === "or" ? config.group : undefined,
+						id: key as BlockConnectionName,
+						name: config.displayName,
 					};
 
-					const markerInstance = MarkerComponent.createInstance(block.instance.PrimaryPart!, index++);
+					const markerInstance = Markers.Marker.createInstance(block.instance.PrimaryPart!, index++);
 					const marker =
 						markerType === "input"
-							? new InputMarkerComponent(markerInstance, data)
-							: new OutputMarkerComponent(markerInstance, data);
+							? new Markers.Input(markerInstance, data)
+							: new Markers.Output(markerInstance, data);
 
 					this.markers.add(block.uuid + key, marker);
 				}
@@ -512,13 +694,12 @@ export default class WireTool2 extends ToolBase {
 
 		for (const block of SharedPlots.getPlotBlockDatas(plot)) {
 			for (const [connectionName, connection] of Objects.entries(block.connections)) {
-				const from = this.markers.get(block.uuid + connectionName) as InputMarkerComponent;
-				const to = this.markers.get(connection.blockUuid + connection.connectionName) as OutputMarkerComponent;
+				const from = this.markers.get(block.uuid + connectionName) as Markers.Input;
+				const to = this.markers.get(connection.blockUuid + connection.connectionName) as Markers.Output;
 
 				to.connect(from, this.wireParent);
 			}
 		}
-		//}
 	}
 
 	getDisplayName(): string {
@@ -543,11 +724,6 @@ export default class WireTool2 extends ToolBase {
 	public getKeyboardTooltips(): readonly { keys: string[]; text: string }[] {
 		return [];
 	}
-
-	public disable(): void {
-		this.markers.clear();
-		super.disable();
-	}
 }
 
 //
@@ -555,27 +731,33 @@ export default class WireTool2 extends ToolBase {
 export const WireToolTests = {
 	connectThrough1() {
 		const wireParent = new Instance("ViewportFrame");
-		const newinstance = () => MarkerComponent.createInstance(new Instance("Part"), 0);
+		const newinstance = () => Markers.Marker.createInstance(new Instance("Part"), 0);
 		const newdata = (uuid: string | number) => ({
 			uuid: tostring(uuid) as BlockUuid,
-			instance: new Instance("Part"),
+			instance: new Instance("Model") as BlockModel,
 		});
 
 		const block1 = newdata(1);
 		const block2 = newdata(2);
 
-		const in1 = new InputMarkerComponent(newinstance(), {
+		const in1 = new Markers.Input(newinstance(), {
+			id: "a" as BlockConnectionName,
+			name: "u",
 			blockData: block1,
 			dataTypes: ["bool", "number"],
 			group: "0",
 		});
-		const in2 = new InputMarkerComponent(newinstance(), {
+		const in2 = new Markers.Input(newinstance(), {
+			id: "a" as BlockConnectionName,
+			name: "u",
 			blockData: block1,
 			dataTypes: ["bool", "number"],
 			group: "0",
 		});
 
-		const out1 = new OutputMarkerComponent(newinstance(), {
+		const out1 = new Markers.Output(newinstance(), {
+			id: "a" as BlockConnectionName,
+			name: "u",
 			blockData: block2,
 			dataTypes: ["bool"],
 			group: undefined,
@@ -603,38 +785,48 @@ export const WireToolTests = {
 	},
 	connectThrough2() {
 		const wireParent = new Instance("ViewportFrame");
-		const newinstance = () => MarkerComponent.createInstance(new Instance("Part"), 0);
+		const newinstance = () => Markers.Marker.createInstance(new Instance("Part"), 0);
 		const newdata = (uuid: string | number) => ({
 			uuid: tostring(uuid) as BlockUuid,
-			instance: new Instance("Part"),
+			instance: new Instance("Model") as BlockModel,
 		});
 
 		const block1 = newdata(1);
 		const block2 = newdata(2);
 		const block3 = newdata(3);
 
-		const in1 = new InputMarkerComponent(newinstance(), {
+		const in1 = new Markers.Input(newinstance(), {
+			id: "a" as BlockConnectionName,
+			name: "u",
 			blockData: block1,
 			dataTypes: ["bool", "number"],
 			group: "0",
 		});
-		const in2 = new InputMarkerComponent(newinstance(), {
+		const in2 = new Markers.Input(newinstance(), {
+			id: "a" as BlockConnectionName,
+			name: "u",
 			blockData: block1,
 			dataTypes: ["bool", "number"],
 			group: "0",
 		});
-		const in3 = new InputMarkerComponent(newinstance(), {
+		const in3 = new Markers.Input(newinstance(), {
+			id: "a" as BlockConnectionName,
+			name: "u",
 			blockData: block3,
 			dataTypes: ["bool", "number"],
 			group: "1",
 		});
-		const in4 = new InputMarkerComponent(newinstance(), {
+		const in4 = new Markers.Input(newinstance(), {
+			id: "a" as BlockConnectionName,
+			name: "u",
 			blockData: block3,
 			dataTypes: ["bool", "number"],
 			group: "1",
 		});
 
-		const out1 = new OutputMarkerComponent(newinstance(), {
+		const out1 = new Markers.Output(newinstance(), {
+			id: "a" as BlockConnectionName,
+			name: "u",
 			blockData: block2,
 			dataTypes: ["bool"],
 			group: undefined,

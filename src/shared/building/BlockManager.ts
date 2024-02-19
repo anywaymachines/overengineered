@@ -16,12 +16,14 @@ export type PlacedBlockData<T extends BlockModel = BlockModel> = {
 	readonly material: Enum.Material;
 	readonly id: string;
 	readonly uuid: BlockUuid;
-	readonly displayName: string | undefined;
 	readonly config: object;
 
 	/** Connections to the INPUT connectors */
 	readonly connections: Readonly<Record<BlockConnectionName, PlacedBlockDataConnection>>;
 };
+declare global {
+	type BlockData<T extends BlockModel = BlockModel> = PlacedBlockData<T>;
+}
 
 /** Methods for reading information about a block */
 export default class BlockManager {
@@ -61,7 +63,6 @@ export default class BlockManager {
 			),
 			material: Serializer.EnumMaterialSerializer.deserialize(model.GetAttribute("material") as number),
 			uuid: model.GetAttribute("uuid") as BlockUuid,
-			displayName: model.GetAttribute("displayName") as string | undefined,
 			connections: HttpService.JSONDecode(
 				(model.GetAttribute("connections") as string | undefined) ?? "{}",
 			) as PlacedBlockData["connections"],

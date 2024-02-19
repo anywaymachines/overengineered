@@ -1,9 +1,9 @@
-type BlockData = {
+type BlockInformation = {
 	readonly name: string;
 	readonly description: string;
 };
 
-export const BlockDataRegistry: Readonly<Record<string, BlockData>> = {
+export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 	accelerometer: {
 		name: "Accelerometer",
 		description: "Returns acceleration",

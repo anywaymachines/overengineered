@@ -22,6 +22,14 @@ export default class SharedPlots {
 		return "IsA" in plot ? (HttpService.JSONDecode(plot.GetAttribute("data") as string) as PlotData) : plot;
 	}
 
+	/** Checks if the provided block is on a plot that is allowed for the provided player */
+	static isBlockOnAllowedPlot(player: Player, block: BlockModel): boolean {
+		const plot = this.getPlotByBlock(block);
+		if (!plot) return false;
+
+		return this.isBuildingAllowed(plot, player);
+	}
+
 	/** Checks if player is allowed to build on the prodived plot */
 	static isBuildingAllowed(plot: PlotModel | PlotData, player: Player) {
 		plot = SharedPlots.readPlotData(plot);
@@ -64,6 +72,13 @@ export default class SharedPlots {
 	static getPlotByBlock(instance: Instance): PlotModel | undefined {
 		if (!instance) {
 			return undefined;
+		}
+
+		{
+			const fastcheck = instance.IsA("Model") ? instance.Parent?.Parent : undefined;
+			if (fastcheck && this.isPlot(fastcheck)) {
+				return fastcheck;
+			}
 		}
 
 		let parent = instance.Parent;
