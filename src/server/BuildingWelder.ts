@@ -90,7 +90,7 @@ export default class BuildingWelder {
 		};
 
 		const setColliderProperties = (collider: BasePart) => {
-			collider.Transparency = 0.5;
+			collider.Transparency = 1;
 			collider.Material = Enum.Material.Plastic;
 			collider.Anchored = true;
 			collider.Massless = true;
