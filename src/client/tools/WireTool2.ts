@@ -16,7 +16,7 @@ import SharedPlots from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 import ComponentBase from "shared/component/SharedComponentBase";
-import ObservableValue from "shared/event/ObservableValue";
+import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import Arrays from "shared/fixes/Arrays";
 import Objects from "shared/fixes/objects";
 
@@ -518,7 +518,15 @@ namespace Controllers {
 		}
 	};
 
-	export class Desktop extends ClientComponentBase {
+	export interface IController extends IComponent {
+		readonly selectedMarker: ReadonlyObservableValue<Markers.Output | undefined>;
+
+		stopDragging(): void;
+	}
+	export class Desktop extends ClientComponentBase implements IController {
+		readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
+		private readonly currentMoverContainer;
+
 		constructor(markers: readonly Markers.Marker[], wireParent: ViewportFrame) {
 			class WireMover extends ClientComponent<WireComponentDefinition> {
 				readonly marker;
@@ -553,6 +561,8 @@ namespace Controllers {
 			super();
 
 			const currentMoverContainer = new ComponentChild<WireMover>(this);
+			this.currentMoverContainer = currentMoverContainer;
+			currentMoverContainer.childSet.Connect((child) => this.selectedMarker.set(child?.marker));
 			let hoverMarker: Markers.Input | undefined;
 
 			for (const marker of markers) {
@@ -583,50 +593,60 @@ namespace Controllers {
 				}
 			}
 		}
+
+		stopDragging() {
+			this.currentMoverContainer.clear();
+		}
 	}
-	export class Touch extends ComponentBase {
+	export class Touch extends ComponentBase implements IController {
+		readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
+		private readonly markers: readonly Markers.Marker[];
+
 		constructor(markers: readonly Markers.Marker[], wireParent: ViewportFrame) {
 			super();
+			this.markers = markers;
 
-			let startMarker: Markers.Output | undefined;
-			const set = (marker: Markers.Output) => {
-				startMarker = marker;
-				marker.highlight();
-				hideNonConnectableMarkers(marker, markers);
-			};
-			const unset = (destroying = false) => {
-				if (startMarker?.isDestroyed()) return;
-				startMarker?.unhighlight();
-				startMarker = undefined;
-
-				if (!destroying) {
-					showAllMarkers(markers);
-				}
-			};
-
-			this.onDisable(() => unset(true));
+			this.onDisable(() => this.unset());
 
 			for (const marker of markers) {
 				if (marker instanceof Markers.Input) {
 					this.event.subscribe(marker.instance.TextButton.Activated, () => {
-						if (!startMarker) {
+						const selected = this.selectedMarker.get();
+						if (!selected) {
 							disconnectMarker(marker);
 							return;
 						}
 
-						connectMarkers(startMarker, marker, wireParent);
-						unset();
+						connectMarkers(selected!, marker, wireParent);
+						this.unset();
 					});
 				} else if (marker instanceof Markers.Output) {
 					this.event.subscribe(marker.instance.TextButton.Activated, () => {
-						if (startMarker) unset();
-						else set(marker);
+						if (this.selectedMarker.get()) this.unset();
+						else this.set(marker);
 					});
 				}
 			}
 		}
+
+		private set(marker: Markers.Output) {
+			this.selectedMarker.set(marker);
+			marker.highlight();
+			hideNonConnectableMarkers(marker, this.markers);
+		}
+		private unset() {
+			if (this.selectedMarker.get()?.isDestroyed()) return;
+			this.selectedMarker.get()?.unhighlight();
+			this.selectedMarker.set(undefined);
+
+			showAllMarkers(this.markers);
+		}
+
+		stopDragging() {
+			this.unset();
+		}
 	}
-	export class Gamepad extends Desktop {
+	export class Gamepad extends Desktop implements IController {
 		constructor(markers: readonly Markers.Marker[], wireParent: ViewportFrame) {
 			super(markers, wireParent);
 
@@ -645,9 +665,11 @@ namespace Controllers {
 
 /** A tool for wiring */
 export default class WireTool2 extends ToolBase {
+	readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
 	readonly markerParent;
 	readonly wireParent;
 	private readonly markers = this.parent(new ComponentKeyedChildren<string, Markers.Marker>(this, true));
+	private readonly controllerContainer = new ComponentChild<Controllers.IController>(this, true);
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -656,6 +678,7 @@ export default class WireTool2 extends ToolBase {
 			Name: "WireToolMarkers",
 			ScreenInsets: Enum.ScreenInsets.None,
 			IgnoreGuiInset: true,
+			DisplayOrder: -1, // to not draw on top of the wires
 			Parent: Gui.getPlayerGui(),
 		});
 		this.wireParent = Element.create("ViewportFrame", {
@@ -673,23 +696,25 @@ export default class WireTool2 extends ToolBase {
 		this.onDisable(() => this.markers.clear());
 
 		{
-			const cic = new ComponentChild(this, true);
-			this.event.onPrepareDesktop(() =>
-				cic.set(
-					new Controllers.Desktop(
+			const controllers = {
+				Desktop: Controllers.Desktop,
+				Touch: Controllers.Touch,
+				Gamepad: Controllers.Gamepad,
+			} as const satisfies Record<
+				InputType,
+				new (markers: readonly Markers.Marker[], wireParent: ViewportFrame) => Controllers.IController
+			>;
+
+			this.event.onPrepare((inputType) => {
+				const controller = this.controllerContainer.set(
+					new controllers[inputType](
 						[...this.markers.getAll()].map((e) => e[1]),
 						this.wireParent,
 					),
-				),
-			);
-			this.event.onPrepareTouch(() =>
-				cic.set(
-					new Controllers.Touch(
-						[...this.markers.getAll()].map((e) => e[1]),
-						this.wireParent,
-					),
-				),
-			);
+				);
+
+				controller.selectedMarker.subscribe((m) => this.selectedMarker.set(m), true);
+			});
 		}
 	}
 
@@ -699,6 +724,10 @@ export default class WireTool2 extends ToolBase {
 			if (marker.data.group === undefined) continue;
 			marker.sameGroupMarkers = groupedMarkers.get(marker.data.group + " " + marker.data.blockData.uuid);
 		}
+	}
+
+	stopDragging() {
+		this.controllerContainer.get()?.stopDragging();
 	}
 
 	private createEverything() {

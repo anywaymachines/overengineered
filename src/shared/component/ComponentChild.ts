@@ -1,5 +1,9 @@
+import SlimSignal from "shared/event/SlimSignal";
+
 /** Stores a single component (or zero). Handles its enabling, disabling and destroying. */
 export class ComponentChild<T extends IComponent = IComponent> implements IDebuggableComponent {
+	readonly childSet = new SlimSignal<(child: T | undefined) => void>();
+
 	private readonly state: IComponent;
 	private child?: T;
 
@@ -32,22 +36,25 @@ export class ComponentChild<T extends IComponent = IComponent> implements IDebug
 		return this.child;
 	}
 
-	set<TChild extends T>(child: TChild): TChild {
-		this.clear();
-
+	set<TChild extends T | undefined>(child: TChild): TChild {
+		this.child?.destroy();
 		this.child = child;
-		child.onDestroy(() => {
-			if (this.child !== child) return;
-			this.child = undefined;
-		});
+		this.childSet.Fire(child);
 
-		if (this.state.isEnabled()) {
-			child.enable();
+		if (child) {
+			child.onDestroy(() => {
+				if (this.child !== child) return;
+				this.child = undefined;
+			});
+
+			if (this.state.isEnabled()) {
+				child.enable();
+			}
 		}
+
 		return child;
 	}
 	clear() {
-		this.child?.destroy();
-		this.child = undefined;
+		this.set(undefined);
 	}
 }
