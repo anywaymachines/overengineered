@@ -1,3 +1,4 @@
+import { Players } from "@rbxts/services";
 import BuildingWelder from "server/BuildingWelder";
 import SlotDatabase from "server/database/SlotDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
@@ -8,6 +9,12 @@ import SharedPlots from "shared/building/SharedPlots";
 import PlayModeBase from "./PlayModeBase";
 
 export default class RideMode implements PlayModeBase {
+	private readonly cache = new Map<Player, PlotBlocks>();
+
+	constructor() {
+		Players.PlayerRemoving.Connect((player) => this.cache.delete(player));
+	}
+
 	onTransitionFrom(player: Player, prevmode: PlayModes | undefined): Response | undefined {
 		if (prevmode === "build") {
 			return this.rideStart(player);
@@ -34,6 +41,9 @@ export default class RideMode implements PlayModeBase {
 				};
 			}
 		}
+
+		const copy = blocks.Clone();
+		this.cache.set(player, copy);
 
 		SlotDatabase.instance.setBlocks(
 			player.UserId,
@@ -74,11 +84,19 @@ export default class RideMode implements PlayModeBase {
 
 		blocks.ClearAllChildren();
 
-		const blocksToLoad = SlotDatabase.instance.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
-		if (blocksToLoad !== undefined) {
-			BlocksSerializer.deserialize(blocksToLoad, plot);
+		const cache = this.cache.get(player);
+		if (cache) {
+			for (const child of cache.GetChildren()) {
+				child.Parent = blocks;
+			}
+		} else {
+			const blocksToLoad = SlotDatabase.instance.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
+			if (blocksToLoad !== undefined) {
+				BlocksSerializer.deserialize(blocksToLoad, plot);
+			}
 		}
 
+		this.cache.delete(player);
 		return { success: true };
 	}
 }
