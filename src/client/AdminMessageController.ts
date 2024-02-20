@@ -1,7 +1,7 @@
+import { Element } from "shared/Element";
 import Remotes from "shared/Remotes";
 import { Colors } from "./gui/Colors";
 import Control from "./gui/Control";
-import { Element } from "./gui/Element";
 import Gui from "./gui/Gui";
 import GuiAnimator from "./gui/GuiAnimator";
 import { TextButtonControl } from "./gui/controls/Button";

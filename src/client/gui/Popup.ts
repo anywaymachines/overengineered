@@ -1,8 +1,8 @@
 import { Lighting, TweenService } from "@rbxts/services";
 import Signal from "@rbxts/signal";
+import { Element } from "shared/Element";
 import { Colors } from "./Colors";
 import Control from "./Control";
-import { Element } from "./Element";
 import Gui from "./Gui";
 import { ScaledScreenGui } from "./GuiScale";
 

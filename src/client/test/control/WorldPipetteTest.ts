@@ -1,7 +1,7 @@
 import Control from "client/gui/Control";
-import { Element } from "client/gui/Element";
 import BlockPipetteButton from "client/gui/controls/BlockPipetteButton";
 import { ControlTest } from "client/test/control/ControlTest";
+import { Element } from "shared/Element";
 import BlockManager from "shared/building/BlockManager";
 
 export const WorldPipetteTest: ControlTest = {

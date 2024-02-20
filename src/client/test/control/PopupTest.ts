@@ -1,11 +1,11 @@
 import Control from "client/gui/Control";
-import { Element } from "client/gui/Element";
 import { TextButtonControl } from "client/gui/controls/Button";
 import ConfirmPopup from "client/gui/popup/ConfirmPopup";
 import SavePopup from "client/gui/popup/SavePopup";
 import SelectButtonPopup from "client/gui/popup/SelectButtonPopup";
 import SettingsPopup from "client/gui/popup/SettingsPopup";
 import { ControlTest } from "client/test/control/ControlTest";
+import { Element } from "shared/Element";
 
 export const PopupTest: ControlTest = {
 	createTests() {

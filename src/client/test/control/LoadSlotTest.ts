@@ -1,7 +1,7 @@
 import Control from "client/gui/Control";
-import { Element } from "client/gui/Element";
 import { TextButtonControl } from "client/gui/controls/Button";
 import NumberTextBoxControl from "client/gui/controls/NumberTextBoxControl";
+import { Element } from "shared/Element";
 import Remotes from "shared/Remotes";
 import { ControlTest } from "./ControlTest";
 

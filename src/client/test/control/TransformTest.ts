@@ -1,7 +1,7 @@
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
-import { Element } from "client/gui/Element";
 import { ButtonControl } from "client/gui/controls/Button";
+import { Element } from "shared/Element";
 import { ControlTest } from "./ControlTest";
 
 export const TransformTest: ControlTest = {

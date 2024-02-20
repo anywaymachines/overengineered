@@ -1,8 +1,8 @@
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
-import { Element } from "client/gui/Element";
 import { ConfigControl2 } from "client/gui/buildmode/ConfigControl";
 import MultiConfigControl from "client/gui/config/MultiConfigControl";
+import { Element } from "shared/Element";
 import { Config } from "shared/config/Config";
 import { ControlTest } from "./ControlTest";
 

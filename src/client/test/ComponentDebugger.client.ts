@@ -3,9 +3,9 @@ import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
-import { Element } from "client/gui/Element";
 import Gui from "client/gui/Gui";
 import { ButtonControl } from "client/gui/controls/Button";
+import { Element } from "shared/Element";
 import GameDefinitions from "shared/data/GameDefinitions";
 import { rootComponents } from "./RootComponents";
 

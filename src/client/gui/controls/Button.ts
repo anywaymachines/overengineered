@@ -1,7 +1,7 @@
 import Signal from "@rbxts/signal";
 import SoundController from "client/controller/SoundController";
 import Control from "client/gui/Control";
-import { Element, ElementProperties } from "client/gui/Element";
+import { Element, ElementProperties } from "shared/Element";
 
 export type ButtonDefinition = GuiButton;
 export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extends Control<T> {
