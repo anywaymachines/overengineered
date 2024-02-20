@@ -1,7 +1,7 @@
+import { Assert } from "client/test/Assert";
 import InstanceComponent from "shared/component/SharedComponent";
 import ComponentBase from "shared/component/SharedComponentBase";
 import ContainerComponent from "shared/component/SharedComponentContainer";
-import { Assert } from "./Assert";
 
 export const ComponentTests = {
 	componentDestroyByInstance: () => {

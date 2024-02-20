@@ -51,6 +51,15 @@ root.add(playModeController);
 root.enable();
 
 spawn(() => {
-	const updated = MarketplaceService.GetProductInfo(game.PlaceId).Updated;
-	Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `DEVTEST | v${game.PlaceVersion} | ${updated}`;
+	for (let i = 0; i < 3; i++) {
+		const updated = MarketplaceService.GetProductInfo(game.PlaceId).Updated;
+		// eslint-disable-next-line roblox-ts/lua-truthiness
+		if (!updated) {
+			task.wait(i + 1);
+			continue;
+		}
+
+		Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `DEVTEST | v${game.PlaceVersion} | ${updated}`;
+		break;
+	}
 });

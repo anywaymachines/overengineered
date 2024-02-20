@@ -35,4 +35,11 @@ export class Element {
 
 		return instance as CreatableInstances[T] & { [k in keyof TChildren]: TChildren[k] };
 	}
+
+	static newFont(this: void, font: Enum.Font, weight: Enum.FontWeight) {
+		const f = Font.fromEnum(font);
+		f.Weight = weight;
+
+		return f;
+	}
 }

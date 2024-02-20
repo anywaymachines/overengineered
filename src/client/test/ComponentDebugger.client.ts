@@ -7,7 +7,7 @@ import Gui from "client/gui/Gui";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Element } from "shared/Element";
 import GameDefinitions from "shared/data/GameDefinitions";
-import { rootComponents } from "./RootComponents";
+import { rootComponents } from "client/test/RootComponents";
 
 type TreeControlDefinition = GuiObject & {
 	readonly Main: GuiButton;

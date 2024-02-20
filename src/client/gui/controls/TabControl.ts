@@ -1,10 +1,10 @@
 import Control from "client/gui/Control";
 import { Element } from "shared/Element";
-import { ButtonControl } from "./Button";
+import { TextButtonControl } from "./Button";
 
 export type TabControlDefinition = Frame & {
 	readonly Tabs: ScrollingFrame & {
-		readonly Template: GuiButton;
+		readonly Template: TextButton;
 	};
 	readonly Content: Frame;
 };
@@ -49,6 +49,9 @@ export class TabControl extends Control<TabControlDefinition> {
 		this.buttonTemplate = Control.asTemplate(gui.Tabs.Template);
 	}
 
+	addButton() {
+		return this.add(new TextButtonControl(this.buttonTemplate()).with((c) => (c.getGui().Parent = this.gui.Tabs)));
+	}
 	addTab(name: string, content: Control) {
 		this.tabs.set(name, content);
 
@@ -56,7 +59,8 @@ export class TabControl extends Control<TabControlDefinition> {
 		this.add(content);
 		content.hide();
 
-		const button = this.add(new ButtonControl(this.buttonTemplate()));
+		const button = this.addButton();
+		button.text.set(name);
 		button.activated.Connect(() => {
 			for (const [_, tab] of this.tabs) {
 				tab.hide();

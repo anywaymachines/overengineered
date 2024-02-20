@@ -6,43 +6,20 @@ import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
-import { WireToolTests } from "client/tools/WireTool2";
 import { Element } from "shared/Element";
 import SharedComponent from "shared/component/SharedComponent";
 import GameDefinitions from "shared/data/GameDefinitions";
 import Objects from "shared/fixes/objects";
-import { ComponentTests } from "./ComponentTests";
-import { LogicTest1 } from "./LogicTest1";
-import { ColorWheelTest } from "./control/ColorWheelTest";
-import { ConfigTest } from "./control/ConfigTest";
-import { LoadSlotTest } from "./control/LoadSlotTest";
-import { PopupTest } from "./control/PopupTest";
-import { TransformTest } from "./control/TransformTest";
-import { WorldPipetteTest } from "./control/WorldPipetteTest";
 
-const autostart = RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm";
-const launch = RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer);
-if (!launch) new Signal().Wait();
+const enabled = RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer);
+if (!enabled) new Signal().Wait();
 task.wait(0.5); // wait for the controls to enable
 
 let destroy: (() => void) | undefined;
 const create = () => {
-	print("f");
 	const parent = new SharedComponent(
 		Element.create("ScreenGui", { Name: "TestScreenGui", Parent: Gui.getPlayerGui() }),
 	);
-	// close button
-	{
-		const closebtn = parent.add(
-			TextButtonControl.create({
-				Text: "Close the test GUI",
-				Size: new UDim2(0, 100, 0, 30),
-				Position: new UDim2(0, 0, 0, 200),
-			}),
-		);
-		closebtn.show();
-		closebtn.activated.Connect(() => parent.destroy());
-	}
 
 	const tabs = TabControl.create();
 	parent.add(tabs);
@@ -79,16 +56,11 @@ const create = () => {
 		return [name, control];
 	};
 
+	const closebtn = tabs.addButton();
+	closebtn.text.set("Close");
+	closebtn.activated.Connect(() => destroy?.());
+
 	const tests: readonly (readonly [name: string, test: Control])[] = [
-		...ColorWheelTest.createTests(),
-		...WorldPipetteTest.createTests(),
-		...TransformTest.createTests(),
-		...ConfigTest.createTests(),
-		...PopupTest.createTests(),
-		...LoadSlotTest.createTests(),
-		wrapNonVisual("Wire Tool", WireToolTests),
-		wrapNonVisual("Logic", LogicTest1),
-		wrapNonVisual("Component", ComponentTests),
 		["Global message", AdminMessageController.createControl()],
 	];
 	for (const [name, content] of tests) {
@@ -111,6 +83,3 @@ UserInputService.InputBegan.Connect((input) => {
 	if (destroy) destroy();
 	else create();
 });
-if (autostart) {
-	spawn(() => create());
-}

@@ -7,7 +7,7 @@ import AltimeterBlockLogic from "shared/block/logic/operations/sensors/Altimeter
 import OperationVec3CombinerBlockLogic from "shared/block/logic/operations/vector/OperationVec3CombinerBlockLogic";
 import OperationVec3SplitterBlockLogic from "shared/block/logic/operations/vector/OperationVec3SplitterBlockLogic";
 import Objects from "shared/fixes/objects";
-import Test from "./Test";
+import { Assert } from "./Assert";
 
 const parent = new Instance("Folder");
 parent.Parent = Workspace;
@@ -21,7 +21,7 @@ const subChanged = (block: ConfigurableBlockLogic<BlockConfigTypes.BothDefinitio
 	}
 };
 
-export const LogicTest1 = {
+export const LogicTests = {
 	altimeter() {
 		const altimeterInstance = new Instance("Model") as BlockModel;
 		altimeterInstance.PivotTo(new CFrame(0, 5, 0));
@@ -58,8 +58,8 @@ export const LogicTest1 = {
 
 		task.wait();
 		task.wait();
-		Test.ensureEquals(altimeterInstance.GetPivot().Y, 5);
-		Test.ensureEquals(combiner.output.result, new Vector3(1, RobloxUnit.Studs_To_Meters(5), 0));
+		Assert.equals(altimeterInstance.GetPivot().Y, 5);
+		Assert.equals(combiner.output.result, new Vector3(1, RobloxUnit.Studs_To_Meters(5), 0));
 		machine.destroy();
 	},
 	size1() {
@@ -79,7 +79,7 @@ export const LogicTest1 = {
 
 		machine.initializeBlockConnections();
 		machine.enable();
-		Test.ensureEquals(combiner.output.result, new Vector3(1, 0, 0));
+		Assert.equals(combiner.output.result, new Vector3(1, 0, 0));
 		machine.destroy();
 	},
 	size2() {
@@ -111,7 +111,7 @@ export const LogicTest1 = {
 
 		machine.initializeBlockConnections();
 		machine.enable();
-		Test.ensureEquals(combiner.output.result, new Vector3(1, 2, 0));
+		Assert.equals(combiner.output.result, new Vector3(1, 2, 0));
 		machine.destroy();
 	},
 	size3() {
@@ -159,7 +159,7 @@ export const LogicTest1 = {
 
 		machine.initializeBlockConnections();
 		machine.enable();
-		Test.ensureEquals(splitter.output.result_y, 7);
+		Assert.equals(splitter.output.result_y, 7);
 		machine.destroy();
 	},
 };
