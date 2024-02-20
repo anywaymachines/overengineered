@@ -561,7 +561,7 @@ namespace Controllers {
 
 			super();
 
-			const currentMoverContainer = new ComponentChild<WireMover>(this);
+			const currentMoverContainer = new ComponentChild<WireMover>(this, true);
 			this.currentMoverContainer = currentMoverContainer;
 			currentMoverContainer.childSet.Connect((child) => this.selectedMarker.set(child?.marker));
 			let hoverMarker: Markers.Input | undefined;
