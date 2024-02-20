@@ -1,8 +1,14 @@
-import { ReplicatedStorage } from "@rbxts/services";
+import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { Element } from "shared/Element";
+import Arrays from "shared/fixes/Arrays";
 
 export default class BuildingWelder {
 	private static readonly weldFolderName = "WeldRegions";
+	private static readonly OverlapParams = new OverlapParams();
+
+	static {
+		this.OverlapParams.CollisionGroup = "BlockCollider";
+	}
 
 	static removeWeldCollisions(block: BlockModel) {
 		block.FindFirstChild(this.weldFolderName)?.Destroy();
@@ -84,7 +90,7 @@ export default class BuildingWelder {
 		};
 
 		const setColliderProperties = (collider: BasePart) => {
-			collider.Transparency = 1;
+			collider.Transparency = 0.5;
 			collider.Material = Enum.Material.Plastic;
 			collider.Anchored = true;
 			collider.Massless = true;
@@ -94,36 +100,115 @@ export default class BuildingWelder {
 			collider.EnableFluidForces = false;
 		};
 
+		const useUnions = true;
+		const unionCache: [Vector3, UnionOperation][] = [];
+
 		for (const block of blocks) {
 			if (block.FindFirstChild(this.weldFolderName)) {
 				const colliders = block
 					.FindFirstChild(this.weldFolderName)
 					?.GetChildren() as unknown as readonly BasePart[];
+				if (colliders.size() === 0) continue;
 
-				for (const collider of colliders) {
-					setColliderProperties(collider);
+				if (useUnions) {
+					for (const [key, group] of Arrays.groupBy(
+						colliders,
+						(g) => (g.GetAttribute("target") as string | undefined) ?? "",
+					)) {
+						if (group.size() < 2) {
+							for (const collider of group) {
+								setColliderProperties(collider);
+							}
+							continue;
+						}
+
+						const union = group[0].UnionAsync(
+							group.filter((_, i) => i !== 0),
+							Enum.CollisionFidelity.PreciseConvexDecomposition,
+						);
+						setColliderProperties(union);
+						if (key !== "") {
+							union.SetAttribute("target", key);
+						}
+
+						union.Parent = group[0].Parent;
+
+						for (const collider of group) {
+							collider.Destroy();
+						}
+					}
+				} else {
+					for (const collider of colliders) {
+						setColliderProperties(collider);
+					}
 				}
 
 				continue;
 			}
 
-			const regions = createAutomatic(block);
-			if (!regions || regions.size() === 0) continue;
+			if (!useUnions) {
+				const regions = createAutomatic(block);
+				if (!regions || regions.size() === 0) continue;
+				const collision = Element.create("Folder", { Name: this.weldFolderName });
 
-			const collision = Element.create("Folder", { Name: this.weldFolderName });
-			for (const region of regions) {
-				const part = Element.create("Part", { Parent: collision, Size: region.Size });
-				setColliderProperties(part);
-				part.PivotTo(region.CFrame);
+				for (const region of regions) {
+					const part = Element.create("Part", { Parent: collision, Size: region.Size });
+					part.PivotTo(region.CFrame);
+					setColliderProperties(part);
+				}
+
+				collision.Parent = block;
+			} else {
+				const blocksize = (
+					block.GetChildren().filter((c) => c.IsA("BasePart")) as unknown as readonly BasePart[]
+				)
+					.map((c) => c.Size)
+					.reduce((acc, val) => (acc.Magnitude > val.Magnitude ? acc : val), Vector3.zero);
+
+				let union = unionCache.find(([size]) => size === blocksize)?.[1];
+				if (union) {
+					union = union.Clone();
+					union.PivotTo(block.GetPivot());
+
+					const collision = Element.create("Folder", { Name: this.weldFolderName });
+					union.Parent = collision;
+					collision.Parent = block;
+				} else {
+					const regions = createAutomatic(block);
+					if (!regions || regions.size() === 0) continue;
+					const collision = Element.create("Folder", { Name: this.weldFolderName });
+
+					const parts: BasePart[] = [];
+					for (const region of regions) {
+						const part = Element.create("Part", { Parent: Workspace, Size: region.Size });
+						part.PivotTo(region.CFrame);
+						parts.push(part);
+					}
+
+					union = parts[0].UnionAsync(
+						parts.filter((_, i) => i !== 0),
+						Enum.CollisionFidelity.PreciseConvexDecomposition,
+					);
+
+					for (const part of parts) {
+						part.Destroy();
+					}
+
+					setColliderProperties(union);
+					unionCache.push([blocksize, union]);
+					union.Parent = collision;
+					collision.Parent = block;
+				}
 			}
 
-			print(`[BLOCKINIT] Adding ${regions.size()} automatic regions to ${block.Name}`);
-			collision.Parent = block;
+			print(`[BLOCKINIT] Adding automatic region to ${block.Name}`);
 		}
+
+		print("[BLOCKINIT] Block welding initialized");
 	}
 
-	static getClosestParts(block: BlockModel): ReadonlyMap<BasePart, ReadonlySet<BasePart>> {
-		if (!block.FindFirstChild(this.weldFolderName)) return new Map();
+	static weld(block: BlockModel) {
+		if (!block.FindFirstChild(this.weldFolderName)) return;
 
 		const getTarget = (collider: BasePart): BasePart | undefined => {
 			let part: BasePart | undefined;
@@ -142,38 +227,21 @@ export default class BuildingWelder {
 			);
 		};
 
-		const weldedWith = new Map<BasePart, Set<BasePart>>();
-		const areWeldedTogether = (
-			part: BasePart,
-			anotherPart: BasePart,
-			allWelds: Map<BasePart, Set<BasePart>>,
-		): boolean => {
-			return (allWelds.get(part)?.has(anotherPart) || allWelds.get(anotherPart)?.has(part)) ?? false;
-		};
-
 		const colliders = block.WaitForChild(this.weldFolderName).GetChildren() as unknown as readonly BasePart[];
 		for (const collider of colliders) {
-			const touchingWith = collider.GetTouchingParts().filter((p) => p.Parent?.Name === this.weldFolderName);
+			const touchingWith = Workspace.GetPartsInPart(collider, this.OverlapParams);
 			if (touchingWith.size() === 0) continue;
 
 			const targetPart = getTarget(collider);
 			if (!targetPart) continue;
 
-			if (!weldedWith.has(targetPart)) {
-				weldedWith.set(targetPart, new Set<BasePart>());
-			}
-
 			for (const anotherCollider of touchingWith) {
 				const anotherTargetPart = getTarget(anotherCollider);
 				if (!anotherTargetPart) continue;
 
-				if (!areWeldedTogether(targetPart, anotherTargetPart, weldedWith)) {
-					weldedWith.get(targetPart)!.add(anotherTargetPart);
-				}
+				this.makeJoints(targetPart, anotherTargetPart);
 			}
 		}
-
-		return weldedWith;
 	}
 
 	static makeJoints(part0: BasePart, part1: BasePart) {
@@ -252,22 +320,5 @@ export default class BuildingWelder {
 		}
 
 		return connected;
-	}
-
-	static weld(model: BlockModel): Set<BasePart> {
-		const newJoints = new Set<BasePart>();
-		const closestParts = this.getClosestParts(model);
-
-		for (const [left, rights] of closestParts) {
-			for (const right of rights) {
-				if (right.IsDescendantOf(model)) continue;
-
-				this.makeJoints(left, right);
-				newJoints.add(left);
-				newJoints.add(right);
-			}
-		}
-
-		return newJoints;
 	}
 }
