@@ -185,7 +185,8 @@ namespace Markers {
 				} else if (inputType === "Touch") {
 					createTooltip();
 				} else if (inputType === "Gamepad") {
-					// TODO:::
+					this.eventHandler.subscribe(this.instance.TextButton.MouseEnter, createTooltip);
+					this.eventHandler.subscribe(this.instance.TextButton.MouseLeave, removeTooltip);
 				}
 
 				if (inputType === "Gamepad") {
