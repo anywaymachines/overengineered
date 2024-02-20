@@ -1,19 +1,28 @@
 import { Assert } from "client/test/Assert";
+import { Element } from "shared/Element";
 import InstanceComponent from "shared/component/SharedComponent";
 import ComponentBase from "shared/component/SharedComponentBase";
 import ContainerComponent from "shared/component/SharedComponentContainer";
 
 export const ComponentTests = {
 	componentDestroyByInstance: () => {
-		const part = new Instance("Part");
+		const part = Element.create("Part");
 		const component = new InstanceComponent(part);
 		component.enable();
 		part.Destroy();
 
 		Assert.true(component.isDestroyed());
 	},
+	componentDestroyByParentInstance: () => {
+		const parent = Element.create("Part", {}, { child: Element.create("Part") });
+		const component = new InstanceComponent(parent.child);
+		component.enable();
+		parent.Destroy();
+
+		Assert.true(component.isDestroyed());
+	},
 	componentDestroyInstanceBySelf: () => {
-		const part = new Instance("Part");
+		const part = Element.create("Part");
 		const component = new InstanceComponent(part);
 		component.enable();
 		component.destroy();

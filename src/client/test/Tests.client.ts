@@ -48,13 +48,29 @@ const create = () => {
 		);
 		const control = new Control(frame);
 
+		const alltests = tests;
+		tests = {
+			runAll: () => {
+				for (const [name, test] of Objects.pairs(alltests)) {
+					print(`[${name}] Running`);
+					test();
+					print(`[${name}] SUCCESS`);
+				}
+			},
+			...tests,
+		};
+
 		for (const [name, test] of Objects.entries(tests)) {
 			const button = TextButtonControl.create({
 				Text: name,
 				AutomaticSize: Enum.AutomaticSize.XY,
 				TextSize: 16,
 			});
-			button.activated.Connect(test);
+			button.activated.Connect(() => {
+				print(`[${name}] Running`);
+				test();
+				print(`[${name}] SUCCESS`);
+			});
 
 			control.add(button);
 		}
