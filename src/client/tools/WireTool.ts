@@ -158,7 +158,7 @@ export default class WireTool extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Wire";
+		return "Wire (OLD)";
 	}
 
 	getImageID(): string {

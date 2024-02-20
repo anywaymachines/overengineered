@@ -174,10 +174,6 @@ namespace Markers {
 				control.getGui().Position = new UDim2(0.5, 0, 0, 0);
 				control.getGui().Size = new UDim2(2, 0, 1, 0);
 
-				control.getGui().AnchorPoint = new Vector2(0.5, 0.5); // can't set Y to 1 because then it doesn't render
-				control.getGui().Position = new UDim2(0.5, 0, 0.5, 0);
-				control.getGui().Size = new UDim2(1, 0, 1, 0);
-
 				tooltipParent.set(control);
 			};
 			const removeTooltip = () => tooltipParent.clear();
@@ -211,13 +207,6 @@ namespace Markers {
 					const setcolor = (color: Color3) => {
 						this.instance.TextButton.BackgroundColor3 = color;
 						this.instance.TextButton.Filled.BackgroundColor3 = color;
-
-						/*
-					const nametext = nameParent.get();
-					if (nametext) {
-						nametext.getGui().TextColor3 = color;
-					}
-					*/
 					};
 
 					if (types.size() === 1) {
@@ -759,7 +748,7 @@ export default class WireTool2 extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Wiring (DEV ONLY)";
+		return "Wire";
 	}
 
 	getImageID(): string {
