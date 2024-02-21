@@ -586,7 +586,6 @@ namespace Controllers {
 					this.event.subscribe(marker.instance.TextButton.MouseEnter, () => {
 						const currentMove = currentMoverContainer.get();
 						if (!currentMove) return;
-						if (!canConnect(currentMove.marker, marker)) return;
 
 						hoverMarker = marker;
 					});
