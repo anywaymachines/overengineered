@@ -87,7 +87,7 @@ export const LogicTests = {
 			id: "id",
 			uuid: "0" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
-			config: { value: 2 },
+			config: { value: { type: "number", value: 2 } },
 			connections: {},
 		});
 		const combiner = new OperationVec3CombinerBlockLogic({
@@ -119,7 +119,7 @@ export const LogicTests = {
 			id: "id",
 			uuid: "0" as BlockUuid,
 			instance: new Instance("Model") as BlockModel,
-			config: { value: 7 },
+			config: { value: { type: "number", value: 7 } },
 			connections: {},
 		});
 		const combiner = new OperationVec3CombinerBlockLogic({

@@ -559,7 +559,7 @@ export default class WireTool extends ToolBase {
 			}
 		}
 
-		return config.types.map((t) => t.type);
+		return Objects.values(config.types).map((t) => t.type);
 	}
 
 	private createPlotWires(plot: PlotModel) {

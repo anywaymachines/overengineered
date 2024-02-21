@@ -19,6 +19,13 @@ const filterMouse1 = (callback: InputCallback, allowGameProcessedEvents: boolean
 		callback(input);
 	};
 };
+const filterMouse2 = (callback: InputCallback, allowGameProcessedEvents: boolean): FullInputCallback => {
+	return (input, gameProcessedEvent) => {
+		if (!allowGameProcessedEvents && gameProcessedEvent) return;
+		if (input.UserInputType !== Enum.UserInputType.MouseButton2) return;
+		callback(input);
+	};
+};
 
 const keyPressed = new Map<KeyCode, Map<InputHandler, Callback[]>>();
 const keyReleased = new Map<KeyCode, Map<InputHandler, Callback[]>>();
@@ -104,6 +111,12 @@ export default class InputHandler {
 	}
 	onMouse1Up(callback: InputCallback, allowGameProcessedEvents = true) {
 		this.onInputEnded(filterMouse1(callback, allowGameProcessedEvents));
+	}
+	onMouse2Down(callback: InputCallback, allowGameProcessedEvents = true) {
+		this.onInputBegan(filterMouse2(callback, allowGameProcessedEvents));
+	}
+	onMouse2Up(callback: InputCallback, allowGameProcessedEvents = true) {
+		this.onInputEnded(filterMouse2(callback, allowGameProcessedEvents));
 	}
 	onMouseMove(callback: InputCallback, allowGameProcessedEvents = true) {
 		this.onInputBegan((input, gameProcessedEvent) => {

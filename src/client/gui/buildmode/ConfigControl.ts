@@ -3,6 +3,7 @@ import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import CheckBoxControl, { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
+import DropdownList, { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import KeyChooserControl, { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import SliderControl, { SliderControlDefinition } from "client/gui/controls/SliderControl";
@@ -31,7 +32,8 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 	private readonly sliderTemplate;
 	private readonly numberTemplate;
 	private readonly stringTemplate;
-	private readonly thrustTemplate;
+	private readonly multiTemplate;
+	private readonly multiMultiTemplate;
 
 	constructor(gui: ConfigControlDefinition) {
 		super(gui);
@@ -43,7 +45,8 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 		this.sliderTemplate = Control.asTemplate(templates.SliderTemplate, false);
 		this.numberTemplate = Control.asTemplate(templates.NumberTemplate, false);
 		this.stringTemplate = Control.asTemplate(templates.NumberTemplate, false);
-		this.thrustTemplate = Control.asTemplate(templates.MultiTemplate, false);
+		this.multiTemplate = Control.asTemplate(templates.MultiTemplate, false);
+		this.multiMultiTemplate = Control.asTemplate(templates.MultiMultiTemplate, false);
 	}
 
 	set<TDef extends BlockConfigDefinitions>(
@@ -69,7 +72,8 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 					number: this.numberTemplate,
 					string: this.stringTemplate,
 					slider: this.sliderTemplate,
-					multi: this.thrustTemplate,
+					multi: this.multiTemplate,
+					multiMulti: this.multiMultiTemplate,
 				},
 				config[id] as never,
 				def as never,
@@ -96,6 +100,7 @@ export class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control
 	private readonly numberTemplate;
 	private readonly stringTemplate;
 	private readonly thrustTemplate;
+	private readonly multiMultiTemplate;
 
 	constructor(
 		gui: ConfigControl2Definition,
@@ -113,6 +118,7 @@ export class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control
 		this.numberTemplate = Control.asTemplate(templates.NumberTemplate, false);
 		this.stringTemplate = Control.asTemplate(templates.StringTemplate, false);
 		this.thrustTemplate = Control.asTemplate(templates.MultiTemplate, false);
+		this.multiMultiTemplate = Control.asTemplate(templates.MultiMultiTemplate, false);
 
 		for (const [id, def] of Objects.pairs(definition)) {
 			if (def.configHidden) continue;
@@ -129,6 +135,7 @@ export class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control
 					string: this.stringTemplate,
 					slider: this.sliderTemplate,
 					multi: this.thrustTemplate,
+					multiMulti: this.multiMultiTemplate,
 				},
 				config[id] as never,
 				def as never,
@@ -587,7 +594,11 @@ export class ServoMotorAngleConfigValueControl extends ConfigValueControl<Config
 	}
 }
 
-export class OrConfigValueControl extends ConfigValueControl<ConfigControlDefinition> {
+export type MultiConfigControlDefinition = GuiObject & {
+	readonly Dropdown: DropdownListDefinition;
+	readonly Control: ConfigControlDefinition;
+};
+export class OrConfigValueControl extends ConfigValueControl<MultiConfigControlDefinition> {
 	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["or"]["config"]) => void>();
 
 	constructor(
@@ -595,23 +606,50 @@ export class OrConfigValueControl extends ConfigValueControl<ConfigControlDefini
 		config: BlockConfigDefinitionRegistry["or"]["config"],
 		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["or"]>,
 	) {
-		throw "Not implemented (waiting for dropdown implementation)";
-		super(templates.multi(), definition.displayName);
+		super(templates.multiMulti(), definition.displayName);
 
-		const control = this.add(new ConfigControl(this.gui.Control));
-		this.event.subscribe(control.configUpdated, (key, value) =>
+		let selected = config.type;
+
+		const updateConfig = (value: typeof config.value) => {
 			this.submitted.Fire(
-				(config = value as BlockConfigDefinitionRegistry[Exclude<
-					keyof BlockConfigDefinitionRegistry,
-					"or"
-				>]["default"]),
-			),
-		);
+				(config = {
+					type: selected,
+					value,
+				}),
+			);
+		};
 
-		const def = Objects.fromEntries(
-			definition.types.map((t) => [t.type, { ...t, displayName: definition.displayName }] as const),
-		);
-		control.set(config as ConfigDefinitionsToConfig<keyof typeof def, typeof def>, def);
+		const control = this.add(new ConfigControl(this.gui.Control.Control));
+		this.event.subscribe(control.configUpdated, (_, value) => updateConfig(value as typeof config.value));
+		control.set({ value: config.value }, { value: definition.types[config.type]! });
+
+		const dropdown = this.add(new DropdownList<keyof typeof definition.types>(this.gui.Control.Dropdown, "down"));
+		this.event.subscribeObservable(dropdown.selectedItem, (typeid) => {
+			// eslint-disable-next-line roblox-ts/lua-truthiness
+			if (!typeid) {
+				dropdown.selectedItem.set(config.type);
+				return;
+			}
+
+			const deftype = definition.types[typeid]!;
+			selected = deftype.type;
+
+			if (config.type === deftype.type) {
+				// use existing value
+				control.set({ value: config.value }, { value: deftype });
+				updateConfig(config.value);
+			} else {
+				// use default value
+				control.set({ value: deftype.config }, { value: deftype });
+				updateConfig(deftype.config as typeof config.value);
+			}
+		});
+
+		for (const [, type] of Objects.pairs(definition.types)) {
+			dropdown.addItem(type.type);
+		}
+
+		dropdown.selectedItem.set(config.type);
 	}
 }
 
@@ -656,6 +694,7 @@ export type Templates = {
 	number: () => ConfigPartDefinition<NumberTextBoxControlDefinition>;
 	string: () => ConfigPartDefinition<TextBoxControlDefinition>;
 	multi: () => ConfigPartDefinition<ConfigControlDefinition>;
+	multiMulti: () => ConfigPartDefinition<MultiConfigControlDefinition>;
 };
 
 export type Template = {
@@ -666,4 +705,5 @@ export type Template = {
 	NumberTemplate: ConfigPartDefinition<NumberTextBoxControlDefinition>;
 	StringTemplate: ConfigPartDefinition<TextBoxControlDefinition>;
 	MultiTemplate: ConfigPartDefinition<ConfigControlDefinition>;
+	MultiMultiTemplate: ConfigPartDefinition<MultiConfigControlDefinition>;
 };

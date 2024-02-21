@@ -89,13 +89,15 @@ const intersectTypes = (types: readonly (readonly DataType[])[]): readonly DataT
 	return result;
 };
 
-const looped = new Map<Markers.Marker | WireComponent, () => void>();
+const looped = new Map<Markers.Marker | WireComponent, (index: number) => void>();
 spawn(() => {
+	let loopindex = 0;
 	while (true as boolean) {
 		task.wait(0.5);
 
+		loopindex++;
 		for (const [_, value] of looped) {
-			value();
+			value(loopindex);
 		}
 	}
 });
@@ -213,10 +215,9 @@ namespace Markers {
 					if (types.size() === 1) {
 						setcolor(typeGroups[types[0]].color);
 					} else {
-						let i = 0;
-						const func = () => {
+						const func = (index: number) => {
 							if (this.pauseColors) return;
-							setcolor(typeGroups[types[(i = (i + 1) % types.size())]].color);
+							setcolor(typeGroups[types[index % types.size()]].color);
 						};
 
 						looped.set(this, func);
@@ -422,11 +423,9 @@ class WireComponent extends ClientComponent<WireComponentDefinition> {
 				if (types.size() === 1) {
 					setcolor(typeGroups[types[0]].color);
 				} else {
-					let i = 0;
-					const func = () =>
+					const func = (index: number) =>
 						setcolor(
-							typeGroups[types[(i = (i + 1) % (types.size() === 0 ? 1 : types.size()))]]?.color ??
-								Colors.red,
+							typeGroups[types[index % (types.size() === 0 ? 1 : types.size())]]?.color ?? Colors.red,
 						);
 
 					looped.set(this, func);
@@ -755,7 +754,7 @@ export default class WireTool2 extends ToolBase {
 						blockData: block,
 						dataTypes:
 							config.type === "or"
-								? Objects.values(config.types).map((t) => groups[t.type])
+								? Objects.keys(config.types).map((k) => groups[k])
 								: [groups[config.type]],
 						group: config.type === "or" ? config.group : undefined,
 						id: key as BlockConnectionName,

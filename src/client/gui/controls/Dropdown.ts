@@ -1,20 +1,18 @@
 import Control from "client/gui/Control";
-import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
+import { ButtonControl } from "client/gui/controls/Button";
 
-export default class Dropdown extends Control<GuiObject> {
-	readonly button;
-	readonly contents;
+export type DropdownDefinition = GuiButton & {
+	readonly Content: GuiObject;
+};
+export default class Dropdown<T extends DropdownDefinition = DropdownDefinition> extends Control<T> {
+	private readonly button;
+	private readonly contents;
 
-	constructor(
-		gui: GuiObject,
-		button: ButtonDefinition,
-		contents: GuiObject,
-		direction: "up" | "down" | "left" | "right",
-	) {
+	constructor(gui: T, direction: "up" | "down" | "left" | "right") {
 		super(gui);
 
-		this.button = this.add(new ButtonControl(button));
-		this.contents = this.add(new Control(contents));
+		this.button = this.add(new ButtonControl(this.gui));
+		this.contents = this.add(new Control(this.gui.Content));
 
 		this.event.subscribe(this.button.activated, () => {
 			this.contents.isVisible() ? this.contents.hide() : this.contents.show();

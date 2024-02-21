@@ -3,11 +3,11 @@ import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
 export class OrMotorAngleConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.Or> {
 	constructor(
-		observable: ObservableValue<BlockConfigTypes.Or["config"]>,
+		observable: ObservableValue<BlockConfigTypes.Or["default"]>,
 		config: BlockConfigTypes.Or["config"],
 		definition: BlockConfigTypes.Or,
 	) {
 		super(observable, config, definition);
-		this.value.set(config);
+		this.value.set(config.value);
 	}
 }

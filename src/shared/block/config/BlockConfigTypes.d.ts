@@ -44,8 +44,12 @@ declare namespace BlockConfigTypes {
 	export type OrConfigType<TType extends keyof Types> = Types[TType]["default"];
 	export type Or<
 		T extends readonly Types[Exclude<keyof Types, "or">][] = readonly Types[Exclude<keyof Types, "or">][],
-	> = BlockConfigPrimitiveType<"or", OrConfigType<T[number]["type"]>> & {
-		readonly types: T;
+	> = BlockConfigType<
+		"or",
+		OrConfigType<T[number]["type"]>,
+		{ type: T[number]["type"]; value: OrConfigType<T[number]["type"]> }
+	> & {
+		readonly types: { readonly [k in T[number]["type"]]?: Types[k] };
 		readonly group?: string;
 	};
 

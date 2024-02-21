@@ -14,28 +14,31 @@ const connectors = {
 			displayName: name,
 			type: "or",
 			default: 0 as number,
-			config: 0 as number,
+			config: {
+				type: "number",
+				value: 0,
+			},
 			group,
-			types: [
-				{
+			types: {
+				bool: {
 					displayName: "Boolean",
 					type: "bool",
 					config: false as boolean,
 					default: false as boolean,
 				},
-				{
+				number: {
 					displayName: "Number",
 					type: "number",
 					default: 0 as number,
 					config: 0 as number,
 				},
-				{
+				vector3: {
 					displayName: "Vector3",
 					type: "vector3",
 					default: Vector3.zero as Vector3,
 					config: Vector3.zero as Vector3,
 				},
-			],
+			},
 			...(additional ?? {}),
 		};
 	},
@@ -47,22 +50,25 @@ const connectors = {
 			displayName: name,
 			type: "or",
 			default: 0 as number,
-			config: 0 as number,
+			config: {
+				type: "number",
+				value: 0,
+			},
 			group,
-			types: [
-				{
+			types: {
+				bool: {
 					displayName: "Boolean",
 					type: "bool",
 					config: false as boolean,
 					default: false as boolean,
 				},
-				{
+				number: {
 					displayName: "Number",
 					type: "number",
 					default: 0 as number,
 					config: 0 as number,
 				},
-			],
+			},
 		};
 	},
 	any(
@@ -77,34 +83,37 @@ const connectors = {
 			displayName: name,
 			type: "or",
 			default: 0 as number,
-			config: 0 as number,
+			config: {
+				type: "number",
+				value: 0,
+			},
 			group,
-			types: [
-				{
+			types: {
+				bool: {
 					displayName: "Boolean",
 					type: "bool",
 					config: false as boolean,
 					default: false as boolean,
 				},
-				{
+				number: {
 					displayName: "Number",
 					type: "number",
 					default: 0 as number,
 					config: 0 as number,
 				},
-				{
+				vector3: {
 					displayName: "Vector",
 					type: "vector3",
 					default: Vector3.zero,
 					config: Vector3.zero,
 				},
-				{
+				string: {
 					displayName: "String",
 					type: "string",
 					default: "" as string,
 					config: "" as string,
 				},
-			],
+			},
 		};
 	},
 } as const;
@@ -907,23 +916,23 @@ const operationclamp = {
 
 const constant = {
 	input: {
-		//connectors.boolOrNumberOrVector("Value", "1", { connectorHidden: true }),
-		value: {
+		value: connectors.boolOrNumberOrVector("Value", "1", { connectorHidden: true }),
+		/*value: {
 			displayName: "Value",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 			connectorHidden: true,
-		},
+		},*/
 	},
 	output: {
-		//connectors.boolOrNumberOrVector("Value", "1"),
-		result: {
+		result: connectors.boolOrNumberOrVector("Value", "1"),
+		/*result: {
 			displayName: "Value",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
-		},
+		},*/
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
