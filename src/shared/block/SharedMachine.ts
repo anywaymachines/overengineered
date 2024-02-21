@@ -54,7 +54,7 @@ export default class SharedMachine extends SharedComponentContainer {
 				continue;
 			}
 
-			const ctor = (logicRegistry as LogicRegistry)[id];
+			const ctor = (logicRegistry as unknown as LogicRegistry)[id as keyof LogicRegistry];
 			if (!ctor) {
 				continue;
 			}

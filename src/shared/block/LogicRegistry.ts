@@ -28,16 +28,12 @@ import RandomAccessMemoryBlockLogic from "./logic/operations/memory/RandomAccess
 import StackMemoryBlockLogic from "./logic/operations/memory/StackMemoryBlockLogic";
 import Multiplexer from "./logic/operations/number/Multiplexer";
 import OperationAbsBlockLogic from "./logic/operations/number/OperationAbsBlockLogic";
-import OperationAddBlockLogic from "./logic/operations/number/OperationAddBlockLogic";
 import OperationClampBlockLogic from "./logic/operations/number/OperationClampBlockLogic";
-import OperationDivBlockLogic from "./logic/operations/number/OperationDivBlockLogic";
 import OperationEqualsBlockLogic from "./logic/operations/number/OperationEqualsBlockLogic";
 import OperationGreaterThanBlockLogic from "./logic/operations/number/OperationGreaterThanBlockLogic";
 import OperationModBlockLogic from "./logic/operations/number/OperationModBlockLogic";
-import OperationMulBlockLogic from "./logic/operations/number/OperationMulBlockLogic";
 import OperationRoundBlockLogic from "./logic/operations/number/OperationRoundBlockLogic";
 import OperationSignBlockLogic from "./logic/operations/number/OperationSignBlockLogic";
-import OperationSubBlockLogic from "./logic/operations/number/OperationSubBlockLogic";
 import RelayBlockLogic from "./logic/operations/number/RelayBlockLogic";
 import OperationDegBlockLogic from "./logic/operations/number/trigonometry/OperationDegBlockLogic";
 import OperationRadBlockLogic from "./logic/operations/number/trigonometry/OperationRadBlockLogic";
@@ -107,10 +103,6 @@ const logicRegistry = {
 	operationxnor: OperationXnorBlockLogic,
 	operationnor: OperationNorBlockLogic,
 
-	operationadd: OperationAddBlockLogic,
-	operationdiv: OperationDivBlockLogic,
-	operationsub: OperationSubBlockLogic,
-	operationmul: OperationMulBlockLogic,
 	operationmod: OperationModBlockLogic,
 
 	operationvec3splitter: OperationVec3SplitterBlockLogic,
@@ -128,4 +120,7 @@ const logicRegistry = {
 	operationsign: OperationSignBlockLogic,
 } as const;
 export default logicRegistry;
-export type LogicRegistry = Readonly<Record<string, { new (block: PlacedBlockData): BlockLogic } | undefined>>;
+export type LogicRegistry = Readonly<
+	Record<keyof typeof logicRegistry, { new (block: PlacedBlockData): BlockLogic } | undefined>
+> &
+	AutoCreatedLogicRegistryTypes;

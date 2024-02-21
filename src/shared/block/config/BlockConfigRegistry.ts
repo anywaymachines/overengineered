@@ -982,10 +982,6 @@ const blockConfigRegistry = {
 	operationgreaterthan: twoNumbersInputBooleanOutput,
 	operationround: numberProcessing,
 
-	operationadd: twoNumberInputsNumberOutput,
-	operationsub: twoNumberInputsNumberOutput,
-	operationmul: twoNumberInputsNumberOutput,
-	operationdiv: twoNumberInputsNumberOutput,
 	operationmod: twoNumberInputsNumberOutput,
 
 	operationrad: numberProcessing,

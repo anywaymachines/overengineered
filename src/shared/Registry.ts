@@ -24,6 +24,11 @@ export default class Registry {
 			}
 		}
 	}
+
+	static registerBlock(block: Block) {
+		(blockRegistry as Map<string, Block>).set(block.id, block);
+		(blockList as Block[]).push(block);
+	}
 }
 
 function readCategory(folder: Folder, prev: Categories) {
@@ -73,8 +78,7 @@ function readBlock(categoryBlock: BlockModel, categoryName: string) {
 		required,
 		limit,
 	};
-	(blockRegistry as Map<string, Block>).set(id, block);
-	(blockList as Block[]).push(block);
+	Registry.registerBlock(block);
 }
 
 const placeable = ReplicatedStorage.WaitForChild("Assets")

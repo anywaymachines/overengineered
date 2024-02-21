@@ -12,6 +12,7 @@ import LogControl from "client/gui/static/LogControl";
 import TooltipsControl from "client/gui/static/TooltipsControl";
 import PlayModeController from "client/modes/PlayModeController";
 import RemoteEvents from "shared/RemoteEvents";
+import { AutoBlockCreator } from "shared/block/logic/AutoBlockCreator";
 import SharedPlots from "shared/building/SharedPlots";
 import { AdminMessageController } from "./AdminMessageController";
 import { ClientComponentContainer } from "./component/ClientComponentContainer";
@@ -22,6 +23,7 @@ ReplicatedStorage.WaitForChild("Assets");
 
 (async () => await PlayerDataStorage.init())();
 
+AutoBlockCreator.initialize();
 GameEnvironmentController.initialize();
 
 TooltipsControl.instance.show();
