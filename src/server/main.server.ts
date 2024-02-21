@@ -18,7 +18,7 @@ import ServerPlots from "./plots/ServerPlots";
 
 class RemoteHandlers {
 	static loadSlot(this: void, player: Player, index: number): LoadSlotResponse {
-		return RemoteHandlers.loadAdminSlot(player, player.UserId, index);
+		return RemoteHandlers.loadAdminSlot(SharedPlots.getPlotByOwnerID(player.UserId), player.UserId, index);
 	}
 	static loadSlotAsAdmin(this: void, player: Player, userid: number, index: number): LoadSlotResponse {
 		if (!GameDefinitions.isAdmin(player)) {
@@ -28,7 +28,7 @@ class RemoteHandlers {
 			};
 		}
 
-		return RemoteHandlers.loadAdminSlot(player, userid, index);
+		return RemoteHandlers.loadAdminSlot(SharedPlots.getPlotByOwnerID(player.UserId), userid, index);
 	}
 
 	static sendMessageAsAdmin(this: void, player: Player, text: string) {
@@ -36,7 +36,8 @@ class RemoteHandlers {
 		Remotes.Server.GetNamespace("Admin").Get("SendMessage").SendToAllPlayers(text);
 	}
 
-	static loadAdminSlot(this: void, player: Player, userid: number, index: number): LoadSlotResponse {
+	static loadAdminSlot(this: void, plot: PlotModel, userid: number, index: number): LoadSlotResponse {
+		const start = os.clock();
 		const blocks = SlotDatabase.instance.getBlocks(userid, index);
 		if (blocks === undefined || blocks.size() === 0) {
 			return {
@@ -45,11 +46,10 @@ class RemoteHandlers {
 			};
 		}
 
-		Logger.info(`Loading ${player.Name}'s slot ${index}`);
-
-		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
+		Logger.info(`Loading ${userid}'s slot ${index}`);
 		ServerPlots.clearAllBlocks(plot);
 		const dblocks = BlocksSerializer.deserialize(blocks, plot);
+		print(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
 
 		return { success: true, isEmpty: dblocks === 0 };
 	}

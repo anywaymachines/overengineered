@@ -270,14 +270,6 @@ export default class BuildingWrapper {
 		}*/
 	}
 	public static placeBlock(this: void, data: PlaceBlockRequest): BuildResponse {
-		const plot = SharedPlots.getPlotByPosition(data.location.Position);
-		if (!plot) {
-			return {
-				success: false,
-				message: "Plot not found",
-			};
-		}
-
 		const block = blockRegistry.get(data.id)!;
 
 		// Create a new instance of the building model
@@ -297,7 +289,7 @@ export default class BuildingWrapper {
 
 		SharedBuilding.paint({ blocks: [model], color: data.color, material: data.material }, true);
 
-		model.Parent = plot.FindFirstChild("Blocks");
+		model.Parent = data.plot.Blocks;
 
 		// Weld block
 		const newJoints = BuildingWelder.weld(model);

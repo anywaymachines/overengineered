@@ -86,9 +86,12 @@ export default class RideMode implements PlayModeBase {
 
 		const cache = this.cache.get(player);
 		if (cache) {
+			const time = os.clock();
 			for (const child of cache.GetChildren()) {
 				child.Parent = blocks;
 			}
+
+			print(`Loaded the cached save in ${os.clock() - time}`);
 		} else {
 			const blocksToLoad = SlotDatabase.instance.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
 			if (blocksToLoad !== undefined) {
