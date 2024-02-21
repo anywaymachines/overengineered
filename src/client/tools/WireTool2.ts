@@ -227,6 +227,7 @@ namespace Markers {
 					}
 				},
 				true,
+				true,
 			);
 		}
 
@@ -435,6 +436,7 @@ class WireComponent extends ClientComponent<WireComponentDefinition> {
 					loop = () => looped.delete(this);
 				}
 			},
+			true,
 			true,
 		);
 
