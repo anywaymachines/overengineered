@@ -47,7 +47,7 @@ declare namespace BlockConfigTypes {
 	> = BlockConfigType<
 		"or",
 		OrConfigType<T[number]["type"]>,
-		{ type: T[number]["type"]; value: OrConfigType<T[number]["type"]> }
+		{ readonly type: T[number]["type"]; readonly value: OrConfigType<T[number]["type"]> }
 	> & {
 		readonly types: { readonly [k in T[number]["type"]]?: Types[k] };
 		readonly group?: string;

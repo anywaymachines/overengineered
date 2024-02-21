@@ -1,7 +1,7 @@
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
-export class OrMotorAngleConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.Or> {
+export class OrConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.Or> {
 	constructor(
 		observable: ObservableValue<BlockConfigTypes.Or["default"]>,
 		config: BlockConfigTypes.Or["config"],

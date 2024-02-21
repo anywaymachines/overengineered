@@ -625,7 +625,7 @@ const v13: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 };
 
 // rotate innercorner -> innerwedge, rotate
-const v14: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v13> = {
+const v14: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v13> = {
 	version: 14,
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
@@ -633,6 +633,31 @@ const v14: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 				return {
 					...block,
 					id: "innercorner" as never,
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+};
+
+// update constant from number to or
+const v15: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v14> = {
+	version: 15,
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
+			if (block.id === "constant") {
+				return {
+					...block,
+					config: {
+						type: "number",
+						value: block.config ?? 0,
+					},
 				};
 			}
 
@@ -659,7 +684,7 @@ const v14: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 
 //
 
-const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14] as const;
+const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const getVersion = (version: number) => versions.find((v) => v.version === version);

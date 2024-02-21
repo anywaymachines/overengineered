@@ -6,7 +6,7 @@ import { KeyConfigLogicValue } from "./KeyConfigLogicValue";
 import { MotorRotationSpeedConfigLogicValue } from "./MotorRotationSpeedConfigLogicValue";
 import { MultiKeyConfigLogicValue } from "./MultiKeyConfigLogicValue";
 import { NumberConfigLogicValue } from "./NumberConfigLogicValue";
-import { OrMotorAngleConfigLogicValue } from "./OrConfigLogicValue";
+import { OrConfigLogicValue } from "./OrConfigLogicValue";
 import { ServoMotorAngleConfigLogicValue } from "./ServoMotorAngleConfigLogicValue";
 import { StringConfigLogicValue } from "./StringConfigLogicValue";
 import { ThrustConfigLogicValue } from "./ThrustConfigLogicValue";
@@ -28,7 +28,7 @@ const blockConfigRegistryClient = {
 	thrust: ThrustConfigLogicValue,
 	motorRotationSpeed: MotorRotationSpeedConfigLogicValue,
 	servoMotorAngle: ServoMotorAngleConfigLogicValue,
-	or: OrMotorAngleConfigLogicValue,
+	or: OrConfigLogicValue,
 } as const satisfies blockConfigRegistryClient;
 
 export default blockConfigRegistryClient;
