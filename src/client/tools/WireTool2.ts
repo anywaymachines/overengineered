@@ -556,6 +556,13 @@ namespace Controllers {
 							this.destroy();
 						}),
 					);
+					this.event.subInput((ih) =>
+						ih.onMouse2Down(() => {
+							if (hoverMarker) {
+								connectMarkers(this.marker, hoverMarker, wireParent);
+							}
+						}),
+					);
 				}
 			}
 
@@ -747,7 +754,9 @@ export default class WireTool2 extends ToolBase {
 					const data: MarkerData = {
 						blockData: block,
 						dataTypes:
-							config.type === "or" ? config.types.map((t) => groups[t.type]) : [groups[config.type]],
+							config.type === "or"
+								? Objects.values(config.types).map((t) => groups[t.type])
+								: [groups[config.type]],
 						group: config.type === "or" ? config.group : undefined,
 						id: key as BlockConnectionName,
 						name: config.displayName,
