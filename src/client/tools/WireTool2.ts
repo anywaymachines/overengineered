@@ -203,6 +203,8 @@ namespace Markers {
 		}
 		private initColors() {
 			let loop: (() => void) | undefined;
+
+			this.onDestroy(() => loop?.());
 			this.event.subscribeObservable2(
 				this.availableTypes,
 				(types) => {
@@ -414,7 +416,8 @@ class WireComponent extends ClientComponent<WireComponentDefinition> {
 		this.onDisable(() => (this.instance.Transparency = 1));
 
 		let loop: (() => void) | undefined;
-		this.event.subscribeObservable(
+		this.onDestroy(() => loop?.());
+		this.event.subscribeObservable2(
 			this.types,
 			(types) => {
 				loop?.();
