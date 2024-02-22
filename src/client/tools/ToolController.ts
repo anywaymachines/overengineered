@@ -50,7 +50,7 @@ export default class ToolController extends ClientComponentBase {
 			this.paintTool,
 			this.wiretool2,
 			this.buildTool2,
-			this.wiretool,
+			//this.wiretool,
 		];
 
 		this.tools = tools;
