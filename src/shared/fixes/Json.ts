@@ -197,12 +197,7 @@ const JSON = {
 			return obj;
 		};
 
-		let processed = process(value);
-		if (typeIs(processed, "table")) {
-			processed = { ...processed, __v: 0 };
-		}
-
-		return HttpService.JSONEncode(processed);
+		return HttpService.JSONEncode(process(value));
 	},
 	deserialize: <T>(data: string): JsonSerializable<T> => {
 		const process = <T>(obj: JsonSerializedProperty): unknown => {
