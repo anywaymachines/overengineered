@@ -11,6 +11,11 @@ export default class AccelerometerBlockLogic extends ConfigurableBlockLogic<type
 	}
 
 	private update() {
+		if (!this.block.instance.PrimaryPart) {
+			this.disable();
+			return;
+		}
+
 		const linearVelocity = this.block.instance.PrimaryPart!.AssemblyLinearVelocity;
 		this.output.linear.set(
 			this.block.instance
