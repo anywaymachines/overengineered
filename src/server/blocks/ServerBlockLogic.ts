@@ -15,7 +15,6 @@ export default abstract class ServerBlockLogic<T extends new (block: PlacedBlock
 		if (block.PrimaryPart?.Anchored || block.PrimaryPart?.AssemblyRootPart?.Anchored) return false;
 
 		if (player && block.PrimaryPart?.GetNetworkOwner() !== player) {
-			player.Kick();
 			return false;
 		}
 

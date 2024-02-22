@@ -21,7 +21,7 @@ export default class ImpactController {
 					!part.CanTouch ||
 					part.Transparency === 1 ||
 					part.IsA("VehicleSeat") ||
-					math.max(part.Size.X, part.Size.Y, part.Size.Z) < 2
+					math.max(part.Size.X, part.Size.Y, part.Size.Z) < 0.5
 				) {
 					return;
 				}
@@ -47,7 +47,7 @@ export default class ImpactController {
 				return;
 			}
 
-			if (secondPart.IsA("BasePart") && math.max(secondPart.Size.X, secondPart.Size.Y, secondPart.Size.Z) < 2)
+			if (secondPart.IsA("BasePart") && math.max(secondPart.Size.X, secondPart.Size.Y, secondPart.Size.Z) < 0.5)
 				return;
 
 			// Default diff
