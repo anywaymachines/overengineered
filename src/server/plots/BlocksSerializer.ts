@@ -3,6 +3,7 @@ import BuildingWrapper from "server/BuildingWrapper";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
+import { LogicRegistry } from "shared/block/LogicRegistry";
 import blockConfigRegistry, { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockDataConnection } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
@@ -15,7 +16,7 @@ type SerializedBlocks<TBlocks extends SerializedBlockV0> = {
 };
 
 interface SerializedBlockV0 {
-	readonly id: keyof BlockConfigRegistry & string;
+	readonly id: (keyof BlockConfigRegistry | keyof LogicRegistry) & string;
 	readonly mat: SerializedEnum;
 	readonly col: SerializedColor;
 	readonly loc: SerializedCFrame;
@@ -647,11 +648,41 @@ const v14: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 };
 
 // update constant from number to or
-const v15: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v14> = {
+const v15: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v14> = {
 	version: 15,
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			if (block.id === "constant") {
+				return {
+					...block,
+					config: {
+						type: "number",
+						value: block.config ?? 0,
+					},
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+};
+
+// update ADD SUB DIV MIL from number to number | vector3
+const v16: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v15> = {
+	version: 16,
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
+			if (
+				block.id === "operationadd" ||
+				block.id === "operationsub" ||
+				block.id === "operationmul" ||
+				block.id === "operationdiv"
+			) {
 				return {
 					...block,
 					config: {
@@ -684,7 +715,7 @@ const v15: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 
 //
 
-const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15] as const;
+const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const getVersion = (version: number) => versions.find((v) => v.version === version);
