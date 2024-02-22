@@ -655,10 +655,9 @@ const v15: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 			if (block.id === "constant") {
 				return {
 					...block,
-					config: {
-						type: "number",
-						value: block.config ?? 0,
-					},
+					config: Objects.fromEntries(
+						Objects.entries(block.config ?? {}).map(([k, v]) => [k, { type: "number", value: v ?? 0 }]),
+					),
 				};
 			}
 
@@ -685,10 +684,9 @@ const v16: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 			) {
 				return {
 					...block,
-					config: {
-						type: "number",
-						value: block.config ?? 0,
-					},
+					config: Objects.fromEntries(
+						Objects.entries(block.config ?? {}).map(([k, v]) => [k, { type: "number", value: v ?? 0 }]),
+					),
 				};
 			}
 
