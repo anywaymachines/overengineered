@@ -2,7 +2,7 @@ import { RunService } from "@rbxts/services";
 import RemoteEvents from "shared/RemoteEvents";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import ConfigurableBlockLogic from "../ConfigurableBlockLogic";
+import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 
 type MotorBlock = BlockModel & {
 	readonly Base: Part & {
@@ -25,11 +25,12 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof block
 			true,
 		);
 
-		this.event.subscribe(RunService.Heartbeat, () => {
-			if (!this.block.instance.FindFirstChild("Attach")) {
-				this.disable();
-			}
+		// Stop on motor corruption
+		this.onDescendantDestroyed(() => {
+			this.disable();
+		});
 
+		this.event.subscribe(RunService.Heartbeat, () => {
 			if (this.block.instance.Attach.Position.sub(this.block.instance.Base.Position).Magnitude > 3) {
 				RemoteEvents.ImpactBreak.send(this.block.instance.Base);
 
