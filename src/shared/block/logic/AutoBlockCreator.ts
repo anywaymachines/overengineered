@@ -299,7 +299,9 @@ type toBlockLogic<T extends keyof operations> = {
 	readonly [k in `operation${Lowercase<keyof operations[T] & string>}`]: ReturnType<(typeof logicReg)[T]>;
 };
 declare global {
-	type AutoCreatedLogicRegistryTypes = toBlockLogic<"math1number"> & toBlockLogic<"math2number">;
+	type AutoCreatedLogicRegistryTypes = toBlockLogic<"math1number"> &
+		toBlockLogic<"math2number"> &
+		toBlockLogic<"math2numberVector3">;
 }
 
 export const AutoBlockCreator = {
