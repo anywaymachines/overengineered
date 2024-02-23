@@ -57,6 +57,7 @@ export default class VectorUtils {
 		);
 	}
 
+	/** Is region1 fully inside region2 */
 	static isRegion3InRegion3(region1: Region3, region2: Region3): boolean {
 		// Get the corners of the first region
 		const corners1 = [

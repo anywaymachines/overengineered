@@ -1,6 +1,12 @@
 import Net from "@rbxts/net";
 
 declare global {
+	interface MoveBlocksRequest {
+		readonly plot: PlotModel;
+		readonly blocks: BlockList;
+		readonly diff: Vector3;
+	}
+
 	interface LogicConnectRequest {
 		readonly outputBlock: BlockModel;
 		readonly outputConnection: BlockConnectionName;
@@ -32,6 +38,7 @@ const Remotes = Net.Definitions.Create({
 		UpdateLogicConnectionRequest:
 			Net.Definitions.ServerAsyncFunction<(data: UpdateLogicConnectionRequest) => Response>(),
 
+		MoveBlocks: Net.Definitions.ServerAsyncFunction<(data: MoveBlocksRequest) => Response>(),
 		LogicConnect: Net.Definitions.ServerAsyncFunction<(data: LogicConnectRequest) => Response>(),
 		LogicDisconnect: Net.Definitions.ServerAsyncFunction<(data: LogicDisconnectRequest) => Response>(),
 

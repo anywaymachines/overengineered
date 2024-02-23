@@ -10,6 +10,7 @@ import PaintTool from "client/tools/PaintTool";
 import ToolBase from "client/tools/ToolBase";
 import WireTool from "client/tools/WireTool";
 import ObservableValue from "shared/event/ObservableValue";
+import EditTool from "./EditTool";
 import WireTool2 from "./WireTool2";
 
 export default class ToolController extends ClientComponentBase {
@@ -18,6 +19,7 @@ export default class ToolController extends ClientComponentBase {
 
 	public readonly buildTool;
 	public readonly moveTool;
+	public readonly editTool;
 	public readonly deleteTool;
 	public readonly configTool;
 	public readonly paintTool;
@@ -35,6 +37,7 @@ export default class ToolController extends ClientComponentBase {
 
 		this.buildTool = new BuildTool(mode);
 		this.moveTool = new MoveTool(mode);
+		this.editTool = new EditTool(mode);
 		this.deleteTool = new DeleteTool(mode);
 		this.configTool = new ConfigTool(mode);
 		this.paintTool = new PaintTool(mode);
@@ -50,7 +53,8 @@ export default class ToolController extends ClientComponentBase {
 			this.paintTool,
 			this.wiretool2,
 			this.buildTool2,
-			//this.wiretool,
+			this.wiretool,
+			this.editTool,
 		];
 
 		this.tools = tools;

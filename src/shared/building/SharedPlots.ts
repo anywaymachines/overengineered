@@ -22,6 +22,11 @@ export default class SharedPlots {
 		return "IsA" in plot ? (HttpService.JSONDecode(plot.GetAttribute("data") as string) as PlotData) : plot;
 	}
 
+	/** Checks if the provided block is on the provided plot */
+	static isBlockOnPlot(plot: PlotModel | PlotBlocks, block: BlockModel): boolean {
+		return block.IsDescendantOf(plot);
+	}
+
 	/** Checks if the provided block is on a plot that is allowed for the provided player */
 	static isBlockOnAllowedPlot(player: Player, block: BlockModel): boolean {
 		const plot = this.getPlotByBlock(block);

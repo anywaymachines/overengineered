@@ -37,7 +37,6 @@ const BuildingManager = {
 		const wsx = 0.5 * (math.abs(R00) * sx + math.abs(R01) * sy + math.abs(R02) * sz);
 		const wsy = 0.5 * (math.abs(R10) * sx + math.abs(R11) * sy + math.abs(R12) * sz);
 		const wsz = 0.5 * (math.abs(R20) * sx + math.abs(R21) * sy + math.abs(R22) * sz);
-
 		return new Region3(new Vector3(x - wsx, y - wsy, z - wsz), new Vector3(x + wsx, y + wsy, z + wsz));
 	},
 
@@ -45,8 +44,13 @@ const BuildingManager = {
 	getBlocksAABB(models: readonly Model[]): Region3 {
 		const min = (v1: Vector3, v2: Vector3): Vector3 =>
 			new Vector3(math.min(v1.X, v2.X), math.min(v1.Y, v2.Y), math.min(v1.Z, v2.Z));
+		const max = (v1: Vector3, v2: Vector3): Vector3 =>
+			new Vector3(math.max(v1.X, v2.X), math.max(v1.Y, v2.Y), math.max(v1.Z, v2.Z));
 
-		let region = new Region3();
+		let region = new Region3(
+			new Vector3(math.huge, math.huge, math.huge),
+			new Vector3(-math.huge, -math.huge, -math.huge),
+		);
 		for (const model of models) {
 			const reg = this.getModelAABB(model);
 			const regmin = reg.CFrame.Position.add(reg.Size.div(-2));
@@ -55,7 +59,7 @@ const BuildingManager = {
 			const regionmin = region.CFrame.Position.add(region.Size.div(-2));
 			const regionmax = region.CFrame.Position.add(region.Size.div(2));
 
-			region = new Region3(min(regmin, regionmin), min(regmax, regionmax));
+			region = new Region3(min(regmin, regionmin), max(regmax, regionmax));
 		}
 
 		return region;

@@ -3,8 +3,18 @@ import MaterialData from "shared/data/MaterialData";
 import Serializer from "shared/Serializer";
 import PartUtils from "shared/utils/PartUtils";
 
+declare global {
+	type BlockList = readonly BlockModel[] | PlotModel;
+}
+
 /** Methods for editing the building */
 export const SharedBuilding = {
+	isFullPlot: (blocks: BlockList): blocks is PlotModel => typeIs(blocks, "Instance"),
+	isBlocks: (blocks: BlockList): blocks is readonly BlockModel[] => !SharedBuilding.isFullPlot(blocks),
+	isEmpty: (blocks: BlockList): blocks is readonly [] => SharedBuilding.isBlocks(blocks) && blocks.size() === 0,
+	getBlockList: (blocks: BlockList): readonly BlockModel[] =>
+		SharedBuilding.isBlocks(blocks) ? blocks : blocks.Blocks.GetChildren(undefined),
+
 	/**
 	 * Set the block material and color
 	 * @param byBuild If true, will force update block transparency

@@ -14,8 +14,7 @@ export class ClientComponentEvents extends ComponentEvents {
 
 	/** Register an event that fires on enable and input type change */
 	onPrepare(callback: (inputType: InputType) => void): void {
-		this.subscribeObservable(InputController.inputType, callback);
-		this.onEnable(() => callback(InputController.inputType.get()));
+		this.subscribeObservable2(InputController.inputType, callback, true);
 	}
 
 	/** Register an event that fires on enable and input type change to Desktop */
