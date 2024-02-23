@@ -30,6 +30,11 @@ export default class BuildTool2 extends ToolBase {
 	private readonly mirroredGhosts: BlockGhost[] = [];
 	private blockRotation = CFrame.identity;
 
+	//samlovebutter's code starts here
+	private fillRotation = CFrame.identity;
+	private nowFillingArea = false;
+	//samlovebutter's code ends here
+
 	private readonly targetPlot = new ObservableValue<PlotModel | undefined>(undefined);
 
 	constructor(mode: BuildingMode) {
@@ -49,12 +54,53 @@ export default class BuildTool2 extends ToolBase {
 		this.event.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.updateBlockPosition());
 		this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.updateBlockPosition());
 
-		this.event.subscribe(this.mouse.Button1Down, () => this.placeBlock());
+		//samlovebutter's code starts here
+		let pressPosition: Vector3 = Vector3.zero;
+		let drawnModelsPositions: Map<CFrame, BlockGhost> = new Map<CFrame, BlockGhost>();
 
+		this.event.subscribe(this.mouse.Button1Down, () => {
+			pressPosition = this.mouse.Hit.Position;
+			this.nowFillingArea = true;
+		});
+
+		this.event.subscribe(this.mouse.Button1Up, async () => {
+			this.nowFillingArea = false;
+			for (const [position, ghost] of drawnModelsPositions) {
+				const result = await BuildingController.placeBlock({
+					id: this.selectedBlock.get()!.id,
+					color: this.selectedColor.get(),
+					material: this.selectedMaterial.get(),
+					location: position,
+					plot: this.targetPlot.get()!,
+				});
+				if (!result.success) {
+					LogControl.instance.addLine(result.message, Colors.red);
+				}
+
+				ghost.model.Destroy();
+			}
+		});
+
+		this.event.subscribe(this.mouse.Move, () => {
+			const pos = this.mouse.Hit.Position; //replace with position on the filling plane <------------------------------------------ main problem
+			const models = this.drawModels(this.selectedBlock.get()?.model, pressPosition, pos);
+			if (models) drawnModelsPositions = models;
+		});
+		//samlovebutter's code ends here
+
+		this.event.subscribe(this.mouse.Button1Up, () => this.placeBlock());
 		this.event.onPrepare(() => {
-			this.inputHandler.onKeyDown("T", () => this.rotateBlock("x"));
-			this.inputHandler.onKeyDown("R", () => this.rotateBlock("y"));
+			this.inputHandler.onKeyDown("T", () =>
+				!this.nowFillingArea ? this.rotateBlock("x") : this.rotateFillAxis("x"),
+			);
+			this.inputHandler.onKeyDown("R", () =>
+				!this.nowFillingArea ? this.rotateBlock("y") : this.rotateFillAxis("y"),
+			);
 			this.inputHandler.onKeyDown("Y", () => {
+				if (this.nowFillingArea) {
+					this.rotateFillAxis("z");
+					return;
+				}
 				if (InputController.isCtrlPressed()) return;
 				this.rotateBlock("z");
 			});
@@ -68,6 +114,32 @@ export default class BuildTool2 extends ToolBase {
 		this.targetPlot.set(undefined);
 		super.disable();
 	}
+
+	//samlovebutter's code starts here
+	private drawModels(part: BlockModel | undefined, from: Vector3, to: Vector3) {
+		if (!part) return;
+		const selectedBlock = this.selectedBlock.get();
+		if (!selectedBlock) return;
+		const [frame, blockSize] = part.GetBoundingBox(); //get sizes
+		const diff = to.sub(from);
+		const allGhosts: Map<CFrame, BlockGhost> = new Map<CFrame, BlockGhost>();
+		const rotation = this.fillRotation;
+		//get cursor position on the plane
+
+		for (let x = 0; x < diff.X; x += blockSize.X)
+			for (let y = 0; y < diff.Y; y += blockSize.Y)
+				for (let z = 0; z < diff.Z; z += blockSize.Z) {
+					const ghostFrame = new CFrame(frame.Position.add(new Vector3(x, y, z))).mul(frame.Rotation);
+					allGhosts.set(ghostFrame, this.createBlockGhost(selectedBlock));
+				}
+
+		return allGhosts;
+	}
+
+	private rotateFillAxis(axis: "x" | "y" | "z") {
+		//todo finish
+	}
+	//samlovebutter's code ends here
 
 	private destroyGhosts(destroyMain = true) {
 		if (destroyMain) {
