@@ -350,7 +350,7 @@ export default class BuildingWrapper {
 			for (const [key, val] of Objects.pairs(value as Record<string, JsonSerializablePrimitive | object>)) {
 				const rk = ret[key];
 
-				if (!typeIs(rk, "table")) {
+				if (typeIs(rk, "Vector3") || !typeIs(rk, "table")) {
 					ret[key] = val;
 				} else {
 					ret[key] = setobj(rk as Record<string, JsonSerializablePrimitive | object>, key, val);
@@ -362,10 +362,10 @@ export default class BuildingWrapper {
 
 		for (const config of data.configs) {
 			const dataTag = config.block.GetAttribute("config") as string | undefined;
-			const currentData = HttpService.JSONDecode(dataTag ?? "{}") as Record<string, JsonSerializablePrimitive>;
+			const currentData = JSON.deserialize(dataTag ?? "{}") as Record<string, JsonSerializablePrimitive>;
 
 			const newData = withValues(currentData, { [config.key]: JSON.deserialize(config.value) });
-			config.block.SetAttribute("config", HttpService.JSONEncode(newData));
+			config.block.SetAttribute("config", JSON.serialize(newData as JsonSerializablePrimitive));
 		}
 
 		return { success: true };
