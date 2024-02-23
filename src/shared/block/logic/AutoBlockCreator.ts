@@ -95,7 +95,7 @@ const defcs = {
 			type: "or",
 			default: 0 as number,
 			config: {
-				type: "number",
+				type: "unset",
 				value: 0,
 			},
 			group,
@@ -138,11 +138,11 @@ const defs = {
 	},
 	math2numberVector3: {
 		input: {
-			value1: defcs.numberOrVector("Value 1"),
-			value2: defcs.numberOrVector("Value 2"),
+			value1: defcs.numberOrVector("Value 1", "1"),
+			value2: defcs.numberOrVector("Value 2", "1"),
 		},
 		output: {
-			result: defcs.numberOrVector("Result"),
+			result: defcs.numberOrVector("Result", "1"),
 		},
 	},
 } as const satisfies Record<string, BlockConfigTypes.BothDefinitions>;

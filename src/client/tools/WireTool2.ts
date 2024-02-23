@@ -745,6 +745,8 @@ export default class WireTool2 extends ToolBase {
 		this.createEverythingOnPlot(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId));
 	}
 	private createEverythingOnPlot(plot: PlotModel) {
+		const toNarrow: Markers.Marker[] = [];
+
 		for (const block of SharedPlots.getPlotBlockDatas(plot)) {
 			const configDef = (blockConfigRegistry as BlockConfigRegistryNonGeneric)[block.id];
 			if (!configDef) continue;
@@ -754,12 +756,24 @@ export default class WireTool2 extends ToolBase {
 				for (const [key, config] of Objects.pairs(configDef[markerType])) {
 					if (config.connectorHidden) continue;
 
+					let narrow = false;
+					let dataTypes: readonly DataType[];
+					if (config.type === "or") {
+						const existingcfg = (block.config as Record<string, typeof config.config | undefined>)[key];
+
+						if (!existingcfg || existingcfg.type === "unset") {
+							dataTypes = Objects.keys(config.types).map((k) => groups[k]);
+						} else {
+							dataTypes = [groups[existingcfg.type]];
+							narrow = true;
+						}
+					} else {
+						dataTypes = [groups[config.type]];
+					}
+
 					const data: MarkerData = {
 						blockData: block,
-						dataTypes:
-							config.type === "or"
-								? Objects.keys(config.types).map((k) => groups[k])
-								: [groups[config.type]],
+						dataTypes,
 						group: config.type === "or" ? config.group : undefined,
 						id: key as BlockConnectionName,
 						name: config.displayName,
@@ -771,6 +785,9 @@ export default class WireTool2 extends ToolBase {
 							? new Markers.Input(markerInstance, data)
 							: new Markers.Output(markerInstance, data);
 
+					if (narrow) {
+						toNarrow.push(marker);
+					}
 					marker.instance.Parent = this.markerParent;
 					this.markers.add(block.uuid + key, marker);
 				}
@@ -786,6 +803,10 @@ export default class WireTool2 extends ToolBase {
 
 				to.connect(from, this.wireParent);
 			}
+		}
+
+		for (const marker of toNarrow) {
+			marker.narrowDownTypesSelfAndOther();
 		}
 	}
 

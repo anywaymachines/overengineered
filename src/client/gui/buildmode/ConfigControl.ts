@@ -609,6 +609,12 @@ export class OrConfigValueControl extends ConfigValueControl<MultiConfigControlD
 		super(templates.multiMulti(), definition.displayName);
 
 		let selected = config.type;
+		if (config.value === undefined && selected !== "unset") {
+			config = {
+				...config,
+				value: definition.types[selected]?.config as never,
+			};
+		}
 
 		const updateConfig = (value: typeof config.value) => {
 			this.submitted.Fire(
@@ -621,13 +627,23 @@ export class OrConfigValueControl extends ConfigValueControl<MultiConfigControlD
 
 		const control = this.add(new ConfigControl(this.gui.Control.Control));
 		this.event.subscribe(control.configUpdated, (_, value) => updateConfig(value as typeof config.value));
-		control.set({ value: config.value }, { value: definition.types[config.type]! });
+		if (config.type !== "unset") {
+			control.set({ value: config.value }, { value: definition.types[config.type]! });
+		}
 
-		const dropdown = this.add(new DropdownList<keyof typeof definition.types>(this.gui.Control.Dropdown, "down"));
+		const dropdown = this.add(
+			new DropdownList<keyof typeof definition.types | "unset">(this.gui.Control.Dropdown, "down"),
+		);
 		this.event.subscribeObservable(dropdown.selectedItem, (typeid) => {
 			// eslint-disable-next-line roblox-ts/lua-truthiness
 			if (!typeid) {
 				dropdown.selectedItem.set(config.type);
+				return;
+			}
+
+			if (typeid === "unset") {
+				control.clear();
+				updateConfig("unset");
 				return;
 			}
 
@@ -645,6 +661,7 @@ export class OrConfigValueControl extends ConfigValueControl<MultiConfigControlD
 			}
 		});
 
+		dropdown.addItem("unset");
 		for (const [, type] of Objects.pairs(definition.types)) {
 			dropdown.addItem(type.type);
 		}

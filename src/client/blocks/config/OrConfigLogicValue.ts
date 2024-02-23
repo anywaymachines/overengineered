@@ -8,6 +8,9 @@ export class OrConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.Or
 		definition: BlockConfigTypes.Or,
 	) {
 		super(observable, config, definition);
-		this.value.set(config.value);
+
+		if (config.type !== "unset") {
+			this.value.set(config.value);
+		}
 	}
 }

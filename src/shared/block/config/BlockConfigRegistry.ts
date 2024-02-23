@@ -15,7 +15,7 @@ const connectors = {
 			type: "or",
 			default: 0 as number,
 			config: {
-				type: "number",
+				type: "unset",
 				value: 0,
 			},
 			group,
@@ -51,7 +51,7 @@ const connectors = {
 			type: "or",
 			default: 0 as number,
 			config: {
-				type: "number",
+				type: "unset",
 				value: 0,
 			},
 			group,
@@ -84,7 +84,7 @@ const connectors = {
 			type: "or",
 			default: 0 as number,
 			config: {
-				type: "number",
+				type: "unset",
 				value: 0,
 			},
 			group,
