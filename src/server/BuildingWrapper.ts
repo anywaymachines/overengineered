@@ -230,6 +230,11 @@ export default class BuildingWrapper {
 			};
 		}
 
+		// round the coordinates
+		(data as Writable<typeof data>).location = data.location.sub(
+			data.location.Position.sub(VectorUtils.apply(data.location.Position, math.round)),
+		);
+
 		const placedBlock = BuildingWrapper.placeBlock(data);
 
 		if (placedBlock.success) {
