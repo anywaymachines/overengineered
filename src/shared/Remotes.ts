@@ -1,6 +1,18 @@
 import Net from "@rbxts/net";
 
 declare global {
+	type MultiBuildResponse = Response<{ readonly models: readonly BlockModel[] }>;
+	interface PlaceBlocksRequest {
+		readonly plot: PlotModel;
+		readonly blocks: readonly {
+			readonly id: string;
+			readonly color: Color3;
+			readonly material: Enum.Material;
+			readonly location: CFrame;
+			readonly uuid?: string;
+			readonly config?: Readonly<Record<string, string>>;
+		}[];
+	}
 	interface MoveBlocksRequest {
 		readonly plot: PlotModel;
 		readonly blocks: BlockList;
@@ -38,6 +50,7 @@ const Remotes = Net.Definitions.Create({
 		UpdateLogicConnectionRequest:
 			Net.Definitions.ServerAsyncFunction<(data: UpdateLogicConnectionRequest) => Response>(),
 
+		PlaceBlocks: Net.Definitions.ServerAsyncFunction<(data: PlaceBlocksRequest) => MultiBuildResponse>(),
 		MoveBlocks: Net.Definitions.ServerAsyncFunction<(data: MoveBlocksRequest) => Response>(),
 		LogicConnect: Net.Definitions.ServerAsyncFunction<(data: LogicConnectRequest) => Response>(),
 		LogicDisconnect: Net.Definitions.ServerAsyncFunction<(data: LogicDisconnectRequest) => Response>(),

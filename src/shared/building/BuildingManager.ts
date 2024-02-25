@@ -25,6 +25,47 @@ const BuildingManager = {
 		Enum.Material.Wood,
 	] as readonly Enum.Material[],
 
+	/** Get an axis-aligned bounding box of a block model, without weld collisions */
+	getBlockModelAABB(block: Model): Region3 {
+		const min = (v1: Vector3, v2: Vector3): Vector3 =>
+			new Vector3(math.min(v1.X, v2.X), math.min(v1.Y, v2.Y), math.min(v1.Z, v2.Z));
+		const max = (v1: Vector3, v2: Vector3): Vector3 =>
+			new Vector3(math.max(v1.X, v2.X), math.max(v1.Y, v2.Y), math.max(v1.Z, v2.Z));
+
+		let region = new Region3(
+			new Vector3(math.huge, math.huge, math.huge),
+			new Vector3(-math.huge, -math.huge, -math.huge),
+		);
+		for (const child of block.GetDescendants()) {
+			if (!child.IsA("BasePart")) continue;
+			if (child.Parent?.Name === "WeldRegions") continue;
+
+			const regpos = child.ExtentsCFrame;
+			const regsize = child.ExtentsSize;
+			const regmin = regpos.Position.add(regsize.div(-2));
+			const regmax = regpos.Position.add(regsize.div(2));
+
+			const regionmin = region.CFrame.Position.add(region.Size.div(-2));
+			const regionmax = region.CFrame.Position.add(region.Size.div(2));
+
+			region = new Region3(min(regmin, regionmin), max(regmax, regionmax));
+		}
+
+		return region;
+
+		const [cf, size] = block.GetBoundingBox();
+		const sx = size.X;
+		const sy = size.Y;
+		const sz = size.Z;
+
+		const [x, y, z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = cf.GetComponents();
+
+		const wsx = 0.5 * (math.abs(R00) * sx + math.abs(R01) * sy + math.abs(R02) * sz);
+		const wsy = 0.5 * (math.abs(R10) * sx + math.abs(R11) * sy + math.abs(R12) * sz);
+		const wsz = 0.5 * (math.abs(R20) * sx + math.abs(R21) * sy + math.abs(R22) * sz);
+		return new Region3(new Vector3(x - wsx, y - wsy, z - wsz), new Vector3(x + wsx, y + wsy, z + wsz));
+	},
+
 	/** Get an axis-aligned bounding box of a model */
 	getModelAABB(block: Model): Region3 {
 		const [cf, size] = block.GetBoundingBox();

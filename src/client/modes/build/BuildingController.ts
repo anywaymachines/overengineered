@@ -4,6 +4,26 @@ import LogControl from "client/gui/static/LogControl";
 import Remotes from "shared/Remotes";
 
 export default class BuildingController {
+	public static async placeBlocks(
+		data: PlaceBlocksRequest,
+	): Promise<Response<{ readonly positions: readonly Vector3[] }>> {
+		const response = await Remotes.Client.GetNamespace("Building").Get("PlaceBlocks").CallServerAsync(data);
+
+		if (response.success) {
+			for (const model of response.models) {
+				while (!model?.PrimaryPart) {
+					task.wait();
+				}
+
+				Signals.BLOCKS.BLOCK_ADDED.Fire(model);
+			}
+		} else {
+			LogControl.instance.addLine("Placement failed: " + response.message, Colors.red);
+			return response;
+		}
+
+		return { success: true, positions: response.models.map((m) => m.GetPivot().Position) };
+	}
 	public static async placeBlock(data: PlaceBlockRequest): Promise<Response<{ position: Vector3 }>> {
 		const response = await Remotes.Client.GetNamespace("Building").Get("PlaceBlockRequest").CallServerAsync(data);
 
