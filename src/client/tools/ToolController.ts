@@ -1,3 +1,4 @@
+import { Players } from "@rbxts/services";
 import { ClientComponentBase } from "client/component/ClientComponentBase";
 import TooltipsControl from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
@@ -9,6 +10,7 @@ import MoveTool from "client/tools/MoveTool";
 import PaintTool from "client/tools/PaintTool";
 import ToolBase from "client/tools/ToolBase";
 import WireTool from "client/tools/WireTool";
+import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
 import EditTool from "./EditTool";
 import WireTool2 from "./WireTool2";
@@ -52,10 +54,12 @@ export default class ToolController extends ClientComponentBase {
 			this.configTool,
 			this.paintTool,
 			this.wiretool2,
-			this.buildTool2,
 			this.wiretool,
 			this.editTool,
 		];
+		if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
+			tools.insert(6, this.buildTool2);
+		}
 
 		this.tools = tools;
 		this.selectedTool.subscribe((tool) => TooltipsControl.instance.updateControlTooltips(tool));
