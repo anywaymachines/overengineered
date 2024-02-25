@@ -2,6 +2,7 @@ import { ReplicatedStorage } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import { ClientComponentBase } from "client/component/ClientComponentBase";
 import InputController from "client/controller/InputController";
+import { Colors } from "client/gui/Colors";
 import Gui from "client/gui/Gui";
 import LogControl from "client/gui/static/LogControl";
 import BuildingMode from "client/modes/build/BuildingMode";
@@ -112,14 +113,14 @@ namespace Controllers {
 		private readonly plot: PlotModel;
 		private readonly blocks: BlockList;
 		private readonly moveHandles: MoveHandles;
-		private readonly bounds: Region3;
+		private readonly plotBounds: Region3;
 
 		constructor(plot: PlotModel, blocks: BlockList) {
 			super();
 
 			this.plot = plot;
 			this.blocks = blocks;
-			this.bounds = SharedPlots.getPlotBuildingRegion(plot);
+			this.plotBounds = SharedPlots.getPlotBuildingRegion(plot);
 
 			this.moveHandles = this.initializeHandles();
 			this.onDestroy(() => this.moveHandles.Destroy());
@@ -131,21 +132,57 @@ namespace Controllers {
 				let pivots: (readonly [BlockModel, CFrame])[] = [];
 				let difference: Vector3 = Vector3.zero;
 
+				const limitMovement = (
+					regionSize: Vector3,
+					regionPos: Vector3,
+					direction: Vector3,
+					distance: number,
+					bounds: Region3,
+				): number => {
+					const axes = direction.X !== 0 ? "X" : direction.Y !== 0 ? "Y" : "Z";
+					const sign = math.sign(direction[axes]);
+
+					const offset = regionPos[axes] + regionSize[axes] / 2;
+					let boundsmin = (bounds.CFrame.Position[axes] - bounds.Size[axes] / 2 - offset) * sign;
+					let boundsmax = (bounds.CFrame.Position[axes] + bounds.Size[axes] / 2 - offset) * sign;
+					[boundsmin, boundsmax] = [math.min(boundsmin, boundsmax), math.max(boundsmin, boundsmax)];
+
+					print("bounds ", bounds.CFrame.Position, "|", bounds.Size);
+					print("clamping " + distance, boundsmin, boundsmax);
+					return math.clamp(distance, boundsmin, boundsmax);
+				};
+
 				this.event.subscribe(instance.MouseButton1Down, () => {
 					startpos = moveHandles.GetPivot().Position;
 					pivots = getBlockList(blocks).map((p) => [p, p.GetPivot()] as const);
 				});
-				this.event.subscribe(instance.MouseButton1Up, () => {
+				this.event.subscribe(instance.MouseButton1Up, async () => {
 					if (moveHandles.GetPivot().Position === startpos) return;
+
+					print("sending movement " + difference);
+					const success = await this.submit(difference);
+					if (!success) {
+						moveHandles.PivotTo(new CFrame(startpos));
+						for (const [block, startpos] of pivots) {
+							block.PivotTo(startpos);
+						}
+					}
+
 					pivots.clear();
-					this.submit(difference);
 				});
 
 				this.event.subscribe(instance.MouseDrag, (face, distance) => {
-					distance -= distance % this.step.get();
+					distance = limitMovement(
+						moveHandles.Size,
+						startpos,
+						Vector3.FromNormalId(face),
+						distance,
+						this.plotBounds,
+					);
+					distance -= ((distance + 0.5) % this.step.get()) - 0.5;
 
 					difference = Vector3.FromNormalId(face).mul(distance);
-					if (!canBeMoved(moveHandles.Size, startpos.add(difference), this.bounds)) {
+					if (!canBeMoved(moveHandles.Size, startpos.add(difference), this.plotBounds)) {
 						return;
 					}
 
@@ -172,12 +209,18 @@ namespace Controllers {
 			return moveHandles;
 		}
 
-		private async submit(diff: Vector3) {
-			await Remotes.Client.GetNamespace("Building").Get("MoveBlocks").CallServerAsync({
+		private async submit(diff: Vector3): Promise<boolean> {
+			const response = await Remotes.Client.GetNamespace("Building").Get("MoveBlocks").CallServerAsync({
 				plot: this.plot,
 				blocks: this.blocks,
 				diff,
 			});
+
+			if (!response.success) {
+				LogControl.instance.addLine(response.message, Colors.red);
+			}
+
+			return response.success;
 		}
 	}
 }
