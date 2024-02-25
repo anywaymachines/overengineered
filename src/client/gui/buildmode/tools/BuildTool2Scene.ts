@@ -53,7 +53,9 @@ export default class BuildTool2Scene extends Control<BuildTool2SceneDefinition> 
 
 			// Set block info
 			if (block) {
-				this.blockInfoPreviewControl = this.add(new BlockPreviewControl(this.gui.Info.ViewportFrame, block));
+				this.blockInfoPreviewControl = this.add(
+					new BlockPreviewControl(this.gui.Info.ViewportFrame, block.model),
+				);
 				this.gui.Info.NameLabel.Text = block.displayName;
 				this.gui.Info.DescriptionLabel.Text = block.info;
 

@@ -4,7 +4,7 @@ import Control from "client/gui/Control";
 export default class BlockPreviewControl extends Control<ViewportFrame> {
 	private block?: BlockModel;
 
-	constructor(gui: ViewportFrame, block?: Block) {
+	constructor(gui: ViewportFrame, block?: BlockModel) {
 		super(gui);
 		this.set(block);
 
@@ -47,11 +47,11 @@ export default class BlockPreviewControl extends Control<ViewportFrame> {
 		}
 	}
 
-	set(block: Block | undefined) {
+	set(block: BlockModel | undefined) {
 		this.gui.ClearAllChildren();
 
 		if (block) {
-			this.block = block.model.Clone();
+			this.block = block.Clone();
 			this.block.Parent = this.gui;
 
 			const size = this.block.GetExtentsSize();

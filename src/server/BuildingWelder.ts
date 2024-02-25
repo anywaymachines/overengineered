@@ -1,4 +1,5 @@
-import { ReplicatedStorage, Workspace } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
+import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
 import Arrays from "shared/fixes/Arrays";
 
@@ -15,24 +16,7 @@ export default class BuildingWelder {
 	}
 
 	static initialize() {
-		const getBlocks = (parent: Instance): readonly BlockModel[] => {
-			const ret: BlockModel[] = [];
-			for (const child of parent.GetChildren()) {
-				if (child.IsA("Folder")) {
-					for (const block of getBlocks(child)) {
-						ret.push(block);
-					}
-				} else if (child.IsA("Model")) {
-					ret.push(child as BlockModel);
-				}
-			}
-
-			return ret;
-		};
-
-		BuildingWelder.initPartBlockCollisions(
-			getBlocks(ReplicatedStorage.WaitForChild("Assets").WaitForChild("Placeable")),
-		);
+		BuildingWelder.initPartBlockCollisions(BlocksInitializer.blocks.sorted.map((b) => b.model));
 	}
 
 	private static initPartBlockCollisions(blocks: readonly BlockModel[]) {

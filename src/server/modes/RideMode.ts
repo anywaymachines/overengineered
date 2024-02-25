@@ -3,7 +3,7 @@ import BuildingWelder from "server/BuildingWelder";
 import SlotDatabase from "server/database/SlotDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
 import ServerPartUtils from "server/plots/ServerPartUtils";
-import { blockList } from "shared/Registry";
+import { BlocksInitializer } from "shared/BlocksInitializer";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
 import PlayModeBase from "./PlayModeBase";
@@ -32,8 +32,7 @@ export default class RideMode implements PlayModeBase {
 
 		const blocksChildren = blocks.GetChildren(undefined);
 
-		const requiredBlocks = blockList.filter((value) => value.required);
-		for (const block of requiredBlocks) {
+		for (const block of BlocksInitializer.blocks.required) {
 			if (!blocksChildren.find((value) => value.GetAttribute("id") === block.id)) {
 				return {
 					success: false,

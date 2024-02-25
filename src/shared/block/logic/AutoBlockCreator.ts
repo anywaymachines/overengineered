@@ -1,5 +1,8 @@
 import { RunService } from "@rbxts/services";
-import { BlockDataRegistry } from "shared/Blocks";
+import { BlockDataRegistry } from "shared/BlockDataRegistry";
+import type { BlocksInitializeData } from "shared/BlocksInitializer";
+import { Element } from "shared/Element";
+import Logger from "shared/Logger";
 import RemoteEvents from "shared/RemoteEvents";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import BlockLogic from "shared/block/BlockLogic";
@@ -22,55 +25,22 @@ interface BlockAdditional {
 }
 interface CreateInfo<TFunc> extends BlockAdditional {
 	readonly func: TFunc;
+	readonly modelTextOverride?: string;
 }
 
-const createBase = (displayName: string, prefab: string, additional: BlockAdditional): BlockResult => {
-	const id = `operation${displayName.lower()}`;
-	displayName = BlockDataRegistry[id].name;
-	const info = BlockDataRegistry[id].description;
-
-	return {
-		id,
-		displayName,
-		info,
-		prefab,
-		...additional,
-	};
-};
-
-/** @server */
-const initializeBlock = (block: BlockResult) => {
-	let currentCategory: Folder | undefined;
-	for (const category of block.category) {
-		currentCategory = (currentCategory?.WaitForChild(category) ??
-			ReplicatedAssets.get<{ Placeable: Folder }>().Placeable.WaitForChild(category)) as Folder;
-	}
-
-	if (!currentCategory) throw "No category";
-
-	const createModel = (prefab: BlockModel, text: string): BlockModel => {
-		prefab = prefab.Clone();
-		prefab.FindFirstChildWhichIsA("TextLabel", true)!.Text = text;
-
-		return prefab;
-	};
-	const model = createModel(
-		ReplicatedAssets.get<{ Prefabs: Record<string, BlockModel> }>().Prefabs[block.prefab],
-		block.displayName,
-	);
-
-	model.Name = block.id;
-	model.SetAttribute("id", block.id);
-	model.SetAttribute("name", block.displayName);
-	model.SetAttribute("info", block.info);
-	if (block.required !== undefined) model.SetAttribute("required", block.required);
-	if (block.limit !== undefined) model.SetAttribute("limit", block.limit);
-	model.Parent = currentCategory;
-};
-
-//
-
 const defcs = {
+	bool(
+		name: string,
+		additional?: Partial<ConfigTypeToDefinition<BlockConfigTypes.Bool>>,
+	): ConfigTypeToDefinition<BlockConfigTypes.Bool> {
+		return {
+			displayName: name,
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+			...(additional ?? {}),
+		};
+	},
 	number(
 		name: string,
 		additional?: Partial<ConfigTypeToDefinition<BlockConfigTypes.Number>>,
@@ -147,14 +117,6 @@ const defs = {
 	},
 } as const satisfies Record<string, BlockConfigTypes.BothDefinitions>;
 
-const regblock = (displayName: string, additional: BlockAdditional): BlockResult => {
-	const data = createBase(displayName, "OperationPrefab", additional);
-	if (RunService.IsServer()) {
-		initializeBlock(data);
-	}
-
-	return data;
-};
 const reglogic = (
 	name: string,
 	logic: new (block: PlacedBlockData) => BlockLogic,
@@ -238,6 +200,7 @@ const operations = {
 	math2number: {},
 	math2numberVector3: {
 		ADD: {
+			modelTextOverride: "ADD",
 			category: mathCategory,
 			func: multiifunc({
 				number: (left, right) => left + right,
@@ -245,6 +208,7 @@ const operations = {
 			}),
 		},
 		SUB: {
+			modelTextOverride: "SUB",
 			category: mathCategory,
 			func: multiifunc({
 				number: (left, right) => left - right,
@@ -252,6 +216,7 @@ const operations = {
 			}),
 		},
 		MUL: {
+			modelTextOverride: "MUL",
 			category: mathCategory,
 			func: multiifunc({
 				number: (left, right) => left * right,
@@ -259,6 +224,7 @@ const operations = {
 			}),
 		},
 		DIV: {
+			modelTextOverride: "DIV",
 			category: mathCategory,
 			func: multiifunc({
 				number: (left, right, logic) => {
@@ -280,19 +246,10 @@ const operations = {
 			}),
 		},
 	},
-} as const satisfies { [k in keyof typeof logicReg]: Record<string, CreateInfo<Parameters<(typeof logicReg)[k]>[0]>> };
-
-for (const [optype, ops] of Objects.pairs(operations)) {
-	for (const [name, data] of Objects.pairs(ops)) {
-		print(`[BLOCKAUTOCREATE] Creating block ${name}`);
-		const block = regblock(name, data);
-
-		const logic = logicReg[optype]((data as { func: never }).func);
-		reglogic(block.id, logic, defs[optype]);
-	}
-}
-
-//
+} as const satisfies NonGenericOperations;
+type NonGenericOperations = {
+	readonly [k in keyof typeof logicReg]: Record<string, CreateInfo<Parameters<(typeof logicReg)[k]>[0]>>;
+};
 
 type operations = typeof operations;
 type toBlockLogic<T extends keyof operations> = {
@@ -304,7 +261,60 @@ declare global {
 		toBlockLogic<"math2numberVector3">;
 }
 
+const create = (info: BlocksInitializeData) => {
+	/** @server */
+	const initializeBlockModel = (
+		id: string,
+		prefab: string,
+		displayName: string,
+		modelTextOverride: string | undefined,
+	): BlockModel => {
+		const model = ReplicatedAssets.get<{ Prefabs: Record<string, BlockModel> }>().Prefabs[prefab].Clone();
+		model.Name = id;
+		model.FindFirstChildWhichIsA("TextLabel", true)!.Text = modelTextOverride ?? displayName;
+		model.Parent = ReplicatedAssets.get<{ Placeable: { Automatic: Folder } }>().Placeable.Automatic;
+
+		return model;
+	};
+
+	const createBase = (displayName: string, prefab: string, additional: BlockAdditional): BlockResult => {
+		const id = `operation${displayName.lower()}`;
+		displayName = BlockDataRegistry[id].name;
+		const info = BlockDataRegistry[id].description;
+
+		return {
+			id,
+			displayName,
+			info,
+			prefab,
+			...additional,
+		};
+	};
+
+	Element.create("Folder", { Name: "Automatic", Parent: ReplicatedAssets.get<{ Placeable: Folder }>().Placeable });
+	for (const [optype, ops] of Objects.pairs(operations as NonGenericOperations)) {
+		for (const [name, data] of Objects.pairs(ops)) {
+			Logger.info(`[BAC] Creating block ${name}`);
+
+			const block = createBase(name, "OperationPrefab", data);
+			const regblock: RegistryBlock = {
+				id: block.id,
+				displayName: block.displayName,
+				info: block.info,
+				category: block.category[block.category.size() - 1] as RegistryBlock["category"],
+				model: RunService.IsClient()
+					? ReplicatedAssets.get<{ Placeable: { Automatic: Record<string, BlockModel> } }>().Placeable
+							.Automatic[block.id]
+					: initializeBlockModel(block.id, block.prefab, block.displayName, data.modelTextOverride),
+			};
+			info.blocks.set(regblock.id, regblock);
+
+			const logic = logicReg[optype](data.func as never);
+			reglogic(block.id, logic, defs[optype]);
+		}
+	}
+};
+
 export const AutoBlockCreator = {
-	// empty method to trigger the import
-	initialize() {},
+	create,
 } as const;

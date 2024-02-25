@@ -3,6 +3,7 @@ type BlockInformation = {
 	readonly description: string;
 };
 
+/** Registry for the block names and descriptions, for easier editing (compared to Roblox Studio) */
 export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 	accelerometer: {
 		name: "Accelerometer",

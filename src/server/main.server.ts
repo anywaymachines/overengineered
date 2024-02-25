@@ -1,9 +1,9 @@
 import { RunService } from "@rbxts/services";
+import { BlocksInitializer } from "shared/BlocksInitializer";
 import Logger from "shared/Logger";
 import RemoteEvents from "shared/RemoteEvents";
 import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
-import { AutoBlockCreator } from "shared/block/logic/AutoBlockCreator";
 import SharedPlots from "shared/building/SharedPlots";
 import GameDefinitions from "shared/data/GameDefinitions";
 import { RequestBuildingController } from "./BuildingController";
@@ -150,7 +150,7 @@ registerOnRemoteEvent("Admin", "LoadSlot", RemoteHandlers.loadSlotAsAdmin);
 registerOnRemoteEvent("Admin", "SendMessage", RemoteHandlers.sendMessageAsAdmin);
 UnreliableRemoteHandler.init();
 
-AutoBlockCreator.initialize();
+BlocksInitializer.initialize();
 BuildingWelder.initialize();
 
 PlayModeController.init();

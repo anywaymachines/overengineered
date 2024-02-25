@@ -5,7 +5,7 @@ import GuiAnimator from "client/gui/GuiAnimator";
 import BlockPreviewControl from "client/gui/buildmode/BlockPreviewControl";
 import BlockPipetteButton from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
-import Registry, { blockList, blockRegistry, categoriesRegistry } from "shared/Registry";
+import { BlocksInitializer } from "shared/BlocksInitializer";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
 
@@ -23,11 +23,11 @@ type BlockControlDefinition = GuiButton & {
 	readonly TextLabel: TextLabel;
 };
 class BlockControl extends TextButtonControl<BlockControlDefinition> {
-	constructor(template: BlockControlDefinition, block: Block) {
+	constructor(template: BlockControlDefinition, block: RegistryBlock) {
 		super(template);
 
 		this.text.set(block.displayName);
-		this.add(new BlockPreviewControl(template.ViewportFrame, block));
+		this.add(new BlockPreviewControl(template.ViewportFrame, block.model));
 	}
 }
 
@@ -51,7 +51,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 	private readonly list;
 
 	readonly selectedCategory = new ObservableValue<readonly CategoryName[]>([]);
-	readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
+	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
 
 	readonly pipette;
 
@@ -68,9 +68,9 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 
 		this.pipette = this.add(
 			BlockPipetteButton.forBlockId(this.gui.Header.Pipette, (id) => {
-				this.selectedBlock.set(blockRegistry.get(id)!);
+				this.selectedBlock.set(BlocksInitializer.blocks.map.get(id));
 				this.selectedCategory.set(
-					Registry.findCategoryPath(categoriesRegistry, this.selectedBlock.get()!.category) ?? [],
+					BlocksInitializer.categories.getCategoryPath(this.selectedBlock.get()!.category) ?? [],
 				);
 			}),
 		);
@@ -105,7 +105,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 			control.getGui().LayoutOrder = idx++;
 			return control;
 		};
-		const createBlockButton = (block: Block, activated: () => void) => {
+		const createBlockButton = (block: RegistryBlock, activated: () => void) => {
 			const control = new BlockControl(this.blockTemplate(), block);
 			control.activated.Connect(activated);
 			this.list.add(control);
@@ -130,7 +130,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		if (this.gui.SearchTextBox.Text === "") {
 			// Category buttons
 			for (const [_, category] of Objects.pairs(
-				selected.reduce((acc, val) => acc[val].sub, categoriesRegistry),
+				selected.reduce((acc, val) => acc[val].sub, BlocksInitializer.categories.categories),
 			)) {
 				createCategoryButton(category.name, () => this.selectedCategory.set([...selected, category.name]));
 			}
@@ -138,7 +138,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 
 		// Block buttons
 		let prev: BlockControl | CategoryControl | undefined;
-		for (const block of blockList) {
+		for (const block of BlocksInitializer.blocks.sorted) {
 			if (
 				block.category === this.selectedCategory.get()[this.selectedCategory.get().size() - 1] ||
 				(this.gui.SearchTextBox.Text !== "" &&
@@ -147,7 +147,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 				const button = createBlockButton(block, () => {
 					if (this.gui.SearchTextBox.Text !== "") {
 						this.gui.SearchTextBox.Text = "";
-						this.selectedCategory.set(Registry.findCategoryPath(categoriesRegistry, block.category) ?? []);
+						this.selectedCategory.set(BlocksInitializer.categories.getCategoryPath(block.category) ?? []);
 					}
 					this.selectedBlock.set(block);
 				});

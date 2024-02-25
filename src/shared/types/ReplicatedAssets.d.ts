@@ -44,8 +44,8 @@ interface ReplicatedStorage {
 				};
 			};
 		};
-		Blocks: Folder;
 		CenterOfMass: Model;
+		Placeable: Folder;
 		Axis: Model & {
 			X: BasePart;
 			Y: BasePart;

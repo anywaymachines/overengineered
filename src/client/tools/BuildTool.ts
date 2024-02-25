@@ -21,7 +21,7 @@ import VectorUtils from "shared/utils/VectorUtils";
 
 /** A tool for building in the world with blocks */
 export default class BuildTool extends ToolBase {
-	public readonly selectedBlock = new ObservableValue<Block | undefined>(undefined);
+	public readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
 
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
@@ -40,7 +40,7 @@ export default class BuildTool extends ToolBase {
 	private lastMouseSurface?: Enum.NormalId;
 
 	// Signals
-	public pickSignal = new Signal<(block: Block) => void>();
+	public pickSignal = new Signal<(block: RegistryBlock) => void>();
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -57,7 +57,7 @@ export default class BuildTool extends ToolBase {
 		return "rbxassetid://12539295858";
 	}
 
-	public setSelectedBlock(block: Block | undefined) {
+	public setSelectedBlock(block: RegistryBlock | undefined) {
 		this.selectedBlock.set(block);
 		this.previewBlockRotation = CFrame.identity;
 		this.prepareVisual();

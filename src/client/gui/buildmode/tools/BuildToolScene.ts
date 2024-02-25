@@ -7,7 +7,7 @@ import MaterialColorEditControl, {
 	MaterialColorEditControlDefinition,
 } from "client/gui/buildmode/MaterialColorEditControl";
 import BuildTool from "client/tools/BuildTool";
-import Registry, { categoriesRegistry } from "shared/Registry";
+import { BlocksInitializer } from "shared/BlocksInitializer";
 
 export type BuildToolSceneDefinition = GuiObject & {
 	readonly Bottom: MaterialColorEditControlDefinition;
@@ -44,7 +44,7 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 
 		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => {
 			this.gui.Info.Visible = block !== undefined;
-			this.blockInfoPreviewControl.set(block);
+			this.blockInfoPreviewControl.set(block?.model);
 			this.tool.setSelectedBlock(block);
 
 			// Clear block info
@@ -61,7 +61,7 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 		});
 
 		this.event.subscribe(this.tool.pickSignal, (block) => {
-			const targetCategory = Registry.findCategoryPath(categoriesRegistry, block.category)!;
+			const targetCategory = BlocksInitializer.categories.getCategoryPath(block.category) ?? [];
 
 			if (
 				this.blockSelector.selectedCategory.get()[this.blockSelector.selectedCategory.get().size() - 1] !==

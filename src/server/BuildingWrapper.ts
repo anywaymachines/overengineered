@@ -223,7 +223,7 @@ export default class BuildingWrapper {
 				return placed_block.GetAttribute("id") === data.id;
 			})
 			.size();
-		if (placedBlocks >= block.limit) {
+		if (placedBlocks >= (block.limit ?? 2000)) {
 			return {
 				success: false,
 				message: "Type limit exceeded",
