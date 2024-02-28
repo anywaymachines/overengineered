@@ -6,7 +6,7 @@ import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
 import GameDefinitions from "shared/data/GameDefinitions";
-import { RequestBuildingController } from "./BuildingController";
+import { BuildingController, RequestBuildingController } from "./BuildingController";
 import BuildingWelder from "./BuildingWelder";
 import BuildingWrapper from "./BuildingWrapper";
 import PlayerDatabase, { PlayerData } from "./database/PlayerDatabase";
@@ -48,7 +48,7 @@ class RemoteHandlers {
 		}
 
 		Logger.info(`Loading ${userid}'s slot ${index}`);
-		ServerPlots.clearAllBlocks(plot);
+		BuildingController.clearPlot(plot);
 		const dblocks = BlocksSerializer.deserialize(blocks, plot);
 		print(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
 

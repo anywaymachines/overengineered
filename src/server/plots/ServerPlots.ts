@@ -1,4 +1,5 @@
 import { HttpService, Players, ReplicatedStorage } from "@rbxts/services";
+import { BuildingController } from "server/BuildingController";
 import Logger from "shared/Logger";
 import SharedPlots from "shared/building/SharedPlots";
 import GameDefinitions from "shared/data/GameDefinitions";
@@ -114,15 +115,11 @@ export default class ServerPlots {
 		return plot;
 	}
 
-	public static clearAllBlocks(plot: PlotModel) {
-		plot.Blocks.ClearAllChildren();
-	}
-
 	private static resetPlotOf(player: Player): void {
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
 		const blocks = plot.FindFirstChild("Blocks") as Model;
 
-		this.clearAllBlocks(plot);
+		BuildingController.clearPlot(plot);
 		this.writePlotData(plot, this.createDefaultPlotData());
 
 		// Remove persistant player

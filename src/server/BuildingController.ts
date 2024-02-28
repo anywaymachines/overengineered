@@ -1,11 +1,13 @@
 import { HttpService } from "@rbxts/services";
+import { blockRegistry } from "shared/Registry";
 import BlockManager from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import SharedPlots from "shared/building/SharedPlots";
+import JSON from "shared/fixes/Json";
+import Objects from "shared/fixes/objects";
 import VectorUtils from "shared/utils/VectorUtils";
 import BuildingWelder from "./BuildingWelder";
-import BuildingWrapper from "./BuildingWrapper";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
@@ -63,11 +65,15 @@ export const RequestBuildingController = {
 
 /** Methods for controlling the buildings server-side */
 export const BuildingController = {
+	clearPlot: (plot: PlotModel): void => {
+		plot.Blocks.ClearAllChildren();
+		BuildingWelder.deleteWelds(plot);
+	},
 	placeBlocks: (request: PlaceBlocksRequest): MultiBuildResponse => {
 		const models: BlockModel[] = [];
 
 		for (const block of request.blocks) {
-			const response = BuildingWrapper.placeBlock({
+			const response = BuildingController.placeBlock({
 				plot: request.plot,
 				...block,
 			});
@@ -83,6 +89,51 @@ export const BuildingController = {
 			success: true,
 			models,
 		};
+	},
+	placeBlock: (data: PlaceBlockRequest): BuildResponse => {
+		const block = blockRegistry.get(data.id)!;
+
+		// Create a new instance of the building model
+		const model = block.model.Clone();
+		model.SetAttribute("id", data.id);
+
+		model.PivotTo(data.location);
+
+		// Set material & color
+		if (data.config && Objects.keys(data.config).size() !== 0) {
+			model.SetAttribute("config", JSON.serialize(data.config));
+		}
+
+		const uuid = data.uuid ?? HttpService.GenerateGUID(false);
+		model.SetAttribute("uuid", uuid);
+		model.Name = uuid;
+
+		SharedBuilding.paint({ blocks: [model], color: data.color, material: data.material }, true);
+
+		model.Parent = data.plot.Blocks;
+
+		// Weld block
+		const newJoints = BuildingWelder.weldOnPlot(data.plot, model);
+		/*if (newJoints.size() !== 0) {
+			PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
+				if (part.Name.lower() === "colbox") return;
+				part.Anchored = false;
+			});
+
+			for (const part of newJoints) {
+				if (part.AssemblyRootPart?.Parent === model) continue;
+
+				PartUtils.applyToAllDescendantsOfType("BasePart", part.AssemblyRootPart!.Parent!, (part) => {
+					part.Anchored = false;
+				});
+			}
+
+			if (!model.PrimaryPart!.AssemblyRootPart!.Anchored) {
+				model.PrimaryPart!.Anchored = true;
+			}
+		}*/
+
+		return { success: true, model: model };
 	},
 	moveBlocks: ({ plot, blocks, diff }: MoveBlocksRequest): Response => {
 		let blocksRegion = SharedBuilding.isFullPlot(blocks)
@@ -102,9 +153,8 @@ export const BuildingController = {
 
 		for (const block of blocks) {
 			// TODO:: not unweld moved blocks between them
-			BuildingWelder.unweldFromOtherBlocks(block);
 			block.PivotTo(block.GetPivot().add(diff));
-			BuildingWelder.weld(block);
+			BuildingWelder.moveCollisions(plot, block, block.GetPivot());
 		}
 
 		return success;

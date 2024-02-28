@@ -8,8 +8,8 @@ import JSON, { JsonSerializablePrimitive } from "shared/fixes/Json";
 import Objects from "shared/fixes/objects";
 import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
+import { BuildingController } from "./BuildingController";
 import BuildingWelder from "./BuildingWelder";
-import ServerPlots from "./plots/ServerPlots";
 
 const errorPlotNotFound = (): ErrorResponse => {
 	return {
@@ -124,9 +124,8 @@ export default class BuildingWrapper {
 			}
 
 			for (const block of blocks) {
-				BuildingWelder.unweldFromOtherBlocks(block);
 				block.PivotTo(block.GetPivot().add(data.vector));
-				BuildingWelder.weld(block);
+				BuildingWelder.moveCollisions(plot, block, block.GetPivot());
 			}
 		}
 
@@ -138,7 +137,10 @@ export default class BuildingWrapper {
 	public static deleteBlockAsPlayer(this: void, player: Player, data: PlayerDeleteBlockRequest): Response {
 		if (data === "all") {
 			const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-			return BuildingWrapper.clearPlot(plot);
+			BuildingController.clearPlot(plot);
+			return {
+				success: true,
+			};
 		}
 
 		for (const block of data) {
@@ -167,11 +169,6 @@ export default class BuildingWrapper {
 		return { success: true };
 	}
 
-	public static clearPlot(this: void, plot: PlotModel): Response {
-		ServerPlots.clearAllBlocks(plot);
-		return { success: true };
-	}
-
 	public static deleteBlock(this: void, block: BlockModel): Response {
 		const plot = SharedPlots.getPlotByBlock(block);
 		if (!plot)
@@ -194,6 +191,7 @@ export default class BuildingWrapper {
 		}
 
 		const unwelded = BuildingWelder.unweld(block);
+		BuildingWelder.deleteWeld(plot, block);
 		/*for (const [root] of Arrays.groupBySet(unwelded, (p) => p.AssemblyRootPart!)) {
 			root.Anchored = true;
 		}*/
@@ -235,7 +233,7 @@ export default class BuildingWrapper {
 			data.location.Position.sub(VectorUtils.apply(data.location.Position, math.round)),
 		);
 
-		const placedBlock = BuildingWrapper.placeBlock(data);
+		const placedBlock = BuildingController.placeBlock(data);
 
 		if (placedBlock.success) {
 			PartUtils.applyToAllDescendantsOfType("Sound", placedBlock.model, (sound) => {
@@ -273,51 +271,6 @@ export default class BuildingWrapper {
 
 			if (!result.success) return result;
 		}*/
-	}
-	public static placeBlock(this: void, data: PlaceBlockRequest): BuildResponse {
-		const block = blockRegistry.get(data.id)!;
-
-		// Create a new instance of the building model
-		const model = block.model.Clone();
-		model.SetAttribute("id", data.id);
-
-		model.PivotTo(data.location);
-
-		// Set material & color
-		if (data.config && Objects.keys(data.config).size() !== 0) {
-			model.SetAttribute("config", JSON.serialize(data.config));
-		}
-
-		const uuid = data.uuid ?? HttpService.GenerateGUID(false);
-		model.SetAttribute("uuid", uuid);
-		model.Name = uuid;
-
-		SharedBuilding.paint({ blocks: [model], color: data.color, material: data.material }, true);
-
-		model.Parent = data.plot.Blocks;
-
-		// Weld block
-		const newJoints = BuildingWelder.weld(model);
-		/*if (newJoints.size() !== 0) {
-			PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
-				if (part.Name.lower() === "colbox") return;
-				part.Anchored = false;
-			});
-
-			for (const part of newJoints) {
-				if (part.AssemblyRootPart?.Parent === model) continue;
-
-				PartUtils.applyToAllDescendantsOfType("BasePart", part.AssemblyRootPart!.Parent!, (part) => {
-					part.Anchored = false;
-				});
-			}
-
-			if (!model.PrimaryPart!.AssemblyRootPart!.Anchored) {
-				model.PrimaryPart!.Anchored = true;
-			}
-		}*/
-
-		return { success: true, model: model };
 	}
 
 	public static updateConfigAsPlayer(this: void, player: Player, data: ConfigUpdateRequest): Response {

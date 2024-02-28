@@ -1,5 +1,4 @@
 import { Players } from "@rbxts/services";
-import BuildingWelder from "server/BuildingWelder";
 import SlotDatabase from "server/database/SlotDatabase";
 import BlocksSerializer from "server/plots/BlocksSerializer";
 import ServerPartUtils from "server/plots/ServerPartUtils";
@@ -63,10 +62,6 @@ export default class RideMode implements PlayModeBase {
 
 		//const currentMachine = new SharedMachine();
 		//currentMachine.init(SharedPlots.getPlotBlockDatas(plot));
-
-		for (const block of blocksChildren) {
-			BuildingWelder.removeWeldCollisions(block);
-		}
 
 		ServerPartUtils.switchDescendantsAnchor(blocks, false);
 		if (true as boolean) {

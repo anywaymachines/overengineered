@@ -53,16 +53,22 @@ export default class BlockManager {
 		return;
 	}
 
+	static getIdByModel(model: BlockModel): string {
+		return model.GetAttribute("id") as string;
+	}
+	static getUuidByModel(model: BlockModel): BlockUuid {
+		return model.GetAttribute("uuid") as BlockUuid;
+	}
 	static getBlockDataByBlockModel(model: BlockModel): PlacedBlockData {
 		return {
 			instance: model,
-			id: model.GetAttribute("id") as string,
+			id: this.getIdByModel(model),
 			cframe: model.GetPivot(),
 			color: Serializer.Color3Serializer.deserialize(
 				HttpService.JSONDecode(model.GetAttribute("color") as string) as SerializedColor,
 			),
 			material: Serializer.EnumMaterialSerializer.deserialize(model.GetAttribute("material") as number),
-			uuid: model.GetAttribute("uuid") as BlockUuid,
+			uuid: this.getUuidByModel(model),
 			connections: HttpService.JSONDecode(
 				(model.GetAttribute("connections") as string | undefined) ?? "{}",
 			) as PlacedBlockData["connections"],

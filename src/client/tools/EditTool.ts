@@ -173,7 +173,7 @@ namespace Controllers {
 
 				this.event.subscribe(instance.MouseDrag, (face, distance) => {
 					distance = limitMovement(
-						moveHandles.Size,
+						aabb.Size,
 						startpos,
 						Vector3.FromNormalId(face),
 						distance,
@@ -182,7 +182,7 @@ namespace Controllers {
 					distance -= ((distance + 0.5) % this.step.get()) - 0.5;
 
 					difference = Vector3.FromNormalId(face).mul(distance);
-					if (!canBeMoved(moveHandles.Size, startpos.add(difference), this.plotBounds)) {
+					if (!canBeMoved(aabb.Size, startpos.add(difference), this.plotBounds)) {
 						return;
 					}
 
@@ -195,10 +195,10 @@ namespace Controllers {
 
 			const aabb = isFullPlot(this.blocks)
 				? BuildingManager.getModelAABB(this.blocks)
-				: BuildingManager.getBlocksAABB(this.blocks);
+				: BuildingManager.getBlockModelsAABB(this.blocks);
 
 			const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
-			moveHandles.Size = aabb.Size.add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
+			moveHandles.Size = aabb.Size.add(new Vector3(0.00001, 0.00001, 0.00001)); // + 0.00001 to avoid z-fighting
 			moveHandles.PivotTo(aabb.CFrame);
 			moveHandles.Parent = Gui.getPlayerGui();
 

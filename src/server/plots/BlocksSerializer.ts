@@ -1,5 +1,5 @@
 import { HttpService } from "@rbxts/services";
-import BuildingWrapper from "server/BuildingWrapper";
+import { BuildingController } from "server/BuildingController";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
@@ -203,7 +203,7 @@ const place = {
 			plot,
 		};
 
-		const response = BuildingWrapper.placeBlock(deserializedData);
+		const response = BuildingController.placeBlock(deserializedData);
 		if (response.success && response.model && blockData.connections) {
 			response.model.SetAttribute("connections", HttpService.JSONEncode(blockData.connections));
 		}

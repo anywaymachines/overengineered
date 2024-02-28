@@ -1,4 +1,4 @@
-import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { Players, Workspace } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
@@ -33,9 +33,10 @@ export default class BuildTool2 extends ToolBase {
 	private blockRotation = CFrame.identity;
 
 	//samlovebutter's code starts here
-	private fillRotation = CFrame.identity;
+	private possibleFillRotationAxis = [Vector3.yAxis, Vector3.xAxis, Vector3.zAxis];
+	private fillRotationMode = 0;
 	private nowFillingArea = false;
-	private debugPrefab = ReplicatedStorage.Assets.CenterOfMass.Clone();
+	//private debugPrefab = ReplicatedStorage.Assets.CenterOfMass.Clone();
 	//samlovebutter's code ends here
 
 	private readonly targetPlot = new ObservableValue<PlotModel | undefined>(undefined);
@@ -43,7 +44,7 @@ export default class BuildTool2 extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		this.debugPrefab.Parent = Workspace;
+		//this.debugPrefab.Parent = Workspace;
 		this.targetPlot.subscribe((plot) => mode.mirrorVisualizer.plot.set(plot));
 
 		this.onPrepare((input) => {
@@ -63,7 +64,12 @@ export default class BuildTool2 extends ToolBase {
 		let drawnModelsPositions: Set<BlockGhost> = new Set<BlockGhost>();
 
 		this.event.subscribe(this.mouse.Button1Down, () => {
+			const block = this.selectedBlock.get();
+			if (!block) return;
 			pressPosition = this.mouse.Hit.Position;
+			const mouseSurface = this.mouse.TargetSurface;
+			const normal = Vector3.FromNormalId(mouseSurface);
+			pressPosition = this.addBlockSize(block, normal, pressPosition);
 			this.nowFillingArea = true;
 		});
 
@@ -88,32 +94,60 @@ export default class BuildTool2 extends ToolBase {
 			const hit = this.mouse.Hit.Position;
 			const clickDirection = cameraPostion.sub(hit).Unit;
 			const pos = this.getPositionOnBuildingPlane(pressPosition, cameraPostion, clickDirection);
+			//detect pos change?
+			//somehow detect which block is outa distance?
+			//create new ghost otherwise
 			const models = this.drawModels(this.selectedBlock.get()?.model, pressPosition, pos);
-			if (models) drawnModelsPositions = models;
+			if (!models) return;
+			drawnModelsPositions = models;
+			/*
+			print(drawnModelsPositions.size(), models.size());
+			print(drawnModelsPositions.size() > models.size() ? "more" : "less");
 
-			/* possible optimisation (not finished)
-			if (models) {
-				for (const [pos, model] of models) {
-					if (!drawnModelsPositions.has(pos)) drawnModelsPositions.set(pos, model);
+			const pos1 = new Set<Vector3>();
+			const pos2 = new Set<Vector3>();
+
+			drawnModelsPositions.forEach((v) => pos2.add(v.model.GetPivot().Position));
+			models.forEach((v) => pos2.add(v.model.GetPivot().Position));
+
+			if (drawnModelsPositions.size() > models.size()) {
+				//find ghosts on same positions
+				const samePos: Vector3[] = [];
+				for (const block of pos1) {
+					if (pos2.has(block)) samePos.push(block);
 				}
-				drawnModelsPositions = models;
-			}*/
+
+				for (const block of drawnModelsPositions)
+					if (samePos.includes(block.model.GetPivot().Position)) {
+						block.model.Destroy();
+					}
+			}
+
+			if (drawnModelsPositions.size() < models.size()) {
+				//find ghost with positions that is not in
+				const newPos: Vector3[] = [];
+				for (const block of pos2) {
+					if (!pos1.has(block)) newPos.push(block);
+				}
+
+				for (const block of models)
+					if (newPos.includes(block.model.GetPivot().Position)) {
+						print(block);
+						drawnModelsPositions.add(block);
+						break;
+					}
+			}
+			*/
 		});
 		//samlovebutter's code ends here
 
-		this.event.subscribe(this.mouse.Button1Up, () => this.placeBlock());
+		this.event.subscribe(this.mouse.Button1Up, () => (!this.nowFillingArea ? this.placeBlock() : undefined));
 		this.event.onPrepare(() => {
-			this.inputHandler.onKeyDown("T", () =>
-				!this.nowFillingArea ? this.rotateBlock("x") : this.rotateFillAxis("x"),
-			);
+			this.inputHandler.onKeyDown("T", () => this.rotateBlock("x"));
 			this.inputHandler.onKeyDown("R", () =>
-				!this.nowFillingArea ? this.rotateBlock("y") : this.rotateFillAxis("y"),
+				this.nowFillingArea ? this.rotateFillAxis() : this.rotateBlock("y"),
 			);
 			this.inputHandler.onKeyDown("Y", () => {
-				if (this.nowFillingArea) {
-					this.rotateFillAxis("z");
-					return;
-				}
 				if (InputController.isCtrlPressed()) return;
 				this.rotateBlock("z");
 			});
@@ -133,16 +167,14 @@ export default class BuildTool2 extends ToolBase {
 		if (!part) return;
 		const selectedBlock = this.selectedBlock.get();
 		if (!selectedBlock) return;
-		this.debugPrefab.MoveTo(to); //remove later
+		//this.debugPrefab.MoveTo(to); //remove later
 		const blockSize = BuildingManager.getBlockModelAABB(part).Size;
 		const allGhosts: Set<BlockGhost> = new Set<BlockGhost>();
 
 		const diff = to.sub(from);
-		const toX = math.abs(diff.X);
-		const toY = math.abs(diff.Y);
-		const toZ = math.abs(diff.Z);
-
-		print(toX, toY, toZ);
+		const toX = math.min(math.abs(diff.X), 32);
+		const toY = math.min(math.abs(diff.Y), 32);
+		const toZ = math.min(math.abs(diff.Z), 32);
 
 		for (let x = 0; x <= toX; x += blockSize.X)
 			for (let y = 0; y <= toY; y += blockSize.Y)
@@ -158,51 +190,30 @@ export default class BuildTool2 extends ToolBase {
 		return allGhosts;
 	}
 
-	private rotateFillAxis(axis: "x" | "y" | "z", inverted = true) {
-		print(`Went from: `, this.fillRotation.ToAxisAngle()[0]);
-		switch (axis) {
-			case "x":
-				this.fillRotation = this.fillRotation.mul(
-					CFrame.fromEulerAnglesXYZ(inverted ? math.pi / 2 : math.pi / -2, 0, 0),
-				);
-				break;
-			case "y":
-				this.fillRotation = this.fillRotation.mul(
-					CFrame.fromEulerAnglesXYZ(0, inverted ? math.pi / 2 : math.pi / -2, 0),
-				);
-				break;
-			case "z":
-				this.fillRotation = this.fillRotation.mul(
-					CFrame.fromEulerAnglesXYZ(0, 0, inverted ? math.pi / 2 : math.pi / -2),
-				);
-		}
-		print(`To: `, this.fillRotation.ToAxisAngle()[0]);
+	private rotateFillAxis() {
+		this.fillRotationMode = (this.fillRotationMode + 1) % this.possibleFillRotationAxis.size();
 	}
 
+	private getCurrentFillRotation() {
+		return this.possibleFillRotationAxis[this.fillRotationMode];
+	}
 	private getPositionOnBuildingPlane(blockPosition: Vector3, cameraPostion: Vector3, lookVector: Vector3) {
-		const [rotation, _] = this.fillRotation.ToAxisAngle();
+		const rotation = this.getCurrentFillRotation();
 		const plane = blockPosition.mul(VectorUtils.apply(rotation, (v) => math.abs(v)));
 		const diff = cameraPostion.sub(plane);
 		let distance = 0;
-		switch (true) {
-			case plane.X > 0: //I really liked the "!!plane.X" solution but compiled didn't :(
+		switch (1) {
+			case rotation.X: //I really liked the "!!rotation.X" solution but compiler didn't :(
 				distance = diff.X / lookVector.X;
 				break;
-			case plane.Y > 0:
+			case rotation.Y:
 				distance = diff.Y / lookVector.Y;
 				break;
-			case plane.Z > 0:
+			case rotation.Z:
 				distance = diff.Z / lookVector.Z;
 				break;
 		}
 		const result = lookVector.mul(-distance).add(cameraPostion);
-		//print(`Block: ${blockPosition}`);
-		//print(`Camera: ${cameraPostion}`);
-		//print(`Look: ${lookVector}`);
-		//print(`Plane: ${plane}`);
-		//print(`Distance: ${distance}\n`);
-		//print(`Final vector ${lookVector.mul(distance)}`);
-		//print(`Magnitude ${lookVector.mul(distance).Magnitude}`);
 		return result;
 	}
 	//samlovebutter's code ends here
@@ -244,6 +255,15 @@ export default class BuildTool2 extends ToolBase {
 		return { model, highlight };
 	}
 
+	private constrainPositionToGrid(pos: Vector3) {
+		const constrain = math.round;
+		return new Vector3(constrain(pos.X), constrain(pos.Y), constrain(pos.Z));
+	}
+
+	private addBlockSize(selectedBlock: RegistryBlock, normal: Vector3, pos: Vector3) {
+		return pos.add(selectedBlock.model.GetBoundingBox()[1].mul(normal).div(2));
+	}
+
 	private updateBlockPosition() {
 		const selected = this.selectedBlock.get();
 		if (!selected) return;
@@ -266,14 +286,6 @@ export default class BuildTool2 extends ToolBase {
 				}
 			).BuildingMode.Tools.Build2.Debug;
 
-			const constrainPositionToGrid = (pos: Vector3) => {
-				const constrain = math.round;
-				return new Vector3(constrain(pos.X), constrain(pos.Y), constrain(pos.Z));
-			};
-			const addBlockSize = (pos: Vector3) => {
-				return pos.add(selected.model.GetBoundingBox()[1].mul(normal).div(2));
-			};
-
 			const mouseTarget = this.mouse.Target;
 			if (!mouseTarget) return undefined;
 
@@ -289,8 +301,8 @@ export default class BuildTool2 extends ToolBase {
 			g.Label4.Text = `Block size mnd: ${selected.model.GetBoundingBox()[1].mul(normal).div(2)}`;
 
 			let targetPosition = globalMouseHitPos;
-			targetPosition = addBlockSize(targetPosition);
-			targetPosition = constrainPositionToGrid(targetPosition);
+			targetPosition = this.addBlockSize(selected, normal, targetPosition);
+			targetPosition = this.constrainPositionToGrid(targetPosition);
 			return targetPosition;
 		};
 		const updateMirrorGhostBlocksPosition = (plot: Model, mainPosition: Vector3) => {
