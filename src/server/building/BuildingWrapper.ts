@@ -8,8 +8,8 @@ import JSON, { JsonSerializablePrimitive } from "shared/fixes/Json";
 import Objects from "shared/fixes/objects";
 import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
-import { BuildingController } from "./BuildingController";
 import BuildingWelder from "./BuildingWelder";
+import { ServerBuilding } from "./ServerBuilding";
 
 const errorPlotNotFound = (): ErrorResponse => {
 	return {
@@ -137,7 +137,7 @@ export default class BuildingWrapper {
 	public static deleteBlockAsPlayer(this: void, player: Player, data: PlayerDeleteBlockRequest): Response {
 		if (data === "all") {
 			const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-			BuildingController.clearPlot(plot);
+			ServerBuilding.clearPlot(plot);
 			return {
 				success: true,
 			};
@@ -233,7 +233,7 @@ export default class BuildingWrapper {
 			data.location.Position.sub(VectorUtils.apply(data.location.Position, math.round)),
 		);
 
-		const placedBlock = BuildingController.placeBlock(data);
+		const placedBlock = ServerBuilding.placeBlock(data);
 
 		if (placedBlock.success) {
 			PartUtils.applyToAllDescendantsOfType("Sound", placedBlock.model, (sound) => {

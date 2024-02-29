@@ -6,16 +6,17 @@ import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
 import GameDefinitions from "shared/data/GameDefinitions";
-import { BuildingController, RequestBuildingController } from "./BuildingController";
-import BuildingWelder from "./BuildingWelder";
-import BuildingWrapper from "./BuildingWrapper";
+import BuildingWelder from "./building/BuildingWelder";
+import BuildingWrapper from "./building/BuildingWrapper";
+import { ServerBuilding } from "./building/ServerBuilding";
+import { ServerBuildingRequestHandler } from "./building/ServerBuildingRequestHandler";
 import PlayerDatabase, { PlayerData } from "./database/PlayerDatabase";
 import SlotDatabase from "./database/SlotDatabase";
 import PlayModeController from "./modes/PlayModeController";
 import { registerOnRemoteEvent, registerOnRemoteFunction } from "./network/event/RemoteHandler";
 import UnreliableRemoteHandler from "./network/event/UnreliableRemoteHandler";
 import BlocksSerializer from "./plots/BlocksSerializer";
-import ServerPlots from "./plots/ServerPlots";
+import { ServerPlots } from "./plots/ServerPlots";
 
 class RemoteHandlers {
 	static loadSlot(this: void, player: Player, index: number): LoadSlotResponse {
@@ -48,7 +49,7 @@ class RemoteHandlers {
 		}
 
 		Logger.info(`Loading ${userid}'s slot ${index}`);
-		BuildingController.clearPlot(plot);
+		ServerBuilding.clearPlot(plot);
 		const dblocks = BlocksSerializer.deserialize(blocks, plot);
 		print(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
 
@@ -140,10 +141,10 @@ registerOnRemoteFunction("Slots", "Save", RemoteHandlers.saveSlot);
 registerOnRemoteFunction("Slots", "Load", RemoteHandlers.loadSlot);
 registerOnRemoteFunction("Building", "UpdateConfigRequest", BuildingWrapper.updateConfigAsPlayer);
 registerOnRemoteFunction("Building", "UpdateLogicConnectionRequest", BuildingWrapper.updateLogicConnectionAsPlayer);
-registerOnRemoteFunction("Building", "PlaceBlocks", RequestBuildingController.placeBlocks);
-registerOnRemoteFunction("Building", "MoveBlocks", RequestBuildingController.moveBlocks);
-registerOnRemoteFunction("Building", "LogicConnect", RequestBuildingController.logicConnect);
-registerOnRemoteFunction("Building", "LogicDisconnect", RequestBuildingController.logicDisconnect);
+registerOnRemoteFunction("Building", "PlaceBlocks", ServerBuildingRequestHandler.placeBlocks);
+registerOnRemoteFunction("Building", "MoveBlocks", ServerBuildingRequestHandler.moveBlocks);
+registerOnRemoteFunction("Building", "LogicConnect", ServerBuildingRequestHandler.logicConnect);
+registerOnRemoteFunction("Building", "LogicDisconnect", ServerBuildingRequestHandler.logicDisconnect);
 registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSetting);
 registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);

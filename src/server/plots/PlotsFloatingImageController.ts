@@ -6,7 +6,7 @@ import InstanceComponent from "shared/component/SharedComponent";
 import ComponentBase from "shared/component/SharedComponentBase";
 import GameDefinitions from "shared/data/GameDefinitions";
 
-class PlotFloatingImageController extends ComponentBase {
+export class PlotFloatingImageController extends ComponentBase {
 	constructor(plot: SharedPlot) {
 		super();
 
@@ -58,15 +58,5 @@ class PlotFloatingImageController extends ComponentBase {
 				container.set(create(Players.GetPlayerByUserId(owner)!));
 			}
 		});
-	}
-}
-
-export class PlotsFloatingImageController extends ComponentBase {
-	constructor(plots: readonly SharedPlot[]) {
-		super();
-
-		for (const plot of plots) {
-			this.parent(new PlotFloatingImageController(plot));
-		}
 	}
 }

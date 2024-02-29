@@ -1,10 +1,10 @@
 import { DataStoreService, Players } from "@rbxts/services";
-import { BuildingController } from "server/BuildingController";
+import { ServerBuilding } from "server/building/ServerBuilding";
+import BlocksSerializer from "server/plots/BlocksSerializer";
 import Logger from "shared/Logger";
+import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
 import GameDefinitions from "shared/data/GameDefinitions";
-import SlotsMeta from "shared/SlotsMeta";
-import BlocksSerializer from "server/plots/BlocksSerializer";
 import { Db } from "./Database";
 import PlayerDatabase from "./PlayerDatabase";
 
@@ -127,7 +127,7 @@ export default class SlotDatabase {
 				if (bs === undefined) continue;
 
 				const plot = SharedPlots.getPlotByOwnerID(Players.GetPlayers()[0].UserId);
-				BuildingController.clearPlot(plot);
+				ServerBuilding.clearPlot(plot);
 
 				BlocksSerializer.deserialize(bs, plot);
 				const serialized = BlocksSerializer.serialize(plot);
