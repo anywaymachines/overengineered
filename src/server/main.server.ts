@@ -153,6 +153,7 @@ UnreliableRemoteHandler.init();
 
 BlocksInitializer.initialize();
 BuildingWelder.initialize();
+BlocksInitializer.clearBlockAttributes();
 
 PlayModeController.init();
 RemoteEvents.initialize();

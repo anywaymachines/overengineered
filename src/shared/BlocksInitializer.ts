@@ -53,11 +53,6 @@ const readFromAssets = (data: BlocksInitializeData) => {
 			limit: block.GetAttribute("limit") as number | undefined,
 		};
 	};
-	const removeBlockAttributes = (block: Model) => {
-		for (const [key] of block.GetAttributes()) {
-			block.SetAttribute(key, undefined);
-		}
-	};
 
 	const readBlock = (block: Model, categoryName: string) => {
 		if (!block.PrimaryPart) {
@@ -94,7 +89,6 @@ const readFromAssets = (data: BlocksInitializeData) => {
 		}
 
 		const attributes = readBlockModelAttributes(block);
-		removeBlockAttributes(block);
 
 		// next checks are `!` instead of `!== undefined` to also throw in case of empty strings
 
@@ -185,6 +179,13 @@ export const BlocksInitializer = {
 
 	/** Empty method just to trigger the import */
 	initialize() {},
+	clearBlockAttributes() {
+		for (const block of sorted) {
+			for (const [key] of block.model.GetAttributes()) {
+				block.model.SetAttribute(key, undefined);
+			}
+		}
+	},
 } as const;
 
 // don't delete, useful for something
