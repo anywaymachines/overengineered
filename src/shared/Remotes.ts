@@ -1,18 +1,29 @@
 import Net from "@rbxts/net";
 
 declare global {
+	type BuildResponse = Response<{ readonly model: BlockModel }>;
 	type MultiBuildResponse = Response<{ readonly models: readonly BlockModel[] }>;
-	interface PlaceBlocksRequest {
-		readonly plot: PlotModel;
-		readonly blocks: readonly {
-			readonly id: string;
-			readonly color: Color3;
-			readonly material: Enum.Material;
-			readonly location: CFrame;
-			readonly uuid?: string;
-			readonly config?: Readonly<Record<string, string>>;
-		}[];
+
+	interface PlaceBlockByPlayerRequest {
+		readonly id: string;
+		readonly color: Color3;
+		readonly material: Enum.Material;
+		readonly location: CFrame;
 	}
+	interface PlaceBlockByServerRequest extends PlaceBlockByPlayerRequest {
+		readonly uuid: string;
+		readonly config: Readonly<Record<string, string>>;
+	}
+
+	interface PlaceBlocksByPlayerRequest {
+		readonly plot: PlotModel;
+		readonly blocks: readonly PlaceBlockByPlayerRequest[];
+	}
+	interface PlaceBlocksByServerRequest {
+		readonly plot: PlotModel;
+		readonly blocks: readonly PlaceBlockByServerRequest[];
+	}
+
 	interface MoveBlocksRequest {
 		readonly plot: PlotModel;
 		readonly blocks: BlockList;
@@ -41,7 +52,6 @@ const Remotes = Net.Definitions.Create({
 		FetchData: Net.Definitions.ServerAsyncFunction<() => PlayerDataResponse>(),
 	}),
 	Building: Net.Definitions.Namespace({
-		PlaceBlockRequest: Net.Definitions.ServerAsyncFunction<(data: PlaceBlockRequest) => BuildResponse>(),
 		MoveRequest: Net.Definitions.ServerAsyncFunction<(data: PlayerMoveRequest) => Response>(),
 
 		UpdateConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
@@ -50,7 +60,7 @@ const Remotes = Net.Definitions.Create({
 		UpdateLogicConnectionRequest:
 			Net.Definitions.ServerAsyncFunction<(data: UpdateLogicConnectionRequest) => Response>(),
 
-		PlaceBlocks: Net.Definitions.ServerAsyncFunction<(data: PlaceBlocksRequest) => MultiBuildResponse>(),
+		PlaceBlocks: Net.Definitions.ServerAsyncFunction<(data: PlaceBlocksByPlayerRequest) => MultiBuildResponse>(),
 		MoveBlocks: Net.Definitions.ServerAsyncFunction<(data: MoveBlocksRequest) => Response>(),
 		LogicConnect: Net.Definitions.ServerAsyncFunction<(data: LogicConnectRequest) => Response>(),
 		LogicDisconnect: Net.Definitions.ServerAsyncFunction<(data: LogicDisconnectRequest) => Response>(),

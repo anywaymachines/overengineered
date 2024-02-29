@@ -2,8 +2,6 @@ type SuccessResponse<T extends object = {}> = T & { readonly success: true };
 type ErrorResponse = { readonly success: false; readonly message: string };
 type Response<T extends object = {}> = SuccessResponse<T> | ErrorResponse;
 
-type BuildResponse = Response<{ readonly model: Model }>;
-
 type TouchControlInfo = Readonly<Record<string, { readonly pos: SerializedVector2 }>>;
 type SlotMeta = {
 	readonly name: string;

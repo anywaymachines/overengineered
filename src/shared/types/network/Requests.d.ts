@@ -31,16 +31,6 @@ type PlayerMoveRequest = {
 	readonly vector: Vector3;
 };
 
-type PlaceBlockRequest = {
-	readonly plot: PlotModel;
-	readonly id: string;
-	readonly color: Color3;
-	readonly material: Enum.Material;
-	readonly location: CFrame;
-	readonly uuid?: string;
-	readonly config?: Readonly<Record<string, string>>;
-};
-
 type PlayerSaveSlotRequest = {
 	readonly index: number;
 	readonly name?: string;

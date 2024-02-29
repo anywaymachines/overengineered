@@ -132,7 +132,6 @@ class RemoteHandlers {
 ServerPlots.initialize();
 
 // Initializing event workders
-registerOnRemoteFunction("Building", "PlaceBlockRequest", BuildingWrapper.placeBlockAsPlayer);
 registerOnRemoteFunction("Building", "MoveRequest", BuildingWrapper.movePlotAsPlayer);
 registerOnRemoteFunction("Building", "Delete", BuildingWrapper.deleteBlockAsPlayer);
 registerOnRemoteFunction("Building", "Paint", BuildingWrapper.paintAsPlayer);

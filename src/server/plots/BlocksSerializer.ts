@@ -193,17 +193,16 @@ const place = {
 			return;
 		}
 
-		const deserializedData: PlaceBlockRequest = {
+		const deserializedData: PlaceBlockByServerRequest = {
 			id: blockData.id,
 			color: Serializer.Color3Serializer.deserialize(blockData.col),
 			material: Serializer.EnumMaterialSerializer.deserialize(blockData.mat),
 			location: buildingCenter.ToWorldSpace(Serializer.CFrameSerializer.deserialize(blockData.loc)),
 			config: (blockData.config ?? {}) as Readonly<Record<string, string>>,
 			uuid: blockData.uuid,
-			plot,
 		};
 
-		const response = ServerBuilding.placeBlock(deserializedData);
+		const response = ServerBuilding.placeBlock(plot, deserializedData);
 		if (response.success && response.model && blockData.connections) {
 			response.model.SetAttribute("connections", HttpService.JSONEncode(blockData.connections));
 		}

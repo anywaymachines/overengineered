@@ -5,7 +5,7 @@ import Remotes from "shared/Remotes";
 
 export default class BuildingController {
 	public static async placeBlocks(
-		data: PlaceBlocksRequest,
+		data: PlaceBlocksByPlayerRequest,
 	): Promise<Response<{ readonly positions: readonly Vector3[] }>> {
 		const response = await Remotes.Client.GetNamespace("Building").Get("PlaceBlocks").CallServerAsync(data);
 
@@ -24,20 +24,23 @@ export default class BuildingController {
 
 		return { success: true, positions: response.models.map((m) => m.GetPivot().Position) };
 	}
-	public static async placeBlock(data: PlaceBlockRequest): Promise<Response<{ position: Vector3 }>> {
-		const response = await Remotes.Client.GetNamespace("Building").Get("PlaceBlockRequest").CallServerAsync(data);
+	public static async placeBlock(
+		plot: PlotModel,
+		data: PlaceBlockByPlayerRequest,
+	): Promise<Response<{ position: Vector3 }>> {
+		const result = await this.placeBlocks({
+			plot,
+			blocks: [data],
+		});
 
-		if (response.success) {
-			while (response.model?.PrimaryPart === undefined) {
-				task.wait();
-			}
-
-			Signals.BLOCKS.BLOCK_ADDED.Fire(response.model);
-			return { success: true, position: response.model.GetPivot().Position } as const;
-		} else {
-			LogControl.instance.addLine("Placement failed: " + response.message, Colors.red);
-			return response;
+		if (!result.success) {
+			return result;
 		}
+
+		return {
+			success: true,
+			position: result.positions[0],
+		};
 	}
 
 	public static async deleteBlock(request: PlayerDeleteBlockRequest) {

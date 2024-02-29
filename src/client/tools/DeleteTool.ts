@@ -54,7 +54,7 @@ export default class DeleteTool extends ToolBase {
 	}
 
 	private blockToUndoRequest(block: BlockModel) {
-		const info: PlaceBlockRequest = {
+		const info = {
 			location: block.PrimaryPart!.CFrame,
 			id: block.GetAttribute("id") as string,
 			color: Serializer.Color3Serializer.deserialize(
@@ -88,7 +88,7 @@ export default class DeleteTool extends ToolBase {
 			blocks === "all" ? "Plot cleared" : "Blocks removed",
 			async () => {
 				for (const undo of undoRequests) {
-					await BuildingController.placeBlock(undo);
+					await BuildingController.placeBlock(undo.plot, undo);
 				}
 			},
 			blocks === "all" ? ("all" as const) : deletedBlocks.map((block) => block.GetAttribute("uuid") as BlockUuid),

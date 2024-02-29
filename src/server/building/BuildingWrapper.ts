@@ -1,12 +1,10 @@
 import { HttpService } from "@rbxts/services";
-import { blockRegistry } from "shared/Registry";
 import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import SharedPlots from "shared/building/SharedPlots";
 import JSON, { JsonSerializablePrimitive } from "shared/fixes/Json";
 import Objects from "shared/fixes/objects";
-import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
 import BuildingWelder from "./BuildingWelder";
 import { ServerBuilding } from "./ServerBuilding";
@@ -199,78 +197,6 @@ export default class BuildingWrapper {
 		block.Destroy();
 
 		return { success: true };
-	}
-
-	public static placeSingleBlockAsPlayer(
-		this: void,
-		player: Player,
-		data: ExcludeMembers<PlaceBlockRequest, "mirrors">,
-	): BuildResponse {
-		// Check is in plot
-		if (!BuildingManager.blockCanBePlacedAt(data.plot, blockRegistry.get(data.id)!.model, data.location, player)) {
-			return {
-				success: false,
-				message: "Out of bounds",
-			};
-		}
-
-		const block = blockRegistry.get(data.id)!;
-		const placedBlocks = SharedPlots.getPlotBlocks(data.plot)
-			.GetChildren()
-			.filter((placed_block) => {
-				return placed_block.GetAttribute("id") === data.id;
-			})
-			.size();
-		if (placedBlocks >= (block.limit ?? 2000)) {
-			return {
-				success: false,
-				message: "Type limit exceeded",
-			};
-		}
-
-		// round the coordinates
-		(data as Writable<typeof data>).location = data.location.sub(
-			data.location.Position.sub(VectorUtils.apply(data.location.Position, math.round)),
-		);
-
-		const placedBlock = ServerBuilding.placeBlock(data);
-
-		if (placedBlock.success) {
-			PartUtils.applyToAllDescendantsOfType("Sound", placedBlock.model, (sound) => {
-				sound.SetAttribute("owner", player.UserId);
-			});
-
-			PartUtils.applyToAllDescendantsOfType("ParticleEmitter", placedBlock.model, (sound) => {
-				sound.SetAttribute("owner", player.UserId);
-			});
-		}
-
-		return placedBlock;
-	}
-
-	public static placeBlockAsPlayer(this: void, player: Player, data: PlaceBlockRequest): BuildResponse {
-		if (data.uuid !== undefined) {
-			return {
-				success: false,
-				message: "Invalid request",
-			};
-		}
-
-		const result = BuildingWrapper.placeSingleBlockAsPlayer(player, data);
-		return result;
-
-		/*if (!result.success) return result;
-		
-		const plot = SharedPlots.getPlotByPosition(data.location.Position) as Model;
-		const mirrorPositions = BuildingManager.getMirrorBlocksCFrames(plot, data.location.Position, data.mirrors);
-		for (const [, pos] of Objects.pairs(mirrorPositions)) {
-			const result = BuildingWrapper.placeSingleBlockAsPlayer(player, {
-				...data,
-				location: pos,
-			});
-
-			if (!result.success) return result;
-		}*/
 	}
 
 	public static updateConfigAsPlayer(this: void, player: Player, data: ConfigUpdateRequest): Response {

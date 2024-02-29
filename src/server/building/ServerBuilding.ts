@@ -21,28 +21,7 @@ export const ServerBuilding = {
 		plot.Blocks.ClearAllChildren();
 		BuildingWelder.deleteWelds(plot);
 	},
-	placeBlocks: (request: PlaceBlocksRequest): MultiBuildResponse => {
-		const models: BlockModel[] = [];
-
-		for (const block of request.blocks) {
-			const response = ServerBuilding.placeBlock({
-				plot: request.plot,
-				...block,
-			});
-
-			if (!response.success) {
-				return response;
-			}
-
-			models.push(response.model as BlockModel);
-		}
-
-		return {
-			success: true,
-			models,
-		};
-	},
-	placeBlock: (data: PlaceBlockRequest): BuildResponse => {
+	placeBlock: (plot: PlotModel, data: PlaceBlockByPlayerRequest | PlaceBlockByServerRequest): BuildResponse => {
 		const block = blockRegistry.get(data.id)!;
 
 		// Create a new instance of the building model
@@ -52,20 +31,21 @@ export const ServerBuilding = {
 		model.PivotTo(data.location);
 
 		// Set material & color
-		if (data.config && Objects.keys(data.config).size() !== 0) {
+		if ("config" in data && Objects.keys(data.config).size() !== 0) {
 			model.SetAttribute("config", JSON.serialize(data.config));
 		}
 
-		const uuid = data.uuid ?? HttpService.GenerateGUID(false);
+		const uuid = "uuid" in data ? data.uuid : HttpService.GenerateGUID(false);
+		// TODO: remove attribute uuid because Name exists?
 		model.SetAttribute("uuid", uuid);
 		model.Name = uuid;
 
 		SharedBuilding.paint({ blocks: [model], color: data.color, material: data.material }, true);
 
-		model.Parent = data.plot.Blocks;
+		model.Parent = plot.Blocks;
 
 		// Weld block
-		const newJoints = BuildingWelder.weldOnPlot(data.plot, model);
+		const newJoints = BuildingWelder.weldOnPlot(plot, model);
 		/*if (newJoints.size() !== 0) {
 			PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
 				if (part.Name.lower() === "colbox") return;

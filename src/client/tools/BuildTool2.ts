@@ -492,18 +492,16 @@ export default class BuildTool2 extends ToolBase {
 
 				if (blocks.size() !== 0) await BuildingController.deleteBlock(blocks!);
 			},
-			[mainGhost, ...this.mirroredGhosts].map(
-				(g): PlaceBlockRequest => ({
-					id: selected.id,
-					color: this.selectedColor.get(),
-					material: this.selectedMaterial.get(),
-					location: g.model.PrimaryPart!.CFrame,
-					plot: this.targetPlot.get()!,
-				}),
-			),
-			async (infos) => {
+			[mainGhost, ...this.mirroredGhosts].map((g) => ({
+				id: selected.id,
+				color: this.selectedColor.get(),
+				material: this.selectedMaterial.get(),
+				location: g.model.PrimaryPart!.CFrame,
+				plot: this.targetPlot.get()!,
+			})),
+			async (infos): Promise<Response> => {
 				for (const info of infos) {
-					const result = await BuildingController.placeBlock(info);
+					const result = await BuildingController.placeBlock(info.plot, info);
 					if (!result.success) return result;
 				}
 
