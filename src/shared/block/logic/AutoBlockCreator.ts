@@ -272,7 +272,7 @@ const create = (info: BlocksInitializeData) => {
 		const model = ReplicatedAssets.get<{ Prefabs: Record<string, BlockModel> }>().Prefabs[prefab].Clone();
 		model.Name = id;
 		model.FindFirstChildWhichIsA("TextLabel", true)!.Text = modelTextOverride ?? displayName;
-		model.Parent = ReplicatedAssets.get<{ Placeable: { Automatic: Folder } }>().Placeable.Automatic;
+		model.Parent = ReplicatedAssets.get<{ PlaceableAutomatic: Folder }>().PlaceableAutomatic;
 
 		return model;
 	};
@@ -291,7 +291,12 @@ const create = (info: BlocksInitializeData) => {
 		};
 	};
 
-	Element.create("Folder", { Name: "Automatic", Parent: ReplicatedAssets.get<{ Placeable: Folder }>().Placeable });
+	if (RunService.IsServer()) {
+		Element.create("Folder", {
+			Name: "PlaceableAutomatic",
+			Parent: ReplicatedAssets.get<Folder>(),
+		});
+	}
 	for (const [optype, ops] of Objects.pairs(operations as NonGenericOperations)) {
 		for (const [name, data] of Objects.pairs(ops)) {
 			Logger.info(`[BAC] Creating block ${name}`);
@@ -303,8 +308,9 @@ const create = (info: BlocksInitializeData) => {
 				info: block.info,
 				category: block.category[block.category.size() - 1] as RegistryBlock["category"],
 				model: RunService.IsClient()
-					? ReplicatedAssets.get<{ Placeable: { Automatic: Record<string, BlockModel> } }>().Placeable
-							.Automatic[block.id]
+					? ReplicatedAssets.get<{ PlaceableAutomatic: Record<string, BlockModel> }>().PlaceableAutomatic[
+							block.id
+						]
 					: initializeBlockModel(block.id, block.prefab, block.displayName, data.modelTextOverride),
 			};
 			info.blocks.set(regblock.id, regblock);
