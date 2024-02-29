@@ -63,43 +63,23 @@ export default class BuildTool2 extends ToolBase {
 		let pressPosition: Vector3 = Vector3.zero;
 		let drawnModelsPositions: Set<BlockGhost> = new Set<BlockGhost>();
 
-		this.event.subscribe(this.mouse.Button1Down, () => {
-			const block = this.selectedBlock.get();
-			if (!block) return;
-			pressPosition = this.mouse.Hit.Position;
-			const mouseSurface = this.mouse.TargetSurface;
-			const normal = Vector3.FromNormalId(mouseSurface);
-			pressPosition = this.addBlockSize(block, normal, pressPosition);
-			this.nowFillingArea = true;
-		});
-
-		this.event.subscribe(this.mouse.Button1Up, async () => {
-			this.nowFillingArea = false;
-			const result = await this.placeBlocks(Arrays.mapSet(drawnModelsPositions, (m) => m.model.GetPivot()));
-			if (result && !result.success) {
-				LogControl.instance.addLine(result.message, Colors.red);
-			}
-
-			for (const ghost of drawnModelsPositions) {
-				ghost.model.Destroy();
-			}
-		});
-
-		this.event.subscribe(this.mouse.Move, () => {
-			//this.mouse.Move
+		const updateGhosts = () => {
 			if (!this.nowFillingArea) return;
 			for (const ghost of drawnModelsPositions) ghost.model.Destroy(); //replace with optimisation later
 
 			const cameraPostion = Workspace.CurrentCamera!.CFrame.Position;
 			const hit = this.mouse.Hit.Position;
 			const clickDirection = cameraPostion.sub(hit).Unit;
+
 			const pos = this.getPositionOnBuildingPlane(pressPosition, cameraPostion, clickDirection);
 			//detect pos change?
 			//somehow detect which block is outa distance?
 			//create new ghost otherwise
 			const models = this.drawModels(this.selectedBlock.get()?.model, pressPosition, pos);
 			if (!models) return;
+			//if(!models.size) models.add(this.createBlockGhost(this.selectedBlock.get()));
 			drawnModelsPositions = models;
+
 			/*
 			print(drawnModelsPositions.size(), models.size());
 			print(drawnModelsPositions.size() > models.size() ? "more" : "less");
@@ -138,7 +118,33 @@ export default class BuildTool2 extends ToolBase {
 					}
 			}
 			*/
+		};
+
+		this.event.subscribe(this.mouse.Button1Down, () => {
+			const block = this.selectedBlock.get();
+			if (!block) return;
+			pressPosition = this.constrainPositionToGrid(this.mouse.Hit.Position);
+			const mouseSurface = this.mouse.TargetSurface;
+			const normal = Vector3.FromNormalId(mouseSurface);
+			pressPosition = this.addBlockSize(block, normal, pressPosition);
+			this.nowFillingArea = true;
+			updateGhosts();
 		});
+
+		this.onDisable(() => (this.nowFillingArea = false));
+		this.event.subscribe(this.mouse.Button1Up, async () => {
+			this.nowFillingArea = false;
+			const result = await this.placeBlocks(Arrays.mapSet(drawnModelsPositions, (m) => m.model));
+			if (result && !result.success) {
+				LogControl.instance.addLine(result.message, Colors.red);
+			}
+
+			for (const ghost of drawnModelsPositions) {
+				ghost.model.Destroy();
+			}
+		});
+
+		this.event.subscribe(this.mouse.Move, updateGhosts);
 		//samlovebutter's code ends here
 
 		this.event.subscribe(this.mouse.Button1Up, () => (!this.nowFillingArea ? this.placeBlock() : undefined));
@@ -380,7 +386,7 @@ export default class BuildTool2 extends ToolBase {
 		this.updateBlockPosition();
 	}
 
-	async placeBlocks(positions: readonly CFrame[]) {
+	async placeBlocks(blocks: readonly Model[]) {
 		const selected = this.selectedBlock.get();
 
 		// Non-alive players bypass
@@ -395,12 +401,24 @@ export default class BuildTool2 extends ToolBase {
 			return;
 		}
 
-		if (!this.targetPlot.get()) {
+		const plot = SharedPlots.getPlotByPosition(blocks[0].GetPivot().Position);
+		if (!plot) {
 			LogControl.instance.addLine("Out of bounds!", Colors.red);
-
-			// Play sound
 			SoundController.getSounds().Build.BlockPlaceError.Play();
+			return;
+		}
 
+		const plotRegion = SharedPlots.getPlotBuildingRegion(plot);
+		const blocksRegion = BuildingManager.getBlocksAABB(blocks);
+		if (!VectorUtils.isRegion3InRegion3(blocksRegion, plotRegion)) {
+			LogControl.instance.addLine("Out of bounds!", Colors.red);
+			SoundController.getSounds().Build.BlockPlaceError.Play();
+			return;
+		}
+
+		if (!SharedPlots.isBuildingAllowed(plot, Players.LocalPlayer)) {
+			LogControl.instance.addLine("Building not allowed!", Colors.red);
+			SoundController.getSounds().Build.BlockPlaceError.Play();
 			return;
 		}
 
@@ -408,9 +426,9 @@ export default class BuildTool2 extends ToolBase {
 			"Block placement",
 			async () => {
 				const blocks: BlockModel[] = [];
-				for (const cframe of positions) {
-					const block = BuildingManager.getBlockByPosition(cframe.Position);
-					if (block) blocks.push(block);
+				for (const block of blocks) {
+					const b = BuildingManager.getBlockByPosition(block.GetPivot().Position);
+					if (b) blocks.push(b);
 				}
 
 				if (blocks.size() !== 0) {
@@ -418,12 +436,12 @@ export default class BuildTool2 extends ToolBase {
 				}
 			},
 			{
-				plot: this.targetPlot.get()!,
-				blocks: positions.map((cf) => ({
+				plot,
+				blocks: blocks.map((b) => ({
 					id: selected.id,
 					color: this.selectedColor.get(),
 					material: this.selectedMaterial.get(),
-					location: cf,
+					location: b.GetPivot(),
 				})),
 			},
 			async (info) => await BuildingController.placeBlocks(info),
