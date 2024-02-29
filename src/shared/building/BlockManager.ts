@@ -34,6 +34,10 @@ export default class BlockManager {
 		return true;
 	}
 
+	static isBlockModel(part: Instance | undefined): part is BlockModel {
+		return part !== undefined && part.Parent?.Name === "Blocks";
+	}
+
 	static isBlockPart(part: Instance | undefined): part is BasePart & { Parent: BlockModel } {
 		if (
 			!part ||

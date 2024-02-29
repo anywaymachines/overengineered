@@ -25,59 +25,6 @@ const BuildingManager = {
 		Enum.Material.Wood,
 	] as readonly Enum.Material[],
 
-	/** Get an axis-aligned bounding box of a block model, without weld collisions */
-	getBlockModelAABB(block: Model): Region3 {
-		const min = (v1: Vector3, v2: Vector3): Vector3 =>
-			new Vector3(math.min(v1.X, v2.X), math.min(v1.Y, v2.Y), math.min(v1.Z, v2.Z));
-		const max = (v1: Vector3, v2: Vector3): Vector3 =>
-			new Vector3(math.max(v1.X, v2.X), math.max(v1.Y, v2.Y), math.max(v1.Z, v2.Z));
-
-		let region = new Region3(
-			new Vector3(math.huge, math.huge, math.huge),
-			new Vector3(-math.huge, -math.huge, -math.huge),
-		);
-		for (const child of block.GetDescendants()) {
-			if (!child.IsA("BasePart")) continue;
-			if (child.Parent?.Name === "WeldRegions") continue;
-
-			const regpos = child.ExtentsCFrame;
-			const regsize = child.ExtentsSize;
-			const regmin = regpos.Position.add(regsize.div(-2));
-			const regmax = regpos.Position.add(regsize.div(2));
-
-			const regionmin = region.CFrame.Position.add(region.Size.div(-2));
-			const regionmax = region.CFrame.Position.add(region.Size.div(2));
-
-			region = new Region3(min(regmin, regionmin), max(regmax, regionmax));
-		}
-
-		return region;
-	},
-	/** Get a `Region3` that has all of the provided block models inside */
-	getBlockModelsAABB(models: readonly Model[]): Region3 {
-		const min = (v1: Vector3, v2: Vector3): Vector3 =>
-			new Vector3(math.min(v1.X, v2.X), math.min(v1.Y, v2.Y), math.min(v1.Z, v2.Z));
-		const max = (v1: Vector3, v2: Vector3): Vector3 =>
-			new Vector3(math.max(v1.X, v2.X), math.max(v1.Y, v2.Y), math.max(v1.Z, v2.Z));
-
-		let region = new Region3(
-			new Vector3(math.huge, math.huge, math.huge),
-			new Vector3(-math.huge, -math.huge, -math.huge),
-		);
-		for (const model of models) {
-			const reg = this.getBlockModelAABB(model);
-			const regmin = reg.CFrame.Position.add(reg.Size.div(-2));
-			const regmax = reg.CFrame.Position.add(reg.Size.div(2));
-
-			const regionmin = region.CFrame.Position.add(region.Size.div(-2));
-			const regionmax = region.CFrame.Position.add(region.Size.div(2));
-
-			region = new Region3(min(regmin, regionmin), max(regmax, regionmax));
-		}
-
-		return region;
-	},
-
 	/** Get an axis-aligned bounding box of a model */
 	getModelAABB(block: Model): Region3 {
 		const [cf, size] = block.GetBoundingBox();
@@ -125,7 +72,7 @@ const BuildingManager = {
 
 	/** Returns the block by its uuid, checks every plot */
 	getBlockByUuidOnAnyPlot(uuid: BlockUuid): BlockModel | undefined {
-		const plot = SharedPlots.plots.find((plot) => this.getBlockByUuid(plot, uuid) !== undefined);
+		const plot = SharedPlots.plots.find((plot) => this.getBlockByUuid(plot.instance, uuid) !== undefined)?.instance;
 		if (!plot) return undefined;
 
 		return this.getBlockByUuid(plot, uuid);

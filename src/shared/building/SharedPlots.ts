@@ -1,11 +1,17 @@
-import { HttpService, Workspace } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
 import GameDefinitions from "shared/data/GameDefinitions";
 import VectorUtils from "shared/utils/VectorUtils";
 import BlockManager, { PlacedBlockData } from "./BlockManager";
+import { SharedPlot } from "./SharedPlot";
+
+const plots = (Workspace.Plots.GetChildren() as unknown as PlotModel[])
+	.map((p) => new SharedPlot(p).with((c) => c.enable()))
+	.sort((left, right) => left.instance.Name < right.instance.Name);
+const plotComponents: ReadonlyMap<PlotModel, SharedPlot> = new Map(plots.map((p) => [p.instance, p]));
 
 /** Methods for reading the plots data */
 export default class SharedPlots {
-	static readonly plots = Workspace.Plots.GetChildren() as unknown as readonly PlotModel[];
+	static readonly plots = plots;
 
 	/** Checks if the provided `Instance` is a plot model */
 	static isPlot(model: Instance | undefined): model is PlotModel {
@@ -17,16 +23,6 @@ export default class SharedPlots {
 		return model !== undefined && this.isPlot(model?.Parent) && model.Name === "Blocks";
 	}
 
-	/** Read encoded plot data inside `Model` */
-	static readPlotData(plot: PlotModel | PlotData): PlotData {
-		return "IsA" in plot ? (HttpService.JSONDecode(plot.GetAttribute("data") as string) as PlotData) : plot;
-	}
-
-	/** Checks if the provided block is on the provided plot */
-	static isBlockOnPlot(plot: PlotModel | PlotBlocks, block: BlockModel): boolean {
-		return block.IsDescendantOf(plot);
-	}
-
 	/** Checks if the provided block is on a plot that is allowed for the provided player */
 	static isBlockOnAllowedPlot(player: Player, block: BlockModel): boolean {
 		const plot = this.getPlotByBlock(block);
@@ -36,41 +32,40 @@ export default class SharedPlots {
 	}
 
 	/** Checks if player is allowed to build on the prodived plot */
-	static isBuildingAllowed(plot: PlotModel | PlotData, player: Player) {
-		plot = SharedPlots.readPlotData(plot);
-		return plot.ownerID === player.UserId || plot.whitelistedPlayerIDs.includes(player.UserId);
-	}
-
-	/** Get plots that the provided player is allowed to build on */
-	static getAllowedPlots(player: Player) {
-		return this.plots.filter((p) => this.isBuildingAllowed(p, player));
+	static isBuildingAllowed(plot: PlotModel, player: Player): boolean {
+		return plotComponents.get(plot)!.isBuildingAllowed(player);
 	}
 
 	/** Returns the player owned plot, if exists */
-	static tryGetPlotByOwnerID(ownerID: number): PlotModel | undefined {
-		if (this.plots.size() === 0) {
-			(this as { plots: readonly PlotModel[] }).plots =
-				Workspace.Plots.GetChildren() as unknown as readonly PlotModel[];
+	static tryGetPlotByOwnerID(ownerID: number): SharedPlot | undefined {
+		for (const plot of this.plots) {
+			if (plot.ownerId.get() === ownerID) {
+				return plot;
+			}
 		}
 
-		return this.plots.find((plot) => {
-			return this.readPlotData(plot).ownerID === ownerID;
-		});
+		return undefined;
 	}
 
 	/** Returns the player owned plot */
-	static getPlotByOwnerID(ownerID: number): PlotModel {
+	static getPlotComponentByOwnerID(ownerID: number): SharedPlot {
 		const plot = this.tryGetPlotByOwnerID(ownerID);
 		if (!plot) throw `Player ${ownerID} does not have a plot`;
 
 		return plot;
 	}
 
+	/** Returns the player owned plot */
+	static getPlotByOwnerID(ownerID: number): PlotModel {
+		return this.getPlotComponentByOwnerID(ownerID).instance;
+	}
+
 	/** Returns the plot by position inside it, if exists
 	 * @deprecated slow
 	 */
 	static getPlotByPosition(position: Vector3): PlotModel | undefined {
-		return this.plots.find((p) => VectorUtils.isInRegion3(this.getPlotBuildingRegion(p), position));
+		return this.plots.find((p) => VectorUtils.isInRegion3(this.getPlotBuildingRegion(p.instance), position))
+			?.instance;
 	}
 
 	/** Returns the `PlotModel` by the given block or block part, if valid */

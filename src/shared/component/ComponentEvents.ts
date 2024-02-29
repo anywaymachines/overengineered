@@ -1,5 +1,6 @@
 import EventHandler from "shared/event/EventHandler";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import JSON, { JsonSerializablePrimitive } from "shared/fixes/Json";
 
 type Sub<T extends Callback> = readonly [signal: RBXScriptSignal<T>, callback: T];
 
@@ -99,6 +100,46 @@ export class ComponentEvents {
 		const observable = new ObservableValue<TInstance[TParam]>(instance[param]);
 		this.subscribe(instance.GetPropertyChangedSignal(param), () => observable.set(instance[param]));
 		this.subscribeObservable(observable, (value) => (instance[param] = value), true);
+
+		return observable;
+	}
+
+	/** Create an `ObservableValue` from an `Instance` attribute */
+	observableFromAttribute<TType extends AttributeValue>(
+		instance: Instance,
+		name: string,
+	): ObservableValue<TType | undefined> {
+		const observable = new ObservableValue<TType | undefined>(instance.GetAttribute(name) as TType | undefined);
+		this.subscribe(instance.GetAttributeChangedSignal(name), () =>
+			observable.set(instance.GetAttribute(name) as TType | undefined),
+		);
+		this.subscribeObservable2(observable, (value) => instance.SetAttribute(name, value), true);
+
+		return observable;
+	}
+
+	/** Create an `ObservableValue` from an `Instance` attribute, using JSON.ts */
+	observableFromAttributeJson<TType>(instance: Instance, name: string): ObservableValue<TType | undefined> {
+		const json = instance.GetAttribute(name) as string | undefined;
+		const observable = new ObservableValue<TType | undefined>(
+			json !== undefined ? JSON.deserialize<TType>(json) : undefined,
+		);
+
+		this.subscribe(instance.GetAttributeChangedSignal(name), () => {
+			const json = instance.GetAttribute(name) as string | undefined;
+			const val = json !== undefined ? JSON.deserialize<TType>(json) : undefined;
+
+			observable.set(val);
+		});
+		this.subscribeObservable2(
+			observable,
+			(value) =>
+				instance.SetAttribute(
+					name,
+					value === undefined ? undefined : JSON.serialize(value as JsonSerializablePrimitive),
+				),
+			true,
+		);
 
 		return observable;
 	}

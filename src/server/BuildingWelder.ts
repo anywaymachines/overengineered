@@ -3,7 +3,7 @@ import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
 import Logger from "shared/Logger";
 import BlockManager from "shared/building/BlockManager";
-import Arrays from "shared/fixes/Arrays";
+import { Arrays } from "shared/fixes/Arrays";
 
 type CollidersModel = Model & { readonly ___nominal: "CollidersModel" };
 export default class BuildingWelder {

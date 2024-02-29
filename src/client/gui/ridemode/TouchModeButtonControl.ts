@@ -2,7 +2,7 @@ import Signal from "@rbxts/signal";
 import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
 import Gui from "client/gui/Gui";
 import { TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
-import Arrays from "shared/fixes/Arrays";
+import { Arrays } from "shared/fixes/Arrays";
 
 export type TouchModeButtonData = {
 	readonly name: string;

@@ -195,7 +195,7 @@ namespace Controllers {
 
 			const aabb = isFullPlot(this.blocks)
 				? BuildingManager.getModelAABB(this.blocks)
-				: BuildingManager.getBlockModelsAABB(this.blocks);
+				: BuildingManager.getBlocksAABB(this.blocks);
 
 			const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
 			moveHandles.Size = aabb.Size.add(new Vector3(0.00001, 0.00001, 0.00001)); // + 0.00001 to avoid z-fighting

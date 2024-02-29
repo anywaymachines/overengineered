@@ -12,7 +12,7 @@ import Logger from "shared/Logger";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
-import Arrays from "shared/fixes/Arrays";
+import { Arrays } from "shared/fixes/Arrays";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import VectorUtils from "shared/utils/VectorUtils";
@@ -168,7 +168,7 @@ export default class BuildTool2 extends ToolBase {
 		const selectedBlock = this.selectedBlock.get();
 		if (!selectedBlock) return;
 		//this.debugPrefab.MoveTo(to); //remove later
-		const blockSize = BuildingManager.getBlockModelAABB(part).Size;
+		const blockSize = BuildingManager.getModelAABB(part).Size;
 		const allGhosts: Set<BlockGhost> = new Set<BlockGhost>();
 
 		const diff = to.sub(from);

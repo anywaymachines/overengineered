@@ -1,7 +1,7 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import { BlockDataRegistry } from "./BlockDataRegistry";
 import { AutoBlockCreator } from "./block/logic/AutoBlockCreator";
-import Arrays from "./fixes/Arrays";
+import { Arrays } from "./fixes/Arrays";
 import Objects from "./fixes/objects";
 
 declare global {

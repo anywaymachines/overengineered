@@ -17,7 +17,7 @@ import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 import ComponentBase from "shared/component/SharedComponentBase";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import Arrays from "shared/fixes/Arrays";
+import { Arrays } from "shared/fixes/Arrays";
 import Objects from "shared/fixes/objects";
 
 const typeGroups = {

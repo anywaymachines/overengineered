@@ -8,7 +8,7 @@ import ComponentBase from "shared/component/SharedComponentBase";
 spawn(() => {
 	let plot: PlotModel | undefined;
 	while (!plot) {
-		plot = SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId);
+		plot = SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)?.instance;
 		wait(0.1);
 	}
 	new Beacon(plot!, "Plot", "plot").enable();
