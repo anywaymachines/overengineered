@@ -35,7 +35,6 @@ namespace Selectors {
 			);
 
 			this.onDestroy(() => {
-				print("destroy");
 				for (const selection of this.selections) {
 					selection.Destroy();
 				}
