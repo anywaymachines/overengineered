@@ -75,7 +75,13 @@ const BuildingManager = {
 		}
 
 		// Not in plot
-		if (!SharedPlots.getPlotBuildingRegion(plot).contains(AABB.fromModel(block))) {
+		if (
+			!SharedPlots.getPlotBuildingRegion(plot).contains(
+				AABB.fromCenterSize(block.GetPivot().Position, block.GetBoundingBox()[1])
+					.withCenter(cframe)
+					.withSize((s) => s.mul(0.9)), // to account for inaccuracies
+			)
+		) {
 			return false;
 		}
 

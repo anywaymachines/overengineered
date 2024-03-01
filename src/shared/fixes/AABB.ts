@@ -47,6 +47,10 @@ export class AABB {
 	}
 	/** Create an {@link AABB} from the minimum and the maximum positions */
 	static fromMinMax(min: Vector3, max: Vector3): AABB {
+		[min, max] = [
+			new Vector3(math.min(min.X, max.X), math.min(min.Y, max.Y), math.min(min.Z, max.Z)),
+			new Vector3(math.max(min.X, max.X), math.max(min.Y, max.Y), math.max(min.Z, max.Z)),
+		];
 		return new AABB({ min, max });
 	}
 
@@ -108,9 +112,27 @@ export class AABB {
 		return this.getMinMaxData().max;
 	}
 
-	/** @returns Copy of this {@link AABB} with the new center point */
-	withCenter(position: Vector3): AABB {
-		return AABB.fromCenterSize(position, this.getSize());
+	/** @returns Copy of this {@link AABB} with the new center point, applying the rotation if {@link CFrame} */
+	withCenter(position: Vector3 | CFrame | ((position: Vector3) => Vector3)): AABB {
+		if (typeIs(position, "Vector3")) {
+			return AABB.fromCenterSize(position, this.getSize());
+		}
+		if (typeIs(position, "function")) {
+			return AABB.fromCenterSize(position(this.getCenter()), this.getSize());
+		}
+
+		const halfSize = this.getSize().div(2);
+		const minPoint = position.Rotation.mul(halfSize.mul(-1)).add(position.Position);
+		const maxPoint = position.Rotation.mul(halfSize).add(position.Position);
+		return AABB.fromMinMax(minPoint, maxPoint);
+	}
+	/** @returns Copy of this {@link AABB} with the new size */
+	withSize(size: Vector3 | ((size: Vector3) => Vector3)): AABB {
+		if (typeIs(size, "Vector3")) {
+			return AABB.fromCenterSize(this.getCenter(), size);
+		}
+
+		return AABB.fromCenterSize(this.getCenter(), size(this.getSize()));
 	}
 
 	/** @returns {@link AABB} that contains both `this` and the provided {@link AABB}s */

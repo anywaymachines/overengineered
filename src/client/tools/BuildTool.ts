@@ -239,7 +239,7 @@ export default class BuildTool extends ToolBase {
 			!BuildingManager.blockCanBePlacedAt(
 				plot,
 				this.selectedBlock.get()!.model,
-				this.previewBlock.PrimaryPart.CFrame,
+				this.previewBlock.GetPivot(),
 				Players.LocalPlayer,
 			)
 		) {
@@ -348,7 +348,7 @@ export default class BuildTool extends ToolBase {
 			BuildingManager.blockCanBePlacedAt(
 				plot,
 				this.selectedBlock.get()!.model,
-				this.previewBlock.PrimaryPart.CFrame,
+				this.previewBlock.GetPivot(),
 				Players.LocalPlayer,
 			)
 		) {
