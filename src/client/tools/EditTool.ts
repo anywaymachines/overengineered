@@ -35,6 +35,7 @@ namespace Selectors {
 			);
 
 			this.onDestroy(() => {
+				print("destroy");
 				for (const selection of this.selections) {
 					selection.Destroy();
 				}
@@ -229,14 +230,19 @@ export default class EditTool extends ToolBase {
 		super(mode);
 
 		{
-			const selector = this.parent(new Selectors.DesktopMultiSelector());
-			this.event.subscribe(selector.selectedBlocksChanged, (selected) => this.selected.set(selected, true));
+			const selectorParent = new ComponentChild<Selectors.DesktopMultiSelector>(this, true);
+			this.onEnable(() => {
+				const selector = selectorParent.set(new Selectors.DesktopMultiSelector());
+				this.eventHandler.subscribe(selector.selectedBlocksChanged, (selected) =>
+					this.selected.set(selected, true),
+				);
+			});
 
 			this.controller.childSet.Connect((child) => {
 				if (child) {
-					selector.disable();
+					selectorParent.get()?.disable();
 				} else {
-					selector.enable();
+					selectorParent.get()?.enable();
 				}
 			});
 		}
