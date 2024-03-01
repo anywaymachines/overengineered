@@ -1,9 +1,9 @@
 import { HttpService } from "@rbxts/services";
 import { blockRegistry } from "shared/Registry";
 import BlockManager from "shared/building/BlockManager";
-import BuildingManager from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import SharedPlots from "shared/building/SharedPlots";
+import { AABB } from "shared/fixes/AABB";
 import JSON from "shared/fixes/Json";
 import Objects from "shared/fixes/objects";
 import VectorUtils from "shared/utils/VectorUtils";
@@ -23,6 +23,11 @@ export const ServerBuilding = {
 	},
 	placeBlock: (plot: PlotModel, data: PlaceBlockByPlayerRequest | PlaceBlockByServerRequest): BuildResponse => {
 		const block = blockRegistry.get(data.id)!;
+
+		// round the coordinates
+		(data as Writable<typeof data>).location = data.location.sub(
+			data.location.Position.sub(VectorUtils.apply(data.location.Position, math.round)),
+		);
 
 		// Create a new instance of the building model
 		const model = block.model.Clone();
@@ -68,24 +73,20 @@ export const ServerBuilding = {
 		return { success: true, model: model };
 	},
 	moveBlocks: ({ plot, blocks, diff }: MoveBlocksRequest): Response => {
-		let blocksRegion = SharedBuilding.isFullPlot(blocks)
-			? BuildingManager.getModelAABB(blocks)
-			: BuildingManager.getBlocksAABB(blocks);
-		blocksRegion = new Region3(
-			blocksRegion.CFrame.Position.sub(blocksRegion.Size.div(2)).add(diff),
-			blocksRegion.CFrame.Position.add(blocksRegion.Size.div(2)).add(diff),
-		);
+		// TODO: whole plot movement optimizations
+
+		let blocksRegion = SharedBuilding.isFullPlot(blocks) ? AABB.fromModel(blocks) : AABB.fromModels(blocks);
+		blocksRegion = blocksRegion.withCenter(blocksRegion.getCenter().add(diff));
 
 		blocks = SharedBuilding.getBlockList(blocks);
-		const plotregion = SharedPlots.getPlotBuildingRegion(plot);
-
-		if (!VectorUtils.isRegion3InRegion3(blocksRegion, plotregion)) {
+		if (!SharedPlots.getPlotBuildingRegion(plot).contains(blocksRegion)) {
 			return err("Invalid movement");
 		}
 
 		for (const block of blocks) {
-			// TODO:: not unweld moved blocks between them
 			block.PivotTo(block.GetPivot().add(diff));
+
+			// TODO:: not unweld moved blocks between them
 			BuildingWelder.moveCollisions(plot, block, block.GetPivot());
 		}
 

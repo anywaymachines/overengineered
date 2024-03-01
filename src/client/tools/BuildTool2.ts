@@ -12,6 +12,7 @@ import Logger from "shared/Logger";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
+import { AABB } from "shared/fixes/AABB";
 import { Arrays } from "shared/fixes/Arrays";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -174,7 +175,7 @@ export default class BuildTool2 extends ToolBase {
 		const selectedBlock = this.selectedBlock.get();
 		if (!selectedBlock) return;
 		//this.debugPrefab.MoveTo(to); //remove later
-		const blockSize = BuildingManager.getModelAABB(part).Size;
+		const blockSize = AABB.fromModel(part).getSize();
 		const allGhosts: Set<BlockGhost> = new Set<BlockGhost>();
 
 		const diff = to.sub(from);
@@ -409,8 +410,8 @@ export default class BuildTool2 extends ToolBase {
 		}
 
 		const plotRegion = SharedPlots.getPlotBuildingRegion(plot);
-		const blocksRegion = BuildingManager.getBlocksAABB(blocks);
-		if (!VectorUtils.isRegion3InRegion3(blocksRegion, plotRegion)) {
+		const blocksRegion = AABB.fromModels(blocks);
+		if (!plotRegion.contains(blocksRegion)) {
 			LogControl.instance.addLine("Out of bounds!", Colors.red);
 			SoundController.getSounds().Build.BlockPlaceError.Play();
 			return;

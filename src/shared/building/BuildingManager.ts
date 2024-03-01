@@ -1,5 +1,6 @@
 import { RunService } from "@rbxts/services";
 import SharedPlots from "shared/building/SharedPlots";
+import { AABB } from "shared/fixes/AABB";
 import VectorUtils from "shared/utils/VectorUtils";
 
 /** Methods for for getting information about blocks in a building */
@@ -24,46 +25,6 @@ const BuildingManager = {
 		Enum.Material.Slate,
 		Enum.Material.Wood,
 	] as readonly Enum.Material[],
-
-	/** Get an axis-aligned bounding box of a model */
-	getModelAABB(block: Model): Region3 {
-		const [cf, size] = block.GetBoundingBox();
-		const sx = size.X;
-		const sy = size.Y;
-		const sz = size.Z;
-
-		const [x, y, z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = cf.GetComponents();
-
-		const wsx = 0.5 * (math.abs(R00) * sx + math.abs(R01) * sy + math.abs(R02) * sz);
-		const wsy = 0.5 * (math.abs(R10) * sx + math.abs(R11) * sy + math.abs(R12) * sz);
-		const wsz = 0.5 * (math.abs(R20) * sx + math.abs(R21) * sy + math.abs(R22) * sz);
-		return new Region3(new Vector3(x - wsx, y - wsy, z - wsz), new Vector3(x + wsx, y + wsy, z + wsz));
-	},
-
-	/** Get a `Region3` that has all of the provided models inside */
-	getBlocksAABB(models: readonly Model[]): Region3 {
-		const min = (v1: Vector3, v2: Vector3): Vector3 =>
-			new Vector3(math.min(v1.X, v2.X), math.min(v1.Y, v2.Y), math.min(v1.Z, v2.Z));
-		const max = (v1: Vector3, v2: Vector3): Vector3 =>
-			new Vector3(math.max(v1.X, v2.X), math.max(v1.Y, v2.Y), math.max(v1.Z, v2.Z));
-
-		let region = new Region3(
-			new Vector3(math.huge, math.huge, math.huge),
-			new Vector3(-math.huge, -math.huge, -math.huge),
-		);
-		for (const model of models) {
-			const reg = this.getModelAABB(model);
-			const regmin = reg.CFrame.Position.add(reg.Size.div(-2));
-			const regmax = reg.CFrame.Position.add(reg.Size.div(2));
-
-			const regionmin = region.CFrame.Position.add(region.Size.div(-2));
-			const regionmax = region.CFrame.Position.add(region.Size.div(2));
-
-			region = new Region3(min(regmin, regionmin), max(regmax, regionmax));
-		}
-
-		return region;
-	},
 
 	/** Returns the block by its uuid */
 	getBlockByUuid(plot: PlotModel, uuid: BlockUuid): BlockModel | undefined {
@@ -107,13 +68,6 @@ const BuildingManager = {
 	 * @param player The player to check
 	 */
 	blockCanBePlacedAt(plot: PlotModel, block: BlockModel, cframe: CFrame, player: Player): boolean {
-		const plotRegion = SharedPlots.getPlotBuildingRegion(plot);
-
-		const halfSize = block.PrimaryPart!.Size.div(2);
-		const minPoint = cframe.Rotation.mul(halfSize.mul(-1)).add(cframe.Position);
-		const maxPoint = cframe.Rotation.mul(halfSize).add(cframe.Position);
-		const blockRegion = new Region3(minPoint, maxPoint);
-
 		// Checking the plot
 		if (!SharedPlots.isBuildingAllowed(plot, player)) {
 			// No plot / Building forbidden
@@ -121,7 +75,9 @@ const BuildingManager = {
 		}
 
 		// Not in plot
-		if (!VectorUtils.isRegion3InRegion3(blockRegion, plotRegion)) return false;
+		if (!SharedPlots.getPlotBuildingRegion(plot).contains(AABB.fromModel(block))) {
+			return false;
+		}
 
 		if (RunService.IsClient()) {
 			// Check is given coordinate occupied by another block

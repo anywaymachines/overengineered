@@ -8,13 +8,12 @@ import LogControl from "client/gui/static/LogControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import Remotes from "shared/Remotes";
-import BuildingManager from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import SharedPlots from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
 import NumberObservableValue from "shared/event/NumberObservableValue";
 import ObservableValue from "shared/event/ObservableValue";
-import VectorUtils from "shared/utils/VectorUtils";
+import { AABB } from "shared/fixes/AABB";
 import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
 
 const { isFullPlot, isBlocks, isEmpty, getBlockList } = SharedBuilding;
@@ -100,20 +99,16 @@ namespace Selectors {
 	}
 }
 
-const newregion = (center: Vector3, size: Vector3) => new Region3(center.sub(size.div(2)), center.add(size.div(2)));
-const canBeMoved = (regionSize: Vector3, regionPos: Vector3, bounds: Region3): boolean =>
-	VectorUtils.isRegion3InRegion3(newregion(regionPos, regionSize), bounds);
-
 namespace Controllers {
 	export interface IController extends IComponent {}
 
 	export class Move extends ClientComponentBase implements IController {
-		readonly step = new NumberObservableValue<number>(1, 0, 256, 0.5);
+		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 
 		private readonly plot: PlotModel;
 		private readonly blocks: BlockList;
 		private readonly moveHandles: MoveHandles;
-		private readonly plotBounds: Region3;
+		private readonly plotBounds: AABB;
 
 		constructor(plot: PlotModel, blocks: BlockList) {
 			super();
@@ -127,6 +122,11 @@ namespace Controllers {
 		}
 
 		private initializeHandles() {
+			const roundByStep = (number: number) => {
+				const step = this.step.get();
+				return number - (((number + step / 2) % step) - step / 2);
+			};
+
 			const initHandles = (instance: Handles, blocks: BlockList) => {
 				let startpos = Vector3.zero;
 				let pivots: (readonly [BlockModel, CFrame])[] = [];
@@ -137,18 +137,17 @@ namespace Controllers {
 					regionPos: Vector3,
 					direction: Vector3,
 					distance: number,
-					bounds: Region3,
+					bounds: AABB,
 				): number => {
 					const axes = direction.X !== 0 ? "X" : direction.Y !== 0 ? "Y" : "Z";
 					const sign = math.sign(direction[axes]);
 
-					const offset = regionPos[axes] + regionSize[axes] / 2;
-					let boundsmin = (bounds.CFrame.Position[axes] - bounds.Size[axes] / 2 - offset) * sign;
-					let boundsmax = (bounds.CFrame.Position[axes] + bounds.Size[axes] / 2 - offset) * sign;
+					const blockOffsetMin = regionPos[axes] - regionSize[axes] / 2;
+					const blockOffsetMax = regionPos[axes] + regionSize[axes] / 2;
+					let boundsmin = (bounds.getMin()[axes] - blockOffsetMin) * sign;
+					let boundsmax = (bounds.getMax()[axes] - blockOffsetMax) * sign;
 					[boundsmin, boundsmax] = [math.min(boundsmin, boundsmax), math.max(boundsmin, boundsmax)];
 
-					print("bounds ", bounds.CFrame.Position, "|", bounds.Size);
-					print("clamping " + distance, boundsmin, boundsmax);
 					return math.clamp(distance, boundsmin, boundsmax);
 				};
 
@@ -159,7 +158,6 @@ namespace Controllers {
 				this.event.subscribe(instance.MouseButton1Up, async () => {
 					if (moveHandles.GetPivot().Position === startpos) return;
 
-					print("sending movement " + difference);
 					const success = await this.submit(difference);
 					if (!success) {
 						moveHandles.PivotTo(new CFrame(startpos));
@@ -173,16 +171,16 @@ namespace Controllers {
 
 				this.event.subscribe(instance.MouseDrag, (face, distance) => {
 					distance = limitMovement(
-						aabb.Size,
+						aabb.getSize(),
 						startpos,
 						Vector3.FromNormalId(face),
 						distance,
 						this.plotBounds,
 					);
-					distance -= ((distance + 0.5) % this.step.get()) - 0.5;
-
+					distance = roundByStep(distance);
 					difference = Vector3.FromNormalId(face).mul(distance);
-					if (!canBeMoved(aabb.Size, startpos.add(difference), this.plotBounds)) {
+
+					if (!this.plotBounds.contains(aabb.withCenter(startpos.add(difference)))) {
 						return;
 					}
 
@@ -193,13 +191,11 @@ namespace Controllers {
 				});
 			};
 
-			const aabb = isFullPlot(this.blocks)
-				? BuildingManager.getModelAABB(this.blocks)
-				: BuildingManager.getBlocksAABB(this.blocks);
+			const aabb = isFullPlot(this.blocks) ? AABB.fromModel(this.blocks) : AABB.fromModels(this.blocks);
 
 			const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
-			moveHandles.Size = aabb.Size.add(new Vector3(0.00001, 0.00001, 0.00001)); // + 0.00001 to avoid z-fighting
-			moveHandles.PivotTo(aabb.CFrame);
+			moveHandles.Size = aabb.getSize().add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
+			moveHandles.PivotTo(new CFrame(aabb.getCenter()));
 			moveHandles.Parent = Gui.getPlayerGui();
 
 			initHandles(moveHandles.XHandles, this.blocks);
@@ -261,7 +257,7 @@ export default class EditTool extends ToolBase {
 		}
 
 		const plot = isFullPlot(selected) ? selected : SharedPlots.getPlotByBlock(selected[0])!;
-		const move = this.controller.set(new Controllers.Move(plot, selected));
+		this.controller.set(new Controllers.Move(plot, selected));
 	}
 
 	getDisplayName(): string {

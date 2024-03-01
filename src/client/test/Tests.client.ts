@@ -16,6 +16,7 @@ import { LoadSlotTest } from "./control/LoadSlotTest";
 import { PopupTest } from "./control/PopupTest";
 import { TransformTest } from "./control/TransformTest";
 import { WorldPipetteTest } from "./control/WorldPipetteTest";
+import { AABBTests } from "./tests/AABBTests";
 
 const enabled = RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm";
 if (!enabled) new Signal().Wait();
@@ -92,6 +93,7 @@ const create = () => {
 		wrapNonVisual("Wire Tool", WireToolTests),
 		wrapNonVisual("Logic", LogicTests),
 		wrapNonVisual("Component", ComponentTests),
+		wrapNonVisual("AABB", AABBTests),
 	];
 	for (const [name, content] of tests) {
 		content.hide();

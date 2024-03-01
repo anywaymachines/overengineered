@@ -7,8 +7,8 @@ import BuildingController from "client/modes/build/BuildingController";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
-import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
+import { AABB } from "shared/fixes/AABB";
 
 /** A tool for moving the entire building as a whole */
 export default class MoveTool extends ToolBase {
@@ -78,9 +78,9 @@ export default class MoveTool extends ToolBase {
 		this.MoveExtent.Parent = Workspace;
 
 		this.MoveExtent.SelectionBox.Adornee = this.targetModel;
-		const aabb = BuildingManager.getModelAABB(this.targetModel);
-		this.MoveExtent.Position = aabb.CFrame.Position;
-		this.MoveExtent.Size = aabb.Size;
+		const aabb = AABB.fromModel(this.targetModel);
+		this.MoveExtent.Position = aabb.getCenter();
+		this.MoveExtent.Size = aabb.getSize();
 
 		this.XHandles = this.MoveExtent.XHandles;
 		this.YHandles = this.MoveExtent.YHandles;

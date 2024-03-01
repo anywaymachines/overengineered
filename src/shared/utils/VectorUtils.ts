@@ -15,6 +15,28 @@ export default class VectorUtils {
 	static normalizeVector3(vector: Vector3) {
 		return vector.Unit;
 	}
+	static normalize<T extends Vector3 | Vector2>(vector: T): T {
+		return vector.Unit as T;
+	}
+
+	static readonly ofVec3 = {
+		/** @returns Are all of the points of `left` less than those of `right` */
+		lessThan: (left: Vector3, right: Vector3): boolean => {
+			return left.X < right.X && left.Y < right.Y && left.Z < right.Z;
+		},
+		/** @returns Are all of the points of `left` less than those of `right` */
+		lessThanOrEquals: (left: Vector3, right: Vector3): boolean => {
+			return left.X <= right.X && left.Y <= right.Y && left.Z <= right.Z;
+		},
+		/** @returns Are all of the points of `left` greater than those of `right` */
+		greaterThan: (left: Vector3, right: Vector3): boolean => {
+			return left.X > right.X && left.Y > right.Y && left.Z > right.Z;
+		},
+		/** @returns Are all of the points of `left` greater than those of `right` */
+		greaterThanOrEquals: (left: Vector3, right: Vector3): boolean => {
+			return left.X >= right.X && left.Y >= right.Y && left.Z >= right.Z;
+		},
+	} as const;
 
 	static roundVectorToBase(vector: Vector3, base: number): Vector3 {
 		const x = math.floor(vector.X / base + 0.5) * base;
@@ -43,45 +65,5 @@ export default class VectorUtils {
 			default:
 				return { vector: Vector3.FromNormalId(mouse_surface), size: part.Size.X };
 		}
-	}
-
-	static isInRegion3(region: Region3, point: Vector3): boolean {
-		const relative = point.sub(region.CFrame.Position).div(region.Size);
-		return (
-			-0.5 <= relative.X &&
-			relative.X <= 0.5 &&
-			-0.5 <= relative.Y &&
-			relative.Y <= 0.5 &&
-			-0.5 <= relative.Z &&
-			relative.Z <= 0.5
-		);
-	}
-
-	/** Is region1 fully inside region2 */
-	static isRegion3InRegion3(region1: Region3, region2: Region3): boolean {
-		// Get the corners of the first region
-		const corners1 = [
-			new Vector3(
-				region1.CFrame.Position.X - region1.Size.X / 2,
-				region1.CFrame.Position.Y - region1.Size.Y / 2,
-				region1.CFrame.Position.Z - region1.Size.Z / 2,
-			),
-			new Vector3(
-				region1.CFrame.Position.X + region1.Size.X / 2,
-				region1.CFrame.Position.Y + region1.Size.Y / 2,
-				region1.CFrame.Position.Z + region1.Size.Z / 2,
-			),
-		];
-
-		// Check each corner of the first region
-		for (const corner of corners1) {
-			if (!this.isInRegion3(region2, corner)) {
-				// If any corner is not in the second region, return false
-				return false;
-			}
-		}
-
-		// If all corners are in the second region, return true
-		return true;
 	}
 }

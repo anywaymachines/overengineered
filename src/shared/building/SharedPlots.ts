@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
 import GameDefinitions from "shared/data/GameDefinitions";
-import VectorUtils from "shared/utils/VectorUtils";
+import { AABB } from "shared/fixes/AABB";
 import BlockManager, { PlacedBlockData } from "./BlockManager";
 import { SharedPlot } from "./SharedPlot";
 
@@ -64,8 +64,7 @@ export default class SharedPlots {
 	 * @deprecated slow
 	 */
 	static getPlotByPosition(position: Vector3): PlotModel | undefined {
-		return this.plots.find((p) => VectorUtils.isInRegion3(this.getPlotBuildingRegion(p.instance), position))
-			?.instance;
+		return this.plots.find((p) => this.getPlotBuildingRegion(p.instance).contains(position))?.instance;
 	}
 
 	/** Returns the `PlotModel` by the given block or block part, if valid */
@@ -103,14 +102,14 @@ export default class SharedPlots {
 		return plot.Blocks.GetChildren(undefined).map((b) => BlockManager.getBlockDataByBlockModel(b));
 	}
 
-	/** Returns the `Region3` of the **construction area** for blocks */
-	static getPlotBuildingRegion(plot: PlotModel) {
+	/** Returns the {@link AABB} of the **construction area** for blocks */
+	static getPlotBuildingRegion(plot: PlotModel): AABB {
 		const buildingPlane = plot.PrimaryPart;
 
-		return new Region3(
+		return AABB.fromMinMax(
 			new Vector3(
 				buildingPlane.Position.X - buildingPlane.Size.X / 2,
-				buildingPlane.Position.Y - buildingPlane.Size.Y / 2,
+				buildingPlane.Position.Y + buildingPlane.Size.Y / 2,
 				buildingPlane.Position.Z - buildingPlane.Size.Z / 2,
 			),
 			new Vector3(
