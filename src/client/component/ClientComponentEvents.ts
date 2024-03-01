@@ -10,11 +10,16 @@ export class ClientComponentEvents extends ComponentEvents {
 
 		state.onDisable(() => this.inputHandler.unsubscribeAll());
 		state.onDestroy(() => this.inputHandler.destroy());
+
+		this.subscribeObservable2(InputController.inputType, () => {
+			state.disable();
+			state.enable();
+		});
 	}
 
 	/** Register an event that fires on enable and input type change */
 	onPrepare(callback: (inputType: InputType) => void): void {
-		this.subscribeObservable2(InputController.inputType, callback, true);
+		this.onEnable(() => callback(InputController.inputType.get()));
 	}
 
 	/** Register an event that fires on enable and input type change to Desktop */
@@ -41,21 +46,21 @@ export class ClientComponentEvents extends ComponentEvents {
 
 	/** Register an InputBegan event */
 	onInputBegin(callback: (input: InputObject) => void) {
-		this.onPrepare(() => this.inputHandler.onInputBegan(callback));
+		this.onEnable(() => this.inputHandler.onInputBegan(callback));
 	}
 	/** Register an InputEnded event */
 	onInputEnd(callback: (input: InputObject) => void) {
-		this.onPrepare(() => this.inputHandler.onInputEnded(callback));
+		this.onEnable(() => this.inputHandler.onInputEnded(callback));
 	}
 	/** Register an InputBegan event, filtered by a keyboard key */
 	onKeyDown(key: KeyCode, callback: (input: InputObject) => void) {
-		this.onPrepare(() => this.inputHandler.onKeyDown(key, callback));
+		this.onEnable(() => this.inputHandler.onKeyDown(key, callback));
 	}
 	/** Register an InputEnded event, filtered by a keyboard key */
 	onKeyUp(key: KeyCode, callback: (input: InputObject) => void) {
-		this.onPrepare(() => this.inputHandler.onKeyUp(key, callback));
+		this.onEnable(() => this.inputHandler.onKeyUp(key, callback));
 	}
 	subInput(setup: (inputHandler: InputHandler) => void) {
-		this.onPrepare(() => setup(this.inputHandler));
+		this.onEnable(() => setup(this.inputHandler));
 	}
 }

@@ -29,7 +29,6 @@ const filterMouse2 = (callback: InputCallback, allowGameProcessedEvents: boolean
 
 const keyPressed = new Map<KeyCode, Map<InputHandler, Callback[]>>();
 const keyReleased = new Map<KeyCode, Map<InputHandler, Callback[]>>();
-const maps = new Set<Map<InputHandler, Callback[]>>();
 
 const inputBegan = GlobalInputHandler.inputBegan;
 const inputChanged = GlobalInputHandler.inputChanged;
@@ -85,7 +84,6 @@ export default class InputHandler {
 	onKeyDown(key: KeyCode, callback: InputCallback) {
 		let map = keyPressed.get(key);
 		if (!map) keyPressed.set(key, (map = new Map()));
-		maps.add(map);
 
 		let selfmap = map.get(this);
 		if (!selfmap) map.set(this, (selfmap = []));
@@ -98,7 +96,6 @@ export default class InputHandler {
 	onKeyUp(key: KeyCode, callback: InputCallback) {
 		let map = keyReleased.get(key);
 		if (!map) keyReleased.set(key, (map = new Map()));
-		maps.add(map);
 
 		let selfmap = map.get(this);
 		if (!selfmap) map.set(this, (selfmap = []));
@@ -131,10 +128,6 @@ export default class InputHandler {
 		this.inputChanged?.unsubscribeAll();
 		this.inputEnded?.unsubscribeAll();
 		this.touchTap?.unsubscribeAll();
-
-		for (const map of maps) {
-			map.delete(this);
-		}
 	}
 
 	destroy() {
