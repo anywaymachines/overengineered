@@ -30,15 +30,24 @@ export class AABB {
 	}
 	/** Create an {@link AABB} that contains all of the provided models */
 	static fromModels(models: readonly Model[]): AABB {
-		let region = this.fromMinMax(
-			new Vector3(math.huge, math.huge, math.huge),
-			new Vector3(-math.huge, -math.huge, -math.huge),
-		);
-		for (const model of models) {
-			region = region.expanded(this.fromModel(model));
+		return this.combine(models.map((m) => this.fromModel(m)));
+	}
+	/** Create an {@link AABB} that contains all of the provided {@link AABB}s */
+	static combine(regions: readonly AABB[]): AABB {
+		const min = (v1: Vector3, v2: Vector3): Vector3 =>
+			new Vector3(math.min(v1.X, v2.X), math.min(v1.Y, v2.Y), math.min(v1.Z, v2.Z));
+		const max = (v1: Vector3, v2: Vector3): Vector3 =>
+			new Vector3(math.max(v1.X, v2.X), math.max(v1.Y, v2.Y), math.max(v1.Z, v2.Z));
+
+		let minpos = new Vector3(math.huge, math.huge, math.huge);
+		let maxpos = new Vector3(-math.huge, -math.huge, -math.huge);
+
+		for (const rg of regions) {
+			minpos = min(minpos, rg.getMin());
+			maxpos = max(maxpos, rg.getMax());
 		}
 
-		return region;
+		return this.fromMinMax(minpos, maxpos);
 	}
 
 	/** Create an {@link AABB} from the center position and a size */
@@ -135,7 +144,7 @@ export class AABB {
 		return AABB.fromCenterSize(this.getCenter(), size(this.getSize()));
 	}
 
-	/** @returns {@link AABB} that contains both `this` and the provided {@link AABB}s */
+	/** @returns AABB that contains both `this` and the provided {@link AABB}s */
 	expanded(region: AABB): AABB {
 		const min = (v1: Vector3, v2: Vector3): Vector3 =>
 			new Vector3(math.min(v1.X, v2.X), math.min(v1.Y, v2.Y), math.min(v1.Z, v2.Z));
