@@ -4,18 +4,18 @@ import SlimSignal from "shared/event/SlimSignal";
 export class ComponentChild<T extends IComponent = IComponent> implements IDebuggableComponent {
 	readonly childSet = new SlimSignal<(child: T | undefined) => void>();
 
-	private readonly state: IComponent;
+	private readonly state: IReadonlyComponent;
 	private child?: T;
 
 	/** Subscribe a child to a parent state. */
-	static init(state: IComponent, child: IComponent) {
+	static init(state: IReadonlyComponent, child: IComponent) {
 		state.onEnable(() => child.enable());
 		state.onDisable(() => child.disable());
 		state.onDestroy(() => child.destroy());
 
 		if (state.isEnabled()) child.enable();
 	}
-	constructor(state: IComponent, clearOnDisable = false) {
+	constructor(state: IReadonlyComponent, clearOnDisable = false) {
 		this.state = state;
 
 		state.onEnable(() => this.child?.enable());

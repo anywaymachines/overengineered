@@ -78,7 +78,7 @@ export default class ComponentBase extends ComponentBaseBase implements ICompone
 		this.parented ??= [];
 		this.parented.push(child);
 
-		if ("isDestroyed" in child || child instanceof ComponentBase) {
+		if ("isDestroyed" in child || child instanceof ComponentBaseBase) {
 			ComponentChild.init(this, child);
 		}
 

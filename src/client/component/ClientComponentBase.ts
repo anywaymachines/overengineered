@@ -14,7 +14,7 @@ export class ClientComponentBase extends SharedComponentBase {
 		super();
 
 		this.inputHandler = this.event.inputHandler;
-		this.event.onPrepare(() => this.prepare());
+		this.onEnable(() => this.prepare());
 	}
 
 	protected onPrepare(callback: (inputType: InputType) => void) {

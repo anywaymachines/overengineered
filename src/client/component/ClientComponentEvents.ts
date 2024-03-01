@@ -46,19 +46,19 @@ export class ClientComponentEvents extends ComponentEvents {
 
 	/** Register an InputBegan event */
 	onInputBegin(callback: (input: InputObject) => void) {
-		this.onEnable(() => this.inputHandler.onInputBegan(callback));
+		this.subInput((ih) => ih.onInputBegan(callback));
 	}
 	/** Register an InputEnded event */
 	onInputEnd(callback: (input: InputObject) => void) {
-		this.onEnable(() => this.inputHandler.onInputEnded(callback));
+		this.subInput((ih) => ih.onInputEnded(callback));
 	}
 	/** Register an InputBegan event, filtered by a keyboard key */
 	onKeyDown(key: KeyCode, callback: (input: InputObject) => void) {
-		this.onEnable(() => this.inputHandler.onKeyDown(key, callback));
+		this.subInput((ih) => ih.onKeyDown(key, callback));
 	}
 	/** Register an InputEnded event, filtered by a keyboard key */
 	onKeyUp(key: KeyCode, callback: (input: InputObject) => void) {
-		this.onEnable(() => this.inputHandler.onKeyUp(key, callback));
+		this.subInput((ih) => ih.onKeyUp(key, callback));
 	}
 	subInput(setup: (inputHandler: InputHandler) => void) {
 		this.onEnable(() => setup(this.inputHandler));

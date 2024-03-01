@@ -48,8 +48,8 @@ const touchTap = GlobalInputHandler.touchTap;
 			const eventmap = map.get(input.KeyCode.Name);
 			if (!eventmap) return;
 
-			for (const [_, events] of eventmap) {
-				for (const event of events) {
+			for (const [_, events] of [...eventmap]) {
+				for (const event of [...events]) {
 					event(input, gameProcessedEvent);
 				}
 			}
