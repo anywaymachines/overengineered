@@ -15,6 +15,7 @@ import { requestMode } from "client/modes/PlayModeRequest";
 import ActionController from "client/modes/build/ActionController";
 import ToolBase from "client/tools/ToolBase";
 import ToolController from "client/tools/ToolController";
+import EditToolScene, { EditToolSceneDefinition } from "./tools/EditToolScene";
 import WireTool2Scene, { WireTool2SceneDefinition } from "./tools/WireTool2Scene";
 
 type ActionBarControlDefinition = GuiObject & {
@@ -58,6 +59,7 @@ export type BuildingModeSceneDefinition = GuiObject & {
 		readonly Paint: PaintToolSceneDefinition;
 		readonly Wire: WireToolSceneDefinition;
 		readonly Wire2: WireTool2SceneDefinition;
+		readonly Edit: EditToolSceneDefinition;
 	};
 };
 export default class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
@@ -99,6 +101,7 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 		this.scenes.set(tools.buildTool2, new BuildTool2Scene(this.gui.Tools.Build2, tools.buildTool2));
 		this.scenes.set(tools.wiretool, new WireToolScene(this.gui.Tools.Wire, tools.wiretool));
 		this.scenes.set(tools.wiretool2, new WireTool2Scene(this.gui.Tools.Wire2, tools.wiretool2));
+		this.scenes.set(tools.editTool, new EditToolScene(this.gui.Tools.Edit, tools.editTool));
 
 		this.scenes.forEach((scene) => this.add(scene));
 

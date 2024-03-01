@@ -12,7 +12,7 @@ import { SharedBuilding } from "shared/building/SharedBuilding";
 import SharedPlots from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
 import NumberObservableValue from "shared/event/NumberObservableValue";
-import ObservableValue from "shared/event/ObservableValue";
+import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
 import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
 
@@ -31,7 +31,7 @@ namespace Selectors {
 			this.event.subInput((ih) =>
 				ih.onMouse1Down(() => {
 					this.selectBlockByClick(highlighter.highlightedBlock.get());
-				}),
+				}, false),
 			);
 
 			this.onDestroy(() => {
@@ -221,9 +221,13 @@ namespace Controllers {
 	}
 }
 
+export type EditToolMode = "Move";
 export default class EditTool extends ToolBase {
+	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
+	readonly selectedMode: ReadonlyObservableValue<EditToolMode | undefined> = this._selectedMode;
+	private readonly _selected = new ObservableValue<BlockList>([]);
+	readonly selected: ReadonlyObservableValue<BlockList> = this._selected;
 	private readonly controller = new ComponentChild<Controllers.IController>(this, true);
-	private readonly selected = new ObservableValue<BlockList>([]);
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -233,7 +237,7 @@ export default class EditTool extends ToolBase {
 			this.onEnable(() => {
 				const selector = selectorParent.set(new Selectors.DesktopMultiSelector());
 				this.eventHandler.subscribe(selector.selectedBlocksChanged, (selected) =>
-					this.selected.set(selected, true),
+					this._selected.set(selected, true),
 				);
 			});
 
@@ -246,23 +250,35 @@ export default class EditTool extends ToolBase {
 			});
 		}
 
-		this.event.onKeyDown("F", () => {
-			if (this.controller.get() instanceof Controllers.Move) {
+		this.onDisable(() => this._selectedMode.set(undefined));
+		this.event.subscribeObservable2(this.selectedMode, (mode) => {
+			if (!mode) {
 				this.controller.clear();
-			} else {
-				this.enterMoveMode();
+				return;
 			}
+
+			const selected = this._selected.get();
+			if (isEmpty(selected)) {
+				return;
+			}
+
+			const plot = isFullPlot(selected) ? selected : SharedPlots.getPlotByBlock(selected[0])!;
+			this.controller.set(new Controllers[mode](plot, selected));
 		});
+
+		this.event.onKeyDown("F", () => this.toggleMode("Move"));
 	}
 
-	enterMoveMode() {
-		const selected = this.selected.get();
-		if (isEmpty(selected)) {
-			return;
-		}
+	toggleMode(mode: EditToolMode | undefined) {
+		if (mode === undefined || mode === this.selectedMode.get()) {
+			this._selectedMode.set(undefined);
+		} else {
+			if (isEmpty(this._selected.get())) {
+				return;
+			}
 
-		const plot = isFullPlot(selected) ? selected : SharedPlots.getPlotByBlock(selected[0])!;
-		this.controller.set(new Controllers.Move(plot, selected));
+			this._selectedMode.set(mode);
+		}
 	}
 
 	getDisplayName(): string {
