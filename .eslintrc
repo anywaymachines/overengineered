@@ -40,6 +40,11 @@
 				"rootDir": "src",
 				"allowSameFolder": true
 			}
+		], "@typescript-eslint/explicit-member-accessibility": [
+			"warn",
+			{
+				"accessibility": "no-public"
+			}
 		]
 	}
 }
