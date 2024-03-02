@@ -57,7 +57,7 @@ export default class ToolController extends ClientComponentBase {
 			this.wiretool,
 			this.editTool,
 		];
-		if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
+		if ((true as boolean) || GameDefinitions.isAdmin(Players.LocalPlayer)) {
 			tools.insert(6, this.buildTool2);
 		}
 
