@@ -13,7 +13,6 @@ import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
-import { Arrays } from "shared/fixes/Arrays";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import VectorUtils from "shared/utils/VectorUtils";
@@ -37,6 +36,8 @@ export default class BuildTool2 extends ToolBase {
 	private possibleFillRotationAxis = [Vector3.yAxis, Vector3.xAxis, Vector3.zAxis];
 	private fillRotationMode = 0;
 	private nowFillingArea = false;
+	private fillLimit = 32;
+	private oldPostitions: { Positions: Vector3[]; relativeEndPoint: Vector3 } | undefined;
 	//private debugPrefab = ReplicatedStorage.Assets.CenterOfMass.Clone();
 	//samlovebutter's code ends here
 
@@ -62,63 +63,31 @@ export default class BuildTool2 extends ToolBase {
 
 		//samlovebutter's code starts here
 		let pressPosition: Vector3 = Vector3.zero;
-		let drawnModelsPositions: Set<BlockGhost> = new Set<BlockGhost>();
+		let drawnGhosts: BlockGhost[] = [];
 
 		const updateGhosts = () => {
 			if (!this.nowFillingArea) return;
-			for (const ghost of drawnModelsPositions) ghost.model.Destroy(); //replace with optimisation later
-
 			const cameraPostion = Workspace.CurrentCamera!.CFrame.Position;
 			const hit = this.mouse.Hit.Position;
 			const clickDirection = cameraPostion.sub(hit).Unit;
 
 			const pos = this.getPositionOnBuildingPlane(pressPosition, cameraPostion, clickDirection);
-			//detect pos change?
-			//somehow detect which block is outa distance?
-			//create new ghost otherwise
-			const models = this.drawModels(this.selectedBlock.get()?.model, pressPosition, pos);
+			const positionsData = this.calculateGhostBlockPositions(
+				this.selectedBlock.get()?.model,
+				pressPosition,
+				pos,
+			);
+			if (!positionsData) return;
+			if (this.oldPostitions === positionsData) return;
+			this.oldPostitions = positionsData;
+			const models = this.drawModels(this.selectedBlock.get()?.model, positionsData.Positions);
 			if (!models) return;
-			//if(!models.size) models.add(this.createBlockGhost(this.selectedBlock.get()));
-			drawnModelsPositions = models;
-
-			/*
-			print(drawnModelsPositions.size(), models.size());
-			print(drawnModelsPositions.size() > models.size() ? "more" : "less");
-
-			const pos1 = new Set<Vector3>();
-			const pos2 = new Set<Vector3>();
-
-			drawnModelsPositions.forEach((v) => pos2.add(v.model.GetPivot().Position));
-			models.forEach((v) => pos2.add(v.model.GetPivot().Position));
-
-			if (drawnModelsPositions.size() > models.size()) {
-				//find ghosts on same positions
-				const samePos: Vector3[] = [];
-				for (const block of pos1) {
-					if (pos2.has(block)) samePos.push(block);
-				}
-
-				for (const block of drawnModelsPositions)
-					if (samePos.includes(block.model.GetPivot().Position)) {
-						block.model.Destroy();
-					}
-			}
-
-			if (drawnModelsPositions.size() < models.size()) {
-				//find ghost with positions that is not in
-				const newPos: Vector3[] = [];
-				for (const block of pos2) {
-					if (!pos1.has(block)) newPos.push(block);
-				}
-
-				for (const block of models)
-					if (newPos.includes(block.model.GetPivot().Position)) {
-						print(block);
-						drawnModelsPositions.add(block);
-						break;
-					}
-			}
-			*/
+			for (const ghost of drawnGhosts) ghost.model.Destroy(); //replace with optimisation later
+			//optimization plan:
+			//get all old ghosts and compare array sizes
+			//if old array bigger than new then destroy extra elements
+			//if lesser then add new ones
+			drawnGhosts = models;
 		};
 
 		this.event.subscribe(this.mouse.Button1Down, () => {
@@ -135,12 +104,12 @@ export default class BuildTool2 extends ToolBase {
 		this.onDisable(() => (this.nowFillingArea = false));
 		this.event.subscribe(this.mouse.Button1Up, async () => {
 			this.nowFillingArea = false;
-			const result = await this.placeBlocks(Arrays.mapSet(drawnModelsPositions, (m) => m.model));
+			const result = await this.placeBlocks(drawnGhosts.map((v) => v.model));
 			if (result && !result.success) {
 				LogControl.instance.addLine(result.message, Colors.red);
 			}
 
-			for (const ghost of drawnModelsPositions) {
+			for (const ghost of drawnGhosts) {
 				ghost.model.Destroy();
 			}
 		});
@@ -170,30 +139,19 @@ export default class BuildTool2 extends ToolBase {
 	}
 
 	//samlovebutter's code starts here
-	private drawModels(part: BlockModel | undefined, from: Vector3, to: Vector3) {
+	private drawModels(part: BlockModel | undefined, positions: Vector3[]) {
 		if (!part) return;
 		const selectedBlock = this.selectedBlock.get();
 		if (!selectedBlock) return;
-		//this.debugPrefab.MoveTo(to); //remove later
-		const blockSize = AABB.fromModel(part).getSize();
-		const allGhosts: Set<BlockGhost> = new Set<BlockGhost>();
+		const allGhosts: BlockGhost[] = [];
 
-		const diff = to.sub(from);
-		const toX = math.min(math.abs(diff.X), 32);
-		const toY = math.min(math.abs(diff.Y), 32);
-		const toZ = math.min(math.abs(diff.Z), 32);
+		for (const pos of positions) {
+			const ghostFrame = new CFrame(pos);
+			const ghost = this.createBlockGhost(selectedBlock);
+			ghost.model.PivotTo(ghostFrame);
+			allGhosts.push(ghost);
+		}
 
-		for (let x = 0; x <= toX; x += blockSize.X)
-			for (let y = 0; y <= toY; y += blockSize.Y)
-				for (let z = 0; z <= toZ; z += blockSize.Z) {
-					const posX = math.sign(diff.X) * x + from.X;
-					const posY = math.sign(diff.Y) * y + from.Y;
-					const posZ = math.sign(diff.Z) * z + from.Z;
-					const ghostFrame = new CFrame(new Vector3(posX, posY, posZ));
-					const ghost = this.createBlockGhost(selectedBlock);
-					ghost.model.PivotTo(ghostFrame);
-					allGhosts.add(ghost);
-				}
 		return allGhosts;
 	}
 
@@ -222,6 +180,39 @@ export default class BuildTool2 extends ToolBase {
 		}
 		const result = lookVector.mul(-distance).add(cameraPostion);
 		return result;
+	}
+
+	private calculateGhostBlockPositions(
+		part: BlockModel | undefined,
+		from: Vector3,
+		to: Vector3,
+	):
+		| {
+				Positions: Vector3[];
+				relativeEndPoint: Vector3;
+		  }
+		| undefined {
+		if (!part) return;
+		const blockSize = AABB.fromModel(part).getSize();
+		const diff = to.sub(from);
+		const toX = math.min(math.abs(diff.X), this.fillLimit);
+		const toY = math.min(math.abs(diff.Y), this.fillLimit);
+		const toZ = math.min(math.abs(diff.Z), this.fillLimit);
+		const result: Vector3[] = [];
+		const endPoint = new Vector3(toX * math.sign(diff.X), toY * math.sign(diff.Y), toZ * math.sign(diff.X));
+		if (this.oldPostitions?.relativeEndPoint === endPoint) return this.oldPostitions;
+		for (let x = 0; x <= toX; x += blockSize.X)
+			for (let y = 0; y <= toY; y += blockSize.Y)
+				for (let z = 0; z <= toZ; z += blockSize.Z) {
+					const posX = math.sign(diff.X) * x + from.X;
+					const posY = math.sign(diff.Y) * y + from.Y;
+					const posZ = math.sign(diff.Z) * z + from.Z;
+					result.push(new Vector3(posX, posY, posZ));
+				}
+		return {
+			Positions: result,
+			relativeEndPoint: endPoint ?? from,
+		};
 	}
 	//samlovebutter's code ends here
 
