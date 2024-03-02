@@ -22,13 +22,16 @@ export default class Control<
 		this.visible = gui.Visible;
 
 		this.children.onAdded.Connect((instance) => {
-			if (instance instanceof Control && instance.getGui().Parent === this.gui) {
+			// needed because `instanceof Control` results in `instance` being `Control<any, any>`
+			const isControl = (instance: IComponent): instance is Control => instance instanceof Control;
+
+			if (isControl(instance) && instance.getGui().Parent === this.gui) {
 				instance.getGui().LayoutOrder = this.getChildren().size();
 			}
 		});
 	}
 
-	getGui() {
+	getGui(): T {
 		return this.gui;
 	}
 
