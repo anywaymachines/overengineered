@@ -8,7 +8,8 @@
 		"project": "./tsconfig.json"
 	},
 	"ignorePatterns": [
-		"/out"
+		"/out",
+		"/rbxts-transformer-macros"
 	],
 	"plugins": [
 		"@typescript-eslint",

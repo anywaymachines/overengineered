@@ -1,3 +1,59 @@
+import { $defineCallMacros } from "rbxts-transformer-macros";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MacroList<T> = { readonly [key: string]: (this: T, ...args: any[]) => unknown };
+type E<T> = { readonly [k in keyof T]?: (this: T, ...args: Parameters<T[k]>) => ReturnType<T[k]> };
+
+declare global {
+	interface ReadonlySet<T> {
+		filter(func: (item: T) => boolean): T[];
+		filterToSet(func: (item: T) => boolean): Set<T>;
+	}
+}
+const setMacros = {
+	filter(func: (item: defined) => boolean): defined[] {
+		const result: defined[] = [];
+		for (const value of this) {
+			if (!func(value)) continue;
+			result.push(value);
+		}
+
+		return result;
+	},
+	filterToSet(func: (item: defined) => boolean): Set<defined> {
+		const result = new Set<defined>();
+		for (const value of this) {
+			if (!func(value)) continue;
+			result.add(value);
+		}
+
+		return result;
+	},
+} as const satisfies E<ReadonlySet<defined>>;
+export const SetMacros = $defineCallMacros<ReadonlySet<defined>>(setMacros);
+
+//
+
+declare global {
+	interface ReadonlyMap<K, V> {
+		filter(func: (key: K, value: V) => boolean): Map<K, V>;
+	}
+}
+const mapMacros = {
+	filter(func: (key: defined, value: defined) => boolean): Map<defined, defined> {
+		const result = new Map<defined, defined>();
+		for (const [key, value] of this) {
+			if (!func(key, value)) continue;
+			result.set(key, value);
+		}
+
+		return result;
+	},
+} as const satisfies MacroList<ReadonlyMap<defined, defined>>;
+export const MapMacros = $defineCallMacros<ReadonlyMap<defined, defined>>(mapMacros);
+
+//
+
 export const Arrays = {
 	ofMap: {
 		keys: <TKey extends defined, TValue extends defined>(map: ReadonlyMap<TKey, TValue>): TKey[] => {
