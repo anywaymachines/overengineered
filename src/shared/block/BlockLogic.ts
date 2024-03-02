@@ -1,5 +1,5 @@
 import { PlacedBlockDataConnection } from "shared/building/BlockManager";
-import SharedComponent from "shared/component/SharedComponent";
+import { InstanceComponent } from "shared/component/InstanceComponent";
 import PartUtils from "shared/utils/PartUtils";
 
 export interface BlockLogicData<TDef extends BlockConfigTypes.Definitions, TBlock extends BlockModel = BlockModel> {
@@ -13,7 +13,7 @@ export interface BlockLogicData<TDef extends BlockConfigTypes.Definitions, TBloc
 	/** Connections to this block INPUT from other blocks OUTPUTs and INPUTs */
 	readonly connections: Readonly<Partial<Record<keyof TDef & BlockConnectionName, PlacedBlockDataConnection>>>;
 }
-export default class BlockLogic<T extends BlockModel = BlockModel> extends SharedComponent<T> {
+export default class BlockLogic<T extends BlockModel = BlockModel> extends InstanceComponent<T> {
 	readonly block: BlockLogicData<BlockConfigTypes.Definitions, T>;
 	readonly instance: T;
 

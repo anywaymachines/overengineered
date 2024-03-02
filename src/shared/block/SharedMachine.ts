@@ -2,7 +2,7 @@ import { RunService } from "@rbxts/services";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import SharedComponentContainer from "shared/component/SharedComponentContainer";
+import { ContainerComponent } from "shared/component/ContainerComponent";
 import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
@@ -12,7 +12,7 @@ import ImpactController from "./ImpactController";
 import logicRegistry, { LogicRegistry } from "./LogicRegistry";
 import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 
-export default class SharedMachine extends SharedComponentContainer {
+export default class SharedMachine extends ContainerComponent {
 	readonly blocks: BlockLogic[] = [];
 	readonly occupiedByLocalPlayer = new ObservableValue(true);
 	private readonly childMap = new Map<BlockUuid, ConfigurableBlockLogic<BlockConfigTypes.BothDefinitions>>();

@@ -7,7 +7,7 @@ import Gui from "client/gui/Gui";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
 import { Element } from "shared/Element";
-import SharedComponent from "shared/component/SharedComponent";
+import { InstanceComponent } from "shared/component/InstanceComponent";
 import GameDefinitions from "shared/data/GameDefinitions";
 import Objects from "shared/fixes/objects";
 
@@ -17,7 +17,7 @@ task.wait(0.5); // wait for the controls to enable
 
 let destroy: (() => void) | undefined;
 const create = () => {
-	const parent = new SharedComponent(
+	const parent = new InstanceComponent(
 		Element.create("ScreenGui", { Name: "TestScreenGui", Parent: Gui.getPlayerGui() }),
 	);
 

@@ -1,12 +1,12 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
 import Logger from "shared/Logger";
 import { SharedPlot } from "shared/building/SharedPlot";
+import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
-import InstanceComponent from "shared/component/SharedComponent";
-import ComponentBase from "shared/component/SharedComponentBase";
+import { InstanceComponent } from "shared/component/InstanceComponent";
 import GameDefinitions from "shared/data/GameDefinitions";
 
-export class PlotFloatingImageController extends ComponentBase {
+export class PlotFloatingImageController extends Component {
 	constructor(plot: SharedPlot) {
 		super();
 

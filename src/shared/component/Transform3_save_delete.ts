@@ -1,9 +1,9 @@
 import { RunService } from "@rbxts/services";
 import SlimSignal from "shared/event/SlimSignal";
 import Objects from "shared/fixes/objects";
+import { Component } from "./Component";
+import { ContainerComponent } from "./ContainerComponent";
 import { Easable, Easing, EasingDirection, EasingStyle } from "./Easing";
-import SharedComponentBase from "./SharedComponentBase";
-import SharedComponentContainer from "./SharedComponentContainer";
 
 interface Transform {
 	/**
@@ -194,7 +194,7 @@ class TransformSequence implements MultiTransform {
 
 //
 
-class TransformRunner extends SharedComponentBase {
+class TransformRunner extends Component {
 	readonly completed = new SlimSignal();
 	readonly transform: Transform;
 	private time = 0;
@@ -365,7 +365,7 @@ export class TransformBuilder<T extends object> {
 
 //
 
-export class TransformContainer<T extends Instance> extends SharedComponentContainer<TransformRunner> {
+export class TransformContainer<T extends Instance> extends ContainerComponent<TransformRunner> {
 	private readonly groups = new Map<string, Transform>();
 	private readonly instance;
 

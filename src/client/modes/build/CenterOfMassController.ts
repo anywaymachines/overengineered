@@ -1,11 +1,11 @@
 import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
-import { ClientComponentBase } from "client/component/ClientComponentBase";
+import { ClientComponent } from "client/component/ClientComponent";
 import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
 import Gui from "client/gui/Gui";
 import SharedPlots from "shared/building/SharedPlots";
 
-export default class CenterOfMassController extends ClientComponentBase {
+export default class CenterOfMassController extends ClientComponent {
 	private readonly viewportFrame;
 	private renderedBalls: Model[] = [];
 

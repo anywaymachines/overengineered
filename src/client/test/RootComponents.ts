@@ -1,3 +1,3 @@
-import SharedComponentBase from "shared/component/SharedComponentBase";
+import { Component } from "shared/component/Component";
 
-export const rootComponents: SharedComponentBase[] = [];
+export const rootComponents: Component[] = [];

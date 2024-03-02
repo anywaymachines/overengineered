@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import { ClientComponentBase } from "client/component/ClientComponentBase";
+import { ClientComponent } from "client/component/ClientComponent";
 import TooltipsControl from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import BuildTool from "client/tools/BuildTool";
@@ -15,7 +15,7 @@ import ObservableValue from "shared/event/ObservableValue";
 import EditTool from "./EditTool";
 import WireTool2 from "./WireTool2";
 
-export default class ToolController extends ClientComponentBase {
+export default class ToolController extends ClientComponent {
 	public readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);
 	public readonly tools: readonly ToolBase[];
 

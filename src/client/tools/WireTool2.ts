@@ -1,6 +1,6 @@
 import { GamepadService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import { ClientComponentBase } from "client/component/ClientComponentBase";
+import { ClientInstanceComponent } from "client/component/ClientInstanceComponent";
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
@@ -13,9 +13,9 @@ import Remotes from "shared/Remotes";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
 import SharedPlots from "shared/building/SharedPlots";
+import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
-import ComponentBase from "shared/component/SharedComponentBase";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import { Arrays } from "shared/fixes/Arrays";
 import Objects from "shared/fixes/objects";
@@ -109,7 +109,7 @@ namespace Markers {
 			readonly Filled: Frame;
 		};
 	};
-	export abstract class Marker extends ClientComponent<MarkerComponentDefinition> {
+	export abstract class Marker extends ClientInstanceComponent<MarkerComponentDefinition> {
 		private static getPartMarkerPositions(part: BasePart): Vector3[] {
 			const averageSize = (part.Size.X + part.Size.Y + part.Size.Z) / 3;
 			const halfSize = averageSize / 2;
@@ -383,7 +383,7 @@ namespace Markers {
 }
 
 type WireComponentDefinition = Part;
-class WireComponent extends ClientComponent<WireComponentDefinition> {
+class WireComponent extends ClientInstanceComponent<WireComponentDefinition> {
 	private static readonly visibleTransparency = 0.4;
 	static createInstance(): WireComponentDefinition {
 		return Element.create("Part", {
@@ -528,12 +528,12 @@ namespace Controllers {
 
 		stopDragging(): void;
 	}
-	export class Desktop extends ClientComponentBase implements IController {
+	export class Desktop extends ClientComponent implements IController {
 		readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
 		private readonly currentMoverContainer;
 
 		constructor(markers: readonly Markers.Marker[], wireParent: ViewportFrame) {
-			class WireMover extends ClientComponent<WireComponentDefinition> {
+			class WireMover extends ClientInstanceComponent<WireComponentDefinition> {
 				readonly marker;
 
 				constructor(instance: WireComponentDefinition, marker: Markers.Output) {
@@ -609,7 +609,7 @@ namespace Controllers {
 			this.currentMoverContainer.clear();
 		}
 	}
-	export class Touch extends ComponentBase implements IController {
+	export class Touch extends Component implements IController {
 		readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
 		private readonly markers: readonly Markers.Marker[];
 

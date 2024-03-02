@@ -4,14 +4,14 @@ import ImpactController from "shared/block/ImpactController";
 import SharedMachine from "shared/block/SharedMachine";
 import blockConfigRegistry, { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import SharedComponentContainer from "shared/component/SharedComponentContainer";
+import { ContainerComponent } from "shared/component/ContainerComponent";
 import { Config } from "shared/config/Config";
 import Objects from "shared/fixes/objects";
 import blockConfigRegistryClient from "./config/BlockConfigRegistryClient";
 import { ConfigLogicValueBase } from "./config/ConfigLogicValueBase";
 
 export default class Machine extends SharedMachine {
-	readonly logicInputs = new SharedComponentContainer<
+	readonly logicInputs = new ContainerComponent<
 		ConfigLogicValueBase<BlockConfigTypes.Types[keyof BlockConfigTypes.Types]>
 	>();
 

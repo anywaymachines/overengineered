@@ -15,7 +15,7 @@ import { BlocksInitializer } from "shared/BlocksInitializer";
 import RemoteEvents from "shared/RemoteEvents";
 import SharedPlots from "shared/building/SharedPlots";
 import { AdminMessageController } from "./AdminMessageController";
-import { ClientComponentContainer } from "./component/ClientComponentContainer";
+import { ClientContainerComponent } from "./component/ClientContainerComponent";
 import { rootComponents } from "./test/RootComponents";
 
 // wait for assets to be copied
@@ -46,7 +46,7 @@ while (!SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)) {
 	task.wait(0.2);
 }
 
-const root = new ClientComponentContainer();
+const root = new ClientContainerComponent();
 rootComponents.push(root);
 const playModeController = new PlayModeController();
 root.add(playModeController);

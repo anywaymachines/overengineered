@@ -1,8 +1,8 @@
 import { Assert } from "client/test/Assert";
 import { Element } from "shared/Element";
-import InstanceComponent from "shared/component/SharedComponent";
-import ComponentBase from "shared/component/SharedComponentBase";
-import ContainerComponent from "shared/component/SharedComponentContainer";
+import { Component } from "shared/component/Component";
+import { ContainerComponent } from "shared/component/ContainerComponent";
+import { InstanceComponent } from "shared/component/InstanceComponent";
 
 export const ComponentTests = {
 	componentDestroyByInstance: () => {
@@ -32,14 +32,14 @@ export const ComponentTests = {
 
 	children: () => {
 		const component = new ContainerComponent();
-		component.children.add(new ComponentBase());
+		component.children.add(new Component());
 		Assert.true(component.children.getAll().size() === 1, "Should not be empty after adding");
 		Assert.true(!component.children.getAll().find((f) => f.isEnabled()), "Should not be enabled yet");
 
 		component.enable();
 		Assert.true(!component.children.getAll().find((f) => !f.isEnabled()), "Should all be enabled (1)");
 
-		component.children.add(new ComponentBase());
+		component.children.add(new Component());
 		Assert.true(
 			!component.children.getAll().find((f) => !f.isEnabled()),
 			"Adding a component when already enabled should enable it",

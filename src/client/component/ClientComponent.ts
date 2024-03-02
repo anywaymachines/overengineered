@@ -1,20 +1,17 @@
 import InputController from "client/controller/InputController";
 import { ReadonlyInputHandler } from "client/event/InputHandler";
-import SharedComponent from "shared/component/SharedComponent";
+import { Component } from "shared/component/Component";
 import { ClientComponentEvents } from "./ClientComponentEvents";
 
 /** @inheritdoc */
-export class ClientComponent<
-	T extends Instance = Instance,
-	TChild extends IComponent = IComponent,
-> extends SharedComponent<T, TChild> {
-	readonly event = new ClientComponentEvents(this);
+export class ClientComponent extends Component {
+	protected readonly event = new ClientComponentEvents(this);
 
 	/** Input handler for use in prepare***() */
 	protected readonly inputHandler: ReadonlyInputHandler;
 
-	constructor(instance: T) {
-		super(instance);
+	constructor() {
+		super();
 
 		this.inputHandler = this.event.inputHandler;
 		this.onEnable(() => this.prepare());

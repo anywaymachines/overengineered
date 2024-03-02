@@ -1,11 +1,11 @@
 import InputController from "client/controller/InputController";
 import { ReadonlyInputHandler } from "client/event/InputHandler";
-import SharedComponentBase from "shared/component/SharedComponentBase";
+import { ContainerComponent } from "shared/component/ContainerComponent";
 import { ClientComponentEvents } from "./ClientComponentEvents";
 
-/** @inheritdoc */
-export class ClientComponentBase extends SharedComponentBase {
-	protected readonly event = new ClientComponentEvents(this);
+/** A component that has children. */
+export class ClientContainerComponent<TChild extends IComponent = IComponent> extends ContainerComponent<TChild> {
+	readonly event = new ClientComponentEvents(this);
 
 	/** Input handler for use in prepare***() */
 	protected readonly inputHandler: ReadonlyInputHandler;

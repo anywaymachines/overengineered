@@ -1,4 +1,4 @@
-import { ClientComponentContainer } from "client/component/ClientComponentContainer";
+import { ClientContainerComponent } from "client/component/ClientContainerComponent";
 import Control from "client/gui/Control";
 import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
 import ObservableValue from "shared/event/ObservableValue";
@@ -6,7 +6,7 @@ import ObservableValue from "shared/event/ObservableValue";
 export abstract class ConfigLogicValueBase<
 	T extends
 		BlockConfigTypes.Types[keyof BlockConfigTypes.Types] = BlockConfigTypes.Types[keyof BlockConfigTypes.Types],
-> extends ClientComponentContainer {
+> extends ClientContainerComponent {
 	readonly value: ObservableValue<T["default"]>;
 	protected readonly definition: T;
 	protected readonly config: T["config"];

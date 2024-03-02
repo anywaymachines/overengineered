@@ -1,8 +1,8 @@
+import { Component } from "./Component";
 import { ComponentChildren } from "./ComponentChildren";
-import ComponentBase from "./SharedComponentBase";
 
 /** Component with children */
-export default class ContainerComponent<TChild extends IComponent = IComponent> extends ComponentBase {
+export class ContainerComponent<TChild extends IComponent = IComponent> extends Component {
 	readonly children: ComponentChildren<TChild> = new ComponentChildren(this);
 
 	/** Returns a list of added children */

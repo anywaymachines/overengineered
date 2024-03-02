@@ -1,12 +1,12 @@
 import { GuiService, Players } from "@rbxts/services";
-import { ClientComponentBase } from "client/component/ClientComponentBase";
+import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import Gui from "client/gui/Gui";
 import ObservableValue from "shared/event/ObservableValue";
 import PlayerUtils from "shared/utils/PlayerUtils";
 
-export default class HoveredPartHighlighter<T extends Instance> extends ClientComponentBase {
+export default class HoveredPartHighlighter<T extends Instance> extends ClientComponent {
 	readonly highlightedPart = new ObservableValue<T | undefined>(undefined);
 
 	constructor(map?: (part: BasePart) => T | undefined) {

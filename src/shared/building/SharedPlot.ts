@@ -1,5 +1,5 @@
 import Signal from "@rbxts/signal";
-import InstanceComponent from "shared/component/SharedComponent";
+import { InstanceComponent } from "shared/component/InstanceComponent";
 
 export class SharedPlot extends InstanceComponent<PlotModel> {
 	readonly blockAdded = new Signal<(block: BlockModel) => void>();

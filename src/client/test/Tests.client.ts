@@ -6,7 +6,7 @@ import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
 import { WireToolTests } from "client/tools/WireTool2";
 import { Element } from "shared/Element";
-import SharedComponent from "shared/component/SharedComponent";
+import { InstanceComponent } from "shared/component/InstanceComponent";
 import Objects from "shared/fixes/objects";
 import { LogicTests } from "./LogicTest1";
 import { ColorWheelTest } from "./control/ColorWheelTest";
@@ -24,7 +24,7 @@ task.wait(0.5); // wait for the controls to enable
 
 let destroy: (() => void) | undefined;
 const create = () => {
-	const parent = new SharedComponent(
+	const parent = new InstanceComponent(
 		Element.create("ScreenGui", { Name: "TestScreenGui", Parent: Gui.getPlayerGui() }),
 	);
 

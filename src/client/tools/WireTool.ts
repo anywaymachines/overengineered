@@ -1,6 +1,6 @@
 import { GamepadService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
-import { ClientComponent } from "client/component/ClientComponent";
-import { ClientComponentContainer } from "client/component/ClientComponentContainer";
+import { ClientContainerComponent } from "client/component/ClientContainerComponent";
+import { ClientInstanceComponent } from "client/component/ClientInstanceComponent";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
@@ -11,7 +11,7 @@ import Remotes from "shared/Remotes";
 import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
-import SharedComponent from "shared/component/SharedComponent";
+import { InstanceComponent } from "shared/component/InstanceComponent";
 import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
 import PartUtils from "shared/utils/PartUtils";
@@ -26,7 +26,7 @@ type MarkerData = {
 };
 
 type MarkerComponentDefinition = BillboardGui;
-class MarkerComponent extends ClientComponent<MarkerComponentDefinition> {
+class MarkerComponent extends ClientInstanceComponent<MarkerComponentDefinition> {
 	readonly instance;
 	readonly data;
 	private tooltip?: BillboardGui;
@@ -80,7 +80,7 @@ class MarkerComponent extends ClientComponent<MarkerComponentDefinition> {
 		gui.StudsOffsetWorldSpace = this.instance.StudsOffsetWorldSpace.add(new Vector3(0, 1, 0));
 		gui.Adornee = this.instance.Adornee;
 		gui.Parent = this.instance.Parent;
-		this.add(new SharedComponent(gui));
+		this.add(new InstanceComponent(gui));
 
 		if (InputController.inputType.get() === "Gamepad") {
 			gui.Size = new UDim2(
@@ -143,7 +143,7 @@ export default class WireTool extends ToolBase {
 
 	constructor(mode: BuildingMode) {
 		super(mode);
-		this.markers = this.parent(new ClientComponentContainer<MarkerComponent>());
+		this.markers = this.parent(new ClientContainerComponent<MarkerComponent>());
 
 		// Wire rendering
 		this.viewportFrame = new Instance("ViewportFrame");

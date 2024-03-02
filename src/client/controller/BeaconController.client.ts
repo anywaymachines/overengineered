@@ -1,8 +1,8 @@
 import { Players } from "@rbxts/services";
 import Beacon from "client/gui/Beacon";
 import SharedPlots from "shared/building/SharedPlots";
+import { Component } from "shared/component/Component";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
-import ComponentBase from "shared/component/SharedComponentBase";
 
 // plot beacon
 spawn(() => {
@@ -16,7 +16,7 @@ spawn(() => {
 
 // players beacon
 spawn(() => {
-	const playerBeacons = new ComponentKeyedChildren<string, Beacon>(new ComponentBase().with((c) => c.enable()));
+	const playerBeacons = new ComponentKeyedChildren<string, Beacon>(new Component().with((c) => c.enable()));
 
 	const createPlayerBeacon = (player: Player) => {
 		// spawn() just in case of infinite wait for something

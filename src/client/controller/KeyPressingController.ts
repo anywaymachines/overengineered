@@ -1,5 +1,5 @@
 import Signal from "@rbxts/signal";
-import { ClientComponentBase } from "client/component/ClientComponentBase";
+import { ClientComponent } from "client/component/ClientComponent";
 import Objects from "shared/fixes/objects";
 
 /*
@@ -103,7 +103,7 @@ export type KeyDefinition<TKeys extends string> = {
 };
 export type KeyDefinitions<TKeys extends string> = { readonly [k in TKeys]: KeyDefinition<TKeys> };
 
-export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> extends ClientComponentBase {
+export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> extends ClientComponent {
 	readonly controller;
 
 	constructor(definitions: T) {

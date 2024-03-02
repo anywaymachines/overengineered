@@ -1,8 +1,8 @@
 import { Element } from "shared/Element";
-import ComponentBase from "shared/component/SharedComponentBase";
+import { Component } from "shared/component/Component";
 
 /** Highlights multiple {@link PVInstance}s by putting them in a single {@link Model} */
-export class MultiModelHighlighter extends ComponentBase {
+export class MultiModelHighlighter extends Component {
 	private readonly model: Model;
 	private readonly highlightInstance: Highlight;
 	private highlighted?: ReadonlyMap<PVInstance, Instance | undefined>;

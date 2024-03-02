@@ -1,7 +1,7 @@
 import Control from "client/gui/Control";
 import { ComponentInstance } from "shared/component/ComponentInstance";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
-import InstanceComponent from "shared/component/SharedComponent";
+import { InstanceComponent } from "shared/component/InstanceComponent";
 
 /** Control that has its children keyed by some value */
 export class DictionaryControl<

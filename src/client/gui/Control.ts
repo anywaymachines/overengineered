@@ -1,11 +1,11 @@
 import Signal from "@rbxts/signal";
-import { ClientComponent } from "client/component/ClientComponent";
+import { ClientInstanceComponent } from "client/component/ClientInstanceComponent";
 
 /** A component that is a GUI element */
 export default class Control<
 	T extends GuiObject = GuiObject,
 	TChild extends IComponent = IComponent,
-> extends ClientComponent<T, TChild> {
+> extends ClientInstanceComponent<T, TChild> {
 	/** Signal that fires when this element is shown */
 	readonly onShow = new Signal<() => void>();
 

@@ -2,7 +2,7 @@ import SlimSignal from "shared/event/SlimSignal";
 import { ComponentChild } from "./ComponentChild";
 import { ComponentEvents } from "./ComponentEvents";
 
-class ComponentBaseBase {
+class ComponentBase {
 	private readonly onEnabled = new SlimSignal();
 	private readonly onDisabled = new SlimSignal();
 	private readonly onDestroyed = new SlimSignal();
@@ -50,7 +50,7 @@ class ComponentBaseBase {
 }
 
 /** Base of any component. Handles events and signals which can be enabled or disabled. */
-export default class ComponentBase extends ComponentBaseBase implements IComponent, IDebuggableComponent {
+export class Component extends ComponentBase implements IComponent, IDebuggableComponent {
 	protected readonly event = new ComponentEvents(this);
 	protected readonly eventHandler = this.event.eventHandler;
 
@@ -79,7 +79,7 @@ export default class ComponentBase extends ComponentBaseBase implements ICompone
 		this.parented ??= [];
 		this.parented.push(child);
 
-		if ("isDestroyed" in child || child instanceof ComponentBaseBase) {
+		if ("isDestroyed" in child || child instanceof ComponentBase) {
 			ComponentChild.init(this, child);
 		}
 

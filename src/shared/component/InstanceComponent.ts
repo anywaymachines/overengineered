@@ -1,9 +1,9 @@
 import { TransformBuilder, TransformContainer } from "shared/component/Transform";
 import { ComponentInstance } from "./ComponentInstance";
-import ContainerComponent from "./SharedComponentContainer";
+import { ContainerComponent } from "./ContainerComponent";
 
 /** Component with an `Instance` and children */
-export default class InstanceComponent<
+export class InstanceComponent<
 	T extends Instance,
 	TChild extends IComponent = IComponent,
 > extends ContainerComponent<TChild> {

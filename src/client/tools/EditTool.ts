@@ -1,6 +1,6 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
 import Signal from "@rbxts/signal";
-import { ClientComponentBase } from "client/component/ClientComponentBase";
+import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
@@ -25,7 +25,7 @@ import { MultiModelHighlighter } from "./selectors/MultiModelHighlighter";
 const { isFullPlot, isBlocks, isEmpty, getBlockList } = SharedBuilding;
 
 namespace Selectors {
-	class HoveredBlocksHighlighter extends ClientComponentBase {
+	class HoveredBlocksHighlighter extends ClientComponent {
 		private readonly _highlighted = new ObservableValue<readonly BlockModel[]>([]);
 		readonly highlighted = this._highlighted.asReadonly();
 
@@ -75,7 +75,7 @@ namespace Selectors {
 		}
 	}
 
-	export class DesktopMultiSelector extends ClientComponentBase {
+	export class DesktopMultiSelector extends ClientComponent {
 		readonly selectedBlocksChanged = new Signal<(blocks: readonly BlockModel[]) => void>();
 		private readonly selected = new Map<BlockModel, SelectionBox>();
 
@@ -201,7 +201,7 @@ namespace Selectors {
 namespace Controllers {
 	export interface IController extends IComponent {}
 
-	export class Move extends ClientComponentBase implements IController {
+	export class Move extends ClientComponent implements IController {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 
 		private readonly plot: PlotModel;

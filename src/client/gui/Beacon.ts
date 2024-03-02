@@ -2,7 +2,7 @@ import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/servic
 import PlayerDataStorage from "client/PlayerDataStorage";
 import Gui from "client/gui/Gui";
 import RobloxUnit from "shared/RobloxUnit";
-import SharedComponent from "shared/component/SharedComponent";
+import { InstanceComponent } from "shared/component/InstanceComponent";
 import PartUtils from "shared/utils/PartUtils";
 import VectorUtils from "shared/utils/VectorUtils";
 
@@ -12,7 +12,7 @@ type BeaconBillboardGui = GuiObject & {
 	readonly ImageLabel: ImageLabel;
 };
 
-export default class Beacon extends SharedComponent<BasePart | Model> {
+export default class Beacon extends InstanceComponent<BasePart | Model> {
 	private readonly billboard;
 
 	constructor(part: BasePart | Model, name: string, config: keyof BeaconsConfiguration) {
