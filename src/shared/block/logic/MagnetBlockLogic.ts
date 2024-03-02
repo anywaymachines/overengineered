@@ -19,13 +19,15 @@ RunService.PostSimulation.Connect((dt) => {
 			const strength2 = magnets[j].input.strength.get() * magicNumber * dt;
 			if (strength2 === 0) continue;
 
-			const calculatedForce: Vector3 = MagnetBlockLogic.calculateForce(magnets[i], magnets[j]);
+			const calculatedForce = MagnetBlockLogic.calculateForce(magnets[i], magnets[j]);
+			if (!calculatedForce) continue;
 			const appliedForce = calculatedForce.mul(strength1).add(calculatedForce.mul(strength2));
 
 			forcesApplied.set(magnets[i], (forcesApplied.get(magnets[i]) ?? Vector3.zero).add(appliedForce));
 			forcesApplied.set(magnets[j], (forcesApplied.get(magnets[j]) ?? Vector3.zero).add(appliedForce.mul(-1)));
 		}
-		magnets[i].part.ApplyImpulseAtPosition(forcesApplied.get(magnets[i])!, magnets[i].part.Position);
+		const finalForce = forcesApplied.get(magnets[i]);
+		if (finalForce) magnets[i].part.ApplyImpulseAtPosition(finalForce, magnets[i].part.Position);
 	}
 });
 
@@ -64,13 +66,12 @@ export default class MagnetBlockLogic extends ConfigurableBlockLogic<typeof bloc
 		super.destroy();
 	}
 
-	static calculateForce(block1: MagnetBlockLogic, block2: MagnetBlockLogic): Vector3 {
+	static calculateForce(block1: MagnetBlockLogic, block2: MagnetBlockLogic): Vector3 | undefined {
 		const pos1 = block1.block.instance.GetPivot().Position;
 		const pos2 = block2.block.instance.GetPivot().Position;
 		const difference = pos1.sub(pos2);
 		const distance = difference.Magnitude;
-		if (distance > 10) return Vector3.zero;
-
+		if (distance > 10) return;
 		const invSqrt = 1 / (1 + math.sqrt(distance));
 		const isAttracted = block1.polarity === block2.polarity;
 		const result = VectorUtils.normalizeVector3(difference).mul(isAttracted ? invSqrt : -invSqrt);
