@@ -117,6 +117,27 @@ export const Arrays = {
 
 			return undefined;
 		},
+
+		removeAll<TValue extends defined>(values: Set<TValue>, toRemove: ReadonlySet<TValue>): void {
+			for (const remove of toRemove) {
+				values.delete(remove);
+			}
+		},
+		intersect<TValue extends defined>(left: Set<TValue>, right: ReadonlySet<TValue>): ReadonlySet<TValue> {
+			const result = new Set<TValue>();
+			for (const item of left) {
+				if (right.has(item)) {
+					result.add(item);
+				}
+			}
+			for (const item of right) {
+				if (left.has(item)) {
+					result.add(item);
+				}
+			}
+
+			return result;
+		},
 	},
 
 	empty: [],

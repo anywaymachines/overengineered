@@ -8,16 +8,18 @@ import ActionController from "client/modes/build/ActionController";
 import BuildingController from "client/modes/build/BuildingController";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
+import { Element } from "shared/Element";
 import Logger from "shared/Logger";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
+import { Arrays } from "shared/fixes/Arrays";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import VectorUtils from "shared/utils/VectorUtils";
 
-type BlockGhost = { readonly model: BlockModel; readonly highlight: Highlight };
+type BlockGhost = { readonly model: BlockModel };
 
 /** A tool for building in the world with blocks */
 export default class BuildTool2 extends ToolBase {
@@ -37,14 +39,29 @@ export default class BuildTool2 extends ToolBase {
 	private fillRotationMode = 0;
 	private nowFillingArea = false;
 	private fillLimit = 32;
-	private oldPostitions: { Positions: Vector3[]; relativeEndPoint: Vector3 } | undefined;
-	//private debugPrefab = ReplicatedStorage.Assets.CenterOfMass.Clone();
+	private oldPositions: { Positions: Set<Vector3>; endPoint: Vector3 } | undefined;
+	private pressPosition: Vector3 = Vector3.zero;
+	private drawnGhostsMap = new Map<Vector3, BlockGhost>();
 	//samlovebutter's code ends here
 
 	private readonly targetPlot = new ObservableValue<PlotModel | undefined>(undefined);
+	private readonly ghostParent;
 
 	constructor(mode: BuildingMode) {
 		super(mode);
+
+		this.ghostParent = Element.create(
+			"Model",
+			{ Parent: Workspace },
+			{
+				highlight: Element.create("Highlight", {
+					FillColor: Colors.blue,
+					FillTransparency: 0.4,
+					OutlineTransparency: 0.5,
+					DepthMode: Enum.HighlightDepthMode.Occluded,
+				}),
+			},
+		);
 
 		//this.debugPrefab.Parent = Workspace;
 		this.targetPlot.subscribe((plot) => mode.mirrorVisualizer.plot.set(plot));
@@ -62,41 +79,47 @@ export default class BuildTool2 extends ToolBase {
 		this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.updateBlockPosition());
 
 		//samlovebutter's code starts here
-		let pressPosition: Vector3 = Vector3.zero;
-		let drawnGhosts: BlockGhost[] = [];
-
 		const updateGhosts = () => {
 			if (!this.nowFillingArea) return;
 			const cameraPostion = Workspace.CurrentCamera!.CFrame.Position;
 			const hit = this.mouse.Hit.Position;
 			const clickDirection = cameraPostion.sub(hit).Unit;
 
-			const pos = this.getPositionOnBuildingPlane(pressPosition, cameraPostion, clickDirection);
+			const pos = this.getPositionOnBuildingPlane(this.pressPosition, cameraPostion, clickDirection);
 			const positionsData = this.calculateGhostBlockPositions(
 				this.selectedBlock.get()?.model,
-				pressPosition,
+				this.pressPosition,
 				pos,
 			);
 			if (!positionsData) return;
-			if (this.oldPostitions === positionsData) return;
-			this.oldPostitions = positionsData;
-			const models = this.drawModels(this.selectedBlock.get()?.model, positionsData.Positions);
+			if (this.oldPositions?.Positions === positionsData.Positions) return;
+
+			const oldPositions = this.oldPositions?.Positions ?? new Set();
+			const newPositions = positionsData.Positions;
+
+			const toDelete = Arrays.ofSet.filter(oldPositions, (p) => !newPositions.has(p));
+			for (const pos of toDelete) {
+				this.drawnGhostsMap.get(pos)?.model.Destroy();
+				this.drawnGhostsMap.delete(pos);
+			}
+
+			const newposs = Arrays.ofSet.filter(newPositions, (p) => !oldPositions.has(p));
+			const models = this.drawModels(this.selectedBlock.get()?.model, newposs);
 			if (!models) return;
-			for (const ghost of drawnGhosts) ghost.model.Destroy(); //replace with optimisation later
-			//optimization plan:
-			//get all old ghosts and compare array sizes
-			//if old array bigger than new then destroy extra elements
-			//if lesser then add new ones
-			drawnGhosts = models;
+			for (const model of models) {
+				this.drawnGhostsMap.set(model.model.GetPivot().Position, model);
+			}
+
+			this.oldPositions = positionsData;
 		};
 
 		this.event.subscribe(this.mouse.Button1Down, () => {
 			const block = this.selectedBlock.get();
 			if (!block) return;
-			pressPosition = this.constrainPositionToGrid(this.mouse.Hit.Position);
+			this.pressPosition = this.constrainPositionToGrid(this.mouse.Hit.Position);
 			const mouseSurface = this.mouse.TargetSurface;
 			const normal = Vector3.FromNormalId(mouseSurface);
-			pressPosition = this.addBlockSize(block, normal, pressPosition);
+			this.pressPosition = this.addBlockSize(block, normal, this.pressPosition);
 			this.nowFillingArea = true;
 			updateGhosts();
 		});
@@ -104,12 +127,12 @@ export default class BuildTool2 extends ToolBase {
 		this.onDisable(() => (this.nowFillingArea = false));
 		this.event.subscribe(this.mouse.Button1Up, async () => {
 			this.nowFillingArea = false;
-			const result = await this.placeBlocks(drawnGhosts.map((v) => v.model));
+			const result = await this.placeBlocks(Arrays.ofMap.map(this.drawnGhostsMap, (_, m) => m.model));
 			if (result && !result.success) {
 				LogControl.instance.addLine(result.message, Colors.red);
 			}
 
-			for (const ghost of drawnGhosts) {
+			for (const [, ghost] of this.drawnGhostsMap) {
 				ghost.model.Destroy();
 			}
 		});
@@ -139,7 +162,7 @@ export default class BuildTool2 extends ToolBase {
 	}
 
 	//samlovebutter's code starts here
-	private drawModels(part: BlockModel | undefined, positions: Vector3[]) {
+	private drawModels(part: BlockModel | undefined, positions: readonly Vector3[]) {
 		if (!part) return;
 		const selectedBlock = this.selectedBlock.get();
 		if (!selectedBlock) return;
@@ -186,12 +209,7 @@ export default class BuildTool2 extends ToolBase {
 		part: BlockModel | undefined,
 		from: Vector3,
 		to: Vector3,
-	):
-		| {
-				Positions: Vector3[];
-				relativeEndPoint: Vector3;
-		  }
-		| undefined {
+	): typeof this.oldPositions {
 		if (!part) return;
 		const blockSize = AABB.fromModel(part).getSize();
 		const diff = to.sub(from);
@@ -199,8 +217,7 @@ export default class BuildTool2 extends ToolBase {
 		const toY = math.min(math.abs(diff.Y), this.fillLimit);
 		const toZ = math.min(math.abs(diff.Z), this.fillLimit);
 		const result: Vector3[] = [];
-		const endPoint = new Vector3(toX * math.sign(diff.X), toY * math.sign(diff.Y), toZ * math.sign(diff.X));
-		if (this.oldPostitions?.relativeEndPoint === endPoint) return this.oldPostitions;
+		if (this.oldPositions?.endPoint === to) return this.oldPositions;
 		for (let x = 0; x <= toX; x += blockSize.X)
 			for (let y = 0; y <= toY; y += blockSize.Y)
 				for (let z = 0; z <= toZ; z += blockSize.Z) {
@@ -210,8 +227,8 @@ export default class BuildTool2 extends ToolBase {
 					result.push(new Vector3(posX, posY, posZ));
 				}
 		return {
-			Positions: result,
-			relativeEndPoint: endPoint ?? from,
+			Positions: new Set(result),
+			endPoint: to ?? from,
 		};
 	}
 	//samlovebutter's code ends here
@@ -228,29 +245,17 @@ export default class BuildTool2 extends ToolBase {
 		this.mirroredGhosts.clear();
 	}
 
-	private createBlockHighlight(block: Model) {
-		const highlight = new Instance("Highlight");
-		highlight.Name = "BlockHighlight";
-		highlight.Parent = block;
-		highlight.Adornee = block;
-		highlight.FillTransparency = 0.4;
-		highlight.OutlineTransparency = 0.5;
-		highlight.DepthMode = Enum.HighlightDepthMode.Occluded;
-
-		return highlight;
-	}
-
 	private createBlockGhost(block: RegistryBlock): BlockGhost {
 		const model = block.model.Clone();
-		model.Parent = Workspace;
+		model.Parent = this.ghostParent;
+		this.ghostParent.highlight.Adornee = undefined;
+		this.ghostParent.highlight.Adornee = this.ghostParent;
 
 		PartUtils.switchDescendantsMaterial(model, this.selectedMaterial.get());
 		PartUtils.switchDescendantsColor(model, this.selectedColor.get());
-		// this.addAxisModel(model);
+		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => (part.CanCollide = false));
 
-		const highlight = this.createBlockHighlight(model);
-
-		return { model, highlight };
+		return { model };
 	}
 
 	private constrainPositionToGrid(pos: Vector3) {

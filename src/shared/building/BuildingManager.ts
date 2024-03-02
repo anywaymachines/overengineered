@@ -98,6 +98,12 @@ const BuildingManager = {
 		return true;
 	},
 
+	getMirroredBlocksByAngle(plot: Model, cframeToMirror: CFrame, axes: readonly CFrame[]): readonly CFrame[] {
+		//const [x, y, z] = cframeToMirror.ToEulerAnglesXYZ();
+		//if(angle > 0) return input.mul(new Vector3(2 * math.pi - x, y, z));
+		return [];
+	},
+
 	getMirroredBlocksCFrames(plot: Model, cframeToMirror: CFrame, axes: readonly CFrame[]): readonly CFrame[] {
 		const reflect = (cframe: CFrame, mirrorCFrame: CFrame) => {
 			const [X, Y, Z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = mirrorCFrame
@@ -120,7 +126,6 @@ const BuildingManager = {
 				ret.push(reflect(frame, plotframe.ToWorldSpace(axis)));
 			}
 		}
-
 		ret.remove(0);
 		return ret;
 	},
