@@ -11,6 +11,47 @@ import PlayerUtils from "shared/utils/PlayerUtils";
 export default class HoveredBlockHighlighter extends ClientComponentBase {
 	readonly highlightedBlock = new ObservableValue<BlockModel | undefined>(undefined);
 
+	static getTargetedBlock(mouse: Mouse): BlockModel | undefined {
+		// if ESC menu is open
+		if (GuiService.MenuIsOpen) {
+			return;
+		}
+
+		// if not alive
+		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
+			return;
+		}
+
+		// if over a GUI element
+		if (Gui.isCursorOnVisibleGui()) {
+			return;
+		}
+
+		const target = mouse.Target;
+		// if no target
+		if (!target) {
+			return;
+		}
+
+		// if target invalid
+		if (!target.Parent || !BlockManager.isBlockPart(target)) {
+			return;
+		}
+
+		const parentPlot = SharedPlots.getPlotByBlock(target.Parent);
+
+		// if no plot
+		if (!parentPlot) {
+			return;
+		}
+
+		// wrong plot
+		if (!SharedPlots.isBuildingAllowed(parentPlot, Players.LocalPlayer)) {
+			return;
+		}
+
+		return target.Parent;
+	}
 	constructor(filter = (block: BlockModel) => true) {
 		super();
 

@@ -11,7 +11,7 @@ const plotComponents: ReadonlyMap<PlotModel, SharedPlot> = new Map(plots.map((p)
 
 /** Methods for reading the plots data */
 export default class SharedPlots {
-	static readonly plots = plots;
+	static readonly plots: readonly SharedPlot[] = plots;
 
 	/** Checks if the provided `Instance` is a plot model */
 	static isPlot(model: Instance | undefined): model is PlotModel {

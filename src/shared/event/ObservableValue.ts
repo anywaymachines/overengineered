@@ -90,6 +90,10 @@ export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 		return observable;
 	}
 
+	asReadonly(): ReadonlyObservableValue<T> {
+		return this;
+	}
+
 	static fromSignal<TSignal extends Signal<(arg: unknown) => void>>(
 		signal: TSignal,
 		defaultValue: TSignal extends Signal<(arg: infer T) => void> ? T : never,

@@ -70,6 +70,7 @@ export default class ComponentBase extends ComponentBaseBase implements ICompone
 		func(this);
 		return this;
 	}
+	readonly setEnabled = (enable: boolean) => (enable ? this.enable() : this.disable());
 
 	private parented?: IDebuggableComponent[];
 
