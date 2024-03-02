@@ -7,14 +7,23 @@ export const Arrays = {
 			return Arrays.ofMap.map(map, (k, v) => v);
 		},
 
+		flatmap<TKey extends defined, TValue extends defined, TOut extends defined>(
+			array: ReadonlyMap<TKey, TValue>,
+			mapfunc: (key: TKey, value: TValue) => readonly TOut[],
+		): TOut[] {
+			const result: TOut[] = [];
+			for (const [key, value] of array) {
+				for (const v of mapfunc(key, value)) {
+					result.push(v);
+				}
+			}
+
+			return result;
+		},
 		map<TKey extends defined, TValue extends defined, TOut extends defined>(
 			map: ReadonlyMap<TKey, TValue>,
 			func: (key: TKey, value: TValue) => TOut,
 		): TOut[] {
-			if (map.size() === 0) {
-				return [];
-			}
-
 			const result: TOut[] = [];
 			for (const [key, value] of map) {
 				result.push(func(key, value));
@@ -27,10 +36,6 @@ export const Arrays = {
 			map: ReadonlyMap<TKey, TValue>,
 			func: (key: TKey, value: TValue) => boolean,
 		): Map<TKey, TValue> {
-			if (map.size() === 0) {
-				return new Map();
-			}
-
 			const result = new Map<TKey, TValue>();
 			for (const [key, value] of map) {
 				if (!func(key, value)) continue;
@@ -44,10 +49,6 @@ export const Arrays = {
 			map: ReadonlyMap<TKey, TValue>,
 			func: (key: TKey, value: TValue) => boolean,
 		): readonly [key: TKey, value: TValue] | undefined {
-			if (map.size() === 0) {
-				return undefined;
-			}
-
 			for (const [key, value] of map) {
 				if (!func(key, value)) continue;
 				return [key, value];
@@ -55,6 +56,79 @@ export const Arrays = {
 
 			return undefined;
 		},
+	},
+	ofSet: {
+		flatmap<TValue extends defined, TOut extends defined>(
+			array: ReadonlySet<TValue>,
+			mapfunc: (value: TValue) => readonly TOut[],
+		): TOut[] {
+			const result: TOut[] = [];
+			for (const value of array) {
+				for (const v of mapfunc(value)) {
+					result.push(v);
+				}
+			}
+
+			return result;
+		},
+		map<TValue extends defined, TOut extends defined>(
+			map: ReadonlySet<TValue>,
+			func: (value: TValue) => TOut,
+		): TOut[] {
+			const result: TOut[] = [];
+			for (const value of map) {
+				result.push(func(value));
+			}
+
+			return result;
+		},
+		groupBy<TValue extends defined, TOut>(
+			values: ReadonlySet<TValue>,
+			keyfunc: (value: TValue) => TOut,
+		): Map<TOut, TValue[]> {
+			const groups = new Map<TOut, TValue[]>();
+			for (const value of values) {
+				const key = keyfunc(value);
+				if (!groups.get(key)) {
+					groups.set(key, []);
+				}
+
+				groups.get(key)?.push(value);
+			}
+
+			return groups;
+		},
+
+		filter<TValue extends defined>(map: ReadonlySet<TValue>, func: (value: TValue) => boolean): TValue[] {
+			const result: TValue[] = [];
+			for (const value of map) {
+				if (!func(value)) continue;
+				result.push(value);
+			}
+
+			return result;
+		},
+
+		find<TValue extends defined>(map: ReadonlySet<TValue>, func: (value: TValue) => boolean): TValue | undefined {
+			for (const value of map) {
+				if (!func(value)) continue;
+				return value;
+			}
+
+			return undefined;
+		},
+	},
+
+	empty: [],
+
+	mapSet<TValue extends defined, TOut extends defined>(
+		array: ReadonlySet<TValue>,
+		mapfunc: (value: TValue) => TOut,
+	): TOut[] {
+		return this.ofSet.map(array, mapfunc);
+	},
+	groupBySet<T extends defined, TOut>(values: ReadonlySet<T>, keyfunc: (value: T) => TOut) {
+		return this.ofSet.groupBy(values, keyfunc);
 	},
 
 	ofType<TElements extends defined, TFilter extends TElements>(
@@ -64,27 +138,11 @@ export const Arrays = {
 		return array.filter((e) => e instanceof filterfunbc) as TFilter[];
 	},
 
-	mapSet<TValue, TOut extends defined>(array: ReadonlySet<TValue>, mapfunc: (value: TValue) => TOut): TOut[] {
-		const result: TOut[] = [];
-		for (const value of array) {
-			result.push(mapfunc(value));
-		}
-
-		return result;
-	},
-
-	map<TKey, TValue, TOut extends defined>(
+	map<TKey extends defined, TValue extends defined, TOut extends defined>(
 		array: ReadonlyMap<TKey, TValue>,
 		mapfunc: (key: TKey, value: TValue) => TOut,
 	): TOut[] {
-		if (array.size() === 0) return [];
-
-		const result: TOut[] = [];
-		for (const [key, value] of array) {
-			result.push(mapfunc(key, value));
-		}
-
-		return result;
+		return this.ofMap.map(array, mapfunc);
 	},
 
 	flatmap<TIn extends defined, TOut extends defined>(
@@ -101,19 +159,6 @@ export const Arrays = {
 		return result;
 	},
 
-	groupBySet<T extends defined, TOut>(values: ReadonlySet<T>, keyfunc: (value: T) => TOut) {
-		const groups = new Map<TOut, T[]>();
-		for (const value of values) {
-			const key = keyfunc(value);
-			if (!groups.get(key)) {
-				groups.set(key, []);
-			}
-
-			groups.get(key)?.push(value);
-		}
-
-		return groups;
-	},
 	groupBy<T extends defined>(values: readonly T[], keyfunc: (value: T) => string) {
 		const groups = new Map<string, T[]>();
 		for (const value of values) {
@@ -126,5 +171,15 @@ export const Arrays = {
 		}
 
 		return groups;
+	},
+	getLast<T extends defined>(values: readonly T[]): T | undefined {
+		return values[values.size() - 1];
+	},
+
+	any<T extends defined>(values: readonly T[], func: (value: T) => boolean): boolean {
+		return values.find(func) !== undefined;
+	},
+	all<T extends defined>(values: readonly T[], func: (value: T) => boolean): boolean {
+		return values.find((v) => !func(v)) === undefined;
 	},
 } as const;
