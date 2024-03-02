@@ -84,6 +84,7 @@ export default class BuildingWelder {
 
 		for (const regblock of blocks) {
 			const block = regblock.model;
+			block.PrimaryPart!.Anchored = true;
 
 			const weldParent = Element.create("Model") as CollidersModel;
 			weldParent.WorldPivot = block.GetPivot();
@@ -112,6 +113,7 @@ export default class BuildingWelder {
 					);
 					setColliderProperties(union);
 					if (key !== "") {
+						(block as unknown as Record<string, BasePart>)[key].Anchored = true;
 						union.SetAttribute("target", key);
 					}
 
