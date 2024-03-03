@@ -14,7 +14,6 @@ import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
-import { Arrays } from "shared/fixes/Arrays";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import VectorUtils from "shared/utils/VectorUtils";
@@ -35,8 +34,8 @@ export default class BuildTool2 extends ToolBase {
 	private blockRotation = CFrame.identity;
 
 	//samlovebutter's code starts here
-	private possibleFillRotationAxis = [Vector3.yAxis, Vector3.xAxis, Vector3.zAxis];
-	private fillRotationMode = 0;
+	private possibleFillRotationAxis = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis];
+	private fillRotationMode = 1;
 	private nowFillingArea = false;
 	private fillLimit = 32;
 	private oldPositions: { Positions: Set<Vector3>; endPoint: Vector3 } | undefined;
@@ -97,13 +96,13 @@ export default class BuildTool2 extends ToolBase {
 			const oldPositions = this.oldPositions?.Positions ?? new Set();
 			const newPositions = positionsData.Positions;
 
-			const toDelete = Arrays.ofSet.filter(oldPositions, (p) => !newPositions.has(p));
+			const toDelete = oldPositions.filter((p) => !newPositions.has(p));
 			for (const pos of toDelete) {
 				this.drawnGhostsMap.get(pos)?.model.Destroy();
 				this.drawnGhostsMap.delete(pos);
 			}
 
-			const newposs = Arrays.ofSet.filter(newPositions, (p) => !oldPositions.has(p));
+			const newposs = newPositions.filter((p) => !oldPositions.has(p));
 			const models = this.drawModels(this.selectedBlock.get()?.model, newposs);
 			if (!models) return;
 			for (const model of models) {
@@ -127,7 +126,7 @@ export default class BuildTool2 extends ToolBase {
 		this.onDisable(() => (this.nowFillingArea = false));
 		this.event.subscribe(this.mouse.Button1Up, async () => {
 			this.nowFillingArea = false;
-			const result = await this.placeBlocks(Arrays.ofMap.map(this.drawnGhostsMap, (_, m) => m.model));
+			const result = await this.placeBlocks(this.drawnGhostsMap.map((_, m) => m.model));
 			if (result && !result.success) {
 				LogControl.instance.addLine(result.message, Colors.red);
 			}
@@ -155,7 +154,7 @@ export default class BuildTool2 extends ToolBase {
 		this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
 	}
 
-	public disable(): void {
+	disable(): void {
 		this.destroyGhosts();
 		this.targetPlot.set(undefined);
 		super.disable();
@@ -311,6 +310,7 @@ export default class BuildTool2 extends ToolBase {
 		const updateMirrorGhostBlocksPosition = (plot: Model, mainPosition: Vector3) => {
 			const mirrorCFrames = BuildingManager.getMirroredBlocksCFrames(
 				plot,
+				this.selectedBlock.get(),
 				new CFrame(mainPosition).mul(this.blockRotation),
 				this.mirrorMode.get(),
 			);
@@ -419,6 +419,20 @@ export default class BuildTool2 extends ToolBase {
 			return;
 		}
 
+		const mainGhost = this.mainGhost;
+		if (!mainGhost || !mainGhost.model.PrimaryPart) {
+			return;
+		}
+		const pos = mainGhost.model.PrimaryPart.CFrame;
+		const mirrors = this.mirrorMode.get();
+		let cframes = BuildingManager.getMirroredBlocksCFrames(
+			SharedPlots.getPlotByPosition(pos.Position)!,
+			this.selectedBlock.get(),
+			pos,
+			mirrors,
+		);
+		cframes = [...cframes, mainGhost.model.GetPivot()];
+
 		const response = await ActionController.instance.executeOperation(
 			"Block placement",
 			async () => {
@@ -488,12 +502,14 @@ export default class BuildTool2 extends ToolBase {
 		}
 
 		const pos = mainGhost.model.PrimaryPart.CFrame;
+		const btype = this.selectedBlock.get();
 		const mirrors = this.mirrorMode.get();
 		const response = await ActionController.instance.executeOperation(
 			"Block placement",
 			async () => {
 				let cframes = BuildingManager.getMirroredBlocksCFrames(
 					SharedPlots.getPlotByPosition(pos.Position)!,
+					btype,
 					pos,
 					mirrors,
 				);
@@ -544,7 +560,7 @@ export default class BuildTool2 extends ToolBase {
 		return "rbxassetid://12539295858";
 	}
 
-	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
+	getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
 		const keys: { key: Enum.KeyCode; text: string }[] = [];
 
 		keys.push({ key: Enum.KeyCode.ButtonX, text: "Place" });
@@ -557,7 +573,7 @@ export default class BuildTool2 extends ToolBase {
 		return keys;
 	}
 
-	public getKeyboardTooltips() {
+	getKeyboardTooltips() {
 		const keys: { keys: string[]; text: string }[] = [];
 
 		keys.push({ keys: ["R"], text: "Rotate by Y" });

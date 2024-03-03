@@ -3,7 +3,6 @@ import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
 import Logger from "shared/Logger";
 import BlockManager from "shared/building/BlockManager";
-import { Arrays } from "shared/fixes/Arrays";
 
 type CollidersModel = Model & { readonly ___nominal: "CollidersModel" };
 export default class BuildingWelder {
@@ -94,8 +93,7 @@ export default class BuildingWelder {
 				const colliders = block.FindFirstChild(weldFolderName)?.GetChildren() as unknown as readonly BasePart[];
 				if (colliders.size() === 0) continue;
 
-				for (const [key, group] of Arrays.groupBy(
-					colliders,
+				for (const [key, group] of colliders.groupBy(
 					(g) => (g.GetAttribute("target") as string | undefined) ?? "",
 				)) {
 					if (group.size() < 2) {

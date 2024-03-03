@@ -9,13 +9,11 @@ import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 
 export default class BuildingMode extends PlayMode {
-	readonly mirrorMode = new ObservableValue<readonly CFrame[]>(
-		[] /*[
+	readonly mirrorMode = new ObservableValue<readonly CFrame[]>([
 		CFrame.identity,
 		CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2),
 		CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(new Vector3(0, 4, 0)),
-	]*/,
-	);
+	]);
 
 	readonly mirrorVisualizer = new MirrorVisualizer();
 
@@ -39,8 +37,8 @@ export default class BuildingMode extends PlayMode {
 		return "build";
 	}
 
-	public onSwitchToNext(mode: PlayModes | undefined) {}
-	public onSwitchFromPrev(prev: PlayModes | undefined) {
+	onSwitchToNext(mode: PlayModes | undefined) {}
+	onSwitchFromPrev(prev: PlayModes | undefined) {
 		const tp = () => {
 			if (!LocalPlayerController.rootPart) return;
 

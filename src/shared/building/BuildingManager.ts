@@ -98,14 +98,31 @@ const BuildingManager = {
 		return true;
 	},
 
-	getMirroredBlocksByAngle(plot: Model, cframeToMirror: CFrame, axes: readonly CFrame[]): readonly CFrame[] {
-		//const [x, y, z] = cframeToMirror.ToEulerAnglesXYZ();
-		//if(angle > 0) return input.mul(new Vector3(2 * math.pi - x, y, z));
-		return [];
-	},
+	getMirroredBlocksCFrames(
+		plot: Model,
+		block: RegistryBlock | undefined,
+		cframeToMirror: CFrame,
+		axes: readonly CFrame[],
+	): readonly CFrame[] {
+		type RotationMethod = "normal" | "wedgeWing" | "none";
+		const offsets = {
+			rotationOffset: math.rad((block?.model.GetAttribute("mirrorRotationOffset") as number | undefined) ?? 0),
+			method: (block?.model.GetAttribute("rotationMethod") as RotationMethod | undefined) ?? "normal",
+		};
 
-	getMirroredBlocksCFrames(plot: Model, cframeToMirror: CFrame, axes: readonly CFrame[]): readonly CFrame[] {
 		const reflect = (cframe: CFrame, mirrorCFrame: CFrame) => {
+			if (offsets.method === "none") {
+				return cframe;
+			}
+
+			if (offsets.method === "wedgeWing") {
+				// if X, rotate 180 X
+				// if Z, rotate 180 Z
+				// if Y, do not rotate
+			}
+
+			cframe = cframe.mul(CFrame.fromEulerAnglesYXZ(0, offsets.rotationOffset, 0));
+
 			const [X, Y, Z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = mirrorCFrame
 				.ToObjectSpace(cframe)
 				.GetComponents();
