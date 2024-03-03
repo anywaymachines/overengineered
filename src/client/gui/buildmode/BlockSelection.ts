@@ -2,6 +2,7 @@ import { GuiService, LocalizationService, Players } from "@rbxts/services";
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
+import BlockPreviewControl from "client/gui/buildmode/BlockPreviewControl";
 import BlockPipetteButton from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { BlocksInitializer } from "shared/BlocksInitializer";
@@ -18,6 +19,7 @@ class CategoryControl extends TextButtonControl<CategoryControlDefinition> {
 }
 
 type BlockControlDefinition = GuiButton & {
+	readonly ViewportFrame: ViewportFrame;
 	readonly TextLabel: TextLabel;
 };
 class BlockControl extends TextButtonControl<BlockControlDefinition> {
@@ -25,6 +27,7 @@ class BlockControl extends TextButtonControl<BlockControlDefinition> {
 		super(template);
 
 		this.text.set(block.displayName);
+		this.add(new BlockPreviewControl(template.ViewportFrame, block.model));
 	}
 }
 
