@@ -52,16 +52,5 @@ const playModeController = new PlayModeController();
 root.add(playModeController);
 root.enable();
 
-spawn(() => {
-	for (let i = 0; i < 3; i++) {
-		const updated = MarketplaceService.GetProductInfo(game.PlaceId).Updated;
-		// eslint-disable-next-line roblox-ts/lua-truthiness
-		if (!updated) {
-			task.wait(i + 1);
-			continue;
-		}
-
-		Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `DEVTEST | v${game.PlaceVersion} | ${updated}`;
-		break;
-	}
-});
+const updated = DateTime.fromUnixTimestamp($compileTime("UnixTimestamp")).FormatUniversalTime("DDMMYY_HHMM", "en-us");
+Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `DEVTEST | v${game.PlaceVersion} | ${updated}`;
