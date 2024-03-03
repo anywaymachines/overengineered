@@ -2,7 +2,6 @@ import Signal from "@rbxts/signal";
 import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
 import Gui from "client/gui/Gui";
 import { TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
-import { Arrays } from "shared/fixes/Arrays";
 
 export type TouchModeButtonData = {
 	readonly name: string;
@@ -74,10 +73,7 @@ export default class TouchModeButtonControl extends TextButtonControl {
 			return button;
 		};
 
-		const grouped = Arrays.groupBy(
-			Arrays.flatmap(logics, (logic) => logic.getTouchButtonDatas()),
-			(logic) => logic.name,
-		);
-		return Arrays.map(grouped, createButton);
+		const grouped = logics.flatmap((logic) => logic.getTouchButtonDatas()).groupBy((logic) => logic.name);
+		return grouped.map(createButton);
 	}
 }

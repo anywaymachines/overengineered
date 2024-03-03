@@ -1,7 +1,6 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import { BlockDataRegistry } from "./BlockDataRegistry";
 import { AutoBlockCreator } from "./block/logic/AutoBlockCreator";
-import { Arrays } from "./fixes/Arrays";
 import Objects from "./fixes/objects";
 
 declare global {
@@ -140,9 +139,7 @@ const initData = init();
 const categories: Readonly<Record<CategoryName, Category>> = initData.categories;
 
 const map: ReadonlyMap<string, RegistryBlock> = initData.blocks;
-const sorted: readonly RegistryBlock[] = Arrays.map(initData.blocks, (_, v) => v).sort(
-	(left, right) => left.id < right.id,
-);
+const sorted: readonly RegistryBlock[] = initData.blocks.map((_, v) => v).sort((left, right) => left.id < right.id);
 const required: readonly RegistryBlock[] = sorted.filter((b) => b.required);
 
 export const BlocksInitializer = {
@@ -182,7 +179,7 @@ export const BlocksInitializer = {
 	clearBlockAttributes() {
 		for (const block of sorted) {
 			for (const [key] of block.model.GetAttributes()) {
-				block.model.SetAttribute(key, undefined);
+				//block.model.SetAttribute(key, undefined);
 			}
 		}
 	},

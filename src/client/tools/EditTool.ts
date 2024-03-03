@@ -18,7 +18,6 @@ import { ComponentChild } from "shared/component/ComponentChild";
 import NumberObservableValue from "shared/event/NumberObservableValue";
 import ObservableValue from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
-import { Arrays } from "shared/fixes/Arrays";
 import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
 import { MultiModelHighlighter } from "./selectors/MultiModelHighlighter";
 
@@ -101,7 +100,7 @@ namespace Selectors {
 					selection.Destroy();
 				}
 				this.selected.clear();
-				this.selectedBlocksChanged.Fire(Arrays.empty);
+				this.selectedBlocksChanged.Fire([]);
 			});
 		}
 
@@ -128,7 +127,7 @@ namespace Selectors {
 			});
 
 			this.selected.set(block, instance);
-			this.selectedBlocksChanged.Fire(Arrays.ofMap.keys(this.selected));
+			this.selectedBlocksChanged.Fire(this.selected.keys());
 			return true;
 		}
 		/** @returns A boolean indicating whether the block was successfully deselected */
@@ -153,7 +152,7 @@ namespace Selectors {
 				this.selected.clear();
 
 				if (blocks.size() === 0) {
-					this.selectedBlocksChanged.Fire(Arrays.ofMap.keys(this.selected));
+					this.selectedBlocksChanged.Fire(this.selected.keys());
 				}
 			}
 
@@ -174,7 +173,7 @@ namespace Selectors {
 
 			if (pc) {
 				if (selectConnected) {
-					const allBlocksAlreadySelected = Arrays.all(blocks, (b) => this.selected.has(b));
+					const allBlocksAlreadySelected = blocks.all((b) => this.selected.has(b));
 					if (!allBlocksAlreadySelected) {
 						for (const block of blocks) {
 							this.selectBlock(block);
@@ -324,7 +323,7 @@ export type EditToolMode = "Move";
 export default class EditTool extends ToolBase {
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
-	private readonly _selected = new ObservableValue<BlockList>(Arrays.empty);
+	private readonly _selected = new ObservableValue<BlockList>([]);
 	readonly selected = this._selected.asReadonly();
 	private readonly controller = new ComponentChild<Controllers.IController>(this, true);
 	private readonly plot = new ObservableValue<SharedPlot>(
@@ -391,10 +390,10 @@ export default class EditTool extends ToolBase {
 		return "rbxassetid://12539306575";
 	}
 
-	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
+	getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
 		return [];
 	}
-	public getKeyboardTooltips(): readonly { readonly keys: KeyCode[]; readonly text: string }[] {
+	getKeyboardTooltips(): readonly { readonly keys: KeyCode[]; readonly text: string }[] {
 		return [{ keys: ["F"], text: "Move" }];
 	}
 }

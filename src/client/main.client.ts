@@ -1,4 +1,4 @@
-import { MarketplaceService, Players, ReplicatedStorage, RunService } from "@rbxts/services";
+import { Players, ReplicatedStorage, RunService } from "@rbxts/services";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import CharacterController from "client/controller/CharacterController";
 import GameEnvironmentController from "client/controller/GameEnvironmentController";
@@ -11,6 +11,7 @@ import DebugControl from "client/gui/static/DebugControl";
 import LogControl from "client/gui/static/LogControl";
 import TooltipsControl from "client/gui/static/TooltipsControl";
 import PlayModeController from "client/modes/PlayModeController";
+import { $compileTime } from "rbxts-transform-debug";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import RemoteEvents from "shared/RemoteEvents";
 import SharedPlots from "shared/building/SharedPlots";

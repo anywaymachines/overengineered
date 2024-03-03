@@ -6,7 +6,7 @@ const INDEX_FILE = path.join(TRANSFORMER_DIR, "index.d.ts");
 
 type Macro = {
 	exportDeclaration: ts.Declaration;
-	methodDeclaration: ts.MethodDeclaration;
+	methodDeclaration: ts.PropertyAssignment;
 	sourceFile: ts.SourceFile;
 };
 type MacroListTypes = {
@@ -56,6 +56,7 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 				files.set(fileName, file);
 			});
 		}
+		if (false)
 		macroList.forEach((map) => {
 			map.CallMacros.forEach((decl, name) => {
 				console.log(`Found call macro ${name} from ${decl.exportDeclaration.getSourceFile().fileName}`);
@@ -108,10 +109,12 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 			};
 			macroList.set(type.symbol, macros);
 
-			const macroMethods = new Array<ts.MethodDeclaration>();
+			const macroMethods = new Array<ts.PropertyAssignment>();
 
-			for (const method of program.getTypeChecker().getTypeAtLocation(argument).getProperties().map(p => p.getDeclarations()![0])) {
-				if (!ts.isMethodDeclaration(method)) throw "Expected method.";
+			for (const method of typeChecker.getTypeAtLocation(argument).getProperties().map(p => p.getDeclarations()![0])) {
+			//for (const method of argument.properties) {
+				if (!ts.isPropertyAssignment(method)) throw "Expected method.";
+				if (!method.initializer || !ts.isArrowFunction(method.initializer)) throw "Expected method.";
 				if (!ts.isIdentifier(method.name)) throw "Expected identifier.";
 				const list = node.expression.text === "$definePropMacros" ? macros.PropMacros : macros.CallMacros;
 				list.set(method.name.text, {
@@ -119,30 +122,7 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 					methodDeclaration: method,
 					sourceFile: node.getSourceFile(),
 				});
-				macroMethods.push(
-					factory.createMethodDeclaration(
-						//method.decorators,
-						method.modifiers,
-						method.asteriskToken,
-						method.name,
-						method.questionToken,
-						method.typeParameters,
-						[
-							factory.createParameterDeclaration(
-								//undefined,
-								undefined,
-								undefined,
-								factory.createIdentifier("this"),
-								undefined,
-								typeArgument,
-								undefined,
-							),
-							...method.parameters,
-						],
-						method.type,
-						method.body,
-					),
-				);
+				macroMethods.push(method);
 			}
 
 			return factory.createObjectLiteralExpression(macroMethods, true);
@@ -238,59 +218,29 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 
 	function buildMacro(macro: Macro, node: ts.Expression) {
 		if (!ts.isIdentifier(macro.methodDeclaration.name)) throw "Method declaration name must be identifier.";
-		if (node.getSourceFile().fileName === macro.sourceFile.fileName)
-			throw "Cannot use macros in the same file they're defined in.";
+		if (node.getSourceFile().fileName === macro.sourceFile.fileName) {
+			const exportedName = getNameFromDeclaration(macro.exportDeclaration);
+			if (!exportedName) throw new Error('Cannot use macros in the same file they\'re defined in.');
+
+			return factory.createCallExpression(
+				factory.createPropertyAccessExpression(factory.createIdentifier(exportedName), macro.methodDeclaration.name),
+				undefined,
+				ts.isCallExpression(node)
+					? [getLeftHandSideOfExpression(node.expression), ...node.arguments]
+					: [getLeftHandSideOfExpression(node)],
+			);
+		}
+
 		const exportedName = getNameFromDeclaration(macro.exportDeclaration);
 		if (exportedName) {
-			/*const specifier = ts.getRelativePathFromFile(
-				node.getSourceFile().fileName,
-				macro.sourceFile.fileName,
-				ts.createGetCanonicalFileName(false),
-			);*/
 			const specifier = "./" + path.relative(
 				path.dirname(node.getSourceFile().fileName),
 				macro.sourceFile.fileName
 			);
 
 			const guid = addImport(node.getSourceFile(), specifier.split(".").slice(0, -1).join("."), exportedName);
-
-			const methodType = typeChecker.getTypeAtLocation(macro.methodDeclaration);
-			if (!methodType) throw "Could not find method type!";
-
-			const callSig = methodType.getCallSignatures()[0];
-			if (!callSig) throw "Could not find call signature!";
-
-			const methodCallSig = ts.isCallExpression(node) ? typeChecker.getResolvedSignature(node) : undefined;
-
 			return factory.createCallExpression(
-				factory.createParenthesizedExpression(
-					factory.createAsExpression(
-						factory.createAsExpression(
-							factory.createPropertyAccessExpression(guid, macro.methodDeclaration.name),
-							factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
-						),
-						factory.createFunctionTypeNode(
-							undefined,
-							[
-								factory.createParameterDeclaration(
-									//undefined,
-									undefined,
-									undefined,
-									factory.createIdentifier("self"),
-									undefined,
-									factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
-									undefined,
-								),
-								...macro.methodDeclaration.parameters,
-							],
-							typeChecker.typeToTypeNode(
-								(methodCallSig ?? callSig).getReturnType(),
-								undefined,
-								undefined,
-							)!,
-						),
-					),
-				),
+				factory.createPropertyAccessExpression(guid, macro.methodDeclaration.name),
 				undefined,
 				ts.isCallExpression(node)
 					? [getLeftHandSideOfExpression(node.expression), ...node.arguments]
@@ -369,9 +319,8 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 		return sourceFile;
 	}
 }
-
 export default function (program: ts.Program) {
-	return (context: ts.TransformationContext): ((file: ts.SourceFile) => ts.Node) => {
+	return (context: ts.TransformationContext) => {
 		const transformer = createTransformer(program, context);
 		let transformed: Map<string, ts.SourceFile>;
 		return (file: ts.SourceFile) => {

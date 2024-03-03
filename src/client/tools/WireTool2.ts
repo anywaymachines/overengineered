@@ -17,7 +17,6 @@ import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import { Arrays } from "shared/fixes/Arrays";
 import Objects from "shared/fixes/objects";
 
 const typeGroups = {
@@ -233,7 +232,7 @@ namespace Markers {
 
 		narrowDownTypesSelfAndOther(): void {
 			const grouped = this.getFullSameGroupTree();
-			const types = intersectTypes(Arrays.mapSet(grouped, (m) => m.availableTypes.get()));
+			const types = intersectTypes(grouped.map((m) => m.availableTypes.get()));
 
 			this.availableTypes.set(types);
 			for (const marker of grouped) {
@@ -242,7 +241,7 @@ namespace Markers {
 		}
 		widenTypesSelfAndOther(): void {
 			const grouped = this.getFullSameGroupTree();
-			const types = intersectTypes(Arrays.mapSet(grouped, (m) => m.data.dataTypes));
+			const types = intersectTypes(grouped.map((m) => m.data.dataTypes));
 
 			this.availableTypes.set(types);
 			for (const marker of grouped) {
@@ -377,7 +376,7 @@ namespace Markers {
 		}
 
 		getConnected(): ReadonlySet<Marker> {
-			return new Set(Arrays.map(this.connected, (k) => k));
+			return new Set(this.connected.keys());
 		}
 	}
 }
@@ -730,7 +729,7 @@ export default class WireTool2 extends ToolBase {
 	}
 
 	static groupMarkers(markers: readonly Markers.Marker[]) {
-		const groupedMarkers = Arrays.groupBy(markers, (m) => m.data.group + " " + m.data.blockData.uuid);
+		const groupedMarkers = markers.groupBy((m) => m.data.group + " " + m.data.blockData.uuid);
 		for (const marker of markers) {
 			if (marker.data.group === undefined) continue;
 			marker.sameGroupMarkers = groupedMarkers.get(marker.data.group + " " + marker.data.blockData.uuid);
@@ -794,7 +793,7 @@ export default class WireTool2 extends ToolBase {
 			}
 		}
 
-		WireTool2.groupMarkers(Arrays.map(this.markers.getAll(), (k, v) => v));
+		WireTool2.groupMarkers(this.markers.getAll().values());
 
 		for (const block of SharedPlots.getPlotBlockDatas(plot)) {
 			for (const [connectionName, connection] of Objects.entries(block.connections)) {
@@ -818,7 +817,7 @@ export default class WireTool2 extends ToolBase {
 		return "http://www.roblox.com/asset/?id=15895880948";
 	}
 
-	public getGamepadTooltips(): readonly { key: Enum.KeyCode; text: string }[] {
+	getGamepadTooltips(): readonly { key: Enum.KeyCode; text: string }[] {
 		const keys: { key: Enum.KeyCode; text: string }[] = [];
 
 		keys.push({ key: Enum.KeyCode.ButtonY, text: "Marker selection mode" });
@@ -829,7 +828,7 @@ export default class WireTool2 extends ToolBase {
 		return keys;
 	}
 
-	public getKeyboardTooltips(): readonly { keys: string[]; text: string }[] {
+	getKeyboardTooltips(): readonly { keys: string[]; text: string }[] {
 		return [];
 	}
 }
