@@ -4,6 +4,7 @@ import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
+import Gui from "client/gui/Gui";
 import LogControl from "client/gui/static/LogControl";
 import ActionController from "client/modes/build/ActionController";
 import BuildingController from "client/modes/build/BuildingController";
@@ -19,6 +20,10 @@ import { AABB } from "shared/fixes/AABB";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import VectorUtils from "shared/utils/VectorUtils";
+
+const allowedColor = Colors.blue;
+const forbiddenColor = Colors.red;
+const mouse = Players.LocalPlayer.GetMouse();
 
 const ghostParent = Element.create(
 	"Model",
@@ -55,12 +60,266 @@ const createBlockGhost = (block: RegistryBlock): BlockGhost => {
 
 type BlockGhost = { readonly model: BlockModel };
 
-namespace MoveController {
-	export class DesktopMoveController extends ClientComponent {
+namespace SinglePlaceController {
+	export class Desktop extends ClientComponent {
+		private mainGhost?: BlockGhost;
+		private readonly mirroredGhosts: BlockGhost[] = [];
+		private blockRotation = CFrame.identity;
+		private readonly selectedBlock;
+		private readonly selectedColor;
+		private readonly selectedMaterial;
+		private readonly mirrorMode;
+		private readonly targetPlot;
+
+		constructor(state: BuildTool2) {
+			super();
+			this.selectedBlock = state.selectedBlock.asReadonly();
+			this.selectedColor = state.selectedColor.asReadonly();
+			this.selectedMaterial = state.selectedMaterial.asReadonly();
+			this.mirrorMode = state.mirrorMode.asReadonly();
+			this.targetPlot = state.targetPlot;
+
+			this.onPrepare((input) => {
+				if (input !== "Touch") return;
+
+				this.inputHandler.onTouchTap(() => this.updateBlockPosition());
+			});
+			this.event.onPrepare(() => this.updateBlockPosition());
+
+			this.event.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
+			this.event.subscribe(mouse.Move, () => this.updateBlockPosition());
+			this.event.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.updateBlockPosition());
+			this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.updateBlockPosition());
+
+			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
+
+			this.event.subscribe(mouse.Button1Up, () => this.placeBlock());
+			this.onPrepare(() => {
+				this.inputHandler.onKeyDown("T", () => this.rotateBlock("x"));
+				this.inputHandler.onKeyDown("R", () => this.rotateBlock("y"));
+				this.inputHandler.onKeyDown("Y", () => {
+					if (InputController.isCtrlPressed()) return;
+					this.rotateBlock("z");
+				});
+			});
+
+			this.onDisable(() => this.destroyGhosts());
+		}
+
+		private destroyGhosts(destroyMain = true) {
+			if (destroyMain) {
+				this.mainGhost?.model.Destroy();
+				this.mainGhost = undefined;
+			}
+
+			for (const ghost of this.mirroredGhosts) {
+				ghost.model.Destroy();
+			}
+			this.mirroredGhosts.clear();
+		}
+
+		private updateBlockPosition() {
+			const selected = this.selectedBlock.get();
+			if (!selected) return;
+
+			const getMouseTargetBlockPosition = () => {
+				const g = Gui.getGameUI<{
+					BuildingMode: {
+						Tools: {
+							Build2: {
+								Debug: { Label1: TextLabel; Label2: TextLabel; Label3: TextLabel; Label4: TextLabel };
+							};
+						};
+					};
+				}>().BuildingMode.Tools.Build2.Debug;
+
+				const mouseTarget = mouse.Target;
+				if (!mouseTarget) return undefined;
+
+				const mouseHit = mouse.Hit;
+				const mouseSurface = mouse.TargetSurface;
+
+				const globalMouseHitPos = mouseHit.PointToWorldSpace(Vector3.zero);
+				const normal = Vector3.FromNormalId(mouseSurface);
+
+				g.Label1.Text = `Target: ${mouseTarget}`;
+				g.Label2.Text = `Hit: ${mouseHit}`;
+				g.Label3.Text = `Normal: ${mouseSurface} ${normal}`;
+				g.Label4.Text = `Block size mnd: ${selected.model.GetBoundingBox()[1].mul(normal).div(2)}`;
+
+				let targetPosition = globalMouseHitPos;
+				targetPosition = addBlockSize(selected, normal, targetPosition);
+				targetPosition = constrainPositionToGrid(targetPosition);
+				return targetPosition;
+			};
+			const updateMirrorGhostBlocksPosition = (plot: Model, mainPosition: Vector3) => {
+				const mirrorCFrames = BuildingManager.getMirroredBlocksCFrames2(
+					plot,
+					this.selectedBlock.get()!.id,
+					new CFrame(mainPosition).mul(this.blockRotation),
+					this.mirrorMode.get(),
+				);
+
+				for (let i = 0; i < mirrorCFrames.size(); i++) {
+					const ghost = (this.mirroredGhosts[i] ??= createBlockGhost(selected));
+					ghost.model.PivotTo(mirrorCFrames[i]);
+				}
+
+				// destroy ghosts if too many
+				for (let i = mirrorCFrames.size(); i < this.mirroredGhosts.size(); i++) {
+					this.mirroredGhosts[i].model.Destroy();
+					delete this.mirroredGhosts[i];
+				}
+			};
+
+			const mainPosition = getMouseTargetBlockPosition();
+			if (!mainPosition) return;
+
+			const plot = SharedPlots.getPlotByPosition(mainPosition);
+			this.targetPlot.set(plot);
+
+			this.mainGhost ??= createBlockGhost(selected);
+			this.mainGhost.model!.PivotTo(this.blockRotation.add(mainPosition));
+
+			if (plot) {
+				updateMirrorGhostBlocksPosition(plot, mainPosition);
+			} else {
+				this.destroyGhosts(false);
+			}
+
+			const canBePlaced =
+				plot &&
+				[...this.mirroredGhosts, this.mainGhost].find(
+					(ghost) =>
+						!BuildingManager.blockCanBePlacedAt(
+							plot,
+							ghost.model,
+							ghost.model.GetPivot(),
+							Players.LocalPlayer,
+						),
+				) === undefined;
+
+			PartUtils.ghostModel(this.mainGhost.model, canBePlaced ? allowedColor : forbiddenColor);
+			for (const ghost of this.mirroredGhosts) {
+				PartUtils.ghostModel(ghost.model, canBePlaced ? allowedColor : forbiddenColor);
+			}
+		}
+
+		rotateBlock(axis: "x" | "y" | "z", inverted = true): void {
+			if (axis === "x") {
+				this.rotateFineTune(new Vector3(inverted ? math.pi / 2 : math.pi / -2, 0, 0));
+			} else if (axis === "y") {
+				this.rotateFineTune(new Vector3(0, inverted ? math.pi / 2 : math.pi / -2, 0));
+			} else if (axis === "z") {
+				this.rotateFineTune(new Vector3(0, 0, inverted ? math.pi / 2 : math.pi / -2));
+			}
+		}
+		private rotateFineTune(rotationVector: Vector3): void;
+		private rotateFineTune(cframe: CFrame): void;
+		private rotateFineTune(rotation: CFrame | Vector3): void {
+			if (typeIs(rotation, "Vector3")) {
+				rotation = CFrame.fromEulerAnglesXYZ(rotation.X, rotation.Y, rotation.Z);
+			}
+
+			SoundController.getSounds().Build.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
+			SoundController.getSounds().Build.BlockRotate.Play();
+
+			if (this.mainGhost) {
+				this.mainGhost.model.PivotTo(this.mainGhost.model.GetPivot().mul(this.blockRotation));
+			}
+
+			this.blockRotation = rotation.mul(this.blockRotation);
+			this.updateBlockPosition();
+		}
+
+		async placeBlock() {
+			const selected = this.selectedBlock.get();
+
+			// Non-alive players bypass
+			if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
+				return;
+			}
+
+			// ERROR: Block is not selected
+			if (!selected) {
+				LogControl.instance.addLine("Block is not selected!");
+
+				return;
+			}
+
+			if (!this.targetPlot.get()) {
+				LogControl.instance.addLine("Out of bounds!", Colors.red);
+
+				// Play sound
+				SoundController.getSounds().Build.BlockPlaceError.Play();
+
+				return;
+			}
+
+			const mainGhost = this.mainGhost;
+			if (!mainGhost || !mainGhost.model.PrimaryPart) {
+				return;
+			}
+
+			const pos = mainGhost.model.PrimaryPart.CFrame;
+			const btype = this.selectedBlock.get();
+			const mirrors = this.mirrorMode.get();
+			const response = await ActionController.instance.executeOperation(
+				"Block placement",
+				async () => {
+					let cframes = BuildingManager.getMirroredBlocksCFrames2(
+						SharedPlots.getPlotByPosition(pos.Position)!,
+						btype!.id,
+						pos,
+						mirrors,
+					);
+					cframes = [...cframes, mainGhost.model.GetPivot()];
+
+					const blocks: BlockModel[] = [];
+					for (const cframe of cframes) {
+						const block = BuildingManager.getBlockByPosition(cframe.Position);
+						if (block) blocks.push(block);
+					}
+
+					if (blocks.size() !== 0) await BuildingController.deleteBlock(blocks!);
+				},
+				[mainGhost, ...this.mirroredGhosts].map((g) => ({
+					id: selected.id,
+					color: this.selectedColor.get(),
+					material: this.selectedMaterial.get(),
+					location: g.model.PrimaryPart!.CFrame,
+					plot: this.targetPlot.get()!,
+				})),
+				async (infos): Promise<Response> => {
+					for (const info of infos) {
+						const result = await BuildingController.placeBlock(info.plot, info);
+						if (!result.success) return result;
+					}
+
+					return { success: true };
+				},
+			);
+
+			if (response.success) {
+				// Play sound
+				SoundController.getSounds().Build.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
+				SoundController.getSounds().Build.BlockPlace.Play();
+
+				task.wait();
+				this.updateBlockPosition();
+			} else {
+				Logger.error(response.message);
+				SoundController.getSounds().Build.BlockPlaceError.Play();
+			}
+		}
+	}
+}
+
+namespace MultiPlaceController {
+	export class Desktop extends ClientComponent {
 		private readonly possibleFillRotationAxis = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis] as const;
 		private readonly fillLimit = 32;
 		private readonly drawnGhostsMap = new Map<Vector3, BlockGhost>();
-		private readonly mouse = Players.LocalPlayer.GetMouse();
 		private readonly selectedBlock;
 		private readonly selectedColor;
 		private readonly selectedMaterial;
@@ -70,7 +329,7 @@ namespace MoveController {
 		private fillRotationMode = 1;
 
 		static subscribe(state: BuildTool2) {
-			const parent = new ComponentChild<DesktopMoveController>(state, true);
+			const parent = new ComponentChild<Desktop>(state, true);
 			const mouse = Players.LocalPlayer.GetMouse();
 
 			state.event.subInput((ih) =>
@@ -86,7 +345,7 @@ namespace MoveController {
 					pressPosition = addBlockSize(selectedBlock, normal, pressPosition);
 
 					parent.set(
-						new DesktopMoveController(
+						new Desktop(
 							pressPosition,
 							selectedBlock,
 							state.selectedColor.get(),
@@ -110,7 +369,7 @@ namespace MoveController {
 
 			const updateGhosts = () => {
 				const cameraPostion = Workspace.CurrentCamera!.CFrame.Position;
-				const hit = this.mouse.Hit.Position;
+				const hit = mouse.Hit.Position;
 				const clickDirection = cameraPostion.sub(hit).Unit;
 
 				const pos = this.getPositionOnBuildingPlane(this.pressPosition, cameraPostion, clickDirection);
@@ -141,7 +400,7 @@ namespace MoveController {
 				this.oldPositions = positionsData;
 			};
 
-			this.event.subscribe(this.mouse.Button1Up, async () => {
+			this.event.subscribe(mouse.Button1Up, async () => {
 				const result = await this.placeBlocks(this.drawnGhostsMap.map((_, m) => m.model));
 				if (result && !result.success) {
 					LogControl.instance.addLine(result.message, Colors.red);
@@ -153,7 +412,7 @@ namespace MoveController {
 				this.destroy();
 			});
 
-			this.event.subscribe(this.mouse.Move, updateGhosts);
+			this.event.subscribe(mouse.Move, updateGhosts);
 			this.event.subInput((ih) => ih.onKeyDown("R", () => this.rotateFillAxis()));
 
 			this.onEnable(updateGhosts);
@@ -293,261 +552,27 @@ export default class BuildTool2 extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
-
-	private readonly allowedColor = Colors.blue;
-	private readonly forbiddenColor = Colors.red;
-
-	private mainGhost?: BlockGhost;
-	private readonly mirroredGhosts: BlockGhost[] = [];
-	private blockRotation = CFrame.identity;
-
-	private readonly targetPlot = new ObservableValue<PlotModel | undefined>(undefined);
+	readonly targetPlot = new ObservableValue<PlotModel | undefined>(undefined);
+	private readonly singlePlacingController;
 
 	constructor(mode: BuildingMode) {
 		super(mode);
 		this.targetPlot.subscribe((plot) => mode.mirrorVisualizer.plot.set(plot));
 
-		this.onPrepare((input) => {
-			if (input !== "Touch") return;
+		this.singlePlacingController = this.parent(new SinglePlaceController.Desktop(this));
+		MultiPlaceController.Desktop.subscribe(this);
+	}
 
-			this.inputHandler.onTouchTap(() => this.updateBlockPosition());
-		});
-		this.event.onPrepare(() => this.updateBlockPosition());
-
-		this.event.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
-		this.event.subscribe(this.mouse.Move, () => this.updateBlockPosition());
-		this.event.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.updateBlockPosition());
-		this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.updateBlockPosition());
-
-		this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
-
-		this.event.subscribe(this.mouse.Button1Up, () => this.placeBlock());
-		this.onPrepare(() => {
-			this.inputHandler.onKeyDown("T", () => this.rotateBlock("x"));
-			this.inputHandler.onKeyDown("R", () => this.rotateBlock("y"));
-			this.inputHandler.onKeyDown("Y", () => {
-				if (InputController.isCtrlPressed()) return;
-				this.rotateBlock("z");
-			});
-		});
-
-		MoveController.DesktopMoveController.subscribe(this);
+	placeBlock() {
+		return this.singlePlacingController.placeBlock();
+	}
+	rotateBlock(axis: "x" | "y" | "z", inverted = true): void {
+		return this.singlePlacingController.rotateBlock(axis, inverted);
 	}
 
 	disable(): void {
-		this.destroyGhosts();
 		this.targetPlot.set(undefined);
 		super.disable();
-	}
-
-	private destroyGhosts(destroyMain = true) {
-		if (destroyMain) {
-			this.mainGhost?.model.Destroy();
-			this.mainGhost = undefined;
-		}
-
-		for (const ghost of this.mirroredGhosts) {
-			ghost.model.Destroy();
-		}
-		this.mirroredGhosts.clear();
-	}
-
-	private updateBlockPosition() {
-		const selected = this.selectedBlock.get();
-		if (!selected) return;
-
-		const getMouseTargetBlockPosition = () => {
-			const g = (
-				this.gameUI as ScreenGui & {
-					BuildingMode: {
-						Tools: {
-							Build2: {
-								Debug: {
-									Label1: TextLabel;
-									Label2: TextLabel;
-									Label3: TextLabel;
-									Label4: TextLabel;
-								};
-							};
-						};
-					};
-				}
-			).BuildingMode.Tools.Build2.Debug;
-
-			const mouseTarget = this.mouse.Target;
-			if (!mouseTarget) return undefined;
-
-			const mouseHit = this.mouse.Hit;
-			const mouseSurface = this.mouse.TargetSurface;
-
-			const globalMouseHitPos = mouseHit.PointToWorldSpace(Vector3.zero);
-			const normal = Vector3.FromNormalId(mouseSurface);
-
-			g.Label1.Text = `Target: ${mouseTarget}`;
-			g.Label2.Text = `Hit: ${mouseHit}`;
-			g.Label3.Text = `Normal: ${mouseSurface} ${normal}`;
-			g.Label4.Text = `Block size mnd: ${selected.model.GetBoundingBox()[1].mul(normal).div(2)}`;
-
-			let targetPosition = globalMouseHitPos;
-			targetPosition = addBlockSize(selected, normal, targetPosition);
-			targetPosition = constrainPositionToGrid(targetPosition);
-			return targetPosition;
-		};
-		const updateMirrorGhostBlocksPosition = (plot: Model, mainPosition: Vector3) => {
-			const mirrorCFrames = BuildingManager.getMirroredBlocksCFrames2(
-				plot,
-				this.selectedBlock.get()!.id,
-				new CFrame(mainPosition).mul(this.blockRotation),
-				this.mirrorMode.get(),
-			);
-
-			for (let i = 0; i < mirrorCFrames.size(); i++) {
-				const ghost = (this.mirroredGhosts[i] ??= createBlockGhost(selected));
-				ghost.model.PivotTo(mirrorCFrames[i]);
-			}
-
-			// destroy ghosts if too many
-			for (let i = mirrorCFrames.size(); i < this.mirroredGhosts.size(); i++) {
-				this.mirroredGhosts[i].model.Destroy();
-				delete this.mirroredGhosts[i];
-			}
-		};
-
-		const mainPosition = getMouseTargetBlockPosition();
-		if (!mainPosition) return;
-
-		const plot = SharedPlots.getPlotByPosition(mainPosition);
-		this.targetPlot.set(plot);
-
-		this.mainGhost ??= createBlockGhost(selected);
-		this.mainGhost.model!.PivotTo(this.blockRotation.add(mainPosition));
-
-		if (plot) {
-			updateMirrorGhostBlocksPosition(plot, mainPosition);
-		} else {
-			this.destroyGhosts(false);
-		}
-
-		const canBePlaced =
-			plot &&
-			[...this.mirroredGhosts, this.mainGhost].find(
-				(ghost) =>
-					!BuildingManager.blockCanBePlacedAt(plot, ghost.model, ghost.model.GetPivot(), Players.LocalPlayer),
-			) === undefined;
-
-		PartUtils.ghostModel(this.mainGhost.model, canBePlaced ? this.allowedColor : this.forbiddenColor);
-		for (const ghost of this.mirroredGhosts) {
-			PartUtils.ghostModel(ghost.model, canBePlaced ? this.allowedColor : this.forbiddenColor);
-		}
-	}
-
-	rotateBlock(axis: "x" | "y" | "z", inverted = true): void {
-		if (axis === "x") {
-			this.rotateFineTune(new Vector3(inverted ? math.pi / 2 : math.pi / -2, 0, 0));
-		} else if (axis === "y") {
-			this.rotateFineTune(new Vector3(0, inverted ? math.pi / 2 : math.pi / -2, 0));
-		} else if (axis === "z") {
-			this.rotateFineTune(new Vector3(0, 0, inverted ? math.pi / 2 : math.pi / -2));
-		}
-	}
-
-	private rotateFineTune(rotationVector: Vector3): void;
-	private rotateFineTune(cframe: CFrame): void;
-	private rotateFineTune(rotation: CFrame | Vector3): void {
-		if (typeIs(rotation, "Vector3")) {
-			rotation = CFrame.fromEulerAnglesXYZ(rotation.X, rotation.Y, rotation.Z);
-		}
-
-		SoundController.getSounds().Build.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
-		SoundController.getSounds().Build.BlockRotate.Play();
-
-		if (this.mainGhost) {
-			this.mainGhost.model.PivotTo(this.mainGhost.model.GetPivot().mul(this.blockRotation));
-		}
-
-		this.blockRotation = rotation.mul(this.blockRotation);
-		this.updateBlockPosition();
-	}
-
-	async placeBlock() {
-		const selected = this.selectedBlock.get();
-
-		// Non-alive players bypass
-		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
-			return;
-		}
-
-		// ERROR: Block is not selected
-		if (!selected) {
-			LogControl.instance.addLine("Block is not selected!");
-
-			return;
-		}
-
-		if (!this.targetPlot.get()) {
-			LogControl.instance.addLine("Out of bounds!", Colors.red);
-
-			// Play sound
-			SoundController.getSounds().Build.BlockPlaceError.Play();
-
-			return;
-		}
-
-		const mainGhost = this.mainGhost;
-		if (!mainGhost || !mainGhost.model.PrimaryPart) {
-			return;
-		}
-
-		const pos = mainGhost.model.PrimaryPart.CFrame;
-		const btype = this.selectedBlock.get();
-		const mirrors = this.mirrorMode.get();
-		const response = await ActionController.instance.executeOperation(
-			"Block placement",
-			async () => {
-				let cframes = BuildingManager.getMirroredBlocksCFrames2(
-					SharedPlots.getPlotByPosition(pos.Position)!,
-					btype!.id,
-					pos,
-					mirrors,
-				);
-				cframes = [...cframes, mainGhost.model.GetPivot()];
-
-				const blocks: BlockModel[] = [];
-				for (const cframe of cframes) {
-					const block = BuildingManager.getBlockByPosition(cframe.Position);
-					if (block) blocks.push(block);
-				}
-
-				if (blocks.size() !== 0) await BuildingController.deleteBlock(blocks!);
-			},
-			[mainGhost, ...this.mirroredGhosts].map((g) => ({
-				id: selected.id,
-				color: this.selectedColor.get(),
-				material: this.selectedMaterial.get(),
-				location: g.model.PrimaryPart!.CFrame,
-				plot: this.targetPlot.get()!,
-			})),
-			async (infos): Promise<Response> => {
-				for (const info of infos) {
-					const result = await BuildingController.placeBlock(info.plot, info);
-					if (!result.success) return result;
-				}
-
-				return { success: true };
-			},
-		);
-
-		if (response.success) {
-			// Play sound
-			SoundController.getSounds().Build.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().Build.BlockPlace.Play();
-
-			task.wait();
-			this.updateBlockPosition();
-		} else {
-			Logger.error(response.message);
-			SoundController.getSounds().Build.BlockPlaceError.Play();
-		}
 	}
 
 	getDisplayName(): string {
