@@ -7,7 +7,6 @@ import ConfigToolScene, { ConfigToolSceneDefinition } from "client/gui/buildmode
 import DeleteToolScene, { DeleteToolSceneDefinition } from "client/gui/buildmode/tools/DeleteToolScene";
 import MoveToolScene, { MoveToolSceneDefinition } from "client/gui/buildmode/tools/MoveToolScene";
 import PaintToolScene, { PaintToolSceneDefinition } from "client/gui/buildmode/tools/PaintToolScene";
-import WireToolScene, { WireToolSceneDefinition } from "client/gui/buildmode/tools/WireToolScene";
 import { ButtonControl } from "client/gui/controls/Button";
 import SavePopup from "client/gui/popup/SavePopup";
 import SettingsPopup from "client/gui/popup/SettingsPopup";
@@ -16,7 +15,7 @@ import ActionController from "client/modes/build/ActionController";
 import ToolBase from "client/tools/ToolBase";
 import ToolController from "client/tools/ToolController";
 import EditToolScene, { EditToolSceneDefinition } from "./tools/EditToolScene";
-import WireTool2Scene, { WireTool2SceneDefinition } from "./tools/WireTool2Scene";
+import WireToolScene, { WireToolSceneDefinition } from "./tools/WireToolScene";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {
@@ -58,7 +57,6 @@ export type BuildingModeSceneDefinition = GuiObject & {
 		readonly Config: ConfigToolSceneDefinition;
 		readonly Paint: PaintToolSceneDefinition;
 		readonly Wire: WireToolSceneDefinition;
-		readonly Wire2: WireTool2SceneDefinition;
 		readonly Edit: EditToolSceneDefinition;
 	};
 };
@@ -100,7 +98,6 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 		this.scenes.set(tools.paintTool, new PaintToolScene(this.gui.Tools.Paint, tools.paintTool));
 		this.scenes.set(tools.buildTool2, new BuildTool2Scene(this.gui.Tools.Build2, tools.buildTool2));
 		this.scenes.set(tools.wiretool, new WireToolScene(this.gui.Tools.Wire, tools.wiretool));
-		this.scenes.set(tools.wiretool2, new WireTool2Scene(this.gui.Tools.Wire2, tools.wiretool2));
 		this.scenes.set(tools.editTool, new EditToolScene(this.gui.Tools.Edit, tools.editTool));
 
 		this.scenes.forEach((scene) => this.add(scene));

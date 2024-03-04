@@ -9,25 +9,23 @@ import DeleteTool from "client/tools/DeleteTool";
 import MoveTool from "client/tools/MoveTool";
 import PaintTool from "client/tools/PaintTool";
 import ToolBase from "client/tools/ToolBase";
-import WireTool from "client/tools/WireTool";
 import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
 import EditTool from "./EditTool";
-import WireTool2 from "./WireTool2";
+import { WireTool } from "./WireTool";
 
 export default class ToolController extends ClientComponent {
-	public readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);
-	public readonly tools: readonly ToolBase[];
+	readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);
+	readonly tools: readonly ToolBase[];
 
-	public readonly buildTool;
-	public readonly moveTool;
-	public readonly editTool;
-	public readonly deleteTool;
-	public readonly configTool;
-	public readonly paintTool;
-	public readonly buildTool2;
-	public readonly wiretool;
-	public readonly wiretool2;
+	readonly buildTool;
+	readonly moveTool;
+	readonly editTool;
+	readonly deleteTool;
+	readonly configTool;
+	readonly paintTool;
+	readonly buildTool2;
+	readonly wiretool;
 
 	constructor(mode: BuildingMode) {
 		super();
@@ -45,7 +43,6 @@ export default class ToolController extends ClientComponent {
 		this.paintTool = new PaintTool(mode);
 		this.buildTool2 = new BuildTool2(mode);
 		this.wiretool = new WireTool(mode);
-		this.wiretool2 = new WireTool2(mode);
 
 		const tools: ToolBase[] = [
 			this.buildTool,
@@ -53,7 +50,6 @@ export default class ToolController extends ClientComponent {
 			this.deleteTool,
 			this.configTool,
 			this.paintTool,
-			this.wiretool2,
 			this.wiretool,
 			this.editTool,
 		];
@@ -70,11 +66,11 @@ export default class ToolController extends ClientComponent {
 		return [...super.getDebugChildren(), ...this.tools];
 	}
 
-	public enable() {
+	enable() {
 		super.enable();
 		TooltipsControl.instance.updateControlTooltips(this.selectedTool.get());
 	}
-	public disable() {
+	disable() {
 		super.disable();
 		TooltipsControl.instance.updateControlTooltips(undefined);
 	}

@@ -4,7 +4,7 @@ import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
-import { WireToolTests } from "client/tools/WireTool2";
+import { WireToolTests } from "client/tools/WireTool";
 import { Element } from "shared/Element";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import Objects from "shared/fixes/objects";
