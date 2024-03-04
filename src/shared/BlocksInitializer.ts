@@ -10,8 +10,10 @@ declare global {
 		readonly info: string;
 		readonly model: BlockModel;
 		readonly category: CategoryName;
-		readonly required?: boolean;
-		readonly limit?: number;
+		readonly required: boolean | undefined;
+		readonly limit: number | undefined;
+		readonly autoWeldShape: AutoWeldColliderBlockShape | undefined;
+		readonly mirrorBehaviour: BlockMirrorBehaviour | undefined;
 	};
 
 	type CategoryName = string & { readonly ___nominal: "CategoryName" };
@@ -43,16 +45,6 @@ const readFromAssets = (data: BlocksInitializeData) => {
 		}
 	};
 
-	const readBlockModelAttributes = (block: Model) => {
-		return {
-			id: block.GetAttribute("id") as string | undefined,
-			name: block.GetAttribute("name") as string | undefined,
-			info: block.GetAttribute("info") as string | undefined,
-			required: block.GetAttribute("required") as boolean | undefined,
-			limit: block.GetAttribute("limit") as number | undefined,
-		};
-	};
-
 	const readBlock = (block: Model, categoryName: string) => {
 		if (!block.PrimaryPart) {
 			throw `PrimaryPart in Block '${block.Name}' is not set!`;
@@ -74,40 +66,17 @@ const readFromAssets = (data: BlocksInitializeData) => {
 
 		const id = block.Name.lower();
 
-		{
-			const desc = BlockDataRegistry[id];
-			if (desc) {
-				let description = desc.description;
-				if (![".", "!", "?", " "].includes(desc.description.sub(desc.description.size()))) {
-					description += ".";
-				}
-
-				block.SetAttribute("info", description);
-				block.SetAttribute("name", desc.name);
-			}
-		}
-
-		const attributes = readBlockModelAttributes(block);
-
-		// next checks are `!` instead of `!== undefined` to also throw in case of empty strings
-
-		// eslint-disable-next-line roblox-ts/lua-truthiness
-		if (!attributes.name) {
-			throw `Attribute 'name' is not set for '${block.Name}'!`;
-		}
-		// eslint-disable-next-line roblox-ts/lua-truthiness
-		if (!attributes.info) {
-			throw `Attribute 'description' is not set for '${block.Name}'!`;
-		}
-
+		const attributes = BlockDataRegistry[id];
 		const regblock: RegistryBlock = {
 			id,
-			displayName: attributes.name ?? block.Name,
-			info: attributes.info ?? "No description",
-			model: block as BlockModel,
-			category: categoryName as CategoryName,
+			displayName: attributes.name,
+			info: attributes.description,
 			required: attributes.required,
 			limit: attributes.limit,
+			autoWeldShape: attributes.autoWeldShape,
+			mirrorBehaviour: attributes.mirrorBehaviour,
+			model: block as BlockModel,
+			category: categoryName as CategoryName,
 		};
 		data.blocks.set(regblock.id, regblock);
 	};
@@ -176,13 +145,6 @@ export const BlocksInitializer = {
 
 	/** Empty method just to trigger the import */
 	initialize() {},
-	clearBlockAttributes() {
-		for (const block of sorted) {
-			for (const [key] of block.model.GetAttributes()) {
-				//block.model.SetAttribute(key, undefined);
-			}
-		}
-	},
 } as const;
 
 // don't delete, useful for something

@@ -279,8 +279,9 @@ const create = (info: BlocksInitializeData) => {
 
 	const createBase = (displayName: string, prefab: string, additional: BlockAdditional): BlockResult => {
 		const id = `operation${displayName.lower()}`;
-		displayName = BlockDataRegistry[id].name;
-		const info = BlockDataRegistry[id].description;
+		const setupinfo = BlockDataRegistry[id];
+		displayName = setupinfo.name;
+		const info = setupinfo.description;
 
 		return {
 			id,
@@ -302,6 +303,7 @@ const create = (info: BlocksInitializeData) => {
 			Logger.info(`[BAC] Creating block ${name}`);
 
 			const block = createBase(name, "OperationPrefab", data);
+			const setupinfo = BlockDataRegistry[block.id];
 			const regblock: RegistryBlock = {
 				id: block.id,
 				displayName: block.displayName,
@@ -312,6 +314,10 @@ const create = (info: BlocksInitializeData) => {
 							block.id
 						]
 					: initializeBlockModel(block.id, block.prefab, block.displayName, data.modelTextOverride),
+				autoWeldShape: setupinfo.autoWeldShape,
+				limit: setupinfo.limit,
+				mirrorBehaviour: setupinfo.mirrorBehaviour,
+				required: setupinfo.required,
 			};
 			info.blocks.set(regblock.id, regblock);
 

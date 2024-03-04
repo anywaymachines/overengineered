@@ -1,4 +1,4 @@
-import { ServerStorage, Workspace } from "@rbxts/services";
+import { RunService, ServerStorage, Workspace } from "@rbxts/services";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
 import Logger from "shared/Logger";
@@ -20,18 +20,19 @@ export default class BuildingWelder {
 			return new Region3(center.sub(size.div(2)), center.add(size.div(2)));
 		};
 
-		const createAutomatic = (block: BlockModel): readonly Region3[] | undefined => {
+		const createAutomatic = (block: RegistryBlock): readonly Region3[] | undefined => {
+			const autoShape = block.autoWeldShape ?? "none";
 			if (
-				(block.GetChildren().size() === 1 && block.PrimaryPart!.IsA("Part")) ||
-				block.GetAttribute("shape") === "cube"
+				(block.model.GetChildren().size() === 1 && block.model.PrimaryPart!.IsA("Part")) ||
+				autoShape === "cube"
 			) {
-				const part = block.FindFirstChildWhichIsA("Part");
+				const part = block.model.FindFirstChildWhichIsA("Part");
 				if (!part) return;
 
 				if (part.Shape === Enum.PartType.Block) {
 					const blockpos = part.Position;
 					const size = (
-						block.GetChildren().filter((c) => c.IsA("BasePart")) as unknown as readonly BasePart[]
+						block.model.GetChildren().filter((c) => c.IsA("BasePart")) as unknown as readonly BasePart[]
 					)
 						.map((c) => c.Size)
 						.reduce((acc, val) => (acc.Magnitude > val.Magnitude ? acc : val), Vector3.zero);
@@ -107,7 +108,10 @@ export default class BuildingWelder {
 
 					const union = group[0].UnionAsync(
 						group.filter((_, i) => i !== 0),
-						Enum.CollisionFidelity.PreciseConvexDecomposition,
+						// Default in studio for loading performance
+						RunService.IsStudio()
+							? Enum.CollisionFidelity.Default
+							: Enum.CollisionFidelity.PreciseConvexDecomposition,
 					);
 					setColliderProperties(union);
 					if (key !== "") {
@@ -136,7 +140,7 @@ export default class BuildingWelder {
 				union.PivotTo(block.GetPivot());
 				union.Parent = weldParent;
 			} else {
-				const regions = createAutomatic(block);
+				const regions = createAutomatic(regblock);
 				if (!regions || regions.size() === 0) continue;
 
 				const parts: BasePart[] = [];

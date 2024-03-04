@@ -1,28 +1,250 @@
-export type MirrorBehaviour = "offset180" | "normal" | "none" | "wedgeWing";
+import Objects from "shared/fixes/objects";
 
-interface BlockInformation {
-	readonly name: string;
-	readonly description: string;
-	readonly mirrorBehaviour?: MirrorBehaviour;
+declare global {
+	type AutoWeldColliderBlockShape = "none" | "cube";
+	type BlockMirrorBehaviour = "offset180" | "normal" | "none" | "wedgeWing";
 }
 
+interface BlockSetupInformation {
+	readonly name: string;
+	readonly description: string;
+	readonly autoWeldShape?: AutoWeldColliderBlockShape;
+	readonly mirrorBehaviour?: BlockMirrorBehaviour;
+	readonly required?: boolean;
+	readonly limit?: number;
+}
+
+type BlockDataRegistry = Record<string, BlockSetupInformation>;
+type BlockDataRegistryRegistry = { readonly [key: string]: BlockSetupInformation | BlockDataRegistryRegistry };
+
+const flatten = (data: BlockDataRegistryRegistry): BlockDataRegistry => {
+	const push = (result: BlockDataRegistry, key: string, item: BlockDataRegistryRegistry | BlockSetupInformation) => {
+		if ("name" in item) {
+			ret[key] = item as BlockSetupInformation;
+		} else {
+			for (const [nextkey, nextitem] of Objects.pairs(item)) {
+				push(result, nextkey as string, nextitem);
+			}
+		}
+	};
+
+	const ret: BlockDataRegistry = {};
+	for (const [key, item] of Objects.pairs(data)) {
+		push(ret, key as string, item);
+	}
+
+	return ret;
+};
+const process = (block: BlockSetupInformation): BlockSetupInformation => {
+	if (![".", "!", "?", " "].includes(block.description.sub(block.description.size()))) {
+		return {
+			...block,
+			description: block.description + ".",
+		};
+	}
+
+	return block;
+};
+
+const logic: BlockDataRegistryRegistry = {
+	gate: {
+		counter: {
+			name: "Counter",
+			description: "Returns a previous value plus step value.",
+			autoWeldShape: "cube",
+		},
+		delayblock: {
+			name: "Delay Block",
+			description: "Returns same value you gave it but with delay",
+			autoWeldShape: "cube",
+		},
+		operationand: {
+			name: '"AND" Gate',
+			description: "Returns true when both inputs are true",
+			autoWeldShape: "cube",
+		},
+		operationnand: {
+			name: '"NAND" Gate',
+			description: "Returns true when both value are not true",
+			autoWeldShape: "cube",
+		},
+		operationnor: {
+			name: '"NOR" Gate',
+			description: "Returns true when none of the values are true",
+			autoWeldShape: "cube",
+		},
+		operationnot: {
+			name: '"NOT" Gate',
+			description: "Returns true when false is given, and vice versa",
+			autoWeldShape: "cube",
+		},
+		operationor: {
+			name: '"OR" Gate',
+			description: "Returns true when any of the inputs are true",
+			autoWeldShape: "cube",
+		},
+		operationxnor: {
+			name: '"XNOR" Gate',
+			description: "Returns true only if both inputs are the same",
+			autoWeldShape: "cube",
+		},
+		operationxor: {
+			name: '"XOR" Gate',
+			description: "Returns true only if both inputs are not the same",
+			autoWeldShape: "cube",
+		},
+		operationbuffer: {
+			name: "Buffer",
+			description: "Returns the same value it was given. Useful for logic organization",
+			autoWeldShape: "none",
+		},
+		operationequals: {
+			name: "Equals",
+			description: "Returns true if two given values are the exact same",
+			autoWeldShape: "cube",
+		},
+		operationgreaterthan: {
+			name: "Greater Than",
+			description: "Returns true if first value greater than second one",
+			autoWeldShape: "cube",
+		},
+	},
+	math: {
+		operationadd: {
+			name: "Addition",
+			description: "Returns a sum of input values",
+			autoWeldShape: "cube",
+		},
+		operationsub: {
+			name: "Subtraction",
+			description: "Returns the result of substruction of two given values",
+			autoWeldShape: "cube",
+		},
+		operationmul: {
+			name: "Multiplication",
+			description: "Returns the result of multiplication of two given values",
+			autoWeldShape: "cube",
+		},
+		operationdiv: {
+			name: "Division",
+			description: "Returns the result of division of two given values",
+			autoWeldShape: "cube",
+		},
+		operationabs: {
+			name: "Absolute",
+			description: "Returns the modulus of incoming number",
+			autoWeldShape: "cube",
+		},
+		operationclamp: {
+			name: "Clamp",
+			description: "Limits the output between max and min.",
+			autoWeldShape: "cube",
+		},
+		operationmod: {
+			name: "Mod",
+			description: "Returns the remainder of a division",
+			autoWeldShape: "cube",
+		},
+		operationround: {
+			name: "Round",
+			description: "Returns rounded input value",
+			autoWeldShape: "cube",
+		},
+		operationsign: {
+			name: "Sign",
+			description: "Returns -1 if input value is less than zero, 1 if greater than zero and zero if equals zero",
+			autoWeldShape: "cube",
+		},
+	},
+	angle: {
+		operationdeg: {
+			name: "Degrees",
+			description: "Returns input value converted to degrees",
+			autoWeldShape: "cube",
+		},
+		operationrad: {
+			name: "Radians",
+			description: "Returns input value converted to radians",
+			autoWeldShape: "cube",
+		},
+	},
+	vector3: {
+		operationvec3combiner: {
+			name: "Vector3 Combiner",
+			description: "Returns a vector combined from input values",
+			autoWeldShape: "cube",
+		},
+		operationvec3splitter: {
+			name: "Vector3 Splitter",
+			description: "Returns splitted input vector",
+			autoWeldShape: "cube",
+		},
+	},
+	number: {
+		constant: {
+			name: "Constant",
+			description: "Always returns the value you've set",
+			autoWeldShape: "cube",
+		},
+		multiplexer: {
+			name: "Multiplexer",
+			description: "Outputs values depending on the incoming boolean",
+			autoWeldShape: "cube",
+		},
+	},
+	output: {
+		lamp: {
+			name: "Lamp",
+			description: "A simple lamp. Turns on when true is passed and turns off when false is passed",
+			autoWeldShape: "cube",
+		},
+		screen: {
+			name: "Screen",
+			description: "Display all your data for everyone to see!",
+			autoWeldShape: "cube",
+		},
+	},
+	sensors: {
+		accelerometer: {
+			name: "Accelerometer",
+			description: "Returns acceleration",
+			autoWeldShape: "cube",
+		},
+		altimeter: {
+			name: "Altimeter",
+			description: "Returns current height",
+			autoWeldShape: "cube",
+		},
+		anglesensor: {
+			name: "Angle Sensor",
+			description: "Returns it's angle",
+			autoWeldShape: "cube",
+		},
+		keysensor: {
+			name: "Key Sensor",
+			description: "Returns true when the chosen button is pressed",
+			autoWeldShape: "cube",
+		},
+		lidarsensor: {
+			name: "Lidar Sensor",
+			description: "Returns the distance to the object it's looking at",
+			autoWeldShape: "cube",
+		},
+		ownerlocator: {
+			name: "Owner Locator",
+			description: "Maks, delete this ####",
+			autoWeldShape: "cube",
+		},
+	},
+};
+
 /** Registry for the block information, for easier editing (compared to Roblox Studio) */
-export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
-	accelerometer: {
-		name: "Accelerometer",
-		description: "Returns acceleration",
-	},
-	altimeter: {
-		name: "Altimeter",
-		description: "Returns current height",
-	},
+const registry: BlockDataRegistry = {
+	...flatten(logic),
 	anchorblock: {
 		name: "Anchor",
 		description: "An immovable block",
-	},
-	anglesensor: {
-		name: "Angle Sensor",
-		description: "Returns it's angle",
+		limit: 1,
 	},
 	ballinsocket: {
 		name: "Ball in Socket",
@@ -40,10 +262,6 @@ export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 		name: "Concave Prism",
 		description: "The convex prism, but concave",
 		mirrorBehaviour: "offset180",
-	},
-	constant: {
-		name: "Constant",
-		description: "Always returns the value you've set",
 	},
 	convexcornerwedge: {
 		name: "Convex Corner Wedge",
@@ -70,10 +288,6 @@ export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 		name: "Corner Wedge 4x1",
 		description: "A simple coooorner wedge",
 	},
-	counter: {
-		name: "Counter",
-		description: "Returns a previous value plus step value.",
-	},
 	cylinder1x1: {
 		name: "Cylinder 1x1",
 		description: "A simple cyllinder",
@@ -89,10 +303,6 @@ export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 	cylinder2x2: {
 		name: "Cylinder 2x2",
 		description: "A bigger sibling of 2x1 cyllinder",
-	},
-	delayblock: {
-		name: "Delay Block",
-		description: "Returns same value you gave it but with delay",
 	},
 	disconnectblock: {
 		name: "Disconnector",
@@ -134,18 +344,6 @@ export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 		name: "Inner Tetra",
 		description: "This name was chosen just to make the searching more inconvenient",
 	},
-	keysensor: {
-		name: "Key Sensor",
-		description: "Returns true when the chosen button is pressed",
-	},
-	lamp: {
-		name: "Lamp",
-		description: "A simple lamp. Turns on when true is passed and turns off when false is passed",
-	},
-	lidarsensor: {
-		name: "Lidar Sensor",
-		description: "Returns the distance to the object it's looking at",
-	},
 	logicmemory: {
 		name: "Memory Cell",
 		description: "Stores the value you gave it",
@@ -157,106 +355,6 @@ export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 	motorblock: {
 		name: "Motor",
 		description: "Rotates attached blocks",
-	},
-	multiplexer: {
-		name: "Multiplexer",
-		description: "Outputs values depending on the incoming boolean",
-	},
-	operationabs: {
-		name: "Absolute",
-		description: "Returns the modulus of incoming number",
-	},
-	operationadd: {
-		name: "Addition",
-		description: "Returns a sum of input values",
-	},
-	operationand: {
-		name: '"AND" Gate',
-		description: "Returns true when both inputs are true",
-	},
-	operationbuffer: {
-		name: "Buffer",
-		description: "Returns the same value it was given. Useful for logic organization",
-	},
-	operationclamp: {
-		name: "Clamp",
-		description: "Limits the output between max and min.",
-	},
-	operationdeg: {
-		name: "Degrees",
-		description: "Returns input value converted to degrees",
-	},
-	operationdiv: {
-		name: "Division",
-		description: "Returns the result of division of two given values",
-	},
-	operationequals: {
-		name: "Equals",
-		description: "Returns true if two given values are the exact same",
-	},
-	operationgreaterthan: {
-		name: "Greater Than",
-		description: "Returns true if first value greater than second one",
-	},
-	operationmod: {
-		name: "Mod",
-		description: "Returns the remainder of a division",
-	},
-	operationmul: {
-		name: "Multiplication",
-		description: "Returns the result of multiplication of two given values",
-	},
-	operationnand: {
-		name: '"NAND" Gate',
-		description: "Returns true when both value are not true",
-	},
-	operationnor: {
-		name: '"NOR" Gate',
-		description: "Returns true when none of the values are true",
-	},
-	operationnot: {
-		name: '"NOT" Gate',
-		description: "Returns true when false is given, and vice versa",
-	},
-	operationor: {
-		name: '"OR" Gate',
-		description: "Returns true when any of the inputs are true",
-	},
-	operationrad: {
-		name: "Radians",
-		description: "Returns input value converted to radians",
-	},
-	operationround: {
-		name: "Round",
-		description: "Returns rounded input value",
-	},
-	operationsign: {
-		name: "Sign",
-		description: "Returns -1 if input value is less than zero, 1 if greater than zero and zero if equals zero",
-	},
-	operationsub: {
-		name: "Subtraction",
-		description: "Returns the result of substruction of two given values",
-	},
-	operationvec3combiner: {
-		name: "Vector3 Combiner",
-		description: "Returns a vector combined from input values",
-	},
-	operationvec3splitter: {
-		name: "Vector3 Splitter",
-		description: "Returns splitted input vector",
-	},
-	operationxnor: {
-		name: '"XNOR" Gate',
-		description: "Returns true only if both inputs are the same",
-	},
-	operationxor: {
-		name: '"XOR" Gate',
-		description: "Returns true only if both inputs are not the same",
-	},
-	ownerlocator: {
-		name: "Owner Locator",
-		description: "Maks, delete this ####",
 	},
 	passengerseat: {
 		name: "Passenger Seat",
@@ -277,10 +375,6 @@ export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 	rope: {
 		name: "Rope",
 		description: "A very VERY robust rope",
-	},
-	screen: {
-		name: "Screen",
-		description: "Display all your data for everyone to see!",
 	},
 	servomotorblock: {
 		name: "Servo",
@@ -329,6 +423,8 @@ export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 	vehicleseat: {
 		name: "Vehicle Seat",
 		description: "A seat for your vehicle. Allows you to control your contraption",
+		required: true,
+		limit: 1,
 	},
 	wedge1x1: {
 		name: "Wedge 1x1",
@@ -395,3 +491,9 @@ export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 		description: "An evil brother of the wing rounding",
 	},
 };
+
+for (const [key, info] of Objects.pairs(registry)) {
+	registry[key] = process(info);
+}
+
+export const BlockDataRegistry = registry;
