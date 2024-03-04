@@ -8,12 +8,20 @@ import ToolController from "client/tools/ToolController";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 
+declare global {
+	type MirrorMode = {
+		readonly x?: Vector3;
+		readonly y?: Vector3;
+		readonly z?: Vector3;
+	};
+}
+
 export default class BuildingMode extends PlayMode {
-	readonly mirrorMode = new ObservableValue<readonly CFrame[]>([
-		CFrame.identity,
-		CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2),
-		CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(new Vector3(0, 4, 0)),
-	]);
+	readonly mirrorMode = new ObservableValue<MirrorMode>({
+		x: Vector3.zero,
+		y: new Vector3(0, 4, 0),
+		z: Vector3.zero,
+	});
 
 	readonly mirrorVisualizer = new MirrorVisualizer();
 

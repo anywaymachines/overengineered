@@ -1,9 +1,12 @@
-type BlockInformation = {
+export type MirrorBehaviour = "offset180" | "normal" | "none" | "wedgeWing";
+
+interface BlockInformation {
 	readonly name: string;
 	readonly description: string;
-};
+	readonly mirrorBehaviour?: MirrorBehaviour;
+}
 
-/** Registry for the block names and descriptions, for easier editing (compared to Roblox Studio) */
+/** Registry for the block information, for easier editing (compared to Roblox Studio) */
 export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 	accelerometer: {
 		name: "Accelerometer",
@@ -36,6 +39,7 @@ export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 	concaveprism: {
 		name: "Concave Prism",
 		description: "The convex prism, but concave",
+		mirrorBehaviour: "offset180",
 	},
 	constant: {
 		name: "Constant",
@@ -48,6 +52,7 @@ export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 	convexprism: {
 		name: "Convex Prism",
 		description: "The concave prism, but convex",
+		mirrorBehaviour: "offset180",
 	},
 	cornerwedge1x1: {
 		name: "Corner Wedge 1x1",
@@ -344,18 +349,22 @@ export const BlockDataRegistry: Readonly<Record<string, BlockInformation>> = {
 	wedgewing1x1: {
 		name: "Wedge Wing 1x1",
 		description: "A wedge shaped wing",
+		mirrorBehaviour: "wedgeWing",
 	},
 	wedgewing1x2: {
 		name: "Wedge Wing 1x2",
 		description: "A wedge shaped wing but longer",
+		mirrorBehaviour: "wedgeWing",
 	},
 	wedgewing1x3: {
 		name: "Wedge Wing 1x3",
 		description: "A wedge shaped wing but much longer",
+		mirrorBehaviour: "wedgeWing",
 	},
 	wedgewing1x4: {
 		name: "Wedge Wing 1x4",
 		description: "A humongously long wedge shaped wing",
+		mirrorBehaviour: "wedgeWing",
 	},
 	wheel: {
 		name: "Wheel",

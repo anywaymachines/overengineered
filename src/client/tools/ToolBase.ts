@@ -6,7 +6,7 @@ import ObservableValue from "shared/event/ObservableValue";
 
 /** An abstract class of tools for working with the world */
 export default abstract class ToolBase extends ClientComponent {
-	readonly mirrorMode = new ObservableValue<readonly CFrame[]>([]);
+	readonly mirrorMode = new ObservableValue<MirrorMode>({});
 
 	protected readonly gameUI;
 	protected readonly mouse: Mouse;
@@ -22,12 +22,12 @@ export default abstract class ToolBase extends ClientComponent {
 		this.mouse = Players.LocalPlayer.GetMouse();
 	}
 
-	public enable() {
+	enable() {
 		this.isEquipped = true;
 		super.enable();
 	}
 
-	public disable() {
+	disable() {
 		this.isEquipped = false;
 		super.disable();
 	}
@@ -38,6 +38,6 @@ export default abstract class ToolBase extends ClientComponent {
 	/** Image of the tool*/
 	abstract getImageID(): string;
 
-	public abstract getGamepadTooltips(): readonly { key: Enum.KeyCode; text: string }[];
-	public abstract getKeyboardTooltips(): readonly { keys: string[]; text: string }[];
+	abstract getGamepadTooltips(): readonly { key: Enum.KeyCode; text: string }[];
+	abstract getKeyboardTooltips(): readonly { keys: string[]; text: string }[];
 }

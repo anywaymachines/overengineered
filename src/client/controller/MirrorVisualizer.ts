@@ -4,7 +4,7 @@ import Control from "client/gui/Control";
 import ObservableValue from "shared/event/ObservableValue";
 
 export default class MirrorVisualizer extends ClientComponent {
-	readonly mirrorMode = new ObservableValue<readonly CFrame[]>([]);
+	readonly mirrorMode = new ObservableValue<MirrorMode>({});
 	readonly plot = new ObservableValue<Model | undefined>(undefined);
 	private readonly template;
 
@@ -21,12 +21,12 @@ export default class MirrorVisualizer extends ClientComponent {
 		this.recreate();
 	}
 
-	public enable() {
+	enable() {
 		super.enable();
 		this.recreate();
 	}
 
-	public disable() {
+	disable() {
 		super.disable();
 		this.plot.get()?.FindFirstChild("Mirrors")?.ClearAllChildren();
 	}
@@ -44,7 +44,18 @@ export default class MirrorVisualizer extends ClientComponent {
 
 		mirrors.ClearAllChildren();
 
-		for (const cframe of this.mirrorMode.get()) {
+		const mode = this.mirrorMode.get();
+		const axes = [
+			!mode.x ? undefined : CFrame.identity.add(mode.x),
+			!mode.y ? undefined : CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(mode.y),
+			!mode.z
+				? undefined
+				: CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2)
+						.add(new Vector3(0, 4, 0))
+						.add(mode.z),
+		] as readonly CFrame[];
+
+		for (const cframe of axes) {
 			const mirror = this.template();
 			mirror.PivotTo(plot.GetPivot().ToWorldSpace(cframe));
 			mirror.Parent = mirrors;

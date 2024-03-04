@@ -1,4 +1,5 @@
 import { RunService } from "@rbxts/services";
+import { BlockDataRegistry } from "shared/BlockDataRegistry";
 import SharedPlots from "shared/building/SharedPlots";
 import { AABB } from "shared/fixes/AABB";
 import VectorUtils from "shared/utils/VectorUtils";
@@ -98,30 +99,84 @@ const BuildingManager = {
 		return true;
 	},
 
+	getMirroredBlocksCFrames2(
+		plot: Model,
+		blockid: string,
+		cframeToMirror: CFrame,
+		mode: MirrorMode,
+	): readonly CFrame[] {
+		const method = BlockDataRegistry[blockid]?.mirrorBehaviour ?? "normal";
+
+		const reflect = (cframe: CFrame, mirrorCFrame: CFrame) => {
+			if (method === "none") {
+				return cframe;
+			}
+
+			if (method === "wedgeWing") {
+				// if X, rotate 180 X
+				// if Z, rotate 180 Z
+				// if Y, do not rotate
+			}
+
+			if (method === "offset180") {
+				cframe = cframe.mul(CFrame.fromEulerAnglesYXZ(0, 180, 0));
+			}
+
+			const [X, Y, Z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = mirrorCFrame
+				.ToObjectSpace(cframe)
+				.GetComponents();
+
+			// reflect along X/Y plane (Z axis)
+			const reflection = new CFrame(X, Y, -Z, -R00, R01, R02, -R10, R11, R12, R20, -R21, -R22);
+			const reflectedCFrame = mirrorCFrame.ToWorldSpace(reflection);
+			const [x, y, z] = reflectedCFrame.ToOrientation();
+
+			return CFrame.fromOrientation(x, y, z).add(reflectedCFrame.Position);
+		};
+
+		const plotframe = plot.GetPivot();
+
+		const axes = [
+			!mode.x ? undefined : CFrame.identity.add(mode.x),
+			!mode.y ? undefined : CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(mode.y),
+			!mode.z
+				? undefined
+				: CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2)
+						.add(new Vector3(0, 4, 0))
+						.add(mode.z),
+		] as readonly CFrame[];
+
+		const ret: CFrame[] = [cframeToMirror];
+		for (const axis of axes) {
+			for (const frame of [...ret]) {
+				ret.push(reflect(frame, plotframe.ToWorldSpace(axis)));
+			}
+		}
+		ret.remove(0);
+		return ret;
+	},
 	getMirroredBlocksCFrames(
 		plot: Model,
 		block: RegistryBlock | undefined,
 		cframeToMirror: CFrame,
 		axes: readonly CFrame[],
 	): readonly CFrame[] {
-		type RotationMethod = "normal" | "wedgeWing" | "none";
-		const offsets = {
-			rotationOffset: math.rad((block?.model.GetAttribute("mirrorRotationOffset") as number | undefined) ?? 0),
-			method: (block?.model.GetAttribute("rotationMethod") as RotationMethod | undefined) ?? "normal",
-		};
+		const method = !block ? undefined : BlockDataRegistry[block.id]?.mirrorBehaviour ?? "normal";
 
 		const reflect = (cframe: CFrame, mirrorCFrame: CFrame) => {
-			if (offsets.method === "none") {
+			if (method === "none") {
 				return cframe;
 			}
 
-			if (offsets.method === "wedgeWing") {
+			if (method === "wedgeWing") {
 				// if X, rotate 180 X
 				// if Z, rotate 180 Z
 				// if Y, do not rotate
 			}
 
-			cframe = cframe.mul(CFrame.fromEulerAnglesYXZ(0, offsets.rotationOffset, 0));
+			if (method === "offset180") {
+				cframe = cframe.mul(CFrame.fromEulerAnglesYXZ(0, 180, 0));
+			}
 
 			const [X, Y, Z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = mirrorCFrame
 				.ToObjectSpace(cframe)

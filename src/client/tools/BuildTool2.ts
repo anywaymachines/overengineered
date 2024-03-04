@@ -308,9 +308,9 @@ export default class BuildTool2 extends ToolBase {
 			return targetPosition;
 		};
 		const updateMirrorGhostBlocksPosition = (plot: Model, mainPosition: Vector3) => {
-			const mirrorCFrames = BuildingManager.getMirroredBlocksCFrames(
+			const mirrorCFrames = BuildingManager.getMirroredBlocksCFrames2(
 				plot,
-				this.selectedBlock.get(),
+				this.selectedBlock.get()!.id,
 				new CFrame(mainPosition).mul(this.blockRotation),
 				this.mirrorMode.get(),
 			);
@@ -425,9 +425,9 @@ export default class BuildTool2 extends ToolBase {
 		}
 		const pos = mainGhost.model.PrimaryPart.CFrame;
 		const mirrors = this.mirrorMode.get();
-		let cframes = BuildingManager.getMirroredBlocksCFrames(
+		let cframes = BuildingManager.getMirroredBlocksCFrames2(
 			SharedPlots.getPlotByPosition(pos.Position)!,
-			this.selectedBlock.get(),
+			this.selectedBlock.get()!.id,
 			pos,
 			mirrors,
 		);
@@ -507,9 +507,9 @@ export default class BuildTool2 extends ToolBase {
 		const response = await ActionController.instance.executeOperation(
 			"Block placement",
 			async () => {
-				let cframes = BuildingManager.getMirroredBlocksCFrames(
+				let cframes = BuildingManager.getMirroredBlocksCFrames2(
 					SharedPlots.getPlotByPosition(pos.Position)!,
-					btype,
+					btype!.id,
 					pos,
 					mirrors,
 				);
