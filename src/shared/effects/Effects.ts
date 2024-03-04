@@ -1,3 +1,4 @@
+import ExplosionEffect from "shared/effects/ExplosionEffect";
 import FireEffect from "./FireEffect";
 import ImpactSoundEffect from "./ImpactSoundEffect";
 import ParticleEffect from "./ParticleEffect";
@@ -7,6 +8,7 @@ import SparksEffect from "./SparksEffect";
 const Effects = {
 	Sparks: new SparksEffect(),
 	ImpactSound: new ImpactSoundEffect(),
+	Explosion: new ExplosionEffect(),
 	Fire: new FireEffect(),
 	Sound: new SoundEffect(),
 	Particle: new ParticleEffect(),

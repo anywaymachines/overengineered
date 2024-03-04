@@ -4,6 +4,7 @@ import ServerBlockLogic from "server/blocks/ServerBlockLogic";
 import ServerPartUtils from "server/plots/ServerPartUtils";
 import TNTBlockLogic from "shared/block/logic/TNTBlockLogic";
 import BlockManager from "shared/building/BlockManager";
+import Effects from "shared/effects/Effects";
 import PartUtils from "shared/utils/PartUtils";
 
 export default class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBlockLogic> {
@@ -62,9 +63,6 @@ export default class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBloc
 		});
 
 		// Explosion sound
-		const sound = block.PrimaryPart!.FindFirstChild("Sound") as Sound;
-		game.GetService("Debris").AddItem(sound, sound.TimeLength);
-		game.GetService("Debris").AddItem(block, sound.TimeLength);
-		sound.Play();
+		Effects.Explosion.sendToNetworkOwnerOrEveryone(block.PrimaryPart!, {part: block.PrimaryPart!, index: undefined })
 	}
 }

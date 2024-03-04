@@ -90,6 +90,7 @@ interface ReplicatedStorage {
 			Effects: Folder & {
 				Underwater: EqualizerSoundEffect;
 			};
+			Explosion: Folder & {[key: string]: Sound}
 		};
 	};
 }
