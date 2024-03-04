@@ -5,7 +5,7 @@ import { ClientComponentEvents } from "./ClientComponentEvents";
 
 /** @inheritdoc */
 export class ClientComponent extends Component {
-	protected readonly event = new ClientComponentEvents(this);
+	readonly event = new ClientComponentEvents(this);
 
 	/** Input handler for use in prepare***() */
 	protected readonly inputHandler: ReadonlyInputHandler;

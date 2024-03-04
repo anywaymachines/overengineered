@@ -21,7 +21,6 @@ export default class PartUtils {
 		}
 
 		this.applyToAllDescendantsOfType("BasePart", model, (part) => fix(part));
-		this.applyToAllDescendantsOfType("UnionOperation", model, (part) => fix(part));
 	}
 
 	static switchDescendantsMaterial(model: Instance, material: Enum.Material) {

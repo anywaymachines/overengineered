@@ -1,4 +1,5 @@
 import { Players, Workspace } from "@rbxts/services";
+import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
@@ -12,13 +13,280 @@ import { Element } from "shared/Element";
 import Logger from "shared/Logger";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
+import { ComponentChild } from "shared/component/ComponentChild";
 import ObservableValue from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import VectorUtils from "shared/utils/VectorUtils";
 
+const ghostParent = Element.create(
+	"Model",
+	{ Parent: Workspace },
+	{
+		highlight: Element.create("Highlight", {
+			FillColor: Colors.blue,
+			FillTransparency: 0.4,
+			OutlineTransparency: 0.5,
+			DepthMode: Enum.HighlightDepthMode.Occluded,
+		}),
+	},
+);
+
+const constrainPositionToGrid = (pos: Vector3) => {
+	const constrain = math.round;
+	return new Vector3(constrain(pos.X), constrain(pos.Y), constrain(pos.Z));
+};
+const addBlockSize = (selectedBlock: RegistryBlock, normal: Vector3, pos: Vector3) => {
+	return pos.add(selectedBlock.model.GetBoundingBox()[1].mul(normal).div(2));
+};
+
+const createBlockGhost = (block: RegistryBlock): BlockGhost => {
+	const model = block.model.Clone();
+	PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => (part.CanCollide = false));
+	model.Parent = ghostParent;
+
+	// trigger the highlight update
+	ghostParent.highlight.Adornee = undefined;
+	ghostParent.highlight.Adornee = ghostParent;
+
+	return { model };
+};
+
 type BlockGhost = { readonly model: BlockModel };
+
+namespace MoveController {
+	export class DesktopMoveController extends ClientComponent {
+		private readonly possibleFillRotationAxis = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis] as const;
+		private readonly fillLimit = 32;
+		private readonly drawnGhostsMap = new Map<Vector3, BlockGhost>();
+		private readonly mouse = Players.LocalPlayer.GetMouse();
+		private readonly selectedBlock;
+		private readonly selectedColor;
+		private readonly selectedMaterial;
+
+		private readonly pressPosition: Vector3 = Vector3.zero;
+		private oldPositions?: { readonly Positions: Set<Vector3>; readonly endPoint: Vector3 };
+		private fillRotationMode = 1;
+
+		static subscribe(state: BuildTool2) {
+			const parent = new ComponentChild<DesktopMoveController>(state, true);
+			const mouse = Players.LocalPlayer.GetMouse();
+
+			state.event.subInput((ih) =>
+				ih.onMouse1Down(() => {
+					const selectedBlock = state.selectedBlock.get();
+					if (!selectedBlock) return;
+
+					const mouseSurface = mouse.TargetSurface;
+					const normal = Vector3.FromNormalId(mouseSurface);
+
+					let pressPosition = mouse.Hit.Position;
+					pressPosition = constrainPositionToGrid(pressPosition);
+					pressPosition = addBlockSize(selectedBlock, normal, pressPosition);
+
+					parent.set(
+						new DesktopMoveController(
+							pressPosition,
+							selectedBlock,
+							state.selectedColor.get(),
+							state.selectedMaterial.get(),
+						),
+					);
+				}),
+			);
+		}
+		constructor(
+			pressPosition: Vector3,
+			selectedBlock: RegistryBlock,
+			selectedColor: Color3,
+			selectedMaterial: Enum.Material,
+		) {
+			super();
+			this.pressPosition = pressPosition;
+			this.selectedBlock = selectedBlock;
+			this.selectedColor = selectedColor;
+			this.selectedMaterial = selectedMaterial;
+
+			const updateGhosts = () => {
+				const cameraPostion = Workspace.CurrentCamera!.CFrame.Position;
+				const hit = this.mouse.Hit.Position;
+				const clickDirection = cameraPostion.sub(hit).Unit;
+
+				const pos = this.getPositionOnBuildingPlane(this.pressPosition, cameraPostion, clickDirection);
+				const positionsData = this.calculateGhostBlockPositions(
+					this.selectedBlock.model,
+					this.pressPosition,
+					pos,
+				);
+				if (!positionsData) return;
+				if (this.oldPositions?.Positions === positionsData.Positions) return;
+
+				const oldPositions = this.oldPositions?.Positions ?? new Set();
+				const newPositions = positionsData.Positions;
+
+				const toDelete = oldPositions.filter((p) => !newPositions.has(p));
+				for (const pos of toDelete) {
+					this.drawnGhostsMap.get(pos)?.model.Destroy();
+					this.drawnGhostsMap.delete(pos);
+				}
+
+				const newposs = newPositions.filter((p) => !oldPositions.has(p));
+				const models = this.drawModels(newposs);
+				if (!models) return;
+				for (const model of models) {
+					this.drawnGhostsMap.set(model.model.GetPivot().Position, model);
+				}
+
+				this.oldPositions = positionsData;
+			};
+
+			this.event.subscribe(this.mouse.Button1Up, async () => {
+				const result = await this.placeBlocks(this.drawnGhostsMap.map((_, m) => m.model));
+				if (result && !result.success) {
+					LogControl.instance.addLine(result.message, Colors.red);
+				}
+
+				for (const [, ghost] of this.drawnGhostsMap) {
+					ghost.model.Destroy();
+				}
+				this.destroy();
+			});
+
+			this.event.subscribe(this.mouse.Move, updateGhosts);
+			this.event.subInput((ih) => ih.onKeyDown("R", () => this.rotateFillAxis()));
+
+			this.onEnable(updateGhosts);
+		}
+
+		private drawModels(positions: readonly Vector3[]) {
+			const allGhosts: BlockGhost[] = [];
+
+			for (const pos of positions) {
+				const ghostFrame = new CFrame(pos);
+				const ghost = createBlockGhost(this.selectedBlock);
+				ghost.model.PivotTo(ghostFrame);
+				allGhosts.push(ghost);
+			}
+
+			return allGhosts;
+		}
+
+		private calculateGhostBlockPositions(part: BlockModel, from: Vector3, to: Vector3): typeof this.oldPositions {
+			const blockSize = AABB.fromModel(part).getSize();
+			const diff = to.sub(from);
+			const toX = math.min(math.abs(diff.X), this.fillLimit);
+			const toY = math.min(math.abs(diff.Y), this.fillLimit);
+			const toZ = math.min(math.abs(diff.Z), this.fillLimit);
+			const result: Vector3[] = [];
+			if (this.oldPositions?.endPoint === to) return this.oldPositions;
+			for (let x = 0; x <= toX; x += blockSize.X)
+				for (let y = 0; y <= toY; y += blockSize.Y)
+					for (let z = 0; z <= toZ; z += blockSize.Z) {
+						const posX = math.sign(diff.X) * x + from.X;
+						const posY = math.sign(diff.Y) * y + from.Y;
+						const posZ = math.sign(diff.Z) * z + from.Z;
+						result.push(new Vector3(posX, posY, posZ));
+					}
+			return {
+				Positions: new Set(result),
+				endPoint: to ?? from,
+			};
+		}
+		private getPositionOnBuildingPlane(blockPosition: Vector3, cameraPostion: Vector3, lookVector: Vector3) {
+			const rotation = this.getCurrentFillRotation();
+			const plane = blockPosition.mul(VectorUtils.apply(rotation, (v) => math.abs(v)));
+			const diff = cameraPostion.sub(plane);
+			let distance = 0;
+			switch (1) {
+				case rotation.X: //I really liked the "!!rotation.X" solution but compiler didn't :(
+					distance = diff.X / lookVector.X;
+					break;
+				case rotation.Y:
+					distance = diff.Y / lookVector.Y;
+					break;
+				case rotation.Z:
+					distance = diff.Z / lookVector.Z;
+					break;
+			}
+			const result = lookVector.mul(-distance).add(cameraPostion);
+			return result;
+		}
+
+		private rotateFillAxis() {
+			this.fillRotationMode = (this.fillRotationMode + 1) % this.possibleFillRotationAxis.size();
+		}
+		private getCurrentFillRotation() {
+			return this.possibleFillRotationAxis[this.fillRotationMode];
+		}
+
+		private async placeBlocks(blocks: readonly Model[]) {
+			// Non-alive players bypass
+			if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
+				return;
+			}
+
+			const plot = SharedPlots.getPlotByPosition(blocks[0].GetPivot().Position);
+			if (!plot) {
+				LogControl.instance.addLine("Out of bounds!", Colors.red);
+				SoundController.getSounds().Build.BlockPlaceError.Play();
+				return;
+			}
+
+			const plotRegion = SharedPlots.getPlotBuildingRegion(plot);
+			const blocksRegion = AABB.fromModels(blocks);
+			if (!plotRegion.contains(blocksRegion)) {
+				LogControl.instance.addLine("Out of bounds!", Colors.red);
+				SoundController.getSounds().Build.BlockPlaceError.Play();
+				return;
+			}
+
+			if (!SharedPlots.isBuildingAllowed(plot, Players.LocalPlayer)) {
+				LogControl.instance.addLine("Building not allowed!", Colors.red);
+				SoundController.getSounds().Build.BlockPlaceError.Play();
+				return;
+			}
+
+			const response = await ActionController.instance.executeOperation(
+				"Block placement",
+				async () => {
+					const blocks: BlockModel[] = [];
+					for (const block of blocks) {
+						const b = BuildingManager.getBlockByPosition(block.GetPivot().Position);
+						if (b) blocks.push(b);
+					}
+
+					if (blocks.size() !== 0) {
+						await BuildingController.deleteBlock(blocks!);
+					}
+				},
+				{
+					plot,
+					blocks: blocks.map((b) => ({
+						id: this.selectedBlock.id,
+						color: this.selectedColor,
+						material: this.selectedMaterial,
+						location: b.GetPivot(),
+					})),
+				},
+				async (info) => await BuildingController.placeBlocks(info),
+			);
+
+			if (response.success) {
+				// Play sound
+				SoundController.getSounds().Build.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
+				SoundController.getSounds().Build.BlockPlace.Play();
+
+				task.wait();
+			} else {
+				Logger.error(response.message);
+				SoundController.getSounds().Build.BlockPlaceError.Play();
+			}
+
+			return response;
+		}
+	}
+}
 
 /** A tool for building in the world with blocks */
 export default class BuildTool2 extends ToolBase {
@@ -33,36 +301,10 @@ export default class BuildTool2 extends ToolBase {
 	private readonly mirroredGhosts: BlockGhost[] = [];
 	private blockRotation = CFrame.identity;
 
-	//samlovebutter's code starts here
-	private possibleFillRotationAxis = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis];
-	private fillRotationMode = 1;
-	private nowFillingArea = false;
-	private fillLimit = 32;
-	private oldPositions: { Positions: Set<Vector3>; endPoint: Vector3 } | undefined;
-	private pressPosition: Vector3 = Vector3.zero;
-	private drawnGhostsMap = new Map<Vector3, BlockGhost>();
-	//samlovebutter's code ends here
-
 	private readonly targetPlot = new ObservableValue<PlotModel | undefined>(undefined);
-	private readonly ghostParent;
 
 	constructor(mode: BuildingMode) {
 		super(mode);
-
-		this.ghostParent = Element.create(
-			"Model",
-			{ Parent: Workspace },
-			{
-				highlight: Element.create("Highlight", {
-					FillColor: Colors.blue,
-					FillTransparency: 0.4,
-					OutlineTransparency: 0.5,
-					DepthMode: Enum.HighlightDepthMode.Occluded,
-				}),
-			},
-		);
-
-		//this.debugPrefab.Parent = Workspace;
 		this.targetPlot.subscribe((plot) => mode.mirrorVisualizer.plot.set(plot));
 
 		this.onPrepare((input) => {
@@ -77,81 +319,19 @@ export default class BuildTool2 extends ToolBase {
 		this.event.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.updateBlockPosition());
 		this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.updateBlockPosition());
 
-		//samlovebutter's code starts here
-		const updateGhosts = () => {
-			if (!this.nowFillingArea) return;
-			const cameraPostion = Workspace.CurrentCamera!.CFrame.Position;
-			const hit = this.mouse.Hit.Position;
-			const clickDirection = cameraPostion.sub(hit).Unit;
+		this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
 
-			const pos = this.getPositionOnBuildingPlane(this.pressPosition, cameraPostion, clickDirection);
-			const positionsData = this.calculateGhostBlockPositions(
-				this.selectedBlock.get()?.model,
-				this.pressPosition,
-				pos,
-			);
-			if (!positionsData) return;
-			if (this.oldPositions?.Positions === positionsData.Positions) return;
-
-			const oldPositions = this.oldPositions?.Positions ?? new Set();
-			const newPositions = positionsData.Positions;
-
-			const toDelete = oldPositions.filter((p) => !newPositions.has(p));
-			for (const pos of toDelete) {
-				this.drawnGhostsMap.get(pos)?.model.Destroy();
-				this.drawnGhostsMap.delete(pos);
-			}
-
-			const newposs = newPositions.filter((p) => !oldPositions.has(p));
-			const models = this.drawModels(this.selectedBlock.get()?.model, newposs);
-			if (!models) return;
-			for (const model of models) {
-				this.drawnGhostsMap.set(model.model.GetPivot().Position, model);
-			}
-
-			this.oldPositions = positionsData;
-		};
-
-		this.event.subscribe(this.mouse.Button1Down, () => {
-			const block = this.selectedBlock.get();
-			if (!block) return;
-			this.pressPosition = this.constrainPositionToGrid(this.mouse.Hit.Position);
-			const mouseSurface = this.mouse.TargetSurface;
-			const normal = Vector3.FromNormalId(mouseSurface);
-			this.pressPosition = this.addBlockSize(block, normal, this.pressPosition);
-			this.nowFillingArea = true;
-			updateGhosts();
-		});
-
-		this.onDisable(() => (this.nowFillingArea = false));
-		this.event.subscribe(this.mouse.Button1Up, async () => {
-			this.nowFillingArea = false;
-			const result = await this.placeBlocks(this.drawnGhostsMap.map((_, m) => m.model));
-			if (result && !result.success) {
-				LogControl.instance.addLine(result.message, Colors.red);
-			}
-
-			for (const [, ghost] of this.drawnGhostsMap) {
-				ghost.model.Destroy();
-			}
-		});
-
-		this.event.subscribe(this.mouse.Move, updateGhosts);
-		//samlovebutter's code ends here
-
-		this.event.subscribe(this.mouse.Button1Up, () => (!this.nowFillingArea ? this.placeBlock() : undefined));
-		this.event.onPrepare(() => {
+		this.event.subscribe(this.mouse.Button1Up, () => this.placeBlock());
+		this.onPrepare(() => {
 			this.inputHandler.onKeyDown("T", () => this.rotateBlock("x"));
-			this.inputHandler.onKeyDown("R", () =>
-				this.nowFillingArea ? this.rotateFillAxis() : this.rotateBlock("y"),
-			);
+			this.inputHandler.onKeyDown("R", () => this.rotateBlock("y"));
 			this.inputHandler.onKeyDown("Y", () => {
 				if (InputController.isCtrlPressed()) return;
 				this.rotateBlock("z");
 			});
 		});
 
-		this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
+		MoveController.DesktopMoveController.subscribe(this);
 	}
 
 	disable(): void {
@@ -159,78 +339,6 @@ export default class BuildTool2 extends ToolBase {
 		this.targetPlot.set(undefined);
 		super.disable();
 	}
-
-	//samlovebutter's code starts here
-	private drawModels(part: BlockModel | undefined, positions: readonly Vector3[]) {
-		if (!part) return;
-		const selectedBlock = this.selectedBlock.get();
-		if (!selectedBlock) return;
-		const allGhosts: BlockGhost[] = [];
-
-		for (const pos of positions) {
-			const ghostFrame = new CFrame(pos);
-			const ghost = this.createBlockGhost(selectedBlock);
-			ghost.model.PivotTo(ghostFrame);
-			allGhosts.push(ghost);
-		}
-
-		return allGhosts;
-	}
-
-	private rotateFillAxis() {
-		this.fillRotationMode = (this.fillRotationMode + 1) % this.possibleFillRotationAxis.size();
-	}
-
-	private getCurrentFillRotation() {
-		return this.possibleFillRotationAxis[this.fillRotationMode];
-	}
-	private getPositionOnBuildingPlane(blockPosition: Vector3, cameraPostion: Vector3, lookVector: Vector3) {
-		const rotation = this.getCurrentFillRotation();
-		const plane = blockPosition.mul(VectorUtils.apply(rotation, (v) => math.abs(v)));
-		const diff = cameraPostion.sub(plane);
-		let distance = 0;
-		switch (1) {
-			case rotation.X: //I really liked the "!!rotation.X" solution but compiler didn't :(
-				distance = diff.X / lookVector.X;
-				break;
-			case rotation.Y:
-				distance = diff.Y / lookVector.Y;
-				break;
-			case rotation.Z:
-				distance = diff.Z / lookVector.Z;
-				break;
-		}
-		const result = lookVector.mul(-distance).add(cameraPostion);
-		return result;
-	}
-
-	private calculateGhostBlockPositions(
-		part: BlockModel | undefined,
-		from: Vector3,
-		to: Vector3,
-	): typeof this.oldPositions {
-		if (!part) return;
-		const blockSize = AABB.fromModel(part).getSize();
-		const diff = to.sub(from);
-		const toX = math.min(math.abs(diff.X), this.fillLimit);
-		const toY = math.min(math.abs(diff.Y), this.fillLimit);
-		const toZ = math.min(math.abs(diff.Z), this.fillLimit);
-		const result: Vector3[] = [];
-		if (this.oldPositions?.endPoint === to) return this.oldPositions;
-		for (let x = 0; x <= toX; x += blockSize.X)
-			for (let y = 0; y <= toY; y += blockSize.Y)
-				for (let z = 0; z <= toZ; z += blockSize.Z) {
-					const posX = math.sign(diff.X) * x + from.X;
-					const posY = math.sign(diff.Y) * y + from.Y;
-					const posZ = math.sign(diff.Z) * z + from.Z;
-					result.push(new Vector3(posX, posY, posZ));
-				}
-		return {
-			Positions: new Set(result),
-			endPoint: to ?? from,
-		};
-	}
-	//samlovebutter's code ends here
 
 	private destroyGhosts(destroyMain = true) {
 		if (destroyMain) {
@@ -242,28 +350,6 @@ export default class BuildTool2 extends ToolBase {
 			ghost.model.Destroy();
 		}
 		this.mirroredGhosts.clear();
-	}
-
-	private createBlockGhost(block: RegistryBlock): BlockGhost {
-		const model = block.model.Clone();
-		model.Parent = this.ghostParent;
-		this.ghostParent.highlight.Adornee = undefined;
-		this.ghostParent.highlight.Adornee = this.ghostParent;
-
-		PartUtils.switchDescendantsMaterial(model, this.selectedMaterial.get());
-		PartUtils.switchDescendantsColor(model, this.selectedColor.get());
-		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => (part.CanCollide = false));
-
-		return { model };
-	}
-
-	private constrainPositionToGrid(pos: Vector3) {
-		const constrain = math.round;
-		return new Vector3(constrain(pos.X), constrain(pos.Y), constrain(pos.Z));
-	}
-
-	private addBlockSize(selectedBlock: RegistryBlock, normal: Vector3, pos: Vector3) {
-		return pos.add(selectedBlock.model.GetBoundingBox()[1].mul(normal).div(2));
 	}
 
 	private updateBlockPosition() {
@@ -303,8 +389,8 @@ export default class BuildTool2 extends ToolBase {
 			g.Label4.Text = `Block size mnd: ${selected.model.GetBoundingBox()[1].mul(normal).div(2)}`;
 
 			let targetPosition = globalMouseHitPos;
-			targetPosition = this.addBlockSize(selected, normal, targetPosition);
-			targetPosition = this.constrainPositionToGrid(targetPosition);
+			targetPosition = addBlockSize(selected, normal, targetPosition);
+			targetPosition = constrainPositionToGrid(targetPosition);
 			return targetPosition;
 		};
 		const updateMirrorGhostBlocksPosition = (plot: Model, mainPosition: Vector3) => {
@@ -316,7 +402,7 @@ export default class BuildTool2 extends ToolBase {
 			);
 
 			for (let i = 0; i < mirrorCFrames.size(); i++) {
-				const ghost = (this.mirroredGhosts[i] ??= this.createBlockGhost(selected));
+				const ghost = (this.mirroredGhosts[i] ??= createBlockGhost(selected));
 				ghost.model.PivotTo(mirrorCFrames[i]);
 			}
 
@@ -333,7 +419,7 @@ export default class BuildTool2 extends ToolBase {
 		const plot = SharedPlots.getPlotByPosition(mainPosition);
 		this.targetPlot.set(plot);
 
-		this.mainGhost ??= this.createBlockGhost(selected);
+		this.mainGhost ??= createBlockGhost(selected);
 		this.mainGhost.model!.PivotTo(this.blockRotation.add(mainPosition));
 
 		if (plot) {
@@ -383,95 +469,6 @@ export default class BuildTool2 extends ToolBase {
 		this.updateBlockPosition();
 	}
 
-	async placeBlocks(blocks: readonly Model[]) {
-		const selected = this.selectedBlock.get();
-
-		// Non-alive players bypass
-		if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
-			return;
-		}
-
-		// ERROR: Block is not selected
-		if (!selected) {
-			LogControl.instance.addLine("Block is not selected!");
-
-			return;
-		}
-
-		const plot = SharedPlots.getPlotByPosition(blocks[0].GetPivot().Position);
-		if (!plot) {
-			LogControl.instance.addLine("Out of bounds!", Colors.red);
-			SoundController.getSounds().Build.BlockPlaceError.Play();
-			return;
-		}
-
-		const plotRegion = SharedPlots.getPlotBuildingRegion(plot);
-		const blocksRegion = AABB.fromModels(blocks);
-		if (!plotRegion.contains(blocksRegion)) {
-			LogControl.instance.addLine("Out of bounds!", Colors.red);
-			SoundController.getSounds().Build.BlockPlaceError.Play();
-			return;
-		}
-
-		if (!SharedPlots.isBuildingAllowed(plot, Players.LocalPlayer)) {
-			LogControl.instance.addLine("Building not allowed!", Colors.red);
-			SoundController.getSounds().Build.BlockPlaceError.Play();
-			return;
-		}
-
-		const mainGhost = this.mainGhost;
-		if (!mainGhost || !mainGhost.model.PrimaryPart) {
-			return;
-		}
-		const pos = mainGhost.model.PrimaryPart.CFrame;
-		const mirrors = this.mirrorMode.get();
-		let cframes = BuildingManager.getMirroredBlocksCFrames2(
-			SharedPlots.getPlotByPosition(pos.Position)!,
-			this.selectedBlock.get()!.id,
-			pos,
-			mirrors,
-		);
-		cframes = [...cframes, mainGhost.model.GetPivot()];
-
-		const response = await ActionController.instance.executeOperation(
-			"Block placement",
-			async () => {
-				const blocks: BlockModel[] = [];
-				for (const block of blocks) {
-					const b = BuildingManager.getBlockByPosition(block.GetPivot().Position);
-					if (b) blocks.push(b);
-				}
-
-				if (blocks.size() !== 0) {
-					await BuildingController.deleteBlock(blocks!);
-				}
-			},
-			{
-				plot,
-				blocks: blocks.map((b) => ({
-					id: selected.id,
-					color: this.selectedColor.get(),
-					material: this.selectedMaterial.get(),
-					location: b.GetPivot(),
-				})),
-			},
-			async (info) => await BuildingController.placeBlocks(info),
-		);
-
-		if (response.success) {
-			// Play sound
-			SoundController.getSounds().Build.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
-			SoundController.getSounds().Build.BlockPlace.Play();
-
-			task.wait();
-			this.updateBlockPosition();
-		} else {
-			Logger.error(response.message);
-			SoundController.getSounds().Build.BlockPlaceError.Play();
-		}
-
-		return response;
-	}
 	async placeBlock() {
 		const selected = this.selectedBlock.get();
 
