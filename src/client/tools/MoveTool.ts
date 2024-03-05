@@ -66,10 +66,6 @@ export default class MoveTool extends ToolBase {
 	private createHandles() {
 		this.destroyHandles();
 
-		if (!this.isEquipped) {
-			return;
-		}
-
 		if (SharedPlots.isPlotBlocks(this.targetModel) && this.targetModel.GetChildren().size() === 0) {
 			return;
 		}
@@ -167,7 +163,7 @@ export default class MoveTool extends ToolBase {
 	}
 	*/
 
-	public disable() {
+	disable() {
 		super.disable();
 		this.destroyHandles();
 	}
@@ -231,7 +227,7 @@ export default class MoveTool extends ToolBase {
 
 	protected prepareTouch(): void {}
 
-	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
+	getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
 		const keys: { key: Enum.KeyCode; text: string }[] = [];
 
 		keys.push({ key: Enum.KeyCode.DPadUp, text: "Move up" });
@@ -249,7 +245,7 @@ export default class MoveTool extends ToolBase {
 
 		return keys;
 	}
-	public getKeyboardTooltips() {
+	getKeyboardTooltips() {
 		return [];
 	}
 }

@@ -2,7 +2,7 @@ import { TweenService } from "@rbxts/services";
 
 export type EasingStyle = Enum.EasingStyle["Name"] | ((value: number) => number);
 export type EasingDirection = Enum.EasingDirection["Name"];
-export type Easable = number | UDim2 | Color3;
+export type Easable = number | UDim2 | Color3 | Vector2 | Vector3;
 
 export const Easing = {
 	ease: (value: number, easing: EasingStyle, direction: EasingDirection) => {
@@ -47,6 +47,18 @@ export const Easing = {
 
 			if (typeIs(from, "Color3") && typeIs(to, "Color3")) {
 				return new Color3(interpolate(from.R, to.R), interpolate(from.G, to.G), interpolate(from.B, to.B)) as T;
+			}
+
+			if (typeIs(from, "Vector2") && typeIs(to, "Vector2")) {
+				return new Vector2(interpolate(from.X, to.X), interpolate(from.Y, to.Y)) as T;
+			}
+
+			if (typeIs(from, "Vector3") && typeIs(to, "Vector3")) {
+				return new Vector3(
+					interpolate(from.X, to.X),
+					interpolate(from.Y, to.Y),
+					interpolate(from.Z, to.Z),
+				) as T;
 			}
 
 			throw "Untweenable type";

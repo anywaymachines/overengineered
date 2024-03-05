@@ -2,15 +2,12 @@ import { UserInputService } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
-import ToolBase from "client/tools/ToolBase";
-import GuiAnimator from "../GuiAnimator";
+import GuiAnimator from "client/gui/GuiAnimator";
 
-export type SimpleTooltip = {
-	isEnabled: (inputType: InputType) => boolean;
-	gui: GuiObject;
-	updateFunc?: (inputType: InputType, info: SimpleTooltip) => void;
-};
-
+export interface TooltipSource {
+	getGamepadTooltips(): readonly { readonly key: Enum.KeyCode; readonly text: string }[];
+	getKeyboardTooltips(): readonly { readonly keys: string[]; readonly text: string }[];
+}
 export type TooltipsControlDefinition = GuiObject & {
 	GamepadTemplate: GuiObject & {
 		ImageLabel: ImageLabel;
@@ -30,7 +27,7 @@ export default class TooltipsControl extends Control<
 	TooltipsControlDefinition,
 	Control<TooltipsControlDefinition["GamepadTemplate"] | TooltipsControlDefinition["KeyboardTemplate"]>
 > {
-	public static readonly instance = new TooltipsControl(
+	static readonly instance = new TooltipsControl(
 		Gui.getGameUI<{
 			ControlsInfo: TooltipsControlDefinition;
 		}>().ControlsInfo,
@@ -46,12 +43,12 @@ export default class TooltipsControl extends Control<
 		this.gamepadTooltipTemplate = Control.asTemplate(this.gui.GamepadTemplate);
 	}
 
-	public updateControlTooltips(tool: ToolBase | undefined) {
+	updateControlTooltips(source: TooltipSource | undefined) {
 		this.clear();
-		if (!tool) return;
+		if (!source) return;
 
 		if (InputController.inputType.get() === "Desktop") {
-			tool.getKeyboardTooltips().forEach((element) => {
+			source.getKeyboardTooltips().forEach((element) => {
 				const button = this.keyboardTooltipTemplate();
 				this.add(new Control(button));
 
@@ -70,7 +67,7 @@ export default class TooltipsControl extends Control<
 				}
 			});
 		} else if (InputController.inputType.get() === "Gamepad") {
-			tool.getGamepadTooltips().forEach((element) => {
+			source.getGamepadTooltips().forEach((element) => {
 				const button = this.gamepadTooltipTemplate();
 				this.add(new Control(button));
 

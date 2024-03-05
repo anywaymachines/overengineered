@@ -4,9 +4,14 @@ import GuiAnimator from "client/gui/GuiAnimator";
 import { ButtonControl } from "client/gui/controls/Button";
 import EditTool, { EditToolMode } from "client/tools/EditTool";
 import { SharedBuilding } from "shared/building/SharedBuilding";
+import type { TransformProps } from "shared/component/Transform";
 import Objects from "shared/fixes/objects";
 
 export type EditToolSceneDefinition = GuiObject & {
+	readonly Top: GuiObject & {
+		readonly SelectAllButton: GuiButton;
+		readonly DeselectAllButton: GuiButton;
+	};
 	readonly Bottom: GuiObject & {
 		readonly MoveButton: GuiButton;
 	};
@@ -19,6 +24,34 @@ export default class EditToolScene extends Control<EditToolSceneDefinition> {
 		super(gui);
 		this.tool = tool;
 
+		this.add(new ButtonControl(this.gui.Top.SelectAllButton, () => tool.selectPlot()));
+		this.add(new ButtonControl(this.gui.Top.DeselectAllButton, () => tool.deselectAll()));
+
+		this.event.subscribeObservable2(
+			tool.selectedMode,
+			(mode) => {
+				const props: TransformProps = {
+					style: "Quad",
+					direction: "Out",
+					duration: 0.2,
+				};
+
+				const buttonsAreActive = mode === undefined;
+
+				this.runTransform(this.gui.Top, (tr) =>
+					tr.transform("AnchorPoint", new Vector2(0.5, buttonsAreActive ? 0 : 0.8), props),
+				);
+
+				for (const button of this.gui.Top.GetChildren()) {
+					if (!button.IsA("TextButton")) continue;
+
+					button.AutoButtonColor = button.Active = buttonsAreActive;
+					this.runTransform(button, (tr) => tr.transform("Transparency", buttonsAreActive ? 0 : 0.6, props));
+				}
+			},
+			true,
+		);
+
 		const move = this.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
 
 		const buttons: readonly ButtonControl[] = [move];
@@ -29,7 +62,13 @@ export default class EditToolScene extends Control<EditToolSceneDefinition> {
 
 				for (const button of buttons) {
 					button.getGui().Active = button.getGui().AutoButtonColor = enabled;
-					button.getGui().Transparency = enabled ? 0 : 0.5;
+					this.runTransform(button.instance, (tr) =>
+						tr.transform("Transparency", enabled ? 0 : 0.6, {
+							style: "Quad",
+							direction: "Out",
+							duration: 0.2,
+						}),
+					);
 				}
 			},
 			true,
@@ -47,7 +86,7 @@ export default class EditToolScene extends Control<EditToolSceneDefinition> {
 		);
 	}
 
-	public show() {
+	show() {
 		super.show();
 		GuiAnimator.transition(this.gui.Bottom, 0.2, "up");
 	}

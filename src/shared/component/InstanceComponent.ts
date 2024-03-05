@@ -44,7 +44,7 @@ export class InstanceComponent<
 		const builder = new TransformBuilder(instance);
 		setup(builder, instance);
 
-		return builder.build();
+		return builder.build().enable();
 	}
 
 	/** Transorm the current instance */

@@ -1,6 +1,5 @@
 import { Players } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import TooltipsControl from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import BuildTool from "client/tools/BuildTool";
 import BuildTool2 from "client/tools/BuildTool2";
@@ -58,20 +57,9 @@ export default class ToolController extends ClientComponent {
 		}
 
 		this.tools = tools;
-		this.selectedTool.subscribe((tool) => TooltipsControl.instance.updateControlTooltips(tool));
-		this.event.onPrepare(() => TooltipsControl.instance.updateControlTooltips(this.selectedTool.get()));
 	}
 
 	getDebugChildren(): readonly IDebuggableComponent[] {
 		return [...super.getDebugChildren(), ...this.tools];
-	}
-
-	enable() {
-		super.enable();
-		TooltipsControl.instance.updateControlTooltips(this.selectedTool.get());
-	}
-	disable() {
-		super.disable();
-		TooltipsControl.instance.updateControlTooltips(undefined);
 	}
 }

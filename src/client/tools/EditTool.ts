@@ -5,7 +5,9 @@ import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
 import Gui from "client/gui/Gui";
+import EditToolScene, { type EditToolSceneDefinition } from "client/gui/buildmode/tools/EditToolScene";
 import LogControl from "client/gui/static/LogControl";
+import type { TooltipSource } from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import { Element } from "shared/Element";
@@ -77,11 +79,14 @@ namespace Selectors {
 	export class DesktopMultiSelector extends ClientComponent {
 		readonly selectedBlocksChanged = new Signal<(blocks: readonly BlockModel[]) => void>();
 		private readonly selected = new Map<BlockModel, SelectionBox>();
+		private readonly plot: SharedPlot;
 
 		constructor(plot: SharedPlot) {
 			super();
+			this.plot = plot;
+
 			const highlighter = this.parent(
-				new HoveredBlocksHighlighter(plot.instance.Blocks, (block) => {
+				new HoveredBlocksHighlighter(plot.instance, (block) => {
 					if (InputController.isCtrlPressed()) {
 						return this.getConnected(block);
 					}
@@ -113,8 +118,23 @@ namespace Selectors {
 			];
 		}
 
-		/** @returns A boolean indicating whether the block was successfully selected */
-		private selectBlock(block: BlockModel): boolean {
+		selectPlot() {
+			for (const block of this.plot.getBlocks()) {
+				this.justSelectBlock(block);
+			}
+
+			this.selectedBlocksChanged.Fire(this.selected.keys());
+		}
+		deselectAll() {
+			for (const [, selected] of this.selected) {
+				selected.Destroy();
+			}
+
+			this.selected.clear();
+			this.selectedBlocksChanged.Fire(this.selected.keys());
+		}
+
+		private justSelectBlock(block: BlockModel): boolean {
 			if (this.selected.has(block)) {
 				return false;
 			}
@@ -127,6 +147,15 @@ namespace Selectors {
 			});
 
 			this.selected.set(block, instance);
+			return true;
+		}
+
+		/** @returns A boolean indicating whether the block was successfully selected */
+		private selectBlock(block: BlockModel): boolean {
+			if (!this.justSelectBlock(block)) {
+				return false;
+			}
+
 			this.selectedBlocksChanged.Fire(this.selected.keys());
 			return true;
 		}
@@ -198,7 +227,7 @@ namespace Selectors {
 }
 
 namespace Controllers {
-	export interface IController extends IComponent {}
+	export interface IController extends IComponent, TooltipSource {}
 
 	export class Move extends ClientComponent implements IController {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
@@ -322,6 +351,13 @@ namespace Controllers {
 
 			return response.success;
 		}
+
+		getGamepadTooltips(): readonly { readonly key: Enum.KeyCode; readonly text: string }[] {
+			return [];
+		}
+		getKeyboardTooltips(): readonly { readonly keys: string[]; readonly text: string }[] {
+			return [];
+		}
 	}
 }
 
@@ -332,17 +368,19 @@ export default class EditTool extends ToolBase {
 	private readonly _selected = new ObservableValue<BlockList>([]);
 	readonly selected = this._selected.asReadonly();
 	private readonly controller = new ComponentChild<Controllers.IController>(this, true);
+	private readonly selectorParent: ComponentChild<Selectors.DesktopMultiSelector>;
 	private readonly plot = new ObservableValue<SharedPlot>(
 		SharedPlots.getPlotComponentByOwnerID(Players.LocalPlayer.UserId),
 	);
 
 	constructor(mode: BuildingMode) {
 		super(mode);
+		this.registerGui(new EditToolScene(this.getToolGui<"Edit", EditToolSceneDefinition>().Edit, this));
 
 		{
-			const selectorParent = new ComponentChild<Selectors.DesktopMultiSelector>(this, true);
+			this.selectorParent = new ComponentChild<Selectors.DesktopMultiSelector>(this, true);
 			const create = () => {
-				const selector = selectorParent.set(new Selectors.DesktopMultiSelector(this.plot.get()));
+				const selector = this.selectorParent.set(new Selectors.DesktopMultiSelector(this.plot.get()));
 				selector.selectedBlocksChanged.Connect((selected) => this._selected.set(selected, true));
 			};
 
@@ -351,7 +389,7 @@ export default class EditTool extends ToolBase {
 
 			this.event.subscribeObservable2(
 				this.selectedMode,
-				(mode) => selectorParent.get()?.setEnabled(mode === undefined),
+				(mode) => this.selectorParent.get()?.setEnabled(mode === undefined),
 				true,
 			);
 		}
@@ -373,7 +411,11 @@ export default class EditTool extends ToolBase {
 			this.controller.set(new Controllers[mode](plot, selected));
 		});
 
+		this.controller.childSet.Connect(() => this.updateTooltips());
 		this.event.onKeyDown("F", () => this.toggleMode("Move"));
+	}
+	protected getTooltipsSource(): TooltipSource | undefined {
+		return this.controller.get() ?? super.getTooltipsSource();
 	}
 
 	toggleMode(mode: EditToolMode | undefined) {
@@ -386,6 +428,12 @@ export default class EditTool extends ToolBase {
 
 			this._selectedMode.set(mode);
 		}
+	}
+	selectPlot() {
+		this.selectorParent.get()?.selectPlot();
+	}
+	deselectAll() {
+		this.selectorParent.get()?.deselectAll();
 	}
 
 	getDisplayName(): string {
