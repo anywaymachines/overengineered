@@ -1,4 +1,4 @@
-import { Players, ReplicatedStorage } from "@rbxts/services";
+import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
@@ -249,11 +249,17 @@ namespace Controllers {
 					return math.clamp(distance, boundsmin, boundsmax);
 				};
 
+				const defaultCameraType = Workspace.CurrentCamera!.CameraType;
 				this.event.subscribe(instance.MouseButton1Down, () => {
 					startpos = moveHandles.GetPivot().Position;
 					pivots = getBlockList(blocks).map((p) => [p, p.GetPivot()] as const);
+
+					if (InputController.inputType.get() === "Touch") {
+						Workspace.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
+					}
 				});
 				this.event.subscribe(instance.MouseButton1Up, async () => {
+					Workspace.CurrentCamera!.CameraType = defaultCameraType;
 					if (moveHandles.GetPivot().Position === startpos) return;
 
 					const success = await this.submit(difference);
