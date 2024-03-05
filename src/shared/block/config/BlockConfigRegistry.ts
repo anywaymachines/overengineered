@@ -192,7 +192,7 @@ const rope = {
 			type: "clampedNumber",
 			min: 2,
 			max: 50,
-			step: 1,
+			step: 0.01,
 			default: 15 as number,
 			config: 15 as number,
 		},
