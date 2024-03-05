@@ -37,14 +37,15 @@ export class ComponentChild<T extends IComponent = IComponent> implements IDebug
 	}
 
 	set<TChild extends T | undefined>(child: TChild): TChild {
-		this.child?.destroy();
+		const prev = this.child;
 		this.child = child;
+		prev?.destroy();
 		this.childSet.Fire(child);
 
 		if (child) {
 			child.onDestroy(() => {
 				if (this.child !== child) return;
-				this.child = undefined;
+				this.set(undefined);
 			});
 
 			if (this.state.isEnabled()) {

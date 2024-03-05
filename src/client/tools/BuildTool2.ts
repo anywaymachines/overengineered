@@ -328,8 +328,7 @@ namespace MultiPlaceController {
 		private oldPositions?: { readonly Positions: Set<Vector3>; readonly endPoint: Vector3 };
 		private fillRotationMode = 1;
 
-		static subscribe(state: BuildTool2) {
-			const parent = new ComponentChild<Desktop>(state, true);
+		static subscribe(state: BuildTool2, parent: ComponentChild<IComponent>) {
 			const mouse = Players.LocalPlayer.GetMouse();
 
 			state.event.subInput((ih) =>
@@ -401,19 +400,21 @@ namespace MultiPlaceController {
 			};
 
 			this.event.subscribe(mouse.Button1Up, async () => {
-				const result = await this.placeBlocks(this.drawnGhostsMap.map((_, m) => m.model));
+				const result = await this.placeBlocks();
 				if (result && !result.success) {
 					LogControl.instance.addLine(result.message, Colors.red);
 				}
 
-				for (const [, ghost] of this.drawnGhostsMap) {
-					ghost.model.Destroy();
-				}
 				this.destroy();
 			});
 
 			this.event.subscribe(mouse.Move, updateGhosts);
 			this.event.subInput((ih) => ih.onKeyDown("R", () => this.rotateFillAxis()));
+			this.onDestroy(() => {
+				for (const [, ghost] of this.drawnGhostsMap) {
+					ghost.model.Destroy();
+				}
+			});
 
 			this.onEnable(updateGhosts);
 		}
@@ -479,12 +480,13 @@ namespace MultiPlaceController {
 			return this.possibleFillRotationAxis[this.fillRotationMode];
 		}
 
-		private async placeBlocks(blocks: readonly Model[]) {
+		private async placeBlocks() {
 			// Non-alive players bypass
 			if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
 				return;
 			}
 
+			const blocks = this.drawnGhostsMap.map((_, m) => m.model);
 			const plot = SharedPlots.getPlotByPosition(blocks[0].GetPivot().Position);
 			if (!plot) {
 				LogControl.instance.addLine("Out of bounds!", Colors.red);
@@ -553,21 +555,37 @@ export default class BuildTool2 extends ToolBase {
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
 	readonly targetPlot = new ObservableValue<PlotModel | undefined>(undefined);
-	private readonly singlePlacingController;
+	private readonly currentMode = new ComponentChild<IComponent>(this, true);
 
 	constructor(mode: BuildingMode) {
 		super(mode);
 		this.targetPlot.subscribe((plot) => mode.mirrorVisualizer.plot.set(plot));
 
-		this.singlePlacingController = this.parent(new SinglePlaceController.Desktop(this));
-		MultiPlaceController.Desktop.subscribe(this);
+		this.currentMode.childSet.Connect((mode) => {
+			if (!this.isEnabled()) return;
+			if (mode) return;
+			this.currentMode.set(new SinglePlaceController.Desktop(this));
+		});
+		this.onEnable(() => this.currentMode.set(new SinglePlaceController.Desktop(this)));
+
+		MultiPlaceController.Desktop.subscribe(this, this.currentMode);
 	}
 
 	placeBlock() {
-		return this.singlePlacingController.placeBlock();
+		const mode = this.currentMode.get();
+		if (!(mode instanceof SinglePlaceController.Desktop)) {
+			return;
+		}
+
+		return mode.placeBlock();
 	}
 	rotateBlock(axis: "x" | "y" | "z", inverted = true): void {
-		return this.singlePlacingController.rotateBlock(axis, inverted);
+		const mode = this.currentMode.get();
+		if (!(mode instanceof SinglePlaceController.Desktop)) {
+			return;
+		}
+
+		return mode.rotateBlock(axis, inverted);
 	}
 
 	disable(): void {
