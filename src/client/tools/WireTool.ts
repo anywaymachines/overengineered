@@ -717,10 +717,7 @@ export class WireTool extends ToolBase {
 
 			this.event.onPrepare((inputType) => {
 				const controller = this.controllerContainer.set(
-					new controllers[inputType](
-						[...this.markers.getAll()].map((e) => e[1]),
-						this.wireParent,
-					),
+					new controllers[inputType](this.markers.getAll().values(), this.wireParent),
 				);
 
 				controller.selectedMarker.subscribe((m) => this.selectedMarker.set(m), true);
@@ -788,7 +785,7 @@ export class WireTool extends ToolBase {
 						toNarrow.push(marker);
 					}
 					marker.instance.Parent = this.markerParent;
-					this.markers.add(block.uuid + key, marker);
+					this.markers.add(`${block.uuid} ${markerType} ${key}`, marker);
 				}
 			}
 		}
