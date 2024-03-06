@@ -1,4 +1,5 @@
 import EventHandler from "shared/event/EventHandler";
+import type { CollectionChangedArgs, ReadonlyObservableCollection } from "shared/event/ObservableCollection";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import JSON, { JsonSerializablePrimitive } from "shared/fixes/Json";
 
@@ -78,6 +79,19 @@ export class ComponentEvents {
 		this.subscribe(observable.changed, callback);
 		if (executeOnEnable) {
 			this.onEnable(() => callback(observable.get(), observable.get()), executeImmediately);
+		}
+	}
+
+	/** Subscribe to an observable collection changed event */
+	subscribeCollection<T extends defined>(
+		observable: ReadonlyObservableCollection<T>,
+		callback: (update: CollectionChangedArgs<T> | { readonly kind: "reset" }) => void,
+		executeOnEnable = false,
+		executeImmediately = false,
+	): void {
+		this.subscribe(observable.changed, callback);
+		if (executeOnEnable) {
+			this.onEnable(() => callback({ kind: "reset" }), executeImmediately);
 		}
 	}
 

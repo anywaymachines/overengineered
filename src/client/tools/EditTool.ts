@@ -1,5 +1,4 @@
 import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
@@ -10,20 +9,18 @@ import LogControl from "client/gui/static/LogControl";
 import type { TooltipSource } from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
-import { Element } from "shared/Element";
+import { SelectedBlocksHighlighter } from "client/tools/selectors/SelectedBlocksHighlighter";
 import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
-import { SharedBuilding } from "shared/building/SharedBuilding";
 import { SharedPlot } from "shared/building/SharedPlot";
 import SharedPlots from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
 import NumberObservableValue from "shared/event/NumberObservableValue";
+import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import ObservableValue from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
 import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
 import { MultiModelHighlighter } from "./selectors/MultiModelHighlighter";
-
-const { isFullPlot, isBlocks, isEmpty, getBlockList } = SharedBuilding;
 
 namespace Selectors {
 	class HoveredBlocksHighlighter extends ClientComponent {
@@ -77,13 +74,13 @@ namespace Selectors {
 	}
 
 	export class DesktopMultiSelector extends ClientComponent {
-		readonly selectedBlocksChanged = new Signal<(blocks: readonly BlockModel[]) => void>();
-		private readonly selected = new Map<BlockModel, SelectionBox>();
+		private readonly selected: ObservableCollectionSet<BlockModel>;
 		private readonly plot: SharedPlot;
 
-		constructor(plot: SharedPlot) {
+		constructor(plot: SharedPlot, selected: ObservableCollectionSet<BlockModel>) {
 			super();
 			this.plot = plot;
+			this.selected = selected;
 
 			const highlighter = this.parent(
 				new HoveredBlocksHighlighter(plot.instance, (block) => {
@@ -100,13 +97,7 @@ namespace Selectors {
 				ih.onTouchTap(() => this.selectBlocksByClick(highlighter.highlighted.get()));
 			});
 
-			this.onDestroy(() => {
-				for (const [, selection] of this.selected) {
-					selection.Destroy();
-				}
-				this.selected.clear();
-				this.selectedBlocksChanged.Fire([]);
-			});
+			this.onDestroy(() => this.selected.clear());
 		}
 
 		private getConnected(block: BlockModel) {
@@ -120,52 +111,22 @@ namespace Selectors {
 
 		selectPlot() {
 			for (const block of this.plot.getBlocks()) {
-				this.justSelectBlock(block);
+				this.selectBlock(block);
 			}
-
-			this.selectedBlocksChanged.Fire(this.selected.keys());
 		}
 		deselectAll() {
-			for (const [, selected] of this.selected) {
-				selected.Destroy();
-			}
-
 			this.selected.clear();
-			this.selectedBlocksChanged.Fire(this.selected.keys());
 		}
 
-		private justSelectBlock(block: BlockModel): boolean {
-			if (this.selected.has(block)) {
-				return false;
-			}
-
-			const instance = Element.create("SelectionBox", {
-				LineThickness: 0.05,
-				Color3: Color3.fromRGB(0, 255 / 2, 255),
-				Adornee: block,
-				Parent: block,
-			});
-
-			this.selected.set(block, instance);
-			return true;
-		}
-
-		/** @returns A boolean indicating whether the block was successfully selected */
-		private selectBlock(block: BlockModel): boolean {
-			if (!this.justSelectBlock(block)) {
-				return false;
-			}
-
-			this.selectedBlocksChanged.Fire(this.selected.keys());
-			return true;
+		private selectBlock(block: BlockModel) {
+			this.selected.add(block);
 		}
 		/** @returns A boolean indicating whether the block was successfully deselected */
 		private deselectBlock(block: BlockModel): boolean {
-			const existing = this.selected.get(block);
+			const existing = this.selected.has(block);
 			if (!existing) return false;
 
-			existing.Destroy();
-			this.selected.delete(block);
+			this.selected.remove(block);
 			return true;
 		}
 
@@ -175,14 +136,7 @@ namespace Selectors {
 			const selectConnected = pc && InputController.isCtrlPressed();
 
 			if (pc && !add) {
-				for (const [, selection] of this.selected) {
-					selection.Destroy();
-				}
 				this.selected.clear();
-
-				if (blocks.size() === 0) {
-					this.selectedBlocksChanged.Fire(this.selected.keys());
-				}
 			}
 
 			if (blocks.size() === 0) {
@@ -233,11 +187,11 @@ namespace Controllers {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 
 		private readonly plot: PlotModel;
-		private readonly blocks: BlockList;
+		private readonly blocks: ReadonlySet<BlockModel>;
 		private readonly moveHandles: MoveHandles;
 		private readonly plotBounds: AABB;
 
-		constructor(plot: PlotModel, blocks: BlockList) {
+		constructor(plot: PlotModel, blocks: ReadonlySet<BlockModel>) {
 			super();
 
 			this.plot = plot;
@@ -254,7 +208,7 @@ namespace Controllers {
 				return number - (((number + step / 2) % step) - step / 2);
 			};
 
-			const initHandles = (instance: Handles, blocks: BlockList) => {
+			const initHandles = (instance: Handles, blocks: ReadonlySet<BlockModel>) => {
 				let startpos = Vector3.zero;
 				let pivots: (readonly [BlockModel, CFrame])[] = [];
 				let difference: Vector3 = Vector3.zero;
@@ -281,7 +235,7 @@ namespace Controllers {
 				const defaultCameraType = Workspace.CurrentCamera!.CameraType;
 				this.event.subscribe(instance.MouseButton1Down, () => {
 					startpos = moveHandles.GetPivot().Position;
-					pivots = getBlockList(blocks).map((p) => [p, p.GetPivot()] as const);
+					pivots = blocks.map((p) => [p, p.GetPivot()] as const);
 
 					if (InputController.inputType.get() === "Touch") {
 						Workspace.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
@@ -324,7 +278,7 @@ namespace Controllers {
 				});
 			};
 
-			const aabb = isFullPlot(this.blocks) ? AABB.fromModel(this.blocks) : AABB.fromModels(this.blocks);
+			const aabb = AABB.fromModelsSet(this.blocks);
 
 			const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
 			moveHandles.Size = aabb.getSize().add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
@@ -339,11 +293,13 @@ namespace Controllers {
 		}
 
 		private async submit(diff: Vector3): Promise<boolean> {
-			const response = await Remotes.Client.GetNamespace("Building").Get("MoveBlocks").CallServerAsync({
-				plot: this.plot,
-				blocks: this.blocks,
-				diff,
-			});
+			const response = await Remotes.Client.GetNamespace("Building")
+				.Get("MoveBlocks")
+				.CallServerAsync({
+					plot: this.plot,
+					blocks: [...this.blocks],
+					diff,
+				});
 
 			if (!response.success) {
 				LogControl.instance.addLine(response.message, Colors.red);
@@ -365,7 +321,7 @@ export type EditToolMode = "Move";
 export default class EditTool extends ToolBase {
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
-	private readonly _selected = new ObservableValue<BlockList>([]);
+	private readonly _selected = new ObservableCollectionSet<BlockModel>();
 	readonly selected = this._selected.asReadonly();
 	private readonly controller = new ComponentChild<Controllers.IController>(this, true);
 	private readonly selectorParent: ComponentChild<Selectors.DesktopMultiSelector>;
@@ -375,14 +331,14 @@ export default class EditTool extends ToolBase {
 
 	constructor(mode: BuildingMode) {
 		super(mode);
+
 		this.registerGui(new EditToolScene(this.getToolGui<"Edit", EditToolSceneDefinition>().Edit, this));
+		this.parent(new SelectedBlocksHighlighter(this.selected));
 
 		{
 			this.selectorParent = new ComponentChild<Selectors.DesktopMultiSelector>(this, true);
-			const create = () => {
-				const selector = this.selectorParent.set(new Selectors.DesktopMultiSelector(this.plot.get()));
-				selector.selectedBlocksChanged.Connect((selected) => this._selected.set(selected, true));
-			};
+			const create = () =>
+				this.selectorParent.set(new Selectors.DesktopMultiSelector(this.plot.get(), this._selected));
 
 			this.onEnable(create);
 			this.event.subscribeObservable2(this.plot, create);
@@ -403,11 +359,17 @@ export default class EditTool extends ToolBase {
 			}
 
 			const selected = this._selected.get();
-			if (isEmpty(selected)) {
+			if (selected.size() === 0) {
 				return;
 			}
 
-			const plot = isFullPlot(selected) ? selected : SharedPlots.getPlotByBlock(selected[0])!;
+			let first: BlockModel = undefined!;
+			for (const block of selected) {
+				first = block;
+				break;
+			}
+
+			const plot = SharedPlots.getPlotByBlock(first)!;
 			this.controller.set(new Controllers[mode](plot, selected));
 		});
 
@@ -422,7 +384,7 @@ export default class EditTool extends ToolBase {
 		if (mode === undefined || mode === this.selectedMode.get()) {
 			this._selectedMode.set(undefined);
 		} else {
-			if (isEmpty(this._selected.get())) {
+			if (this._selected.size() === 0) {
 				return;
 			}
 

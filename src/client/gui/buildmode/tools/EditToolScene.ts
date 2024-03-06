@@ -3,7 +3,6 @@ import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
 import { ButtonControl } from "client/gui/controls/Button";
 import EditTool, { EditToolMode } from "client/tools/EditTool";
-import { SharedBuilding } from "shared/building/SharedBuilding";
 import type { TransformProps } from "shared/component/Transform";
 import Objects from "shared/fixes/objects";
 
@@ -55,10 +54,10 @@ export default class EditToolScene extends Control<EditToolSceneDefinition> {
 		const move = this.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
 
 		const buttons: readonly ButtonControl[] = [move];
-		this.event.subscribeObservable2(
+		this.event.subscribeCollection(
 			tool.selected,
-			(selected) => {
-				const enabled = !SharedBuilding.isEmpty(selected);
+			() => {
+				const enabled = tool.selected.size() !== 0;
 
 				for (const button of buttons) {
 					button.getGui().Active = button.getGui().AutoButtonColor = enabled;

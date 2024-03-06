@@ -32,6 +32,10 @@ export class AABB {
 	static fromModels(models: readonly Model[]): AABB {
 		return this.combine(models.map((m) => this.fromModel(m)));
 	}
+	/** Create an {@link AABB} that contains all of the provided models */
+	static fromModelsSet(models: ReadonlySet<Model>): AABB {
+		return this.combine(models.map((m) => this.fromModel(m)));
+	}
 	/** Create an {@link AABB} that contains all of the provided {@link AABB}s */
 	static combine(regions: readonly AABB[]): AABB {
 		const min = (v1: Vector3, v2: Vector3): Vector3 =>
