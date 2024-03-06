@@ -53,5 +53,5 @@ const playModeController = new PlayModeController();
 root.add(playModeController);
 root.enable();
 
-const updated = DateTime.fromUnixTimestamp($compileTime("UnixTimestamp")).FormatUniversalTime("DDMMYY_HHMM", "en-us");
+const updated = DateTime.fromUnixTimestamp($compileTime("UnixTimestamp")).FormatUniversalTime("DDMMYY_HHmm", "en-us");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `DEVTEST | v${game.PlaceVersion} | ${updated}`;
