@@ -1,3 +1,4 @@
+import Logger from "shared/Logger";
 import RemoteEvents from "shared/RemoteEvents";
 import TerrainDataInfo from "shared/TerrainDataInfo";
 import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
@@ -13,6 +14,17 @@ export default class ImpactController {
 
 	static readonly WATER_DIFF_MULTIPLIER = 3 as const;
 	static readonly PLAYER_CHARACTER_DIFF_MULTIPLIER = 4 as const;
+
+	static readonly MATERIAL_STRONGNESS: { [key: string]: number } = {};
+
+	static {
+		Enum.Material.GetEnumItems().forEach((material) => {
+			const physicalProperties = new PhysicalProperties(material);
+			const strongness = math.max(0.5, physicalProperties.Density / 3.5);
+			this.MATERIAL_STRONGNESS[material.Name] = strongness;
+			Logger.info(`Setting strongness '${strongness}' to ${material.Name}`);
+		});
+	}
 
 	static initializeBlocks(blocks: readonly PlacedBlockData[]) {
 		blocks.forEach((value) => {
@@ -38,17 +50,14 @@ export default class ImpactController {
 		}
 
 		const event = part.Touched.Connect((secondPart: BasePart | Terrain) => {
-			// Do nothing for non-collidable blocks
-			if (!secondPart.CanCollide) return;
-
 			// Optimization (do nothing for non-connected blocks)
 			if (part.AssemblyMass === part.Mass) {
 				event.Disconnect();
 				return;
 			}
 
-			if (secondPart.IsA("BasePart") && math.max(secondPart.Size.X, secondPart.Size.Y, secondPart.Size.Z) < 0.5)
-				return;
+			// Do nothing for non-collidable blocks
+			if (!secondPart.CanCollide) return;
 
 			// Default diff
 			let allowedMagnitudeDiff: number = this.STRONG_BLOCKS.includes(blockData.id)
@@ -74,7 +83,7 @@ export default class ImpactController {
 				secondPart.AssemblyLinearVelocity.Magnitude + secondPart.AssemblyAngularVelocity.Magnitude;
 
 			// Material protection
-			allowedMagnitudeDiff *= math.max(0.5, part.CurrentPhysicalProperties.Density / 3.5);
+			allowedMagnitudeDiff *= this.MATERIAL_STRONGNESS[part.Material.Name];
 			const magnitudeDiff = math.abs(partMagnitude - secondPartMagnitude);
 
 			if (magnitudeDiff > allowedMagnitudeDiff * 5) {
@@ -89,8 +98,16 @@ export default class ImpactController {
 					event.Disconnect();
 				}
 
-				if (math.random(1, 3) > 1) {
+				if (math.random(1, 5) > 1) {
 					RemoteEvents.ImpactBreak.send(part);
+
+					// FIXME: TODO: Make this for all RemoteEvents.ImpactBreak.send();
+					part.CustomPhysicalProperties = new PhysicalProperties(
+						part.CurrentPhysicalProperties.Density * 1.5,
+						part.CurrentPhysicalProperties.Friction * 3.5,
+						part.CurrentPhysicalProperties.Elasticity,
+					);
+
 					event.Disconnect();
 				}
 			} else if (magnitudeDiff + allowedMagnitudeDiff * 0.2 > allowedMagnitudeDiff) {
