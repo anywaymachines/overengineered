@@ -11,7 +11,6 @@ type Macro = {
 };
 type MacroListTypes = {
 	CallMacros: Map<string, Macro>;
-	PropMacros: Map<string, Macro>;
 };
 type MacroList = Map<ts.Symbol, MacroListTypes>;
 type ImportInfo = {
@@ -61,9 +60,6 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 			map.CallMacros.forEach((decl, name) => {
 				console.log(`Found call macro ${name} from ${decl.exportDeclaration.getSourceFile().fileName}`);
 			});
-			map.PropMacros.forEach((decl, name) => {
-				console.log(`Found property macro ${name} from ${decl.exportDeclaration.getSourceFile().fileName}`);
-			});
 		});
 		return files;
 	}
@@ -105,7 +101,6 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 
 			const macros: MacroListTypes = macroList.get(type.symbol) ?? {
 				CallMacros: new Map(),
-				PropMacros: new Map(),
 			};
 			macroList.set(type.symbol, macros);
 
@@ -116,8 +111,7 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 				if (!ts.isPropertyAssignment(method)) throw "Expected method.";
 				if (!method.initializer || !ts.isArrowFunction(method.initializer)) throw "Expected method.";
 				if (!ts.isIdentifier(method.name)) throw "Expected identifier.";
-				const list = node.expression.text === "$definePropMacros" ? macros.PropMacros : macros.CallMacros;
-				list.set(method.name.text, {
+				macros.CallMacros.set(method.name.text, {
 					exportDeclaration: declaration,
 					methodDeclaration: method,
 					sourceFile: node.getSourceFile(),
@@ -158,25 +152,6 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 			return ts.isStringLiteral(node.argumentExpression) ? node.argumentExpression.text : undefined;
 		} else {
 			return ts.isIdentifier(node.name) ? node.name.text : undefined;
-		}
-	}
-
-	function getMacroFromExpression(node: ts.ElementAccessExpression | ts.PropertyAccessExpression): Macro | undefined {
-		const type = typeChecker.getTypeAtLocation(node.expression);
-		if (type && type.symbol) {
-			const propName = getNameFromAccessExpression(node);
-			if (propName) {
-				const declaration = type.getProperty(propName)?.valueDeclaration?.parent;
-				if (declaration && ts.isInterfaceDeclaration(declaration)) {
-					const parentSymbol = typeChecker.getTypeAtLocation(declaration.name);
-					if (parentSymbol?.symbol) {
-						const macros = macroList.get(parentSymbol.symbol);
-						if (macros) {
-							return macros.PropMacros.get(propName);
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -261,16 +236,6 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 			}
 		}
 
-		// property macros
-		if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
-			const macro = getMacroFromExpression(node);
-			if (macro) {
-				const macroExpression = buildMacro(macro, node);
-				if (macroExpression) {
-					return ts.visitEachChild(macroExpression, macroTransformInner, context);
-				}
-			}
-		}
 		return ts.visitEachChild(node, macroTransformInner, context);
 	}
 
