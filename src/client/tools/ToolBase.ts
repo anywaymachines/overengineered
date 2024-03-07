@@ -1,6 +1,5 @@
 import { Players } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import type Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import type { TooltipSource } from "client/gui/static/TooltipsControl";
 import TooltipsControl from "client/gui/static/TooltipsControl";
@@ -31,15 +30,8 @@ export default abstract class ToolBase extends ClientComponent implements Toolti
 		TooltipsControl.instance.updateControlTooltips(this.getTooltipsSource());
 	}
 
-	protected getToolGui<TName extends string, TType>(): { readonly [k in TName]: TType } {
+	static getToolGui<TName extends string, TType>(): { readonly [k in TName]: TType } {
 		return Gui.getGameUI<{ BuildingMode: { Tools: { [k in TName]: TType } } }>().BuildingMode.Tools;
-	}
-	protected registerGui(gui: Control) {
-		this.onEnable(() => gui.show());
-		this.onDisable(() => gui.hide());
-		this.onDestroy(() => gui.destroy());
-
-		if (this.isEnabled()) gui.show();
 	}
 
 	enable() {

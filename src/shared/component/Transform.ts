@@ -432,7 +432,12 @@ export class TransformContainer<T extends Instance> extends ContainerComponent<T
 		this.finish();
 		super.disable();
 	}
+
+	private destroying = false;
 	destroy(): void {
+		if (this.destroying) return;
+
+		this.destroying = true;
 		this.finish();
 		super.destroy();
 	}

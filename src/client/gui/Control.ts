@@ -62,4 +62,6 @@ export default class Control<
 		this.disable();
 		this.onHide.Fire();
 	}
+
+	readonly setVisible = (visible: boolean) => (visible ? this.show() : this.hide());
 }

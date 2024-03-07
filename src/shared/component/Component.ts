@@ -1,3 +1,4 @@
+import type Control from "client/gui/Control";
 import SlimSignal from "shared/event/SlimSignal";
 import { ComponentChild } from "./ComponentChild";
 import { ComponentEvents } from "./ComponentEvents";
@@ -84,6 +85,16 @@ export class Component extends ComponentBase implements IComponent, IDebuggableC
 		}
 
 		return child;
+	}
+
+	/** Equivalent of {@link parent} but shows/hides the provided {@link Control} */
+	protected parentGui<T extends Control>(gui: T): T {
+		this.onEnable(() => gui.show());
+		this.onDisable(() => gui.hide());
+		this.onDestroy(() => gui.destroy());
+
+		if (this.isEnabled()) gui.show();
+		return gui;
 	}
 
 	getDebugChildren(): readonly IDebuggableComponent[] {

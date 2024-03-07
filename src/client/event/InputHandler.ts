@@ -75,8 +75,15 @@ export default class InputHandler {
 	onInputEnded(callback: FullInputCallback) {
 		(this.inputEnded ??= new ThinSignalWrapper(inputEnded)).subscribe(callback);
 	}
-	onTouchTap(callback: TouchCallback) {
-		(this.touchTap ??= new ThinSignalWrapper(touchTap)).subscribe(callback);
+	onTouchTap(callback: TouchCallback, allowGameProcessedEvents = true) {
+		if (!allowGameProcessedEvents) {
+			(this.touchTap ??= new ThinSignalWrapper(touchTap)).subscribe((positions, gameProcessedEvent) => {
+				if (gameProcessedEvent) return;
+				callback(positions, gameProcessedEvent);
+			});
+		} else {
+			(this.touchTap ??= new ThinSignalWrapper(touchTap)).subscribe(callback);
+		}
 	}
 
 	onKeysDown(callback: InputCallback, allowGameProcessedEvents = true) {
