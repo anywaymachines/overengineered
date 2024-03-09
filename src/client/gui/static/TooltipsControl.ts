@@ -100,7 +100,7 @@ export class TooltipsHolder extends ClientInstanceComponent<
 				tr
 					.transform("Size", new UDim2(1, 0, 0, 0))
 					.then()
-					.transform("Size", new UDim2(1, 0, 0, 32), { style: "Quad", direction: "Out", duration: 0.2 }),
+					.transform("Size", new UDim2(1, 0, 0, 50), { style: "Quad", direction: "Out", duration: 0.2 }),
 			);
 		} else {
 			button.Visible = false;
