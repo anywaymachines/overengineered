@@ -73,7 +73,9 @@ export const ServerBuilding = {
 		return { success: true, model: model };
 	},
 	moveBlocks: ({ plot, blocks, diff }: MoveBlocksRequest): Response => {
-		// TODO: whole plot movement optimizations
+		if (SharedBuilding.getBlockList(blocks).size() === 0) {
+			return success;
+		}
 
 		let blocksRegion = SharedBuilding.isFullPlot(blocks) ? AABB.fromModel(blocks) : AABB.fromModels(blocks);
 		blocksRegion = blocksRegion.withCenter(blocksRegion.getCenter().add(diff));

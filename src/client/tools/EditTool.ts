@@ -9,6 +9,7 @@ import GuiAnimator from "client/gui/GuiAnimator";
 import { ButtonControl, TextButtonControl, type TextButtonDefinition } from "client/gui/controls/Button";
 import LogControl from "client/gui/static/LogControl";
 import type { TooltipSource } from "client/gui/static/TooltipsControl";
+import TooltipsControl from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import { SelectedBlocksHighlighter } from "client/tools/selectors/SelectedBlocksHighlighter";
@@ -305,6 +306,7 @@ namespace Selectors {
 			this.event.subInput((ih) => {
 				const sel = () => this.selectBlocksByClick(this.highlighterParent.get()?.highlighted.get() ?? []);
 				ih.onMouse1Down(sel, false);
+				ih.onKeyDown("ButtonY", sel);
 				ih.onTouchTap(sel, false);
 			});
 
@@ -343,7 +345,7 @@ namespace Selectors {
 
 		private selectBlocksByClick(blocks: readonly BlockModel[]) {
 			const pc = InputController.inputType.get() === "Desktop";
-			const add = InputController.inputType.get() === "Gamepad" || InputController.isShiftPressed();
+			const add = InputController.isShiftPressed();
 			const selectConnected = this.highlightModeName.get() === "assembly";
 
 			if (pc && !add) {
@@ -392,123 +394,41 @@ namespace Selectors {
 namespace Controllers {
 	export interface IController extends IComponent, TooltipSource {}
 
-	export class Move extends ClientComponent implements IController {
-		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
+	abstract class MoveBase extends ClientComponent implements IController {
+		protected readonly step: ReadonlyObservableValue<number>;
+		protected readonly plot: PlotModel;
+		protected readonly blocks: readonly BlockModel[];
+		protected readonly pivots: readonly (readonly [BlockModel, CFrame])[];
+		protected readonly plotBounds: AABB;
+		protected difference: Vector3 = Vector3.zero;
 
-		private readonly plot: PlotModel;
-		private readonly blocks: ReadonlySet<BlockModel>;
-		private readonly moveHandles: MoveHandles;
-		private readonly plotBounds: AABB;
-
-		constructor(plot: PlotModel, blocks: ReadonlySet<BlockModel>) {
+		constructor(plot: PlotModel, blocks: readonly BlockModel[], step: ReadonlyObservableValue<number>) {
 			super();
 
 			this.plot = plot;
 			this.blocks = blocks;
+			this.step = step;
 			this.plotBounds = SharedPlots.getPlotBuildingRegion(plot);
+			this.pivots = blocks.map((p) => [p, p.GetPivot()] as const);
 
-			this.moveHandles = this.initializeHandles();
-			this.onDestroy(() => this.moveHandles.Destroy());
+			const moveHandles = this.initializeHandles();
+			this.onDisable(async () => {
+				await this.submit();
+				moveHandles.Destroy();
+			});
 		}
 
-		private initializeHandles() {
-			const roundByStep = (number: number) => {
-				const step = this.step.get();
-				return number - (((number + step / 2) % step) - step / 2);
-			};
+		protected abstract initializeHandles(): Instance;
+		protected async submit(): Promise<boolean> {
+			if (this.difference === Vector3.zero) {
+				return true;
+			}
 
-			const initHandles = (instance: Handles, blocks: ReadonlySet<BlockModel>) => {
-				let startpos = Vector3.zero;
-				let pivots: (readonly [BlockModel, CFrame])[] = [];
-				let difference: Vector3 = Vector3.zero;
-
-				const limitMovement = (
-					regionSize: Vector3,
-					regionPos: Vector3,
-					direction: Vector3,
-					distance: number,
-					bounds: AABB,
-				): number => {
-					const axes = direction.X !== 0 ? "X" : direction.Y !== 0 ? "Y" : "Z";
-					const sign = math.sign(direction[axes]);
-
-					const blockOffsetMin = regionPos[axes] - regionSize[axes] / 2;
-					const blockOffsetMax = regionPos[axes] + regionSize[axes] / 2;
-					let boundsmin = (bounds.getMin()[axes] - blockOffsetMin) * sign;
-					let boundsmax = (bounds.getMax()[axes] - blockOffsetMax) * sign;
-					[boundsmin, boundsmax] = [math.min(boundsmin, boundsmax), math.max(boundsmin, boundsmax)];
-
-					return math.clamp(distance, boundsmin, boundsmax);
-				};
-
-				const defaultCameraType = Workspace.CurrentCamera!.CameraType;
-				this.event.subscribe(instance.MouseButton1Down, () => {
-					startpos = moveHandles.GetPivot().Position;
-					pivots = blocks.map((p) => [p, p.GetPivot()] as const);
-
-					if (InputController.inputType.get() === "Touch") {
-						Workspace.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
-					}
-				});
-				this.event.subscribe(instance.MouseButton1Up, async () => {
-					Workspace.CurrentCamera!.CameraType = defaultCameraType;
-					if (moveHandles.GetPivot().Position === startpos) return;
-
-					const success = await this.submit(difference);
-					if (!success) {
-						moveHandles.PivotTo(new CFrame(startpos));
-						for (const [block, startpos] of pivots) {
-							block.PivotTo(startpos);
-						}
-					}
-
-					pivots.clear();
-				});
-
-				this.event.subscribe(instance.MouseDrag, (face, distance) => {
-					distance = limitMovement(
-						aabb.getSize(),
-						startpos,
-						Vector3.FromNormalId(face),
-						distance,
-						this.plotBounds,
-					);
-					distance = roundByStep(distance);
-					difference = Vector3.FromNormalId(face).mul(distance);
-
-					if (!this.plotBounds.contains(aabb.withCenter(startpos.add(difference)))) {
-						return;
-					}
-
-					moveHandles.PivotTo(new CFrame(startpos.add(difference)));
-					for (const [block, startpos] of pivots) {
-						block.PivotTo(startpos.add(difference));
-					}
-				});
-			};
-
-			const aabb = AABB.fromModelsSet(this.blocks);
-
-			const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
-			moveHandles.Size = aabb.getSize().add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
-			moveHandles.PivotTo(new CFrame(aabb.getCenter()));
-			moveHandles.Parent = Gui.getPlayerGui();
-
-			initHandles(moveHandles.XHandles, this.blocks);
-			initHandles(moveHandles.YHandles, this.blocks);
-			initHandles(moveHandles.ZHandles, this.blocks);
-
-			return moveHandles;
-		}
-
-		private async submit(diff: Vector3): Promise<boolean> {
-			const response = await Remotes.Client.GetNamespace("Building")
-				.Get("MoveBlocks")
-				.CallServerAsync({
-					plot: this.plot,
-					blocks: [...this.blocks],
-					diff,
-				});
+			const response = await Remotes.Client.GetNamespace("Building").Get("MoveBlocks").CallServerAsync({
+				plot: this.plot,
+				blocks: this.blocks,
+				diff: this.difference,
+			});
 
 			if (!response.success) {
 				LogControl.instance.addLine(response.message, Colors.red);
@@ -522,6 +442,193 @@ namespace Controllers {
 		}
 		getKeyboardTooltips(): readonly { readonly keys: string[]; readonly text: string }[] {
 			return [];
+		}
+	}
+	class DesktopMove extends MoveBase {
+		protected initializeHandles() {
+			const roundByStep = (number: number) => {
+				const step = this.step.get();
+				return number - (((number + step / 2) % step) - step / 2);
+			};
+			const limitMovement = (
+				regionSize: Vector3,
+				regionPos: Vector3,
+				direction: Vector3,
+				distance: number,
+				bounds: AABB,
+			): number => {
+				const axes = direction.X !== 0 ? "X" : direction.Y !== 0 ? "Y" : "Z";
+				const sign = math.sign(direction[axes]);
+
+				const blockOffsetMin = regionPos[axes] - regionSize[axes] / 2;
+				const blockOffsetMax = regionPos[axes] + regionSize[axes] / 2;
+				let boundsmin = (bounds.getMin()[axes] - blockOffsetMin) * sign;
+				let boundsmax = (bounds.getMax()[axes] - blockOffsetMax) * sign;
+				[boundsmin, boundsmax] = [math.min(boundsmin, boundsmax), math.max(boundsmin, boundsmax)];
+
+				return math.clamp(distance, boundsmin, boundsmax);
+			};
+
+			const initHandles = (instance: Handles) => {
+				let startpos = Vector3.zero;
+				let startDifference: Vector3 = Vector3.zero;
+
+				const defaultCameraType = Workspace.CurrentCamera!.CameraType;
+				this.event.subscribe(instance.MouseButton1Down, () => {
+					startpos = moveHandles.GetPivot().Position;
+					startDifference = this.difference;
+
+					if (InputController.inputType.get() === "Touch") {
+						Workspace.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
+					}
+				});
+				this.event.subscribe(instance.MouseButton1Up, async () => {
+					Workspace.CurrentCamera!.CameraType = defaultCameraType;
+				});
+
+				this.event.subscribe(instance.MouseDrag, (face, distance) => {
+					distance = limitMovement(
+						aabb.getSize(),
+						startpos,
+						Vector3.FromNormalId(face),
+						distance,
+						this.plotBounds,
+					);
+					distance = roundByStep(distance);
+
+					this.difference = startDifference.add(Vector3.FromNormalId(face).mul(distance));
+					if (!this.plotBounds.contains(aabb.withCenter(fullStartPos.add(this.difference)))) {
+						return;
+					}
+
+					moveHandles.PivotTo(new CFrame(fullStartPos.add(this.difference)));
+					for (const [block, startpos] of this.pivots) {
+						block.PivotTo(startpos.add(this.difference));
+					}
+				});
+			};
+
+			const aabb = AABB.fromModels(this.blocks);
+
+			const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
+			moveHandles.Size = aabb.getSize().add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
+			moveHandles.PivotTo(new CFrame(aabb.getCenter()));
+			moveHandles.Parent = Gui.getPlayerGui();
+
+			const fullStartPos: Vector3 = moveHandles.GetPivot().Position;
+			initHandles(moveHandles.XHandles);
+			initHandles(moveHandles.YHandles);
+			initHandles(moveHandles.ZHandles);
+
+			return moveHandles;
+		}
+
+		getKeyboardTooltips(): readonly { readonly keys: KeyCode[]; readonly text: string }[] {
+			return [{ keys: ["F"], text: "Stop moving" }];
+		}
+	}
+	class TouchMove extends DesktopMove {}
+	class GamepadMove extends MoveBase {
+		protected initializeHandles() {
+			let direction: "+x" | "-x" | "+z" | "-z" = "+x";
+
+			const initHandles = (instance: MoveHandles) => {
+				const tryAddDiff = (diff: Vector3) => {
+					if (!this.plotBounds.contains(aabb.withCenter(fullStartPos.add(diff).add(this.difference)))) {
+						return;
+					}
+
+					this.difference = this.difference.add(diff);
+					moveHandles.PivotTo(new CFrame(fullStartPos.add(this.difference)));
+					for (const [block, startpos] of this.pivots) {
+						block.PivotTo(startpos.add(this.difference));
+					}
+				};
+
+				this.event.subInput((ih) => {
+					ih.onKeyDown("DPadUp", () => tryAddDiff(new Vector3(0, this.step.get(), 0)));
+					ih.onKeyDown("DPadDown", () => tryAddDiff(new Vector3(0, -this.step.get(), 0)));
+					ih.onKeyDown("DPadRight", () => tryAddDiff(getMoveDirection(true).mul(this.step.get())));
+					ih.onKeyDown("DPadLeft", () => tryAddDiff(getMoveDirection(false).mul(this.step.get())));
+				});
+
+				const getMoveDirection = (positive: boolean) => {
+					if (direction === "+x") {
+						return positive ? Vector3.xAxis : Vector3.xAxis.mul(-1);
+					} else if (direction === "-z") {
+						return positive ? Vector3.zAxis.mul(-1) : Vector3.zAxis;
+					} else if (direction === "+z") {
+						return positive ? Vector3.zAxis : Vector3.zAxis.mul(-1);
+					} else {
+						return positive ? Vector3.xAxis.mul(-1) : Vector3.xAxis;
+					}
+				};
+				const updateCamera = () => {
+					const lookvector = Workspace.CurrentCamera!.CFrame.LookVector;
+					if (math.abs(lookvector.X) > math.abs(lookvector.Z)) {
+						direction = lookvector.X > 0 ? "+z" : "-z";
+						instance.XHandles.Visible = false;
+						instance.ZHandles.Visible = true;
+					} else {
+						direction = lookvector.Z > 0 ? "-x" : "+x";
+						instance.XHandles.Visible = true;
+						instance.ZHandles.Visible = false;
+					}
+				};
+				this.event.subscribe(Signals.CAMERA.MOVED, updateCamera);
+				this.onEnable(updateCamera);
+			};
+
+			const aabb = AABB.fromModels(this.blocks);
+
+			const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
+			moveHandles.Size = aabb.getSize().add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
+			moveHandles.PivotTo(new CFrame(aabb.getCenter()));
+			moveHandles.Parent = Gui.getPlayerGui();
+
+			const fullStartPos: Vector3 = moveHandles.GetPivot().Position;
+			initHandles(moveHandles);
+
+			return moveHandles;
+		}
+
+		getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
+			return [
+				{ key: Enum.KeyCode.ButtonX, text: "Stop moving" },
+
+				{ key: Enum.KeyCode.DPadUp, text: "Move up" },
+				{ key: Enum.KeyCode.DPadDown, text: "Move down" },
+				{ key: Enum.KeyCode.DPadLeft, text: "Move left (based on camera)" },
+				{ key: Enum.KeyCode.DPadRight, text: "Move right (based on camera)" },
+			];
+		}
+	}
+
+	export class Move extends ClientComponent implements IController {
+		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
+		private readonly moverParent = new ComponentChild<MoveBase>(this);
+
+		constructor(plot: PlotModel, blocks: readonly BlockModel[]) {
+			super();
+
+			this.onPrepare((inputType) => {
+				if (inputType === "Desktop") {
+					this.moverParent.set(new DesktopMove(plot, blocks, this.step));
+				} else if (inputType === "Touch") {
+					this.moverParent.set(new TouchMove(plot, blocks, this.step));
+				} else if (inputType === "Gamepad") {
+					this.moverParent.set(new GamepadMove(plot, blocks, this.step));
+				}
+
+				TooltipsControl.instance.updateControlTooltips(this);
+			});
+		}
+
+		getGamepadTooltips(): readonly { readonly key: Enum.KeyCode; readonly text: string }[] {
+			return this.moverParent.get()?.getGamepadTooltips() ?? [];
+		}
+		getKeyboardTooltips(): readonly { readonly keys: string[]; readonly text: string }[] {
+			return this.moverParent.get()?.getKeyboardTooltips() ?? [];
 		}
 	}
 }
@@ -576,11 +683,12 @@ export default class EditTool extends ToolBase {
 			}
 
 			const plot = SharedPlots.getPlotByBlock(first)!;
-			this.controller.set(new Controllers[mode](plot, selected));
+			this.controller.set(new Controllers[mode](plot, [...selected]));
 		});
 
 		this.controller.childSet.Connect(() => this.updateTooltips());
 		this.event.onKeyDown("F", () => this.toggleMode("Move"));
+		this.event.onKeyDown("ButtonX", () => this.toggleMode("Move"));
 	}
 	protected getTooltipsSource(): TooltipSource | undefined {
 		return this.controller.get() ?? super.getTooltipsSource();
