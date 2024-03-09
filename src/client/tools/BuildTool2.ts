@@ -1,4 +1,4 @@
-import { Players, Workspace } from "@rbxts/services";
+import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
@@ -50,6 +50,12 @@ const createBlockGhost = (block: RegistryBlock): BlockGhost => {
 	const model = block.model.Clone();
 	PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => (part.CanCollide = false));
 	model.Parent = ghostParent;
+
+	if (false as boolean) {
+		const axis = ReplicatedStorage.Assets.Axis.Clone();
+		axis.PivotTo(model.GetPivot());
+		axis.Parent = model;
+	}
 
 	// trigger the highlight update
 	ghostParent.highlight.Adornee = undefined;
@@ -119,20 +125,20 @@ namespace SinglePlaceController {
 		}
 
 		private updateBlockPosition() {
+			const g = Gui.getGameUI<{
+				BuildingMode: {
+					Tools: {
+						Build2: {
+							Debug: { Label1: TextLabel; Label2: TextLabel; Label3: TextLabel; Label4: TextLabel };
+						};
+					};
+				};
+			}>().BuildingMode.Tools.Build2.Debug;
+
 			const selected = this.selectedBlock.get();
 			if (!selected) return;
 
 			const getMouseTargetBlockPosition = () => {
-				const g = Gui.getGameUI<{
-					BuildingMode: {
-						Tools: {
-							Build2: {
-								Debug: { Label1: TextLabel; Label2: TextLabel; Label3: TextLabel; Label4: TextLabel };
-							};
-						};
-					};
-				}>().BuildingMode.Tools.Build2.Debug;
-
 				const mouseTarget = mouse.Target;
 				if (!mouseTarget) return undefined;
 
@@ -145,7 +151,6 @@ namespace SinglePlaceController {
 				g.Label1.Text = `Target: ${mouseTarget}`;
 				g.Label2.Text = `Hit: ${mouseHit}`;
 				g.Label3.Text = `Normal: ${mouseSurface} ${normal}`;
-				g.Label4.Text = `Block size mnd: ${selected.model.GetBoundingBox()[1].mul(normal).div(2)}`;
 
 				let targetPosition = globalMouseHitPos;
 				targetPosition = addBlockSize(selected, normal, targetPosition);
@@ -180,6 +185,25 @@ namespace SinglePlaceController {
 
 			this.mainGhost ??= createBlockGhost(selected);
 			this.mainGhost.model!.PivotTo(this.blockRotation.add(mainPosition));
+
+			const prettyCFrame = (cframe: CFrame) => {
+				const round = (vec: Vector3) => new Vector3(math.round(vec.X), math.round(vec.Y), math.round(vec.Z));
+				const [, , , XX, XY, XZ, YX, YY, YZ, ZX, ZY, ZZ] = cframe.GetComponents();
+				return (
+					[XX, XY, XZ, YX, YY, YZ, ZX, ZY, ZZ]
+						.map(math.round)
+						.map(tostring)
+						.map((n) => (n.size() === 2 ? n : `+${n}`))
+						.join() +
+					" | " +
+					round(cframe.RightVector) +
+					" / " +
+					round(cframe.UpVector) +
+					" / " +
+					round(cframe.LookVector.mul(-1))
+				);
+			};
+			g.Label4.Text = `Rotation: ${prettyCFrame(this.mainGhost?.model.GetPivot() ?? this.blockRotation)}`;
 
 			if (plot) {
 				updateMirrorGhostBlocksPosition(plot, mainPosition);

@@ -106,50 +106,88 @@ const BuildingManager = {
 		mode: MirrorMode,
 	): readonly CFrame[] {
 		const method = BlockDataRegistry[blockid]?.mirrorBehaviour ?? "normal";
+		const [xAxis, yAxis, zAxis] = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis];
 
-		const reflect = (cframe: CFrame, mirrorCFrame: CFrame) => {
-			if (method === "none") {
-				return cframe;
+		const reflect = (cframe: CFrame, mode: "x" | "y" | "z", mirrorCFrame: CFrame) => {
+			const pos = cframe.Position;
+
+			// apply rotation only
+			switch (method) {
+				case "none":
+					break;
+				case "offset90":
+					cframe = cframe.mul(CFrame.fromEulerAnglesYXZ(0, math.pi / 2, 0));
+					break;
+				case "offset180":
+					cframe = cframe.mul(CFrame.fromEulerAnglesYXZ(0, math.pi, 0));
+					break;
+				case "normal": {
+					if (mode === "y") cframe = CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(cframe.Position);
+					else if (mode === "x") cframe = CFrame.identity.add(cframe.Position);
+					else if (mode === "z")
+						cframe = CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(cframe.Position);
+					else throw "what";
+
+					const [X, Y, Z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = mirrorCFrame
+						.ToObjectSpace(cframe)
+						.GetComponents();
+
+					const reflection = new CFrame(X, Y, -Z, -R00, R01, R02, -R10, R11, R12, R20, -R21, -R22);
+					const reflectedCFrame = mirrorCFrame.ToWorldSpace(reflection);
+					cframe = reflectedCFrame.Rotation;
+					break;
+				}
+				case "wedgeWing": {
+					const round = (vec: Vector3) =>
+						new Vector3(math.round(vec.X), math.round(vec.Y), math.round(vec.Z));
+					const [xvec, yvec, zvec] = [
+						round(cframe.RightVector),
+						round(cframe.UpVector),
+						round(cframe.LookVector),
+					];
+
+					// Y targets Y
+					if (yvec.Y !== 0) {
+						if (mode === "x") cframe = CFrame.fromAxisAngle(xAxis, math.pi).mul(cframe);
+						if (mode === "y") break;
+						if (mode === "z") cframe = CFrame.fromAxisAngle(zAxis, math.pi).mul(cframe);
+						break;
+					}
+
+					// Y targets X
+					if (yvec.X !== 0) {
+						if (mode === "x") cframe = CFrame.fromAxisAngle(yAxis, math.pi).mul(cframe);
+						if (mode === "y") cframe = CFrame.fromAxisAngle(zAxis, math.pi).mul(cframe);
+						if (mode === "z") break;
+						break;
+					}
+
+					// Y targets Z
+					if (mode === "x") break;
+					if (mode === "y") cframe = CFrame.fromAxisAngle(xAxis, math.pi).mul(cframe);
+					if (mode === "z") cframe = CFrame.fromAxisAngle(yAxis, math.pi).mul(cframe);
+					break;
+				}
 			}
 
-			if (method === "wedgeWing") {
-				// if X, rotate 180 X
-				// if Z, rotate 180 Z
-				// if Y, do not rotate
-			}
-
-			if (method === "offset180") {
-				cframe = cframe.mul(CFrame.fromEulerAnglesYXZ(0, 180, 0));
-			}
-
-			const [X, Y, Z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = mirrorCFrame
-				.ToObjectSpace(cframe)
-				.GetComponents();
-
-			// reflect along X/Y plane (Z axis)
-			const reflection = new CFrame(X, Y, -Z, -R00, R01, R02, -R10, R11, R12, R20, -R21, -R22);
-			const reflectedCFrame = mirrorCFrame.ToWorldSpace(reflection);
-			const [x, y, z] = reflectedCFrame.ToOrientation();
-
-			return CFrame.fromOrientation(x, y, z).add(reflectedCFrame.Position);
+			// apply position \/
+			const rpos = mirrorCFrame.PointToObjectSpace(pos);
+			return new CFrame(mirrorCFrame.ToWorldSpace(new CFrame(rpos.X, rpos.Y, -rpos.Z)).Position).mul(
+				cframe.Rotation,
+			);
 		};
 
 		const plotframe = plot.GetPivot();
 
-		const axes = [
-			!mode.x ? undefined : CFrame.identity.add(mode.x),
-			!mode.y ? undefined : CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(mode.y),
-			!mode.z
-				? undefined
-				: CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2)
-						.add(new Vector3(0, 4, 0))
-						.add(mode.z),
-		] as readonly CFrame[];
+		const axes: ["x" | "y" | "z", CFrame][] = [];
+		if (mode.y) axes.push(["y", CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(mode.y)]);
+		if (mode.x) axes.push(["x", CFrame.identity.add(mode.x)]);
+		if (mode.z) axes.push(["z", CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(mode.z)]);
 
 		const ret: CFrame[] = [cframeToMirror];
-		for (const axis of axes) {
+		for (const [axe, axis] of axes) {
 			for (const frame of [...ret]) {
-				ret.push(reflect(frame, plotframe.ToWorldSpace(axis)));
+				ret.push(reflect(frame, axe, plotframe.ToWorldSpace(axis)));
 			}
 		}
 		ret.remove(0);

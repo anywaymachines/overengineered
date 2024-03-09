@@ -46,13 +46,9 @@ export default class MirrorVisualizer extends ClientComponent {
 
 		const mode = this.mirrorMode.get();
 		const axes = [
+			!mode.y ? undefined : CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(mode.y),
 			!mode.x ? undefined : CFrame.identity.add(mode.x),
-			!mode.y ? undefined : CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(mode.y),
-			!mode.z
-				? undefined
-				: CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2)
-						.add(new Vector3(0, 4, 0))
-						.add(mode.z),
+			!mode.z ? undefined : CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(mode.z),
 		] as readonly CFrame[];
 
 		for (const cframe of axes) {

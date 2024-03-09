@@ -2,7 +2,7 @@ import Objects from "shared/fixes/objects";
 
 declare global {
 	type AutoWeldColliderBlockShape = "none" | "cube";
-	type BlockMirrorBehaviour = "offset180" | "normal" | "none" | "wedgeWing";
+	type BlockMirrorBehaviour = "offset90" | "offset180" | "normal" | "none" | "wedgeWing";
 }
 
 interface BlockSetupInformation {
@@ -46,7 +46,7 @@ const process = (block: BlockSetupInformation): BlockSetupInformation => {
 	return block;
 };
 
-const logic: BlockDataRegistryRegistry = {
+const logic: Record<string, BlockDataRegistry> = {
 	gate: {
 		counter: {
 			name: "Counter",
@@ -229,6 +229,7 @@ const logic: BlockDataRegistryRegistry = {
 			name: "Lidar Sensor",
 			description: "Returns the distance to the object it's looking at",
 			autoWeldShape: "cube",
+			mirrorBehaviour: "normal",
 		},
 		ownerlocator: {
 			name: "Owner Locator",
@@ -469,18 +470,22 @@ const registry: BlockDataRegistry = {
 	wing1x1: {
 		name: "Wing 1x1",
 		description: "A part with advanced aerodynamic properties",
+		mirrorBehaviour: "none",
 	},
 	wing1x2: {
 		name: "Wing 1x2",
 		description: "A part with advanced aerodynamic properties but a bit longer",
+		mirrorBehaviour: "none",
 	},
 	wing1x3: {
 		name: "Wing 1x3",
 		description: "A part with advanced aerodynamic properties but two bits longer",
+		mirrorBehaviour: "none",
 	},
 	wing1x4: {
 		name: "Wing 1x4",
 		description: "A part with advanced aerodynamic properties but the joke is overused",
+		mirrorBehaviour: "none",
 	},
 	wingrounding: {
 		name: "Wing Rounding",
