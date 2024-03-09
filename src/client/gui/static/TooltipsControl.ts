@@ -1,14 +1,26 @@
 import { UserInputService } from "@rbxts/services";
+import { ClientInstanceComponent } from "client/component/ClientInstanceComponent";
 import InputController from "client/controller/InputController";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
-import GuiAnimator from "client/gui/GuiAnimator";
+import { Element } from "shared/Element";
+import { InstanceComponent } from "shared/component/InstanceComponent";
+import { TransformService } from "shared/component/TransformService";
 
-export interface TooltipSource {
-	getGamepadTooltips(): readonly { readonly key: Enum.KeyCode; readonly text: string }[];
-	getKeyboardTooltips(): readonly { readonly keys: string[]; readonly text: string }[];
+const tooltipsGui = Gui.getGameUI<{ ControlsInfo: TooltipsControlDefinition }>().ControlsInfo;
+tooltipsGui.Visible = true;
+
+const keyboardTooltipTemplate = Control.asTemplate(tooltipsGui.KeyboardTemplate);
+const gamepadTooltipTemplate = Control.asTemplate(tooltipsGui.GamepadTemplate);
+
+export type Tooltip = { readonly keys: readonly KeyCode[]; readonly text: string };
+export type Tooltips = readonly Tooltip[];
+export interface InputTooltips {
+	readonly Desktop?: Tooltips;
+	readonly Gamepad?: Tooltips;
 }
-export type TooltipsControlDefinition = GuiObject & {
+
+type TooltipsControlDefinition = GuiObject & {
 	GamepadTemplate: GuiObject & {
 		ImageLabel: ImageLabel;
 		TextLabel: TextLabel;
@@ -23,59 +35,112 @@ export type TooltipsControlDefinition = GuiObject & {
 	};
 };
 
-export default class TooltipsControl extends Control<
-	TooltipsControlDefinition,
-	Control<TooltipsControlDefinition["GamepadTemplate"] | TooltipsControlDefinition["KeyboardTemplate"]>
+export class TooltipsHolder extends ClientInstanceComponent<
+	GuiObject,
+	InstanceComponent<typeof tooltipsGui.KeyboardTemplate>
 > {
-	static readonly instance = new TooltipsControl(
-		Gui.getGameUI<{
-			ControlsInfo: TooltipsControlDefinition;
-		}>().ControlsInfo,
-	);
+	static createComponent(category: string): TooltipsHolder {
+		const gui = Element.create(
+			"Frame",
+			{
+				Size: new UDim2(1, 0, 0, 0),
+				AutomaticSize: Enum.AutomaticSize.Y,
+				BackgroundTransparency: 1,
+				Name: category,
+				Parent: tooltipsGui,
+			},
+			{
+				list: Element.create("UIListLayout", {
+					FillDirection: Enum.FillDirection.Vertical,
+					SortOrder: Enum.SortOrder.LayoutOrder,
+					VerticalAlignment: Enum.VerticalAlignment.Bottom,
+				}),
+			},
+		);
 
-	private readonly gamepadTooltipTemplate;
-	private readonly keyboardTooltipTemplate;
-
-	constructor(gui: TooltipsControlDefinition) {
-		super(gui);
-
-		this.keyboardTooltipTemplate = Control.asTemplate(this.gui.KeyboardTemplate);
-		this.gamepadTooltipTemplate = Control.asTemplate(this.gui.GamepadTemplate);
+		return new TooltipsHolder(gui);
 	}
 
-	updateControlTooltips(source: TooltipSource | undefined) {
-		this.clear();
-		if (!source) return;
+	private readonly instances: GuiObject[] = [];
+	private tooltips: InputTooltips = {};
+	constructor(instance: GuiObject) {
+		super(instance);
+		this.onPrepare(() => this.set(this.tooltips));
+		this.onDisable(() => this.justSet({}));
+	}
 
-		if (InputController.inputType.get() === "Desktop") {
-			source.getKeyboardTooltips().forEach((element) => {
-				const button = this.keyboardTooltipTemplate();
-				this.add(new Control(button));
+	private createTooltip(tooltip: Tooltip) {
+		const button = keyboardTooltipTemplate();
+		button.TextLabel.Text = tooltip.text;
 
-				button.TextLabel.Text = element.text;
+		for (let i = 0; i < tooltip.keys.size(); i++) {
+			let key;
 
-				for (let i = 0; i < element.keys.size(); i++) {
-					let key;
+			if (i === 0) key = button.Keys.ImageLabel;
+			else {
+				key = button.Keys.ImageLabel.Clone();
+				key.Parent = button.Keys;
+			}
 
-					if (i === 0) key = button.Keys.ImageLabel;
-					else {
-						key = button.Keys.ImageLabel.Clone();
-						key.Parent = button.Keys;
-					}
-
-					key.KeyLabel.Text = element.keys[i];
-				}
-			});
-		} else if (InputController.inputType.get() === "Gamepad") {
-			source.getGamepadTooltips().forEach((element) => {
-				const button = this.gamepadTooltipTemplate();
-				this.add(new Control(button));
-
-				button.TextLabel.Text = element.text;
-				button.ImageLabel.Image = UserInputService.GetImageForKeyCode(element.key);
-			});
+			if (tooltip.keys[i].sub(0, "Button".size()) === "Button") {
+				// gamepad button
+				key.Image = UserInputService.GetImageForKeyCode(tooltip.keys[i]);
+			} else if (tooltip.keys[i].sub(0, "DPad".size()) === "DPad") {
+				// gamepad dpad
+				key.Image = UserInputService.GetImageForKeyCode(tooltip.keys[i]);
+			} else {
+				key.KeyLabel.Text = tooltip.keys[i];
+			}
 		}
 
-		GuiAnimator.transition(this.gui, 0.2, "up");
+		if (this.isEnabled()) {
+			TransformService.run(button, (tr) =>
+				tr
+					.transform("Size", new UDim2(1, 0, 0, 0))
+					.then()
+					.transform("Size", new UDim2(1, 0, 0, 32), { style: "Quad", direction: "Out", duration: 0.2 }),
+			);
+		} else {
+			button.Visible = false;
+		}
+
+		return button;
+	}
+
+	private destroyTooltip(tooltip: GuiObject) {
+		TransformService.run(tooltip, (tr) => {
+			tr.transform("Size", new UDim2(1, 0, 0, 0), { style: "Quad", direction: "Out", duration: 0.2 })
+				.then()
+				.func(() => tooltip.Destroy());
+		});
+	}
+
+	set(tooltips: InputTooltips) {
+		this.tooltips = tooltips;
+		this.justSet(tooltips);
+	}
+	private justSet(tooltips: InputTooltips) {
+		for (const tooltip of this.instances) {
+			this.destroyTooltip(tooltip);
+		}
+		this.instances.clear();
+
+		const set = (tooltips: Tooltips) => {
+			for (const tooltip of tooltips) {
+				const instance = this.createTooltip(tooltip);
+				instance.Parent = this.instance;
+				this.instances.push(instance);
+			}
+		};
+
+		if (InputController.inputType.get() === "Desktop" && tooltips.Desktop) {
+			set(tooltips.Desktop);
+		} else if (InputController.inputType.get() === "Gamepad" && tooltips.Gamepad) {
+			set(tooltips.Gamepad);
+		}
+	}
+
+	destroy(): void {
+		task.delay(0.2, () => super.destroy());
 	}
 }

@@ -2,6 +2,7 @@ import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
+import { InputTooltips } from "client/gui/static/TooltipsControl";
 import ActionController from "client/modes/build/ActionController";
 import BuildingController from "client/modes/build/BuildingController";
 import BuildingMode from "client/modes/build/BuildingMode";
@@ -227,25 +228,14 @@ export default class MoveTool extends ToolBase {
 
 	protected prepareTouch(): void {}
 
-	getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
-		const keys: { key: Enum.KeyCode; text: string }[] = [];
-
-		keys.push({ key: Enum.KeyCode.DPadUp, text: "Move up" });
-		keys.push({ key: Enum.KeyCode.DPadDown, text: "Move down" });
-
-		keys.push({
-			key: Enum.KeyCode.DPadLeft,
-			text: "Move left (based on camera)",
-		});
-
-		keys.push({
-			key: Enum.KeyCode.DPadRight,
-			text: "Move right (based on camera)",
-		});
-
-		return keys;
-	}
-	getKeyboardTooltips() {
-		return [];
+	protected getTooltips(): InputTooltips {
+		return {
+			Gamepad: [
+				{ keys: ["DPadUp"], text: "Move up" },
+				{ keys: ["DPadDown"], text: "Move down" },
+				{ keys: ["DPadLeft"], text: "Move left (based on camera)" },
+				{ keys: ["DPadRight"], text: "Move right (based on camera)" },
+			],
+		};
 	}
 }

@@ -6,6 +6,7 @@ import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
 import Gui from "client/gui/Gui";
 import LogControl from "client/gui/static/LogControl";
+import { InputTooltips } from "client/gui/static/TooltipsControl";
 import ActionController from "client/modes/build/ActionController";
 import BuildingController from "client/modes/build/BuildingController";
 import BuildingMode from "client/modes/build/BuildingMode";
@@ -624,26 +625,21 @@ export default class BuildTool2 extends ToolBase {
 		return "rbxassetid://12539295858";
 	}
 
-	getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
-		const keys: { key: Enum.KeyCode; text: string }[] = [];
-
-		keys.push({ key: Enum.KeyCode.ButtonX, text: "Place" });
-		keys.push({ key: Enum.KeyCode.ButtonB, text: "Unequip" });
-		keys.push({ key: Enum.KeyCode.ButtonSelect, text: "Select block" });
-		keys.push({ key: Enum.KeyCode.DPadLeft, text: "Rotate by X" });
-		keys.push({ key: Enum.KeyCode.DPadUp, text: "Rotate by Y" });
-		keys.push({ key: Enum.KeyCode.DPadRight, text: "Rotate by Z" });
-
-		return keys;
-	}
-
-	getKeyboardTooltips() {
-		const keys: { keys: string[]; text: string }[] = [];
-
-		keys.push({ keys: ["R"], text: "Rotate by Y" });
-		keys.push({ keys: ["T"], text: "Rotate by X" });
-		keys.push({ keys: ["Y"], text: "Rotate by Z" });
-
-		return keys;
+	protected getTooltips(): InputTooltips {
+		return {
+			Desktop: [
+				{ keys: ["R"], text: "Rotate by Y" },
+				{ keys: ["T"], text: "Rotate by X" },
+				{ keys: ["Y"], text: "Rotate by Z" },
+			],
+			Gamepad: [
+				{ keys: ["ButtonX"], text: "Place" },
+				{ keys: ["ButtonB"], text: "Unequip" },
+				{ keys: ["ButtonSelect"], text: "Select block" },
+				{ keys: ["DPadLeft"], text: "Rotate by X" },
+				{ keys: ["DPadUp"], text: "Rotate by Y" },
+				{ keys: ["DPadRight"], text: "Rotate by Z" },
+			],
+		};
 	}
 }

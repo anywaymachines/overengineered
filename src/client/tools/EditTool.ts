@@ -1,5 +1,6 @@
 import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
+import { ClientComponentChild } from "client/component/ClientComponentChild";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
@@ -8,8 +9,7 @@ import Gui from "client/gui/Gui";
 import GuiAnimator from "client/gui/GuiAnimator";
 import { ButtonControl, TextButtonControl, type TextButtonDefinition } from "client/gui/controls/Button";
 import LogControl from "client/gui/static/LogControl";
-import type { TooltipSource } from "client/gui/static/TooltipsControl";
-import TooltipsControl from "client/gui/static/TooltipsControl";
+import { InputTooltips, TooltipsHolder } from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import { HoveredBlocksHighlighter } from "client/tools/selectors/HoveredBlocksHighlighter";
@@ -51,7 +51,7 @@ namespace Scene {
 
 					for (const button of buttons) {
 						button.getGui().Active = button.getGui().AutoButtonColor = enabled;
-						this.runTransform(button.instance, (tr) =>
+						TransformService.run(button.instance, (tr) =>
 							tr.transform("Transparency", enabled ? 0 : 0.6, {
 								style: "Quad",
 								direction: "Out",
@@ -319,9 +319,11 @@ namespace Selectors {
 }
 
 namespace Controllers {
-	export interface IController extends IComponent, TooltipSource {}
+	export interface IController extends IComponent {}
 
 	abstract class MoveBase extends ClientComponent implements IController {
+		protected readonly tooltipHolder = this.parent(TooltipsHolder.createComponent("Moving"));
+
 		protected readonly step: ReadonlyObservableValue<number>;
 		protected readonly plot: PlotModel;
 		protected readonly blocks: readonly BlockModel[];
@@ -343,6 +345,8 @@ namespace Controllers {
 				await this.submit();
 				moveHandles.Destroy();
 			});
+
+			this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
 		}
 
 		protected abstract initializeHandles(): Instance;
@@ -364,12 +368,7 @@ namespace Controllers {
 			return response.success;
 		}
 
-		getGamepadTooltips(): readonly { readonly key: Enum.KeyCode; readonly text: string }[] {
-			return [];
-		}
-		getKeyboardTooltips(): readonly { readonly keys: string[]; readonly text: string }[] {
-			return [];
-		}
+		protected abstract getTooltips(): InputTooltips;
 	}
 	class DesktopMove extends MoveBase {
 		protected initializeHandles() {
@@ -450,8 +449,8 @@ namespace Controllers {
 			return moveHandles;
 		}
 
-		getKeyboardTooltips(): readonly { readonly keys: KeyCode[]; readonly text: string }[] {
-			return [{ keys: ["F"], text: "Stop moving" }];
+		protected getTooltips(): InputTooltips {
+			return { Desktop: [{ keys: ["F"], text: "Stop moving" }] };
 		}
 	}
 	class TouchMove extends DesktopMove {}
@@ -519,43 +518,31 @@ namespace Controllers {
 			return moveHandles;
 		}
 
-		getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
-			return [
-				{ key: Enum.KeyCode.ButtonX, text: "Stop moving" },
+		protected getTooltips(): InputTooltips {
+			return {
+				Gamepad: [
+					{ keys: ["ButtonX"], text: "Stop moving" },
 
-				{ key: Enum.KeyCode.DPadUp, text: "Move up" },
-				{ key: Enum.KeyCode.DPadDown, text: "Move down" },
-				{ key: Enum.KeyCode.DPadLeft, text: "Move left (based on camera)" },
-				{ key: Enum.KeyCode.DPadRight, text: "Move right (based on camera)" },
-			];
+					{ keys: ["DPadUp"], text: "Move up" },
+					{ keys: ["DPadDown"], text: "Move down" },
+					{ keys: ["DPadLeft"], text: "Move left (based on camera)" },
+					{ keys: ["DPadRight"], text: "Move right (based on camera)" },
+				],
+			};
 		}
 	}
 
 	export class Move extends ClientComponent implements IController {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
-		private readonly moverParent = new ComponentChild<MoveBase>(this);
 
 		constructor(plot: PlotModel, blocks: readonly BlockModel[]) {
 			super();
 
-			this.onPrepare((inputType) => {
-				if (inputType === "Desktop") {
-					this.moverParent.set(new DesktopMove(plot, blocks, this.step));
-				} else if (inputType === "Touch") {
-					this.moverParent.set(new TouchMove(plot, blocks, this.step));
-				} else if (inputType === "Gamepad") {
-					this.moverParent.set(new GamepadMove(plot, blocks, this.step));
-				}
-
-				TooltipsControl.instance.updateControlTooltips(this);
+			ClientComponentChild.registerBasedOnInputType<IController>(this, {
+				Desktop: () => new DesktopMove(plot, blocks, this.step),
+				Touch: () => new TouchMove(plot, blocks, this.step),
+				Gamepad: () => new GamepadMove(plot, blocks, this.step),
 			});
-		}
-
-		getGamepadTooltips(): readonly { readonly key: Enum.KeyCode; readonly text: string }[] {
-			return this.moverParent.get()?.getGamepadTooltips() ?? [];
-		}
-		getKeyboardTooltips(): readonly { readonly keys: string[]; readonly text: string }[] {
-			return this.moverParent.get()?.getKeyboardTooltips() ?? [];
 		}
 	}
 }
@@ -589,6 +576,10 @@ export default class EditTool extends ToolBase {
 			);
 		}
 
+		this.event.subscribeObservable2(this.selectedMode, (mode) =>
+			this.tooltipHolder.set(mode === undefined ? this.getTooltips() : {}),
+		);
+
 		this.onDisable(() => this._selected.clear());
 		this.onDisable(() => this._selectedMode.set(undefined));
 		this.event.subscribeObservable2(this.plot, () => this._selectedMode.set(undefined), true);
@@ -613,12 +604,8 @@ export default class EditTool extends ToolBase {
 			this.controller.set(new Controllers[mode](plot, [...selected]));
 		});
 
-		this.controller.childSet.Connect(() => this.updateTooltips());
 		this.event.onKeyDown("F", () => this.toggleMode("Move"));
 		this.event.onKeyDown("ButtonX", () => this.toggleMode("Move"));
-	}
-	protected getTooltipsSource(): TooltipSource | undefined {
-		return this.controller.get() ?? super.getTooltipsSource();
 	}
 
 	toggleMode(mode: EditToolMode | undefined) {
@@ -647,10 +634,10 @@ export default class EditTool extends ToolBase {
 		return "rbxassetid://12539306575";
 	}
 
-	getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
-		return [{ key: Enum.KeyCode.ButtonX, text: "Move" }];
-	}
-	getKeyboardTooltips(): readonly { readonly keys: KeyCode[]; readonly text: string }[] {
-		return [{ keys: ["F"], text: "Move" }];
+	protected getTooltips(): InputTooltips {
+		return {
+			Desktop: [{ keys: ["F"], text: "Move" }],
+			Gamepad: [{ keys: ["ButtonX"], text: "Move" }],
+		};
 	}
 }

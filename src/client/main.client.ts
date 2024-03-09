@@ -9,7 +9,6 @@ import InputTypeChangeEvent from "client/event/InputTypeChangeEvent";
 import Gui from "client/gui/Gui";
 import DebugControl from "client/gui/static/DebugControl";
 import LogControl from "client/gui/static/LogControl";
-import TooltipsControl from "client/gui/static/TooltipsControl";
 import PlayModeController from "client/modes/PlayModeController";
 import { $compileTime } from "rbxts-transform-debug";
 import { BlocksInitializer } from "shared/BlocksInitializer";
@@ -27,7 +26,6 @@ ReplicatedStorage.WaitForChild("Assets");
 BlocksInitializer.initialize();
 GameEnvironmentController.initialize();
 
-TooltipsControl.instance.show();
 LogControl.instance.show();
 WindController.initialize();
 

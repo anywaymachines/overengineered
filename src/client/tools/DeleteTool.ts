@@ -2,6 +2,7 @@ import { HttpService, Players } from "@rbxts/services";
 import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
+import { InputTooltips } from "client/gui/static/TooltipsControl";
 import ActionController from "client/modes/build/ActionController";
 import BuildingController from "client/modes/build/BuildingController";
 import BuildingMode from "client/modes/build/BuildingMode";
@@ -113,6 +114,16 @@ export default class DeleteTool extends ToolBase {
 
 	getImageID(): string {
 		return "rbxassetid://12539349041";
+	}
+
+	protected getTooltips(): InputTooltips {
+		return {
+			Gamepad: [
+				{ keys: ["ButtonY"], text: "Clear all" },
+				{ keys: ["ButtonX"], text: "Delete" },
+				{ keys: ["ButtonB"], text: "Unequip" },
+			],
+		};
 	}
 
 	getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {

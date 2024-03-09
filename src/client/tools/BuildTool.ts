@@ -6,6 +6,7 @@ import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
 import Gui from "client/gui/Gui";
 import LogControl from "client/gui/static/LogControl";
+import { InputTooltips } from "client/gui/static/TooltipsControl";
 import ActionController from "client/modes/build/ActionController";
 import BuildingController from "client/modes/build/BuildingController";
 import BuildingMode from "client/modes/build/BuildingMode";
@@ -21,7 +22,7 @@ import VectorUtils from "shared/utils/VectorUtils";
 
 /** A tool for building in the world with blocks */
 export default class BuildTool extends ToolBase {
-	public readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
+	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
 
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
@@ -40,7 +41,7 @@ export default class BuildTool extends ToolBase {
 	private lastMouseSurface?: Enum.NormalId;
 
 	// Signals
-	public pickSignal = new Signal<(block: RegistryBlock) => void>();
+	pickSignal = new Signal<(block: RegistryBlock) => void>();
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -57,18 +58,18 @@ export default class BuildTool extends ToolBase {
 		return "rbxassetid://12539295858";
 	}
 
-	public setSelectedBlock(block: RegistryBlock | undefined) {
+	setSelectedBlock(block: RegistryBlock | undefined) {
 		this.selectedBlock.set(block);
 		this.previewBlockRotation = CFrame.identity;
 		this.prepareVisual();
 	}
 
-	public setSelectedMaterial(material: Enum.Material) {
+	setSelectedMaterial(material: Enum.Material) {
 		this.selectedMaterial.set(material);
 		this.prepareVisual();
 	}
 
-	public setSelectedColor(color: Color3) {
+	setSelectedColor(color: Color3) {
 		this.selectedColor.set(color);
 		this.prepareVisual();
 	}
@@ -210,7 +211,7 @@ export default class BuildTool extends ToolBase {
 		);
 	}
 
-	public async placeBlock() {
+	async placeBlock() {
 		// Non-alive players bypass
 		if (!PlayerUtils.isAlive(Players.LocalPlayer)) return;
 
@@ -307,7 +308,7 @@ export default class BuildTool extends ToolBase {
 		this.rotateFineTune(model.GetPivot().Rotation);
 	}
 
-	public rotate(axis: "x" | "y" | "z", isInverted: boolean = InputController.isShiftPressed()) {
+	rotate(axis: "x" | "y" | "z", isInverted: boolean = InputController.isShiftPressed()) {
 		if (this.selectedBlock.get() === undefined) {
 			return;
 		}
@@ -400,36 +401,31 @@ export default class BuildTool extends ToolBase {
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updatePosition());
 	}
 
-	public enable() {
+	enable() {
 		super.enable();
 		this.prepareVisual();
 	}
 
-	public disable() {
+	disable() {
 		super.disable();
 		this.previewBlock?.Destroy();
 	}
 
-	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
-		const keys: { key: Enum.KeyCode; text: string }[] = [];
-
-		keys.push({ key: Enum.KeyCode.ButtonX, text: "Place" });
-		keys.push({ key: Enum.KeyCode.ButtonB, text: "Unequip" });
-		keys.push({ key: Enum.KeyCode.ButtonSelect, text: "Select block" });
-		keys.push({ key: Enum.KeyCode.DPadLeft, text: "Rotate by X" });
-		keys.push({ key: Enum.KeyCode.DPadUp, text: "Rotate by Y" });
-		keys.push({ key: Enum.KeyCode.DPadRight, text: "Rotate by Z" });
-
-		return keys;
-	}
-
-	public getKeyboardTooltips() {
-		const keys: { keys: string[]; text: string }[] = [];
-
-		keys.push({ keys: ["R"], text: "Rotate by Y" });
-		keys.push({ keys: ["T"], text: "Rotate by X" });
-		keys.push({ keys: ["Y"], text: "Rotate by Z" });
-
-		return keys;
+	protected getTooltips(): InputTooltips {
+		return {
+			Desktop: [
+				{ keys: ["R"], text: "Rotate by Y" },
+				{ keys: ["T"], text: "Rotate by X" },
+				{ keys: ["Y"], text: "Rotate by Z" },
+			],
+			Gamepad: [
+				{ keys: ["ButtonX"], text: "Place" },
+				{ keys: ["ButtonB"], text: "Unequip" },
+				{ keys: ["ButtonSelect"], text: "Select block" },
+				{ keys: ["DPadLeft"], text: "Rotate by X" },
+				{ keys: ["DPadUp"], text: "Rotate by Y" },
+				{ keys: ["DPadRight"], text: "Rotate by Z" },
+			],
+		};
 	}
 }

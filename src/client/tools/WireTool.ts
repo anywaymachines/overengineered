@@ -5,6 +5,7 @@ import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import LogControl from "client/gui/static/LogControl";
+import { InputTooltips } from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import { Assert } from "client/test/Assert";
 import ToolBase from "client/tools/ToolBase";
@@ -816,19 +817,15 @@ export class WireTool extends ToolBase {
 		return "http://www.roblox.com/asset/?id=15895880948";
 	}
 
-	getGamepadTooltips(): readonly { key: Enum.KeyCode; text: string }[] {
-		const keys: { key: Enum.KeyCode; text: string }[] = [];
-
-		keys.push({ key: Enum.KeyCode.ButtonY, text: "Marker selection mode" });
-		keys.push({ key: Enum.KeyCode.ButtonA, text: "Click on marker" });
-		keys.push({ key: Enum.KeyCode.ButtonX, text: "Cancel selection" });
-		keys.push({ key: Enum.KeyCode.ButtonB, text: "Unequip" });
-
-		return keys;
-	}
-
-	getKeyboardTooltips(): readonly { keys: string[]; text: string }[] {
-		return [];
+	protected getTooltips(): InputTooltips {
+		return {
+			Gamepad: [
+				{ keys: ["ButtonY"], text: "Marker selection mode" },
+				{ keys: ["ButtonA"], text: "Click on marker" },
+				{ keys: ["ButtonX"], text: "Cancel selection" },
+				{ keys: ["ButtonB"], text: "Unequip" },
+			],
+		};
 	}
 }
 

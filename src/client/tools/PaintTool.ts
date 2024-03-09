@@ -101,11 +101,4 @@ export default class PaintTool extends ToolBase {
 	getImageID(): string {
 		return "http://www.roblox.com/asset/?id=15895846447";
 	}
-
-	public getGamepadTooltips(): readonly { key: Enum.KeyCode; text: string }[] {
-		return [];
-	}
-	public getKeyboardTooltips(): readonly { keys: string[]; text: string }[] {
-		return [];
-	}
 }

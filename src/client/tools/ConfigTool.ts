@@ -153,14 +153,6 @@ export default class ConfigTool extends ToolBase {
 		return "http://www.roblox.com/asset/?id=15414751900";
 	}
 
-	getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
-		return [];
-	}
-
-	getKeyboardTooltips() {
-		return [];
-	}
-
 	disable() {
 		super.disable();
 		this.unselectAll();
