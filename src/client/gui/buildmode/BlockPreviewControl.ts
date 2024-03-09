@@ -1,4 +1,4 @@
-import { Players, RunService } from "@rbxts/services";
+import { RunService } from "@rbxts/services";
 import Control from "client/gui/Control";
 
 export default class BlockPreviewControl extends Control<ViewportFrame> {
@@ -8,7 +8,7 @@ export default class BlockPreviewControl extends Control<ViewportFrame> {
 		super(gui);
 		this.set(block);
 
-		const gcmode = Players.LocalPlayer.Name === "i3ymm";
+		const gcmode = false;
 		if (!gcmode) {
 			this.event.subscribe(RunService.Heartbeat, (dt) => {
 				if (this.block)
