@@ -2,7 +2,7 @@ import Objects from "shared/fixes/objects";
 
 declare global {
 	type AutoWeldColliderBlockShape = "none" | "cube";
-	type BlockMirrorBehaviour = "offset90" | "offset180" | "normal" | "none" | "wedgeWing";
+	type BlockMirrorBehaviour = "offset90" | "offset180" | "offset270" | "normal" | "none" | "wedgeWing";
 }
 
 interface BlockSetupInformation {
@@ -245,7 +245,6 @@ const registry: BlockDataRegistry = {
 	anchorblock: {
 		name: "Anchor",
 		description: "An immovable block",
-		limit: 1,
 	},
 	ballinsocket: {
 		name: "Ball in Socket",
@@ -254,10 +253,12 @@ const registry: BlockDataRegistry = {
 	block: {
 		name: "Block",
 		description: "Makes you question why every engineering game has it",
+		mirrorBehaviour: "none",
 	},
 	concavecornerwedge: {
 		name: "Concave Corner Wedge",
 		description: "The convex corner wedge, but concave",
+		mirrorBehaviour: "offset270",
 	},
 	concaveprism: {
 		name: "Concave Prism",
@@ -267,6 +268,7 @@ const registry: BlockDataRegistry = {
 	convexcornerwedge: {
 		name: "Convex Corner Wedge",
 		description: "The concave corner wedge, but convex",
+		mirrorBehaviour: "offset270",
 	},
 	convexprism: {
 		name: "Convex Prism",
@@ -276,18 +278,22 @@ const registry: BlockDataRegistry = {
 	cornerwedge1x1: {
 		name: "Corner Wedge 1x1",
 		description: "A simple corner wedge",
+		mirrorBehaviour: "offset270",
 	},
 	cornerwedge2x1: {
 		name: "Corner Wedge 2x1",
 		description: "A simple coorner wedge",
+		mirrorBehaviour: "offset270",
 	},
 	cornerwedge3x1: {
 		name: "Corner Wedge 3x1",
 		description: "A simple cooorner wedge",
+		mirrorBehaviour: "offset270",
 	},
 	cornerwedge4x1: {
 		name: "Corner Wedge 4x1",
 		description: "A simple coooorner wedge",
+		mirrorBehaviour: "offset270",
 	},
 	cylinder1x1: {
 		name: "Cylinder 1x1",
@@ -340,10 +346,12 @@ const registry: BlockDataRegistry = {
 	innercorner: {
 		name: "Inner Corner",
 		description: "An inner corner. Some long time ago it was called an Inner Wedge.. Those were the times!",
+		mirrorBehaviour: "offset270",
 	},
 	innertetra: {
 		name: "Inner Tetra",
 		description: "This name was chosen just to make the searching more inconvenient",
+		mirrorBehaviour: "offset270",
 	},
 	logicmemory: {
 		name: "Memory Cell",
@@ -372,6 +380,7 @@ const registry: BlockDataRegistry = {
 	rocketengine: {
 		name: "Rocket Engine",
 		description: "Engines your rocket into the space and onto the ground",
+		mirrorBehaviour: "offset180",
 	},
 	rope: {
 		name: "Rope",
@@ -392,6 +401,7 @@ const registry: BlockDataRegistry = {
 	smallrocketengine: {
 		name: "Small Rocket Engine",
 		description: "Smaller brother of a rocket engine",
+		mirrorBehaviour: "offset180",
 	},
 	smallwheel: {
 		name: "Small Wheel",
@@ -412,10 +422,12 @@ const registry: BlockDataRegistry = {
 	tetrahedron: {
 		name: "Tetrahedron",
 		description: "MAKS STOP NAMING BLOCKS LIKE THAT",
+		mirrorBehaviour: "offset90",
 	},
 	tetraround: {
 		name: "Tetra Round",
 		description: "A rounded version of the tetrahedron",
+		mirrorBehaviour: "offset270",
 	},
 	tnt: {
 		name: "TNT",
