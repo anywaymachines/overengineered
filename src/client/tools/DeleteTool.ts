@@ -15,8 +15,8 @@ import ObservableValue from "shared/event/ObservableValue";
 import JSON from "shared/fixes/Json";
 
 export default class DeleteTool extends ToolBase {
-	public readonly onClearAllRequested = new Signal<() => void>();
-	public readonly highlightedBlock = new ObservableValue<BlockModel | undefined>(undefined);
+	readonly onClearAllRequested = new Signal<() => void>();
+	readonly highlightedBlock = new ObservableValue<BlockModel | undefined>(undefined);
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -25,7 +25,7 @@ export default class DeleteTool extends ToolBase {
 		hoverSelector.highlightedBlock.autoSet(this.highlightedBlock);
 
 		const fireSelected = async () => {
-			if (InputController.inputType.get() !== "Desktop") return;
+			if (InputController.inputType.get() === "Touch") return;
 
 			const block = hoverSelector.highlightedBlock.get();
 			if (!block) return;
@@ -70,7 +70,7 @@ export default class DeleteTool extends ToolBase {
 		return info;
 	}
 
-	public async deleteBlocks(blocks: readonly BlockModel[] | "all") {
+	async deleteBlocks(blocks: readonly BlockModel[] | "all") {
 		const getDeletedBlocks = () => {
 			if (blocks === "all") {
 				return SharedPlots.getPlotBlocks(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId)).GetChildren(
@@ -115,7 +115,7 @@ export default class DeleteTool extends ToolBase {
 		return "rbxassetid://12539349041";
 	}
 
-	public getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
+	getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
 		const keys: { key: Enum.KeyCode; text: string }[] = [];
 
 		keys.push({ key: Enum.KeyCode.ButtonY, text: "Clear all" });
@@ -125,7 +125,7 @@ export default class DeleteTool extends ToolBase {
 		return keys;
 	}
 
-	public getKeyboardTooltips() {
+	getKeyboardTooltips() {
 		return [];
 	}
 }
