@@ -1,5 +1,5 @@
 interface ReplicatedStorage {
-	Assets: {
+	Assets: Folder & {
 		Atmosphere: Folder & {
 			AtmosphericExtinction: Model & {
 				AtmosphericExtinction1: Part & {
@@ -90,7 +90,7 @@ interface ReplicatedStorage {
 			Effects: Folder & {
 				Underwater: EqualizerSoundEffect;
 			};
-			Explosion: Folder & {[key: string]: Sound}
+			Explosion: Folder & { [key: string]: Sound };
 		};
 	};
 }
