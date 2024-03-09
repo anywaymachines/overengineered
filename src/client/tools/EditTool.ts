@@ -12,12 +12,12 @@ import type { TooltipSource } from "client/gui/static/TooltipsControl";
 import TooltipsControl from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
+import { HoveredBlocksHighlighter } from "client/tools/selectors/HoveredBlocksHighlighter";
 import { SelectedBlocksHighlighter } from "client/tools/selectors/SelectedBlocksHighlighter";
 import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import SharedPlots from "shared/building/SharedPlots";
-import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { type TransformProps } from "shared/component/Transform";
 import { TransformService } from "shared/component/TransformService";
@@ -26,8 +26,6 @@ import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import ObservableValue, { type ReadonlyObservableValue } from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
 import Objects from "shared/fixes/objects";
-import HoveredBlockHighlighter from "./selectors/HoveredBlockHighlighter";
-import { MultiModelHighlighter } from "./selectors/MultiModelHighlighter";
 
 namespace Scene {
 	export interface EditToolSceneDefinition extends GuiObject, Selectors.SelectorGuiDefinition {
@@ -85,77 +83,6 @@ namespace Scene {
 }
 
 namespace Selectors {
-	class HoveredBlocksHighlighter extends ClientComponent {
-		private readonly _highlighted = new ObservableValue<readonly BlockModel[]>([]);
-		readonly highlighted = this._highlighted.asReadonly();
-
-		constructor(parent: Instance, getTargets: (block: BlockModel) => readonly BlockModel[]) {
-			super();
-
-			interface Highlighter extends IComponent {
-				highlight(models: readonly BlockModel[]): void;
-				stop(): void;
-			}
-
-			const highlighterParent = new ComponentChild<Highlighter>(this, true);
-
-			this.onPrepare((inputType) => {
-				if (inputType === "Touch") {
-					class EmptyHighlighter extends Component implements Highlighter {
-						highlight() {}
-						stop() {}
-					}
-
-					highlighterParent.set(new EmptyHighlighter());
-				} else {
-					highlighterParent.set(new MultiModelHighlighter(parent));
-				}
-
-				highlighterParent.get()?.highlight(this.highlighted.get());
-			});
-
-			const mouse = Players.LocalPlayer.GetMouse();
-			let prevTarget: Instance | undefined;
-
-			const destroyHighlight = () => {
-				prevTarget = undefined;
-				highlighterParent.get()?.stop();
-				this._highlighted.set([]);
-			};
-
-			/** @param forceUpdate If true, don't check for `target === prevTarget`. Useful for updating on pressing Ctrl, since the targeted block did not change but the update is nesessary */
-			const updateTarget = (forceUpdate: boolean) => {
-				const target = HoveredBlockHighlighter.getTargetedBlock(mouse);
-				if (!target) {
-					destroyHighlight();
-					return;
-				}
-
-				if (!forceUpdate && target === prevTarget) {
-					return;
-				}
-				prevTarget = target;
-
-				const targets = getTargets(target);
-				highlighterParent.get()?.highlight(targets);
-				this._highlighted.set(targets);
-			};
-
-			const prepare = () => {
-				this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => updateTarget(false));
-				this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => updateTarget(false));
-				this.inputHandler.onInputBegan(() => updateTarget(true));
-				this.inputHandler.onInputChanged(() => updateTarget(false));
-				this.inputHandler.onInputEnded(() => updateTarget(true));
-
-				updateTarget(true);
-			};
-
-			this.onEnable(prepare);
-			this.onDisable(destroyHighlight);
-		}
-	}
-
 	export type SelectorGuiDefinition = GuiObject & {
 		readonly MobileSelection: GuiObject & {
 			readonly SingleSelection: TextButtonDefinition;
