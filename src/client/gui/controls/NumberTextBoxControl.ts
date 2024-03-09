@@ -9,8 +9,8 @@ export type NumberTextBoxControlDefinition = TextBox;
 export default class NumberTextBoxControl<
 	T extends number | undefined = number,
 > extends Control<NumberTextBoxControlDefinition> {
-	public readonly submitted = new Signal<(value: number) => void>();
-	public readonly value;
+	readonly submitted = new Signal<(value: number) => void>();
+	readonly value;
 
 	constructor(gui: NumberTextBoxControlDefinition);
 	constructor(gui: NumberTextBoxControlDefinition, min: number, max: number, step: number);
@@ -28,7 +28,7 @@ export default class NumberTextBoxControl<
 			(value) => {
 				let text = tostring(value ?? "");
 				if (step !== undefined && max !== undefined) {
-					text = text.sub(1, tostring(step + max).size());
+					text = text.sub(1, tostring(step + max).size() + ((value ?? 0) < 0 ? 1 : 0));
 				}
 
 				this.gui.Text = text;
@@ -60,7 +60,7 @@ export default class NumberTextBoxControl<
 		this.submitted.Fire(num);
 	}
 
-	public destroy() {
+	destroy() {
 		this.commit(true);
 		super.destroy();
 	}

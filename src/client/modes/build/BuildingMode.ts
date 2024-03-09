@@ -17,11 +17,7 @@ declare global {
 }
 
 export default class BuildingMode extends PlayMode {
-	readonly mirrorMode = new ObservableValue<MirrorMode>({
-		x: Vector3.zero,
-		y: new Vector3(0, 4, 0),
-		z: Vector3.zero,
-	});
+	readonly mirrorMode = new ObservableValue<MirrorMode>({ x: Vector3.zero });
 
 	readonly mirrorVisualizer = new MirrorVisualizer();
 

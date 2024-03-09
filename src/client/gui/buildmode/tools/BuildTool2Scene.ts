@@ -6,9 +6,19 @@ import BlockSelectionControl, { BlockSelectionControlDefinition } from "client/g
 import MaterialColorEditControl, {
 	MaterialColorEditControlDefinition,
 } from "client/gui/buildmode/MaterialColorEditControl";
+import MirrorEditorControl, { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
+import { ButtonControl } from "client/gui/controls/Button";
 import BuildTool2 from "client/tools/BuildTool2";
 
 export type BuildTool2SceneDefinition = GuiObject & {
+	readonly ActionBar: GuiObject & {
+		readonly Buttons: GuiObject & {
+			readonly Mirror: GuiButton;
+		};
+	};
+	readonly Mirror: GuiObject & {
+		readonly Content: MirrorEditorControlDefinition;
+	};
 	readonly Bottom: MaterialColorEditControlDefinition;
 	readonly Info: Frame & {
 		readonly ViewportFrame: ViewportFrame;
@@ -37,6 +47,17 @@ export default class BuildTool2Scene extends Control<BuildTool2SceneDefinition> 
 		this.blockSelector = new BlockSelectionControl(gui.Inventory);
 		this.blockSelector.show();
 		this.add(this.blockSelector);
+
+		const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content));
+		mirrorEditor.value.set(tool.mirrorMode.get());
+		this.event.subscribeObservable2(mirrorEditor.value, (val) => tool.mirrorMode.set(val), true);
+		this.onEnable(() => (this.gui.Mirror.Visible = false));
+		this.add(
+			new ButtonControl(
+				this.gui.ActionBar.Buttons.Mirror,
+				() => (this.gui.Mirror.Visible = !this.gui.Mirror.Visible),
+			),
+		);
 
 		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => {
 			this.tool.selectedBlock.set(block);
@@ -93,7 +114,7 @@ export default class BuildTool2Scene extends Control<BuildTool2SceneDefinition> 
 		);
 	}
 
-	public show() {
+	show() {
 		super.show();
 
 		GuiAnimator.transition(this.gui.Inventory, 0.2, "right");

@@ -62,10 +62,10 @@ const createBlockGhost = (block: RegistryBlock): BlockGhost => {
 	ghostParent.highlight.Adornee = undefined;
 	ghostParent.highlight.Adornee = ghostParent;
 
-	return { model };
+	return { model, mirrors: [] };
 };
 
-type BlockGhost = { readonly model: BlockModel };
+type BlockGhost = { readonly model: BlockModel; mirrors: BlockModel[] };
 
 namespace SinglePlaceController {
 	export class Desktop extends ClientComponent {
@@ -159,7 +159,7 @@ namespace SinglePlaceController {
 				return targetPosition;
 			};
 			const updateMirrorGhostBlocksPosition = (plot: Model, mainPosition: Vector3) => {
-				const mirrorCFrames = BuildingManager.getMirroredBlocksCFrames2(
+				const mirrorCFrames = BuildingManager.getMirroredBlocksCFrames(
 					plot,
 					this.selectedBlock.get()!.id,
 					new CFrame(mainPosition).mul(this.blockRotation),
@@ -292,7 +292,7 @@ namespace SinglePlaceController {
 			const response = await ActionController.instance.executeOperation(
 				"Block placement",
 				async () => {
-					let cframes = BuildingManager.getMirroredBlocksCFrames2(
+					let cframes = BuildingManager.getMirroredBlocksCFrames(
 						SharedPlots.getPlotByPosition(pos.Position)!,
 						btype!.id,
 						pos,
@@ -348,11 +348,12 @@ namespace MultiPlaceController {
 		private readonly selectedBlock;
 		private readonly selectedColor;
 		private readonly selectedMaterial;
+		private readonly mirrorModes;
+		private readonly plot;
 
 		private readonly pressPosition: Vector3 = Vector3.zero;
 		private oldPositions?: { readonly Positions: Set<Vector3>; readonly endPoint: Vector3 };
 		private fillRotationMode = 1;
-
 		static subscribe(state: BuildTool2, parent: ComponentChild<IComponent>) {
 			const mouse = Players.LocalPlayer.GetMouse();
 
@@ -374,6 +375,8 @@ namespace MultiPlaceController {
 							selectedBlock,
 							state.selectedColor.get(),
 							state.selectedMaterial.get(),
+							state.mirrorMode.get(),
+							state.targetPlot.get()!,
 						),
 					);
 				}, false),
@@ -384,18 +387,21 @@ namespace MultiPlaceController {
 			selectedBlock: RegistryBlock,
 			selectedColor: Color3,
 			selectedMaterial: Enum.Material,
+			mirrorModes: MirrorMode,
+			plot: PlotModel,
 		) {
 			super();
 			this.pressPosition = pressPosition;
 			this.selectedBlock = selectedBlock;
 			this.selectedColor = selectedColor;
 			this.selectedMaterial = selectedMaterial;
+			this.mirrorModes = mirrorModes;
+			this.plot = plot;
 
 			const updateGhosts = () => {
 				const cameraPostion = Workspace.CurrentCamera!.CFrame.Position;
 				const hit = mouse.Hit.Position;
 				const clickDirection = cameraPostion.sub(hit).Unit;
-
 				const pos = this.getPositionOnBuildingPlane(this.pressPosition, cameraPostion, clickDirection);
 				const positionsData = this.calculateGhostBlockPositions(
 					this.selectedBlock.model,
@@ -411,6 +417,7 @@ namespace MultiPlaceController {
 				const toDelete = oldPositions.filter((p) => !newPositions.has(p));
 				for (const pos of toDelete) {
 					this.drawnGhostsMap.get(pos)?.model.Destroy();
+					this.drawnGhostsMap.get(pos)?.mirrors.forEach((v) => v.Destroy());
 					this.drawnGhostsMap.delete(pos);
 				}
 
@@ -419,6 +426,17 @@ namespace MultiPlaceController {
 				if (!models) return;
 				for (const model of models) {
 					this.drawnGhostsMap.set(model.model.GetPivot().Position, model);
+					const p = BuildingManager.getMirroredBlocksCFrames(
+						plot,
+						selectedBlock.id,
+						model.model.GetPivot(),
+						mirrorModes,
+					);
+					for (const mirror of p) {
+						const b = createBlockGhost(this.selectedBlock);
+						b.model.PivotTo(mirror);
+						model.mirrors.push(b.model);
+					}
 				}
 
 				this.oldPositions = positionsData;
@@ -438,6 +456,7 @@ namespace MultiPlaceController {
 			this.onDestroy(() => {
 				for (const [, ghost] of this.drawnGhostsMap) {
 					ghost.model.Destroy();
+					ghost.mirrors.forEach((v) => v.Destroy());
 				}
 			});
 
@@ -511,7 +530,7 @@ namespace MultiPlaceController {
 				return;
 			}
 
-			const blocks = this.drawnGhostsMap.map((_, m) => m.model);
+			const blocks = this.drawnGhostsMap.flatmap((_, m) => [...m.mirrors, m.model]);
 			const plot = SharedPlots.getPlotByPosition(blocks[0].GetPivot().Position);
 			if (!plot) {
 				LogControl.instance.addLine("Out of bounds!", Colors.red);
@@ -520,7 +539,7 @@ namespace MultiPlaceController {
 			}
 
 			const plotRegion = SharedPlots.getPlotBuildingRegion(plot);
-			const blocksRegion = AABB.fromModels(blocks);
+			const blocksRegion = AABB.fromModels(blocks).withSize((s) => s.mul(0.99));
 			if (!plotRegion.contains(blocksRegion)) {
 				LogControl.instance.addLine("Out of bounds!", Colors.red);
 				SoundController.getSounds().Build.BlockPlaceError.Play();
