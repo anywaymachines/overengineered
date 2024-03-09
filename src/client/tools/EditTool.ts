@@ -721,7 +721,7 @@ export default class EditTool extends ToolBase {
 	}
 
 	getGamepadTooltips(): { key: Enum.KeyCode; text: string }[] {
-		return [];
+		return [{ key: Enum.KeyCode.ButtonX, text: "Move" }];
 	}
 	getKeyboardTooltips(): readonly { readonly keys: KeyCode[]; readonly text: string }[] {
 		return [{ keys: ["F"], text: "Move" }];
