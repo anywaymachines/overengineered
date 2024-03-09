@@ -22,7 +22,7 @@ export default class ImpactController {
 			const physicalProperties = new PhysicalProperties(material);
 			const strongness = math.max(0.5, physicalProperties.Density / 3.5);
 			this.MATERIAL_STRONGNESS[material.Name] = strongness;
-			Logger.info(`Setting strongness '${strongness}' to ${material.Name}`);
+			Logger.info(`Strongness of '${material.Name}' set to ${strongness}`);
 		});
 	}
 
@@ -31,6 +31,9 @@ export default class ImpactController {
 			PartUtils.applyToAllDescendantsOfType("BasePart", value.instance, (part) => {
 				if (
 					!part.CanTouch ||
+					!part.CanCollide ||
+					!part.CanQuery ||
+					part.Massless ||
 					part.Transparency === 1 ||
 					part.IsA("VehicleSeat") ||
 					math.max(part.Size.X, part.Size.Y, part.Size.Z) < 0.5
@@ -100,13 +103,6 @@ export default class ImpactController {
 
 				if (math.random(1, 5) > 1) {
 					RemoteEvents.ImpactBreak.send(part);
-
-					// FIXME: TODO: Make this for all RemoteEvents.ImpactBreak.send();
-					part.CustomPhysicalProperties = new PhysicalProperties(
-						part.CurrentPhysicalProperties.Density * 1.5,
-						part.CurrentPhysicalProperties.Friction * 3.5,
-						part.CurrentPhysicalProperties.Elasticity,
-					);
 
 					event.Disconnect();
 				}

@@ -1,8 +1,8 @@
 import PlayerDataStorage from "client/PlayerDataStorage";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import ImpactController from "shared/block/ImpactController";
 import SharedMachine from "shared/block/SharedMachine";
 import blockConfigRegistry, { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import ImpactController from "shared/block/impact/ImpactController";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { Config } from "shared/config/Config";

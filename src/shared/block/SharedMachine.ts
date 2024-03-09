@@ -8,8 +8,8 @@ import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
 import BlockLogic from "./BlockLogic";
 import ConfigurableBlockLogic from "./ConfigurableBlockLogic";
-import ImpactController from "./ImpactController";
 import logicRegistry, { LogicRegistry } from "./LogicRegistry";
+import ImpactController from "./impact/ImpactController";
 import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 
 export default class SharedMachine extends ContainerComponent {
