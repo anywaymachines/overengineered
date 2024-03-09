@@ -627,7 +627,7 @@ export default class EditTool extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Edit (DEV TEST)";
+		return "Edit";
 	}
 
 	getImageID(): string {

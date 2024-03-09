@@ -5,7 +5,6 @@ import BuildTool from "client/tools/BuildTool";
 import BuildTool2 from "client/tools/BuildTool2";
 import ConfigTool from "client/tools/ConfigTool";
 import DeleteTool from "client/tools/DeleteTool";
-import MoveTool from "client/tools/MoveTool";
 import PaintTool from "client/tools/PaintTool";
 import ToolBase from "client/tools/ToolBase";
 import GameDefinitions from "shared/data/GameDefinitions";
@@ -18,7 +17,6 @@ export default class ToolController extends ClientComponent {
 	readonly tools: readonly ToolBase[];
 
 	readonly buildTool;
-	readonly moveTool;
 	readonly editTool;
 	readonly deleteTool;
 	readonly configTool;
@@ -35,7 +33,6 @@ export default class ToolController extends ClientComponent {
 		});
 
 		this.buildTool = new BuildTool(mode);
-		this.moveTool = new MoveTool(mode);
 		this.editTool = new EditTool(mode);
 		this.deleteTool = new DeleteTool(mode);
 		this.configTool = new ConfigTool(mode);
@@ -45,12 +42,11 @@ export default class ToolController extends ClientComponent {
 
 		const tools: ToolBase[] = [
 			this.buildTool,
-			this.moveTool,
+			this.editTool,
 			this.deleteTool,
 			this.configTool,
 			this.paintTool,
 			this.wiretool,
-			this.editTool,
 		];
 		if ((true as boolean) || GameDefinitions.isAdmin(Players.LocalPlayer)) {
 			tools.insert(6, this.buildTool2);

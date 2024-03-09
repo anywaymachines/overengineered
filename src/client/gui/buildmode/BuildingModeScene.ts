@@ -5,7 +5,6 @@ import BuildTool2Scene, { BuildTool2SceneDefinition } from "client/gui/buildmode
 import BuildToolScene, { BuildToolSceneDefinition } from "client/gui/buildmode/tools/BuildToolScene";
 import ConfigToolScene, { ConfigToolSceneDefinition } from "client/gui/buildmode/tools/ConfigToolScene";
 import DeleteToolScene, { DeleteToolSceneDefinition } from "client/gui/buildmode/tools/DeleteToolScene";
-import MoveToolScene, { MoveToolSceneDefinition } from "client/gui/buildmode/tools/MoveToolScene";
 import PaintToolScene, { PaintToolSceneDefinition } from "client/gui/buildmode/tools/PaintToolScene";
 import { ButtonControl } from "client/gui/controls/Button";
 import SavePopup from "client/gui/popup/SavePopup";
@@ -50,7 +49,6 @@ export type BuildingModeSceneDefinition = GuiObject & {
 	readonly Hotbar: ToolbarControlDefinition;
 	readonly Tools: {
 		readonly Build: BuildToolSceneDefinition;
-		readonly Move: MoveToolSceneDefinition;
 		readonly Build2: BuildTool2SceneDefinition;
 		readonly Delete: DeleteToolSceneDefinition;
 		readonly Config: ConfigToolSceneDefinition;
@@ -90,7 +88,6 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 		this.add(this.toolbar);
 
 		this.scenes.set(tools.buildTool, new BuildToolScene(this.gui.Tools.Build, tools.buildTool));
-		this.scenes.set(tools.moveTool, new MoveToolScene(this.gui.Tools.Move, tools.moveTool));
 		this.scenes.set(tools.deleteTool, new DeleteToolScene(this.gui.Tools.Delete, tools.deleteTool));
 		this.scenes.set(tools.configTool, new ConfigToolScene(this.gui.Tools.Config, tools.configTool));
 		this.scenes.set(tools.paintTool, new PaintToolScene(this.gui.Tools.Paint, tools.paintTool));
