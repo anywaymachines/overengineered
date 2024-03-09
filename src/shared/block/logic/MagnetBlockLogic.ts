@@ -16,6 +16,7 @@ RunService.PostSimulation.Connect((dt) => {
 		if (strength1 === 0) continue;
 
 		for (let j = i + 1; j < magnets.size(); j++) {
+			if (magnets[i].part.AssemblyRootPart === magnets[j].part.AssemblyRootPart) continue;
 			const strength2 = magnets[j].input.strength.get() * magicNumber * dt;
 			if (strength2 === 0) continue;
 
@@ -36,7 +37,7 @@ export default class MagnetBlockLogic extends ConfigurableBlockLogic<typeof bloc
 	private static readonly partColor2 = Color3.fromRGB(240, 128, 128);
 
 	private polarity: boolean = false;
-	public readonly part;
+	readonly part;
 
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.magnet);
