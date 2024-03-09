@@ -84,9 +84,11 @@ export class TooltipsHolder extends ClientInstanceComponent<
 
 			if (tooltip.keys[i].sub(0, "Button".size()) === "Button") {
 				// gamepad button
+				key.KeyLabel.Text = "";
 				key.Image = UserInputService.GetImageForKeyCode(tooltip.keys[i]);
 			} else if (tooltip.keys[i].sub(0, "DPad".size()) === "DPad") {
 				// gamepad dpad
+				key.KeyLabel.Text = "";
 				key.Image = UserInputService.GetImageForKeyCode(tooltip.keys[i]);
 			} else {
 				key.KeyLabel.Text = tooltip.keys[i];
