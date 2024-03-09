@@ -16,6 +16,7 @@ import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import SharedPlots from "shared/building/SharedPlots";
+import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { type TransformProps } from "shared/component/Transform";
 import { TransformService } from "shared/component/TransformService";
@@ -90,13 +91,34 @@ namespace Selectors {
 		constructor(parent: Instance, getTargets: (block: BlockModel) => readonly BlockModel[]) {
 			super();
 
-			const highlighter = this.parent(new MultiModelHighlighter(parent));
+			interface Highlighter extends IComponent {
+				highlight(models: readonly BlockModel[]): void;
+				stop(): void;
+			}
+
+			const highlighterParent = new ComponentChild<Highlighter>(this, true);
+
+			this.onPrepare((inputType) => {
+				if (inputType === "Touch") {
+					class EmptyHighlighter extends Component implements Highlighter {
+						highlight() {}
+						stop() {}
+					}
+
+					highlighterParent.set(new EmptyHighlighter());
+				} else {
+					highlighterParent.set(new MultiModelHighlighter(parent));
+				}
+
+				highlighterParent.get()?.highlight(this.highlighted.get());
+			});
+
 			const mouse = Players.LocalPlayer.GetMouse();
 			let prevTarget: Instance | undefined;
 
 			const destroyHighlight = () => {
 				prevTarget = undefined;
-				highlighter.stop();
+				highlighterParent.get()?.stop();
 				this._highlighted.set([]);
 			};
 
@@ -114,7 +136,7 @@ namespace Selectors {
 				prevTarget = target;
 
 				const targets = getTargets(target);
-				highlighter.highlight(targets);
+				highlighterParent.get()?.highlight(targets);
 				this._highlighted.set(targets);
 			};
 
