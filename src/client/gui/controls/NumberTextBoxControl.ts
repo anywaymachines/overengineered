@@ -1,7 +1,7 @@
-import Signal from "@rbxts/signal";
 import Control from "client/gui/Control";
 import NumberObservableValue from "shared/event/NumberObservableValue";
 import ObservableValue from "shared/event/ObservableValue";
+import Signal from "shared/event/Signal";
 
 export type NumberTextBoxControlDefinition = TextBox;
 

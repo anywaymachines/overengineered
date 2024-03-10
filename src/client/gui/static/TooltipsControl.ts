@@ -10,8 +10,8 @@ import { TransformService } from "shared/component/TransformService";
 const tooltipsGui = Gui.getGameUI<{ ControlsInfo: TooltipsControlDefinition }>().ControlsInfo;
 tooltipsGui.Visible = true;
 
-const keyboardTooltipTemplate = Control.asTemplate(tooltipsGui.KeyboardTemplate);
-const gamepadTooltipTemplate = Control.asTemplate(tooltipsGui.GamepadTemplate);
+const keyboardTooltipTemplate = Control.asTemplateWithMemoryLeak(tooltipsGui.KeyboardTemplate);
+const gamepadTooltipTemplate = Control.asTemplateWithMemoryLeak(tooltipsGui.GamepadTemplate);
 
 export type Tooltip = { readonly keys: readonly KeyCode[]; readonly text: string };
 export type Tooltips = readonly Tooltip[];

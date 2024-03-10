@@ -355,6 +355,22 @@ namespace Controllers {
 				return true;
 			}
 
+			/*const info = {
+				plot: this.plot,
+				blocks: this.blocks.map((b) => b.Name) as unknown as readonly BlockUuid[],
+				diff: this.difference,
+			};
+			ActionController.instance.executeOperation(
+				"Moving blocks",
+				async (info) => {},
+				{
+					plot: this.plot,
+					blocks: this.blocks,
+					diff: this.difference,
+				},
+				(info) => Remotes.Client.GetNamespace("Building").Get("MoveBlocks").CallServerAsync(info),
+			);*/
+
 			const response = await Remotes.Client.GetNamespace("Building").Get("MoveBlocks").CallServerAsync({
 				plot: this.plot,
 				blocks: this.blocks,

@@ -1,9 +1,9 @@
 import { GuiService } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import Popup from "client/gui/Popup";
 import { ButtonControl, ButtonDefinition, TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import Signal from "shared/event/Signal";
 
 export type SelectButtonPopupDefinition = GuiObject & {
 	readonly Content: {
@@ -43,7 +43,7 @@ export default class SelectButtonPopup extends Popup<SelectButtonPopupDefinition
 		const list = new Control(gui.Content.ScrollingFrame);
 		this.add(list);
 
-		const template = Control.asTemplate(this.gui.Content.ScrollingFrame.ButtonTemplate);
+		const template = this.asTemplate(this.gui.Content.ScrollingFrame.ButtonTemplate);
 
 		const keys = Enum.KeyCode.GetEnumItems().filter((value) => {
 			// numbers

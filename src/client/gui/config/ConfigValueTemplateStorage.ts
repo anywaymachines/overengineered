@@ -24,12 +24,12 @@ type Templates = {
 const templates = Gui.getGameUI<{ Templates: { Config: Templates } }>().Templates.Config;
 
 export const configValueTemplateStorage = {
-	connected: Control.asTemplate(templates.ConnectedTemplate, false),
-	checkbox: Control.asTemplate(templates.CheckboxTemplate, false),
-	key: Control.asTemplate(templates.KeyTemplate, false),
-	slider: Control.asTemplate(templates.SliderTemplate, false),
-	number: Control.asTemplate(templates.NumberTemplate, false),
-	string: Control.asTemplate(templates.StringTemplate, false),
-	multi: Control.asTemplate(templates.MultiTemplate, false),
+	connected: Control.asTemplateWithMemoryLeak(templates.ConnectedTemplate, false),
+	checkbox: Control.asTemplateWithMemoryLeak(templates.CheckboxTemplate, false),
+	key: Control.asTemplateWithMemoryLeak(templates.KeyTemplate, false),
+	slider: Control.asTemplateWithMemoryLeak(templates.SliderTemplate, false),
+	number: Control.asTemplateWithMemoryLeak(templates.NumberTemplate, false),
+	string: Control.asTemplateWithMemoryLeak(templates.StringTemplate, false),
+	multi: Control.asTemplateWithMemoryLeak(templates.MultiTemplate, false),
 } as const;
 export type ConfigValueTemplateStorage = typeof configValueTemplateStorage;

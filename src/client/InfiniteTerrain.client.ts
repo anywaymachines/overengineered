@@ -1,5 +1,5 @@
 import { Players, ReplicatedFirst, Workspace } from "@rbxts/services";
-import Signal from "@rbxts/signal";
+import type { TerrainActor } from "client/InfiniteTerrainActor";
 import TerrainDataInfo from "shared/TerrainDataInfo";
 import Objects from "shared/fixes/objects";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -16,12 +16,6 @@ while (!PlayerDataStorage.data.get()) {
 const work = true;
 
 const folder = TerrainDataInfo.getInfo();
-
-type TerrainActor = {
-	Load: Signal<(chunkX: number, chunkZ: number, loadFoliage: boolean) => void>;
-	Unload: Signal<(chunkX: number, chunkZ: number) => void>;
-	Loaded: Signal<(chunkX: number, chunkZ: number) => void>;
-};
 
 const actorAmount = folder.Configuration.ActorAmount.Value;
 const chunkSize = folder.Configuration.ChunkSize.Value;
@@ -52,8 +46,8 @@ const recreateActors = () => {
 		actorScript.Parent = actor;
 
 		const tactor = (require(actorScript) as { default: TerrainActor }).default;
-		tactor.Loaded.Connect(() => actorSemaphore.release());
-		tactor.Loaded.Connect((chunkX, chunkZ) => {
+		tactor.Loaded.Event.Connect(() => actorSemaphore.release());
+		tactor.Loaded.Event.Connect((chunkX, chunkZ) => {
 			const load = false;
 			if (!load) return;
 

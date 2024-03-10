@@ -1,7 +1,7 @@
-import Signal from "@rbxts/signal";
 import { ClientComponent } from "client/component/ClientComponent";
-import LogControl from "client/gui/static/LogControl";
 import InputController from "client/controller/InputController";
+import LogControl from "client/gui/static/LogControl";
+import Signal from "shared/event/Signal";
 
 type Operation = {
 	readonly description: string;
@@ -20,22 +20,18 @@ export default class ActionController extends ClientComponent {
 		super();
 
 		this.event.onKeyDown("Z", () => {
-			if (InputController.isCtrlPressed()) {
-				ActionController.instance.undo();
-				return true;
-			}
+			if (!InputController.isCtrlPressed()) return;
+			this.undo();
 		});
 		this.event.onKeyDown("Y", () => {
-			if (InputController.isCtrlPressed()) {
-				ActionController.instance.redo();
-				return true;
-			}
+			if (!InputController.isCtrlPressed()) return;
+			this.redo();
 		});
 	}
 
 	async executeOperation<TInfo, TResult extends Response>(
 		description: string,
-		undo: Operation["undo"],
+		undo: (info: TInfo) => Promise<void>,
 		info: TInfo,
 		func: (info: TInfo) => Promise<TResult>,
 	) {
@@ -44,7 +40,7 @@ export default class ActionController extends ClientComponent {
 		if (result.success)
 			this.appendOperation({
 				description,
-				undo,
+				undo: () => undo(info),
 				redo: async () => {
 					await func(info);
 				},

@@ -19,7 +19,7 @@ export default class DebugControl extends Control<DebugControlDefinition> {
 
 	constructor(gui: DebugControlDefinition) {
 		super(gui);
-		this.lineTemplate = Control.asTemplate(this.gui.Template);
+		this.lineTemplate = this.asTemplate(this.gui.Template);
 
 		this.event.subscribe(Logger.onLog, (text, isError) => {
 			this.addLine(`■ [DEBUG] ${text}`, isError ? Colors.red : Colors.blue);

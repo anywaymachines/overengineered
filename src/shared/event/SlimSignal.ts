@@ -1,8 +1,10 @@
 /** A signal that you can subscribe to and fire but without any unnesessary things */
 export default class SlimSignal<T extends (...args: never[]) => void = () => void> {
+	private destroyed = false;
 	private subscribed?: T[];
 
 	Connect(callback: T): void {
+		if (this.destroyed) return;
 		(this.subscribed ??= []).push(callback);
 	}
 	Fire(...args: Parameters<T>): void {
@@ -13,7 +15,8 @@ export default class SlimSignal<T extends (...args: never[]) => void = () => voi
 		}
 	}
 
-	unsubscribeAll() {
+	destroy() {
+		this.destroyed = true;
 		this.subscribed = undefined;
 	}
 }

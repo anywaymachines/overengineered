@@ -1,6 +1,6 @@
-import Signal from "@rbxts/signal";
 import Control from "client/gui/Control";
 import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
+import Signal from "shared/event/Signal";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
@@ -20,7 +20,9 @@ class ConfigNumberControl extends Control<NumberTextBoxControlDefinition> {
 }
 
 class NumberConfigValueControl extends ConfigValueControl<NumberTextBoxControlDefinition> {
-	readonly submitted = new Signal<(config: Readonly<Record<BlockUuid, BlockConfigTypes.Number["config"]>>) => void>();
+	readonly submitted = new Signal<
+		(config: Readonly<Record<BlockUuid, BlockConfigTypes.Number["config"]>>) => void
+	>();
 
 	constructor(
 		configs: Readonly<Record<BlockUuid, BlockConfigTypes.Number["config"]>>,

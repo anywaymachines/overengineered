@@ -1,5 +1,4 @@
 import { Players, RunService } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import { TextButtonControl } from "client/gui/controls/Button";
@@ -19,7 +18,7 @@ import { WorldPipetteTest } from "./control/WorldPipetteTest";
 import { AABBTests } from "./tests/AABBTests";
 
 const enabled = RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm";
-if (!enabled) new Signal().Wait();
+if (!enabled) new Instance("BindableEvent").Event.Wait();
 task.wait(0.5); // wait for the controls to enable
 
 let destroy: (() => void) | undefined;

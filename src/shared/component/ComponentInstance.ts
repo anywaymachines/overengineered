@@ -3,7 +3,7 @@ export const ComponentInstance = {
 	init<T extends Instance>(state: IComponent, instance: T | undefined) {
 		if (!instance) throw "The provided instance is nil";
 
-		instance.Destroying.Connect(() => {
+		const destroyingSignal = instance!.Destroying.Connect(() => {
 			instance = undefined;
 			state.destroy();
 		});
@@ -12,6 +12,7 @@ export const ComponentInstance = {
 			if (!instance) return;
 
 			try {
+				destroyingSignal.Disconnect();
 				instance.Destroy();
 			} catch (error) {
 				print(`Could not destroy instance ${this}: ${error}`);

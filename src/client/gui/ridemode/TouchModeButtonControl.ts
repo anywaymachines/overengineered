@@ -1,7 +1,7 @@
-import Signal from "@rbxts/signal";
 import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
 import Gui from "client/gui/Gui";
 import { TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import Signal from "shared/event/Signal";
 
 export type TouchModeButtonData = {
 	readonly name: string;

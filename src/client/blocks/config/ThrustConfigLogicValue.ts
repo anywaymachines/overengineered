@@ -96,6 +96,6 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigType
 	}
 
 	protected createObservable(): ObservableValue<number> {
-		return new NumberObservableValue(0, 0, 100, 0.01);
+		return new NumberObservableValue<number>(0, 0, 100, 0.01);
 	}
 }

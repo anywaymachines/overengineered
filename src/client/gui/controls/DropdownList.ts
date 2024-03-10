@@ -19,7 +19,7 @@ export default class DropdownList<TValue extends string = string> extends Contro
 	constructor(gui: DropdownListDefinition, direction: "up" | "down" | "left" | "right") {
 		super(gui);
 
-		this.itemTemplate = Control.asTemplate(this.gui.Content.Template);
+		this.itemTemplate = this.asTemplate(this.gui.Content.Template);
 
 		this.button = this.add(new TextButtonControl(this.gui));
 		this.contents = this.add(new Control(this.gui.Content));

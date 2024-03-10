@@ -46,7 +46,7 @@ export class TabControl extends Control<TabControlDefinition> {
 
 	constructor(gui: TabControlDefinition) {
 		super(gui);
-		this.buttonTemplate = Control.asTemplate(gui.Tabs.Template);
+		this.buttonTemplate = this.asTemplate(gui.Tabs.Template);
 	}
 
 	addButton() {

@@ -1,9 +1,9 @@
 import { Players, RunService } from "@rbxts/services";
-import Signal from "@rbxts/signal";
+import Signal from "shared/event/Signal";
 import GameDefinitions from "./data/GameDefinitions";
 
 export default class Logger {
-	public static readonly onLog = new Signal<(text: string, error: boolean) => void>();
+	static readonly onLog = new Signal<(text: string, error: boolean) => void>();
 
 	static info(msg: string) {
 		if (RunService.IsClient() === true) {

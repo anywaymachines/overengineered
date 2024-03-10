@@ -1,5 +1,4 @@
 import { HttpService, Players } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
@@ -13,6 +12,7 @@ import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
+import Signal from "shared/event/Signal";
 import JSON from "shared/fixes/Json";
 
 export default class DeleteTool extends ToolBase {

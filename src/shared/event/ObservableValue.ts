@@ -1,7 +1,7 @@
-import Signal from "@rbxts/signal";
+import Signal, { ReadonlySignal } from "shared/event/Signal";
 
 export interface ReadonlyObservableValue<T> {
-	readonly changed: Pick<Signal<(value: T, prev: T) => void>, "Connect" | "ConnectParallel" | "Once" | "Wait">;
+	readonly changed: ReadonlySignal<(value: T, prev: T) => void>;
 
 	get(): T;
 
@@ -14,10 +14,8 @@ export interface ReadonlyObservableValue<T> {
 
 /** Stores a value and provides and event of it being changed */
 export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
-	public readonly changed: Pick<
-		Signal<(value: T, prev: T) => void>,
-		"Connect" | "ConnectParallel" | "Once" | "Wait"
-	> = new Signal<(value: T, prev: T) => void>();
+	readonly _changed = new Signal<(value: T, prev: T) => void>();
+	readonly changed = this._changed.asReadonly();
 
 	private value: T;
 
@@ -25,21 +23,21 @@ export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 		this.value = value;
 	}
 
-	public set(value: T, forceSet = false) {
+	set(value: T, forceSet = false) {
 		value = this.processValue(value);
 
 		if (!forceSet && this.value === value) return;
 		const prev = this.get();
 
 		this.value = value;
-		(this.changed as Signal<(value: T, prev: T) => void>).Fire(value, prev);
+		this._changed.Fire(value, prev);
 	}
 
-	public get() {
+	get() {
 		return this.value;
 	}
 
-	public triggerChanged() {
+	triggerChanged() {
 		this.set(this.value, true);
 	}
 
@@ -49,7 +47,7 @@ export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 	}
 
 	/** Subscribes to the value changed event */
-	public subscribe(func: (value: T, prev: T) => void, executeImmediately: boolean = false) {
+	subscribe(func: (value: T, prev: T) => void, executeImmediately: boolean = false) {
 		this.changed.Connect(func);
 
 		if (executeImmediately) {
@@ -58,17 +56,17 @@ export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 	}
 
 	/** Automatically sets the provided ObservableValue value to the current one. */
-	public autoSet(observable: ObservableValue<T>, funcProvider?: (value: T) => T) {
+	autoSet(observable: ObservableValue<T>, funcProvider?: (value: T) => T) {
 		this.subscribe((value) => observable.set(funcProvider === undefined ? value : funcProvider(value)), true);
 	}
 
 	/** Binds to the other ObservableValue, making their values to share their value and events. */
-	public bindTo(observable: ObservableValue<T>) {
+	bindTo(observable: ObservableValue<T>) {
 		this.subscribe((value) => observable.set(value));
 		observable.subscribe((value) => this.set(value), true);
 	}
 
-	public createChild<TKey extends keyof NonNullable<T>>(key: TKey, def: NonNullable<T>[TKey]) {
+	createChild<TKey extends keyof NonNullable<T>>(key: TKey, def: NonNullable<T>[TKey]) {
 		const observable = new ObservableValue(this.value?.[key] ?? def);
 		this.subscribe((value) => observable.set(value?.[key] ?? def));
 		observable.subscribe((value) => {
@@ -80,7 +78,7 @@ export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 
 		return observable;
 	}
-	public createNullableChild<TKey extends keyof NonNullable<T>>(
+	createNullableChild<TKey extends keyof NonNullable<T>>(
 		key: TKey,
 		def: NonNullable<T>[TKey] | undefined,
 	): ReadonlyObservableValue<NonNullable<T>[TKey] | undefined> {

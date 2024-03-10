@@ -1,12 +1,14 @@
+import { ReadonlySignal } from "shared/event/Signal";
+
 /** Killable EventHandler for roblox connections */
 export default class EventHandler {
-	private readonly events: RBXScriptConnection[] = [];
+	private readonly events: { Disconnect(): void }[] = [];
 
 	/** The function of registering an event
 	 * @param signal A signal. Example: `UserInputService.InputChanged`
 	 * @param callback Callback
 	 */
-	subscribe<T extends Callback = Callback>(signal: RBXScriptSignal<T>, callback: T) {
+	subscribe<T extends Callback = Callback>(signal: ReadonlySignal<T>, callback: T) {
 		this.events.push(signal.Connect(callback));
 	}
 

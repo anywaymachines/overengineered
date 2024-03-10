@@ -1,11 +1,10 @@
 import { Players, Workspace } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
-import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import SharedPlots from "shared/building/SharedPlots";
 import EventHandler from "shared/event/EventHandler";
+import Signal from "shared/event/Signal";
 
 export default class BoxSelector extends ClientComponent {
 	readonly submitted = new Signal<(blocks: readonly BlockModel[]) => void>();
@@ -15,7 +14,7 @@ export default class BoxSelector extends ClientComponent {
 
 		const camera = Workspace.CurrentCamera!;
 		const mouse = Players.LocalPlayer.GetMouse();
-		const template = Control.asTemplate(
+		const template = this.asTemplate(
 			Gui.getGameUI<{ Templates: { Selection: GuiObject } }>().Templates.Selection,
 			false,
 		);

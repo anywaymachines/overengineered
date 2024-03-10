@@ -1,5 +1,5 @@
-import Signal from "@rbxts/signal";
 import Control from "client/gui/Control";
+import Signal from "shared/event/Signal";
 import Objects from "shared/fixes/objects";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";

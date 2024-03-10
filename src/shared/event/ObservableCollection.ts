@@ -1,4 +1,4 @@
-import Signal from "@rbxts/signal";
+import Signal, { ReadonlySignal } from "shared/event/Signal";
 
 export type CollectionChangedArgs<T> =
 	| { readonly kind: "add"; readonly added: readonly T[] }
@@ -6,7 +6,7 @@ export type CollectionChangedArgs<T> =
 	| { readonly kind: "clear" };
 
 export interface ReadonlyObservableCollection<T extends defined> {
-	readonly changed: Signal<(collectionChangedType: CollectionChangedArgs<T>) => void>;
+	readonly changed: ReadonlySignal<(collectionChangedType: CollectionChangedArgs<T>) => void>;
 
 	size(): number;
 }
@@ -18,7 +18,8 @@ export interface ReadonlyObservableCollectionSet<T extends defined> extends Read
 }
 
 abstract class ObservableCollectionBase<T extends defined> implements ReadonlyObservableCollection<T> {
-	readonly changed = new Signal<(collectionChangedType: CollectionChangedArgs<T>) => void>();
+	private readonly _changed = new Signal<(collectionChangedType: CollectionChangedArgs<T>) => void>();
+	readonly changed = this._changed.asReadonly();
 
 	abstract size(): number;
 
@@ -35,17 +36,17 @@ abstract class ObservableCollectionBase<T extends defined> implements ReadonlyOb
 	/** Add the provided items */
 	add(...items: readonly T[]) {
 		items = this._add(...items);
-		this.changed.Fire({ kind: "add", added: items });
+		this._changed.Fire({ kind: "add", added: items });
 	}
 	/** Remove the provided items */
 	remove(...items: readonly T[]) {
 		items = this._remove(...items);
-		this.changed.Fire({ kind: "remove", removed: items });
+		this._changed.Fire({ kind: "remove", removed: items });
 	}
 	/** Clear the collection */
 	clear() {
 		this._clear();
-		this.changed.Fire({ kind: "clear" });
+		this._changed.Fire({ kind: "clear" });
 	}
 
 	asReadonly(): ReadonlyObservableCollection<T> {

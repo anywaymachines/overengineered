@@ -1,6 +1,6 @@
 import { Lighting, TweenService } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import { Element } from "shared/Element";
+import Signal from "shared/event/Signal";
 import { Colors } from "./Colors";
 import Control from "./Control";
 import Gui from "./Gui";
@@ -17,21 +17,12 @@ export default class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 		Popup.onAnyShow.Connect(() => Popup.tweenBlur(12));
 		Popup.onAllHide.Connect(() => Popup.tweenBlur(0));
 	}
+
+	private readonly parentScreen: ScaledScreenGui<ScreenGui>;
 	constructor(gui: T) {
 		super(gui);
-	}
 
-	private static tweenBlur(size: number) {
-		TweenService.Create(Popup.blur, new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			Size: size,
-		}).Play();
-	}
-
-	show() {
-		super.show();
-		Popup.onAnyShow.Fire();
-
-		new ScaledScreenGui(
+		this.parentScreen = new ScaledScreenGui(
 			Element.create(
 				"ScreenGui",
 				{ Name: tostring(this), Parent: Popup.popupsScreenGui, IgnoreGuiInset: true },
@@ -44,12 +35,24 @@ export default class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 					popup: this.instance,
 				},
 			),
-		).enable();
+		);
+	}
+
+	private static tweenBlur(size: number) {
+		TweenService.Create(Popup.blur, new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Size: size,
+		}).Play();
+	}
+
+	show() {
+		super.show();
+		this.parentScreen.enable();
+		Popup.onAnyShow.Fire();
 	}
 	hide() {
 		super.hide();
+		this.parentScreen.instance.Destroy();
 		Popup.onAnyHide.Fire();
-		this.instance.Parent?.Destroy();
 
 		// 1 for UIScale
 		if (Popup.popupsScreenGui.GetChildren().size() === 1) {

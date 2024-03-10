@@ -1,5 +1,4 @@
 import { ReplicatedFirst, ReplicatedStorage, Workspace } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import { TerrainData, TerrainInfo } from "shared/TerrainDataInfo";
 
 const folder = ReplicatedFirst.WaitForChild("Terrain") as Folder & TerrainInfo;
@@ -82,13 +81,20 @@ const GetHeight = (x: number, z: number) => {
 	return height;
 };
 
+export type TerrainActor = {
+	Load: BindableEvent<(chunkX: number, chunkZ: number, loadFoliage: boolean) => void>;
+	Unload: BindableEvent<(chunkX: number, chunkZ: number) => void>;
+	Loaded: BindableEvent<(chunkX: number, chunkZ: number) => void>;
+};
 const infterrainActor = {
-	Load: new Signal<(chunkX: number, chunkZ: number, loadFoliage: boolean) => void>(),
-	Loaded: new Signal<(chunkX: number, chunkZ: number) => void>(),
-	Unload: new Signal<(chunkX: number, chunkZ: number) => void>(),
+	Load: new Instance("BindableEvent") as BindableEvent<
+		(chunkX: number, chunkZ: number, loadFoliage: boolean) => void
+	>,
+	Loaded: new Instance("BindableEvent") as BindableEvent<(chunkX: number, chunkZ: number) => void>,
+	Unload: new Instance("BindableEvent") as BindableEvent<(chunkX: number, chunkZ: number) => void>,
 } as const;
 
-infterrainActor.Load.ConnectParallel((chunkX: number, chunkZ: number, loadFoliage: boolean) => {
+infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, loadFoliage: boolean) => {
 	const startX = chunkX * chunkSize;
 	const startZ = chunkZ * chunkSize;
 	const endX = startX + chunkSize - 1;
@@ -326,7 +332,7 @@ infterrainActor.Load.ConnectParallel((chunkX: number, chunkZ: number, loadFoliag
 	}
 });
 
-infterrainActor.Unload.ConnectParallel((chunkX: number, chunkZ: number) => {
+infterrainActor.Unload.Event.ConnectParallel((chunkX: number, chunkZ: number) => {
 	const startX = chunkX * chunkSize;
 	const startZ = chunkZ * chunkSize;
 	const endX = startX + chunkSize - 1;

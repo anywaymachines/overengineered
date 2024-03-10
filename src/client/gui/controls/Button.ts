@@ -1,11 +1,11 @@
-import Signal from "@rbxts/signal";
 import SoundController from "client/controller/SoundController";
 import Control from "client/gui/Control";
 import { Element, ElementProperties } from "shared/Element";
+import Signal from "shared/event/Signal";
 
 export type ButtonDefinition = GuiButton;
 export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extends Control<T> {
-	public readonly activated = new Signal<() => void>();
+	readonly activated = new Signal();
 
 	constructor(gui: T, activated?: () => void) {
 		super(gui);
@@ -25,7 +25,7 @@ export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extend
 
 export type TextButtonDefinition = (GuiButton & { readonly TextLabel: TextLabel }) | TextButton;
 export class TextButtonControl<T extends TextButtonDefinition = TextButtonDefinition> extends ButtonControl<T> {
-	public readonly text;
+	readonly text;
 
 	constructor(gui: T, activated?: () => void) {
 		super(gui, activated);

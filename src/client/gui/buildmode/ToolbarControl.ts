@@ -75,7 +75,7 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 		// Disable roblox native backpack
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
-		const template = Control.asTemplate(this.gui.Buttons.Template);
+		const template = this.asTemplate(this.gui.Buttons.Template);
 		const toolButtons = new Control<GuiObject, ToolbarButtonControl>(this.gui.Buttons);
 		this.add(toolButtons);
 

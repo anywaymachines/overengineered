@@ -1,5 +1,4 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import Machine from "client/blocks/Machine";
 import InputController from "client/controller/InputController";
@@ -17,6 +16,7 @@ import RobloxUnit from "shared/RobloxUnit";
 import SlotsMeta from "shared/SlotsMeta";
 import RocketEngineLogic from "shared/block/logic/RocketEngineLogic";
 import EventHandler from "shared/event/EventHandler";
+import Signal from "shared/event/Signal";
 
 export type ActionBarControlDefinition = GuiObject & {
 	readonly Stop: GuiButton;
@@ -90,7 +90,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 	constructor(gui: RideModeControlsDefinition) {
 		super(gui);
 
-		this.overlayTemplate = Control.asTemplate(this.gui.Overlay);
+		this.overlayTemplate = this.asTemplate(this.gui.Overlay);
 
 		this.event.onDisable(() => {
 			if (this.quitSettingsMode) {
@@ -332,8 +332,8 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		this.info = new Control(this.gui.Info);
 		this.add(this.info);
 
-		this.infoTemplate = Control.asTemplate(this.gui.Info.Template);
-		this.infoTextTemplate = Control.asTemplate(this.gui.Info.TextTemplate);
+		this.infoTemplate = this.asTemplate(this.gui.Info.Template);
+		this.infoTextTemplate = this.asTemplate(this.gui.Info.TextTemplate);
 	}
 
 	private addMeters(machine: Machine) {
@@ -444,7 +444,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 	}
 
-	public start(machine: Machine) {
+	start(machine: Machine) {
 		if (InputController.inputType.get() === "Touch") {
 			this.controls.start(machine);
 		}

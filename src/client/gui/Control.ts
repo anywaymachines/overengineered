@@ -1,4 +1,3 @@
-import Signal from "@rbxts/signal";
 import { ClientInstanceComponent } from "client/component/ClientInstanceComponent";
 
 /** A component that is a GUI element */
@@ -6,12 +5,6 @@ export default class Control<
 	T extends GuiObject = GuiObject,
 	TChild extends IComponent = IComponent,
 > extends ClientInstanceComponent<T, TChild> {
-	/** Signal that fires when this element is shown */
-	readonly onShow = new Signal<() => void>();
-
-	/** Signal that fires when this element is hidden */
-	readonly onHide = new Signal<() => void>();
-
 	private visible;
 	protected readonly gui: T;
 
@@ -51,7 +44,6 @@ export default class Control<
 		this.instance.Visible = true;
 
 		this.enable();
-		this.onShow.Fire();
 	}
 
 	/** Hide the control and disable it with the children */
@@ -60,7 +52,6 @@ export default class Control<
 		this.instance.Visible = false;
 
 		this.disable();
-		this.onHide.Fire();
 	}
 
 	readonly setVisible = (visible: boolean) => (visible ? this.show() : this.hide());

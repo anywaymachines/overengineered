@@ -1,5 +1,5 @@
-import Signal from "@rbxts/signal";
 import { ClientComponent } from "client/component/ClientComponent";
+import Signal from "shared/event/Signal";
 import Objects from "shared/fixes/objects";
 
 /*
@@ -7,8 +7,8 @@ import Objects from "shared/fixes/objects";
 	When a key is released, invoke keyUp()
 */
 export default class KeyPressingController<TKeys extends string> {
-	public readonly onKeyDown = new Signal<(key: TKeys) => void>();
-	public readonly onKeyUp = new Signal<(key: TKeys) => void>();
+	readonly onKeyDown = new Signal<(key: TKeys) => void>();
+	readonly onKeyUp = new Signal<(key: TKeys) => void>();
 	private readonly pressed: TKeys[] = [];
 
 	isDown(key: TKeys) {

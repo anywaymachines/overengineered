@@ -9,13 +9,13 @@ class ComponentBase {
 	private readonly onDestroyed = new SlimSignal();
 
 	private selfEnabled = false;
-	private selfDisabled = false;
+	private selfDestroyed = false;
 
 	isEnabled(): boolean {
 		return this.selfEnabled;
 	}
 	isDestroyed(): boolean {
-		return this.selfDisabled;
+		return this.selfDestroyed;
 	}
 
 	onEnable(func: () => void): void {
@@ -29,24 +29,28 @@ class ComponentBase {
 	}
 
 	enable(): void {
-		if (this.selfDisabled || this.selfEnabled) return;
+		if (this.selfDestroyed || this.selfEnabled) return;
 
 		this.selfEnabled = true;
 		this.onEnabled.Fire();
 	}
 	disable(): void {
-		if (this.selfDisabled || !this.selfEnabled) return;
+		if (this.selfDestroyed || !this.selfEnabled) return;
 
 		this.selfEnabled = false;
 		this.onDisabled.Fire();
 	}
 	destroy(): void {
-		if (this.selfDisabled) return;
+		if (this.selfDestroyed) return;
 
 		this.disable();
 
-		this.selfDisabled = true;
+		this.selfDestroyed = true;
 		this.onDestroyed.Fire();
+
+		this.onEnabled.destroy();
+		this.onDisabled.destroy();
+		this.onDestroyed.destroy();
 	}
 }
 
@@ -59,10 +63,21 @@ export class Component extends ComponentBase implements IComponent, IDebuggableC
 		super();
 	}
 
-	/** Return a function that returns a copy of the provided Instance; Destroys the Instance if specified */
-	static asTemplate<T extends Instance>(object: T, destroyOriginal = true) {
+	/**
+	 * Return a function that returns a copy of the provided Instance. Destroys the Instance if specified.
+	 * Leaks the memory, use only in static context.
+	 */
+	static asTemplateWithMemoryLeak<T extends Instance>(object: T, destroyOriginal = true) {
 		const template = object.Clone();
 		if (destroyOriginal) object.Destroy();
+
+		return () => template.Clone();
+	}
+	/** Return a function that returns a copy of the provided Instance; Destroys the original if specified */
+	protected asTemplate<T extends Instance>(object: T, destroyOriginal = true) {
+		const template = object.Clone();
+		if (destroyOriginal) object.Destroy();
+		this.onDestroy(() => template.Destroy());
 
 		return () => template.Clone();
 	}

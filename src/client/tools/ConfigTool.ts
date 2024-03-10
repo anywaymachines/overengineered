@@ -1,4 +1,3 @@
-import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
@@ -6,6 +5,7 @@ import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import Signal from "shared/event/Signal";
 import Objects from "shared/fixes/objects";
 
 export default class ConfigTool extends ToolBase {

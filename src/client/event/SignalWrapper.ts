@@ -34,12 +34,15 @@ export class SignalWrapper<TArgs extends readonly unknown[]>
 {
 	private readonly events = new Map<Callback, Callback>();
 	private connection: SignalWrapperConnection | undefined;
+	private destroyed = false;
 
 	constructor(signal: RBXScriptSignal<CallbackOf<TArgs>> | ISignalWrapper<TArgs>) {
 		super(signal);
 	}
 
 	subscribe(callback: CallbackOf<TArgs>): SignalWrapperConnection {
+		if (this.destroyed) return () => {};
+
 		this.connection ??= this.signal.subscribe((...args) => {
 			for (const [_, event] of [...this.events]) {
 				event(...args);
@@ -55,6 +58,7 @@ export class SignalWrapper<TArgs extends readonly unknown[]>
 	}
 
 	destroy(): void {
+		this.destroyed = true;
 		this.unsubscribeAll();
 		this.connection?.();
 	}
@@ -63,12 +67,15 @@ export class SignalWrapper<TArgs extends readonly unknown[]>
 export class ThinSignalWrapper<TArgs extends readonly unknown[]> extends SignalWrapperBase<TArgs> {
 	private readonly events: Callback[] = [];
 	private connection: SignalWrapperConnection | undefined;
+	private destroyed = false;
 
 	constructor(signal: RBXScriptSignal<CallbackOf<TArgs>> | ISignalWrapper<TArgs>) {
 		super(signal);
 	}
 
 	subscribe(callback: CallbackOf<TArgs>): void {
+		if (this.destroyed) return;
+
 		this.connection ??= this.signal.subscribe((...args) => {
 			for (const event of this.events) {
 				event(...args);
@@ -83,6 +90,7 @@ export class ThinSignalWrapper<TArgs extends readonly unknown[]> extends SignalW
 	}
 
 	destroy(): void {
+		this.destroyed = true;
 		this.unsubscribeAll();
 		this.connection?.();
 	}

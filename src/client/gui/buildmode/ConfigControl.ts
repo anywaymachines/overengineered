@@ -1,4 +1,3 @@
-import Signal from "@rbxts/signal";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import CheckBoxControl, { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
@@ -8,6 +7,7 @@ import KeyChooserControl, { KeyChooserControlDefinition } from "client/gui/contr
 import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import SliderControl, { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import TextBoxControl, { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
+import Signal from "shared/event/Signal";
 import Objects from "shared/fixes/objects";
 
 type PartialIfObject<T> = T extends CheckableTypes[Exclude<keyof CheckableTypes, keyof CheckablePrimitives>]
@@ -39,14 +39,14 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 		super(gui);
 
 		const templates = Gui.getGameUI<{ Templates: { Config: Template } }>().Templates.Config;
-		this.connectedTemplate = Control.asTemplate(templates.ConnectedTemplate, false);
-		this.checkboxTemplate = Control.asTemplate(templates.CheckboxTemplate, false);
-		this.keyTemplate = Control.asTemplate(templates.KeyTemplate, false);
-		this.sliderTemplate = Control.asTemplate(templates.SliderTemplate, false);
-		this.numberTemplate = Control.asTemplate(templates.NumberTemplate, false);
-		this.stringTemplate = Control.asTemplate(templates.NumberTemplate, false);
-		this.multiTemplate = Control.asTemplate(templates.MultiTemplate, false);
-		this.multiMultiTemplate = Control.asTemplate(templates.MultiMultiTemplate, false);
+		this.connectedTemplate = this.asTemplate(templates.ConnectedTemplate, false);
+		this.checkboxTemplate = this.asTemplate(templates.CheckboxTemplate, false);
+		this.keyTemplate = this.asTemplate(templates.KeyTemplate, false);
+		this.sliderTemplate = this.asTemplate(templates.SliderTemplate, false);
+		this.numberTemplate = this.asTemplate(templates.NumberTemplate, false);
+		this.stringTemplate = this.asTemplate(templates.StringTemplate, false);
+		this.multiTemplate = this.asTemplate(templates.MultiTemplate, false);
+		this.multiMultiTemplate = this.asTemplate(templates.MultiMultiTemplate, false);
 	}
 
 	set<TDef extends BlockConfigDefinitions>(
@@ -111,14 +111,14 @@ export class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control
 		super(gui);
 
 		const templates = Gui.getGameUI<{ Templates: { Config: Template } }>().Templates.Config;
-		this.connectedTemplate = Control.asTemplate(templates.ConnectedTemplate, false);
-		this.checkboxTemplate = Control.asTemplate(templates.CheckboxTemplate, false);
-		this.keyTemplate = Control.asTemplate(templates.KeyTemplate, false);
-		this.sliderTemplate = Control.asTemplate(templates.SliderTemplate, false);
-		this.numberTemplate = Control.asTemplate(templates.NumberTemplate, false);
-		this.stringTemplate = Control.asTemplate(templates.StringTemplate, false);
-		this.thrustTemplate = Control.asTemplate(templates.MultiTemplate, false);
-		this.multiMultiTemplate = Control.asTemplate(templates.MultiMultiTemplate, false);
+		this.connectedTemplate = this.asTemplate(templates.ConnectedTemplate, false);
+		this.checkboxTemplate = this.asTemplate(templates.CheckboxTemplate, false);
+		this.keyTemplate = this.asTemplate(templates.KeyTemplate, false);
+		this.sliderTemplate = this.asTemplate(templates.SliderTemplate, false);
+		this.numberTemplate = this.asTemplate(templates.NumberTemplate, false);
+		this.stringTemplate = this.asTemplate(templates.StringTemplate, false);
+		this.thrustTemplate = this.asTemplate(templates.MultiTemplate, false);
+		this.multiMultiTemplate = this.asTemplate(templates.MultiMultiTemplate, false);
 
 		for (const [id, def] of Objects.pairs(definition)) {
 			if (def.configHidden) continue;
@@ -250,7 +250,7 @@ export class KeyBoolConfigValueControl extends ConfigValueControl<ConfigControlD
 	) {
 		super(templates.multi(), definition.displayName);
 
-		const controlTemplate = Control.asTemplate(this.gui.Control);
+		const controlTemplate = this.asTemplate(this.gui.Control);
 
 		const def: Partial<
 			Record<keyof BlockConfigDefinitionRegistry["keybool"]["config"], BlockConfigTypes.Definition>

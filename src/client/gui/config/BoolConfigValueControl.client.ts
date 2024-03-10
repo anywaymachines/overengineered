@@ -1,5 +1,5 @@
-import Signal from "@rbxts/signal";
 import CheckBoxControl, { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
+import Signal from "shared/event/Signal";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";

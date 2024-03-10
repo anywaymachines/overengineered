@@ -1,5 +1,4 @@
 import { GuiService, HttpService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
@@ -16,6 +15,7 @@ import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
+import Signal from "shared/event/Signal";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 import VectorUtils from "shared/utils/VectorUtils";

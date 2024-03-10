@@ -1,5 +1,4 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import { AdminMessageController } from "client/AdminMessageController";
 import InputController from "client/controller/InputController";
 import Control from "client/gui/Control";
@@ -12,7 +11,7 @@ import GameDefinitions from "shared/data/GameDefinitions";
 import Objects from "shared/fixes/objects";
 
 const enabled = RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer);
-if (!enabled) new Signal().Wait();
+if (!enabled) new Instance("BindableEvent").Event.Wait();
 task.wait(0.5); // wait for the controls to enable
 
 let destroy: (() => void) | undefined;

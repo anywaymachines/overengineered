@@ -1,9 +1,10 @@
 import EventHandler from "shared/event/EventHandler";
 import type { CollectionChangedArgs, ReadonlyObservableCollection } from "shared/event/ObservableCollection";
 import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import { ReadonlySignal } from "shared/event/Signal";
 import JSON, { JsonSerializablePrimitive } from "shared/fixes/Json";
 
-type Sub<T extends Callback> = readonly [signal: RBXScriptSignal<T>, callback: T];
+type Sub<T extends Callback> = readonly [signal: ReadonlySignal<T>, callback: T];
 
 /** Event handler with the ability to disable event processing */
 export class ComponentEvents {
@@ -26,7 +27,6 @@ export class ComponentEvents {
 		this.eventHandler.unsubscribeAll();
 	}
 	private destroy() {
-		this.disable();
 		this.events.clear();
 	}
 
@@ -53,7 +53,8 @@ export class ComponentEvents {
 	}
 
 	/** Register an event */
-	subscribe<T extends Callback = Callback>(signal: RBXScriptSignal<T>, callback: T): void {
+	subscribe<T extends Callback = Callback>(signal: ReadonlySignal<T>, callback: T): void {
+		if (this.state.isDestroyed()) return;
 		this.sub(this.events, [signal, callback]);
 	}
 
@@ -127,7 +128,7 @@ export class ComponentEvents {
 		this.subscribe(instance.GetAttributeChangedSignal(name), () =>
 			observable.set(instance.GetAttribute(name) as TType | undefined),
 		);
-		this.subscribeObservable2(observable, (value) => instance.SetAttribute(name, value), true);
+		this.subscribeObservable2(observable, (value) => instance.SetAttribute(name, value));
 
 		return observable;
 	}

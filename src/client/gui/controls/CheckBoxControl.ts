@@ -1,6 +1,6 @@
-import Signal from "@rbxts/signal";
 import Control from "client/gui/Control";
 import ObservableValue from "shared/event/ObservableValue";
+import Signal from "shared/event/Signal";
 
 export type CheckBoxControlDefinition = TextButton & {
 	readonly Enabled: GuiObject;
@@ -9,8 +9,8 @@ export type CheckBoxControlDefinition = TextButton & {
 
 /** Control that represents a boolean */
 export default class CheckBoxControl extends Control<CheckBoxControlDefinition> {
-	public readonly submitted = new Signal<(value: boolean) => void>();
-	public readonly value = new ObservableValue<boolean | undefined>(false);
+	readonly submitted = new Signal<(value: boolean) => void>();
+	readonly value = new ObservableValue<boolean | undefined>(false);
 
 	constructor(gui: CheckBoxControlDefinition) {
 		super(gui);

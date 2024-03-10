@@ -1,13 +1,12 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import InputController from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import { ButtonControl } from "client/gui/controls/Button";
+import { rootComponents } from "client/test/RootComponents";
 import { Element } from "shared/Element";
 import GameDefinitions from "shared/data/GameDefinitions";
-import { rootComponents } from "client/test/RootComponents";
 
 type TreeControlDefinition = GuiObject & {
 	readonly Main: GuiButton;
@@ -150,7 +149,7 @@ const toggle = () => {
 };
 
 const launch = RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer);
-if (!launch) new Signal<() => void>().Wait();
+if (!launch) new Instance("BindableEvent").Event.Wait();
 task.wait(0.5); // wait for the controls to enable
 
 UserInputService.InputBegan.Connect((input) => {

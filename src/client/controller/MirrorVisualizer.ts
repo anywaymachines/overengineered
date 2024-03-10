@@ -1,6 +1,5 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import Control from "client/gui/Control";
 import ObservableValue from "shared/event/ObservableValue";
 
 export default class MirrorVisualizer extends ClientComponent {
@@ -11,7 +10,7 @@ export default class MirrorVisualizer extends ClientComponent {
 	constructor() {
 		super();
 
-		this.template = Control.asTemplate(ReplicatedStorage.WaitForChild("Assets").WaitForChild("Mirror") as Part);
+		this.template = this.asTemplate(ReplicatedStorage.WaitForChild("Assets").WaitForChild("Mirror") as Part);
 
 		this.mirrorMode.subscribe(() => this.recreate());
 		this.plot.subscribe((plot, prev) => {

@@ -1,18 +1,18 @@
 import { Workspace } from "@rbxts/services";
-import Signal from "@rbxts/signal";
+import Signal from "shared/event/Signal";
 
 /** Class for working with local networking signals */
 export default class Signals {
-	public static readonly CAMERA = {
+	static readonly CAMERA = {
 		MOVED: (Workspace.CurrentCamera as Camera).GetPropertyChangedSignal("CFrame"),
 	} as const;
 
-	public static readonly PLAYER = {
+	static readonly PLAYER = {
 		SPAWN: this.registerSignal(new Signal<() => void>()),
 		DIED: this.registerSignal(new Signal<() => void>()),
 	} as const;
 
-	public static readonly BLOCKS = {
+	static readonly BLOCKS = {
 		BLOCK_ADDED: this.registerSignal(new Signal<(block: Model) => void>()),
 		BLOCK_REMOVED: this.registerSignal(new Signal<(block: Model) => void>()),
 		BLOCKS_MOVED: this.registerSignal(new Signal<(offset: Vector3) => void>()),

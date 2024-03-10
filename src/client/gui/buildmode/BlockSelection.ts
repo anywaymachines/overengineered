@@ -61,8 +61,8 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 		this.list = this.add(new Control<ScrollingFrame, BlockControl | CategoryControl>(this.gui.ScrollingFrame));
 
 		// Prepare templates
-		this.blockTemplate = Control.asTemplate(this.gui.ScrollingFrame.BlockButtonTemplate);
-		this.categoryTemplate = Control.asTemplate(this.gui.ScrollingFrame.CategoryButtonTemplate);
+		this.blockTemplate = this.asTemplate(this.gui.ScrollingFrame.BlockButtonTemplate);
+		this.categoryTemplate = this.asTemplate(this.gui.ScrollingFrame.CategoryButtonTemplate);
 
 		this.event.subscribeObservable(this.selectedCategory, (category) => this.create(category, true), true);
 

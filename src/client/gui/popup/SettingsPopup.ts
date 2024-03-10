@@ -1,4 +1,3 @@
-import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
@@ -8,6 +7,7 @@ import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui
 import SliderControl, { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import ToggleControl, { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
+import Signal from "shared/event/Signal";
 import Objects from "shared/fixes/objects";
 
 export type Templates = {
@@ -41,10 +41,10 @@ class ConfigControl<TDef extends PlayerConfigTypes.Definitions> extends Control<
 		super(gui);
 
 		const templates = Gui.getGameUI<{ Templates: { PlayerConfig: Template } }>().Templates.PlayerConfig;
-		this.toggleTemplate = Control.asTemplate(templates.ToggleTemplate, false);
-		this.numberTemplate = Control.asTemplate(templates.NumberTemplate, false);
-		this.sliderTemplate = Control.asTemplate(templates.SliderTemplate, false);
-		this.dayCycleTemplate = Control.asTemplate(templates.MultiTemplate, false);
+		this.toggleTemplate = this.asTemplate(templates.ToggleTemplate, false);
+		this.numberTemplate = this.asTemplate(templates.NumberTemplate, false);
+		this.sliderTemplate = this.asTemplate(templates.SliderTemplate, false);
+		this.dayCycleTemplate = this.asTemplate(templates.MultiTemplate, false);
 
 		if (config && definition) {
 			this.set(config, definition);

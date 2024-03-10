@@ -1,13 +1,13 @@
-import Signal from "@rbxts/signal";
 import Control from "client/gui/Control";
 import ObservableValue from "shared/event/ObservableValue";
+import Signal from "shared/event/Signal";
 
 export type TextBoxControlDefinition = TextBox;
 
 /** Control that represents a text value */
 export default class TextBoxControl extends Control<TextBoxControlDefinition> {
-	public readonly submitted = new Signal<(value: string) => void>();
-	public readonly text;
+	readonly submitted = new Signal<(value: string) => void>();
+	readonly text;
 
 	constructor(gui: TextBoxControlDefinition) {
 		super(gui);

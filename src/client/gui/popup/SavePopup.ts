@@ -1,5 +1,4 @@
 import { Players } from "@rbxts/services";
-import Signal from "@rbxts/signal";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
@@ -10,8 +9,10 @@ import TextBoxControl from "client/gui/controls/TextBoxControl";
 import ConfirmPopup from "client/gui/popup/ConfirmPopup";
 import Serializer from "shared/Serializer";
 import SlotsMeta from "shared/SlotsMeta";
+import { TransformService } from "shared/component/TransformService";
 import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
+import Signal from "shared/event/Signal";
 
 type SaveItemDefinition = GuiButton & {
 	readonly ImageLabel: ImageLabel;
@@ -26,7 +27,7 @@ class SaveItem extends ButtonControl<SaveItemDefinition> {
 		super(gui);
 		this.index = index;
 
-		this.event.subscribeObservable(
+		this.event.subscribeObservable2(
 			PlayerDataStorage.slots,
 			(slots) => {
 				const slot = SlotsMeta.get(slots, this.index);
@@ -60,25 +61,27 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 		this.event.onEnable(() => this.selectedSlot.set(alreadySelected));
 		this.selectedSlot.subscribe((value) => (SaveSlots.staticSelected = value));
 
-		this.template = Control.asTemplate(this.gui.Template);
+		this.template = this.asTemplate(this.gui.Template);
 
 		this.slots = new Control<SaveSlotsDefinition, SaveItem>(this.gui);
 		this.add(this.slots);
 
-		PlayerDataStorage.slots.subscribe((slots) => {
-			if (!slots) return;
+		this.event.subscribeObservable2(
+			PlayerDataStorage.slots,
+			(slots) => {
+				if (!slots) return;
 
-			this.slots.clear();
-			[...slots]
-				.sort((left, right) => left.index < right.index)
-				.forEach((slot) => {
-					const item = new SaveItem(this.template(), slot.index);
-					item.activated.Connect(() => this.selectedSlot.set(slot.index));
-					this.selectedSlot.subscribe((index) => item.selected.set(index === slot.index));
-					this.slots.add(item);
-				});
+				this.slots.clear();
+				[...slots]
+					.sort((left, right) => left.index < right.index)
+					.forEach((slot) => {
+						const item = new SaveItem(this.template(), slot.index);
+						item.activated.Connect(() => this.selectedSlot.set(slot.index));
+						this.selectedSlot.subscribe((index) => item.selected.set(index === slot.index));
+						this.slots.add(item);
+					});
 
-			/*const add = new Control(this.buyNewTemplate());
+				/*const add = new Control(this.buyNewTemplate());
 			add.getGui().Activated.Connect(() => {
 				const slotcount = this.slots.getChildren().size();
 
@@ -87,7 +90,9 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 				}
 			});
 			this.add(add);*/
-		}, true);
+			},
+			true,
+		);
 	}
 }
 
@@ -105,8 +110,8 @@ type SavePreviewDefinition = GuiButton & {
 };
 
 class SavePreview extends Control<SavePreviewDefinition> {
-	readonly onSave = new Signal<() => void>();
-	readonly onLoad = new Signal<() => void>();
+	readonly onSave = new Signal();
+	readonly onLoad = new Signal();
 
 	readonly selectedSlotIndex = new ObservableValue<number | undefined>(undefined);
 
@@ -252,9 +257,6 @@ export type SavePopupDefinition = GuiObject & {
 };
 
 export default class SavePopup extends Popup<SavePopupDefinition> {
-	private readonly slots;
-	private readonly preview;
-
 	static showPopup() {
 		const popup = new SavePopup(
 			Gui.getGameUI<{
@@ -266,18 +268,19 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 
 		popup.show();
 	}
+
+	private readonly preview;
 	constructor(gui: SavePopupDefinition) {
 		super(gui);
 
-		this.slots = new SaveSlots(this.gui.Slots.Content.ScrollingFrame);
-		this.add(this.slots);
+		const slots = new SaveSlots(this.gui.Slots.Content.ScrollingFrame);
+		this.add(slots);
 
 		this.preview = new SavePreview(this.gui.Slot);
 		this.add(this.preview);
-		this.preview.selectedSlotIndex.bindTo(this.slots.selectedSlot);
+		this.preview.selectedSlotIndex.bindTo(slots.selectedSlot);
 
 		this.event.subscribe(this.preview.onLoad, () => this.hide());
-		this.onShow.Connect(() => this.preview.selectedSlotIndex.triggerChanged());
 
 		this.add(new ButtonControl(this.gui.Slots.Buttons.CancelButton, () => this.hide()));
 		this.add(new ButtonControl(this.gui.Slots.Head.CloseButton, () => this.hide()));
@@ -285,6 +288,7 @@ export default class SavePopup extends Popup<SavePopupDefinition> {
 
 	show() {
 		super.show();
-		this.transform((transform) => transform.slideIn("top", 50, { duration: 0.2 }));
+		this.preview.selectedSlotIndex.triggerChanged();
+		TransformService.run(this.instance, (transform) => transform.slideIn("top", 50, { duration: 0.2 }));
 	}
 }

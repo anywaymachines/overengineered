@@ -1,4 +1,4 @@
-import Signal from "@rbxts/signal";
+import { ReadonlySignal } from "shared/event/Signal";
 import { ConfigValueControl } from "./ConfigValueControl";
 
 type Ctor<TKey extends keyof BlockConfigTypes.Types> = {
@@ -6,7 +6,7 @@ type Ctor<TKey extends keyof BlockConfigTypes.Types> = {
 		configs: Readonly<Record<BlockUuid, BlockConfigTypes.Types[TKey]["config"]>>,
 		definition: ConfigTypeToDefinition<BlockConfigTypes.Types[TKey]>,
 	): ConfigValueControl<GuiObject> & {
-		readonly submitted: Signal<
+		readonly submitted: ReadonlySignal<
 			(config: Readonly<Record<BlockUuid, BlockConfigTypes.Types[TKey]["config"]>>) => void
 		>;
 	};
