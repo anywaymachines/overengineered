@@ -11,7 +11,11 @@ explosionBase.Visible = false;
 
 export default class SpreadingFireController {
 	private static isPartBurnable(part: BasePart) {
-		if (!BlockManager.isActiveBlockPart(part) || (math.random(1, 8) !== 1 && part.Position.Y < 1)) {
+		if (
+			!BlockManager.isActiveBlockPart(part) ||
+			part.HasTag("Burn") ||
+			(math.random(1, 8) !== 1 && part.Position.Y < 1)
+		) {
 			return false;
 		}
 
