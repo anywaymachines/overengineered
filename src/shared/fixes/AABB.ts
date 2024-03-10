@@ -98,6 +98,17 @@ export class AABB {
 		return this.getCenterSizeData().size;
 	}
 
+	clampVector(vec: Vector3): Vector3 {
+		const min = this.getMin();
+		const max = this.getMax();
+
+		return new Vector3(
+			math.clamp(vec.X, min.X, max.X),
+			math.clamp(vec.Y, min.Y, max.Y),
+			math.clamp(vec.Z, min.Z, max.Z),
+		);
+	}
+
 	private getMinMaxData(): MinMaxData {
 		if (this.minMaxData) {
 			return this.minMaxData;
