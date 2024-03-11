@@ -12,12 +12,6 @@ export default class Signals {
 		DIED: this.registerSignal(new Signal<() => void>()),
 	} as const;
 
-	static readonly BLOCKS = {
-		BLOCK_ADDED: this.registerSignal(new Signal<(block: Model) => void>()),
-		BLOCK_REMOVED: this.registerSignal(new Signal<(block: Model) => void>()),
-		BLOCKS_MOVED: this.registerSignal(new Signal<(offset: Vector3) => void>()),
-	} as const;
-
 	private static registerSignal<T extends Signal>(signal: T): T {
 		return signal;
 	}

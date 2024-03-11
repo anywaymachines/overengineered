@@ -47,6 +47,11 @@ const SharedPlots = {
 		return undefined;
 	},
 
+	/** Returns the plot component by the plot model */
+	getPlotComponent: (plot: PlotModel): SharedPlot => {
+		return plotComponents.get(plot)!;
+	},
+
 	/** Returns the player owned plot */
 	getPlotComponentByOwnerID: (ownerID: number): SharedPlot => {
 		const plot = SharedPlots.tryGetPlotByOwnerID(ownerID);

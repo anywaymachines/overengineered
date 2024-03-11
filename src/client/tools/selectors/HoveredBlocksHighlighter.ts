@@ -1,6 +1,6 @@
 import { Players } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import Signals from "client/event/Signals";
+import { SharedPlot } from "shared/building/SharedPlot";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import ObservableValue from "shared/event/ObservableValue";
@@ -64,8 +64,7 @@ export class HoveredBlocksHighlighter extends ClientComponent {
 		};
 
 		const prepare = () => {
-			this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => updateTarget(false));
-			this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => updateTarget(false));
+			this.eventHandler.subscribe(SharedPlot.anyChanged, () => updateTarget(false));
 			this.inputHandler.onInputBegan(() => updateTarget(true));
 			this.inputHandler.onInputChanged(() => updateTarget(false));
 			this.inputHandler.onInputEnded(() => updateTarget(true));

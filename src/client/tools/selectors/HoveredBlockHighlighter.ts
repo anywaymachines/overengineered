@@ -4,6 +4,7 @@ import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
 import Gui from "client/gui/Gui";
 import BlockManager from "shared/building/BlockManager";
+import { SharedPlot } from "shared/building/SharedPlot";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import PlayerUtils from "shared/utils/PlayerUtils";
@@ -128,8 +129,7 @@ export default class HoveredBlockHighlighter extends ClientComponent {
 		};
 
 		const prepare = () => {
-			this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_ADDED, updatePosition);
-			this.eventHandler.subscribe(Signals.BLOCKS.BLOCK_REMOVED, updatePosition);
+			this.eventHandler.subscribe(SharedPlot.anyChanged, updatePosition);
 
 			if (InputController.inputType.get() === "Desktop") {
 				this.eventHandler.subscribe(mouse.Move, updatePosition);

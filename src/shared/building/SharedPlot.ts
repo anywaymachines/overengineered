@@ -1,10 +1,14 @@
+import { RunService } from "@rbxts/services";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import Signal from "shared/event/Signal";
 
 export class SharedPlot extends InstanceComponent<PlotModel> {
-	readonly blockAdded = new Signal<(block: BlockModel) => void>();
-	readonly blockRemoved = new Signal<(block: BlockModel) => void>();
+	/** @client */
+	private static readonly _anyChanged = new Signal<(plot: SharedPlot) => void>();
+	/** @client */
+	static readonly anyChanged = this._anyChanged.asReadonly();
 
+	readonly version;
 	readonly ownerId;
 	readonly whitelistedPlayers;
 	readonly blacklistedPlayers;
@@ -12,28 +16,43 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	constructor(instance: PlotModel) {
 		super(instance);
 
+		this.version = this.event.observableFromAttribute<number>(instance, "version");
+		if (RunService.IsClient()) {
+			this.version.subscribe(() => SharedPlot._anyChanged.Fire(this));
+		}
+
 		this.ownerId = this.event.observableFromAttribute<number>(instance, "ownerid");
 		this.whitelistedPlayers = this.event.observableFromAttributeJson<readonly number[]>(instance, "whitelisted");
 		this.blacklistedPlayers = this.event.observableFromAttributeJson<readonly number[]>(instance, "blacklisted");
 		this.whitelistedPlayers.set([5243461283]);
 
-		const subToBlocks = () => {
-			this.event.subscribe(instance.Blocks.ChildAdded, (child) => {
-				this.blockAdded.Fire(child as BlockModel);
-			});
-			this.event.subscribe(instance.Blocks.ChildRemoved, (child) => {
-				this.blockRemoved.Fire(child as BlockModel);
-			});
-		};
-		this.event.subscribe(this.instance.ChildAdded, (child) => {
-			if (!child.IsA("Model") || child.Name !== "Blocks") {
-				return;
-			}
+		if (RunService.IsClient()) {
+			const subToBlocks = () => {
+				this.event.subscribe(instance.Blocks.ChildAdded, (child) => {
+					if (child.IsA("Model")) {
+						while (!child.PrimaryPart) {
+							task.wait();
+						}
+					}
 
-			subToBlocks();
-		});
-		if (this.instance.FindFirstChild("Blocks")) {
-			subToBlocks();
+					SharedPlot._anyChanged.Fire(this);
+				});
+				this.event.subscribe(instance.Blocks.ChildRemoved, () => {
+					SharedPlot._anyChanged.Fire(this);
+				});
+			};
+
+			this.instance.ChildAdded.Connect((child) => {
+				if (!child.IsA("Model") || child.Name !== "Blocks") {
+					return;
+				}
+
+				print("sub to blocks");
+				subToBlocks();
+			});
+			if (this.instance.FindFirstChild("Blocks")) {
+				subToBlocks();
+			}
 		}
 	}
 

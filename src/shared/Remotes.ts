@@ -9,7 +9,7 @@ declare global {
 		readonly color: Color3;
 		readonly material: Enum.Material;
 		readonly location: CFrame;
-		readonly uuid: BlockUuid | undefined;
+		readonly uuid?: BlockUuid;
 	}
 	interface PlaceBlockByServerRequest extends PlaceBlockByPlayerRequest {
 		readonly uuid: BlockUuid;
@@ -36,12 +36,14 @@ declare global {
 	}
 
 	interface LogicConnectRequest {
+		readonly plot: PlotModel;
 		readonly outputBlock: BlockModel;
 		readonly outputConnection: BlockConnectionName;
 		readonly inputBlock: BlockModel;
 		readonly inputConnection: BlockConnectionName;
 	}
 	interface LogicDisconnectRequest {
+		readonly plot: PlotModel;
 		readonly inputBlock: BlockModel;
 		readonly inputConnection: BlockConnectionName;
 	}
@@ -57,13 +59,7 @@ const Remotes = Net.Definitions.Create({
 		FetchData: Net.Definitions.ServerAsyncFunction<() => PlayerDataResponse>(),
 	}),
 	Building: Net.Definitions.Namespace({
-		MoveRequest: Net.Definitions.ServerAsyncFunction<(data: PlayerMoveRequest) => Response>(),
-
 		UpdateConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
-
-		/** @deprecated */
-		UpdateLogicConnectionRequest:
-			Net.Definitions.ServerAsyncFunction<(data: UpdateLogicConnectionRequest) => Response>(),
 
 		PlaceBlocks: Net.Definitions.ServerAsyncFunction<(data: PlaceBlocksByPlayerRequest) => MultiBuildResponse>(),
 		DeleteBlocks: Net.Definitions.ServerAsyncFunction<(data: DeleteBlocksRequest) => Response>(),
@@ -71,7 +67,6 @@ const Remotes = Net.Definitions.Create({
 		LogicConnect: Net.Definitions.ServerAsyncFunction<(data: LogicConnectRequest) => Response>(),
 		LogicDisconnect: Net.Definitions.ServerAsyncFunction<(data: LogicDisconnectRequest) => Response>(),
 
-		Delete: Net.Definitions.ServerAsyncFunction<(data: PlayerDeleteBlockRequest) => Response>(),
 		Paint: Net.Definitions.ServerAsyncFunction<(data: PaintRequest) => Response>(),
 	}),
 	Slots: Net.Definitions.Namespace({

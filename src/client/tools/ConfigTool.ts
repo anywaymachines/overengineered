@@ -1,10 +1,10 @@
 import InputController from "client/controller/InputController";
-import Signals from "client/event/Signals";
 import LogControl from "client/gui/static/LogControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { SharedPlot } from "shared/building/SharedPlot";
 import Signal from "shared/event/Signal";
 import Objects from "shared/fixes/objects";
 
@@ -49,14 +49,16 @@ export default class ConfigTool extends ToolBase {
 		});
 		*/
 
-		this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, (model) => {
-			const removed = this.selected.filter((sel) => sel.Parent === model);
-
-			for (const sel of removed) {
-				sel.Destroy();
-				this.selected.remove(this.selected.indexOf(sel));
+		this.event.subscribe(SharedPlot.anyChanged, (plot) => {
+			if (!this.selected.any((s) => s.IsDescendantOf(plot.instance))) {
+				return;
 			}
 
+			for (const sel of this.selected) {
+				sel.Destroy();
+			}
+
+			this.selected.clear();
 			this.selectedBlocksChanged.Fire(this.selected);
 		});
 	}

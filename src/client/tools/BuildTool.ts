@@ -6,13 +6,13 @@ import { Colors } from "client/gui/Colors";
 import Gui from "client/gui/Gui";
 import LogControl from "client/gui/static/LogControl";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
-import ActionController from "client/modes/build/ActionController";
-import BuildingController from "client/modes/build/BuildingController";
 import BuildingMode from "client/modes/build/BuildingMode";
+import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
 import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
+import { SharedPlot } from "shared/building/SharedPlot";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import Signal from "shared/event/Signal";
@@ -45,9 +45,7 @@ export default class BuildTool extends ToolBase {
 
 	constructor(mode: BuildingMode) {
 		super(mode);
-
-		this.event.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.updatePosition());
-		this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.updatePosition());
+		this.event.subscribe(SharedPlot.anyChanged, () => this.updatePosition());
 	}
 
 	getDisplayName(): string {
@@ -252,31 +250,19 @@ export default class BuildTool extends ToolBase {
 			return;
 		}
 
-		const pos = this.previewBlock.PrimaryPart.CFrame.Position;
-		const response = await ActionController.instance.executeOperation(
-			"Block placement",
-			async () => {
-				const block = BuildingManager.getBlockByPosition(pos);
-				if (block) await BuildingController.deleteBlock([block]);
-			},
+		const response = await ClientBuilding.placeBlocks(plot, [
 			{
 				id: this.selectedBlock.get()!.id,
 				color: this.selectedColor.get(),
 				material: this.selectedMaterial.get(),
 				location: this.previewBlock.PrimaryPart.CFrame,
-				plot: plot,
-				uuid: undefined,
 			},
-			(info) => BuildingController.placeBlock(info.plot, info),
-		);
+		]);
 
 		if (response.success) {
 			// Play sound
 			SoundController.getSounds().Build.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
 			SoundController.getSounds().Build.BlockPlace.Play();
-
-			task.wait();
-			this.updatePosition(true);
 		} else {
 			SoundController.getSounds().Build.BlockPlaceError.Play();
 		}

@@ -15,11 +15,19 @@ const errPlotNotFound = err("Plot not found");
 const errBuildingNotPermitted = err("Building is not permitted");
 const errInvalidOperation = err("Invalid operation");
 
+/** Bumps the {@link PlotModel} `version` attribute */
+const bumpPlotVersion = (plot: PlotModel) => {
+	const component = SharedPlots.getPlotComponent(plot);
+	task.defer(() => component.version.set((component.version.get() ?? 0) + 1));
+};
+
 /** Methods for editing the buildings server-side */
 export const ServerBuilding = {
 	clearPlot: (plot: PlotModel): void => {
 		plot.Blocks.ClearAllChildren();
 		BuildingWelder.deleteWelds(plot);
+
+		bumpPlotVersion(plot);
 	},
 	placeBlock: (plot: PlotModel, data: PlaceBlockByPlayerRequest | PlaceBlockByServerRequest): BuildResponse => {
 		const uuid =
@@ -51,30 +59,10 @@ export const ServerBuilding = {
 		model.Name = uuid;
 
 		SharedBuilding.paint({ blocks: [model], color: data.color, material: data.material }, true);
-
 		model.Parent = plot.Blocks;
+		BuildingWelder.weldOnPlot(plot, model);
 
-		// Weld block
-		const newJoints = BuildingWelder.weldOnPlot(plot, model);
-		/*if (newJoints.size() !== 0) {
-			PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
-				if (part.Name.lower() === "colbox") return;
-				part.Anchored = false;
-			});
-
-			for (const part of newJoints) {
-				if (part.AssemblyRootPart?.Parent === model) continue;
-
-				PartUtils.applyToAllDescendantsOfType("BasePart", part.AssemblyRootPart!.Parent!, (part) => {
-					part.Anchored = false;
-				});
-			}
-
-			if (!model.PrimaryPart!.AssemblyRootPart!.Anchored) {
-				model.PrimaryPart!.Anchored = true;
-			}
-		}*/
-
+		bumpPlotVersion(plot);
 		return { success: true, model: model };
 	},
 	deleteBlocks: ({ plot, blocks }: DeleteBlocksRequest): Response => {
@@ -86,11 +74,27 @@ export const ServerBuilding = {
 			plot.Blocks.ClearAllChildren();
 		} else {
 			for (const block of blocks) {
+				const uuid = BlockManager.getUuidByModel(block);
+				for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
+					for (const [connector, connection] of Objects.pairs(otherblock.connections)) {
+						if (connection.blockUuid !== uuid) continue;
+
+						ServerBuilding.logicDisconnect({
+							plot,
+							inputBlock: otherblock.instance,
+							inputConnection: connector,
+						});
+					}
+				}
+
+				BuildingWelder.unweld(block);
 				BuildingWelder.deleteWeld(plot, block);
+
 				block.Destroy();
 			}
 		}
 
+		bumpPlotVersion(plot);
 		return success;
 	},
 	moveBlocks: ({ plot, blocks, diff }: MoveBlocksRequest): Response => {
@@ -113,6 +117,7 @@ export const ServerBuilding = {
 			BuildingWelder.moveCollisions(plot, block, block.GetPivot());
 		}
 
+		bumpPlotVersion(plot);
 		return success;
 	},
 	logicConnect: (request: LogicConnectRequest): Response => {
@@ -128,6 +133,7 @@ export const ServerBuilding = {
 		};
 
 		request.inputBlock.SetAttribute("connections", HttpService.JSONEncode(connections));
+		bumpPlotVersion(request.plot);
 		return success;
 	},
 	logicDisconnect: (request: LogicDisconnectRequest): Response => {
@@ -139,6 +145,7 @@ export const ServerBuilding = {
 		}
 
 		request.inputBlock.SetAttribute("connections", HttpService.JSONEncode(connections));
+		bumpPlotVersion(request.plot);
 		return success;
 	},
 } as const;

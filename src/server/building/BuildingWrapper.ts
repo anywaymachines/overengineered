@@ -1,11 +1,7 @@
-import { HttpService } from "@rbxts/services";
-import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import SharedPlots from "shared/building/SharedPlots";
 import JSON, { JsonSerializablePrimitive } from "shared/fixes/Json";
 import Objects from "shared/fixes/objects";
-import BuildingWelder from "./BuildingWelder";
-import { ServerBuilding } from "./ServerBuilding";
 
 const errorPlotNotFound = (): ErrorResponse => {
 	return {
@@ -21,7 +17,7 @@ const errorBuildingNotPermitted = (): ErrorResponse => {
 };
 
 export default class BuildingWrapper {
-	public static tryGetValidPlotByBlock(
+	static tryGetValidPlotByBlock(
 		this: void,
 		player: Player,
 		block: BlockModel,
@@ -44,96 +40,7 @@ export default class BuildingWrapper {
 		};
 	}
 
-	public static movePlotAsPlayer(this: void, player: Player, data: PlayerMoveRequest): Response {
-		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-		return BuildingWrapper.movePlot(plot, data);
-	}
-
-	public static movePlot(this: void, plot: PlotModel, data: PlayerMoveRequest): Response {
-		if (data.blocks === "all") {
-			return ServerBuilding.moveBlocks({
-				plot,
-				// TODO: whole plot movement optimizations
-				blocks: plot.Blocks.GetChildren(undefined),
-				diff: data.vector,
-			});
-		}
-
-		return ServerBuilding.moveBlocks({
-			plot,
-			blocks: data.blocks,
-			diff: data.vector,
-		});
-	}
-
-	public static deleteBlockAsPlayer(this: void, player: Player, data: PlayerDeleteBlockRequest): Response {
-		if (data === "all") {
-			const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-			ServerBuilding.clearPlot(plot);
-			return {
-				success: true,
-			};
-		}
-
-		for (const block of data) {
-			const plot = SharedPlots.getPlotByBlock(block);
-
-			// No plot?
-			if (plot === undefined) {
-				return {
-					success: false,
-					message: "Plot not found",
-				};
-			}
-
-			// Plot is forbidden
-			if (!SharedPlots.isBuildingAllowed(plot, player)) {
-				return {
-					success: false,
-					message: "Building is not permitted",
-				};
-			}
-
-			const response = BuildingWrapper.deleteBlock(block);
-			if (!response.success) return response;
-		}
-
-		return { success: true };
-	}
-
-	public static deleteBlock(this: void, block: BlockModel): Response {
-		const plot = SharedPlots.getPlotByBlock(block);
-		if (!plot)
-			return {
-				success: false,
-				message: "No plot",
-			};
-
-		const data = BlockManager.getBlockDataByBlockModel(block);
-		for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
-			for (const [connector, connection] of Objects.pairs(otherblock.connections)) {
-				if (connection.blockUuid !== data.uuid) continue;
-
-				BuildingWrapper.updateLogicConnection({
-					operation: "disconnect",
-					inputBlock: otherblock.instance,
-					inputConnection: connector,
-				});
-			}
-		}
-
-		const unwelded = BuildingWelder.unweld(block);
-		BuildingWelder.deleteWeld(plot, block);
-		/*for (const [root] of Arrays.groupBySet(unwelded, (p) => p.AssemblyRootPart!)) {
-			root.Anchored = true;
-		}*/
-
-		block.Destroy();
-
-		return { success: true };
-	}
-
-	public static updateConfigAsPlayer(this: void, player: Player, data: ConfigUpdateRequest): Response {
+	static updateConfigAsPlayer(this: void, player: Player, data: ConfigUpdateRequest): Response {
 		for (const config of data.configs) {
 			const plot = BuildingWrapper.tryGetValidPlotByBlock(player, config.block);
 			if (!plot.success) return plot;
@@ -141,7 +48,7 @@ export default class BuildingWrapper {
 
 		return BuildingWrapper.updateConfig(data);
 	}
-	public static updateConfig(this: void, data: ConfigUpdateRequest): Response {
+	static updateConfig(this: void, data: ConfigUpdateRequest): Response {
 		/**
 		 * Assign only values, recursively.
 		 * @example assignValues({ a: { b: 'foo' } }, 'a', { c: 'bar' })
@@ -187,49 +94,6 @@ export default class BuildingWrapper {
 		}
 
 		return { success: true };
-	}
-
-	static updateLogicConnectionAsPlayer(this: void, player: Player, data: UpdateLogicConnectionRequest): Response {
-		const plot1 = BuildingWrapper.tryGetValidPlotByBlock(player, data.inputBlock);
-		if (!plot1.success) return plot1;
-
-		if (data.operation === "connect") {
-			const plot2 = BuildingWrapper.tryGetValidPlotByBlock(player, data.outputBlock);
-			if (!plot2.success) return plot2;
-		}
-
-		return BuildingWrapper.updateLogicConnection(data);
-	}
-	static updateLogicConnection(this: void, data: UpdateLogicConnectionRequest): Response {
-		const inputInfo = BlockManager.getBlockDataByBlockModel(data.inputBlock);
-
-		if (data.operation === "connect") {
-			const outputInfo = BlockManager.getBlockDataByBlockModel(data.outputBlock);
-
-			const connections: PlacedBlockData["connections"] = {
-				...inputInfo.connections,
-				[data.inputConnection]: {
-					blockUuid: outputInfo.uuid,
-					connectionName: data.outputConnection,
-				},
-			};
-
-			data.inputBlock.SetAttribute("connections", HttpService.JSONEncode(connections));
-		}
-
-		if (data.operation === "disconnect") {
-			const connections = { ...inputInfo.connections };
-			if (connections[data.inputConnection]) {
-				delete connections[data.inputConnection];
-			}
-
-			data.inputBlock.SetAttribute("connections", HttpService.JSONEncode(connections));
-		}
-
-		return {
-			success: false,
-			message: "Invalid operation",
-		};
 	}
 
 	static paintAsPlayer(this: void, player: Player, data: PaintRequest): Response {

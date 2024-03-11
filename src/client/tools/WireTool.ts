@@ -144,12 +144,13 @@ namespace Markers {
 
 		readonly instance;
 		readonly data;
+		readonly plot;
 		readonly position;
 		readonly availableTypes;
 		sameGroupMarkers?: readonly Marker[];
 		protected pauseColors = false;
 
-		constructor(instance: MarkerComponentDefinition, data: MarkerData) {
+		constructor(instance: MarkerComponentDefinition, data: MarkerData, plot: PlotModel) {
 			super(instance);
 
 			this.onEnable(() => (this.instance.Enabled = true));
@@ -157,6 +158,7 @@ namespace Markers {
 
 			this.instance = instance;
 			this.data = data;
+			this.plot = plot;
 			this.position = data.blockData.instance.GetPivot().PointToWorldSpace(instance.StudsOffsetWorldSpace);
 			this.availableTypes = new ObservableValue<readonly DataType[]>(data.dataTypes);
 
@@ -291,8 +293,8 @@ namespace Markers {
 			readonly wire: WireComponent;
 		};
 
-		constructor(gui: MarkerComponentDefinition, data: MarkerData) {
-			super(gui, data);
+		constructor(gui: MarkerComponentDefinition, data: MarkerData, plot: PlotModel) {
+			super(gui, data, plot);
 
 			this.instance.TextButton.White.Visible = true;
 			this.updateConnectedVisual(false);
@@ -329,8 +331,8 @@ namespace Markers {
 	export class Output extends Marker {
 		private readonly connected = new Map<Marker, WireComponent>();
 
-		constructor(gui: MarkerComponentDefinition, data: MarkerData) {
-			super(gui, data);
+		constructor(gui: MarkerComponentDefinition, data: MarkerData, plot: PlotModel) {
+			super(gui, data, plot);
 
 			this.instance.TextButton.White.Visible = false;
 			this.instance.TextButton.Filled.Visible = false;
@@ -474,10 +476,14 @@ const canConnect = (output: Markers.Output, input: Markers.Input): boolean => {
 
 namespace Controllers {
 	const connectMarkers = (from: Markers.Output, to: Markers.Input, wireParent: ViewportFrame) => {
-		from.connect(to, wireParent);
+		if (from.plot !== to.plot) {
+			throw "Interplot connections are not supported";
+		}
 
+		from.connect(to, wireParent);
 		spawn(async () => {
 			const result = await Remotes.Client.GetNamespace("Building").Get("LogicConnect").CallServerAsync({
+				plot: from.plot,
 				inputBlock: to.data.blockData.instance,
 				inputConnection: to.data.id,
 				outputBlock: from.data.blockData.instance,
@@ -494,6 +500,7 @@ namespace Controllers {
 
 		spawn(async () => {
 			const result = await Remotes.Client.GetNamespace("Building").Get("LogicDisconnect").CallServerAsync({
+				plot: marker.plot,
 				inputBlock: marker.data.blockData.instance,
 				inputConnection: marker.data.id,
 			});
@@ -779,8 +786,8 @@ export class WireTool extends ToolBase {
 					const markerInstance = Markers.Marker.createInstance(block.instance.PrimaryPart!, index++);
 					const marker =
 						markerType === "input"
-							? new Markers.Input(markerInstance, data)
-							: new Markers.Output(markerInstance, data);
+							? new Markers.Input(markerInstance, data, plot)
+							: new Markers.Output(markerInstance, data, plot);
 
 					if (narrow) {
 						toNarrow.push(marker);
@@ -834,6 +841,7 @@ export class WireTool extends ToolBase {
 export const WireToolTests = {
 	connectThrough1() {
 		const wireParent = new Instance("ViewportFrame");
+		const plot = new Instance("Model") as PlotModel;
 		const newinstance = () => Markers.Marker.createInstance(new Instance("Part"), 0);
 		const newdata = (uuid: string | number) => ({
 			uuid: tostring(uuid) as BlockUuid,
@@ -843,28 +851,40 @@ export const WireToolTests = {
 		const block1 = newdata(1);
 		const block2 = newdata(2);
 
-		const in1 = new Markers.Input(newinstance(), {
-			id: "a" as BlockConnectionName,
-			name: "u",
-			blockData: block1,
-			dataTypes: ["bool", "number"],
-			group: "0",
-		});
-		const in2 = new Markers.Input(newinstance(), {
-			id: "a" as BlockConnectionName,
-			name: "u",
-			blockData: block1,
-			dataTypes: ["bool", "number"],
-			group: "0",
-		});
+		const in1 = new Markers.Input(
+			newinstance(),
+			{
+				id: "a" as BlockConnectionName,
+				name: "u",
+				blockData: block1,
+				dataTypes: ["bool", "number"],
+				group: "0",
+			},
+			plot,
+		);
+		const in2 = new Markers.Input(
+			newinstance(),
+			{
+				id: "a" as BlockConnectionName,
+				name: "u",
+				blockData: block1,
+				dataTypes: ["bool", "number"],
+				group: "0",
+			},
+			plot,
+		);
 
-		const out1 = new Markers.Output(newinstance(), {
-			id: "a" as BlockConnectionName,
-			name: "u",
-			blockData: block2,
-			dataTypes: ["bool"],
-			group: undefined,
-		});
+		const out1 = new Markers.Output(
+			newinstance(),
+			{
+				id: "a" as BlockConnectionName,
+				name: "u",
+				blockData: block2,
+				dataTypes: ["bool"],
+				group: undefined,
+			},
+			plot,
+		);
 
 		WireTool.groupMarkers([in1, in2, out1]);
 
@@ -888,6 +908,7 @@ export const WireToolTests = {
 	},
 	connectThrough2() {
 		const wireParent = new Instance("ViewportFrame");
+		const plot = new Instance("Model") as PlotModel;
 		const newinstance = () => Markers.Marker.createInstance(new Instance("Part"), 0);
 		const newdata = (uuid: string | number) => ({
 			uuid: tostring(uuid) as BlockUuid,
@@ -898,42 +919,62 @@ export const WireToolTests = {
 		const block2 = newdata(2);
 		const block3 = newdata(3);
 
-		const in1 = new Markers.Input(newinstance(), {
-			id: "a" as BlockConnectionName,
-			name: "u",
-			blockData: block1,
-			dataTypes: ["bool", "number"],
-			group: "0",
-		});
-		const in2 = new Markers.Input(newinstance(), {
-			id: "a" as BlockConnectionName,
-			name: "u",
-			blockData: block1,
-			dataTypes: ["bool", "number"],
-			group: "0",
-		});
-		const in3 = new Markers.Input(newinstance(), {
-			id: "a" as BlockConnectionName,
-			name: "u",
-			blockData: block3,
-			dataTypes: ["bool", "number"],
-			group: "1",
-		});
-		const in4 = new Markers.Input(newinstance(), {
-			id: "a" as BlockConnectionName,
-			name: "u",
-			blockData: block3,
-			dataTypes: ["bool", "number"],
-			group: "1",
-		});
+		const in1 = new Markers.Input(
+			newinstance(),
+			{
+				id: "a" as BlockConnectionName,
+				name: "u",
+				blockData: block1,
+				dataTypes: ["bool", "number"],
+				group: "0",
+			},
+			plot,
+		);
+		const in2 = new Markers.Input(
+			newinstance(),
+			{
+				id: "a" as BlockConnectionName,
+				name: "u",
+				blockData: block1,
+				dataTypes: ["bool", "number"],
+				group: "0",
+			},
+			plot,
+		);
+		const in3 = new Markers.Input(
+			newinstance(),
+			{
+				id: "a" as BlockConnectionName,
+				name: "u",
+				blockData: block3,
+				dataTypes: ["bool", "number"],
+				group: "1",
+			},
+			plot,
+		);
+		const in4 = new Markers.Input(
+			newinstance(),
+			{
+				id: "a" as BlockConnectionName,
+				name: "u",
+				blockData: block3,
+				dataTypes: ["bool", "number"],
+				group: "1",
+			},
+			plot,
+		);
 
-		const out1 = new Markers.Output(newinstance(), {
-			id: "a" as BlockConnectionName,
-			name: "u",
-			blockData: block2,
-			dataTypes: ["bool"],
-			group: undefined,
-		});
+		const out1 = new Markers.Output(
+			newinstance(),
+			{
+				id: "a" as BlockConnectionName,
+				name: "u",
+				blockData: block2,
+				dataTypes: ["bool"],
+				group: undefined,
+			},
+			plot,
+		);
 
 		WireTool.groupMarkers([in1, in2, in3, in4, out1]);
 

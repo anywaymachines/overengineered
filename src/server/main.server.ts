@@ -132,14 +132,11 @@ class RemoteHandlers {
 ServerPlots.initialize();
 
 // Initializing event workders
-registerOnRemoteFunction("Building", "MoveRequest", BuildingWrapper.movePlotAsPlayer);
-registerOnRemoteFunction("Building", "Delete", BuildingWrapper.deleteBlockAsPlayer);
 registerOnRemoteFunction("Building", "Paint", BuildingWrapper.paintAsPlayer);
 registerOnRemoteFunction("Ride", "SetPlayMode", PlayModeController.changeModeForPlayer);
 registerOnRemoteFunction("Slots", "Save", RemoteHandlers.saveSlot);
 registerOnRemoteFunction("Slots", "Load", RemoteHandlers.loadSlot);
 registerOnRemoteFunction("Building", "UpdateConfigRequest", BuildingWrapper.updateConfigAsPlayer);
-registerOnRemoteFunction("Building", "UpdateLogicConnectionRequest", BuildingWrapper.updateLogicConnectionAsPlayer);
 registerOnRemoteFunction("Building", "PlaceBlocks", ServerBuildingRequestHandler.placeBlocks);
 registerOnRemoteFunction("Building", "DeleteBlocks", ServerBuildingRequestHandler.deleteBlocks);
 registerOnRemoteFunction("Building", "MoveBlocks", ServerBuildingRequestHandler.moveBlocks);

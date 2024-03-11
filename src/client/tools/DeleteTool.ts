@@ -1,4 +1,4 @@
-import { HttpService, Players } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
@@ -7,11 +7,9 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
 import BoxSelector from "client/tools/selectors/BoxSelector";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
-import Serializer from "shared/Serializer";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import Signal from "shared/event/Signal";
-import JSON from "shared/fixes/Json";
 
 export default class DeleteTool extends ToolBase {
 	readonly onClearAllRequested = new Signal<() => void>();
@@ -50,23 +48,6 @@ export default class DeleteTool extends ToolBase {
 
 	protected prepareGamepad(): void {
 		this.inputHandler.onKeyDown("ButtonY", () => this.onClearAllRequested.Fire());
-	}
-
-	private blockToUndoRequest(block: BlockModel) {
-		const info = {
-			location: block.PrimaryPart!.CFrame,
-			id: block.GetAttribute("id") as string,
-			color: Serializer.Color3Serializer.deserialize(
-				HttpService.JSONDecode(block.GetAttribute("color") as string) as SerializedColor,
-			),
-			material: Serializer.EnumMaterialSerializer.deserialize(
-				block.GetAttribute("material") as number as SerializedEnum,
-			),
-			config: JSON.deserialize<object>((block.GetAttribute("config") as string | undefined) ?? "{}"),
-			plot: SharedPlots.getPlotByPosition(block.PrimaryPart!.Position)!,
-		};
-
-		return info;
 	}
 
 	async deleteBlocks(blocks: readonly BlockModel[] | "all") {

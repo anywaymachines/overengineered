@@ -46,9 +46,9 @@ const initializeBlocksFolder = (plot: PlotModel) => {
 		const blocks = Element.create("Model", {
 			Name: "Blocks",
 			ModelStreamingMode: Enum.ModelStreamingMode.PersistentPerPlayer,
-			Parent: plot,
 		});
 
+		blocks.Parent = plot;
 		blocks.GetPropertyChangedSignal("Parent").Once(create);
 	};
 

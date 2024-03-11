@@ -3,8 +3,29 @@ import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 
-/** Methods to send building requests to the server, with undo/redo support */
+/** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
 export const ClientBuilding = {
+	placeBlocks: (plot: PlotModel, blocks: readonly Omit<PlaceBlockByPlayerRequest, "uuid">[]) => {
+		let placed: readonly BlockModel[];
+		return ActionController.instance.execute(
+			"Place blocks",
+			async () => {
+				await Remotes.Client.GetNamespace("Building")
+					.Get("DeleteBlocks")
+					.CallServerAsync({ plot, blocks: placed });
+			},
+			async () => {
+				const response = await Remotes.Client.GetNamespace("Building")
+					.Get("PlaceBlocks")
+					.CallServerAsync({ plot, blocks });
+				if (response.success) {
+					placed = response.models;
+				}
+
+				return response;
+			},
+		);
+	},
 	deleteBlocks: (plot: PlotModel, _blocks: readonly BlockModel[] | "all") => {
 		const uuids = _blocks === "all" ? "all" : _blocks.map((b) => BlockManager.getBlockDataByBlockModel(b).uuid);
 		const undo: PlaceBlocksByPlayerRequest = {
@@ -27,7 +48,7 @@ export const ClientBuilding = {
 			uuids === "all" ? ("all" as const) : uuids.map((uuid) => SharedPlots.getBlockByUuid(plot, uuid));
 
 		return ActionController.instance.execute(
-			uuids === "all" ? "Plot cleared" : "Blocks removed",
+			uuids === "all" ? "Clear plot" : "Remove blocks",
 			async () => {
 				await Remotes.Client.GetNamespace("Building").Get("PlaceBlocks").CallServerAsync(undo);
 			},
@@ -43,7 +64,7 @@ export const ClientBuilding = {
 		const getBlocks = (): readonly BlockModel[] => uuids.map((uuid) => SharedPlots.getBlockByUuid(plot, uuid));
 
 		return ActionController.instance.execute(
-			"Moving blocks",
+			"Move blocks",
 			async () => {
 				await Remotes.Client.GetNamespace("Building")
 					.Get("MoveBlocks")

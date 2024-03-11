@@ -1,8 +1,8 @@
 import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
 import Gui from "client/gui/Gui";
+import { SharedPlot } from "shared/building/SharedPlot";
 import SharedPlots from "shared/building/SharedPlots";
 
 export default class CenterOfMassController extends ClientComponent {
@@ -46,9 +46,7 @@ export default class CenterOfMassController extends ClientComponent {
 			}
 		};
 
-		this.event.subscribe(Signals.BLOCKS.BLOCKS_MOVED, update);
-		this.event.subscribe(Signals.BLOCKS.BLOCK_ADDED, update);
-		this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, update);
+		this.event.subscribe(SharedPlot.anyChanged, update);
 		this.event.onEnable(update);
 		this.event.onDisable(() => {
 			this.renderedBalls.forEach((element) => {

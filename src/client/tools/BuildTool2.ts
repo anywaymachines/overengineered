@@ -7,13 +7,13 @@ import { Colors } from "client/gui/Colors";
 import Gui from "client/gui/Gui";
 import LogControl from "client/gui/static/LogControl";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
-import ActionController from "client/modes/build/ActionController";
-import BuildingController from "client/modes/build/BuildingController";
 import BuildingMode from "client/modes/build/BuildingMode";
+import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
 import { Element } from "shared/Element";
 import Logger from "shared/Logger";
 import BuildingManager from "shared/building/BuildingManager";
+import { SharedPlot } from "shared/building/SharedPlot";
 import SharedPlots from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
 import EventHandler from "shared/event/EventHandler";
@@ -96,8 +96,7 @@ namespace SinglePlaceController {
 
 			this.event.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
 			this.event.subscribe(mouse.Move, () => this.updateBlockPosition());
-			this.event.subscribe(Signals.BLOCKS.BLOCK_ADDED, () => this.updateBlockPosition());
-			this.event.subscribe(Signals.BLOCKS.BLOCK_REMOVED, () => this.updateBlockPosition());
+			this.event.subscribe(SharedPlot.anyChanged, () => this.updateBlockPosition());
 
 			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
 
@@ -273,12 +272,12 @@ namespace SinglePlaceController {
 				return;
 			}
 
-			if (!this.targetPlot.get()) {
+			const plot = this.targetPlot.get();
+			if (!plot) {
 				LogControl.instance.addLine("Out of bounds!", Colors.red);
 
 				// Play sound
 				SoundController.getSounds().Build.BlockPlaceError.Play();
-
 				return;
 			}
 
@@ -287,44 +286,16 @@ namespace SinglePlaceController {
 				return;
 			}
 
-			const pos = mainGhost.model.PrimaryPart.CFrame;
-			const btype = this.selectedBlock.get();
-			const mirrors = this.mirrorMode.get();
-			const response = await ActionController.instance.executeOperation(
-				"Block placement",
-				async () => {
-					let cframes = BuildingManager.getMirroredBlocksCFrames(
-						SharedPlots.getPlotByPosition(pos.Position)!,
-						btype!.id,
-						pos,
-						mirrors,
-					);
-					cframes = [...cframes, mainGhost.model.GetPivot()];
-
-					const blocks: BlockModel[] = [];
-					for (const cframe of cframes) {
-						const block = BuildingManager.getBlockByPosition(cframe.Position);
-						if (block) blocks.push(block);
-					}
-
-					if (blocks.size() !== 0) await BuildingController.deleteBlock(blocks!);
-				},
-				[mainGhost, ...this.mirroredGhosts].map((g) => ({
-					id: selected.id,
-					color: this.selectedColor.get(),
-					material: this.selectedMaterial.get(),
-					location: g.model.PrimaryPart!.CFrame,
-					plot: this.targetPlot.get()!,
-					uuid: undefined,
-				})),
-				async (infos): Promise<Response> => {
-					for (const info of infos) {
-						const result = await BuildingController.placeBlock(info.plot, info);
-						if (!result.success) return result;
-					}
-
-					return { success: true };
-				},
+			const response = await ClientBuilding.placeBlocks(
+				plot,
+				[mainGhost, ...this.mirroredGhosts].map(
+					(g): PlaceBlockByPlayerRequest => ({
+						id: selected.id,
+						color: this.selectedColor.get(),
+						material: this.selectedMaterial.get(),
+						location: g.model.PrimaryPart!.CFrame,
+					}),
+				),
 			);
 
 			if (response.success) {
@@ -578,30 +549,16 @@ namespace MultiPlaceController {
 				return;
 			}
 
-			const response = await ActionController.instance.executeOperation(
-				"Block placement",
-				async () => {
-					const blocks: BlockModel[] = [];
-					for (const block of blocks) {
-						const b = BuildingManager.getBlockByPosition(block.GetPivot().Position);
-						if (b) blocks.push(b);
-					}
-
-					if (blocks.size() !== 0) {
-						await BuildingController.deleteBlock(blocks!);
-					}
-				},
-				{
-					plot,
-					blocks: blocks.map((b) => ({
+			const response = await ClientBuilding.placeBlocks(
+				plot,
+				blocks.map(
+					(b): PlaceBlockByPlayerRequest => ({
 						id: this.selectedBlock.id,
 						color: this.selectedColor,
 						material: this.selectedMaterial,
 						location: b.GetPivot(),
-						uuid: undefined,
-					})),
-				},
-				async (info) => await BuildingController.placeBlocks(info),
+					}),
+				),
 			);
 
 			if (response.success) {
