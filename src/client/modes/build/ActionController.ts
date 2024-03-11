@@ -69,6 +69,7 @@ export default class ActionController extends ClientComponent {
 
 	appendOperation(operation: Operation) {
 		this.history.push(operation);
+		this.redoHistory.clear();
 	}
 
 	redo() {
