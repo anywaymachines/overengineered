@@ -4,7 +4,7 @@ import LogControl from "client/gui/static/LogControl";
 import Remotes from "shared/Remotes";
 
 export default class BuildingController {
-	public static async placeBlocks(
+	static async placeBlocks(
 		data: PlaceBlocksByPlayerRequest,
 	): Promise<Response<{ readonly positions: readonly Vector3[] }>> {
 		const response = await Remotes.Client.GetNamespace("Building").Get("PlaceBlocks").CallServerAsync(data);
@@ -24,7 +24,7 @@ export default class BuildingController {
 
 		return { success: true, positions: response.models.map((m) => m.GetPivot().Position) };
 	}
-	public static async placeBlock(
+	static async placeBlock(
 		plot: PlotModel,
 		data: PlaceBlockByPlayerRequest,
 	): Promise<Response<{ position: Vector3 }>> {
@@ -43,7 +43,7 @@ export default class BuildingController {
 		};
 	}
 
-	public static async deleteBlock(request: PlayerDeleteBlockRequest) {
+	static async deleteBlock(request: PlayerDeleteBlockRequest) {
 		const response = await Remotes.Client.GetNamespace("Building").Get("Delete").CallServerAsync(request);
 
 		if (response.success) {
@@ -60,7 +60,7 @@ export default class BuildingController {
 		return response;
 	}
 
-	public static async moveBlock(request: PlayerMoveRequest) {
+	static async moveBlock(request: PlayerMoveRequest) {
 		const response = await Remotes.Client.GetNamespace("Building").Get("MoveRequest").CallServerAsync(request);
 
 		if (response.success) Signals.BLOCKS.BLOCKS_MOVED.Fire(request.vector);

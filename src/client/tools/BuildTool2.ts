@@ -315,6 +315,7 @@ namespace SinglePlaceController {
 					material: this.selectedMaterial.get(),
 					location: g.model.PrimaryPart!.CFrame,
 					plot: this.targetPlot.get()!,
+					uuid: undefined,
 				})),
 				async (infos): Promise<Response> => {
 					for (const info of infos) {
@@ -597,6 +598,7 @@ namespace MultiPlaceController {
 						color: this.selectedColor,
 						material: this.selectedMaterial,
 						location: b.GetPivot(),
+						uuid: undefined,
 					})),
 				},
 				async (info) => await BuildingController.placeBlocks(info),

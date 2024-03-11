@@ -29,6 +29,7 @@ export default class ActionController extends ClientComponent {
 		});
 	}
 
+	/** @deprecated Does not make sense */
 	async executeOperation<TInfo, TResult extends Response>(
 		description: string,
 		undo: (info: TInfo) => Promise<void>,
@@ -43,6 +44,23 @@ export default class ActionController extends ClientComponent {
 				undo: () => undo(info),
 				redo: async () => {
 					await func(info);
+				},
+			});
+
+		return result;
+	}
+	async execute<TResult extends Response>(
+		description: string,
+		undo: () => Promise<void>,
+		func: () => Promise<TResult>,
+	) {
+		const result = await func();
+		if (result.success)
+			this.appendOperation({
+				description,
+				undo,
+				redo: async () => {
+					await func();
 				},
 			});
 

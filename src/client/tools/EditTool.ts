@@ -10,7 +10,9 @@ import GuiAnimator from "client/gui/GuiAnimator";
 import { ButtonControl, TextButtonControl, type TextButtonDefinition } from "client/gui/controls/Button";
 import LogControl from "client/gui/static/LogControl";
 import { InputTooltips, TooltipsHolder } from "client/gui/static/TooltipsControl";
+import ActionController from "client/modes/build/ActionController";
 import BuildingMode from "client/modes/build/BuildingMode";
+import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
 import { HoveredBlocksHighlighter } from "client/tools/selectors/HoveredBlocksHighlighter";
 import { SelectedBlocksHighlighter } from "client/tools/selectors/SelectedBlocksHighlighter";
@@ -349,34 +351,38 @@ namespace Controllers {
 			this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
 		}
 
+		private static moveBlocks(plot: PlotModel, uuids: readonly BlockUuid[], diff: Vector3) {
+			const getBlocks = () => {
+				const blocks = uuids.map((uuid) => SharedPlots.tryGetBlockByUuid(plot, uuid)) as readonly BlockModel[];
+				if (blocks.size() !== uuids.size()) {
+					throw "Some blocks were not found";
+				}
+
+				return blocks;
+			};
+
+			return ActionController.instance.execute(
+				"Moving blocks",
+				async () => {
+					await Remotes.Client.GetNamespace("Building")
+						.Get("MoveBlocks")
+						.CallServerAsync({ plot, diff: diff.mul(-1), blocks: getBlocks() });
+				},
+				() => {
+					return Remotes.Client.GetNamespace("Building")
+						.Get("MoveBlocks")
+						.CallServerAsync({ plot, diff, blocks: getBlocks() });
+				},
+			);
+		}
+
 		protected abstract initializeHandles(): Instance;
 		protected async submit(): Promise<boolean> {
 			if (this.difference === Vector3.zero) {
 				return true;
 			}
 
-			/*const info = {
-				plot: this.plot,
-				blocks: this.blocks.map((b) => b.Name) as unknown as readonly BlockUuid[],
-				diff: this.difference,
-			};
-			ActionController.instance.executeOperation(
-				"Moving blocks",
-				async (info) => {},
-				{
-					plot: this.plot,
-					blocks: this.blocks,
-					diff: this.difference,
-				},
-				(info) => Remotes.Client.GetNamespace("Building").Get("MoveBlocks").CallServerAsync(info),
-			);*/
-
-			const response = await Remotes.Client.GetNamespace("Building").Get("MoveBlocks").CallServerAsync({
-				plot: this.plot,
-				blocks: this.blocks,
-				diff: this.difference,
-			});
-
+			const response = await ClientBuilding.moveBlocks(this.plot, this.blocks, this.difference);
 			if (!response.success) {
 				LogControl.instance.addLine(response.message, Colors.red);
 			}

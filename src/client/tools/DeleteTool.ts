@@ -2,14 +2,12 @@ import { HttpService, Players } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
-import ActionController from "client/modes/build/ActionController";
-import BuildingController from "client/modes/build/BuildingController";
 import BuildingMode from "client/modes/build/BuildingMode";
+import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
 import BoxSelector from "client/tools/selectors/BoxSelector";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
 import Serializer from "shared/Serializer";
-import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import Signal from "shared/event/Signal";
@@ -82,26 +80,9 @@ export default class DeleteTool extends ToolBase {
 			return blocks;
 		};
 
-		const deletedBlocks = getDeletedBlocks();
-
-		const undoRequests = deletedBlocks.map((block) => this.blockToUndoRequest(block));
-		const response = await ActionController.instance.executeOperation(
-			blocks === "all" ? "Plot cleared" : "Blocks removed",
-			async () => {
-				for (const undo of undoRequests) {
-					await BuildingController.placeBlock(undo.plot, undo);
-				}
-			},
-			blocks === "all" ? ("all" as const) : deletedBlocks.map((block) => block.GetAttribute("uuid") as BlockUuid),
-			(info) =>
-				BuildingController.deleteBlock(
-					info === "all" ? "all" : info.map((uuid) => BuildingManager.getBlockByUuidOnAnyPlot(uuid)!),
-				),
-		);
-
-		// Parsing response
+		const plot = SharedPlots.getPlotByPosition(getDeletedBlocks()[0].PrimaryPart!.Position)!;
+		const response = await ClientBuilding.deleteBlocks(plot, blocks);
 		if (response.success) {
-			// Block removed
 			task.wait();
 
 			SoundController.getSounds().Build.BlockDelete.PlaybackSpeed = SoundController.randomSoundSpeed();

@@ -22,6 +22,12 @@ export const ServerBuilding = {
 		BuildingWelder.deleteWelds(plot);
 	},
 	placeBlock: (plot: PlotModel, data: PlaceBlockByPlayerRequest | PlaceBlockByServerRequest): BuildResponse => {
+		const uuid =
+			"uuid" in data && data.uuid !== undefined ? data.uuid : (HttpService.GenerateGUID(false) as BlockUuid);
+		if (SharedPlots.tryGetBlockByUuid(plot, uuid)) {
+			throw "Block with this uuid already exists";
+		}
+
 		const block = blockRegistry.get(data.id)!;
 
 		// round the coordinates
@@ -40,7 +46,6 @@ export const ServerBuilding = {
 			model.SetAttribute("config", JSON.serialize(data.config));
 		}
 
-		const uuid = "uuid" in data ? data.uuid : HttpService.GenerateGUID(false);
 		// TODO: remove attribute uuid because Name exists?
 		model.SetAttribute("uuid", uuid);
 		model.Name = uuid;
@@ -71,6 +76,22 @@ export const ServerBuilding = {
 		}*/
 
 		return { success: true, model: model };
+	},
+	deleteBlocks: ({ plot, blocks }: DeleteBlocksRequest): Response => {
+		if (blocks !== "all" && blocks.size() === 0) {
+			return success;
+		}
+
+		if (blocks === "all") {
+			plot.Blocks.ClearAllChildren();
+		} else {
+			for (const block of blocks) {
+				BuildingWelder.deleteWeld(plot, block);
+				block.Destroy();
+			}
+		}
+
+		return success;
 	},
 	moveBlocks: ({ plot, blocks, diff }: MoveBlocksRequest): Response => {
 		if (SharedBuilding.getBlockList(blocks).size() === 0) {

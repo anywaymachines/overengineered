@@ -265,6 +265,7 @@ export default class BuildTool extends ToolBase {
 				material: this.selectedMaterial.get(),
 				location: this.previewBlock.PrimaryPart.CFrame,
 				plot: plot,
+				uuid: undefined,
 			},
 			(info) => BuildingController.placeBlock(info.plot, info),
 		);

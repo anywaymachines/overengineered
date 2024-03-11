@@ -9,9 +9,10 @@ declare global {
 		readonly color: Color3;
 		readonly material: Enum.Material;
 		readonly location: CFrame;
+		readonly uuid: BlockUuid | undefined;
 	}
 	interface PlaceBlockByServerRequest extends PlaceBlockByPlayerRequest {
-		readonly uuid: string;
+		readonly uuid: BlockUuid;
 		readonly config: Readonly<Record<string, string>>;
 	}
 
@@ -24,6 +25,10 @@ declare global {
 		readonly blocks: readonly PlaceBlockByServerRequest[];
 	}
 
+	interface DeleteBlocksRequest {
+		readonly plot: PlotModel;
+		readonly blocks: readonly BlockModel[] | "all";
+	}
 	interface MoveBlocksRequest {
 		readonly plot: PlotModel;
 		readonly blocks: BlockList;
@@ -61,6 +66,7 @@ const Remotes = Net.Definitions.Create({
 			Net.Definitions.ServerAsyncFunction<(data: UpdateLogicConnectionRequest) => Response>(),
 
 		PlaceBlocks: Net.Definitions.ServerAsyncFunction<(data: PlaceBlocksByPlayerRequest) => MultiBuildResponse>(),
+		DeleteBlocks: Net.Definitions.ServerAsyncFunction<(data: DeleteBlocksRequest) => Response>(),
 		MoveBlocks: Net.Definitions.ServerAsyncFunction<(data: MoveBlocksRequest) => Response>(),
 		LogicConnect: Net.Definitions.ServerAsyncFunction<(data: LogicConnectRequest) => Response>(),
 		LogicDisconnect: Net.Definitions.ServerAsyncFunction<(data: LogicDisconnectRequest) => Response>(),

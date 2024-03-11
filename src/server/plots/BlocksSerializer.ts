@@ -23,7 +23,7 @@ interface SerializedBlockV0 {
 	readonly config: object | undefined;
 }
 interface SerializedBlockV2 extends SerializedBlockV0 {
-	readonly uuid: string;
+	readonly uuid: BlockUuid;
 }
 interface SerializedBlockV3 extends SerializedBlockV2 {
 	readonly connections?: Readonly<Record<BlockConnectionName, PlacedBlockDataConnection>>;
@@ -168,7 +168,7 @@ const read = {
 			col: HttpService.JSONDecode(block.GetAttribute("color") as string) as SerializedColor, // Color
 			loc: Serializer.CFrameSerializer.serialize(buildingCenter.ToObjectSpace(block.GetPivot())), // Position
 			config: configattr === undefined ? undefined : JSON.deserialize<object>(configattr as string),
-			uuid: block.GetAttribute("uuid") as string,
+			uuid: block.GetAttribute("uuid") as BlockUuid,
 			connections:
 				connectionsattr === undefined
 					? undefined
@@ -242,7 +242,7 @@ const v5: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV2>, typeof
 			blocks: prev.blocks.map(
 				(b, i): SerializedBlockV2 => ({
 					...b,
-					uuid: tostring(i),
+					uuid: tostring(i) as BlockUuid,
 				}),
 			),
 		};

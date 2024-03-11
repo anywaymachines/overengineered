@@ -69,6 +69,21 @@ export const ServerBuildingRequestHandler = {
 			models: placed,
 		};
 	},
+	deleteBlocks: (player: Player, request: DeleteBlocksRequest): Response => {
+		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
+			return errBuildingNotPermitted;
+		}
+
+		if (request.blocks !== "all") {
+			for (const block of request.blocks) {
+				if (!SharedPlots.isBlockOnAllowedPlot(player, block)) {
+					return errBuildingNotPermitted;
+				}
+			}
+		}
+
+		return ServerBuilding.deleteBlocks(request);
+	},
 	moveBlocks: (player: Player, request: MoveBlocksRequest): Response => {
 		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
 			return errBuildingNotPermitted;

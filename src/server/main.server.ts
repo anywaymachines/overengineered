@@ -141,6 +141,7 @@ registerOnRemoteFunction("Slots", "Load", RemoteHandlers.loadSlot);
 registerOnRemoteFunction("Building", "UpdateConfigRequest", BuildingWrapper.updateConfigAsPlayer);
 registerOnRemoteFunction("Building", "UpdateLogicConnectionRequest", BuildingWrapper.updateLogicConnectionAsPlayer);
 registerOnRemoteFunction("Building", "PlaceBlocks", ServerBuildingRequestHandler.placeBlocks);
+registerOnRemoteFunction("Building", "DeleteBlocks", ServerBuildingRequestHandler.deleteBlocks);
 registerOnRemoteFunction("Building", "MoveBlocks", ServerBuildingRequestHandler.moveBlocks);
 registerOnRemoteFunction("Building", "LogicConnect", ServerBuildingRequestHandler.logicConnect);
 registerOnRemoteFunction("Building", "LogicDisconnect", ServerBuildingRequestHandler.logicDisconnect);

@@ -10,79 +10,79 @@ const plots = (Workspace.Plots.GetChildren() as unknown as PlotModel[])
 const plotComponents: ReadonlyMap<PlotModel, SharedPlot> = new Map(plots.map((p) => [p.instance, p]));
 
 /** Methods for reading the plots data */
-export default class SharedPlots {
-	static readonly plots: readonly SharedPlot[] = plots;
+const SharedPlots = {
+	plots: plots as readonly SharedPlot[],
 
 	/** Checks if the provided `Instance` is a plot model */
-	static isPlot(model: Instance | undefined): model is PlotModel {
+	isPlot: (model: Instance | undefined): model is PlotModel => {
 		return model?.Parent === Workspace.Plots;
-	}
+	},
 
 	/** Checks if the provided `Instance` is a plot model blocks */
-	static isPlotBlocks(model: Instance | undefined): model is PlotBlocks {
-		return model !== undefined && this.isPlot(model?.Parent) && model.Name === "Blocks";
-	}
+	isPlotBlocks: (model: Instance | undefined): model is PlotBlocks => {
+		return model !== undefined && SharedPlots.isPlot(model?.Parent) && model.Name === "Blocks";
+	},
 
 	/** Checks if the provided block is on a plot that is allowed for the provided player */
-	static isBlockOnAllowedPlot(player: Player, block: BlockModel): boolean {
-		const plot = this.getPlotByBlock(block);
+	isBlockOnAllowedPlot: (player: Player, block: BlockModel): boolean => {
+		const plot = SharedPlots.getPlotByBlock(block);
 		if (!plot) return false;
 
-		return this.isBuildingAllowed(plot, player);
-	}
+		return SharedPlots.isBuildingAllowed(plot, player);
+	},
 
 	/** Checks if player is allowed to build on the prodived plot */
-	static isBuildingAllowed(plot: PlotModel, player: Player): boolean {
+	isBuildingAllowed: (plot: PlotModel, player: Player): boolean => {
 		return plotComponents.get(plot)!.isBuildingAllowed(player);
-	}
+	},
 
 	/** Returns the player owned plot, if exists */
-	static tryGetPlotByOwnerID(ownerID: number): SharedPlot | undefined {
-		for (const plot of this.plots) {
+	tryGetPlotByOwnerID: (ownerID: number): SharedPlot | undefined => {
+		for (const plot of SharedPlots.plots) {
 			if (plot.ownerId.get() === ownerID) {
 				return plot;
 			}
 		}
 
 		return undefined;
-	}
+	},
 
 	/** Returns the player owned plot */
-	static getPlotComponentByOwnerID(ownerID: number): SharedPlot {
-		const plot = this.tryGetPlotByOwnerID(ownerID);
+	getPlotComponentByOwnerID: (ownerID: number): SharedPlot => {
+		const plot = SharedPlots.tryGetPlotByOwnerID(ownerID);
 		if (!plot) throw `Player ${ownerID} does not have a plot`;
 
 		return plot;
-	}
+	},
 
 	/** Returns the player owned plot */
-	static getPlotByOwnerID(ownerID: number): PlotModel {
-		return this.getPlotComponentByOwnerID(ownerID).instance;
-	}
+	getPlotByOwnerID: (ownerID: number): PlotModel => {
+		return SharedPlots.getPlotComponentByOwnerID(ownerID).instance;
+	},
 
 	/** Returns the plot by position inside it, if exists
 	 * @deprecated slow
 	 */
-	static getPlotByPosition(position: Vector3): PlotModel | undefined {
-		return this.plots.find((p) => this.getPlotBuildingRegion(p.instance).contains(position))?.instance;
-	}
-
+	getPlotByPosition: (position: Vector3): PlotModel | undefined => {
+		return SharedPlots.plots.find((p) => SharedPlots.getPlotBuildingRegion(p.instance).contains(position))
+			?.instance;
+	},
 	/** Returns the `PlotModel` by the given block or block part, if valid */
-	static getPlotByBlock(instance: Instance): PlotModel | undefined {
+	getPlotByBlock: (instance: Instance): PlotModel | undefined => {
 		if (!instance) {
 			return undefined;
 		}
 
 		{
 			const fastcheck = instance.IsA("Model") ? instance.Parent?.Parent : undefined;
-			if (fastcheck && this.isPlot(fastcheck)) {
+			if (fastcheck && SharedPlots.isPlot(fastcheck)) {
 				return fastcheck;
 			}
 		}
 
 		let parent = instance.Parent;
 		while (parent) {
-			if (this.isPlot(parent)) {
+			if (SharedPlots.isPlot(parent)) {
 				return parent;
 			}
 
@@ -90,20 +90,44 @@ export default class SharedPlots {
 		}
 
 		return undefined;
-	}
+	},
 
 	/** Returns an `Instance` that holds plot blocks */
-	static getPlotBlocks(plot: PlotModel): PlotBlocks {
+	getPlotBlocks: (plot: PlotModel): PlotBlocks => {
 		return plot.Blocks;
-	}
+	},
+
+	/** Returns the block by its uuid */
+	getBlockByUuid: (plot: PlotModel, uuid: BlockUuid): BlockModel => {
+		return (plot.Blocks as unknown as Record<BlockUuid, BlockModel>)[uuid];
+	},
+	/** Returns the block by its uuid */
+	tryGetBlockByUuid: (plot: PlotModel, uuid: BlockUuid): BlockModel | undefined => {
+		return plot.Blocks.FindFirstChild(uuid) as BlockModel | undefined;
+	},
+
+	/** Returns the block by its uuid, checks every plot */
+	getBlockByUuidOnAnyPlot: (uuid: BlockUuid): BlockModel => {
+		const block = SharedPlots.tryGetBlockByUuidOnAnyPlot(uuid);
+		if (!block) throw `Block ${uuid} was not found on any plot`;
+
+		return block;
+	},
+	/** Returns the block by its uuid, checks every plot */
+	tryGetBlockByUuidOnAnyPlot: (uuid: BlockUuid): BlockModel | undefined => {
+		for (const plot of SharedPlots.plots) {
+			const block = SharedPlots.tryGetBlockByUuid(plot.instance, uuid);
+			if (block) return block;
+		}
+	},
 
 	/** Returns `PlacedBlockData` for all blocks on the plot */
-	static getPlotBlockDatas(plot: PlotModel): readonly PlacedBlockData[] {
+	getPlotBlockDatas: (plot: PlotModel): readonly PlacedBlockData[] => {
 		return plot.Blocks.GetChildren(undefined).map((b) => BlockManager.getBlockDataByBlockModel(b));
-	}
+	},
 
 	/** Returns the {@link AABB} of the **construction area** for blocks */
-	static getPlotBuildingRegion(plot: PlotModel): AABB {
+	getPlotBuildingRegion: (plot: PlotModel): AABB => {
 		const buildingPlane = plot.PrimaryPart;
 
 		return AABB.fromMinMax(
@@ -118,5 +142,7 @@ export default class SharedPlots {
 				buildingPlane.Position.Z + buildingPlane.Size.Z / 2,
 			),
 		);
-	}
-}
+	},
+} as const;
+
+export default SharedPlots;
