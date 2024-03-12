@@ -14,6 +14,7 @@ export default class ImpactSoundEffect extends EffectBase<Args> {
 		Metal: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
 		Glass: ReplicatedStorage.Assets.Sounds.Impact.Materials.Glass.GetChildren(),
 		Wood: ReplicatedStorage.Assets.Sounds.Impact.Materials.Wood.GetChildren(),
+		WoodPlanks: ReplicatedStorage.Assets.Sounds.Impact.Materials.Wood.GetChildren(),
 	};
 
 	constructor() {
