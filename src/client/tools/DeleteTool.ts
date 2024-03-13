@@ -1,4 +1,3 @@
-import { Players } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
@@ -7,7 +6,6 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
 import BoxSelector from "client/tools/selectors/BoxSelector";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
-import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import Signal from "shared/event/Signal";
 
@@ -18,7 +16,7 @@ export default class DeleteTool extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		const hoverSelector = this.parent(new HoveredBlockHighlighter());
+		const hoverSelector = this.parent(new HoveredBlockHighlighter((b) => this.targetPlot.get().hasBlock(b)));
 		hoverSelector.highlightedBlock.autoSet(this.highlightedBlock);
 
 		const fireSelected = async () => {
@@ -51,18 +49,11 @@ export default class DeleteTool extends ToolBase {
 	}
 
 	async deleteBlocks(blocks: readonly BlockModel[] | "all") {
-		const getDeletedBlocks = () => {
-			if (blocks === "all") {
-				return SharedPlots.getPlotBlocks(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId)).GetChildren(
-					undefined,
-				);
-			}
+		if (blocks !== "all" && blocks.any((b) => !this.targetPlot.get().hasBlock(b))) {
+			return;
+		}
 
-			return blocks;
-		};
-
-		const plot = SharedPlots.getPlotByPosition(getDeletedBlocks()[0].PrimaryPart!.Position)!;
-		const response = await ClientBuilding.deleteBlocks(plot, blocks);
+		const response = await ClientBuilding.deleteBlocks(this.targetPlot.get().instance, blocks);
 		if (response.success) {
 			task.wait();
 

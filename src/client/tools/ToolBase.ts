@@ -4,11 +4,11 @@ import Gui from "client/gui/Gui";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
-import ObservableValue from "shared/event/ObservableValue";
 
 /** An abstract class of tools for working with the world */
 export default abstract class ToolBase extends ClientComponent {
-	readonly mirrorMode = new ObservableValue<MirrorMode>({});
+	readonly mirrorMode;
+	readonly targetPlot;
 
 	protected readonly gameUI;
 	protected readonly mouse: Mouse;
@@ -18,7 +18,8 @@ export default abstract class ToolBase extends ClientComponent {
 	constructor(mode: BuildingMode) {
 		super();
 		this.mode = mode;
-		this.mirrorMode.bindTo(mode.mirrorMode);
+		this.mirrorMode = mode.mirrorMode;
+		this.targetPlot = mode.targetPlot.asReadonly();
 
 		this.tooltipHolder = this.parent(TooltipsHolder.createComponent(this.getDisplayName()));
 		this.tooltipHolder.set(this.getTooltips());
@@ -29,6 +30,10 @@ export default abstract class ToolBase extends ClientComponent {
 
 	static getToolGui<TName extends string, TType>(): { readonly [k in TName]: TType } {
 		return Gui.getGameUI<{ BuildingMode: { Tools: { [k in TName]: TType } } }>().BuildingMode.Tools;
+	}
+
+	supportsMirror() {
+		return false;
 	}
 
 	/** The name of the tool, for example: `Example Mode` */

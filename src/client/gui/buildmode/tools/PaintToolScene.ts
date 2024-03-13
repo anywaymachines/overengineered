@@ -1,4 +1,3 @@
-import { Players } from "@rbxts/services";
 import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
 import MaterialColorEditControl, {
@@ -7,7 +6,6 @@ import MaterialColorEditControl, {
 import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
 import ToggleControl, { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import PaintTool from "client/tools/PaintTool";
-import SharedPlots from "shared/building/SharedPlots";
 
 export type PaintToolSceneDefinition = GuiObject & {
 	readonly Bottom: MaterialColorEditControlDefinition & {
@@ -66,20 +64,10 @@ export default class PaintToolScene extends Control<PaintToolSceneDefinition> {
 	}
 
 	private paintEverything(enableColor?: boolean, enableMaterial?: boolean) {
-		let plot: PlotModel | undefined;
-
-		if (Players.LocalPlayer.Character) {
-			plot = SharedPlots.getPlotByPosition(Players.LocalPlayer.Character.GetPivot().Position);
-		}
-
-		if (!plot || SharedPlots.isBuildingAllowed(plot, Players.LocalPlayer)) {
-			plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
-		}
-
-		this.tool.paintEverything(plot, enableColor, enableMaterial);
+		this.tool.paintEverything(this.tool.targetPlot.get().instance, enableColor, enableMaterial);
 	}
 
-	public show() {
+	show() {
 		super.show();
 
 		GuiAnimator.transition(this.gui.Bottom, 0.2, "up");

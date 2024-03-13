@@ -19,7 +19,7 @@ export default class PaintTool extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		const hoverHighlighter = this.parent(new HoveredBlockHighlighter());
+		const hoverHighlighter = this.parent(new HoveredBlockHighlighter((b) => this.targetPlot.get().hasBlock(b)));
 		this.onPrepare((inputType) => {
 			if (inputType === "Desktop") {
 				hoverHighlighter.enable();

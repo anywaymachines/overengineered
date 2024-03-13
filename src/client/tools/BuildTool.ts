@@ -13,7 +13,6 @@ import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
 import BuildingManager from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
-import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 import Signal from "shared/event/Signal";
 import PartUtils from "shared/utils/PartUtils";
@@ -223,23 +222,11 @@ export default class BuildTool extends ToolBase {
 		// ERROR: Nothing to place
 		if (!this.previewBlock || !this.previewBlock.PrimaryPart) return;
 
-		// Client limitations
-		const plot = SharedPlots.getPlotByPosition(this.previewBlock.PrimaryPart.Position) as PlotModel | undefined;
-		if (!plot) {
-			LogControl.instance.addLine("Out of bounds!", Colors.red);
-
-			// Play sound
-			SoundController.getSounds().Build.BlockPlaceError.Play();
-
-			return;
-		}
-
 		if (
 			!BuildingManager.blockCanBePlacedAt(
-				plot,
-				this.selectedBlock.get()!.model,
+				this.targetPlot.get(),
+				this.selectedBlock.get()!,
 				this.previewBlock.GetPivot(),
-				Players.LocalPlayer,
 			)
 		) {
 			LogControl.instance.addLine("Can't be placed here!");
@@ -250,7 +237,7 @@ export default class BuildTool extends ToolBase {
 			return;
 		}
 
-		const response = await ClientBuilding.placeBlocks(plot, [
+		const response = await ClientBuilding.placeBlocks(this.targetPlot.get().instance, [
 			{
 				id: this.selectedBlock.get()!.id,
 				color: this.selectedColor.get(),
@@ -329,17 +316,12 @@ export default class BuildTool extends ToolBase {
 		assert(this.previewBlock);
 		assert(this.previewBlock.PrimaryPart);
 
-		// Colorizing
-		const plot = SharedPlots.getPlotByPosition(this.previewBlock.PrimaryPart.Position) as PlotModel | undefined;
-		if (
-			plot &&
-			BuildingManager.blockCanBePlacedAt(
-				plot,
-				this.selectedBlock.get()!.model,
-				this.previewBlock.GetPivot(),
-				Players.LocalPlayer,
-			)
-		) {
+		const isBlockInsidePlot = BuildingManager.blockCanBePlacedAt(
+			this.targetPlot.get(),
+			this.selectedBlock.get()!,
+			this.previewBlock.GetPivot(),
+		);
+		if (isBlockInsidePlot) {
 			PartUtils.ghostModel(this.previewBlock, this.allowedColor);
 		} else {
 			PartUtils.ghostModel(this.previewBlock, this.forbiddenColor);

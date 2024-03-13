@@ -15,8 +15,11 @@ export class AABB {
 	private minMaxData?: MinMaxData;
 
 	/** Get the {@link AABB} of a model */
-	static fromModel(block: Model): AABB {
-		const [cf, size] = block.GetBoundingBox();
+	static fromModel(block: Model, cframe?: CFrame): AABB {
+		// eslint-disable-next-line prefer-const
+		let [cf, size] = block.GetBoundingBox();
+		cf = cframe ?? cf;
+
 		const sx = size.X;
 		const sy = size.Y;
 		const sz = size.Z;

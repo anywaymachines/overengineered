@@ -87,9 +87,23 @@ export default class ObservableValue<T> implements ReadonlyObservableValue<T> {
 
 		return observable;
 	}
+	createBased<TNew>(func: (value: T) => TNew): ReadonlyObservableValue<TNew> {
+		const observable = new ObservableValue<TNew>(func(this.get()));
+		this.subscribe((value) => observable.set(func(value)));
+
+		return observable;
+	}
 
 	asReadonly(): ReadonlyObservableValue<T> {
 		return this;
+	}
+
+	withDefault(defval: T & defined): ObservableValue<T & defined> {
+		const observable = new ObservableValue<T & defined>(this.get() ?? defval);
+		this.subscribe((val) => observable.set(val ?? defval));
+		observable.subscribe((val) => this.set(val));
+
+		return observable;
 	}
 
 	static fromSignal<TSignal extends Signal<(arg: unknown) => void>>(

@@ -19,19 +19,21 @@ export const ServerBuildingRequestHandler = {
 			return errBuildingNotPermitted;
 		}
 
-		const placed: BlockModel[] = [];
 		for (const block of request.blocks) {
 			if (
-				!BuildingManager.blockCanBePlacedAt(
-					request.plot,
-					blockRegistry.get(block.id)!.model,
+				!BuildingManager.serverBlockCanBePlacedAt(
+					SharedPlots.getPlotComponent(request.plot),
+					blockRegistry.get(block.id)!,
 					block.location,
 					player,
 				)
 			) {
 				return err("Out of bounds");
 			}
+		}
 
+		const placed: BlockModel[] = [];
+		for (const block of request.blocks) {
 			const regblock = blockRegistry.get(block.id)!;
 			const placedBlocks = SharedPlots.getPlotBlocks(request.plot)
 				.GetChildren()

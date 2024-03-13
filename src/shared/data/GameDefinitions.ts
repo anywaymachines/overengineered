@@ -20,7 +20,6 @@ const GameDefinitions = {
 	// Building
 	FREE_SLOTS: 10,
 	ADMIN_SLOTS: 50,
-	BUILD_HEIGHT_LIMIT: 400,
 
 	MAX_LINEAR_SPEED: RobloxUnit.Meters_To_Studs(1000),
 	MAX_ANGULAR_SPEED: 40,

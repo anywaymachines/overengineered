@@ -77,7 +77,7 @@ namespace SinglePlaceController {
 		private readonly selectedColor;
 		private readonly selectedMaterial;
 		private readonly mirrorMode;
-		private readonly targetPlot;
+		private readonly plot;
 
 		constructor(state: BuildTool2) {
 			super();
@@ -85,7 +85,7 @@ namespace SinglePlaceController {
 			this.selectedColor = state.selectedColor.asReadonly();
 			this.selectedMaterial = state.selectedMaterial.asReadonly();
 			this.mirrorMode = state.mirrorMode.asReadonly();
-			this.targetPlot = state.targetPlot;
+			this.plot = state.targetPlot;
 
 			this.onPrepare((input) => {
 				if (input !== "Touch") return;
@@ -181,9 +181,6 @@ namespace SinglePlaceController {
 			const mainPosition = getMouseTargetBlockPosition();
 			if (!mainPosition) return;
 
-			const plot = SharedPlots.getPlotByPosition(mainPosition);
-			this.targetPlot.set(plot);
-
 			this.mainGhost ??= createBlockGhost(selected);
 			this.mainGhost.model!.PivotTo(this.blockRotation.add(mainPosition));
 
@@ -206,23 +203,22 @@ namespace SinglePlaceController {
 			};
 			g.Label4.Text = `Rotation: ${prettyCFrame(this.mainGhost?.model.GetPivot() ?? this.blockRotation)}`;
 
-			if (plot) {
-				updateMirrorGhostBlocksPosition(plot, mainPosition);
+			const plot = this.plot.get();
+			const areAllBlocksInsidePlot =
+				plot.isModelInside(this.mainGhost.model) &&
+				this.mirroredGhosts.all((ghost) => plot.isModelInside(ghost.model));
+
+			if (areAllBlocksInsidePlot) {
+				updateMirrorGhostBlocksPosition(plot.instance, mainPosition);
 			} else {
 				this.destroyGhosts(false);
 			}
 
 			const canBePlaced =
-				plot &&
-				[...this.mirroredGhosts, this.mainGhost].find(
-					(ghost) =>
-						!BuildingManager.blockCanBePlacedAt(
-							plot,
-							ghost.model,
-							ghost.model.GetPivot(),
-							Players.LocalPlayer,
-						),
-				) === undefined;
+				areAllBlocksInsidePlot &&
+				this.mirroredGhosts.all((ghost) =>
+					BuildingManager.blockCanBePlacedAt(plot, selected, ghost.model.GetPivot()),
+				);
 
 			PartUtils.ghostModel(this.mainGhost.model, canBePlaced ? allowedColor : forbiddenColor);
 			for (const ghost of this.mirroredGhosts) {
@@ -272,8 +268,17 @@ namespace SinglePlaceController {
 				return;
 			}
 
-			const plot = this.targetPlot.get();
-			if (!plot) {
+			const mainGhost = this.mainGhost;
+			if (!mainGhost || !mainGhost.model.PrimaryPart) {
+				return;
+			}
+
+			const plot = this.plot.get();
+			if (
+				![mainGhost, ...this.mirroredGhosts].all((ghost) =>
+					BuildingManager.blockCanBePlacedAt(plot, selected, ghost.model.GetPivot()),
+				)
+			) {
 				LogControl.instance.addLine("Out of bounds!", Colors.red);
 
 				// Play sound
@@ -281,13 +286,8 @@ namespace SinglePlaceController {
 				return;
 			}
 
-			const mainGhost = this.mainGhost;
-			if (!mainGhost || !mainGhost.model.PrimaryPart) {
-				return;
-			}
-
 			const response = await ClientBuilding.placeBlocks(
-				plot,
+				plot.instance,
 				[mainGhost, ...this.mirroredGhosts].map(
 					(g): PlaceBlockByPlayerRequest => ({
 						id: selected.id,
@@ -328,9 +328,6 @@ namespace MultiPlaceController {
 		static subscribe(state: BuildTool2, parent: ComponentChild<IComponent>) {
 			const mouse = Players.LocalPlayer.GetMouse();
 			const buttonPress = () => {
-				const plot = state.targetPlot.get();
-				if (!plot) return;
-
 				const selectedBlock = state.selectedBlock.get();
 				if (!selectedBlock) return;
 
@@ -341,6 +338,7 @@ namespace MultiPlaceController {
 				pressPosition = constrainPositionToGrid(pressPosition);
 				pressPosition = addBlockSize(selectedBlock, normal, pressPosition);
 
+				const plot = state.targetPlot.get();
 				parent.set(
 					new Desktop(
 						pressPosition,
@@ -374,7 +372,7 @@ namespace MultiPlaceController {
 			private readonly selectedColor: Color3,
 			private readonly selectedMaterial: Enum.Material,
 			private readonly mirrorModes: MirrorMode,
-			private readonly plot: PlotModel,
+			private readonly plot: SharedPlot,
 			private readonly blockRotation: CFrame,
 		) {
 			super();
@@ -384,7 +382,7 @@ namespace MultiPlaceController {
 				const hit = mouse.Hit.Position;
 				const clickDirection = cameraPostion.sub(hit).Unit;
 				let pos = this.getPositionOnBuildingPlane(this.pressPosition, cameraPostion, clickDirection);
-				const plotRegion = SharedPlots.getPlotBuildingRegion(plot);
+				const plotRegion = SharedPlots.getPlotBuildingRegion(plot.instance);
 				pos = plotRegion.clampVector(pos);
 				const positionsData = this.calculateGhostBlockPositions(
 					this.selectedBlock.model,
@@ -411,7 +409,7 @@ namespace MultiPlaceController {
 				for (const model of models) {
 					this.drawnGhostsMap.set(model.model.GetPivot().Position, model);
 					const p = BuildingManager.getMirroredBlocksCFrames(
-						plot,
+						plot.instance,
 						selectedBlock.id,
 						model.model.GetPivot(),
 						mirrorModes,
@@ -528,29 +526,14 @@ namespace MultiPlaceController {
 			}
 
 			const blocks = this.drawnGhostsMap.flatmap((_, m) => [...m.mirrors, m.model]);
-			const plot = SharedPlots.getPlotByPosition(blocks[0].GetPivot().Position);
-			if (!plot) {
+			if (!blocks.all((b) => BuildingManager.blockCanBePlacedAt(this.plot, this.selectedBlock, b.GetPivot()))) {
 				LogControl.instance.addLine("Out of bounds!", Colors.red);
-				SoundController.getSounds().Build.BlockPlaceError.Play();
-				return;
-			}
-
-			const plotRegion = SharedPlots.getPlotBuildingRegion(plot);
-			const blocksRegion = AABB.fromModels(blocks).withSize((s) => s.mul(0.99));
-			if (!plotRegion.contains(blocksRegion)) {
-				LogControl.instance.addLine("Out of bounds!", Colors.red);
-				SoundController.getSounds().Build.BlockPlaceError.Play();
-				return;
-			}
-
-			if (!SharedPlots.isBuildingAllowed(plot, Players.LocalPlayer)) {
-				LogControl.instance.addLine("Building not allowed!", Colors.red);
 				SoundController.getSounds().Build.BlockPlaceError.Play();
 				return;
 			}
 
 			const response = await ClientBuilding.placeBlocks(
-				plot,
+				this.plot.instance,
 				blocks.map(
 					(b): PlaceBlockByPlayerRequest => ({
 						id: this.selectedBlock.id,
@@ -582,12 +565,10 @@ export default class BuildTool2 extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
-	readonly targetPlot = new ObservableValue<PlotModel | undefined>(undefined);
 	readonly currentMode = new ComponentChild<IComponent>(this, true);
 
 	constructor(mode: BuildingMode) {
 		super(mode);
-		this.targetPlot.subscribe((plot) => mode.mirrorVisualizer.plot.set(plot));
 
 		this.currentMode.childSet.Connect((mode) => {
 			if (!this.isEnabled()) return;
@@ -597,6 +578,10 @@ export default class BuildTool2 extends ToolBase {
 		this.onEnable(() => this.currentMode.set(new SinglePlaceController.Desktop(this)));
 
 		MultiPlaceController.Desktop.subscribe(this, this.currentMode);
+	}
+
+	supportsMirror() {
+		return true;
 	}
 
 	placeBlock() {
@@ -614,11 +599,6 @@ export default class BuildTool2 extends ToolBase {
 		}
 
 		return mode.rotateBlock(axis, inverted);
-	}
-
-	disable(): void {
-		this.targetPlot.set(undefined);
-		super.disable();
 	}
 
 	getDisplayName(): string {

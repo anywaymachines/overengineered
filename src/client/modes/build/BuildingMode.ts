@@ -5,6 +5,7 @@ import Gui from "client/gui/Gui";
 import BuildingModeScene, { BuildingModeSceneDefinition } from "client/gui/buildmode/BuildingModeScene";
 import PlayMode from "client/modes/PlayMode";
 import ToolController from "client/tools/ToolController";
+import { SharedPlot } from "shared/building/SharedPlot";
 import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 
@@ -18,23 +19,25 @@ declare global {
 
 export default class BuildingMode extends PlayMode {
 	readonly mirrorMode = new ObservableValue<MirrorMode>({ x: Vector3.zero });
-
-	readonly mirrorVisualizer = new MirrorVisualizer();
+	readonly targetPlot = new ObservableValue<SharedPlot | undefined>(undefined).withDefault(
+		SharedPlots.getPlotComponentByOwnerID(Players.LocalPlayer.UserId),
+	);
+	readonly mirrorVisualizer;
 
 	constructor() {
 		super();
 
-		this.mirrorVisualizer.mirrorMode.bindTo(this.mirrorMode);
-		this.add(this.mirrorVisualizer);
-
-		const tools = new ToolController(this);
-		this.add(tools);
-
-		const scene = new BuildingModeScene(
-			Gui.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode,
-			tools,
+		this.mirrorVisualizer = this.add(
+			new MirrorVisualizer(
+				this.targetPlot.createBased((plot) => plot.instance),
+				this.mirrorMode,
+			),
 		);
-		this.add(scene);
+
+		const tools = this.add(new ToolController(this));
+		this.add(
+			new BuildingModeScene(Gui.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode, tools),
+		);
 	}
 
 	getName(): PlayModes {

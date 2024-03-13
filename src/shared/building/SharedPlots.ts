@@ -1,5 +1,4 @@
 import { Workspace } from "@rbxts/services";
-import GameDefinitions from "shared/data/GameDefinitions";
 import { AABB } from "shared/fixes/AABB";
 import BlockManager, { PlacedBlockData } from "./BlockManager";
 import { SharedPlot } from "./SharedPlot";
@@ -133,20 +132,7 @@ const SharedPlots = {
 
 	/** Returns the {@link AABB} of the **construction area** for blocks */
 	getPlotBuildingRegion: (plot: PlotModel): AABB => {
-		const buildingPlane = plot.PrimaryPart;
-
-		return AABB.fromMinMax(
-			new Vector3(
-				buildingPlane.Position.X - buildingPlane.Size.X / 2,
-				buildingPlane.Position.Y + buildingPlane.Size.Y / 2,
-				buildingPlane.Position.Z - buildingPlane.Size.Z / 2,
-			),
-			new Vector3(
-				buildingPlane.Position.X + buildingPlane.Size.X / 2,
-				buildingPlane.Position.Y + GameDefinitions.BUILD_HEIGHT_LIMIT,
-				buildingPlane.Position.Z + buildingPlane.Size.Z / 2,
-			),
-		);
+		return SharedPlots.getPlotComponent(plot).bounds;
 	},
 } as const;
 

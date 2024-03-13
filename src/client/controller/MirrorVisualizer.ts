@@ -1,19 +1,21 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import ObservableValue from "shared/event/ObservableValue";
+import { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 export default class MirrorVisualizer extends ClientComponent {
-	readonly mirrorMode = new ObservableValue<MirrorMode>({});
-	readonly plot = new ObservableValue<Model | undefined>(undefined);
+	private readonly plot: ReadonlyObservableValue<PlotModel>;
+	private readonly mirrorMode: ReadonlyObservableValue<MirrorMode>;
 	private readonly template;
 
-	constructor() {
+	constructor(plot: ReadonlyObservableValue<PlotModel>, mirrorMode: ReadonlyObservableValue<MirrorMode>) {
 		super();
 
+		this.plot = plot;
+		this.mirrorMode = mirrorMode;
 		this.template = this.asTemplate(ReplicatedStorage.WaitForChild("Assets").WaitForChild("Mirror") as Part);
 
 		this.mirrorMode.subscribe(() => this.recreate());
-		this.plot.subscribe((plot, prev) => {
+		this.event.subscribeObservable2(this.plot, (plot, prev) => {
 			prev?.FindFirstChild("Mirrors")?.ClearAllChildren();
 			this.recreate();
 		});
@@ -32,7 +34,6 @@ export default class MirrorVisualizer extends ClientComponent {
 
 	private recreate() {
 		const plot = this.plot.get();
-		if (!plot) return;
 
 		let mirrors = plot.FindFirstChild("Mirrors");
 		if (!mirrors) {

@@ -1,7 +1,7 @@
-import { RunService } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import { BlockDataRegistry } from "shared/BlockDataRegistry";
+import { SharedPlot } from "shared/building/SharedPlot";
 import SharedPlots from "shared/building/SharedPlots";
-import { AABB } from "shared/fixes/AABB";
 import VectorUtils from "shared/utils/VectorUtils";
 
 /** Methods for for getting information about blocks in a building */
@@ -51,33 +51,27 @@ const BuildingManager = {
 		return undefined;
 	},
 
-	/** Check that the block position for a given player is a permitted position and not occupied by any other block
-	 * @param position The position to check
-	 * @param player The player to check
-	 */
-	blockCanBePlacedAt(plot: PlotModel, block: BlockModel, cframe: CFrame, player: Player): boolean {
-		// Checking the plot
-		if (!SharedPlots.isBuildingAllowed(plot, player)) {
-			// No plot / Building forbidden
+	blockCanBePlacedAt(plot: SharedPlot, block: { readonly model: Model }, pivot: CFrame): boolean {
+		return this.serverBlockCanBePlacedAt(plot, block, pivot, Players.LocalPlayer);
+	},
+
+	serverBlockCanBePlacedAt(
+		plot: SharedPlot,
+		block: { readonly model: Model },
+		pivot: CFrame,
+		player: Player,
+	): boolean {
+		if (!plot.isBuildingAllowed(player ?? Players.LocalPlayer)) {
 			return false;
 		}
 
-		// Not in plot
-		if (
-			!SharedPlots.getPlotBuildingRegion(plot).contains(
-				AABB.fromCenterSize(block.GetPivot().Position, block.GetBoundingBox()[1])
-					.withCenter(cframe)
-					.withSize((s) => s.mul(0.9)), // to account for inaccuracies
-			)
-		) {
+		if (!plot.isModelInside(block.model, pivot)) {
 			return false;
 		}
 
 		if (RunService.IsClient()) {
-			// Check is given coordinate occupied by another block
-			const collideBlock = this.getBlockByPosition(cframe.Position);
-			if (collideBlock !== undefined) {
-				// Occupied coordinates
+			const collideBlock = this.getBlockByPosition(pivot.Position);
+			if (collideBlock) {
 				return false;
 			}
 		}

@@ -37,6 +37,12 @@ export default class ToolController extends ClientComponent {
 			tool?.enable();
 		});
 
+		this.event.subscribeObservable2(
+			this.selectedTool,
+			(tool) => mode.mirrorVisualizer.setEnabled(tool?.supportsMirror() ?? false),
+			true,
+		);
+
 		this.buildTool = new BuildTool(mode);
 		this.editTool = new EditTool(mode);
 		this.deleteTool = new DeleteTool(mode);
