@@ -27,6 +27,10 @@ export default class ToolController extends ClientComponent {
 	constructor(mode: BuildingMode) {
 		super();
 
+		Signals.PLAYER.DIED.Connect(() => {
+			this.selectedTool.set(undefined);
+		});
+
 		this.selectedTool.subscribe((tool, prev) => {
 			prev?.disable();
 			tool?.enable();
