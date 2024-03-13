@@ -100,7 +100,7 @@ namespace SinglePlaceController {
 
 			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
 
-			this.event.subscribe(mouse.Button1Up, () => this.placeBlock());
+			this.event.subInput((ih) => ih.onMouse1Up(() => this.placeBlock(), false));
 			this.onPrepare(() => {
 				this.inputHandler.onKeyDown("T", () => this.rotateBlock("x"));
 				this.inputHandler.onKeyDown("R", () => this.rotateBlock("y"));
@@ -353,17 +353,34 @@ namespace MultiPlaceController {
 			};
 
 			state.event.subInput((ih) => {
-				ih.onKeyDown("ButtonR2", buttonPress);
-				ih.onMouse1Down(buttonPress, false);
+				ih.onKeyDown("ButtonR2", () => {
+					if (InputController.isShiftPressed()) {
+						buttonPress();
+					}
+				});
+				ih.onMouse1Down(() => {
+					if (InputController.isShiftPressed()) {
+						buttonPress();
+					}
+				}, false);
 
-				(state as unknown as { eventHandler: EventHandler }).eventHandler.subscribe(
-					UserInputService.TouchStarted,
-					(input, gameProcessedEvent) => {
-						if (gameProcessedEvent) return;
+				const eh = new EventHandler();
+				const stateeh = state as unknown as { readonly eventHandler: EventHandler };
+				stateeh.eventHandler.subscribe(UserInputService.TouchStarted, (input, gameProcessedEvent) => {
+					if (gameProcessedEvent) return;
+					const thread = task.delay(0.4, () => {
+						eh.unsubscribeAll();
 						Workspace.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
 						buttonPress();
-					},
-				);
+					});
+
+					const cancel = () => {
+						task.cancel(thread);
+						eh.unsubscribeAll();
+					};
+					eh.subscribe(Signals.CAMERA.MOVED, cancel);
+					eh.subscribe(UserInputService.TouchEnded, cancel);
+				});
 			});
 		}
 		constructor(
@@ -436,7 +453,6 @@ namespace MultiPlaceController {
 				ih.onMouse1Up(buttonUnpress);
 				ih.onKeyUp("ButtonR2", buttonUnpress);
 				this.eventHandler.subscribe(UserInputService.TouchEnded, () => {
-					print("ended with", Desktop.defaultCameraType);
 					Workspace.CurrentCamera!.CameraType = Desktop.defaultCameraType;
 					buttonUnpress();
 				});
