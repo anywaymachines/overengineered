@@ -19,27 +19,31 @@ export const SharedBuilding = {
 	 * Set the block material and color
 	 * @param byBuild If true, will force update block transparency
 	 */
-	paint: (data: PaintRequest, byBuild: boolean = false): Response => {
-		const blocks = "blocks" in data ? data.blocks : data.plot.Blocks.GetChildren(undefined);
+	paint: (
+		blocks: readonly BlockModel[],
+		color: Color3 | undefined,
+		material: Enum.Material | undefined,
+		byBuild: boolean = false,
+	) => {
 		for (const block of blocks) {
-			if (data.material) {
-				block.SetAttribute("material", Serializer.EnumMaterialSerializer.serialize(data.material));
-				PartUtils.switchDescendantsMaterial(block, data.material);
+			if (material) {
+				block.SetAttribute("material", Serializer.EnumMaterialSerializer.serialize(material));
+				PartUtils.switchDescendantsMaterial(block, material);
 
 				// Make glass material transparent
-				if (data.material === Enum.Material.Glass) {
+				if (material === Enum.Material.Glass) {
 					PartUtils.switchDescendantsTransparency(block, 0.3);
 				} else if (!byBuild) {
 					PartUtils.switchDescendantsTransparency(block, 0);
 				}
 
 				// Custom physical properties
-				const customPhysProp = MaterialData.Properties[data.material.Name] ?? MaterialData.Properties.Default;
+				const customPhysProp = MaterialData.Properties[material.Name] ?? MaterialData.Properties.Default;
 
 				PartUtils.applyToAllDescendantsOfType("BasePart", block, (part) => {
 					if (!byBuild || !part.CustomPhysicalProperties) {
 						const currentPhysProp = !byBuild
-							? new PhysicalProperties(data.material!)
+							? new PhysicalProperties(material!)
 							: part.CurrentPhysicalProperties;
 
 						part.CustomPhysicalProperties = new PhysicalProperties(
@@ -53,12 +57,10 @@ export const SharedBuilding = {
 				});
 			}
 
-			if (data.color) {
-				block.SetAttribute("color", HttpService.JSONEncode(Serializer.Color3Serializer.serialize(data.color)));
-				PartUtils.switchDescendantsColor(block, data.color);
+			if (color) {
+				block.SetAttribute("color", HttpService.JSONEncode(Serializer.Color3Serializer.serialize(color)));
+				PartUtils.switchDescendantsColor(block, color);
 			}
 		}
-
-		return { success: true };
 	},
 } as const;

@@ -7,6 +7,7 @@ import MovingSelector from "client/tools/selectors/MovingSelector";
 import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
+import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 
 export default class PaintTool extends ToolBase {
@@ -40,7 +41,9 @@ export default class PaintTool extends ToolBase {
 						selected.add(block.instance);
 					},
 					() => {
-						this.paint([...selected]);
+						if (selected.size() === 0) return;
+
+						this.paint(SharedPlots.getPlotByBlock([...selected][0])!, [...selected]);
 						selected.clear();
 					},
 				),
@@ -48,7 +51,10 @@ export default class PaintTool extends ToolBase {
 		}
 
 		const boxSelector = this.parent(new BoxSelector());
-		this.event.subscribe(boxSelector.submitted, async (blocks) => await this.paint(blocks));
+		this.event.subscribe(
+			boxSelector.submitted,
+			async (blocks) => await this.paint(SharedPlots.getPlotByBlock(blocks[0])!, blocks),
+		);
 
 		this.event.onInputBegin(async (input) => {
 			if (Gui.isCursorOnVisibleGui()) return;
@@ -69,26 +75,28 @@ export default class PaintTool extends ToolBase {
 	}
 
 	async paintClientSide(block: BlockModel) {
-		SharedBuilding.paint({
-			blocks: [block],
-			material: this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
-			color: this.enableColor.get() ? this.selectedColor.get() : undefined,
-		});
+		SharedBuilding.paint(
+			[block],
+			this.enableColor.get() ? this.selectedColor.get() : undefined,
+			this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
+		);
 	}
 
 	async paintEverything(plot: PlotModel, enableColor?: boolean, enableMaterial?: boolean) {
 		await Remotes.Client.GetNamespace("Building")
-			.Get("Paint")
+			.Get("PaintBlocks")
 			.CallServerAsync({
 				plot,
+				blocks: "all",
 				color: enableColor ?? this.enableColor.get() ? this.selectedColor.get() : undefined,
 				material: enableMaterial ?? this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
 			});
 	}
-	async paint(blocks: readonly BlockModel[]) {
+	async paint(plot: PlotModel, blocks: readonly BlockModel[]) {
 		await Remotes.Client.GetNamespace("Building")
-			.Get("Paint")
+			.Get("PaintBlocks")
 			.CallServerAsync({
+				plot,
 				blocks,
 				color: this.enableColor.get() ? this.selectedColor.get() : undefined,
 				material: this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,

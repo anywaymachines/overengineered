@@ -116,4 +116,31 @@ export const ServerBuildingRequestHandler = {
 
 		return ServerBuilding.logicDisconnect(request);
 	},
+	paintBlocks: (player: Player, request: PaintBlocksRequest): Response => {
+		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
+			return errBuildingNotPermitted;
+		}
+
+		if (request.blocks !== "all") {
+			for (const block of request.blocks) {
+				if (!SharedPlots.isBlockOnAllowedPlot(player, block)) {
+					return errBuildingNotPermitted;
+				}
+			}
+		}
+
+		return ServerBuilding.paintBlocks(request);
+	},
+	updateConfig: (player: Player, request: ConfigUpdateRequest): Response => {
+		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
+			return errBuildingNotPermitted;
+		}
+		for (const config of request.configs) {
+			if (!SharedPlots.isBlockOnAllowedPlot(player, config.block)) {
+				return errBuildingNotPermitted;
+			}
+		}
+
+		return ServerBuilding.updateConfig(request);
+	},
 } as const;

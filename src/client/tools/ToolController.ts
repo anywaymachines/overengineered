@@ -1,5 +1,6 @@
 import { Players } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
+import Signals from "client/event/Signals";
 import BuildingMode from "client/modes/build/BuildingMode";
 import BuildTool from "client/tools/BuildTool";
 import BuildTool2 from "client/tools/BuildTool2";

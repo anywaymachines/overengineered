@@ -7,7 +7,6 @@ import SlotsMeta from "shared/SlotsMeta";
 import SharedPlots from "shared/building/SharedPlots";
 import GameDefinitions from "shared/data/GameDefinitions";
 import BuildingWelder from "./building/BuildingWelder";
-import BuildingWrapper from "./building/BuildingWrapper";
 import { ServerBuilding } from "./building/ServerBuilding";
 import { ServerBuildingRequestHandler } from "./building/ServerBuildingRequestHandler";
 import PlayerDatabase, { PlayerData } from "./database/PlayerDatabase";
@@ -132,16 +131,16 @@ class RemoteHandlers {
 ServerPlots.initialize();
 
 // Initializing event workders
-registerOnRemoteFunction("Building", "Paint", BuildingWrapper.paintAsPlayer);
 registerOnRemoteFunction("Ride", "SetPlayMode", PlayModeController.changeModeForPlayer);
 registerOnRemoteFunction("Slots", "Save", RemoteHandlers.saveSlot);
 registerOnRemoteFunction("Slots", "Load", RemoteHandlers.loadSlot);
-registerOnRemoteFunction("Building", "UpdateConfigRequest", BuildingWrapper.updateConfigAsPlayer);
+registerOnRemoteFunction("Building", "UpdateConfigRequest", ServerBuildingRequestHandler.updateConfig);
 registerOnRemoteFunction("Building", "PlaceBlocks", ServerBuildingRequestHandler.placeBlocks);
 registerOnRemoteFunction("Building", "DeleteBlocks", ServerBuildingRequestHandler.deleteBlocks);
 registerOnRemoteFunction("Building", "MoveBlocks", ServerBuildingRequestHandler.moveBlocks);
 registerOnRemoteFunction("Building", "LogicConnect", ServerBuildingRequestHandler.logicConnect);
 registerOnRemoteFunction("Building", "LogicDisconnect", ServerBuildingRequestHandler.logicDisconnect);
+registerOnRemoteFunction("Building", "PaintBlocks", ServerBuildingRequestHandler.paintBlocks);
 registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSetting);
 registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);

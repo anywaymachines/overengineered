@@ -47,6 +47,21 @@ declare global {
 		readonly inputBlock: BlockModel;
 		readonly inputConnection: BlockConnectionName;
 	}
+
+	interface PaintBlocksRequest {
+		readonly plot: PlotModel;
+		readonly blocks: readonly BlockModel[] | "all";
+		readonly color?: Color3;
+		readonly material?: Enum.Material;
+	}
+	interface ConfigUpdateRequest {
+		readonly plot: PlotModel;
+		readonly configs: readonly {
+			readonly block: BlockModel;
+			readonly key: string;
+			readonly value: string;
+		}[];
+	}
 }
 
 const Remotes = Net.Definitions.Create({
@@ -66,8 +81,7 @@ const Remotes = Net.Definitions.Create({
 		MoveBlocks: Net.Definitions.ServerAsyncFunction<(data: MoveBlocksRequest) => Response>(),
 		LogicConnect: Net.Definitions.ServerAsyncFunction<(data: LogicConnectRequest) => Response>(),
 		LogicDisconnect: Net.Definitions.ServerAsyncFunction<(data: LogicDisconnectRequest) => Response>(),
-
-		Paint: Net.Definitions.ServerAsyncFunction<(data: PaintRequest) => Response>(),
+		PaintBlocks: Net.Definitions.ServerAsyncFunction<(data: PaintBlocksRequest) => Response>(),
 	}),
 	Slots: Net.Definitions.Namespace({
 		Load: Net.Definitions.ServerAsyncFunction<(index: number) => LoadSlotResponse>([
