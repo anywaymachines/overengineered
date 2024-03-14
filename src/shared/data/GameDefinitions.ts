@@ -18,7 +18,7 @@ const GameDefinitions = {
 	} as { readonly [rank: number]: { name: string; color?: Color3; rainbow?: boolean } },
 
 	// Building
-	FREE_SLOTS: 10,
+	FREE_SLOTS: 15,
 	ADMIN_SLOTS: 50,
 
 	MAX_LINEAR_SPEED: RobloxUnit.Meters_To_Studs(1000),
