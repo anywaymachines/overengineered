@@ -33,6 +33,10 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		super(gui);
 
 		this.configControl = this.added(new ConfigControl(this.gui.ParamsSelection.Buttons));
+		this.configControl.travelToConnectedPressed.Connect((uuid) => {
+			tool.unselectAll();
+			tool.selectBlockByUuid(uuid);
+		});
 
 		const selected = ObservableValue.fromSignal(tool.selectedBlocksChanged, []);
 		this.event.subscribe(this.configControl.configUpdated, async (key, value) => {
@@ -128,14 +132,10 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 					BlockManager.manager.config.get(blockmodel) as Record<string, number>,
 					defs,
 				);
-				return [
-					blockmodel,
-					config,
-					Objects.keys(BlockManager.getBlockDataByBlockModel(blockmodel).connections),
-				] as const;
+				return [blockmodel, config, Objects.keys(BlockManager.manager.connections.get(blockmodel))] as const;
 			})
 			.filter((x) => x !== undefined);
 
-		this.configControl.set(configs[0][1], onedef, configs[0][2]);
+		this.configControl.set(configs[0][1], onedef, configs[0][2], configs[0][0]);
 	}
 }

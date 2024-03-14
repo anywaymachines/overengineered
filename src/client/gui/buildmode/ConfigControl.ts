@@ -1,5 +1,6 @@
 import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
+import { ButtonControl } from "client/gui/controls/Button";
 import CheckBoxControl, { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import DropdownList, { DropdownListDefinition } from "client/gui/controls/DropdownList";
@@ -7,6 +8,7 @@ import KeyChooserControl, { KeyChooserControlDefinition } from "client/gui/contr
 import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import SliderControl, { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import TextBoxControl, { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
+import BlockManager from "shared/building/BlockManager";
 import Signal from "shared/event/Signal";
 import Objects from "shared/fixes/objects";
 
@@ -19,6 +21,7 @@ type BlockConfigDefinitions = BlockConfigTypes.Definitions;
 
 export type ConfigControlDefinition = GuiObject;
 export default class ConfigControl extends Control<ConfigControlDefinition> {
+	readonly travelToConnectedPressed = new Signal<(uuid: BlockUuid) => void>();
 	readonly configUpdated = new Signal<
 		(
 			key: string,
@@ -53,6 +56,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 		config: ConfigDefinitionsToConfig<keyof TDef, TDef>,
 		definition: TDef,
 		connected: readonly (keyof TDef)[] = [],
+		block?: BlockModel,
 	) {
 		this.clear();
 
@@ -61,7 +65,13 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 		)) {
 			if (def.configHidden) continue;
 			if (connected.includes(id)) {
-				this.add(new ConnectedValueControl(this.connectedTemplate(), def.displayName));
+				const connected = this.add(new ConnectedValueControl(this.connectedTemplate(), def.displayName));
+				connected.travelToConnectedPressed.Connect(() =>
+					this.travelToConnectedPressed.Fire(
+						BlockManager.manager.connections.get(block!)?.[id as BlockConnectionName].blockUuid,
+					),
+				);
+
 				continue;
 			}
 
@@ -169,7 +179,19 @@ export abstract class ConfigValueControl<TGui extends GuiObject> extends Control
 		return value;
 	}
 }
-class ConnectedValueControl extends ConfigValueControl<GuiObject> {}
+
+type ConnectedValueControlDefinition = GuiButton;
+class ConnectedValueControl extends ConfigValueControl<ConnectedValueControlDefinition> {
+	private readonly _travelToConnectedPressed = new Signal();
+	readonly travelToConnectedPressed = this._travelToConnectedPressed.asReadonly();
+
+	constructor(gui: ConfigPartDefinition<ConnectedValueControlDefinition>, name: string) {
+		super(gui, name);
+
+		const locate = this.add(new ButtonControl(gui.Control));
+		locate.activated.Connect(() => this._travelToConnectedPressed.Fire());
+	}
+}
 
 //
 
@@ -715,7 +737,7 @@ export type Templates = {
 };
 
 export type Template = {
-	ConnectedTemplate: ConfigPartDefinition<GuiObject>;
+	ConnectedTemplate: ConfigPartDefinition<ConnectedValueControlDefinition>;
 	CheckboxTemplate: ConfigPartDefinition<CheckBoxControlDefinition>;
 	KeyTemplate: ConfigPartDefinition<KeyChooserControlDefinition>;
 	SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;

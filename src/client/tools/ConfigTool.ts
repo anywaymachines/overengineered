@@ -5,6 +5,7 @@ import ToolBase from "client/tools/ToolBase";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import BlockManager from "shared/building/BlockManager";
+import SharedPlots from "shared/building/SharedPlots";
 import Signal from "shared/event/Signal";
 import Objects from "shared/fixes/objects";
 
@@ -135,6 +136,9 @@ export default class ConfigTool extends ToolBase {
 		}
 	}
 
+	selectBlockByUuid(uuid: BlockUuid) {
+		this.selectBlock(SharedPlots.getBlockByUuid(this.targetPlot.get().instance, uuid));
+	}
 	unselectAll() {
 		this.selected.forEach((element) => element.Destroy());
 		this.selected.clear();
