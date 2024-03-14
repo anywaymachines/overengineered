@@ -12,7 +12,6 @@ import ToolBase from "client/tools/ToolBase";
 import { blockRegistry } from "shared/Registry";
 import BlockManager from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
-import { SharedPlot } from "shared/building/SharedPlot";
 import ObservableValue from "shared/event/ObservableValue";
 import Signal from "shared/event/Signal";
 import PartUtils from "shared/utils/PartUtils";
@@ -44,7 +43,7 @@ export default class BuildTool extends ToolBase {
 
 	constructor(mode: BuildingMode) {
 		super(mode);
-		this.event.subscribe(SharedPlot.anyChanged, () => this.updatePosition());
+		this.subscribeToCurrentPlot(() => this.updatePosition());
 	}
 
 	getDisplayName(): string {

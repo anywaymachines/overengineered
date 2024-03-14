@@ -5,7 +5,6 @@ import ToolBase from "client/tools/ToolBase";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import BlockManager from "shared/building/BlockManager";
-import { SharedPlot } from "shared/building/SharedPlot";
 import Signal from "shared/event/Signal";
 import Objects from "shared/fixes/objects";
 
@@ -52,7 +51,7 @@ export default class ConfigTool extends ToolBase {
 
 		// TODO: remove false later, deselects everything after any change
 		if (false as boolean)
-			this.event.subscribe(SharedPlot.anyChanged, (plot) => {
+			this.subscribeToCurrentPlot((plot) => {
 				if (!this.selected.any((s) => s.IsDescendantOf(plot.instance))) {
 					return;
 				}

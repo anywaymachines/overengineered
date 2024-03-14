@@ -9,6 +9,9 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	/** @client */
 	static readonly anyChanged = this._anyChanged.asReadonly();
 
+	/** @client */
+	readonly changed = new Signal();
+
 	readonly version;
 	readonly ownerId;
 	readonly whitelistedPlayers;
@@ -18,9 +21,11 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	constructor(instance: PlotModel) {
 		super(instance);
 
+		this.changed.Connect(() => SharedPlot._anyChanged.Fire(this));
+
 		this.version = this.event.observableFromAttribute<number>(instance, "version");
 		if (RunService.IsClient()) {
-			this.version.subscribe(() => SharedPlot._anyChanged.Fire(this));
+			this.version.subscribe(() => this.changed.Fire());
 		}
 
 		this.ownerId = this.event.observableFromAttribute<number>(instance, "ownerid");
@@ -38,10 +43,10 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 						}
 					}
 
-					SharedPlot._anyChanged.Fire(this);
+					this.changed.Fire();
 				});
 				this.event.subscribe(instance.Blocks.ChildRemoved, () => {
-					SharedPlot._anyChanged.Fire(this);
+					this.changed.Fire();
 				});
 			};
 
@@ -50,7 +55,6 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 					return;
 				}
 
-				print("sub to blocks");
 				subToBlocks();
 			});
 			if (this.instance.FindFirstChild("Blocks")) {

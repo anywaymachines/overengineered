@@ -94,12 +94,18 @@ namespace SinglePlaceController {
 			});
 			this.event.onPrepare(() => this.updateBlockPosition());
 
+			state.subscribeToCurrentPlot(() => {
+				if (InputController.inputType.get() === "Touch") {
+					return;
+				}
+
+				this.updateBlockPosition();
+			});
 			this.event.onPrepare((ih, eh) => {
 				if (ih === "Touch") return;
 
 				eh.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
 				eh.subscribe(mouse.Move, () => this.updateBlockPosition());
-				eh.subscribe(SharedPlot.anyChanged, () => this.updateBlockPosition());
 			});
 
 			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());

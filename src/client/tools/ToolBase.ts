@@ -4,6 +4,7 @@ import Gui from "client/gui/Gui";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
+import { SharedPlot } from "shared/building/SharedPlot";
 
 /** An abstract class of tools for working with the world */
 export default abstract class ToolBase extends ClientComponent {
@@ -26,6 +27,17 @@ export default abstract class ToolBase extends ClientComponent {
 
 		this.gameUI = Gui.getGameUI<ScreenGui>();
 		this.mouse = Players.LocalPlayer.GetMouse();
+	}
+
+	subscribeToCurrentPlot(func: (plot: SharedPlot) => void) {
+		this.event.subscribeObservable2(
+			this.targetPlot,
+			(plot) => {
+				this.eventHandler.subscribe(plot.changed, () => func(plot));
+				func(plot);
+			},
+			true,
+		);
 	}
 
 	static getToolGui<TName extends string, TType>(): { readonly [k in TName]: TType } {
