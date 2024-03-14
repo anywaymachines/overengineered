@@ -90,17 +90,21 @@ namespace SinglePlaceController {
 			this.onPrepare((input) => {
 				if (input !== "Touch") return;
 
-				this.inputHandler.onTouchTap(() => this.updateBlockPosition());
+				this.inputHandler.onTouchTap(() => this.updateBlockPosition(), false);
 			});
 			this.event.onPrepare(() => this.updateBlockPosition());
 
-			this.event.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
-			this.event.subscribe(mouse.Move, () => this.updateBlockPosition());
-			this.event.subscribe(SharedPlot.anyChanged, () => this.updateBlockPosition());
+			this.event.onPrepare((ih, eh) => {
+				if (ih === "Touch") return;
+
+				eh.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
+				eh.subscribe(mouse.Move, () => this.updateBlockPosition());
+				eh.subscribe(SharedPlot.anyChanged, () => this.updateBlockPosition());
+			});
 
 			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
 
-			this.event.subInput((ih) => ih.onMouse1Up(() => this.placeBlock(), false));
+			//this.event.subInput((ih) => ih.onMouse1Up(() => this.placeBlock(), false));
 			this.onPrepare(() => {
 				this.inputHandler.onKeyDown("T", () => this.rotateBlock("x"));
 				this.inputHandler.onKeyDown("R", () => this.rotateBlock("y"));
@@ -126,6 +130,10 @@ namespace SinglePlaceController {
 		}
 
 		private updateBlockPosition() {
+			if (Gui.isCursorOnVisibleGui()) {
+				return;
+			}
+
 			const g = Gui.getGameUI<{
 				BuildingMode: {
 					Tools: {
@@ -355,6 +363,7 @@ namespace MultiPlaceController {
 			state.event.subInput((ih) => {
 				ih.onKeyDown("ButtonR2", () => {
 					if (InputController.isShiftPressed()) {
+						//shift with controller??
 						buttonPress();
 					}
 				});

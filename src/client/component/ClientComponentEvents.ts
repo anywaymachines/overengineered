@@ -1,6 +1,7 @@
 import InputController from "client/controller/InputController";
 import InputHandler from "client/event/InputHandler";
 import { ComponentEvents } from "shared/component/ComponentEvents";
+import EventHandler from "shared/event/EventHandler";
 
 export class ClientComponentEvents extends ComponentEvents {
 	readonly inputHandler = new InputHandler();
@@ -18,8 +19,8 @@ export class ClientComponentEvents extends ComponentEvents {
 	}
 
 	/** Register an event that fires on enable and input type change */
-	onPrepare(callback: (inputType: InputType) => void): void {
-		this.onEnable(() => callback(InputController.inputType.get()));
+	onPrepare(callback: (inputType: InputType, eventHandler: EventHandler) => void): void {
+		this.onEnable(() => callback(InputController.inputType.get(), this.eventHandler));
 	}
 
 	/** Register an event that fires on enable and input type change to Desktop */
