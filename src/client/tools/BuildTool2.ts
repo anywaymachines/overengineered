@@ -129,6 +129,29 @@ namespace SinglePlaceController {
 			this.mirroredGhosts.clear();
 		}
 
+		private updateMirrorGhostBlocksPosition(plot: Model, mainPosition: Vector3) {
+			const selected = this.selectedBlock.get();
+			if (!selected) return;
+
+			this.mainGhost?.model.PivotTo(this.blockRotation.add(mainPosition));
+			const mirrorCFrames = BuildingManager.getMirroredBlocksCFrames(
+				plot,
+				this.selectedBlock.get()!.id,
+				new CFrame(mainPosition).mul(this.blockRotation),
+				this.mirrorMode.get(),
+			);
+
+			for (let i = 0; i < mirrorCFrames.size(); i++) {
+				const ghost = (this.mirroredGhosts[i] ??= createBlockGhost(selected));
+				ghost.model.PivotTo(mirrorCFrames[i]);
+			}
+
+			// destroy ghosts if too many
+			for (let i = mirrorCFrames.size(); i < this.mirroredGhosts.size(); i++) {
+				this.mirroredGhosts[i].model.Destroy();
+				delete this.mirroredGhosts[i];
+			}
+		}
 		private updateBlockPosition() {
 			if (Gui.isCursorOnVisibleGui()) {
 				return;
@@ -166,25 +189,6 @@ namespace SinglePlaceController {
 				targetPosition = constrainPositionToGrid(targetPosition);
 				return targetPosition;
 			};
-			const updateMirrorGhostBlocksPosition = (plot: Model, mainPosition: Vector3) => {
-				const mirrorCFrames = BuildingManager.getMirroredBlocksCFrames(
-					plot,
-					this.selectedBlock.get()!.id,
-					new CFrame(mainPosition).mul(this.blockRotation),
-					this.mirrorMode.get(),
-				);
-
-				for (let i = 0; i < mirrorCFrames.size(); i++) {
-					const ghost = (this.mirroredGhosts[i] ??= createBlockGhost(selected));
-					ghost.model.PivotTo(mirrorCFrames[i]);
-				}
-
-				// destroy ghosts if too many
-				for (let i = mirrorCFrames.size(); i < this.mirroredGhosts.size(); i++) {
-					this.mirroredGhosts[i].model.Destroy();
-					delete this.mirroredGhosts[i];
-				}
-			};
 
 			const mainPosition = getMouseTargetBlockPosition();
 			if (!mainPosition) return;
@@ -217,7 +221,7 @@ namespace SinglePlaceController {
 				this.mirroredGhosts.all((ghost) => plot.isModelInside(ghost.model));
 
 			if (areAllBlocksInsidePlot) {
-				updateMirrorGhostBlocksPosition(plot.instance, mainPosition);
+				this.updateMirrorGhostBlocksPosition(plot.instance, mainPosition);
 			} else {
 				this.destroyGhosts(false);
 			}
@@ -253,12 +257,13 @@ namespace SinglePlaceController {
 			SoundController.getSounds().Build.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
 			SoundController.getSounds().Build.BlockRotate.Play();
 
+			this.blockRotation = this.blockRotation.mul(rotation);
 			if (this.mainGhost) {
-				this.mainGhost.model.PivotTo(this.mainGhost.model.GetPivot().mul(this.blockRotation));
+				this.updateMirrorGhostBlocksPosition(
+					this.plot.get().instance,
+					this.mainGhost.model.GetPivot().Position,
+				);
 			}
-
-			this.blockRotation = rotation.mul(this.blockRotation);
-			this.updateBlockPosition();
 		}
 
 		async placeBlock() {
