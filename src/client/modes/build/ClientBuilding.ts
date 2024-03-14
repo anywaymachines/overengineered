@@ -5,7 +5,7 @@ import SharedPlots from "shared/building/SharedPlots";
 
 /** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
 export const ClientBuilding = {
-	placeBlocks: (plot: PlotModel, blocks: readonly Omit<PlaceBlockByPlayerRequest, "uuid">[]) => {
+	placeBlocks: (plot: PlotModel, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) => {
 		let placed: readonly BlockModel[];
 		return ActionController.instance.execute(
 			"Place blocks",
@@ -28,10 +28,10 @@ export const ClientBuilding = {
 	},
 	deleteBlocks: (plot: PlotModel, _blocks: readonly BlockModel[] | "all") => {
 		const uuids = _blocks === "all" ? "all" : _blocks.map((b) => BlockManager.getBlockDataByBlockModel(b).uuid);
-		const undo: PlaceBlocksByPlayerRequest = {
+		const undo: PlaceBlocksRequest = {
 			plot,
 			blocks: (_blocks === "all" ? plot.Blocks.GetChildren(undefined) : _blocks).map(
-				(block): PlaceBlockByPlayerRequest => {
+				(block): PlaceBlockRequest => {
 					const data = BlockManager.getBlockDataByBlockModel(block);
 					return {
 						id: data.id,

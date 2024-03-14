@@ -1,28 +1,25 @@
 import Net from "@rbxts/net";
+import { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel }>;
 	type MultiBuildResponse = Response<{ readonly models: readonly BlockModel[] }>;
 
-	interface PlaceBlockByPlayerRequest {
+	interface PlaceBlockRequest {
 		readonly id: string;
 		readonly color: Color3;
 		readonly material: Enum.Material;
 		readonly location: CFrame;
 		readonly uuid?: BlockUuid;
-	}
-	interface PlaceBlockByServerRequest extends PlaceBlockByPlayerRequest {
-		readonly uuid: BlockUuid;
-		readonly config: Readonly<Record<string, string>>;
-	}
 
-	interface PlaceBlocksByPlayerRequest {
-		readonly plot: PlotModel;
-		readonly blocks: readonly PlaceBlockByPlayerRequest[];
+		readonly config?: PlacedBlockConfig;
+
+		/** Connections to the INPUT connectors */
+		readonly connections?: PlacedBlockLogicConnections;
 	}
-	interface PlaceBlocksByServerRequest {
+	interface PlaceBlocksRequest {
 		readonly plot: PlotModel;
-		readonly blocks: readonly PlaceBlockByServerRequest[];
+		readonly blocks: readonly PlaceBlockRequest[];
 	}
 
 	interface DeleteBlocksRequest {
@@ -62,6 +59,10 @@ declare global {
 			readonly value: string;
 		}[];
 	}
+	interface ConfigResetRequest {
+		readonly plot: PlotModel;
+		readonly blocks: readonly BlockModel[];
+	}
 }
 
 const Remotes = Net.Definitions.Create({
@@ -75,8 +76,9 @@ const Remotes = Net.Definitions.Create({
 	}),
 	Building: Net.Definitions.Namespace({
 		UpdateConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
+		ResetConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigResetRequest) => Response>(),
 
-		PlaceBlocks: Net.Definitions.ServerAsyncFunction<(data: PlaceBlocksByPlayerRequest) => MultiBuildResponse>(),
+		PlaceBlocks: Net.Definitions.ServerAsyncFunction<(data: PlaceBlocksRequest) => MultiBuildResponse>(),
 		DeleteBlocks: Net.Definitions.ServerAsyncFunction<(data: DeleteBlocksRequest) => Response>(),
 		MoveBlocks: Net.Definitions.ServerAsyncFunction<(data: MoveBlocksRequest) => Response>(),
 		LogicConnect: Net.Definitions.ServerAsyncFunction<(data: LogicConnectRequest) => Response>(),

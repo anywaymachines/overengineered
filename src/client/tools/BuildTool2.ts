@@ -302,7 +302,7 @@ namespace SinglePlaceController {
 			const response = await ClientBuilding.placeBlocks(
 				plot.instance,
 				[mainGhost, ...this.mirroredGhosts].map(
-					(g): PlaceBlockByPlayerRequest => ({
+					(g): PlaceBlockRequest => ({
 						id: selected.id,
 						color: this.selectedColor.get(),
 						material: this.selectedMaterial.get(),
@@ -565,7 +565,7 @@ namespace MultiPlaceController {
 			const response = await ClientBuilding.placeBlocks(
 				this.plot.instance,
 				blocks.map(
-					(b): PlaceBlockByPlayerRequest => ({
+					(b): PlaceBlockRequest => ({
 						id: this.selectedBlock.id,
 						color: this.selectedColor,
 						material: this.selectedMaterial,

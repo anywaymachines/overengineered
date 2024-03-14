@@ -1,4 +1,5 @@
 import { blockRegistry } from "shared/Registry";
+import BlockManager from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import SharedPlots from "shared/building/SharedPlots";
@@ -14,7 +15,7 @@ const errInvalidOperation = err("Invalid operation");
 
 /** Methods for editing the buildings server-side on player requests */
 export const ServerBuildingRequestHandler = {
-	placeBlocks: (player: Player, request: PlaceBlocksByPlayerRequest): MultiBuildResponse => {
+	placeBlocks: (player: Player, request: PlaceBlocksRequest): MultiBuildResponse => {
 		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
 			return errBuildingNotPermitted;
 		}
@@ -30,15 +31,20 @@ export const ServerBuildingRequestHandler = {
 			) {
 				return err("Out of bounds");
 			}
+
+			// if block with the same uuid already exists
+			if (block.uuid !== undefined && request.plot.Blocks.FindFirstChild(block.uuid)) {
+				return err("Invalid block placement data");
+			}
 		}
 
 		const placed: BlockModel[] = [];
 		for (const block of request.blocks) {
 			const regblock = blockRegistry.get(block.id)!;
 			const placedBlocks = SharedPlots.getPlotBlocks(request.plot)
-				.GetChildren()
+				.GetChildren(undefined)
 				.filter((placed_block) => {
-					return placed_block.GetAttribute("id") === block.id;
+					return BlockManager.manager.id.get(placed_block) === block.id;
 				})
 				.size();
 			if (placedBlocks >= (regblock.limit ?? 2000)) {
@@ -144,5 +150,17 @@ export const ServerBuildingRequestHandler = {
 		}
 
 		return ServerBuilding.updateConfig(request);
+	},
+	resetConfig: (player: Player, request: ConfigResetRequest): Response => {
+		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
+			return errBuildingNotPermitted;
+		}
+		for (const block of request.blocks) {
+			if (!SharedPlots.isBlockOnAllowedPlot(player, block)) {
+				return errBuildingNotPermitted;
+			}
+		}
+
+		return ServerBuilding.resetConfig(request);
 	},
 } as const;

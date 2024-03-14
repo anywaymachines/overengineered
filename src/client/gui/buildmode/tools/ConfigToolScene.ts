@@ -1,6 +1,8 @@
+import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
 import ConfigControl, { ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
+import LogControl from "client/gui/static/LogControl";
 import ConfigTool from "client/tools/ConfigTool";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
@@ -36,7 +38,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		this.event.subscribe(this.configControl.configUpdated, async (key, value) => {
 			Logger.info(`Sending (${selected.get().size()}) block config values ${key} ${JSON.serialize(value)}`);
 
-			await Remotes.Client.GetNamespace("Building")
+			const response = await Remotes.Client.GetNamespace("Building")
 				.Get("UpdateConfigRequest")
 				.CallServerAsync({
 					plot: SharedPlots.getPlotByBlock(selected.get()[0].Parent)!,
@@ -52,6 +54,9 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 								}) satisfies ConfigUpdateRequest["configs"][number],
 						),
 				});
+			if (!response.success) {
+				LogControl.instance.addLine(response.message, Colors.red);
+			}
 		});
 
 		tool.selectedBlocksChanged.Connect((selected) => {
@@ -62,8 +67,21 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 			tool.unselectAll();
 		});
 
-		this.gui.Bottom.ResetButton.Activated.Connect(() => {
-			tool.reset();
+		this.gui.Bottom.ResetButton.Activated.Connect(async () => {
+			Logger.info(`Resetting (${selected.get().size()}) block config values`);
+
+			const response = await Remotes.Client.GetNamespace("Building")
+				.Get("ResetConfigRequest")
+				.CallServerAsync({
+					plot: tool.targetPlot.get().instance,
+					blocks: selected.get().map((p) => p.Parent),
+				});
+
+			if (!response.success) {
+				LogControl.instance.addLine(response.message, Colors.red);
+			}
+
+			this.updateConfigs(selected.get());
 		});
 
 		this.onPrepare((inputType) => {
@@ -88,7 +106,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 
 		if (!wasVisible) GuiAnimator.transition(this.gui, 0.2, "up");
 		const blockmodel = selected[0].Parent;
-		const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
+		const block = blockRegistry.get(BlockManager.manager.id.get(blockmodel))!;
 		const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
 			.input as BlockConfigTypes.Definitions;
 
@@ -100,15 +118,16 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		const configs = selected
 			.map((selected) => {
 				const blockmodel = selected.Parent;
-				const block = blockRegistry.get(blockmodel.GetAttribute("id") as string)!;
+				const block = blockRegistry.get(BlockManager.manager.id.get(blockmodel))!;
 
 				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
 					.input as BlockConfigTypes.Definitions;
 				if (!defs) return undefined!;
 
-				const jsonstr = (blockmodel.GetAttribute("config") as string | undefined) ?? "{}";
-				const config = Config.addDefaults(JSON.deserialize<Record<string, number>>(jsonstr), defs);
-
+				const config = Config.addDefaults(
+					BlockManager.manager.config.get(blockmodel) as Record<string, number>,
+					defs,
+				);
 				return [
 					blockmodel,
 					config,

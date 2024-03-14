@@ -1,6 +1,6 @@
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
-import BlockLogic from "../BlockLogic";
+import BlockLogic from "shared/block/BlockLogic";
 
 export default class AnchorBlockLogic extends BlockLogic {
 	static readonly events = {

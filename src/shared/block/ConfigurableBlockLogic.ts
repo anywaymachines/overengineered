@@ -45,7 +45,7 @@ export default abstract class ConfigurableBlockLogic<
 	readonly instance: TBlock;
 
 	constructor(block: BlockLogicData<TDef["input"]>, configDefinition: TDef) {
-		super(block);
+		super(block as never);
 		this.block = block as typeof this.block;
 		this.instance = this.block.instance;
 

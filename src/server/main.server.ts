@@ -4,6 +4,7 @@ import Logger from "shared/Logger";
 import RemoteEvents from "shared/RemoteEvents";
 import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
+import BlockManager from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import GameDefinitions from "shared/data/GameDefinitions";
 import BuildingWelder from "./building/BuildingWelder";
@@ -114,9 +115,9 @@ class RemoteHandlers {
 		if (hrp.Sit) return;
 
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-		const blocks = SharedPlots.getPlotBlocks(plot).GetChildren();
+		const blocks = SharedPlots.getPlotBlocks(plot).GetChildren(undefined);
 
-		const vehicleSeatModel = blocks.find((model) => model.GetAttribute("id") === "vehicleseat") as Model;
+		const vehicleSeatModel = blocks.find((model) => BlockManager.manager.id.get(model) === "vehicleseat") as Model;
 		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
 		if (vehicleSeat.Occupant && vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
 			vehicleSeat.Occupant.Sit = false;
@@ -135,6 +136,7 @@ registerOnRemoteFunction("Ride", "SetPlayMode", PlayModeController.changeModeFor
 registerOnRemoteFunction("Slots", "Save", RemoteHandlers.saveSlot);
 registerOnRemoteFunction("Slots", "Load", RemoteHandlers.loadSlot);
 registerOnRemoteFunction("Building", "UpdateConfigRequest", ServerBuildingRequestHandler.updateConfig);
+registerOnRemoteFunction("Building", "ResetConfigRequest", ServerBuildingRequestHandler.resetConfig);
 registerOnRemoteFunction("Building", "PlaceBlocks", ServerBuildingRequestHandler.placeBlocks);
 registerOnRemoteFunction("Building", "DeleteBlocks", ServerBuildingRequestHandler.deleteBlocks);
 registerOnRemoteFunction("Building", "MoveBlocks", ServerBuildingRequestHandler.moveBlocks);

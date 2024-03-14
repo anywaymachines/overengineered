@@ -4,6 +4,7 @@ import BlocksSerializer from "server/plots/BlocksSerializer";
 import ServerPartUtils from "server/plots/ServerPartUtils";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import SlotsMeta from "shared/SlotsMeta";
+import BlockManager from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import PlayModeBase from "./PlayModeBase";
 
@@ -32,7 +33,7 @@ export default class RideMode implements PlayModeBase {
 		const blocksChildren = blocks.GetChildren(undefined);
 
 		for (const block of BlocksInitializer.blocks.required) {
-			if (!blocksChildren.find((value) => value.GetAttribute("id") === block.id)) {
+			if (!blocksChildren.find((value) => BlockManager.manager.id.get(value) === block.id)) {
 				return {
 					success: false,
 					message: block.displayName + " not found",
@@ -51,7 +52,9 @@ export default class RideMode implements PlayModeBase {
 		);
 
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
-		const vehicleSeatModel = blocksChildren.find((model) => model.GetAttribute("id") === "vehicleseat") as Model;
+		const vehicleSeatModel = blocksChildren.find(
+			(model) => BlockManager.manager.id.get(model) === "vehicleseat",
+		) as Model;
 		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
 		if (vehicleSeat.Occupant && vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
 			vehicleSeat.Occupant.Sit = false;

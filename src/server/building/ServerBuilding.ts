@@ -1,6 +1,6 @@
 import { HttpService } from "@rbxts/services";
 import { blockRegistry } from "shared/Registry";
-import BlockManager from "shared/building/BlockManager";
+import BlockManager, { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import SharedPlots from "shared/building/SharedPlots";
 import { AABB } from "shared/fixes/AABB";
@@ -29,9 +29,8 @@ export const ServerBuilding = {
 
 		bumpPlotVersion(plot);
 	},
-	placeBlock: (plot: PlotModel, data: PlaceBlockByPlayerRequest | PlaceBlockByServerRequest): BuildResponse => {
-		const uuid =
-			"uuid" in data && data.uuid !== undefined ? data.uuid : (HttpService.GenerateGUID(false) as BlockUuid);
+	placeBlock: (plot: PlotModel, data: PlaceBlockRequest): BuildResponse => {
+		const uuid = data.uuid ?? (HttpService.GenerateGUID(false) as BlockUuid);
 		if (SharedPlots.tryGetBlockByUuid(plot, uuid)) {
 			throw "Block with this uuid already exists";
 		}
@@ -45,17 +44,17 @@ export const ServerBuilding = {
 
 		// Create a new instance of the building model
 		const model = block.model.Clone();
-		model.SetAttribute("id", data.id);
+		BlockManager.manager.id.set(model, data.id);
 
 		model.PivotTo(data.location);
 
 		// Set material & color
-		if ("config" in data && Objects.keys(data.config).size() !== 0) {
-			model.SetAttribute("config", JSON.serialize(data.config));
+		if (data.config && Objects.keys(data.config).size() !== 0) {
+			BlockManager.manager.config.set(model, data.config);
 		}
 
 		// TODO: remove attribute uuid because Name exists?
-		model.SetAttribute("uuid", uuid);
+		BlockManager.manager.uuid.set(model, uuid);
 		model.Name = uuid;
 
 		SharedBuilding.paint([model], data.color, data.material, true);
@@ -74,8 +73,10 @@ export const ServerBuilding = {
 			plot.Blocks.ClearAllChildren();
 		} else {
 			for (const block of blocks) {
-				const uuid = BlockManager.getUuidByModel(block);
+				const uuid = BlockManager.manager.uuid.get(block);
 				for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
+					if (otherblock.connections === undefined) continue;
+
 					for (const [connector, connection] of Objects.pairs(otherblock.connections)) {
 						if (connection.blockUuid !== uuid) continue;
 
@@ -124,7 +125,7 @@ export const ServerBuilding = {
 		const inputInfo = BlockManager.getBlockDataByBlockModel(request.inputBlock);
 		const outputInfo = BlockManager.getBlockDataByBlockModel(request.outputBlock);
 
-		const connections: BlockData["connections"] = {
+		const connections: PlacedBlockLogicConnections = {
 			...inputInfo.connections,
 			[request.inputConnection]: {
 				blockUuid: outputInfo.uuid,
@@ -132,7 +133,7 @@ export const ServerBuilding = {
 			},
 		};
 
-		request.inputBlock.SetAttribute("connections", HttpService.JSONEncode(connections));
+		BlockManager.manager.connections.set(request.inputBlock, connections);
 		bumpPlotVersion(request.plot);
 		return success;
 	},
@@ -144,7 +145,7 @@ export const ServerBuilding = {
 			delete connections[request.inputConnection];
 		}
 
-		request.inputBlock.SetAttribute("connections", HttpService.JSONEncode(connections));
+		BlockManager.manager.connections.set(request.inputBlock, connections);
 		bumpPlotVersion(request.plot);
 		return success;
 	},
@@ -158,7 +159,7 @@ export const ServerBuilding = {
 		bumpPlotVersion(plot);
 		return success;
 	},
-	updateConfig: (data: ConfigUpdateRequest): Response => {
+	updateConfig: (request: ConfigUpdateRequest): Response => {
 		/**
 		 * Assign only values, recursively.
 		 * @example assignValues({ a: { b: 'foo' } }, 'a', { c: 'bar' })
@@ -195,14 +196,22 @@ export const ServerBuilding = {
 			return ret;
 		};
 
-		for (const config of data.configs) {
-			const dataTag = config.block.GetAttribute("config") as string | undefined;
-			const currentData = JSON.deserialize(dataTag ?? "{}") as Record<string, JsonSerializablePrimitive>;
-
+		for (const config of request.configs) {
+			const currentData = BlockManager.manager.config.get(config.block);
 			const newData = withValues(currentData, { [config.key]: JSON.deserialize(config.value) });
-			config.block.SetAttribute("config", JSON.serialize(newData as JsonSerializablePrimitive));
+
+			BlockManager.manager.config.set(config.block, newData as PlacedBlockConfig);
 		}
 
+		bumpPlotVersion(request.plot);
+		return { success: true };
+	},
+	resetConfig: ({ plot, blocks }: ConfigResetRequest): Response => {
+		for (const block of blocks) {
+			BlockManager.manager.config.set(block, undefined);
+		}
+
+		bumpPlotVersion(plot);
 		return { success: true };
 	},
 } as const;

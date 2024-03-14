@@ -4,6 +4,7 @@ import BuildingMode from "client/modes/build/BuildingMode";
 import ToolBase from "client/tools/ToolBase";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import BlockManager from "shared/building/BlockManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import Signal from "shared/event/Signal";
 import Objects from "shared/fixes/objects";
@@ -49,22 +50,24 @@ export default class ConfigTool extends ToolBase {
 		});
 		*/
 
-		this.event.subscribe(SharedPlot.anyChanged, (plot) => {
-			if (!this.selected.any((s) => s.IsDescendantOf(plot.instance))) {
-				return;
-			}
+		// TODO: remove false later, deselects everything after any change
+		if (false as boolean)
+			this.event.subscribe(SharedPlot.anyChanged, (plot) => {
+				if (!this.selected.any((s) => s.IsDescendantOf(plot.instance))) {
+					return;
+				}
 
-			for (const sel of this.selected) {
-				sel.Destroy();
-			}
+				for (const sel of this.selected) {
+					sel.Destroy();
+				}
 
-			this.selected.clear();
-			this.selectedBlocksChanged.Fire(this.selected);
-		});
+				this.selected.clear();
+				this.selectedBlocksChanged.Fire(this.selected);
+			});
 	}
 
 	private canBeSelected(block: BlockModel): boolean {
-		const config = blockConfigRegistry[block.GetAttribute("id") as keyof typeof blockConfigRegistry];
+		const config = blockConfigRegistry[BlockManager.manager.id.get(block) as keyof typeof blockConfigRegistry];
 		if (!config) return false;
 
 		if (!Objects.values(config.input).find((v) => !(v as BlockConfigTypes.Definition).configHidden)) {
@@ -79,7 +82,7 @@ export default class ConfigTool extends ToolBase {
 		}
 
 		const differentId = this.selected.find(
-			(s) => (s.Parent.GetAttribute("id") as string) !== (block.GetAttribute("id") as string),
+			(s) => BlockManager.manager.id.get(s.Parent) !== (BlockManager.manager.id.get(block) as string),
 		);
 		return differentId === undefined;
 	}
@@ -131,14 +134,6 @@ export default class ConfigTool extends ToolBase {
 			if (add) this.selectBlock(block);
 			else removeOrAddHighlight();
 		}
-	}
-
-	reset() {
-		for (const sel of this.selected) {
-			sel.Parent.SetAttribute("config", "{}");
-		}
-
-		this.selectedBlocksChanged.Fire(this.selected);
 	}
 
 	unselectAll() {

@@ -184,15 +184,15 @@ export default class BuildingWelder {
 	}
 	static deleteWeld(plot: PlotModel, block: BlockModel) {
 		(this.getPlotColliders(plot) as unknown as Record<BlockUuid, CollidersModel>)[
-			BlockManager.getUuidByModel(block)
+			BlockManager.manager.uuid.get(block)
 		].Destroy();
 	}
 
 	static weldOnPlot(plot: PlotModel, block: BlockModel) {
-		const collider = this.weldColliders.get(BlockManager.getIdByModel(block))?.Clone();
+		const collider = this.weldColliders.get(BlockManager.manager.id.get(block))?.Clone();
 		if (!collider) return;
 
-		collider.Name = BlockManager.getUuidByModel(block);
+		collider.Name = BlockManager.manager.uuid.get(block);
 		collider.PivotTo(block.GetPivot());
 		collider.Parent = this.getPlotColliders(plot);
 
@@ -240,7 +240,7 @@ export default class BuildingWelder {
 	}
 
 	static moveCollisions(plot: PlotModel, block: BlockModel, newpivot: CFrame) {
-		const child = this.getPlotColliders(plot).FindFirstChild(BlockManager.getUuidByModel(block)) as
+		const child = this.getPlotColliders(plot).FindFirstChild(BlockManager.manager.uuid.get(block)) as
 			| CollidersModel
 			| undefined;
 		if (!child) throw "what";

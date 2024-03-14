@@ -1,4 +1,4 @@
-import { GuiService, HttpService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { GuiService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import InputController from "client/controller/InputController";
 import SoundController from "client/controller/SoundController";
 import Signals from "client/event/Signals";
@@ -10,7 +10,7 @@ import BuildingMode from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
 import { blockRegistry } from "shared/Registry";
-import Serializer from "shared/Serializer";
+import BlockManager from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import ObservableValue from "shared/event/ObservableValue";
@@ -259,24 +259,19 @@ export default class BuildTool extends ToolBase {
 		const target = this.mouse.Target;
 		if (!target) return;
 
-		let model = target as Model | BasePart;
+		let model = target as BlockModel | BasePart;
 		while (!model.IsA("Model")) {
-			model = model.Parent as Model | BasePart;
+			model = model.Parent as BlockModel | BasePart;
 			if (!model) return;
 		}
 
-		const id = model.GetAttribute("id") as string | undefined;
-		if (id === undefined) return;
+		const id = BlockManager.manager.id.get(model);
+		if (id === undefined) return; // not a block
 
 		this.pickSignal.Fire(blockRegistry.get(id)!);
 
-		// Color & Material
-		const mat = Serializer.EnumMaterialSerializer.deserialize(model.GetAttribute("material") as SerializedEnum);
-		const col = Serializer.Color3Serializer.deserialize(
-			HttpService.JSONDecode(model.GetAttribute("color") as string) as SerializedColor,
-		);
-		this.setSelectedMaterial(mat);
-		this.setSelectedColor(col);
+		this.setSelectedMaterial(BlockManager.manager.material.get(model));
+		this.setSelectedColor(BlockManager.manager.color.get(model));
 
 		// Same rotation
 		this.rotateFineTune(model.GetPivot().Rotation);

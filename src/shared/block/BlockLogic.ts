@@ -1,4 +1,4 @@
-import { PlacedBlockDataConnection } from "shared/building/BlockManager";
+import { PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import PartUtils from "shared/utils/PartUtils";
 
@@ -17,7 +17,7 @@ export default class BlockLogic<T extends BlockModel = BlockModel> extends Insta
 	readonly block: BlockLogicData<BlockConfigTypes.Definitions, T>;
 	readonly instance: T;
 
-	constructor(block: BlockLogicData<BlockConfigTypes.Definitions>) {
+	constructor(block: PlacedBlockData) {
 		super(block.instance as T);
 		this.block = block as typeof this.block;
 		this.instance = this.block.instance;

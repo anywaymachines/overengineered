@@ -33,6 +33,7 @@ namespace Scene {
 	export interface EditToolSceneDefinition extends GuiObject, Selectors.SelectorGuiDefinition {
 		readonly Bottom: GuiObject & {
 			readonly MoveButton: GuiButton;
+			readonly CloneButton: GuiButton;
 		};
 	}
 
@@ -44,8 +45,9 @@ namespace Scene {
 			this.tool = tool;
 
 			const move = this.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
+			const clone = this.add(new ButtonControl(this.gui.Bottom.CloneButton, () => tool.cloneBlocks()));
 
-			const buttons: readonly ButtonControl[] = [move];
+			const buttons: readonly ButtonControl[] = [move, clone];
 			this.event.subscribeCollection(
 				tool.selected,
 				() => {
@@ -646,6 +648,31 @@ export default class EditTool extends ToolBase {
 	}
 	deselectAll() {
 		this.selector.deselectAll();
+	}
+	async cloneBlocks() {
+		const response = await Remotes.Client.GetNamespace("Building")
+			.Get("PlaceBlocks")
+			.CallServerAsync({
+				plot: this.plot.get().instance,
+				blocks: this.selected.get().map((block): PlaceBlockRequest => {
+					const data = BlockManager.getBlockDataByBlockModel(block);
+
+					return {
+						id: data.id,
+						location: block.GetPivot(),
+						color: data.color,
+						material: data.material,
+					};
+				}),
+			});
+
+		if (!response.success) {
+			LogControl.instance.addLine(response.message, Colors.red);
+			return;
+		}
+
+		this._selected.setRange(...response.models);
+		this.toggleMode("Move");
 	}
 
 	getDisplayName(): string {

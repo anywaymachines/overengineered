@@ -1,6 +1,5 @@
-import { HttpService } from "@rbxts/services";
+import BlockManager from "shared/building/BlockManager";
 import MaterialData from "shared/data/MaterialData";
-import Serializer from "shared/Serializer";
 import PartUtils from "shared/utils/PartUtils";
 
 declare global {
@@ -27,7 +26,7 @@ export const SharedBuilding = {
 	) => {
 		for (const block of blocks) {
 			if (material) {
-				block.SetAttribute("material", Serializer.EnumMaterialSerializer.serialize(material));
+				BlockManager.manager.material.set(block, material);
 				PartUtils.switchDescendantsMaterial(block, material);
 
 				// Make glass material transparent
@@ -58,7 +57,7 @@ export const SharedBuilding = {
 			}
 
 			if (color) {
-				block.SetAttribute("color", HttpService.JSONEncode(Serializer.Color3Serializer.serialize(color)));
+				BlockManager.manager.color.set(block, color);
 				PartUtils.switchDescendantsColor(block, color);
 			}
 		}

@@ -5,22 +5,24 @@ import { blockRegistry } from "shared/Registry";
 import Serializer from "shared/Serializer";
 import { LogicRegistry } from "shared/block/LogicRegistry";
 import blockConfigRegistry, { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { PlacedBlockDataConnection } from "shared/building/BlockManager";
+import BlockManager, { PlacedBlockDataConnection } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
-import JSON from "shared/fixes/Json";
 import Objects from "shared/fixes/objects";
 
-type SerializedBlocks<TBlocks extends SerializedBlockV0> = {
+type SerializedBlocks<TBlocks extends SerializedBlockBase> = {
 	readonly version: number;
 	readonly blocks: readonly TBlocks[];
 };
 
-interface SerializedBlockV0 {
+interface SerializedBlockBase {
+	readonly id: string;
+}
+interface SerializedBlockV0 extends SerializedBlockBase {
 	readonly id: (keyof BlockConfigRegistry | keyof LogicRegistry) & string;
 	readonly mat: SerializedEnum;
 	readonly col: SerializedColor;
 	readonly loc: SerializedCFrame;
-	readonly config: object | undefined;
+	readonly config: Readonly<Record<string, unknown>> | undefined;
 }
 interface SerializedBlockV2 extends SerializedBlockV0 {
 	readonly uuid: BlockUuid;
@@ -28,156 +30,37 @@ interface SerializedBlockV2 extends SerializedBlockV0 {
 interface SerializedBlockV3 extends SerializedBlockV2 {
 	readonly connections?: Readonly<Record<BlockConnectionName, PlacedBlockDataConnection>>;
 }
-
-const createBufferReader = (buf: buffer) => {
-	let position = 0;
-
-	return {
-		getPosition() {
-			return position;
-		},
-		setPosition(value: number) {
-			position = value;
-		},
-		getBuffer() {
-			return buf;
-		},
-
-		readi8(): number {
-			const ret = buffer.readi8(buf, position);
-			position += 1;
-			return ret;
-		},
-		readu8(): number {
-			const ret = buffer.readu8(buf, position);
-			position += 1;
-			return ret;
-		},
-		readi16(): number {
-			const ret = buffer.readi16(buf, position);
-			position += 2;
-			return ret;
-		},
-		readu16(): number {
-			const ret = buffer.readu16(buf, position);
-			position += 2;
-			return ret;
-		},
-		readi32(): number {
-			const ret = buffer.readi32(buf, position);
-			position += 4;
-			return ret;
-		},
-		readu32(): number {
-			const ret = buffer.readu32(buf, position);
-			position += 4;
-			return ret;
-		},
-		readf32(): number {
-			const ret = buffer.readf32(buf, position);
-			position += 4;
-			return ret;
-		},
-		readf64(): number {
-			const ret = buffer.readf64(buf, position);
-			position += 8;
-			return ret;
-		},
-
-		readstring(count: number): string {
-			const ret = buffer.readstring(buf, position, count);
-			position += count;
-
-			return ret;
-		},
-	};
-};
-const createBufferWriter = (buf: buffer) => {
-	let position = 0;
-
-	return {
-		getPosition() {
-			return position;
-		},
-		setPosition(value: number) {
-			position = value;
-		},
-		getBuffer() {
-			return buf;
-		},
-
-		writei8(value: number): void {
-			buffer.writei8(buf, position, value);
-			position += 1;
-		},
-		writeu8(value: number): void {
-			buffer.writeu8(buf, position, value);
-			position += 1;
-		},
-		writei16(value: number): void {
-			buffer.writei16(buf, position, value);
-			position += 2;
-		},
-		writeu16(value: number): void {
-			buffer.writeu16(buf, position, value);
-			position += 2;
-		},
-		writei32(value: number): void {
-			buffer.writei32(buf, position, value);
-			position += 4;
-		},
-		writeu32(value: number): void {
-			buffer.writeu32(buf, position, value);
-			position += 4;
-		},
-		writef32(value: number): void {
-			buffer.writef32(buf, position, value);
-			position += 4;
-		},
-		writef64(value: number): void {
-			buffer.writef64(buf, position, value);
-			position += 8;
-		},
-
-		writestring(value: string, count?: number): void {
-			buffer.writestring(buf, position, value, count);
-			position += count ?? value.size();
-		},
-	};
-};
+interface SerializedBlockV4 extends Omit<SerializedBlockV3, "mat" | "col"> {
+	readonly mat: Enum.Material;
+	readonly col: Color3;
+}
 
 const read = {
-	blocksFromPlot: <T extends SerializedBlockV0>(
+	blocksFromPlot: <T extends SerializedBlockBase>(
 		plot: PlotModel,
-		serialize: (block: Model, index: number, buildingCenter: CFrame) => T,
+		serialize: (block: BlockModel, index: number, buildingCenter: CFrame) => T,
 	): readonly T[] => {
 		const buildingCenter = (plot.FindFirstChild("BuildingArea")!.FindFirstChild("BuildingAreaCenter") as Part)
 			.CFrame;
 		return SharedPlots.getPlotBlocks(plot)
-			.GetChildren()
-			.map((block, i) => serialize(block as Model, i, buildingCenter));
+			.GetChildren(undefined)
+			.map((block, i) => serialize(block, i, buildingCenter));
 	},
 
-	blockV3: (block: Model, index: number, buildingCenter: CFrame): SerializedBlockV3 => {
-		const configattr = block.GetAttribute("config") as string | undefined;
-		const connectionsattr = block.GetAttribute("connections") as string | undefined;
-
+	blockV4: (block: BlockModel, index: number, buildingCenter: CFrame): SerializedBlockV4 => {
 		return {
-			id: block.GetAttribute("id") as SerializedBlockV0["id"], // Block ID
-			mat: block.GetAttribute("material") as SerializedEnum, // Material
-			col: HttpService.JSONDecode(block.GetAttribute("color") as string) as SerializedColor, // Color
-			loc: Serializer.CFrameSerializer.serialize(buildingCenter.ToObjectSpace(block.GetPivot())), // Position
-			config: configattr === undefined ? undefined : JSON.deserialize<object>(configattr as string),
-			uuid: block.GetAttribute("uuid") as BlockUuid,
-			connections:
-				connectionsattr === undefined
-					? undefined
-					: (HttpService.JSONDecode(connectionsattr as string) as SerializedBlockV3["connections"]),
+			id: BlockManager.manager.id.get(block) as SerializedBlockV4["id"],
+			loc: Serializer.CFrameSerializer.serialize(buildingCenter.ToObjectSpace(block.GetPivot())),
+			col: BlockManager.manager.color.get(block),
+			mat: BlockManager.manager.material.get(block),
+			uuid: BlockManager.manager.uuid.get(block),
+			connections: BlockManager.manager.connections.get(block),
+			config: BlockManager.manager.config.get(block),
 		};
 	},
 } as const;
 const place = {
-	blocksOnPlot: <T extends SerializedBlockV0>(
+	blocksOnPlot: <T extends SerializedBlockBase>(
 		plot: PlotModel,
 		data: readonly T[],
 		place: (plot: PlotModel, blockData: T, buildingCenter: CFrame) => void,
@@ -187,40 +70,40 @@ const place = {
 		data.forEach((blockData) => place(plot, blockData, buildingCenter));
 	},
 
-	blockOnPlotV3: (plot: PlotModel, blockData: SerializedBlockV3, buildingCenter: CFrame) => {
+	blockOnPlotV4: (plot: PlotModel, blockData: SerializedBlockV4, buildingCenter: CFrame) => {
 		if (!blockRegistry.has(blockData.id)) {
 			Logger.error(`Could not load ${blockData.id} from slot: Block does not exists`);
 			return;
 		}
 
-		const deserializedData: PlaceBlockByServerRequest = {
+		const deserializedData: PlaceBlockRequest = {
 			id: blockData.id,
-			color: Serializer.Color3Serializer.deserialize(blockData.col),
-			material: Serializer.EnumMaterialSerializer.deserialize(blockData.mat),
+			color: blockData.col,
+			material: blockData.mat,
 			location: buildingCenter.ToWorldSpace(Serializer.CFrameSerializer.deserialize(blockData.loc)),
-			config: (blockData.config ?? {}) as Readonly<Record<string, string>>,
+			config: blockData.config as never,
 			uuid: blockData.uuid,
 		};
 
 		const response = ServerBuilding.placeBlock(plot, deserializedData);
 		if (response.success && response.model && blockData.connections) {
-			response.model.SetAttribute("connections", HttpService.JSONEncode(blockData.connections));
+			BlockManager.manager.connections.set(response.model, blockData.connections);
 		}
 	},
 } as const;
 
-interface BlockSerializer<TBlocks extends SerializedBlocks<SerializedBlockV0>> {
+interface BlockSerializer<TBlocks extends SerializedBlocks<SerializedBlockBase>> {
 	readonly version: number;
 }
 interface UpgradableBlocksSerializer<
-	TBlocks extends SerializedBlocks<SerializedBlockV0>,
-	TPrev extends BlockSerializer<SerializedBlocks<SerializedBlockV0>>,
+	TBlocks extends SerializedBlocks<SerializedBlockBase>,
+	TPrev extends BlockSerializer<SerializedBlocks<SerializedBlockBase>>,
 > extends BlockSerializer<TBlocks> {
 	upgradeFrom(data: string, prev: TPrev extends BlockSerializer<infer T> ? T : never): TBlocks;
 }
 interface CurrentUpgradableBlocksSerializer<
-	TBlocks extends SerializedBlocks<SerializedBlockV0>,
-	TPrev extends BlockSerializer<SerializedBlocks<SerializedBlockV0>>,
+	TBlocks extends SerializedBlocks<SerializedBlockBase>,
+	TPrev extends BlockSerializer<SerializedBlocks<SerializedBlockBase>>,
 > extends UpgradableBlocksSerializer<TBlocks, TPrev> {
 	read(plot: PlotModel): TBlocks;
 	place(data: TBlocks, plot: PlotModel): number;
@@ -434,7 +317,7 @@ const v8: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 			blocks: prev.blocks.map(
 				(b): SerializedBlockV3 => ({
 					...b,
-					config: update(b),
+					config: update(b) as never,
 				}),
 			),
 		};
@@ -671,7 +554,7 @@ const v15: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 };
 
 // update ADD SUB DIV MIL from number to number | vector3
-const v16: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v15> = {
+const v16: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v15> = {
 	version: 16,
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
@@ -697,22 +580,42 @@ const v16: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 			blocks: prev.blocks.map(update),
 		};
 	},
+};
 
-	read(plot: PlotModel): SerializedBlocks<SerializedBlockV3> {
+// update de/serialization of color & material
+const v17: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeof v16> = {
+	version: 17,
+
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV4> {
+		const update = (block: SerializedBlockV3): SerializedBlockV4 => {
+			return {
+				...block,
+				col: Serializer.Color3Serializer.deserialize(block.col),
+				mat: Serializer.EnumMaterialSerializer.deserialize(block.mat),
+			};
+		};
+
 		return {
 			version: this.version,
-			blocks: read.blocksFromPlot(plot, read.blockV3),
+			blocks: prev.blocks.map(update),
 		};
 	},
-	place(data: SerializedBlocks<SerializedBlockV3>, plot: PlotModel): number {
-		place.blocksOnPlot(plot, data.blocks, place.blockOnPlotV3);
+
+	read(plot: PlotModel): SerializedBlocks<SerializedBlockV4> {
+		return {
+			version: this.version,
+			blocks: read.blocksFromPlot(plot, read.blockV4),
+		};
+	},
+	place(data: SerializedBlocks<SerializedBlockV4>, plot: PlotModel): number {
+		place.blocksOnPlot(plot, data.blocks, place.blockOnPlotV4);
 		return data.blocks.size();
 	},
 };
 
 //
 
-const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16] as const;
+const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const getVersion = (version: number) => versions.find((v) => v.version === version);
@@ -725,7 +628,7 @@ const BlocksSerializer = {
 		return HttpService.JSONEncode(current.read(plot));
 	},
 	deserialize: function (data: string, plot: PlotModel): number {
-		let deserialized = HttpService.JSONDecode(data) as SerializedBlocks<SerializedBlockV0>;
+		let deserialized = HttpService.JSONDecode(data) as SerializedBlocks<SerializedBlockBase>;
 		Logger.info(`Loaded a slot using savev${deserialized.version}`);
 
 		const version = deserialized.version;
@@ -734,7 +637,7 @@ const BlocksSerializer = {
 			if (!version) continue;
 			if (!("upgradeFrom" in version)) continue;
 
-			deserialized = version.upgradeFrom(data, deserialized);
+			deserialized = version.upgradeFrom(data, deserialized as never);
 			Logger.info(`Upgrading a slot to savev${version.version}`);
 		}
 
@@ -744,108 +647,3 @@ const BlocksSerializer = {
 	},
 } as const;
 export default BlocksSerializer;
-
-/*
-const vBUFFER = {
-	version: 3,
-
-	serialize(plot: PlotModel): string {
-		const blocks = read.blocksFromPlot(plot, read.blockV3);
-
-		const palette = new Map<string, number>(
-			[...new Set<string>(blocks.map((b) => b.id))]
-				.map((id) => [id, blocks.reduce((acc, val) => acc + (val.id === id ? 1 : 0), 0)] as const)
-				.sort((left, right) => left[1] < right[1])
-				.map((entry) => entry[0])
-				.map((entry, id) => [entry, id] as const),
-		);
-
-		const buf = createBufferWriter(buffer.create(1024 * 1024));
-		buf.writei8(this.version);
-
-		buf.writeu16(palette.size());
-		for (const [id, idx] of palette) {
-			buf.writeu16(idx);
-			buf.writeu16(id.size());
-			buf.writestring(id);
-		}
-
-		buf.writeu16(blocks.size());
-		for (const block of blocks) {
-			buf.writeu16(palette.get(block.id)!);
-			buf.writeu16(block.mat);
-
-			const clr = Serializer.Color3Serializer.deserialize(block.col);
-			buf.writeu8(clr.R * 255);
-			buf.writeu8(clr.G * 255);
-			buf.writeu8(clr.B * 255);
-
-			buf.writef32(block.loc[0]);
-			buf.writef32(block.loc[1]);
-			buf.writef32(block.loc[2]);
-			buf.writef32(block.loc[3][0]);
-			buf.writef32(block.loc[3][1]);
-			buf.writef32(block.loc[3][2]);
-
-			if (!block.config) {
-				buf.writeu32(0);
-			} else {
-				const str = HttpService.JSONEncode(block.config);
-				buf.writeu32(str.size());
-				buf.writestring(str);
-			}
-		}
-
-		const buf2 = buffer.create(buf.getPosition());
-		buffer.copy(buf2, 0, buf.getBuffer(), 0, buf.getPosition());
-
-		print(Base64.Encode(buffer.tostring(buf2)));
-		print(HttpService.JSONEncode(blocks));
-		print(Base64.Encode(buffer.tostring(buf2)).size());
-		print(HttpService.JSONEncode(blocks).size());
-		return buffer.tostring(buf2);
-	},
-	deserialize(data: string): readonly SerializedBlockV0[] {
-		const buf = createBufferReader(buffer.fromstring(data));
-		const version = buf.readu8();
-		if (version !== 0) throw "invalid save version"; // TODO: check version before
-
-		const palettesize = buf.readu16();
-		const palette = new Map<number, string>();
-		for (let i = 0; i < palettesize; i++) {
-			const idx = buf.readu16();
-			const idsize = buf.readu16();
-			const id = buf.readstring(idsize);
-
-			palette.set(idx, id);
-		}
-
-		const blockssize = buf.readu16();
-		const blocks: SerializedBlockV0[] = new Array(blockssize);
-		for (let i = 0; i < blockssize; i++) {
-			const id = palette.get(buf.readu16())!;
-			const mat = buf.readu16();
-
-			const col = Serializer.Color3Serializer.serialize(Color3.fromRGB(buf.readu8(), buf.readu8(), buf.readu8()));
-
-			const loc: SerializedCFrame = [
-				buf.readf32(),
-				buf.readf32(),
-				buf.readf32(),
-				[buf.readf32(), buf.readf32(), buf.readf32()],
-			];
-
-			const configstrsize = buf.readu32();
-			let config: object | undefined = undefined;
-			if (configstrsize !== 0) {
-				config = HttpService.JSONDecode(buf.readstring(configstrsize)) as object;
-			}
-
-			const block: SerializedBlockV0 = { id, mat, col, loc, config };
-			blocks.push(block);
-		}
-
-		return blocks;
-	},
-} as const;
-*/
