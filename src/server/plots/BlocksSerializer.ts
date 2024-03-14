@@ -30,10 +30,6 @@ interface SerializedBlockV2 extends SerializedBlockV0 {
 interface SerializedBlockV3 extends SerializedBlockV2 {
 	readonly connections?: Readonly<Record<BlockConnectionName, PlacedBlockDataConnection>>;
 }
-interface SerializedBlockV4 extends Omit<SerializedBlockV3, "mat" | "col"> {
-	readonly mat: Enum.Material;
-	readonly col: Color3;
-}
 
 const read = {
 	blocksFromPlot: <T extends SerializedBlockBase>(
@@ -47,12 +43,12 @@ const read = {
 			.map((block, i) => serialize(block, i, buildingCenter));
 	},
 
-	blockV4: (block: BlockModel, index: number, buildingCenter: CFrame): SerializedBlockV4 => {
+	blockV3: (block: BlockModel, index: number, buildingCenter: CFrame): SerializedBlockV3 => {
 		return {
-			id: BlockManager.manager.id.get(block) as SerializedBlockV4["id"],
+			id: BlockManager.manager.id.get(block) as SerializedBlockV3["id"],
 			loc: Serializer.CFrameSerializer.serialize(buildingCenter.ToObjectSpace(block.GetPivot())),
-			col: BlockManager.manager.color.get(block),
-			mat: BlockManager.manager.material.get(block),
+			col: Serializer.Color3Serializer.serialize(BlockManager.manager.color.get(block)),
+			mat: Serializer.EnumMaterialSerializer.serialize(BlockManager.manager.material.get(block)),
 			uuid: BlockManager.manager.uuid.get(block),
 			connections: BlockManager.manager.connections.get(block),
 			config: BlockManager.manager.config.get(block),
@@ -70,7 +66,7 @@ const place = {
 		data.forEach((blockData) => place(plot, blockData, buildingCenter));
 	},
 
-	blockOnPlotV4: (plot: PlotModel, blockData: SerializedBlockV4, buildingCenter: CFrame) => {
+	blockOnPlotV3: (plot: PlotModel, blockData: SerializedBlockV3, buildingCenter: CFrame) => {
 		if (!blockRegistry.has(blockData.id)) {
 			Logger.error(`Could not load ${blockData.id} from slot: Block does not exists`);
 			return;
@@ -78,8 +74,8 @@ const place = {
 
 		const deserializedData: PlaceBlockRequest = {
 			id: blockData.id,
-			color: blockData.col,
-			material: blockData.mat,
+			color: Serializer.Color3Serializer.deserialize(blockData.col ?? "FFFFFF"),
+			material: Serializer.EnumMaterialSerializer.deserialize(blockData.mat ?? Enum.Material.Plastic.Value),
 			location: buildingCenter.ToWorldSpace(Serializer.CFrameSerializer.deserialize(blockData.loc)),
 			config: blockData.config as never,
 			uuid: blockData.uuid,
@@ -583,39 +579,44 @@ const v16: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 };
 
 // update de/serialization of color & material
-const v17: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV4>, typeof v16> = {
+// REMOVED; caused the loss of block material and color
+const v17: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v16> = {
 	version: 17,
 
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV4> {
-		const update = (block: SerializedBlockV3): SerializedBlockV4 => {
-			return {
-				...block,
-				col: Serializer.Color3Serializer.deserialize(block.col),
-				mat: Serializer.EnumMaterialSerializer.deserialize(block.mat),
-			};
-		};
-
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		return {
 			version: this.version,
-			blocks: prev.blocks.map(update),
+			blocks: prev.blocks as never,
+		};
+	},
+};
+
+// fix de/serialization of color & material from v17
+const v18: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v17> = {
+	version: 18,
+
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		return {
+			version: this.version,
+			blocks: prev.blocks,
 		};
 	},
 
-	read(plot: PlotModel): SerializedBlocks<SerializedBlockV4> {
+	read(plot: PlotModel): SerializedBlocks<SerializedBlockV3> {
 		return {
 			version: this.version,
-			blocks: read.blocksFromPlot(plot, read.blockV4),
+			blocks: read.blocksFromPlot(plot, read.blockV3),
 		};
 	},
-	place(data: SerializedBlocks<SerializedBlockV4>, plot: PlotModel): number {
-		place.blocksOnPlot(plot, data.blocks, place.blockOnPlotV4);
+	place(data: SerializedBlocks<SerializedBlockV3>, plot: PlotModel): number {
+		place.blocksOnPlot(plot, data.blocks, place.blockOnPlotV3);
 		return data.blocks.size();
 	},
 };
 
 //
 
-const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17] as const;
+const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const getVersion = (version: number) => versions.find((v) => v.version === version);
