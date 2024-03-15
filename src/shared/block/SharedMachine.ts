@@ -126,6 +126,7 @@ export default class SharedMachine extends ContainerComponent {
 	initializeBlockConnections() {
 		for (const inputLogic of this.getChildren()) {
 			if (!(inputLogic instanceof ConfigurableBlockLogic)) continue;
+			if (inputLogic.block.connections === undefined) continue;
 
 			for (const [connectionFrom, connection] of Objects.pairs(inputLogic.block.connections)) {
 				const outputLogic = this.childMap.get(connection.blockUuid);

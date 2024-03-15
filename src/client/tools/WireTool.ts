@@ -801,6 +801,8 @@ export class WireTool extends ToolBase {
 		WireTool.groupMarkers(this.markers.getAll().values());
 
 		for (const block of SharedPlots.getPlotBlockDatas(plot)) {
+			if (block.connections === undefined) continue;
+
 			for (const [connectionName, connection] of Objects.entries(block.connections)) {
 				const from = this.markers.get(`${block.uuid} input ${connectionName}`) as Markers.Input;
 				const to = this.markers.get(

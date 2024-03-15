@@ -1,4 +1,4 @@
-import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientComponentChild } from "client/component/ClientComponentChild";
 import InputController from "client/controller/InputController";
@@ -579,9 +579,6 @@ export default class EditTool extends ToolBase {
 	readonly selected = this._selected.asReadonly();
 	private readonly controller = new ComponentChild<Controllers.IController>(this, true);
 	private readonly selector;
-	private readonly plot = new ObservableValue<SharedPlot>(
-		SharedPlots.getPlotComponentByOwnerID(Players.LocalPlayer.UserId),
-	);
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -592,7 +589,7 @@ export default class EditTool extends ToolBase {
 		this.parent(new SelectedBlocksHighlighter(this.selected));
 
 		{
-			this.selector = this.parent(new Selectors.Selector(this.plot, this._selected, gui.instance));
+			this.selector = this.parent(new Selectors.Selector(this.targetPlot, this._selected, gui.instance));
 			this.event.subscribeObservable2(
 				this.selectedMode,
 				(mode) => this.selector?.setEnabled(mode === undefined),
@@ -606,7 +603,7 @@ export default class EditTool extends ToolBase {
 
 		this.onDisable(() => this._selected.clear());
 		this.onDisable(() => this._selectedMode.set(undefined));
-		this.event.subscribeObservable2(this.plot, () => this._selectedMode.set(undefined), true);
+		this.event.subscribeObservable2(this.targetPlot, () => this._selectedMode.set(undefined), true);
 		this.event.subscribeObservable2(this.selectedMode, (mode) => {
 			if (!mode) {
 				this.controller.clear();
@@ -653,7 +650,7 @@ export default class EditTool extends ToolBase {
 		const response = await Remotes.Client.GetNamespace("Building")
 			.Get("PlaceBlocks")
 			.CallServerAsync({
-				plot: this.plot.get().instance,
+				plot: this.targetPlot.get().instance,
 				blocks: this.selected.get().map((block): PlaceBlockRequest => {
 					const data = BlockManager.getBlockDataByBlockModel(block);
 

@@ -11,10 +11,7 @@ declare global {
 		readonly material: Enum.Material;
 		readonly location: CFrame;
 		readonly uuid?: BlockUuid;
-
 		readonly config?: PlacedBlockConfig;
-
-		/** Connections to the INPUT connectors */
 		readonly connections?: PlacedBlockLogicConnections;
 	}
 	interface PlaceBlocksRequest {

@@ -34,6 +34,7 @@ export default class Machine extends SharedMachine {
 	initializeControls() {
 		for (const logic of this.getChildren()) {
 			if (!(logic instanceof ConfigurableBlockLogic)) continue;
+			if (!logic.block.config) continue;
 
 			const configDef = (blockConfigRegistry as BlockConfigRegistry)[
 				logic.block.id as keyof typeof blockConfigRegistry
@@ -42,7 +43,7 @@ export default class Machine extends SharedMachine {
 
 			for (const [key, observable] of Objects.pairs(logic.input)) {
 				// if already connected
-				if (key in logic.block.connections) continue;
+				if (logic.block.connections !== undefined && key in logic.block.connections) continue;
 
 				const def = configDef.input[key as keyof typeof configDef.input];
 

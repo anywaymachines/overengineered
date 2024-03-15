@@ -6,12 +6,12 @@ export interface BlockLogicData<TDef extends BlockConfigTypes.Definitions, TBloc
 	readonly id: string;
 	readonly instance: TBlock;
 	readonly uuid: BlockUuid;
-	readonly config: Partial<ConfigDefinitionsToConfig<keyof TDef, TDef>>;
 	readonly color?: Color3;
 	readonly material?: Enum.Material;
-
-	/** Connections to this block INPUT from other blocks OUTPUTs and INPUTs */
-	readonly connections: Readonly<Partial<Record<keyof TDef & BlockConnectionName, PlacedBlockDataConnection>>>;
+	readonly config: Partial<ConfigDefinitionsToConfig<keyof TDef, TDef>> | undefined;
+	readonly connections:
+		| Readonly<Partial<Record<keyof TDef & BlockConnectionName, PlacedBlockDataConnection>>>
+		| undefined;
 }
 export default class BlockLogic<T extends BlockModel = BlockModel> extends InstanceComponent<T> {
 	readonly block: BlockLogicData<BlockConfigTypes.Definitions, T>;

@@ -39,10 +39,11 @@ export class HoveredBlocksHighlighter extends ClientComponent {
 		const mouse = Players.LocalPlayer.GetMouse();
 		let prevTarget: Instance | undefined;
 
+		const empty = [] as const;
 		const destroyHighlight = () => {
 			prevTarget = undefined;
 			highlighterParent.get()?.stop();
-			this._highlighted.set([]);
+			this._highlighted.set(empty);
 		};
 
 		/** @param forceUpdate If true, don't check for `target === prevTarget`. Useful for updating on pressing Ctrl, since the targeted block did not change but the update is nesessary */

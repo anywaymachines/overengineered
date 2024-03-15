@@ -32,6 +32,7 @@ export const ClientBuilding = {
 			plot,
 			blocks: (_blocks === "all" ? plot.Blocks.GetChildren(undefined) : _blocks).map(
 				(block): PlaceBlockRequest => {
+					// TODO: other block connections
 					const data = BlockManager.getBlockDataByBlockModel(block);
 					return {
 						id: data.id,
@@ -39,6 +40,8 @@ export const ClientBuilding = {
 						color: data.color,
 						material: data.material,
 						uuid: data.uuid,
+						config: data.config,
+						connections: data.connections,
 					};
 				},
 			),

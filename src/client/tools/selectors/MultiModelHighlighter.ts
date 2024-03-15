@@ -30,7 +30,7 @@ export class MultiModelHighlighter extends Component {
 		this.stop();
 
 		const children = new Map(instances.map((i) => [i, i.Parent]));
-		for (const instance of instances) {
+		for (const [instance] of children) {
 			instance.Parent = this.model;
 		}
 

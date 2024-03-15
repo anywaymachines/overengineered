@@ -22,8 +22,8 @@ export type PlacedBlockData<T extends BlockModel = BlockModel> = {
 	readonly material: Enum.Material;
 	readonly id: string;
 	readonly uuid: BlockUuid;
-	readonly config: PlacedBlockConfig; // TODO: set to undefined
-	readonly connections: PlacedBlockLogicConnections; // TODO: set to undefined
+	readonly config: PlacedBlockConfig | undefined;
+	readonly connections: PlacedBlockLogicConnections | undefined;
 };
 declare global {
 	type BlockData<T extends BlockModel = BlockModel> = PlacedBlockData<T>;
