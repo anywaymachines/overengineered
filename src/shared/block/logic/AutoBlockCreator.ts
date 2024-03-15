@@ -89,9 +89,51 @@ const defcs = {
 } as const;
 
 const defs = {
+	const: {
+		input: {},
+		output: {
+			value: defcs.number("Value"),
+		},
+	},
 	math1number: {
 		input: {
 			value: defcs.number("Value"),
+		},
+		output: {
+			result: defcs.number("Result"),
+		},
+	},
+	rand: {
+		input: {
+			min: defcs.number("Min", { default: 0, config: 0 }),
+			max: defcs.number("Max", { default: 1, config: 1 }),
+		},
+		output: {
+			result: defcs.number("Result"),
+		},
+	},
+	nsqrt: {
+		input: {
+			value: defcs.number("Value"),
+			root: defcs.number("Degree"),
+		},
+		output: {
+			result: defcs.number("Result"),
+		},
+	},
+	pow: {
+		input: {
+			value: defcs.number("Value"),
+			power: defcs.number("Power"),
+		},
+		output: {
+			result: defcs.number("Result"),
+		},
+	},
+	atan2: {
+		input: {
+			y: defcs.number("Y"),
+			x: defcs.number("X"),
 		},
 		output: {
 			result: defcs.number("Result"),
@@ -126,6 +168,30 @@ const reglogic = (
 	(blockConfigRegistry as Writable<BlockConfigRegistry>)[name as keyof BlockConfigRegistry] = def;
 };
 const logicReg = {
+	const: (func: (logic: BlockLogic) => number) => {
+		return class Logic extends ConfigurableBlockLogic<typeof defs.const> {
+			constructor(block: PlacedBlockData) {
+				super(block, defs.const);
+
+				const update = () => this.output.value.set(func(this));
+				this.onEnable(update);
+			}
+		};
+	},
+	rand: (func: (min: number, max: number, logic: BlockLogic) => number) => {
+		return class Logic extends ConfigurableBlockLogic<typeof defs.rand> {
+			constructor(block: PlacedBlockData) {
+				super(block, defs.rand);
+
+				const update = () => this.output.result.set(func(this.input.min.get(), this.input.max.get(), this));
+				this.input.min.subscribe(update);
+				this.input.max.subscribe(update);
+
+				// TODO: Remove after logic ticking
+				this.event.subscribe(RunService.Heartbeat, update);
+			}
+		};
+	},
 	math1number: (func: (value: number, logic: BlockLogic) => number) => {
 		return class Logic extends ConfigurableBlockLogic<typeof defs.math1number> {
 			constructor(block: PlacedBlockData) {
@@ -133,6 +199,39 @@ const logicReg = {
 
 				const update = () => this.output.result.set(func(this.input.value.get(), this));
 				this.input.value.subscribe(update);
+			}
+		};
+	},
+	nsqrt: (func: (value: number, root: number, logic: BlockLogic) => number) => {
+		return class Logic extends ConfigurableBlockLogic<typeof defs.nsqrt> {
+			constructor(block: PlacedBlockData) {
+				super(block, defs.nsqrt);
+
+				const update = () => this.output.result.set(func(this.input.value.get(), this.input.root.get(), this));
+				this.input.value.subscribe(update);
+				this.input.root.subscribe(update);
+			}
+		};
+	},
+	pow: (func: (value: number, power: number, logic: BlockLogic) => number) => {
+		return class Logic extends ConfigurableBlockLogic<typeof defs.pow> {
+			constructor(block: PlacedBlockData) {
+				super(block, defs.pow);
+
+				const update = () => this.output.result.set(func(this.input.value.get(), this.input.power.get(), this));
+				this.input.value.subscribe(update);
+				this.input.power.subscribe(update);
+			}
+		};
+	},
+	atan2: (func: (y: number, x: number, logic: BlockLogic) => number) => {
+		return class Logic extends ConfigurableBlockLogic<typeof defs.atan2> {
+			constructor(block: PlacedBlockData) {
+				super(block, defs.atan2);
+
+				const update = () => this.output.result.set(func(this.input.y.get(), this.input.x.get(), this));
+				this.input.y.subscribe(update);
+				this.input.x.subscribe(update);
 			}
 		};
 	},
@@ -193,11 +292,140 @@ const multiifunc =
 		multiif(arg, left, right, checks);
 
 const mathCategory = ["Logic", "Math"];
+const trigCategory = ["Logic", "Trigonometry"];
+const angleCategory = ["Logic", "Trigonometry", "Angle"];
+const constCategory = ["Logic", "Trigonometry", "Constant"];
+
 const operations = {
+	const: {
+		PI: {
+			modelTextOverride: "π",
+			category: constCategory,
+			func: () => math.pi,
+		},
+		E: {
+			modelTextOverride: "e",
+			category: constCategory,
+			func: () => 2.718281828459,
+		},
+	},
 	math1number: {
 		//NEG: { category: mathCategory, func: (value) => -value },
+		SQRT: {
+			modelTextOverride: "SQRT",
+			category: trigCategory,
+			func: (value) => math.sqrt(value),
+		},
+
+		TAN: {
+			modelTextOverride: "TAN",
+			category: trigCategory,
+			func: (value) => math.tan(value),
+		},
+		ATAN: {
+			modelTextOverride: "ATAN",
+			category: trigCategory,
+			func: (value) => math.atan(value),
+		},
+
+		SIN: {
+			modelTextOverride: "SIN",
+			category: trigCategory,
+			func: (value) => math.sin(value),
+		},
+		ASIN: {
+			modelTextOverride: "ASIN",
+			category: trigCategory,
+			func: (value) => math.asin(value),
+		},
+
+		COS: {
+			modelTextOverride: "SOS",
+			category: trigCategory,
+			func: (value) => math.cos(value),
+		},
+		ACOS: {
+			modelTextOverride: "ACOS",
+			category: trigCategory,
+			func: (value) => math.acos(value),
+		},
+
+		LOG: {
+			modelTextOverride: "LOG",
+			category: mathCategory,
+			func: (value) => math.log(value),
+		},
+		LOG10: {
+			modelTextOverride: "LOG10",
+			category: mathCategory,
+			func: (value) => math.log10(value),
+		},
+		LOGE: {
+			modelTextOverride: "LOG(E)",
+			category: mathCategory,
+			func: (value) => math.log(value, 2.718281828459),
+		},
+
+		DEG: {
+			modelTextOverride: "DEG",
+			category: angleCategory,
+			func: (value) => math.deg(value),
+		},
+		RAD: {
+			modelTextOverride: "RAD",
+			category: angleCategory,
+			func: (value) => math.rad(value),
+		},
+
+		SIGN: {
+			modelTextOverride: "SIGN",
+			category: mathCategory,
+			func: (value) => math.sign(value),
+		},
 	},
-	math2number: {},
+	rand: {
+		RAND: {
+			modelTextOverride: "RAND",
+			category: mathCategory,
+			func: (min, max, logic) => {
+				if (max <= min) {
+					RemoteEvents.Burn.send(logic.instance.PrimaryPart!);
+					logic.disable();
+					return 727;
+				}
+
+				return math.random() * (max - min) + min;
+			},
+		},
+	},
+	pow: {
+		POW: {
+			modelTextOverride: "POW",
+			category: mathCategory,
+			func: (value, power) => math.pow(value, power),
+		},
+	},
+	nsqrt: {
+		NSQRT: {
+			modelTextOverride: "NSQRT",
+			category: mathCategory,
+			func: (value, root) => value ** (1 / root),
+		},
+	},
+	atan2: {
+		ATAN2: {
+			modelTextOverride: "ATAN2",
+			category: mathCategory,
+			func: (y, x) => math.atan2(y, x),
+		},
+	},
+	math2number: {
+		MOD: {
+			modelTextOverride: "MOD",
+			category: mathCategory,
+			func: (value1, value2) => value1 % value2,
+		},
+	},
 	math2numberVector3: {
 		ADD: {
 			modelTextOverride: "ADD",
@@ -320,6 +548,25 @@ const create = (info: BlocksInitializeData) => {
 				required: setupinfo.required,
 			};
 			info.blocks.set(regblock.id, regblock);
+
+			// automatically create categories
+			//some magic idk DO NOT TOUCH
+			{
+				let cat: (typeof info.categories)[CategoryName] | undefined = undefined;
+				for (const c of block.category) {
+					const se = (cat?.sub ?? info.categories) as Writable<typeof info.categories>;
+					if (!se[c as CategoryName]) {
+						se[c as CategoryName] = { name: c as CategoryName, sub: {} };
+					}
+
+					const newcat = se[c as CategoryName];
+					if (cat) {
+						(cat.sub as Writable<typeof cat.sub>)[c as CategoryName] = newcat;
+					}
+
+					cat = newcat;
+				}
+			}
 
 			const logic = logicReg[optype](data.func as never);
 			reglogic(block.id, logic, defs[optype]);

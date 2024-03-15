@@ -156,7 +156,88 @@ const logic: Record<string, BlockDataRegistry> = {
 			autoWeldShape: "cube",
 		},
 	},
-	angle: {
+	trigonometry: {
+		operationpi: {
+			name: "Pi",
+			description: `So called "free thinkers" will make a thousand PIe jokes as soon as they'll see the PI constant..`,
+			autoWeldShape: "cube",
+		},
+		operatione: {
+			name: "Euler's number (e)",
+			description: "Very useful constant you'll probably never use if you doesn't already know what it is",
+			autoWeldShape: "cube",
+		},
+		operationrand: {
+			name: "Random",
+			description: `Returns a "random" value between chosen minimum and maximum`,
+			autoWeldShape: "cube",
+		},
+
+		operationsqrt: {
+			name: "Square Root",
+			description: "Square the root out of input value",
+			autoWeldShape: "cube",
+		},
+		operationnsqrt: {
+			name: "Custom Degree Root",
+			description: "Same as the square root but you're allowed to change the degree of it",
+			autoWeldShape: "cube",
+		},
+		operationpow: {
+			name: "Power",
+			description: "Buffs input values",
+			autoWeldShape: "cube",
+		},
+		operationtan: {
+			name: "Tangent",
+			description: "Calculates a tangent of input",
+			autoWeldShape: "cube",
+		},
+		operationatan: {
+			name: "Arctangent",
+			description: "The opposite of the Tangent",
+			autoWeldShape: "cube",
+		},
+		operationatan2: {
+			name: "Arctangent 2",
+			description: "No way they made a sequel",
+			autoWeldShape: "cube",
+		},
+		operationsin: {
+			name: "Sine",
+			description: "Calculates a sine of input",
+			autoWeldShape: "cube",
+		},
+		operationasin: {
+			name: "Arcsine",
+			description: "The opposite of the Sine",
+			autoWeldShape: "cube",
+		},
+		operationcos: {
+			name: "Cosine",
+			description: "Calculates a cosine of input",
+			autoWeldShape: "cube",
+		},
+		operationacos: {
+			name: "Arccosine",
+			description: "The opposite of the Cosine",
+			autoWeldShape: "cube",
+		},
+		operationlog: {
+			name: "Logarithm",
+			description: "Calculates a logarithm of the input value with selected base",
+			autoWeldShape: "cube",
+		},
+		operationlog10: {
+			name: "Logarithm (10 base)",
+			description: "Calculates a base 10 logarithm of the input value",
+			autoWeldShape: "cube",
+		},
+		operationloge: {
+			name: "Logarithm (natural)",
+			description: "Returns a natural Logarithm of inputed value. Unlike it's evil artificial counterparts..",
+			autoWeldShape: "cube",
+		},
 		operationdeg: {
 			name: "Degrees",
 			description: "Returns input value converted to degrees",

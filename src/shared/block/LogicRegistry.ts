@@ -31,12 +31,8 @@ import OperationAbsBlockLogic from "./logic/operations/number/OperationAbsBlockL
 import OperationClampBlockLogic from "./logic/operations/number/OperationClampBlockLogic";
 import OperationEqualsBlockLogic from "./logic/operations/number/OperationEqualsBlockLogic";
 import OperationGreaterThanBlockLogic from "./logic/operations/number/OperationGreaterThanBlockLogic";
-import OperationModBlockLogic from "./logic/operations/number/OperationModBlockLogic";
 import OperationRoundBlockLogic from "./logic/operations/number/OperationRoundBlockLogic";
-import OperationSignBlockLogic from "./logic/operations/number/OperationSignBlockLogic";
 import RelayBlockLogic from "./logic/operations/number/RelayBlockLogic";
-import OperationDegBlockLogic from "./logic/operations/number/trigonometry/OperationDegBlockLogic";
-import OperationRadBlockLogic from "./logic/operations/number/trigonometry/OperationRadBlockLogic";
 import LampBlockLogic from "./logic/operations/output/LampBlockLogic";
 import ScreenBlockLogic from "./logic/operations/output/ScreenBlockLogic";
 import AccelerometerBlockLogic from "./logic/operations/sensors/AccelerometerBlockLogic";
@@ -103,8 +99,6 @@ const logicRegistry = {
 	operationxnor: OperationXnorBlockLogic,
 	operationnor: OperationNorBlockLogic,
 
-	operationmod: OperationModBlockLogic,
-
 	operationvec3splitter: OperationVec3SplitterBlockLogic,
 	operationvec3combiner: OperationVec3CombinerBlockLogic,
 
@@ -112,12 +106,8 @@ const logicRegistry = {
 	operationgreaterthan: OperationGreaterThanBlockLogic,
 	operationround: OperationRoundBlockLogic,
 
-	operationdeg: OperationDegBlockLogic,
-	operationrad: OperationRadBlockLogic,
-
 	operationclamp: OperationClampBlockLogic,
 	operationabs: OperationAbsBlockLogic,
-	operationsign: OperationSignBlockLogic,
 } as const;
 export default logicRegistry;
 export type LogicRegistry = Readonly<
