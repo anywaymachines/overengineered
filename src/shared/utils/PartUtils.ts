@@ -56,4 +56,11 @@ export default class PartUtils {
 			callback(element);
 		});
 	}
+
+	static BreakJoints(part: BasePart) {
+		const joints = part.GetJoints();
+		joints.forEach((constraint) => {
+			constraint.Destroy();
+		});
+	}
 }

@@ -1,6 +1,6 @@
 import BlockManager from "shared/building/BlockManager";
 import Effects from "shared/effects/Effects";
-import ServerPartUtils from "./plots/ServerPartUtils";
+import PartUtils from "shared/utils/PartUtils";
 
 const explosionBase = new Instance("Explosion");
 explosionBase.BlastPressure = 0;
@@ -44,7 +44,7 @@ export default class SpreadingFireController {
 
 			// Break joints with a chance
 			if (math.random(1, 4) === 1) {
-				ServerPartUtils.BreakJoints(part);
+				PartUtils.BreakJoints(part);
 			}
 
 			// Burn closest parts

@@ -52,7 +52,7 @@ export default class ImpactController {
 			return;
 		}
 
-		const event = part.Touched.Connect((secondPart: BasePart | Terrain) => {
+		const event = part.Touched.Connect((hit: BasePart | Terrain) => {
 			// Optimization (do nothing for non-connected blocks)
 			if (part.AssemblyMass === part.Mass) {
 				event.Disconnect();
@@ -60,7 +60,13 @@ export default class ImpactController {
 			}
 
 			// Do nothing for non-collidable blocks
-			if (!secondPart.CanCollide) return;
+			if (!hit.CanCollide) return;
+
+			// Don't let the blocks collapse too much
+			if (part.AssemblyMass < part.Mass * 7 && !this.STRONG_BLOCKS.includes(blockData.id)) {
+				event.Disconnect();
+				return;
+			}
 
 			// Default diff
 			let allowedMagnitudeDiff: number = this.STRONG_BLOCKS.includes(blockData.id)
@@ -76,20 +82,20 @@ export default class ImpactController {
 			}
 
 			// Player character diff
-			if (PlayerUtils.isPlayerPart(secondPart)) {
+			if (PlayerUtils.isPlayerPart(hit)) {
 				allowedMagnitudeDiff *= this.PLAYER_CHARACTER_DIFF_MULTIPLIER;
 			}
 
 			// Compute magnitudes
 			const partMagnitude = part.AssemblyLinearVelocity.Magnitude + part.AssemblyAngularVelocity.Magnitude;
-			const secondPartMagnitude =
-				secondPart.AssemblyLinearVelocity.Magnitude + secondPart.AssemblyAngularVelocity.Magnitude;
+			const secondPartMagnitude = hit.AssemblyLinearVelocity.Magnitude + hit.AssemblyAngularVelocity.Magnitude;
 
 			// Material protection
 			allowedMagnitudeDiff *= this.MATERIAL_STRONGNESS[part.Material.Name];
 			const magnitudeDiff = math.abs(partMagnitude - secondPartMagnitude);
 
 			if (magnitudeDiff > allowedMagnitudeDiff * 5) {
+				PartUtils.BreakJoints(part);
 				RemoteEvents.ImpactExplode.send({
 					part,
 					blastRadius: 1 + magnitudeDiff / (2 * allowedMagnitudeDiff * 5),
@@ -102,6 +108,7 @@ export default class ImpactController {
 				}
 
 				if (math.random(1, 5) > 1) {
+					PartUtils.BreakJoints(part);
 					RemoteEvents.ImpactBreak.send(part);
 
 					event.Disconnect();
