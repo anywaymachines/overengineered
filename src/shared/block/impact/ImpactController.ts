@@ -63,7 +63,11 @@ export default class ImpactController {
 			if (!hit.CanCollide) return;
 
 			// Don't let the blocks collapse too much
-			if (part.AssemblyMass < part.Mass * 7 && !this.STRONG_BLOCKS.includes(blockData.id)) {
+			if (
+				part.AssemblyMass < part.Mass * 7 &&
+				!this.STRONG_BLOCKS.includes(blockData.id) &&
+				math.min(part.Size.X, part.Size.Y, part.Size.Z) > 1
+			) {
 				event.Disconnect();
 				return;
 			}
