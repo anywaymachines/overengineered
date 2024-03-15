@@ -340,7 +340,7 @@ const operations = {
 		},
 
 		COS: {
-			modelTextOverride: "SOS",
+			modelTextOverride: "COS",
 			category: trigCategory,
 			func: (value) => math.cos(value),
 		},
