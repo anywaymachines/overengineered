@@ -24,9 +24,9 @@ const BlockConfigValueRegistry = {
 	string: createObservable,
 	clampedNumber: (definition) =>
 		new NumberObservableValue(definition.default, definition.min, definition.max, definition.step),
-	thrust: () => new NumberObservableValue(0, 0, 100, 0.01),
-	motorRotationSpeed: createObservable,
-	servoMotorAngle: createObservable,
+	thrust: () => new NumberObservableValue<number>(0, 0, 100, 0.01),
+	motorRotationSpeed: (def) => new NumberObservableValue<number>(0, 0, def.maxSpeed, 0.01),
+	servoMotorAngle: () => new NumberObservableValue<number>(0, -180, 180, 0.01),
 	or: createObservable,
 } as const satisfies BlockConfigValueRegistry;
 
