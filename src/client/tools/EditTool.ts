@@ -659,6 +659,7 @@ export default class EditTool extends ToolBase {
 						location: block.GetPivot(),
 						color: data.color,
 						material: data.material,
+						config: data.config,
 					};
 				}),
 			});
