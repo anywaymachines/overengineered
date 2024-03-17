@@ -71,6 +71,7 @@ export const ServerBuilding = {
 
 		if (blocks === "all") {
 			plot.Blocks.ClearAllChildren();
+			BuildingWelder.deleteWelds(plot);
 		} else {
 			for (const block of blocks) {
 				const uuid = BlockManager.manager.uuid.get(block);
