@@ -11,6 +11,7 @@ declare global {
 		find(func: (item: T) => boolean): T | undefined;
 		groupBy<TKey extends defined, T extends defined>(keyfunc: (value: T) => TKey): Map<TKey, T[]>;
 
+		count(func: (value: T) => boolean): number;
 		all(func: (value: T) => boolean): boolean;
 		any(func: (value: T) => boolean): boolean;
 	}
@@ -108,6 +109,16 @@ export const SetMacros = $defineCallMacros<ReadonlySet<defined>>({
 		return groups;
 	},
 
+	count: <T extends defined>(set: ReadonlySet<T>, func: (value: T) => boolean): number => {
+		let count = 0;
+		for (const value of set) {
+			if (func(value)) {
+				count++;
+			}
+		}
+
+		return count;
+	},
 	all: <T extends defined>(array: ReadonlySet<T>, func: (value: T) => boolean): boolean => {
 		return array.find((v) => !func(v)) === undefined;
 	},
@@ -123,6 +134,7 @@ declare global {
 		keys(): K[];
 		values(): V[];
 
+		count(func: (key: K, value: V) => boolean): number;
 		filter(func: (key: K, value: V) => boolean): Map<K, V>;
 		map<TOut extends defined>(func: (key: K, value: V) => TOut): TOut[];
 		flatmap<TOut extends defined>(func: (key: K, value: V) => readonly TOut[]): TOut[];
@@ -144,6 +156,19 @@ export const MapMacros = $defineCallMacros<ReadonlyMap<defined, defined>>({
 		return map.map((k, v) => v);
 	},
 
+	count: <K extends defined, V extends defined>(
+		array: ReadonlyMap<K, V>,
+		func: (key: K, value: V) => boolean,
+	): number => {
+		let count = 0;
+		for (const [key, value] of array) {
+			if (func(key, value)) {
+				count++;
+			}
+		}
+
+		return count;
+	},
 	filter: <K extends defined, V extends defined>(
 		map: ReadonlyMap<K, V>,
 		func: (key: K, value: V) => boolean,
@@ -200,6 +225,7 @@ declare global {
 		flatmap<TOut extends defined>(func: (item: T) => readonly TOut[]): TOut[];
 		groupBy<TKey extends defined>(keyfunc: (value: T) => TKey): Map<TKey, T[]>;
 
+		count(func: (value: T) => boolean): number;
 		all(func: (value: T) => boolean): boolean;
 		any(func: (value: T) => boolean): boolean;
 	}
@@ -243,6 +269,16 @@ export const ArrayMacros = $defineCallMacros<ReadonlyArray<defined>>({
 		return groups;
 	},
 
+	count: <T extends defined>(array: readonly T[], func: (value: T) => boolean): number => {
+		let count = 0;
+		for (const value of array) {
+			if (func(value)) {
+				count++;
+			}
+		}
+
+		return count;
+	},
 	all: <T extends defined>(array: readonly T[], func: (value: T) => boolean): boolean => {
 		return array.find((v) => !func(v)) === undefined;
 	},

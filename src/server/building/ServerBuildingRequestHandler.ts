@@ -38,19 +38,32 @@ export const ServerBuildingRequestHandler = {
 			}
 		}
 
-		const placed: BlockModel[] = [];
-		for (const block of request.blocks) {
-			const regblock = blockRegistry.get(block.id)!;
-			const placedBlocks = SharedPlots.getPlotBlocks(request.plot)
-				.GetChildren(undefined)
-				.filter((placed_block) => {
-					return BlockManager.manager.id.get(placed_block) === block.id;
-				})
-				.size();
-			if (placedBlocks >= (regblock.limit ?? 2000)) {
-				return err("Type limit exceeded");
+		const countBy = <T, K>(arr: readonly T[], keyfunc: (value: T) => K): Map<K, number> => {
+			const result = new Map<K, number>();
+			for (const value of arr) {
+				const key = keyfunc(value);
+				result.set(key, (result.get(key) ?? 0) + 1);
 			}
 
+			return result;
+		};
+
+		const counts = countBy(request.blocks, (b) => b.id);
+		for (const [id, count] of counts) {
+			const regblock = blockRegistry.get(id)!;
+			const placed = SharedPlots.getPlotBlocks(request.plot)
+				.GetChildren(undefined)
+				.count((placed_block) => {
+					return BlockManager.manager.id.get(placed_block) === id;
+				});
+
+			if (placed + count > (regblock.limit ?? 2000)) {
+				return err(`Type limit exceeded for ${id}`);
+			}
+		}
+
+		const placed: BlockModel[] = [];
+		for (const block of request.blocks) {
 			// round the coordinates
 			(block as Writable<typeof block>).location = block.location.sub(
 				block.location.Position.sub(VectorUtils.apply(block.location.Position, math.round)),
