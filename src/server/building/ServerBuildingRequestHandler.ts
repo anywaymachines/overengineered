@@ -4,7 +4,6 @@ import BuildingManager from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import SharedPlots from "shared/building/SharedPlots";
 import PartUtils from "shared/utils/PartUtils";
-import VectorUtils from "shared/utils/VectorUtils";
 import { ServerBuilding } from "./ServerBuilding";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
@@ -64,11 +63,6 @@ export const ServerBuildingRequestHandler = {
 
 		const placed: BlockModel[] = [];
 		for (const block of request.blocks) {
-			// round the coordinates
-			(block as Writable<typeof block>).location = block.location.sub(
-				block.location.Position.sub(VectorUtils.apply(block.location.Position, math.round)),
-			);
-
 			const placedBlock = ServerBuilding.placeBlock(request.plot, block);
 			if (!placedBlock.success) {
 				return placedBlock;

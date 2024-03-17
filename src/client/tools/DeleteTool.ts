@@ -53,7 +53,7 @@ export default class DeleteTool extends ToolBase {
 			return;
 		}
 
-		const response = await ClientBuilding.deleteBlocks(this.targetPlot.get().instance, blocks);
+		const response = await ClientBuilding.deleteBlocks(this.targetPlot.get(), blocks);
 		if (response.success) {
 			task.wait();
 

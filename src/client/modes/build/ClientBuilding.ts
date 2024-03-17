@@ -1,23 +1,24 @@
 import ActionController from "client/modes/build/ActionController";
 import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
+import { SharedPlot } from "shared/building/SharedPlot";
 import SharedPlots from "shared/building/SharedPlots";
 
 /** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
 export const ClientBuilding = {
-	placeBlocks: (plot: PlotModel, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) => {
+	placeBlocks: async (plot: SharedPlot, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) => {
 		let placed: readonly BlockModel[];
-		return ActionController.instance.execute(
+		const result = await ActionController.instance.execute(
 			"Place blocks",
 			async () => {
 				await Remotes.Client.GetNamespace("Building")
 					.Get("DeleteBlocks")
-					.CallServerAsync({ plot, blocks: placed });
+					.CallServerAsync({ plot: plot.instance, blocks: placed });
 			},
 			async () => {
 				const response = await Remotes.Client.GetNamespace("Building")
 					.Get("PlaceBlocks")
-					.CallServerAsync({ plot, blocks });
+					.CallServerAsync({ plot: plot.instance, blocks });
 				if (response.success) {
 					placed = response.models;
 				}
@@ -25,32 +26,42 @@ export const ClientBuilding = {
 				return response;
 			},
 		);
+
+		if (result.success) {
+			for (const model of result.models) {
+				while (!model.PrimaryPart) {
+					task.wait();
+				}
+			}
+		}
+
+		task.wait();
+		plot.changed.Fire();
+		return result;
 	},
-	deleteBlocks: (plot: PlotModel, _blocks: readonly BlockModel[] | "all") => {
+	deleteBlocks: async (plot: SharedPlot, _blocks: readonly BlockModel[] | "all") => {
 		const uuids = _blocks === "all" ? "all" : _blocks.map((b) => BlockManager.getBlockDataByBlockModel(b).uuid);
 		const undo: PlaceBlocksRequest = {
-			plot,
-			blocks: (_blocks === "all" ? plot.Blocks.GetChildren(undefined) : _blocks).map(
-				(block): PlaceBlockRequest => {
-					// TODO: other block connections
-					const data = BlockManager.getBlockDataByBlockModel(block);
-					return {
-						id: data.id,
-						location: block.GetPivot(),
-						color: data.color,
-						material: data.material,
-						uuid: data.uuid,
-						config: data.config,
-						connections: data.connections,
-					};
-				},
-			),
+			plot: plot.instance,
+			blocks: (_blocks === "all" ? plot.getBlocks() : _blocks).map((block): PlaceBlockRequest => {
+				// TODO: other block connections
+				const data = BlockManager.getBlockDataByBlockModel(block);
+				return {
+					id: data.id,
+					location: block.GetPivot(),
+					color: data.color,
+					material: data.material,
+					uuid: data.uuid,
+					config: data.config,
+					connections: data.connections,
+				};
+			}),
 		};
 
 		const getBlocks = (): readonly BlockModel[] | "all" =>
-			uuids === "all" ? ("all" as const) : uuids.map((uuid) => SharedPlots.getBlockByUuid(plot, uuid));
+			uuids === "all" ? ("all" as const) : uuids.map((uuid) => SharedPlots.getBlockByUuid(plot.instance, uuid));
 
-		return ActionController.instance.execute(
+		const result = await ActionController.instance.execute(
 			uuids === "all" ? "Clear plot" : "Remove blocks",
 			async () => {
 				await Remotes.Client.GetNamespace("Building").Get("PlaceBlocks").CallServerAsync(undo);
@@ -58,26 +69,33 @@ export const ClientBuilding = {
 			() => {
 				return Remotes.Client.GetNamespace("Building")
 					.Get("DeleteBlocks")
-					.CallServerAsync({ plot, blocks: getBlocks() });
+					.CallServerAsync({ plot: plot.instance, blocks: getBlocks() });
 			},
 		);
-	},
-	moveBlocks: (plot: PlotModel, _blocks: readonly BlockModel[], diff: Vector3) => {
-		const uuids = _blocks.map((b) => BlockManager.getBlockDataByBlockModel(b).uuid);
-		const getBlocks = (): readonly BlockModel[] => uuids.map((uuid) => SharedPlots.getBlockByUuid(plot, uuid));
 
-		return ActionController.instance.execute(
+		plot.changed.Fire();
+		return result;
+	},
+	moveBlocks: async (plot: SharedPlot, _blocks: readonly BlockModel[], diff: Vector3) => {
+		const uuids = _blocks.map((b) => BlockManager.getBlockDataByBlockModel(b).uuid);
+		const getBlocks = (): readonly BlockModel[] =>
+			uuids.map((uuid) => SharedPlots.getBlockByUuid(plot.instance, uuid));
+
+		const result = await ActionController.instance.execute(
 			"Move blocks",
 			async () => {
 				await Remotes.Client.GetNamespace("Building")
 					.Get("MoveBlocks")
-					.CallServerAsync({ plot, diff: diff.mul(-1), blocks: getBlocks() });
+					.CallServerAsync({ plot: plot.instance, diff: diff.mul(-1), blocks: getBlocks() });
 			},
 			() => {
 				return Remotes.Client.GetNamespace("Building")
 					.Get("MoveBlocks")
-					.CallServerAsync({ plot, diff, blocks: getBlocks() });
+					.CallServerAsync({ plot: plot.instance, diff, blocks: getBlocks() });
 			},
 		);
+
+		plot.changed.Fire();
+		return result;
 	},
 } as const;

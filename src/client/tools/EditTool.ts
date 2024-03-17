@@ -1,4 +1,4 @@
-import { ReplicatedStorage, Workspace } from "@rbxts/services";
+import { HttpService, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientComponentChild } from "client/component/ClientComponentChild";
 import InputController from "client/controller/InputController";
@@ -329,19 +329,19 @@ namespace Controllers {
 		protected readonly tooltipHolder = this.parent(TooltipsHolder.createComponent("Moving"));
 
 		protected readonly step: ReadonlyObservableValue<number>;
-		protected readonly plot: PlotModel;
+		protected readonly plot: SharedPlot;
 		protected readonly blocks: readonly BlockModel[];
 		protected readonly pivots: readonly (readonly [BlockModel, CFrame])[];
 		protected readonly plotBounds: AABB;
 		protected difference: Vector3 = Vector3.zero;
 
-		constructor(plot: PlotModel, blocks: readonly BlockModel[], step: ReadonlyObservableValue<number>) {
+		constructor(plot: SharedPlot, blocks: readonly BlockModel[], step: ReadonlyObservableValue<number>) {
 			super();
 
 			this.plot = plot;
 			this.blocks = blocks;
 			this.step = step;
-			this.plotBounds = SharedPlots.getPlotBuildingRegion(plot);
+			this.plotBounds = plot.bounds;
 			this.pivots = blocks.map((p) => [p, p.GetPivot()] as const);
 
 			const moveHandles = this.initializeHandles();
@@ -559,7 +559,7 @@ namespace Controllers {
 	export class Move extends ClientComponent implements IController {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 
-		constructor(plot: PlotModel, blocks: readonly BlockModel[]) {
+		constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
 
 			ClientComponentChild.registerBasedOnInputType<IController>(this, {
@@ -621,8 +621,7 @@ export default class EditTool extends ToolBase {
 				break;
 			}
 
-			const plot = SharedPlots.getPlotByBlock(first)!;
-			this.controller.set(new Controllers[mode](plot, [...selected]));
+			this.controller.set(new Controllers[mode](this.targetPlot.get(), [...selected]));
 		});
 
 		this.event.onKeyDown("F", () => this.toggleMode("Move"));
@@ -647,12 +646,42 @@ export default class EditTool extends ToolBase {
 		this.selector.deselectAll();
 	}
 	async cloneBlocks() {
+		const createBlocksCopy = (blocks: ReadonlySet<BlockModel>): readonly PlaceBlockRequest[] => {
+			// <old, new>
+			const uuidmap = new Map<BlockUuid, PlaceBlockRequest>();
+
+			const newblocks = blocks.map((block): Writable<PlaceBlockRequest> => {
+				const data = BlockManager.getBlockDataByBlockModel(block);
+				const request: Writable<PlaceBlockRequest> = {
+					id: data.id,
+					uuid: HttpService.GenerateGUID(false) as BlockUuid,
+					location: block.GetPivot(),
+					color: data.color,
+					material: data.material,
+					config: data.config,
+				};
+
+				uuidmap.set(data.uuid, request);
+				return request;
+			});
+
+			for (const [olduuid, newblock] of uuidmap) {
+				//
+			}
+
+			return newblocks;
+		};
+
 		const response = await Remotes.Client.GetNamespace("Building")
 			.Get("PlaceBlocks")
 			.CallServerAsync({
 				plot: this.targetPlot.get().instance,
 				blocks: this.selected.get().map((block): PlaceBlockRequest => {
 					const data = BlockManager.getBlockDataByBlockModel(block);
+
+					const updateConnections = () => {
+						//
+					};
 
 					return {
 						id: data.id,

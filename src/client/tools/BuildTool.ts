@@ -236,7 +236,7 @@ export default class BuildTool extends ToolBase {
 			return;
 		}
 
-		const response = await ClientBuilding.placeBlocks(this.targetPlot.get().instance, [
+		const response = await ClientBuilding.placeBlocks(this.targetPlot.get(), [
 			{
 				id: this.selectedBlock.get()!.id,
 				color: this.selectedColor.get(),

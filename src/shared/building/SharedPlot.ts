@@ -33,34 +33,6 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 		this.blacklistedPlayers = this.event.observableFromAttributeJson<readonly number[]>(instance, "blacklisted");
 		this.whitelistedPlayers.set([5243461283]);
 		this.bounds = SharedPlot.getPlotBuildingRegion(instance);
-
-		if (RunService.IsClient()) {
-			const subToBlocks = () => {
-				this.event.subscribe(instance.Blocks.ChildAdded, (child) => {
-					if (child.IsA("Model")) {
-						while (!child.PrimaryPart) {
-							task.wait();
-						}
-					}
-
-					this.changed.Fire();
-				});
-				this.event.subscribe(instance.Blocks.ChildRemoved, () => {
-					this.changed.Fire();
-				});
-			};
-
-			this.instance.ChildAdded.Connect((child) => {
-				if (!child.IsA("Model") || child.Name !== "Blocks") {
-					return;
-				}
-
-				subToBlocks();
-			});
-			if (this.instance.FindFirstChild("Blocks")) {
-				subToBlocks();
-			}
-		}
 	}
 
 	/** Returns the {@link AABB} of the plot construction area */

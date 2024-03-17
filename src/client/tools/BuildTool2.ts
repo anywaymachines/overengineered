@@ -306,7 +306,7 @@ namespace SinglePlaceController {
 			}
 
 			const response = await ClientBuilding.placeBlocks(
-				plot.instance,
+				plot,
 				[mainGhost, ...this.mirroredGhosts].map(
 					(g): PlaceBlockRequest => ({
 						id: selected.id,
@@ -569,7 +569,7 @@ namespace MultiPlaceController {
 			}
 
 			const response = await ClientBuilding.placeBlocks(
-				this.plot.instance,
+				this.plot,
 				blocks.map(
 					(b): PlaceBlockRequest => ({
 						id: this.selectedBlock.id,
