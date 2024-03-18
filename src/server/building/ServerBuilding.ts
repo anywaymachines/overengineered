@@ -52,6 +52,9 @@ export const ServerBuilding = {
 		if (data.config && Objects.keys(data.config).size() !== 0) {
 			BlockManager.manager.config.set(model, data.config);
 		}
+		if (data.connections !== undefined && Objects.keys(data.connections).size() !== 0) {
+			BlockManager.manager.connections.set(model, data.connections);
+		}
 
 		// TODO: remove attribute uuid because Name exists?
 		BlockManager.manager.uuid.set(model, uuid);
@@ -75,18 +78,15 @@ export const ServerBuilding = {
 		} else {
 			for (const block of blocks) {
 				const uuid = BlockManager.manager.uuid.get(block);
-				for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
-					if (otherblock.connections === undefined) continue;
-
-					for (const [connector, connection] of Objects.pairs(otherblock.connections)) {
-						if (connection.blockUuid !== uuid) continue;
-
-						ServerBuilding.logicDisconnect({
-							plot,
-							inputBlock: otherblock.instance,
-							inputConnection: connector,
-						});
-					}
+				for (const [otherblock, connectionName, connection] of SharedBuilding.getBlocksConnectedByLogicTo(
+					plot,
+					uuid,
+				)) {
+					ServerBuilding.logicDisconnect({
+						plot,
+						inputBlock: otherblock.instance,
+						inputConnection: connectionName,
+					});
 				}
 
 				BuildingWelder.unweld(block);

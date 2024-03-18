@@ -1,5 +1,7 @@
 import BlockManager from "shared/building/BlockManager";
+import SharedPlots from "shared/building/SharedPlots";
 import MaterialData from "shared/data/MaterialData";
+import Objects from "shared/fixes/objects";
 import PartUtils from "shared/utils/PartUtils";
 
 declare global {
@@ -13,6 +15,18 @@ export const SharedBuilding = {
 	isEmpty: (blocks: BlockList): blocks is readonly [] => SharedBuilding.isBlocks(blocks) && blocks.size() === 0,
 	getBlockList: (blocks: BlockList): readonly BlockModel[] =>
 		SharedBuilding.isBlocks(blocks) ? blocks : blocks.Blocks.GetChildren(undefined),
+
+	*getBlocksConnectedByLogicTo(plot: PlotModel, uuid: BlockUuid) {
+		for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
+			if (otherblock.connections === undefined) continue;
+
+			for (const [connectionName, connection] of Objects.pairs(otherblock.connections)) {
+				if (connection.blockUuid !== uuid) continue;
+
+				yield [otherblock, connectionName, connection] as const;
+			}
+		}
+	},
 
 	/**
 	 * Set the block material and color

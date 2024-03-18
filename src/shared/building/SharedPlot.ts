@@ -57,6 +57,9 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	getBlocks(): readonly BlockModel[] {
 		return this.instance.Blocks.GetChildren(undefined);
 	}
+	getBlock(uuid: BlockUuid): BlockModel {
+		return (this.instance.Blocks as unknown as Record<BlockUuid, BlockModel>)[uuid];
+	}
 
 	/** Is the provided `Instance` is a plot model */
 	static isPlot(model: Instance | undefined): model is PlotModel {

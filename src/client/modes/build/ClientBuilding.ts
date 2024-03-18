@@ -1,6 +1,7 @@
 import ActionController from "client/modes/build/ActionController";
 import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
+import { SharedBuilding } from "shared/building/SharedBuilding";
 import { SharedPlot } from "shared/building/SharedPlot";
 import SharedPlots from "shared/building/SharedPlots";
 
@@ -41,11 +42,32 @@ export const ClientBuilding = {
 	},
 	deleteBlocks: async (plot: SharedPlot, _blocks: readonly BlockModel[] | "all") => {
 		const uuids = _blocks === "all" ? "all" : _blocks.map((b) => BlockManager.getBlockDataByBlockModel(b).uuid);
+
+		type SavedConnection = {
+			readonly inputBlock: BlockUuid;
+			readonly outputBlock: BlockUuid;
+			readonly inputConnection: BlockConnectionName;
+			readonly outputConnection: BlockConnectionName;
+		};
+		const connectedByLogic: SavedConnection[] = [];
+
 		const undo: PlaceBlocksRequest = {
 			plot: plot.instance,
 			blocks: (_blocks === "all" ? plot.getBlocks() : _blocks).map((block): PlaceBlockRequest => {
-				// TODO: other block connections
 				const data = BlockManager.getBlockDataByBlockModel(block);
+
+				for (const [otherblock, connectionName, connection] of SharedBuilding.getBlocksConnectedByLogicTo(
+					plot.instance,
+					data.uuid,
+				)) {
+					connectedByLogic.push({
+						inputBlock: otherblock.uuid,
+						outputBlock: data.uuid,
+						inputConnection: connectionName,
+						outputConnection: connection.connectionName,
+					});
+				}
+
 				return {
 					id: data.id,
 					location: block.GetPivot(),
@@ -60,11 +82,26 @@ export const ClientBuilding = {
 
 		const getBlocks = (): readonly BlockModel[] | "all" =>
 			uuids === "all" ? ("all" as const) : uuids.map((uuid) => SharedPlots.getBlockByUuid(plot.instance, uuid));
+		const getConnectRequest = (connection: SavedConnection): LogicConnectRequest => {
+			return {
+				plot: plot.instance,
+				inputBlock: plot.getBlock(connection.inputBlock),
+				inputConnection: connection.inputConnection,
+				outputBlock: plot.getBlock(connection.outputBlock),
+				outputConnection: connection.outputConnection,
+			};
+		};
 
 		const result = await ActionController.instance.execute(
 			uuids === "all" ? "Clear plot" : "Remove blocks",
 			async () => {
 				await Remotes.Client.GetNamespace("Building").Get("PlaceBlocks").CallServerAsync(undo);
+
+				for (const connection of connectedByLogic) {
+					await Remotes.Client.GetNamespace("Building")
+						.Get("LogicConnect")
+						.CallServerAsync(getConnectRequest(connection));
+				}
 			},
 			() => {
 				return Remotes.Client.GetNamespace("Building")
