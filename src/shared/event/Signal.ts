@@ -6,6 +6,7 @@ export interface ReadonlySignal<T extends (...args: never[]) => void = () => voi
 export default class Signal<T extends (...args: never[]) => void = () => void> implements ReadonlySignal<T> {
 	private destroyed = false;
 	private subscribed?: Set<unknown>; // unknown instead of T to workaround the type system
+	private inSelf = 0;
 
 	Connect(callback: T): { Disconnect(): void } {
 		if (this.destroyed) return { Disconnect() {} };
@@ -22,9 +23,18 @@ export default class Signal<T extends (...args: never[]) => void = () => void> i
 	}
 	Fire(...args: Parameters<T>): void {
 		if (!this.subscribed) return;
+		if (this.inSelf > 10) {
+			print(`Signal self-calling overflow: ${debug.traceback()}`);
+			throw "Signal self-calling overflow.";
+		}
 
-		for (const sub of this.subscribed) {
-			(sub as T)(...args);
+		this.inSelf++;
+		try {
+			for (const sub of this.subscribed) {
+				(sub as T)(...args);
+			}
+		} finally {
+			this.inSelf = 0;
 		}
 	}
 
