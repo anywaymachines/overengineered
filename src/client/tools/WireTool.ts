@@ -759,9 +759,9 @@ export class WireTool extends ToolBase {
 			if (!configDef) continue;
 
 			let index = 0;
+			const entriesSize = (["output", "input"] as const).flatmap((t) => Objects.entries(configDef[t])).size();
 			for (const markerType of ["output", "input"] as const) {
-				const entries = Objects.entries(configDef[markerType]);
-				for (const [key, config] of entries) {
+				for (const [key, config] of Objects.pairs(configDef[markerType])) {
 					if (config.connectorHidden) continue;
 
 					let narrow = false;
@@ -789,7 +789,7 @@ export class WireTool extends ToolBase {
 
 					const markerInstance = Markers.Marker.createInstance(
 						block.instance.PrimaryPart!,
-						entries.size() === 1 ? "center" : index++,
+						entriesSize === 1 ? "center" : index++,
 					);
 					const marker =
 						markerType === "input"
