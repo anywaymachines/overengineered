@@ -20,6 +20,9 @@ import { rootComponents } from "./test/RootComponents";
 
 // wait for assets to be copied
 ReplicatedStorage.WaitForChild("Assets");
+while (!SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)) {
+	task.wait(0.2);
+}
 
 (async () => await PlayerDataStorage.init())();
 
@@ -40,10 +43,6 @@ if (RunService.IsStudio()) {
 }
 
 SoundController.initialize();
-
-while (!SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)) {
-	task.wait(0.2);
-}
 
 const root = new ClientContainerComponent();
 rootComponents.push(root);
