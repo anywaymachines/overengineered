@@ -101,16 +101,16 @@ namespace SinglePlaceController {
 
 				this.updateBlockPosition();
 			});
-			this.event.onPrepare((ih, eh) => {
-				if (ih === "Touch") return;
+			this.event.onPrepare((inputType, eh, ih) => {
+				if (inputType === "Touch") return;
 
 				eh.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
 				eh.subscribe(mouse.Move, () => this.updateBlockPosition());
+				ih.onMouse1Up(() => this.placeBlock(), false);
 			});
 
 			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
 
-			//this.event.subInput((ih) => ih.onMouse1Up(() => this.placeBlock(), false));
 			this.onPrepare(() => {
 				this.inputHandler.onKeyDown("T", () => this.rotateBlock("x"));
 				this.inputHandler.onKeyDown("R", () => this.rotateBlock("y"));

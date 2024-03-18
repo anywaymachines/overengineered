@@ -19,8 +19,8 @@ export class ClientComponentEvents extends ComponentEvents {
 	}
 
 	/** Register an event that fires on enable and input type change */
-	onPrepare(callback: (inputType: InputType, eventHandler: EventHandler) => void): void {
-		this.onEnable(() => callback(InputController.inputType.get(), this.eventHandler));
+	onPrepare(callback: (inputType: InputType, eventHandler: EventHandler, inputHandler: InputHandler) => void): void {
+		this.onEnable(() => callback(InputController.inputType.get(), this.eventHandler, this.inputHandler));
 	}
 
 	/** Register an event that fires on enable and input type change to Desktop */
