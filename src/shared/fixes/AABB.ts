@@ -33,7 +33,6 @@ export class AABB {
 		const wsx = math.abs(R00) * sx + math.abs(R01) * sy + math.abs(R02) * sz;
 		const wsy = math.abs(R10) * sx + math.abs(R11) * sy + math.abs(R12) * sz;
 		const wsz = math.abs(R20) * sx + math.abs(R21) * sy + math.abs(R22) * sz;
-		print(new Vector3(wsx, wsy, wsz));
 		return this.fromCenterSize(cf.Position, new Vector3(wsx, wsy, wsz));
 	}
 	/** Create an {@link AABB} that contains all of the provided models */
