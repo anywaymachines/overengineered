@@ -7,10 +7,18 @@ export const Config = {
 	): ConfigDefinitionsToConfig<TKeys, TDef> => {
 		for (const [key, def] of Objects.pairs(definition)) {
 			if (typeIs(config[key], "table") || typeIs(def.config, "table")) {
-				config[key] = {
-					...((def.config as object) ?? {}),
-					...(config[key] ?? {}),
-				} as (typeof config)[typeof key];
+				if (
+					config[key] !== undefined &&
+					def.config !== undefined &&
+					typeOf(config[key]) !== typeOf(def.config)
+				) {
+					config[key] = def.config;
+				} else {
+					config[key] = {
+						...((def.config as object) ?? {}),
+						...(config[key] ?? {}),
+					} as (typeof config)[typeof key];
+				}
 
 				for (const [k, v] of Objects.entries(config[key]!)) {
 					if (!typeIs(v, "table")) continue;
