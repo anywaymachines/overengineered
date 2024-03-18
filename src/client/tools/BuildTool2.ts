@@ -94,7 +94,7 @@ namespace SinglePlaceController {
 			});
 			this.event.onPrepare(() => this.updateBlockPosition());
 
-			state.subscribeToCurrentPlot(() => {
+			state.subscribeSomethingToCurrentPlot(this, () => {
 				if (InputController.inputType.get() === "Touch") {
 					return;
 				}
@@ -482,11 +482,12 @@ namespace MultiPlaceController {
 			this.event.subscribe(Signals.CAMERA.MOVED, updateGhosts);
 			this.event.subInput((ih) => ih.onKeyDown("R", () => this.rotateFillAxis()));
 			this.onDestroy(() => {
-				for (const [pos, ghost] of this.drawnGhostsMap) {
+				for (const [, ghost] of this.drawnGhostsMap) {
 					ghost.model.Destroy();
 					ghost.mirrors.forEach((v) => v.Destroy());
-					this.drawnGhostsMap.delete(pos);
 				}
+
+				this.drawnGhostsMap.clear();
 			});
 
 			this.onEnable(updateGhosts);

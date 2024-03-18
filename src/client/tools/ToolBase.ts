@@ -5,6 +5,7 @@ import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import { SharedPlot } from "shared/building/SharedPlot";
+import { ComponentEvents } from "shared/component/ComponentEvents";
 
 /** An abstract class of tools for working with the world */
 export default abstract class ToolBase extends ClientComponent {
@@ -29,15 +30,21 @@ export default abstract class ToolBase extends ClientComponent {
 		this.mouse = Players.LocalPlayer.GetMouse();
 	}
 
-	subscribeToCurrentPlot(func: (plot: SharedPlot) => void) {
-		this.event.subscribeObservable2(
+	subscribeSomethingToCurrentPlot(
+		state: IComponent & { readonly event: ComponentEvents },
+		func: (plot: SharedPlot) => void,
+	) {
+		state.event.subscribeObservable2(
 			this.targetPlot,
 			(plot) => {
-				this.eventHandler.subscribe(plot.changed, () => func(plot));
+				state.event.eventHandler.subscribe(plot.changed, () => func(plot));
 				func(plot);
 			},
 			true,
 		);
+	}
+	protected subscribeToCurrentPlot(func: (plot: SharedPlot) => void) {
+		this.subscribeSomethingToCurrentPlot(this, func);
 	}
 
 	static getToolGui<TName extends string, TType>(): { readonly [k in TName]: TType } {
