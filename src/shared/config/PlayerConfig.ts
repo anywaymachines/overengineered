@@ -78,4 +78,12 @@ export const PlayerConfigDefinition = {
 			manual: 0 as number,
 		},
 	},
+	uiScale: {
+		displayName: "UI scale",
+		type: "clampedNumber",
+		config: 1 as number,
+		min: 0.5,
+		max: 1.5,
+		step: 0.01,
+	},
 } as const satisfies ConfigTypesToDefinition<keyof PlayerConfigTypes.Types, PlayerConfigTypes.Types>;

@@ -4,7 +4,7 @@ import Signal from "shared/event/Signal";
 import { Colors } from "./Colors";
 import Control from "./Control";
 import Gui from "./Gui";
-import { ScaledScreenGui } from "./GuiScale";
+import { ScaledScreenGui } from "./ScaledScreenGui";
 
 export default class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 	static readonly onAnyShow = new Signal<() => void>();

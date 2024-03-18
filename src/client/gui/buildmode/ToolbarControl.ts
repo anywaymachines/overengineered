@@ -59,9 +59,9 @@ export type ToolbarControlDefinition = GuiObject & {
 	};
 	readonly Info: {
 		readonly NameLabel: TextLabel;
+		readonly GamepadBack: ImageLabel;
+		readonly GamepadNext: ImageLabel;
 	};
-	readonly GamepadBack: ImageLabel;
-	readonly GamepadNext: ImageLabel;
 };
 
 export default class ToolbarControl extends Control<ToolbarControlDefinition> {
@@ -101,13 +101,13 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 				tween(button.getGui().KeyboardNumberLabel, inputType === "Desktop");
 			}
 
-			tween(this.gui.GamepadBack, inputType === "Gamepad");
-			tween(this.gui.GamepadNext, inputType === "Gamepad");
+			tween(this.gui.Info.GamepadBack, inputType === "Gamepad");
+			tween(this.gui.Info.GamepadNext, inputType === "Gamepad");
 		});
 
 		this.event.onPrepareGamepad(() => {
-			this.gui.GamepadBack.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonL1);
-			this.gui.GamepadNext.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
+			this.gui.Info.GamepadBack.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonL1);
+			this.gui.Info.GamepadNext.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
 		});
 
 		this.event.onPrepareDesktop(() => {
