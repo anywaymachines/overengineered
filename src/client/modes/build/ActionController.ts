@@ -5,8 +5,8 @@ import Signal from "shared/event/Signal";
 
 type Operation = {
 	readonly description: string;
-	readonly undo: () => Promise<void>;
-	readonly redo?: () => Promise<void>;
+	readonly undo: () => Promise<void | Response>;
+	readonly redo: () => Promise<void | Response>;
 };
 
 export default class ActionController extends ClientComponent {
@@ -29,29 +29,9 @@ export default class ActionController extends ClientComponent {
 		});
 	}
 
-	/** @deprecated Does not make sense */
-	async executeOperation<TInfo, TResult extends Response>(
-		description: string,
-		undo: (info: TInfo) => Promise<void>,
-		info: TInfo,
-		func: (info: TInfo) => Promise<TResult>,
-	) {
-		const result = await func(info);
-
-		if (result.success)
-			this.appendOperation({
-				description,
-				undo: () => undo(info),
-				redo: async () => {
-					await func(info);
-				},
-			});
-
-		return result;
-	}
 	async execute<TResult extends Response>(
 		description: string,
-		undo: () => Promise<void>,
+		undo: () => Promise<Response>,
 		func: () => Promise<TResult>,
 	) {
 		const result = await func();
@@ -59,9 +39,7 @@ export default class ActionController extends ClientComponent {
 			this.appendOperation({
 				description,
 				undo,
-				redo: async () => {
-					await func();
-				},
+				redo: func,
 			});
 
 		return result;
@@ -72,22 +50,32 @@ export default class ActionController extends ClientComponent {
 		this.redoHistory.clear();
 	}
 
-	redo() {
+	async redo() {
 		const operation = this.redoHistory.pop();
 		if (!operation) return false;
 
 		this.history.push(operation);
-		operation.redo?.();
+		const response = await operation.redo();
+		if (response && !response.success) {
+			LogControl.instance.addLine(`Error redoing "${operation.description}": ${response.message}`);
+			return true;
+		}
+
 		LogControl.instance.addLine(`Redone "${operation.description}"`);
 		return true;
 	}
 
-	undo() {
+	async undo() {
 		const operation = this.history.pop();
 		if (!operation) return false;
 
 		this.redoHistory.push(operation);
-		operation.undo();
+		const response = await operation.undo();
+		if (response && !response.success) {
+			LogControl.instance.addLine(`Error undoing "${operation.description}": ${response.message}`);
+			return true;
+		}
+
 		LogControl.instance.addLine(`Undone "${operation.description}"`);
 		return true;
 	}

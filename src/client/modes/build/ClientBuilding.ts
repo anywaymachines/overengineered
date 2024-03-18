@@ -11,8 +11,8 @@ export const ClientBuilding = {
 		let placed: readonly BlockModel[];
 		const result = await ActionController.instance.execute(
 			"Place blocks",
-			async () => {
-				await Remotes.Client.GetNamespace("Building")
+			() => {
+				return Remotes.Client.GetNamespace("Building")
 					.Get("DeleteBlocks")
 					.CallServerAsync({ plot: plot.instance, blocks: placed });
 			},
@@ -95,13 +95,28 @@ export const ClientBuilding = {
 		const result = await ActionController.instance.execute(
 			uuids === "all" ? "Clear plot" : "Remove blocks",
 			async () => {
-				await Remotes.Client.GetNamespace("Building").Get("PlaceBlocks").CallServerAsync(undo);
+				const response = await Remotes.Client.GetNamespace("Building").Get("PlaceBlocks").CallServerAsync(undo);
+				if (!response.success) {
+					return response;
+				}
 
 				for (const connection of connectedByLogic) {
-					await Remotes.Client.GetNamespace("Building")
+					const response = await Remotes.Client.GetNamespace("Building")
 						.Get("LogicConnect")
 						.CallServerAsync(getConnectRequest(connection));
+
+					if (!response.success) {
+						return response;
+					}
 				}
+
+				for (const model of response.models) {
+					while (!model.PrimaryPart) {
+						task.wait();
+					}
+				}
+
+				return { success: true };
 			},
 			() => {
 				return Remotes.Client.GetNamespace("Building")
@@ -120,8 +135,8 @@ export const ClientBuilding = {
 
 		const result = await ActionController.instance.execute(
 			"Move blocks",
-			async () => {
-				await Remotes.Client.GetNamespace("Building")
+			() => {
+				return Remotes.Client.GetNamespace("Building")
 					.Get("MoveBlocks")
 					.CallServerAsync({ plot: plot.instance, diff: diff.mul(-1), blocks: getBlocks() });
 			},

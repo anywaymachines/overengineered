@@ -10,7 +10,6 @@ import GuiAnimator from "client/gui/GuiAnimator";
 import { ButtonControl, TextButtonControl, type TextButtonDefinition } from "client/gui/controls/Button";
 import LogControl from "client/gui/static/LogControl";
 import { InputTooltips, TooltipsHolder } from "client/gui/static/TooltipsControl";
-import ActionController from "client/modes/build/ActionController";
 import BuildingMode from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
@@ -19,7 +18,6 @@ import { SelectedBlocksHighlighter } from "client/tools/selectors/SelectedBlocks
 import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 import { SharedPlot } from "shared/building/SharedPlot";
-import SharedPlots from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { type TransformProps } from "shared/component/Transform";
 import { TransformService } from "shared/component/TransformService";
@@ -351,31 +349,6 @@ namespace Controllers {
 			});
 
 			this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
-		}
-
-		private static moveBlocks(plot: PlotModel, uuids: readonly BlockUuid[], diff: Vector3) {
-			const getBlocks = () => {
-				const blocks = uuids.map((uuid) => SharedPlots.tryGetBlockByUuid(plot, uuid)) as readonly BlockModel[];
-				if (blocks.size() !== uuids.size()) {
-					throw "Some blocks were not found";
-				}
-
-				return blocks;
-			};
-
-			return ActionController.instance.execute(
-				"Moving blocks",
-				async () => {
-					await Remotes.Client.GetNamespace("Building")
-						.Get("MoveBlocks")
-						.CallServerAsync({ plot, diff: diff.mul(-1), blocks: getBlocks() });
-				},
-				() => {
-					return Remotes.Client.GetNamespace("Building")
-						.Get("MoveBlocks")
-						.CallServerAsync({ plot, diff, blocks: getBlocks() });
-				},
-			);
 		}
 
 		protected abstract initializeHandles(): Instance;
