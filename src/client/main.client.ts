@@ -53,14 +53,3 @@ root.enable();
 
 const updated = DateTime.fromUnixTimestamp($compileTime("UnixTimestamp")).FormatUniversalTime("DDMMYY_HHmm", "en-us");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `DEVTEST | v${game.PlaceVersion} | ${updated}`;
-
-/** Preload all sound assets */
-
-const sounds = ReplicatedStorage.Assets.GetDescendants().filter((value) => value.IsA("Sound")) as Sound[];
-const list: string[] = [];
-
-sounds.forEach((sound) => {
-	list.push(sound.SoundId);
-});
-
-game.GetService("ContentProvider").PreloadAsync(list);

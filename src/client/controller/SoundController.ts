@@ -25,7 +25,7 @@ declare type Sounds = {
 export default class SoundController {
 	private static underwater = false;
 
-	public static initialize() {
+	static initialize() {
 		MusicController.initialize();
 
 		Signals.CAMERA.MOVED.Connect(() => {
@@ -45,6 +45,16 @@ export default class SoundController {
 			}
 			this.updateSound(descendant);
 		});
+
+		/** Preload all sound assets */
+		const sounds = ReplicatedStorage.Assets.GetDescendants().filter((value) => value.IsA("Sound")) as Sound[];
+		const list: string[] = [];
+
+		sounds.forEach((sound) => {
+			list.push(sound.SoundId);
+		});
+
+		game.GetService("ContentProvider").PreloadAsync(list);
 	}
 
 	private static updateSound(sound: Sound) {
@@ -65,15 +75,15 @@ export default class SoundController {
 		});
 	}
 
-	public static getSounds(): Sounds {
+	static getSounds(): Sounds {
 		return (StarterGui as unknown as { GameUI: { Sounds: Sounds } }).GameUI.Sounds;
 	}
 
-	public static randomSoundSpeed(): number {
+	static randomSoundSpeed(): number {
 		return math.random(8, 12) / 10;
 	}
 
-	public static getWorldVolume(volume: number) {
+	static getWorldVolume(volume: number) {
 		return Sound.getWorldVolume(GameEnvironmentController.currentHeight) * volume;
 	}
 }
