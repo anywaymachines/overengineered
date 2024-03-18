@@ -13,21 +13,23 @@ type NonNullableFields<T> = {
 };
 
 export default class PlayerDataStorage {
-	public static readonly loadedSlot = new ObservableValue<number | undefined>(undefined);
+	static readonly loadedSlot = new ObservableValue<number | undefined>(undefined);
 
-	public static readonly data = new ObservableValue<NonNullableFields<PlayerDataResponse> | undefined>(undefined);
-	public static readonly config = this.data.createChild(
+	static readonly data = new ObservableValue<NonNullableFields<PlayerDataResponse> | undefined>(undefined);
+	static readonly config = this.data.createChild(
 		"settings",
 		Config.addDefaults({}, PlayerConfigDefinition),
 	) as ObservableValue<Required<PlayerConfig>>;
-	public static readonly slots = this.data.createChild("slots", []);
+	static readonly slots = this.data.createChild("slots", []);
 
 	static async init() {
 		await this.refetchData();
 
 		this.config.createNullableChild("betterCamera", undefined).subscribe((betterCamera) => {
-			Logger.info("better_camera set to " + betterCamera);
-			Workspace.SetAttribute("better_camera", betterCamera === true);
+			Logger.info("better_camera set to " + HttpService.JSONEncode(betterCamera));
+			Workspace.SetAttribute("camera_improved", betterCamera?.improved);
+			Workspace.SetAttribute("camera_playerCentered", betterCamera?.playerCentered);
+			Workspace.SetAttribute("camera_strictFollow", betterCamera?.strictFollow);
 		}, true);
 	}
 

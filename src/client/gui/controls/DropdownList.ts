@@ -15,6 +15,7 @@ export default class DropdownList<TValue extends string = string> extends Contro
 	private readonly itemTemplate;
 	private readonly button;
 	private readonly contents;
+	private readonly names = new Map<TValue, string>();
 
 	constructor(gui: DropdownListDefinition, direction: "up" | "down" | "left" | "right") {
 		super(gui);
@@ -25,20 +26,28 @@ export default class DropdownList<TValue extends string = string> extends Contro
 		this.contents = this.add(new Control(this.gui.Content));
 
 		this.event.subscribe(this.button.activated, () => this.toggle());
-		this.event.subscribeObservable2(this.selectedItem, (v) => this.button.text.set(v ?? ""), true);
+		this.event.subscribeObservable2(
+			this.selectedItem,
+			(v) => this.button.text.set(v === undefined ? "" : this.names.get(v) ?? v),
+			true,
+		);
 	}
 
 	private toggle() {
 		this.contents.isVisible() ? this.contents.hide() : this.contents.show();
 	}
 
-	addItem(name: TValue) {
+	addItem(name: TValue, text?: string) {
 		const btn = new TextButtonControl(this.itemTemplate(), () => {
 			this.selectedItem.set(name);
 			this.toggle();
 		});
 
-		btn.text.set(name);
+		if (text !== undefined) {
+			this.names.set(name, text);
+		}
+
+		btn.text.set(text ?? name);
 		btn.getGui().Parent = this.gui.Content;
 
 		this.add(btn);

@@ -7,6 +7,11 @@ declare global {
 		readonly plot: boolean;
 		readonly players: boolean;
 	};
+	type CameraConfiguration = {
+		readonly improved: boolean;
+		readonly strictFollow: boolean;
+		readonly playerCentered: boolean;
+	};
 
 	namespace PlayerConfigTypes {
 		export type Bool = ConfigType<"bool", boolean>;
@@ -18,6 +23,7 @@ declare global {
 		};
 		export type DayCycle = ConfigType<"dayCycle", DayCycleConfiguration>;
 		export type Beacons = ConfigType<"beacons", BeaconsConfiguration>;
+		export type Camera = ConfigType<"camera", CameraConfiguration>;
 
 		export interface Types {
 			readonly bool: Bool;
@@ -25,6 +31,7 @@ declare global {
 			readonly clampedNumber: ClampedNumber;
 			readonly dayCycle: DayCycle;
 			readonly beacons: Beacons;
+			readonly camera: Camera;
 		}
 
 		export type Definitions = ConfigTypesToDefinition<keyof Types, Types>;
@@ -38,8 +45,12 @@ declare global {
 export const PlayerConfigDefinition = {
 	betterCamera: {
 		displayName: "Better camera",
-		type: "bool",
-		config: true as boolean,
+		type: "camera",
+		config: {
+			improved: false as boolean,
+			strictFollow: false as boolean,
+			playerCentered: false as boolean,
+		},
 	},
 	music: {
 		displayName: "Music",

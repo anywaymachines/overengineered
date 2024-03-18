@@ -50,7 +50,24 @@ const v3: UpdatablePlayerConfigVersion<PlayerConfigV3, PlayerConfigV2> = {
 	},
 };
 
-const versions = [v1, v2, v3] as const;
+type PlayerConfigV4 = Replace<PlayerConfigV3, "betterCamera", CameraConfiguration>;
+const v4: UpdatablePlayerConfigVersion<PlayerConfigV4, PlayerConfigV3> = {
+	version: 4,
+
+	update(prev: Partial<PlayerConfigV3>): Partial<PlayerConfigV4> {
+		return {
+			...prev,
+			version: this.version,
+			betterCamera: {
+				improved: prev.betterCamera ?? true,
+				strictFollow: true,
+				playerCentered: false,
+			},
+		};
+	},
+};
+
+const versions = [v1, v2, v3, v4] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 export const PlayerConfigUpdater = {

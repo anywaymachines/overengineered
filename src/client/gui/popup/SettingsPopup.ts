@@ -3,6 +3,7 @@ import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import Popup from "client/gui/Popup";
 import { ButtonControl } from "client/gui/controls/Button";
+import { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import SliderControl, { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import ToggleControl, { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
@@ -15,6 +16,8 @@ export type Templates = {
 	number: () => ConfigPartDefinition<NumberTextBoxControlDefinition>;
 	slider: () => ConfigPartDefinition<SliderControlDefinition>;
 	multi: () => ConfigPartDefinition<MultiTemplate>;
+	dropdown: () => ConfigPartDefinition<DropdownListDefinition>;
+	//camera: () => ConfigPartDefinition<CameraTemplate>;
 };
 
 type Template = {
@@ -22,6 +25,8 @@ type Template = {
 	readonly NumberTemplate: ConfigPartDefinition<NumberTextBoxControlDefinition>;
 	readonly SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 	readonly MultiTemplate: ConfigPartDefinition<MultiTemplate>;
+	readonly DropdownTemplate: ConfigPartDefinition<DropdownListDefinition>;
+	//readonly CameraTemplate: ConfigPartDefinition<MultiTemplate>;
 };
 
 type ConfigControlDefinition = GuiObject;
@@ -34,6 +39,10 @@ class ConfigControl<TDef extends PlayerConfigTypes.Definitions> extends Control<
 	private readonly numberTemplate;
 	private readonly sliderTemplate;
 	private readonly dayCycleTemplate;
+	private readonly dropdownTemplate;
+	//private readonly cameraTemplate;
+
+	private settedElements = new Map<keyof TDef, Control>();
 
 	constructor(gui: ConfigControlDefinition);
 	constructor(gui: ConfigControlDefinition, config: ConfigDefinitionsToConfig<keyof TDef, TDef>, definition: TDef);
@@ -45,14 +54,20 @@ class ConfigControl<TDef extends PlayerConfigTypes.Definitions> extends Control<
 		this.numberTemplate = this.asTemplate(templates.NumberTemplate, false);
 		this.sliderTemplate = this.asTemplate(templates.SliderTemplate, false);
 		this.dayCycleTemplate = this.asTemplate(templates.MultiTemplate, false);
+		this.dropdownTemplate = this.asTemplate(templates.DropdownTemplate, false);
+		//this.cameraTemplate = this.asTemplate(templates.CameraTemplate, false);
 
 		if (config && definition) {
 			this.set(config, definition);
 		}
 	}
 
+	get(key: keyof TDef): Control {
+		return this.settedElements.get(key)!;
+	}
 	set(config: ConfigDefinitionsToConfig<keyof TDef, TDef>, definition: TDef) {
 		this.clear();
+		this.settedElements.clear();
 
 		for (const [id, def] of Objects.entries(definition).sort(
 			(left, right) => tostring(left[0]) < tostring(right[0]),
@@ -63,11 +78,14 @@ class ConfigControl<TDef extends PlayerConfigTypes.Definitions> extends Control<
 					number: this.numberTemplate,
 					slider: this.sliderTemplate,
 					multi: this.dayCycleTemplate,
+					dropdown: this.dropdownTemplate,
+					//camera: this.cameraTemplate,
 				},
 				config[id] as never,
 				def as never,
 			);
 			this.add(control);
+			this.settedElements.set(id, control);
 
 			control.submitted.Connect((value) => this.configUpdated.Fire(id as string, value));
 		}
@@ -101,11 +119,11 @@ export class BoolConfigValueControl extends ConfigValueControl<ToggleControlDefi
 	readonly submitted = new Signal<(config: PlayerConfigTypes.Bool["config"]) => void>();
 
 	constructor(
-		templates: Templates,
+		templates: Templates | ConfigPartDefinition<ToggleControlDefinition>,
 		config: PlayerConfigTypes.Bool["config"],
 		definition: ConfigTypeToDefinition<PlayerConfigTypes.Bool>,
 	) {
-		super(templates.toggle(), definition.displayName);
+		super(typeIs(templates, "Instance") ? templates : templates.toggle(), definition.displayName);
 
 		const control = this.add(new ToggleControl(this.gui.Control));
 		control.value.set(config);
@@ -214,6 +232,93 @@ export class BeaconsValueControl extends ConfigValueControl<MultiTemplate> {
 	}
 }
 
+type CameraTemplate = GuiObject & {
+	readonly Improved: ConfigPartDefinition<ToggleControlDefinition>;
+	readonly StrictFollow: ConfigPartDefinition<ToggleControlDefinition>;
+	readonly PlayerCentered: ConfigPartDefinition<ToggleControlDefinition>;
+};
+export class CameraValueControl extends ConfigValueControl<MultiTemplate> {
+	readonly submitted = new Signal<(config: PlayerConfigTypes.Camera["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: PlayerConfigTypes.Camera["config"],
+		definition: ConfigTypeToDefinition<PlayerConfigTypes.Camera>,
+	) {
+		super(templates.multi(), definition.displayName);
+
+		const def = {
+			improved: {
+				displayName: "Improved",
+				type: "bool",
+				config: definition.config.improved,
+			},
+			strictFollow: {
+				displayName: "Strict Follow",
+				type: "bool",
+				config: definition.config.strictFollow,
+			},
+			playerCentered: {
+				displayName: "Player Centered",
+				type: "bool",
+				config: definition.config.playerCentered,
+			},
+		} as const satisfies PlayerConfigTypes.Definitions;
+		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
+
+		const control = this.add(new ConfigControl(this.gui.Control, config, def));
+		this.event.subscribe(control.configUpdated, (key, value) => {
+			this.submitted.Fire((config = { ...config, [key]: value }));
+		});
+
+		const improved = control.get("improved") as BoolConfigValueControl;
+		const strictFollow = control.get("strictFollow") as BoolConfigValueControl;
+		const playerCentered = control.get("playerCentered") as BoolConfigValueControl;
+
+		const setImprovedControlsEnabled = (enabled: boolean) => {
+			strictFollow.setVisible(enabled);
+			playerCentered.setVisible(enabled);
+		};
+		this.event.subscribe(improved.submitted, setImprovedControlsEnabled);
+		setImprovedControlsEnabled(config.improved);
+
+		/*const improved = this.add(
+			new BoolConfigValueControl(this.gui.Control.Improved, config.improved, {
+				displayName: "Improved",
+				type: "bool",
+				config: definition.config.improved,
+			}),
+		);
+		const strictFollow = this.add(
+			new BoolConfigValueControl(this.gui.Control.StrictFollow, config.strictFollow, {
+				displayName: "Strict Follow",
+				type: "bool",
+				config: definition.config.strictFollow,
+			}),
+		);
+		const playerCentered = this.add(
+			new BoolConfigValueControl(this.gui.Control.PlayerCentered, config.playerCentered, {
+				displayName: "Player Centered",
+				type: "bool",
+				config: definition.config.playerCentered,
+			}),
+		);
+
+		this.event.subscribe(improved.submitted, (value) => {
+			strictFollow.setEnabled(value);
+			playerCentered.setEnabled(value);
+
+			this.submitted.Fire((config = { ...config, improved: value }));
+		});
+		this.event.subscribe(strictFollow.submitted, (value) => {
+			this.submitted.Fire((config = { ...config, strictFollow: value }));
+		});
+		this.event.subscribe(playerCentered.submitted, (value) => {
+			this.submitted.Fire((config = { ...config, playerCentered: value }));
+		});*/
+	}
+}
+
 //
 
 export const configControls = {
@@ -222,6 +327,7 @@ export const configControls = {
 	clampedNumber: ClampedNumberConfigValueControl,
 	dayCycle: DayCycleValueControl,
 	beacons: BeaconsValueControl,
+	camera: CameraValueControl,
 } as const satisfies {
 	readonly [k in keyof PlayerConfigTypes.Types]: {
 		new (
