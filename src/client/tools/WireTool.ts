@@ -126,9 +126,12 @@ namespace Markers {
 			];
 		}
 
-		static createInstance(origin: BasePart, offset: Vector3 | number): MarkerComponentDefinition {
+		static createInstance(origin: BasePart, offset: Vector3 | number | "center"): MarkerComponentDefinition {
 			if (typeIs(offset, "number")) {
 				offset = this.getPartMarkerPositions(origin)[offset];
+			}
+			if (offset === "center") {
+				offset = Vector3.zero;
 			}
 
 			const markerInstance = ReplicatedStorage.Assets.Wires.WireMarker.Clone();
@@ -757,7 +760,8 @@ export class WireTool extends ToolBase {
 
 			let index = 0;
 			for (const markerType of ["output", "input"] as const) {
-				for (const [key, config] of Objects.pairs(configDef[markerType])) {
+				const entries = Objects.entries(configDef[markerType]);
+				for (const [key, config] of entries) {
 					if (config.connectorHidden) continue;
 
 					let narrow = false;
@@ -783,7 +787,10 @@ export class WireTool extends ToolBase {
 						name: config.displayName,
 					};
 
-					const markerInstance = Markers.Marker.createInstance(block.instance.PrimaryPart!, index++);
+					const markerInstance = Markers.Marker.createInstance(
+						block.instance.PrimaryPart!,
+						entries.size() === 1 ? "center" : index++,
+					);
 					const marker =
 						markerType === "input"
 							? new Markers.Input(markerInstance, data, plot)
