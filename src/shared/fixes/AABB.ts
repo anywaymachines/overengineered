@@ -18,18 +18,23 @@ export class AABB {
 	static fromModel(block: Model, cframe?: CFrame): AABB {
 		// eslint-disable-next-line prefer-const
 		let [cf, size] = block.GetBoundingBox();
-		cf = cframe ?? cf;
+		if (cframe) {
+			cf = cframe;
+		} else {
+			cf = block.GetPivot();
+		}
 
-		const sx = size.X;
-		const sy = size.Y;
-		const sz = size.Z;
+		const sx = size.X - (size.X % 0.1);
+		const sy = size.Y - (size.Y % 0.1);
+		const sz = size.Z - (size.Z % 0.1);
 
-		const [x, y, z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = cf.GetComponents();
+		const [, , , R00, R01, R02, R10, R11, R12, R20, R21, R22] = cf.GetComponents();
 
-		const wsx = 0.5 * (math.abs(R00) * sx + math.abs(R01) * sy + math.abs(R02) * sz);
-		const wsy = 0.5 * (math.abs(R10) * sx + math.abs(R11) * sy + math.abs(R12) * sz);
-		const wsz = 0.5 * (math.abs(R20) * sx + math.abs(R21) * sy + math.abs(R22) * sz);
-		return this.fromMinMax(new Vector3(x - wsx, y - wsy, z - wsz), new Vector3(x + wsx, y + wsy, z + wsz));
+		const wsx = math.abs(R00) * sx + math.abs(R01) * sy + math.abs(R02) * sz;
+		const wsy = math.abs(R10) * sx + math.abs(R11) * sy + math.abs(R12) * sz;
+		const wsz = math.abs(R20) * sx + math.abs(R21) * sy + math.abs(R22) * sz;
+		print(new Vector3(wsx, wsy, wsz));
+		return this.fromCenterSize(cf.Position, new Vector3(wsx, wsy, wsz));
 	}
 	/** Create an {@link AABB} that contains all of the provided models */
 	static fromModels(models: readonly Model[]): AABB {

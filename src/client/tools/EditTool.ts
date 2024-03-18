@@ -15,6 +15,7 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
 import { HoveredBlocksHighlighter } from "client/tools/selectors/HoveredBlocksHighlighter";
 import { SelectedBlocksHighlighter } from "client/tools/selectors/SelectedBlocksHighlighter";
+import { Element } from "shared/Element";
 import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 import { SharedPlot } from "shared/building/SharedPlot";
@@ -432,6 +433,15 @@ namespace Controllers {
 			};
 
 			const aabb = AABB.fromModels(this.blocks);
+			Element.create("Part", {
+				Anchored: true,
+				Parent: Workspace,
+				Position: aabb.getCenter(),
+				Size: aabb.getSize(),
+				CanTouch: false,
+				CanCollide: false,
+				Transparency: 0.5,
+			});
 
 			const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
 			moveHandles.Size = aabb.getSize().add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
