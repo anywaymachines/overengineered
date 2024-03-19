@@ -3,6 +3,11 @@ import { AABB } from "shared/fixes/AABB";
 import BlockManager, { PlacedBlockData } from "./BlockManager";
 import { SharedPlot } from "./SharedPlot";
 
+const count = Workspace.WaitForChild("Plots").GetAttribute("count") as number;
+while (Workspace.Plots.GetChildren().size() !== count) {
+	task.wait();
+}
+
 const plots = (Workspace.Plots.GetChildren() as unknown as PlotModel[])
 	.map((p) => new SharedPlot(p).with((c) => c.enable()))
 	.sort((left, right) => left.instance.Name < right.instance.Name);
