@@ -12,7 +12,7 @@ export default class ImpactController {
 	static readonly STRONG_BLOCKS_ALLOWED_DIFF = 1500 as const;
 	static readonly OBJECTS_ALLOWED_DIFF = 70 as const;
 
-	static readonly WATER_DIFF_MULTIPLIER = 1.5 as const;
+	static readonly WATER_DIFF_MULTIPLIER = 4.5 as const;
 	static readonly PLAYER_CHARACTER_DIFF_MULTIPLIER = 4 as const;
 
 	static readonly MATERIAL_STRONGNESS: { [key: string]: number } = {};

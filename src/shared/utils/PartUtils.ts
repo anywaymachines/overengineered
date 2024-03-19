@@ -1,3 +1,5 @@
+import { RunService } from "@rbxts/services";
+
 export default class PartUtils {
 	static ghostModel(model: Model, color: Color3) {
 		function fix(part: BasePart | UnionOperation) {
@@ -63,8 +65,9 @@ export default class PartUtils {
 			constraint.Destroy();
 		});
 
-		if (game.PrivateServerOwnerId === 0) {
+		if (!RunService.IsClient() && game.PrivateServerOwnerId === 0 && !part.HasTag("Disappearing")) {
 			game.GetService("Debris").AddItem(part, math.random(20, 60));
+			part.AddTag("Disappearing");
 		}
 	}
 }
