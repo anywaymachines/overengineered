@@ -62,5 +62,7 @@ export default class PartUtils {
 		joints.forEach((constraint) => {
 			constraint.Destroy();
 		});
+
+		game.GetService("Debris").AddItem(part, math.random(20, 60));
 	}
 }
