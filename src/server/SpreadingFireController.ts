@@ -54,6 +54,8 @@ export default class SpreadingFireController {
 			explosion.Hit.Connect((part, _) => {
 				this.burn(part);
 			});
+
+			game.GetService("Debris").AddItem(part, math.random(20, 60));
 		});
 	}
 }
