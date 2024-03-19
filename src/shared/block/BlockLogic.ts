@@ -40,6 +40,6 @@ export default class BlockLogic<T extends BlockModel = BlockModel> extends Insta
 		};
 
 		PartUtils.applyToAllDescendantsOfType("BasePart", this.instance, (part) => subscribe(part));
-		PartUtils.applyToAllDescendantsOfType("WeldConstraint", this.instance, (part) => subscribe(part));
+		PartUtils.applyToAllDescendantsOfType("Constraint", this.instance, (part) => subscribe(part));
 	}
 }
