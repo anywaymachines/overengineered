@@ -9,7 +9,7 @@ import { Db } from "./Database";
 import PlayerDatabase from "./PlayerDatabase";
 
 export default class SlotDatabase {
-	public static readonly instance = new SlotDatabase();
+	static readonly instance = new SlotDatabase();
 
 	private readonly datastore: DataStore = DataStoreService.GetDataStore("slots");
 	private readonly blocksdb;
@@ -67,11 +67,11 @@ export default class SlotDatabase {
 	private toKey(userId: number, index: number) {
 		return `${userId}_${index}`;
 	}
-	public getBlocks(userId: number, index: number) {
+	getBlocks(userId: number, index: number) {
 		this.ensureValidSlotIndex(userId, index);
 		return this.blocksdb.get(this.toKey(userId, index)) as string | undefined;
 	}
-	public setBlocks(userId: number, index: number, blocks: string, blockCount: number) {
+	setBlocks(userId: number, index: number, blocks: string, blockCount: number) {
 		this.ensureValidSlotIndex(userId, index);
 		this.blocksdb.set(this.toKey(userId, index), blocks);
 
@@ -80,7 +80,7 @@ export default class SlotDatabase {
 		this.setMeta(userId, meta);
 	}
 
-	public update(
+	update(
 		userId: number,
 		index: number,
 		update: (meta: readonly SlotMeta[]) => readonly SlotMeta[],
@@ -134,7 +134,7 @@ export default class SlotDatabase {
 
 				this.blocksdb.set(id, serialized);
 			} catch (err) {
-				print(err);
+				Logger.error(err as string);
 			}
 		}
 

@@ -2,7 +2,7 @@ import { Players } from "@rbxts/services";
 import PartUtils from "shared/utils/PartUtils";
 
 export default class CharacterController {
-	public static initialize() {
+	static initialize() {
 		Players.PlayerAdded.Connect((plr) => this.preparePlayer(plr));
 
 		Players.GetPlayers().forEach((plr) => {
@@ -10,7 +10,7 @@ export default class CharacterController {
 		});
 	}
 
-	public static preparePlayer(plr: Player) {
+	static preparePlayer(plr: Player) {
 		if (plr === Players.LocalPlayer) return;
 
 		plr.CharacterAdded.Connect(() => {
@@ -22,8 +22,7 @@ export default class CharacterController {
 		if (plr.Character) this.updateCharacter(plr);
 	}
 
-	public static updateCharacter(plr: Player) {
-		print("updateCharacter");
+	static updateCharacter(plr: Player) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", plr.Character!, (instance) => {
 			instance.Massless = true;
 			instance.EnableFluidForces = false;

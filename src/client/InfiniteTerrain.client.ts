@@ -170,7 +170,6 @@ const terrainsrc = ReplicatedFirst.WaitForChild("Terrain").WaitForChild("Terrain
 terrainsrc.Enabled = false;
 
 const createChunkLoader = () => {
-	print("Initializing chunk LOAD er");
 	let radiusLoaded = 0;
 
 	const loadChunksNextSingleRadius = (centerX: number, centerZ: number) => {
