@@ -23,7 +23,7 @@ export default class PlayModeController {
 		return this.playerModes[player.UserId];
 	}
 
-	static changeModeForPlayer(this: void, player: Player, mode: PlayModes | undefined): Response {
+	static async changeModeForPlayer(this: void, player: Player, mode: PlayModes | undefined): Promise<Response> {
 		if (mode !== undefined && !PlayerUtils.isAlive(player)) {
 			return { success: false, message: "Player is not alive" };
 		}
@@ -48,7 +48,8 @@ export default class PlayModeController {
 
 		Logger.info(`${player.Name}'s mode: '${PlayModeController.playerModes[player.UserId]}' => '${mode}'`);
 		PlayModeController.playerModes[player.UserId] = mode;
-		Remotes.Server.GetNamespace("Ride").Get("SetPlayModeOnClient").CallPlayerAsync(player, mode);
+
+		await Remotes.Server.GetNamespace("Ride").Get("SetPlayModeOnClient").CallPlayerAsync(player, mode);
 		return { success: true };
 	}
 }

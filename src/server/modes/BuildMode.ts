@@ -7,15 +7,15 @@ export default class BuildMode implements PlayModeBase {
 	constructor(controller: PlayModeControllerType) {
 		Players.PlayerAdded.Connect((plr) => {
 			// on spawn
-			plr.CharacterAdded.Connect((character) => {
-				const response = controller.changeModeForPlayer(plr, "build");
+			plr.CharacterAdded.Connect(async (character) => {
+				const response = await controller.changeModeForPlayer(plr, "build");
 				if (!response.success) Logger.error(response.message);
 
 				// on death
-				(character.WaitForChild("Humanoid") as Humanoid).Died.Once(() => {
+				(character.WaitForChild("Humanoid") as Humanoid).Died.Once(async () => {
 					if (controller.getPlayerMode(plr) !== "build") return;
 
-					const response = controller.changeModeForPlayer(plr, undefined);
+					const response = await controller.changeModeForPlayer(plr, undefined);
 					if (!response.success) Logger.error(response.message);
 				});
 			});
