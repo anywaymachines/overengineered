@@ -63,6 +63,8 @@ export default class PartUtils {
 			constraint.Destroy();
 		});
 
-		game.GetService("Debris").AddItem(part, math.random(20, 60));
+		if (game.PrivateServerOwnerId === 0) {
+			game.GetService("Debris").AddItem(part, math.random(20, 60));
+		}
 	}
 }
