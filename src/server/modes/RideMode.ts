@@ -86,6 +86,9 @@ export default class RideMode implements PlayModeBase {
 			const time = os.clock();
 			for (const child of cache.GetChildren()) {
 				child.Parent = blocks;
+				if (math.random(3) === 1) {
+					task.wait();
+				}
 			}
 
 			print(`Loaded the cached save in ${os.clock() - time}`);

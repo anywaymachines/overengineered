@@ -61,6 +61,9 @@ export const ServerBuilding = {
 		model.Name = uuid;
 
 		SharedBuilding.paint([model], data.color, data.material, true);
+		if (math.random(3) === 1) {
+			task.wait();
+		}
 		model.Parent = plot.Blocks;
 		BuildingWelder.weldOnPlot(plot, model);
 
@@ -73,7 +76,14 @@ export const ServerBuilding = {
 		}
 
 		if (blocks === "all") {
-			plot.Blocks.ClearAllChildren();
+			blocks = SharedPlots.getPlotComponent(plot).getBlocks();
+			for (const block of blocks) {
+				block.Destroy();
+				if (math.random(6) === 1) {
+					task.wait();
+				}
+			}
+
 			BuildingWelder.deleteWelds(plot);
 		} else {
 			for (const block of blocks) {
@@ -93,6 +103,9 @@ export const ServerBuilding = {
 				BuildingWelder.deleteWeld(plot, block);
 
 				block.Destroy();
+				if (math.random(3) === 1) {
+					task.wait();
+				}
 			}
 		}
 
