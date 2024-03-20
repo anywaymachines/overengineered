@@ -1,4 +1,4 @@
-import { Players } from "@rbxts/services";
+import { MarketplaceService, Players } from "@rbxts/services";
 import Control from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import GameDefinitions from "shared/data/GameDefinitions";
@@ -16,9 +16,29 @@ export default class MaterialChooser extends Control<MaterialChooserDefinition> 
 
 		for (const instance of this.gui.GetChildren(undefined)) {
 			if (!instance.IsA("ImageButton")) continue;
-			if (instance.Name === "Neon" && !GameDefinitions.isAdmin(Players.LocalPlayer)) {
-				instance.Destroy();
-				continue;
+
+			if (instance.Name === "Neon") {
+				if (
+					MarketplaceService.UserOwnsGamePassAsync(
+						Players.LocalPlayer.UserId,
+						GameDefinitions.GAMEPASSES.NeonMaterial,
+					)
+				) {
+					const lockFrame = instance.FindFirstChild("Lock") as Frame;
+					lockFrame.Visible = false;
+				} else {
+					const btn = this.add(new ButtonControl(instance));
+
+					this.event.subscribe(btn.activated, () => {
+						// TODO: Update buttons on purchase complete
+						MarketplaceService.PromptGamePassPurchase(
+							Players.LocalPlayer,
+							GameDefinitions.GAMEPASSES.NeonMaterial,
+						);
+					});
+
+					continue;
+				}
 			}
 
 			const material = Enum.Material.GetEnumItems().find((m) => m.Name === instance.Name);

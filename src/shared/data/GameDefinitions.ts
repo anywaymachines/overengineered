@@ -17,6 +17,10 @@ const GameDefinitions = {
 		},
 	} as { readonly [rank: number]: { name: string; color?: Color3; rainbow?: boolean } },
 
+	GAMEPASSES: {
+		NeonMaterial: 748518813,
+	},
+
 	// Building
 	FREE_SLOTS: 15,
 	ADMIN_SLOTS: 50,
