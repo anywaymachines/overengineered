@@ -4,6 +4,52 @@ import { ButtonControl } from "client/gui/controls/Button";
 import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
 
+class MaterialButton extends ButtonControl {
+	constructor(gui: GuiButton, set: (material: Enum.Material) => void, gamePass?: number) {
+		super(gui);
+
+		const material = Enum.Material.GetEnumItems().find((m) => m.Name === gui.Name);
+		if (!material) throw `Unknown material ${gui.Name}`;
+
+		let bought = gamePass === undefined;
+		this.event.subscribe(this.activated, () => {
+			if (!bought) return;
+			set(material);
+		});
+
+		if (gamePass !== undefined) {
+			const lockFrame = gui.FindFirstChild("Lock") as Frame;
+			const priceLabel = lockFrame.FindFirstChild("TextLabel") as TextLabel;
+
+			const onBuy = () => {
+				bought = true;
+				lockFrame.Visible = false;
+				set(material);
+			};
+
+			if (MarketplaceService.UserOwnsGamePassAsync(Players.LocalPlayer.UserId, gamePass)) {
+				onBuy();
+			} else {
+				const price = MarketplaceService.GetProductInfo(gamePass, Enum.InfoType.GamePass).PriceInRobux ?? "N/A";
+				priceLabel.Text = `${price} R$`;
+				lockFrame.Visible = true;
+
+				MarketplaceService.PromptGamePassPurchaseFinished.Connect((player, gamePassId, wasPurchased) => {
+					if (!wasPurchased) return;
+					if (gamePassId !== gamePass) return;
+
+					onBuy();
+				});
+
+				this.event.subscribe(this.activated, () => {
+					if (bought) return;
+					MarketplaceService.PromptGamePassPurchase(Players.LocalPlayer, gamePass);
+				});
+			}
+		}
+	}
+}
+
 export type MaterialChooserDefinition = GuiObject & {
 	GetChildren(undefined: undefined): readonly ImageButton[];
 };
@@ -17,41 +63,12 @@ export default class MaterialChooser extends Control<MaterialChooserDefinition> 
 		for (const instance of this.gui.GetChildren(undefined)) {
 			if (!instance.IsA("ImageButton")) continue;
 
-			if (instance.Name === "Neon") {
-				if (
-					MarketplaceService.UserOwnsGamePassAsync(
-						Players.LocalPlayer.UserId,
-						GameDefinitions.GAMEPASSES.NeonMaterial,
-					)
-				) {
-					const lockFrame = instance.FindFirstChild("Lock") as Frame;
-					lockFrame.Visible = false;
+			const gamepassid =
+				instance.Name === "Neon"
+					? GameDefinitions.GAMEPASSES.NeonMaterial //
+					: undefined;
 
-					const price = MarketplaceService.GetProductInfo(
-						GameDefinitions.GAMEPASSES.NeonMaterial,
-					).PriceInRobux;
-					const priceLabel = instance.FindFirstChild("Lock")?.FindFirstChild("TextLabel") as TextLabel;
-					priceLabel.Text = `${price} R$`;
-				} else {
-					const btn = this.add(new ButtonControl(instance));
-
-					this.event.subscribe(btn.activated, () => {
-						// TODO: Update buttons on purchase complete
-						MarketplaceService.PromptGamePassPurchase(
-							Players.LocalPlayer,
-							GameDefinitions.GAMEPASSES.NeonMaterial,
-						);
-					});
-
-					continue;
-				}
-			}
-
-			const material = Enum.Material.GetEnumItems().find((m) => m.Name === instance.Name);
-			if (!material) throw `Unknown material ${instance.Name}`;
-
-			const btn = this.add(new ButtonControl(instance));
-			this.event.subscribe(btn.activated, () => this.value.set(material));
+			this.add(new MaterialButton(instance, (material) => this.value.set(material), gamepassid));
 		}
 	}
 }
