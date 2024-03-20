@@ -53,7 +53,7 @@ export default class MirrorVisualizer extends ClientComponent {
 
 		for (const cframe of axes) {
 			const mirror = this.template();
-			mirror.PivotTo(plot.GetPivot().ToWorldSpace(cframe));
+			mirror.PivotTo(plot.BuildingArea.GetPivot().ToWorldSpace(cframe));
 			mirror.Parent = mirrors;
 		}
 	}

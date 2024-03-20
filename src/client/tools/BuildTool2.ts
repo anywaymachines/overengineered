@@ -135,7 +135,7 @@ namespace SinglePlaceController {
 			this.mirroredGhosts.clear();
 		}
 
-		private updateMirrorGhostBlocksPosition(plot: Model, mainPosition: Vector3) {
+		private updateMirrorGhostBlocksPosition(plot: PlotModel, mainPosition: Vector3) {
 			const selected = this.selectedBlock.get();
 			if (!selected) return;
 

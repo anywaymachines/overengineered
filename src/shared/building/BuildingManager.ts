@@ -81,7 +81,7 @@ const BuildingManager = {
 	},
 
 	getMirroredBlocksCFrames(
-		plot: Model,
+		plot: PlotModel,
 		blockid: string,
 		cframeToMirror: CFrame,
 		mode: MirrorMode,
@@ -162,7 +162,7 @@ const BuildingManager = {
 			);
 		};
 
-		const plotframe = plot.GetPivot();
+		const plotframe = plot.BuildingArea.GetPivot();
 
 		const axes: ["x" | "y" | "z", CFrame][] = [];
 		if (mode.y) axes.push(["y", CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(mode.y)]);

@@ -11,7 +11,7 @@ const assignPlotTo = (player: Player): void => {
 		if (!plot) throw "No free plot available";
 
 		plot.ownerId.set(player.UserId);
-		plot.instance.Blocks.AddPersistentPlayer(player);
+		//plot.instance.Blocks.AddPersistentPlayer(player);
 	} catch {
 		player.Kick("No free plot found, try again later");
 	}
@@ -45,7 +45,7 @@ const initializeBlocksFolder = (plot: PlotModel) => {
 		plot.FindFirstChild("Blocks")?.Destroy();
 		const blocks = Element.create("Model", {
 			Name: "Blocks",
-			ModelStreamingMode: Enum.ModelStreamingMode.PersistentPerPlayer,
+			ModelStreamingMode: Enum.ModelStreamingMode.Nonatomic,
 		});
 
 		blocks.Parent = plot;

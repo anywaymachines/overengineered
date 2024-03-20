@@ -11,7 +11,7 @@ spawn(() => {
 		plot = SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)?.instance;
 		wait(0.1);
 	}
-	new Beacon(plot!, "Plot", "plot").enable();
+	new Beacon(plot.BuildingArea!, "Plot", "plot").enable();
 });
 
 // players beacon

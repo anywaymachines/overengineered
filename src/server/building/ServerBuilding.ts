@@ -104,7 +104,7 @@ export const ServerBuilding = {
 			return success;
 		}
 
-		let blocksRegion = SharedBuilding.isFullPlot(blocks) ? AABB.fromModel(blocks) : AABB.fromModels(blocks);
+		let blocksRegion = SharedBuilding.isFullPlot(blocks) ? AABB.fromModel(blocks.Blocks) : AABB.fromModels(blocks);
 		blocksRegion = blocksRegion.withCenter(blocksRegion.getCenter().add(diff));
 
 		blocks = SharedBuilding.getBlockList(blocks);

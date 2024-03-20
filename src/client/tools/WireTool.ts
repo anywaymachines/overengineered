@@ -850,7 +850,7 @@ export class WireTool extends ToolBase {
 export const WireToolTests = {
 	connectThrough1() {
 		const wireParent = new Instance("ViewportFrame");
-		const plot = new Instance("Model") as PlotModel;
+		const plot = new Instance("Folder") as PlotModel;
 		const newinstance = () => Markers.Marker.createInstance(new Instance("Part"), 0);
 		const newdata = (uuid: string | number) => ({
 			uuid: tostring(uuid) as BlockUuid,
@@ -917,7 +917,7 @@ export const WireToolTests = {
 	},
 	connectThrough2() {
 		const wireParent = new Instance("ViewportFrame");
-		const plot = new Instance("Model") as PlotModel;
+		const plot = new Instance("Folder") as PlotModel;
 		const newinstance = () => Markers.Marker.createInstance(new Instance("Part"), 0);
 		const newdata = (uuid: string | number) => ({
 			uuid: tostring(uuid) as BlockUuid,

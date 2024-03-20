@@ -7,6 +7,9 @@ const count = Workspace.WaitForChild("Plots").GetAttribute("count") as number;
 while (Workspace.Plots.GetChildren().size() !== count) {
 	task.wait();
 }
+for (const plot of Workspace.Plots.GetChildren()) {
+	plot.WaitForChild("BuildingArea");
+}
 
 const plots = (Workspace.Plots.GetChildren() as unknown as PlotModel[])
 	.map((p) => new SharedPlot(p).with((c) => c.enable()))

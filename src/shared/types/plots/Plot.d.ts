@@ -8,10 +8,11 @@ interface PlotData {
 	readonly blacklistedPlayerIDs: number[];
 }
 
-type PlotModel = Model & {
+type PlotModel = Folder & {
 	readonly ___nominal: "plotModel";
 	readonly Blocks: PlotBlocks;
-	readonly PrimaryPart: BasePart;
+	//readonly PrimaryPart: BasePart;
+	readonly BuildingArea: BasePart;
 };
 
 type PlotBlocks = Model & {

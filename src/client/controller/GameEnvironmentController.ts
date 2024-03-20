@@ -3,13 +3,13 @@ import GameEnvironment from "shared/data/GameEnvironment";
 import LocalPlayerController from "./LocalPlayerController";
 
 export default class GameEnvironmentController {
-	public static currentHeight = 0;
+	static currentHeight = 0;
 
-	public static initialize() {
+	static initialize() {
 		RunService.Heartbeat.Connect(() => this.update());
 	}
 
-	public static update() {
+	static update() {
 		if (!LocalPlayerController.rootPart) return;
 
 		let position = LocalPlayerController.rootPart.Position;

@@ -38,7 +38,7 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	/** Returns the {@link AABB} of the plot construction area */
 	private static getPlotBuildingRegion(plot: PlotModel): AABB {
 		const heightLimit = 400;
-		const buildingPlane = plot.PrimaryPart;
+		const buildingPlane = plot.BuildingArea;
 
 		return AABB.fromMinMax(
 			new Vector3(

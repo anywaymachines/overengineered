@@ -50,9 +50,11 @@ export default class BuildingMode extends PlayMode {
 			if (!LocalPlayerController.rootPart) return;
 
 			const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
-			const pos = plot.GetPivot().Position.add(new Vector3(plot.GetExtentsSize().X / 2 + 2, 10, 0));
+			const pos = plot.BuildingArea.GetPivot().Position.add(
+				new Vector3(plot.BuildingArea.ExtentsSize.X / 2 + 2, 10, 0),
+			);
 
-			if (LocalPlayerController.rootPart.Position.sub(pos).Magnitude < plot.GetExtentsSize().X) return;
+			if (LocalPlayerController.rootPart.Position.sub(pos).Magnitude < plot.BuildingArea.ExtentsSize.X) return;
 
 			LocalPlayerController.rootPart.CFrame = new CFrame(pos);
 			LocalPlayerController.rootPart.AssemblyLinearVelocity = Vector3.zero;
