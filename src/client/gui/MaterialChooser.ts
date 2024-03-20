@@ -26,6 +26,12 @@ export default class MaterialChooser extends Control<MaterialChooserDefinition> 
 				) {
 					const lockFrame = instance.FindFirstChild("Lock") as Frame;
 					lockFrame.Visible = false;
+
+					const price = MarketplaceService.GetProductInfo(
+						GameDefinitions.GAMEPASSES.NeonMaterial,
+					).PriceInRobux;
+					const priceLabel = instance.FindFirstChild("Lock")?.FindFirstChild("TextLabel") as TextLabel;
+					priceLabel.Text = `${price} R$`;
 				} else {
 					const btn = this.add(new ButtonControl(instance));
 
