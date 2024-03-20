@@ -56,16 +56,18 @@ export const ClientBuilding = {
 			blocks: (_blocks === "all" ? plot.getBlocks() : _blocks).map((block): PlaceBlockRequest => {
 				const data = BlockManager.getBlockDataByBlockModel(block);
 
-				for (const [otherblock, connectionName, connection] of SharedBuilding.getBlocksConnectedByLogicTo(
-					plot.instance,
-					data.uuid,
-				)) {
-					connectedByLogic.push({
-						inputBlock: otherblock.uuid,
-						outputBlock: data.uuid,
-						inputConnection: connectionName,
-						outputConnection: connection.connectionName,
-					});
+				if (uuids !== "all") {
+					for (const [otherblock, connectionName, connection] of SharedBuilding.getBlocksConnectedByLogicTo(
+						plot.instance,
+						data.uuid,
+					)) {
+						connectedByLogic.push({
+							inputBlock: otherblock.uuid,
+							outputBlock: data.uuid,
+							inputConnection: connectionName,
+							outputConnection: connection.connectionName,
+						});
+					}
 				}
 
 				return {
