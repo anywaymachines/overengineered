@@ -1,4 +1,4 @@
-import { Workspace } from "@rbxts/services";
+import { Players, Workspace } from "@rbxts/services";
 import { AABB } from "shared/fixes/AABB";
 import BlockManager, { PlacedBlockData } from "./BlockManager";
 import { SharedPlot } from "./SharedPlot";
@@ -72,6 +72,11 @@ const SharedPlots = {
 		return SharedPlots.getPlotComponentByOwnerID(ownerID).instance;
 	},
 
+	/** Returns the current player owned plot
+	 * @client
+	 */
+	getOwnPlot: (): SharedPlot => SharedPlots.getPlotComponentByOwnerID(Players.LocalPlayer.UserId),
+
 	/** Returns the plot by position inside it, if exists
 	 * @deprecated slow
 	 */
@@ -102,11 +107,6 @@ const SharedPlots = {
 		}
 
 		return undefined;
-	},
-
-	/** Returns an `Instance` that holds plot blocks */
-	getPlotBlocks: (plot: PlotModel): PlotBlocks => {
-		return plot.Blocks;
 	},
 
 	/** Returns the block by its uuid */

@@ -37,7 +37,7 @@ const BuildingManager = {
 			return undefined;
 		}
 
-		const blocks = plot.Blocks.GetChildren(undefined);
+		const blocks = SharedPlots.getPlotComponent(plot).getBlocks();
 		for (let i = 0; i < blocks.size(); i++) {
 			const block = blocks[i];
 			if (

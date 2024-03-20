@@ -1,7 +1,6 @@
 import { blockRegistry } from "shared/Registry";
 import BlockManager from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
-import { SharedBuilding } from "shared/building/SharedBuilding";
 import SharedPlots from "shared/building/SharedPlots";
 import PartUtils from "shared/utils/PartUtils";
 import { ServerBuilding } from "./ServerBuilding";
@@ -32,7 +31,7 @@ export const ServerBuildingRequestHandler = {
 			}
 
 			// if block with the same uuid already exists
-			if (block.uuid !== undefined && request.plot.Blocks.FindFirstChild(block.uuid)) {
+			if (block.uuid !== undefined && SharedPlots.tryGetBlockByUuid(request.plot, block.uuid)) {
 				return err("Invalid block placement data");
 			}
 		}
@@ -50,8 +49,8 @@ export const ServerBuildingRequestHandler = {
 		const counts = countBy(request.blocks, (b) => b.id);
 		for (const [id, count] of counts) {
 			const regblock = blockRegistry.get(id)!;
-			const placed = SharedPlots.getPlotBlocks(request.plot)
-				.GetChildren(undefined)
+			const placed = SharedPlots.getPlotComponent(request.plot)
+				.getBlocks()
 				.count((placed_block) => {
 					return BlockManager.manager.id.get(placed_block) === id;
 				});
@@ -104,7 +103,7 @@ export const ServerBuildingRequestHandler = {
 			return errBuildingNotPermitted;
 		}
 
-		if (SharedBuilding.isBlocks(request.blocks)) {
+		if (request.blocks !== "all") {
 			for (const block of request.blocks) {
 				if (!SharedPlots.isBlockOnAllowedPlot(player, block)) {
 					return errBuildingNotPermitted;

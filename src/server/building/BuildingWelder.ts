@@ -3,6 +3,7 @@ import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
 import Logger from "shared/Logger";
 import BlockManager from "shared/building/BlockManager";
+import SharedPlots from "shared/building/SharedPlots";
 
 type CollidersModel = Model & { readonly ___nominal: "CollidersModel" };
 export default class BuildingWelder {
@@ -201,7 +202,7 @@ export default class BuildingWelder {
 
 	private static weld(plot: PlotModel, colliders: CollidersModel) {
 		const getTarget = (collider: BasePart): BasePart | undefined => {
-			const targetBlock = (plot.Blocks as unknown as Record<string, BlockModel>)[collider.Parent!.Name];
+			const targetBlock = SharedPlots.getBlockByUuid(plot, collider.Parent!.Name as BlockUuid);
 			let part: BasePart | undefined;
 
 			const targetstr = collider.GetAttribute("target") as string | undefined;

@@ -2,12 +2,6 @@ interface Workspace {
 	readonly Plots: Folder;
 }
 
-interface PlotData {
-	readonly ownerID: number;
-	readonly whitelistedPlayerIDs: number[];
-	readonly blacklistedPlayerIDs: number[];
-}
-
 type PlotModel = Folder & {
 	readonly ___nominal: "plotModel";
 	readonly Blocks: PlotBlocks;

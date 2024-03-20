@@ -25,7 +25,7 @@ declare global {
 	}
 	interface MoveBlocksRequest {
 		readonly plot: PlotModel;
-		readonly blocks: BlockList;
+		readonly blocks: readonly BlockModel[] | "all";
 		readonly diff: Vector3;
 	}
 

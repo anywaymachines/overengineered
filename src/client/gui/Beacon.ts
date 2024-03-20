@@ -12,10 +12,10 @@ type BeaconBillboardGui = GuiObject & {
 	readonly ImageLabel: ImageLabel;
 };
 
-export default class Beacon extends InstanceComponent<BasePart | Model> {
+export default class Beacon extends InstanceComponent<PVInstance> {
 	private readonly billboard;
 
-	constructor(part: BasePart | Model, name: string, config: keyof BeaconsConfiguration) {
+	constructor(part: PVInstance, name: string, config: keyof BeaconsConfiguration) {
 		super(part);
 
 		this.billboard = (

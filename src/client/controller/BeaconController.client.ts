@@ -6,12 +6,13 @@ import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren"
 
 // plot beacon
 spawn(() => {
-	let plot: PlotModel | undefined;
+	let plot: PVInstance | undefined;
 	while (!plot) {
-		plot = SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)?.instance;
+		plot = SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)?.instance?.BuildingArea;
 		wait(0.1);
 	}
-	new Beacon(plot.BuildingArea!, "Plot", "plot").enable();
+
+	new Beacon(plot, "Plot", "plot").enable();
 });
 
 // players beacon

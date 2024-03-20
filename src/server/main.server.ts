@@ -115,7 +115,7 @@ class RemoteHandlers {
 		if (hrp.Sit) return;
 
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-		const blocks = SharedPlots.getPlotBlocks(plot).GetChildren(undefined);
+		const blocks = SharedPlots.getPlotComponent(plot).getBlocks();
 
 		const vehicleSeatModel = blocks.find((model) => BlockManager.manager.id.get(model) === "vehicleseat") as Model;
 		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;

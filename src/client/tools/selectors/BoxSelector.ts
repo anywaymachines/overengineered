@@ -77,9 +77,7 @@ export default class BoxSelector extends ClientComponent {
 
 				const searchBlocks = () =>
 					search(
-						SharedPlots.getPlotBlocks(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId)).GetChildren(
-							undefined,
-						),
+						SharedPlots.getOwnPlot().getBlocks(),
 						new Vector2(startpos.Width.Offset, startpos.Height.Offset),
 						new Vector2(mouse.X, mouse.Y),
 					).filter(filter);

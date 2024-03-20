@@ -28,7 +28,7 @@ export default class RideMode implements PlayModeBase {
 
 	private rideStart(player: Player): Response {
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-		const blocks = SharedPlots.getPlotBlocks(plot);
+		const blocks = plot.Blocks;
 
 		const blocksChildren = blocks.GetChildren(undefined);
 
@@ -48,7 +48,7 @@ export default class RideMode implements PlayModeBase {
 			player.UserId,
 			SlotsMeta.autosaveSlotIndex,
 			BlocksSerializer.serialize(plot),
-			SharedPlots.getPlotBlocks(plot).GetChildren().size(),
+			SharedPlots.getPlotComponent(plot).getBlocks().size(),
 		);
 
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
@@ -77,7 +77,7 @@ export default class RideMode implements PlayModeBase {
 	}
 	private rideStop(player: Player): Response {
 		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-		const blocks = SharedPlots.getPlotBlocks(plot);
+		const blocks = plot.Blocks;
 
 		blocks.ClearAllChildren();
 

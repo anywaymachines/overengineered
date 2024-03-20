@@ -36,10 +36,9 @@ const read = {
 		plot: PlotModel,
 		serialize: (block: BlockModel, index: number, buildingCenter: CFrame) => T,
 	): readonly T[] => {
-		const buildingCenter = (plot.FindFirstChild("BuildingArea")!.FindFirstChild("BuildingAreaCenter") as Part)
-			.CFrame;
-		return SharedPlots.getPlotBlocks(plot)
-			.GetChildren(undefined)
+		const buildingCenter = plot.BuildingArea.CFrame;
+		return SharedPlots.getPlotComponent(plot)
+			.getBlocks()
 			.map((block, i) => serialize(block, i, buildingCenter));
 	},
 
@@ -61,8 +60,7 @@ const place = {
 		data: readonly T[],
 		place: (plot: PlotModel, blockData: T, buildingCenter: CFrame) => void,
 	) => {
-		const buildingCenter = (plot.FindFirstChild("BuildingArea")!.FindFirstChild("BuildingAreaCenter") as Part)
-			.CFrame;
+		const buildingCenter = plot.BuildingArea.CFrame;
 		data.forEach((blockData) => place(plot, blockData, buildingCenter));
 	},
 

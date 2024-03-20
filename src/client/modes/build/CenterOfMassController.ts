@@ -1,4 +1,4 @@
-import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { Colors } from "client/gui/Colors";
 import Gui from "client/gui/Gui";
@@ -23,7 +23,7 @@ export default class CenterOfMassController extends ClientComponent {
 		this.viewportFrame.ZIndex = -1000;
 
 		const update = () => {
-			const blocks = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId).Blocks.GetChildren(undefined);
+			const blocks = SharedPlots.getOwnPlot().getBlocks();
 			const pos = this.calculateCentersOfMass(blocks);
 
 			if (pos.size() > this.renderedBalls.size()) {

@@ -100,14 +100,14 @@ export const ServerBuilding = {
 		return success;
 	},
 	moveBlocks: ({ plot, blocks, diff }: MoveBlocksRequest): Response => {
-		if (SharedBuilding.getBlockList(blocks).size() === 0) {
+		if (blocks !== "all" && blocks.size() === 0) {
 			return success;
 		}
 
-		let blocksRegion = SharedBuilding.isFullPlot(blocks) ? AABB.fromModel(blocks.Blocks) : AABB.fromModels(blocks);
+		let blocksRegion = blocks === "all" ? AABB.fromModel(plot.Blocks) : AABB.fromModels(blocks);
 		blocksRegion = blocksRegion.withCenter(blocksRegion.getCenter().add(diff));
 
-		blocks = SharedBuilding.getBlockList(blocks);
+		blocks = blocks === "all" ? SharedPlots.getPlotComponent(plot).getBlocks() : blocks;
 		if (!SharedPlots.getPlotBuildingRegion(plot).contains(blocksRegion)) {
 			return err("Invalid movement");
 		}
