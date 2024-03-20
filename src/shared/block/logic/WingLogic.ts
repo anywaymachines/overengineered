@@ -1,6 +1,7 @@
 import { RunService, Workspace } from "@rbxts/services";
+import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
+import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import BlockLogic from "../BlockLogic";
 
 type Wing = BlockModel & {
 	readonly WingSurface:
@@ -10,13 +11,14 @@ type Wing = BlockModel & {
 		  });
 };
 
-export default class WingLogic extends BlockLogic<Wing> {
+export default class WingLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.wing1x1, Wing> {
 	private readonly wingSurface;
 
 	constructor(block: PlacedBlockData) {
-		super(block);
+		super(block, blockConfigRegistry.wing1x1);
 
 		this.wingSurface = this.instance.WingSurface;
+
 		this.event.onEnable(() => this.initializeForces());
 	}
 
@@ -26,6 +28,8 @@ export default class WingLogic extends BlockLogic<Wing> {
 			this.wingSurface.EnableFluidForces = true;
 			return;
 		}
+
+		if (this.input.enabled.get() === false) return;
 
 		this.wingSurface.EnableFluidForces = false;
 
@@ -37,10 +41,7 @@ export default class WingLogic extends BlockLogic<Wing> {
 		const surface = findWingSurface(this.wingSurface);
 		const vectorForce = this.wingSurface.FindFirstChild("VectorForce") as VectorForce;
 
-		const density = math.max(
-			0.7,
-			new PhysicalProperties(this.block.material ?? Enum.Material.Plastic).Density / 2,
-		);
+		const density = math.max(0.7, new PhysicalProperties(this.block.material ?? Enum.Material.Plastic).Density / 2);
 		this.wingSurface.CustomPhysicalProperties = new PhysicalProperties(density, 0.3, 0.5, 1, 1);
 
 		if (!vectorForce) return;

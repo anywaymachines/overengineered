@@ -571,6 +571,19 @@ const relay = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const wing = {
+	input: {
+		enabled: {
+			displayName: "Enabled",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+			connectorHidden: true,
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
 const twoNumbersOrBooleansInputBooleanOutput = {
 	input: {
 		value1: connectors.boolOrNumber("Value 1", "1"),
@@ -948,6 +961,14 @@ const blockConfigRegistry = {
 	vehicleseat,
 	magnet,
 
+	wing1x1: wing,
+	wing1x2: wing,
+	wing1x3: wing,
+	wing1x4: wing,
+	wedgewing1x1: wing,
+	wedgewing1x2: wing,
+	wedgewing1x3: wing,
+	wedgewing1x4: wing,
 	lamp,
 	screen,
 
