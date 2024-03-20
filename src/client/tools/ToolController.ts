@@ -1,5 +1,6 @@
 import { Players } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
+import { LoadingController } from "client/controller/LoadingController";
 import Signals from "client/event/Signals";
 import BuildingMode from "client/modes/build/BuildingMode";
 import BuildTool from "client/tools/BuildTool";
@@ -12,6 +13,56 @@ import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
 import EditTool from "./EditTool";
 import { WireTool } from "./WireTool";
+
+class ToolInputController extends ClientComponent {
+	constructor(tools: ToolController) {
+		super();
+
+		this.event.onPrepareDesktop(() => {
+			const keycodes: readonly KeyCode[] = [
+				"One",
+				"Two",
+				"Three",
+				"Four",
+				"Five",
+				"Six",
+				"Seven",
+				"Eight",
+				"Nine",
+			];
+
+			tools.tools.forEach((tool, i) => {
+				this.inputHandler.onKeyDown(keycodes[i], () =>
+					tools.selectedTool.set(tool === tools.selectedTool.get() ? undefined : tool),
+				);
+			});
+		});
+
+		const gamepadSelectTool = (isRight: boolean) => {
+			if (!tools.selectedTool.get()) {
+				tools.selectedTool.set(tools.tools[0]);
+				return;
+			}
+
+			const currentIndex = tools.tools.indexOf(tools.selectedTool.get()!);
+			const toolsLength = tools.tools.size();
+			let newIndex = isRight ? currentIndex + 1 : currentIndex - 1;
+
+			if (newIndex >= toolsLength) {
+				newIndex = 0;
+			} else if (newIndex < 0) {
+				newIndex = toolsLength - 1;
+			}
+
+			tools.selectedTool.set(tools.tools[newIndex]);
+		};
+		this.event.onPrepareGamepad(() => {
+			this.inputHandler.onKeyDown("ButtonB", () => tools.selectedTool.set(undefined));
+			this.inputHandler.onKeyDown("ButtonR1", () => gamepadSelectTool(true));
+			this.inputHandler.onKeyDown("ButtonL1", () => gamepadSelectTool(false));
+		});
+	}
+}
 
 export default class ToolController extends ClientComponent {
 	readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);
@@ -64,6 +115,19 @@ export default class ToolController extends ClientComponent {
 		}
 
 		this.tools = tools;
+
+		const input = this.parent(new ToolInputController(this));
+		this.event.subscribeObservable2(
+			LoadingController.isLoading,
+			(loading) => {
+				if (loading) {
+					this.selectedTool.set(undefined);
+				}
+
+				input.setEnabled(!loading);
+			},
+			true,
+		);
 	}
 
 	getDebugChildren(): readonly IDebuggableComponent[] {

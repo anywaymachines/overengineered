@@ -1,10 +1,12 @@
 import { StarterGui, UserInputService } from "@rbxts/services";
+import { LoadingController } from "client/controller/LoadingController";
 import SoundController from "client/controller/SoundController";
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
 import ToolBase from "client/tools/ToolBase";
 import ToolController from "client/tools/ToolController";
+import { TransformProps } from "shared/component/Transform";
 
 export type ToolbarButtonControlDefinition = TextButton & {
 	readonly ImageLabel: ImageLabel;
@@ -25,9 +27,10 @@ export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition
 		this.gui.ImageLabel.Image = tool.getImageID();
 		this.gui.KeyboardNumberLabel.Text = tostring(tools.tools.indexOf(tool) + 1);
 
-		this.event.subscribe(this.gui.Activated, () =>
-			tools.selectedTool.set(tool === tools.selectedTool.get() ? undefined : tool),
-		);
+		this.event.subscribe(this.gui.Activated, () => {
+			if (LoadingController.isLoading.get()) return;
+			tools.selectedTool.set(tool === tools.selectedTool.get() ? undefined : tool);
+		});
 		this.event.subscribeObservable(
 			tools.selectedTool,
 			(newtool) => {
@@ -110,34 +113,23 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 			this.gui.Info.GamepadNext.Image = UserInputService.GetImageForKeyCode(Enum.KeyCode.ButtonR1);
 		});
 
-		this.event.onPrepareDesktop(() => {
-			const keycodes: readonly KeyCode[] = [
-				"One",
-				"Two",
-				"Three",
-				"Four",
-				"Five",
-				"Six",
-				"Seven",
-				"Eight",
-				"Nine",
-			];
-
-			this.tools.tools.forEach((tool, i) => {
-				this.inputHandler.onKeyDown(keycodes[i], () =>
-					this.tools.selectedTool.set(tool === this.tools.selectedTool.get() ? undefined : tool),
-				);
-			});
-		});
-
-		this.event.onPrepareGamepad(() => {
-			this.inputHandler.onKeyDown("ButtonB", () => this.tools.selectedTool.set(undefined));
-			this.inputHandler.onKeyDown("ButtonR1", () => this.gamepadSelectTool(true));
-			this.inputHandler.onKeyDown("ButtonL1", () => this.gamepadSelectTool(false));
-		});
-
 		this.event.subscribeObservable(tools.selectedTool, (tool, prev) => this.toolChanged(tool, prev));
 		this.resetLabels();
+
+		const params: TransformProps = {
+			style: "Quad",
+			direction: "Out",
+			duration: 0.3,
+		};
+		this.event.subscribeObservable2(
+			LoadingController.isLoading,
+			(loading) => {
+				this.runTransform(this.gui, (tr) =>
+					tr.transform("AnchorPoint", new Vector2(0, loading ? 0 : 1), params),
+				);
+			},
+			true,
+		);
 	}
 
 	private toolChanged(tool: ToolBase | undefined, prev: ToolBase | undefined) {
@@ -170,26 +162,5 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 
 	private resetLabels() {
 		this.getGui().Info.NameLabel.Text = "";
-	}
-
-	private gamepadSelectTool(isRight: boolean) {
-		const tools = this.tools.tools;
-
-		if (!this.tools.selectedTool.get()) {
-			this.tools.selectedTool.set(tools[0]);
-			return;
-		}
-
-		const currentIndex = tools.indexOf(this.tools.selectedTool.get()!);
-		const toolsLength = tools.size();
-		let newIndex = isRight ? currentIndex + 1 : currentIndex - 1;
-
-		if (newIndex >= toolsLength) {
-			newIndex = 0;
-		} else if (newIndex < 0) {
-			newIndex = toolsLength - 1;
-		}
-
-		this.tools.selectedTool.set(tools[newIndex]);
 	}
 }

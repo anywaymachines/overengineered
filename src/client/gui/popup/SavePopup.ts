@@ -153,10 +153,8 @@ class SavePreview extends Control<SavePreviewDefinition> {
 				const index = this.selectedSlotIndex.get();
 				if (index === undefined) return;
 
-				const response = await PlayerDataStorage.loadPlayerSlot(index);
-				if (response.success && !response.isEmpty) {
-					this.onLoad.Fire();
-				}
+				this.onLoad.Fire();
+				await PlayerDataStorage.loadPlayerSlot(index);
 			} finally {
 				loadButton.enable();
 			}

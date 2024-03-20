@@ -1,4 +1,5 @@
 import { HttpService, Players, Workspace } from "@rbxts/services";
+import { LoadingController } from "client/controller/LoadingController";
 import Logger from "shared/Logger";
 import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
@@ -91,12 +92,17 @@ export default class PlayerDataStorage {
 
 	static async loadPlayerSlot(index: number) {
 		Logger.info("Loading slot " + index);
+		LoadingController.show("Loading slot");
 
-		const response = await Remotes.Client.GetNamespace("Slots").Get("Load").CallServerAsync(index);
-		if (response.success && !response.isEmpty) {
-			this.loadedSlot.set(index);
+		try {
+			const response = await Remotes.Client.GetNamespace("Slots").Get("Load").CallServerAsync(index);
+			if (response.success && !response.isEmpty) {
+				this.loadedSlot.set(index);
+			}
+
+			return response;
+		} finally {
+			LoadingController.hide();
 		}
-
-		return response;
 	}
 }

@@ -3,6 +3,7 @@ import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
+import { LoadingTests } from "client/test/control/LoadingTests";
 import { WireToolTests } from "client/tools/WireTool";
 import { Element } from "shared/Element";
 import { InstanceComponent } from "shared/component/InstanceComponent";
@@ -93,6 +94,7 @@ const create = () => {
 		wrapNonVisual("Logic", LogicTests),
 		wrapNonVisual("Component", ComponentTests),
 		wrapNonVisual("AABB", AABBTests),
+		wrapNonVisual("Loading", LoadingTests),
 	];
 	for (const [name, content] of tests) {
 		content.hide();
