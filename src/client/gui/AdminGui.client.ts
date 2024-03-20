@@ -5,6 +5,7 @@ import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
+import { LoadSlotTest } from "client/test/control/LoadSlotTest";
 import { Element } from "shared/Element";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import GameDefinitions from "shared/data/GameDefinitions";
@@ -60,6 +61,7 @@ const create = () => {
 	closebtn.activated.Connect(() => destroy?.());
 
 	const tests: readonly (readonly [name: string, test: Control])[] = [
+		...LoadSlotTest.createTests(),
 		["Global message", AdminMessageController.createControl()],
 	];
 	for (const [name, content] of tests) {
