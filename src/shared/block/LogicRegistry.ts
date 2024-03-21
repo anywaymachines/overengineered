@@ -50,8 +50,6 @@ const logicRegistry = {
 	wing1x2: WingLogic,
 	wing1x3: WingLogic,
 	wing1x4: WingLogic,
-	wingrounding: WingLogic,
-	wingsharpening: WingLogic,
 
 	vehicleseat: VehicleSeatBlockLogic,
 	disconnectblock: DisconnectBlockLogic,
