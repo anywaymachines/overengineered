@@ -1,4 +1,4 @@
-import { RunService } from "@rbxts/services";
+import { RunService, Workspace } from "@rbxts/services";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import Logger from "shared/Logger";
 import RemoteEvents from "shared/RemoteEvents";
@@ -49,7 +49,7 @@ class RemoteHandlers {
 		}
 
 		Logger.info(`Loading ${userid}'s slot ${index}`);
-		ServerBuilding.clearPlot(plot);
+		ServerBuilding.deleteBlocks({ plot, blocks: "all" });
 		const dblocks = BlocksSerializer.deserialize(blocks, plot);
 		print(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
 
@@ -161,3 +161,5 @@ if (RunService.IsStudio()) {
 		Remotes.Server.GetNamespace("Debug").Get("DisplayLine").SendToAllPlayers(text, false, isError);
 	});
 }
+
+Workspace.SetAttribute("loaded", true);

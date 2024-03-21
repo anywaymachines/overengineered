@@ -1,3 +1,4 @@
+import { LoadingController } from "client/controller/LoadingController";
 import ActionController from "client/modes/build/ActionController";
 import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
@@ -12,19 +13,33 @@ export const ClientBuilding = {
 		const result = await ActionController.instance.execute(
 			"Place blocks",
 			() => {
-				return Remotes.Client.GetNamespace("Building")
-					.Get("DeleteBlocks")
-					.CallServerAsync({ plot: plot.instance, blocks: placed });
-			},
-			async () => {
-				const response = await Remotes.Client.GetNamespace("Building")
-					.Get("PlaceBlocks")
-					.CallServerAsync({ plot: plot.instance, blocks });
-				if (response.success) {
-					placed = response.models;
+				const execute = () =>
+					Remotes.Client.GetNamespace("Building")
+						.Get("DeleteBlocks")
+						.CallServerAsync({ plot: plot.instance, blocks: placed });
+
+				if (blocks.size() > 10) {
+					return LoadingController.runAsync("Deleting blocks", execute);
 				}
 
-				return response;
+				return execute();
+			},
+			() => {
+				const execute = async () => {
+					const response = await Remotes.Client.GetNamespace("Building")
+						.Get("PlaceBlocks")
+						.CallServerAsync({ plot: plot.instance, blocks });
+					if (response.success) {
+						placed = response.models;
+					}
+
+					return response;
+				};
+
+				if (blocks.size() > 10) {
+					return LoadingController.runAsync("Placing blocks", execute);
+				}
+				return execute();
 			},
 		);
 
@@ -42,6 +57,7 @@ export const ClientBuilding = {
 	},
 	deleteBlocks: async (plot: SharedPlot, _blocks: readonly BlockModel[] | "all") => {
 		const uuids = _blocks === "all" ? "all" : _blocks.map((b) => BlockManager.getBlockDataByBlockModel(b).uuid);
+		const blockCount = uuids === "all" ? plot.getBlocks().size() : uuids.size();
 
 		type SavedConnection = {
 			readonly inputBlock: BlockUuid;
@@ -96,34 +112,51 @@ export const ClientBuilding = {
 
 		const result = await ActionController.instance.execute(
 			uuids === "all" ? "Clear plot" : "Remove blocks",
-			async () => {
-				const response = await Remotes.Client.GetNamespace("Building").Get("PlaceBlocks").CallServerAsync(undo);
-				if (!response.success) {
-					return response;
-				}
-
-				for (const connection of connectedByLogic) {
+			() => {
+				const execute = async (): Promise<Response> => {
 					const response = await Remotes.Client.GetNamespace("Building")
-						.Get("LogicConnect")
-						.CallServerAsync(getConnectRequest(connection));
-
+						.Get("PlaceBlocks")
+						.CallServerAsync(undo);
 					if (!response.success) {
 						return response;
 					}
-				}
 
-				for (const model of response.models) {
-					while (!model.PrimaryPart) {
-						task.wait();
+					for (const connection of connectedByLogic) {
+						const response = await Remotes.Client.GetNamespace("Building")
+							.Get("LogicConnect")
+							.CallServerAsync(getConnectRequest(connection));
+
+						if (!response.success) {
+							return response;
+						}
 					}
+
+					for (const model of response.models) {
+						while (!model.PrimaryPart) {
+							task.wait();
+						}
+					}
+
+					return { success: true };
+				};
+
+				if (blockCount > 10) {
+					return LoadingController.runAsync("Placing blocks", execute);
 				}
 
-				return { success: true };
+				return execute();
 			},
 			() => {
-				return Remotes.Client.GetNamespace("Building")
-					.Get("DeleteBlocks")
-					.CallServerAsync({ plot: plot.instance, blocks: getBlocks() });
+				const execute = () =>
+					Remotes.Client.GetNamespace("Building")
+						.Get("DeleteBlocks")
+						.CallServerAsync({ plot: plot.instance, blocks: getBlocks() });
+
+				if (blockCount > 10) {
+					return LoadingController.runAsync("Removing blocks", execute);
+				}
+
+				return execute();
 			},
 		);
 
@@ -137,16 +170,18 @@ export const ClientBuilding = {
 
 		const result = await ActionController.instance.execute(
 			"Move blocks",
-			() => {
-				return Remotes.Client.GetNamespace("Building")
-					.Get("MoveBlocks")
-					.CallServerAsync({ plot: plot.instance, diff: diff.mul(-1), blocks: getBlocks() });
-			},
-			() => {
-				return Remotes.Client.GetNamespace("Building")
-					.Get("MoveBlocks")
-					.CallServerAsync({ plot: plot.instance, diff, blocks: getBlocks() });
-			},
+			() =>
+				LoadingController.runAsync("Moving blocks", async () => {
+					return Remotes.Client.GetNamespace("Building")
+						.Get("MoveBlocks")
+						.CallServerAsync({ plot: plot.instance, diff: diff.mul(-1), blocks: getBlocks() });
+				}),
+			() =>
+				LoadingController.runAsync("Moving blocks", async () => {
+					return Remotes.Client.GetNamespace("Building")
+						.Get("MoveBlocks")
+						.CallServerAsync({ plot: plot.instance, diff, blocks: getBlocks() });
+				}),
 		);
 
 		plot.changed.Fire();

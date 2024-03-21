@@ -1,7 +1,8 @@
-import { Players, ReplicatedStorage, RunService } from "@rbxts/services";
+import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import CharacterController from "client/controller/CharacterController";
 import GameEnvironmentController from "client/controller/GameEnvironmentController";
+import { LoadingController } from "client/controller/LoadingController";
 import LocalPlayerController from "client/controller/LocalPlayerController";
 import SoundController from "client/controller/SoundController";
 import WindController from "client/controller/WindController";
@@ -20,11 +21,15 @@ import { rootComponents } from "./test/RootComponents";
 
 // wait for assets to be copied
 ReplicatedStorage.WaitForChild("Assets");
+LoadingController.show("Waiting for the plot");
+
 while (!SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)) {
 	task.wait(0.2);
 }
 
-(async () => await PlayerDataStorage.init())();
+LoadingController.show("Loading the game");
+
+const dataLoading = PlayerDataStorage.init();
 
 BlocksInitializer.initialize();
 GameEnvironmentController.initialize();
@@ -56,3 +61,10 @@ Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `DEVTEST | v${game.PlaceV
 Players.PlayerAdded.Connect((p) => {
 	(p.WaitForChild("Character") as Model).ModelStreamingMode = Enum.ModelStreamingMode.Persistent;
 });
+
+dataLoading.await();
+while (!(Workspace.GetAttribute("loaded") as boolean | undefined)) {
+	task.wait();
+}
+
+LoadingController.hide();

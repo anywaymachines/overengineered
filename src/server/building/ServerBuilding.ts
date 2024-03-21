@@ -130,6 +130,10 @@ export const ServerBuilding = {
 
 			// TODO:: not unweld moved blocks between them
 			BuildingWelder.moveCollisions(plot, block, block.GetPivot());
+
+			if (math.random(3) === 1) {
+				task.wait();
+			}
 		}
 
 		bumpPlotVersion(plot);

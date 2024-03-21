@@ -115,28 +115,40 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 
 		this.event.subscribeObservable(tools.selectedTool, (tool, prev) => this.toolChanged(tool, prev));
 		this.resetLabels();
+	}
+
+	show(): void {
+		super.show();
+		return;
 
 		const params: TransformProps = {
 			style: "Quad",
 			direction: "Out",
 			duration: 0.3,
 		};
-		this.event.subscribeObservable2(
-			LoadingController.isLoading,
-			(loading) => {
-				this.runTransform(this.gui, (tr) =>
-					tr.transform("AnchorPoint", new Vector2(0, loading ? 0 : 1), params),
-				);
-			},
-			true,
+		this.transform((tr) => tr.transform("AnchorPoint", new Vector2(0, 1), params));
+	}
+	hide(): void {
+		super.hide();
+		return;
+
+		const params: TransformProps = {
+			style: "Quad",
+			direction: "Out",
+			duration: 0.3,
+		};
+		this.transform((tr) =>
+			tr
+				.transform("AnchorPoint", new Vector2(0, 0), params)
+				.then()
+				.func(() => super.hide()),
 		);
 	}
 
 	private toolChanged(tool: ToolBase | undefined, prev: ToolBase | undefined) {
 		const duration = tool && prev ? 0.07 : 0.15;
 
-		this.nameLabel.getTransform().cancel();
-		this.nameLabel.getTransform().run((transform) => {
+		this.nameLabel.transform((transform) => {
 			if (prev) {
 				transform
 					.moveY(new UDim(0, 0), { duration })

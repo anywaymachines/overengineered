@@ -356,15 +356,13 @@ const registry: BlockDataRegistry = {
 		description: "The concave prism, but convex",
 		mirrorBehaviour: "offset180",
 	},
-	// TODO:
 	pyramid: {
 		name: "Pyramid",
-		description: "TODO:",
+		description: "triangel",
 	},
-	// TODO:
 	halfblock: {
 		name: "Half Block",
-		description: "It will work until we have made the scale tool",
+		description: "Good enough",
 	},
 	cornerwedge1x1: {
 		name: "Corner Wedge 1x1",

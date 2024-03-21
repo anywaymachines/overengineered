@@ -1,4 +1,5 @@
-import { TransformBuilder, TransformContainer } from "shared/component/Transform";
+import { TransformBuilder } from "shared/component/Transform";
+import { TransformService } from "shared/component/TransformService";
 import { ComponentInstance } from "./ComponentInstance";
 import { ContainerComponent } from "./ContainerComponent";
 
@@ -35,33 +36,11 @@ export class InstanceComponent<
 		return this.instance.GetAttribute(name) as T | undefined;
 	}
 
-	//
-
-	private transforms?: TransformContainer<T>;
-
-	/** Transform the provided instance */
-	runTransform<T extends Instance>(instance: T, setup: (transform: TransformBuilder<T>, instance: T) => void) {
-		const builder = new TransformBuilder(instance);
-		setup(builder, instance);
-
-		return builder.build().enable();
+	cancelTransforms() {
+		TransformService.cancel(this.instance);
 	}
-
-	/** Transorm the current instance */
-	transform(build: (transform: TransformBuilder<T>, instance: T) => void) {
-		this.getTransform().run(build);
-	}
-
-	/** Initializes and returns the transform component */
-	getTransform(): TransformContainer<T> {
-		if (!this.transforms) {
-			this.transforms = new TransformContainer(this.instance);
-			this.onEnable(() => this.transforms?.enable());
-			this.onDisable(() => this.transforms?.disable());
-			this.onDestroy(() => this.transforms?.destroy());
-			if (this.isEnabled()) this.transforms.enable();
-		}
-
-		return this.transforms;
+	/** Transform the current instance */
+	transform(setup: (transform: TransformBuilder<T>, instance: T) => void) {
+		TransformService.run(this.instance, setup);
 	}
 }

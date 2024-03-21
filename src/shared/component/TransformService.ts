@@ -17,4 +17,12 @@ export class TransformService {
 		});
 		container.enable();
 	}
+	static cancel(instance: object) {
+		const transform = this.transforms.get(instance);
+		if (!transform) return;
+
+		transform.cancel();
+		transform.destroy();
+		this.transforms.delete(instance);
+	}
 }

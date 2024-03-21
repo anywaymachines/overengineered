@@ -15,16 +15,22 @@ interface Transform {
 
 class FuncTransform implements Transform {
 	private readonly func: () => void;
+	private finished = false;
 
 	constructor(func: () => void) {
 		this.func = func;
 	}
 
 	runFrame(_: never): boolean {
+		if (this.finished) return true;
+
+		this.finished = true;
 		this.func();
 		return true;
 	}
 	finish() {
+		if (this.finished) return;
+
 		this.func();
 	}
 }

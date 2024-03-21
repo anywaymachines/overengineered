@@ -92,7 +92,7 @@ export default class PlayerDataStorage {
 
 	static async loadPlayerSlot(index: number) {
 		Logger.info("Loading slot " + index);
-		LoadingController.show("Loading slot");
+		LoadingController.show("Loading a slot");
 
 		try {
 			const response = await Remotes.Client.GetNamespace("Slots").Get("Load").CallServerAsync(index);

@@ -2,6 +2,7 @@ import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import PlayerDataStorage from "client/PlayerDataStorage";
 import Machine from "client/blocks/Machine";
 import InputController from "client/controller/InputController";
+import { LoadingController } from "client/controller/LoadingController";
 import LocalPlayerController from "client/controller/LocalPlayerController";
 import Control from "client/gui/Control";
 import { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
@@ -327,7 +328,9 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		this.actionbar = new ActionBarControl(gui.ActionBar, this.controls);
 		this.add(this.actionbar);
-		this.actionbar.show();
+		const updateActionBarVisibility = () => this.actionbar.setVisible(!LoadingController.isLoading.get());
+		this.event.subscribeObservable2(LoadingController.isLoading, updateActionBarVisibility);
+		this.onEnable(updateActionBarVisibility);
 
 		this.info = new Control(this.gui.Info);
 		this.add(this.info);
