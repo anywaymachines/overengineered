@@ -58,10 +58,6 @@ root.enable();
 const updated = DateTime.fromUnixTimestamp($compileTime("UnixTimestamp")).FormatUniversalTime("DDMMYY_HHmm", "en-us");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `DEVTEST | v${game.PlaceVersion} | ${updated}`;
 
-Players.PlayerAdded.Connect((p) => {
-	(p.WaitForChild("Character") as Model).ModelStreamingMode = Enum.ModelStreamingMode.Persistent;
-});
-
 dataLoading.await();
 while (!(Workspace.GetAttribute("loaded") as boolean | undefined)) {
 	task.wait();
