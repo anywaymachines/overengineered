@@ -76,10 +76,15 @@ export default class RideMode implements PlayModeBase {
 		return { success: true };
 	}
 	private rideStop(player: Player): Response {
-		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-		const blocks = plot.Blocks;
+		const plot = SharedPlots.getPlotComponentByOwnerID(player.UserId);
+		const blocks = plot.instance.Blocks;
 
-		blocks.ClearAllChildren();
+		for (const block of plot.getBlocks()) {
+			block.Destroy();
+			if (math.random(6) === 1) {
+				task.wait();
+			}
+		}
 
 		const cache = this.cache.get(player);
 		if (cache) {
@@ -95,7 +100,7 @@ export default class RideMode implements PlayModeBase {
 		} else {
 			const blocksToLoad = SlotDatabase.instance.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
 			if (blocksToLoad !== undefined) {
-				BlocksSerializer.deserialize(blocksToLoad, plot);
+				BlocksSerializer.deserialize(blocksToLoad, plot.instance);
 			}
 		}
 

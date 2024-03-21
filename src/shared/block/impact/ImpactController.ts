@@ -2,33 +2,38 @@ import Logger from "shared/Logger";
 import RemoteEvents from "shared/RemoteEvents";
 import TerrainDataInfo from "shared/TerrainDataInfo";
 import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
+import { Component } from "shared/component/Component";
 import Effects from "shared/effects/Effects";
+import Objects from "shared/fixes/objects";
 import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
 
-export default class ImpactController {
-	static STRONG_BLOCKS = ["smallwheel", "wheel"];
+const strongBlocks: readonly string[] = ["smallwheel", "wheel"];
 
-	static readonly STRONG_BLOCKS_ALLOWED_DIFF = 1500 as const;
-	static readonly OBJECTS_ALLOWED_DIFF = 70 as const;
+const strongBlocksAllowedDiff = 1500;
+const objectsAllowedDiff = 70;
 
-	static readonly WATER_DIFF_MULTIPLIER = 4.5 as const;
-	static readonly PLAYER_CHARACTER_DIFF_MULTIPLIER = 4 as const;
+const waterDiffMultiplier = 4.5;
+const playerCharacterDiffMultiplier = 4;
 
-	static readonly MATERIAL_STRONGNESS: { [key: string]: number } = {};
+const materialStrongness: { readonly [k in Enum.Material["Name"]]: number } = Objects.fromEntries(
+	Enum.Material.GetEnumItems().map((material) => {
+		const physicalProperties = new PhysicalProperties(material);
+		const strongness = math.max(0.5, physicalProperties.Density / 3.5);
+		Logger.info(`Strongness of '${material.Name}' set to ${strongness}`);
 
-	static {
-		Enum.Material.GetEnumItems().forEach((material) => {
-			const physicalProperties = new PhysicalProperties(material);
-			const strongness = math.max(0.5, physicalProperties.Density / 3.5);
-			this.MATERIAL_STRONGNESS[material.Name] = strongness;
-			Logger.info(`Strongness of '${material.Name}' set to ${strongness}`);
-		});
-	}
+		return [material.Name, strongness] as const;
+	}),
+);
 
-	static initializeBlocks(blocks: readonly PlacedBlockData[]) {
-		blocks.forEach((value) => {
-			PartUtils.applyToAllDescendantsOfType("BasePart", value.instance, (part) => {
+export class ImpactController extends Component {
+	private readonly events: RBXScriptConnection[] = [];
+
+	constructor(blocks: readonly PlacedBlockData[]) {
+		super();
+
+		for (const block of blocks) {
+			PartUtils.applyToAllDescendantsOfType("BasePart", block.instance, (part) => {
 				if (
 					!part.CanTouch ||
 					!part.CanCollide ||
@@ -40,12 +45,24 @@ export default class ImpactController {
 				) {
 					return;
 				}
-				this.initializeBlock(part);
+
+				const event = this.initializeBlock(part);
+				if (event) {
+					this.events.push(event);
+				}
 			});
-		});
+		}
 	}
 
-	private static initializeBlock(part: BasePart) {
+	destroy(): void {
+		for (const event of this.events) {
+			event.Disconnect();
+		}
+
+		super.destroy();
+	}
+
+	private initializeBlock(part: BasePart) {
 		const blockData = BlockManager.getBlockDataByPart(part);
 
 		if (!blockData) {
@@ -65,7 +82,7 @@ export default class ImpactController {
 			// Don't let the blocks collapse too much
 			if (
 				part.AssemblyMass < part.Mass * 7 &&
-				!this.STRONG_BLOCKS.includes(blockData.id) &&
+				!strongBlocks.includes(blockData.id) &&
 				math.min(part.Size.X, part.Size.Y, part.Size.Z) > 1
 			) {
 				event.Disconnect();
@@ -73,21 +90,21 @@ export default class ImpactController {
 			}
 
 			// Default diff
-			let allowedMagnitudeDiff: number = this.STRONG_BLOCKS.includes(blockData.id)
-				? this.STRONG_BLOCKS_ALLOWED_DIFF
-				: this.OBJECTS_ALLOWED_DIFF;
+			let allowedMagnitudeDiff: number = strongBlocks.includes(blockData.id)
+				? strongBlocksAllowedDiff
+				: objectsAllowedDiff;
 
 			// Some randomness
 			allowedMagnitudeDiff += math.random(0, 30);
 
 			// Terrain Water
 			if (part.CFrame.Y < TerrainDataInfo.getData().waterHeight + 4) {
-				allowedMagnitudeDiff *= this.WATER_DIFF_MULTIPLIER;
+				allowedMagnitudeDiff *= waterDiffMultiplier;
 			}
 
 			// Player character diff
 			if (PlayerUtils.isPlayerPart(hit)) {
-				allowedMagnitudeDiff *= this.PLAYER_CHARACTER_DIFF_MULTIPLIER;
+				allowedMagnitudeDiff *= playerCharacterDiffMultiplier;
 			}
 
 			// Compute magnitudes
@@ -95,7 +112,7 @@ export default class ImpactController {
 			const secondPartMagnitude = hit.AssemblyLinearVelocity.Magnitude + hit.AssemblyAngularVelocity.Magnitude;
 
 			// Material protection
-			allowedMagnitudeDiff *= this.MATERIAL_STRONGNESS[part.Material.Name];
+			allowedMagnitudeDiff *= materialStrongness[part.Material.Name];
 			const magnitudeDiff = math.abs(partMagnitude - secondPartMagnitude);
 
 			if (magnitudeDiff > allowedMagnitudeDiff * 5) {
@@ -121,5 +138,7 @@ export default class ImpactController {
 				Effects.Sparks.sendToNetworkOwnerOrEveryone(part, { part });
 			}
 		});
+
+		return event;
 	}
 }

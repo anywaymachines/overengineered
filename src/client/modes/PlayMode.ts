@@ -2,11 +2,13 @@ import { ClientContainerComponent } from "client/component/ClientContainerCompon
 import Control from "client/gui/Control";
 
 export default abstract class PlayMode extends ClientContainerComponent {
-	public abstract getName(): PlayModes;
-	public abstract onSwitchToNext(mode: PlayModes | undefined): void;
-	public abstract onSwitchFromPrev(prev: PlayModes | undefined): void;
+	abstract getName(): PlayModes;
+	abstract onSwitchToNext(mode: PlayModes | undefined): void;
+	abstract onSwitchFromPrev(prev: PlayModes | undefined): void;
+	onImmediateSwitchToNext(mode: PlayModes | undefined): void {}
+	onImmediateSwitchFromPrev(prev: PlayModes | undefined): void {}
 
-	public enable() {
+	enable() {
 		for (const child of this.getChildren()) {
 			if (child instanceof Control) {
 				child.show();
@@ -15,7 +17,7 @@ export default abstract class PlayMode extends ClientContainerComponent {
 
 		super.enable();
 	}
-	public disable() {
+	disable() {
 		for (const child of this.getChildren()) {
 			if (child instanceof Control) {
 				child.hide();

@@ -9,7 +9,7 @@ import Objects from "shared/fixes/objects";
 import BlockLogic from "./BlockLogic";
 import ConfigurableBlockLogic from "./ConfigurableBlockLogic";
 import logicRegistry, { LogicRegistry } from "./LogicRegistry";
-import ImpactController from "./impact/ImpactController";
+import { ImpactController } from "./impact/ImpactController";
 import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
 
 export default class SharedMachine extends ContainerComponent {
@@ -69,10 +69,14 @@ export default class SharedMachine extends ContainerComponent {
 	protected initialize(blocks: readonly PlacedBlockData[]) {
 		this.initializeSpeedLimiter();
 		this.initializeBlockConnections();
-		this.initializeDestructionIfNeeded(blocks);
+
+		const impact = this.createImpactControllerIfNeeded(blocks);
+		if (impact) {
+			this.parent(impact);
+		}
 	}
-	protected initializeDestructionIfNeeded(blocks: readonly PlacedBlockData[]) {
-		ImpactController.initializeBlocks(blocks);
+	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {
+		return new ImpactController(blocks);
 	}
 
 	initializeSpeedLimiter() {

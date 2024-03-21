@@ -2,7 +2,7 @@ import PlayerDataStorage from "client/PlayerDataStorage";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import SharedMachine from "shared/block/SharedMachine";
 import blockConfigRegistry, { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import ImpactController from "shared/block/impact/ImpactController";
+import { ImpactController } from "shared/block/impact/ImpactController";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { Config } from "shared/config/Config";
@@ -24,11 +24,12 @@ export default class Machine extends SharedMachine {
 		super.initialize(blocks);
 		this.initializeControls();
 	}
-	protected initializeDestructionIfNeeded(blocks: readonly PlacedBlockData[]) {
-		// no super
-		if (PlayerDataStorage.config.get().impact_destruction) {
-			ImpactController.initializeBlocks(blocks);
+	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {
+		if (!PlayerDataStorage.config.get().impact_destruction) {
+			return undefined;
 		}
+
+		return super.createImpactControllerIfNeeded(blocks);
 	}
 
 	initializeControls() {

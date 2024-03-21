@@ -12,6 +12,8 @@ export default class Signals {
 		DIED: this.registerSignal(new Signal<() => void>()),
 	} as const;
 
+	static readonly LOCAL_PLAY_MODE_CHANGED = new Signal<(mode: PlayModes) => void>();
+
 	private static registerSignal<T extends Signal>(signal: T): T {
 		return signal;
 	}

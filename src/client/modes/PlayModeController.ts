@@ -10,8 +10,8 @@ import BuildingMode from "./build/BuildingMode";
 import RideMode from "./ride/RideMode";
 
 export default class PlayModeController extends ClientComponent {
-	public readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
-	public readonly modes;
+	readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
+	readonly modes;
 
 	constructor() {
 		super();
@@ -55,13 +55,24 @@ export default class PlayModeController extends ClientComponent {
 		this.event.subscribe(Signals.PLAYER.DIED, () => this.setMode(undefined, this.playmode.get()));
 
 		this.setMode(this.playmode.get(), undefined);
+
+		this.event.subscribe(Signals.LOCAL_PLAY_MODE_CHANGED, (mode) => this.callImmediateSetMode(mode));
 	}
 
 	getDebugChildren(): readonly IDebuggableComponent[] {
 		return [...super.getDebugChildren(), ...Objects.values(this.modes)];
 	}
 
-	private async setMode(mode: PlayModes | undefined, prev: PlayModes | undefined) {
+	private callImmediateSetMode(mode: PlayModes) {
+		const prev = this.playmode.get();
+
+		if (prev) {
+			this.modes[prev].onImmediateSwitchToNext(mode);
+		}
+
+		this.modes[mode].onImmediateSwitchFromPrev(prev);
+	}
+	private setMode(mode: PlayModes | undefined, prev: PlayModes | undefined) {
 		if (mode === prev) return;
 
 		if (prev) {

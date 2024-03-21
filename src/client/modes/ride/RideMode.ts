@@ -1,10 +1,10 @@
 import { Players } from "@rbxts/services";
 import Machine from "client/blocks/Machine";
+import SoundController from "client/controller/SoundController";
+import Gui from "client/gui/Gui";
 import RideModeScene, { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
+import PlayMode from "client/modes/PlayMode";
 import SharedPlots from "shared/building/SharedPlots";
-import SoundController from "../../controller/SoundController";
-import Gui from "../../gui/Gui";
-import PlayMode from "../PlayMode";
 
 export default class RideMode extends PlayMode {
 	private currentMachine?: Machine;
@@ -25,11 +25,13 @@ export default class RideMode extends PlayMode {
 		return this.currentMachine;
 	}
 
-	public onSwitchToNext(mode: PlayModes | undefined) {
+	onImmediateSwitchToNext(mode: PlayModes | undefined): void {
 		this.currentMachine?.destroy();
 		this.currentMachine = undefined;
 	}
-	public onSwitchFromPrev(prev: PlayModes | undefined) {
+
+	onSwitchToNext(mode: PlayModes | undefined) {}
+	onSwitchFromPrev(prev: PlayModes | undefined) {
 		if (prev === undefined) {
 			//
 		} else if (prev === "build") {
