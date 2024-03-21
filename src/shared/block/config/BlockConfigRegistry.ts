@@ -576,8 +576,8 @@ const wing = {
 		enabled: {
 			displayName: "Enabled",
 			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
+			default: true as boolean,
+			config: true as boolean,
 			connectorHidden: true,
 		},
 	},
