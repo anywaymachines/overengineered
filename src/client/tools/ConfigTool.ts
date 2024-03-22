@@ -28,15 +28,15 @@ export default class ConfigTool extends ToolBase {
 
 		this.onPrepare((input) => {
 			if (input === "Desktop") {
-				this.eventHandler.subscribe(this.mouse.Button1Down, () => {
+				this.inputHandler.onMouse1Down(() => {
 					if (!InputController.isCtrlPressed()) {
 						fireSelected();
 					}
-				});
+				}, false);
 			} else if (input === "Gamepad") {
 				this.inputHandler.onKeyDown("ButtonX", fireSelected);
 			} else if (input === "Touch") {
-				this.inputHandler.onTouchTap(fireSelected);
+				this.inputHandler.onTouchTap(fireSelected, false);
 			}
 		});
 
