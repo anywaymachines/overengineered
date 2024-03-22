@@ -17,7 +17,6 @@ export type Templates = {
 	slider: () => ConfigPartDefinition<SliderControlDefinition>;
 	multi: () => ConfigPartDefinition<MultiTemplate>;
 	dropdown: () => ConfigPartDefinition<DropdownListDefinition>;
-	//camera: () => ConfigPartDefinition<CameraTemplate>;
 };
 
 type Template = {
@@ -26,7 +25,6 @@ type Template = {
 	readonly SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 	readonly MultiTemplate: ConfigPartDefinition<MultiTemplate>;
 	readonly DropdownTemplate: ConfigPartDefinition<DropdownListDefinition>;
-	//readonly CameraTemplate: ConfigPartDefinition<MultiTemplate>;
 };
 
 type ConfigControlDefinition = GuiObject;
@@ -40,7 +38,6 @@ class ConfigControl<TDef extends PlayerConfigTypes.Definitions> extends Control<
 	private readonly sliderTemplate;
 	private readonly dayCycleTemplate;
 	private readonly dropdownTemplate;
-	//private readonly cameraTemplate;
 
 	private settedElements = new Map<keyof TDef, Control>();
 
@@ -79,7 +76,6 @@ class ConfigControl<TDef extends PlayerConfigTypes.Definitions> extends Control<
 					slider: this.sliderTemplate,
 					multi: this.dayCycleTemplate,
 					dropdown: this.dropdownTemplate,
-					//camera: this.cameraTemplate,
 				},
 				config[id] as never,
 				def as never,
@@ -232,11 +228,6 @@ export class BeaconsValueControl extends ConfigValueControl<MultiTemplate> {
 	}
 }
 
-type CameraTemplate = GuiObject & {
-	readonly Improved: ConfigPartDefinition<ToggleControlDefinition>;
-	readonly StrictFollow: ConfigPartDefinition<ToggleControlDefinition>;
-	readonly PlayerCentered: ConfigPartDefinition<ToggleControlDefinition>;
-};
 export class CameraValueControl extends ConfigValueControl<MultiTemplate> {
 	readonly submitted = new Signal<(config: PlayerConfigTypes.Camera["config"]) => void>();
 
@@ -281,41 +272,37 @@ export class CameraValueControl extends ConfigValueControl<MultiTemplate> {
 		};
 		this.event.subscribe(improved.submitted, setImprovedControlsEnabled);
 		setImprovedControlsEnabled(config.improved);
+	}
+}
 
-		/*const improved = this.add(
-			new BoolConfigValueControl(this.gui.Control.Improved, config.improved, {
-				displayName: "Improved",
-				type: "bool",
-				config: definition.config.improved,
-			}),
-		);
-		const strictFollow = this.add(
-			new BoolConfigValueControl(this.gui.Control.StrictFollow, config.strictFollow, {
-				displayName: "Strict Follow",
-				type: "bool",
-				config: definition.config.strictFollow,
-			}),
-		);
-		const playerCentered = this.add(
-			new BoolConfigValueControl(this.gui.Control.PlayerCentered, config.playerCentered, {
-				displayName: "Player Centered",
-				type: "bool",
-				config: definition.config.playerCentered,
-			}),
-		);
+export class GraphicsValueControl extends ConfigValueControl<MultiTemplate> {
+	readonly submitted = new Signal<(config: PlayerConfigTypes.Graphics["config"]) => void>();
 
-		this.event.subscribe(improved.submitted, (value) => {
-			strictFollow.setEnabled(value);
-			playerCentered.setEnabled(value);
+	constructor(
+		templates: Templates,
+		config: PlayerConfigTypes.Graphics["config"],
+		definition: ConfigTypeToDefinition<PlayerConfigTypes.Graphics>,
+	) {
+		super(templates.multi(), definition.displayName);
 
-			this.submitted.Fire((config = { ...config, improved: value }));
+		const def = {
+			localShadows: {
+				displayName: "Local shadows",
+				type: "bool",
+				config: definition.config.localShadows,
+			},
+			othersShadows: {
+				displayName: "Others' shadows",
+				type: "bool",
+				config: definition.config.othersShadows,
+			},
+		} as const satisfies PlayerConfigTypes.Definitions;
+		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
+
+		const control = this.add(new ConfigControl(this.gui.Control, config, def));
+		this.event.subscribe(control.configUpdated, (key, value) => {
+			this.submitted.Fire((config = { ...config, [key]: value }));
 		});
-		this.event.subscribe(strictFollow.submitted, (value) => {
-			this.submitted.Fire((config = { ...config, strictFollow: value }));
-		});
-		this.event.subscribe(playerCentered.submitted, (value) => {
-			this.submitted.Fire((config = { ...config, playerCentered: value }));
-		});*/
 	}
 }
 
@@ -328,6 +315,7 @@ export const configControls = {
 	dayCycle: DayCycleValueControl,
 	beacons: BeaconsValueControl,
 	camera: CameraValueControl,
+	graphics: GraphicsValueControl,
 } as const satisfies {
 	readonly [k in keyof PlayerConfigTypes.Types]: {
 		new (

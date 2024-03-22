@@ -67,7 +67,24 @@ const v4: UpdatablePlayerConfigVersion<PlayerConfigV4, PlayerConfigV3> = {
 	},
 };
 
-const versions = [v1, v2, v3, v4] as const;
+// Added graphics config
+type PlayerConfigV5 = PlayerConfigV4 & { graphics: GraphicsConfiguration };
+const v5: UpdatablePlayerConfigVersion<PlayerConfigV5, PlayerConfigV4> = {
+	version: 5,
+
+	update(prev: Partial<PlayerConfigV4>): Partial<PlayerConfigV5> {
+		return {
+			...prev,
+			version: this.version,
+			graphics: {
+				localShadows: false,
+				othersShadows: false,
+			},
+		};
+	},
+};
+
+const versions = [v1, v2, v3, v4, v5] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 export const PlayerConfigUpdater = {

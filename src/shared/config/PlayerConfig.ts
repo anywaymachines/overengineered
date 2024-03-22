@@ -12,6 +12,10 @@ declare global {
 		readonly strictFollow: boolean;
 		readonly playerCentered: boolean;
 	};
+	type GraphicsConfiguration = {
+		readonly localShadows: boolean;
+		readonly othersShadows: boolean;
+	};
 
 	namespace PlayerConfigTypes {
 		export type Bool = ConfigType<"bool", boolean>;
@@ -24,6 +28,7 @@ declare global {
 		export type DayCycle = ConfigType<"dayCycle", DayCycleConfiguration>;
 		export type Beacons = ConfigType<"beacons", BeaconsConfiguration>;
 		export type Camera = ConfigType<"camera", CameraConfiguration>;
+		export type Graphics = ConfigType<"graphics", GraphicsConfiguration>;
 
 		export interface Types {
 			readonly bool: Bool;
@@ -32,6 +37,7 @@ declare global {
 			readonly dayCycle: DayCycle;
 			readonly beacons: Beacons;
 			readonly camera: Camera;
+			readonly graphics: Graphics;
 		}
 
 		export type Definitions = ConfigTypesToDefinition<keyof Types, Types>;
@@ -50,6 +56,14 @@ export const PlayerConfigDefinition = {
 			improved: false as boolean,
 			strictFollow: false as boolean,
 			playerCentered: false as boolean,
+		},
+	},
+	graphics: {
+		displayName: "Graphics",
+		type: "graphics",
+		config: {
+			localShadows: false as boolean,
+			othersShadows: false as boolean,
 		},
 	},
 	music: {

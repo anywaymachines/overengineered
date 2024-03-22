@@ -2,6 +2,7 @@ import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/servic
 import PlayerDataStorage from "client/PlayerDataStorage";
 import CharacterController from "client/controller/CharacterController";
 import GameEnvironmentController from "client/controller/GameEnvironmentController";
+import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
 import { LoadingController } from "client/controller/LoadingController";
 import LocalPlayerController from "client/controller/LocalPlayerController";
 import SoundController from "client/controller/SoundController";
@@ -48,6 +49,7 @@ if (RunService.IsStudio()) {
 }
 
 SoundController.initialize();
+GraphicsSettingsController.initialize();
 
 const root = new ClientContainerComponent();
 rootComponents.push(root);
