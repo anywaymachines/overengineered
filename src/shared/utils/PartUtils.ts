@@ -1,5 +1,3 @@
-import { RunService } from "@rbxts/services";
-
 export default class PartUtils {
 	static ghostModel(model: Model, color: Color3) {
 		function fix(part: BasePart | UnionOperation) {
@@ -57,17 +55,5 @@ export default class PartUtils {
 		children.forEach((element) => {
 			callback(element);
 		});
-	}
-
-	static BreakJoints(part: BasePart) {
-		const joints = part.GetJoints();
-		joints.forEach((constraint) => {
-			constraint.Destroy();
-		});
-
-		if (!RunService.IsClient() && game.PrivateServerOwnerId === 0 && !part.HasTag("Disappearing")) {
-			game.GetService("Debris").AddItem(part, math.random(20, 60));
-			part.AddTag("Disappearing");
-		}
 	}
 }

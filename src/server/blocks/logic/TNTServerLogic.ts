@@ -1,6 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import SpreadingFireController from "server/SpreadingFireController";
 import ServerBlockLogic from "server/blocks/ServerBlockLogic";
+import ServerPartUtils from "server/plots/ServerPartUtils";
 import TNTBlockLogic from "shared/block/logic/TNTBlockLogic";
 import BlockManager from "shared/building/BlockManager";
 import Effects from "shared/effects/Effects";
@@ -46,7 +47,7 @@ export default class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBloc
 			}
 
 			if (math.random(1, 2) === 1) {
-				PartUtils.BreakJoints(part);
+				ServerPartUtils.BreakJoints(part);
 			}
 
 			part.Velocity = new Vector3(

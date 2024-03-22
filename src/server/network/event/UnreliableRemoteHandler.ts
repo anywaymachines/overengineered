@@ -1,11 +1,11 @@
 import SpreadingFireController from "server/SpreadingFireController";
 import PlayerDatabase from "server/database/PlayerDatabase";
+import ServerPartUtils from "server/plots/ServerPartUtils";
 import RemoteEvents from "shared/RemoteEvents";
 import BlockManager from "shared/building/BlockManager";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import EffectBase from "shared/effects/EffectBase";
 import Effects from "shared/effects/Effects";
-import PartUtils from "shared/utils/PartUtils";
 
 const UnreliableRemoteHandler = {
 	init() {
@@ -41,7 +41,7 @@ const UnreliableRemoteHandler = {
 	impactBreakEvent(player: Player | undefined, part: BasePart) {
 		if (!BlockManager.isActiveBlockPart(part)) return;
 
-		PartUtils.BreakJoints(part);
+		ServerPartUtils.BreakJoints(part);
 
 		// Play sounds
 		Effects.ImpactSound.send(player ? [player] : "everyone", { part, index: undefined });

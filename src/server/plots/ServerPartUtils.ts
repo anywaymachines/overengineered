@@ -13,4 +13,25 @@ export default class ServerPartUtils {
 			part.SetNetworkOwner(owner);
 		});
 	}
+
+	static readonly removeQueue = new Set<Instance>();
+
+	static BreakJoints(part: BasePart) {
+		const joints = part.GetJoints();
+		joints.forEach((constraint) => {
+			constraint.Destroy();
+		});
+
+		if (part.IsA("VehicleSeat")) return;
+
+		if (game.PrivateServerOwnerId === 0 && !this.removeQueue.has(part)) {
+			const time = math.random(20, 60);
+			game.GetService("Debris").AddItem(part, time);
+
+			this.removeQueue.add(part);
+			task.delay(time, () => {
+				this.removeQueue.delete(part);
+			});
+		}
+	}
 }

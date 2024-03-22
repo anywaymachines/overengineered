@@ -37,8 +37,9 @@ interface Manager<T> {
 /** Methods for reading information about a block */
 export default class BlockManager {
 	static isActiveBlockPart(part: Instance): boolean {
-		if (!this.isBlockPart(part) || part.AssemblyRootPart?.Anchored || part.Anchored /*|| part.HasTag("Burn")*/)
+		if (!this.isBlockPart(part) || part.AssemblyRootPart?.Anchored || part.Anchored) {
 			return false;
+		}
 
 		return true;
 	}

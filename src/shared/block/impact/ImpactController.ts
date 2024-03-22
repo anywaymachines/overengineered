@@ -116,7 +116,7 @@ export class ImpactController extends Component {
 			const magnitudeDiff = math.abs(partMagnitude - secondPartMagnitude);
 
 			if (magnitudeDiff > allowedMagnitudeDiff * 5) {
-				PartUtils.BreakJoints(part);
+				//PartUtils.BreakJoints(part);
 				RemoteEvents.ImpactExplode.send({
 					part,
 					blastRadius: 1 + magnitudeDiff / (2 * allowedMagnitudeDiff * 5),
@@ -129,7 +129,7 @@ export class ImpactController extends Component {
 				}
 
 				if (math.random(1, 5) > 1) {
-					PartUtils.BreakJoints(part);
+					//PartUtils.BreakJoints(part);
 					RemoteEvents.ImpactBreak.send(part);
 
 					event.Disconnect();
