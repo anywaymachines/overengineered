@@ -117,14 +117,18 @@ export default class ToolController extends ClientComponent {
 		this.tools = tools;
 
 		let prevTool: ToolBase | undefined = undefined;
+		let wasSetByLoading = false;
+		this.onEnable(() => (wasSetByLoading = false));
+
 		const input = this.parent(new ToolInputController(this));
 		this.event.subscribeObservable2(
 			LoadingController.isLoading,
 			(loading) => {
 				if (loading) {
+					wasSetByLoading = true;
 					prevTool = this.selectedTool.get();
 					this.selectedTool.set(undefined);
-				} else {
+				} else if (wasSetByLoading) {
 					this.selectedTool.set(prevTool);
 					prevTool = undefined;
 				}
