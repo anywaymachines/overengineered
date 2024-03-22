@@ -1,21 +1,19 @@
-import { HttpService, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { HttpService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import { ClientComponentChild } from "client/component/ClientComponentChild";
 import InputController from "client/controller/InputController";
-import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
-import Gui from "client/gui/Gui";
 import GuiAnimator from "client/gui/GuiAnimator";
 import { ButtonControl, TextButtonControl, type TextButtonDefinition } from "client/gui/controls/Button";
 import LogControl from "client/gui/static/LogControl";
-import { InputTooltips, TooltipsHolder } from "client/gui/static/TooltipsControl";
+import { InputTooltips } from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
+import { BlockMover } from "client/tools/selectors/BlockMover";
 import { HoveredBlocksHighlighter } from "client/tools/selectors/HoveredBlocksHighlighter";
 import { SelectedBlocksHighlighter } from "client/tools/selectors/SelectedBlocksHighlighter";
-import Remotes from "shared/Remotes";
+import { Element } from "shared/Element";
 import BlockManager from "shared/building/BlockManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { ComponentChild } from "shared/component/ComponentChild";
@@ -24,8 +22,8 @@ import { TransformService } from "shared/component/TransformService";
 import NumberObservableValue from "shared/event/NumberObservableValue";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import ObservableValue, { type ReadonlyObservableValue } from "shared/event/ObservableValue";
-import { AABB } from "shared/fixes/AABB";
 import Objects from "shared/fixes/objects";
+import PartUtils from "shared/utils/PartUtils";
 
 namespace Scene {
 	export interface EditToolSceneDefinition extends GuiObject, Selectors.SelectorGuiDefinition {
@@ -43,7 +41,7 @@ namespace Scene {
 			this.tool = tool;
 
 			const move = this.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
-			const clone = this.add(new ButtonControl(this.gui.Bottom.CloneButton, () => tool.cloneBlocks()));
+			const clone = this.add(new ButtonControl(this.gui.Bottom.CloneButton, () => tool.toggleMode("Clone")));
 
 			const buttons: readonly ButtonControl[] = [move, clone];
 			this.event.subscribeCollection(
@@ -65,7 +63,7 @@ namespace Scene {
 				true,
 			);
 
-			const modeButtons: Readonly<Record<EditToolMode, ButtonControl>> = { Move: move };
+			const modeButtons: Readonly<Record<EditToolMode, ButtonControl>> = { Move: move, Clone: clone };
 			this.event.subscribeObservable2(
 				tool.selectedMode,
 				(mode) => {
@@ -321,236 +319,125 @@ namespace Selectors {
 }
 
 namespace Controllers {
-	export interface IController extends IComponent {}
-
-	abstract class MoveBase extends ClientComponent implements IController {
-		protected readonly tooltipHolder = this.parent(TooltipsHolder.createComponent("Moving"));
-
-		protected readonly step: ReadonlyObservableValue<number>;
-		protected readonly plot: SharedPlot;
-		protected readonly blocks: readonly BlockModel[];
-		protected readonly pivots: readonly (readonly [BlockModel, CFrame])[];
-		protected readonly plotBounds: AABB;
-		protected difference: Vector3 = Vector3.zero;
-
-		constructor(plot: SharedPlot, blocks: readonly BlockModel[], step: ReadonlyObservableValue<number>) {
-			super();
-
-			this.plot = plot;
-			this.blocks = blocks;
-			this.step = step;
-			this.plotBounds = plot.bounds;
-			this.pivots = blocks.map((p) => [p, p.GetPivot()] as const);
-
-			const moveHandles = this.initializeHandles();
-			this.onDisable(async () => {
-				await this.submit();
-				moveHandles.Destroy();
-			});
-
-			this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
-		}
-
-		protected abstract initializeHandles(): Instance;
-		protected async submit(): Promise<boolean> {
-			if (this.difference === Vector3.zero) {
-				return true;
-			}
-
-			const response = await ClientBuilding.moveBlocks(this.plot, this.blocks, this.difference);
-			if (!response.success) {
-				LogControl.instance.addLine(response.message, Colors.red);
-			}
-
-			return response.success;
-		}
-
-		protected abstract getTooltips(): InputTooltips;
-	}
-	class DesktopMove extends MoveBase {
-		protected initializeHandles() {
-			const roundByStep = (number: number) => {
-				const step = this.step.get();
-				return number - (((number + step / 2) % step) - step / 2);
-			};
-			const limitMovement = (
-				regionSize: Vector3,
-				regionPos: Vector3,
-				direction: Vector3,
-				distance: number,
-				bounds: AABB,
-			): number => {
-				const axes = direction.X !== 0 ? "X" : direction.Y !== 0 ? "Y" : "Z";
-				const sign = math.sign(direction[axes]);
-
-				const blockOffsetMin = regionPos[axes] - regionSize[axes] / 2;
-				const blockOffsetMax = regionPos[axes] + regionSize[axes] / 2;
-				let boundsmin = (bounds.getMin()[axes] - blockOffsetMin) * sign;
-				let boundsmax = (bounds.getMax()[axes] - blockOffsetMax) * sign;
-				[boundsmin, boundsmax] = [math.min(boundsmin, boundsmax), math.max(boundsmin, boundsmax)];
-
-				return math.clamp(distance, boundsmin, boundsmax);
-			};
-
-			const initHandles = (instance: Handles) => {
-				let startpos = Vector3.zero;
-				let startDifference: Vector3 = Vector3.zero;
-
-				const defaultCameraType = Workspace.CurrentCamera!.CameraType;
-				this.event.subscribe(instance.MouseButton1Down, () => {
-					startpos = moveHandles.GetPivot().Position;
-					startDifference = this.difference;
-
-					if (InputController.inputType.get() === "Touch") {
-						Workspace.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
-					}
-				});
-				this.event.subscribe(instance.MouseButton1Up, async () => {
-					Workspace.CurrentCamera!.CameraType = defaultCameraType;
-				});
-
-				this.event.subscribe(instance.MouseDrag, (face, distance) => {
-					distance = limitMovement(
-						aabb.getSize(),
-						startpos,
-						Vector3.FromNormalId(face),
-						distance,
-						this.plotBounds,
-					);
-					distance = roundByStep(distance);
-
-					this.difference = startDifference.add(Vector3.FromNormalId(face).mul(distance));
-					if (!this.plotBounds.contains(aabb.withCenter(fullStartPos.add(this.difference)))) {
-						return;
-					}
-
-					moveHandles.PivotTo(new CFrame(fullStartPos.add(this.difference)));
-					for (const [block, startpos] of this.pivots) {
-						block.PivotTo(startpos.add(this.difference));
-					}
-				});
-			};
-
-			const aabb = AABB.fromModels(this.blocks);
-
-			const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
-			moveHandles.Size = aabb.getSize().add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
-			moveHandles.PivotTo(new CFrame(aabb.getCenter()));
-			moveHandles.Parent = Gui.getPlayerGui();
-
-			const fullStartPos: Vector3 = moveHandles.GetPivot().Position;
-			initHandles(moveHandles.XHandles);
-			initHandles(moveHandles.YHandles);
-			initHandles(moveHandles.ZHandles);
-
-			return moveHandles;
-		}
-
-		protected getTooltips(): InputTooltips {
-			return { Desktop: [{ keys: ["F"], text: "Stop moving" }] };
-		}
-	}
-	class TouchMove extends DesktopMove {}
-	class GamepadMove extends MoveBase {
-		protected initializeHandles() {
-			let direction: "+x" | "-x" | "+z" | "-z" = "+x";
-
-			const initHandles = (instance: MoveHandles) => {
-				const tryAddDiff = (diff: Vector3) => {
-					if (!this.plotBounds.contains(aabb.withCenter(fullStartPos.add(diff).add(this.difference)))) {
-						return;
-					}
-
-					this.difference = this.difference.add(diff);
-					moveHandles.PivotTo(new CFrame(fullStartPos.add(this.difference)));
-					for (const [block, startpos] of this.pivots) {
-						block.PivotTo(startpos.add(this.difference));
-					}
-				};
-
-				this.event.subInput((ih) => {
-					ih.onKeyDown("DPadUp", () => tryAddDiff(new Vector3(0, this.step.get(), 0)));
-					ih.onKeyDown("DPadDown", () => tryAddDiff(new Vector3(0, -this.step.get(), 0)));
-					ih.onKeyDown("DPadRight", () => tryAddDiff(getMoveDirection(true).mul(this.step.get())));
-					ih.onKeyDown("DPadLeft", () => tryAddDiff(getMoveDirection(false).mul(this.step.get())));
-				});
-
-				const getMoveDirection = (positive: boolean) => {
-					if (direction === "+x") {
-						return positive ? Vector3.xAxis : Vector3.xAxis.mul(-1);
-					} else if (direction === "-z") {
-						return positive ? Vector3.zAxis.mul(-1) : Vector3.zAxis;
-					} else if (direction === "+z") {
-						return positive ? Vector3.zAxis : Vector3.zAxis.mul(-1);
-					} else {
-						return positive ? Vector3.xAxis.mul(-1) : Vector3.xAxis;
-					}
-				};
-				const updateCamera = () => {
-					const lookvector = Workspace.CurrentCamera!.CFrame.LookVector;
-					if (math.abs(lookvector.X) > math.abs(lookvector.Z)) {
-						direction = lookvector.X > 0 ? "+z" : "-z";
-						instance.XHandles.Visible = false;
-						instance.ZHandles.Visible = true;
-					} else {
-						direction = lookvector.Z > 0 ? "-x" : "+x";
-						instance.XHandles.Visible = true;
-						instance.ZHandles.Visible = false;
-					}
-				};
-				this.event.subscribe(Signals.CAMERA.MOVED, updateCamera);
-				this.onEnable(updateCamera);
-			};
-
-			const aabb = AABB.fromModels(this.blocks);
-
-			const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
-			moveHandles.Size = aabb.getSize().add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
-			moveHandles.PivotTo(new CFrame(aabb.getCenter()));
-			moveHandles.Parent = Gui.getPlayerGui();
-
-			const fullStartPos: Vector3 = moveHandles.GetPivot().Position;
-			initHandles(moveHandles);
-
-			return moveHandles;
-		}
-
-		protected getTooltips(): InputTooltips {
-			return {
-				Gamepad: [
-					{ keys: ["ButtonX"], text: "Stop moving" },
-
-					{ keys: ["DPadUp"], text: "Move up" },
-					{ keys: ["DPadDown"], text: "Move down" },
-					{ keys: ["DPadLeft"], text: "Move left (based on camera)" },
-					{ keys: ["DPadRight"], text: "Move right (based on camera)" },
-				],
-			};
-		}
-	}
-
-	export class Move extends ClientComponent implements IController {
+	export class Move extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 
 		constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
 
-			ClientComponentChild.registerBasedOnInputType<IController>(this, {
-				Desktop: () => new DesktopMove(plot, blocks, this.step),
-				Touch: () => new TouchMove(plot, blocks, this.step),
-				Gamepad: () => new GamepadMove(plot, blocks, this.step),
+			const mover = this.parent(new BlockMover(plot, blocks));
+			this.step.autoSet(mover.step);
+
+			mover.moved.Connect(async (diff) => {
+				if (diff === Vector3.zero) {
+					return true;
+				}
+
+				const response = await ClientBuilding.moveBlocks(plot, blocks, diff);
+				if (!response.success) {
+					LogControl.instance.addLine(response.message, Colors.red);
+				}
+
+				return response.success;
+			});
+		}
+	}
+	export class Clone extends ClientComponent {
+		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
+
+		constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
+			super();
+
+			const ghostParent = Element.create(
+				"Model",
+				{ Parent: Workspace },
+				{
+					highlight: Element.create("Highlight", {
+						FillColor: Colors.blue,
+						FillTransparency: 0.4,
+						OutlineTransparency: 0.5,
+						DepthMode: Enum.HighlightDepthMode.Occluded,
+					}),
+				},
+			);
+			this.onDestroy(() => ghostParent.Destroy());
+
+			const mover = this.parent(
+				new BlockMover(
+					plot,
+					blocks.map((b) => {
+						b = b.Clone();
+						PartUtils.ghostModel(b, Colors.blue);
+						b.Parent = ghostParent;
+
+						return b;
+					}),
+				),
+			);
+			this.step.autoSet(mover.step);
+
+			mover.moved.Connect(async (diff) => {
+				if (diff === Vector3.zero) {
+					return true;
+				}
+
+				const createBlocksCopy = (blocks: readonly BlockModel[]): readonly PlaceBlockRequest[] => {
+					const existingBlocks = new Map<BlockUuid, BlockData>();
+					for (const block of blocks) {
+						const data = BlockManager.getBlockDataByBlockModel(block);
+						existingBlocks.set(data.uuid, data);
+					}
+
+					// <old, new>
+					const uuidmap = new Map<BlockUuid, Writable<PlaceBlockRequest & { uuid: BlockUuid }>>();
+
+					const newblocks = existingBlocks.map((_, data): Writable<PlaceBlockRequest> => {
+						const request = {
+							id: data.id,
+							uuid: HttpService.GenerateGUID(false) as BlockUuid,
+							location: data.instance.GetPivot().add(diff),
+							color: data.color,
+							material: data.material,
+							config: data.config,
+						} satisfies PlaceBlockRequest;
+
+						uuidmap.set(data.uuid, request);
+						return request;
+					});
+
+					for (const [olduuid, newblock] of uuidmap) {
+						const connections = { ...(existingBlocks.get(olduuid)?.connections ?? {}) };
+						for (const [, connection] of Objects.pairs(connections)) {
+							const neww = uuidmap.get(connection.blockUuid);
+							if (!neww) continue;
+
+							(connection as Writable<typeof connection>).blockUuid = neww.uuid;
+						}
+
+						newblock.connections = connections;
+					}
+
+					return newblocks;
+				};
+
+				const response = await ClientBuilding.placeBlocks(plot, createBlocksCopy(blocks));
+				if (!response.success) {
+					LogControl.instance.addLine(response.message, Colors.red);
+				}
+
+				return response.success;
 			});
 		}
 	}
 }
 
-export type EditToolMode = "Move";
+export type EditToolMode = "Move" | "Clone";
 export default class EditTool extends ToolBase {
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
 	private readonly _selected = new ObservableCollectionSet<BlockModel>();
 	readonly selected = this._selected.asReadonly();
-	private readonly controller = new ComponentChild<Controllers.IController>(this, true);
+	private readonly controller = new ComponentChild<IComponent>(this, true);
 	private readonly selector;
 
 	constructor(mode: BuildingMode) {
@@ -617,62 +504,6 @@ export default class EditTool extends ToolBase {
 	}
 	deselectAll() {
 		this.selector.deselectAll();
-	}
-	async cloneBlocks() {
-		const createBlocksCopy = (blocks: ReadonlySet<BlockModel>): readonly PlaceBlockRequest[] => {
-			// <old, new>
-			const uuidmap = new Map<BlockUuid, PlaceBlockRequest>();
-
-			const newblocks = blocks.map((block): Writable<PlaceBlockRequest> => {
-				const data = BlockManager.getBlockDataByBlockModel(block);
-				const request: Writable<PlaceBlockRequest> = {
-					id: data.id,
-					uuid: HttpService.GenerateGUID(false) as BlockUuid,
-					location: block.GetPivot(),
-					color: data.color,
-					material: data.material,
-					config: data.config,
-				};
-
-				uuidmap.set(data.uuid, request);
-				return request;
-			});
-
-			for (const [olduuid, newblock] of uuidmap) {
-				//
-			}
-
-			return newblocks;
-		};
-
-		const response = await Remotes.Client.GetNamespace("Building")
-			.Get("PlaceBlocks")
-			.CallServerAsync({
-				plot: this.targetPlot.get().instance,
-				blocks: this.selected.get().map((block): PlaceBlockRequest => {
-					const data = BlockManager.getBlockDataByBlockModel(block);
-
-					const updateConnections = () => {
-						//
-					};
-
-					return {
-						id: data.id,
-						location: block.GetPivot(),
-						color: data.color,
-						material: data.material,
-						config: data.config,
-					};
-				}),
-			});
-
-		if (!response.success) {
-			LogControl.instance.addLine(response.message, Colors.red);
-			return;
-		}
-
-		this._selected.setRange(...response.models);
-		this.toggleMode("Move");
 	}
 
 	getDisplayName(): string {
