@@ -292,7 +292,7 @@ export class GraphicsValueControl extends ConfigValueControl<MultiTemplate> {
 				config: definition.config.localShadows,
 			},
 			othersShadows: {
-				displayName: "Others' shadows",
+				displayName: "Others shadows",
 				type: "bool",
 				config: definition.config.othersShadows,
 			},

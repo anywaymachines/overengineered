@@ -85,7 +85,7 @@ export const PlayerConfigDefinition = {
 		config: true as boolean,
 	},
 	others_gfx: {
-		displayName: "Other's effects & sounds",
+		displayName: "Others effects & sounds",
 		type: "bool",
 		config: true as boolean,
 	},
