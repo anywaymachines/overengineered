@@ -9,7 +9,6 @@ import { blockRegistry } from "shared/Registry";
 import Remotes from "shared/Remotes";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import BlockManager from "shared/building/BlockManager";
-import SharedPlots from "shared/building/SharedPlots";
 import { Config } from "shared/config/Config";
 import ObservableValue from "shared/event/ObservableValue";
 import JSON from "shared/fixes/Json";
@@ -45,7 +44,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 			const response = await Remotes.Client.GetNamespace("Building")
 				.Get("UpdateConfigRequest")
 				.CallServerAsync({
-					plot: SharedPlots.getPlotByBlock(selected.get()[0].Parent)!,
+					plot: tool.targetPlot.get().instance,
 					configs: selected
 						.get()
 						.map((p) => p.Parent)
