@@ -1,4 +1,3 @@
-import { Workspace } from "@rbxts/services";
 import SpreadingFireController from "server/SpreadingFireController";
 import PlayerDatabase from "server/database/PlayerDatabase";
 import ServerPartUtils from "server/plots/ServerPartUtils";
@@ -15,16 +14,26 @@ const UnreliableRemoteHandler = {
 			PlayerConfigDefinition.others_gfx.config;
 
 		RemoteEvents.ImpactBreak.invoked.Connect((player, part) => this.impactBreakEvent(player, part));
-		RemoteEvents.ImpactExplode.invoked.Connect((player, { parts }) => this.impactExplodeEvent(player, parts));
+		RemoteEvents.ImpactExplode.invoked.Connect((player, parts) => this.impactExplodeEvent(player, parts));
 		RemoteEvents.Burn.invoked.Connect((_, parts) => this.burnEvent(parts));
 	},
 
-	impactExplodeEvent(player: Player | undefined, parts: Map<BasePart, number>) {
-		parts.forEach((blastRadius, block) => {
-			if (!BlockManager.isActiveBlockPart(block)) return;
-
-			const closestParts = Workspace.GetPartBoundsInRadius(block.Position, blastRadius);
-			this.impactBreakEvent(player, closestParts);
+	// TODO: Optimize @Maks_gaming
+	impactExplodeEvent(player: Player | undefined, parts: { part: BasePart; blastRadius: number }[]) {
+		parts.forEach((part) => {
+			const explosion = new Instance("Explosion");
+			explosion.BlastPressure = 2000;
+			explosion.BlastRadius = part.blastRadius;
+			explosion.ExplosionType = Enum.ExplosionType.NoCraters;
+			explosion.Visible = false;
+			explosion.Position = part.part.Position;
+			explosion.DestroyJointRadiusPercent = 0;
+			explosion.Parent = part.part;
+			explosion.Hit.Connect((part) => {
+				if (math.random(1, 3) > 1) {
+					this.impactBreakEvent(player, [part]);
+				}
+			});
 		});
 	},
 

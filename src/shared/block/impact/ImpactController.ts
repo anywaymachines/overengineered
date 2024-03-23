@@ -22,7 +22,7 @@ export class ImpactController extends Component {
 	private readonly events: RBXScriptConnection[] = [];
 
 	private breakQueue: BasePart[] = [];
-	private strongBreakQueue: Map<BasePart, number> = new Map();
+	private strongBreakQueue: { part: BasePart; blastRadius: number }[] = [];
 	private burnQueue: BasePart[] = [];
 
 	private readonly blocksStrength = 70;
@@ -54,19 +54,16 @@ export class ImpactController extends Component {
 
 		this.event.subscribe(RunService.Heartbeat, (dT) => {
 			if (this.breakQueue.size() > 0) {
-				print("breakQueue", this.breakQueue.size());
 				RemoteEvents.ImpactBreak.send(this.breakQueue);
 				this.breakQueue.clear();
 			}
 
 			if (this.strongBreakQueue.size() > 0) {
-				print("strongBreakQueue", this.strongBreakQueue.size());
-				RemoteEvents.ImpactExplode.send({ parts: this.strongBreakQueue });
+				RemoteEvents.ImpactExplode.send(this.strongBreakQueue);
 				this.strongBreakQueue.clear();
 			}
 
 			if (this.burnQueue.size() > 0) {
-				print("burnQueue", this.burnQueue.size());
 				RemoteEvents.Burn.send(this.burnQueue);
 				this.burnQueue.clear();
 			}
@@ -132,7 +129,7 @@ export class ImpactController extends Component {
 			const magnitudeDiff = math.abs(partMagnitude - secondPartMagnitude);
 
 			if (magnitudeDiff > allowedDifference * 5) {
-				this.strongBreakQueue.set(part, 1 + magnitudeDiff / (allowedDifference * 10));
+				this.strongBreakQueue.push({ part: part, blastRadius: 1 + magnitudeDiff / (allowedDifference * 10) });
 
 				event.Disconnect();
 			} else if (magnitudeDiff > allowedDifference) {

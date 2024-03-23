@@ -6,7 +6,7 @@ const RemoteEvents = {
 	...Effects,
 
 	Burn: new AutoC2SRemoteEvent<BasePart[]>("burn"),
-	ImpactExplode: new AutoC2SRemoteEvent<{ readonly parts: Map<BasePart, number> }>("impact_explode"),
+	ImpactExplode: new AutoC2SRemoteEvent<{ part: BasePart; blastRadius: number }[]>("impact_explode"),
 	ImpactBreak: new ImpactBreakAutoC2SRemoteEvent("impact_break"),
 
 	// empty method just to trigger constructors
