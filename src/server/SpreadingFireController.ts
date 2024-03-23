@@ -1,3 +1,4 @@
+import LocalInstanceData from "shared/LocalInstanceData";
 import BlockManager from "shared/building/BlockManager";
 import Effects from "shared/effects/Effects";
 import ServerPartUtils from "./plots/ServerPartUtils";
@@ -13,7 +14,7 @@ export default class SpreadingFireController {
 	private static isPartBurnable(part: BasePart) {
 		if (
 			!BlockManager.isActiveBlockPart(part) ||
-			part.HasTag("Burn") ||
+			LocalInstanceData.HasLocalTag(part, "Burn") ||
 			(math.random(1, 8) !== 1 && part.Position.Y < 1)
 		) {
 			return false;
@@ -27,7 +28,7 @@ export default class SpreadingFireController {
 			return;
 		}
 
-		part.AddTag("Burn");
+		LocalInstanceData.AddLocalTag(part, "Burn");
 
 		// Apply color
 		const rand_rgb = math.random(0, 50);
