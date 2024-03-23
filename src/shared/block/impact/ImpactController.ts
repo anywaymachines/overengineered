@@ -1,4 +1,3 @@
-import { RunService } from "@rbxts/services";
 import Logger from "shared/Logger";
 import RemoteEvents from "shared/RemoteEvents";
 import TerrainGenerator from "shared/TerrainGenerationController";
@@ -21,9 +20,9 @@ const materialStrongness: { readonly [k in Enum.Material["Name"]]: number } = Ob
 export class ImpactController extends Component {
 	private readonly events: RBXScriptConnection[] = [];
 
-	private breakQueue: BasePart[] = [];
-	private strongBreakQueue: Map<BasePart, number> = new Map();
-	private burnQueue: BasePart[] = [];
+	// private breakQueue: BasePart[] = [];
+	// private strongBreakQueue: Map<BasePart, number> = new Map();
+	// private burnQueue: BasePart[] = [];
 
 	private readonly blocksStrength = 70;
 	private readonly cylindricalBlocksStrength = 1500;
@@ -52,22 +51,25 @@ export class ImpactController extends Component {
 			this.subscribeOnBlock(block);
 		}
 
-		this.event.subscribe(RunService.Heartbeat, (dT) => {
-			if (this.breakQueue.size() > 0) {
-				RemoteEvents.ImpactBreak.send(this.breakQueue);
-				this.breakQueue.clear();
-			}
+		// this.event.subscribe(RunService.Heartbeat, (dT) => {
+		// 	if (this.breakQueue.size() > 0) {
+		// 		print("breakQueue", this.breakQueue.size());
+		// 		RemoteEvents.ImpactBreak.send(this.breakQueue);
+		// 		this.breakQueue.clear();
+		// 	}
 
-			if (this.strongBreakQueue.size() > 0) {
-				RemoteEvents.ImpactExplode.send({ parts: this.strongBreakQueue });
-				this.strongBreakQueue.clear();
-			}
+		// 	if (this.strongBreakQueue.size() > 0) {
+		// 		print("strongBreakQueue", this.strongBreakQueue.size());
+		// 		RemoteEvents.ImpactExplode.send({ parts: this.strongBreakQueue });
+		// 		this.strongBreakQueue.clear();
+		// 	}
 
-			if (this.burnQueue.size() > 0) {
-				RemoteEvents.Burn.send(this.burnQueue);
-				this.burnQueue.clear();
-			}
-		});
+		// 	if (this.burnQueue.size() > 0) {
+		// 		print("burnQueue", this.burnQueue.size());
+		// 		RemoteEvents.Burn.send(this.burnQueue);
+		// 		this.burnQueue.clear();
+		// 	}
+		// });
 	}
 
 	subscribeOnBlock(block: PlacedBlockData) {
@@ -121,15 +123,24 @@ export class ImpactController extends Component {
 			const magnitudeDiff = math.abs(partMagnitude - secondPartMagnitude);
 
 			if (magnitudeDiff > allowedDifference * 5) {
-				this.strongBreakQueue.set(part, 1 + magnitudeDiff / (2 * allowedDifference * 5));
+				//this.strongBreakQueue.set(part, 1 + magnitudeDiff / (allowedDifference * 10));
+
+				RemoteEvents.ImpactExplode.send({
+					parts: new Map([[part, 1 + magnitudeDiff / (allowedDifference * 10)]]),
+				});
+
 				event.Disconnect();
 			} else if (magnitudeDiff > allowedDifference) {
 				if (math.random(1, 20) === 1) {
-					this.burnQueue.push(part);
+					//this.burnQueue.push(part);
+
+					RemoteEvents.Burn.send([part]);
 				}
 
 				if (math.random(1, 5) > 1) {
-					this.breakQueue.push(part);
+					//this.breakQueue.push(part);
+
+					RemoteEvents.ImpactBreak.send([part]);
 
 					event.Disconnect();
 				}
