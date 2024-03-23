@@ -1,15 +1,11 @@
+import { Workspace } from "@rbxts/services";
 import LocalInstanceData from "shared/LocalInstanceData";
 import BlockManager from "shared/building/BlockManager";
 import Effects from "shared/effects/Effects";
 import ServerPartUtils from "./plots/ServerPartUtils";
 
-const explosionBase = new Instance("Explosion");
-explosionBase.BlastPressure = 0;
-explosionBase.BlastRadius = 3.5;
-explosionBase.ExplosionType = Enum.ExplosionType.NoCraters;
-explosionBase.DestroyJointRadiusPercent = 0;
-explosionBase.Visible = false;
-
+const overlapParams = new OverlapParams();
+overlapParams.CollisionGroup = "Blocks";
 export default class SpreadingFireController {
 	private static isPartBurnable(part: BasePart) {
 		if (
@@ -49,10 +45,8 @@ export default class SpreadingFireController {
 			}
 
 			// Burn closest parts
-			const explosion = explosionBase.Clone();
-			explosion.Position = part.Position;
-			explosion.Parent = part;
-			explosion.Hit.Connect((part, _) => {
+			const closestParts = Workspace.GetPartBoundsInRadius(part.Position, 3.5, overlapParams);
+			closestParts.forEach((part) => {
 				this.burn(part);
 			});
 		});
