@@ -15,7 +15,7 @@ class TerrainChunk {
 }
 
 export default class TerrainGenerator {
-	static instance = new TerrainGenerator(256, () => 1, 0);
+	static instance = new TerrainGenerator(256, () => 1, -2);
 	private ChunkMap: Map<Vector2, TerrainChunk> = new Map<Vector2, TerrainChunk>();
 	private noiseFunction: Function;
 	private heightLimit = 0;

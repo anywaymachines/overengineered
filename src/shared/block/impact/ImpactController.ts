@@ -1,3 +1,4 @@
+import { RunService } from "@rbxts/services";
 import Logger from "shared/Logger";
 import RemoteEvents from "shared/RemoteEvents";
 import TerrainGenerator from "shared/TerrainGenerationController";
@@ -20,9 +21,9 @@ const materialStrongness: { readonly [k in Enum.Material["Name"]]: number } = Ob
 export class ImpactController extends Component {
 	private readonly events: RBXScriptConnection[] = [];
 
-	// private breakQueue: BasePart[] = [];
-	// private strongBreakQueue: Map<BasePart, number> = new Map();
-	// private burnQueue: BasePart[] = [];
+	private breakQueue: BasePart[] = [];
+	private strongBreakQueue: Map<BasePart, number> = new Map();
+	private burnQueue: BasePart[] = [];
 
 	private readonly blocksStrength = 70;
 	private readonly cylindricalBlocksStrength = 1500;
@@ -51,25 +52,25 @@ export class ImpactController extends Component {
 			this.subscribeOnBlock(block);
 		}
 
-		// this.event.subscribe(RunService.Heartbeat, (dT) => {
-		// 	if (this.breakQueue.size() > 0) {
-		// 		print("breakQueue", this.breakQueue.size());
-		// 		RemoteEvents.ImpactBreak.send(this.breakQueue);
-		// 		this.breakQueue.clear();
-		// 	}
+		this.event.subscribe(RunService.Heartbeat, (dT) => {
+			if (this.breakQueue.size() > 0) {
+				print("breakQueue", this.breakQueue.size());
+				RemoteEvents.ImpactBreak.send(this.breakQueue);
+				this.breakQueue.clear();
+			}
 
-		// 	if (this.strongBreakQueue.size() > 0) {
-		// 		print("strongBreakQueue", this.strongBreakQueue.size());
-		// 		RemoteEvents.ImpactExplode.send({ parts: this.strongBreakQueue });
-		// 		this.strongBreakQueue.clear();
-		// 	}
+			if (this.strongBreakQueue.size() > 0) {
+				print("strongBreakQueue", this.strongBreakQueue.size());
+				RemoteEvents.ImpactExplode.send({ parts: this.strongBreakQueue });
+				this.strongBreakQueue.clear();
+			}
 
-		// 	if (this.burnQueue.size() > 0) {
-		// 		print("burnQueue", this.burnQueue.size());
-		// 		RemoteEvents.Burn.send(this.burnQueue);
-		// 		this.burnQueue.clear();
-		// 	}
-		// });
+			if (this.burnQueue.size() > 0) {
+				print("burnQueue", this.burnQueue.size());
+				RemoteEvents.Burn.send(this.burnQueue);
+				this.burnQueue.clear();
+			}
+		});
 	}
 
 	subscribeOnBlock(block: PlacedBlockData) {
@@ -78,7 +79,9 @@ export class ImpactController extends Component {
 			.filter((value) => value.IsA("BasePart") && ImpactController.isImpactAllowed(value)) as BasePart[];
 
 		parts.forEach((part) => {
-			this.subscribeOnBasePart(part);
+			task.delay(0.1, () => {
+				this.subscribeOnBasePart(part);
+			});
 		});
 	}
 
@@ -101,13 +104,19 @@ export class ImpactController extends Component {
 			// Do nothing for non-collidable blocks
 			if (!hit.CanCollide) return;
 
+			// Don't let the blocks collapse too much (TODO: Fix building still not welded @i3ym)
+			// if (part.AssemblyMass < part.Mass * 7) {
+			// 	event.Disconnect();
+			// 	return;
+			// }
+
 			let allowedDifference = partPower;
 
 			// Randomness
 			allowedDifference += math.random(0, 30);
 
 			// Terrain Water
-			if (part.CFrame.Y < TerrainGenerator.instance.waterLevel) {
+			if (part.CFrame.Y < TerrainGenerator.instance.waterLevel + 4) {
 				allowedDifference *= this.waterDiffMultiplier;
 			}
 
@@ -123,24 +132,16 @@ export class ImpactController extends Component {
 			const magnitudeDiff = math.abs(partMagnitude - secondPartMagnitude);
 
 			if (magnitudeDiff > allowedDifference * 5) {
-				//this.strongBreakQueue.set(part, 1 + magnitudeDiff / (allowedDifference * 10));
-
-				RemoteEvents.ImpactExplode.send({
-					parts: new Map([[part, 1 + magnitudeDiff / (allowedDifference * 10)]]),
-				});
+				this.strongBreakQueue.set(part, 1 + magnitudeDiff / (allowedDifference * 10));
 
 				event.Disconnect();
 			} else if (magnitudeDiff > allowedDifference) {
 				if (math.random(1, 20) === 1) {
-					//this.burnQueue.push(part);
-
-					RemoteEvents.Burn.send([part]);
+					this.burnQueue.push(part);
 				}
 
 				if (math.random(1, 5) > 1) {
-					//this.breakQueue.push(part);
-
-					RemoteEvents.ImpactBreak.send([part]);
+					this.breakQueue.push(part);
 
 					event.Disconnect();
 				}
