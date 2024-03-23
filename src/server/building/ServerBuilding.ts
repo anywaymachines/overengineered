@@ -30,6 +30,10 @@ export const ServerBuilding = {
 		bumpPlotVersion(plot);
 	},
 	placeBlock: (plot: PlotModel, data: PlaceBlockRequest): BuildResponse => {
+		if (SharedPlots.getPlotComponent(plot).ownerId.get() === undefined) {
+			return { success: false, message: "Player quit." };
+		}
+
 		const uuid = data.uuid ?? (HttpService.GenerateGUID(false) as BlockUuid);
 		if (SharedPlots.tryGetBlockByUuid(plot, uuid)) {
 			throw "Block with this uuid already exists";
