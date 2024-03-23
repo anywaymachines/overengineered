@@ -101,6 +101,9 @@ export class ImpactController extends Component {
 
 			let allowedDifference = partPower;
 
+			// Randomness
+			allowedDifference += math.random(0, 30);
+
 			// Terrain Water
 			if (part.CFrame.Y < TerrainGenerator.instance.waterLevel) {
 				allowedDifference *= this.waterDiffMultiplier;
