@@ -17,7 +17,7 @@ export default class OperationClampBlockLogic extends ConfigurableBlockLogic<
 	private update() {
 		if (this.input.min.get() > this.input.max.get()) {
 			if (this.instance.PrimaryPart) {
-				RemoteEvents.Burn.send(this.instance.PrimaryPart);
+				RemoteEvents.Burn.send([this.instance.PrimaryPart]);
 			}
 			this.disable();
 		}

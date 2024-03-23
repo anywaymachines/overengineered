@@ -39,6 +39,6 @@ export default class RandomAccessMemoryBlockLogic extends ConfigurableBlockLogic
 	}
 
 	private burn() {
-		RemoteEvents.Burn.send(this.instance.PrimaryPart!);
+		RemoteEvents.Burn.send([this.instance.PrimaryPart!]);
 	}
 }

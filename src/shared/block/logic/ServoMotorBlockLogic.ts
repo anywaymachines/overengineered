@@ -47,7 +47,7 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<
 
 		this.event.subscribe(RunService.Heartbeat, () => {
 			if (this.block.instance.Attach.Position.sub(this.block.instance.Base.Position).Magnitude > 3) {
-				RemoteEvents.ImpactBreak.send(this.block.instance.Base);
+				RemoteEvents.ImpactBreak.send([this.block.instance.Base]);
 
 				this.disable();
 				return;

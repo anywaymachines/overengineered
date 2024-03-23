@@ -1,8 +1,8 @@
 import { RunService } from "@rbxts/services";
 import RemoteEvents from "shared/RemoteEvents";
+import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 
 type MotorBlock = BlockModel & {
 	readonly Base: Part & {
@@ -32,7 +32,7 @@ export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof block
 
 		this.event.subscribe(RunService.Heartbeat, () => {
 			if (this.block.instance.Attach.Position.sub(this.block.instance.Base.Position).Magnitude > 3) {
-				RemoteEvents.ImpactBreak.send(this.block.instance.Base);
+				RemoteEvents.ImpactBreak.send([this.block.instance.Base]);
 
 				this.disable();
 			}

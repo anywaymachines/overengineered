@@ -389,7 +389,7 @@ const operations = {
 			category: mathCategory,
 			func: (min, max, logic) => {
 				if (max <= min) {
-					RemoteEvents.Burn.send(logic.instance.PrimaryPart!);
+					RemoteEvents.Burn.send([logic.instance.PrimaryPart!]);
 					logic.disable();
 					return 727;
 				}
@@ -457,7 +457,7 @@ const operations = {
 			func: multiifunc({
 				number: (left, right, logic) => {
 					if (right === 0) {
-						RemoteEvents.Burn.send(logic.instance.PrimaryPart!);
+						RemoteEvents.Burn.send([logic.instance.PrimaryPart!]);
 						logic.disable();
 					}
 
@@ -465,7 +465,7 @@ const operations = {
 				},
 				Vector3: (left, right, logic) => {
 					if (right.X === 0 && right.Y === 0 && right.Z === 0) {
-						RemoteEvents.Burn.send(logic.instance.PrimaryPart!);
+						RemoteEvents.Burn.send([logic.instance.PrimaryPart!]);
 						logic.disable();
 					}
 

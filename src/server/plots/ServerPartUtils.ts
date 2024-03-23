@@ -17,10 +17,7 @@ export default class ServerPartUtils {
 	static readonly removeQueue = new Set<Instance>();
 
 	static BreakJoints(part: BasePart) {
-		const joints = part.GetJoints();
-		joints.forEach((constraint) => {
-			constraint.Destroy();
-		});
+		PartUtils.BreakJoints(part);
 
 		if (part.IsA("VehicleSeat")) return;
 

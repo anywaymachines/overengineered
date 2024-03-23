@@ -35,6 +35,6 @@ export default class StackMemoryBlockLogic extends ConfigurableBlockLogic<typeof
 	}
 
 	private burn() {
-		RemoteEvents.Burn.send(this.instance.PrimaryPart!);
+		RemoteEvents.Burn.send([this.instance.PrimaryPart!]);
 	}
 }
