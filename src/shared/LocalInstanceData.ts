@@ -12,9 +12,7 @@ export default class LocalInstanceData {
 	}
 
 	static AddLocalTag(instance: Instance, tag: string) {
-		if (!this.instanceTags.has(instance)) return;
-
-		const currentTags = this.instanceTags.get(instance)!;
+		const currentTags = this.instanceTags.has(instance) ? this.instanceTags.get(instance)! : [];
 		currentTags.push(tag);
 		this.instanceTags.set(instance, currentTags);
 
