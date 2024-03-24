@@ -169,6 +169,9 @@ export class ImpactController extends Component {
 			event.Disconnect();
 		}
 
+		this.breakQueue.clear();
+		this.burnQueue.clear();
+
 		super.destroy();
 	}
 }
