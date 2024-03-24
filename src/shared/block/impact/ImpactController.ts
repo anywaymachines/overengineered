@@ -99,11 +99,11 @@ export class ImpactController extends Component {
 			// Do nothing for non-collidable blocks
 			if (!hit.CanCollide) return;
 
-			// Don't let the blocks collapse too much (TODO: Fix building still not welded @i3ym)
-			// if (part.AssemblyMass < part.Mass * 7) {
-			// 	event.Disconnect();
-			// 	return;
-			// }
+			// Don't let the blocks collapse too much
+			if (part.AssemblyMass < part.Mass * 7) {
+				event.Disconnect();
+				return;
+			}
 
 			let allowedDifference = partPower;
 
