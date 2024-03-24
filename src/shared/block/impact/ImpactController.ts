@@ -1,7 +1,7 @@
 import { RunService, Workspace } from "@rbxts/services";
 import Logger from "shared/Logger";
 import RemoteEvents from "shared/RemoteEvents";
-import TerrainGenerator from "shared/TerrainGenerationController";
+import TerrainDataInfo from "shared/TerrainDataInfo";
 import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
 import { Component } from "shared/component/Component";
 import Effects from "shared/effects/Effects";
@@ -111,7 +111,7 @@ export class ImpactController extends Component {
 			allowedDifference += math.random(0, 30);
 
 			// Terrain Water
-			if (part.CFrame.Y < TerrainGenerator.instance.waterLevel + 4) {
+			if (part.CFrame.Y < TerrainDataInfo.waterLevel + 4) {
 				allowedDifference *= this.waterDiffMultiplier;
 			}
 

@@ -105,13 +105,13 @@ infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, load
 	let maximumHeight = -math.huge;
 
 	for (let x = startX - 1 - 1; x < endX + 1; x++) {
-		heights[x] = [];
+		heights[x - startX - 1 - 1] = [];
 
 		for (let z = startZ - 1 - 1; z < endZ + 1; z++) {
 			const height = GetHeight(x, z);
 			minimumHeight = math.min(height, minimumHeight);
 			maximumHeight = math.max(height, maximumHeight);
-			heights[x][z] = height;
+			heights[x - startX - 1 - 1][z - startZ - 1 - 1] = height;
 		}
 	}
 
@@ -125,184 +125,191 @@ infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, load
 	);
 	const [materials, occupancys] = Workspace.Terrain.ReadVoxels(region, 4);
 
-	for (let x = 0; x < materials.Size.X; x++) {
-		for (let z = 0; z < materials.Size.Z; z++) {
-			const voxelX = startX + x - 1 + 1;
-			const voxelZ = startZ + z - 1 + 1;
-			const height = heights[voxelX][voxelZ];
-			let [nMinimumHeight, nMaximumHeight] = [math.huge, -math.huge];
+	if (false as boolean)
+		for (let x = 0; x < materials.Size.X; x++) {
+			for (let z = 0; z < materials.Size.Z; z++) {
+				const voxelX = startX + x - 1 + 1;
+				const voxelZ = startZ + z - 1 + 1;
+				const height = heights[voxelX][voxelZ];
+				let [nMinimumHeight, nMaximumHeight] = [math.huge, -math.huge];
 
-			for (let nx = voxelX - 1 - 1; nx < voxelX + 1; nx++) {
-				for (let nz = voxelZ - 1 - 1; nz < voxelZ + 1; nz++) {
-					const height = heights[nx][nz];
-					nMinimumHeight = math.min(height, nMinimumHeight);
-					nMaximumHeight = math.max(height, nMaximumHeight);
+				for (let nx = voxelX - 1 - 1; nx < voxelX + 1; nx++) {
+					for (let nz = voxelZ - 1 - 1; nz < voxelZ + 1; nz++) {
+						const height = heights[nx][nz];
+						nMinimumHeight = math.min(height, nMinimumHeight);
+						nMaximumHeight = math.max(height, nMaximumHeight);
+					}
 				}
-			}
 
-			const slope = nMaximumHeight - nMinimumHeight;
-			let material: Enum.Material = undefined!;
+				const slope = nMaximumHeight - nMinimumHeight;
+				let material: Enum.Material = undefined!;
 
-			if (materialData[voxelX]?.[voxelZ] !== undefined) {
-				material = materialEnums[materialData[voxelX][voxelZ]];
-			} else {
-				for (const materialData of terrainData.materials) {
-					if (height < materialData[2] || height >= materialData[3]) {
-						continue;
-					}
-					if (slope < materialData[4] || slope >= materialData[5]) {
-						continue;
-					}
-
-					material = materialEnums[materialData[1]];
-					break;
-				}
-			}
-
-			if (loadFoliage) {
-				for (const modelData of terrainData.models) {
-					if (math.fmod(voxelX, modelData[2]) !== 0 || math.fmod(voxelZ, modelData[2]) !== 0) {
-						continue;
-					}
-					if (height < modelData[3] || height >= modelData[4]) {
-						continue;
-					}
-					if (slope < modelData[5] || slope >= modelData[6]) {
-						continue;
-					}
-					let load = true;
-					let offset = new Vector3(0, 0, 0);
-					let scale = new Vector3(1, 1, 1);
-					let rotation = new Vector3(0, 0, 0);
-					for (const data of modelData[7]) {
-						if (data[1] === 1) {
-							const noise = math.noise(voxelX * data[3], data[2], voxelZ * data[3]);
-							if (noise < data[4] || noise >= data[5]) {
-								load = false;
-								break;
-							}
-						} else if (data[1] === 2) {
-							offset = offset.add(
-								new Vector3(
-									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-									0,
-									0,
-								),
-							);
-						} else if (data[1] === 3) {
-							offset = offset.add(
-								new Vector3(
-									0,
-									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-									0,
-								),
-							);
-						} else if (data[1] === 4) {
-							offset = offset.add(
-								new Vector3(
-									0,
-									0,
-									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-								),
-							);
-						} else if (data[1] === 5) {
-							scale = scale.mul(
-								data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-							);
-						} else if (data[1] === 6) {
-							scale = scale.mul(
-								new Vector3(
-									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-									1,
-									1,
-								),
-							);
-						} else if (data[1] === 7) {
-							scale = scale.mul(
-								new Vector3(
-									1,
-									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-									1,
-								),
-							);
-						} else if (data[1] === 8) {
-							scale = scale.mul(
-								new Vector3(
-									1,
-									1,
-									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-								),
-							);
-						} else if (data[1] === 9) {
-							rotation = rotation.add(
-								new Vector3(
-									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-									0,
-									0,
-								),
-							);
-						} else if (data[1] === 10) {
-							rotation = rotation.add(
-								new Vector3(
-									0,
-									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-									0,
-								),
-							);
-						} else if (data[1] === 11) {
-							rotation = rotation.add(
-								new Vector3(
-									0,
-									0,
-									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
-								),
-							);
-						}
-					}
-					if (!load) {
-						continue;
-					}
-					if (scale.X <= 0 || scale.Y <= 0 || scale.Z <= 0) {
-						continue;
-					}
-
-					const data = {
-						1: ReplicatedStorage.FindFirstChild("TerrainModels")!.FindFirstChild(modelData[1]) as Model,
-						2: new CFrame(new Vector3(voxelX * 4, height, voxelZ * 4).add(offset)).mul(
-							CFrame.fromOrientation(math.rad(rotation.X), math.rad(rotation.Y), math.rad(rotation.Z)),
-						),
-						3: scale,
-					} as const;
-					models.push(data);
-
-					break;
-				}
-			}
-
-			for (let y = 0; y < materials.Size.Y; y++) {
-				if (materials[x][y][z] !== Enum.Material.Air) {
-					continue;
-				}
-				const yHeight = minimumHeight + (y + 1) * 4;
-				let occupancy = (height - yHeight) / 4;
-
-				if (occupancy > 0) {
-					materials[x][y][z] = material;
-					occupancys[x][y][z] = occupancy;
+				if (materialData[voxelX]?.[voxelZ] !== undefined) {
+					material = materialEnums[materialData[voxelX][voxelZ]];
 				} else {
-					occupancy = (terrainData.waterHeight - yHeight) / 4;
-					if (occupancy <= 0) {
+					for (const materialData of terrainData.materials) {
+						if (height < materialData[2] || height >= materialData[3]) {
+							continue;
+						}
+						if (slope < materialData[4] || slope >= materialData[5]) {
+							continue;
+						}
+
+						material = materialEnums[materialData[1]];
+						break;
+					}
+				}
+
+				if (loadFoliage) {
+					for (const modelData of terrainData.models) {
+						if (math.fmod(voxelX, modelData[2]) !== 0 || math.fmod(voxelZ, modelData[2]) !== 0) {
+							continue;
+						}
+						if (height < modelData[3] || height >= modelData[4]) {
+							continue;
+						}
+						if (slope < modelData[5] || slope >= modelData[6]) {
+							continue;
+						}
+						let load = true;
+						let offset = new Vector3(0, 0, 0);
+						let scale = new Vector3(1, 1, 1);
+						let rotation = new Vector3(0, 0, 0);
+						for (const data of modelData[7]) {
+							if (data[1] === 1) {
+								const noise = math.noise(voxelX * data[3], data[2], voxelZ * data[3]);
+								if (noise < data[4] || noise >= data[5]) {
+									load = false;
+									break;
+								}
+							} else if (data[1] === 2) {
+								offset = offset.add(
+									new Vector3(
+										data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+										0,
+										0,
+									),
+								);
+							} else if (data[1] === 3) {
+								offset = offset.add(
+									new Vector3(
+										0,
+										data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+										0,
+									),
+								);
+							} else if (data[1] === 4) {
+								offset = offset.add(
+									new Vector3(
+										0,
+										0,
+										data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+									),
+								);
+							} else if (data[1] === 5) {
+								scale = scale.mul(
+									data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+								);
+							} else if (data[1] === 6) {
+								scale = scale.mul(
+									new Vector3(
+										data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+										1,
+										1,
+									),
+								);
+							} else if (data[1] === 7) {
+								scale = scale.mul(
+									new Vector3(
+										1,
+										data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+										1,
+									),
+								);
+							} else if (data[1] === 8) {
+								scale = scale.mul(
+									new Vector3(
+										1,
+										1,
+										data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+									),
+								);
+							} else if (data[1] === 9) {
+								rotation = rotation.add(
+									new Vector3(
+										data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+										0,
+										0,
+									),
+								);
+							} else if (data[1] === 10) {
+								rotation = rotation.add(
+									new Vector3(
+										0,
+										data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+										0,
+									),
+								);
+							} else if (data[1] === 11) {
+								rotation = rotation.add(
+									new Vector3(
+										0,
+										0,
+										data[4] + math.noise(voxelX * data[3], data[2], voxelZ * data[3]) * data[5],
+									),
+								);
+							}
+						}
+						if (!load) {
+							continue;
+						}
+						if (scale.X <= 0 || scale.Y <= 0 || scale.Z <= 0) {
+							continue;
+						}
+
+						const data = {
+							1: ReplicatedStorage.FindFirstChild("TerrainModels")!.FindFirstChild(modelData[1]) as Model,
+							2: new CFrame(new Vector3(voxelX * 4, height, voxelZ * 4).add(offset)).mul(
+								CFrame.fromOrientation(
+									math.rad(rotation.X),
+									math.rad(rotation.Y),
+									math.rad(rotation.Z),
+								),
+							),
+							3: scale,
+						} as const;
+						models.push(data);
+
+						break;
+					}
+				}
+
+				for (let y = 0; y < materials.Size.Y; y++) {
+					if (materials[x][y][z] !== Enum.Material.Air) {
 						continue;
 					}
+					const yHeight = minimumHeight + (y + 1) * 4;
+					let occupancy = (height - yHeight) / 4;
 
-					materials[x][y][z] = Enum.Material.Water;
-					occupancys[x][y][z] = occupancy;
+					if (occupancy > 0) {
+						materials[x][y][z] = material;
+						occupancys[x][y][z] = occupancy;
+					} else {
+						occupancy = (terrainData.waterHeight - yHeight) / 4;
+						if (occupancy <= 0) {
+							continue;
+						}
+
+						materials[x][y][z] = Enum.Material.Water;
+						occupancys[x][y][z] = occupancy;
+					}
 				}
 			}
 		}
-	}
 	task.synchronize();
-	game.Workspace.Terrain.WriteVoxels(region, 4, materials, occupancys);
+
+	// TerrainGenerator.instance.generateTerrain(new Vector2(chunkX * chunkSize, chunkZ * chunkSize), heights);
+	// game.Workspace.Terrain.WriteVoxels(region, 4, materials, occupancys);
 	infterrainActor.Loaded.Fire(chunkX, chunkZ);
 
 	if (models.size() === 0) {

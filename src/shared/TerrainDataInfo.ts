@@ -25,6 +25,8 @@ export type TerrainInfo = {
 };
 
 export default class TerrainDataInfo {
+	static readonly waterLevel = this.getData().waterHeight - 2;
+
 	static getInfo(): Folder & TerrainInfo {
 		return ReplicatedFirst.WaitForChild("Terrain") as Folder & TerrainInfo;
 	}
