@@ -1,4 +1,4 @@
-import { RunService } from "@rbxts/services";
+import { RunService, Workspace } from "@rbxts/services";
 import Logger from "shared/Logger";
 import RemoteEvents from "shared/RemoteEvents";
 import TerrainGenerator from "shared/TerrainGenerationController";
@@ -6,7 +6,11 @@ import { PlacedBlockData } from "shared/building/BlockManager";
 import { Component } from "shared/component/Component";
 import Effects from "shared/effects/Effects";
 import Objects from "shared/fixes/objects";
+import PartUtils from "shared/utils/PartUtils";
 import PlayerUtils from "shared/utils/PlayerUtils";
+
+const overlapParams = new OverlapParams();
+overlapParams.CollisionGroup = "Blocks";
 
 const materialStrongness: { readonly [k in Enum.Material["Name"]]: number } = Objects.fromEntries(
 	Enum.Material.GetEnumItems().map((material) => {
@@ -22,7 +26,6 @@ export class ImpactController extends Component {
 	private readonly events: RBXScriptConnection[] = [];
 
 	private breakQueue: BasePart[] = [];
-	private strongBreakQueue: { part: BasePart; blastRadius: number }[] = [];
 	private burnQueue: BasePart[] = [];
 
 	private readonly blocksStrength = 70;
@@ -56,11 +59,6 @@ export class ImpactController extends Component {
 			if (this.breakQueue.size() > 0) {
 				RemoteEvents.ImpactBreak.send(this.breakQueue);
 				this.breakQueue.clear();
-			}
-
-			if (this.strongBreakQueue.size() > 0) {
-				RemoteEvents.ImpactExplode.send(this.strongBreakQueue);
-				this.strongBreakQueue.clear();
 			}
 
 			if (this.burnQueue.size() > 0) {
@@ -129,7 +127,23 @@ export class ImpactController extends Component {
 			const magnitudeDiff = math.abs(partMagnitude - secondPartMagnitude);
 
 			if (magnitudeDiff > allowedDifference * 5) {
-				this.strongBreakQueue.push({ part: part, blastRadius: 1 + magnitudeDiff / (allowedDifference * 10) });
+				// Pseudo-explode
+				const partsInRadius = Workspace.GetPartBoundsInRadius(
+					part.Position,
+					1 + magnitudeDiff / (allowedDifference * 10),
+					overlapParams,
+				).filter(() => math.random(1, 3) > 1);
+
+				for (const partInRadius of partsInRadius) {
+					this.breakQueue.push(partInRadius);
+					PartUtils.BreakJoints(partInRadius);
+
+					const predictedVelocity = partInRadius.Position.sub(part.Position)
+						.Unit.mul(2000)
+						.div(partInRadius.Mass)
+						.div(6080);
+					partInRadius.ApplyImpulse(predictedVelocity);
+				}
 
 				event.Disconnect();
 			} else if (magnitudeDiff > allowedDifference) {
