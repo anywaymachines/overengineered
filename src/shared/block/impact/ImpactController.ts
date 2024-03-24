@@ -100,10 +100,10 @@ export class ImpactController extends Component {
 			if (!hit.CanCollide) return;
 
 			// Don't let the blocks collapse too much
-			if (part.AssemblyMass < part.Mass * 7) {
-				event.Disconnect();
-				return;
-			}
+			// if (part.AssemblyMass < part.Mass * 7) {
+			// 	event.Disconnect();
+			// 	return;
+			// }
 
 			let allowedDifference = partPower;
 
