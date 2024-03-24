@@ -1,4 +1,4 @@
-import { Assert } from "client/test/Assert";
+import { Assert } from "shared/Assert";
 import { AABB } from "shared/fixes/AABB";
 
 const vec3 = (x: number, y: number, z: number) => new Vector3(x, y, z);

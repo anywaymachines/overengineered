@@ -1,5 +1,3 @@
-import ObservableValue from "shared/event/ObservableValue";
-
 export class Assert {
 	static notNull<T>(value: T, message?: string): asserts value is T & defined {
 		if (value === undefined) throw `Value is undefined: ${message}`;
@@ -14,9 +12,9 @@ export class Assert {
 		if (condition) throw `Condition is not false: ${message}`;
 	}
 
-	static equals<T>(left: T | ObservableValue<T>, right: T | ObservableValue<T>, message?: string) {
-		left = typeIs(left, "table") && left instanceof ObservableValue ? left.get() : left;
-		right = typeIs(right, "table") && right instanceof ObservableValue ? right.get() : right;
+	static equals<T>(left: T | { get(): T }, right: T | { get(): T }, message?: string) {
+		left = typeIs(left, "table") && "get" in left ? left.get() : left;
+		right = typeIs(right, "table") && "get" in right ? right.get() : right;
 
 		if (left !== right) {
 			throw `${left} and ${right} are not equal: ${message}`;

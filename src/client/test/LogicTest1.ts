@@ -7,7 +7,7 @@ import AltimeterBlockLogic from "shared/block/logic/operations/sensors/Altimeter
 import OperationVec3CombinerBlockLogic from "shared/block/logic/operations/vector/OperationVec3CombinerBlockLogic";
 import OperationVec3SplitterBlockLogic from "shared/block/logic/operations/vector/OperationVec3SplitterBlockLogic";
 import Objects from "shared/fixes/objects";
-import { Assert } from "./Assert";
+import { Assert } from "shared/Assert";
 
 const parent = new Instance("Folder");
 parent.Parent = Workspace;

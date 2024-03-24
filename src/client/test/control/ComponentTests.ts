@@ -1,4 +1,4 @@
-import { Assert } from "client/test/Assert";
+import { Assert } from "shared/Assert";
 import { Element } from "shared/Element";
 import { Component } from "shared/component/Component";
 import { ContainerComponent } from "shared/component/ContainerComponent";
