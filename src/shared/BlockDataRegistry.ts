@@ -521,6 +521,7 @@ const registry: BlockDataRegistry = {
 	tnt: {
 		name: "TNT",
 		description: "A box of explosives. DO NOT HIT!",
+		limit: 200,
 	},
 	vehicleseat: {
 		name: "Vehicle Seat",
