@@ -1,3 +1,4 @@
+import { PhysicsService } from "@rbxts/services";
 import SpreadingFireController from "server/SpreadingFireController";
 import PlayerDatabase from "server/database/PlayerDatabase";
 import ServerPartUtils from "server/plots/ServerPartUtils";
@@ -6,6 +7,9 @@ import BlockManager from "shared/building/BlockManager";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import EffectBase from "shared/effects/EffectBase";
 import Effects from "shared/effects/Effects";
+
+PhysicsService.RegisterCollisionGroup("Wreckage");
+PhysicsService.CollisionGroupSetCollidable("Wreckage", "Wreckage", false);
 
 const UnreliableRemoteHandler = {
 	init() {
@@ -42,6 +46,7 @@ const UnreliableRemoteHandler = {
 			if (!BlockManager.isActiveBlockPart(part)) return;
 
 			ServerPartUtils.BreakJoints(part);
+			part.CollisionGroup = "Wreckage";
 
 			// Play sounds
 			Effects.ImpactSound.send(player ? [player] : "everyone", { part, index: undefined });
