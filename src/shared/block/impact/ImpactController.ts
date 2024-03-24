@@ -2,7 +2,7 @@ import { RunService, Workspace } from "@rbxts/services";
 import Logger from "shared/Logger";
 import RemoteEvents from "shared/RemoteEvents";
 import TerrainGenerator from "shared/TerrainGenerationController";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
 import { Component } from "shared/component/Component";
 import Effects from "shared/effects/Effects";
 import Objects from "shared/fixes/objects";
@@ -132,7 +132,7 @@ export class ImpactController extends Component {
 					part.Position,
 					1 + magnitudeDiff / (allowedDifference * 10),
 					overlapParams,
-				).filter(() => math.random(1, 3) > 1);
+				).filter((value) => BlockManager.isActiveBlockPart(value) && math.random(1, 3) > 1);
 
 				for (const partInRadius of partsInRadius) {
 					this.breakQueue.push(partInRadius);
