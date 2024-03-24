@@ -1,6 +1,9 @@
 import EventHandler from "shared/event/EventHandler";
 import type { CollectionChangedArgs, ReadonlyObservableCollection } from "shared/event/ObservableCollection";
-import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import ObservableValue, {
+	ReadonlyObservableValue,
+	ReadonlySubscribeObservableValue,
+} from "shared/event/ObservableValue";
 import { ReadonlySignal } from "shared/event/Signal";
 import JSON, { JsonSerializablePrimitive } from "shared/fixes/Json";
 
@@ -60,7 +63,7 @@ export class ComponentEvents {
 
 	/** Subscribe to an observable value changed event */
 	subscribeObservable<T>(
-		observable: ReadonlyObservableValue<T>,
+		observable: ReadonlySubscribeObservableValue<T>,
 		callback: (value: T, prev: T) => void,
 		executeImmediately = false,
 	): void {

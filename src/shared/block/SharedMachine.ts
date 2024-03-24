@@ -1,6 +1,8 @@
 import { RunService } from "@rbxts/services";
 import Logger from "shared/Logger";
 import { blockRegistry } from "shared/Registry";
+import { BlockLogicValue } from "shared/block/BlockLogicValue";
+import { BlockLogicValueGroup } from "shared/block/BlockLogicValueGroup";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import GameDefinitions from "shared/data/GameDefinitions";
@@ -141,13 +143,65 @@ export default class SharedMachine extends ContainerComponent {
 					throw "Connecting block is not configurable: " + connection.blockUuid;
 				}
 
-				const input = inputLogic.input[connectionFrom as BlockConnectionName] as ObservableValue<
-					ReturnType<(typeof inputLogic.input)[BlockConnectionName]["get"]>
-				>;
-				const output = outputLogic.output[connection.connectionName];
+				const input = inputLogic.input[connectionFrom as BlockConnectionName] as BlockLogicValue<defined>;
+				const output = outputLogic.output[connection.connectionName] as BlockLogicValue<defined>;
 
-				outputLogic.getEvent().subscribeObservable(output, (value) => input.set(value), true);
+				output.connectTo(input);
 			}
 		}
+
+		type t = {
+			readonly original: BlockLogicValue<defined>;
+			readonly holderId: BlockUuid;
+			connections: readonly t[];
+		};
+
+		const toValue = (blockUuid: BlockUuid, logic: BlockLogicValue<defined>): t => {
+			return {
+				original: logic,
+				holderId: blockUuid,
+				connections: undefined!,
+			};
+		};
+
+		const blocksValues = new Map(
+			this.blocks.flatmap((b) => {
+				if (!(b instanceof ConfigurableBlockLogic)) {
+					return [];
+				}
+
+				return [...Objects.values(b.input), ...Objects.values(b.output)].map(
+					(c) => [c, toValue(b.block.uuid, c as BlockLogicValue<defined>)] as const,
+				);
+			}),
+		);
+		for (const [, t] of blocksValues) {
+			t.connections = t.original.connections.map((c) => blocksValues.get(c)!);
+		}
+
+		const grouped = BlockLogicValueGroup.group(blocksValues.values());
+
+		const mappedBlocks = new ReadonlyMap(
+			this.blocks
+				.filter((b) => b instanceof ConfigurableBlockLogic)
+				.map((b) => [b.block.uuid, b as ConfigurableBlockLogic<BlockConfigTypes.BothDefinitions>] as const),
+		);
+		const order = grouped.map((g) => g.map((g) => mappedBlocks.get(g.id as BlockUuid)!));
+
+		let tick = 0;
+		this.event.subscribe(RunService.Heartbeat, () => {
+			for (const group of order) {
+				for (const block of group) {
+					for (const [, input] of Objects.pairs(block.input)) {
+						(input as BlockLogicValue<defined>).tick(tick);
+					}
+					for (const [, output] of Objects.pairs(block.output)) {
+						(output as BlockLogicValue<defined>).tick(tick);
+					}
+				}
+			}
+
+			tick++;
+		});
 	}
 }

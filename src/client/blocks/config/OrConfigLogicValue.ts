@@ -1,9 +1,9 @@
-import ObservableValue from "shared/event/ObservableValue";
+import { IBlockLogicValue } from "shared/block/BlockLogicValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
 export class OrConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.Or> {
 	constructor(
-		observable: ObservableValue<BlockConfigTypes.Or["default"]>,
+		observable: IBlockLogicValue<BlockConfigTypes.Or["default"]>,
 		config: BlockConfigTypes.Or["config"],
 		definition: BlockConfigTypes.Or,
 	) {

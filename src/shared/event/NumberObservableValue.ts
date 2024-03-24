@@ -20,8 +20,11 @@ export default class NumberObservableValue<T extends number | undefined = number
 
 	protected processValue(value: T) {
 		if (value === undefined) return value;
+		return NumberObservableValue.clamp(value, this.min, this.max, this.step) as T;
+	}
 
-		const halfstep = this.step / 2;
-		return math.clamp(value - ((value + halfstep) % this.step) + halfstep, this.min, this.max) as T;
+	static clamp(value: number, min: number, max: number, step: number) {
+		const halfstep = step / 2;
+		return math.clamp(value - ((value + halfstep) % step) + halfstep, min, max);
 	}
 }

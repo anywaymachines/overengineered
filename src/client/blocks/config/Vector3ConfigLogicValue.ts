@@ -1,9 +1,9 @@
-import ObservableValue from "shared/event/ObservableValue";
+import { IBlockLogicValue } from "shared/block/BlockLogicValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
 export class Vector3ConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.Vec3> {
 	constructor(
-		observable: ObservableValue<BlockConfigTypes.Vec3["default"]>,
+		observable: IBlockLogicValue<BlockConfigTypes.Vec3["default"]>,
 		config: BlockConfigTypes.Vec3["config"],
 		definition: BlockConfigTypes.Vec3,
 	) {

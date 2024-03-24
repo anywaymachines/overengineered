@@ -1,7 +1,6 @@
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import ObservableValue from "shared/event/ObservableValue";
 
 export default class OperationEqualsBlockLogic extends ConfigurableBlockLogic<
 	typeof blockConfigRegistry.operationequals
@@ -11,8 +10,6 @@ export default class OperationEqualsBlockLogic extends ConfigurableBlockLogic<
 
 		this.input.value1.subscribe(() => this.update());
 		this.input.value2.subscribe(() => this.update());
-
-		(this.input.value1 as ObservableValue<number>).triggerChanged();
 	}
 
 	private update() {

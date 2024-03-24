@@ -23,7 +23,7 @@ export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<
 
 		this.input.stiffness.subscribe((value, prev) => {
 			this.hingeConstraint.AngularResponsiveness = value;
-		}, true);
+		});
 
 		this.event.subscribeObservable(
 			this.input.speed,

@@ -7,6 +7,5 @@ export default class ConstantBlockLogic extends ConfigurableBlockLogic<typeof bl
 		super(block, blockConfigRegistry.constant);
 
 		this.event.subscribeObservable(this.input.value, (value) => this.output.result.set(value), true);
-		this.event.onEnable(() => this.output.result.triggerChanged());
 	}
 }

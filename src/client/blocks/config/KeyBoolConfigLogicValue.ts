@@ -1,10 +1,10 @@
 import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
-import ObservableValue from "shared/event/ObservableValue";
+import { IBlockLogicValue } from "shared/block/BlockLogicValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
 export class KeyBoolConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.KeyBool> {
 	constructor(
-		observable: ObservableValue<BlockConfigTypes.KeyBool["default"]>,
+		observable: IBlockLogicValue<BlockConfigTypes.KeyBool["default"]>,
 		config: BlockConfigTypes.KeyBool["config"],
 		definition: BlockConfigTypes.KeyBool,
 	) {

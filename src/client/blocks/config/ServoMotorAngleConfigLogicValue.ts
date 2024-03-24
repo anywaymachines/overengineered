@@ -1,13 +1,13 @@
 import { KeyDefinitions, KeyPressingDefinitionsController } from "client/controller/KeyPressingController";
 import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
-import ObservableValue from "shared/event/ObservableValue";
+import { IBlockLogicValue } from "shared/block/BlockLogicValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
 export class ServoMotorAngleConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.ServoMotorAngle> {
 	private readonly controller;
 
 	constructor(
-		observable: ObservableValue<BlockConfigTypes.ServoMotorAngle["default"]>,
+		observable: IBlockLogicValue<BlockConfigTypes.ServoMotorAngle["default"]>,
 		config: BlockConfigTypes.ServoMotorAngle["config"],
 		definition: BlockConfigTypes.ServoMotorAngle,
 	) {

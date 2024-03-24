@@ -8,8 +8,6 @@ export default class LogicMemoryBlockLogic extends ConfigurableBlockLogic<typeof
 
 		this.input.set.subscribe(() => this.update());
 		this.input.value.subscribe(() => this.update());
-
-		this.update();
 	}
 
 	private update() {

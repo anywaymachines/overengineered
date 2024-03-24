@@ -1,13 +1,13 @@
 import { KeyDefinitions, KeyPressingDefinitionsController } from "client/controller/KeyPressingController";
 import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
-import ObservableValue from "shared/event/ObservableValue";
+import { IBlockLogicValue } from "shared/block/BlockLogicValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
 export class MotorRotationSpeedConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.MotorRotationSpeed> {
 	private readonly controller;
 
 	constructor(
-		observable: ObservableValue<BlockConfigTypes.MotorRotationSpeed["default"]>,
+		observable: IBlockLogicValue<BlockConfigTypes.MotorRotationSpeed["default"]>,
 		config: BlockConfigTypes.MotorRotationSpeed["config"],
 		definition: BlockConfigTypes.MotorRotationSpeed,
 	) {

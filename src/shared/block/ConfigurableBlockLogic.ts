@@ -1,18 +1,19 @@
-import NumberObservableValue from "shared/event/NumberObservableValue";
-import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import { BlockLogicValue, IBlockLogicValue, ReadonlyBlockLogicValue } from "shared/block/BlockLogicValue";
+import { NumberBlockLogicValue } from "shared/block/NumberBlockLogicValue";
+import ObservableValue from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
 import BlockLogic, { BlockLogicData } from "./BlockLogic";
 
 type BlockConfigValueRegistry = {
 	readonly [k in keyof BlockConfigTypes.Types]: (
 		definition: BlockConfigTypes.Types[k],
-	) => ObservableValue<BlockConfigTypes.Types[k]["default"]>;
+	) => IBlockLogicValue<BlockConfigTypes.Types[k]["default"]>;
 };
 
 const createObservable = <TDef extends BlockConfigTypes.Types[keyof BlockConfigTypes.Types]>(
 	definition: TDef,
-): ObservableValue<TDef["default"]> => {
-	return new ObservableValue(definition.default);
+): IBlockLogicValue<TDef["default"]> => {
+	return new BlockLogicValue(definition.default);
 };
 const BlockConfigValueRegistry = {
 	bool: createObservable,
@@ -23,10 +24,10 @@ const BlockConfigValueRegistry = {
 	number: createObservable,
 	string: createObservable,
 	clampedNumber: (definition) =>
-		new NumberObservableValue(definition.default, definition.min, definition.max, definition.step),
-	thrust: () => new NumberObservableValue<number>(0, 0, 100, 0.01),
-	motorRotationSpeed: (def) => new NumberObservableValue<number>(0, -def.maxSpeed, def.maxSpeed, 0.01),
-	servoMotorAngle: () => new NumberObservableValue<number>(0, -180, 180, 0.01),
+		new NumberBlockLogicValue(definition.default, definition.min, definition.max, definition.step),
+	thrust: () => new NumberBlockLogicValue(0, 0, 100, 0.01),
+	motorRotationSpeed: (def) => new NumberBlockLogicValue(0, -def.maxSpeed, def.maxSpeed, 0.01),
+	servoMotorAngle: () => new NumberBlockLogicValue(0, -180, 180, 0.01),
 	or: createObservable,
 } as const satisfies BlockConfigValueRegistry;
 
@@ -36,10 +37,10 @@ export default abstract class ConfigurableBlockLogic<
 > extends BlockLogic {
 	readonly enableControls = new ObservableValue(false);
 	readonly input: {
-		readonly [k in keyof TDef["input"]]: ReadonlyObservableValue<TDef["input"][k]["default"]>;
+		readonly [k in keyof TDef["input"]]: ReadonlyBlockLogicValue<TDef["input"][k]["default"]>;
 	};
 	readonly output: {
-		readonly [k in keyof TDef["output"]]: ObservableValue<TDef["output"][k]["default"]>;
+		readonly [k in keyof TDef["output"]]: IBlockLogicValue<TDef["output"][k]["default"]>;
 	};
 	readonly block: BlockLogicData<TDef["input"], TBlock>;
 	readonly instance: TBlock;

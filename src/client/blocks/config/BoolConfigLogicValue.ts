@@ -1,9 +1,9 @@
-import ObservableValue from "shared/event/ObservableValue";
+import { IBlockLogicValue } from "shared/block/BlockLogicValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
 export class BoolConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.Bool> {
 	constructor(
-		observable: ObservableValue<BlockConfigTypes.Bool["default"]>,
+		observable: IBlockLogicValue<BlockConfigTypes.Bool["default"]>,
 		config: BlockConfigTypes.Bool["config"],
 		definition: BlockConfigTypes.Bool,
 	) {

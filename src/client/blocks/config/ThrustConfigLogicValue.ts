@@ -1,5 +1,6 @@
 import { KeyDefinitions, KeyPressingDefinitionsController } from "client/controller/KeyPressingController";
 import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
+import { IBlockLogicValue } from "shared/block/BlockLogicValue";
 import NumberObservableValue from "shared/event/NumberObservableValue";
 import ObservableValue from "shared/event/ObservableValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
@@ -8,7 +9,7 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigType
 	private readonly controller;
 
 	constructor(
-		observable: ObservableValue<BlockConfigTypes.Thrust["default"]>,
+		observable: IBlockLogicValue<BlockConfigTypes.Thrust["default"]>,
 		config: BlockConfigTypes.Thrust["config"],
 		definition: BlockConfigTypes.Thrust,
 	) {

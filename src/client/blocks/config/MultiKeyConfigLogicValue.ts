@@ -1,9 +1,9 @@
-import ObservableValue from "shared/event/ObservableValue";
+import { IBlockLogicValue } from "shared/block/BlockLogicValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
 
 export class MultiKeyConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.MultiKey> {
 	constructor(
-		observable: ObservableValue<BlockConfigTypes.MultiKey["default"]>,
+		observable: IBlockLogicValue<BlockConfigTypes.MultiKey["default"]>,
 		config: BlockConfigTypes.MultiKey["config"],
 		definition: BlockConfigTypes.MultiKey,
 	) {
