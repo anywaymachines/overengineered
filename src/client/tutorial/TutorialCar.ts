@@ -1,16 +1,18 @@
-import TutorialControl from "client/gui/static/TutorialControl";
-import { Tutorial } from "client/tutorial/Tutorial";
+import Tutorial from "client/tutorial/Tutorial";
 
-export default async function carTutorial(control: TutorialControl) {
-	control.startTutorial("CAR TUTORIAL", Tutorial.TutorialData.cancellable);
+export default async function TutorialCar(tutorial: typeof Tutorial) {
+	tutorial.Control.startTutorial("CAR TUTORIAL", tutorial.Cancellable);
 
-	control.displayStep("Welcome to the Plane Engineers! Now we will bring you up to date. Let's build a car!", true);
+	tutorial.Control.displayStep(
+		"Welcome to the Plane Engineers! Now we will bring you up to date. Let's build a car!",
+		true,
+	);
 
-	await control.waitForNextButton();
+	if (!(await tutorial.WaitForNextButtonPress())) return;
 
-	control.displayStep("no car for you haha", true);
+	tutorial.Control.displayStep("no car for you haha", true);
 
-	await control.waitForNextButton();
+	if (!(await tutorial.WaitForNextButtonPress())) return;
 
-	control.finish();
+	tutorial.Control.finish();
 }

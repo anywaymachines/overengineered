@@ -12,17 +12,21 @@ export type TutorialControlDefinition = Frame & {
 };
 
 export default class TutorialControl extends Control<TutorialControlDefinition> {
+	private cancellable = false;
+
 	constructor() {
 		super(Gui.getGameUI().FindFirstChild("Tutorial") as TutorialControlDefinition);
 	}
 
+	/** @deprecated Do not use outside */
 	show(): void {
 		this.gui.Visible = true;
 		GuiAnimator.transition(this.gui, 0.2, "down");
 	}
 
-	async waitForNextButton() {
-		return await new Promise((resolve) => this.gui.Header.Next.MouseButton1Click.Once(() => resolve(undefined)));
+	/** @deprecated Do not use outside */
+	hide(): void {
+		GuiAnimator.hide(this.gui, 0.2, "down");
 	}
 
 	private translate(text: string) {
@@ -40,13 +44,14 @@ export default class TutorialControl extends Control<TutorialControlDefinition> 
 
 	startTutorial(name: string, cancellable: boolean) {
 		this.gui.Header.Text = name;
-		this.gui.Header.Cancel.Visible = cancellable;
+		this.cancellable = cancellable;
 
 		this.show();
 	}
 
 	displayStep(text: string, nextButtonActive?: boolean) {
 		this.gui.TextLabel.Text = "";
+		this.gui.Header.Cancel.Visible = false;
 		this.gui.Header.Next.Visible = false;
 
 		const translatedText = this.translate(text);
@@ -59,9 +64,10 @@ export default class TutorialControl extends Control<TutorialControlDefinition> 
 		}
 
 		this.gui.Header.Next.Visible = nextButtonActive ?? false;
+		this.gui.Header.Cancel.Visible = this.cancellable;
 	}
 
 	finish() {
-		this.gui.Visible = false;
+		this.hide();
 	}
 }

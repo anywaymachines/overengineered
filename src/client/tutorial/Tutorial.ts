@@ -1,19 +1,41 @@
 import TutorialControl from "client/gui/static/TutorialControl";
-import carTutorial from "client/tutorial/TutorialCar";
+import TutorialCar from "client/tutorial/TutorialCar";
+import EventHandler from "shared/event/EventHandler";
 
-type Tutorial = "Car";
+type TutorialType = "Car";
 
-export namespace Tutorial {
-	const Control = new TutorialControl();
+type TutorialPlaceBlocksHighlight = {
+	id: string;
+	cframe: CFrame;
+};
 
-	export class TutorialData {
-		static cancellable = true;
+export default class Tutorial {
+	static Control = new TutorialControl();
+
+	static Cancellable = true;
+	static BlocksToPlace: TutorialPlaceBlocksHighlight[] = [];
+
+	static async WaitForNextButtonPress(): Promise<boolean> {
+		return new Promise((resolve) => {
+			const eventHandler = new EventHandler();
+
+			eventHandler.subscribeOnce(this.Control.getGui().Header.Next.MouseButton1Click, () => {
+				eventHandler.unsubscribeAll();
+				resolve(true);
+			});
+
+			eventHandler.subscribeOnce(this.Control.getGui().Header.Cancel.MouseButton1Click, () => {
+				eventHandler.unsubscribeAll();
+				this.Control.finish();
+				resolve(false);
+			});
+		});
 	}
 
-	export function Begin(tutorial: Tutorial) {
+	static Begin(tutorial: TutorialType) {
 		switch (tutorial) {
 			case "Car":
-				carTutorial(Control);
+				TutorialCar(this);
 				break;
 
 			default:
