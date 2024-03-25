@@ -6,13 +6,13 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
 import BoxSelector from "client/tools/selectors/BoxSelector";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
-import Tutorial from "client/tutorial/Tutorial";
 import ObservableValue from "shared/event/ObservableValue";
 import Signal from "shared/event/Signal";
 
 export default class DeleteTool extends ToolBase {
 	readonly onClearAllRequested = new Signal<() => void>();
 	readonly highlightedBlock = new ObservableValue<BlockModel | undefined>(undefined);
+	blocksToRemove?: (TutorialDeleteBlockHighlight & { instance: Instance })[];
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -54,11 +54,11 @@ export default class DeleteTool extends ToolBase {
 			return;
 		}
 
-		if (blocks !== "all" && Tutorial.BlocksToRemove.size() > 0) {
+		if (blocks !== "all" && this.blocksToRemove && this.blocksToRemove.size() > 0) {
 			if (
 				blocks.any(
 					(value) =>
-						!Tutorial.BlocksToRemove.find(
+						!this.blocksToRemove!.find(
 							(value2) =>
 								this.targetPlot
 									.get()

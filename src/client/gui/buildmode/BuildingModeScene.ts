@@ -11,8 +11,15 @@ import SavePopup from "client/gui/popup/SavePopup";
 import SettingsPopup from "client/gui/popup/SettingsPopup";
 import { requestMode } from "client/modes/PlayModeRequest";
 import ActionController from "client/modes/build/ActionController";
+import BuildTool from "client/tools/BuildTool";
+import BuildTool2 from "client/tools/BuildTool2";
+import ConfigTool from "client/tools/ConfigTool";
+import DeleteTool from "client/tools/DeleteTool";
+import PaintTool from "client/tools/PaintTool";
 import ToolBase from "client/tools/ToolBase";
 import ToolController from "client/tools/ToolController";
+import { WireTool } from "client/tools/WireTool";
+import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 import { TransformProps } from "shared/component/Transform";
 import WireToolScene, { WireToolSceneDefinition } from "./tools/WireToolScene";
 
@@ -86,7 +93,7 @@ export type BuildingModeSceneDefinition = GuiObject & {
 	};
 };
 export default class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
-	private readonly scenes = new Map<ToolBase, Control>();
+	private readonly scenes = new ComponentKeyedChildren<ToolBase, Control>(this);
 
 	constructor(gui: BuildingModeSceneDefinition, tools: ToolController) {
 		super(gui);
@@ -106,23 +113,45 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 		this.event.subscribeObservable2(LoadingController.isLoading, updateToolbarVisibility);
 		this.onEnable(updateToolbarVisibility);
 
-		this.scenes.set(tools.buildTool, new BuildToolScene(this.gui.Tools.Build, tools.buildTool));
-		this.scenes.set(tools.deleteTool, new DeleteToolScene(this.gui.Tools.Delete, tools.deleteTool));
-		this.scenes.set(tools.configTool, new ConfigToolScene(this.gui.Tools.Config, tools.configTool));
-		this.scenes.set(tools.paintTool, new PaintToolScene(this.gui.Tools.Paint, tools.paintTool));
-		this.scenes.set(tools.buildTool2, new BuildTool2Scene(this.gui.Tools.Build2, tools.buildTool2));
-		this.scenes.set(tools.wireTool, new WireToolScene(this.gui.Tools.Wire, tools.wireTool));
+		const types = [
+			[BuildTool, BuildToolScene, this.gui.Tools.Build],
+			[DeleteTool, DeleteToolScene, this.gui.Tools.Delete],
+			[ConfigTool, ConfigToolScene, this.gui.Tools.Config],
+			[PaintTool, PaintToolScene, this.gui.Tools.Paint],
+			[BuildTool2, BuildTool2Scene, this.gui.Tools.Build2],
+			[WireTool, WireToolScene, this.gui.Tools.Wire],
+		] as const;
 
-		this.scenes.forEach((scene) => this.add(scene));
+		const selectedToolUpdated = (tool: ToolBase | undefined) => {
+			for (const [, scene] of this.scenes.getAll()) {
+				scene.hide();
+			}
 
-		tools.selectedTool.subscribe((tool, prev) => {
-			const newscene = tool && this.scenes.get(tool);
-			const prevscene = prev && this.scenes.get(prev);
+			(tool && this.scenes.get(tool))?.show();
+		};
 
-			if (tool === prev) return;
+		this.event.subscribeObservable2(
+			tools.tools,
+			(toollist) => {
+				this.scenes.clear();
 
-			prevscene?.hide();
-			newscene?.show();
-		}, true);
+				for (const tool of toollist) {
+					for (const [tooltype, scenetype, scenegui] of types) {
+						if (!(tool instanceof tooltype)) {
+							continue;
+						}
+
+						const gui = scenegui.Clone();
+						gui.Parent = scenegui.Parent;
+						this.scenes.add(tool, new scenetype(gui as never, tool as never));
+					}
+				}
+
+				selectedToolUpdated(tools.selectedTool.get());
+			},
+			true,
+		);
+
+		tools.selectedTool.subscribe(selectedToolUpdated, true);
 	}
 }

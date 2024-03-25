@@ -1,7 +1,11 @@
+import BuildingMode from "client/modes/build/BuildingMode";
 import Tutorial from "client/tutorial/Tutorial";
 
 export default async function TutorialBasics(tutorial: typeof Tutorial) {
 	tutorial.Control.startTutorial("BASICS", tutorial.Cancellable);
+	const toolController = BuildingMode.instance.toolController;
+	const tools = toolController.tools;
+	tools.set([]);
 
 	tutorial.Control.displayStep(
 		"Welcome to Plane Engineers! Now we will bring you up to date. Let's build a car!",
@@ -27,7 +31,8 @@ export default async function TutorialBasics(tutorial: typeof Tutorial) {
 		cframe: new CFrame(0, 5.5, 2),
 	});
 
-	tutorial.Control.displayStep("no car for you haha", false);
+	tools.set([toolController.buildTool]);
+	tutorial.Control.displayStep("waiting", false);
 
 	if (!(await tutorial.WaitForBlocksToPlace())) return;
 
@@ -41,7 +46,8 @@ export default async function TutorialBasics(tutorial: typeof Tutorial) {
 		position: new Vector3(0, 5.5, 2),
 	});
 
-	tutorial.Control.displayStep("Remove useless block", false);
+	tools.set([...tools.get(), toolController.deleteTool]);
+	tutorial.Control.displayStep("Now remove a useless block", false);
 
 	if (!(await tutorial.WaitForBlocksToRemove())) return;
 
@@ -49,5 +55,6 @@ export default async function TutorialBasics(tutorial: typeof Tutorial) {
 
 	if (!(await tutorial.WaitForNextButtonPress())) return;
 
+	tools.set(BuildingMode.instance.toolController.allTools);
 	tutorial.Control.finish();
 }

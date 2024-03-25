@@ -1,5 +1,6 @@
 import { Workspace } from "@rbxts/services";
 import TutorialControl from "client/gui/static/TutorialControl";
+import BuildingMode from "client/modes/build/BuildingMode";
 import TutorialBasics from "client/tutorial/TutorialBasics";
 import { blockRegistry } from "shared/Registry";
 import BuildingManager from "shared/building/BuildingManager";
@@ -9,36 +10,42 @@ import PartUtils from "shared/utils/PartUtils";
 
 type TutorialType = "Basics";
 
-type TutorialPlaceBlockHighlight = {
-	id: string;
-	cframe: CFrame;
-};
+declare global {
+	type TutorialPlaceBlockHighlight = {
+		id: string;
+		cframe: CFrame;
+	};
 
-type TutorialDeleteBlockHighlight = {
-	position: Vector3;
-};
+	type TutorialDeleteBlockHighlight = {
+		position: Vector3;
+	};
+}
 
 export default class Tutorial {
 	static Control = new TutorialControl();
 	static Cancellable = true;
 
-	static BlocksToPlace: (TutorialPlaceBlockHighlight & { instance: Instance })[] = [];
-	static BlocksToRemove: (TutorialDeleteBlockHighlight & { instance: Instance })[] = [];
+	private static getBuildTool() {
+		return BuildingMode.instance.toolController.buildTool;
+	}
+	private static getDeleteTool() {
+		return BuildingMode.instance.toolController.deleteTool;
+	}
 
 	static ClearBlocksToRemove() {
-		this.BlocksToRemove.forEach((block) => {
+		this.getDeleteTool().blocksToRemove?.forEach((block) => {
 			block.instance.Destroy();
 		});
 
-		this.BlocksToRemove.clear();
+		this.getDeleteTool().blocksToRemove?.clear();
 	}
 
 	static ClearBlocksToPlace() {
-		this.BlocksToPlace.forEach((block) => {
+		this.getBuildTool().blocksToPlace?.forEach((block) => {
 			block.instance.Destroy();
 		});
 
-		this.BlocksToPlace.clear();
+		this.getBuildTool().blocksToPlace = [];
 	}
 
 	static AddBlockToRemove(data: TutorialDeleteBlockHighlight) {
@@ -54,7 +61,7 @@ export default class Tutorial {
 		selectionBox.LineThickness = 0.05;
 		selectionBox.Parent = block;
 
-		this.BlocksToRemove.push({ ...data, instance: selectionBox });
+		(this.getDeleteTool().blocksToRemove ??= []).push({ ...data, instance: selectionBox });
 	}
 
 	static AddBlockToPlace(data: TutorialPlaceBlockHighlight) {
@@ -66,7 +73,7 @@ export default class Tutorial {
 		model.PivotTo(relativePosition);
 		model.Parent = Workspace;
 
-		this.BlocksToPlace.push({ ...data, instance: model });
+		(this.getBuildTool().blocksToPlace ??= []).push({ ...data, instance: model });
 	}
 
 	static async WaitForNextButtonPress(): Promise<boolean> {
@@ -92,7 +99,7 @@ export default class Tutorial {
 			const eventHandler = new EventHandler();
 
 			eventHandler.subscribe(plot.instance.Blocks.ChildAdded, () => {
-				for (const blockToPlace of this.BlocksToPlace) {
+				for (const blockToPlace of this.getBuildTool().blocksToPlace ?? []) {
 					if (
 						!BuildingManager.getBlockByPosition(
 							plot.instance.BuildingArea.CFrame.ToWorldSpace(blockToPlace.cframe).Position,
@@ -119,7 +126,7 @@ export default class Tutorial {
 			const eventHandler = new EventHandler();
 
 			eventHandler.subscribe(plot.instance.Blocks.ChildRemoved, () => {
-				for (const blockToPlace of this.BlocksToRemove) {
+				for (const blockToPlace of this.getDeleteTool().blocksToRemove ?? []) {
 					if (
 						BuildingManager.getBlockByPosition(
 							plot.instance.BuildingArea.CFrame.PointToWorldSpace(blockToPlace.position),

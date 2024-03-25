@@ -18,13 +18,16 @@ declare global {
 }
 
 export default class BuildingMode extends PlayMode {
+	static readonly instance = new BuildingMode();
+
 	readonly mirrorMode = new ObservableValue<MirrorMode>({ x: Vector3.zero });
 	readonly targetPlot = new ObservableValue<SharedPlot | undefined>(undefined).withDefault(
 		SharedPlots.getPlotComponentByOwnerID(Players.LocalPlayer.UserId),
 	);
 	readonly mirrorVisualizer;
+	readonly toolController;
 
-	constructor() {
+	private constructor() {
 		super();
 
 		this.mirrorVisualizer = this.add(
@@ -34,9 +37,12 @@ export default class BuildingMode extends PlayMode {
 			),
 		);
 
-		const tools = this.add(new ToolController(this));
+		this.toolController = this.add(new ToolController(this));
 		this.add(
-			new BuildingModeScene(Gui.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode, tools),
+			new BuildingModeScene(
+				Gui.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode,
+				this.toolController,
+			),
 		);
 	}
 

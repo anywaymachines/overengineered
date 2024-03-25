@@ -10,6 +10,7 @@ import DebugTool from "client/tools/DebugTool";
 import DeleteTool from "client/tools/DeleteTool";
 import PaintTool from "client/tools/PaintTool";
 import ToolBase from "client/tools/ToolBase";
+import { ComponentChild } from "shared/component/ComponentChild";
 import GameDefinitions from "shared/data/GameDefinitions";
 import ObservableValue from "shared/event/ObservableValue";
 import EditTool from "./EditTool";
@@ -32,7 +33,7 @@ class ToolInputController extends ClientComponent {
 				"Nine",
 			];
 
-			tools.tools.forEach((tool, i) => {
+			tools.tools.get().forEach((tool, i) => {
 				this.inputHandler.onKeyDown(keycodes[i], () =>
 					tools.selectedTool.set(tool === tools.selectedTool.get() ? undefined : tool),
 				);
@@ -41,12 +42,12 @@ class ToolInputController extends ClientComponent {
 
 		const gamepadSelectTool = (isRight: boolean) => {
 			if (!tools.selectedTool.get()) {
-				tools.selectedTool.set(tools.tools[0]);
+				tools.selectedTool.set(tools.tools.get()[0]);
 				return;
 			}
 
-			const currentIndex = tools.tools.indexOf(tools.selectedTool.get()!);
-			const toolsLength = tools.tools.size();
+			const currentIndex = tools.tools.get().indexOf(tools.selectedTool.get()!);
+			const toolsLength = tools.tools.get().size();
 			let newIndex = isRight ? currentIndex + 1 : currentIndex - 1;
 
 			if (newIndex >= toolsLength) {
@@ -55,7 +56,7 @@ class ToolInputController extends ClientComponent {
 				newIndex = toolsLength - 1;
 			}
 
-			tools.selectedTool.set(tools.tools[newIndex]);
+			tools.selectedTool.set(tools.tools.get()[newIndex]);
 		};
 		this.event.onPrepareGamepad(() => {
 			this.inputHandler.onKeyDown("ButtonB", () => tools.selectedTool.set(undefined));
@@ -67,7 +68,7 @@ class ToolInputController extends ClientComponent {
 
 export default class ToolController extends ClientComponent {
 	readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);
-	readonly tools: readonly ToolBase[];
+	readonly tools = new ObservableValue<readonly ToolBase[]>([]);
 
 	readonly buildTool;
 	readonly editTool;
@@ -77,6 +78,7 @@ export default class ToolController extends ClientComponent {
 	readonly buildTool2;
 	readonly wireTool;
 	readonly debugTool;
+	readonly allTools;
 
 	constructor(mode: BuildingMode) {
 		super();
@@ -122,14 +124,18 @@ export default class ToolController extends ClientComponent {
 		if (RunService.IsStudio() && GameDefinitions.isAdmin(Players.LocalPlayer)) {
 			tools.insert(7, this.debugTool);
 		}
+		this.allTools = tools;
 
-		this.tools = tools;
+		this.tools.subscribe(() => this.selectedTool.set(undefined));
+		this.tools.set(tools);
 
 		let prevTool: ToolBase | undefined = undefined;
 		let wasSetByLoading = false;
 		this.onEnable(() => (wasSetByLoading = false));
 
-		const input = this.parent(new ToolInputController(this));
+		const inputParent = new ComponentChild<ToolInputController>(this);
+		this.tools.subscribe(() => inputParent.set(new ToolInputController(this)), true);
+
 		this.event.subscribeObservable2(
 			LoadingController.isLoading,
 			(loading) => {
@@ -142,13 +148,13 @@ export default class ToolController extends ClientComponent {
 					prevTool = undefined;
 				}
 
-				input.setEnabled(!loading);
+				inputParent.get()?.setEnabled(!loading);
 			},
 			true,
 		);
 	}
 
 	getDebugChildren(): readonly IDebuggableComponent[] {
-		return [...super.getDebugChildren(), ...this.tools];
+		return [...super.getDebugChildren(), ...this.tools.get()];
 	}
 }

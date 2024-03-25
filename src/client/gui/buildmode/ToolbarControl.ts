@@ -20,12 +20,12 @@ export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition
 	private readonly activeImageColor = Colors.black;
 	private readonly inactiveImageColor = Colors.accentLight;
 
-	constructor(gui: ToolbarButtonControlDefinition, tools: ToolController, tool: ToolBase) {
+	constructor(gui: ToolbarButtonControlDefinition, tools: ToolController, tool: ToolBase, index: number) {
 		super(gui);
 
 		this.gui.Name = tool.getDisplayName();
 		this.gui.ImageLabel.Image = tool.getImageID();
-		this.gui.KeyboardNumberLabel.Text = tostring(tools.tools.indexOf(tool) + 1);
+		this.gui.KeyboardNumberLabel.Text = tostring(index);
 
 		this.event.subscribe(this.gui.Activated, () => {
 			if (LoadingController.isLoading.get()) return;
@@ -84,11 +84,19 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 
 		this.nameLabel = this.add(new Control(this.gui.Info.NameLabel));
 
-		// Creating buttons
-		for (const tool of tools.tools) {
-			const button = new ToolbarButtonControl(template(), tools, tool);
-			toolButtons.add(button);
-		}
+		this.event.subscribeObservable2(
+			tools.tools,
+			(toollist) => {
+				toolButtons.clear();
+
+				let index = 0;
+				for (const tool of toollist) {
+					const button = new ToolbarButtonControl(template(), tools, tool, ++index);
+					toolButtons.add(button);
+				}
+			},
+			true,
+		);
 
 		this.event.onPrepare((inputType) => {
 			const tween = (element: GuiObject, enabled: boolean) => {

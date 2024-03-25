@@ -29,7 +29,7 @@ export default class PlayModeController extends ClientComponent {
 			});
 
 		this.modes = {
-			build: new BuildingMode(),
+			build: BuildingMode.instance,
 			ride: new RideMode(),
 		} as const;
 

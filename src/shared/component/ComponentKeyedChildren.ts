@@ -1,10 +1,10 @@
 import SlimSignal from "shared/event/SlimSignal";
 
 /** Stores keyed components. Handles its enabling, disabling and destroying. */
-export class ComponentKeyedChildren<TKey extends string, T extends IComponent = IComponent>
+export class ComponentKeyedChildren<TKey extends defined, T extends IComponent = IComponent>
 	implements IDebuggableComponent
 {
-	private static readonly empty: ReadonlyMap<string, IComponent> = new Map<string, IComponent>();
+	private static readonly empty: ReadonlyMap<defined, IComponent> = new Map<defined, IComponent>();
 	private static readonly emptyarr: [] = [];
 
 	readonly onAdded = new SlimSignal<(key: TKey, child: T) => void>();
