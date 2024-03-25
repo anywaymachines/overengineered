@@ -12,15 +12,8 @@ export type TutorialControlDefinition = Frame & {
 };
 
 export default class TutorialControl extends Control<TutorialControlDefinition> {
-	protected readonly cancellable;
-
-	constructor(name: string, cancellable: boolean) {
+	constructor() {
 		super(Gui.getGameUI().FindFirstChild("Tutorial") as TutorialControlDefinition);
-
-		this.cancellable = cancellable;
-
-		this.gui.Header.Text = name;
-		this.gui.Header.Cancel.Visible = cancellable;
 	}
 
 	show(): void {
@@ -41,7 +34,18 @@ export default class TutorialControl extends Control<TutorialControlDefinition> 
 		}
 	}
 
-	showStep(text: string, nextButtonActive?: boolean) {
+	isActive() {
+		return this.gui.Visible;
+	}
+
+	startTutorial(name: string, cancellable: boolean) {
+		this.gui.Header.Text = name;
+		this.gui.Header.Cancel.Visible = cancellable;
+
+		this.show();
+	}
+
+	displayStep(text: string, nextButtonActive?: boolean) {
 		this.gui.TextLabel.Text = "";
 		this.gui.Header.Next.Visible = false;
 
