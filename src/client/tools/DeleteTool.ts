@@ -6,6 +6,7 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
 import BoxSelector from "client/tools/selectors/BoxSelector";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
+import Tutorial from "client/tutorial/Tutorial";
 import ObservableValue from "shared/event/ObservableValue";
 import Signal from "shared/event/Signal";
 
@@ -51,6 +52,23 @@ export default class DeleteTool extends ToolBase {
 	async deleteBlocks(blocks: readonly BlockModel[] | "all") {
 		if (blocks !== "all" && blocks.any((b) => !this.targetPlot.get().hasBlock(b))) {
 			return;
+		}
+
+		if (blocks !== "all" && Tutorial.BlocksToRemove.size() > 0) {
+			if (
+				blocks.any(
+					(value) =>
+						!Tutorial.BlocksToRemove.find(
+							(value2) =>
+								this.targetPlot
+									.get()
+									.instance.BuildingArea.CFrame.PointToObjectSpace(value.GetPivot().Position) ===
+								value2.position,
+						),
+				)
+			) {
+				return;
+			}
 		}
 
 		const response = await ClientBuilding.deleteBlocks(this.targetPlot.get(), blocks);
