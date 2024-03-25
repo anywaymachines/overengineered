@@ -133,29 +133,14 @@ infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, load
 	const [materials, occupancys] = terrain.ReadVoxels(region, 4);
 	debug.profileend();
 
-	debug.profilebegin("magicking");
-	const arrey: Enum.Material[][][] = [];
-	for (let i = 0; i < region.Size.X / 4; i++) {
-		const arr: Enum.Material[][] = [];
-		arrey[i] = arr;
-
-		for (let j = 0; j < region.Size.Y / 4; j++) {
-			const arr2: Enum.Material[] = [];
-			arr[j] = arr2;
-
-			for (let k = 0; k < region.Size.Z / 4; k++) {
-				arr2[k] = Enum.Material.Air;
-			}
-		}
-	}
-	debug.profileend();
-
 	debug.profilebegin("what");
+	const minimumHeightd4 = minimumHeight / 4;
 	for (let x = 0; x < materials.Size.X; x++) {
 		for (let z = 0; z < materials.Size.Z; z++) {
 			const voxelX = startX + x - 1 + 1;
 			const voxelZ = startZ + z - 1 + 1;
 			const height = heights[voxelX][voxelZ];
+			const heightd4 = height / 4;
 			let [nMinimumHeight, nMaximumHeight] = [math.huge, -math.huge];
 
 			for (let nx = voxelX - 1 - 1; nx < voxelX + 1; nx++) {
@@ -306,17 +291,14 @@ infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, load
 			}
 
 			for (let y = 0; y < materials.Size.Y; y++) {
-				if (materials[x][y][z] !== Enum.Material.Air) {
-					continue;
-				}
-				const yHeight = minimumHeight + (y + 1) * 4;
-				let occupancy = (height - yHeight) / 4;
+				const yHeight = minimumHeightd4 + (y + 1);
+				const occupancy = heightd4 - yHeight;
 
 				if (occupancy > 0) {
 					materials[x][y][z] = material;
 					occupancys[x][y][z] = occupancy;
 				} else {
-					occupancy = (terrainData.waterHeight - yHeight) / 4;
+					const occupancy = terrainData.waterHeight / 4 - yHeight;
 					if (occupancy <= 0) {
 						continue;
 					}

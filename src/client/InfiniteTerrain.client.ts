@@ -197,6 +197,7 @@ const createChunkLoader = () => {
 	let prevPosZ = math.huge;
 
 	const tr = true;
+	let c = os.clock() as number | undefined;
 	while (tr) {
 		task.wait();
 		if (!Workspace.CurrentCamera) continue;
@@ -226,6 +227,9 @@ const createChunkLoader = () => {
 		if (radiusLoaded < loadDistance) {
 			loadChunksNextSingleRadius(chunkX, chunkZ);
 			continue;
+		} else if (c !== undefined) {
+			print(os.clock() - c);
+			c = undefined;
 		}
 	}
 };
