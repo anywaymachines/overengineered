@@ -21,6 +21,9 @@ export default class PartUtils {
 		}
 
 		this.applyToAllDescendantsOfType("BasePart", model, (part) => fix(part));
+		this.applyToAllDescendantsOfType("Decal", model, (part) => {
+			part.Transparency = 0.5;
+		});
 	}
 
 	static switchDescendantsMaterial(model: Instance, material: Enum.Material) {

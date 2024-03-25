@@ -68,4 +68,4 @@ while (!(Workspace.GetAttribute("loaded") as boolean | undefined)) {
 
 LoadingController.hide();
 
-Tutorial.Begin("Car");
+Tutorial.Begin("Basics");
