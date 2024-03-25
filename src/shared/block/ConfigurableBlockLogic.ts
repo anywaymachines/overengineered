@@ -74,7 +74,7 @@ export default abstract class ConfigurableBlockLogic<
 		}
 	}
 
-	destroy(): void {
+	disable(): void {
 		for (const [, value] of Objects.pairs(this.input)) {
 			(value as unknown as BlockLogicValue<defined>).destroy();
 		}
@@ -82,6 +82,6 @@ export default abstract class ConfigurableBlockLogic<
 			(value as unknown as BlockLogicValue<defined>).destroy();
 		}
 
-		super.destroy();
+		super.disable();
 	}
 }
