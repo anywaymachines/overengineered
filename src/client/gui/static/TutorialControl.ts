@@ -55,10 +55,9 @@ export default class TutorialControl extends Control<TutorialControlDefinition> 
 		this.gui.Header.Next.Visible = false;
 
 		const translatedText = this.translate(text);
-		const symbols = translatedText.split("");
 
 		// Animated text for tutorial
-		for (const symbol of symbols) {
+		for (const symbol of translatedText) {
 			this.gui.TextLabel.Text = this.gui.TextLabel.Text + symbol;
 			task.wait(0.05);
 		}

@@ -4,30 +4,38 @@ export default async function TutorialCar(tutorial: typeof Tutorial) {
 	tutorial.Control.startTutorial("CAR TUTORIAL", tutorial.Cancellable);
 
 	tutorial.Control.displayStep(
-		"Welcome to the Plane Engineers! Now we will bring you up to date. Let's build a car!",
+		"Welcome to Plane Engineers! Now we will bring you up to date. Let's build a car!",
 		true,
 	);
 
 	if (!(await tutorial.WaitForNextButtonPress())) return;
 
-	tutorial.Control.displayStep("no car for you haha", true);
+	tutorial.AddBlockToPlace({
+		id: "block",
+		cframe: new CFrame(0, 1.5, 0),
+	});
+	tutorial.AddBlockToPlace({
+		id: "block",
+		cframe: new CFrame(0, 3.5, 0),
+	});
+	tutorial.AddBlockToPlace({
+		id: "block",
+		cframe: new CFrame(0, 3.5, 2),
+	});
+	tutorial.AddBlockToPlace({
+		id: "tnt",
+		cframe: new CFrame(0, 5.5, 2),
+	});
 
-	tutorial.AddBlockToPlace({
-		id: "block",
-		cframe: new CFrame(0, 2, 0),
-	});
-	tutorial.AddBlockToPlace({
-		id: "block",
-		cframe: new CFrame(0, 4, 0),
-	});
-	tutorial.AddBlockToPlace({
-		id: "block",
-		cframe: new CFrame(0, 2, 2),
-	});
+	tutorial.Control.displayStep("no car for you haha", false);
 
-	if (!(await tutorial.WaitForNextButtonPress())) return;
+	if (!(await tutorial.WaitForBlocksToPlace())) return;
 
 	tutorial.ClearBlocksToPlace();
+
+	tutorial.Control.displayStep("Great job!", true);
+
+	if (!(await tutorial.WaitForNextButtonPress())) return;
 
 	tutorial.Control.finish();
 }

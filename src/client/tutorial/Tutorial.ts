@@ -2,6 +2,7 @@ import { Workspace } from "@rbxts/services";
 import TutorialControl from "client/gui/static/TutorialControl";
 import TutorialCar from "client/tutorial/TutorialCar";
 import { blockRegistry } from "shared/Registry";
+import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
 import EventHandler from "shared/event/EventHandler";
 import PartUtils from "shared/utils/PartUtils";
@@ -23,6 +24,8 @@ export default class Tutorial {
 		this.BlocksToPlace.forEach((block) => {
 			block.instance.Destroy();
 		});
+
+		this.BlocksToPlace.clear();
 	}
 
 	static async AddBlockToPlace(block: TutorialPlaceBlockHighlight) {
@@ -43,6 +46,33 @@ export default class Tutorial {
 
 			eventHandler.subscribeOnce(this.Control.getGui().Header.Next.MouseButton1Click, () => {
 				eventHandler.unsubscribeAll();
+				resolve(true);
+			});
+
+			eventHandler.subscribeOnce(this.Control.getGui().Header.Cancel.MouseButton1Click, () => {
+				eventHandler.unsubscribeAll();
+				this.Control.finish();
+				resolve(false);
+			});
+		});
+	}
+
+	static async WaitForBlocksToPlace(): Promise<boolean> {
+		const plot = SharedPlots.getOwnPlot();
+		return new Promise((resolve) => {
+			const eventHandler = new EventHandler();
+
+			eventHandler.subscribe(plot.instance.Blocks.ChildAdded, () => {
+				for (const blockToPlace of this.BlocksToPlace) {
+					if (
+						!BuildingManager.getBlockByPosition(
+							plot.instance.BuildingArea.CFrame.ToWorldSpace(blockToPlace.cframe).Position,
+						)
+					) {
+						return;
+					}
+				}
+
 				resolve(true);
 			});
 

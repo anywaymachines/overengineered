@@ -9,6 +9,7 @@ import { InputTooltips } from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
+import Tutorial from "client/tutorial/Tutorial";
 import { blockRegistry } from "shared/Registry";
 import BlockManager from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
@@ -234,6 +235,24 @@ export default class BuildTool extends ToolBase {
 			SoundController.getSounds().Build.BlockPlaceError.Play();
 
 			return;
+		}
+
+		// Tutorial
+		const relativeCoordinates = this.targetPlot
+			.get()
+			.instance.BuildingArea.CFrame.ToObjectSpace(this.previewBlock!.GetPivot());
+
+		if (Tutorial.BlocksToPlace.size() > 0) {
+			const block = Tutorial.BlocksToPlace.find(
+				(value) =>
+					value.id === this.selectedBlock.get()!.id && value.cframe.Position === relativeCoordinates.Position,
+			);
+			if (!block) {
+				SoundController.getSounds().Build.BlockPlaceError.Play();
+				return;
+			}
+
+			this.previewBlock.PivotTo(this.targetPlot.get().instance.BuildingArea.CFrame.ToWorldSpace(block.cframe));
 		}
 
 		const response = await ClientBuilding.placeBlocks(this.targetPlot.get(), [
