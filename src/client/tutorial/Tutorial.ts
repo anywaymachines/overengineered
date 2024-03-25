@@ -20,14 +20,10 @@ type TutorialDeleteBlockHighlight = {
 
 export default class Tutorial {
 	static Control = new TutorialControl();
-
 	static Cancellable = true;
+
 	static BlocksToPlace: (TutorialPlaceBlockHighlight & { instance: Instance })[] = [];
 	static BlocksToRemove: (TutorialDeleteBlockHighlight & { instance: Instance })[] = [];
-
-	static IsActive() {
-		return this.Control.isActive();
-	}
 
 	static ClearBlocksToRemove() {
 		this.BlocksToRemove.forEach((block) => {
@@ -144,6 +140,7 @@ export default class Tutorial {
 		});
 	}
 
+	/** Starts the tutorial scenery */
 	static Begin(tutorial: TutorialType) {
 		switch (tutorial) {
 			case "Basics":
@@ -155,9 +152,11 @@ export default class Tutorial {
 		}
 	}
 
+	/** Ends the tutorial */
 	static Finish() {
 		this.ClearBlocksToRemove();
 		this.ClearBlocksToPlace();
+
 		this.Control.finish();
 	}
 }
