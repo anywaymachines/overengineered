@@ -1,9 +1,20 @@
-import { ReplicatedFirst, Workspace } from "@rbxts/services";
-import type { TerrainActor } from "server/InfiniteTerrainActor";
+import { Players, ReplicatedFirst, Workspace } from "@rbxts/services";
+import type { TerrainActor } from "client/InfiniteTerrainActor";
 import TerrainDataInfo from "shared/TerrainDataInfo";
 import Objects from "shared/fixes/objects";
+import PlayerUtils from "shared/utils/PlayerUtils";
+import PlayerDataStorage from "./PlayerDataStorage";
+
+if (!game.IsLoaded()) {
+	game.Loaded.Wait();
+}
+
+while (!PlayerDataStorage.data.get()) {
+	task.wait();
+}
 
 const work = true;
+
 const folder = TerrainDataInfo.getInfo();
 
 const actorAmount = folder.Configuration.ActorAmount.Value;
@@ -104,7 +115,7 @@ const LoadChunk = (chunkX: number, chunkZ: number) => {
 	loadedChunks[chunkX][chunkZ] = true;
 
 	actorSemaphore.wait();
-	findAvailableActor().Load.Fire(chunkX, chunkZ, true);
+	findAvailableActor().Load.Fire(chunkX, chunkZ, PlayerDataStorage.config.get().terrainFoliage);
 };
 
 const UnloadChunk = (chunkX: number, chunkZ: number) => {
@@ -190,12 +201,12 @@ const createChunkLoader = () => {
 		task.wait();
 		if (!Workspace.CurrentCamera) continue;
 
-		if (isTooHigh()) {
+		if (isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer)) {
 			unloadWholeTerrain();
 
 			do {
 				task.wait();
-			} while (isTooHigh());
+			} while (isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer));
 
 			continue;
 		}
@@ -262,12 +273,12 @@ const betaChunkLoader = () => {
 		task.wait();
 		if (!Workspace.CurrentCamera) continue;
 
-		if (isTooHigh()) {
+		if (isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer)) {
 			unloadWholeTerrain();
 
 			do {
 				task.wait();
-			} while (isTooHigh());
+			} while (isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer));
 
 			continue;
 		}
@@ -291,4 +302,9 @@ const betaChunkLoader = () => {
 	}
 };
 
+//if (Players.LocalPlayer.Name === "i3ymm") {
 createChunkLoader();
+throw "ded";
+//}
+
+betaChunkLoader();
