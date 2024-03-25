@@ -51,7 +51,7 @@ export default class Tutorial {
 
 			eventHandler.subscribeOnce(this.Control.getGui().Header.Cancel.MouseButton1Click, () => {
 				eventHandler.unsubscribeAll();
-				this.Control.finish();
+				this.Finish();
 				resolve(false);
 			});
 		});
@@ -78,7 +78,7 @@ export default class Tutorial {
 
 			eventHandler.subscribeOnce(this.Control.getGui().Header.Cancel.MouseButton1Click, () => {
 				eventHandler.unsubscribeAll();
-				this.Control.finish();
+				this.Finish();
 				resolve(false);
 			});
 		});
@@ -93,5 +93,10 @@ export default class Tutorial {
 			default:
 				break;
 		}
+	}
+
+	static Finish() {
+		this.ClearBlocksToPlace();
+		this.Control.finish();
 	}
 }
