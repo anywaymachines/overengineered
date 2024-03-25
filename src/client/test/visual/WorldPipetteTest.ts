@@ -1,6 +1,6 @@
 import Control from "client/gui/Control";
 import BlockPipetteButton from "client/gui/controls/BlockPipetteButton";
-import { ControlTest } from "client/test/control/ControlTest";
+import { ControlTest } from "client/test/visual/ControlTest";
 import { Element } from "shared/Element";
 import BlockManager from "shared/building/BlockManager";
 

@@ -5,7 +5,7 @@ import Control from "client/gui/Control";
 import Gui from "client/gui/Gui";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
-import { LoadSlotTest } from "client/test/control/LoadSlotTest";
+import { LoadSlotTest } from "client/test/visual/LoadSlotTest";
 import { Element } from "shared/Element";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import GameDefinitions from "shared/data/GameDefinitions";

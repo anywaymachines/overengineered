@@ -1,6 +1,6 @@
 import ColorWheel, { ColorWheelDefinition } from "client/gui/ColorWheel";
 import Gui from "client/gui/Gui";
-import { ControlTest } from "client/test/control/ControlTest";
+import { ControlTest } from "client/test/visual/ControlTest";
 
 export const ColorWheelTest: ControlTest = {
 	createTests() {
