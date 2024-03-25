@@ -61,4 +61,8 @@ export class BlockLogicValue<T extends defined> implements IBlockLogicValue<T> {
 
 		this.changed.Fire(this.value, prev);
 	}
+
+	destroy() {
+		this.changed.destroy();
+	}
 }

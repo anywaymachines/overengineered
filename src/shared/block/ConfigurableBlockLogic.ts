@@ -63,7 +63,25 @@ export default abstract class ConfigurableBlockLogic<
 		) as typeof this.output;
 	}
 
-	getEvent() {
-		return this.event;
+	tick(tick: number): void {
+		if (this.isDestroyed()) return;
+
+		for (const [, value] of Objects.pairs(this.input)) {
+			(value as unknown as BlockLogicValue<defined>).tick(tick);
+		}
+		for (const [, value] of Objects.pairs(this.output)) {
+			(value as unknown as BlockLogicValue<defined>).tick(tick);
+		}
+	}
+
+	destroy(): void {
+		for (const [, value] of Objects.pairs(this.input)) {
+			(value as unknown as BlockLogicValue<defined>).destroy();
+		}
+		for (const [, value] of Objects.pairs(this.output)) {
+			(value as unknown as BlockLogicValue<defined>).destroy();
+		}
+
+		super.destroy();
 	}
 }

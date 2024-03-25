@@ -7,7 +7,7 @@ export default class RandomAccessMemoryBlockLogic extends ConfigurableBlockLogic
 	typeof blockConfigRegistry.randomaccessmemory
 > {
 	private readonly size = 0xff;
-	private readonly internalMemory: ReturnType<typeof this.output.result.get>[] = [];
+	private readonly internalMemory: Parameters<typeof this.output.result.set>[0][] = [];
 
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.randomaccessmemory);

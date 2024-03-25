@@ -192,12 +192,7 @@ export default class SharedMachine extends ContainerComponent {
 		this.event.subscribe(RunService.Heartbeat, () => {
 			for (const group of order) {
 				for (const block of group) {
-					for (const [, input] of Objects.pairs(block.input)) {
-						(input as BlockLogicValue<defined>).tick(tick);
-					}
-					for (const [, output] of Objects.pairs(block.output)) {
-						(output as BlockLogicValue<defined>).tick(tick);
-					}
+					block.tick(tick);
 				}
 			}
 

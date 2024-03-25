@@ -19,11 +19,6 @@ export abstract class ConfigLogicValueBase<
 		this.value = observable;
 	}
 
-	enable() {
-		super.enable();
-		this.value.changed.Fire(this.value.get(), this.value.get()); // TODO: remove?
-	}
-
 	getTouchButtonDatas(): readonly TouchModeButtonData[] {
 		return [];
 	}

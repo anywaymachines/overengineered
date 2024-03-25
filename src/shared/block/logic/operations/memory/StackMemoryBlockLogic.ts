@@ -5,7 +5,7 @@ import RemoteEvents from "shared/RemoteEvents";
 
 export default class StackMemoryBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.stackmemory> {
 	private readonly size = 32;
-	private readonly internalMemory: ReturnType<typeof this.output.result.get>[] = [];
+	private readonly internalMemory: Parameters<typeof this.output.result.set>[0][] = [];
 
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.stackmemory);
