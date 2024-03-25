@@ -12,7 +12,22 @@ export default async function TutorialCar(tutorial: typeof Tutorial) {
 
 	tutorial.Control.displayStep("no car for you haha", true);
 
+	tutorial.AddBlockToPlace({
+		id: "block",
+		cframe: new CFrame(0, 2, 0),
+	});
+	tutorial.AddBlockToPlace({
+		id: "block",
+		cframe: new CFrame(0, 4, 0),
+	});
+	tutorial.AddBlockToPlace({
+		id: "block",
+		cframe: new CFrame(0, 2, 2),
+	});
+
 	if (!(await tutorial.WaitForNextButtonPress())) return;
+
+	tutorial.ClearBlocksToPlace();
 
 	tutorial.Control.finish();
 }

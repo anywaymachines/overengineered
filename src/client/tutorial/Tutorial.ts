@@ -1,10 +1,14 @@
+import { Workspace } from "@rbxts/services";
 import TutorialControl from "client/gui/static/TutorialControl";
 import TutorialCar from "client/tutorial/TutorialCar";
+import { blockRegistry } from "shared/Registry";
+import SharedPlots from "shared/building/SharedPlots";
 import EventHandler from "shared/event/EventHandler";
+import PartUtils from "shared/utils/PartUtils";
 
 type TutorialType = "Car";
 
-type TutorialPlaceBlocksHighlight = {
+type TutorialPlaceBlockHighlight = {
 	id: string;
 	cframe: CFrame;
 };
@@ -13,7 +17,25 @@ export default class Tutorial {
 	static Control = new TutorialControl();
 
 	static Cancellable = true;
-	static BlocksToPlace: TutorialPlaceBlocksHighlight[] = [];
+	static BlocksToPlace: (TutorialPlaceBlockHighlight & { instance: Instance })[] = [];
+
+	static ClearBlocksToPlace() {
+		this.BlocksToPlace.forEach((block) => {
+			block.instance.Destroy();
+		});
+	}
+
+	static async AddBlockToPlace(block: TutorialPlaceBlockHighlight) {
+		const model = blockRegistry.get(block.id)!.model.Clone();
+		const plot = SharedPlots.getOwnPlot();
+		const relativePosition = plot.instance.BuildingArea.CFrame.ToWorldSpace(block.cframe);
+
+		PartUtils.ghostModel(model, Color3.fromRGB(255, 255, 255));
+		model.PivotTo(relativePosition);
+		model.Parent = Workspace;
+
+		this.BlocksToPlace.push({ ...block, instance: model });
+	}
 
 	static async WaitForNextButtonPress(): Promise<boolean> {
 		return new Promise((resolve) => {
