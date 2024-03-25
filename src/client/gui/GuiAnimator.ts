@@ -3,7 +3,9 @@ import { ComponentEvents } from "shared/component/ComponentEvents";
 import { ReadonlyObservableValue } from "shared/event/ObservableValue";
 import Objects from "shared/fixes/objects";
 
-/** A class created for animating interfaces */
+/** A class created for animating interfaces
+ * @deprecated Use new gui animation module instead
+ * */
 export default class GuiAnimator {
 	/** Animation for GUI transition */
 	static transition(
