@@ -31,7 +31,12 @@ export default class Signal<T extends (...args: never[]) => void = () => void> i
 		this.inSelf++;
 		try {
 			for (const sub of this.subscribed) {
-				(sub as T)(...args);
+				try {
+					(sub as T)(...args);
+				} catch (err) {
+					print(err, debug.traceback());
+					throw err;
+				}
 			}
 		} finally {
 			this.inSelf = 0;
