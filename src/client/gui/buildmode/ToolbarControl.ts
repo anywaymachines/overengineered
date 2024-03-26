@@ -4,6 +4,7 @@ import SoundController from "client/controller/SoundController";
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
 import GuiAnimator from "client/gui/GuiAnimator";
+import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import ToolBase from "client/tools/ToolBase";
 import ToolController from "client/tools/ToolController";
 import { TransformProps } from "shared/component/Transform";
@@ -79,7 +80,7 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
 		const template = this.asTemplate(this.gui.Buttons.Template);
-		const toolButtons = new Control<GuiObject, ToolbarButtonControl>(this.gui.Buttons);
+		const toolButtons = new DictionaryControl<GuiObject, ToolBase, ToolbarButtonControl>(this.gui.Buttons);
 		this.add(toolButtons);
 
 		this.nameLabel = this.add(new Control(this.gui.Info.NameLabel));
@@ -92,7 +93,21 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 				let index = 0;
 				for (const tool of toollist) {
 					const button = new ToolbarButtonControl(template(), tools, tool, ++index);
-					toolButtons.add(button);
+					toolButtons.keyedChildren.add(tool, button);
+				}
+			},
+			true,
+		);
+		this.event.subscribeObservable2(
+			tools.disabledTools,
+			(disabled) => {
+				for (const [tool, control] of toolButtons.keyedChildren.getAll()) {
+					const isdisabled = disabled.includes(tool);
+
+					control.getGui().BackgroundTransparency = isdisabled ? 0.8 : 0.2;
+					control.getGui().Active = !isdisabled;
+					control.getGui().Interactable = !isdisabled;
+					control.getGui().AutoButtonColor = !isdisabled;
 				}
 			},
 			true,

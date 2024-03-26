@@ -311,6 +311,26 @@ namespace SinglePlaceController {
 				return;
 			}
 
+			const g = Gui.getGameUI<{
+				BuildingMode: {
+					Tools: {
+						Build2: {
+							Debug: {
+								Label1: TextLabel;
+								Label2: TextLabel;
+								Label3: TextLabel;
+								Label4: TextLabel;
+								Label5: TextLabel;
+							};
+						};
+					};
+				};
+			}>().BuildingMode.Tools.Build2.Debug;
+
+			const pos = plot.instance.BuildingArea.CFrame.ToObjectSpace(mainGhost!.model.PrimaryPart!.CFrame);
+			g.Label5.Text = `new CFrame(${[...pos.GetComponents()].join()})`;
+			print(g.Label5.Text);
+
 			const response = await ClientBuilding.placeBlocks(
 				plot,
 				[mainGhost, ...this.mirroredGhosts].map(
@@ -330,27 +350,6 @@ namespace SinglePlaceController {
 
 				task.wait();
 				this.updateBlockPosition();
-
-				const g = Gui.getGameUI<{
-					BuildingMode: {
-						Tools: {
-							Build2: {
-								Debug: {
-									Label1: TextLabel;
-									Label2: TextLabel;
-									Label3: TextLabel;
-									Label4: TextLabel;
-									Label5: TextLabel;
-								};
-							};
-						};
-					};
-				}>().BuildingMode.Tools.Build2.Debug;
-
-				const pos = this.plot
-					.get()
-					.instance.BuildingArea.CFrame.ToObjectSpace(this.mainGhost!.model.GetPivot()).Position;
-				g.Label5.Text = `${pos.X}, ${pos.Y}, ${pos.Z}`;
 			} else {
 				Logger.error(response.message);
 				SoundController.getSounds().Build.BlockPlaceError.Play();

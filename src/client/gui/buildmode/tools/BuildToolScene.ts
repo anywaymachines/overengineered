@@ -115,8 +115,10 @@ export default class BuildToolScene extends Control<BuildToolSceneDefinition> {
 		this.eventHandler.subscribe(this.gui.Touch.RotateYButton.MouseButton1Click, () => this.tool.rotate("z", true));
 	}
 
-	public show() {
+	show() {
 		super.show();
+
+		this.gui.Bottom.Visible = this.tool.tutorialBlocksToPlace.size() === 0;
 
 		GuiAnimator.transition(this.gui.Inventory, 0.2, "right");
 

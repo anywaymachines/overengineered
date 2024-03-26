@@ -52,6 +52,7 @@ interface ReplicatedStorage {
 			Z: BasePart;
 		};
 		MoveHandles: MoveHandles;
+		RotateHandles: RotateHandles;
 		Fire: Folder;
 		Sparks: ParticleEmitter;
 		PlotOwnerGui: BillboardGui & {
@@ -104,4 +105,10 @@ type MoveHandles = Part & {
 	YHandles: Handles;
 	ZHandles: Handles;
 	SelectionBox: SelectionBox;
+};
+
+type RotateHandles = Part & {
+	readonly ArcHandles: ArcHandles;
+	readonly SelectionBox: SelectionBox;
+	readonly Center: BasePart;
 };

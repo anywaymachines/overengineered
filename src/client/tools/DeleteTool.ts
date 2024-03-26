@@ -12,7 +12,7 @@ import Signal from "shared/event/Signal";
 export default class DeleteTool extends ToolBase {
 	readonly onClearAllRequested = new Signal<() => void>();
 	readonly highlightedBlock = new ObservableValue<BlockModel | undefined>(undefined);
-	blocksToRemove?: (TutorialDeleteBlockHighlight & { instance: Instance })[];
+	tutorialBlocksToRemove: (TutorialDeleteBlockHighlight & { instance: Instance })[] = [];
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -54,11 +54,11 @@ export default class DeleteTool extends ToolBase {
 			return;
 		}
 
-		if (blocks !== "all" && this.blocksToRemove && this.blocksToRemove.size() > 0) {
+		if (blocks !== "all" && this.tutorialBlocksToRemove && this.tutorialBlocksToRemove.size() > 0) {
 			if (
 				blocks.any(
 					(value) =>
-						!this.blocksToRemove!.find(
+						!this.tutorialBlocksToRemove!.find(
 							(value2) =>
 								this.targetPlot
 									.get()

@@ -6,7 +6,7 @@ import { InstanceComponent } from "shared/component/InstanceComponent";
 /** Control that has its children keyed by some value */
 export class DictionaryControl<
 	T extends GuiObject,
-	TKey extends string,
+	TKey extends defined,
 	TValue extends Control = Control,
 > extends Control<T, TValue> {
 	readonly keyedChildren = new ComponentKeyedChildren<TKey, TValue>(this);

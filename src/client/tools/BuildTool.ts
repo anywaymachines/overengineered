@@ -38,7 +38,7 @@ export default class BuildTool extends ToolBase {
 	private lastMouseTarget?: BasePart;
 	private lastMouseSurface?: Enum.NormalId;
 
-	blocksToPlace?: (TutorialPlaceBlockHighlight & { readonly instance: Instance })[];
+	tutorialBlocksToPlace: (TutorialPlaceBlockHighlight & { readonly instance: Instance })[] = [];
 
 	// Signals
 	pickSignal = new Signal<(block: RegistryBlock) => void>();
@@ -243,8 +243,8 @@ export default class BuildTool extends ToolBase {
 			.get()
 			.instance.BuildingArea.CFrame.ToObjectSpace(this.previewBlock!.GetPivot());
 
-		if (this.blocksToPlace && this.blocksToPlace.size() > 0) {
-			const block = this.blocksToPlace.find(
+		if (this.tutorialBlocksToPlace && this.tutorialBlocksToPlace.size() > 0) {
+			const block = this.tutorialBlocksToPlace.find(
 				(value) =>
 					value.id === this.selectedBlock.get()!.id && value.cframe.Position === relativeCoordinates.Position,
 			);

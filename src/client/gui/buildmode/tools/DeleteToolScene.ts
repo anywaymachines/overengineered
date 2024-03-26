@@ -8,7 +8,7 @@ export type DeleteToolSceneDefinition = GuiObject & {
 	readonly TouchControls: Frame & {
 		readonly DeleteButton: TextButton;
 	};
-	readonly Bottom: {
+	readonly Bottom: Frame & {
 		readonly DeleteAllButton: GuiButton;
 	};
 };
@@ -68,12 +68,17 @@ export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> 
 		this.event.subscribe(deleteAllButton.activated, () => this.suggestClearAll());
 	}
 
-	public show() {
+	show() {
 		super.show();
+
+		this.gui.Bottom.Visible = this.tool.tutorialBlocksToRemove.size() === 0;
+
 		GuiAnimator.transition(this.gui.Bottom.DeleteAllButton, 0.2, "up");
 	}
 
 	private suggestClearAll() {
+		if (this.tool.tutorialBlocksToRemove.size() > 0) return;
+
 		ConfirmPopup.showPopup(
 			"Are you sure you want to delete all blocks?",
 			"It will be impossible to undo this action",

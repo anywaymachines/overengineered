@@ -12,6 +12,7 @@ import PaintTool from "client/tools/PaintTool";
 import ToolBase from "client/tools/ToolBase";
 import { ComponentChild } from "shared/component/ComponentChild";
 import GameDefinitions from "shared/data/GameDefinitions";
+import { MiddlewaredObservableValue } from "shared/event/MiddlewaredObservableValue";
 import ObservableValue from "shared/event/ObservableValue";
 import EditTool from "./EditTool";
 import { WireTool } from "./WireTool";
@@ -67,8 +68,9 @@ class ToolInputController extends ClientComponent {
 }
 
 export default class ToolController extends ClientComponent {
-	readonly selectedTool = new ObservableValue<ToolBase | undefined>(undefined);
+	readonly selectedTool = new MiddlewaredObservableValue<ToolBase | undefined>(undefined);
 	readonly tools = new ObservableValue<readonly ToolBase[]>([]);
+	readonly disabledTools = new ObservableValue<readonly ToolBase[]>([]);
 
 	readonly buildTool;
 	readonly editTool;
@@ -87,6 +89,15 @@ export default class ToolController extends ClientComponent {
 			this.selectedTool.set(undefined);
 		});
 
+		this.selectedTool.addMiddleware((value) => {
+			if (!value) return value;
+
+			if (this.disabledTools.get().includes(value)) {
+				return undefined;
+			}
+
+			return value;
+		});
 		this.selectedTool.subscribe((tool, prev) => {
 			prev?.disable();
 			tool?.enable();
@@ -114,11 +125,8 @@ export default class ToolController extends ClientComponent {
 			this.configTool,
 			this.paintTool,
 			this.wireTool,
+			this.buildTool2,
 		];
-
-		if ((true as boolean) || GameDefinitions.isAdmin(Players.LocalPlayer)) {
-			tools.insert(6, this.buildTool2);
-		}
 
 		// Debug tool
 		if (RunService.IsStudio() && GameDefinitions.isAdmin(Players.LocalPlayer)) {
@@ -126,6 +134,7 @@ export default class ToolController extends ClientComponent {
 		}
 		this.allTools = tools;
 
+		this.disabledTools.subscribe(() => this.selectedTool.set(undefined));
 		this.tools.subscribe(() => this.selectedTool.set(undefined));
 		this.tools.set(tools);
 

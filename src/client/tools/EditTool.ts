@@ -1,4 +1,4 @@
-import { HttpService, Workspace } from "@rbxts/services";
+import { HttpService, RunService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
@@ -11,6 +11,7 @@ import BuildingMode from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
 import { BlockMover } from "client/tools/selectors/BlockMover";
+import { BlockRotater } from "client/tools/selectors/BlockRotater";
 import { HoveredBlocksHighlighter } from "client/tools/selectors/HoveredBlocksHighlighter";
 import { SelectedBlocksHighlighter } from "client/tools/selectors/SelectedBlocksHighlighter";
 import { Element } from "shared/Element";
@@ -29,6 +30,7 @@ namespace Scene {
 	export interface EditToolSceneDefinition extends GuiObject, Selectors.SelectorGuiDefinition {
 		readonly Bottom: GuiObject & {
 			readonly MoveButton: GuiButton;
+			readonly RotateButton: GuiButton;
 			readonly CloneButton: GuiButton;
 		};
 	}
@@ -41,16 +43,24 @@ namespace Scene {
 			this.tool = tool;
 
 			const move = this.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
+			const rotate = this.add(new ButtonControl(this.gui.Bottom.RotateButton, () => tool.toggleMode("Rotate")));
+			if (!RunService.IsStudio()) {
+				rotate.destroy();
+			}
 			const clone = this.add(new ButtonControl(this.gui.Bottom.CloneButton, () => tool.toggleMode("Clone")));
 
-			const buttons: readonly ButtonControl[] = [move, clone];
+			const buttons: readonly ButtonControl[] = [move, rotate, clone];
 			this.event.subscribeCollection(
 				tool.selected,
 				() => {
 					const enabled = tool.selected.size() !== 0;
 
 					for (const button of buttons) {
-						button.getGui().Active = button.getGui().AutoButtonColor = enabled;
+						button.getGui().Active =
+							button.getGui().Interactable =
+							button.getGui().AutoButtonColor =
+								enabled;
+
 						TransformService.run(button.instance, (tr) =>
 							tr.transform("Transparency", enabled ? 0 : 0.6, {
 								style: "Quad",
@@ -63,12 +73,22 @@ namespace Scene {
 				true,
 			);
 
-			const modeButtons: Readonly<Record<EditToolMode, ButtonControl>> = { Move: move, Clone: clone };
+			const modeButtons: Readonly<Record<EditToolMode, ButtonControl>> = {
+				Move: move,
+				Rotate: rotate,
+				Clone: clone,
+			};
 			this.event.subscribeObservable2(
 				tool.selectedMode,
 				(mode) => {
 					for (const [name, button] of Objects.pairs(modeButtons)) {
 						button.getGui().BackgroundColor3 = mode === name ? Colors.accentDark : Colors.staticBackground;
+
+						const enabled = mode === undefined || mode === name;
+						button.getGui().Transparency = enabled ? 0 : 0.8;
+						button.getGui().AutoButtonColor = enabled;
+						button.getGui().Active = enabled;
+						button.getGui().Interactable = enabled;
 					}
 				},
 				true,
@@ -322,7 +342,7 @@ namespace Controllers {
 	export class Move extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 
-		constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
+		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
 
 			const mover = this.parent(new BlockMover(plot, blocks));
@@ -338,6 +358,7 @@ namespace Controllers {
 					LogControl.instance.addLine(response.message, Colors.red);
 				}
 
+				tool.selected.setRange(...blocks);
 				return response.success;
 			});
 		}
@@ -345,7 +366,7 @@ namespace Controllers {
 	export class Clone extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 
-		constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
+		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
 
 			const ghostParent = Element.create(
@@ -429,14 +450,37 @@ namespace Controllers {
 			});
 		}
 	}
+	export class Rotate extends ClientComponent {
+		readonly step = new NumberObservableValue<number>(0, 90, 180, 90);
+
+		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
+			super();
+
+			const rotater = this.parent(new BlockRotater(plot, blocks));
+			this.step.autoSet(rotater.step);
+
+			rotater.submitted.Connect(async (diff): Promise<boolean> => {
+				if (diff === CFrame.identity) {
+					return true;
+				}
+
+				/*const response = await ClientBuilding.moveBlocks(plot, blocks, diff);
+				if (!response.success) {
+					LogControl.instance.addLine(response.message, Colors.red);
+				}
+
+				return response.success;*/
+				return true;
+			});
+		}
+	}
 }
 
-export type EditToolMode = "Move" | "Clone";
+export type EditToolMode = "Move" | "Clone" | "Rotate";
 export default class EditTool extends ToolBase {
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
-	private readonly _selected = new ObservableCollectionSet<BlockModel>();
-	readonly selected = this._selected.asReadonly();
+	readonly selected = new ObservableCollectionSet<BlockModel>();
 	private readonly controller = new ComponentChild<IComponent>(this, true);
 	private readonly selector;
 
@@ -449,7 +493,7 @@ export default class EditTool extends ToolBase {
 		this.parent(new SelectedBlocksHighlighter(this.selected));
 
 		{
-			this.selector = this.parent(new Selectors.Selector(this.targetPlot, this._selected, gui.instance));
+			this.selector = this.parent(new Selectors.Selector(this.targetPlot, this.selected, gui.instance));
 			this.event.subscribeObservable2(
 				this.selectedMode,
 				(mode) => this.selector?.setEnabled(mode === undefined),
@@ -461,7 +505,7 @@ export default class EditTool extends ToolBase {
 			this.tooltipHolder.set(mode === undefined ? this.getTooltips() : {}),
 		);
 
-		this.onDisable(() => this._selected.clear());
+		this.onDisable(() => this.selected.clear());
 		this.onDisable(() => this._selectedMode.set(undefined));
 		this.event.subscribeObservable2(this.targetPlot, () => this._selectedMode.set(undefined), true);
 		this.event.subscribeObservable2(this.selectedMode, (mode) => {
@@ -470,7 +514,7 @@ export default class EditTool extends ToolBase {
 				return;
 			}
 
-			const selected = this._selected.get();
+			const selected = this.selected.get();
 			if (selected.size() === 0) {
 				return;
 			}
@@ -481,7 +525,7 @@ export default class EditTool extends ToolBase {
 				break;
 			}
 
-			this.controller.set(new Controllers[mode](this.targetPlot.get(), [...selected]));
+			this.controller.set(new Controllers[mode](this, this.targetPlot.get(), [...selected]));
 		});
 
 		this.event.onKeyDown("F", () => this.toggleMode("Move"));
@@ -492,7 +536,7 @@ export default class EditTool extends ToolBase {
 		if (mode === undefined || mode === this.selectedMode.get()) {
 			this._selectedMode.set(undefined);
 		} else {
-			if (this._selected.size() === 0) {
+			if (this.selected.size() === 0) {
 				return;
 			}
 

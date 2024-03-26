@@ -83,7 +83,7 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 export type BuildingModeSceneDefinition = GuiObject & {
 	readonly ActionBar: ActionBarControlDefinition;
 	readonly Hotbar: ToolbarControlDefinition;
-	readonly Tools: {
+	readonly Tools: Folder & {
 		readonly Build: BuildToolSceneDefinition;
 		readonly Build2: BuildTool2SceneDefinition;
 		readonly Delete: DeleteToolSceneDefinition;
@@ -121,6 +121,11 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 			[BuildTool2, BuildTool2Scene, this.gui.Tools.Build2],
 			[WireTool, WireToolScene, this.gui.Tools.Wire],
 		] as const;
+		for (const t of types) {
+			const orig = t[2];
+			(t as Writable<typeof t>)[2] = t[2].Clone();
+			orig.Destroy();
+		}
 
 		const selectedToolUpdated = (tool: ToolBase | undefined) => {
 			for (const [, scene] of this.scenes.getAll()) {
@@ -142,7 +147,7 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 						}
 
 						const gui = scenegui.Clone();
-						gui.Parent = scenegui.Parent;
+						gui.Parent = this.gui.Tools;
 						this.scenes.add(tool, new scenetype(gui as never, tool as never));
 					}
 				}

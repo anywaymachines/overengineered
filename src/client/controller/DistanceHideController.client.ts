@@ -5,11 +5,7 @@ import RobloxUnit from "shared/RobloxUnit";
 // wait for everything to spawn
 task.wait(1);
 
-const parts: Instance[] = [
-	Workspace.WaitForChild("Baseplate"),
-	Workspace.WaitForChild("Plots"),
-	Workspace.WaitForChild("Obstacles"),
-];
+const parts: Instance[] = [Workspace.WaitForChild("Plots"), Workspace.WaitForChild("Obstacles")];
 
 const transparencies = new Map<Instance & { Transparency: number }, number>();
 for (const part of parts.map((p) => [p, ...p.GetDescendants()])) {

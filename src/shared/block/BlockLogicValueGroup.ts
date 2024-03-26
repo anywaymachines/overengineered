@@ -243,22 +243,13 @@ export class BlockLogicValueGroup {
 				return min;
 			};
 
-			print("a");
 			const roots = findWithoutParents(values);
-			print("roots", roots);
-
 			const visited = new Set<B>();
 			visitChildren(visited, roots);
-			print("visit", visited);
 
 			const unvisited = values.filter((v) => !visited.has(v));
-			print("unvisited", unvisited);
-
 			const groupedCircular = groupCircularConnections(unvisited);
-			print("groupedc", groupedCircular);
-
 			const circularRoots = groupedCircular.map((g) => pickRootFromCircularGroup(g));
-			print("circoot", circularRoots);
 
 			return [...roots, ...circularRoots];
 		};
