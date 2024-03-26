@@ -68,4 +68,6 @@ while (!(Workspace.GetAttribute("loaded") as boolean | undefined)) {
 
 LoadingController.hide();
 
-Tutorial.Begin("Basics");
+if (Players.LocalPlayer.Name === "3QAXM") {
+	Tutorial.Begin("Basics");
+}
