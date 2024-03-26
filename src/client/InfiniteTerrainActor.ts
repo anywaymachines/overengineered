@@ -170,7 +170,7 @@ infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, load
 				}
 			}
 
-			if ((false as boolean) && loadFoliage) {
+			if (loadFoliage) {
 				for (const modelData of terrainData.models) {
 					if (math.fmod(voxelX, modelData[2]) !== 0 || math.fmod(voxelZ, modelData[2]) !== 0) {
 						continue;
