@@ -28,6 +28,7 @@ export default class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 				{ Name: tostring(this), Parent: Popup.popupsScreenGui, IgnoreGuiInset: true },
 				{
 					bg: Element.create("Frame", {
+						Active: true,
 						Size: new UDim2(1, 0, 1, 0),
 						BackgroundColor3: Colors.black,
 						BackgroundTransparency: 0.5,
