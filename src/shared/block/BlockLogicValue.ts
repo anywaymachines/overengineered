@@ -22,7 +22,7 @@ export class BlockLogicValue<T extends defined> implements IBlockLogicValue<T> {
 	}
 
 	get(): T {
-		return this.value;
+		return this.nextValue ?? this.value;
 	}
 	set(value: T) {
 		this.nextValue = this.processValue(value);
