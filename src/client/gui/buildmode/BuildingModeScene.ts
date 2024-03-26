@@ -11,14 +11,8 @@ import SavePopup from "client/gui/popup/SavePopup";
 import SettingsPopup from "client/gui/popup/SettingsPopup";
 import { requestMode } from "client/modes/PlayModeRequest";
 import ActionController from "client/modes/build/ActionController";
-import BuildTool from "client/tools/BuildTool";
-import BuildTool2 from "client/tools/BuildTool2";
-import ConfigTool from "client/tools/ConfigTool";
-import DeleteTool from "client/tools/DeleteTool";
-import PaintTool from "client/tools/PaintTool";
 import ToolBase from "client/tools/ToolBase";
 import ToolController from "client/tools/ToolController";
-import { WireTool } from "client/tools/WireTool";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 import { TransformProps } from "shared/component/Transform";
 import WireToolScene, { WireToolSceneDefinition } from "./tools/WireToolScene";
@@ -114,17 +108,22 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 		this.onEnable(updateToolbarVisibility);
 
 		const types = [
-			[BuildTool, BuildToolScene, this.gui.Tools.Build],
-			[DeleteTool, DeleteToolScene, this.gui.Tools.Delete],
-			[ConfigTool, ConfigToolScene, this.gui.Tools.Config],
-			[PaintTool, PaintToolScene, this.gui.Tools.Paint],
-			[BuildTool2, BuildTool2Scene, this.gui.Tools.Build2],
-			[WireTool, WireToolScene, this.gui.Tools.Wire],
+			[tools.buildTool, BuildToolScene, this.gui.Tools.Build],
+			[tools.deleteTool, DeleteToolScene, this.gui.Tools.Delete],
+			[tools.configTool, ConfigToolScene, this.gui.Tools.Config],
+			[tools.paintTool, PaintToolScene, this.gui.Tools.Paint],
+			[tools.buildTool2, BuildTool2Scene, this.gui.Tools.Build2],
+			[tools.wireTool, WireToolScene, this.gui.Tools.Wire],
 		] as const;
 		for (const t of types) {
 			const orig = t[2];
 			(t as Writable<typeof t>)[2] = t[2].Clone();
 			orig.Destroy();
+		}
+		for (const [tool, scenetype, scenegui] of types) {
+			const gui = scenegui.Clone();
+			gui.Parent = this.gui.Tools;
+			this.scenes.add(tool, new scenetype(gui as never, tool as never));
 		}
 
 		const selectedToolUpdated = (tool: ToolBase | undefined) => {
@@ -135,28 +134,7 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 			(tool && this.scenes.get(tool))?.show();
 		};
 
-		this.event.subscribeObservable2(
-			tools.tools,
-			(toollist) => {
-				this.scenes.clear();
-
-				for (const tool of toollist) {
-					for (const [tooltype, scenetype, scenegui] of types) {
-						if (!(tool instanceof tooltype)) {
-							continue;
-						}
-
-						const gui = scenegui.Clone();
-						gui.Parent = this.gui.Tools;
-						this.scenes.add(tool, new scenetype(gui as never, tool as never));
-					}
-				}
-
-				selectedToolUpdated(tools.selectedTool.get());
-			},
-			true,
-		);
-
+		this.event.subscribeObservable2(tools.tools, () => selectedToolUpdated(tools.selectedTool.get()), true);
 		tools.selectedTool.subscribe(selectedToolUpdated, true);
 	}
 }
