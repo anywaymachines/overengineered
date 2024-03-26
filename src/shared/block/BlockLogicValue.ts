@@ -42,7 +42,7 @@ export class BlockLogicValue<T extends defined> implements IBlockLogicValue<T> {
 
 	tick(tick: number): void {
 		if (this.processedAtLeastOnce) {
-			if (this.nextValue === undefined || this.nextValue === this.get()) {
+			if (this.nextValue === undefined || this.nextValue === this.value) {
 				return;
 			}
 		} else {

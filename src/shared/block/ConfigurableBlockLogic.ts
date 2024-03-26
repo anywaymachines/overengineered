@@ -64,7 +64,7 @@ export default abstract class ConfigurableBlockLogic<
 	}
 
 	tick(tick: number): void {
-		if (this.isDestroyed()) return;
+		if (!this.isEnabled()) return;
 
 		for (const [, value] of Objects.pairs(this.input)) {
 			(value as unknown as BlockLogicValue<defined>).tick(tick);
