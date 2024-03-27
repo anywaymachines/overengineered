@@ -36,8 +36,8 @@ export default class SpreadingFireController {
 		// Apply fire effect
 		Effects.Fire.sendToNetworkOwnerOrEveryone(part, { part, duration });
 
-		spawn(() => {
-			wait(duration);
+		task.delay(duration, () => {
+			if (!part.Parent) return;
 
 			// Break joints with a chance
 			if (math.random(1, 4) === 1) {
