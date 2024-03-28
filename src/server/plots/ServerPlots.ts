@@ -11,7 +11,7 @@ const assignPlotTo = (player: Player): void => {
 		if (!plot) throw "No free plot available";
 
 		plot.ownerId.set(player.UserId);
-		//plot.instance.Blocks.AddPersistentPlayer(player);
+		plot.instance.Blocks.ClearAllChildren();
 	} catch {
 		player.Kick("No free plot found, try again later");
 	}
