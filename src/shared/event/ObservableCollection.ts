@@ -24,7 +24,7 @@ abstract class ObservableCollectionBase<T extends defined> implements ReadonlyOb
 	abstract size(): number;
 
 	/** Clear the collection and add the provided items */
-	setRange(...items: readonly T[]) {
+	setRange(items: readonly T[]) {
 		this.clear();
 		this.add(...items);
 	}

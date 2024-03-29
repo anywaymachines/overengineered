@@ -32,6 +32,7 @@ namespace Scene {
 			readonly MoveButton: GuiButton;
 			readonly RotateButton: GuiButton;
 			readonly CloneButton: GuiButton;
+			readonly DeleteButton: GuiButton;
 		};
 	}
 
@@ -48,19 +49,16 @@ namespace Scene {
 				rotate.destroy();
 			}
 			const clone = this.add(new ButtonControl(this.gui.Bottom.CloneButton, () => tool.toggleMode("Clone")));
+			const del = this.add(new ButtonControl(this.gui.Bottom.DeleteButton, () => tool.deleteSelectedBlocks()));
 
-			const buttons: readonly ButtonControl[] = [move, rotate, clone];
+			const buttons: readonly ButtonControl[] = [move, rotate, clone, del];
 			this.event.subscribeCollection(
 				tool.selected,
 				() => {
 					const enabled = tool.selected.size() !== 0;
+					this.gui.Interactable = enabled;
 
 					for (const button of buttons) {
-						button.getGui().Active =
-							button.getGui().Interactable =
-							button.getGui().AutoButtonColor =
-								enabled;
-
 						TransformService.run(button.instance, (tr) =>
 							tr.transform("Transparency", enabled ? 0 : 0.6, {
 								style: "Quad",
@@ -86,8 +84,6 @@ namespace Scene {
 
 						const enabled = mode === undefined || mode === name;
 						button.getGui().Transparency = enabled ? 0 : 0.8;
-						button.getGui().AutoButtonColor = enabled;
-						button.getGui().Active = enabled;
 						button.getGui().Interactable = enabled;
 					}
 				},
@@ -358,7 +354,7 @@ namespace Controllers {
 					LogControl.instance.addLine(response.message, Colors.red);
 				}
 
-				tool.selected.setRange(...blocks);
+				tool.selected.setRange(blocks);
 				return response.success;
 			});
 		}
@@ -548,6 +544,13 @@ export default class EditTool extends ToolBase {
 	}
 	deselectAll() {
 		this.selector.deselectAll();
+	}
+
+	async deleteSelectedBlocks() {
+		const selected = [...this.selected.get()];
+		this.selected.setRange([]);
+
+		await ClientBuilding.deleteBlocks(this.targetPlot.get(), selected);
 	}
 
 	getDisplayName(): string {
