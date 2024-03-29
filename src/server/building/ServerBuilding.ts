@@ -90,19 +90,21 @@ export const ServerBuilding = {
 
 			BuildingWelder.deleteWelds(plot);
 		} else {
-			for (const block of blocks) {
-				const uuid = BlockManager.manager.uuid.get(block);
-				for (const [otherblock, connectionName, connection] of SharedBuilding.getBlocksConnectedByLogicTo(
-					plot,
-					uuid,
-				)) {
+			const connections = SharedBuilding.getBlocksConnectedByLogicToMulti(
+				plot,
+				blocks.mapToSet(BlockManager.manager.uuid.get),
+			);
+			for (const [, c] of connections) {
+				for (const [otherblock, connectionName] of c) {
 					ServerBuilding.logicDisconnect({
 						plot,
 						inputBlock: otherblock.instance,
 						inputConnection: connectionName,
 					});
 				}
+			}
 
+			for (const block of blocks) {
 				BuildingWelder.unweld(block);
 				BuildingWelder.deleteWeld(plot, block);
 

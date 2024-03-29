@@ -223,6 +223,7 @@ export const MapMacros = $defineCallMacros<ReadonlyMap<defined, defined>>({
 declare global {
 	interface ReadonlyArray<T> {
 		flatmap<TOut extends defined>(func: (item: T) => readonly TOut[]): TOut[];
+		mapToSet<TOut extends defined>(func: (item: T) => TOut): Set<TOut>;
 		groupBy<TKey extends defined>(keyfunc: (value: T) => TKey): Map<TKey, T[]>;
 
 		count(func: (value: T) => boolean): number;
@@ -247,6 +248,14 @@ export const ArrayMacros = $defineCallMacros<ReadonlyArray<defined>>({
 			for (const v of func(item)) {
 				result.push(v);
 			}
+		}
+
+		return result;
+	},
+	mapToSet: <T extends defined, TOut extends defined>(array: readonly T[], func: (item: T) => TOut): Set<TOut> => {
+		const result = new Set<TOut>();
+		for (const item of array) {
+			result.add(func(item));
 		}
 
 		return result;
