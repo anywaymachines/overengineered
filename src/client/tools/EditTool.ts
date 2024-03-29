@@ -56,7 +56,7 @@ namespace Scene {
 				tool.selected,
 				() => {
 					const enabled = tool.selected.size() !== 0;
-					this.gui.Interactable = enabled;
+					this.gui.Bottom.Interactable = enabled;
 
 					for (const button of buttons) {
 						TransformService.run(button.instance, (tr) =>
