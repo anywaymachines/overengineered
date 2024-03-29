@@ -51,9 +51,11 @@ export class ImpactController extends Component {
 	constructor(blocks: readonly PlacedBlockData[]) {
 		super();
 
-		for (const block of blocks) {
-			this.subscribeOnBlock(block);
-		}
+		task.delay(0.1, () => {
+			for (const block of blocks) {
+				this.subscribeOnBlock(block);
+			}
+		});
 
 		this.event.subscribe(RunService.Heartbeat, (dT) => {
 			if (this.breakQueue.size() > 0) {
@@ -69,18 +71,20 @@ export class ImpactController extends Component {
 	}
 
 	subscribeOnBlock(block: PlacedBlockData) {
-		const parts = block.instance
-			.GetDescendants()
-			.filter((value) => value.IsA("BasePart") && ImpactController.isImpactAllowed(value)) as BasePart[];
+		for (const part of block.instance.GetDescendants()) {
+			if (!part.IsA("BasePart")) continue;
+			if (!ImpactController.isImpactAllowed(part)) continue;
 
-		parts.forEach((part) => {
-			task.delay(0.1, () => {
-				this.subscribeOnBasePart(part);
-			});
-		});
+			this.subscribeOnBasePart(part);
+		}
 	}
 
 	subscribeOnBasePart(part: BasePart) {
+		// Optimization (do nothing for non-connected blocks)
+		if (part.AssemblyMass === part.Mass) {
+			return;
+		}
+
 		let partPower =
 			part.IsA("Part") && part.Shape === Enum.PartType.Cylinder
 				? this.cylindricalBlocksStrength
@@ -132,9 +136,13 @@ export class ImpactController extends Component {
 					part.Position,
 					1 + magnitudeDiff / (allowedDifference * 10),
 					overlapParams,
-				).filter((value) => BlockManager.isActiveBlockPart(value) && math.random(1, 3) > 1);
+				);
 
 				for (const partInRadius of partsInRadius) {
+					if (!BlockManager.isActiveBlockPart(partInRadius) || math.random(1, 3) <= 1) {
+						continue;
+					}
+
 					this.breakQueue.push(partInRadius);
 					PartUtils.BreakJoints(partInRadius);
 
