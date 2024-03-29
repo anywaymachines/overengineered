@@ -210,7 +210,7 @@ namespace Markers {
 			let loop: (() => void) | undefined;
 
 			this.onDestroy(() => loop?.());
-			this.event.subscribeObservable2(
+			this.event.subscribeObservable(
 				this.availableTypes,
 				(types) => {
 					loop?.();
@@ -423,7 +423,7 @@ class WireComponent extends ClientInstanceComponent<WireComponentDefinition> {
 
 		let loop: (() => void) | undefined;
 		this.onDestroy(() => loop?.());
-		this.event.subscribeObservable2(
+		this.event.subscribeObservable(
 			this.types,
 			(types) => {
 				loop?.();
@@ -446,8 +446,8 @@ class WireComponent extends ClientInstanceComponent<WireComponentDefinition> {
 		);
 
 		// markers share the availableTypes anyways so there's no need to intersect them
-		this.event.subscribeObservable2(from.availableTypes, () => this.types.set(from.availableTypes.get()), true);
-		this.event.subscribeObservable2(to.availableTypes, () => this.types.set(to.availableTypes.get()), true);
+		this.event.subscribeObservable(from.availableTypes, () => this.types.set(from.availableTypes.get()), true);
+		this.event.subscribeObservable(to.availableTypes, () => this.types.set(to.availableTypes.get()), true);
 
 		WireComponent.staticSetPosition(this.instance, from.position, to.position);
 	}

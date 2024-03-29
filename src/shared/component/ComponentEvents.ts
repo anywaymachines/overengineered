@@ -68,23 +68,9 @@ export class ComponentEvents {
 		callback();
 	}
 
-	/** Subscribe to an observable value changed event
-	 * @deprecated Use v2 instead
-	 */
+	/** Subscribe to an observable value changed event */
 	subscribeObservable<T>(
 		observable: ReadonlySubscribeObservableValue<T>,
-		callback: (value: T, prev: T) => void,
-		executeImmediately = false,
-	): void {
-		this.subscribe(observable.changed, callback);
-		if (executeImmediately) {
-			this.onEnable(() => callback(observable.get(), observable.get()), true);
-		}
-	}
-
-	/** Subscribe to an observable value changed event */
-	subscribeObservable2<T>(
-		observable: ReadonlyObservableValue<T>,
 		callback: (value: T, prev: T) => void,
 		executeOnEnable = false,
 		executeImmediately = false,
@@ -156,7 +142,7 @@ export class ComponentEvents {
 		this.subscribe(instance.GetAttributeChangedSignal(name), () =>
 			observable.set(instance.GetAttribute(name) as TType | undefined),
 		);
-		this.subscribeObservable2(observable, (value) => instance.SetAttribute(name, value));
+		this.subscribeObservable(observable, (value) => instance.SetAttribute(name, value));
 
 		return observable;
 	}
@@ -174,7 +160,7 @@ export class ComponentEvents {
 
 			observable.set(val);
 		});
-		this.subscribeObservable2(
+		this.subscribeObservable(
 			observable,
 			(value) =>
 				instance.SetAttribute(

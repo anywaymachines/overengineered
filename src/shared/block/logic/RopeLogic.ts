@@ -1,6 +1,6 @@
+import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 
 type Rope = BlockModel & {
 	readonly RopeSide: BasePart & {

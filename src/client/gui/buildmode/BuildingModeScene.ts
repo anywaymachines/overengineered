@@ -98,13 +98,13 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 		const updateActionBarVisibility = () =>
 			actionbar.setVisible(!tools.selectedTool.get() && !LoadingController.isLoading.get());
 
-		this.event.subscribeObservable2(LoadingController.isLoading, updateActionBarVisibility);
-		this.event.subscribeObservable2(tools.selectedTool, updateActionBarVisibility);
+		this.event.subscribeObservable(LoadingController.isLoading, updateActionBarVisibility);
+		this.event.subscribeObservable(tools.selectedTool, updateActionBarVisibility);
 		this.onEnable(updateActionBarVisibility);
 
 		const toolbar = this.add(new ToolbarControl(tools, gui.Hotbar));
 		const updateToolbarVisibility = () => toolbar.setVisible(!LoadingController.isLoading.get());
-		this.event.subscribeObservable2(LoadingController.isLoading, updateToolbarVisibility);
+		this.event.subscribeObservable(LoadingController.isLoading, updateToolbarVisibility);
 		this.onEnable(updateToolbarVisibility);
 
 		const types = [
@@ -134,7 +134,7 @@ export default class BuildingModeScene extends Control<BuildingModeSceneDefiniti
 			(tool && this.scenes.get(tool))?.show();
 		};
 
-		this.event.subscribeObservable2(tools.tools, () => selectedToolUpdated(tools.selectedTool.get()), true);
+		this.event.subscribeObservable(tools.tools, () => selectedToolUpdated(tools.selectedTool.get()), true);
 		tools.selectedTool.subscribe(selectedToolUpdated, true);
 	}
 }

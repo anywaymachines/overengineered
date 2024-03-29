@@ -45,7 +45,7 @@ export class MirrorEditorSingleControl extends Control<MirrorEditorSingleControl
 			this.value.set(this.enabled.value.get() ? this.position.value.get() : undefined);
 			selfsetting = false;
 		};
-		this.event.subscribeObservable2(
+		this.event.subscribeObservable(
 			this.value,
 			(val) => {
 				if (selfsetting) return;
@@ -83,7 +83,7 @@ export default class MirrorEditorControl extends Control<MirrorEditorControlDefi
 		this.y = this.add(new MirrorEditorSingleControl(this.gui.Y, 2, math.floor(plot.getSize().Y), 4));
 		this.z = this.add(new MirrorEditorSingleControl(this.gui.Z, -plot.getSize().Z / 2, plot.getSize().Z / 2, 0));
 
-		this.event.subscribeObservable2(
+		this.event.subscribeObservable(
 			this.value,
 			(val) => {
 				this.x.value.set(val.x?.Z);

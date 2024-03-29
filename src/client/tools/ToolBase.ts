@@ -34,7 +34,7 @@ export default abstract class ToolBase extends ClientComponent {
 		state: IComponent & { readonly event: ComponentEvents },
 		func: (plot: SharedPlot) => void,
 	) {
-		state.event.subscribeObservable2(
+		state.event.subscribeObservable(
 			this.targetPlot,
 			(plot) => {
 				state.event.eventHandler.subscribe(plot.changed, () => func(plot));

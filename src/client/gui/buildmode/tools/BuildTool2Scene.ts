@@ -50,7 +50,7 @@ export default class BuildTool2Scene extends Control<BuildTool2SceneDefinition> 
 
 		const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content));
 		mirrorEditor.value.set(tool.mirrorMode.get());
-		this.event.subscribeObservable2(mirrorEditor.value, (val) => tool.mirrorMode.set(val), true);
+		this.event.subscribeObservable(mirrorEditor.value, (val) => tool.mirrorMode.set(val), true);
 		this.onEnable(() => (this.gui.Mirror.Visible = false));
 		this.add(
 			new ButtonControl(

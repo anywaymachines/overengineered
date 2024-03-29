@@ -327,7 +327,7 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		this.actionbar = new ActionBarControl(gui.ActionBar, this.controls);
 		this.add(this.actionbar);
 		const updateActionBarVisibility = () => this.actionbar.setVisible(!LoadingController.isLoading.get());
-		this.event.subscribeObservable2(LoadingController.isLoading, updateActionBarVisibility);
+		this.event.subscribeObservable(LoadingController.isLoading, updateActionBarVisibility);
 		this.onEnable(updateActionBarVisibility);
 
 		this.info = new Control(this.gui.Info);

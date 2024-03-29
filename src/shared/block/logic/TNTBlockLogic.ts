@@ -1,7 +1,7 @@
+import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 
 export default class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.tnt> {
 	static readonly events = {

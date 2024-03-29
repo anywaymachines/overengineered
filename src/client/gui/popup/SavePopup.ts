@@ -27,7 +27,7 @@ class SaveItem extends ButtonControl<SaveItemDefinition> {
 		super(gui);
 		this.index = index;
 
-		this.event.subscribeObservable2(
+		this.event.subscribeObservable(
 			PlayerDataStorage.slots,
 			(slots) => {
 				const slot = SlotsMeta.get(slots, this.index);
@@ -66,7 +66,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 		this.slots = new Control<SaveSlotsDefinition, SaveItem>(this.gui);
 		this.add(this.slots);
 
-		this.event.subscribeObservable2(
+		this.event.subscribeObservable(
 			PlayerDataStorage.slots,
 			(slots) => {
 				if (!slots) return;

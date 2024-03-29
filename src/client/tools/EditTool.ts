@@ -76,7 +76,7 @@ namespace Scene {
 				Rotate: rotate,
 				Clone: clone,
 			};
-			this.event.subscribeObservable2(
+			this.event.subscribeObservable(
 				tool.selectedMode,
 				(mode) => {
 					for (const [name, button] of Objects.pairs(modeButtons)) {
@@ -129,7 +129,7 @@ namespace Selectors {
 					const assembly = this.add(
 						new TextButtonControl(gui.AssemblySelection, () => params.highlightModeName.set("assembly")),
 					);
-					this.event.subscribeObservable2(
+					this.event.subscribeObservable(
 						params.highlightModeName,
 						(active) => {
 							const buttons: { readonly [k in typeof active]: TextButtonControl } = { single, assembly };
@@ -242,8 +242,8 @@ namespace Selectors {
 						getHighlightModeFunc(this.highlightModeName.get()),
 					),
 				);
-			this.event.subscribeObservable2(this.plot, updateHighlighter);
-			this.event.subscribeObservable2(this.highlightModeName, updateHighlighter);
+			this.event.subscribeObservable(this.plot, updateHighlighter);
+			this.event.subscribeObservable(this.highlightModeName, updateHighlighter);
 			this.onEnable(updateHighlighter);
 
 			this.event.subInput((ih) => {
@@ -490,21 +490,21 @@ export default class EditTool extends ToolBase {
 
 		{
 			this.selector = this.parent(new Selectors.Selector(this.targetPlot, this.selected, gui.instance));
-			this.event.subscribeObservable2(
+			this.event.subscribeObservable(
 				this.selectedMode,
 				(mode) => this.selector?.setEnabled(mode === undefined),
 				true,
 			);
 		}
 
-		this.event.subscribeObservable2(this.selectedMode, (mode) =>
+		this.event.subscribeObservable(this.selectedMode, (mode) =>
 			this.tooltipHolder.set(mode === undefined ? this.getTooltips() : {}),
 		);
 
 		this.onDisable(() => this.selected.clear());
 		this.onDisable(() => this._selectedMode.set(undefined));
-		this.event.subscribeObservable2(this.targetPlot, () => this._selectedMode.set(undefined), true);
-		this.event.subscribeObservable2(this.selectedMode, (mode) => {
+		this.event.subscribeObservable(this.targetPlot, () => this._selectedMode.set(undefined), true);
+		this.event.subscribeObservable(this.selectedMode, (mode) => {
 			if (!mode) {
 				this.controller.clear();
 				return;

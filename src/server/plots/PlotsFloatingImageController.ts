@@ -51,7 +51,7 @@ export class PlotFloatingImageController extends Component {
 			return new InstanceComponent(gui);
 		};
 
-		this.event.subscribeObservable2(plot.ownerId, (owner) => {
+		this.event.subscribeObservable(plot.ownerId, (owner) => {
 			container.clear();
 
 			if (owner !== undefined) {

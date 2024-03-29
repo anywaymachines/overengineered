@@ -12,7 +12,7 @@ export class ClientComponentEvents extends ComponentEvents {
 		state.onDisable(() => this.inputHandler.unsubscribeAll());
 		state.onDestroy(() => this.inputHandler.destroy());
 
-		this.subscribeObservable2(InputController.inputType, () => {
+		this.subscribeObservable(InputController.inputType, () => {
 			state.disable();
 			state.enable();
 		});

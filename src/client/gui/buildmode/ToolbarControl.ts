@@ -85,7 +85,7 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 
 		this.nameLabel = this.add(new Control(this.gui.Info.NameLabel));
 
-		this.event.subscribeObservable2(
+		this.event.subscribeObservable(
 			tools.tools,
 			(toollist) => {
 				toolButtons.clear();
@@ -98,7 +98,7 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 			},
 			true,
 		);
-		this.event.subscribeObservable2(
+		this.event.subscribeObservable(
 			tools.disabledTools,
 			(disabled) => {
 				for (const [tool, control] of toolButtons.keyedChildren.getAll()) {

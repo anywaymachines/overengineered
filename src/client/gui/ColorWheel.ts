@@ -59,6 +59,7 @@ export default class ColorWheel extends Control<ColorWheelDefinition> {
 				bri.value.set(v);
 			},
 			true,
+			true,
 		);
 
 		const updateColorBySlider = (h: number | undefined, s: number | undefined, v: number | undefined) => {
@@ -118,6 +119,7 @@ export default class ColorWheel extends Control<ColorWheelDefinition> {
 				btext.value.set(math.floor(color.B * 255));
 				hextext.text.set("#" + this.value.get().ToHex().upper());
 			},
+			true,
 			true,
 		);
 	}

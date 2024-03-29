@@ -26,7 +26,7 @@ export default class DropdownList<TValue extends string = string> extends Contro
 		this.contents = this.add(new Control(this.gui.Content));
 
 		this.event.subscribe(this.button.activated, () => this.toggle());
-		this.event.subscribeObservable2(
+		this.event.subscribeObservable(
 			this.selectedItem,
 			(v) => this.button.text.set(v === undefined ? "" : this.names.get(v) ?? v),
 			true,

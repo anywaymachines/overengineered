@@ -103,7 +103,7 @@ export default class ToolController extends ClientComponent {
 			tool?.enable();
 		});
 
-		this.event.subscribeObservable2(
+		this.event.subscribeObservable(
 			this.selectedTool,
 			(tool) => mode.mirrorVisualizer.setEnabled(tool?.supportsMirror() ?? false),
 			true,
@@ -145,7 +145,7 @@ export default class ToolController extends ClientComponent {
 		const inputParent = new ComponentChild<ToolInputController>(this);
 		this.tools.subscribe(() => inputParent.set(new ToolInputController(this)), true);
 
-		this.event.subscribeObservable2(
+		this.event.subscribeObservable(
 			LoadingController.isLoading,
 			(loading) => {
 				if (loading) {
