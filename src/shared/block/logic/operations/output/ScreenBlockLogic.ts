@@ -1,4 +1,3 @@
-import { Players, TextService } from "@rbxts/services";
 import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -17,6 +16,7 @@ export default class ScreenBlockLogic extends ConfigurableBlockLogic<typeof bloc
 		update: new AutoC2SRemoteEvent<{
 			readonly block: Screen;
 			readonly text: string;
+			readonly translate: boolean;
 		}>("screen_update"),
 	} as const;
 
@@ -26,22 +26,10 @@ export default class ScreenBlockLogic extends ConfigurableBlockLogic<typeof bloc
 		this.event.subscribeObservable(
 			this.input.data,
 			(data) => {
-				let text: string;
-
-				if (typeIs(data, "string")) {
-					// TODO: TESTME
-					// FIXME: this code MIGHT be executed on the server, causing a nil error in Players.LocalPlayer
-					text = TextService.FilterStringAsync(
-						data,
-						Players.LocalPlayer.UserId,
-					).GetNonChatStringForBroadcastAsync();
-				} else {
-					text = tostring(data);
-				}
-
 				ScreenBlockLogic.events.update.send({
 					block: this.instance,
-					text,
+					text: tostring(data),
+					translate: typeIs(data, "string"),
 				});
 			},
 			true,
