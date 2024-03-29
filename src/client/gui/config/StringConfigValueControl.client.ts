@@ -5,9 +5,7 @@ import TextBoxControl, { TextBoxControlDefinition } from "client/gui/controls/Te
 import Signal from "shared/event/Signal";
 
 class StringConfigValueControl extends ConfigValueControl<TextBoxControlDefinition> {
-	readonly submitted = new Signal<
-		(config: Readonly<Record<BlockUuid, BlockConfigTypes.String["config"]>>) => void
-	>();
+	readonly submitted = new Signal<(config: Readonly<Record<BlockUuid, BlockConfigTypes.String["config"]>>) => void>();
 
 	constructor(
 		configs: Readonly<Record<BlockUuid, BlockConfigTypes.String["config"]>>,

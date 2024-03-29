@@ -3,7 +3,7 @@ import ObservableValue from "shared/event/ObservableValue";
 
 /** Basic class of input data type control */
 export default class InputController {
-	public static readonly inputType = new ObservableValue<InputType>(InputController.getPhysicalInputType());
+	static readonly inputType = new ObservableValue<InputType>(InputController.getPhysicalInputType());
 
 	/** Returns the input type based on the device the client is playing from */
 	static getPhysicalInputType(): InputType {

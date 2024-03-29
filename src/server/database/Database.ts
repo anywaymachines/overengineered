@@ -20,11 +20,11 @@ export abstract class DbBase<T> {
 	protected abstract deserialize(data: string): T;
 	protected abstract serialize(data: T): string | undefined;
 
-	public get(key: string) {
+	get(key: string) {
 		return (this.cache[key] ??= this.load(key)).value;
 	}
 
-	public set(key: string, value: T) {
+	set(key: string, value: T) {
 		this.cache[key] = { changed: true, value };
 	}
 
@@ -37,24 +37,24 @@ export abstract class DbBase<T> {
 		return { changed: false, value: this.createDefault() };
 	}
 
-	public loadedUnsavedEntries() {
+	loadedUnsavedEntries() {
 		return Objects.entries(this.cache).filter((entry) => entry[1].changed);
 	}
 
 	/** Removes an entry from the cache */
-	public free(key: string) {
+	free(key: string) {
 		delete this.cache[key];
 	}
 
 	/** Clears tha cache */
-	public freeAll() {
+	freeAll() {
 		for (const [key, _] of Objects.pairs(this.cache)) {
 			delete this.cache[key];
 		}
 	}
 
 	/** Saves an entry if it's not changed */
-	public save(key: string) {
+	save(key: string) {
 		const value = this.cache[key];
 		if (!value || !value.changed) return;
 
@@ -63,7 +63,7 @@ export abstract class DbBase<T> {
 		value.changed = false;
 	}
 
-	public saveChanged() {
+	saveChanged() {
 		for (const [key, value] of Objects.pairs(this.cache)) {
 			if (!value.changed) continue;
 

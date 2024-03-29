@@ -100,6 +100,6 @@ export default class SelectButtonPopup extends Popup<SelectButtonPopupDefinition
 	}
 
 	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.cancelButton.getGui();
+		GuiService.SelectedObject = this.cancelButton.instance;
 	}
 }

@@ -102,7 +102,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 			control.activated.Connect(activated);
 			this.list.add(control);
 
-			control.getGui().LayoutOrder = idx++;
+			control.instance.LayoutOrder = idx++;
 			return control;
 		};
 		const createBlockButton = (block: RegistryBlock, activated: () => void) => {
@@ -110,7 +110,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 			control.activated.Connect(activated);
 			this.list.add(control);
 
-			control.getGui().LayoutOrder = idx++;
+			control.instance.LayoutOrder = idx++;
 			return control;
 		};
 
@@ -153,8 +153,8 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 				});
 
 				if (prev) {
-					button.getGui().NextSelectionUp = prev.getGui();
-					prev.getGui().NextSelectionDown = button.getGui();
+					button.instance.NextSelectionUp = prev.instance;
+					prev.instance.NextSelectionDown = button.instance;
 				}
 
 				button.event.subscribe(button.activated, () => {
@@ -165,11 +165,11 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 				button.event.subscribeObservable(
 					this.selectedBlock,
 					(newblock) => {
-						button.getGui().BackgroundColor3 =
+						button.instance.BackgroundColor3 =
 							newblock === block ? Colors.accentDark : Colors.staticBackground;
 
 						// Gamepad selection improvements
-						button.getGui().SelectionOrder = newblock === block ? 0 : 1;
+						button.instance.SelectionOrder = newblock === block ? 0 : 1;
 					},
 					true,
 				);
@@ -183,7 +183,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 
 		// Gamepad selection improvements
 		const isSelected = GuiService.SelectedObject !== undefined;
-		GuiService.SelectedObject = isSelected ? this.list.getChildren()[0].getGui() : undefined;
+		GuiService.SelectedObject = isSelected ? this.list.getChildren()[0].instance : undefined;
 
 		if (animated && this.gui.SearchTextBox.Text === "") {
 			GuiAnimator.transition(this.gui.ScrollingFrame, 0.2, "up", 10);

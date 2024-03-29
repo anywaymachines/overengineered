@@ -61,7 +61,10 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 		}
 
 		// The strength depends on the material
-		this.multiplier *= math.max(1, new PhysicalProperties(this.block.material ?? Enum.Material.Plastic).Density / 2);
+		this.multiplier *= math.max(
+			1,
+			new PhysicalProperties(this.block.material ?? Enum.Material.Plastic).Density / 2,
+		);
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 		this.event.subscribeObservable(
@@ -130,7 +133,7 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 		}
 	}
 
-	public getTorque() {
+	getTorque() {
 		return this.input.thrust.get();
 	}
 }

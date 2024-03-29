@@ -1,6 +1,6 @@
 import Control from "client/gui/Control";
 import NumberObservableValue from "shared/event/NumberObservableValue";
-import GuiAnimator from "../GuiAnimator";
+import GuiAnimator from "client/gui/GuiAnimator";
 
 export type ProgressBarControlDefinition = GuiObject & {
 	Filled?: GuiObject;
@@ -12,8 +12,8 @@ export type ProgressBarControlDefinition = GuiObject & {
 export default class ProgressBarControl<
 	T extends ProgressBarControlDefinition = ProgressBarControlDefinition,
 > extends Control<T> {
-	public readonly value;
-	public readonly vertical;
+	readonly value;
+	readonly vertical;
 
 	constructor(gui: T, min: number, max: number, step: number) {
 		super(gui);

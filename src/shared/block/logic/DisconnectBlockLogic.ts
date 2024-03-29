@@ -1,7 +1,7 @@
 import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
-import ConfigurableBlockLogic from "../ConfigurableBlockLogic";
+import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
 
 export default class DisconnectBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.disconnectblock> {
 	static readonly events = {

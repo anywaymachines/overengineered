@@ -24,10 +24,10 @@ export const WorldPipetteTest: ControlTest = {
 		const megaPipette = list.add(new BlockPipetteButton(newpipettebtn("MEGA PIPETTE")));
 		megaPipette.onSelect.Connect((part) => {
 			if (part.IsA("BasePart")) {
-				(megaPipette.getGui() as TextButton).Text = `${part.Material.Name} #${part.Color.ToHex().upper()}`;
+				(megaPipette.instance as TextButton).Text = `${part.Material.Name} #${part.Color.ToHex().upper()}`;
 			} else {
 				const data = BlockManager.getBlockDataByBlockModel(part);
-				(megaPipette.getGui() as TextButton).Text =
+				(megaPipette.instance as TextButton).Text =
 					`${data.id} ${data.material.Name} #${data.color.ToHex().upper()}`;
 			}
 

@@ -9,7 +9,7 @@ import { LogControlDefinition } from "./LogControl";
 export type DebugControlDefinition = LogControlDefinition;
 
 export default class DebugControl extends Control<DebugControlDefinition> {
-	public static readonly instance = new DebugControl(
+	static readonly instance = new DebugControl(
 		Gui.getGameUI<{
 			Debug: DebugControlDefinition;
 		}>().Debug,
@@ -32,7 +32,7 @@ export default class DebugControl extends Control<DebugControlDefinition> {
 			});
 	}
 
-	public addLine(text: string, color: Color3 = Colors.white) {
+	addLine(text: string, color: Color3 = Colors.white) {
 		const line = this.lineTemplate();
 		line.TextLabel.Text = text;
 		line.TextLabel.TextColor3 = color;

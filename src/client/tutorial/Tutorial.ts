@@ -81,12 +81,12 @@ export default class Tutorial {
 		return new Promise((resolve) => {
 			const eventHandler = new EventHandler();
 
-			eventHandler.subscribeOnce(this.Control.getGui().Header.Next.MouseButton1Click, () => {
+			eventHandler.subscribeOnce(this.Control.instance.Header.Next.MouseButton1Click, () => {
 				eventHandler.unsubscribeAll();
 				resolve(true);
 			});
 
-			eventHandler.subscribeOnce(this.Control.getGui().Header.Cancel.MouseButton1Click, () => {
+			eventHandler.subscribeOnce(this.Control.instance.Header.Cancel.MouseButton1Click, () => {
 				eventHandler.unsubscribeAll();
 				this.Finish();
 				resolve(false);
@@ -114,7 +114,7 @@ export default class Tutorial {
 				resolve(true);
 			});
 
-			eventHandler.subscribeOnce(this.Control.getGui().Header.Cancel.MouseButton1Click, () => {
+			eventHandler.subscribeOnce(this.Control.instance.Header.Cancel.MouseButton1Click, () => {
 				eventHandler.unsubscribeAll();
 				this.Finish();
 				resolve(false);
@@ -142,7 +142,7 @@ export default class Tutorial {
 				resolve(true);
 			});
 
-			eventHandler.subscribeOnce(this.Control.getGui().Header.Cancel.MouseButton1Click, () => {
+			eventHandler.subscribeOnce(this.Control.instance.Header.Cancel.MouseButton1Click, () => {
 				eventHandler.unsubscribeAll();
 				this.Finish();
 				resolve(false);

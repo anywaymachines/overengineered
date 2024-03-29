@@ -60,6 +60,6 @@ export default class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
 	}
 
 	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.cancelButton.getGui();
+		GuiService.SelectedObject = this.cancelButton.instance;
 	}
 }

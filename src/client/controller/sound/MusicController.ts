@@ -18,7 +18,7 @@ export default class MusicController {
 		15,
 	);
 
-	public static initialize() {
+	static initialize() {
 		Workspace.GetPropertyChangedSignal("Gravity").Connect(() => {
 			if (PlayerDataStorage.config.get().music === false) return;
 

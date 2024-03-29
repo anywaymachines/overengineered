@@ -20,9 +20,7 @@ class ConfigNumberControl extends Control<NumberTextBoxControlDefinition> {
 }
 
 class NumberConfigValueControl extends ConfigValueControl<NumberTextBoxControlDefinition> {
-	readonly submitted = new Signal<
-		(config: Readonly<Record<BlockUuid, BlockConfigTypes.Number["config"]>>) => void
-	>();
+	readonly submitted = new Signal<(config: Readonly<Record<BlockUuid, BlockConfigTypes.Number["config"]>>) => void>();
 
 	constructor(
 		configs: Readonly<Record<BlockUuid, BlockConfigTypes.Number["config"]>>,

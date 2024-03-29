@@ -8,7 +8,7 @@ type Args = {
 	readonly index?: number;
 };
 export default class ExplosionEffect extends EffectBase<Args> {
-	 readonly soundsFolder = ReplicatedStorage.Assets.Sounds.Explosion.GetChildren();
+	readonly soundsFolder = ReplicatedStorage.Assets.Sounds.Explosion.GetChildren();
 
 	constructor() {
 		super("explosion_effect");

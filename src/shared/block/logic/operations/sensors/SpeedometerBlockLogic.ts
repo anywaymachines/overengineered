@@ -12,7 +12,7 @@ export default class SpeedometerBlockLogic extends ConfigurableBlockLogic<typeof
 
 	private update() {
 		if (!this.block.instance.PrimaryPart) {
-			this.disable()
+			this.disable();
 			return;
 		}
 

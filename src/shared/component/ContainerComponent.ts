@@ -8,11 +8,6 @@ export class ContainerComponent<TChild extends IComponent = IComponent> extends 
 	/** Returns a list of added children */
 	readonly getChildren = () => this.children.getAll();
 
-	/** Add a child and return it
-	 * @deprecated Use `add` instead
-	 */
-	readonly added = <T extends TChild>(instance: T) => this.add(instance);
-
 	/** Add a child and return it */
 	readonly add = <T extends TChild>(instance: T) => this.children.add(instance);
 

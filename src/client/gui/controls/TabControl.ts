@@ -50,12 +50,12 @@ export class TabControl extends Control<TabControlDefinition> {
 	}
 
 	addButton() {
-		return this.add(new TextButtonControl(this.buttonTemplate()).with((c) => (c.getGui().Parent = this.gui.Tabs)));
+		return this.add(new TextButtonControl(this.buttonTemplate()).with((c) => (c.instance.Parent = this.gui.Tabs)));
 	}
 	addTab(name: string, content: Control) {
 		this.tabs.set(name, content);
 
-		content.getGui().Parent = this.gui.Content;
+		content.instance.Parent = this.gui.Content;
 		this.add(content);
 		content.hide();
 

@@ -175,11 +175,11 @@ namespace Markers {
 				const control = new Control(
 					ReplicatedAssets.get<{ Wires: { WireInfoLabel: TextLabel } }>().Wires.WireInfoLabel.Clone(),
 				);
-				control.getGui().Text = this.data.name;
-				control.getGui().Parent = this.instance;
-				control.getGui().AnchorPoint = new Vector2(0.5, 0.98); // can't set Y to 1 because then it doesn't render
-				control.getGui().Position = new UDim2(0.5, 0, 0, 0);
-				control.getGui().Size = new UDim2(2, 0, 1, 0);
+				control.instance.Text = this.data.name;
+				control.instance.Parent = this.instance;
+				control.instance.AnchorPoint = new Vector2(0.5, 0.98); // can't set Y to 1 because then it doesn't render
+				control.instance.Position = new UDim2(0.5, 0, 0, 0);
+				control.instance.Size = new UDim2(2, 0, 1, 0);
 
 				tooltipParent.set(control);
 			};

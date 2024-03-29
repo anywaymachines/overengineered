@@ -29,10 +29,10 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 	constructor(gui: ActionBarControlDefinition, controls: RideModeControls) {
 		super(gui);
 
-		const stopButton = this.added(new ButtonControl(this.gui.Stop));
-		const sitButton = this.added(new ButtonControl(this.gui.Sit));
-		const controlSettingsButton = this.added(new ButtonControl(this.gui.ControlSettings));
-		const controlResetButton = this.added(new ButtonControl(this.gui.ControlReset));
+		const stopButton = this.add(new ButtonControl(this.gui.Stop));
+		const sitButton = this.add(new ButtonControl(this.gui.Sit));
+		const controlSettingsButton = this.add(new ButtonControl(this.gui.ControlSettings));
+		const controlResetButton = this.add(new ButtonControl(this.gui.ControlReset));
 		controlResetButton.hide();
 
 		this.onPrepare((input) => {
@@ -101,7 +101,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 	}
 
 	resetControl(btn: Control, pos: number) {
-		const size = btn.getGui().Size;
+		const size = btn.instance.Size;
 
 		let x = 0.95;
 		let y = 1 - size.Y.Scale * pos - 0.01 * pos;
@@ -111,7 +111,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			x -= 0.05;
 		}
 
-		btn.getGui().Position = new UDim2(x, 0, y, 0);
+		btn.instance.Position = new UDim2(x, 0, y, 0);
 	}
 	resetControls() {
 		let pos = 0;
@@ -139,8 +139,8 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			const instance = this.overlayTemplate();
 			instance.Position = new UDim2(0, 0, 0, 0);
 			instance.Size = new UDim2(1, 0, 1, 0);
-			instance.Parent = child.getGui();
-			child.getGui().Active = false;
+			instance.Parent = child.instance;
+			child.instance.Active = false;
 
 			instance.InputBegan.Connect((input) => {
 				if (inputting) return;
@@ -165,11 +165,9 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 					const delta = input.Position.sub(prevpos);
 					prevpos = input.Position;
-					child.getGui().Position = child
-						.getGui()
-						.Position.add(
-							new UDim2(delta.X / this.gui.AbsoluteSize.X, 0, delta.Y / this.gui.AbsoluteSize.Y, 0),
-						);
+					child.instance.Position = child.instance.Position.add(
+						new UDim2(delta.X / this.gui.AbsoluteSize.X, 0, delta.Y / this.gui.AbsoluteSize.Y, 0),
+					);
 				});
 
 				eh.subscribe(UserInputService.InputEnded, (input) => {
@@ -181,14 +179,14 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 					{
 						let abs = new Vector2(
-							child.getGui().Position.X.Scale * this.gui.AbsoluteSize.X,
-							child.getGui().Position.Y.Scale * this.gui.AbsoluteSize.Y,
+							child.instance.Position.X.Scale * this.gui.AbsoluteSize.X,
+							child.instance.Position.Y.Scale * this.gui.AbsoluteSize.Y,
 						);
 
-						const grid = child.getGui().AbsoluteSize.div(4);
+						const grid = child.instance.AbsoluteSize.div(4);
 						abs = new Vector2(math.round(abs.X / grid.X) * grid.X, math.round(abs.Y / grid.Y) * grid.Y);
 
-						child.getGui().Position = new UDim2(
+						child.instance.Position = new UDim2(
 							abs.X / this.gui.AbsoluteSize.X,
 							0,
 							abs.Y / this.gui.AbsoluteSize.Y,
@@ -210,7 +208,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		this.quitSettingsMode = async () => {
 			for (const child of overlay.getChildren()) {
 				if (!(child instanceof Control)) continue;
-				child.getGui().Active = true;
+				child.instance.Active = true;
 			}
 
 			this.onQuitSettingsMode.Fire();
@@ -223,7 +221,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			const touchControls: Record<string, TouchControlInfo[string]> = {};
 			for (const [keycode, child] of this.keyedChildren.getAll()) {
 				touchControls[keycode] = {
-					pos: [child.getGui().Position.X.Scale, child.getGui().Position.Y.Scale],
+					pos: [child.instance.Position.X.Scale, child.instance.Position.Y.Scale],
 				};
 			}
 
@@ -266,9 +264,9 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			const doload =
 				controlsInfo !== undefined &&
 				controlsInfo[keycode] !== undefined &&
-				controlsInfo[keycode].pos[0] >= control.getGui().AbsoluteSize.X / this.gui.AbsoluteSize.X &&
+				controlsInfo[keycode].pos[0] >= control.instance.AbsoluteSize.X / this.gui.AbsoluteSize.X &&
 				controlsInfo[keycode].pos[0] <= 1 &&
-				controlsInfo[keycode].pos[1] >= control.getGui().AbsoluteSize.Y / this.gui.AbsoluteSize.Y &&
+				controlsInfo[keycode].pos[1] >= control.instance.AbsoluteSize.Y / this.gui.AbsoluteSize.Y &&
 				controlsInfo[keycode].pos[1] <= 1;
 
 			if (doload) {
@@ -276,10 +274,10 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 				if (kc) {
 					if (kc.pos[0] <= 1) {
 						// relative position
-						control.getGui().Position = new UDim2(kc.pos[0], 0, kc.pos[1], 0);
+						control.instance.Position = new UDim2(kc.pos[0], 0, kc.pos[1], 0);
 					} else {
 						// pixel position
-						control.getGui().Position = new UDim2(0, kc.pos[0], 0, kc.pos[1]);
+						control.instance.Position = new UDim2(0, kc.pos[0], 0, kc.pos[1]);
 					}
 				}
 			} else {
@@ -298,8 +296,8 @@ export class RideModeInfoControl extends Control<RideModeInfoControlDefinition> 
 	constructor(gui: RideModeInfoControlDefinition, min: number, max: number, step: number) {
 		super(gui);
 
-		this.slider = this.added(new ProgressBarControl(this.gui, min, max, step));
-		this.text = this.added(new FormattedLabelControl(this.gui.FormattedText));
+		this.slider = this.add(new ProgressBarControl(this.gui, min, max, step));
+		this.text = this.add(new FormattedLabelControl(this.gui.FormattedText));
 	}
 }
 

@@ -9,7 +9,7 @@ export type PlayerData = {
 };
 
 export default class PlayerDatabase {
-	public static readonly instance = new PlayerDatabase();
+	static readonly instance = new PlayerDatabase();
 
 	private readonly datastore: DataStore = DataStoreService.GetDataStore("players");
 	private readonly db;
@@ -37,11 +37,11 @@ export default class PlayerDatabase {
 		});
 	}
 
-	public get(userId: string) {
+	get(userId: string) {
 		return this.db.get(userId);
 	}
 
-	public set(userId: string, data: PlayerData) {
+	set(userId: string, data: PlayerData) {
 		this.db.set(userId, data);
 	}
 }

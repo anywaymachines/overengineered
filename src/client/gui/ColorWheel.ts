@@ -66,9 +66,9 @@ export default class ColorWheel extends Control<ColorWheelDefinition> {
 			s ??= sat.value.get();
 			v ??= bri.value.get();
 
-			sat.getGui().UIGradient.Color = new ColorSequence(Color3.fromHSV(h, 0, v), Color3.fromHSV(h, 1, v));
-			bri.getGui().UIGradient.Color = new ColorSequence(
-				bri.getGui().UIGradient.Color.Keypoints[0].Value,
+			sat.instance.UIGradient.Color = new ColorSequence(Color3.fromHSV(h, 0, v), Color3.fromHSV(h, 1, v));
+			bri.instance.UIGradient.Color = new ColorSequence(
+				bri.instance.UIGradient.Color.Keypoints[0].Value,
 				Color3.fromHSV(h, s, 1),
 			);
 		};

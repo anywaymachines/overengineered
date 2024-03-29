@@ -80,11 +80,11 @@ namespace Scene {
 				tool.selectedMode,
 				(mode) => {
 					for (const [name, button] of Objects.pairs(modeButtons)) {
-						button.getGui().BackgroundColor3 = mode === name ? Colors.accentDark : Colors.staticBackground;
+						button.instance.BackgroundColor3 = mode === name ? Colors.accentDark : Colors.staticBackground;
 
 						const enabled = mode === undefined || mode === name;
-						button.getGui().Transparency = enabled ? 0 : 0.8;
-						button.getGui().Interactable = enabled;
+						button.instance.Transparency = enabled ? 0 : 0.8;
+						button.instance.Interactable = enabled;
 					}
 				},
 				true,

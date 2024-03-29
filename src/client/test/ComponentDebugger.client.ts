@@ -54,13 +54,13 @@ class TreeControl extends Control<TreeControlDefinition, Control> {
 		this.main = this.add(new ButtonControl(gui.Main));
 		this.childContainer = this.add(new Control(this.gui.Children));
 
-		this.main.getGui().BackgroundColor3 = Colors.accent;
+		this.main.instance.BackgroundColor3 = Colors.accent;
 		this.event.subscribe(this.main.activated, () => {
 			if (this.childContainer.isVisible()) {
-				this.main.getGui().BackgroundColor3 = Colors.accentDark;
+				this.main.instance.BackgroundColor3 = Colors.accentDark;
 				this.childContainer.hide();
 			} else {
-				this.main.getGui().BackgroundColor3 = Colors.accent;
+				this.main.instance.BackgroundColor3 = Colors.accent;
 				this.childContainer.show();
 			}
 		});

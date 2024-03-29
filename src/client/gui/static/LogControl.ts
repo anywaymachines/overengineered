@@ -10,7 +10,7 @@ export type LogControlDefinition = GuiObject & {
 };
 
 export default class LogControl extends Control<LogControlDefinition> {
-	public static readonly instance = new LogControl(
+	static readonly instance = new LogControl(
 		Gui.getGameUI<{
 			Log: LogControlDefinition;
 		}>().Log,
@@ -23,7 +23,7 @@ export default class LogControl extends Control<LogControlDefinition> {
 		this.lineTemplate = this.asTemplate(this.gui.Template);
 	}
 
-	public addLine(text: string, color: Color3 = Colors.white) {
+	addLine(text: string, color: Color3 = Colors.white) {
 		const line = this.lineTemplate();
 		line.TextLabel.Text = text;
 		line.TextLabel.TextColor3 = color;

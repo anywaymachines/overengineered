@@ -48,7 +48,7 @@ export default class DropdownList<TValue extends string = string> extends Contro
 		}
 
 		btn.text.set(text ?? name);
-		btn.getGui().Parent = this.gui.Content;
+		btn.instance.Parent = this.gui.Content;
 
 		this.add(btn);
 	}

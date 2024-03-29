@@ -8,8 +8,8 @@ export const ColorWheelTest: ControlTest = {
 			[
 				"Color wheel",
 				new ColorWheel(Gui.getGameUI<{ Templates: { Color: ColorWheelDefinition } }>().Templates.Color.Clone())
-					.with((c) => (c.getGui().Position = new UDim2()))
-					.with((c) => (c.getGui().AnchorPoint = new Vector2())),
+					.with((c) => (c.instance.Position = new UDim2()))
+					.with((c) => (c.instance.AnchorPoint = new Vector2())),
 			],
 		];
 	},

@@ -1,5 +1,4 @@
 import { ClientContainerComponent } from "client/component/ClientContainerComponent";
-import Control from "client/gui/Control";
 import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
 import { IBlockLogicValue } from "shared/block/BlockLogicValue";
 
@@ -20,11 +19,6 @@ export abstract class ConfigLogicValueBase<
 	}
 
 	getTouchButtonDatas(): readonly TouchModeButtonData[] {
-		return [];
-	}
-
-	/** @deprecated */
-	getRideModeGuis(inputType: InputType): readonly Control[] {
 		return [];
 	}
 }

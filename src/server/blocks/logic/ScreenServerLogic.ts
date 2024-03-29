@@ -1,5 +1,5 @@
 import ScreenBlockLogic from "shared/block/logic/operations/output/ScreenBlockLogic";
-import ServerBlockLogic from "../ServerBlockLogic";
+import ServerBlockLogic from "server/blocks/ServerBlockLogic";
 
 export default class ScreenServerLogic extends ServerBlockLogic<typeof ScreenBlockLogic> {
 	constructor(logic: typeof ScreenBlockLogic) {

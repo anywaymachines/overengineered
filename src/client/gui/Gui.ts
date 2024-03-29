@@ -26,7 +26,7 @@ export default class Gui {
 		return Players.LocalPlayer.WaitForChild("PlayerGui") as T;
 	}
 
-	public static isCursorOnVisibleGui(): boolean {
+	static isCursorOnVisibleGui(): boolean {
 		const playerGUI = this.getPlayerGui();
 		const gameUI = this.getGameUI();
 		const mouse = Players.LocalPlayer.GetMouse();

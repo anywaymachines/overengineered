@@ -104,10 +104,10 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 				for (const [tool, control] of toolButtons.keyedChildren.getAll()) {
 					const isdisabled = disabled.includes(tool);
 
-					control.getGui().BackgroundTransparency = isdisabled ? 0.8 : 0.2;
-					control.getGui().Active = !isdisabled;
-					control.getGui().Interactable = !isdisabled;
-					control.getGui().AutoButtonColor = !isdisabled;
+					control.instance.BackgroundTransparency = isdisabled ? 0.8 : 0.2;
+					control.instance.Active = !isdisabled;
+					control.instance.Interactable = !isdisabled;
+					control.instance.AutoButtonColor = !isdisabled;
 				}
 			},
 			true,
@@ -124,7 +124,7 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 			};
 
 			for (const button of toolButtons.getChildren()) {
-				tween(button.getGui().KeyboardNumberLabel, inputType === "Desktop");
+				tween(button.instance.KeyboardNumberLabel, inputType === "Desktop");
 			}
 
 			tween(this.gui.Info.GamepadBack, inputType === "Gamepad");
@@ -178,7 +178,7 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 					.transform("TextTransparency", 1, { duration: duration * 0.8 });
 			}
 
-			transform.then().func(() => (this.getGui().Info.NameLabel.Text = tool?.getDisplayName() ?? ""));
+			transform.then().func(() => (this.instance.Info.NameLabel.Text = tool?.getDisplayName() ?? ""));
 
 			if (tool) {
 				transform
@@ -196,6 +196,6 @@ export default class ToolbarControl extends Control<ToolbarControlDefinition> {
 	}
 
 	private resetLabels() {
-		this.getGui().Info.NameLabel.Text = "";
+		this.instance.Info.NameLabel.Text = "";
 	}
 }

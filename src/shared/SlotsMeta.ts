@@ -1,6 +1,6 @@
 /** Slots storage for a single user */
 export default class SlotsMeta {
-	public static readonly autosaveSlotIndex = -1;
+	static readonly autosaveSlotIndex = -1;
 
 	private static defaultSlot(index: number): SlotMeta {
 		const def: SlotMeta = {

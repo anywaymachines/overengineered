@@ -31,7 +31,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 	constructor(gui: ConfigToolSceneDefinition, tool: ConfigTool) {
 		super(gui);
 
-		this.configControl = this.added(new ConfigControl(this.gui.ParamsSelection.Buttons));
+		this.configControl = this.add(new ConfigControl(this.gui.ParamsSelection.Buttons));
 		this.configControl.travelToConnectedPressed.Connect((uuid) => {
 			tool.unselectAll();
 			tool.selectBlockByUuid(uuid);

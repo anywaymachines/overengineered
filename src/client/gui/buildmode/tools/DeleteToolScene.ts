@@ -64,7 +64,7 @@ export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> 
 
 		this.event.subscribe(this.tool.onClearAllRequested, () => this.suggestClearAll());
 
-		const deleteAllButton = this.added(new ButtonControl(this.gui.Bottom.DeleteAllButton));
+		const deleteAllButton = this.add(new ButtonControl(this.gui.Bottom.DeleteAllButton));
 		this.event.subscribe(deleteAllButton.activated, () => this.suggestClearAll());
 	}
 

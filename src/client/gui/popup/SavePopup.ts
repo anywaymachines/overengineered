@@ -82,7 +82,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 					});
 
 				/*const add = new Control(this.buyNewTemplate());
-			add.getGui().Activated.Connect(() => {
+			add.instance.Activated.Connect(() => {
 				const slotcount = this.slots.getChildren().size();
 
 				if (slotcount + 1 > GameDefinitions.FREE_SLOTS + (data.purchasedSlots ?? 0)) {
@@ -214,7 +214,7 @@ class SavePreview extends Control<SavePreviewDefinition> {
 			setControlActive(this.gui.Buttons.SaveButton);
 
 			for (const child of buttons) {
-				setControlActive(child.getGui());
+				setControlActive(child.instance);
 			}
 		};
 
@@ -225,11 +225,11 @@ class SavePreview extends Control<SavePreviewDefinition> {
 		const buttons: ButtonControl[] = [];
 		for (const child of this.gui.Content.Colors.GetChildren()) {
 			if (child.IsA("GuiButton")) {
-				const button = this.added(new ButtonControl(child));
+				const button = this.add(new ButtonControl(child));
 				buttons.push(button);
 
 				button.activated.Connect(() => {
-					send({ color: Serializer.Color3Serializer.serialize(button.getGui().BackgroundColor3) });
+					send({ color: Serializer.Color3Serializer.serialize(button.instance.BackgroundColor3) });
 				});
 			}
 		}
