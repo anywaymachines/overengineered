@@ -9,6 +9,27 @@ export default class VectorUtils {
 		return new Vector2(func(vector.X), func(vector.Y));
 	}
 
+	static round(num: number, precision?: number) {
+		precision = precision ?? 1;
+		return math.floor(num + precision / 2) * precision;
+	}
+
+	static areCFrameEqual(cf1: CFrame, cf2: CFrame, precision?: number) {
+		precision = precision ?? 0.05;
+		let pos1 = cf1.Position;
+		let rot1 = cf1.ToObjectSpace(new CFrame()).LookVector;
+		let pos2 = cf2.Position;
+		let rot2 = cf2.ToObjectSpace(new CFrame()).LookVector;
+
+		pos1 = new Vector3(this.round(pos1.X, precision), this.round(pos1.Y, precision), this.round(pos1.Z, precision));
+		rot1 = new Vector3(this.round(rot1.X, precision), this.round(rot1.Y, precision), this.round(rot1.Z, precision));
+
+		pos2 = new Vector3(this.round(pos2.X, precision), this.round(pos2.Y, precision), this.round(pos2.Z, precision));
+		rot2 = new Vector3(this.round(rot2.X, precision), this.round(rot2.Y, precision), this.round(rot2.Z, precision));
+
+		return pos1 === pos2 && rot1 === rot2;
+	}
+
 	static normalizeVector2(vector: Vector2) {
 		return vector.Unit;
 	}

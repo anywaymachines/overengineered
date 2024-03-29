@@ -4,6 +4,8 @@ import Logger from "shared/Logger";
 import RemoteEvents from "shared/RemoteEvents";
 import Remotes from "shared/Remotes";
 import SlotsMeta from "shared/SlotsMeta";
+import { AutoTerrainGenerator } from "shared/TerrainGenerator";
+import TerrainModelGenerator from "shared/TerrainModelGenerator";
 import BlockManager from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import GameDefinitions from "shared/data/GameDefinitions";
@@ -126,6 +128,11 @@ class RemoteHandlers {
 
 		vehicleSeat.Sit(hrp);
 	}
+}
+
+if (RunService.IsStudio()) {
+	const terragen = new TerrainModelGenerator(new Vector3(25, 50, 25));
+	task.spawn(() => AutoTerrainGenerator.initialize(terragen));
 }
 
 // Plots
