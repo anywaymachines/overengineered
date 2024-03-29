@@ -1,4 +1,4 @@
-import BlockManager from "shared/building/BlockManager";
+import BlockManager, { PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
 import SharedPlots from "shared/building/SharedPlots";
 import MaterialData from "shared/data/MaterialData";
 import Objects from "shared/fixes/objects";
@@ -6,6 +6,28 @@ import PartUtils from "shared/utils/PartUtils";
 
 /** Methods for editing the building */
 export const SharedBuilding = {
+	getBlocksConnectedByLogicToMulti(plot: PlotModel, uuids: ReadonlySet<BlockUuid>) {
+		const result = new Map<
+			BlockUuid,
+			(readonly [PlacedBlockData, BlockConnectionName, PlacedBlockDataConnection])[]
+		>();
+		for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
+			if (otherblock.connections === undefined) continue;
+
+			for (const [connectionName, connection] of Objects.pairs(otherblock.connections)) {
+				if (!uuids.has(connection.blockUuid)) continue;
+
+				let ret = result.get(connection.blockUuid);
+				if (!ret) {
+					result.set(connection.blockUuid, (ret = []));
+				}
+
+				ret.push([otherblock, connectionName, connection] as const);
+			}
+		}
+
+		return result;
+	},
 	*getBlocksConnectedByLogicTo(plot: PlotModel, uuid: BlockUuid) {
 		for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
 			if (otherblock.connections === undefined) continue;
