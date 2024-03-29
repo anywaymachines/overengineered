@@ -61,7 +61,16 @@ export class ComponentEvents {
 		this.sub(this.events, [signal, callback]);
 	}
 
-	/** Subscribe to an observable value changed event */
+	/** Register an event and immediately call the callback function */
+	subscribeImmediately<T extends Callback = Callback>(signal: ReadonlySignal<T>, callback: () => void): void {
+		if (this.state.isDestroyed()) return;
+		this.sub(this.events, [signal, callback]);
+		callback();
+	}
+
+	/** Subscribe to an observable value changed event
+	 * @deprecated Use v2 instead
+	 */
 	subscribeObservable<T>(
 		observable: ReadonlySubscribeObservableValue<T>,
 		callback: (value: T, prev: T) => void,
@@ -83,6 +92,22 @@ export class ComponentEvents {
 		this.subscribe(observable.changed, callback);
 		if (executeOnEnable) {
 			this.onEnable(() => callback(observable.get(), observable.get()), executeImmediately);
+		}
+	}
+
+	/** Subscribe to an observable value changed event */
+	subscribeObservableCollection<T extends defined>(
+		observable: ReadonlyObservableCollection<T>,
+		callback: (collectionChangedType: CollectionChangedArgs<T>) => void,
+		executeOnEnable = false,
+		executeImmediately = false,
+	): void {
+		this.subscribe(observable.changed, callback);
+		if (executeOnEnable) {
+			this.onEnable(() => {
+				callback({ kind: "clear" });
+				callback({ kind: "add", added: observable.getArr() });
+			}, executeImmediately);
 		}
 	}
 

@@ -9,6 +9,7 @@ export interface ReadonlyObservableCollection<T extends defined> {
 	readonly changed: ReadonlySignal<(collectionChangedType: CollectionChangedArgs<T>) => void>;
 
 	size(): number;
+	getArr(): readonly T[];
 }
 export interface ReadonlyObservableCollectionArr<T extends defined> extends ReadonlyObservableCollection<T> {
 	get(): readonly T[];
@@ -18,10 +19,11 @@ export interface ReadonlyObservableCollectionSet<T extends defined> extends Read
 }
 
 abstract class ObservableCollectionBase<T extends defined> implements ReadonlyObservableCollection<T> {
-	private readonly _changed = new Signal<(collectionChangedType: CollectionChangedArgs<T>) => void>();
+	protected readonly _changed = new Signal<(collectionChangedType: CollectionChangedArgs<T>) => void>();
 	readonly changed = this._changed.asReadonly();
 
 	abstract size(): number;
+	abstract getArr(): readonly T[];
 
 	/** Clear the collection and add the provided items */
 	setRange(items: readonly T[]) {
@@ -38,6 +40,11 @@ abstract class ObservableCollectionBase<T extends defined> implements ReadonlyOb
 		items = this._add(...items);
 		this._changed.Fire({ kind: "add", added: items });
 	}
+	/** Add the provided items */
+	push(...items: readonly T[]) {
+		this.add(...items);
+	}
+
 	/** Remove the provided items */
 	remove(...items: readonly T[]) {
 		items = this._remove(...items);
@@ -68,11 +75,26 @@ export class ObservableCollectionArr<T extends defined>
 	get(): readonly T[] {
 		return this.items;
 	}
+	getArr(): readonly T[] {
+		return this.get();
+	}
+
 	size(): number {
 		return this.items.size();
 	}
 	has(item: T) {
 		return this.items.includes(item);
+	}
+
+	/** Pop the last added item */
+	pop(): T | undefined {
+		const item = this.items.pop();
+
+		if (item !== undefined) {
+			this._changed.Fire({ kind: "remove", removed: [item] });
+		}
+
+		return item;
 	}
 
 	protected _add(...items: readonly T[]): readonly T[] {
@@ -112,6 +134,10 @@ export class ObservableCollectionSet<T extends defined>
 	get(): ReadonlySet<T> {
 		return this.items;
 	}
+	getArr(): readonly T[] {
+		return [...this.get()];
+	}
+
 	size(): number {
 		return this.items.size();
 	}

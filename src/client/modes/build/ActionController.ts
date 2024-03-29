@@ -1,6 +1,7 @@
 import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
 import LogControl from "client/gui/static/LogControl";
+import { ObservableCollectionArr } from "shared/event/ObservableCollection";
 import Signal from "shared/event/Signal";
 
 type Operation = {
@@ -13,8 +14,10 @@ export default class ActionController extends ClientComponent {
 	static readonly instance = new ActionController();
 
 	readonly onUndo = new Signal<(operation: Operation) => void>();
-	private readonly history: Operation[] = [];
-	private readonly redoHistory: Operation[] = [];
+	private readonly _history = new ObservableCollectionArr<Operation>();
+	private readonly _redoHistory = new ObservableCollectionArr<Operation>();
+	readonly history = this._history.asReadonly();
+	readonly redoHistory = this._redoHistory.asReadonly();
 
 	constructor() {
 		super();
@@ -46,15 +49,15 @@ export default class ActionController extends ClientComponent {
 	}
 
 	appendOperation(operation: Operation) {
-		this.history.push(operation);
-		this.redoHistory.clear();
+		this._history.push(operation);
+		this._redoHistory.clear();
 	}
 
 	async redo() {
-		const operation = this.redoHistory.pop();
+		const operation = this._redoHistory.pop();
 		if (!operation) return false;
 
-		this.history.push(operation);
+		this._history.push(operation);
 		const response = await operation.redo();
 		if (response && !response.success) {
 			LogControl.instance.addLine(`Error redoing "${operation.description}": ${response.message}`);
@@ -66,10 +69,10 @@ export default class ActionController extends ClientComponent {
 	}
 
 	async undo() {
-		const operation = this.history.pop();
+		const operation = this._history.pop();
 		if (!operation) return false;
 
-		this.redoHistory.push(operation);
+		this._redoHistory.push(operation);
 		const response = await operation.undo();
 		if (response && !response.success) {
 			LogControl.instance.addLine(`Error undoing "${operation.description}": ${response.message}`);

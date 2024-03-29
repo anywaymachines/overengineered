@@ -6,6 +6,7 @@ import Signal from "shared/event/Signal";
 export type ButtonDefinition = GuiButton;
 export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extends Control<T> {
 	readonly activated = new Signal();
+	private interactabeTransparency?: number;
 
 	constructor(gui: T, activated?: () => void) {
 		super(gui);
@@ -20,6 +21,19 @@ export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extend
 		if (activated) {
 			this.activated.Connect(activated);
 		}
+	}
+
+	setInteractable(interactable: boolean) {
+		this.gui.Interactable = interactable;
+
+		this.interactabeTransparency ??= this.instance.Transparency;
+		(this as Control<GuiButton>).transform((tr) =>
+			tr.transform("Transparency", interactable ? this.interactabeTransparency! : 0.6, {
+				style: "Quad",
+				direction: "Out",
+				duration: 0.2,
+			}),
+		);
 	}
 }
 
