@@ -36,7 +36,7 @@ export const AdminMessageController = {
 
 	createControl: () => {
 		const tb = new TextBoxControl(
-			Element.create("TextBox", { Size: new UDim2(0, 500, 0, 30), AutoLocalize: false }),
+			Element.create("TextBox", { Size: new UDim2(0, 500, 0, 30), ClearTextOnFocus: false, AutoLocalize: false }),
 		);
 
 		return new Control(

@@ -21,13 +21,25 @@ export const LoadSlotTest: ControlTest = {
 		);
 
 		const userid = loadControl.add(
-			new NumberTextBoxControl(Element.create("TextBox", { Size: new UDim2(0, 100, 0, 30) })),
+			new NumberTextBoxControl(
+				Element.create("TextBox", {
+					Size: new UDim2(0, 100, 0, 30),
+					ClearTextOnFocus: false,
+					AutoLocalize: false,
+				}),
+			),
 		);
 		const slotid = loadControl.add(
-			new NumberTextBoxControl(Element.create("TextBox", { Size: new UDim2(0, 100, 0, 30) })),
+			new NumberTextBoxControl(
+				Element.create("TextBox", {
+					Size: new UDim2(0, 100, 0, 30),
+					ClearTextOnFocus: false,
+					AutoLocalize: false,
+				}),
+			),
 		);
 		const loadbtn = loadControl.add(
-			TextButtonControl.create({ Size: new UDim2(0, 100, 0, 30), Text: "Load slot" }),
+			TextButtonControl.create({ Size: new UDim2(0, 100, 0, 30), Text: "Load slot", AutoLocalize: false }),
 		);
 
 		userid.value.set(1745850275); // BlackWater
