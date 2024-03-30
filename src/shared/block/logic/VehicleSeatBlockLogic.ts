@@ -31,6 +31,7 @@ export default class VehicleSeatBlockLogic extends ConfigurableBlockLogic<
 		};
 
 		this.occupant.subscribe(() => update());
-		this.output.occupied.set(true);
+		this.output.occupied.set(false);
+		this.onEnable(update);
 	}
 }
