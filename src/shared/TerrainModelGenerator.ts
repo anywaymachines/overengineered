@@ -35,24 +35,29 @@ class TerrainChunk {
 				const posX = stepX * x;
 				const posY = stepY * y;
 				const model = models["TerrainTile"].Clone();
+				const modelPos = model.GetPivot().Position;
 				allModels.push(model);
 				model.PivotTo(new CFrame(new Vector3(80, 5, 350)));
-				this.applyTriangle(model["1"], stepX, this.heightMap[x][y], this.heightMap[x + 1][y]);
-				//this.applyTriangle(model["2"], stepX, this.heightMap[x][y], this.heightMap[x][y]);
-				//this.applyTriangle(model["3"], stepX, this.heightMap[x][y], this.heightMap[x][y]);
-				this.applyTriangle(model["4"], stepX, this.heightMap[x][y], this.heightMap[x][y + 1]);
+				//print("map:", this.heightMap);
+				this.applyTriangle(model["1"], modelPos, this.heightMap[x][y], this.heightMap[x + 1][y]);
+				this.applyTriangle(model["2"], modelPos, this.heightMap[x + 1][y + 1], this.heightMap[x + 1][y]);
+				this.applyTriangle(model["3"], modelPos, this.heightMap[x][y + 1], this.heightMap[x + 1][y + 1]);
+				this.applyTriangle(model["4"], modelPos, this.heightMap[x][y + 1], this.heightMap[x][y]);
 				model.Parent = parent;
 			}
 		}
 	}
 
-	private applyTriangle(part: BasePart, distanceBetween: number, height1: number, height2: number) {
-		print("heights: ", height1, height2);
+	private applyTriangle(part: BasePart, Center: Vector3, height1: number, height2: number) {
 		const helfHeight = (height1 + height2) / 2;
-		//if (height2 > height1) [height1, height2] = [height2, height1];
-		const angle = math.atan(math.abs(height1 / height2));
-		//part.Position = new Vector3(part.Position.X, helfHeight, part.Position.Z);
-		part.PivotTo(part.GetPivot().mul(CFrame.fromOrientation(0, angle, 0)));
+		const d = height2 > height1;
+		//if (d) [height1, height2] = [height2, height1];
+		const angle = math.atan(height1 / height2);
+		const newAngle = d ? angle : -angle;
+		part.Size = new Vector3(part.Size.X, part.Size.Y, part.Size.Z / angle);
+		part.PivotTo(part.GetPivot().mul(CFrame.fromOrientation(0, newAngle, 0)));
+		print("heights: ", height1, height2);
+		print("angle: ", math.deg(newAngle));
 	}
 }
 
