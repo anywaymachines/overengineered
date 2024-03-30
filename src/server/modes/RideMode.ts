@@ -61,6 +61,7 @@ export default class RideMode implements PlayModeBase {
 			task.wait(0.5);
 		}
 
+		hrp.Sit = false;
 		vehicleSeat.Sit(hrp);
 
 		//const currentMachine = new SharedMachine();
