@@ -28,6 +28,7 @@ import PartUtils from "shared/utils/PartUtils";
 
 namespace Scene {
 	export interface EditToolSceneDefinition extends GuiObject, Selectors.SelectorGuiDefinition {
+		readonly CancelButton: GuiButton;
 		readonly Bottom: GuiObject & {
 			readonly MoveButton: GuiButton;
 			readonly RotateButton: GuiButton;
@@ -43,6 +44,46 @@ namespace Scene {
 			super(gui);
 			this.tool = tool;
 
+			const cancel = this.add(new ButtonControl(this.gui.CancelButton, () => tool.cancelCurrentMode()));
+			this.event.subscribeObservable(
+				tool.selectedMode,
+				(mode) => {
+					const visible = mode !== undefined;
+					const props: TransformProps = {
+						style: "Quad",
+						direction: "Out",
+						duration: 0.2,
+					};
+
+					if (visible) {
+						TransformService.run(this.gui.CancelButton, (tr) =>
+							tr
+								.moveRelative(new UDim2(0, 0, 0, 20))
+								.transform("Transparency", 1)
+								.func(() => cancel.show())
+								.func(() => (cancel.instance.Interactable = false))
+								.then()
+								.moveRelative(new UDim2(0, 0, 0, -20), props)
+								.transform("Transparency", 0, props)
+								.func(() => (cancel.instance.Interactable = true)),
+						);
+					} else {
+						TransformService.run(this.gui.CancelButton, (tr) =>
+							tr
+								.moveRelative(new UDim2(0, 0, 0, 20), props)
+								.transform("Transparency", 1, props)
+								.func(() => (cancel.instance.Interactable = false))
+								.then()
+								.moveRelative(new UDim2(0, 0, 0, -20))
+								.transform("Transparency", 0)
+								.func(() => cancel.hide())
+								.func(() => (cancel.instance.Interactable = true)),
+						);
+					}
+				},
+				true,
+			);
+
 			const move = this.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
 			const rotate = this.add(new ButtonControl(this.gui.Bottom.RotateButton, () => tool.toggleMode("Rotate")));
 			if (!RunService.IsStudio()) {
@@ -51,14 +92,23 @@ namespace Scene {
 			const clone = this.add(new ButtonControl(this.gui.Bottom.CloneButton, () => tool.toggleMode("Clone")));
 			const del = this.add(new ButtonControl(this.gui.Bottom.DeleteButton, () => tool.deleteSelectedBlocks()));
 
-			const buttons: readonly ButtonControl[] = [move, rotate, clone, del];
+			const buttons: Readonly<Record<EditToolMode, ButtonControl> & Record<string, ButtonControl>> = {
+				// edit tool modes
+				Move: move,
+				Rotate: rotate,
+				Clone: clone,
+
+				// other buttons
+				ButtonDelete: del,
+			};
+
 			this.event.subscribeCollection(
 				tool.selected,
 				() => {
 					const enabled = tool.selected.size() !== 0;
 					this.gui.Bottom.Interactable = enabled;
 
-					for (const button of buttons) {
+					for (const [, button] of Objects.pairs(buttons)) {
 						TransformService.run(button.instance, (tr) =>
 							tr.transform("Transparency", enabled ? 0 : 0.6, {
 								style: "Quad",
@@ -71,20 +121,14 @@ namespace Scene {
 				true,
 			);
 
-			const modeButtons: Readonly<Record<EditToolMode, ButtonControl>> = {
-				Move: move,
-				Rotate: rotate,
-				Clone: clone,
-			};
 			this.event.subscribeObservable(
 				tool.selectedMode,
 				(mode) => {
-					for (const [name, button] of Objects.pairs(modeButtons)) {
+					for (const [name, button] of Objects.pairs(buttons)) {
 						button.instance.BackgroundColor3 = mode === name ? Colors.accentDark : Colors.staticBackground;
 
 						const enabled = mode === undefined || mode === name;
-						button.instance.Transparency = enabled ? 0 : 0.8;
-						button.instance.Interactable = enabled;
+						button.setInteractable(enabled);
 					}
 				},
 				true,
@@ -337,14 +381,16 @@ namespace Selectors {
 namespace Controllers {
 	export class Move extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
+		private readonly mover;
 
 		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
 
-			const mover = this.parent(new BlockMover(plot, blocks));
-			this.step.autoSet(mover.step);
+			this.mover = this.parent(BlockMover.create(plot, blocks));
+			this.step.autoSet(this.mover.step);
 
-			mover.moved.Connect(async (diff) => {
+			this.onDestroy(async () => {
+				const diff = this.mover.getDifference();
 				if (diff === Vector3.zero) {
 					return true;
 				}
@@ -358,9 +404,15 @@ namespace Controllers {
 				return response.success;
 			});
 		}
+
+		cancel() {
+			this.mover.cancel();
+		}
 	}
 	export class Clone extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
+		private readonly blocks;
+		private readonly mover;
 
 		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
@@ -379,21 +431,19 @@ namespace Controllers {
 			);
 			this.onDestroy(() => ghostParent.Destroy());
 
-			const mover = this.parent(
-				new BlockMover(
-					plot,
-					blocks.map((b) => {
-						b = b.Clone();
-						PartUtils.ghostModel(b, Colors.blue);
-						b.Parent = ghostParent;
+			this.blocks = blocks.map((b) => {
+				b = b.Clone();
+				PartUtils.ghostModel(b, Colors.blue);
+				b.Parent = ghostParent;
 
-						return b;
-					}),
-				),
-			);
-			this.step.autoSet(mover.step);
+				return b;
+			});
 
-			mover.moved.Connect(async (diff) => {
+			this.mover = this.parent(BlockMover.create(plot, this.blocks));
+			this.step.autoSet(this.mover.step);
+
+			this.onDestroy(async () => {
+				const diff = this.mover.getDifference();
 				if (diff === Vector3.zero) {
 					return true;
 				}
@@ -445,17 +495,26 @@ namespace Controllers {
 				return response.success;
 			});
 		}
+
+		cancel() {
+			this.mover.cancel();
+			for (const block of this.blocks) {
+				block.Destroy();
+			}
+		}
 	}
 	export class Rotate extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(0, 90, 180, 90);
+		private readonly rotater;
 
 		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
 
-			const rotater = this.parent(new BlockRotater(plot, blocks));
-			this.step.autoSet(rotater.step);
+			this.rotater = this.parent(BlockRotater.create(plot, blocks));
+			this.step.autoSet(this.rotater.step);
 
-			rotater.submitted.Connect(async (diff): Promise<boolean> => {
+			this.onDestroy(async () => {
+				const diff = this.rotater.getDifference();
 				if (diff === CFrame.identity) {
 					return true;
 				}
@@ -469,6 +528,10 @@ namespace Controllers {
 				return true;
 			});
 		}
+
+		cancel() {
+			this.rotater.cancel();
+		}
 	}
 }
 
@@ -477,7 +540,7 @@ export default class EditTool extends ToolBase {
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
 	readonly selected = new ObservableCollectionSet<BlockModel>();
-	private readonly controller = new ComponentChild<IComponent>(this, true);
+	private readonly controller = new ComponentChild<IComponent & { cancel(): void }>(this, true);
 	private readonly selector;
 
 	constructor(mode: BuildingMode) {
@@ -526,6 +589,11 @@ export default class EditTool extends ToolBase {
 
 		this.event.onKeyDown("F", () => this.toggleMode("Move"));
 		this.event.onKeyDown("ButtonX", () => this.toggleMode("Move"));
+	}
+
+	cancelCurrentMode() {
+		this.controller.get()?.cancel();
+		this.toggleMode(undefined);
 	}
 
 	toggleMode(mode: EditToolMode | undefined) {

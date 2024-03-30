@@ -7,37 +7,43 @@ import Gui from "client/gui/Gui";
 import { InputTooltips, TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { SharedPlot } from "shared/building/SharedPlot";
 import NumberObservableValue from "shared/event/NumberObservableValue";
-import { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import Signal from "shared/event/Signal";
 import { AABB } from "shared/fixes/AABB";
 
 abstract class RotaterBase extends ClientComponent {
-	readonly submitted = new Signal<(diff: CFrame) => void>();
-
 	protected readonly tooltipHolder = this.parent(TooltipsHolder.createComponent("Rotating"));
-	protected readonly step: ReadonlyObservableValue<number>;
 	protected readonly plot: SharedPlot;
 	protected readonly blocks: readonly BlockModel[];
 	protected readonly pivots: readonly (readonly [BlockModel, CFrame])[];
 	protected readonly plotBounds: AABB;
 	protected difference: CFrame = CFrame.identity;
+	readonly step = new NumberObservableValue<number>(0, 90, 180, 1);
 
-	constructor(plot: SharedPlot, blocks: readonly BlockModel[], step: ReadonlyObservableValue<number>) {
+	constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
 		super();
 
 		this.plot = plot;
 		this.blocks = blocks;
-		this.step = step;
 		this.plotBounds = plot.bounds;
 		this.pivots = blocks.map((p) => [p, p.GetPivot()] as const);
 
 		const moveHandles = this.initializeHandles();
-		this.onDisable(async () => {
-			this.submitted.Fire(this.difference);
-			moveHandles.Destroy();
-		});
-
+		this.onDisable(async () => moveHandles.Destroy());
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
+	}
+
+	getDifference() {
+		return this.difference;
+	}
+
+	protected pivotBlocksTo(rotatedCenter: CFrame, fullStartPos: CFrame) {
+		for (const [block, startpos] of this.pivots) {
+			block.PivotTo(rotatedCenter.ToWorldSpace(fullStartPos.ToObjectSpace(startpos)));
+		}
+	}
+
+	cancel() {
+		this.difference = CFrame.identity;
+		this.pivotBlocksTo(CFrame.identity, CFrame.identity);
 	}
 
 	protected abstract initializeHandles(): Instance;
@@ -77,15 +83,15 @@ class DesktopRotater extends RotaterBase {
 				this.difference = startDifference.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle));
 				if (!this.plotBounds.contains(aabb.withCenter(fullStartPos.mul(this.difference)))) {
 					(moveHandles.WaitForChild("SelectionBox") as SelectionBox).Color3 = Colors.red;
+				} else {
+					(moveHandles.WaitForChild("SelectionBox") as SelectionBox).Color3 = Colors.green;
 				}
 
 				const rotatedCenter = fullStartPos.mul(this.difference);
 				moveHandles.PivotTo(rotatedCenter);
 				moveHandles.Center.PivotTo(centerframe);
 
-				for (const [block, startpos] of this.pivots) {
-					block.PivotTo(rotatedCenter.ToWorldSpace(fullStartPos.ToObjectSpace(startpos)));
-				}
+				this.pivotBlocksTo(rotatedCenter, fullStartPos);
 			});
 		};
 
@@ -120,9 +126,7 @@ class GamepadRotater extends RotaterBase {
 
 				this.difference = this.difference.add(diff);
 				moveHandles.PivotTo(new CFrame(fullStartPos.add(this.difference)));
-				for (const [block, startpos] of this.pivots) {
-					block.PivotTo(startpos.add(this.difference));
-				}
+				this.moveBlocksTo(rotatedCenter, fullStartPos);
 			};
 
 			this.event.subInput((ih) => {
@@ -186,26 +190,12 @@ class GamepadRotater extends RotaterBase {
 	}
 }
 
-export class BlockRotater extends ClientComponent {
-	readonly submitted = new Signal<(diff: CFrame) => void>();
-	readonly step = new NumberObservableValue<number>(0, 90, 180, 1);
-
-	constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
-		super();
-
-		ClientComponentChild.registerBasedOnInputType<RotaterBase>(this, {
-			Desktop: () =>
-				new DesktopRotater(plot, blocks, this.step).with((c) =>
-					c.submitted.Connect((diff) => this.submitted.Fire(diff)),
-				),
-			Touch: () =>
-				new TouchRotater(plot, blocks, this.step).with((c) =>
-					c.submitted.Connect((diff) => this.submitted.Fire(diff)),
-				),
-			Gamepad: () =>
-				new GamepadRotater(plot, blocks, this.step).with((c) =>
-					c.submitted.Connect((diff) => this.submitted.Fire(diff)),
-				),
+export const BlockRotater = {
+	create: (plot: SharedPlot, blocks: readonly BlockModel[]) => {
+		return ClientComponentChild.createOnceBasedOnInputType<RotaterBase>({
+			Desktop: () => new DesktopRotater(plot, blocks),
+			Touch: () => new TouchRotater(plot, blocks),
+			Gamepad: () => new GamepadRotater(plot, blocks),
 		});
-	}
-}
+	},
+} as const;

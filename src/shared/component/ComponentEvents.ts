@@ -81,22 +81,6 @@ export class ComponentEvents {
 		}
 	}
 
-	/** Subscribe to an observable value changed event */
-	subscribeObservableCollection<T extends defined>(
-		observable: ReadonlyObservableCollection<T>,
-		callback: (collectionChangedType: CollectionChangedArgs<T>) => void,
-		executeOnEnable = false,
-		executeImmediately = false,
-	): void {
-		this.subscribe(observable.changed, callback);
-		if (executeOnEnable) {
-			this.onEnable(() => {
-				callback({ kind: "clear" });
-				callback({ kind: "add", added: observable.getArr() });
-			}, executeImmediately);
-		}
-	}
-
 	/** Subscribe to an observable collection changed event */
 	subscribeCollection<T extends defined>(
 		observable: ReadonlyObservableCollection<T>,

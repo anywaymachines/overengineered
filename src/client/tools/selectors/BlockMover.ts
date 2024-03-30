@@ -7,37 +7,43 @@ import Gui from "client/gui/Gui";
 import { InputTooltips, TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { SharedPlot } from "shared/building/SharedPlot";
 import NumberObservableValue from "shared/event/NumberObservableValue";
-import { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import Signal from "shared/event/Signal";
 import { AABB } from "shared/fixes/AABB";
 
 abstract class MoveBase extends ClientComponent {
-	readonly moved = new Signal<(diff: Vector3) => void>();
-
 	protected readonly tooltipHolder = this.parent(TooltipsHolder.createComponent("Moving"));
-	protected readonly step: ReadonlyObservableValue<number>;
 	protected readonly plot: SharedPlot;
 	protected readonly blocks: readonly BlockModel[];
 	protected readonly pivots: readonly (readonly [BlockModel, CFrame])[];
 	protected readonly plotBounds: AABB;
 	protected difference: Vector3 = Vector3.zero;
+	readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 
-	constructor(plot: SharedPlot, blocks: readonly BlockModel[], step: ReadonlyObservableValue<number>) {
+	constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
 		super();
 
 		this.plot = plot;
 		this.blocks = blocks;
-		this.step = step;
 		this.plotBounds = plot.bounds;
 		this.pivots = blocks.map((p) => [p, p.GetPivot()] as const);
 
 		const moveHandles = this.initializeHandles();
-		this.onDisable(async () => {
-			this.moved.Fire(this.difference);
-			moveHandles.Destroy();
-		});
-
+		this.onDisable(async () => moveHandles.Destroy());
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
+	}
+
+	getDifference(): Vector3 {
+		return this.difference;
+	}
+
+	protected moveBlocksTo(difference: Vector3) {
+		for (const [block, startpos] of this.pivots) {
+			block.PivotTo(startpos.add(difference));
+		}
+	}
+
+	cancel() {
+		this.difference = Vector3.zero;
+		this.moveBlocksTo(this.difference);
 	}
 
 	protected abstract initializeHandles(): Instance;
@@ -101,9 +107,7 @@ class DesktopMove extends MoveBase {
 				}
 
 				moveHandles.PivotTo(new CFrame(fullStartPos.add(this.difference)));
-				for (const [block, startpos] of this.pivots) {
-					block.PivotTo(startpos.add(this.difference));
-				}
+				this.moveBlocksTo(this.difference);
 			});
 		};
 
@@ -139,9 +143,7 @@ class GamepadMove extends MoveBase {
 
 				this.difference = this.difference.add(diff);
 				moveHandles.PivotTo(new CFrame(fullStartPos.add(this.difference)));
-				for (const [block, startpos] of this.pivots) {
-					block.PivotTo(startpos.add(this.difference));
-				}
+				this.moveBlocksTo(this.difference);
 			};
 
 			this.event.subInput((ih) => {
@@ -205,20 +207,12 @@ class GamepadMove extends MoveBase {
 	}
 }
 
-export class BlockMover extends ClientComponent {
-	readonly moved = new Signal<(diff: Vector3) => void>();
-	readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
-
-	constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
-		super();
-
-		ClientComponentChild.registerBasedOnInputType<MoveBase>(this, {
-			Desktop: () =>
-				new DesktopMove(plot, blocks, this.step).with((c) => c.moved.Connect((diff) => this.moved.Fire(diff))),
-			Touch: () =>
-				new TouchMove(plot, blocks, this.step).with((c) => c.moved.Connect((diff) => this.moved.Fire(diff))),
-			Gamepad: () =>
-				new GamepadMove(plot, blocks, this.step).with((c) => c.moved.Connect((diff) => this.moved.Fire(diff))),
+export const BlockMover = {
+	create: (plot: SharedPlot, blocks: readonly BlockModel[]) => {
+		return ClientComponentChild.createOnceBasedOnInputType<MoveBase>({
+			Desktop: () => new DesktopMove(plot, blocks),
+			Touch: () => new TouchMove(plot, blocks),
+			Gamepad: () => new GamepadMove(plot, blocks),
 		});
-	}
-}
+	},
+} as const;
