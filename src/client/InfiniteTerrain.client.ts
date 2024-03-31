@@ -207,7 +207,12 @@ const createChunkLoader = () => {
 			continue;
 		}
 
-		const pos = Workspace.CurrentCamera.Focus.Position;
+		let pos = Workspace.CurrentCamera?.Focus?.Position ?? Vector3.zero;
+		if (pos.X !== pos.X || pos.Y !== pos.Y || pos.Z !== pos.Z) {
+			// nan
+			pos = Vector3.zero;
+		}
+
 		const chunkX = math.floor(pos.X / 4 / chunkSize);
 		const chunkZ = math.floor(pos.Z / 4 / chunkSize);
 
