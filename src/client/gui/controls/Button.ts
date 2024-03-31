@@ -1,12 +1,13 @@
 import SoundController from "client/controller/SoundController";
 import Control from "client/gui/Control";
 import { Element, ElementProperties } from "shared/Element";
+import { TransformService } from "shared/component/TransformService";
 import Signal from "shared/event/Signal";
 
 export type ButtonDefinition = GuiButton;
 export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extends Control<T> {
 	readonly activated = new Signal();
-	private interactabeTransparency?: number;
+	private animateInteractability?: (interactable: boolean) => void;
 
 	constructor(gui: T, activated?: () => void) {
 		super(gui);
@@ -24,16 +25,15 @@ export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extend
 	}
 
 	setInteractable(interactable: boolean) {
-		this.gui.Interactable = interactable;
-
-		this.interactabeTransparency ??= this.instance.Transparency;
-		(this as Control<GuiButton>).transform((tr) =>
-			tr.transform("Transparency", interactable ? this.interactabeTransparency! : 0.6, {
-				style: "Quad",
-				direction: "Out",
-				duration: 0.2,
-			}),
+		this.animateInteractability ??= TransformService.boolStateMachine(
+			this.instance as GuiButton,
+			{ style: "Quad", direction: "Out", duration: 0.2 },
+			{ Transparency: this.instance.Transparency },
+			{ Transparency: 0.6 },
 		);
+
+		this.gui.Interactable = interactable;
+		this.animateInteractability(interactable);
 	}
 }
 

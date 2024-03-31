@@ -3,7 +3,6 @@ import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
-import GuiAnimator from "client/gui/GuiAnimator";
 import { ButtonControl, TextButtonControl, type TextButtonDefinition } from "client/gui/controls/Button";
 import LogControl from "client/gui/static/LogControl";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
@@ -44,45 +43,24 @@ namespace Scene {
 			super(gui);
 			this.tool = tool;
 
-			const cancel = this.add(new ButtonControl(this.gui.CancelButton, () => tool.cancelCurrentMode()));
-			this.event.subscribeObservable(
-				tool.selectedMode,
-				(mode) => {
-					const visible = mode !== undefined;
-					const props: TransformProps = {
-						style: "Quad",
-						direction: "Out",
-						duration: 0.2,
-					};
+			{
+				const cancel = this.add(new ButtonControl(this.gui.CancelButton, () => tool.cancelCurrentMode()));
 
-					if (visible) {
-						TransformService.run(this.gui.CancelButton, (tr) =>
-							tr
-								.moveRelative(new UDim2(0, 0, 0, 20))
-								.transform("Transparency", 1)
-								.func(() => cancel.show())
-								.func(() => (cancel.instance.Interactable = false))
-								.then()
-								.moveRelative(new UDim2(0, 0, 0, -20), props)
-								.transform("Transparency", 0, props)
-								.func(() => (cancel.instance.Interactable = true)),
-						);
-					} else {
-						TransformService.run(this.gui.CancelButton, (tr) =>
-							tr
-								.moveRelative(new UDim2(0, 0, 0, 20), props)
-								.transform("Transparency", 1, props)
-								.func(() => (cancel.instance.Interactable = false))
-								.then()
-								.moveRelative(new UDim2(0, 0, 0, -20))
-								.transform("Transparency", 0)
-								.func(() => cancel.hide())
-								.func(() => (cancel.instance.Interactable = true)),
-						);
-					}
-				},
-				true,
-			);
+				const animateCancelButton = TransformService.boolStateMachine(
+					cancel.instance,
+					{ style: "Quad", direction: "Out", duration: 0.2 },
+					{ Position: cancel.instance.Position, Transparency: 0 },
+					{ Position: cancel.instance.Position.add(new UDim2(0, 0, 0, 20)), Transparency: 1 },
+					(tr) => tr.func(() => (cancel.instance.Interactable = false)),
+					(tr) => tr.func(() => (cancel.instance.Interactable = true)),
+				);
+
+				this.event.subscribeObservable(
+					tool.selectedMode,
+					(mode) => animateCancelButton(mode !== undefined),
+					true,
+				);
+			}
 
 			const move = this.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
 			const rotate = this.add(new ButtonControl(this.gui.Bottom.RotateButton, () => tool.toggleMode("Rotate")));
@@ -106,16 +84,8 @@ namespace Scene {
 				tool.selected,
 				() => {
 					const enabled = tool.selected.size() !== 0;
-					this.gui.Bottom.Interactable = enabled;
-
 					for (const [, button] of Objects.pairs(buttons)) {
-						TransformService.run(button.instance, (tr) =>
-							tr.transform("Transparency", enabled ? 0 : 0.6, {
-								style: "Quad",
-								direction: "Out",
-								duration: 0.2,
-							}),
-						);
+						button.setInteractable(enabled);
 					}
 				},
 				true,
@@ -135,9 +105,35 @@ namespace Scene {
 			);
 		}
 
-		show() {
-			super.show();
-			GuiAnimator.transition(this.gui.Bottom, 0.2, "up");
+		private readonly bottomVisibilityFunction = TransformService.multi(
+			TransformService.boolStateMachine(
+				this.instance.Bottom,
+				{ style: "Quad", direction: "Out", duration: 0.2 },
+				{ Position: this.instance.Bottom.Position },
+				{ Position: this.instance.Bottom.Position.add(new UDim2(0, 0, 0, 20)) },
+				(tr, visible) =>
+					tr.func(() => {
+						for (const [, button] of Objects.pairs(this.getChildren())) {
+							if (button instanceof ButtonControl) {
+								button.setVisible(visible);
+							}
+						}
+					}),
+				(tr, visible) => tr.func(() => super.setInstanceVisibilityFunction(visible)),
+			),
+			TransformService.boolStateMachine(
+				this.instance,
+				{ style: "Quad", direction: "Out", duration: 0.2 },
+				{},
+				{},
+			),
+		);
+		protected setInstanceVisibilityFunction(visible: boolean): void {
+			if (visible) {
+				super.setInstanceVisibilityFunction(visible);
+			}
+
+			this.bottomVisibilityFunction(visible);
 		}
 	}
 }

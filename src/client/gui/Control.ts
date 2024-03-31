@@ -41,15 +41,18 @@ export default class Control<
 	/** Show the control and enable it with the children */
 	show() {
 		this.visible = true;
-		this.instance.Visible = true;
+		this.setInstanceVisibilityFunction(true);
 
 		this.enable();
+	}
+	protected setInstanceVisibilityFunction(visible: boolean) {
+		this.instance.Visible = visible;
 	}
 
 	/** Hide the control and disable it with the children */
 	hide() {
 		this.visible = false;
-		this.instance.Visible = false;
+		this.setInstanceVisibilityFunction(false);
 
 		this.disable();
 	}
