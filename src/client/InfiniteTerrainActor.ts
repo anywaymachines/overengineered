@@ -1,5 +1,6 @@
 import { ReplicatedFirst, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { TerrainData, TerrainInfo } from "shared/TerrainDataInfo";
+import GameDefinitions from "shared/data/GameDefinitions";
 
 const folder = ReplicatedFirst.WaitForChild("Terrain") as Folder & TerrainInfo;
 const terrainChild = folder.Data.TerrainData;
@@ -8,6 +9,8 @@ const materialChild = folder.Data.MaterialData;
 if (!terrainChild) {
 	throw "No terrin";
 }
+
+const aprilFools = GameDefinitions.APRIL_FOOLS;
 
 const chunkSize = folder.Configuration.ChunkSize.Value;
 const terrainData = require(folder.Data.TerrainData) as TerrainData;
@@ -170,7 +173,7 @@ infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, load
 				}
 			}
 
-			if (loadFoliage) {
+			if (!aprilFools && loadFoliage) {
 				for (const modelData of terrainData.models) {
 					if (math.fmod(voxelX, modelData[2]) !== 0 || math.fmod(voxelZ, modelData[2]) !== 0) {
 						continue;
@@ -295,16 +298,21 @@ infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, load
 				const occupancy = heightd4 - yHeight;
 
 				if (occupancy > 0) {
-					materials[x][y][z] = material;
-					occupancys[x][y][z] = occupancy;
+					materials[x][y][z] = aprilFools ? Enum.Material.Basalt : material;
+					occupancys[x][y][z] = aprilFools ? 0.3 : occupancy;
 				} else {
 					const occupancy = terrainData.waterHeight / 4 - yHeight;
 					if (occupancy <= 0) {
 						continue;
 					}
 
-					materials[x][y][z] = Enum.Material.Water;
-					occupancys[x][y][z] = occupancy;
+					if (aprilFools) {
+						materials[x][y][z] = Enum.Material.Air;
+						occupancys[x][y][z] = 0;
+					} else {
+						materials[x][y][z] = Enum.Material.Water;
+						occupancys[x][y][z] = occupancy;
+					}
 				}
 			}
 		}

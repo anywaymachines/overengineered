@@ -26,7 +26,7 @@ const chunkAmount = math.pow(folder.Configuration.LoadDistance.Value * 2 + 1, 2)
 const moveDistance = math.pow(chunkSize * 4, 2);
 
 const actors: TerrainActor[] = [];
-let loadedChunks: Record<number, Record<number, boolean>> = {};
+const loadedChunks: Record<number, Record<number, boolean>> = {};
 
 let selectedActor = 0;
 
@@ -132,9 +132,6 @@ const UnloadChunk = (chunkX: number, chunkZ: number) => {
 };
 
 const shouldBeLoaded = (chunkX: number, chunkZ: number, centerX: number, centerZ: number) => {
-	const alwaysLoad = false;
-	if (alwaysLoad) return true;
-
 	if (math.pow(chunkX - centerX, 2) + math.pow(chunkZ - centerZ, 2) > loadDistancePow) {
 		return false;
 	}
@@ -156,13 +153,6 @@ const maxVisibleHeight = 1500;
 
 const isTooHigh = () => {
 	return Workspace.CurrentCamera && Workspace.CurrentCamera.Focus.Position.Y >= maxVisibleHeight;
-};
-const unloadWholeTerrain = () => {
-	loadedChunks = {};
-	recreateActors();
-
-	(Workspace.WaitForChild("Terrain") as Terrain).Clear();
-	(Workspace.WaitForChild("Terrain") as Terrain).ClearAllChildren();
 };
 
 // init
@@ -203,7 +193,12 @@ const createChunkLoader = () => {
 		if (!Workspace.CurrentCamera) continue;
 
 		if (isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer)) {
-			unloadWholeTerrain();
+			for (const [x, c] of Objects.pairs(loadedChunks)) {
+				for (const [y] of Objects.pairs(c)) {
+					UnloadChunk(x, y);
+				}
+				task.wait();
+			}
 
 			do {
 				task.wait();
@@ -234,81 +229,4 @@ const createChunkLoader = () => {
 	}
 };
 
-const betaChunkLoader = () => {
-	const loadChunksAround = (centerX: number, centerZ: number) => {
-		for (let size = 0; size < loadDistance; size++) {
-			let alreadyLoaded = true;
-
-			for (let num = -size; num <= size; num++) {
-				for (const [x, z] of [
-					[num, -size],
-					[-size, num],
-					[num, size],
-					[size, num],
-				]) {
-					const chunkX = centerX + x;
-					const chunkZ = centerZ + z;
-
-					if (loadedChunks[chunkX]?.[chunkZ]) continue;
-					if (!shouldBeLoaded(chunkX, chunkZ, centerX, centerZ)) continue;
-
-					alreadyLoaded = false;
-					LoadChunk(chunkX, chunkZ);
-				}
-			}
-
-			if (!alreadyLoaded) {
-				return true;
-			}
-		}
-
-		return false;
-	};
-
-	let positionX = math.huge;
-	let positionZ = math.huge;
-
-	const tru = true;
-	while (tru) {
-		while (!work) {
-			task.wait();
-		}
-
-		task.wait();
-		if (!Workspace.CurrentCamera) continue;
-
-		if (isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer)) {
-			unloadWholeTerrain();
-
-			do {
-				task.wait();
-			} while (isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer));
-
-			continue;
-		}
-
-		const focusX = Workspace.CurrentCamera.Focus.Position.X;
-		const focusZ = Workspace.CurrentCamera.Focus.Position.Z;
-
-		positionX = focusX;
-		positionZ = focusZ;
-		const chunkX = math.floor(positionX / 4 / chunkSize);
-		const chunkZ = math.floor(positionZ / 4 / chunkSize);
-
-		loadChunksAround(chunkX, chunkZ);
-
-		if (
-			math.pow(positionX - focusX, 2) + math.pow(positionZ - focusZ, 2) < moveDistance &&
-			unloadDistance >= loadDistance
-		) {
-			UnloadChunks(chunkX, chunkZ);
-		}
-	}
-};
-
-//if (Players.LocalPlayer.Name === "i3ymm") {
 createChunkLoader();
-throw "ded";
-//}
-
-betaChunkLoader();
