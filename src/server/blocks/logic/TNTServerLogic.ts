@@ -50,11 +50,14 @@ export default class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBloc
 				ServerPartUtils.BreakJoints(part);
 			}
 
+			// FIXME: Too high velocity numbers for server calculations, move to client
 			const predictedVelocity = part.Position.sub(explosion.Position)
-				.Unit.mul(pressure * 800)
-				.div(part.Mass)
-				.div(6080);
-			part.Velocity = predictedVelocity;
+				.Unit.mul(pressure * 50)
+				.div(part.Massless ? 1 : part.Mass)
+				.div(6080)
+				.mul(distance / radius);
+
+			part.AssemblyLinearVelocity = part.AssemblyLinearVelocity.add(predictedVelocity);
 		});
 
 		block.PrimaryPart!.Transparency = 1;
