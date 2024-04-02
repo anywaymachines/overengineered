@@ -1,4 +1,4 @@
-import { HttpService, RunService, Workspace } from "@rbxts/services";
+import { HttpService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
@@ -64,9 +64,6 @@ namespace Scene {
 
 			const move = this.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
 			const rotate = this.add(new ButtonControl(this.gui.Bottom.RotateButton, () => tool.toggleMode("Rotate")));
-			if (!RunService.IsStudio()) {
-				rotate.destroy();
-			}
 			const clone = this.add(new ButtonControl(this.gui.Bottom.CloneButton, () => tool.toggleMode("Clone")));
 			const del = this.add(new ButtonControl(this.gui.Bottom.DeleteButton, () => tool.deleteSelectedBlocks()));
 
