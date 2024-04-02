@@ -1,7 +1,7 @@
 import RobloxUnit from "shared/RobloxUnit";
 
 const GameDefinitions = {
-	APRIL_FOOLS: true,
+	APRIL_FOOLS: false,
 
 	GROUP: 1088368,
 	RANKS: {
