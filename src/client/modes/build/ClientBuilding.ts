@@ -188,4 +188,28 @@ export const ClientBuilding = {
 		plot.changed.Fire();
 		return result;
 	},
+	rotateBlocks: async (plot: SharedPlot, _blocks: readonly BlockModel[], pivot: Vector3, rotation: CFrame) => {
+		const uuids = _blocks.map((b) => BlockManager.getBlockDataByBlockModel(b).uuid);
+		const getBlocks = (): readonly BlockModel[] =>
+			uuids.map((uuid) => SharedPlots.getBlockByUuid(plot.instance, uuid));
+
+		const result = await ActionController.instance.execute(
+			"Rotate blocks",
+			() =>
+				LoadingController.runAsync("Rotating blocks", async () => {
+					return Remotes.Client.GetNamespace("Building")
+						.Get("RotateBlocks")
+						.CallServerAsync({ plot: plot.instance, pivot, diff: rotation.Inverse(), blocks: getBlocks() });
+				}),
+			() =>
+				LoadingController.runAsync("Rotating blocks", async () => {
+					return Remotes.Client.GetNamespace("Building")
+						.Get("RotateBlocks")
+						.CallServerAsync({ plot: plot.instance, pivot, diff: rotation, blocks: getBlocks() });
+				}),
+		);
+
+		plot.changed.Fire();
+		return result;
+	},
 } as const;

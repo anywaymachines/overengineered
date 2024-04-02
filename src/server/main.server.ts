@@ -147,6 +147,7 @@ registerOnRemoteFunction("Building", "ResetConfigRequest", ServerBuildingRequest
 registerOnRemoteFunction("Building", "PlaceBlocks", ServerBuildingRequestHandler.placeBlocks);
 registerOnRemoteFunction("Building", "DeleteBlocks", ServerBuildingRequestHandler.deleteBlocks);
 registerOnRemoteFunction("Building", "MoveBlocks", ServerBuildingRequestHandler.moveBlocks);
+registerOnRemoteFunction("Building", "RotateBlocks", ServerBuildingRequestHandler.rotateBlocks);
 registerOnRemoteFunction("Building", "LogicConnect", ServerBuildingRequestHandler.logicConnect);
 registerOnRemoteFunction("Building", "LogicDisconnect", ServerBuildingRequestHandler.logicDisconnect);
 registerOnRemoteFunction("Building", "PaintBlocks", ServerBuildingRequestHandler.paintBlocks);

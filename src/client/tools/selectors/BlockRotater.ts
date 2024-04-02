@@ -2,6 +2,7 @@ import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientComponentChild } from "client/component/ClientComponentChild";
 import InputController from "client/controller/InputController";
+import Signals from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
 import Gui from "client/gui/Gui";
 import { InputTooltips, TooltipsHolder } from "client/gui/static/TooltipsControl";
@@ -16,6 +17,8 @@ abstract class RotaterBase extends ClientComponent {
 	protected readonly pivots: readonly (readonly [BlockModel, CFrame])[];
 	protected readonly plotBounds: AABB;
 	protected difference: CFrame = CFrame.identity;
+	protected pivot: Vector3 = Vector3.zero;
+	protected isValid: boolean = true;
 	readonly step = new NumberObservableValue<number>(0, 90, 180, 1);
 
 	constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
@@ -31,8 +34,14 @@ abstract class RotaterBase extends ClientComponent {
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
 	}
 
+	getPivot() {
+		return this.pivot;
+	}
 	getDifference() {
 		return this.difference;
+	}
+	isValidRotation() {
+		return this.isValid;
 	}
 
 	protected pivotBlocksTo(rotatedCenter: CFrame, fullStartPos: CFrame) {
@@ -81,7 +90,8 @@ class DesktopRotater extends RotaterBase {
 				relativeAngle = math.rad(roundByStep(math.deg(relativeAngle)));
 
 				this.difference = startDifference.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle));
-				if (!this.plotBounds.contains(aabb.withCenter(fullStartPos.mul(this.difference)))) {
+				this.isValid = this.plotBounds.contains(aabb.withCenter(fullStartPos.mul(this.difference)));
+				if (!this.isValid) {
 					(moveHandles.WaitForChild("SelectionBox") as SelectionBox).Color3 = Colors.red;
 				} else {
 					(moveHandles.WaitForChild("SelectionBox") as SelectionBox).Color3 = Colors.green;
@@ -104,6 +114,7 @@ class DesktopRotater extends RotaterBase {
 		moveHandles.Parent = Gui.getPlayerGui();
 
 		const fullStartPos = moveHandles.GetPivot();
+		this.pivot = fullStartPos.Position;
 		initHandles(moveHandles.ArcHandles);
 
 		return moveHandles;
@@ -116,24 +127,31 @@ class DesktopRotater extends RotaterBase {
 class TouchRotater extends DesktopRotater {}
 class GamepadRotater extends RotaterBase {
 	protected initializeHandles() {
-		const direction: "+x" | "-x" | "+z" | "-z" = "+x";
+		let direction: "+x" | "-x" | "+z" | "-z" = "+x";
 
-		const initHandles = (instance: RotateHandles) => {
-			/*const tryAddDiff = (diff: Vector3) => {
-				if (!this.plotBounds.contains(aabb.withCenter(fullStartPos.add(diff).add(this.difference)))) {
-					return;
+		const initHandles = () => {
+			const tryAddDiff = (axis: Vector3, relativeAngle: number) => {
+				relativeAngle = math.rad(relativeAngle);
+
+				this.difference = this.difference.mul(CFrame.fromAxisAngle(axis, relativeAngle));
+				this.isValid = this.plotBounds.contains(aabb.withCenter(fullStartPos.mul(this.difference)));
+				if (!this.isValid) {
+					(moveHandles.WaitForChild("SelectionBox") as SelectionBox).Color3 = Colors.red;
+				} else {
+					(moveHandles.WaitForChild("SelectionBox") as SelectionBox).Color3 = Colors.green;
 				}
 
-				this.difference = this.difference.add(diff);
-				moveHandles.PivotTo(new CFrame(fullStartPos.add(this.difference)));
-				this.moveBlocksTo(rotatedCenter, fullStartPos);
+				const rotatedCenter = fullStartPos.mul(this.difference);
+				moveHandles.PivotTo(rotatedCenter);
+
+				this.pivotBlocksTo(rotatedCenter, fullStartPos);
 			};
 
 			this.event.subInput((ih) => {
-				ih.onKeyDown("DPadUp", () => tryAddDiff(new Vector3(0, this.step.get(), 0)));
-				ih.onKeyDown("DPadDown", () => tryAddDiff(new Vector3(0, -this.step.get(), 0)));
-				ih.onKeyDown("DPadRight", () => tryAddDiff(getMoveDirection(true).mul(this.step.get())));
-				ih.onKeyDown("DPadLeft", () => tryAddDiff(getMoveDirection(false).mul(this.step.get())));
+				ih.onKeyDown("DPadRight", () => tryAddDiff(Vector3.yAxis, this.step.get()));
+				ih.onKeyDown("DPadLeft", () => tryAddDiff(Vector3.yAxis, -this.step.get()));
+				ih.onKeyDown("DPadUp", () => tryAddDiff(getMoveDirection(false), this.step.get()));
+				ih.onKeyDown("DPadDown", () => tryAddDiff(getMoveDirection(true), this.step.get()));
 			});
 
 			const getMoveDirection = (positive: boolean) => {
@@ -151,27 +169,25 @@ class GamepadRotater extends RotaterBase {
 				const lookvector = Workspace.CurrentCamera!.CFrame.LookVector;
 				if (math.abs(lookvector.X) > math.abs(lookvector.Z)) {
 					direction = lookvector.X > 0 ? "+z" : "-z";
-					//instance.XHandles.Visible = false;
-					//instance.ZHandles.Visible = true;
 				} else {
 					direction = lookvector.Z > 0 ? "-x" : "+x";
-					//instance.XHandles.Visible = true;
-					//instance.ZHandles.Visible = false;
 				}
 			};
 			this.event.subscribe(Signals.CAMERA.MOVED, updateCamera);
-			this.onEnable(updateCamera);*/
+			this.onEnable(updateCamera);
 		};
 
 		const aabb = AABB.fromModels(this.blocks);
 
 		const moveHandles = ReplicatedStorage.Assets.RotateHandles.Clone();
 		moveHandles.Size = aabb.getSize().add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
+		moveHandles.Center.Size = moveHandles.Size;
 		moveHandles.PivotTo(new CFrame(aabb.getCenter()));
 		moveHandles.Parent = Gui.getPlayerGui();
 
-		const fullStartPos: Vector3 = moveHandles.GetPivot().Position;
-		initHandles(moveHandles);
+		const fullStartPos = moveHandles.GetPivot();
+		this.pivot = fullStartPos.Position;
+		initHandles();
 
 		return moveHandles;
 	}

@@ -28,6 +28,12 @@ declare global {
 		readonly blocks: readonly BlockModel[] | "all";
 		readonly diff: Vector3;
 	}
+	interface RotateBlocksRequest {
+		readonly plot: PlotModel;
+		readonly blocks: readonly BlockModel[] | "all";
+		readonly pivot: Vector3;
+		readonly diff: CFrame;
+	}
 
 	interface LogicConnectRequest {
 		readonly plot: PlotModel;
@@ -78,6 +84,7 @@ const Remotes = Net.Definitions.Create({
 		PlaceBlocks: Net.Definitions.ServerAsyncFunction<(data: PlaceBlocksRequest) => MultiBuildResponse>(),
 		DeleteBlocks: Net.Definitions.ServerAsyncFunction<(data: DeleteBlocksRequest) => Response>(),
 		MoveBlocks: Net.Definitions.ServerAsyncFunction<(data: MoveBlocksRequest) => Response>(),
+		RotateBlocks: Net.Definitions.ServerAsyncFunction<(data: RotateBlocksRequest) => Response>(),
 		LogicConnect: Net.Definitions.ServerAsyncFunction<(data: LogicConnectRequest) => Response>(),
 		LogicDisconnect: Net.Definitions.ServerAsyncFunction<(data: LogicDisconnectRequest) => Response>(),
 		PaintBlocks: Net.Definitions.ServerAsyncFunction<(data: PaintBlocksRequest) => Response>(),

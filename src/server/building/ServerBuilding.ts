@@ -145,6 +145,39 @@ export const ServerBuilding = {
 		bumpPlotVersion(plot);
 		return success;
 	},
+	rotateBlocks: ({ plot, blocks, pivot, diff }: RotateBlocksRequest): Response => {
+		if (blocks !== "all" && blocks.size() === 0) {
+			return success;
+		}
+
+		const mul = (source: CFrame) => {
+			const pvt = new CFrame(pivot);
+			const loc = pvt.ToObjectSpace(source);
+			return pvt.mul(diff).ToWorldSpace(loc);
+		};
+
+		let blocksRegion = blocks === "all" ? AABB.fromModel(plot.Blocks) : AABB.fromModels(blocks);
+		blocksRegion = blocksRegion.withCenter(mul(new CFrame(blocksRegion.getCenter())));
+
+		blocks = blocks === "all" ? SharedPlots.getPlotComponent(plot).getBlocks() : blocks;
+		if (!SharedPlots.getPlotBuildingRegion(plot).contains(blocksRegion)) {
+			return err("Invalid rotation");
+		}
+
+		for (const block of blocks) {
+			block.PivotTo(mul(block.GetPivot()));
+
+			// TODO:: not unweld moved blocks between them
+			BuildingWelder.moveCollisions(plot, block, block.GetPivot());
+
+			if (math.random(3) === 1) {
+				task.wait();
+			}
+		}
+
+		bumpPlotVersion(plot);
+		return success;
+	},
 	logicConnect: (request: LogicConnectRequest): Response => {
 		const inputInfo = BlockManager.getBlockDataByBlockModel(request.inputBlock);
 		const outputInfo = BlockManager.getBlockDataByBlockModel(request.outputBlock);

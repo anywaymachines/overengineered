@@ -486,6 +486,7 @@ namespace Controllers {
 				const response = await ClientBuilding.placeBlocks(plot, createBlocksCopy(blocks));
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
+					this.cancel();
 				}
 
 				return response.success;
@@ -510,18 +511,25 @@ namespace Controllers {
 			this.step.autoSet(this.rotater.step);
 
 			this.onDestroy(async () => {
+				if (!this.rotater.isValidRotation()) {
+					LogControl.instance.addLine("Invalid rotation", Colors.red);
+					this.cancel();
+					return;
+				}
+
 				const diff = this.rotater.getDifference();
 				if (diff === CFrame.identity) {
 					return true;
 				}
 
-				/*const response = await ClientBuilding.moveBlocks(plot, blocks, diff);
+				const pivot = this.rotater.getPivot();
+				const response = await ClientBuilding.rotateBlocks(plot, blocks, pivot, diff);
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
+					this.cancel();
 				}
 
-				return response.success;*/
-				return true;
+				return response.success;
 			});
 		}
 

@@ -113,6 +113,21 @@ export const ServerBuildingRequestHandler = {
 
 		return ServerBuilding.moveBlocks(request);
 	},
+	rotateBlocks: (player: Player, request: RotateBlocksRequest): Response => {
+		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
+			return errBuildingNotPermitted;
+		}
+
+		if (request.blocks !== "all") {
+			for (const block of request.blocks) {
+				if (!SharedPlots.isBlockOnAllowedPlot(player, block)) {
+					return errBuildingNotPermitted;
+				}
+			}
+		}
+
+		return ServerBuilding.rotateBlocks(request);
+	},
 	logicConnect: (player: Player, request: LogicConnectRequest): Response => {
 		if (!SharedPlots.isBlockOnAllowedPlot(player, request.inputBlock)) {
 			return errBuildingNotPermitted;
