@@ -50,11 +50,11 @@ export default class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBloc
 				ServerPartUtils.BreakJoints(part);
 			}
 
-			const predictedVelocity = part.Position.sub(explosion.Position)
-				.Unit.mul(pressure * 800)
-				.div(part.Mass)
-				.div(6080);
-			part.Velocity = predictedVelocity;
+			part.Velocity = new Vector3(
+				math.random(0, pressure / 40),
+				math.random(0, pressure / 40),
+				math.random(0, pressure / 40),
+			);
 		});
 
 		block.PrimaryPart!.Transparency = 1;
