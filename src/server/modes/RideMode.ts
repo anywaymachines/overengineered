@@ -74,6 +74,12 @@ export default class RideMode implements PlayModeBase {
 			ServerPartUtils.switchDescendantsNetworkOwner(blocks, /*player*/ undefined);
 		}
 
+		for (const block of blocksChildren) {
+			if (BlockManager.manager.id.get(block) === "anchorblock") {
+				ServerPartUtils.switchDescendantsAnchor(block, true);
+			}
+		}
+
 		return { success: true };
 	}
 	private rideStop(player: Player): Response {

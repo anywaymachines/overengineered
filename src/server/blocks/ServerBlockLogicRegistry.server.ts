@@ -2,7 +2,6 @@ import Logger from "shared/Logger";
 import logicRegistry from "shared/block/LogicRegistry";
 import Objects from "shared/fixes/objects";
 import ServerBlockLogic from "./ServerBlockLogic";
-import AnchorBlockServerLogic from "./logic/AnchorBlockServerLogic";
 import DisconnectBlockServerLogic from "./logic/DisconnectBlockServerLogic";
 import LampServerLogic from "./logic/LampServerLogic";
 import ScreenServerLogic from "./logic/ScreenServerLogic";
@@ -16,7 +15,6 @@ type ServerBlockLogicRegistry = {
 const serverBlockLogicRegistry: ServerBlockLogicRegistry = {
 	tnt: TNTServerBlockLogic,
 	disconnectblock: DisconnectBlockServerLogic,
-	anchorblock: AnchorBlockServerLogic,
 	lamp: LampServerLogic,
 	screen: ScreenServerLogic,
 };

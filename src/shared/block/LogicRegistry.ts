@@ -1,6 +1,5 @@
 import { PlacedBlockData } from "shared/building/BlockManager";
 import BlockLogic from "./BlockLogic";
-import AnchorBlockLogic from "./logic/AnchorBlockLogic";
 import DisconnectBlockLogic from "./logic/DisconnectBlockLogic";
 import HeliumBlockLogic from "./logic/HeliumBlockLogic";
 import MagnetBlockLogic from "./logic/MagnetBlockLogic";
@@ -62,7 +61,6 @@ const logicRegistry = {
 	heliumblock: HeliumBlockLogic,
 	tnt: TNTBlockLogic,
 	suspensionblock: SuspensionLogic,
-	anchorblock: AnchorBlockLogic,
 	magnet: MagnetBlockLogic,
 
 	lamp: LampBlockLogic,
