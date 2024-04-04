@@ -2,24 +2,14 @@ import { Players } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
 import Signals from "client/event/Signals";
-import EventHandler from "shared/event/EventHandler";
 
-export default class MovingSelector extends ClientComponent {
+export class MovingSelector extends ClientComponent {
 	constructor(hovered: (part: BasePart) => void, released: () => void) {
 		super();
 
 		const mouse = Players.LocalPlayer.GetMouse();
-		const eh = new EventHandler();
-
 		let prevTarget: BasePart | undefined;
 
-		const start = () => {
-			if (InputController.inputType.get() === "Desktop") {
-				eh.subscribe(mouse.Move, move);
-				eh.subscribe(Signals.CAMERA.MOVED, move);
-				move();
-			}
-		};
 		const move = () => {
 			const target = mouse.Target;
 			if (!target || target === prevTarget) return;
@@ -28,16 +18,24 @@ export default class MovingSelector extends ClientComponent {
 			hovered(target);
 		};
 		const stop = () => {
+			if (!this.isEnabled()) return;
+
 			released();
-			eh.unsubscribeAll();
-			prevTarget = undefined;
+			this.destroy();
 		};
 
-		this.event.onDisable(stop);
+		this.onDestroy(stop);
+		this.event.subscribe(mouse.Move, move);
+		this.event.subscribe(Signals.CAMERA.MOVED, move);
 		this.event.subInput((ih) => {
-			ih.onMouse1Down(start, false);
 			ih.onMouse1Up(stop, false);
 			ih.onTouchTap(move, false);
+		});
+
+		this.onEnable(() => {
+			if (InputController.inputType.get() === "Desktop") {
+				move();
+			}
 		});
 	}
 }

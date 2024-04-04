@@ -1,10 +1,12 @@
+import InputController from "client/controller/InputController";
 import Gui from "client/gui/Gui";
 import BuildingMode from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
-import BoxSelector from "client/tools/selectors/BoxSelector";
+import { BoxSelectorChild } from "client/tools/selectors/BoxSelector";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
-import MovingSelector from "client/tools/selectors/MovingSelector";
+import { MovingSelector } from "client/tools/selectors/MovingSelector";
+import { SelectorParent } from "client/tools/selectors/SelectorParent";
 import BlockManager from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import ObservableValue from "shared/event/ObservableValue";
@@ -27,32 +29,38 @@ export default class PaintTool extends ToolBase {
 			}
 		});
 
-		{
-			const selected = new Map<BlockModel, readonly [material: Enum.Material, color: Color3]>();
+		const selectorParent = this.parent(new SelectorParent());
+		selectorParent.childSet.Connect((child) => {
+			hoverHighlighter.setEnabled(!child || child instanceof MovingSelector);
+		});
+		this.event.subInput((ih) => {
+			ih.onMouse1Down(() => {
+				if (InputController.isCtrlPressed()) {
+					selectorParent.tryEnableSelector(() => {
+						return new BoxSelectorChild(async (blocks) => await this.paint(blocks));
+					});
+				} else {
+					selectorParent.tryEnableSelector(() => {
+						const selected = new Map<BlockModel, readonly [material: Enum.Material, color: Color3]>();
+						return new MovingSelector(
+							(part) => {
+								const block = BlockManager.getBlockDataByPart(part);
+								if (!block) return;
 
-			this.parent(
-				new MovingSelector(
-					(part) => {
-						const block = BlockManager.getBlockDataByPart(part);
-						if (!block) return;
+								if (selected.has(block.instance)) return;
 
-						if (selected.has(block.instance)) return;
-
-						selected.set(block.instance, [block.material, block.color]);
-						this.paintClientSide(block.instance);
-					},
-					() => {
-						if (selected.size() === 0) return;
-
-						this.paint(selected.keys(), selected);
-						selected.clear();
-					},
-				),
-			);
-		}
-
-		const boxSelector = this.parent(new BoxSelector());
-		this.event.subscribe(boxSelector.submitted, async (blocks) => await this.paint(blocks));
+								selected.set(block.instance, [block.material, block.color]);
+								this.paintClientSide(block.instance);
+							},
+							() => {
+								if (selected.size() === 0) return;
+								this.paint(selected.keys(), selected);
+							},
+						);
+					});
+				}
+			}, false);
+		});
 
 		this.event.subInput((ih) => {
 			ih.onMouse3Down(() => {
