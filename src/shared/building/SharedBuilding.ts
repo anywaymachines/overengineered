@@ -28,17 +28,6 @@ export const SharedBuilding = {
 
 		return result;
 	},
-	*getBlocksConnectedByLogicTo(plot: PlotModel, uuid: BlockUuid) {
-		for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
-			if (otherblock.connections === undefined) continue;
-
-			for (const [connectionName, connection] of Objects.pairs(otherblock.connections)) {
-				if (connection.blockUuid !== uuid) continue;
-
-				yield [otherblock, connectionName, connection] as const;
-			}
-		}
-	},
 
 	/**
 	 * Set the block material and color

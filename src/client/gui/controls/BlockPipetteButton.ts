@@ -73,7 +73,7 @@ export default class BlockPipetteButton extends ButtonControl {
 				return part.Material;
 			}
 
-			return BlockManager.getBlockDataByBlockModel(part).material;
+			return BlockManager.manager.material.get(part);
 		};
 		pipette.onSelect.Connect((part) => clicked(getMaterial(part)));
 		if (!GameDefinitions.isAdmin(Players.LocalPlayer)) {
@@ -88,8 +88,8 @@ export default class BlockPipetteButton extends ButtonControl {
 			if (part.IsA("BasePart")) {
 				clicked(part.Color);
 			} else {
-				const data = BlockManager.getBlockDataByBlockModel(part);
-				clicked(data.color);
+				const data = BlockManager.manager.color.get(part);
+				clicked(data);
 			}
 		});
 
@@ -102,8 +102,8 @@ export default class BlockPipetteButton extends ButtonControl {
 				throw "What.";
 			}
 
-			const data = BlockManager.getBlockDataByBlockModel(part);
-			clicked(data.id);
+			const data = BlockManager.manager.id.get(part);
+			clicked(data);
 		});
 		pipette.filter.add((part) => BlockManager.isBlockPart(part));
 

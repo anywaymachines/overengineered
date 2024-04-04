@@ -6,8 +6,6 @@ import PartUtils from "shared/utils/PartUtils";
 import { ServerBuilding } from "./ServerBuilding";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
-const success: SuccessResponse = { success: true };
-const errPlotNotFound = err("Plot not found");
 const errBuildingNotPermitted = err("Building is not permitted");
 const errInvalidOperation = err("Invalid operation");
 

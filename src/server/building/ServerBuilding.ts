@@ -11,9 +11,6 @@ import BuildingWelder from "./BuildingWelder";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
-const errPlotNotFound = err("Plot not found");
-const errBuildingNotPermitted = err("Building is not permitted");
-const errInvalidOperation = err("Invalid operation");
 
 /** Bumps the {@link PlotModel} `version` attribute */
 const bumpPlotVersion = (plot: PlotModel) => {
@@ -179,13 +176,13 @@ export const ServerBuilding = {
 		return success;
 	},
 	logicConnect: (request: LogicConnectRequest): Response => {
-		const inputInfo = BlockManager.getBlockDataByBlockModel(request.inputBlock);
-		const outputInfo = BlockManager.getBlockDataByBlockModel(request.outputBlock);
+		const inputInfo = BlockManager.manager.connections.get(request.inputBlock);
+		const outputInfo = BlockManager.manager.uuid.get(request.outputBlock);
 
 		const connections: PlacedBlockLogicConnections = {
-			...inputInfo.connections,
+			...inputInfo,
 			[request.inputConnection]: {
-				blockUuid: outputInfo.uuid,
+				blockUuid: outputInfo,
 				connectionName: request.outputConnection,
 			},
 		};
@@ -195,9 +192,7 @@ export const ServerBuilding = {
 		return success;
 	},
 	logicDisconnect: (request: LogicDisconnectRequest): Response => {
-		const inputInfo = BlockManager.getBlockDataByBlockModel(request.inputBlock);
-
-		const connections = { ...inputInfo.connections };
+		const connections = { ...BlockManager.manager.connections.get(request.inputBlock) };
 		if (connections[request.inputConnection]) {
 			delete connections[request.inputConnection];
 		}
@@ -261,7 +256,7 @@ export const ServerBuilding = {
 		}
 
 		bumpPlotVersion(request.plot);
-		return { success: true };
+		return success;
 	},
 	resetConfig: ({ plot, blocks }: ConfigResetRequest): Response => {
 		for (const block of blocks) {
@@ -269,6 +264,6 @@ export const ServerBuilding = {
 		}
 
 		bumpPlotVersion(plot);
-		return { success: true };
+		return success;
 	},
 } as const;
