@@ -3,7 +3,7 @@ import Gui from "client/gui/Gui";
 import BuildingMode from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
-import { BoxSelectorChild } from "client/tools/selectors/BoxSelector";
+import { BoxSelector } from "client/tools/selectors/BoxSelector";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
 import { MovingSelector } from "client/tools/selectors/MovingSelector";
 import { SelectorParent } from "client/tools/selectors/SelectorParent";
@@ -37,7 +37,7 @@ export default class PaintTool extends ToolBase {
 			ih.onMouse1Down(() => {
 				if (InputController.isCtrlPressed()) {
 					selectorParent.tryEnableSelector(() => {
-						return new BoxSelectorChild(async (blocks) => await this.paint(blocks));
+						return new BoxSelector(async (blocks) => await this.paint(blocks));
 					});
 				} else {
 					selectorParent.tryEnableSelector(() => {

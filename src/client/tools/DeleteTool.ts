@@ -4,8 +4,9 @@ import { InputTooltips } from "client/gui/static/TooltipsControl";
 import BuildingMode from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
-import BoxSelector from "client/tools/selectors/BoxSelector";
+import { BoxSelector } from "client/tools/selectors/BoxSelector";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
+import { SelectorParent } from "client/tools/selectors/SelectorParent";
 import ObservableValue from "shared/event/ObservableValue";
 import Signal from "shared/event/Signal";
 
@@ -17,13 +18,13 @@ export default class DeleteTool extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		const hoverSelector = this.parent(new HoveredBlockHighlighter((b) => this.targetPlot.get().hasBlock(b)));
-		hoverSelector.highlightedBlock.autoSet(this.highlightedBlock);
+		const hoverHighlighter = this.parent(new HoveredBlockHighlighter((b) => this.targetPlot.get().hasBlock(b)));
+		hoverHighlighter.highlightedBlock.autoSet(this.highlightedBlock);
 
 		const fireSelected = async () => {
 			if (InputController.inputType.get() === "Touch") return;
 
-			const block = hoverSelector.highlightedBlock.get();
+			const block = hoverHighlighter.highlightedBlock.get();
 			if (!block) return;
 			await this.deleteBlocks([block]);
 		};
@@ -41,8 +42,19 @@ export default class DeleteTool extends ToolBase {
 			}
 		});
 
-		const boxSelector = this.parent(new BoxSelector());
-		this.event.subscribe(boxSelector.submitted, async (blocks) => await this.deleteBlocks(blocks));
+		const selectorParent = this.parent(new SelectorParent());
+		selectorParent.childSet.Connect((child) => {
+			hoverHighlighter.setEnabled(!child);
+		});
+		this.event.subInput((ih) => {
+			ih.onMouse1Down(() => {
+				if (InputController.isCtrlPressed()) {
+					selectorParent.tryEnableSelector(() => {
+						return new BoxSelector(async (blocks) => await this.deleteBlocks(blocks));
+					});
+				}
+			}, false);
+		});
 	}
 
 	protected prepareGamepad(): void {
