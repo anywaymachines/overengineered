@@ -356,11 +356,10 @@ export default class BuildTool extends ToolBase {
 			if (Gui.isCursorOnVisibleGui()) return;
 			await this.placeBlock();
 		}, false);
-		this.inputHandler.onInputBegan(async (input) => {
+		this.inputHandler.onMouse3Down(() => {
 			if (Gui.isCursorOnVisibleGui()) return;
-			if (input.UserInputType !== Enum.UserInputType.MouseButton3) return;
 			this.pickBlock();
-		});
+		}, false);
 
 		this.eventHandler.subscribe(Signals.CAMERA.MOVED, () => this.updatePosition());
 	}

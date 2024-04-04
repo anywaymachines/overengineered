@@ -35,9 +35,9 @@ export default class MovingSelector extends ClientComponent {
 
 		this.event.onDisable(stop);
 		this.event.subInput((ih) => {
-			ih.onMouse1Down(start);
-			ih.onMouse1Up(stop);
-			ih.onTouchTap(move);
+			ih.onMouse1Down(start, false);
+			ih.onMouse1Up(stop, false);
+			ih.onTouchTap(move, false);
 		});
 	}
 }

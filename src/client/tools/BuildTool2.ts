@@ -496,7 +496,7 @@ namespace MultiPlaceController {
 
 					this.destroy();
 				};
-				ih.onMouse1Up(buttonUnpress);
+				ih.onMouse1Up(buttonUnpress, true);
 				ih.onKeyUp("ButtonR2", buttonUnpress);
 				this.eventHandler.subscribe(UserInputService.TouchEnded, () => {
 					Workspace.CurrentCamera!.CameraType = Desktop.defaultCameraType;

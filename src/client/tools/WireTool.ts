@@ -568,14 +568,14 @@ namespace Controllers {
 							}
 
 							this.destroy();
-						}),
+						}, true),
 					);
 					this.event.subInput((ih) =>
 						ih.onMouse2Down(() => {
 							if (hoverMarker) {
 								connectMarkers(this.marker, hoverMarker, wireParent);
 							}
-						}),
+						}, true),
 					);
 				}
 			}

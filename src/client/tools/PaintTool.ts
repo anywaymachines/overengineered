@@ -54,10 +54,11 @@ export default class PaintTool extends ToolBase {
 		const boxSelector = this.parent(new BoxSelector());
 		this.event.subscribe(boxSelector.submitted, async (blocks) => await this.paint(blocks));
 
-		this.event.onInputBegin(async (input) => {
-			if (Gui.isCursorOnVisibleGui()) return;
-			if (input.UserInputType !== Enum.UserInputType.MouseButton3) return;
-			this.pick();
+		this.event.subInput((ih) => {
+			ih.onMouse3Down(() => {
+				if (Gui.isCursorOnVisibleGui()) return;
+				this.pick();
+			}, false);
 		});
 	}
 
