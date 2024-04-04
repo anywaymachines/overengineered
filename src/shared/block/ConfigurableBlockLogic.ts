@@ -1,3 +1,4 @@
+import RemoteEvents from "shared/RemoteEvents";
 import { BlockLogicValue, IBlockLogicValue, ReadonlyBlockLogicValue } from "shared/block/BlockLogicValue";
 import { NumberBlockLogicValue } from "shared/block/NumberBlockLogicValue";
 import ObservableValue from "shared/event/ObservableValue";
@@ -61,6 +62,22 @@ export default abstract class ConfigurableBlockLogic<
 				(d) => [d[0], BlockConfigValueRegistry[d[1].type](d[1] as never)] as const,
 			),
 		) as typeof this.output;
+
+		//
+
+		const subInvalidValue = (values: Readonly<Record<string, ReadonlyBlockLogicValue<defined>>>) => {
+			for (const [, input] of Objects.pairs(values)) {
+				input.subscribe((value) => {
+					// if infinity or nan
+					if (value === math.huge || value === -math.huge || value !== value) {
+						RemoteEvents.Burn.send([this.instance.PrimaryPart!]);
+						this.disable();
+					}
+				});
+			}
+		};
+		subInvalidValue(this.input);
+		subInvalidValue(this.output);
 	}
 
 	tick(tick: number): void {
