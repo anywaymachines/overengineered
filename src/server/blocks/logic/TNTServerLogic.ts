@@ -18,30 +18,21 @@ export default class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBloc
 	}
 
 	explode(player: Player | undefined, block: BlockModel, isFlammable: boolean, pressure: number, radius: number) {
-		// temporary until block configuration moved to shared
+		// TODO: temporary until block configuration moved to shared
 		radius = math.clamp(radius, 0, 16);
 		pressure = math.clamp(pressure, 0, 2500);
 
-		// Explosion
-		const explosion = new Instance("Explosion");
-		explosion.ExplosionType = Enum.ExplosionType.NoCraters;
-		explosion.BlastRadius = radius;
-		explosion.BlastPressure = 0;
-		explosion.DestroyJointRadiusPercent = 0;
-		explosion.Position = block.GetPivot().Position;
+		const hitParts = Workspace.GetPartBoundsInRadius(block.GetPivot().Position, radius);
 
-		// Flame explosion
 		if (isFlammable) {
-			const flameExplosion = explosion.Clone();
-			flameExplosion.BlastRadius *= 1.5;
-			flameExplosion.Parent = Workspace;
-			flameExplosion.Hit.Connect((part, distance) => {
+			const flameHitParts = Workspace.GetPartBoundsInRadius(block.GetPivot().Position, radius * 1.5);
+
+			flameHitParts.forEach((part) => {
 				if (math.random(1, 3) === 1) SpreadingFireController.burn(part);
 			});
 		}
 
-		explosion.Parent = Workspace;
-		explosion.Hit.Connect((part, distance) => {
+		hitParts.forEach((part) => {
 			if (!BlockManager.isActiveBlockPart(part)) {
 				return;
 			}
