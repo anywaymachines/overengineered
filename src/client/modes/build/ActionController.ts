@@ -1,5 +1,6 @@
 import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
+import { LoadingController } from "client/controller/LoadingController";
 import LogControl from "client/gui/static/LogControl";
 import { ObservableCollectionArr } from "shared/event/ObservableCollection";
 import Signal from "shared/event/Signal";
@@ -24,10 +25,12 @@ export default class ActionController extends ClientComponent {
 
 		this.event.onKeyDown("Z", () => {
 			if (!InputController.isCtrlPressed()) return;
+			if (LoadingController.isLoading.get()) return;
 			this.undo();
 		});
 		this.event.onKeyDown("Y", () => {
 			if (!InputController.isCtrlPressed()) return;
+			if (LoadingController.isLoading.get()) return;
 			this.redo();
 		});
 	}
