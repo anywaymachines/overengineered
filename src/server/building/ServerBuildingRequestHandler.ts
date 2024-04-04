@@ -2,7 +2,6 @@ import { blockRegistry } from "shared/Registry";
 import BlockManager from "shared/building/BlockManager";
 import BuildingManager from "shared/building/BuildingManager";
 import SharedPlots from "shared/building/SharedPlots";
-import PartUtils from "shared/utils/PartUtils";
 import { ServerBuilding } from "./ServerBuilding";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
@@ -66,14 +65,6 @@ export const ServerBuildingRequestHandler = {
 			}
 
 			placed.push(placedBlock.model);
-
-			PartUtils.applyToAllDescendantsOfType("Sound", placedBlock.model, (sound) => {
-				sound.SetAttribute("owner", player.UserId);
-			});
-
-			PartUtils.applyToAllDescendantsOfType("ParticleEmitter", placedBlock.model, (sound) => {
-				sound.SetAttribute("owner", player.UserId);
-			});
 		}
 
 		return {
