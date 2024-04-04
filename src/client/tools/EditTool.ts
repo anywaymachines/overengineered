@@ -21,7 +21,6 @@ import BlockManager from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { ComponentChild } from "shared/component/ComponentChild";
-import { type TransformProps } from "shared/component/Transform";
 import { TransformService } from "shared/component/TransformService";
 import NumberObservableValue from "shared/event/NumberObservableValue";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
@@ -54,7 +53,7 @@ namespace Scene {
 
 				const animateCancelButton = TransformService.boolStateMachine(
 					cancel.instance,
-					{ style: "Quad", direction: "Out", duration: 0.2 },
+					TransformService.commonProps.quadOut02,
 					{ Position: cancel.instance.Position, Transparency: 0 },
 					{ Position: cancel.instance.Position.add(new UDim2(0, 0, 0, 20)), Transparency: 1 },
 					(tr) => tr.func(() => (cancel.instance.Interactable = false)),
@@ -113,7 +112,7 @@ namespace Scene {
 		private readonly bottomVisibilityFunction = TransformService.multi(
 			TransformService.boolStateMachine(
 				this.instance.Bottom,
-				{ style: "Quad", direction: "Out", duration: 0.2 },
+				TransformService.commonProps.quadOut02,
 				{ Position: this.instance.Bottom.Position },
 				{ Position: this.instance.Bottom.Position.add(new UDim2(0, 0, 0, 20)) },
 				(tr, visible) =>
@@ -126,12 +125,7 @@ namespace Scene {
 					}),
 				(tr, visible) => tr.func(() => super.setInstanceVisibilityFunction(visible)),
 			),
-			TransformService.boolStateMachine(
-				this.instance,
-				{ style: "Quad", direction: "Out", duration: 0.2 },
-				{},
-				{},
-			),
+			TransformService.boolStateMachine(this.instance, TransformService.commonProps.quadOut02, {}, {}),
 		);
 		protected setInstanceVisibilityFunction(visible: boolean): void {
 			if (visible) {
@@ -219,11 +213,7 @@ namespace Selectors {
 				}
 			}
 
-			const animationProps: TransformProps = {
-				style: "Quad",
-				direction: "Out",
-				duration: 0.2,
-			};
+			const animationProps = TransformService.commonProps.quadOut02;
 
 			const mobile = this.parent(new MobileSelection(gui.MobileSelection));
 			this.onPrepare((inputType) => mobile.setVisible(inputType === "Touch"));

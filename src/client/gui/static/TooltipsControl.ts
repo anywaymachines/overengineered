@@ -100,7 +100,7 @@ export class TooltipsHolder extends ClientInstanceComponent<
 				tr
 					.transform("Size", new UDim2(1, 0, 0, 0))
 					.then()
-					.transform("Size", new UDim2(1, 0, 0, 50), { style: "Quad", direction: "Out", duration: 0.2 }),
+					.transform("Size", new UDim2(1, 0, 0, 50), TransformService.commonProps.quadOut02),
 			);
 		} else {
 			button.Visible = false;
@@ -111,7 +111,7 @@ export class TooltipsHolder extends ClientInstanceComponent<
 
 	private destroyTooltip(tooltip: GuiObject) {
 		TransformService.run(tooltip, (tr) => {
-			tr.transform("Size", new UDim2(1, 0, 0, 0), { style: "Quad", direction: "Out", duration: 0.2 })
+			tr.transform("Size", new UDim2(1, 0, 0, 0), TransformService.commonProps.quadOut02)
 				.then()
 				.func(() => tooltip.Destroy());
 		});

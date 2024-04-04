@@ -6,8 +6,13 @@ import {
 } from "shared/component/Transform";
 import Objects from "shared/fixes/objects";
 
+const commonProps: Readonly<Record<string, TransformProps>> = {
+	quadOut02: { style: "Quad", direction: "Out", duration: 0.2 },
+};
+
 type State<T extends Instance> = { readonly [k in TweenableProperties<T>]?: T[k] };
 export class TransformService {
+	static readonly commonProps = commonProps;
 	private static readonly transforms = new Map<object, TransformContainer<Instance>>();
 
 	static run<T extends Instance>(instance: T, setup: (transform: TransformBuilder<T>, instance: T) => void) {

@@ -27,7 +27,7 @@ export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extend
 	setInteractable(interactable: boolean) {
 		this.animateInteractability ??= TransformService.boolStateMachine(
 			this.instance as GuiButton,
-			{ style: "Quad", direction: "Out", duration: 0.2 },
+			TransformService.commonProps.quadOut02,
 			{ Transparency: this.instance.Transparency },
 			{ Transparency: 0.6 },
 		);
