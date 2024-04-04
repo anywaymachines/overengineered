@@ -17,6 +17,7 @@ import RobloxUnit from "shared/RobloxUnit";
 import SlotsMeta from "shared/SlotsMeta";
 import RocketEngineLogic from "shared/block/logic/RocketEngineLogic";
 import EventHandler from "shared/event/EventHandler";
+import NumberObservableValue from "shared/event/NumberObservableValue";
 import Signal from "shared/event/Signal";
 
 export type ActionBarControlDefinition = GuiObject & {
@@ -375,20 +376,22 @@ export default class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 
 		{
-			const rockets = machine.getChildren().filter((c) => c instanceof RocketEngineLogic);
+			const rockets = machine
+				.getChildren()
+				.filter((c) => c instanceof RocketEngineLogic) as unknown as readonly RocketEngineLogic[];
 			if (rockets.size() !== 0) {
 				init("Torque", "%s %%", this.infoTemplate(), 0, 100, 1, (control) => {
-					const avg: number[] = [];
-					for (const block of machine.getChildren()) {
-						if (!block.isEnabled()) continue;
-						if (!(block instanceof RocketEngineLogic)) continue;
-						avg.push(block.getTorque());
+					let avgg = 0;
+					let amount = 0;
+					for (const rocket of rockets) {
+						if (!rocket.isEnabled()) continue;
+
+						avgg += rocket.getTorque();
+						amount++;
 					}
 
-					control.slider.value.set(
-						avg.size() === 0 ? 0 : avg.reduce((acc, val) => acc + val, 0) / avg.size(),
-					);
-					control.text.value.set(control.slider.value.get());
+					control.slider.value.set(amount === 0 ? 0 : avgg / amount);
+					control.text.value.set(NumberObservableValue.clamp(control.slider.value.get(), 0, 100, 1));
 				});
 			}
 		}
