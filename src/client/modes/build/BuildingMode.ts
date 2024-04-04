@@ -67,6 +67,23 @@ export default class BuildingMode extends PlayMode {
 			LocalPlayerController.rootPart.AssemblyAngularVelocity = Vector3.zero;
 		};
 
-		delay(0.1, tp);
+		const forcetp = () => {
+			if (!LocalPlayerController.rootPart) return;
+
+			const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
+			const pos = plot.BuildingArea.GetPivot().Position.add(
+				new Vector3(plot.BuildingArea.ExtentsSize.X / 2 + 2, 10, 0),
+			);
+
+			LocalPlayerController.rootPart.CFrame = new CFrame(pos);
+			LocalPlayerController.rootPart.AssemblyLinearVelocity = Vector3.zero;
+			LocalPlayerController.rootPart.AssemblyAngularVelocity = Vector3.zero;
+		};
+
+		if (!prev) {
+			delay(0.1, forcetp);
+		} else {
+			delay(0.1, tp);
+		}
 	}
 }
