@@ -1,4 +1,3 @@
-import { Players, RunService } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { LoadingController } from "client/controller/LoadingController";
 import Signals from "client/event/Signals";
@@ -6,12 +5,10 @@ import BuildingMode from "client/modes/build/BuildingMode";
 import BuildTool from "client/tools/BuildTool";
 import BuildTool2 from "client/tools/BuildTool2";
 import ConfigTool from "client/tools/ConfigTool";
-import DebugTool from "client/tools/DebugTool";
 import DeleteTool from "client/tools/DeleteTool";
 import PaintTool from "client/tools/PaintTool";
 import ToolBase from "client/tools/ToolBase";
 import { ComponentChild } from "shared/component/ComponentChild";
-import GameDefinitions from "shared/data/GameDefinitions";
 import { MiddlewaredObservableValue } from "shared/event/MiddlewaredObservableValue";
 import ObservableValue from "shared/event/ObservableValue";
 import EditTool from "./EditTool";
@@ -79,7 +76,6 @@ export default class ToolController extends ClientComponent {
 	readonly paintTool;
 	readonly buildTool2;
 	readonly wireTool;
-	readonly debugTool;
 	readonly allTools;
 
 	constructor(mode: BuildingMode) {
@@ -115,7 +111,6 @@ export default class ToolController extends ClientComponent {
 		this.configTool = new ConfigTool(mode);
 		this.paintTool = new PaintTool(mode);
 		this.buildTool2 = new BuildTool2(mode);
-		this.debugTool = new DebugTool(mode);
 		this.wireTool = new WireTool(mode);
 
 		const tools: ToolBase[] = [
@@ -128,10 +123,6 @@ export default class ToolController extends ClientComponent {
 			this.buildTool2,
 		];
 
-		// Debug tool
-		if (RunService.IsStudio() && GameDefinitions.isAdmin(Players.LocalPlayer)) {
-			tools.insert(7, this.debugTool);
-		}
 		this.allTools = tools;
 
 		this.disabledTools.subscribe(() => this.selectedTool.set(undefined));
