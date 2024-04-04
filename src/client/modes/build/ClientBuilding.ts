@@ -4,19 +4,18 @@ import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { SharedPlot } from "shared/building/SharedPlot";
-import SharedPlots from "shared/building/SharedPlots";
 
 /** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
 export const ClientBuilding = {
 	placeBlocks: async (plot: SharedPlot, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) => {
-		let placed: readonly BlockModel[];
+		let placed: readonly BlockUuid[];
 		const result = await ActionController.instance.execute(
 			"Place blocks",
 			() => {
 				const execute = () =>
 					Remotes.Client.GetNamespace("Building")
 						.Get("DeleteBlocks")
-						.CallServerAsync({ plot: plot.instance, blocks: placed });
+						.CallServerAsync({ plot: plot.instance, blocks: placed.map((uuid) => plot.getBlock(uuid)) });
 
 				if (blocks.size() > 10) {
 					return LoadingController.runAsync("Deleting blocks", execute);
@@ -30,7 +29,7 @@ export const ClientBuilding = {
 						.Get("PlaceBlocks")
 						.CallServerAsync({ plot: plot.instance, blocks });
 					if (response.success) {
-						placed = response.models;
+						placed = response.models.map(BlockManager.manager.uuid.get);
 					}
 
 					return response;
@@ -56,7 +55,7 @@ export const ClientBuilding = {
 		return result;
 	},
 	deleteBlocks: async (plot: SharedPlot, _blocks: readonly BlockModel[] | "all") => {
-		const uuids = _blocks === "all" ? "all" : _blocks.map((b) => BlockManager.getBlockDataByBlockModel(b).uuid);
+		const uuids = _blocks === "all" ? "all" : _blocks.map(BlockManager.manager.uuid.get);
 		const blockCount = uuids === "all" ? plot.getBlocks().size() : uuids.size();
 
 		type SavedConnection = {
@@ -100,7 +99,7 @@ export const ClientBuilding = {
 		};
 
 		const getBlocks = (): readonly BlockModel[] | "all" =>
-			uuids === "all" ? ("all" as const) : uuids.map((uuid) => SharedPlots.getBlockByUuid(plot.instance, uuid));
+			uuids === "all" ? ("all" as const) : uuids.map((uuid) => plot.getBlock(uuid));
 		const getConnectRequest = (connection: SavedConnection): LogicConnectRequest => {
 			return {
 				plot: plot.instance,
@@ -165,9 +164,8 @@ export const ClientBuilding = {
 		return result;
 	},
 	moveBlocks: async (plot: SharedPlot, _blocks: readonly BlockModel[], diff: Vector3) => {
-		const uuids = _blocks.map((b) => BlockManager.getBlockDataByBlockModel(b).uuid);
-		const getBlocks = (): readonly BlockModel[] =>
-			uuids.map((uuid) => SharedPlots.getBlockByUuid(plot.instance, uuid));
+		const uuids = _blocks.map(BlockManager.manager.uuid.get);
+		const getBlocks = (): readonly BlockModel[] => uuids.map((uuid) => plot.getBlock(uuid));
 
 		const result = await ActionController.instance.execute(
 			"Move blocks",
@@ -189,9 +187,8 @@ export const ClientBuilding = {
 		return result;
 	},
 	rotateBlocks: async (plot: SharedPlot, _blocks: readonly BlockModel[], pivot: Vector3, rotation: CFrame) => {
-		const uuids = _blocks.map((b) => BlockManager.getBlockDataByBlockModel(b).uuid);
-		const getBlocks = (): readonly BlockModel[] =>
-			uuids.map((uuid) => SharedPlots.getBlockByUuid(plot.instance, uuid));
+		const uuids = _blocks.map(BlockManager.manager.uuid.get);
+		const getBlocks = (): readonly BlockModel[] => uuids.map((uuid) => plot.getBlock(uuid));
 
 		const result = await ActionController.instance.execute(
 			"Rotate blocks",
@@ -206,6 +203,80 @@ export const ClientBuilding = {
 					return Remotes.Client.GetNamespace("Building")
 						.Get("RotateBlocks")
 						.CallServerAsync({ plot: plot.instance, pivot, diff: rotation, blocks: getBlocks() });
+				}),
+		);
+
+		plot.changed.Fire();
+		return result;
+	},
+	paintBlocks: async (
+		plot: SharedPlot,
+		_blocks: readonly BlockModel[] | "all",
+		material: Enum.Material | undefined,
+		color: Color3 | undefined,
+		_original?: ReadonlyMap<BlockModel, readonly [material: Enum.Material, color: Color3]>,
+	) => {
+		const origData = _original
+			? new ReadonlyMap(_original.map((block, value) => [BlockManager.manager.uuid.get(block), value] as const))
+			: new ReadonlyMap(
+					(_blocks === "all" ? plot.getBlocks() : _blocks).map(
+						(b) =>
+							[
+								BlockManager.manager.uuid.get(b),
+								[BlockManager.manager.material.get(b), BlockManager.manager.color.get(b)],
+							] as const,
+					),
+				);
+		const getBlocks = (): readonly BlockModel[] => origData.map((uuid) => plot.getBlock(uuid));
+
+		const result = await ActionController.instance.execute(
+			"Paint blocks",
+			async () => {
+				const grouped = new Map<Enum.Material, Map<string, BlockUuid[]>>();
+				for (const [uuid, [material, color]] of origData) {
+					let matmap = grouped.get(material);
+					if (!matmap) {
+						matmap = new Map();
+						grouped.set(material, matmap);
+					}
+
+					let colormap = matmap.get(color.ToHex());
+					if (!colormap) {
+						colormap = [];
+						matmap.set(color.ToHex(), colormap);
+					}
+
+					colormap.push(uuid);
+				}
+
+				for (const [material, colorgroup] of grouped) {
+					for (const [color, uuids] of colorgroup) {
+						const blocks = uuids.map((uuid) => plot.getBlock(uuid));
+
+						const result = await LoadingController.runAsync("Painting blocks", async () => {
+							return Remotes.Client.GetNamespace("Building")
+								.Get("PaintBlocks")
+								.CallServerAsync({
+									plot: plot.instance,
+									material,
+									color: Color3.fromHex(color),
+									blocks,
+								});
+						});
+
+						if (!result.success) {
+							return result;
+						}
+					}
+				}
+
+				return { success: true };
+			},
+			() =>
+				LoadingController.runAsync("Painting blocks", async () => {
+					return Remotes.Client.GetNamespace("Building")
+						.Get("PaintBlocks")
+						.CallServerAsync({ plot: plot.instance, material, color, blocks: getBlocks() });
 				}),
 		);
 

@@ -64,7 +64,7 @@ export default class PaintToolScene extends Control<PaintToolSceneDefinition> {
 	}
 
 	private paintEverything(enableColor?: boolean, enableMaterial?: boolean) {
-		this.tool.paintEverything(this.tool.targetPlot.get().instance, enableColor, enableMaterial);
+		this.tool.paintEverything(enableColor, enableMaterial);
 	}
 
 	show() {

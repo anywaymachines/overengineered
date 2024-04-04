@@ -1,13 +1,12 @@
 import Gui from "client/gui/Gui";
 import BuildingMode from "client/modes/build/BuildingMode";
+import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import ToolBase from "client/tools/ToolBase";
 import BoxSelector from "client/tools/selectors/BoxSelector";
 import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
 import MovingSelector from "client/tools/selectors/MovingSelector";
-import Remotes from "shared/Remotes";
 import BlockManager from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import SharedPlots from "shared/building/SharedPlots";
 import ObservableValue from "shared/event/ObservableValue";
 
 export default class PaintTool extends ToolBase {
@@ -29,7 +28,7 @@ export default class PaintTool extends ToolBase {
 		});
 
 		{
-			const selected = new Set<BlockModel>();
+			const selected = new Map<BlockModel, readonly [material: Enum.Material, color: Color3]>();
 
 			this.parent(
 				new MovingSelector(
@@ -37,13 +36,15 @@ export default class PaintTool extends ToolBase {
 						const block = BlockManager.getBlockDataByPart(part);
 						if (!block) return;
 
+						if (selected.has(block.instance)) return;
+
+						selected.set(block.instance, [block.material, block.color]);
 						this.paintClientSide(block.instance);
-						selected.add(block.instance);
 					},
 					() => {
 						if (selected.size() === 0) return;
 
-						this.paint(SharedPlots.getPlotByBlock([...selected][0])!, [...selected]);
+						this.paint(selected.keys(), selected);
 						selected.clear();
 					},
 				),
@@ -51,10 +52,7 @@ export default class PaintTool extends ToolBase {
 		}
 
 		const boxSelector = this.parent(new BoxSelector());
-		this.event.subscribe(
-			boxSelector.submitted,
-			async (blocks) => await this.paint(SharedPlots.getPlotByBlock(blocks[0])!, blocks),
-		);
+		this.event.subscribe(boxSelector.submitted, async (blocks) => await this.paint(blocks));
 
 		this.event.onInputBegin(async (input) => {
 			if (Gui.isCursorOnVisibleGui()) return;
@@ -82,25 +80,25 @@ export default class PaintTool extends ToolBase {
 		);
 	}
 
-	async paintEverything(plot: PlotModel, enableColor?: boolean, enableMaterial?: boolean) {
-		await Remotes.Client.GetNamespace("Building")
-			.Get("PaintBlocks")
-			.CallServerAsync({
-				plot,
-				blocks: "all",
-				color: enableColor ?? this.enableColor.get() ? this.selectedColor.get() : undefined,
-				material: enableMaterial ?? this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
-			});
+	paintEverything(enableColor?: boolean, enableMaterial?: boolean) {
+		return ClientBuilding.paintBlocks(
+			this.targetPlot.get(),
+			"all",
+			enableMaterial ?? this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
+			enableColor ?? this.enableColor.get() ? this.selectedColor.get() : undefined,
+		);
 	}
-	async paint(plot: PlotModel, blocks: readonly BlockModel[]) {
-		await Remotes.Client.GetNamespace("Building")
-			.Get("PaintBlocks")
-			.CallServerAsync({
-				plot,
-				blocks,
-				color: this.enableColor.get() ? this.selectedColor.get() : undefined,
-				material: this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
-			});
+	paint(
+		blocks: readonly BlockModel[],
+		original?: ReadonlyMap<BlockModel, readonly [material: Enum.Material, color: Color3]>,
+	) {
+		return ClientBuilding.paintBlocks(
+			this.targetPlot.get(),
+			blocks,
+			this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
+			this.enableColor.get() ? this.selectedColor.get() : undefined,
+			original,
+		);
 	}
 
 	getDisplayName(): string {

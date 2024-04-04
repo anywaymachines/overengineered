@@ -3,6 +3,9 @@ import { ClientComponent } from "client/component/ClientComponent";
 import InputController from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
 import Control from "client/gui/Control";
+import MaterialColorEditControl, {
+	MaterialColorEditControlDefinition,
+} from "client/gui/buildmode/MaterialColorEditControl";
 import { ButtonControl, TextButtonControl, type TextButtonDefinition } from "client/gui/controls/Button";
 import LogControl from "client/gui/static/LogControl";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
@@ -15,6 +18,7 @@ import { HoveredBlocksHighlighter } from "client/tools/selectors/HoveredBlocksHi
 import { SelectedBlocksHighlighter } from "client/tools/selectors/SelectedBlocksHighlighter";
 import { Element } from "shared/Element";
 import BlockManager from "shared/building/BlockManager";
+import { SharedBuilding } from "shared/building/SharedBuilding";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { type TransformProps } from "shared/component/Transform";
@@ -28,11 +32,13 @@ import PartUtils from "shared/utils/PartUtils";
 namespace Scene {
 	export interface EditToolSceneDefinition extends GuiObject, Selectors.SelectorGuiDefinition {
 		readonly CancelButton: GuiButton;
+		readonly Paint: MaterialColorEditControlDefinition;
 		readonly Bottom: GuiObject & {
 			readonly MoveButton: GuiButton;
 			readonly RotateButton: GuiButton;
 			readonly CloneButton: GuiButton;
 			readonly DeleteButton: GuiButton;
+			readonly PaintButton: GuiButton;
 		};
 	}
 
@@ -65,6 +71,7 @@ namespace Scene {
 			const move = this.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
 			const rotate = this.add(new ButtonControl(this.gui.Bottom.RotateButton, () => tool.toggleMode("Rotate")));
 			const clone = this.add(new ButtonControl(this.gui.Bottom.CloneButton, () => tool.toggleMode("Clone")));
+			const paint = this.add(new ButtonControl(this.gui.Bottom.PaintButton, () => tool.toggleMode("Paint")));
 			const del = this.add(new ButtonControl(this.gui.Bottom.DeleteButton, () => tool.deleteSelectedBlocks()));
 
 			const buttons: Readonly<Record<EditToolMode, ButtonControl> & Record<string, ButtonControl>> = {
@@ -72,6 +79,7 @@ namespace Scene {
 				Move: move,
 				Rotate: rotate,
 				Clone: clone,
+				Paint: paint,
 
 				// other buttons
 				ButtonDelete: del,
@@ -534,26 +542,86 @@ namespace Controllers {
 			this.rotater.cancel();
 		}
 	}
+	export class Paint extends ClientComponent {
+		private static readonly material = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
+		private static readonly color = new ObservableValue<Color3>(new Color3(1, 1, 1));
+		private readonly origData: ReadonlyMap<BlockModel, readonly [material: Enum.Material, color: Color3]>;
+
+		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
+			super();
+
+			this.origData = new ReadonlyMap(
+				blocks.map(
+					(b) => [b, [BlockManager.manager.material.get(b), BlockManager.manager.color.get(b)]] as const,
+				),
+			);
+
+			const ui = tool.gui.instance.Paint.Clone();
+			ui.Parent = tool.gui.instance.Paint.Parent;
+			this.parentGui(new MaterialColorEditControl(ui, Paint.material, Paint.color));
+			this.event.subscribeObservable(
+				Paint.material,
+				(material) => {
+					for (const block of blocks) {
+						SharedBuilding.paint([block], undefined, material);
+					}
+				},
+				true,
+			);
+			this.event.subscribeObservable(
+				Paint.color,
+				(color) => {
+					for (const block of blocks) {
+						SharedBuilding.paint([block], color, undefined);
+					}
+				},
+				true,
+			);
+
+			this.onDestroy(async () => {
+				const response = await ClientBuilding.paintBlocks(
+					plot,
+					blocks,
+					Paint.material.get(),
+					Paint.color.get(),
+					this.origData,
+				);
+				if (!response.success) {
+					LogControl.instance.addLine(response.message, Colors.red);
+					this.cancel();
+				}
+
+				return response.success;
+			});
+		}
+
+		cancel() {
+			for (const [block, [material, color]] of this.origData) {
+				SharedBuilding.paint([block], color, material);
+			}
+		}
+	}
 }
 
-export type EditToolMode = "Move" | "Clone" | "Rotate";
+export type EditToolMode = "Move" | "Clone" | "Rotate" | "Paint";
 export default class EditTool extends ToolBase {
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
 	readonly selected = new ObservableCollectionSet<BlockModel>();
 	private readonly controller = new ComponentChild<IComponent & { cancel(): void }>(this, true);
 	private readonly selector;
+	readonly gui;
 
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		const gui = this.parentGui(
+		this.gui = this.parentGui(
 			new Scene.EditToolScene(ToolBase.getToolGui<"Edit", Scene.EditToolSceneDefinition>().Edit, this),
 		);
 		this.parent(new SelectedBlocksHighlighter(this.selected));
 
 		{
-			this.selector = this.parent(new Selectors.Selector(this.targetPlot, this.selected, gui.instance));
+			this.selector = this.parent(new Selectors.Selector(this.targetPlot, this.selected, this.gui.instance));
 			this.event.subscribeObservable(
 				this.selectedMode,
 				(mode) => this.selector?.setEnabled(mode === undefined),
