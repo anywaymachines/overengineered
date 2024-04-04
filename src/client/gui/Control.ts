@@ -24,10 +24,6 @@ export default class Control<
 		});
 	}
 
-	getGui(): T {
-		return this.gui;
-	}
-
 	enable() {
 		if (!this.isVisible()) return;
 		super.enable();
