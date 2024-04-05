@@ -27,7 +27,8 @@ export namespace ServerBuilding {
 		bumpPlotVersion(plot);
 	}
 	export function placeBlock(plot: PlotModel, data: PlaceBlockRequest): BuildResponse {
-		if (SharedPlots.getPlotComponent(plot).ownerId.get() === undefined) {
+		const plotc = SharedPlots.getPlotComponent(plot);
+		if (plotc.ownerId.get() === undefined) {
 			return { success: false, message: "Player quit." };
 		}
 
@@ -65,6 +66,11 @@ export namespace ServerBuilding {
 		if (math.random(3) === 1) {
 			task.wait();
 		}
+
+		if (plotc.ownerId.get() === undefined) {
+			return { success: false, message: "Player quit." };
+		}
+
 		model.Parent = plot.Blocks;
 		BuildingWelder.weldOnPlot(plot, model);
 

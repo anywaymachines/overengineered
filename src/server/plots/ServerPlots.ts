@@ -18,15 +18,15 @@ const assignPlotTo = (player: Player): void => {
 };
 const resetPlotOf = (player: Player): void => {
 	const plot = SharedPlots.getPlotComponentByOwnerID(player.UserId);
+	plot.ownerId.set(undefined);
+	plot.whitelistedPlayers.set([5243461283]);
+	plot.blacklistedPlayers.set(undefined);
+
 	ServerBuilding.clearPlot(plot.instance);
 
 	if (plot.instance.Blocks.GetPersistentPlayers().includes(player)) {
 		plot.instance.Blocks.RemovePersistentPlayer(player);
 	}
-
-	plot.ownerId.set(undefined);
-	plot.whitelistedPlayers.set([5243461283]);
-	plot.blacklistedPlayers.set(undefined);
 };
 
 // Plot assignment
