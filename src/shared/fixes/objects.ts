@@ -20,7 +20,7 @@ export namespace Objects {
 	export function pairs_<T extends object>(
 		object: T,
 	): IterableFunction<LuaTuple<[keyof T, Exclude<T[keyof T], undefined> & defined]>> {
-		return pairs_(object) as IterableFunction<LuaTuple<[keyof T, Exclude<T[keyof T], undefined> & defined]>>;
+		return pairs(object) as IterableFunction<LuaTuple<[keyof T, Exclude<T[keyof T], undefined> & defined]>>;
 	}
 
 	export function entriesArray<T extends object>(object: T): (readonly [keyof T, Exclude<T[keyof T], undefined>])[] {
