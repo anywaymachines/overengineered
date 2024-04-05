@@ -22,7 +22,7 @@ export class PaintTool extends ToolBase {
 
 		const hoverHighlighter = this.parent(new HoveredBlockHighlighter((b) => this.targetPlot.get().hasBlock(b)));
 		this.onPrepare((inputType) => {
-			if (inputType === "Desktop") {
+			if (inputType !== "Touch") {
 				hoverHighlighter.enable();
 			} else {
 				hoverHighlighter.disable();
