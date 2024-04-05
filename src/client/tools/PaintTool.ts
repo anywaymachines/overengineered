@@ -31,7 +31,7 @@ export class PaintTool extends ToolBase {
 
 		const selectorParent = this.parent(new SelectorParent());
 		selectorParent.childSet.Connect((child) => {
-			hoverHighlighter.setEnabled(!child || child instanceof MovingSelector);
+			hoverHighlighter.setEnabled(this.isEnabled() && (!child || child instanceof MovingSelector));
 		});
 		this.event.subInput((ih) => {
 			ih.onMouse1Down(() => {
