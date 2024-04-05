@@ -115,15 +115,8 @@ export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 			[tools.buildTool2, BuildTool2Scene, this.gui.Tools.Build2],
 			[tools.wireTool, WireToolScene, this.gui.Tools.Wire],
 		] as const;
-		for (const t of types) {
-			const orig = t[2];
-			(t as Writable<typeof t>)[2] = t[2].Clone();
-			orig.Destroy();
-		}
 		for (const [tool, scenetype, scenegui] of types) {
-			const gui = scenegui.Clone();
-			gui.Parent = this.gui.Tools;
-			this.scenes.add(tool, new scenetype(gui as never, tool as never));
+			this.scenes.add(tool, new scenetype(scenegui as never, tool as never));
 		}
 
 		const selectedToolUpdated = (tool: ToolBase | undefined) => {
