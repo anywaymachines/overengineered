@@ -1,7 +1,7 @@
 import { Players } from "@rbxts/services";
 import { ServerBuilding } from "server/building/ServerBuilding";
 import { Element } from "shared/Element";
-import SharedPlots from "shared/building/SharedPlots";
+import { SharedPlots } from "shared/building/SharedPlots";
 import { PlotFloatingImageController } from "./PlotsFloatingImageController";
 
 const tryGetFreePlot = () => SharedPlots.plots.find((p) => p.ownerId.get() === undefined);
@@ -58,7 +58,7 @@ for (const plot of SharedPlots.plots) {
 	initializeBlocksFolder(plot.instance);
 }
 
-export const ServerPlots = {
+export namespace ServerPlots {
 	/** Empty method to trigger initialization */
-	initialize: () => {},
-} as const;
+	export function initialize() {}
+}

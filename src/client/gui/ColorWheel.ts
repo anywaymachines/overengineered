@@ -1,8 +1,8 @@
-import Control from "client/gui/Control";
-import NumberTextBoxControl from "client/gui/controls/NumberTextBoxControl";
-import SliderControl, { SliderControlDefinition } from "client/gui/controls/SliderControl";
-import TextBoxControl from "client/gui/controls/TextBoxControl";
-import ObservableValue from "shared/event/ObservableValue";
+import { Control } from "client/gui/Control";
+import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
+import { SliderControl, SliderControlDefinition } from "client/gui/controls/SliderControl";
+import { TextBoxControl } from "client/gui/controls/TextBoxControl";
+import { ObservableValue } from "shared/event/ObservableValue";
 
 export type ColorWheelDefinition = GuiObject & {
 	readonly Preview: GuiObject;
@@ -22,7 +22,7 @@ export type ColorWheelDefinition = GuiObject & {
 };
 
 /** Color chooser, not an actual wheel */
-export default class ColorWheel extends Control<ColorWheelDefinition> {
+export class ColorWheel extends Control<ColorWheelDefinition> {
 	readonly value = new ObservableValue<Color3>(new Color3(1, 1, 1));
 
 	constructor(gui: ColorWheelDefinition) {

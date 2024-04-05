@@ -1,4 +1,4 @@
-import ObservableValue from "shared/event/ObservableValue";
+import { ObservableValue } from "shared/event/ObservableValue";
 
 export class MiddlewaredObservableValue<T> extends ObservableValue<T> {
 	private readonly middleware: ((value: T, prev: T) => T)[] = [];

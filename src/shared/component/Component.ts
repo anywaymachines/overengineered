@@ -1,5 +1,5 @@
-import type Control from "client/gui/Control";
-import SlimSignal from "shared/event/SlimSignal";
+import type { Control } from "client/gui/Control";
+import { SlimSignal } from "shared/event/SlimSignal";
 import { ComponentChild } from "./ComponentChild";
 import { ComponentEvents } from "./ComponentEvents";
 

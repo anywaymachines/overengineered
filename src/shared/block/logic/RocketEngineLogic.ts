@@ -1,10 +1,9 @@
 import { Workspace } from "@rbxts/services";
-import RemoteEvents from "shared/RemoteEvents";
-import Sound from "shared/Sound";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { RemoteEvents } from "shared/RemoteEvents";
+import { Sound } from "shared/Sound";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import Effects from "shared/effects/Effects";
 
 type RocketEngine = BlockModel & {
 	readonly EffectEmitter: Part & {
@@ -16,7 +15,7 @@ type RocketEngine = BlockModel & {
 	};
 	readonly ColBox: Part;
 };
-export default class RocketEngineLogic extends ConfigurableBlockLogic<
+export class RocketEngineLogic extends ConfigurableBlockLogic<
 	typeof blockConfigRegistry.smallrocketengine,
 	RocketEngine
 > {
@@ -118,14 +117,14 @@ export default class RocketEngineLogic extends ConfigurableBlockLogic<
 		this.sound.Volume = newVolume;
 
 		if (volumeHasDifference) {
-			Effects.Sound.sendToNetworkOwnerOrEveryone(this.instance.PrimaryPart, {
+			RemoteEvents.Effects.Sound.sendToNetworkOwnerOrEveryone(this.instance.PrimaryPart, {
 				sound: this.sound,
 				isPlaying: this.sound.Playing,
 				volume: this.sound.Volume,
 			});
 		}
 		if (particleEmmiterHasDifference) {
-			RemoteEvents.Particle.sendToNetworkOwnerOrEveryone(this.instance.PrimaryPart, {
+			RemoteEvents.Effects.Particle.sendToNetworkOwnerOrEveryone(this.instance.PrimaryPart, {
 				particle: this.particleEmitter,
 				isEnabled: this.particleEmitter.Enabled,
 				acceleration: this.particleEmitter.Acceleration,

@@ -1,7 +1,7 @@
 import { GamepadService, GuiService } from "@rbxts/services";
-import InputController from "client/controller/InputController";
-import Control from "client/gui/Control";
-import GuiAnimator from "client/gui/GuiAnimator";
+import { InputController } from "client/controller/InputController";
+import { Control } from "client/gui/Control";
+import { GuiAnimator } from "client/gui/GuiAnimator";
 import { ButtonControl } from "client/gui/controls/Button";
 import { WireTool } from "client/tools/WireTool";
 
@@ -13,7 +13,7 @@ export type WireToolSceneDefinition = GuiObject & {
 	readonly TextLabel: TextLabel;
 };
 
-export default class WireToolScene extends Control<WireToolSceneDefinition> {
+export class WireToolScene extends Control<WireToolSceneDefinition> {
 	readonly tool;
 
 	constructor(gui: WireToolSceneDefinition, tool: WireTool) {

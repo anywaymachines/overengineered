@@ -1,5 +1,5 @@
-export default class PartUtils {
-	static ghostModel(model: Model, color: Color3) {
+export namespace PartUtils {
+	export function ghostModel(model: Model, color: Color3) {
 		function fix(part: BasePart | UnionOperation) {
 			if (part.Parent?.Name === "Axis") {
 				return;
@@ -20,28 +20,28 @@ export default class PartUtils {
 			}
 		}
 
-		this.applyToAllDescendantsOfType("BasePart", model, (part) => fix(part));
-		this.applyToAllDescendantsOfType("Decal", model, (part) => {
+		applyToAllDescendantsOfType("BasePart", model, (part) => fix(part));
+		applyToAllDescendantsOfType("Decal", model, (part) => {
 			part.Transparency = 0.5;
 		});
 	}
 
-	static switchDescendantsMaterial(model: Instance, material: Enum.Material) {
-		this.applyToAllDescendantsOfType("BasePart", model, (part) => {
+	export function switchDescendantsMaterial(model: Instance, material: Enum.Material) {
+		applyToAllDescendantsOfType("BasePart", model, (part) => {
 			if (part.HasTag("STATIC_MATERIAL")) return;
 			if (part.Transparency === 1) return;
 			part.Material = material;
 		});
 	}
 
-	static switchDescendantsColor(model: Instance, color: Color3) {
-		this.applyToAllDescendantsOfType("BasePart", model, (part) => {
+	export function switchDescendantsColor(model: Instance, color: Color3) {
+		applyToAllDescendantsOfType("BasePart", model, (part) => {
 			if (part.HasTag("STATIC_COLOR")) return;
 			part.Color = color;
 		});
 	}
 
-	static switchDescendantsTransparency(model: Instance, transparency: number) {
+	export function switchDescendantsTransparency(model: Instance, transparency: number) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
 			if (part.HasTag("STATIC_MATERIAL")) return;
 			if (part.Transparency === 1) return;
@@ -49,7 +49,7 @@ export default class PartUtils {
 		});
 	}
 
-	static applyToAllDescendantsOfType<T extends keyof Instances>(
+	export function applyToAllDescendantsOfType<T extends keyof Instances>(
 		typeName: T,
 		parent: Instance,
 		callback: (instance: Instances[T]) => void,
@@ -60,7 +60,7 @@ export default class PartUtils {
 		});
 	}
 
-	static BreakJoints(part: BasePart) {
+	export function BreakJoints(part: BasePart) {
 		const joints = part.GetJoints();
 		joints.forEach((constraint) => {
 			constraint.Destroy();

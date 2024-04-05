@@ -1,10 +1,10 @@
-import Control from "client/gui/Control";
-import ObservableValue from "shared/event/ObservableValue";
+import { Control } from "client/gui/Control";
+import { ObservableValue } from "shared/event/ObservableValue";
 
 export type LabelControlDefinition = TextLabel;
 
 /** Control that shows a text value */
-export default class FormattedLabelControl extends Control<LabelControlDefinition> {
+export class FormattedLabelControl extends Control<LabelControlDefinition> {
 	readonly value;
 
 	constructor(gui: LabelControlDefinition) {

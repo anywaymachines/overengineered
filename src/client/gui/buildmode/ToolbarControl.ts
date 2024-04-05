@@ -1,12 +1,12 @@
 import { StarterGui, UserInputService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
-import SoundController from "client/controller/SoundController";
+import { SoundController } from "client/controller/SoundController";
 import { Colors } from "client/gui/Colors";
-import Control from "client/gui/Control";
-import GuiAnimator from "client/gui/GuiAnimator";
+import { Control } from "client/gui/Control";
+import { GuiAnimator } from "client/gui/GuiAnimator";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
-import ToolBase from "client/tools/ToolBase";
-import ToolController from "client/tools/ToolController";
+import { ToolBase } from "client/tools/ToolBase";
+import { ToolController } from "client/tools/ToolController";
 import { TransformProps } from "shared/component/Transform";
 
 export type ToolbarButtonControlDefinition = TextButton & {
@@ -68,7 +68,7 @@ export type ToolbarControlDefinition = GuiObject & {
 	};
 };
 
-export default class ToolbarControl extends Control<ToolbarControlDefinition> {
+export class ToolbarControl extends Control<ToolbarControlDefinition> {
 	private readonly tools;
 	private readonly nameLabel;
 

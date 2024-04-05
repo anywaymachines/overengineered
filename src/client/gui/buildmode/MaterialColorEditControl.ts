@@ -1,10 +1,10 @@
-import ColorWheel, { ColorWheelDefinition } from "client/gui/ColorWheel";
-import Control from "client/gui/Control";
-import GuiAnimator from "client/gui/GuiAnimator";
-import MaterialChooser, { MaterialChooserDefinition } from "client/gui/MaterialChooser";
-import BlockPipetteButton from "client/gui/controls/BlockPipetteButton";
+import { ColorWheel, ColorWheelDefinition } from "client/gui/ColorWheel";
+import { Control } from "client/gui/Control";
+import { GuiAnimator } from "client/gui/GuiAnimator";
+import { MaterialChooser, MaterialChooserDefinition } from "client/gui/MaterialChooser";
+import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
-import ObservableValue from "shared/event/ObservableValue";
+import { ObservableValue } from "shared/event/ObservableValue";
 
 export type MaterialColorEditControlDefinition = GuiObject & {
 	readonly Material: GuiObject & {
@@ -27,7 +27,7 @@ export type MaterialColorEditControlDefinition = GuiObject & {
 };
 
 /** Material preview with an edit button */
-export default class MaterialColorEditControl extends Control<MaterialColorEditControlDefinition> {
+export class MaterialColorEditControl extends Control<MaterialColorEditControlDefinition> {
 	readonly materialPipette;
 	readonly colorPipette;
 

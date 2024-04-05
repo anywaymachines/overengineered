@@ -1,8 +1,8 @@
-import Control from "client/gui/Control";
+import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
-import NumberTextBoxControl from "client/gui/controls/NumberTextBoxControl";
+import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { Element } from "shared/Element";
-import Remotes from "shared/Remotes";
+import { Remotes } from "shared/Remotes";
 import { ControlTest } from "./ControlTest";
 
 export const LoadSlotTest: ControlTest = {

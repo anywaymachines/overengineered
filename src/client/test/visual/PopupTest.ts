@@ -1,9 +1,9 @@
-import Control from "client/gui/Control";
+import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
-import ConfirmPopup from "client/gui/popup/ConfirmPopup";
-import SavePopup from "client/gui/popup/SavePopup";
-import SelectButtonPopup from "client/gui/popup/SelectButtonPopup";
-import SettingsPopup from "client/gui/popup/SettingsPopup";
+import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
+import { SavePopup } from "client/gui/popup/SavePopup";
+import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
+import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { ControlTest } from "client/test/visual/ControlTest";
 import { Element } from "shared/Element";
 

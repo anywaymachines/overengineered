@@ -1,13 +1,13 @@
 import { UserInputService } from "@rbxts/services";
-import InputController from "client/controller/InputController";
+import { InputController } from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
-import LogControl from "client/gui/static/LogControl";
-import Remotes from "shared/Remotes";
+import { LogControl } from "client/gui/static/LogControl";
+import { Remotes } from "shared/Remotes";
 
 /** A permanent event that monitors the change in the type of input type, which makes the game more flexible */
-export default class InputTypeChangeEvent {
+export namespace InputTypeChangeEvent {
 	/** Returns the input type based on the given input type */
-	private static getInputTypeByEnum(userInputType: Enum.UserInputType): InputType {
+	function getInputTypeByEnum(userInputType: Enum.UserInputType): InputType {
 		if (userInputType === Enum.UserInputType.Gamepad1) {
 			return "Gamepad";
 		} else if (userInputType === Enum.UserInputType.Touch) {
@@ -18,8 +18,8 @@ export default class InputTypeChangeEvent {
 	}
 
 	/** Callback of subscribed event */
-	private static onLastInputTypeChanged(lastInputType: Enum.UserInputType) {
-		const newInputType = this.getInputTypeByEnum(lastInputType);
+	function onLastInputTypeChanged(lastInputType: Enum.UserInputType) {
+		const newInputType = getInputTypeByEnum(lastInputType);
 
 		if (newInputType !== InputController.inputType.get()) {
 			if (UserInputService.GetFocusedTextBox()) {
@@ -27,19 +27,19 @@ export default class InputTypeChangeEvent {
 			}
 
 			InputController.inputType.set(newInputType);
-			this.share();
+			share();
 
 			LogControl.instance.addLine("New input type set to " + newInputType, Colors.yellow);
 		}
 	}
 
-	private static share() {
+	function share() {
 		Remotes.Client.GetNamespace("Player").Get("InputTypeInfo").SendToServer(InputController.inputType.get());
 	}
 
-	static subscribe() {
+	export function subscribe() {
 		// Event
-		UserInputService.LastInputTypeChanged.Connect((lastInputType) => this.onLastInputTypeChanged(lastInputType));
-		this.share();
+		UserInputService.LastInputTypeChanged.Connect(onLastInputTypeChanged);
+		share();
 	}
 }

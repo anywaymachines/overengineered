@@ -87,8 +87,8 @@ const v5: UpdatablePlayerConfigVersion<PlayerConfigV5, PlayerConfigV4> = {
 const versions = [v1, v2, v3, v4, v5] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
-export const PlayerConfigUpdater = {
-	update(config: object | { readonly version: number }) {
+export namespace PlayerConfigUpdater {
+	export function update(config: object | { readonly version: number }) {
 		const version = "version" in config ? config.version : 1;
 
 		for (let i = version + 1; i <= current.version; i++) {
@@ -99,5 +99,5 @@ export const PlayerConfigUpdater = {
 		}
 
 		return config as ReturnType<(typeof current)["update"]>;
-	},
-} as const;
+	}
+}

@@ -1,9 +1,9 @@
-import RemoteEvents from "shared/RemoteEvents";
+import { RemoteEvents } from "shared/RemoteEvents";
 import { BlockLogicValue, IBlockLogicValue, ReadonlyBlockLogicValue } from "shared/block/BlockLogicValue";
 import { NumberBlockLogicValue } from "shared/block/NumberBlockLogicValue";
-import ObservableValue from "shared/event/ObservableValue";
-import Objects from "shared/fixes/objects";
-import BlockLogic, { BlockLogicData } from "./BlockLogic";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { Objects } from "shared/fixes/objects";
+import { BlockLogic, BlockLogicData } from "./BlockLogic";
 
 type BlockConfigValueRegistry = {
 	readonly [k in keyof BlockConfigTypes.Types]: (
@@ -32,7 +32,7 @@ const BlockConfigValueRegistry = {
 	or: createObservable,
 } as const satisfies BlockConfigValueRegistry;
 
-export default abstract class ConfigurableBlockLogic<
+export abstract class ConfigurableBlockLogic<
 	TDef extends BlockConfigTypes.BothDefinitions,
 	TBlock extends BlockModel = BlockModel,
 > extends BlockLogic {
@@ -52,13 +52,13 @@ export default abstract class ConfigurableBlockLogic<
 		this.instance = this.block.instance;
 
 		this.input = Objects.fromEntries(
-			Objects.entries(configDefinition.input).map(
+			Objects.entriesArray(configDefinition.input).map(
 				(d) => [d[0], BlockConfigValueRegistry[d[1].type](d[1] as never)] as const,
 			),
 		) as typeof this.input;
 
 		this.output = Objects.fromEntries(
-			Objects.entries(configDefinition.output).map(
+			Objects.entriesArray(configDefinition.output).map(
 				(d) => [d[0], BlockConfigValueRegistry[d[1].type](d[1] as never)] as const,
 			),
 		) as typeof this.output;
@@ -66,7 +66,7 @@ export default abstract class ConfigurableBlockLogic<
 		//
 
 		const subInvalidValue = (values: Readonly<Record<string, ReadonlyBlockLogicValue<defined>>>) => {
-			for (const [, input] of Objects.pairs(values)) {
+			for (const [, input] of Objects.pairs_(values)) {
 				input.subscribe((value) => {
 					// if infinity or nan
 					if (value === math.huge || value === -math.huge || value !== value) {
@@ -83,19 +83,19 @@ export default abstract class ConfigurableBlockLogic<
 	tick(tick: number): void {
 		if (!this.isEnabled()) return;
 
-		for (const [, value] of Objects.pairs(this.input)) {
+		for (const [, value] of Objects.pairs_(this.input)) {
 			(value as unknown as BlockLogicValue<defined>).tick(tick);
 		}
-		for (const [, value] of Objects.pairs(this.output)) {
+		for (const [, value] of Objects.pairs_(this.output)) {
 			(value as unknown as BlockLogicValue<defined>).tick(tick);
 		}
 	}
 
 	disable(): void {
-		for (const [, value] of Objects.pairs(this.input)) {
+		for (const [, value] of Objects.pairs_(this.input)) {
 			(value as unknown as BlockLogicValue<defined>).destroy();
 		}
-		for (const [, value] of Objects.pairs(this.output)) {
+		for (const [, value] of Objects.pairs_(this.output)) {
 			(value as unknown as BlockLogicValue<defined>).destroy();
 		}
 

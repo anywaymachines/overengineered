@@ -1,6 +1,6 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { InstanceComponent } from "shared/component/InstanceComponent";
-import Signal from "shared/event/Signal";
+import { Signal } from "shared/event/Signal";
 import { AABB } from "shared/fixes/AABB";
 
 export class SharedPlot extends InstanceComponent<PlotModel> {

@@ -1,15 +1,15 @@
 import { UserInputService } from "@rbxts/services";
-import InputController from "client/controller/InputController";
+import { InputController } from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
-import Control from "client/gui/Control";
-import SelectButtonPopup from "client/gui/popup/SelectButtonPopup";
-import ObservableValue from "shared/event/ObservableValue";
-import Signal from "shared/event/Signal";
+import { Control } from "client/gui/Control";
+import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { Signal } from "shared/event/Signal";
 
 export type KeyChooserControlDefinition = TextButton;
 
 /** Control that represents a key */
-export default class KeyChooserControl extends Control<KeyChooserControlDefinition> {
+export class KeyChooserControl extends Control<KeyChooserControlDefinition> {
 	readonly submitted = new Signal<(value: KeyCode, prev: KeyCode) => void>();
 	readonly value = new ObservableValue<KeyCode>("P");
 

@@ -1,10 +1,10 @@
 import { Players, UserInputService } from "@rbxts/services";
-import Control from "client/gui/Control";
-import EventHandler from "shared/event/EventHandler";
-import NumberObservableValue from "shared/event/NumberObservableValue";
-import Signal from "shared/event/Signal";
-import NumberTextBoxControl from "./NumberTextBoxControl";
-import ProgressBarControl, { ProgressBarControlDefinition } from "./ProgressBarControl";
+import { Control } from "client/gui/Control";
+import { EventHandler } from "shared/event/EventHandler";
+import { NumberObservableValue } from "shared/event/NumberObservableValue";
+import { Signal } from "shared/event/Signal";
+import { NumberTextBoxControl } from "./NumberTextBoxControl";
+import { ProgressBarControl, ProgressBarControlDefinition } from "./ProgressBarControl";
 
 export type SliderControlDefinition = GuiObject &
 	ProgressBarControlDefinition & {
@@ -12,7 +12,7 @@ export type SliderControlDefinition = GuiObject &
 	};
 
 /** Control that represents a number via a slider. */
-export default class SliderControl<T extends SliderControlDefinition = SliderControlDefinition> extends Control<T> {
+export class SliderControl<T extends SliderControlDefinition = SliderControlDefinition> extends Control<T> {
 	readonly submitted = new Signal<(value: number) => void>();
 	readonly value;
 	readonly visualValue;

@@ -1,15 +1,15 @@
 import { GuiService, StarterGui } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import LocalPlayerController from "client/controller/LocalPlayerController";
-import Signals from "client/event/Signals";
-import Popup from "client/gui/Popup";
-import Remotes from "shared/Remotes";
-import ObservableValue from "shared/event/ObservableValue";
-import Objects from "shared/fixes/objects";
-import BuildingMode from "./build/BuildingMode";
-import RideMode from "./ride/RideMode";
+import { LocalPlayerController } from "client/controller/LocalPlayerController";
+import { Signals } from "client/event/Signals";
+import { Popup } from "client/gui/Popup";
+import { Remotes } from "shared/Remotes";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { Objects } from "shared/fixes/objects";
+import { BuildingMode } from "./build/BuildingMode";
+import { RideMode } from "./ride/RideMode";
 
-export default class PlayModeController extends ClientComponent {
+export class PlayModeController extends ClientComponent {
 	readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
 	readonly modes;
 
@@ -33,7 +33,7 @@ export default class PlayModeController extends ClientComponent {
 			ride: new RideMode(),
 		} as const;
 
-		for (const [_, mode] of Objects.pairs(this.modes)) {
+		for (const [_, mode] of Objects.pairs_(this.modes)) {
 			mode.disable();
 		}
 

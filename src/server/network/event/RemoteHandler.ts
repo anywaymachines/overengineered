@@ -11,8 +11,8 @@ import {
 	InferServerConnect,
 	RemoteDeclarations,
 } from "@rbxts/net/out/definitions/Types";
-import Logger from "shared/Logger";
-import Remotes from "shared/Remotes";
+import { Logger } from "shared/Logger";
+import { Remotes } from "shared/Remotes";
 
 // Types copied from rbxts
 type ServerEventDeclarationKeys<T extends RemoteDeclarations> = keyof DeclarationsOf<

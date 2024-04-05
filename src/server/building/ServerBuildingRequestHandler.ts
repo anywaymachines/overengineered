@@ -1,7 +1,7 @@
-import { blockRegistry } from "shared/Registry";
-import BlockManager from "shared/building/BlockManager";
-import BuildingManager from "shared/building/BuildingManager";
-import SharedPlots from "shared/building/SharedPlots";
+import { BlocksInitializer } from "shared/BlocksInitializer";
+import { BlockManager } from "shared/building/BlockManager";
+import { BuildingManager } from "shared/building/BuildingManager";
+import { SharedPlots } from "shared/building/SharedPlots";
 import { ServerBuilding } from "./ServerBuilding";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
@@ -9,8 +9,8 @@ const errBuildingNotPermitted = err("Building is not permitted");
 const errInvalidOperation = err("Invalid operation");
 
 /** Methods for editing the buildings server-side on player requests */
-export const ServerBuildingRequestHandler = {
-	placeBlocks: (player: Player, request: PlaceBlocksRequest): MultiBuildResponse => {
+export namespace ServerBuildingRequestHandler {
+	export function placeBlocks(player: Player, request: PlaceBlocksRequest): MultiBuildResponse {
 		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
 			return errBuildingNotPermitted;
 		}
@@ -19,7 +19,7 @@ export const ServerBuildingRequestHandler = {
 			if (
 				!BuildingManager.serverBlockCanBePlacedAt(
 					SharedPlots.getPlotComponent(request.plot),
-					blockRegistry.get(block.id)!,
+					BlocksInitializer.blocks.map.get(block.id)!,
 					block.location,
 					player,
 				)
@@ -45,7 +45,7 @@ export const ServerBuildingRequestHandler = {
 
 		const counts = countBy(request.blocks, (b) => b.id);
 		for (const [id, count] of counts) {
-			const regblock = blockRegistry.get(id)!;
+			const regblock = BlocksInitializer.blocks.map.get(id)!;
 			const placed = SharedPlots.getPlotComponent(request.plot)
 				.getBlocks()
 				.count((placed_block) => {
@@ -71,8 +71,8 @@ export const ServerBuildingRequestHandler = {
 			success: true,
 			models: placed,
 		};
-	},
-	deleteBlocks: (player: Player, request: DeleteBlocksRequest): Response => {
+	}
+	export function deleteBlocks(player: Player, request: DeleteBlocksRequest): Response {
 		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
 			return errBuildingNotPermitted;
 		}
@@ -86,8 +86,8 @@ export const ServerBuildingRequestHandler = {
 		}
 
 		return ServerBuilding.deleteBlocks(request);
-	},
-	moveBlocks: (player: Player, request: MoveBlocksRequest): Response => {
+	}
+	export function moveBlocks(player: Player, request: MoveBlocksRequest): Response {
 		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
 			return errBuildingNotPermitted;
 		}
@@ -101,8 +101,8 @@ export const ServerBuildingRequestHandler = {
 		}
 
 		return ServerBuilding.moveBlocks(request);
-	},
-	rotateBlocks: (player: Player, request: RotateBlocksRequest): Response => {
+	}
+	export function rotateBlocks(player: Player, request: RotateBlocksRequest): Response {
 		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
 			return errBuildingNotPermitted;
 		}
@@ -116,8 +116,8 @@ export const ServerBuildingRequestHandler = {
 		}
 
 		return ServerBuilding.rotateBlocks(request);
-	},
-	logicConnect: (player: Player, request: LogicConnectRequest): Response => {
+	}
+	export function logicConnect(player: Player, request: LogicConnectRequest): Response {
 		if (!SharedPlots.isBlockOnAllowedPlot(player, request.inputBlock)) {
 			return errBuildingNotPermitted;
 		}
@@ -126,15 +126,15 @@ export const ServerBuildingRequestHandler = {
 		}
 
 		return ServerBuilding.logicConnect(request);
-	},
-	logicDisconnect: (player: Player, request: LogicDisconnectRequest): Response => {
+	}
+	export function logicDisconnect(player: Player, request: LogicDisconnectRequest): Response {
 		if (!SharedPlots.isBlockOnAllowedPlot(player, request.inputBlock)) {
 			return errBuildingNotPermitted;
 		}
 
 		return ServerBuilding.logicDisconnect(request);
-	},
-	paintBlocks: (player: Player, request: PaintBlocksRequest): Response => {
+	}
+	export function paintBlocks(player: Player, request: PaintBlocksRequest): Response {
 		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
 			return errBuildingNotPermitted;
 		}
@@ -148,8 +148,8 @@ export const ServerBuildingRequestHandler = {
 		}
 
 		return ServerBuilding.paintBlocks(request);
-	},
-	updateConfig: (player: Player, request: ConfigUpdateRequest): Response => {
+	}
+	export function updateConfig(player: Player, request: ConfigUpdateRequest): Response {
 		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
 			return errBuildingNotPermitted;
 		}
@@ -160,8 +160,8 @@ export const ServerBuildingRequestHandler = {
 		}
 
 		return ServerBuilding.updateConfig(request);
-	},
-	resetConfig: (player: Player, request: ConfigResetRequest): Response => {
+	}
+	export function resetConfig(player: Player, request: ConfigResetRequest): Response {
 		if (!SharedPlots.isBuildingAllowed(request.plot, player)) {
 			return errBuildingNotPermitted;
 		}
@@ -172,5 +172,5 @@ export const ServerBuildingRequestHandler = {
 		}
 
 		return ServerBuilding.resetConfig(request);
-	},
-} as const;
+	}
+}

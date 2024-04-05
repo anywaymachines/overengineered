@@ -1,13 +1,13 @@
 import { HttpService } from "@rbxts/services";
 import { ServerBuilding } from "server/building/ServerBuilding";
-import Logger from "shared/Logger";
-import { blockRegistry } from "shared/Registry";
-import Serializer from "shared/Serializer";
+import { BlocksInitializer } from "shared/BlocksInitializer";
+import { Logger } from "shared/Logger";
+import { Serializer } from "shared/Serializer";
 import { LogicRegistry } from "shared/block/LogicRegistry";
-import blockConfigRegistry, { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import BlockManager, { PlacedBlockDataConnection } from "shared/building/BlockManager";
-import SharedPlots from "shared/building/SharedPlots";
-import Objects from "shared/fixes/objects";
+import { BlockConfigRegistry, blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { BlockManager, PlacedBlockDataConnection } from "shared/building/BlockManager";
+import { SharedPlots } from "shared/building/SharedPlots";
+import { Objects } from "shared/fixes/objects";
 
 type SerializedBlocks<TBlocks extends SerializedBlockBase> = {
 	readonly version: number;
@@ -65,8 +65,8 @@ const place = {
 	},
 
 	blockOnPlotV3: (plot: PlotModel, blockData: SerializedBlockV3, buildingCenter: CFrame) => {
-		if (!blockRegistry.has(blockData.id)) {
-			Logger.error(`Could not load ${blockData.id} from slot: Block does not exists`);
+		if (!BlocksInitializer.blocks.map.has(blockData.id)) {
+			Logger.err(`Could not load ${blockData.id} from slot: Block does not exists`);
 			return;
 		}
 
@@ -157,7 +157,7 @@ const v7: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 						b.config === undefined
 							? undefined
 							: Objects.fromEntries(
-									Objects.entries(b.config).map(
+									Objects.entriesArray(b.config).map(
 										(e) => [e[0], e[1] === "Y" ? true : e[1] === "N" ? false : e[1]] as const,
 									),
 								),
@@ -532,7 +532,10 @@ const v15: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 				return {
 					...block,
 					config: Objects.fromEntries(
-						Objects.entries(block.config ?? {}).map(([k, v]) => [k, { type: "number", value: v ?? 0 }]),
+						Objects.entriesArray(block.config ?? {}).map(([k, v]) => [
+							k,
+							{ type: "number", value: v ?? 0 },
+						]),
 					),
 				};
 			}
@@ -561,7 +564,10 @@ const v16: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 				return {
 					...block,
 					config: Objects.fromEntries(
-						Objects.entries(block.config ?? {}).map(([k, v]) => [k, { type: "number", value: v ?? 0 }]),
+						Objects.entriesArray(block.config ?? {}).map(([k, v]) => [
+							k,
+							{ type: "number", value: v ?? 0 },
+						]),
 					),
 				};
 			}
@@ -620,13 +626,11 @@ const current = versions[versions.size() - 1] as typeof versions extends readonl
 const getVersion = (version: number) => versions.find((v) => v.version === version);
 
 /** Methods to save and load buildings */
-const BlocksSerializer = {
-	version: current.version,
-
-	serialize: function (plot: PlotModel): string {
+export namespace BlocksSerializer {
+	export function serialize(plot: PlotModel): string {
 		return HttpService.JSONEncode(current.read(plot));
-	},
-	deserialize: function (data: string, plot: PlotModel): number {
+	}
+	export function deserialize(data: string, plot: PlotModel): number {
 		let deserialized = HttpService.JSONDecode(data) as SerializedBlocks<SerializedBlockBase>;
 		Logger.info(`Loaded a slot using savev${deserialized.version}`);
 
@@ -643,6 +647,5 @@ const BlocksSerializer = {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		current.place(deserialized as any, plot);
 		return deserialized.blocks.size();
-	},
-} as const;
-export default BlocksSerializer;
+	}
+}

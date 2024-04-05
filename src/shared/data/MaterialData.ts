@@ -1,4 +1,4 @@
-export type PhysicalProperties = {
+type PhysicalProperties = {
 	readonly [key: string]: {
 		readonly Density?: number;
 		readonly Elasticity?: number;
@@ -8,13 +8,12 @@ export type PhysicalProperties = {
 	};
 };
 
-const MaterialData = {
-	Properties: {
+export namespace MaterialData {
+	export const Properties: PhysicalProperties = {
 		Default: {},
 		Ice: {
 			Friction: 0.02,
 			FrictionWeight: 50,
 		},
-	} as PhysicalProperties,
-} as const;
-export default MaterialData;
+	};
+}

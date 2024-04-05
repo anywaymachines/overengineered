@@ -1,28 +1,28 @@
 import { Workspace } from "@rbxts/services";
-import Machine from "client/blocks/Machine";
-import RobloxUnit from "shared/RobloxUnit";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import ConstantBlockLogic from "shared/block/logic/operations/ConstantBlockLogic";
-import AltimeterBlockLogic from "shared/block/logic/operations/sensors/AltimeterBlockLogic";
-import OperationVec3CombinerBlockLogic from "shared/block/logic/operations/vector/OperationVec3CombinerBlockLogic";
-import OperationVec3SplitterBlockLogic from "shared/block/logic/operations/vector/OperationVec3SplitterBlockLogic";
-import Objects from "shared/fixes/objects";
+import { Machine } from "client/blocks/Machine";
 import { Assert } from "shared/Assert";
+import { RobloxUnit } from "shared/RobloxUnit";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { ConstantBlockLogic } from "shared/block/logic/operations/ConstantBlockLogic";
+import { AltimeterBlockLogic } from "shared/block/logic/operations/sensors/AltimeterBlockLogic";
+import { OperationVec3CombinerBlockLogic } from "shared/block/logic/operations/vector/OperationVec3CombinerBlockLogic";
+import { OperationVec3SplitterBlockLogic } from "shared/block/logic/operations/vector/OperationVec3SplitterBlockLogic";
+import { Objects } from "shared/fixes/objects";
 
 const parent = new Instance("Folder");
 parent.Parent = Workspace;
 
 const subChanged = (block: ConfigurableBlockLogic<BlockConfigTypes.BothDefinitions>, blockname?: string) => {
-	for (const [name, input] of Objects.pairs(block.input)) {
+	for (const [name, input] of Objects.pairs_(block.input)) {
 		input.subscribe((value, prev) => print(`[in ${blockname + " "}${name}] ${prev} -> ${value}`));
 	}
-	for (const [name, output] of Objects.pairs(block.output)) {
+	for (const [name, output] of Objects.pairs_(block.output)) {
 		output.subscribe((value, prev) => print(`[ou ${blockname + " "}${name}] ${prev} -> ${value}`));
 	}
 };
 
-export const LogicTests = {
-	altimeter() {
+export namespace LogicTests {
+	export function altimeter() {
 		const altimeterInstance = new Instance("Model") as BlockModel;
 		altimeterInstance.PivotTo(new CFrame(0, 5, 0));
 		altimeterInstance.Parent = parent;
@@ -61,8 +61,8 @@ export const LogicTests = {
 		Assert.equals(altimeterInstance.GetPivot().Y, 5);
 		Assert.equals(combiner.output.result, new Vector3(1, RobloxUnit.Studs_To_Meters(5), 0));
 		machine.destroy();
-	},
-	size1() {
+	}
+	export function size1() {
 		const combiner = new OperationVec3CombinerBlockLogic({
 			id: "id",
 			uuid: "0" as BlockUuid,
@@ -81,8 +81,8 @@ export const LogicTests = {
 		machine.enable();
 		Assert.equals(combiner.output.result, new Vector3(1, 0, 0));
 		machine.destroy();
-	},
-	size2() {
+	}
+	export function size2() {
 		const constant = new ConstantBlockLogic({
 			id: "id",
 			uuid: "0" as BlockUuid,
@@ -113,8 +113,8 @@ export const LogicTests = {
 		machine.enable();
 		Assert.equals(combiner.output.result, new Vector3(1, 2, 0));
 		machine.destroy();
-	},
-	size3() {
+	}
+	export function size3() {
 		const constant = new ConstantBlockLogic({
 			id: "id",
 			uuid: "0" as BlockUuid,
@@ -161,5 +161,5 @@ export const LogicTests = {
 		machine.enable();
 		Assert.equals(splitter.output.result_y, 7);
 		machine.destroy();
-	},
-};
+	}
+}

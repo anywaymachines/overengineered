@@ -1,7 +1,7 @@
 import { RunService } from "@rbxts/services";
-import Control from "client/gui/Control";
+import { Control } from "client/gui/Control";
 
-export default class BlockPreviewControl extends Control<ViewportFrame> {
+export class BlockPreviewControl extends Control<ViewportFrame> {
 	private block?: BlockModel;
 
 	constructor(gui: ViewportFrame, block?: BlockModel) {

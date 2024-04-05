@@ -1,10 +1,10 @@
 import { RunService, Workspace } from "@rbxts/services";
-import RobloxUnit from "shared/RobloxUnit";
+import { RobloxUnit } from "shared/RobloxUnit";
 import { BlockLogicData } from "shared/block/BlockLogic";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 
-export default class LidarSensorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.lidarsensor> {
+export class LidarSensorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.lidarsensor> {
 	private raycastParams;
 	private ray;
 

@@ -1,4 +1,4 @@
-export default interface PlayModeBase {
+export interface PlayModeBase {
 	/** Returns a response, or undefined if the transition is invalid */
 	onTransitionFrom(player: Player, prevmode: PlayModes | undefined): Response | undefined;
 

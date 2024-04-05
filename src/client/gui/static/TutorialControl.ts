@@ -1,7 +1,7 @@
 import { LocalizationService, Players } from "@rbxts/services";
-import Control from "client/gui/Control";
-import Gui from "client/gui/Gui";
-import GuiAnimator from "client/gui/GuiAnimator";
+import { Control } from "client/gui/Control";
+import { Gui } from "client/gui/Gui";
+import { GuiAnimator } from "client/gui/GuiAnimator";
 
 export type TutorialControlDefinition = Frame & {
 	Header: TextLabel & {
@@ -11,7 +11,7 @@ export type TutorialControlDefinition = Frame & {
 	TextLabel: TextLabel;
 };
 
-export default class TutorialControl extends Control<TutorialControlDefinition> {
+export class TutorialControl extends Control<TutorialControlDefinition> {
 	private cancellable = false;
 
 	constructor() {

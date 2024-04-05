@@ -1,18 +1,18 @@
-export class Assert {
-	static notNull<T>(value: T, message?: string): asserts value is T & defined {
+export namespace Assert {
+	export function notNull<T>(value: T, message?: string): asserts value is T & defined {
 		if (value === undefined) throw `Value is undefined: ${message}`;
 	}
-	static null<T>(value: T, message?: string): asserts value is T & undefined {
+	export function isNull<T>(value: T, message?: string): asserts value is T & undefined {
 		if (value !== undefined) throw `Value is not undefined: ${value}: ${message}`;
 	}
-	static true(condition: boolean, message?: string): asserts condition is true {
+	export function isTrue(condition: boolean, message?: string): asserts condition is true {
 		if (!condition) throw `Condition is not true: ${message}`;
 	}
-	static false(condition: boolean, message?: string): asserts condition is false {
+	export function isFalse(condition: boolean, message?: string): asserts condition is false {
 		if (condition) throw `Condition is not false: ${message}`;
 	}
 
-	static equals<T>(left: T | { get(): T }, right: T | { get(): T }, message?: string) {
+	export function equals<T>(left: T | { get(): T }, right: T | { get(): T }, message?: string) {
 		left = typeIs(left, "table") && "get" in left ? left.get() : left;
 		right = typeIs(right, "table") && "get" in right ? right.get() : right;
 
@@ -20,7 +20,7 @@ export class Assert {
 			throw `${left} and ${right} are not equal: ${message}`;
 		}
 	}
-	static sequenceEquals<T>(left: readonly T[], right: readonly T[], message?: string) {
+	export function sequenceEquals<T>(left: readonly T[], right: readonly T[], message?: string) {
 		if (left.size() !== right.size())
 			throw `Array sizes are not equal: ${left.size()} vs ${right.size()}: ${message}`;
 

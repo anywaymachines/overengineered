@@ -1,6 +1,6 @@
 import { RunService, Workspace } from "@rbxts/services";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
 type Wing = BlockModel & {
@@ -11,7 +11,7 @@ type Wing = BlockModel & {
 		  });
 };
 
-export default class WingLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.wing1x1, Wing> {
+export class WingLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.wing1x1, Wing> {
 	private readonly wingSurface;
 
 	constructor(block: PlacedBlockData) {

@@ -1,5 +1,5 @@
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
 type Rope = BlockModel & {
@@ -7,7 +7,7 @@ type Rope = BlockModel & {
 		readonly RopeConstraint: RopeConstraint;
 	};
 };
-export default class RopeLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.rope, Rope> {
+export class RopeLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.rope, Rope> {
 	private ropeConstraint;
 
 	constructor(block: PlacedBlockData) {

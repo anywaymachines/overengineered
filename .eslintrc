@@ -15,15 +15,19 @@
 		"@typescript-eslint",
 		"roblox-ts",
 		"prettier",
-		"no-relative-import-paths"
+		"no-relative-import-paths",
+		"import"
 	],
 	"extends": [
 		"eslint:recommended",
 		"plugin:@typescript-eslint/recommended",
 		"plugin:roblox-ts/recommended",
-		"plugin:prettier/recommended"
+		"plugin:prettier/recommended",
+		"plugin:import/recommended",
+		"plugin:import/typescript"
 	],
 	"rules": {
+		"no-inner-declarations": 0,
 		"prettier/prettier": [
 			"warn",
 			{
@@ -46,6 +50,9 @@
 			{
 				"accessibility": "no-public"
 			}
-		]
+		],
+		"import/no-named-as-default": "off",
+		"import/no-unresolved": "off",
+		"import/no-default-export": "error"
 	}
 }

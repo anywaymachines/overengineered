@@ -1,6 +1,6 @@
 import { Players, Workspace } from "@rbxts/services";
-import Logger from "shared/Logger";
-import RobloxUnit from "shared/RobloxUnit";
+import { Logger } from "shared/Logger";
+import { RobloxUnit } from "shared/RobloxUnit";
 
 // wait for everything to spawn
 task.wait(1);

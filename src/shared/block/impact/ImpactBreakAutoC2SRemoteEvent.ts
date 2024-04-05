@@ -1,6 +1,6 @@
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
 
-export default class ImpactBreakAutoC2SRemoteEvent extends AutoC2SRemoteEvent<BasePart[]> {
+export class ImpactBreakAutoC2SRemoteEvent extends AutoC2SRemoteEvent<BasePart[]> {
 	justRun(player: Player | undefined, arg: BasePart[] | undefined): void {
 		if (!arg) return;
 

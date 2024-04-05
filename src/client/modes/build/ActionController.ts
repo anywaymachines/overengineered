@@ -1,9 +1,9 @@
 import { ClientComponent } from "client/component/ClientComponent";
-import InputController from "client/controller/InputController";
+import { InputController } from "client/controller/InputController";
 import { LoadingController } from "client/controller/LoadingController";
-import LogControl from "client/gui/static/LogControl";
+import { LogControl } from "client/gui/static/LogControl";
 import { ObservableCollectionArr } from "shared/event/ObservableCollection";
-import Signal from "shared/event/Signal";
+import { Signal } from "shared/event/Signal";
 
 type Operation = {
 	readonly description: string;
@@ -11,7 +11,7 @@ type Operation = {
 	readonly redo: () => Promise<void | Response>;
 };
 
-export default class ActionController extends ClientComponent {
+export class ActionController extends ClientComponent {
 	static readonly instance = new ActionController();
 
 	readonly onUndo = new Signal<(operation: Operation) => void>();

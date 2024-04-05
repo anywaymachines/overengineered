@@ -1,8 +1,8 @@
 import { MarketplaceService, Players } from "@rbxts/services";
-import Control from "client/gui/Control";
+import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
-import GameDefinitions from "shared/data/GameDefinitions";
-import ObservableValue from "shared/event/ObservableValue";
+import { GameDefinitions } from "shared/data/GameDefinitions";
+import { ObservableValue } from "shared/event/ObservableValue";
 
 class MaterialButton extends ButtonControl {
 	constructor(gui: GuiButton, set: (material: Enum.Material) => void, gamePass?: number) {
@@ -54,7 +54,7 @@ export type MaterialChooserDefinition = GuiObject & {
 	GetChildren(undefined: undefined): readonly ImageButton[];
 };
 /** Material chooser part */
-export default class MaterialChooser extends Control<MaterialChooserDefinition> {
+export class MaterialChooser extends Control<MaterialChooserDefinition> {
 	readonly value = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 
 	constructor(gui: MaterialChooserDefinition) {

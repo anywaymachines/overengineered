@@ -1,12 +1,12 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
-import InputController from "client/controller/InputController";
+import { InputController } from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
-import Control from "client/gui/Control";
-import Gui from "client/gui/Gui";
+import { Control } from "client/gui/Control";
+import { Gui } from "client/gui/Gui";
 import { ButtonControl } from "client/gui/controls/Button";
 import { rootComponents } from "client/test/RootComponents";
 import { Element } from "shared/Element";
-import GameDefinitions from "shared/data/GameDefinitions";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 
 type TreeControlDefinition = GuiObject & {
 	readonly Main: GuiButton;

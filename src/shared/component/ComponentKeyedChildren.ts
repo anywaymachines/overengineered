@@ -1,4 +1,4 @@
-import SlimSignal from "shared/event/SlimSignal";
+import { SlimSignal } from "shared/event/SlimSignal";
 
 /** Stores keyed components. Handles its enabling, disabling and destroying. */
 export class ComponentKeyedChildren<TKey extends defined, T extends IComponent = IComponent>

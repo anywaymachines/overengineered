@@ -1,5 +1,5 @@
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
 
@@ -11,7 +11,7 @@ type Screen = BlockModel & {
 	};
 };
 
-export default class ScreenBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.screen, Screen> {
+export class ScreenBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.screen, Screen> {
 	static readonly events = {
 		update: new AutoC2SRemoteEvent<{
 			readonly block: Screen;

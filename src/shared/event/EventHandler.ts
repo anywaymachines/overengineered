@@ -1,7 +1,7 @@
 import { ReadonlySignal } from "shared/event/Signal";
 
 /** Killable EventHandler for roblox connections */
-export default class EventHandler {
+export class EventHandler {
 	private readonly events: { Disconnect(): void }[] = [];
 
 	/** The function of registering an event

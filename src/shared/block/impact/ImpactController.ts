@@ -1,13 +1,12 @@
 import { RunService, Workspace } from "@rbxts/services";
-import Logger from "shared/Logger";
-import RemoteEvents from "shared/RemoteEvents";
-import TerrainDataInfo from "shared/TerrainDataInfo";
-import BlockManager, { PlacedBlockData } from "shared/building/BlockManager";
+import { Logger } from "shared/Logger";
+import { RemoteEvents } from "shared/RemoteEvents";
+import { TerrainDataInfo } from "shared/TerrainDataInfo";
+import { BlockManager, PlacedBlockData } from "shared/building/BlockManager";
 import { Component } from "shared/component/Component";
-import Effects from "shared/effects/Effects";
-import Objects from "shared/fixes/objects";
-import PartUtils from "shared/utils/PartUtils";
-import PlayerUtils from "shared/utils/PlayerUtils";
+import { Objects } from "shared/fixes/objects";
+import { PartUtils } from "shared/utils/PartUtils";
+import { PlayerUtils } from "shared/utils/PlayerUtils";
 
 const overlapParams = new OverlapParams();
 overlapParams.CollisionGroup = "Blocks";
@@ -165,7 +164,7 @@ export class ImpactController extends Component {
 					event.Disconnect();
 				}
 			} else if (magnitudeDiff + allowedDifference * 0.2 > allowedDifference) {
-				Effects.Sparks.sendToNetworkOwnerOrEveryone(part, { part });
+				RemoteEvents.Effects.Sparks.sendToNetworkOwnerOrEveryone(part, { part });
 			}
 		});
 

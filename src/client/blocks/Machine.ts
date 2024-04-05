@@ -1,16 +1,16 @@
-import PlayerDataStorage from "client/PlayerDataStorage";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import SharedMachine from "shared/block/SharedMachine";
-import blockConfigRegistry, { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { blockConfigRegistryClient } from "client/blocks/config/BlockConfigRegistryClient";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { SharedMachine } from "shared/block/SharedMachine";
+import { BlockConfigRegistry, blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ImpactController } from "shared/block/impact/ImpactController";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { Config } from "shared/config/Config";
-import Objects from "shared/fixes/objects";
-import blockConfigRegistryClient from "./config/BlockConfigRegistryClient";
+import { Objects } from "shared/fixes/objects";
 import { ConfigLogicValueBase } from "./config/ConfigLogicValueBase";
 
-export default class Machine extends SharedMachine {
+export class Machine extends SharedMachine {
 	readonly logicInputs = new ContainerComponent<
 		ConfigLogicValueBase<BlockConfigTypes.Types[keyof BlockConfigTypes.Types]>
 	>();
@@ -42,7 +42,7 @@ export default class Machine extends SharedMachine {
 			];
 			const config = Config.addDefaults(logic.block.config, configDef.input);
 
-			for (const [key, observable] of Objects.pairs(logic.input)) {
+			for (const [key, observable] of Objects.pairs_(logic.input)) {
 				// if already connected
 				if (logic.block.connections !== undefined && key in logic.block.connections) continue;
 

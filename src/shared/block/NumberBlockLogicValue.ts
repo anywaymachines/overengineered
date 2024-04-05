@@ -1,5 +1,5 @@
 import { BlockLogicValue } from "shared/block/BlockLogicValue";
-import NumberObservableValue from "shared/event/NumberObservableValue";
+import { NumberObservableValue } from "shared/event/NumberObservableValue";
 
 export class NumberBlockLogicValue extends BlockLogicValue<number> {
 	readonly min;

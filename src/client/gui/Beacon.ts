@@ -1,10 +1,10 @@
 import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import PlayerDataStorage from "client/PlayerDataStorage";
-import Gui from "client/gui/Gui";
-import RobloxUnit from "shared/RobloxUnit";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { Gui } from "client/gui/Gui";
+import { RobloxUnit } from "shared/RobloxUnit";
 import { InstanceComponent } from "shared/component/InstanceComponent";
-import PartUtils from "shared/utils/PartUtils";
-import VectorUtils from "shared/utils/VectorUtils";
+import { PartUtils } from "shared/utils/PartUtils";
+import { VectorUtils } from "shared/utils/VectorUtils";
 
 type BeaconBillboardGui = GuiObject & {
 	readonly Title: TextLabel;
@@ -12,7 +12,7 @@ type BeaconBillboardGui = GuiObject & {
 	readonly ImageLabel: ImageLabel;
 };
 
-export default class Beacon extends InstanceComponent<PVInstance> {
+export class Beacon extends InstanceComponent<PVInstance> {
 	private readonly billboard;
 
 	constructor(part: PVInstance, name: string, config: keyof BeaconsConfiguration) {

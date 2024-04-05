@@ -1,30 +1,30 @@
 import { RunService, Workspace } from "@rbxts/services";
+import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
+import { AutoTerrainGenerator } from "shared/AutoTerrainGenerator";
 import { BlocksInitializer } from "shared/BlocksInitializer";
-import Logger from "shared/Logger";
-import RemoteEvents from "shared/RemoteEvents";
-import Remotes from "shared/Remotes";
-import SlotsMeta from "shared/SlotsMeta";
-import { AutoTerrainGenerator } from "shared/TerrainGenerator";
-import TerrainModelGenerator from "shared/TerrainModelGenerator";
-import BlockManager from "shared/building/BlockManager";
-import SharedPlots from "shared/building/SharedPlots";
-import GameDefinitions from "shared/data/GameDefinitions";
-import BuildingWelder from "./building/BuildingWelder";
+import { Logger } from "shared/Logger";
+import { RemoteEvents } from "shared/RemoteEvents";
+import { Remotes } from "shared/Remotes";
+import { SlotsMeta } from "shared/SlotsMeta";
+import { TerrainModelGenerator } from "shared/TerrainModelGenerator";
+import { BlockManager } from "shared/building/BlockManager";
+import { SharedPlots } from "shared/building/SharedPlots";
+import { GameDefinitions } from "shared/data/GameDefinitions";
+import { BuildingWelder } from "./building/BuildingWelder";
 import { ServerBuilding } from "./building/ServerBuilding";
 import { ServerBuildingRequestHandler } from "./building/ServerBuildingRequestHandler";
-import PlayerDatabase, { PlayerData } from "./database/PlayerDatabase";
-import SlotDatabase from "./database/SlotDatabase";
-import PlayModeController from "./modes/PlayModeController";
+import { PlayerData, PlayerDatabase } from "./database/PlayerDatabase";
+import { SlotDatabase } from "./database/SlotDatabase";
+import { PlayModeController } from "./modes/PlayModeController";
 import { registerOnRemoteEvent, registerOnRemoteFunction } from "./network/event/RemoteHandler";
-import UnreliableRemoteHandler from "./network/event/UnreliableRemoteHandler";
-import BlocksSerializer from "./plots/BlocksSerializer";
+import { BlocksSerializer } from "./plots/BlocksSerializer";
 import { ServerPlots } from "./plots/ServerPlots";
 
-class RemoteHandlers {
-	static loadSlot(this: void, player: Player, index: number): LoadSlotResponse {
+namespace RemoteHandlers {
+	export function loadSlot(player: Player, index: number): LoadSlotResponse {
 		return RemoteHandlers.loadAdminSlot(SharedPlots.getPlotByOwnerID(player.UserId), player.UserId, index);
 	}
-	static loadSlotAsAdmin(this: void, player: Player, userid: number, index: number): LoadSlotResponse {
+	export function loadSlotAsAdmin(player: Player, userid: number, index: number): LoadSlotResponse {
 		if (!GameDefinitions.isAdmin(player)) {
 			return {
 				success: false,
@@ -35,12 +35,12 @@ class RemoteHandlers {
 		return RemoteHandlers.loadAdminSlot(SharedPlots.getPlotByOwnerID(player.UserId), userid, index);
 	}
 
-	static sendMessageAsAdmin(this: void, player: Player, text: string) {
+	export function sendMessageAsAdmin(player: Player, text: string) {
 		if (!GameDefinitions.isAdmin(player)) return;
 		Remotes.Server.GetNamespace("Admin").Get("SendMessage").SendToAllPlayers(text);
 	}
 
-	static loadAdminSlot(this: void, plot: PlotModel, userid: number, index: number): LoadSlotResponse {
+	export function loadAdminSlot(plot: PlotModel, userid: number, index: number): LoadSlotResponse {
 		const start = os.clock();
 		const blocks = SlotDatabase.instance.getBlocks(userid, index);
 		if (blocks === undefined || blocks.size() === 0) {
@@ -58,7 +58,7 @@ class RemoteHandlers {
 		return { success: true, isEmpty: dblocks === 0 };
 	}
 
-	static updateSetting<TKey extends keyof PlayerConfig>(
+	export function updateSetting<TKey extends keyof PlayerConfig>(
 		this: void,
 		player: Player,
 		key: TKey,
@@ -79,7 +79,7 @@ class RemoteHandlers {
 			success: true,
 		};
 	}
-	static fetchSettings(this: void, player: Player): PlayerDataResponse {
+	export function fetchSettings(player: Player): PlayerDataResponse {
 		const data = PlayerDatabase.instance.get(tostring(player.UserId)) ?? {};
 
 		return {
@@ -89,7 +89,7 @@ class RemoteHandlers {
 		};
 	}
 
-	static saveSlot(this: void, player: Player, data: PlayerSaveSlotRequest): SaveSlotResponse {
+	export function saveSlot(player: Player, data: PlayerSaveSlotRequest): SaveSlotResponse {
 		Logger.info(`Saving ${player.Name}'s slot ${data.index}`);
 
 		const output = SlotDatabase.instance.update(
@@ -97,7 +97,7 @@ class RemoteHandlers {
 			data.index,
 			(meta) => {
 				const get = SlotsMeta.get(meta, data.index);
-				return SlotsMeta.with(meta, data.index, {
+				return SlotsMeta.withSlot(meta, data.index, {
 					name: data.name ?? get.name,
 					color: data.color ?? get.color,
 					touchControls: data.touchControls ?? get.touchControls,
@@ -112,7 +112,7 @@ class RemoteHandlers {
 		};
 	}
 
-	static sit(this: void, player: Player) {
+	export function sit(player: Player) {
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
 		if (hrp.Sit) return;
 
@@ -132,7 +132,7 @@ class RemoteHandlers {
 
 if (RunService.IsStudio()) {
 	const terragen = new TerrainModelGenerator(new Vector3(25, 50, 25));
-	task.spawn(() => AutoTerrainGenerator.initialize(terragen));
+	task.spawn(() => new AutoTerrainGenerator(terragen));
 }
 
 // Plots
@@ -156,7 +156,7 @@ registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
 registerOnRemoteEvent("Admin", "LoadSlot", RemoteHandlers.loadSlotAsAdmin);
 registerOnRemoteEvent("Admin", "SendMessage", RemoteHandlers.sendMessageAsAdmin);
-UnreliableRemoteHandler.init();
+UnreliableRemoteHandler.initialize();
 
 BlocksInitializer.initialize();
 BuildingWelder.initialize();

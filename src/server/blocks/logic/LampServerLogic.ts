@@ -1,7 +1,7 @@
-import LampBlockLogic from "shared/block/logic/operations/output/LampBlockLogic";
-import ServerBlockLogic from "server/blocks/ServerBlockLogic";
+import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
+import { LampBlockLogic } from "shared/block/logic/operations/output/LampBlockLogic";
 
-export default class LampServerLogic extends ServerBlockLogic<typeof LampBlockLogic> {
+export class LampServerLogic extends ServerBlockLogic<typeof LampBlockLogic> {
 	constructor(logic: typeof LampBlockLogic) {
 		super(logic);
 

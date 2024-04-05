@@ -1,7 +1,7 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import { BlockDataRegistry } from "./BlockDataRegistry";
 import { AutoBlockCreator } from "./block/logic/AutoBlockCreator";
-import Objects from "./fixes/objects";
+import { Objects } from "./fixes/objects";
 
 declare global {
 	type RegistryBlock = {
@@ -105,47 +105,43 @@ const init = (): BlocksInitializeData => {
 
 const initData = init();
 
-const categories: Readonly<Record<CategoryName, Category>> = initData.categories;
-
-const map: ReadonlyMap<string, RegistryBlock> = initData.blocks;
-const sorted: readonly RegistryBlock[] = initData.blocks.map((_, v) => v).sort((left, right) => left.id < right.id);
-const required: readonly RegistryBlock[] = sorted.filter((b) => b.required);
-
-export const BlocksInitializer = {
-	blocks: {
+export namespace BlocksInitializer {
+	export namespace blocks {
 		/** The map of blocks */
-		map,
+		export const map: ReadonlyMap<string, RegistryBlock> = initData.blocks;
 		/** All blocks, sorted by id */
-		sorted,
+		export const sorted: readonly RegistryBlock[] = initData.blocks
+			.map((_, v) => v)
+			.sort((left, right) => left.id < right.id);
 		/** Blocks that have `required` set to `true` */
-		required,
-	},
+		export const required: readonly RegistryBlock[] = sorted.filter((b) => b.required);
+	}
 
-	categories: {
+	export namespace categories {
 		/** The map of block categories */
-		categories,
+		export const categories: Readonly<Record<CategoryName, Category>> = initData.categories;
 
 		/** Get the full path of the category
 		 * @example getCategoryPath(categories, 'Math') => ['Logic', 'Math']
 		 */
-		getCategoryPath(key: string, categories?: Categories): CategoryName[] | undefined {
+		export function getCategoryPath(key: string, categories?: Categories): CategoryName[] | undefined {
 			categories ??= BlocksInitializer.categories.categories;
-			for (const [category, _] of Objects.pairs(categories)) {
+			for (const [category, _] of Objects.pairs_(categories)) {
 				if (category === key) {
 					return [category];
 				}
 
-				const subPath = this.getCategoryPath(key, categories[category].sub);
+				const subPath = getCategoryPath(key, categories[category].sub);
 				if (subPath) {
 					return [category, ...subPath];
 				}
 			}
-		},
-	},
+		}
+	}
 
 	/** Empty method just to trigger the import */
-	initialize() {},
-} as const;
+	export function initialize() {}
+}
 
 // don't delete, useful for something
 // prints all blocks in .json format

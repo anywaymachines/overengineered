@@ -1,9 +1,9 @@
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
 
-export default class LampBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.lamp> {
+export class LampBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.lamp> {
 	static readonly events = {
 		update: new AutoC2SRemoteEvent<{
 			readonly block: BlockModel;

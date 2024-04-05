@@ -1,6 +1,6 @@
 import { PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
 import { InstanceComponent } from "shared/component/InstanceComponent";
-import PartUtils from "shared/utils/PartUtils";
+import { PartUtils } from "shared/utils/PartUtils";
 
 export interface BlockLogicData<TDef extends BlockConfigTypes.Definitions, TBlock extends BlockModel = BlockModel> {
 	readonly id: string;
@@ -13,7 +13,7 @@ export interface BlockLogicData<TDef extends BlockConfigTypes.Definitions, TBloc
 		| Readonly<Partial<Record<keyof TDef & BlockConnectionName, PlacedBlockDataConnection>>>
 		| undefined;
 }
-export default class BlockLogic<T extends BlockModel = BlockModel> extends InstanceComponent<T> {
+export class BlockLogic<T extends BlockModel = BlockModel> extends InstanceComponent<T> {
 	readonly block: BlockLogicData<BlockConfigTypes.Definitions, T>;
 	readonly instance: T;
 

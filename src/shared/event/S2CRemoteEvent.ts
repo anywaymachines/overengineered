@@ -1,6 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
-import SlimSignal from "shared/event/SlimSignal";
-import RemoteEventBase, { CreatableRemoteEvents } from "./RemoteEventBase";
+import { SlimSignal } from "shared/event/SlimSignal";
+import { CreatableRemoteEvents, RemoteEventBase } from "./RemoteEventBase";
 
 type CustomRemoteEvent<T extends Callback> = Instance & {
 	readonly OnServerEvent: RBXScriptSignal<
@@ -16,10 +16,7 @@ type CustomRemoteEvent<T extends Callback> = Instance & {
  * On client, runs and sends it to all specified clients;
  * On server, sends it to all specified clients.
  */
-export default abstract class S2CRemoteEvent<T> extends RemoteEventBase<
-	TweenInfo,
-	CustomRemoteEvent<(arg: T) => void>
-> {
+export abstract class S2CRemoteEvent<T> extends RemoteEventBase<TweenInfo, CustomRemoteEvent<(arg: T) => void>> {
 	constructor(name: string, eventType: CreatableRemoteEvents = "UnreliableRemoteEvent") {
 		super(name, eventType);
 

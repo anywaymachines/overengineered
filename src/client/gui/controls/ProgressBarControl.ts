@@ -1,6 +1,6 @@
-import Control from "client/gui/Control";
-import GuiAnimator from "client/gui/GuiAnimator";
-import NumberObservableValue from "shared/event/NumberObservableValue";
+import { Control } from "client/gui/Control";
+import { GuiAnimator } from "client/gui/GuiAnimator";
+import { NumberObservableValue } from "shared/event/NumberObservableValue";
 
 export type ProgressBarControlDefinition = GuiObject & {
 	Filled?: GuiObject;
@@ -9,7 +9,7 @@ export type ProgressBarControlDefinition = GuiObject & {
 };
 
 /** Control that represents a number as a progress bar. */
-export default class ProgressBarControl<
+export class ProgressBarControl<
 	T extends ProgressBarControlDefinition = ProgressBarControlDefinition,
 > extends Control<T> {
 	readonly value;

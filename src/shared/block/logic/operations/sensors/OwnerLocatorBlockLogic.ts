@@ -1,10 +1,10 @@
 import { Players, RunService } from "@rbxts/services";
-import RobloxUnit from "shared/RobloxUnit";
+import { RobloxUnit } from "shared/RobloxUnit";
 import { BlockLogicData } from "shared/block/BlockLogic";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 
-export default class OwnerLocatorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.ownerlocator> {
+export class OwnerLocatorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.ownerlocator> {
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.ownerlocator.input>) {
 		super(block, blockConfigRegistry.ownerlocator);
 

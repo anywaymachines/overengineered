@@ -1,8 +1,8 @@
-import Control from "client/gui/Control";
-import Gui from "client/gui/Gui";
+import { Control } from "client/gui/Control";
+import { Gui } from "client/gui/Gui";
 import { TransformProps } from "shared/component/Transform";
 import { TransformService } from "shared/component/TransformService";
-import ObservableValue from "shared/event/ObservableValue";
+import { ObservableValue } from "shared/event/ObservableValue";
 
 class LoadingImage extends Control {
 	runShowAnimation() {
@@ -102,25 +102,25 @@ const control = new LoadingPopup(Gui.getGameUI<{ Loading: LoadingPopupDefinition
 control.hide();
 
 const state = new ObservableValue<boolean>(false);
-export const LoadingController = {
-	isLoading: state.asReadonly(),
+export namespace LoadingController {
+	export const isLoading = state.asReadonly();
 
-	show: (text: string) => {
+	export function show(text: string) {
 		control.setText(`${text}...`);
 		control.show();
 		state.set(true);
-	},
-	hide: () => {
+	}
+	export function hide() {
 		control.hide();
 		state.set(false);
-	},
+	}
 
-	runAsync: async <T>(text: string, func: () => T | Promise<T>) => {
+	export async function runAsync<T>(text: string, func: () => T | Promise<T>) {
 		try {
 			LoadingController.show(text);
 			return await func();
 		} finally {
 			LoadingController.hide();
 		}
-	},
-} as const;
+	}
+}

@@ -1,13 +1,13 @@
 import { GuiService, LocalizationService, Players } from "@rbxts/services";
 import { Colors } from "client/gui/Colors";
-import Control from "client/gui/Control";
-import GuiAnimator from "client/gui/GuiAnimator";
-import BlockPreviewControl from "client/gui/buildmode/BlockPreviewControl";
-import BlockPipetteButton from "client/gui/controls/BlockPipetteButton";
+import { Control } from "client/gui/Control";
+import { GuiAnimator } from "client/gui/GuiAnimator";
+import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
+import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { BlocksInitializer } from "shared/BlocksInitializer";
-import ObservableValue from "shared/event/ObservableValue";
-import Objects from "shared/fixes/objects";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { Objects } from "shared/fixes/objects";
 
 type CategoryControlDefinition = TextButton;
 class CategoryControl extends TextButtonControl<CategoryControlDefinition> {
@@ -45,7 +45,7 @@ export type BlockSelectionControlDefinition = GuiObject & {
 };
 
 /** Block chooser control */
-export default class BlockSelectionControl extends Control<BlockSelectionControlDefinition> {
+export class BlockSelectionControl extends Control<BlockSelectionControlDefinition> {
 	private readonly blockTemplate;
 	private readonly categoryTemplate;
 	private readonly list;
@@ -129,7 +129,7 @@ export default class BlockSelectionControl extends Control<BlockSelectionControl
 
 		if (this.gui.SearchTextBox.Text === "") {
 			// Category buttons
-			for (const [_, category] of Objects.pairs(
+			for (const [_, category] of Objects.pairs_(
 				selected.reduce((acc, val) => acc[val].sub, BlocksInitializer.categories.categories),
 			)) {
 				createCategoryButton(category.name, () => this.selectedCategory.set([...selected, category.name]));

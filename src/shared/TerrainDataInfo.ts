@@ -24,14 +24,14 @@ export type TerrainInfo = {
 	};
 };
 
-export default class TerrainDataInfo {
-	static readonly waterLevel = this.getData().waterHeight - 2;
+export namespace TerrainDataInfo {
+	export const waterLevel = getData().waterHeight - 2;
 
-	static getInfo(): Folder & TerrainInfo {
+	export function getInfo(): Folder & TerrainInfo {
 		return ReplicatedFirst.WaitForChild("Terrain") as Folder & TerrainInfo;
 	}
 
-	static getData(): TerrainData {
-		return require(this.getInfo().Data.TerrainData) as TerrainData;
+	export function getData(): TerrainData {
+		return require(getInfo().Data.TerrainData) as TerrainData;
 	}
 }

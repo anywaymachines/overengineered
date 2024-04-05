@@ -1,12 +1,12 @@
-import BlockManager from "shared/building/BlockManager";
-import EffectBase from "./EffectBase";
+import { BlockManager } from "shared/building/BlockManager";
+import { EffectBase } from "./EffectBase";
 
 type Args = {
 	readonly sound: Sound;
 	readonly isPlaying: boolean;
 	readonly volume: number;
 };
-export default class SoundEffect extends EffectBase<Args> {
+export class SoundEffect extends EffectBase<Args> {
 	constructor() {
 		super("sound_effect");
 	}

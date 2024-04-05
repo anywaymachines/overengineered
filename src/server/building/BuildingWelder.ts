@@ -1,20 +1,20 @@
 import { RunService, ServerStorage, Workspace } from "@rbxts/services";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
-import Logger from "shared/Logger";
-import BlockManager from "shared/building/BlockManager";
-import SharedPlots from "shared/building/SharedPlots";
+import { Logger } from "shared/Logger";
+import { BlockManager } from "shared/building/BlockManager";
+import { SharedPlots } from "shared/building/SharedPlots";
 
 type CollidersModel = Model & { readonly ___nominal: "CollidersModel" };
-export default class BuildingWelder {
-	private static readonly weldColliders = new Map<string, CollidersModel>();
-	private static readonly plotColliders = new Map<PlotModel, WorldModel>();
+export namespace BuildingWelder {
+	const weldColliders = new Map<string, CollidersModel>();
+	const plotColliders = new Map<PlotModel, WorldModel>();
 
-	static initialize() {
-		BuildingWelder.initPartBlockCollisions(BlocksInitializer.blocks.sorted);
+	export function initialize() {
+		initPartBlockCollisions(BlocksInitializer.blocks.sorted);
 	}
 
-	private static initPartBlockCollisions(blocks: readonly RegistryBlock[]) {
+	function initPartBlockCollisions(blocks: readonly RegistryBlock[]) {
 		const weldFolderName = "WeldRegions";
 		const offset = 0.2;
 		const region = (center: Vector3, size: Vector3) => {
@@ -89,7 +89,7 @@ export default class BuildingWelder {
 
 			const weldParent = Element.create("Model") as CollidersModel;
 			weldParent.WorldPivot = block.GetPivot();
-			this.weldColliders.set(regblock.id, weldParent);
+			weldColliders.set(regblock.id, weldParent);
 
 			if (block.FindFirstChild(weldFolderName)) {
 				const colliders = block.FindFirstChild(weldFolderName)?.GetChildren() as unknown as readonly BasePart[];
@@ -171,36 +171,36 @@ export default class BuildingWelder {
 		print("[BLOCKINIT] Block welding initialized");
 	}
 
-	private static getPlotColliders(plot: PlotModel): WorldModel {
-		let colliderModel = this.plotColliders.get(plot);
+	function getPlotColliders(plot: PlotModel): WorldModel {
+		let colliderModel = plotColliders.get(plot);
 		if (colliderModel) return colliderModel;
 
 		colliderModel = Element.create("WorldModel", { Parent: ServerStorage, Name: "PlotCollision" });
-		this.plotColliders.set(plot, colliderModel);
+		plotColliders.set(plot, colliderModel);
 		return colliderModel;
 	}
 
-	static deleteWelds(plot: PlotModel) {
-		this.getPlotColliders(plot).ClearAllChildren();
+	export function deleteWelds(plot: PlotModel) {
+		getPlotColliders(plot).ClearAllChildren();
 	}
-	static deleteWeld(plot: PlotModel, block: BlockModel) {
-		(this.getPlotColliders(plot) as unknown as Record<BlockUuid, CollidersModel>)[
+	export function deleteWeld(plot: PlotModel, block: BlockModel) {
+		(getPlotColliders(plot) as unknown as Record<BlockUuid, CollidersModel>)[
 			BlockManager.manager.uuid.get(block)
 		].Destroy();
 	}
 
-	static weldOnPlot(plot: PlotModel, block: BlockModel) {
-		const collider = this.weldColliders.get(BlockManager.manager.id.get(block))?.Clone();
+	export function weldOnPlot(plot: PlotModel, block: BlockModel) {
+		const collider = weldColliders.get(BlockManager.manager.id.get(block))?.Clone();
 		if (!collider) return;
 
 		collider.Name = BlockManager.manager.uuid.get(block);
 		collider.PivotTo(block.GetPivot());
-		collider.Parent = this.getPlotColliders(plot);
+		collider.Parent = getPlotColliders(plot);
 
-		this.weld(plot, collider);
+		weld(plot, collider);
 	}
 
-	private static weld(plot: PlotModel, colliders: CollidersModel) {
+	function weld(plot: PlotModel, colliders: CollidersModel) {
 		const getTarget = (collider: BasePart): BasePart | undefined => {
 			const targetBlock = SharedPlots.getBlockByUuid(plot, collider.Parent!.Name as BlockUuid);
 			let part: BasePart | undefined;
@@ -221,7 +221,7 @@ export default class BuildingWelder {
 
 		for (const collider of colliders.GetChildren()) {
 			if (!collider.IsA("BasePart")) {
-				Logger.error("Found a non-BasePart in a collider!!!");
+				Logger.err("Found a non-BasePart in a collider!!!");
 				continue;
 			}
 
@@ -235,23 +235,23 @@ export default class BuildingWelder {
 				const anotherTargetPart = getTarget(anotherCollider);
 				if (!anotherTargetPart) continue;
 
-				this.makeJoints(targetPart, anotherTargetPart);
+				makeJoints(targetPart, anotherTargetPart);
 			}
 		}
 	}
 
-	static moveCollisions(plot: PlotModel, block: BlockModel, newpivot: CFrame) {
-		const child = this.getPlotColliders(plot).FindFirstChild(BlockManager.manager.uuid.get(block)) as
+	export function moveCollisions(plot: PlotModel, block: BlockModel, newpivot: CFrame) {
+		const child = getPlotColliders(plot).FindFirstChild(BlockManager.manager.uuid.get(block)) as
 			| CollidersModel
 			| undefined;
 		if (!child) throw "what";
 
-		this.unweldFromOtherBlocks(block);
+		unweldFromOtherBlocks(block);
 		child.PivotTo(newpivot);
-		this.weld(plot, child);
+		weld(plot, child);
 	}
 
-	static makeJoints(part0: BasePart, part1: BasePart) {
+	export function makeJoints(part0: BasePart, part1: BasePart) {
 		const weld = new Instance("WeldConstraint");
 
 		weld.Part0 = part0;
@@ -261,7 +261,7 @@ export default class BuildingWelder {
 		weld.Parent = part0;
 	}
 
-	static unweld(model: BlockModel): Set<BasePart> {
+	export function unweld(model: BlockModel): Set<BasePart> {
 		const connected = new Set<BasePart>();
 
 		const modelParts = model.GetChildren().filter((value) => value.IsA("BasePart") && value.CanCollide);
@@ -288,7 +288,7 @@ export default class BuildingWelder {
 		return connected;
 	}
 
-	static unweldFromOtherBlocks(model: BlockModel): Set<BasePart> {
+	export function unweldFromOtherBlocks(model: BlockModel): Set<BasePart> {
 		const connected = new Set<BasePart>();
 
 		const modelParts = model.GetChildren().filter((value) => value.IsA("BasePart") && value.CanCollide);

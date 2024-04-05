@@ -1,14 +1,15 @@
-import InputController from "client/controller/InputController";
-import Control from "client/gui/Control";
-import GuiAnimator from "client/gui/GuiAnimator";
-import BlockPreviewControl from "client/gui/buildmode/BlockPreviewControl";
-import BlockSelectionControl, { BlockSelectionControlDefinition } from "client/gui/buildmode/BlockSelection";
-import MaterialColorEditControl, {
+import { InputController } from "client/controller/InputController";
+import { Control } from "client/gui/Control";
+import { GuiAnimator } from "client/gui/GuiAnimator";
+import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
+import { BlockSelectionControl, BlockSelectionControlDefinition } from "client/gui/buildmode/BlockSelection";
+import {
+	MaterialColorEditControl,
 	MaterialColorEditControlDefinition,
 } from "client/gui/buildmode/MaterialColorEditControl";
-import MirrorEditorControl, { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
+import { MirrorEditorControl, MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
 import { ButtonControl } from "client/gui/controls/Button";
-import BuildTool2 from "client/tools/BuildTool2";
+import { BuildTool2 } from "client/tools/BuildTool2";
 
 export type BuildTool2SceneDefinition = GuiObject & {
 	readonly ActionBar: GuiObject & {
@@ -34,7 +35,7 @@ export type BuildTool2SceneDefinition = GuiObject & {
 	};
 };
 
-export default class BuildTool2Scene extends Control<BuildTool2SceneDefinition> {
+export class BuildTool2Scene extends Control<BuildTool2SceneDefinition> {
 	readonly tool;
 	readonly blockSelector;
 

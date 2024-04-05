@@ -1,11 +1,12 @@
 import { Players, RunService } from "@rbxts/services";
-import Signal from "shared/event/Signal";
-import GameDefinitions from "./data/GameDefinitions";
+import { Signal } from "shared/event/Signal";
+import { GameDefinitions } from "./data/GameDefinitions";
 
-export default class Logger {
-	static readonly onLog = new Signal<(text: string, error: boolean) => void>();
+export namespace Logger {
+	const _onLog = new Signal<(text: string, error: boolean) => void>();
+	export const onLog = _onLog.asReadonly();
 
-	static info(msg: string) {
+	export function info(msg: string) {
 		if (RunService.IsClient() === true) {
 			// Show logs only to maintainers
 			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
@@ -15,24 +16,24 @@ export default class Logger {
 			print(`[INFO] [SERVER] ${msg}`);
 		}
 
-		this.onLog.Fire(msg, false);
+		_onLog.Fire(msg, false);
 	}
 
-	static error(msg: string) {
+	export function err(msg: string) {
 		if (RunService.IsClient() === true) {
 			try {
-				error(`[ERROR] [CLIENT] ${msg}`);
+				err(`[ERROR] [CLIENT] ${msg}`);
 			} catch {
 				// empty
 			}
 		} else {
 			try {
-				error(`[ERROR] [SERVER] ${msg}`);
+				err(`[ERROR] [SERVER] ${msg}`);
 			} catch {
 				// empty
 			}
 		}
 
-		this.onLog.Fire(msg, true);
+		_onLog.Fire(msg, true);
 	}
 }

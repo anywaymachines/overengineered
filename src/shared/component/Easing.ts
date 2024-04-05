@@ -4,8 +4,8 @@ export type EasingStyle = Enum.EasingStyle["Name"] | ((value: number) => number)
 export type EasingDirection = Enum.EasingDirection["Name"];
 export type Easable = number | UDim2 | Color3 | Vector2 | Vector3;
 
-export const Easing = {
-	ease: (value: number, easing: EasingStyle, direction: EasingDirection) => {
+export namespace Easing {
+	export function ease(value: number, easing: EasingStyle, direction: EasingDirection) {
 		if (typeIs(easing, "function")) {
 			if (direction === "In") {
 				return easing(value);
@@ -22,15 +22,15 @@ export const Easing = {
 		}
 
 		return TweenService.GetValue(value, easing, direction);
-	},
+	}
 
-	easeValue: <T extends Easable>(
+	export function easeValue<T extends Easable>(
 		alpha: number,
 		from: T,
 		to: T,
 		easing: EasingStyle,
 		direction: EasingDirection,
-	): T => {
+	): T {
 		const interpolate = <T extends Easable>(from: T, to: T): T => {
 			if (typeIs(from, "number") && typeIs(to, "number")) {
 				return (from + (to - from) * alpha) as T;
@@ -66,5 +66,5 @@ export const Easing = {
 
 		alpha = Easing.ease(alpha, easing, direction);
 		return interpolate(from, to);
-	},
-} as const;
+	}
+}

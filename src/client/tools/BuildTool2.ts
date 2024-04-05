@@ -1,27 +1,27 @@
 import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import InputController from "client/controller/InputController";
-import SoundController from "client/controller/SoundController";
-import Signals from "client/event/Signals";
+import { InputController } from "client/controller/InputController";
+import { SoundController } from "client/controller/SoundController";
+import { Signals } from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
-import Gui from "client/gui/Gui";
-import LogControl from "client/gui/static/LogControl";
+import { Gui } from "client/gui/Gui";
+import { LogControl } from "client/gui/static/LogControl";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
-import BuildingMode from "client/modes/build/BuildingMode";
+import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import ToolBase from "client/tools/ToolBase";
+import { ToolBase } from "client/tools/ToolBase";
 import { Element } from "shared/Element";
-import Logger from "shared/Logger";
-import BuildingManager from "shared/building/BuildingManager";
+import { Logger } from "shared/Logger";
+import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
-import SharedPlots from "shared/building/SharedPlots";
+import { SharedPlots } from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
-import EventHandler from "shared/event/EventHandler";
-import ObservableValue from "shared/event/ObservableValue";
+import { EventHandler } from "shared/event/EventHandler";
+import { ObservableValue } from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
-import PartUtils from "shared/utils/PartUtils";
-import PlayerUtils from "shared/utils/PlayerUtils";
-import VectorUtils from "shared/utils/VectorUtils";
+import { PartUtils } from "shared/utils/PartUtils";
+import { PlayerUtils } from "shared/utils/PlayerUtils";
+import { VectorUtils } from "shared/utils/VectorUtils";
 
 const allowedColor = Colors.blue;
 const forbiddenColor = Colors.red;
@@ -351,7 +351,7 @@ namespace SinglePlaceController {
 				task.wait();
 				this.updateBlockPosition();
 			} else {
-				Logger.error(response.message);
+				Logger.err(response.message);
 				SoundController.getSounds().Build.BlockPlaceError.Play();
 			}
 		}
@@ -614,7 +614,7 @@ namespace MultiPlaceController {
 
 				task.wait();
 			} else {
-				Logger.error(response.message);
+				Logger.err(response.message);
 				SoundController.getSounds().Build.BlockPlaceError.Play();
 			}
 
@@ -624,7 +624,7 @@ namespace MultiPlaceController {
 }
 
 /** A tool for building in the world with blocks */
-export default class BuildTool2 extends ToolBase {
+export class BuildTool2 extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);

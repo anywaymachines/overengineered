@@ -1,11 +1,11 @@
-import Logger from "shared/Logger";
-import logicRegistry from "shared/block/LogicRegistry";
-import Objects from "shared/fixes/objects";
-import ServerBlockLogic from "./ServerBlockLogic";
-import DisconnectBlockServerLogic from "./logic/DisconnectBlockServerLogic";
-import LampServerLogic from "./logic/LampServerLogic";
-import ScreenServerLogic from "./logic/ScreenServerLogic";
-import TNTServerBlockLogic from "./logic/TNTServerLogic";
+import { Logger } from "shared/Logger";
+import { logicRegistry } from "shared/block/LogicRegistry";
+import { Objects } from "shared/fixes/objects";
+import { ServerBlockLogic } from "./ServerBlockLogic";
+import { DisconnectBlockServerLogic } from "./logic/DisconnectBlockServerLogic";
+import { LampServerLogic } from "./logic/LampServerLogic";
+import { ScreenServerLogic } from "./logic/ScreenServerLogic";
+import { TNTServerBlockLogic } from "./logic/TNTServerLogic";
 
 type ShareableLogic = ExtractMembers<typeof logicRegistry, { readonly events: Record<string, unknown> }>;
 type ServerBlockLogicRegistry = {
@@ -21,7 +21,7 @@ const serverBlockLogicRegistry: ServerBlockLogicRegistry = {
 
 //
 const logics: object[] = [];
-for (const [id, logic] of Objects.pairs(serverBlockLogicRegistry)) {
+for (const [id, logic] of Objects.pairs_(serverBlockLogicRegistry)) {
 	Logger.info(`Initializing server logic for ${id}`);
 	logics.push(new logic(logicRegistry[id] as never));
 }

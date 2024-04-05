@@ -1,6 +1,6 @@
-import Control from "client/gui/Control";
-import Signal from "shared/event/Signal";
-import Objects from "shared/fixes/objects";
+import { Control } from "client/gui/Control";
+import { Signal } from "shared/event/Signal";
+import { Objects } from "shared/fixes/objects";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
@@ -15,7 +15,7 @@ type ConfigUpdatedCallback<TDef extends BlockConfigTypes.Definitions, TKey exten
 	value: Readonly<Record<BlockUuid, PartialIfObject<TDef[TKey]["config"]>>>,
 ) => void;
 
-export default class MultiConfigControl<
+export class MultiConfigControl<
 	TDef extends BlockConfigTypes.Definitions,
 > extends Control<MultiConfigControlDefinition> {
 	readonly configUpdated = new Signal<ConfigUpdatedCallback<TDef, keyof TDef>>();
@@ -28,7 +28,7 @@ export default class MultiConfigControl<
 	) {
 		super(gui);
 
-		for (const [id, def] of Objects.pairs(definition)) {
+		for (const [id, def] of Objects.pairs_(definition)) {
 			if (def.configHidden) continue;
 			if (connected.includes(id)) {
 				this.add(new ConfigValueControl(configValueTemplateStorage.connected(), def.displayName));
@@ -36,7 +36,7 @@ export default class MultiConfigControl<
 			}
 
 			const control = new configControlRegistry[def.type](
-				Objects.fromEntries(Objects.entries(configs).map((e) => [e[0], e[1][id]] as const)) as never,
+				Objects.fromEntries(Objects.entriesArray(configs).map((e) => [e[0], e[1][id]] as const)) as never,
 				def as never,
 			);
 			this.add(control);

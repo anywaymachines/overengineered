@@ -1,9 +1,9 @@
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import RemoteEvents from "shared/RemoteEvents";
+import { RemoteEvents } from "shared/RemoteEvents";
 
-export default class RandomAccessMemoryBlockLogic extends ConfigurableBlockLogic<
+export class RandomAccessMemoryBlockLogic extends ConfigurableBlockLogic<
 	typeof blockConfigRegistry.randomaccessmemory
 > {
 	private readonly size = 0xff;

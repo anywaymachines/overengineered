@@ -1,6 +1,6 @@
 import { TweenService } from "@rbxts/services";
 
-export default class MusicPlaylist {
+export class MusicPlaylist {
 	readonly sounds: Sound[];
 	private readonly interval: number;
 

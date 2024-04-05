@@ -1,7 +1,7 @@
 import { Colors } from "client/gui/Colors";
-import Control from "client/gui/Control";
-import Gui from "client/gui/Gui";
-import GuiAnimator from "client/gui/GuiAnimator";
+import { Control } from "client/gui/Control";
+import { Gui } from "client/gui/Gui";
+import { GuiAnimator } from "client/gui/GuiAnimator";
 
 export type LogControlDefinition = GuiObject & {
 	Template: Frame & {
@@ -9,7 +9,7 @@ export type LogControlDefinition = GuiObject & {
 	};
 };
 
-export default class LogControl extends Control<LogControlDefinition> {
+export class LogControl extends Control<LogControlDefinition> {
 	static readonly instance = new LogControl(
 		Gui.getGameUI<{
 			Log: LogControlDefinition;

@@ -1,7 +1,7 @@
-import ObservableValue from "./ObservableValue";
+import { ObservableValue } from "./ObservableValue";
 
 /** ObservableValue that stores a number that can be clamped */
-export default class NumberObservableValue<T extends number | undefined = number> extends ObservableValue<T> {
+export class NumberObservableValue<T extends number | undefined = number> extends ObservableValue<T> {
 	readonly min;
 	readonly max;
 	readonly step;

@@ -1,12 +1,12 @@
 import { ClientComponent } from "client/component/ClientComponent";
-import Signal from "shared/event/Signal";
-import Objects from "shared/fixes/objects";
+import { Signal } from "shared/event/Signal";
+import { Objects } from "shared/fixes/objects";
 
 /*
 	When a key is pressed, invoke keyDown()
 	When a key is released, invoke keyUp()
 */
-export default class KeyPressingController<TKeys extends string> {
+export class KeyPressingController<TKeys extends string> {
 	readonly onKeyDown = new Signal<(key: TKeys) => void>();
 	readonly onKeyUp = new Signal<(key: TKeys) => void>();
 	private readonly pressed: TKeys[] = [];
@@ -118,7 +118,7 @@ export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> 
 			definitions[key]?.keyUp?.();
 		});
 
-		for (const [key, def] of Objects.pairs(definitions)) {
+		for (const [key, def] of Objects.pairs_(definitions)) {
 			this.event.onKeyDown(def.key, () => this.controller.keyDown(key as keyof T & string));
 			this.event.onKeyUp(def.key, () => this.controller.keyUp(key as keyof T & string));
 		}

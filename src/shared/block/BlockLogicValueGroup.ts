@@ -10,8 +10,10 @@ interface Block<T> {
 	readonly connections: Block<T>[];
 }
 
-export const BlockLogicValueGroup = {
-	group: <BLV extends BL<BLV>>(values: readonly BLV[]): readonly (readonly { readonly id: string }[])[] => {
+export namespace BlockLogicValueGroup {
+	export function group<BLV extends BL<BLV>>(
+		values: readonly BLV[],
+	): readonly (readonly { readonly id: string }[])[] {
 		type B = Block<BLV>;
 
 		const convertToBlocks = (values: readonly BLV[]): B[] => {
@@ -166,8 +168,8 @@ export const BlockLogicValueGroup = {
 		const order = calculateOrder(roots);
 
 		return order;
-	},
-};
+	}
+}
 
 const test = () => {
 	type BL = {

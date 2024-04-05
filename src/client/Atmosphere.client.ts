@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-loss-of-precision */
 import { Lighting, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import LocalPlayerController from "./controller/LocalPlayerController";
-import Gui from "./gui/Gui";
+import { LocalPlayerController } from "./controller/LocalPlayerController";
+import { Gui } from "./gui/Gui";
 
-export default class Atmosphere {
+export class Atmosphere {
 	private static camera = Workspace.CurrentCamera!;
 
 	private static atmosphereModel: Model;

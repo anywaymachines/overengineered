@@ -1,6 +1,6 @@
 /** Handles the destruction of the provided instance, along with the component. */
-export const ComponentInstance = {
-	init<T extends Instance>(state: IComponent, instance: T | undefined) {
+export namespace ComponentInstance {
+	export function init<T extends Instance>(state: IComponent, instance: T | undefined) {
 		if (!instance) throw "The provided instance is nil";
 
 		const destroyingSignal = instance!.Destroying.Connect(() => {
@@ -15,13 +15,13 @@ export const ComponentInstance = {
 				destroyingSignal.Disconnect();
 				instance.Destroy();
 			} catch (error) {
-				print(`Could not destroy instance ${this}: ${error}`);
+				print(`Could not destroy instance ${instance}: ${error}`);
 			}
 		});
-	},
-	setParentIfNeeded(instance: Instance, parent: Instance) {
+	}
+	export function setParentIfNeeded(instance: Instance, parent: Instance) {
 		if (instance !== parent && instance.Parent === undefined) {
 			instance.Parent = parent;
 		}
-	},
-} as const;
+	}
+}

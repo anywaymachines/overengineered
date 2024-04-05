@@ -1,15 +1,14 @@
 import { TweenService, Workspace } from "@rbxts/services";
-import GameEnvironment from "shared/data/GameEnvironment";
-import GameEnvironmentController from "./GameEnvironmentController";
+import { GameEnvironment } from "shared/data/GameEnvironment";
+import { GameEnvironmentController } from "./GameEnvironmentController";
 
-export default class WindController {
-	static initialize() {
-		Workspace.GetAttributeChangedSignal("GlobalWindValue").Connect(() => this.updateWind());
-
-		this.updateWind();
+export namespace WindController {
+	export function initialize() {
+		Workspace.GetAttributeChangedSignal("GlobalWindValue").Connect(updateWind);
+		updateWind();
 	}
 
-	static updateWind() {
+	export function updateWind() {
 		const windValue: Vector3 = (Workspace.GetAttribute("GlobalWindValue") as Vector3 | undefined) ?? Vector3.zero;
 		const smoothTime = (Workspace.GetAttribute("GlobalWindSmoothTime") as number | undefined) ?? 0;
 

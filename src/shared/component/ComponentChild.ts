@@ -1,4 +1,4 @@
-import SlimSignal from "shared/event/SlimSignal";
+import { SlimSignal } from "shared/event/SlimSignal";
 
 export interface ReadonlyComponentChild<T extends IComponent> {
 	get(): T | undefined;

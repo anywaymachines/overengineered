@@ -1,4 +1,4 @@
-import GlobalInputHandler from "client/event/GlobalInputHandler";
+import { GlobalInputHandler } from "client/event/GlobalInputHandler";
 import { ISignalWrapper, ThinSignalWrapper } from "client/event/SignalWrapper";
 
 type InputCallback = (input: InputObject) => void;
@@ -67,7 +67,7 @@ const touchTap = GlobalInputHandler.touchTap;
 }
 
 export type ReadonlyInputHandler = Pick<InputHandler, Exclude<keyof InputHandler, "destroy" | "unsubscribeAll">>;
-export default class InputHandler {
+export class InputHandler {
 	private inputBegan?: ThinSignalWrapper<Parameters<FullInputCallback>>;
 	private inputChanged?: ThinSignalWrapper<Parameters<FullInputCallback>>;
 	private inputEnded?: ThinSignalWrapper<Parameters<FullInputCallback>>;

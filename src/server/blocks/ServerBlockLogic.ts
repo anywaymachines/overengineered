@@ -1,9 +1,9 @@
 import { Workspace } from "@rbxts/services";
-import PlayModeController from "server/modes/PlayModeController";
-import BlockLogic from "shared/block/BlockLogic";
+import { PlayModeController } from "server/modes/PlayModeController";
+import { BlockLogic } from "shared/block/BlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default abstract class ServerBlockLogic<T extends new (block: PlacedBlockData) => BlockLogic> {
+export abstract class ServerBlockLogic<T extends new (block: PlacedBlockData) => BlockLogic> {
 	readonly logic;
 
 	constructor(logic: T) {

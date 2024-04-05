@@ -1,5 +1,5 @@
 /** A filter that you can add checks into. On fire returns false when any of the callbacks returns false. */
-export default class SlimFilter<T extends (...args: never[]) => boolean = () => true> {
+export class SlimFilter<T extends (...args: never[]) => boolean = () => true> {
 	private subscribed?: T[];
 
 	add(callback: T): void {

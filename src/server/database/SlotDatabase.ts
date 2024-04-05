@@ -1,14 +1,14 @@
 import { DataStoreService, Players } from "@rbxts/services";
 import { ServerBuilding } from "server/building/ServerBuilding";
-import BlocksSerializer from "server/plots/BlocksSerializer";
-import Logger from "shared/Logger";
-import SlotsMeta from "shared/SlotsMeta";
-import SharedPlots from "shared/building/SharedPlots";
-import GameDefinitions from "shared/data/GameDefinitions";
+import { BlocksSerializer } from "server/plots/BlocksSerializer";
+import { Logger } from "shared/Logger";
+import { SlotsMeta } from "shared/SlotsMeta";
+import { SharedPlots } from "shared/building/SharedPlots";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Db } from "./Database";
-import PlayerDatabase from "./PlayerDatabase";
+import { PlayerDatabase } from "./PlayerDatabase";
 
-export default class SlotDatabase {
+export class SlotDatabase {
 	static readonly instance = new SlotDatabase();
 
 	private readonly datastore: DataStore = DataStoreService.GetDataStore("slots");
@@ -134,7 +134,7 @@ export default class SlotDatabase {
 
 				this.blocksdb.set(id, serialized);
 			} catch (err) {
-				Logger.error(err as string);
+				Logger.err(err as string);
 			}
 		}
 

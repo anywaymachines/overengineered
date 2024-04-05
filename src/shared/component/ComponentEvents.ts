@@ -1,11 +1,12 @@
-import EventHandler from "shared/event/EventHandler";
+import { EventHandler } from "shared/event/EventHandler";
 import type { CollectionChangedArgs, ReadonlyObservableCollection } from "shared/event/ObservableCollection";
-import ObservableValue, {
+import {
+	ObservableValue,
 	ReadonlyObservableValue,
 	ReadonlySubscribeObservableValue,
 } from "shared/event/ObservableValue";
 import { ReadonlySignal } from "shared/event/Signal";
-import JSON, { JsonSerializablePrimitive } from "shared/fixes/Json";
+import { JSON, JsonSerializablePrimitive } from "shared/fixes/Json";
 
 type Sub<T extends Callback> = readonly [signal: ReadonlySignal<T>, callback: T];
 

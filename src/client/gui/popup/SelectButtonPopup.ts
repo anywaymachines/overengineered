@@ -1,9 +1,9 @@
 import { GuiService } from "@rbxts/services";
-import Control from "client/gui/Control";
-import Gui from "client/gui/Gui";
-import Popup from "client/gui/Popup";
+import { Control } from "client/gui/Control";
+import { Gui } from "client/gui/Gui";
+import { Popup } from "client/gui/Popup";
 import { ButtonControl, ButtonDefinition, TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
-import Signal from "shared/event/Signal";
+import { Signal } from "shared/event/Signal";
 
 export type SelectButtonPopupDefinition = GuiObject & {
 	readonly Content: {
@@ -19,7 +19,7 @@ export type SelectButtonPopupDefinition = GuiObject & {
 	};
 };
 
-export default class SelectButtonPopup extends Popup<SelectButtonPopupDefinition> {
+export class SelectButtonPopup extends Popup<SelectButtonPopupDefinition> {
 	private readonly buttonPressed = new Signal<(key: KeyCode) => void>();
 	private readonly cancelButton;
 	private readonly closeButton;

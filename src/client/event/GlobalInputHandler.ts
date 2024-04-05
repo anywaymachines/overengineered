@@ -1,11 +1,9 @@
 import { UserInputService } from "@rbxts/services";
 import { SignalWrapper } from "./SignalWrapper";
 
-const GlobalInputHandler = {
-	inputBegan: new SignalWrapper(UserInputService.InputBegan),
-	inputChanged: new SignalWrapper(UserInputService.InputChanged),
-	inputEnded: new SignalWrapper(UserInputService.InputEnded),
-	touchTap: new SignalWrapper(UserInputService.TouchTap),
-} as const;
-
-export default GlobalInputHandler;
+export namespace GlobalInputHandler {
+	export const inputBegan = new SignalWrapper(UserInputService.InputBegan);
+	export const inputChanged = new SignalWrapper(UserInputService.InputChanged);
+	export const inputEnded = new SignalWrapper(UserInputService.InputEnded);
+	export const touchTap = new SignalWrapper(UserInputService.TouchTap);
+}

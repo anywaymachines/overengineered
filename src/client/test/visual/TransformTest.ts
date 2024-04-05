@@ -1,5 +1,5 @@
 import { Colors } from "client/gui/Colors";
-import Control from "client/gui/Control";
+import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Element } from "shared/Element";
 import { ControlTest } from "./ControlTest";

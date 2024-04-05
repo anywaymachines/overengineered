@@ -2,23 +2,23 @@ import { GamepadService, Players, ReplicatedStorage, RunService, Workspace } fro
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientInstanceComponent } from "client/component/ClientInstanceComponent";
 import { Colors } from "client/gui/Colors";
-import Control from "client/gui/Control";
-import Gui from "client/gui/Gui";
-import LogControl from "client/gui/static/LogControl";
+import { Control } from "client/gui/Control";
+import { Gui } from "client/gui/Gui";
+import { LogControl } from "client/gui/static/LogControl";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
-import BuildingMode from "client/modes/build/BuildingMode";
-import ToolBase from "client/tools/ToolBase";
+import { BuildingMode } from "client/modes/build/BuildingMode";
+import { ToolBase } from "client/tools/ToolBase";
 import { Assert } from "shared/Assert";
 import { Element } from "shared/Element";
-import Remotes from "shared/Remotes";
+import { Remotes } from "shared/Remotes";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
-import blockConfigRegistry, { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
-import SharedPlots from "shared/building/SharedPlots";
+import { BlockConfigRegistryNonGeneric, blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { SharedPlots } from "shared/building/SharedPlots";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
-import ObservableValue, { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import Objects from "shared/fixes/objects";
+import { ObservableValue, ReadonlyObservableValue } from "shared/event/ObservableValue";
+import { Objects } from "shared/fixes/objects";
 
 const typeGroups = {
 	bool: {
@@ -759,9 +759,11 @@ export class WireTool extends ToolBase {
 			if (!configDef) continue;
 
 			let index = 0;
-			const entriesSize = (["output", "input"] as const).flatmap((t) => Objects.entries(configDef[t])).size();
+			const entriesSize = (["output", "input"] as const)
+				.flatmap((t) => Objects.entriesArray(configDef[t]))
+				.size();
 			for (const markerType of ["output", "input"] as const) {
-				for (const [key, config] of Objects.pairs(configDef[markerType])) {
+				for (const [key, config] of Objects.pairs_(configDef[markerType])) {
 					if (config.connectorHidden) continue;
 
 					let narrow = false;
@@ -810,7 +812,7 @@ export class WireTool extends ToolBase {
 		for (const block of SharedPlots.getPlotBlockDatas(plot)) {
 			if (block.connections === undefined) continue;
 
-			for (const [connectionName, connection] of Objects.entries(block.connections)) {
+			for (const [connectionName, connection] of Objects.pairs_(block.connections)) {
 				const from = this.markers.get(`${block.uuid} input ${connectionName}`) as Markers.Input;
 				const to = this.markers.get(
 					`${connection.blockUuid} output ${connection.connectionName}`,
@@ -847,8 +849,8 @@ export class WireTool extends ToolBase {
 
 //
 
-export const WireToolTests = {
-	connectThrough1() {
+export namespace WireToolTests {
+	export function connectThrough1() {
 		const wireParent = new Instance("ViewportFrame");
 		const plot = new Instance("Folder") as PlotModel;
 		const newinstance = () => Markers.Marker.createInstance(new Instance("Part"), 0);
@@ -899,7 +901,7 @@ export const WireToolTests = {
 
 		Assert.notNull(in1.sameGroupMarkers);
 		Assert.notNull(in2.sameGroupMarkers);
-		Assert.null(out1.sameGroupMarkers);
+		Assert.isNull(out1.sameGroupMarkers);
 		Assert.sequenceEquals(in1.sameGroupMarkers, [in1, in2]);
 		Assert.sequenceEquals(in2.sameGroupMarkers, [in1, in2]);
 
@@ -914,8 +916,8 @@ export const WireToolTests = {
 		Assert.sequenceEquals(in1.availableTypes.get(), ["bool"]);
 		Assert.sequenceEquals(in2.availableTypes.get(), ["bool"]);
 		Assert.sequenceEquals(out1.availableTypes.get(), ["bool"]);
-	},
-	connectThrough2() {
+	}
+	export function connectThrough2() {
 		const wireParent = new Instance("ViewportFrame");
 		const plot = new Instance("Folder") as PlotModel;
 		const newinstance = () => Markers.Marker.createInstance(new Instance("Part"), 0);
@@ -1003,5 +1005,5 @@ export const WireToolTests = {
 		Assert.sequenceEquals(in3.availableTypes.get(), ["bool"]);
 		Assert.sequenceEquals(in4.availableTypes.get(), ["bool"]);
 		Assert.sequenceEquals(out1.availableTypes.get(), ["bool"]);
-	},
-} as const;
+	}
+}

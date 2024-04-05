@@ -1,8 +1,8 @@
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default class Multiplexer extends ConfigurableBlockLogic<typeof blockConfigRegistry.multiplexer> {
+export class Multiplexer extends ConfigurableBlockLogic<typeof blockConfigRegistry.multiplexer> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.multiplexer);
 

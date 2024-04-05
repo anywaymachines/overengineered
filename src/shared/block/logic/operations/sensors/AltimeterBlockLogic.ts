@@ -1,10 +1,10 @@
 import { RunService } from "@rbxts/services";
-import RobloxUnit from "shared/RobloxUnit";
+import { RobloxUnit } from "shared/RobloxUnit";
 import { BlockLogicData } from "shared/block/BlockLogic";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 
-export default class AltimeterBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.altimeter> {
+export class AltimeterBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.altimeter> {
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.altimeter.input>) {
 		super(block, blockConfigRegistry.altimeter);
 		this.event.subscribe(RunService.Heartbeat, () => this.update());

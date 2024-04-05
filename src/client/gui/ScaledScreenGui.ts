@@ -1,5 +1,5 @@
-import PlayerDataStorage from "client/PlayerDataStorage";
-import Logger from "shared/Logger";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { Logger } from "shared/Logger";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 
 export class ScaledScreenGui<T extends ScreenGui> extends InstanceComponent<T> {

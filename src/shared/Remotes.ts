@@ -1,4 +1,4 @@
-import Net from "@rbxts/net";
+import { Definitions, Middleware } from "@rbxts/net";
 import { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 declare global {
@@ -66,50 +66,57 @@ declare global {
 		readonly plot: PlotModel;
 		readonly blocks: readonly BlockModel[];
 	}
+
+	type PlayerSaveSlotRequest = {
+		readonly index: number;
+		readonly name?: string;
+		readonly color?: SerializedColor;
+		readonly touchControls?: TouchControlInfo;
+		readonly save: boolean;
+	};
 }
 
-const Remotes = Net.Definitions.Create({
-	Player: Net.Definitions.Namespace({
-		InputTypeInfo: Net.Definitions.ClientToServerEvent<[inputType: InputType]>(),
+export const Remotes = Definitions.Create({
+	Player: Definitions.Namespace({
+		InputTypeInfo: Definitions.ClientToServerEvent<[inputType: InputType]>(),
 		UpdateSettings:
-			Net.Definitions.ServerAsyncFunction<
+			Definitions.ServerAsyncFunction<
 				<TKey extends keyof PlayerConfig>(key: TKey, value: PlayerConfig[TKey]) => Response
 			>(),
-		FetchData: Net.Definitions.ServerAsyncFunction<() => PlayerDataResponse>(),
+		FetchData: Definitions.ServerAsyncFunction<() => PlayerDataResponse>(),
 	}),
-	Building: Net.Definitions.Namespace({
-		UpdateConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
-		ResetConfigRequest: Net.Definitions.ServerAsyncFunction<(data: ConfigResetRequest) => Response>(),
+	Building: Definitions.Namespace({
+		UpdateConfigRequest: Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
+		ResetConfigRequest: Definitions.ServerAsyncFunction<(data: ConfigResetRequest) => Response>(),
 
-		PlaceBlocks: Net.Definitions.ServerAsyncFunction<(data: PlaceBlocksRequest) => MultiBuildResponse>(),
-		DeleteBlocks: Net.Definitions.ServerAsyncFunction<(data: DeleteBlocksRequest) => Response>(),
-		MoveBlocks: Net.Definitions.ServerAsyncFunction<(data: MoveBlocksRequest) => Response>(),
-		RotateBlocks: Net.Definitions.ServerAsyncFunction<(data: RotateBlocksRequest) => Response>(),
-		LogicConnect: Net.Definitions.ServerAsyncFunction<(data: LogicConnectRequest) => Response>(),
-		LogicDisconnect: Net.Definitions.ServerAsyncFunction<(data: LogicDisconnectRequest) => Response>(),
-		PaintBlocks: Net.Definitions.ServerAsyncFunction<(data: PaintBlocksRequest) => Response>(),
+		PlaceBlocks: Definitions.ServerAsyncFunction<(data: PlaceBlocksRequest) => MultiBuildResponse>(),
+		DeleteBlocks: Definitions.ServerAsyncFunction<(data: DeleteBlocksRequest) => Response>(),
+		MoveBlocks: Definitions.ServerAsyncFunction<(data: MoveBlocksRequest) => Response>(),
+		RotateBlocks: Definitions.ServerAsyncFunction<(data: RotateBlocksRequest) => Response>(),
+		LogicConnect: Definitions.ServerAsyncFunction<(data: LogicConnectRequest) => Response>(),
+		LogicDisconnect: Definitions.ServerAsyncFunction<(data: LogicDisconnectRequest) => Response>(),
+		PaintBlocks: Definitions.ServerAsyncFunction<(data: PaintBlocksRequest) => Response>(),
 	}),
-	Slots: Net.Definitions.Namespace({
-		Load: Net.Definitions.ServerAsyncFunction<(index: number) => LoadSlotResponse>([
-			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 8 }),
+	Slots: Definitions.Namespace({
+		Load: Definitions.ServerAsyncFunction<(index: number) => LoadSlotResponse>([
+			Middleware.RateLimit({ MaxRequestsPerMinute: 8 }),
 		]),
-		Save: Net.Definitions.ServerAsyncFunction<(data: PlayerSaveSlotRequest) => SaveSlotResponse>([
-			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 60 }),
+		Save: Definitions.ServerAsyncFunction<(data: PlayerSaveSlotRequest) => SaveSlotResponse>([
+			Middleware.RateLimit({ MaxRequestsPerMinute: 60 }),
 		]),
 	}),
-	Ride: Net.Definitions.Namespace({
-		SetPlayMode: Net.Definitions.ServerAsyncFunction<(mode: PlayModes) => Response>([
-			Net.Middleware.RateLimit({ MaxRequestsPerMinute: 30 }),
+	Ride: Definitions.Namespace({
+		SetPlayMode: Definitions.ServerAsyncFunction<(mode: PlayModes) => Response>([
+			Middleware.RateLimit({ MaxRequestsPerMinute: 30 }),
 		]),
-		SetPlayModeOnClient: Net.Definitions.ClientAsyncFunction<(mode: PlayModes | undefined) => Response>(),
-		Sit: Net.Definitions.ClientToServerEvent<[]>(),
+		SetPlayModeOnClient: Definitions.ClientAsyncFunction<(mode: PlayModes | undefined) => Response>(),
+		Sit: Definitions.ClientToServerEvent<[]>(),
 	}),
-	Debug: Net.Definitions.Namespace({
-		DisplayLine: Net.Definitions.ServerToClientEvent<[text: string, isClient: boolean, isError: boolean]>(),
+	Debug: Definitions.Namespace({
+		DisplayLine: Definitions.ServerToClientEvent<[text: string, isClient: boolean, isError: boolean]>(),
 	}),
-	Admin: Net.Definitions.Namespace({
-		LoadSlot: Net.Definitions.ClientToServerEvent<[userid: number, slot: number]>(),
-		SendMessage: Net.Definitions.BidirectionalEvent<[text: string], [text: string]>(),
+	Admin: Definitions.Namespace({
+		LoadSlot: Definitions.ClientToServerEvent<[userid: number, slot: number]>(),
+		SendMessage: Definitions.BidirectionalEvent<[text: string], [text: string]>(),
 	}),
 });
-export default Remotes;

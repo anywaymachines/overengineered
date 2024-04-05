@@ -1,9 +1,9 @@
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import RemoteEvents from "shared/RemoteEvents";
+import { RemoteEvents } from "shared/RemoteEvents";
 
-export default class StackMemoryBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.stackmemory> {
+export class StackMemoryBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.stackmemory> {
 	private readonly size = 32;
 	private readonly internalMemory: Parameters<typeof this.output.result.set>[0][] = [];
 

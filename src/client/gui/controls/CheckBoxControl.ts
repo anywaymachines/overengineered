@@ -1,6 +1,6 @@
-import Control from "client/gui/Control";
-import ObservableValue from "shared/event/ObservableValue";
-import Signal from "shared/event/Signal";
+import { Control } from "client/gui/Control";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { Signal } from "shared/event/Signal";
 
 export type CheckBoxControlDefinition = TextButton & {
 	readonly Enabled: GuiObject;
@@ -8,7 +8,7 @@ export type CheckBoxControlDefinition = TextButton & {
 };
 
 /** Control that represents a boolean */
-export default class CheckBoxControl extends Control<CheckBoxControlDefinition> {
+export class CheckBoxControl extends Control<CheckBoxControlDefinition> {
 	readonly submitted = new Signal<(value: boolean) => void>();
 	readonly value = new ObservableValue<boolean | undefined>(false);
 

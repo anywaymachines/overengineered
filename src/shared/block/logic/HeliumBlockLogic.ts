@@ -1,14 +1,14 @@
 import { Workspace } from "@rbxts/services";
+import { BlockLogic } from "shared/block/BlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import GameEnvironment from "shared/data/GameEnvironment";
-import BlockLogic from "shared/block/BlockLogic";
+import { GameEnvironment } from "shared/data/GameEnvironment";
 
 type HeliumBlock = BlockModel & {
 	readonly Part: BasePart & {
 		readonly VectorForce: VectorForce;
 	};
 };
-export default class HeliumBlockLogic extends BlockLogic<HeliumBlock> {
+export class HeliumBlockLogic extends BlockLogic<HeliumBlock> {
 	private readonly part;
 	private readonly vectorForce;
 

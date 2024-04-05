@@ -1,4 +1,4 @@
-import SlimSignal from "shared/event/SlimSignal";
+import { SlimSignal } from "shared/event/SlimSignal";
 
 /** Stores components. Handles its enabling, disabling and destroying. */
 export class ComponentChildren<T extends IComponent = IComponent> implements IDebuggableComponent {

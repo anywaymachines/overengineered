@@ -1,4 +1,4 @@
-import Control from "client/gui/Control";
+import { Control } from "client/gui/Control";
 import { ComponentInstance } from "shared/component/ComponentInstance";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 import { InstanceComponent } from "shared/component/InstanceComponent";

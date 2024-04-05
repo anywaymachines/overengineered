@@ -1,7 +1,7 @@
 import { RunService } from "@rbxts/services";
-import RemoteEvents from "shared/RemoteEvents";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { RemoteEvents } from "shared/RemoteEvents";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
 type MotorBlock = BlockModel & {
@@ -10,7 +10,7 @@ type MotorBlock = BlockModel & {
 	};
 	readonly Attach: Part;
 };
-export default class MotorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.motorblock, MotorBlock> {
+export class MotorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.motorblock, MotorBlock> {
 	private readonly hingeConstraint;
 
 	constructor(block: PlacedBlockData) {

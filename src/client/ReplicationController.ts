@@ -1,22 +1,21 @@
 import { RunService } from "@rbxts/services";
-import VectorUtils from "shared/utils/VectorUtils";
+import { VectorUtils } from "shared/utils/VectorUtils";
 
-export default class ReplicationController {
-	private static parts: Map<BasePart, CFrame> = new Map();
-	private static replicateStack: BasePart[] = [];
+export namespace ReplicationController {
+	const parts = new Map<BasePart, CFrame>();
+	const replicateStack: BasePart[] = [];
+	const MIN_MAGNITUDE = 0.1;
 
-	private static readonly MIN_MAGNITUDE = 0.1;
-
-	static replicateBlock(part: BasePart) {
-		this.parts.set(part, part.CFrame);
+	export function replicateBlock(part: BasePart) {
+		parts.set(part, part.CFrame);
 	}
 
-	static initialize() {
+	export function initialize() {
 		RunService.Heartbeat.Connect((dT) => {
-			for (const data of this.parts) {
+			for (const data of parts) {
 				const part = data[0];
 				const lastCFrame = data[1];
-				this.parts.set(part, part.CFrame);
+				parts.set(part, part.CFrame);
 
 				// Don't replicate part if it is anchored
 				if (part.Anchored) continue;
@@ -24,19 +23,19 @@ export default class ReplicationController {
 				// Don't replicate part if cframe is not changed
 				if (VectorUtils.areCFrameEqual(lastCFrame, part.CFrame)) continue;
 
-				this.replicateStack.push(part);
+				replicateStack.push(part);
 			}
 
-			this.replicateChanges();
+			replicateChanges();
 		});
 	}
 
-	private static replicateChanges() {
+	function replicateChanges() {
 		// TODO:
 		// if (Players.LocalPlayer.Name === "3QAXM") {
-		// 	print(this.replicateStack);
+		// 	print(replicateStack);
 		// }
 
-		this.replicateStack.clear();
+		replicateStack.clear();
 	}
 }

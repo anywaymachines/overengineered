@@ -1,18 +1,18 @@
 import { Players } from "@rbxts/services";
-import PlayerDataStorage from "client/PlayerDataStorage";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { Colors } from "client/gui/Colors";
-import Control from "client/gui/Control";
-import Gui from "client/gui/Gui";
-import Popup from "client/gui/Popup";
+import { Control } from "client/gui/Control";
+import { Gui } from "client/gui/Gui";
+import { Popup } from "client/gui/Popup";
 import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
-import TextBoxControl from "client/gui/controls/TextBoxControl";
-import ConfirmPopup from "client/gui/popup/ConfirmPopup";
-import Serializer from "shared/Serializer";
-import SlotsMeta from "shared/SlotsMeta";
+import { TextBoxControl } from "client/gui/controls/TextBoxControl";
+import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
+import { Serializer } from "shared/Serializer";
+import { SlotsMeta } from "shared/SlotsMeta";
 import { TransformService } from "shared/component/TransformService";
-import GameDefinitions from "shared/data/GameDefinitions";
-import ObservableValue from "shared/event/ObservableValue";
-import Signal from "shared/event/Signal";
+import { GameDefinitions } from "shared/data/GameDefinitions";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { Signal } from "shared/event/Signal";
 
 type SaveItemDefinition = GuiButton & {
 	readonly ImageLabel: ImageLabel;
@@ -254,7 +254,7 @@ export type SavePopupDefinition = GuiObject & {
 	readonly Slot: SavePreviewDefinition;
 };
 
-export default class SavePopup extends Popup<SavePopupDefinition> {
+export class SavePopup extends Popup<SavePopupDefinition> {
 	static showPopup() {
 		const popup = new SavePopup(
 			Gui.getGameUI<{

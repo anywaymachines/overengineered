@@ -1,24 +1,24 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
-import PlayerDataStorage from "client/PlayerDataStorage";
-import Machine from "client/blocks/Machine";
-import InputController from "client/controller/InputController";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { Machine } from "client/blocks/Machine";
+import { InputController } from "client/controller/InputController";
 import { LoadingController } from "client/controller/LoadingController";
-import LocalPlayerController from "client/controller/LocalPlayerController";
-import Control from "client/gui/Control";
+import { LocalPlayerController } from "client/controller/LocalPlayerController";
+import { Control } from "client/gui/Control";
 import { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
-import FormattedLabelControl from "client/gui/controls/FormattedLabelControl";
-import ProgressBarControl, { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
-import ConfirmPopup from "client/gui/popup/ConfirmPopup";
-import TouchModeButtonControl from "client/gui/ridemode/TouchModeButtonControl";
+import { FormattedLabelControl } from "client/gui/controls/FormattedLabelControl";
+import { ProgressBarControl, ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
+import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
+import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
-import Remotes from "shared/Remotes";
-import RobloxUnit from "shared/RobloxUnit";
-import SlotsMeta from "shared/SlotsMeta";
-import RocketEngineLogic from "shared/block/logic/RocketEngineLogic";
-import EventHandler from "shared/event/EventHandler";
-import NumberObservableValue from "shared/event/NumberObservableValue";
-import Signal from "shared/event/Signal";
+import { Remotes } from "shared/Remotes";
+import { RobloxUnit } from "shared/RobloxUnit";
+import { SlotsMeta } from "shared/SlotsMeta";
+import { RocketEngineLogic } from "shared/block/logic/RocketEngineLogic";
+import { EventHandler } from "shared/event/EventHandler";
+import { NumberObservableValue } from "shared/event/NumberObservableValue";
+import { Signal } from "shared/event/Signal";
 
 export type ActionBarControlDefinition = GuiObject & {
 	readonly Stop: GuiButton;
@@ -311,7 +311,7 @@ export type RideModeSceneDefinition = GuiObject & {
 	};
 };
 
-export default class RideModeScene extends Control<RideModeSceneDefinition> {
+export class RideModeScene extends Control<RideModeSceneDefinition> {
 	private readonly actionbar;
 	private readonly controls;
 	private readonly info;

@@ -1,7 +1,7 @@
 import { ReplicatedStorage, RunService } from "@rbxts/services";
 
 export type CreatableRemoteEvents = "UnreliableRemoteEvent" | "RemoteEvent";
-export default abstract class RemoteEventBase<T, TEvent extends Instance> {
+export abstract class RemoteEventBase<T, TEvent extends Instance> {
 	readonly event: TEvent;
 
 	constructor(name: string, eventType: CreatableRemoteEvents = "UnreliableRemoteEvent") {

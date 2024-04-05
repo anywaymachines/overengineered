@@ -1,15 +1,15 @@
 import { GuiService, Players } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import InputController from "client/controller/InputController";
-import Signals from "client/event/Signals";
-import Gui from "client/gui/Gui";
-import BlockManager from "shared/building/BlockManager";
+import { InputController } from "client/controller/InputController";
+import { Signals } from "client/event/Signals";
+import { Gui } from "client/gui/Gui";
+import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlot } from "shared/building/SharedPlot";
-import SharedPlots from "shared/building/SharedPlots";
-import ObservableValue from "shared/event/ObservableValue";
-import PlayerUtils from "shared/utils/PlayerUtils";
+import { SharedPlots } from "shared/building/SharedPlots";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { PlayerUtils } from "shared/utils/PlayerUtils";
 
-export default class HoveredBlockHighlighter extends ClientComponent {
+export class HoveredBlockHighlighter extends ClientComponent {
 	readonly highlightedBlock = new ObservableValue<BlockModel | undefined>(undefined);
 
 	static getTargetedBlock(mouse: Mouse): BlockModel | undefined {

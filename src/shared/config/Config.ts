@@ -1,11 +1,11 @@
-import Objects from "shared/fixes/objects";
+import { Objects } from "shared/fixes/objects";
 
-export const Config = {
-	addDefaults: <TKeys extends keyof TDef & string, TDef extends UnknownConfigDefinitions>(
+export namespace Config {
+	export function addDefaults<TKeys extends keyof TDef & string, TDef extends UnknownConfigDefinitions>(
 		config: Partial<ConfigDefinitionsToConfig<TKeys, TDef>>,
 		definition: TDef,
-	): ConfigDefinitionsToConfig<TKeys, TDef> => {
-		for (const [key, def] of Objects.pairs(definition)) {
+	): ConfigDefinitionsToConfig<TKeys, TDef> {
+		for (const [key, def] of Objects.pairs_(definition)) {
 			if (typeIs(config[key], "table") || typeIs(def.config, "table")) {
 				if (
 					config[key] !== undefined &&
@@ -20,7 +20,7 @@ export const Config = {
 					} as (typeof config)[typeof key];
 				}
 
-				for (const [k, v] of Objects.entries(config[key]!)) {
+				for (const [k, v] of Objects.pairs_(config[key]!)) {
 					if (!typeIs(v, "table")) continue;
 
 					config[key]![k] = {
@@ -32,5 +32,5 @@ export const Config = {
 		}
 
 		return config as ConfigDefinitionsToConfig<TKeys, TDef>;
-	},
-} as const;
+	}
+}

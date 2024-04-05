@@ -1,7 +1,7 @@
 import { ClientContainerComponent } from "client/component/ClientContainerComponent";
-import Control from "client/gui/Control";
+import { Control } from "client/gui/Control";
 
-export default abstract class PlayMode extends ClientContainerComponent {
+export abstract class PlayMode extends ClientContainerComponent {
 	abstract getName(): PlayModes;
 	abstract onSwitchToNext(mode: PlayModes | undefined): void;
 	abstract onSwitchFromPrev(prev: PlayModes | undefined): void;

@@ -1,17 +1,17 @@
 import { ClientComponent } from "client/component/ClientComponent";
 import { LoadingController } from "client/controller/LoadingController";
-import Signals from "client/event/Signals";
-import BuildingMode from "client/modes/build/BuildingMode";
-import BuildTool from "client/tools/BuildTool";
-import BuildTool2 from "client/tools/BuildTool2";
-import ConfigTool from "client/tools/ConfigTool";
-import DeleteTool from "client/tools/DeleteTool";
-import PaintTool from "client/tools/PaintTool";
-import ToolBase from "client/tools/ToolBase";
+import { Signals } from "client/event/Signals";
+import { BuildingMode } from "client/modes/build/BuildingMode";
+import { BuildTool } from "client/tools/BuildTool";
+import { BuildTool2 } from "client/tools/BuildTool2";
+import { ConfigTool } from "client/tools/ConfigTool";
+import { DeleteTool } from "client/tools/DeleteTool";
+import { PaintTool } from "client/tools/PaintTool";
+import { ToolBase } from "client/tools/ToolBase";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { MiddlewaredObservableValue } from "shared/event/MiddlewaredObservableValue";
-import ObservableValue from "shared/event/ObservableValue";
-import EditTool from "./EditTool";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { EditTool } from "./EditTool";
 import { WireTool } from "./WireTool";
 
 class ToolInputController extends ClientComponent {
@@ -64,7 +64,7 @@ class ToolInputController extends ClientComponent {
 	}
 }
 
-export default class ToolController extends ClientComponent {
+export class ToolController extends ClientComponent {
 	readonly selectedTool = new MiddlewaredObservableValue<ToolBase | undefined>(undefined);
 	readonly tools = new ObservableValue<readonly ToolBase[]>([]);
 	readonly disabledTools = new ObservableValue<readonly ToolBase[]>([]);

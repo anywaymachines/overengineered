@@ -1,8 +1,8 @@
 import { Workspace } from "@rbxts/services";
-import BlockLogic from "shared/block/BlockLogic";
+import { BlockLogic } from "shared/block/BlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default abstract class ClientBlockLogic<T extends new (block: PlacedBlockData) => BlockLogic> {
+export abstract class ClientBlockLogic<T extends new (block: PlacedBlockData) => BlockLogic> {
 	readonly logic;
 
 	constructor(logic: T) {

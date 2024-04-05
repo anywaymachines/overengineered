@@ -1,4 +1,4 @@
-import Objects from "shared/fixes/objects";
+import { Objects } from "shared/fixes/objects";
 
 declare global {
 	type AutoWeldColliderBlockShape = "none" | "cube";
@@ -22,14 +22,14 @@ const flatten = (data: BlockDataRegistryRegistry): BlockDataRegistry => {
 		if ("name" in item) {
 			ret[key] = item as BlockSetupInformation;
 		} else {
-			for (const [nextkey, nextitem] of Objects.pairs(item)) {
+			for (const [nextkey, nextitem] of Objects.pairs_(item)) {
 				push(result, nextkey as string, nextitem);
 			}
 		}
 	};
 
 	const ret: BlockDataRegistry = {};
-	for (const [key, item] of Objects.pairs(data)) {
+	for (const [key, item] of Objects.pairs_(data)) {
 		push(ret, key as string, item);
 	}
 
@@ -321,7 +321,7 @@ const logic: Record<string, BlockDataRegistry> = {
 };
 
 /** Registry for the block information, for easier editing (compared to Roblox Studio) */
-const registry: BlockDataRegistry = {
+export const BlockDataRegistry: BlockDataRegistry = {
 	...flatten(logic),
 	anchorblock: {
 		name: "Anchor",
@@ -599,8 +599,6 @@ const registry: BlockDataRegistry = {
 	},
 };
 
-for (const [key, info] of Objects.pairs(registry)) {
-	registry[key] = process(info);
+for (const [key, info] of Objects.pairs_(BlockDataRegistry)) {
+	BlockDataRegistry[key] = process(info);
 }
-
-export const BlockDataRegistry = registry;

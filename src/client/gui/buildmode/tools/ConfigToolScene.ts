@@ -1,18 +1,18 @@
 import { Colors } from "client/gui/Colors";
-import Control from "client/gui/Control";
-import GuiAnimator from "client/gui/GuiAnimator";
-import ConfigControl, { ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
-import LogControl from "client/gui/static/LogControl";
-import ConfigTool from "client/tools/ConfigTool";
-import Logger from "shared/Logger";
-import { blockRegistry } from "shared/Registry";
-import Remotes from "shared/Remotes";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
-import BlockManager from "shared/building/BlockManager";
+import { Control } from "client/gui/Control";
+import { GuiAnimator } from "client/gui/GuiAnimator";
+import { ConfigControl, ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
+import { LogControl } from "client/gui/static/LogControl";
+import { ConfigTool } from "client/tools/ConfigTool";
+import { BlocksInitializer } from "shared/BlocksInitializer";
+import { Logger } from "shared/Logger";
+import { Remotes } from "shared/Remotes";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { BlockManager } from "shared/building/BlockManager";
 import { Config } from "shared/config/Config";
-import ObservableValue from "shared/event/ObservableValue";
-import JSON from "shared/fixes/Json";
-import Objects from "shared/fixes/objects";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { JSON } from "shared/fixes/Json";
+import { Objects } from "shared/fixes/objects";
 
 export type ConfigToolSceneDefinition = GuiObject & {
 	readonly ParamsSelection: Frame & {
@@ -25,7 +25,7 @@ export type ConfigToolSceneDefinition = GuiObject & {
 	};
 };
 
-export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> {
+export class ConfigToolScene extends Control<ConfigToolSceneDefinition> {
 	private readonly configControl;
 
 	constructor(gui: ConfigToolSceneDefinition, tool: ConfigTool) {
@@ -109,7 +109,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 
 		if (!wasVisible) GuiAnimator.transition(this.gui, 0.2, "up");
 		const blockmodel = selected[0].Parent;
-		const block = blockRegistry.get(BlockManager.manager.id.get(blockmodel))!;
+		const block = BlocksInitializer.blocks.map.get(BlockManager.manager.id.get(blockmodel))!;
 		const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
 			.input as BlockConfigTypes.Definitions;
 
@@ -121,7 +121,7 @@ export default class ConfigToolScene extends Control<ConfigToolSceneDefinition> 
 		const configs = selected
 			.map((selected) => {
 				const blockmodel = selected.Parent;
-				const block = blockRegistry.get(BlockManager.manager.id.get(blockmodel))!;
+				const block = BlocksInitializer.blocks.map.get(BlockManager.manager.id.get(blockmodel))!;
 
 				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
 					.input as BlockConfigTypes.Definitions;

@@ -1,6 +1,6 @@
 import { RunService } from "@rbxts/services";
-import SlimSignal from "shared/event/SlimSignal";
-import Objects from "shared/fixes/objects";
+import { SlimSignal } from "shared/event/SlimSignal";
+import { Objects } from "shared/fixes/objects";
 import { Component } from "./Component";
 import { ContainerComponent } from "./ContainerComponent";
 import { Easable, Easing, EasingDirection, EasingStyle } from "./Easing";

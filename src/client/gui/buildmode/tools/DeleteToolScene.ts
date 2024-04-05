@@ -1,8 +1,8 @@
-import Control from "client/gui/Control";
-import GuiAnimator from "client/gui/GuiAnimator";
+import { Control } from "client/gui/Control";
+import { GuiAnimator } from "client/gui/GuiAnimator";
 import { ButtonControl } from "client/gui/controls/Button";
-import ConfirmPopup from "client/gui/popup/ConfirmPopup";
-import DeleteTool from "client/tools/DeleteTool";
+import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
+import { DeleteTool } from "client/tools/DeleteTool";
 
 export type DeleteToolSceneDefinition = GuiObject & {
 	readonly TouchControls: Frame & {
@@ -13,7 +13,7 @@ export type DeleteToolSceneDefinition = GuiObject & {
 	};
 };
 
-export default class DeleteToolScene extends Control<DeleteToolSceneDefinition> {
+export class DeleteToolScene extends Control<DeleteToolSceneDefinition> {
 	private tool: DeleteTool;
 
 	constructor(gui: DeleteToolSceneDefinition, tool: DeleteTool) {

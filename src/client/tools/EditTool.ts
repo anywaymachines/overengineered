@@ -1,32 +1,33 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import InputController from "client/controller/InputController";
+import { InputController } from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
-import Control from "client/gui/Control";
-import MaterialColorEditControl, {
+import { Control } from "client/gui/Control";
+import {
+	MaterialColorEditControl,
 	MaterialColorEditControlDefinition,
 } from "client/gui/buildmode/MaterialColorEditControl";
 import { ButtonControl, TextButtonControl, type TextButtonDefinition } from "client/gui/controls/Button";
-import LogControl from "client/gui/static/LogControl";
+import { LogControl } from "client/gui/static/LogControl";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
-import BuildingMode from "client/modes/build/BuildingMode";
+import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import ToolBase from "client/tools/ToolBase";
+import { ToolBase } from "client/tools/ToolBase";
 import { BlockMover } from "client/tools/selectors/BlockMover";
 import { BlockRotater } from "client/tools/selectors/BlockRotater";
 import { HoveredBlocksHighlighter } from "client/tools/selectors/HoveredBlocksHighlighter";
 import { SelectedBlocksHighlighter } from "client/tools/selectors/SelectedBlocksHighlighter";
 import { Element } from "shared/Element";
-import BlockManager from "shared/building/BlockManager";
+import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { TransformService } from "shared/component/TransformService";
-import NumberObservableValue from "shared/event/NumberObservableValue";
+import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
-import ObservableValue, { type ReadonlyObservableValue } from "shared/event/ObservableValue";
-import Objects from "shared/fixes/objects";
-import PartUtils from "shared/utils/PartUtils";
+import { ObservableValue, type ReadonlyObservableValue } from "shared/event/ObservableValue";
+import { Objects } from "shared/fixes/objects";
+import { PartUtils } from "shared/utils/PartUtils";
 
 namespace Scene {
 	export interface EditToolSceneDefinition extends GuiObject, Selectors.SelectorGuiDefinition {
@@ -88,7 +89,7 @@ namespace Scene {
 				tool.selected,
 				() => {
 					const enabled = tool.selected.size() !== 0;
-					for (const [, button] of Objects.pairs(buttons)) {
+					for (const [, button] of Objects.pairs_(buttons)) {
 						button.setInteractable(enabled);
 					}
 				},
@@ -98,7 +99,7 @@ namespace Scene {
 			this.event.subscribeObservable(
 				tool.selectedMode,
 				(mode) => {
-					for (const [name, button] of Objects.pairs(buttons)) {
+					for (const [name, button] of Objects.pairs_(buttons)) {
 						button.instance.BackgroundColor3 = mode === name ? Colors.accentDark : Colors.staticBackground;
 
 						const enabled = mode === undefined || mode === name;
@@ -117,7 +118,7 @@ namespace Scene {
 				{ Position: this.instance.Bottom.Position.add(new UDim2(0, 0, 0, 20)) },
 				(tr, visible) =>
 					tr.func(() => {
-						for (const [, button] of Objects.pairs(this.getChildren())) {
+						for (const [, button] of Objects.pairs_(this.getChildren())) {
 							if (button instanceof ButtonControl) {
 								button.setVisible(visible);
 							}
@@ -172,7 +173,7 @@ namespace Selectors {
 						params.highlightModeName,
 						(active) => {
 							const buttons: { readonly [k in typeof active]: TextButtonControl } = { single, assembly };
-							for (const [name, button] of Objects.pairs(buttons)) {
+							for (const [name, button] of Objects.pairs_(buttons)) {
 								TransformService.run(button.instance, (builder, instance) =>
 									builder
 										.func(() => (instance.AutoButtonColor = instance.Active = active !== name))
@@ -465,7 +466,7 @@ namespace Controllers {
 
 					for (const [olduuid, newblock] of uuidmap) {
 						const connections = { ...(existingBlocks.get(olduuid)?.connections ?? {}) };
-						for (const [, connection] of Objects.pairs(connections)) {
+						for (const [, connection] of Objects.pairs_(connections)) {
 							const neww = uuidmap.get(connection.blockUuid);
 							if (!neww) continue;
 
@@ -594,7 +595,7 @@ namespace Controllers {
 }
 
 export type EditToolMode = "Move" | "Clone" | "Rotate" | "Paint";
-export default class EditTool extends ToolBase {
+export class EditTool extends ToolBase {
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
 	readonly selected = new ObservableCollectionSet<BlockModel>();

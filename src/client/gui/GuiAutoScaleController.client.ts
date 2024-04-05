@@ -1,4 +1,4 @@
-import Gui from "client/gui/Gui";
+import { Gui } from "client/gui/Gui";
 import { ScaledScreenGui } from "./ScaledScreenGui";
 
 new ScaledScreenGui(Gui.getGameUI()).enable();

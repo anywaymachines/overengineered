@@ -1,7 +1,7 @@
-import InputController from "client/controller/InputController";
-import InputHandler from "client/event/InputHandler";
+import { InputController } from "client/controller/InputController";
+import { InputHandler } from "client/event/InputHandler";
 import { ComponentEvents } from "shared/component/ComponentEvents";
-import EventHandler from "shared/event/EventHandler";
+import { EventHandler } from "shared/event/EventHandler";
 
 export class ClientComponentEvents extends ComponentEvents {
 	readonly inputHandler = new InputHandler();

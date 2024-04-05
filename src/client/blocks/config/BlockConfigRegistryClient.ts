@@ -16,7 +16,7 @@ export type blockConfigRegistryClient = {
 	[k in keyof BlockConfigTypes.Types]: typeof ConfigLogicValueBase<BlockConfigTypes.Types[k]>;
 };
 
-const blockConfigRegistryClient = {
+export const blockConfigRegistryClient = {
 	bool: BoolConfigLogicValue,
 	vector3: Vector3ConfigLogicValue,
 	key: KeyConfigLogicValue,
@@ -30,5 +30,3 @@ const blockConfigRegistryClient = {
 	servoMotorAngle: ServoMotorAngleConfigLogicValue,
 	or: OrConfigLogicValue,
 } as const satisfies blockConfigRegistryClient;
-
-export default blockConfigRegistryClient;

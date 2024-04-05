@@ -1,4 +1,4 @@
-import VectorUtils from "shared/utils/VectorUtils";
+import { VectorUtils } from "shared/utils/VectorUtils";
 
 interface CenterSizeData {
 	readonly center: Vector3;
@@ -11,9 +11,6 @@ interface MinMaxData {
 
 /** Lazily initialized immutable {@link https://wikipedia.org/wiki/AABB Axis-Aligned Bounding Box} */
 export class AABB {
-	private centerSizeData?: CenterSizeData;
-	private minMaxData?: MinMaxData;
-
 	/** Get the {@link AABB} of a model */
 	static fromModel(block: Model, cframe?: CFrame): AABB {
 		// eslint-disable-next-line prefer-const
@@ -69,6 +66,9 @@ export class AABB {
 		];
 		return new AABB({ min, max });
 	}
+
+	private centerSizeData?: CenterSizeData;
+	private minMaxData?: MinMaxData;
 
 	private constructor(data: CenterSizeData | MinMaxData) {
 		if ("min" in data) {

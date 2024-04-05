@@ -1,7 +1,7 @@
-import BuildingMode from "client/modes/build/BuildingMode";
-import Tutorial from "client/tutorial/Tutorial";
+import { BuildingMode } from "client/modes/build/BuildingMode";
+import type { Tutorial } from "client/tutorial/Tutorial";
 
-export default async function TutorialBasics(tutorial: typeof Tutorial) {
+export async function TutorialBasics(tutorial: typeof Tutorial) {
 	tutorial.Control.startTutorial("BASICS", tutorial.Cancellable);
 	const toolController = BuildingMode.instance.toolController;
 	const tools = toolController.tools;

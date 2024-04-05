@@ -1,13 +1,13 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientComponentChild } from "client/component/ClientComponentChild";
-import InputController from "client/controller/InputController";
-import Signals from "client/event/Signals";
+import { InputController } from "client/controller/InputController";
+import { Signals } from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
-import Gui from "client/gui/Gui";
+import { Gui } from "client/gui/Gui";
 import { InputTooltips, TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { SharedPlot } from "shared/building/SharedPlot";
-import NumberObservableValue from "shared/event/NumberObservableValue";
+import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { AABB } from "shared/fixes/AABB";
 
 abstract class RotaterBase extends ClientComponent {
@@ -206,12 +206,12 @@ class GamepadRotater extends RotaterBase {
 	}
 }
 
-export const BlockRotater = {
-	create: (plot: SharedPlot, blocks: readonly BlockModel[]) => {
+export namespace BlockRotater {
+	export function create(plot: SharedPlot, blocks: readonly BlockModel[]) {
 		return ClientComponentChild.createOnceBasedOnInputType<RotaterBase>({
 			Desktop: () => new DesktopRotater(plot, blocks),
 			Touch: () => new TouchRotater(plot, blocks),
 			Gamepad: () => new GamepadRotater(plot, blocks),
 		});
-	},
-} as const;
+	}
+}

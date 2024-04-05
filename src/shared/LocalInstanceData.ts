@@ -1,43 +1,43 @@
-export default class LocalInstanceData {
-	private static readonly instanceTags: Map<Instance, string[]> = new Map();
+export namespace LocalInstanceData {
+	const instanceTags = new Map<Instance, string[]>();
 
-	private static PrepareCleanupLogic(instance: Instance) {
+	function PrepareCleanupLogic(instance: Instance) {
 		// Cleanup
-		instance.Destroying.Once(() => this.instanceTags.delete(instance));
+		instance.Destroying.Once(() => instanceTags.delete(instance));
 		instance.GetPropertyChangedSignal("Parent").Connect(() => {
 			if (!instance) {
-				this.instanceTags.delete(instance);
+				instanceTags.delete(instance);
 			}
 		});
 	}
 
-	static AddLocalTag(instance: Instance, tag: string) {
-		const currentTags = this.instanceTags.has(instance) ? this.instanceTags.get(instance)! : [];
+	export function AddLocalTag(instance: Instance, tag: string) {
+		const currentTags = instanceTags.has(instance) ? instanceTags.get(instance)! : [];
 		currentTags.push(tag);
-		this.instanceTags.set(instance, currentTags);
+		instanceTags.set(instance, currentTags);
 
-		this.PrepareCleanupLogic(instance);
+		PrepareCleanupLogic(instance);
 	}
 
-	static HasLocalTag(instance: Instance, tag: string) {
-		if (!this.instanceTags.has(instance)) return false;
+	export function HasLocalTag(instance: Instance, tag: string) {
+		if (!instanceTags.has(instance)) return false;
 
-		const currentTags = this.instanceTags.get(instance)!;
+		const currentTags = instanceTags.get(instance)!;
 		return currentTags.includes(tag);
 	}
 
-	static RemoveLocalTag(instance: Instance, tag: string) {
-		if (!this.instanceTags.has(instance)) return;
+	export function RemoveLocalTag(instance: Instance, tag: string) {
+		if (!instanceTags.has(instance)) return;
 
-		const currentTags = this.instanceTags.get(instance)!;
+		const currentTags = instanceTags.get(instance)!;
 		currentTags.remove(currentTags.indexOf(tag));
-		this.instanceTags.set(instance, currentTags);
+		instanceTags.set(instance, currentTags);
 	}
 
-	static GetAllLocalTags(instance: Instance) {
-		if (!this.instanceTags.has(instance)) return [];
+	export function GetAllLocalTags(instance: Instance) {
+		if (!instanceTags.has(instance)) return [];
 
-		const currentTags = this.instanceTags.get(instance)!;
+		const currentTags = instanceTags.get(instance)!;
 		return currentTags;
 	}
 }

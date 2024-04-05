@@ -1,13 +1,13 @@
 import { Workspace } from "@rbxts/services";
-import SpreadingFireController from "server/SpreadingFireController";
-import ServerBlockLogic from "server/blocks/ServerBlockLogic";
-import ServerPartUtils from "server/plots/ServerPartUtils";
-import TNTBlockLogic from "shared/block/logic/TNTBlockLogic";
-import BlockManager from "shared/building/BlockManager";
-import Effects from "shared/effects/Effects";
-import PartUtils from "shared/utils/PartUtils";
+import { SpreadingFireController } from "server/SpreadingFireController";
+import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
+import { ServerPartUtils } from "server/plots/ServerPartUtils";
+import { RemoteEvents } from "shared/RemoteEvents";
+import { TNTBlockLogic } from "shared/block/logic/TNTBlockLogic";
+import { BlockManager } from "shared/building/BlockManager";
+import { PartUtils } from "shared/utils/PartUtils";
 
-export default class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBlockLogic> {
+export class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBlockLogic> {
 	constructor(logic: typeof TNTBlockLogic) {
 		super(logic);
 
@@ -54,7 +54,7 @@ export default class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBloc
 		});
 
 		// Explosion sound
-		Effects.Explosion.sendToNetworkOwnerOrEveryone(block.PrimaryPart!, {
+		RemoteEvents.Effects.Explosion.sendToNetworkOwnerOrEveryone(block.PrimaryPart!, {
 			part: block.PrimaryPart!,
 			index: undefined,
 		});

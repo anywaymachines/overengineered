@@ -949,7 +949,7 @@ const constant = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const blockConfigRegistry = {
+export const blockConfigRegistry = {
 	disconnectblock,
 	motorblock,
 	smallrocketengine: rocketengine,
@@ -1015,8 +1015,6 @@ const blockConfigRegistry = {
 	operationvec3splitter,
 	operationvec3combiner,
 } as const satisfies Record<string, BlockConfigBothDefinitions>;
-
-export default blockConfigRegistry;
 
 type BlockConfigDefinitions = ConfigTypesToDefinition<keyof BlockConfigTypes.Types, BlockConfigTypes.Types>;
 type BlockConfigBothDefinitions = {

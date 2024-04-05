@@ -1,5 +1,5 @@
 import { Players, RunService } from "@rbxts/services";
-import DiscordWebhook from "./DiscordWebhook";
+import { DiscordWebhook } from "./DiscordWebhook";
 
 if (!RunService.IsStudio()) {
 	const banlist: { [key: number]: string } = {

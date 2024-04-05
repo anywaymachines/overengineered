@@ -1,5 +1,5 @@
-export default class PlayerUtils {
-	static isAlive(this: void, player: Player): boolean {
+export namespace PlayerUtils {
+	export function isAlive(this: void, player: Player): boolean {
 		return (
 			player.Character !== undefined &&
 			player.Character.FindFirstChild("Humanoid") !== undefined &&
@@ -7,7 +7,7 @@ export default class PlayerUtils {
 		);
 	}
 
-	static isPlayerPart(part: BasePart): boolean {
+	export function isPlayerPart(part: BasePart): boolean {
 		return (
 			(part.IsA("BasePart") &&
 				part.Parent &&

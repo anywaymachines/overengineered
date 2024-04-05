@@ -1,11 +1,11 @@
 import { Element } from "shared/Element";
-import Remotes from "shared/Remotes";
+import { Remotes } from "shared/Remotes";
 import { Colors } from "./gui/Colors";
-import Control from "./gui/Control";
-import Gui from "./gui/Gui";
-import GuiAnimator from "./gui/GuiAnimator";
+import { Control } from "./gui/Control";
+import { Gui } from "./gui/Gui";
+import { GuiAnimator } from "./gui/GuiAnimator";
 import { TextButtonControl } from "./gui/controls/Button";
-import TextBoxControl from "./gui/controls/TextBoxControl";
+import { TextBoxControl } from "./gui/controls/TextBoxControl";
 
 Remotes.Client.GetNamespace("Admin")
 	.Get("SendMessage")
@@ -26,15 +26,15 @@ Remotes.Client.GetNamespace("Admin")
 		});
 	});
 
-export const AdminMessageController = {
+export namespace AdminMessageController {
 	// empty method to trigger subscription
-	initialize() {},
+	export function initialize() {}
 
-	send(text: string) {
+	export function send(text: string) {
 		Remotes.Client.GetNamespace("Admin").Get("SendMessage").SendToServer(text);
-	},
+	}
 
-	createControl: () => {
+	export function createControl() {
 		const tb = new TextBoxControl(
 			Element.create("TextBox", { Size: new UDim2(0, 500, 0, 30), ClearTextOnFocus: false, AutoLocalize: false }),
 		);
@@ -67,5 +67,5 @@ export const AdminMessageController = {
 					AdminMessageController.send(tb.text.get()),
 				),
 			);
-	},
-} as const;
+	}
+}

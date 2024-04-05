@@ -1,6 +1,6 @@
 import { ReplicatedFirst, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { TerrainData, TerrainInfo } from "shared/TerrainDataInfo";
-import GameDefinitions from "shared/data/GameDefinitions";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 
 const folder = ReplicatedFirst.WaitForChild("Terrain") as Folder & TerrainInfo;
 const terrainChild = folder.Data.TerrainData;
@@ -409,4 +409,6 @@ if (fastunload) {
 	});
 }
 
+// uses default as a name in InfiniteTerrain.ts
+// eslint-disable-next-line import/no-default-export
 export default infterrainActor;

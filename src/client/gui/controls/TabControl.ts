@@ -1,4 +1,4 @@
-import Control from "client/gui/Control";
+import { Control } from "client/gui/Control";
 import { Element } from "shared/Element";
 import { TextButtonControl } from "./Button";
 

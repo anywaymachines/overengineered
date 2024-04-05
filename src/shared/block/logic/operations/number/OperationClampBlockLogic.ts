@@ -1,11 +1,9 @@
-import RemoteEvents from "shared/RemoteEvents";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { RemoteEvents } from "shared/RemoteEvents";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default class OperationClampBlockLogic extends ConfigurableBlockLogic<
-	typeof blockConfigRegistry.operationclamp
-> {
+export class OperationClampBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationclamp> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationclamp);
 

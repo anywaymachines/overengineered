@@ -1,20 +1,20 @@
 import { RunService } from "@rbxts/services";
-import Logger from "shared/Logger";
-import { blockRegistry } from "shared/Registry";
+import { BlocksInitializer } from "shared/BlocksInitializer";
+import { Logger } from "shared/Logger";
 import { BlockLogicValue } from "shared/block/BlockLogicValue";
 import { BlockLogicValueGroup } from "shared/block/BlockLogicValueGroup";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { ContainerComponent } from "shared/component/ContainerComponent";
-import GameDefinitions from "shared/data/GameDefinitions";
-import ObservableValue from "shared/event/ObservableValue";
-import Objects from "shared/fixes/objects";
-import BlockLogic from "./BlockLogic";
-import ConfigurableBlockLogic from "./ConfigurableBlockLogic";
-import logicRegistry, { LogicRegistry } from "./LogicRegistry";
+import { GameDefinitions } from "shared/data/GameDefinitions";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { Objects } from "shared/fixes/objects";
+import { BlockLogic } from "./BlockLogic";
+import { ConfigurableBlockLogic } from "./ConfigurableBlockLogic";
+import { LogicRegistry, logicRegistry } from "./LogicRegistry";
 import { ImpactController } from "./impact/ImpactController";
-import VehicleSeatBlockLogic from "./logic/VehicleSeatBlockLogic";
+import { VehicleSeatBlockLogic } from "./logic/VehicleSeatBlockLogic";
 
-export default class SharedMachine extends ContainerComponent {
+export class SharedMachine extends ContainerComponent {
 	readonly blocks: BlockLogic[] = [];
 	readonly occupiedByLocalPlayer = new ObservableValue(true);
 	private readonly childMap = new Map<BlockUuid, ConfigurableBlockLogic<BlockConfigTypes.BothDefinitions>>();
@@ -51,8 +51,8 @@ export default class SharedMachine extends ContainerComponent {
 		for (const block of blocks) {
 			const id = block.id;
 
-			if (!blockRegistry.get(id)) {
-				Logger.error(`Unknown block id ${id}`);
+			if (!BlocksInitializer.blocks.map.get(id)) {
+				Logger.err(`Unknown block id ${id}`);
 				continue;
 			}
 
@@ -134,7 +134,7 @@ export default class SharedMachine extends ContainerComponent {
 			if (!(inputLogic instanceof ConfigurableBlockLogic)) continue;
 			if (inputLogic.block.connections === undefined) continue;
 
-			for (const [connectionFrom, connection] of Objects.pairs(inputLogic.block.connections)) {
+			for (const [connectionFrom, connection] of Objects.pairs_(inputLogic.block.connections)) {
 				const outputLogic = this.childMap.get(connection.blockUuid);
 				if (!outputLogic) {
 					throw "No logic found for connecting block " + connection.blockUuid;

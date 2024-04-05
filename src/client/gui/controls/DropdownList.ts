@@ -1,6 +1,6 @@
-import Control from "client/gui/Control";
+import { Control } from "client/gui/Control";
 import { TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
-import ObservableValue from "shared/event/ObservableValue";
+import { ObservableValue } from "shared/event/ObservableValue";
 import { DropdownDefinition } from "./Dropdown";
 
 export type DropdownListDefinition = DropdownDefinition &
@@ -9,7 +9,7 @@ export type DropdownListDefinition = DropdownDefinition &
 			readonly Template: TextButtonDefinition;
 		};
 	};
-export default class DropdownList<TValue extends string = string> extends Control<DropdownListDefinition> {
+export class DropdownList<TValue extends string = string> extends Control<DropdownListDefinition> {
 	readonly selectedItem = new ObservableValue<TValue | undefined>(undefined);
 
 	private readonly itemTemplate;

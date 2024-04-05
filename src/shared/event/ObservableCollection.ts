@@ -1,4 +1,4 @@
-import Signal, { ReadonlySignal } from "shared/event/Signal";
+import { ReadonlySignal, Signal } from "shared/event/Signal";
 
 export type CollectionChangedArgs<T> =
 	| { readonly kind: "add"; readonly added: readonly T[] }

@@ -1,15 +1,15 @@
 import { Colors } from "client/gui/Colors";
-import Control from "client/gui/Control";
-import GuiAnimator from "client/gui/GuiAnimator";
-import ObservableValue from "shared/event/ObservableValue";
-import Signal from "shared/event/Signal";
+import { Control } from "client/gui/Control";
+import { GuiAnimator } from "client/gui/GuiAnimator";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { Signal } from "shared/event/Signal";
 
 export type ToggleControlDefinition = TextButton & {
 	readonly Circle: TextButton;
 };
 
 /** Control that represents a boolean */
-export default class ToggleControl extends Control<ToggleControlDefinition> {
+export class ToggleControl extends Control<ToggleControlDefinition> {
 	readonly submitted = new Signal<(value: boolean) => void>();
 	readonly value = new ObservableValue(false);
 

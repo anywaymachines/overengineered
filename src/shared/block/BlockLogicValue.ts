@@ -1,4 +1,4 @@
-import Signal from "shared/event/Signal";
+import { Signal } from "shared/event/Signal";
 
 export interface ReadonlyBlockLogicValue<T> {
 	readonly changed: Signal<(value: T, prev: T) => void>;

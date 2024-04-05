@@ -1,6 +1,6 @@
 import { Players } from "@rbxts/services";
-import Beacon from "client/gui/Beacon";
-import SharedPlots from "shared/building/SharedPlots";
+import { Beacon } from "client/gui/Beacon";
+import { SharedPlots } from "shared/building/SharedPlots";
 import { Component } from "shared/component/Component";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 

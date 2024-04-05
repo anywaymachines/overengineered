@@ -1,8 +1,8 @@
 import { BlockLogicData } from "shared/block/BlockLogic";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 
-export default class OperationVec3CombinerBlockLogic extends ConfigurableBlockLogic<
+export class OperationVec3CombinerBlockLogic extends ConfigurableBlockLogic<
 	typeof blockConfigRegistry.operationvec3combiner
 > {
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.operationvec3combiner.input>) {

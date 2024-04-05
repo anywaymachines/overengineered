@@ -2,7 +2,7 @@ import { ReplicatedStorage } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
-export default class MirrorVisualizer extends ClientComponent {
+export class MirrorVisualizer extends ClientComponent {
 	private readonly plot: ReadonlyObservableValue<PlotModel>;
 	private readonly mirrorMode: ReadonlyObservableValue<MirrorMode>;
 	private readonly template;

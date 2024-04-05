@@ -1,6 +1,6 @@
-import Control from "client/gui/Control";
+import { Control } from "client/gui/Control";
 import { ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
-import Signal from "shared/event/Signal";
+import { Signal } from "shared/event/Signal";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";

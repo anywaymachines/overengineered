@@ -1,6 +1,6 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
-import Logger from "shared/Logger";
-import GameDefinitions from "shared/data/GameDefinitions";
+import { Logger } from "shared/Logger";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 
 Players.PlayerAdded.Connect((player) => {
 	player.CharacterAdded.Connect((character) => {
@@ -22,7 +22,7 @@ Players.PlayerAdded.Connect((player) => {
 		try {
 			rank = player.GetRankInGroup(GameDefinitions.GROUP);
 		} catch {
-			Logger.error("Unable to get player rank");
+			Logger.err("Unable to get player rank");
 		}
 		const rankData = GameDefinitions.RANKS[rank];
 		if (rankData) {

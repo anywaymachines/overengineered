@@ -1,5 +1,5 @@
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
 type Suspension = BlockModel & {
@@ -8,10 +8,7 @@ type Suspension = BlockModel & {
 		readonly Beam: Beam;
 	};
 };
-export default class SuspensionLogic extends ConfigurableBlockLogic<
-	typeof blockConfigRegistry.suspensionblock,
-	Suspension
-> {
+export class SuspensionLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.suspensionblock, Suspension> {
 	private readonly springConstraint: SpringConstraint;
 
 	constructor(block: PlacedBlockData) {

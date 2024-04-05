@@ -1,15 +1,15 @@
-import PlayerDataStorage from "client/PlayerDataStorage";
-import Control from "client/gui/Control";
-import Gui from "client/gui/Gui";
-import Popup from "client/gui/Popup";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { Control } from "client/gui/Control";
+import { Gui } from "client/gui/Gui";
+import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "client/gui/controls/Button";
 import { DropdownListDefinition } from "client/gui/controls/DropdownList";
-import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
-import SliderControl, { SliderControlDefinition } from "client/gui/controls/SliderControl";
-import ToggleControl, { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
+import { NumberTextBoxControl, NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
+import { SliderControl, SliderControlDefinition } from "client/gui/controls/SliderControl";
+import { ToggleControl, ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
-import Signal from "shared/event/Signal";
-import Objects from "shared/fixes/objects";
+import { Signal } from "shared/event/Signal";
+import { Objects } from "shared/fixes/objects";
 
 export type Templates = {
 	toggle: () => ConfigPartDefinition<ToggleControlDefinition>;
@@ -66,7 +66,7 @@ class ConfigControl<TDef extends PlayerConfigTypes.Definitions> extends Control<
 		this.clear();
 		this.settedElements.clear();
 
-		for (const [id, def] of Objects.entries(definition).sort(
+		for (const [id, def] of Objects.entriesArray(definition).sort(
 			(left, right) => tostring(left[0]) < tostring(right[0]),
 		)) {
 			const control = new configControls[def.type](
@@ -347,7 +347,7 @@ export type SettingsPopupDefinition = GuiObject & {
 	};
 };
 
-export default class SettingsPopup extends Popup<SettingsPopupDefinition> {
+export class SettingsPopup extends Popup<SettingsPopupDefinition> {
 	private readonly config;
 
 	static showPopup() {

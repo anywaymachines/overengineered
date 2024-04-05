@@ -1,6 +1,6 @@
-import Control from "client/gui/Control";
-import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
-import Signal from "shared/event/Signal";
+import { Control } from "client/gui/Control";
+import { NumberTextBoxControl, NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
+import { Signal } from "shared/event/Signal";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";

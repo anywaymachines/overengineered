@@ -1,16 +1,16 @@
-import Control from "client/gui/Control";
-import Gui from "client/gui/Gui";
+import { Control } from "client/gui/Control";
+import { Gui } from "client/gui/Gui";
 import { ButtonControl } from "client/gui/controls/Button";
-import CheckBoxControl, { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
+import { CheckBoxControl, CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
-import DropdownList, { DropdownListDefinition } from "client/gui/controls/DropdownList";
-import KeyChooserControl, { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
-import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
-import SliderControl, { SliderControlDefinition } from "client/gui/controls/SliderControl";
-import TextBoxControl, { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
-import BlockManager from "shared/building/BlockManager";
-import Signal from "shared/event/Signal";
-import Objects from "shared/fixes/objects";
+import { DropdownList, DropdownListDefinition } from "client/gui/controls/DropdownList";
+import { KeyChooserControl, KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
+import { NumberTextBoxControl, NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
+import { SliderControl, SliderControlDefinition } from "client/gui/controls/SliderControl";
+import { TextBoxControl, TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
+import { BlockManager } from "shared/building/BlockManager";
+import { Signal } from "shared/event/Signal";
+import { Objects } from "shared/fixes/objects";
 
 type PartialIfObject<T> = T extends CheckableTypes[Exclude<keyof CheckableTypes, keyof CheckablePrimitives>]
 	? T
@@ -20,7 +20,7 @@ type BlockConfigDefinitionRegistry = BlockConfigTypes.Types;
 type BlockConfigDefinitions = BlockConfigTypes.Definitions;
 
 export type ConfigControlDefinition = GuiObject;
-export default class ConfigControl extends Control<ConfigControlDefinition> {
+export class ConfigControl extends Control<ConfigControlDefinition> {
 	readonly travelToConnectedPressed = new Signal<(uuid: BlockUuid) => void>();
 	readonly configUpdated = new Signal<
 		(
@@ -60,7 +60,7 @@ export default class ConfigControl extends Control<ConfigControlDefinition> {
 	) {
 		this.clear();
 
-		for (const [id, def] of Objects.entries(definition).sort(
+		for (const [id, def] of Objects.entriesArray(definition).sort(
 			(left, right) => tostring(left[0]) < tostring(right[0]),
 		)) {
 			if (def.configHidden) continue;
@@ -130,7 +130,7 @@ export class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control
 		this.thrustTemplate = this.asTemplate(templates.MultiTemplate, false);
 		this.multiMultiTemplate = this.asTemplate(templates.MultiMultiTemplate, false);
 
-		for (const [id, def] of Objects.pairs(definition)) {
+		for (const [id, def] of Objects.pairs_(definition)) {
 			if (def.configHidden) continue;
 			if (connected.includes(id)) {
 				this.add(new ConnectedValueControl(this.connectedTemplate(), def.displayName));
@@ -344,7 +344,7 @@ export class MultiKeyConfigValueControl extends ConfigValueControl<MultiKeyConfi
 		super(templates.multi(), definition.displayName);
 
 		const list = this.add(new DictionaryControl<GuiObject, string, KeyConfigValueControl>(this.gui.Control));
-		for (const [name, _] of Objects.pairs(definition.default)) {
+		for (const [name, _] of Objects.pairs_(definition.default)) {
 			const control = new KeyConfigValueControl(templates, config[name], definition.keyDefinitions[name]);
 			list.keyedChildren.add(name, control);
 
@@ -684,7 +684,7 @@ export class OrConfigValueControl extends ConfigValueControl<MultiConfigControlD
 		});
 
 		dropdown.addItem("unset");
-		for (const [, type] of Objects.pairs(definition.types)) {
+		for (const [, type] of Objects.pairs_(definition.types)) {
 			dropdown.addItem(type.type);
 		}
 

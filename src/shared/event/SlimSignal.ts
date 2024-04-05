@@ -1,5 +1,5 @@
 /** A signal that you can subscribe to and fire but without any unnesessary things */
-export default class SlimSignal<T extends (...args: never[]) => void = () => void> {
+export class SlimSignal<T extends (...args: never[]) => void = () => void> {
 	private destroyed = false;
 	private subscribed?: T[];
 

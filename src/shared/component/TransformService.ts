@@ -4,41 +4,42 @@ import {
 	type TransformProps,
 	type TweenableProperties,
 } from "shared/component/Transform";
-import Objects from "shared/fixes/objects";
-
-const commonProps: Readonly<Record<string, TransformProps>> = {
-	quadOut02: { style: "Quad", direction: "Out", duration: 0.2 },
-};
+import { Objects } from "shared/fixes/objects";
 
 type State<T extends Instance> = { readonly [k in TweenableProperties<T>]?: T[k] };
-export class TransformService {
-	static readonly commonProps = commonProps;
-	private static readonly transforms = new Map<object, TransformContainer<Instance>>();
+export namespace TransformService {
+	const transforms = new Map<object, TransformContainer<Instance>>();
+	export const commonProps: Readonly<Record<string, TransformProps>> = {
+		quadOut02: { style: "Quad", direction: "Out", duration: 0.2 },
+	};
 
-	static run<T extends Instance>(instance: T, setup: (transform: TransformBuilder<T>, instance: T) => void) {
-		this.transforms.get(instance)?.finish();
+	export function run<T extends Instance>(
+		instance: T,
+		setup: (transform: TransformBuilder<T>, instance: T) => void,
+	): void {
+		transforms.get(instance)?.finish();
 
 		const container = new TransformContainer(instance);
-		this.transforms.set(instance, container);
+		transforms.set(instance, container);
 		container.run((transform, instance) => {
 			setup(transform, instance);
 			transform.then().func(() => {
 				container.destroy();
-				this.transforms.delete(instance);
+				transforms.delete(instance);
 			});
 		});
 		container.enable();
 	}
-	static cancel(instance: object) {
-		const transform = this.transforms.get(instance);
+	export function cancel(instance: object) {
+		const transform = transforms.get(instance);
 		if (!transform) return;
 
 		transform.cancel();
 		transform.destroy();
-		this.transforms.delete(instance);
+		transforms.delete(instance);
 	}
 
-	static stateMachine<T extends Instance, TStates extends { readonly [k in string]: State<T> }>(
+	export function stateMachine<T extends Instance, TStates extends { readonly [k in string]: State<T> }>(
 		instance: T,
 		props: TransformProps,
 		states: TStates,
@@ -46,7 +47,7 @@ export class TransformService {
 		setupEnd?: (transform: TransformBuilder<T>, state: keyof TStates) => void,
 	): { readonly [k in keyof TStates]: () => void } {
 		const result: Partial<Readonly<Record<keyof TStates, () => void>>> = {};
-		for (const [name, state] of Objects.pairs(states)) {
+		for (const [name, state] of Objects.pairs_(states)) {
 			result[name] = () => {
 				const setup = (tr: TransformBuilder<T>) => {
 					if (setupStart) {
@@ -54,7 +55,7 @@ export class TransformService {
 						tr.then();
 					}
 
-					for (const [key, value] of Objects.pairs(state)) {
+					for (const [key, value] of Objects.pairs_(state)) {
 						tr.transform(key as never, value as never, props);
 					}
 
@@ -70,7 +71,7 @@ export class TransformService {
 
 		return result as Readonly<Record<keyof TStates, () => void>>;
 	}
-	static boolStateMachine<T extends Instance>(
+	export function boolStateMachine<T extends Instance>(
 		instance: T,
 		props: TransformProps,
 		trueState: State<T>,
@@ -87,7 +88,7 @@ export class TransformService {
 		);
 		return (value) => (value ? sm.true() : sm.false());
 	}
-	static lazyBoolStateMachine<T extends Instance>(
+	export function lazyBoolStateMachine<T extends Instance>(
 		instance: T,
 		props: TransformProps,
 		trueState: State<T>,
@@ -100,7 +101,7 @@ export class TransformService {
 			(cache ??= TransformService.boolStateMachine(instance, props, trueState, falseState, setupStart, setupEnd));
 	}
 
-	static multi<T>(...states: ((value: T) => void)[]): (value: T) => void {
+	export function multi<T>(...states: ((value: T) => void)[]): (value: T) => void {
 		return (value: T) => {
 			for (const state of states) {
 				state(value);

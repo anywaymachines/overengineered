@@ -2,15 +2,15 @@ import { RunService } from "@rbxts/services";
 import { BlockDataRegistry } from "shared/BlockDataRegistry";
 import type { BlocksInitializeData } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
-import Logger from "shared/Logger";
-import RemoteEvents from "shared/RemoteEvents";
+import { Logger } from "shared/Logger";
+import { RemoteEvents } from "shared/RemoteEvents";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
-import BlockLogic from "shared/block/BlockLogic";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import logicRegistry, { LogicRegistry } from "shared/block/LogicRegistry";
-import blockConfigRegistry, { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { BlockLogic } from "shared/block/BlockLogic";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { LogicRegistry, logicRegistry } from "shared/block/LogicRegistry";
+import { BlockConfigRegistry, blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import Objects from "shared/fixes/objects";
+import { Objects } from "shared/fixes/objects";
 
 interface BlockResult extends BlockAdditional {
 	readonly id: string;
@@ -278,7 +278,7 @@ const multiif = <TArg, T, TType extends keyof CheckableTypes, TRet extends Check
 	right: T,
 	checks: Checks<TArg>,
 ): TRet => {
-	for (const [typename, func] of Objects.pairs(checks)) {
+	for (const [typename, func] of Objects.pairs_(checks)) {
 		if (typeIs(left, typename) && typeIs(right, typename)) {
 			return func(left as never, right as never, arg) as never;
 		}
@@ -526,8 +526,8 @@ const create = (info: BlocksInitializeData) => {
 			Parent: ReplicatedAssets.get<Folder>(),
 		});
 	}
-	for (const [optype, ops] of Objects.pairs(operations as NonGenericOperations)) {
-		for (const [name, data] of Objects.pairs(ops)) {
+	for (const [optype, ops] of Objects.pairs_(operations as NonGenericOperations)) {
+		for (const [name, data] of Objects.pairs_(ops)) {
 			Logger.info(`[BAC] Creating block ${name}`);
 
 			const block = createBase(name, "OperationPrefab", data);

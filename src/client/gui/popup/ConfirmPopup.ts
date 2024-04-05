@@ -1,7 +1,7 @@
 import { GuiService } from "@rbxts/services";
-import SoundController from "client/controller/SoundController";
-import Gui from "client/gui/Gui";
-import Popup from "client/gui/Popup";
+import { SoundController } from "client/controller/SoundController";
+import { Gui } from "client/gui/Gui";
+import { Popup } from "client/gui/Popup";
 import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
 
 export type ConfirmPopupDefinition = GuiObject & {
@@ -18,7 +18,7 @@ export type ConfirmPopupDefinition = GuiObject & {
 	};
 };
 
-export default class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
+export class ConfirmPopup extends Popup<ConfirmPopupDefinition> {
 	private readonly confirmButton;
 	private readonly cancelButton;
 	private readonly closeButton;

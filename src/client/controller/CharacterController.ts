@@ -1,28 +1,24 @@
 import { Players } from "@rbxts/services";
-import PartUtils from "shared/utils/PartUtils";
+import { PartUtils } from "shared/utils/PartUtils";
 
-export default class CharacterController {
-	static initialize() {
-		Players.PlayerAdded.Connect((plr) => this.preparePlayer(plr));
-
-		Players.GetPlayers().forEach((plr) => {
-			this.preparePlayer(plr);
-		});
+export namespace CharacterController {
+	export function initialize() {
+		Players.PlayerAdded.Connect(preparePlayer);
+		Players.GetPlayers().forEach(preparePlayer);
 	}
 
-	static preparePlayer(plr: Player) {
+	export function preparePlayer(plr: Player) {
 		if (plr === Players.LocalPlayer) return;
 
 		plr.CharacterAdded.Connect(() => {
 			plr.CharacterAppearanceLoaded.Wait();
-
-			this.updateCharacter(plr);
+			updateCharacter(plr);
 		});
 
-		if (plr.Character) this.updateCharacter(plr);
+		if (plr.Character) updateCharacter(plr);
 	}
 
-	static updateCharacter(plr: Player) {
+	export function updateCharacter(plr: Player) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", plr.Character!, (instance) => {
 			instance.Massless = true;
 			instance.EnableFluidForces = false;

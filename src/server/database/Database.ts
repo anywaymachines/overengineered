@@ -1,5 +1,5 @@
-import Logger from "shared/Logger";
-import Objects from "shared/fixes/objects";
+import { Logger } from "shared/Logger";
+import { Objects } from "shared/fixes/objects";
 
 export abstract class DbBase<T> {
 	private readonly datastore;
@@ -38,7 +38,7 @@ export abstract class DbBase<T> {
 	}
 
 	loadedUnsavedEntries() {
-		return Objects.entries(this.cache).filter((entry) => entry[1].changed);
+		return Objects.entriesArray(this.cache).filter((entry) => entry[1].changed);
 	}
 
 	/** Removes an entry from the cache */
@@ -48,7 +48,7 @@ export abstract class DbBase<T> {
 
 	/** Clears tha cache */
 	freeAll() {
-		for (const [key, _] of Objects.pairs(this.cache)) {
+		for (const [key, _] of Objects.pairs_(this.cache)) {
 			delete this.cache[key];
 		}
 	}
@@ -64,7 +64,7 @@ export abstract class DbBase<T> {
 	}
 
 	saveChanged() {
-		for (const [key, value] of Objects.pairs(this.cache)) {
+		for (const [key, value] of Objects.pairs_(this.cache)) {
 			if (!value.changed) continue;
 
 			// delay between saves?

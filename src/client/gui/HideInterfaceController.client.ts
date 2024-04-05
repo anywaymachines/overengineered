@@ -1,5 +1,5 @@
 import { ReplicatedStorage, StarterGui, UserInputService, Workspace } from "@rbxts/services";
-import Gui from "./Gui";
+import { Gui } from "./Gui";
 
 let enabled = true;
 const guis = [Gui.getGameUI(), Gui.getUnscaledGameUI()];

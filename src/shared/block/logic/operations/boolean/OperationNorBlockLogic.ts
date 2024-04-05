@@ -1,8 +1,8 @@
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default class OperationNorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationnor> {
+export class OperationNorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationnor> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationnor);
 

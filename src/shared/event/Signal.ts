@@ -3,7 +3,7 @@ export interface ReadonlySignal<T extends (...args: never[]) => void = () => voi
 }
 
 /** A signal that you can subscribe to, unsibscribe from and fire */
-export default class Signal<T extends (...args: never[]) => void = () => void> implements ReadonlySignal<T> {
+export class Signal<T extends (...args: never[]) => void = () => void> implements ReadonlySignal<T> {
 	private destroyed = false;
 	private subscribed?: Set<unknown>; // unknown instead of T to workaround the type system
 	private inSelf = 0;

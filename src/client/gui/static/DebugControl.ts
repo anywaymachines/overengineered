@@ -1,14 +1,14 @@
 import { Colors } from "client/gui/Colors";
-import Control from "client/gui/Control";
-import Gui from "client/gui/Gui";
-import GuiAnimator from "client/gui/GuiAnimator";
-import Logger from "shared/Logger";
-import Remotes from "shared/Remotes";
+import { Control } from "client/gui/Control";
+import { Gui } from "client/gui/Gui";
+import { GuiAnimator } from "client/gui/GuiAnimator";
+import { Logger } from "shared/Logger";
+import { Remotes } from "shared/Remotes";
 import { LogControlDefinition } from "./LogControl";
 
 export type DebugControlDefinition = LogControlDefinition;
 
-export default class DebugControl extends Control<DebugControlDefinition> {
+export class DebugControl extends Control<DebugControlDefinition> {
 	static readonly instance = new DebugControl(
 		Gui.getGameUI<{
 			Debug: DebugControlDefinition;

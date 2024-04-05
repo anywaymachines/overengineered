@@ -1,19 +1,19 @@
-export default class RobloxUnit {
-	static Studs_To_Meters(Studs: number) {
+export namespace RobloxUnit {
+	export function Studs_To_Meters(Studs: number) {
 		return Studs * 0.28;
 	}
 
-	static Meters_To_Studs(Meters: number) {
+	export function Meters_To_Studs(Meters: number) {
 		return Meters / 0.28;
 	}
 
 	/** BasePart.Mass */
-	static RMU_To_Kilograms(Mass: number) {
+	export function RMU_To_Kilograms(Mass: number) {
 		return Mass * 21.952;
 	}
 
 	/** Magnitude => meter/second */
-	static getSpeedFromMagnitude(magnitude: number, unit: "MetersPerSecond" | "Knots" = "MetersPerSecond") {
+	export function getSpeedFromMagnitude(magnitude: number, unit: "MetersPerSecond" | "Knots" = "MetersPerSecond") {
 		if (unit === "MetersPerSecond") {
 			return magnitude / 3.57;
 		} else if (unit === "Knots") {
@@ -24,20 +24,20 @@ export default class RobloxUnit {
 	}
 
 	/** VectorForce.Force */
-	static Rowton_To_Newton(Force: number) {
+	export function Rowton_To_Newton(Force: number) {
 		return Force / 0.163;
 	}
 
 	/** Torque.Torque */
-	static RowtonStuds_To_NewtonMeters(RowtonStuds: number) {
+	export function RowtonStuds_To_NewtonMeters(RowtonStuds: number) {
 		return RowtonStuds / 0.581;
 	}
 
-	static SpringStiffnes_To_NewtonOnMeters(Stiffnes: number) {
+	export function SpringStiffnes_To_NewtonOnMeters(Stiffnes: number) {
 		return Stiffnes / 0.0456;
 	}
 
-	static SpringDumping_To_NewtonSecondOnMeter(Dumping: number) {
+	export function SpringDumping_To_NewtonSecondOnMeter(Dumping: number) {
 		return Dumping / 0.0456;
 	}
 }

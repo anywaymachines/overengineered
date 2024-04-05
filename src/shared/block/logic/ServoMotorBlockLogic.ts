@@ -1,7 +1,7 @@
 import { RunService } from "@rbxts/services";
-import RemoteEvents from "shared/RemoteEvents";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { RemoteEvents } from "shared/RemoteEvents";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
 type ServoMotor = BlockModel & {
@@ -10,7 +10,7 @@ type ServoMotor = BlockModel & {
 	};
 	readonly Attach: Part;
 };
-export default class ServoMotorBlockLogic extends ConfigurableBlockLogic<
+export class ServoMotorBlockLogic extends ConfigurableBlockLogic<
 	typeof blockConfigRegistry.servomotorblock,
 	ServoMotor
 > {

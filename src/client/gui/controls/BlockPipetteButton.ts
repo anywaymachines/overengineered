@@ -1,15 +1,15 @@
 import { Players, UserInputService } from "@rbxts/services";
 import { Colors } from "client/gui/Colors";
 import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
-import HoveredPartHighlighter from "client/tools/selectors/HoveredPartHighlighter";
-import BlockManager from "shared/building/BlockManager";
-import BuildingManager from "shared/building/BuildingManager";
-import GameDefinitions from "shared/data/GameDefinitions";
-import EventHandler from "shared/event/EventHandler";
-import SlimFilter from "shared/event/SlimFilter";
-import SlimSignal from "shared/event/SlimSignal";
+import { HoveredPartHighlighter } from "client/tools/selectors/HoveredPartHighlighter";
+import { BlockManager } from "shared/building/BlockManager";
+import { BuildingManager } from "shared/building/BuildingManager";
+import { GameDefinitions } from "shared/data/GameDefinitions";
+import { EventHandler } from "shared/event/EventHandler";
+import { SlimFilter } from "shared/event/SlimFilter";
+import { SlimSignal } from "shared/event/SlimSignal";
 
-export default class BlockPipetteButton extends ButtonControl {
+export class BlockPipetteButton extends ButtonControl {
 	readonly onStart = new SlimSignal();
 	readonly onEnd = new SlimSignal();
 	readonly onSelect = new SlimSignal<(part: BasePart | BlockModel) => void>();

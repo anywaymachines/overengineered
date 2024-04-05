@@ -1,17 +1,17 @@
-import InputController from "client/controller/InputController";
-import Gui from "client/gui/Gui";
-import BuildingMode from "client/modes/build/BuildingMode";
+import { InputController } from "client/controller/InputController";
+import { Gui } from "client/gui/Gui";
+import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import ToolBase from "client/tools/ToolBase";
+import { ToolBase } from "client/tools/ToolBase";
 import { BoxSelector } from "client/tools/selectors/BoxSelector";
-import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
+import { HoveredBlockHighlighter } from "client/tools/selectors/HoveredBlockHighlighter";
 import { MovingSelector } from "client/tools/selectors/MovingSelector";
 import { SelectorParent } from "client/tools/selectors/SelectorParent";
-import BlockManager from "shared/building/BlockManager";
+import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import ObservableValue from "shared/event/ObservableValue";
+import { ObservableValue } from "shared/event/ObservableValue";
 
-export default class PaintTool extends ToolBase {
+export class PaintTool extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly enableMaterial = new ObservableValue(true);

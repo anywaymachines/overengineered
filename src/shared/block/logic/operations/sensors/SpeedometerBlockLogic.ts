@@ -1,10 +1,10 @@
 import { RunService } from "@rbxts/services";
-import RobloxUnit from "shared/RobloxUnit";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { RobloxUnit } from "shared/RobloxUnit";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default class SpeedometerBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.speedometer> {
+export class SpeedometerBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.speedometer> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.speedometer);
 		this.event.subscribe(RunService.Heartbeat, () => this.update());

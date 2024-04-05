@@ -3,8 +3,8 @@ import { ClientComponent } from "client/component/ClientComponent";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
-import ObservableValue from "shared/event/ObservableValue";
-import HoveredBlockHighlighter from "./HoveredBlockHighlighter";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { HoveredBlockHighlighter } from "./HoveredBlockHighlighter";
 import { MultiModelHighlighter } from "./MultiModelHighlighter";
 
 export class HoveredBlocksHighlighter extends ClientComponent {

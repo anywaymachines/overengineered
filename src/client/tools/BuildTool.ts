@@ -1,25 +1,25 @@
 import { GuiService, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
-import InputController from "client/controller/InputController";
-import SoundController from "client/controller/SoundController";
-import Signals from "client/event/Signals";
+import { InputController } from "client/controller/InputController";
+import { SoundController } from "client/controller/SoundController";
+import { Signals } from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
-import Gui from "client/gui/Gui";
-import LogControl from "client/gui/static/LogControl";
+import { Gui } from "client/gui/Gui";
+import { LogControl } from "client/gui/static/LogControl";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
-import BuildingMode from "client/modes/build/BuildingMode";
+import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import ToolBase from "client/tools/ToolBase";
-import { blockRegistry } from "shared/Registry";
-import BlockManager from "shared/building/BlockManager";
-import BuildingManager from "shared/building/BuildingManager";
-import ObservableValue from "shared/event/ObservableValue";
-import Signal from "shared/event/Signal";
-import PartUtils from "shared/utils/PartUtils";
-import PlayerUtils from "shared/utils/PlayerUtils";
-import VectorUtils from "shared/utils/VectorUtils";
+import { ToolBase } from "client/tools/ToolBase";
+import { BlocksInitializer } from "shared/BlocksInitializer";
+import { BlockManager } from "shared/building/BlockManager";
+import { BuildingManager } from "shared/building/BuildingManager";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { Signal } from "shared/event/Signal";
+import { PartUtils } from "shared/utils/PartUtils";
+import { PlayerUtils } from "shared/utils/PlayerUtils";
+import { VectorUtils } from "shared/utils/VectorUtils";
 
 /** A tool for building in the world with blocks */
-export default class BuildTool extends ToolBase {
+export class BuildTool extends ToolBase {
 	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
 
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
@@ -287,7 +287,7 @@ export default class BuildTool extends ToolBase {
 		const id = BlockManager.manager.id.get(model);
 		if (id === undefined) return; // not a block
 
-		this.pickSignal.Fire(blockRegistry.get(id)!);
+		this.pickSignal.Fire(BlocksInitializer.blocks.map.get(id)!);
 
 		this.setSelectedMaterial(BlockManager.manager.material.get(model));
 		this.setSelectedColor(BlockManager.manager.color.get(model));

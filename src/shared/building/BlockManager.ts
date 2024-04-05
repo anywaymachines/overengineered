@@ -1,5 +1,5 @@
-import Serializer from "shared/Serializer";
-import JSON, { JsonSerializablePrimitive } from "shared/fixes/Json";
+import { Serializer } from "shared/Serializer";
+import { JSON, JsonSerializablePrimitive } from "shared/fixes/Json";
 
 /** Connections to the INPUT connectors */
 export type PlacedBlockLogicConnections = {
@@ -31,91 +31,93 @@ declare global {
 
 interface Manager<T> {
 	readonly set: (block: BlockModel, value: T) => void;
-	readonly get: (block: BlockModel) => T;
+	readonly get: (block: BlockModel) => T & defined;
 }
 
 /** Methods for reading information about a block */
-export default class BlockManager {
-	static isActiveBlockPart(part: Instance): boolean {
-		if (!this.isBlockPart(part) || part.AssemblyRootPart?.Anchored || part.Anchored) {
+export namespace BlockManager {
+	export function isActiveBlockPart(part: Instance): boolean {
+		if (!isBlockPart(part) || part.AssemblyRootPart?.Anchored || part.Anchored) {
 			return false;
 		}
 
 		return true;
 	}
 
-	static isBlockModel(part: Instance | undefined): part is BlockModel {
+	export function isBlockModel(part: Instance | undefined): part is BlockModel {
 		return part !== undefined && part.Parent?.Name === "Blocks";
 	}
 
-	static isBlockPart(part: Instance | undefined): part is BasePart & { Parent: BlockModel } {
+	export function isBlockPart(part: Instance | undefined): part is BasePart & { Parent: BlockModel } {
 		if (
 			!part ||
 			!part.Parent ||
 			!part.Parent.IsA("Model") ||
-			this.manager.id.get(part.Parent as BlockModel) === undefined
+			manager.id.get(part.Parent as BlockModel) === undefined
 		)
 			return false;
 		return true;
 	}
 
-	static getBlockDataByPart(part: BasePart): PlacedBlockData | undefined {
-		if (this.isBlockPart(part)) {
-			return this.getBlockDataByBlockModel(part.Parent);
+	export function getBlockDataByPart(part: BasePart): PlacedBlockData | undefined {
+		if (isBlockPart(part)) {
+			return getBlockDataByBlockModel(part.Parent);
 		}
 
 		return;
 	}
 
-	static readonly manager = {
-		id: {
-			set: (block, value) => block.SetAttribute("id", value),
-			get: (block) => block.GetAttribute("id") as string,
-		},
-		uuid: {
-			set: (block, value) => block.SetAttribute("uuid", value),
-			get: (block) => block.GetAttribute("uuid") as BlockUuid,
-		},
-
-		material: {
-			set: (block, value) => block.SetAttribute("material", Serializer.EnumMaterialSerializer.serialize(value)),
-			get: (block) =>
-				Serializer.EnumMaterialSerializer.deserialize(block.GetAttribute("material") as SerializedEnum),
-		},
-		color: {
-			set: (block, value) => block.SetAttribute("color", value),
-			get: (block) => block.GetAttribute("color") as Color3,
-		},
-
-		config: {
-			set: (block, value: PlacedBlockConfig | undefined) =>
-				block.SetAttribute("config", value ? JSON.serialize(value) : undefined),
-			get: (block) => {
-				const attribute = block.GetAttribute("config") as string | undefined;
-				if (attribute === undefined) return attribute ?? {};
-				return JSON.deserialize<PlacedBlockConfig>(attribute);
+	export const manager: { readonly [k in Exclude<keyof PlacedBlockData, "instance">]: Manager<PlacedBlockData[k]> } =
+		{
+			id: {
+				set: (block, value) => block.SetAttribute("id", value),
+				get: (block) => block.GetAttribute("id") as string,
 			},
-		},
-		connections: {
-			set: (block, value: PlacedBlockLogicConnections | undefined) =>
-				block.SetAttribute("connections", value !== undefined ? JSON.serialize(value) : undefined),
-			get: (block) => {
-				const attribute = block.GetAttribute("connections") as string | undefined;
-				if (attribute === undefined) return attribute ?? {};
-				return JSON.deserialize<PlacedBlockLogicConnections>(attribute);
+			uuid: {
+				set: (block, value) => block.SetAttribute("uuid", value),
+				get: (block) => block.GetAttribute("uuid") as BlockUuid,
 			},
-		},
-	} as const satisfies { [k in Exclude<keyof PlacedBlockData, "instance">]: Manager<PlacedBlockData[k]> };
 
-	static getBlockDataByBlockModel(model: BlockModel): PlacedBlockData {
+			material: {
+				set: (block, value) =>
+					block.SetAttribute("material", Serializer.EnumMaterialSerializer.serialize(value)),
+				get: (block) =>
+					Serializer.EnumMaterialSerializer.deserialize(block.GetAttribute("material") as SerializedEnum),
+			},
+			color: {
+				set: (block, value) => block.SetAttribute("color", value),
+				get: (block) => block.GetAttribute("color") as Color3,
+			},
+
+			config: {
+				set: (block, value: PlacedBlockConfig | undefined) =>
+					block.SetAttribute("config", value ? JSON.serialize(value) : undefined),
+				get: (block) => {
+					const attribute = block.GetAttribute("config") as string | undefined;
+					if (attribute === undefined) return attribute ?? {};
+					return JSON.deserialize<PlacedBlockConfig>(attribute);
+				},
+			},
+			connections: {
+				set: (block, value: PlacedBlockLogicConnections | undefined) =>
+					block.SetAttribute("connections", value !== undefined ? JSON.serialize(value) : undefined),
+				get: (block) => {
+					const attribute = block.GetAttribute("connections") as string | undefined;
+					if (attribute === undefined) return attribute ?? {};
+					return JSON.deserialize<PlacedBlockLogicConnections>(attribute);
+				},
+			},
+		};
+
+	export function getBlockDataByBlockModel(model: BlockModel): PlacedBlockData {
 		return {
 			instance: model,
-			id: this.manager.id.get(model),
-			color: this.manager.color.get(model),
-			material: this.manager.material.get(model),
-			uuid: this.manager.uuid.get(model),
-			connections: this.manager.connections.get(model) ?? {},
-			config: this.manager.config.get(model) ?? {},
+			id: manager.id.get(model),
+			color: manager.color.get(model),
+			material: manager.material.get(model),
+			uuid: manager.uuid.get(model),
+			connections: manager.connections.get(model) ?? {},
+			config: manager.config.get(model) ?? {},
 		};
 	}
 }

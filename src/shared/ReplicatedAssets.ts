@@ -1,5 +1,7 @@
 import { ReplicatedStorage } from "@rbxts/services";
 
-export const ReplicatedAssets = {
-	get: <T extends object = Folder>() => ReplicatedStorage.Assets as T,
-};
+export namespace ReplicatedAssets {
+	export function get<T extends object = Folder>() {
+		return ReplicatedStorage.Assets as T;
+	}
+}

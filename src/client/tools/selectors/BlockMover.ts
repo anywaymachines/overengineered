@@ -1,12 +1,12 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientComponentChild } from "client/component/ClientComponentChild";
-import InputController from "client/controller/InputController";
-import Signals from "client/event/Signals";
-import Gui from "client/gui/Gui";
+import { InputController } from "client/controller/InputController";
+import { Signals } from "client/event/Signals";
+import { Gui } from "client/gui/Gui";
 import { InputTooltips, TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { SharedPlot } from "shared/building/SharedPlot";
-import NumberObservableValue from "shared/event/NumberObservableValue";
+import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { AABB } from "shared/fixes/AABB";
 
 abstract class MoveBase extends ClientComponent {
@@ -207,12 +207,12 @@ class GamepadMove extends MoveBase {
 	}
 }
 
-export const BlockMover = {
-	create: (plot: SharedPlot, blocks: readonly BlockModel[]) => {
+export namespace BlockMover {
+	export function create(plot: SharedPlot, blocks: readonly BlockModel[]) {
 		return ClientComponentChild.createOnceBasedOnInputType<MoveBase>({
 			Desktop: () => new DesktopMove(plot, blocks),
 			Touch: () => new TouchMove(plot, blocks),
 			Gamepad: () => new GamepadMove(plot, blocks),
 		});
-	},
-} as const;
+	}
+}

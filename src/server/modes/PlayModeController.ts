@@ -1,12 +1,12 @@
 import { Players } from "@rbxts/services";
-import Logger from "shared/Logger";
-import Remotes from "shared/Remotes";
-import PlayerUtils from "shared/utils/PlayerUtils";
-import BuildMode from "./BuildMode";
-import PlayModeBase from "./PlayModeBase";
-import RideMode from "./RideMode";
+import { Logger } from "shared/Logger";
+import { Remotes } from "shared/Remotes";
+import { PlayerUtils } from "shared/utils/PlayerUtils";
+import { BuildMode } from "./BuildMode";
+import { PlayModeBase } from "./PlayModeBase";
+import { RideMode } from "./RideMode";
 
-export default class PlayModeController {
+export class PlayModeController {
 	private static readonly playerModes: Record<number, PlayModes | undefined> = {};
 	private static readonly modes = {
 		ride: new RideMode(),

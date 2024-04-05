@@ -1,10 +1,10 @@
-import RobloxUnit from "shared/RobloxUnit";
+import { RobloxUnit } from "shared/RobloxUnit";
 
-const GameDefinitions = {
-	APRIL_FOOLS: false,
+export namespace GameDefinitions {
+	export const APRIL_FOOLS = false;
 
-	GROUP: 1088368,
-	RANKS: {
+	export const GROUP = 1088368;
+	export const RANKS = {
 		255: {
 			name: "UNREAL",
 			color: Color3.fromRGB(0, 0, 0),
@@ -17,26 +17,26 @@ const GameDefinitions = {
 			name: "Game Test",
 			color: Color3.fromRGB(170, 255, 255),
 		},
-	} as { readonly [rank: number]: { name: string; color?: Color3; rainbow?: boolean } },
+	} as { readonly [rank: number]: { name: string; color?: Color3; rainbow?: boolean } };
 
-	GAMEPASSES: {
+	export const GAMEPASSES = {
 		NeonMaterial: 748518813,
-	},
+	};
 
 	// Building
-	FREE_SLOTS: 15,
-	ADMIN_SLOTS: 50,
+	export const FREE_SLOTS = 15;
+	export const ADMIN_SLOTS = 50;
 
-	MAX_LINEAR_SPEED: RobloxUnit.Meters_To_Studs(1000),
-	MAX_ANGULAR_SPEED: 40,
+	export const MAX_LINEAR_SPEED = RobloxUnit.Meters_To_Studs(1000);
+	export const MAX_ANGULAR_SPEED = 40;
 
-	isAdmin(player: Player) {
+	export function isAdmin(player: Player) {
 		if (player.Name === "i3ymm" || player.Name === "3QAXM" || player.Name === "samlovebutter") return true;
 
 		let err: string | undefined;
 		for (let i = 0; i < 3; i++) {
 			try {
-				return player.GetRankInGroup(GameDefinitions.GROUP) > 250;
+				return player.GetRankInGroup(GROUP) > 250;
 			} catch (error) {
 				// eslint-disable-next-line no-ex-assign
 				error = err;
@@ -45,13 +45,12 @@ const GameDefinitions = {
 		}
 
 		return false;
-	},
+	}
 
-	getMaxSlots(player: Player, additional: number) {
-		let max = this.FREE_SLOTS + additional;
-		if (this.isAdmin(player)) max += this.ADMIN_SLOTS;
+	export function getMaxSlots(player: Player, additional: number) {
+		let max = FREE_SLOTS + additional;
+		if (isAdmin(player)) max += ADMIN_SLOTS;
 
 		return max;
-	},
-} as const;
-export default GameDefinitions;
+	}
+}

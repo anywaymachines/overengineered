@@ -1,8 +1,8 @@
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default class CounterBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.counter> {
+export class CounterBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.counter> {
 	private currentValue: number = 0;
 	private step: number = 0;
 

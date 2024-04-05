@@ -1,5 +1,5 @@
 import { Debris, ReplicatedStorage } from "@rbxts/services";
-import EffectBase from "./EffectBase";
+import { EffectBase } from "./EffectBase";
 
 ReplicatedStorage.WaitForChild("Assets");
 
@@ -7,7 +7,7 @@ type Args = {
 	readonly part: BasePart;
 	readonly index?: number;
 };
-export default class ImpactSoundEffect extends EffectBase<Args> {
+export class ImpactSoundEffect extends EffectBase<Args> {
 	private readonly materialSounds: { readonly [key: string]: Instance[] } = {
 		Default: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
 

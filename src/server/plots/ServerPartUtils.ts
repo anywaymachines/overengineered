@@ -1,33 +1,32 @@
-import PartUtils from "shared/utils/PartUtils";
+import { PartUtils } from "shared/utils/PartUtils";
 
 /** Methods to edit block part information */
-export default class ServerPartUtils {
-	static switchDescendantsAnchor(model: Instance, isAnchored: boolean) {
+export namespace ServerPartUtils {
+	export function switchDescendantsAnchor(model: Instance, isAnchored: boolean) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
 			part.Anchored = isAnchored;
 		});
 	}
 
-	static switchDescendantsNetworkOwner(model: Instance, owner: Player | undefined) {
+	export function switchDescendantsNetworkOwner(model: Instance, owner: Player | undefined) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
 			part.SetNetworkOwner(owner);
 		});
 	}
 
-	static readonly removeQueue = new Set<Instance>();
-
-	static BreakJoints(part: BasePart) {
+	const removeQueue = new Set<Instance>();
+	export function BreakJoints(part: BasePart) {
 		PartUtils.BreakJoints(part);
 
 		if (part.IsA("VehicleSeat")) return;
 
-		if (game.PrivateServerOwnerId === 0 && !this.removeQueue.has(part)) {
+		if (game.PrivateServerOwnerId === 0 && !removeQueue.has(part)) {
 			const time = math.random(20, 60);
 			game.GetService("Debris").AddItem(part, time);
 
-			this.removeQueue.add(part);
+			removeQueue.add(part);
 			task.delay(time, () => {
-				this.removeQueue.delete(part);
+				removeQueue.delete(part);
 			});
 		}
 	}

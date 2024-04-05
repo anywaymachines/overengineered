@@ -1,13 +1,13 @@
 import { Players, RunService } from "@rbxts/services";
-import Control from "client/gui/Control";
-import Gui from "client/gui/Gui";
+import { Control } from "client/gui/Control";
+import { Gui } from "client/gui/Gui";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
 import { LoadingTests } from "client/test/tests/LoadingTests";
 import { WireToolTests } from "client/tools/WireTool";
 import { Element } from "shared/Element";
 import { InstanceComponent } from "shared/component/InstanceComponent";
-import Objects from "shared/fixes/objects";
+import { Objects } from "shared/fixes/objects";
 import { AABBTests } from "./tests/AABBTests";
 import { ComponentTests } from "./tests/ComponentTests";
 import { LogicTests } from "./tests/LogicTests";
@@ -52,7 +52,7 @@ const create = () => {
 		const alltests = tests;
 		tests = {
 			runAll: () => {
-				for (const [name, test] of Objects.pairs(alltests)) {
+				for (const [name, test] of Objects.pairs_(alltests)) {
 					print(`[${name}] Running`);
 					test();
 					print(`[${name}] SUCCESS`);
@@ -61,7 +61,7 @@ const create = () => {
 			...tests,
 		};
 
-		for (const [name, test] of Objects.entries(tests)) {
+		for (const [name, test] of Objects.pairs_(tests)) {
 			const button = TextButtonControl.create({
 				Text: name,
 				AutomaticSize: Enum.AutomaticSize.XY,

@@ -1,52 +1,52 @@
 import { ContextActionService, Players } from "@rbxts/services";
-import Signals from "client/event/Signals";
+import { Signals } from "client/event/Signals";
 import { PlayerModule } from "client/types/PlayerModule";
-import ObservableValue from "shared/event/ObservableValue";
-import PartUtils from "shared/utils/PartUtils";
-import InputController from "./InputController";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { PartUtils } from "shared/utils/PartUtils";
+import { InputController } from "./InputController";
 
-export default class LocalPlayerController {
-	static humanoid: Humanoid | undefined;
-	static rootPart: BasePart | undefined;
+export namespace LocalPlayerController {
+	export let humanoid: Humanoid | undefined;
+	export let rootPart: BasePart | undefined;
 
 	// Player settings
-	private static readonly WALKSPEED_DEFAULT = 20;
-	private static readonly WALKSPEED_SPRINT = 60;
+	const WALKSPEED_DEFAULT = 20;
+	const WALKSPEED_SPRINT = 60;
 
 	// Properties
-	static readonly isSprinting = new ObservableValue<boolean>(false);
+	export const isSprinting = new ObservableValue<boolean>(false);
 
-	private static playerSpawned() {
+	function playerSpawned() {
 		const character = Players.LocalPlayer.Character!;
-		this.humanoid = character.WaitForChild("Humanoid") as Humanoid;
-		this.rootPart = character.WaitForChild("HumanoidRootPart") as Part;
+		humanoid = character.WaitForChild("Humanoid") as Humanoid;
+		rootPart = character.WaitForChild("HumanoidRootPart") as Part;
 
 		// Death signal event
-		this.humanoid.Died.Once(() => Signals.PLAYER.DIED.Fire());
+		humanoid.Died.Once(() => Signals.PLAYER.DIED.Fire());
 
 		// Spawn signal
 		Signals.PLAYER.SPAWN.Fire();
 
 		// Prepare physics
-		this.disableCharacterFluidForces();
+		disableCharacterFluidForces();
 	}
 
-	private static initializeSprintLogic() {
+	function initializeSprintLogic() {
 		// ContextActionService worker
 		const runEvent = (_: string, inputState: Enum.UserInputState, inputObject: InputObject) => {
 			if (inputState !== Enum.UserInputState.Begin) {
-				this.isSprinting.set(false);
+				isSprinting.set(false);
 				return Enum.ContextActionResult.Pass;
 			}
-			this.isSprinting.set(true);
+			isSprinting.set(true);
 			return Enum.ContextActionResult.Pass;
 		};
 
 		// Update character walkspeed
-		this.isSprinting.subscribe((value) => {
-			if (!this.humanoid) return;
+		isSprinting.subscribe((value) => {
+			if (!humanoid) return;
 
-			this.humanoid.WalkSpeed = value ? this.WALKSPEED_SPRINT : this.WALKSPEED_DEFAULT;
+			humanoid.WalkSpeed = value ? WALKSPEED_SPRINT : WALKSPEED_DEFAULT;
 		});
 
 		// Input type handling for displaying sprint button correctly
@@ -70,29 +70,29 @@ export default class LocalPlayerController {
 	}
 
 	/** By default, character has `EnableFluidForces`, but because of the huge `Workspace.AirDensity`, it just flies like a feather */
-	private static disableCharacterFluidForces() {
+	function disableCharacterFluidForces() {
 		PartUtils.applyToAllDescendantsOfType("BasePart", Players.LocalPlayer.Character!, (part) => {
 			part.EnableFluidForces = false;
 		});
 	}
 
 	/** Native `PlayerModule` library */
-	static getPlayerModule(): PlayerModule {
+	export function getPlayerModule(): PlayerModule {
 		const instance = Players.LocalPlayer.WaitForChild("PlayerScripts").WaitForChild("PlayerModule") as ModuleScript;
 		return require(instance) as PlayerModule;
 	}
 
-	static initialize() {
-		this.initializeSprintLogic();
+	export function initialize() {
+		initializeSprintLogic();
 
 		Players.LocalPlayer.CharacterAdded.Connect((_) => {
 			// Wait for character loading if needed
 			if (!Players.LocalPlayer.HasAppearanceLoaded()) Players.LocalPlayer.CharacterAppearanceLoaded.Wait();
 
-			this.playerSpawned();
+			playerSpawned();
 		});
 
-		this.playerSpawned();
+		playerSpawned();
 
 		Players.LocalPlayer.CameraMaxZoomDistance = 512;
 	}

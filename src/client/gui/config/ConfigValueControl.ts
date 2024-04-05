@@ -1,6 +1,6 @@
-import Control from "client/gui/Control";
-import Objects from "shared/fixes/objects";
+import { Control } from "client/gui/Control";
 import { ConfigPartDefinition } from "client/gui/popup/SettingsPopup";
+import { Objects } from "shared/fixes/objects";
 
 export class ConfigValueControl<TGui extends GuiObject> extends Control<ConfigPartDefinition<TGui>> {
 	constructor(gui: ConfigPartDefinition<TGui>, name: string) {
@@ -10,7 +10,7 @@ export class ConfigValueControl<TGui extends GuiObject> extends Control<ConfigPa
 
 	protected sameOrUndefined<T>(configs: Readonly<Record<BlockUuid, T>>) {
 		let value: T | undefined;
-		for (const [_, config] of Objects.pairs(configs)) {
+		for (const [_, config] of Objects.pairs_(configs)) {
 			if (value !== undefined && value !== config) {
 				value = undefined;
 				break;
@@ -25,6 +25,6 @@ export class ConfigValueControl<TGui extends GuiObject> extends Control<ConfigPa
 		configs: Readonly<Record<BlockUuid, T>>,
 		mapfunc: (value: T, key: BlockUuid) => TOut,
 	): Readonly<Record<BlockUuid, TOut>> {
-		return Objects.fromEntries(Objects.entries(configs).map((e) => [e[0], mapfunc(e[1], e[0])] as const));
+		return Objects.fromEntries(Objects.entriesArray(configs).map((e) => [e[0], mapfunc(e[1], e[0])] as const));
 	}
 }

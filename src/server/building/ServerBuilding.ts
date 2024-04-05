@@ -1,13 +1,13 @@
 import { HttpService } from "@rbxts/services";
-import { blockRegistry } from "shared/Registry";
-import BlockManager, { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
+import { BlocksInitializer } from "shared/BlocksInitializer";
+import { BlockManager, PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import SharedPlots from "shared/building/SharedPlots";
+import { SharedPlots } from "shared/building/SharedPlots";
 import { AABB } from "shared/fixes/AABB";
-import JSON, { JsonSerializablePrimitive } from "shared/fixes/Json";
-import Objects from "shared/fixes/objects";
-import VectorUtils from "shared/utils/VectorUtils";
-import BuildingWelder from "./BuildingWelder";
+import { JSON, JsonSerializablePrimitive } from "shared/fixes/Json";
+import { Objects } from "shared/fixes/objects";
+import { VectorUtils } from "shared/utils/VectorUtils";
+import { BuildingWelder } from "./BuildingWelder";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
@@ -19,14 +19,14 @@ const bumpPlotVersion = (plot: PlotModel) => {
 };
 
 /** Methods for editing the buildings server-side */
-export const ServerBuilding = {
-	clearPlot: (plot: PlotModel): void => {
+export namespace ServerBuilding {
+	export function clearPlot(plot: PlotModel): void {
 		plot.Blocks.ClearAllChildren();
 		BuildingWelder.deleteWelds(plot);
 
 		bumpPlotVersion(plot);
-	},
-	placeBlock: (plot: PlotModel, data: PlaceBlockRequest): BuildResponse => {
+	}
+	export function placeBlock(plot: PlotModel, data: PlaceBlockRequest): BuildResponse {
 		if (SharedPlots.getPlotComponent(plot).ownerId.get() === undefined) {
 			return { success: false, message: "Player quit." };
 		}
@@ -36,7 +36,7 @@ export const ServerBuilding = {
 			throw "Block with this uuid already exists";
 		}
 
-		const block = blockRegistry.get(data.id)!;
+		const block = BlocksInitializer.blocks.map.get(data.id)!;
 
 		// round the coordinates
 		(data as Writable<typeof data>).location = data.location.sub(
@@ -70,8 +70,8 @@ export const ServerBuilding = {
 
 		bumpPlotVersion(plot);
 		return { success: true, model: model };
-	},
-	deleteBlocks: ({ plot, blocks }: DeleteBlocksRequest): Response => {
+	}
+	export function deleteBlocks({ plot, blocks }: DeleteBlocksRequest): Response {
 		if (blocks !== "all" && blocks.size() === 0) {
 			return success;
 		}
@@ -93,7 +93,7 @@ export const ServerBuilding = {
 			);
 			for (const [, c] of connections) {
 				for (const [otherblock, connectionName] of c) {
-					ServerBuilding.logicDisconnect({
+					logicDisconnect({
 						plot,
 						inputBlock: otherblock.instance,
 						inputConnection: connectionName,
@@ -114,8 +114,8 @@ export const ServerBuilding = {
 
 		bumpPlotVersion(plot);
 		return success;
-	},
-	moveBlocks: ({ plot, blocks, diff }: MoveBlocksRequest): Response => {
+	}
+	export function moveBlocks({ plot, blocks, diff }: MoveBlocksRequest): Response {
 		if (blocks !== "all" && blocks.size() === 0) {
 			return success;
 		}
@@ -141,8 +141,8 @@ export const ServerBuilding = {
 
 		bumpPlotVersion(plot);
 		return success;
-	},
-	rotateBlocks: ({ plot, blocks, pivot, diff }: RotateBlocksRequest): Response => {
+	}
+	export function rotateBlocks({ plot, blocks, pivot, diff }: RotateBlocksRequest): Response {
 		if (blocks !== "all" && blocks.size() === 0) {
 			return success;
 		}
@@ -174,8 +174,8 @@ export const ServerBuilding = {
 
 		bumpPlotVersion(plot);
 		return success;
-	},
-	logicConnect: (request: LogicConnectRequest): Response => {
+	}
+	export function logicConnect(request: LogicConnectRequest): Response {
 		const inputInfo = BlockManager.manager.connections.get(request.inputBlock);
 		const outputInfo = BlockManager.manager.uuid.get(request.outputBlock);
 
@@ -190,8 +190,8 @@ export const ServerBuilding = {
 		BlockManager.manager.connections.set(request.inputBlock, connections);
 		bumpPlotVersion(request.plot);
 		return success;
-	},
-	logicDisconnect: (request: LogicDisconnectRequest): Response => {
+	}
+	export function logicDisconnect(request: LogicDisconnectRequest): Response {
 		const connections = { ...BlockManager.manager.connections.get(request.inputBlock) };
 		if (connections[request.inputConnection]) {
 			delete connections[request.inputConnection];
@@ -200,8 +200,8 @@ export const ServerBuilding = {
 		BlockManager.manager.connections.set(request.inputBlock, connections);
 		bumpPlotVersion(request.plot);
 		return success;
-	},
-	paintBlocks: ({ plot, blocks, color, material }: PaintBlocksRequest): Response => {
+	}
+	export function paintBlocks({ plot, blocks, color, material }: PaintBlocksRequest): Response {
 		if (blocks !== "all" && blocks.size() === 0) {
 			return success;
 		}
@@ -210,8 +210,8 @@ export const ServerBuilding = {
 		SharedBuilding.paint(blocks, color, material, false);
 		bumpPlotVersion(plot);
 		return success;
-	},
-	updateConfig: (request: ConfigUpdateRequest): Response => {
+	}
+	export function updateConfig(request: ConfigUpdateRequest): Response {
 		/**
 		 * Assign only values, recursively.
 		 * @example assignValues({ a: { b: 'foo' } }, 'a', { c: 'bar' })
@@ -235,7 +235,7 @@ export const ServerBuilding = {
 			};
 
 			const ret: Record<string, JsonSerializablePrimitive | object> = { ...object };
-			for (const [key, val] of Objects.pairs(value as Record<string, JsonSerializablePrimitive | object>)) {
+			for (const [key, val] of Objects.pairs_(value as Record<string, JsonSerializablePrimitive | object>)) {
 				const rk = ret[key];
 
 				if (typeIs(rk, "Vector3") || !typeIs(rk, "table")) {
@@ -257,13 +257,13 @@ export const ServerBuilding = {
 
 		bumpPlotVersion(request.plot);
 		return success;
-	},
-	resetConfig: ({ plot, blocks }: ConfigResetRequest): Response => {
+	}
+	export function resetConfig({ plot, blocks }: ConfigResetRequest): Response {
 		for (const block of blocks) {
 			BlockManager.manager.config.set(block, undefined);
 		}
 
 		bumpPlotVersion(plot);
 		return success;
-	},
-} as const;
+	}
+}

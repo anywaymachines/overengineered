@@ -1,10 +1,10 @@
 import { Players } from "@rbxts/services";
-import Control from "client/gui/Control";
+import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
-import NumberTextBoxControl, { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
-import ToggleControl, { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
-import SharedPlots from "shared/building/SharedPlots";
-import ObservableValue from "shared/event/ObservableValue";
+import { NumberTextBoxControl, NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
+import { ToggleControl, ToggleControlDefinition } from "client/gui/controls/ToggleControl";
+import { SharedPlots } from "shared/building/SharedPlots";
+import { ObservableValue } from "shared/event/ObservableValue";
 
 export type MirrorEditorSingleControlDefinition = GuiObject & {
 	readonly Toggle: ToggleControlDefinition;
@@ -68,7 +68,7 @@ export type MirrorEditorControlDefinition = GuiObject & {
 	readonly Z: MirrorEditorSingleControlDefinition;
 };
 
-export default class MirrorEditorControl extends Control<MirrorEditorControlDefinition> {
+export class MirrorEditorControl extends Control<MirrorEditorControlDefinition> {
 	readonly value = new ObservableValue<MirrorMode>({});
 
 	private readonly x;

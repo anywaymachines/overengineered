@@ -1,12 +1,12 @@
-import BlockManager, { PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
-import SharedPlots from "shared/building/SharedPlots";
-import MaterialData from "shared/data/MaterialData";
-import Objects from "shared/fixes/objects";
-import PartUtils from "shared/utils/PartUtils";
+import { BlockManager, PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
+import { SharedPlots } from "shared/building/SharedPlots";
+import { MaterialData } from "shared/data/MaterialData";
+import { Objects } from "shared/fixes/objects";
+import { PartUtils } from "shared/utils/PartUtils";
 
 /** Methods for editing the building */
-export const SharedBuilding = {
-	getBlocksConnectedByLogicToMulti(plot: PlotModel, uuids: ReadonlySet<BlockUuid>) {
+export namespace SharedBuilding {
+	export function getBlocksConnectedByLogicToMulti(plot: PlotModel, uuids: ReadonlySet<BlockUuid>) {
 		const result = new Map<
 			BlockUuid,
 			(readonly [PlacedBlockData, BlockConnectionName, PlacedBlockDataConnection])[]
@@ -14,7 +14,7 @@ export const SharedBuilding = {
 		for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
 			if (otherblock.connections === undefined) continue;
 
-			for (const [connectionName, connection] of Objects.pairs(otherblock.connections)) {
+			for (const [connectionName, connection] of Objects.pairs_(otherblock.connections)) {
 				if (!uuids.has(connection.blockUuid)) continue;
 
 				let ret = result.get(connection.blockUuid);
@@ -27,18 +27,18 @@ export const SharedBuilding = {
 		}
 
 		return result;
-	},
+	}
 
 	/**
 	 * Set the block material and color
 	 * @param byBuild If true, will force update block transparency
 	 */
-	paint: (
+	export function paint(
 		blocks: readonly BlockModel[],
 		color: Color3 | undefined,
 		material: Enum.Material | undefined,
 		byBuild: boolean = false,
-	) => {
+	) {
 		for (const block of blocks) {
 			if (material) {
 				BlockManager.manager.material.set(block, material);
@@ -76,5 +76,5 @@ export const SharedBuilding = {
 				PartUtils.switchDescendantsColor(block, color);
 			}
 		}
-	},
-} as const;
+	}
+}

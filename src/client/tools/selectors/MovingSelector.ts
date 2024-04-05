@@ -1,7 +1,7 @@
 import { Players } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import InputController from "client/controller/InputController";
-import Signals from "client/event/Signals";
+import { InputController } from "client/controller/InputController";
+import { Signals } from "client/event/Signals";
 
 export class MovingSelector extends ClientComponent {
 	constructor(hovered: (part: BasePart) => void, released: () => void) {

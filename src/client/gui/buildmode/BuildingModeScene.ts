@@ -1,21 +1,21 @@
 import { LoadingController } from "client/controller/LoadingController";
-import Control from "client/gui/Control";
-import ToolbarControl, { ToolbarControlDefinition } from "client/gui/buildmode/ToolbarControl";
-import BuildTool2Scene, { BuildTool2SceneDefinition } from "client/gui/buildmode/tools/BuildTool2Scene";
-import BuildToolScene, { BuildToolSceneDefinition } from "client/gui/buildmode/tools/BuildToolScene";
-import ConfigToolScene, { ConfigToolSceneDefinition } from "client/gui/buildmode/tools/ConfigToolScene";
-import DeleteToolScene, { DeleteToolSceneDefinition } from "client/gui/buildmode/tools/DeleteToolScene";
-import PaintToolScene, { PaintToolSceneDefinition } from "client/gui/buildmode/tools/PaintToolScene";
+import { Control } from "client/gui/Control";
+import { ToolbarControl, ToolbarControlDefinition } from "client/gui/buildmode/ToolbarControl";
+import { BuildTool2Scene, BuildTool2SceneDefinition } from "client/gui/buildmode/tools/BuildTool2Scene";
+import { BuildToolScene, BuildToolSceneDefinition } from "client/gui/buildmode/tools/BuildToolScene";
+import { ConfigToolScene, ConfigToolSceneDefinition } from "client/gui/buildmode/tools/ConfigToolScene";
+import { DeleteToolScene, DeleteToolSceneDefinition } from "client/gui/buildmode/tools/DeleteToolScene";
+import { PaintToolScene, PaintToolSceneDefinition } from "client/gui/buildmode/tools/PaintToolScene";
 import { ButtonControl } from "client/gui/controls/Button";
-import SavePopup from "client/gui/popup/SavePopup";
-import SettingsPopup from "client/gui/popup/SettingsPopup";
+import { SavePopup } from "client/gui/popup/SavePopup";
+import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { requestMode } from "client/modes/PlayModeRequest";
-import ActionController from "client/modes/build/ActionController";
-import ToolBase from "client/tools/ToolBase";
-import ToolController from "client/tools/ToolController";
+import { ActionController } from "client/modes/build/ActionController";
+import { ToolBase } from "client/tools/ToolBase";
+import { ToolController } from "client/tools/ToolController";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 import { TransformProps } from "shared/component/Transform";
-import WireToolScene, { WireToolSceneDefinition } from "./tools/WireToolScene";
+import { WireToolScene, WireToolSceneDefinition } from "./tools/WireToolScene";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {
@@ -86,7 +86,7 @@ export type BuildingModeSceneDefinition = GuiObject & {
 		readonly Wire: WireToolSceneDefinition;
 	};
 };
-export default class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
+export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 	private readonly scenes = new ComponentKeyedChildren<ToolBase, Control>(this);
 
 	constructor(gui: BuildingModeSceneDefinition, tools: ToolController) {

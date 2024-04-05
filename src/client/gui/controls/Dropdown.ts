@@ -1,10 +1,10 @@
-import Control from "client/gui/Control";
+import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 
 export type DropdownDefinition = GuiButton & {
 	readonly Content: GuiObject;
 };
-export default class Dropdown<T extends DropdownDefinition = DropdownDefinition> extends Control<T> {
+export class Dropdown<T extends DropdownDefinition = DropdownDefinition> extends Control<T> {
 	private readonly button;
 	private readonly contents;
 

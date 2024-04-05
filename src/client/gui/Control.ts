@@ -1,7 +1,7 @@
 import { ClientInstanceComponent } from "client/component/ClientInstanceComponent";
 
 /** A component that is a GUI element */
-export default class Control<
+export class Control<
 	T extends GuiObject = GuiObject,
 	TChild extends IComponent = IComponent,
 > extends ClientInstanceComponent<T, TChild> {

@@ -1,5 +1,5 @@
 import { HttpService } from "@rbxts/services";
-import Objects from "./objects";
+import { Objects } from "./objects";
 
 type Serializer<TActual, TSerialized extends JsonSerializedProperty> = {
 	isType(obj: unknown): obj is TActual;
@@ -171,8 +171,8 @@ const serializers = {
 const serializerValues = Objects.values(serializers) as readonly Serializer<unknown, JsonSerializedProperty>[];
 
 /** JSON de/serializer with the support of some roblox native types like `Vector3` or `CFrame` */
-const JSON = {
-	serialize: <T>(value: JsonSerializable<T>): string => {
+export namespace JSON {
+	export function serialize<T>(value: JsonSerializable<T>): string {
 		const process = <T extends defined | undefined>(obj: T): JsonSerializedProperty => {
 			if (typeIs(obj, "number")) return obj;
 			if (typeIs(obj, "string")) return obj;
@@ -187,7 +187,7 @@ const JSON = {
 
 			if (typeIs(obj, "table")) {
 				const toserialize: Partial<Record<keyof T, JsonSerializedProperty>> = {};
-				for (const [key, value] of Objects.pairs(obj)) {
+				for (const [key, value] of Objects.pairs_(obj)) {
 					toserialize[key as keyof typeof toserialize] = process(value as JsonSerializedProperty);
 				}
 
@@ -198,8 +198,8 @@ const JSON = {
 		};
 
 		return HttpService.JSONEncode(process(value));
-	},
-	deserialize: <T>(data: string): JsonSerializable<T> => {
+	}
+	export function deserialize<T>(data: string): JsonSerializable<T> {
 		const process = <T>(obj: JsonSerializedProperty): unknown => {
 			if (typeIs(obj, "table") && "__type" in obj && obj["__type"] in serializers) {
 				return serializers[obj["__type"]].deserialize(obj as never);
@@ -212,7 +212,7 @@ const JSON = {
 
 			if (typeIs(obj, "table")) {
 				const toserialize: Partial<Record<keyof T, unknown>> = {};
-				for (const [key, value] of Objects.pairs(obj)) {
+				for (const [key, value] of Objects.pairs_(obj)) {
 					if (key === "__v") continue;
 					toserialize[key as keyof T] = process(value);
 				}
@@ -224,7 +224,5 @@ const JSON = {
 		};
 
 		return process(HttpService.JSONDecode(data) as JsonSerializedProperty) as JsonSerializable<T>;
-	},
-};
-
-export default JSON;
+	}
+}

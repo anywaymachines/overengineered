@@ -1,7 +1,7 @@
-import DisconnectBlockLogic from "shared/block/logic/DisconnectBlockLogic";
-import ServerBlockLogic from "server/blocks/ServerBlockLogic";
+import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
+import { DisconnectBlockLogic } from "shared/block/logic/DisconnectBlockLogic";
 
-export default class DisconnectBlockServerLogic extends ServerBlockLogic<typeof DisconnectBlockLogic> {
+export class DisconnectBlockServerLogic extends ServerBlockLogic<typeof DisconnectBlockLogic> {
 	constructor(logic: typeof DisconnectBlockLogic) {
 		super(logic);
 

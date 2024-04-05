@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
-import TerrainDataInfo from "shared/TerrainDataInfo";
+import { TerrainDataInfo } from "shared/TerrainDataInfo";
 
 type TerrainModel = Model & {
 	readonly 1: BasePart;
@@ -61,7 +61,7 @@ class TerrainChunk {
 	}
 }
 
-export default class TerrainModelGenerator {
+export class TerrainModelGenerator {
 	private readonly ChunkMap: Map<Vector2, TerrainChunk> = new Map<Vector2, TerrainChunk>();
 	private heightLimit = 0;
 	readonly chunkSize: Vector3;

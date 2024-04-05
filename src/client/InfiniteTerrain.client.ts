@@ -1,9 +1,10 @@
 import { Players, ReplicatedFirst, Workspace } from "@rbxts/services";
 import type { TerrainActor } from "client/InfiniteTerrainActor";
-import TerrainDataInfo from "shared/TerrainDataInfo";
-import Objects from "shared/fixes/objects";
-import PlayerUtils from "shared/utils/PlayerUtils";
-import PlayerDataStorage from "./PlayerDataStorage";
+import { TerrainDataInfo } from "shared/TerrainDataInfo";
+import { GameDefinitions } from "shared/data/GameDefinitions";
+import { Objects } from "shared/fixes/objects";
+import { PlayerUtils } from "shared/utils/PlayerUtils";
+import { PlayerDataStorage } from "./PlayerDataStorage";
 
 if (!game.IsLoaded()) {
 	game.Loaded.Wait();
@@ -13,6 +14,9 @@ while (!PlayerDataStorage.data.get()) {
 	task.wait();
 }
 
+if (GameDefinitions.APRIL_FOOLS) {
+	Workspace.Terrain.SetMaterialColor(Enum.Material.Basalt, new Color3(0.4, 0.2, 0.2));
+}
 const work = true;
 
 const folder = TerrainDataInfo.getInfo();
@@ -140,8 +144,8 @@ const shouldBeLoaded = (chunkX: number, chunkZ: number, centerX: number, centerZ
 };
 
 const UnloadChunks = (centerX: number, centerZ: number) => {
-	for (const [chunkX, data] of Objects.pairs(loadedChunks)) {
-		for (const [chunkZ, _] of Objects.pairs(data)) {
+	for (const [chunkX, data] of Objects.pairs_(loadedChunks)) {
+		for (const [chunkZ, _] of Objects.pairs_(data)) {
 			if (shouldBeLoaded(chunkX, chunkZ, centerX, centerZ)) continue;
 			UnloadChunk(chunkX, chunkZ);
 		}
@@ -193,8 +197,8 @@ const createChunkLoader = () => {
 		if (!Workspace.CurrentCamera) continue;
 
 		if (isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer)) {
-			for (const [x, c] of Objects.pairs(loadedChunks)) {
-				for (const [y] of Objects.pairs(c)) {
+			for (const [x, c] of Objects.pairs_(loadedChunks)) {
+				for (const [y] of Objects.pairs_(c)) {
 					UnloadChunk(x, y);
 				}
 				task.wait();

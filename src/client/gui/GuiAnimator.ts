@@ -1,14 +1,14 @@
 import { TweenService } from "@rbxts/services";
 import { ComponentEvents } from "shared/component/ComponentEvents";
 import { ReadonlyObservableValue } from "shared/event/ObservableValue";
-import Objects from "shared/fixes/objects";
+import { Objects } from "shared/fixes/objects";
 
 /** A class created for animating interfaces
  * @deprecated Use new gui animation module instead
  * */
-export default class GuiAnimator {
+export namespace GuiAnimator {
 	/** Animation for GUI transition */
-	static transition(
+	export function transition(
 		frame: GuiObject,
 		duration: number,
 		direction: "right" | "left" | "up" | "down",
@@ -29,7 +29,12 @@ export default class GuiAnimator {
 		frame.TweenPosition(defaultPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, duration);
 	}
 
-	static hide(frame: GuiObject, duration: number, direction: "right" | "left" | "up" | "down", power: number = 50) {
+	export function hide(
+		frame: GuiObject,
+		duration: number,
+		direction: "right" | "left" | "up" | "down",
+		power: number = 50,
+	) {
 		const defaultPosition = frame.Position;
 		const offsets = {
 			left: new UDim2(0, power, 0, 0),
@@ -49,7 +54,7 @@ export default class GuiAnimator {
 		});
 	}
 
-	static tweenPosition(frame: GuiObject, position: UDim2, duration: number) {
+	export function tweenPosition(frame: GuiObject, position: UDim2, duration: number) {
 		const info = { Position: position };
 		const tween = TweenService.Create(
 			frame,
@@ -60,7 +65,7 @@ export default class GuiAnimator {
 		tween.Play();
 	}
 
-	static revTransition(
+	export function revTransition(
 		frame: GuiObject,
 		duration: number,
 		direction: "right" | "left" | "up" | "down",
@@ -84,7 +89,7 @@ export default class GuiAnimator {
 	}
 
 	/** Animation for changing GUI colors */
-	static tweenColor(gui: GuiObject, color: Color3, time: number) {
+	export function tweenColor(gui: GuiObject, color: Color3, time: number) {
 		const info = { BackgroundColor3: color } as Partial<ExtractMembers<GuiBase, Tweenable>>;
 		const tween = TweenService.Create(
 			gui,
@@ -94,7 +99,7 @@ export default class GuiAnimator {
 		tween.Play();
 	}
 
-	static tweenTransparency(gui: GuiObject, transparency: number, time: number) {
+	export function tweenTransparency(gui: GuiObject, transparency: number, time: number) {
 		let info;
 		if (gui.IsA("TextLabel")) {
 			info = { TextTransparency: transparency } as Partial<ExtractMembers<GuiBase, Tweenable>>;
@@ -112,7 +117,7 @@ export default class GuiAnimator {
 		tween.Play();
 	}
 
-	static tween<T extends Instance>(gui: T, values: Partial<ExtractMembers<T, Tweenable>>, info: TweenInfo) {
+	export function tween<T extends Instance>(gui: T, values: Partial<ExtractMembers<T, Tweenable>>, info: TweenInfo) {
 		const tween = TweenService.Create(gui, info, values);
 		tween.Play();
 
@@ -123,7 +128,7 @@ export default class GuiAnimator {
 	 * Subscribes to the observable changed event and tweens the gui when it's changed.
 	 * Also immediately sets the properties on prepare.
 	 */
-	static value<T extends Instance, TValue>(
+	export function value<T extends Instance, TValue>(
 		event: ComponentEvents,
 		gui: T,
 		value: ReadonlyObservableValue<TValue>,

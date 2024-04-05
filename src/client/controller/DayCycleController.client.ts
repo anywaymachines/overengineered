@@ -1,5 +1,5 @@
 import { Lighting } from "@rbxts/services";
-import PlayerDataStorage from "client/PlayerDataStorage";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
 
 const timePerDayCycle = 20 * 60;
 const getMinutesAfterMidnightTime = () => {

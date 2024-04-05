@@ -1,16 +1,16 @@
-import InputController from "client/controller/InputController";
-import SoundController from "client/controller/SoundController";
+import { InputController } from "client/controller/InputController";
+import { SoundController } from "client/controller/SoundController";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
-import BuildingMode from "client/modes/build/BuildingMode";
+import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import ToolBase from "client/tools/ToolBase";
+import { ToolBase } from "client/tools/ToolBase";
 import { BoxSelector } from "client/tools/selectors/BoxSelector";
-import HoveredBlockHighlighter from "client/tools/selectors/HoveredBlockHighlighter";
+import { HoveredBlockHighlighter } from "client/tools/selectors/HoveredBlockHighlighter";
 import { SelectorParent } from "client/tools/selectors/SelectorParent";
-import ObservableValue from "shared/event/ObservableValue";
-import Signal from "shared/event/Signal";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { Signal } from "shared/event/Signal";
 
-export default class DeleteTool extends ToolBase {
+export class DeleteTool extends ToolBase {
 	readonly onClearAllRequested = new Signal<() => void>();
 	readonly highlightedBlock = new ObservableValue<BlockModel | undefined>(undefined);
 	tutorialBlocksToRemove: (TutorialDeleteBlockHighlight & { instance: Instance })[] = [];

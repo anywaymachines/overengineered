@@ -1,12 +1,12 @@
-import Control from "client/gui/Control";
-import NumberObservableValue from "shared/event/NumberObservableValue";
-import ObservableValue from "shared/event/ObservableValue";
-import Signal from "shared/event/Signal";
+import { Control } from "client/gui/Control";
+import { NumberObservableValue } from "shared/event/NumberObservableValue";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { Signal } from "shared/event/Signal";
 
 export type NumberTextBoxControlDefinition = TextBox;
 
 /** Control that represents a number via a text input */
-export default class NumberTextBoxControl<
+export class NumberTextBoxControl<
 	T extends number | undefined = number,
 > extends Control<NumberTextBoxControlDefinition> {
 	readonly submitted = new Signal<(value: number) => void>();

@@ -1,11 +1,12 @@
-import Control from "client/gui/Control";
-import GuiAnimator from "client/gui/GuiAnimator";
-import MaterialColorEditControl, {
+import { Control } from "client/gui/Control";
+import { GuiAnimator } from "client/gui/GuiAnimator";
+import {
+	MaterialColorEditControl,
 	MaterialColorEditControlDefinition,
 } from "client/gui/buildmode/MaterialColorEditControl";
 import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
-import ToggleControl, { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
-import PaintTool from "client/tools/PaintTool";
+import { ToggleControl, ToggleControlDefinition } from "client/gui/controls/ToggleControl";
+import { PaintTool } from "client/tools/PaintTool";
 
 export type PaintToolSceneDefinition = GuiObject & {
 	readonly Bottom: MaterialColorEditControlDefinition & {
@@ -25,7 +26,7 @@ export type PaintToolSceneDefinition = GuiObject & {
 	//readonly PaintEverythingButton: GuiButton;
 };
 
-export default class PaintToolScene extends Control<PaintToolSceneDefinition> {
+export class PaintToolScene extends Control<PaintToolSceneDefinition> {
 	readonly tool;
 
 	constructor(gui: PaintToolSceneDefinition, tool: PaintTool) {

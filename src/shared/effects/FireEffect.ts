@@ -1,11 +1,11 @@
 import { Debris, ReplicatedStorage } from "@rbxts/services";
-import EffectBase from "./EffectBase";
+import { EffectBase } from "./EffectBase";
 
 type Args = {
 	readonly part: BasePart;
 	readonly duration?: number;
 };
-export default class FireEffect extends EffectBase<Args> {
+export class FireEffect extends EffectBase<Args> {
 	constructor() {
 		super("fire_effect");
 	}

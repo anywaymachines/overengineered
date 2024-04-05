@@ -1,10 +1,8 @@
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export default class OperationBufferBlockLogic extends ConfigurableBlockLogic<
-	typeof blockConfigRegistry.operationbuffer
-> {
+export class OperationBufferBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationbuffer> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.operationbuffer);
 

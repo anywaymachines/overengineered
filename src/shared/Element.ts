@@ -1,20 +1,25 @@
-import Objects from "shared/fixes/objects";
+import { Objects } from "shared/fixes/objects";
 
 export type ElementProperties<T extends Instance> = Partial<ExcludeMembers<T, "Name">>;
 
-export class Element {
-	static create<T extends keyof CreatableInstances, const TChildren extends Readonly<Record<string, Instance>>>(
-		this: void,
-		instanceType: T,
-		properties?: ElementProperties<CreatableInstances[T]>,
-	): CreatableInstances[T];
-	static create<T extends keyof CreatableInstances, const TChildren extends Readonly<Record<string, Instance>>>(
+export namespace Element {
+	export function create<
+		T extends keyof CreatableInstances,
+		const TChildren extends Readonly<Record<string, Instance>>,
+	>(this: void, instanceType: T, properties?: ElementProperties<CreatableInstances[T]>): CreatableInstances[T];
+	export function create<
+		T extends keyof CreatableInstances,
+		const TChildren extends Readonly<Record<string, Instance>>,
+	>(
 		this: void,
 		instanceType: T,
 		properties?: ElementProperties<CreatableInstances[T]>,
 		children?: TChildren,
 	): CreatableInstances[T] & { [k in keyof TChildren]: TChildren[k] };
-	static create<T extends keyof CreatableInstances, const TChildren extends Readonly<Record<string, Instance>>>(
+	export function create<
+		T extends keyof CreatableInstances,
+		const TChildren extends Readonly<Record<string, Instance>>,
+	>(
 		this: void,
 		instanceType: T,
 		properties?: ElementProperties<CreatableInstances[T]>,
@@ -27,7 +32,7 @@ export class Element {
 		}
 
 		if (children) {
-			for (const [name, child] of Objects.pairs(children)) {
+			for (const [name, child] of Objects.pairs_(children)) {
 				child.Name = name as string;
 				child.Parent = instance;
 			}
@@ -36,7 +41,7 @@ export class Element {
 		return instance as CreatableInstances[T] & { [k in keyof TChildren]: TChildren[k] };
 	}
 
-	static newFont(this: void, font: Enum.Font, weight: Enum.FontWeight) {
+	export function newFont(this: void, font: Enum.Font, weight: Enum.FontWeight) {
 		const f = Font.fromEnum(font);
 		f.Weight = weight;
 

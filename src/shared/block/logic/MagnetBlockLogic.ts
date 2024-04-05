@@ -1,9 +1,9 @@
 import { RunService } from "@rbxts/services";
-import ConfigurableBlockLogic from "shared/block/ConfigurableBlockLogic";
-import blockConfigRegistry from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import PartUtils from "shared/utils/PartUtils";
-import VectorUtils from "shared/utils/VectorUtils";
+import { PartUtils } from "shared/utils/PartUtils";
+import { VectorUtils } from "shared/utils/VectorUtils";
 
 const magicNumber = 60 * 1; // dt
 const magnets: MagnetBlockLogic[] = [];
@@ -32,7 +32,7 @@ RunService.PostSimulation.Connect((dt) => {
 	}
 });
 
-export default class MagnetBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.magnet> {
+export class MagnetBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.magnet> {
 	private static readonly partColor1 = Color3.fromRGB(128, 128, 240);
 	private static readonly partColor2 = Color3.fromRGB(240, 128, 128);
 

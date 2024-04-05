@@ -1,8 +1,8 @@
 /** Slots storage for a single user */
-export default class SlotsMeta {
-	static readonly autosaveSlotIndex = -1;
+export namespace SlotsMeta {
+	export const autosaveSlotIndex = -1;
 
-	private static defaultSlot(index: number): SlotMeta {
+	function defaultSlot(index: number): SlotMeta {
 		const def: SlotMeta = {
 			index,
 			name: "Slot " + (index + 1),
@@ -23,35 +23,39 @@ export default class SlotsMeta {
 		return def;
 	}
 
-	static indexOf(slots: readonly SlotMeta[], index: number): number | undefined {
+	export function indexOf(slots: readonly SlotMeta[], index: number): number | undefined {
 		return slots.findIndex((slot) => slot.index === index);
 	}
-	static get(slots: readonly SlotMeta[], index: number): SlotMeta {
-		const idx = this.indexOf(slots, index);
-		if (idx === undefined) return this.defaultSlot(index);
+	export function get(slots: readonly SlotMeta[], index: number): SlotMeta {
+		const idx = indexOf(slots, index);
+		if (idx === undefined) return defaultSlot(index);
 
-		return slots[idx] ?? this.defaultSlot(index);
+		return slots[idx] ?? defaultSlot(index);
 	}
-	static set(slots: SlotMeta[], meta: SlotMeta) {
-		const idx = this.indexOf(slots, meta.index);
+	export function set(slots: SlotMeta[], meta: SlotMeta) {
+		const idx = indexOf(slots, meta.index);
 		if (idx !== undefined) slots.remove(idx);
 
 		slots.push(meta);
 	}
-	static with(slots: readonly SlotMeta[], index: number, meta: Readonly<Partial<SlotMeta>>): readonly SlotMeta[] {
+	export function withSlot(
+		slots: readonly SlotMeta[],
+		index: number,
+		meta: Readonly<Partial<SlotMeta>>,
+	): readonly SlotMeta[] {
 		const s = [...slots];
-		this.set(s, {
-			...this.get(s, index),
+		set(s, {
+			...get(s, index),
 			...meta,
 			index,
 		});
 		return s;
 	}
 
-	static getAll(slots: readonly SlotMeta[], min: number): readonly SlotMeta[] {
+	export function getAll(slots: readonly SlotMeta[], min: number): readonly SlotMeta[] {
 		const ret: SlotMeta[] = [];
 		for (let i = -1; i < min; i++) {
-			ret.push(this.get(slots, i));
+			ret.push(get(slots, i));
 		}
 
 		return ret;

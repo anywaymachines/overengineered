@@ -1,8 +1,8 @@
 import { Players, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import InputController from "client/controller/InputController";
-import Gui from "client/gui/Gui";
-import SharedPlots from "shared/building/SharedPlots";
+import { InputController } from "client/controller/InputController";
+import { Gui } from "client/gui/Gui";
+import { SharedPlots } from "shared/building/SharedPlots";
 
 export class BoxSelector extends ClientComponent {
 	constructor(submitted: (blocks: readonly BlockModel[]) => void, filter = (block: BlockModel) => true) {

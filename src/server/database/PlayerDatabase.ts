@@ -8,7 +8,7 @@ export type PlayerData = {
 	readonly slots?: readonly SlotMeta[];
 };
 
-export default class PlayerDatabase {
+export class PlayerDatabase {
 	static readonly instance = new PlayerDatabase();
 
 	private readonly datastore: DataStore = DataStoreService.GetDataStore("players");

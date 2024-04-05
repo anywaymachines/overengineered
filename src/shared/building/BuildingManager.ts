@@ -1,12 +1,12 @@
 import { Players, RunService } from "@rbxts/services";
 import { BlockDataRegistry } from "shared/BlockDataRegistry";
 import { SharedPlot } from "shared/building/SharedPlot";
-import SharedPlots from "shared/building/SharedPlots";
-import VectorUtils from "shared/utils/VectorUtils";
+import { SharedPlots } from "shared/building/SharedPlots";
+import { VectorUtils } from "shared/utils/VectorUtils";
 
 /** Methods for for getting information about blocks in a building */
-const BuildingManager = {
-	AllowedMaterials: [
+export namespace BuildingManager {
+	export const AllowedMaterials: readonly Enum.Material[] = [
 		Enum.Material.Brick,
 		Enum.Material.Cobblestone,
 		Enum.Material.Concrete,
@@ -25,13 +25,13 @@ const BuildingManager = {
 		Enum.Material.Sand,
 		Enum.Material.Slate,
 		Enum.Material.Wood,
-	] as readonly Enum.Material[],
+	];
 
 	/** Returns the block or nothing that is set on (or near) the given vector
 	 * @param vector The vector to check
 	 * @deprecated slow & stupid
 	 */
-	getBlockByPosition(vector: Vector3): BlockModel | undefined {
+	export function getBlockByPosition(vector: Vector3): BlockModel | undefined {
 		const plot = SharedPlots.getPlotByPosition(vector);
 		if (!plot) {
 			return undefined;
@@ -49,13 +49,13 @@ const BuildingManager = {
 		}
 
 		return undefined;
-	},
+	}
 
-	blockCanBePlacedAt(plot: SharedPlot, block: { readonly model: Model }, pivot: CFrame): boolean {
-		return this.serverBlockCanBePlacedAt(plot, block, pivot, Players.LocalPlayer);
-	},
+	export function blockCanBePlacedAt(plot: SharedPlot, block: { readonly model: Model }, pivot: CFrame): boolean {
+		return serverBlockCanBePlacedAt(plot, block, pivot, Players.LocalPlayer);
+	}
 
-	serverBlockCanBePlacedAt(
+	export function serverBlockCanBePlacedAt(
 		plot: SharedPlot,
 		block: { readonly model: Model },
 		pivot: CFrame,
@@ -70,7 +70,7 @@ const BuildingManager = {
 		}
 
 		if (RunService.IsClient()) {
-			const collideBlock = this.getBlockByPosition(pivot.Position);
+			const collideBlock = getBlockByPosition(pivot.Position);
 			if (collideBlock) {
 				return false;
 			}
@@ -78,9 +78,9 @@ const BuildingManager = {
 
 		// OK
 		return true;
-	},
+	}
 
-	getMirroredBlocksCFrames(
+	export function getMirroredBlocksCFrames(
 		plot: PlotModel,
 		blockid: string,
 		cframeToMirror: CFrame,
@@ -177,7 +177,5 @@ const BuildingManager = {
 		}
 		ret.remove(0);
 		return ret;
-	},
-} as const;
-
-export default BuildingManager;
+	}
+}
