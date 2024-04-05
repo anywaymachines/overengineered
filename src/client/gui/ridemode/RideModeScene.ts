@@ -17,7 +17,6 @@ import { RobloxUnit } from "shared/RobloxUnit";
 import { SlotsMeta } from "shared/SlotsMeta";
 import { RocketEngineLogic } from "shared/block/logic/RocketEngineLogic";
 import { EventHandler } from "shared/event/EventHandler";
-import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { Signal } from "shared/event/Signal";
 
 export type ActionBarControlDefinition = GuiObject & {
@@ -391,7 +390,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 					}
 
 					control.slider.value.set(amount === 0 ? 0 : avgg / amount);
-					control.text.value.set(NumberObservableValue.clamp(control.slider.value.get(), 0, 100, 1));
+					control.text.value.set(math.round(control.slider.value.get()));
 				});
 			}
 		}
