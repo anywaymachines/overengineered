@@ -48,7 +48,59 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 		return generatedUID;
 	}
 
+	function transformNamespaces(file: ts.SourceFile): ts.SourceFile {
+		const fixNamespace = (node: ts.ModuleDeclaration): ts.ModuleDeclaration => {
+			if ((node.flags & ts.NodeFlags.Namespace) === 0 || !node.body || !ts.isModuleBlock(node.body))
+				return node;
+
+			const functionDeclarations: ts.FunctionDeclaration[] = [];
+			const namespaceDeclarations: ts.Statement[] = [];
+			const variableDeclarations: ts.VariableStatement[] = [];
+			const anyDeclarations: ts.Statement[] = [];
+
+			for (const child of node.body.statements) {
+				if (ts.isVariableStatement(child)) {
+					variableDeclarations.push(child);
+				}
+				else if (ts.isFunctionDeclaration(child)) {
+					functionDeclarations.push(child);
+				}
+				else if (ts.isModuleDeclaration(child)) {
+					namespaceDeclarations.push(fixNamespace(child));
+				}
+				else {
+					anyDeclarations.push(child);
+				}
+			}
+
+			return factory.createModuleDeclaration(
+				node.modifiers,
+				node.name,
+				factory.createModuleBlock([
+					...functionDeclarations,
+					...anyDeclarations,
+					...namespaceDeclarations,
+					...variableDeclarations,
+				]),
+				node.flags
+			)
+		}
+
+		return ts.visitEachChild(file, node => {
+			if (ts.isModuleDeclaration(node)) {
+				return fixNamespace(node);
+			}
+
+			return node;
+		}, context);
+	}
+
 	function transformFiles(files: Map<string, ts.SourceFile>): Map<string, ts.SourceFile> {
+		files.forEach((file, fileName) => {
+			file = transformNamespaces(file);
+			files.set(fileName, file);
+		});
+
 		for (const transformer of [defineMacroTransform, removeImportTransform, macroTransform, addImportTransform]) {
 			files.forEach((file, fileName) => {
 				file = transformer(file);
