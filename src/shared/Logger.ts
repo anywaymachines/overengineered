@@ -22,13 +22,13 @@ export namespace Logger {
 	export function err(msg: string) {
 		if (RunService.IsClient() === true) {
 			try {
-				err(`[ERROR] [CLIENT] ${msg}`);
+				error(`[ERROR] [CLIENT] ${msg}`);
 			} catch {
 				// empty
 			}
 		} else {
 			try {
-				err(`[ERROR] [SERVER] ${msg}`);
+				error(`[ERROR] [SERVER] ${msg}`);
 			} catch {
 				// empty
 			}
