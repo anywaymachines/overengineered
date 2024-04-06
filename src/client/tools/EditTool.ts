@@ -74,23 +74,51 @@ namespace Scene {
 			const paint = this.add(new ButtonControl(this.gui.Bottom.PaintButton, () => tool.toggleMode("Paint")));
 			const del = this.add(new ButtonControl(this.gui.Bottom.DeleteButton, () => tool.deleteSelectedBlocks()));
 
-			const buttons: Readonly<Record<EditToolMode, ButtonControl> & Record<string, ButtonControl>> = {
+			const multiValueSetter = <T>(instance: T, func: (value: boolean) => void) => {
+				const values: boolean[] = [];
+
+				return {
+					instance,
+					set: (index: number, value: boolean) => {
+						values[index] = value;
+						func(values.all((v) => v));
+					},
+				} as const;
+			};
+			type mvs = ReturnType<typeof multiValueSetter<Control>>;
+
+			const movemvs = multiValueSetter(move, (v) => move.setInteractable(v));
+			const rotatemvs = multiValueSetter(rotate, (v) => rotate.setInteractable(v));
+			const clonemvs = multiValueSetter(clone, (v) => clone.setInteractable(v));
+			const paintmvs = multiValueSetter(paint, (v) => paint.setInteractable(v));
+			const delmvs = multiValueSetter(del, (v) => del.setInteractable(v));
+
+			const buttons: Readonly<Record<EditToolButtons, mvs>> = {
 				// edit tool modes
-				Move: move,
-				Rotate: rotate,
-				Clone: clone,
-				Paint: paint,
+				Move: movemvs,
+				Rotate: rotatemvs,
+				Clone: clonemvs,
+				Paint: paintmvs,
 
 				// other buttons
-				ButtonDelete: del,
+				Delete: delmvs,
 			};
+			this.event.subscribeObservable(
+				tool.enabledModes,
+				(enabledModes) => {
+					for (const [name, button] of Objects.pairs_(buttons)) {
+						button.set(2, enabledModes.includes(name));
+					}
+				},
+				true,
+			);
 
 			this.event.subscribeCollection(
 				tool.selected,
 				() => {
 					const enabled = tool.selected.size() !== 0;
 					for (const [, button] of Objects.pairs_(buttons)) {
-						button.setInteractable(enabled);
+						button.set(0, enabled);
 					}
 				},
 				true,
@@ -100,10 +128,11 @@ namespace Scene {
 				tool.selectedMode,
 				(mode) => {
 					for (const [name, button] of Objects.pairs_(buttons)) {
-						button.instance.BackgroundColor3 = mode === name ? Colors.accentDark : Colors.staticBackground;
+						button.instance.instance.BackgroundColor3 =
+							mode === name ? Colors.accentDark : Colors.staticBackground;
 
 						const enabled = mode === undefined || mode === name;
-						button.setInteractable(enabled);
+						button.set(1, enabled);
 					}
 				},
 				true,
@@ -595,7 +624,12 @@ namespace Controllers {
 }
 
 export type EditToolMode = "Move" | "Clone" | "Rotate" | "Paint";
+export type EditToolButtons = EditToolMode | "Delete";
+
 export class EditTool extends ToolBase {
+	static readonly allModes: readonly EditToolButtons[] = ["Move", "Rotate", "Clone", "Paint", "Delete"];
+	readonly enabledModes = new ObservableValue<readonly EditToolButtons[]>(EditTool.allModes);
+
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
 	readonly selected = new ObservableCollectionSet<BlockModel>();
@@ -638,12 +672,6 @@ export class EditTool extends ToolBase {
 				return;
 			}
 
-			let first: BlockModel = undefined!;
-			for (const block of selected) {
-				first = block;
-				break;
-			}
-
 			this.controller.set(new Controllers[mode](this, this.targetPlot.get(), [...selected]));
 		});
 
@@ -657,6 +685,11 @@ export class EditTool extends ToolBase {
 	}
 
 	toggleMode(mode: EditToolMode | undefined) {
+		if (mode && !this.enabledModes.get().includes(mode)) {
+			this._selectedMode.set(undefined);
+			return;
+		}
+
 		if (mode === undefined || mode === this.selectedMode.get()) {
 			this._selectedMode.set(undefined);
 		} else {
