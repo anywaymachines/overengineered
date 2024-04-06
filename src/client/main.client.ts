@@ -19,7 +19,6 @@ import { SharedPlots } from "shared/building/SharedPlots";
 import { AdminMessageController } from "./AdminMessageController";
 import { ClientContainerComponent } from "./component/ClientContainerComponent";
 import { rootComponents } from "./test/RootComponents";
-import { Tutorial } from "./tutorial/Tutorial";
 
 // wait for assets to be copied
 ReplicatedStorage.WaitForChild("Assets");
@@ -67,7 +66,3 @@ while (!(Workspace.GetAttribute("loaded") as boolean | undefined)) {
 }
 
 LoadingController.hide();
-
-if (Players.LocalPlayer.Name === "3QAXM") {
-	Tutorial.Begin("Basics");
-}
