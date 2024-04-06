@@ -7,6 +7,11 @@ import { SharedPlots } from "shared/building/SharedPlots";
 import { EventHandler } from "shared/event/EventHandler";
 import { PartUtils } from "shared/utils/PartUtils";
 
+export type TutorialPlaceBlockHighlight = {
+	id: string;
+	cframe: CFrame;
+};
+
 export class TutorialBuildTool {
 	constructor(private readonly tutorial: typeof Tutorial) {}
 

@@ -9,6 +9,7 @@ import { InputTooltips } from "client/gui/static/TooltipsControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
+import { TutorialPlaceBlockHighlight } from "client/tutorial/TutorialBuildTool";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";

@@ -7,17 +7,6 @@ import { EventHandler } from "shared/event/EventHandler";
 
 type TutorialType = "Basics";
 
-declare global {
-	type TutorialPlaceBlockHighlight = {
-		id: string;
-		cframe: CFrame;
-	};
-
-	type TutorialDeleteBlockHighlight = {
-		position: Vector3;
-	};
-}
-
 export namespace Tutorial {
 	export const Control = new TutorialControl();
 	export const Cancellable = true;

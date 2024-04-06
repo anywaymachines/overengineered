@@ -4,6 +4,10 @@ import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { EventHandler } from "shared/event/EventHandler";
 
+export type TutorialDeleteBlockHighlight = {
+	position: Vector3;
+};
+
 export class TutorialDeleteTool {
 	constructor(private readonly tutorial: typeof Tutorial) {}
 

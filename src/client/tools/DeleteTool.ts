@@ -7,6 +7,7 @@ import { ToolBase } from "client/tools/ToolBase";
 import { BoxSelector } from "client/tools/selectors/BoxSelector";
 import { HoveredBlockHighlighter } from "client/tools/selectors/HoveredBlockHighlighter";
 import { SelectorParent } from "client/tools/selectors/SelectorParent";
+import { TutorialDeleteBlockHighlight } from "client/tutorial/TutorialDeleteTool";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
 
