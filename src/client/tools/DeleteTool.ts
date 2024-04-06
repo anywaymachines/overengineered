@@ -44,6 +44,7 @@ export class DeleteTool extends ToolBase {
 
 		const selectorParent = this.parent(new SelectorParent());
 		selectorParent.childSet.Connect((child) => {
+			if (!this.isEnabled()) return;
 			hoverHighlighter.setEnabled(!child);
 		});
 		this.event.subInput((ih) => {
