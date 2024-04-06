@@ -139,6 +139,9 @@ declare global {
 		map<TOut extends defined>(func: (key: K, value: V) => TOut): TOut[];
 		flatmap<TOut extends defined>(func: (key: K, value: V) => readonly TOut[]): TOut[];
 		find(func: (key: K, value: V) => boolean): readonly [key: K, value: V] | undefined;
+
+		all(func: (key: K, value: V) => boolean): boolean;
+		any(func: (key: K, value: V) => boolean): boolean;
 	}
 }
 
@@ -215,6 +218,19 @@ export const MapMacros = $defineCallMacros<ReadonlyMap<defined, defined>>({
 		}
 
 		return undefined;
+	},
+
+	all: <K extends defined, V extends defined>(
+		map: ReadonlyMap<K, V>,
+		func: (key: K, value: V) => boolean,
+	): boolean => {
+		return map.find((k, v) => !func(k, v)) === undefined;
+	},
+	any: <K extends defined, V extends defined>(
+		map: ReadonlyMap<K, V>,
+		func: (key: K, value: V) => boolean,
+	): boolean => {
+		return map.find(func) !== undefined;
 	},
 } satisfies maps);
 

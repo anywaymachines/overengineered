@@ -1,4 +1,4 @@
-import { Players, ReplicatedStorage, UserInputService, Workspace } from "@rbxts/services";
+import { Players, UserInputService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { InputController } from "client/controller/InputController";
 import { SoundController } from "client/controller/SoundController";
@@ -10,7 +10,8 @@ import { InputTooltips } from "client/gui/static/TooltipsControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
-import { Element } from "shared/Element";
+import { BlockGhoster } from "client/tools/additional/BlockGhoster";
+import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
 import { Logger } from "shared/Logger";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
@@ -19,26 +20,12 @@ import { ComponentChild } from "shared/component/ComponentChild";
 import { EventHandler } from "shared/event/EventHandler";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
-import { PartUtils } from "shared/utils/PartUtils";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
 const allowedColor = Colors.blue;
 const forbiddenColor = Colors.red;
 const mouse = Players.LocalPlayer.GetMouse();
-
-const ghostParent = Element.create(
-	"Model",
-	{ Parent: Workspace },
-	{
-		highlight: Element.create("Highlight", {
-			FillColor: Colors.blue,
-			FillTransparency: 0.4,
-			OutlineTransparency: 0.5,
-			DepthMode: Enum.HighlightDepthMode.Occluded,
-		}),
-	},
-);
 
 const constrainPositionToGrid = (pos: Vector3) => {
 	const constrain = math.round;
@@ -48,36 +35,48 @@ const addBlockSize = (selectedBlock: RegistryBlock, normal: Vector3, pos: Vector
 	return pos.add(selectedBlock.model.GetBoundingBox()[1].mul(normal).div(2));
 };
 
-const createBlockGhost = (block: RegistryBlock): BlockGhost => {
+const createBlockGhost = (block: RegistryBlock): Model => {
 	const model = block.model.Clone();
-	PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => (part.CanCollide = false));
-	model.Parent = ghostParent;
+	BlockGhoster.ghostModel(model);
 
-	if (false as boolean) {
-		const axis = ReplicatedStorage.Assets.Axis.Clone();
-		axis.PivotTo(model.GetPivot());
-		axis.Parent = model;
-	}
-
-	// trigger the highlight update
-	ghostParent.highlight.Adornee = undefined;
-	ghostParent.highlight.Adornee = ghostParent;
-
-	return { model, mirrors: [] };
+	return model;
 };
 
-type BlockGhost = { readonly model: BlockModel; mirrors: BlockModel[] };
+// eslint-disable-next-line prettier/prettier
+const g = Gui.getGameUI<{ BuildingMode: { Tools: { Build2: { Debug: { Label1: TextLabel; Label2: TextLabel; Label3: TextLabel; Label4: TextLabel; Label5: TextLabel; }; }; }; }; }>().BuildingMode.Tools.Build2.Debug;
+
+const getMouseTargetBlockPosition = (block: RegistryBlock): Vector3 | undefined => {
+	const mouseTarget = mouse.Target;
+	if (!mouseTarget) return undefined;
+
+	const mouseHit = mouse.Hit;
+	const mouseSurface = mouse.TargetSurface;
+
+	const globalMouseHitPos = mouseHit.PointToWorldSpace(Vector3.zero);
+	const normal = Vector3.FromNormalId(mouseSurface);
+
+	g.Label1.Text = `Target: ${mouseTarget}`;
+	g.Label2.Text = `Hit: ${mouseHit}`;
+	g.Label3.Text = `Normal: ${mouseSurface} ${normal}`;
+
+	let targetPosition = globalMouseHitPos;
+	targetPosition = addBlockSize(block, normal, targetPosition);
+	targetPosition = constrainPositionToGrid(targetPosition);
+
+	return targetPosition;
+};
 
 namespace SinglePlaceController {
 	export class Desktop extends ClientComponent {
-		private mainGhost?: BlockGhost;
-		private readonly mirroredGhosts: BlockGhost[] = [];
-		blockRotation = CFrame.identity;
+		private mainGhost?: Model;
+		private readonly blockRotation;
 		private readonly selectedBlock;
 		private readonly selectedColor;
 		private readonly selectedMaterial;
 		private readonly mirrorMode;
 		private readonly plot;
+
+		private readonly blockMirrorer;
 
 		constructor(state: BuildTool2) {
 			super();
@@ -86,6 +85,9 @@ namespace SinglePlaceController {
 			this.selectedMaterial = state.selectedMaterial.asReadonly();
 			this.mirrorMode = state.mirrorMode.asReadonly();
 			this.plot = state.targetPlot;
+			this.blockRotation = state.blockRotation;
+
+			this.blockMirrorer = this.parent(new BlockMirrorer());
 
 			this.onPrepare((input) => {
 				if (input !== "Touch") return;
@@ -125,88 +127,38 @@ namespace SinglePlaceController {
 
 		private destroyGhosts(destroyMain = true) {
 			if (destroyMain) {
-				this.mainGhost?.model.Destroy();
+				this.blockMirrorer.blocks.set([]);
+				this.mainGhost?.Destroy();
 				this.mainGhost = undefined;
 			}
 
-			for (const ghost of this.mirroredGhosts) {
-				ghost.model.Destroy();
-			}
-			this.mirroredGhosts.clear();
+			this.blockMirrorer.destroyMirrors();
 		}
-
-		private updateMirrorGhostBlocksPosition(plot: PlotModel, mainPosition: Vector3) {
+		private updateMirrorGhostBlocksPosition() {
 			const selected = this.selectedBlock.get();
 			if (!selected) return;
 
-			this.mainGhost?.model.PivotTo(this.blockRotation.add(mainPosition));
-			const mirrorCFrames = BuildingManager.getMirroredBlocksCFrames(
-				plot,
-				this.selectedBlock.get()!.id,
-				new CFrame(mainPosition).mul(this.blockRotation),
-				this.mirrorMode.get(),
-			);
+			const mainPosition = this.mainGhost?.GetPivot().Position;
+			if (!mainPosition) return;
 
-			for (let i = 0; i < mirrorCFrames.size(); i++) {
-				const ghost = (this.mirroredGhosts[i] ??= createBlockGhost(selected));
-				ghost.model.PivotTo(mirrorCFrames[i]);
-			}
-
-			// destroy ghosts if too many
-			for (let i = mirrorCFrames.size(); i < this.mirroredGhosts.size(); i++) {
-				this.mirroredGhosts[i].model.Destroy();
-				delete this.mirroredGhosts[i];
-			}
+			this.mainGhost?.PivotTo(this.blockRotation.get().add(mainPosition));
+			this.blockMirrorer.updatePositions(this.plot.get().instance, this.mirrorMode.get());
 		}
+
 		private updateBlockPosition() {
 			if (Gui.isCursorOnVisibleGui()) {
 				return;
 			}
 
-			const g = Gui.getGameUI<{
-				BuildingMode: {
-					Tools: {
-						Build2: {
-							Debug: {
-								Label1: TextLabel;
-								Label2: TextLabel;
-								Label3: TextLabel;
-								Label4: TextLabel;
-								Label5: TextLabel;
-							};
-						};
-					};
-				};
-			}>().BuildingMode.Tools.Build2.Debug;
+			const selectedBlock = this.selectedBlock.get();
+			if (!selectedBlock) return;
 
-			const selected = this.selectedBlock.get();
-			if (!selected) return;
-
-			const getMouseTargetBlockPosition = () => {
-				const mouseTarget = mouse.Target;
-				if (!mouseTarget) return undefined;
-
-				const mouseHit = mouse.Hit;
-				const mouseSurface = mouse.TargetSurface;
-
-				const globalMouseHitPos = mouseHit.PointToWorldSpace(Vector3.zero);
-				const normal = Vector3.FromNormalId(mouseSurface);
-
-				g.Label1.Text = `Target: ${mouseTarget}`;
-				g.Label2.Text = `Hit: ${mouseHit}`;
-				g.Label3.Text = `Normal: ${mouseSurface} ${normal}`;
-
-				let targetPosition = globalMouseHitPos;
-				targetPosition = addBlockSize(selected, normal, targetPosition);
-				targetPosition = constrainPositionToGrid(targetPosition);
-				return targetPosition;
-			};
-
-			const mainPosition = getMouseTargetBlockPosition();
+			const mainPosition = getMouseTargetBlockPosition(selectedBlock);
 			if (!mainPosition) return;
 
-			this.mainGhost ??= createBlockGhost(selected);
-			this.mainGhost.model!.PivotTo(this.blockRotation.add(mainPosition));
+			this.mainGhost ??= createBlockGhost(selectedBlock);
+			this.blockMirrorer.blocks.set([{ id: selectedBlock.id, model: this.mainGhost }]);
+			this.mainGhost.PivotTo(this.blockRotation.get().add(mainPosition));
 
 			const prettyCFrame = (cframe: CFrame) => {
 				const round = (vec: Vector3) => new Vector3(math.round(vec.X), math.round(vec.Y), math.round(vec.Z));
@@ -225,29 +177,32 @@ namespace SinglePlaceController {
 					round(cframe.LookVector.mul(-1))
 				);
 			};
-			g.Label4.Text = `Rotation: ${prettyCFrame(this.mainGhost?.model.GetPivot() ?? this.blockRotation)}`;
+			g.Label4.Text = `Rotation: ${prettyCFrame(this.mainGhost?.GetPivot() ?? this.blockRotation)}`;
 
 			const plot = this.plot.get();
 			const areAllBlocksInsidePlot =
-				plot.isModelInside(this.mainGhost.model) &&
-				this.mirroredGhosts.all((ghost) => plot.isModelInside(ghost.model));
+				plot.isModelInside(this.mainGhost) &&
+				this.blockMirrorer
+					.getMirroredModels()
+					.all((_, ghosts) => ghosts.all((ghost) => plot.isModelInside(ghost)));
 
 			if (areAllBlocksInsidePlot) {
-				this.updateMirrorGhostBlocksPosition(plot.instance, mainPosition);
+				this.updateMirrorGhostBlocksPosition();
 			} else {
 				this.destroyGhosts(false);
 			}
 
 			const canBePlaced =
 				areAllBlocksInsidePlot &&
-				this.mirroredGhosts.all((ghost) =>
-					BuildingManager.blockCanBePlacedAt(plot, selected, ghost.model.GetPivot()),
-				);
+				this.blockMirrorer
+					.getMirroredModels()
+					.all((_, ghosts) =>
+						ghosts.all((ghost) =>
+							BuildingManager.blockCanBePlacedAt(plot, selectedBlock, ghost.GetPivot()),
+						),
+					);
 
-			PartUtils.ghostModel(this.mainGhost.model, canBePlaced ? allowedColor : forbiddenColor);
-			for (const ghost of this.mirroredGhosts) {
-				PartUtils.ghostModel(ghost.model, canBePlaced ? allowedColor : forbiddenColor);
-			}
+			BlockGhoster.setColor(canBePlaced ? allowedColor : forbiddenColor);
 		}
 
 		rotateBlock(axis: "x" | "y" | "z", inverted = true): void {
@@ -269,12 +224,9 @@ namespace SinglePlaceController {
 			SoundController.getSounds().Build.BlockRotate.PlaybackSpeed = SoundController.randomSoundSpeed();
 			SoundController.getSounds().Build.BlockRotate.Play();
 
-			this.blockRotation = this.blockRotation.mul(rotation);
+			this.blockRotation.set(this.blockRotation.get().mul(rotation));
 			if (this.mainGhost) {
-				this.updateMirrorGhostBlocksPosition(
-					this.plot.get().instance,
-					this.mainGhost.model.GetPivot().Position,
-				);
+				this.updateMirrorGhostBlocksPosition();
 			}
 		}
 
@@ -294,15 +246,19 @@ namespace SinglePlaceController {
 			}
 
 			const mainGhost = this.mainGhost;
-			if (!mainGhost || !mainGhost.model.PrimaryPart) {
+			if (!mainGhost || !mainGhost.PrimaryPart) {
 				return;
 			}
 
 			const plot = this.plot.get();
 			if (
-				![mainGhost, ...this.mirroredGhosts].all((ghost) =>
-					BuildingManager.blockCanBePlacedAt(plot, selected, ghost.model.GetPivot()),
-				)
+				![
+					mainGhost,
+					...this.blockMirrorer
+						.getMirroredModels()
+						.values()
+						.flatmap((m) => m),
+				].all((ghost) => BuildingManager.blockCanBePlacedAt(plot, selected, ghost.GetPivot()))
 			) {
 				LogControl.instance.addLine("Out of bounds!", Colors.red);
 
@@ -310,35 +266,24 @@ namespace SinglePlaceController {
 				SoundController.getSounds().Build.BlockPlaceError.Play();
 				return;
 			}
-
-			const g = Gui.getGameUI<{
-				BuildingMode: {
-					Tools: {
-						Build2: {
-							Debug: {
-								Label1: TextLabel;
-								Label2: TextLabel;
-								Label3: TextLabel;
-								Label4: TextLabel;
-								Label5: TextLabel;
-							};
-						};
-					};
-				};
-			}>().BuildingMode.Tools.Build2.Debug;
-
-			const pos = plot.instance.BuildingArea.CFrame.ToObjectSpace(mainGhost!.model.PrimaryPart!.CFrame);
+			const pos = plot.instance.BuildingArea.CFrame.ToObjectSpace(mainGhost!.PrimaryPart!.CFrame);
 			g.Label5.Text = `new CFrame(${[...pos.GetComponents()].join()})`;
 			print(g.Label5.Text);
 
 			const response = await ClientBuilding.placeBlocks(
 				plot,
-				[mainGhost, ...this.mirroredGhosts].map(
+				[
+					mainGhost,
+					...this.blockMirrorer
+						.getMirroredModels()
+						.values()
+						.flatmap((m) => m),
+				].map(
 					(g): PlaceBlockRequest => ({
 						id: selected.id,
 						color: this.selectedColor.get(),
 						material: this.selectedMaterial.get(),
-						location: g.model.PrimaryPart!.CFrame,
+						location: g.PrimaryPart!.CFrame,
 					}),
 				),
 			);
@@ -360,28 +305,13 @@ namespace SinglePlaceController {
 
 namespace MultiPlaceController {
 	export class Desktop extends ClientComponent {
-		private readonly possibleFillRotationAxis = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis] as const;
-		private readonly fillLimit = 32;
-		private readonly drawnGhostsMap = new Map<Vector3, BlockGhost>();
-		private static defaultCameraType = Workspace.CurrentCamera!.CameraType; //Enum.CameraType.Custom
-		private oldPositions?: {
-			readonly positions: Set<Vector3>;
-			endPoint: Vector3;
-			readonly rotation: CFrame;
-		};
-		private fillRotationMode = 1;
 		static subscribe(state: BuildTool2, parent: ComponentChild<IComponent>) {
-			const mouse = Players.LocalPlayer.GetMouse();
 			const buttonPress = () => {
 				const selectedBlock = state.selectedBlock.get();
 				if (!selectedBlock) return;
 
-				const mouseSurface = mouse.TargetSurface;
-				const normal = Vector3.FromNormalId(mouseSurface);
-
-				let pressPosition = mouse.Hit.Position;
-				pressPosition = constrainPositionToGrid(pressPosition);
-				pressPosition = addBlockSize(selectedBlock, normal, pressPosition);
+				const pressPosition = getMouseTargetBlockPosition(selectedBlock);
+				if (!pressPosition) return;
 
 				const plot = state.targetPlot.get();
 				parent.set(
@@ -392,7 +322,7 @@ namespace MultiPlaceController {
 						state.selectedMaterial.get(),
 						state.mirrorMode.get(),
 						plot,
-						(state.currentMode.get() as SinglePlaceController.Desktop).blockRotation,
+						state.blockRotation.get(),
 					),
 				);
 			};
@@ -429,6 +359,19 @@ namespace MultiPlaceController {
 				});
 			});
 		}
+
+		private readonly possibleFillRotationAxis = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis] as const;
+		private readonly fillLimit = 32;
+		private readonly drawnGhostsMap = new Map<Vector3, Model>();
+		private static defaultCameraType = Workspace.CurrentCamera!.CameraType; //Enum.CameraType.Custom
+		private readonly blockMirrorer;
+		private oldPositions?: {
+			readonly positions: Set<Vector3>;
+			endPoint: Vector3;
+			readonly rotation: CFrame;
+		};
+		private fillRotationMode = 1;
+
 		constructor(
 			private readonly pressPosition: Vector3,
 			private readonly selectedBlock: RegistryBlock,
@@ -439,6 +382,7 @@ namespace MultiPlaceController {
 			private readonly blockRotation: CFrame,
 		) {
 			super();
+			this.blockMirrorer = this.parent(new BlockMirrorer());
 
 			const updateGhosts = () => {
 				const cameraPostion = Workspace.CurrentCamera!.CFrame.Position;
@@ -461,30 +405,21 @@ namespace MultiPlaceController {
 
 				const toDelete = oldPositions.filter((p) => !newPositions.has(p));
 				for (const pos of toDelete) {
-					this.drawnGhostsMap.get(pos)?.model.Destroy();
-					this.drawnGhostsMap.get(pos)?.mirrors.forEach((v) => v.Destroy());
+					this.drawnGhostsMap.get(pos)?.Destroy();
 					this.drawnGhostsMap.delete(pos);
 				}
 
 				const newposs = newPositions.filter((p) => !oldPositions.has(p));
-				const models = this.drawModels(newposs, positionsData.rotation);
-				if (!models) return;
-				for (const model of models) {
-					this.drawnGhostsMap.set(model.model.GetPivot().Position, model);
-					const p = BuildingManager.getMirroredBlocksCFrames(
-						plot.instance,
-						selectedBlock.id,
-						model.model.GetPivot(),
-						mirrorModes,
-					);
-					for (const mirror of p) {
-						const b = createBlockGhost(this.selectedBlock);
-						b.model.PivotTo(mirror);
-						model.mirrors.push(b.model);
-					}
+				const newModels = this.drawModels(newposs, positionsData.rotation);
+
+				for (const model of newModels) {
+					this.drawnGhostsMap.set(model.GetPivot().Position, model);
 				}
 
 				this.oldPositions = positionsData;
+
+				this.blockMirrorer.blocks.set(this.drawnGhostsMap.map((_, m) => ({ id: selectedBlock.id, model: m })));
+				this.blockMirrorer.updatePositions(plot.instance, mirrorModes);
 			};
 
 			this.event.subInput((ih) => {
@@ -507,10 +442,9 @@ namespace MultiPlaceController {
 			this.event.subscribe(mouse.Move, updateGhosts);
 			this.event.subscribe(Signals.CAMERA.MOVED, updateGhosts);
 			this.event.subInput((ih) => ih.onKeyDown("R", () => this.rotateFillAxis()));
-			this.onDestroy(() => {
+			this.onDisable(() => {
 				for (const [, ghost] of this.drawnGhostsMap) {
-					ghost.model.Destroy();
-					ghost.mirrors.forEach((v) => v.Destroy());
+					ghost.Destroy();
 				}
 
 				this.drawnGhostsMap.clear();
@@ -520,12 +454,12 @@ namespace MultiPlaceController {
 		}
 
 		private drawModels(positions: readonly Vector3[], rotation: CFrame) {
-			const allGhosts: BlockGhost[] = [];
+			const allGhosts: Model[] = [];
 
 			for (const pos of positions) {
 				const ghostFrame = new CFrame(pos).mul(rotation);
 				const ghost = createBlockGhost(this.selectedBlock);
-				ghost.model.PivotTo(ghostFrame);
+				ghost.PivotTo(ghostFrame);
 				allGhosts.push(ghost);
 			}
 
@@ -533,6 +467,10 @@ namespace MultiPlaceController {
 		}
 
 		private calculateGhostBlockPositions(part: BlockModel, from: Vector3, to: Vector3): typeof this.oldPositions {
+			if (this.oldPositions?.endPoint === to) {
+				return this.oldPositions;
+			}
+
 			const aabb = AABB.fromModel(part);
 			const blockSize = aabb.withCenter(this.blockRotation.Rotation.add(aabb.getCenter())).getSize();
 			const diff = to.sub(from);
@@ -540,15 +478,18 @@ namespace MultiPlaceController {
 			const toY = math.min(math.abs(diff.Y), this.fillLimit);
 			const toZ = math.min(math.abs(diff.Z), this.fillLimit);
 			const result: Vector3[] = [];
-			if (this.oldPositions?.endPoint === to) return this.oldPositions;
-			for (let x = 0; x <= toX; x += blockSize.X)
-				for (let y = 0; y <= toY; y += blockSize.Y)
+
+			for (let x = 0; x <= toX; x += blockSize.X) {
+				for (let y = 0; y <= toY; y += blockSize.Y) {
 					for (let z = 0; z <= toZ; z += blockSize.Z) {
 						const posX = math.sign(diff.X) * x + from.X;
 						const posY = math.sign(diff.Y) * y + from.Y;
 						const posZ = math.sign(diff.Z) * z + from.Z;
 						result.push(new Vector3(posX, posY, posZ));
 					}
+				}
+			}
+
 			return {
 				positions: new Set(result),
 				endPoint: to ?? from,
@@ -560,6 +501,7 @@ namespace MultiPlaceController {
 			const plane = blockPosition.mul(VectorUtils.apply(rotation, (v) => math.abs(v)));
 			const diff = cameraPostion.sub(plane);
 			let distance = 0;
+
 			switch (1) {
 				case rotation.X: //I really liked the "!!rotation.X" solution but compiler didn't :(
 					distance = diff.X / lookVector.X;
@@ -571,8 +513,8 @@ namespace MultiPlaceController {
 					distance = diff.Z / lookVector.Z;
 					break;
 			}
-			const result = lookVector.mul(-distance).add(cameraPostion);
-			return result;
+
+			return lookVector.mul(-distance).add(cameraPostion);
 		}
 
 		private rotateFillAxis() {
@@ -588,8 +530,16 @@ namespace MultiPlaceController {
 				return;
 			}
 
-			const blocks = this.drawnGhostsMap.flatmap((_, m) => [...m.mirrors, m.model]);
-			if (!blocks.all((b) => BuildingManager.blockCanBePlacedAt(this.plot, this.selectedBlock, b.GetPivot()))) {
+			const locations = this.drawnGhostsMap.flatmap((_, m) => [
+				m.GetPivot(),
+				...BuildingManager.getMirroredBlocksCFrames(
+					this.plot.instance,
+					this.selectedBlock.id,
+					m.GetPivot(),
+					this.mirrorModes,
+				),
+			]);
+			if (!locations.all((loc) => BuildingManager.blockCanBePlacedAt(this.plot, this.selectedBlock, loc))) {
 				LogControl.instance.addLine("Out of bounds!", Colors.red);
 				SoundController.getSounds().Build.BlockPlaceError.Play();
 				return;
@@ -597,12 +547,12 @@ namespace MultiPlaceController {
 
 			const response = await ClientBuilding.placeBlocks(
 				this.plot,
-				blocks.map(
-					(b): PlaceBlockRequest => ({
+				locations.map(
+					(loc): PlaceBlockRequest => ({
 						id: this.selectedBlock.id,
 						color: this.selectedColor,
 						material: this.selectedMaterial,
-						location: b.GetPivot(),
+						location: loc,
 					}),
 				),
 			);
@@ -629,6 +579,7 @@ export class BuildTool2 extends ToolBase {
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
 	readonly currentMode = new ComponentChild<IComponent>(this, true);
+	readonly blockRotation = new ObservableValue<CFrame>(CFrame.identity);
 
 	constructor(mode: BuildingMode) {
 		super(mode);
