@@ -664,6 +664,7 @@ export class EditTool extends ToolBase {
 				return;
 			}
 
+			this._selectedMode.set(undefined);
 			this._selectedMode.set(mode);
 		}
 	}
