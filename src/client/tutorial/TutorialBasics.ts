@@ -16,121 +16,121 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	if (!(await tutorial.WaitForNextButtonPress())) return;
 
 	// Main
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(0, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(2, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(4, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(4, 1.5, 2, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(6, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(8, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(10, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(12, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(14, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(16, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(18, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
 
 	// Up
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(0, 3.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(0, 5.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(18, 3.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(18, 5.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
 
 	// Right-front
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(0, 5.5, -2, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(0, 5.5, -4, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(0, 5.5, -6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
 
 	// Right-back
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(18, 5.5, -2, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(18, 5.5, -4, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(18, 5.5, -6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
 
 	// Left-front
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(0, 5.5, 2, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(0, 5.5, 4, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(0, 5.5, 6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
 
 	// Left-back
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(18, 5.5, 2, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(18, 5.5, 4, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(18, 5.5, 6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
@@ -138,62 +138,62 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	disabledTools.set(toolController.allTools.filter((t) => t !== toolController.buildTool));
 	tutorial.Control.displayStep("Build a frame using ordinary blocks", false);
 
-	if (!(await tutorial.WaitForBlocksToPlace())) return;
+	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
 	disabledTools.set(toolController.allTools);
 
 	tutorial.Control.displayStep("Great job! Now delete the useless block", false);
 
-	tutorial.AddBlockToRemove({
+	tutorial.deleteTool.addBlockToDelete({
 		position: new Vector3(4, 1.5, 2),
 	});
 
 	disabledTools.set(toolController.allTools.filter((t) => t !== toolController.deleteTool));
 
-	if (!(await tutorial.WaitForBlocksToRemove())) return;
+	if (!(await tutorial.deleteTool.waitForBlocksToDelete())) return;
 	disabledTools.set(toolController.allTools);
 
 	tutorial.Control.displayStep("Next, you need to install servomotors. They help the car turn", false);
 
 	disabledTools.set(toolController.allTools.filter((t) => t !== toolController.buildTool));
 
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "servomotorblock",
 		cframe: new CFrame(0, 3.5, -6, 1, 0, 0, 0, -1, 8.742277657347586e-8, 0, -8.742277657347586e-8, -1),
 	});
 
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "servomotorblock",
 		cframe: new CFrame(18, 3.5, -6, 1, 0, 0, 0, -1, 8.742277657347586e-8, 0, -8.742277657347586e-8, -1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "servomotorblock",
 		cframe: new CFrame(0, 3.5, 6, 1, 0, 0, 0, -1, 8.742277657347586e-8, 0, -8.742277657347586e-8, -1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "servomotorblock",
 		cframe: new CFrame(18, 3.5, 6, 1, 0, 0, 0, -1, 8.742277657347586e-8, 0, -8.742277657347586e-8, -1),
 	});
 
-	if (!(await tutorial.WaitForBlocksToPlace())) return;
+	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
 
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(0, 1.5, 6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(0, 1.5, -6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(18, 1.5, -6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
-	tutorial.AddBlockToPlace({
+	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(18, 1.5, 6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
 
-	if (!(await tutorial.WaitForBlocksToPlace())) return;
+	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
 	disabledTools.set(toolController.allTools);
 
 	tutorial.Control.displayStep("the end", true);
