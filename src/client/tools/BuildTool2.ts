@@ -1,5 +1,6 @@
 import { Players, UserInputService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
+import { ClientComponentChild } from "client/component/ClientComponentChild";
 import { InputController } from "client/controller/InputController";
 import { SoundController } from "client/controller/SoundController";
 import { Signals } from "client/event/Signals";
@@ -12,7 +13,9 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
+import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Logger } from "shared/Logger";
+import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -27,14 +30,6 @@ const allowedColor = Colors.blue;
 const forbiddenColor = Colors.red;
 const mouse = Players.LocalPlayer.GetMouse();
 
-const constrainPositionToGrid = (pos: Vector3) => {
-	const constrain = math.round;
-	return new Vector3(constrain(pos.X), constrain(pos.Y), constrain(pos.Z));
-};
-const addBlockSize = (selectedBlock: RegistryBlock, normal: Vector3, pos: Vector3) => {
-	return pos.add(selectedBlock.model.GetBoundingBox()[1].mul(normal).div(2));
-};
-
 const createBlockGhost = (block: RegistryBlock): Model => {
 	const model = block.model.Clone();
 	BlockGhoster.ghostModel(model);
@@ -45,7 +40,71 @@ const createBlockGhost = (block: RegistryBlock): Model => {
 // eslint-disable-next-line prettier/prettier
 const g = Gui.getGameUI<{ BuildingMode: { Tools: { Build2: { Debug: { Label1: TextLabel; Label2: TextLabel; Label3: TextLabel; Label4: TextLabel; Label5: TextLabel; }; }; }; }; }>().BuildingMode.Tools.Build2.Debug;
 
-const getMouseTargetBlockPosition = (block: RegistryBlock): Vector3 | undefined => {
+// old block positioning from build tool 1
+const getMouseTargetBlockPositionV1 = (block: RegistryBlock, rotation: CFrame): Vector3 | undefined => {
+	const mouseTarget = mouse.Target;
+	if (!mouseTarget) return undefined;
+
+	const mouseHit = mouse.Hit;
+	const mouseSurface = mouse.TargetSurface;
+
+	// Positioning Stage 1
+	const rotationRelative = mouseTarget.CFrame.sub(mouseTarget.Position).Inverse();
+	const normalPositioning = VectorUtils.normalIdToNormalVector(mouseSurface, mouseTarget);
+	const positioning = mouseTarget.CFrame.mul(new CFrame(normalPositioning.vector.mul(normalPositioning.size / 2)));
+	const p1 = positioning.mul(rotationRelative).mul(rotation);
+
+	// Positioning Stage 2
+	const convertedPosition = mouseTarget.CFrame.sub(mouseTarget.Position).PointToWorldSpace(normalPositioning.vector);
+
+	const RightVectorValue = math.abs(p1.RightVector.Dot(convertedPosition));
+	const UpVectorValue = math.abs(p1.UpVector.Dot(convertedPosition));
+	const LookVectorValue = math.abs(p1.LookVector.Dot(convertedPosition));
+
+	// Positioning Stage 3
+	const MouseHitObjectSpace = mouseTarget.CFrame.PointToObjectSpace(mouseHit.Position);
+
+	const blockSize = block.model.GetExtentsSize();
+	const moveRangeStuds = math.clamp(math.min(blockSize?.X, blockSize.Y, blockSize.Z) / 2, 0.5, 1);
+
+	const offset = VectorUtils.roundVectorToBase(
+		MouseHitObjectSpace.sub(
+			new Vector3(
+				math.abs(normalPositioning.vector.X),
+				math.abs(normalPositioning.vector.Y),
+				math.abs(normalPositioning.vector.Z),
+			).mul(MouseHitObjectSpace),
+		),
+		moveRangeStuds,
+	);
+
+	const p2 = positioning
+		.mul(
+			new CFrame(
+				normalPositioning.vector.mul(
+					RightVectorValue * (block.model.PrimaryPart!.Size.X / 2) +
+						UpVectorValue * (block.model.PrimaryPart!.Size.Y / 2) +
+						LookVectorValue * (block.model.PrimaryPart!.Size.Z / 2),
+				),
+			),
+		)
+		.mul(new CFrame(offset))
+		.mul(rotationRelative)
+		.mul(rotation);
+
+	return VectorUtils.roundVectorToBase(p2.Position, moveRangeStuds);
+};
+
+// new block positioning by i3ym
+const getMouseTargetBlockPositionV2 = (block: RegistryBlock, rotation: CFrame): Vector3 | undefined => {
+	const constrainPositionToGrid = (pos: Vector3) => {
+		const constrain = math.round;
+		return new Vector3(constrain(pos.X), constrain(pos.Y), constrain(pos.Z));
+	};
+	const addBlockSize = (selectedBlock: RegistryBlock, normal: Vector3, pos: Vector3) => {
+		return pos.add(AABB.fromModel(selectedBlock.model, rotation).getSize().mul(normal).div(2));
+	};
+
 	const mouseTarget = mouse.Target;
 	if (!mouseTarget) return undefined;
 
@@ -65,9 +124,14 @@ const getMouseTargetBlockPosition = (block: RegistryBlock): Vector3 | undefined 
 
 	return targetPosition;
 };
+const getMouseTargetBlockPosition = getMouseTargetBlockPositionV2;
 
+interface IController extends IComponent {
+	rotate(axis: "x" | "y" | "z", inverted?: boolean): void;
+	place(): Promise<unknown>;
+}
 namespace SinglePlaceController {
-	export class Desktop extends ClientComponent {
+	class Desktop extends ClientComponent implements IController {
 		private mainGhost?: Model;
 		private readonly blockRotation;
 		private readonly selectedBlock;
@@ -108,17 +172,22 @@ namespace SinglePlaceController {
 
 				eh.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
 				eh.subscribe(mouse.Move, () => this.updateBlockPosition());
-				ih.onMouse1Up(() => this.placeBlock(), false);
+				ih.onMouse1Up(() => this.place(), false);
 			});
 
 			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
 
-			this.onPrepare(() => {
-				this.inputHandler.onKeyDown("T", () => this.rotateBlock("x"));
-				this.inputHandler.onKeyDown("R", () => this.rotateBlock("y"));
-				this.inputHandler.onKeyDown("Y", () => {
+			this.event.subInput((ih) => {
+				ih.onMouse3Down(() => {
+					state.pickBlock();
+					this.updateBlockPosition();
+				}, false);
+
+				ih.onKeyDown("T", () => this.rotate("x"));
+				ih.onKeyDown("R", () => this.rotate("y"));
+				ih.onKeyDown("Y", () => {
 					if (InputController.isCtrlPressed()) return;
-					this.rotateBlock("z");
+					this.rotate("z");
 				});
 			});
 
@@ -153,7 +222,7 @@ namespace SinglePlaceController {
 			const selectedBlock = this.selectedBlock.get();
 			if (!selectedBlock) return;
 
-			const mainPosition = getMouseTargetBlockPosition(selectedBlock);
+			const mainPosition = getMouseTargetBlockPosition(selectedBlock, this.blockRotation.get());
 			if (!mainPosition) return;
 
 			this.mainGhost ??= createBlockGhost(selectedBlock);
@@ -205,7 +274,7 @@ namespace SinglePlaceController {
 			BlockGhoster.setColor(canBePlaced ? allowedColor : forbiddenColor);
 		}
 
-		rotateBlock(axis: "x" | "y" | "z", inverted = true): void {
+		rotate(axis: "x" | "y" | "z", inverted = true): void {
 			if (axis === "x") {
 				this.rotateFineTune(new Vector3(inverted ? math.pi / 2 : math.pi / -2, 0, 0));
 			} else if (axis === "y") {
@@ -225,12 +294,10 @@ namespace SinglePlaceController {
 			SoundController.getSounds().Build.BlockRotate.Play();
 
 			this.blockRotation.set(this.blockRotation.get().mul(rotation));
-			if (this.mainGhost) {
-				this.updateMirrorGhostBlocksPosition();
-			}
+			this.updateBlockPosition();
 		}
 
-		async placeBlock() {
+		async place() {
 			const selected = this.selectedBlock.get();
 
 			// Non-alive players bypass
@@ -301,16 +368,24 @@ namespace SinglePlaceController {
 			}
 		}
 	}
+
+	export function create(tool: BuildTool2) {
+		return ClientComponentChild.createOnceBasedOnInputType({
+			Desktop: () => new Desktop(tool),
+			Gamepad: () => new Desktop(tool),
+			Touch: () => new Desktop(tool),
+		});
+	}
 }
 
 namespace MultiPlaceController {
-	export class Desktop extends ClientComponent {
-		static subscribe(state: BuildTool2, parent: ComponentChild<IComponent>) {
+	export class Desktop extends ClientComponent implements IController {
+		static subscribe(state: BuildTool2, parent: ComponentChild<IController>) {
 			const buttonPress = () => {
 				const selectedBlock = state.selectedBlock.get();
 				if (!selectedBlock) return;
 
-				const pressPosition = getMouseTargetBlockPosition(selectedBlock);
+				const pressPosition = getMouseTargetBlockPosition(selectedBlock, state.blockRotation.get());
 				if (!pressPosition) return;
 
 				const plot = state.targetPlot.get();
@@ -424,7 +499,7 @@ namespace MultiPlaceController {
 
 			this.event.subInput((ih) => {
 				const buttonUnpress = async () => {
-					const result = await this.placeBlocks();
+					const result = await this.place();
 					if (result && !result.success) {
 						LogControl.instance.addLine(result.message, Colors.red);
 					}
@@ -451,6 +526,10 @@ namespace MultiPlaceController {
 			});
 
 			this.onEnable(updateGhosts);
+		}
+
+		rotate(axis: "x" | "y" | "z", inverted?: boolean | undefined): void {
+			this.rotateFillAxis();
 		}
 
 		private drawModels(positions: readonly Vector3[], rotation: CFrame) {
@@ -524,7 +603,7 @@ namespace MultiPlaceController {
 			return this.possibleFillRotationAxis[this.fillRotationMode];
 		}
 
-		private async placeBlocks() {
+		async place() {
 			// Non-alive players bypass
 			if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
 				return;
@@ -578,7 +657,7 @@ export class BuildTool2 extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
-	readonly currentMode = new ComponentChild<IComponent>(this, true);
+	readonly currentMode = new ComponentChild<IController>(this, true);
 	readonly blockRotation = new ObservableValue<CFrame>(CFrame.identity);
 
 	constructor(mode: BuildingMode) {
@@ -587,9 +666,9 @@ export class BuildTool2 extends ToolBase {
 		this.currentMode.childSet.Connect((mode) => {
 			if (!this.isEnabled()) return;
 			if (mode) return;
-			this.currentMode.set(new SinglePlaceController.Desktop(this));
+			this.currentMode.set(SinglePlaceController.create(this));
 		});
-		this.onEnable(() => this.currentMode.set(new SinglePlaceController.Desktop(this)));
+		this.onEnable(() => this.currentMode.set(SinglePlaceController.create(this)));
 
 		MultiPlaceController.Desktop.subscribe(this, this.currentMode);
 	}
@@ -599,20 +678,31 @@ export class BuildTool2 extends ToolBase {
 	}
 
 	placeBlock() {
-		const mode = this.currentMode.get();
-		if (!(mode instanceof SinglePlaceController.Desktop)) {
-			return;
-		}
-
-		return mode.placeBlock();
+		return this.currentMode.get()?.place();
 	}
-	rotateBlock(axis: "x" | "y" | "z", inverted = true): void {
-		const mode = this.currentMode.get();
-		if (!(mode instanceof SinglePlaceController.Desktop)) {
-			return;
+	rotateBlock(axis: "x" | "y" | "z", inverted = true) {
+		return this.currentMode.get()?.rotate(axis, inverted);
+	}
+
+	pickBlock() {
+		const target = this.mouse.Target;
+		if (!target) return;
+
+		let model = target as BlockModel | BasePart;
+		while (!model.IsA("Model")) {
+			model = model.Parent as BlockModel | BasePart;
+			if (!model) return;
 		}
 
-		return mode.rotateBlock(axis, inverted);
+		const id = BlockManager.manager.id.get(model);
+		if (id === undefined) return; // not a block
+
+		const block = BlocksInitializer.blocks.map.get(id)!;
+
+		this.selectedBlock.set(block);
+		this.selectedMaterial.set(BlockManager.manager.material.get(model));
+		this.selectedColor.set(BlockManager.manager.color.get(model));
+		this.blockRotation.set(model.GetPivot().Rotation);
 	}
 
 	getDisplayName(): string {

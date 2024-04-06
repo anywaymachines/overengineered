@@ -10,6 +10,7 @@ import {
 import { MirrorEditorControl, MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
 import { ButtonControl } from "client/gui/controls/Button";
 import { BuildTool2 } from "client/tools/BuildTool2";
+import { BlocksInitializer } from "shared/BlocksInitializer";
 
 export type BuildTool2SceneDefinition = GuiObject & {
 	readonly ActionBar: GuiObject & {
@@ -38,8 +39,7 @@ export type BuildTool2SceneDefinition = GuiObject & {
 export class BuildTool2Scene extends Control<BuildTool2SceneDefinition> {
 	readonly tool;
 	readonly blockSelector;
-
-	private blockInfoPreviewControl?: BlockPreviewControl;
+	private readonly blockInfoPreviewControl: BlockPreviewControl;
 
 	constructor(gui: BuildTool2SceneDefinition, tool: BuildTool2) {
 		super(gui);
@@ -60,30 +60,26 @@ export class BuildTool2Scene extends Control<BuildTool2SceneDefinition> {
 			),
 		);
 
-		this.event.subscribeObservable(this.blockSelector.selectedBlock, (block) => {
-			this.tool.selectedBlock.set(block);
+		this.blockInfoPreviewControl = this.add(new BlockPreviewControl(this.gui.Info.ViewportFrame));
+		this.event.subscribeObservable(
+			this.blockSelector.selectedBlock,
+			(block) => {
+				this.gui.Info.Visible = block !== undefined;
+				this.blockInfoPreviewControl.set(block?.model);
+				this.tool.selectedBlock.set(block);
 
-			// Clear block info
-			if (this.blockInfoPreviewControl) {
-				this.blockInfoPreviewControl.clear();
-				this.remove(this.blockInfoPreviewControl);
-				this.blockInfoPreviewControl = undefined;
-			}
+				if (block) {
+					this.gui.Info.NameLabel.Text = block.displayName;
+					this.gui.Info.DescriptionLabel.Text = block.info;
 
-			this.gui.Info.NameLabel.Text = "";
-			this.gui.Info.DescriptionLabel.Text = "";
-
-			// Set block info
-			if (block) {
-				this.blockInfoPreviewControl = this.add(
-					new BlockPreviewControl(this.gui.Info.ViewportFrame, block.model),
-				);
-				this.gui.Info.NameLabel.Text = block.displayName;
-				this.gui.Info.DescriptionLabel.Text = block.info;
-
-				GuiAnimator.transition(this.gui.Info, 0.2, "right");
-			}
-		});
+					GuiAnimator.transition(this.gui.Info, 0.2, "right");
+				} else {
+					this.gui.Info.NameLabel.Text = "";
+					this.gui.Info.DescriptionLabel.Text = "";
+				}
+			},
+			true,
+		);
 
 		this.add(new MaterialColorEditControl(this.gui.Bottom, tool.selectedMaterial, tool.selectedColor));
 
@@ -96,8 +92,28 @@ export class BuildTool2Scene extends Control<BuildTool2SceneDefinition> {
 				GuiAnimator.transition(this.gui.Touch, 0.2, "left");
 			}
 		};
+		const updateSelectedBlock = () => {
+			const block = tool.selectedBlock.get();
+			if (!block) {
+				this.blockSelector.selectedBlock.set(undefined);
+				return;
+			}
+
+			const targetCategory = BlocksInitializer.categories.getCategoryPath(block.category) ?? [];
+
+			if (
+				this.blockSelector.selectedCategory.get()[this.blockSelector.selectedCategory.get().size() - 1] !==
+				targetCategory[targetCategory.size() - 1]
+			) {
+				this.blockSelector.selectedCategory.set(targetCategory);
+			}
+
+			this.blockSelector.selectedBlock.set(block);
+		};
+
 		this.event.onPrepare(updateTouchControls);
 		this.event.subscribeObservable(tool.selectedBlock, updateTouchControls);
+		this.event.subscribeObservable(tool.selectedBlock, updateSelectedBlock);
 		updateTouchControls();
 	}
 
