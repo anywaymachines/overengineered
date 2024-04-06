@@ -12,7 +12,7 @@ import { Gui } from "client/gui/Gui";
 import { DebugControl } from "client/gui/static/DebugControl";
 import { LogControl } from "client/gui/static/LogControl";
 import { PlayModeController } from "client/modes/PlayModeController";
-import { $compileTime } from "rbxts-transform-debug";
+import { $compileTime } from "rbxts-transformer-macros";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -57,7 +57,7 @@ const playModeController = new PlayModeController();
 root.add(playModeController);
 root.enable();
 
-const updated = DateTime.fromUnixTimestamp($compileTime("UnixTimestamp")).FormatUniversalTime("DDMMYY_HHmm", "en-us");
+const updated = DateTime.fromUnixTimestamp($compileTime()).FormatUniversalTime("DDMMYY_HHmm", "en-us");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `DEVTEST | v${game.PlaceVersion} | ${updated}`;
 
 dataLoading.await();

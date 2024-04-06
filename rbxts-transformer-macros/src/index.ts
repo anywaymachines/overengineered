@@ -3,6 +3,8 @@ import ts from "typescript";
 
 const TRANSFORMER_DIR = path.join(__dirname, "../");
 const INDEX_FILE = path.join(TRANSFORMER_DIR, "index.d.ts");
+const defineCallMacrosName = "$defineCallMacros";
+const compileTimeName = "$compileTime";
 
 type Macro = {
 	exportDeclaration: ts.Declaration;
@@ -48,6 +50,7 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 		return generatedUID;
 	}
 
+	/** Fix namespace function hoisting by moving any variable and inside namespace declarations to the bottom */
 	function transformNamespaces(file: ts.SourceFile): ts.SourceFile {
 		const fixNamespace = (node: ts.ModuleDeclaration): ts.ModuleDeclaration => {
 			if ((node.flags & ts.NodeFlags.Namespace) === 0 || !node.body || !ts.isModuleBlock(node.body))
@@ -95,9 +98,22 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 		}, context);
 	}
 
+	function transformCompileTime(file: ts.SourceFile): ts.SourceFile {
+		const visit = (node: ts.Node): ts.Node => {
+			if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === compileTimeName) {
+				return factory.createNumericLiteral(Date.now() / 1000);
+			}
+
+			return ts.visitEachChild(node, visit, context);
+		};
+		
+		return ts.visitEachChild(file, visit, context);
+	}
+
 	function transformFiles(files: Map<string, ts.SourceFile>): Map<string, ts.SourceFile> {
 		files.forEach((file, fileName) => {
 			file = transformNamespaces(file);
+			file = transformCompileTime(file);
 			files.set(fileName, file);
 		});
 
@@ -108,26 +124,22 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 			});
 		}
 		if (false)
-		macroList.forEach((map) => {
-			map.CallMacros.forEach((decl, name) => {
-				console.log(`Found call macro ${name} from ${decl.exportDeclaration.getSourceFile().fileName}`);
+			macroList.forEach((map) => {
+				map.CallMacros.forEach((decl, name) => {
+					console.log(`Found call macro ${name} from ${decl.exportDeclaration.getSourceFile().fileName}`);
+				});
 			});
-		});
 		return files;
 	}
 
 	function isDefineMacro(node: ts.Node): node is ts.CallExpression & { expression: ts.Identifier } {
 		if (!ts.isCallExpression(node)) return false;
 		if (!ts.isIdentifier(node.expression)) return false;
-		const type = typeChecker.getTypeAtLocation(node.expression);
-		if (type && type.symbol) {
-			const originFile = type.symbol.declarations?.[0]?.getSourceFile();
-			if (originFile) {
-				if (path.normalize(originFile.fileName) === INDEX_FILE) {
-					return true;
-				}
-			}
+
+		if (node.expression.escapedText === defineCallMacrosName) {
+			return true;
 		}
+
 		return false;
 	}
 
@@ -151,15 +163,13 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 			const type = typeChecker.getTypeAtLocation(typeArgument);
 			if (!type) throw "Could not retrieve symbol for type.";
 
-			const macros: MacroListTypes = macroList.get(type.symbol) ?? {
-				CallMacros: new Map(),
-			};
+			const macros: MacroListTypes = macroList.get(type.symbol) ?? { CallMacros: new Map(), };
 			macroList.set(type.symbol, macros);
 
 			const macroMethods = new Array<ts.PropertyAssignment>();
 
 			for (const method of typeChecker.getTypeAtLocation(argument).getProperties().map(p => p.getDeclarations()![0])) {
-			//for (const method of argument.properties) {
+				//for (const method of argument.properties) {
 				if (!ts.isPropertyAssignment(method)) throw "Expected method.";
 				if (!method.initializer || !ts.isArrowFunction(method.initializer)) throw "Expected method.";
 				if (!ts.isIdentifier(method.name)) throw "Expected identifier.";
