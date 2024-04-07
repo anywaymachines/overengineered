@@ -28,7 +28,7 @@ export namespace BlockGhoster {
 				return;
 			}
 
-			// part.Material = Enum.Material.SmoothPlastic;
+			part.CastShadow = true;
 			part.CanCollide = false;
 			part.CanQuery = false;
 			part.CanTouch = false;

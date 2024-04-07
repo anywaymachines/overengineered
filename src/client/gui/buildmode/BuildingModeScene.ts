@@ -1,7 +1,6 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { Control } from "client/gui/Control";
 import { ToolbarControl, ToolbarControlDefinition } from "client/gui/buildmode/ToolbarControl";
-import { BuildTool2Scene, BuildTool2SceneDefinition } from "client/gui/buildmode/tools/BuildTool2Scene";
 import { BuildToolScene, BuildToolSceneDefinition } from "client/gui/buildmode/tools/BuildToolScene";
 import { ConfigToolScene, ConfigToolSceneDefinition } from "client/gui/buildmode/tools/ConfigToolScene";
 import { DeleteToolScene, DeleteToolSceneDefinition } from "client/gui/buildmode/tools/DeleteToolScene";
@@ -79,7 +78,6 @@ export type BuildingModeSceneDefinition = GuiObject & {
 	readonly Hotbar: ToolbarControlDefinition;
 	readonly Tools: Folder & {
 		readonly Build: BuildToolSceneDefinition;
-		readonly Build2: BuildTool2SceneDefinition;
 		readonly Delete: DeleteToolSceneDefinition;
 		readonly Config: ConfigToolSceneDefinition;
 		readonly Paint: PaintToolSceneDefinition;
@@ -112,7 +110,6 @@ export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 			[tools.deleteTool, DeleteToolScene, this.gui.Tools.Delete],
 			[tools.configTool, ConfigToolScene, this.gui.Tools.Config],
 			[tools.paintTool, PaintToolScene, this.gui.Tools.Paint],
-			[tools.buildTool2, BuildTool2Scene, this.gui.Tools.Build2],
 			[tools.wireTool, WireToolScene, this.gui.Tools.Wire],
 		] as const;
 		for (const [tool, scenetype, scenegui] of types) {

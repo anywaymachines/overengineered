@@ -11,6 +11,10 @@ interface MinMaxData {
 
 /** Lazily initialized immutable {@link https://wikipedia.org/wiki/AABB Axis-Aligned Bounding Box} */
 export class AABB {
+	/** Get the {@link AABB} of a part */
+	static fromPart(block: BasePart, cframe?: CFrame): AABB {
+		return this.fromCenterSize(block.Position, block.Size).withCenter(cframe ?? block.GetPivot().Rotation);
+	}
 	/** Get the {@link AABB} of a model */
 	static fromModel(block: Model, cframe?: CFrame): AABB {
 		// eslint-disable-next-line prefer-const

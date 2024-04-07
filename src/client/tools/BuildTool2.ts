@@ -1,11 +1,21 @@
-import { Players, UserInputService, Workspace } from "@rbxts/services";
+import { Players, RunService, UserInputService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientComponentChild } from "client/component/ClientComponentChild";
 import { InputController } from "client/controller/InputController";
 import { SoundController } from "client/controller/SoundController";
 import { Signals } from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
+import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
+import { GuiAnimator } from "client/gui/GuiAnimator";
+import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
+import { BlockSelectionControl, BlockSelectionControlDefinition } from "client/gui/buildmode/BlockSelection";
+import {
+	MaterialColorEditControl,
+	MaterialColorEditControlDefinition,
+} from "client/gui/buildmode/MaterialColorEditControl";
+import { MirrorEditorControl, MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
+import { ButtonControl } from "client/gui/controls/Button";
 import { LogControl } from "client/gui/static/LogControl";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
@@ -38,15 +48,22 @@ const createBlockGhost = (block: RegistryBlock): Model => {
 };
 
 // eslint-disable-next-line prettier/prettier
-const g = Gui.getGameUI<{ BuildingMode: { Tools: { Build2: { Debug: { Label1: TextLabel; Label2: TextLabel; Label3: TextLabel; Label4: TextLabel; Label5: TextLabel; }; }; }; }; }>().BuildingMode.Tools.Build2.Debug;
+const g = Gui.getGameUI<{ BuildingMode: { Tools: { Build2: { Debug: Instance & { Label1: TextLabel; Label2: TextLabel; Label3: TextLabel; Label4: TextLabel; Label5: TextLabel; }; }; }; }; }>().BuildingMode.Tools.Build2.Debug;
+if (!RunService.IsStudio()) {
+	g.Destroy();
+}
 
 // old block positioning from build tool 1
-const getMouseTargetBlockPositionV1 = (block: RegistryBlock, rotation: CFrame): Vector3 | undefined => {
+const getMouseTargetBlockPositionV1 = (
+	block: RegistryBlock,
+	rotation: CFrame,
+	info?: [target: BasePart, hit: CFrame, surface: Enum.NormalId],
+): Vector3 | undefined => {
 	const mouseTarget = mouse.Target;
 	if (!mouseTarget) return undefined;
 
-	const mouseHit = mouse.Hit;
-	const mouseSurface = mouse.TargetSurface;
+	const mouseHit = info?.[1] ?? mouse.Hit;
+	const mouseSurface = info?.[2] ?? mouse.TargetSurface;
 
 	// Positioning Stage 1
 	const rotationRelative = mouseTarget.CFrame.sub(mouseTarget.Position).Inverse();
@@ -96,54 +113,203 @@ const getMouseTargetBlockPositionV1 = (block: RegistryBlock, rotation: CFrame): 
 };
 
 // new block positioning by i3ym
-const getMouseTargetBlockPositionV2 = (block: RegistryBlock, rotation: CFrame): Vector3 | undefined => {
-	const constrainPositionToGrid = (pos: Vector3) => {
+const getMouseTargetBlockPositionV2 = (
+	block: RegistryBlock,
+	rotation: CFrame,
+	info?: [target: BasePart, hit: CFrame, surface: Enum.NormalId],
+): Vector3 | undefined => {
+	const constrainPositionToGrid = (normal: Vector3, pos: Vector3) => {
+		const roundByStep = (number: number) => {
+			const step = 1;
+			return number - (((number + step / 2) % step) - step / 2);
+		};
 		const constrain = math.round;
-		return new Vector3(constrain(pos.X), constrain(pos.Y), constrain(pos.Z));
+
+		return new Vector3(
+			normal.X === 0 ? constrain(pos.X) : pos.X,
+			normal.Y === 0 ? constrain(pos.Y) : pos.Y,
+			normal.Z === 0 ? constrain(pos.Z) : pos.Z,
+		);
+	};
+	const addTargetSize = (target: BasePart, normal: Vector3, pos: Vector3) => {
+		return pos
+			.sub(pos.sub(target.Position).mul(VectorUtils.apply(normal, math.abs)))
+			.add(AABB.fromPart(target).getSize().div(2).mul(normal));
 	};
 	const addBlockSize = (selectedBlock: RegistryBlock, normal: Vector3, pos: Vector3) => {
 		return pos.add(AABB.fromModel(selectedBlock.model, rotation).getSize().mul(normal).div(2));
 	};
 
-	const mouseTarget = mouse.Target;
-	if (!mouseTarget) return undefined;
+	const target = info?.[0] ?? mouse.Target;
+	if (!target) return;
 
-	const mouseHit = mouse.Hit;
-	const mouseSurface = mouse.TargetSurface;
+	const mouseHit = info?.[1] ?? mouse.Hit;
+	const mouseSurface = info?.[2] ?? mouse.TargetSurface;
 
 	const globalMouseHitPos = mouseHit.PointToWorldSpace(Vector3.zero);
-	const normal = Vector3.FromNormalId(mouseSurface);
+	const normal = target.CFrame.Rotation.VectorToWorldSpace(Vector3.FromNormalId(mouseSurface));
 
-	g.Label1.Text = `Target: ${mouseTarget}`;
+	g.Label1.Text = `Target: ${target}`;
 	g.Label2.Text = `Hit: ${mouseHit}`;
 	g.Label3.Text = `Normal: ${mouseSurface} ${normal}`;
 
 	let targetPosition = globalMouseHitPos;
+	targetPosition = addTargetSize(target, normal, targetPosition);
 	targetPosition = addBlockSize(block, normal, targetPosition);
-	targetPosition = constrainPositionToGrid(targetPosition);
+	targetPosition = constrainPositionToGrid(normal, targetPosition);
 
 	return targetPosition;
 };
 const getMouseTargetBlockPosition = getMouseTargetBlockPositionV2;
+
+namespace Scene {
+	export type BuildToolSceneDefinition = GuiObject & {
+		readonly ActionBar: GuiObject & {
+			readonly Buttons: GuiObject & {
+				readonly Mirror: GuiButton;
+			};
+		};
+		readonly Mirror: GuiObject & {
+			readonly Content: MirrorEditorControlDefinition;
+		};
+		readonly Bottom: MaterialColorEditControlDefinition;
+		readonly Info: Frame & {
+			readonly ViewportFrame: ViewportFrame;
+			readonly DescriptionLabel: TextLabel;
+			readonly NameLabel: TextLabel;
+		};
+		readonly Inventory: BlockSelectionControlDefinition;
+		readonly Touch: Frame & {
+			readonly PlaceButton: GuiButton;
+			readonly RotateRButton: GuiButton;
+			readonly RotateTButton: GuiButton;
+			readonly RotateYButton: GuiButton;
+		};
+	};
+
+	export class BuildToolScene extends Control<BuildToolSceneDefinition> {
+		readonly tool;
+		readonly blockSelector;
+		private readonly blockInfoPreviewControl: BlockPreviewControl;
+
+		constructor(gui: BuildToolSceneDefinition, tool: BuildTool2) {
+			super(gui);
+			this.tool = tool;
+
+			this.blockSelector = new BlockSelectionControl(gui.Inventory);
+			this.blockSelector.show();
+			this.add(this.blockSelector);
+
+			const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content));
+			mirrorEditor.value.set(tool.mirrorMode.get());
+			this.event.subscribeObservable(mirrorEditor.value, (val) => tool.mirrorMode.set(val), true);
+			this.onEnable(() => (this.gui.Mirror.Visible = false));
+			this.add(
+				new ButtonControl(
+					this.gui.ActionBar.Buttons.Mirror,
+					() => (this.gui.Mirror.Visible = !this.gui.Mirror.Visible),
+				),
+			);
+
+			this.blockInfoPreviewControl = this.add(new BlockPreviewControl(this.gui.Info.ViewportFrame));
+			this.event.subscribeObservable(
+				this.blockSelector.selectedBlock,
+				(block) => {
+					this.gui.Info.Visible = block !== undefined;
+					this.blockInfoPreviewControl.set(block?.model);
+					this.tool.selectedBlock.set(block);
+
+					if (block) {
+						this.gui.Info.NameLabel.Text = block.displayName;
+						this.gui.Info.DescriptionLabel.Text = block.info;
+
+						GuiAnimator.transition(this.gui.Info, 0.2, "right");
+					} else {
+						this.gui.Info.NameLabel.Text = "";
+						this.gui.Info.DescriptionLabel.Text = "";
+					}
+				},
+				true,
+			);
+
+			this.add(new MaterialColorEditControl(this.gui.Bottom, tool.selectedMaterial, tool.selectedColor));
+
+			const updateTouchControls = () => {
+				const visible =
+					InputController.inputType.get() === "Touch" && this.blockSelector.selectedBlock.get() !== undefined;
+				this.gui.Touch.Visible = visible;
+
+				if (visible) {
+					GuiAnimator.transition(this.gui.Touch, 0.2, "left");
+				}
+			};
+			const updateSelectedBlock = () => {
+				const block = tool.selectedBlock.get();
+				if (!block) {
+					this.blockSelector.selectedBlock.set(undefined);
+					return;
+				}
+
+				const targetCategory = BlocksInitializer.categories.getCategoryPath(block.category) ?? [];
+
+				if (
+					this.blockSelector.selectedCategory.get()[this.blockSelector.selectedCategory.get().size() - 1] !==
+					targetCategory[targetCategory.size() - 1]
+				) {
+					this.blockSelector.selectedCategory.set(targetCategory);
+				}
+
+				this.blockSelector.selectedBlock.set(block);
+			};
+
+			this.event.onPrepare(updateTouchControls);
+			this.event.subscribeObservable(tool.selectedBlock, updateTouchControls);
+			this.event.subscribeObservable(tool.selectedBlock, updateSelectedBlock);
+			updateTouchControls();
+		}
+
+		protected prepareTouch(): void {
+			// Touchscreen controls
+			this.eventHandler.subscribe(this.gui.Touch.PlaceButton.MouseButton1Click, () => this.tool.placeBlock());
+			this.eventHandler.subscribe(this.gui.Touch.RotateRButton.MouseButton1Click, () =>
+				this.tool.rotateBlock("x", true),
+			);
+			this.eventHandler.subscribe(this.gui.Touch.RotateTButton.MouseButton1Click, () =>
+				this.tool.rotateBlock("y", true),
+			);
+			this.eventHandler.subscribe(this.gui.Touch.RotateYButton.MouseButton1Click, () =>
+				this.tool.rotateBlock("z", true),
+			);
+		}
+
+		show() {
+			super.show();
+			GuiAnimator.transition(this.gui.Inventory, 0.2, "right");
+		}
+	}
+}
 
 interface IController extends IComponent {
 	rotate(axis: "x" | "y" | "z", inverted?: boolean): void;
 	place(): Promise<unknown>;
 }
 namespace SinglePlaceController {
-	class Desktop extends ClientComponent implements IController {
-		private mainGhost?: Model;
-		private readonly blockRotation;
-		private readonly selectedBlock;
-		private readonly selectedColor;
-		private readonly selectedMaterial;
-		private readonly mirrorMode;
-		private readonly plot;
+	abstract class Controller extends ClientComponent implements IController {
+		protected readonly state: BuildTool2;
 
-		private readonly blockMirrorer;
+		private mainGhost?: Model;
+		protected readonly blockRotation;
+		protected readonly selectedBlock;
+		protected readonly selectedColor;
+		protected readonly selectedMaterial;
+		protected readonly mirrorMode;
+		protected readonly plot;
+		protected readonly blockMirrorer;
 
 		constructor(state: BuildTool2) {
 			super();
+
+			this.state = state;
 			this.selectedBlock = state.selectedBlock.asReadonly();
 			this.selectedColor = state.selectedColor.asReadonly();
 			this.selectedMaterial = state.selectedMaterial.asReadonly();
@@ -153,44 +319,8 @@ namespace SinglePlaceController {
 
 			this.blockMirrorer = this.parent(new BlockMirrorer());
 
-			this.onPrepare((input) => {
-				if (input !== "Touch") return;
-
-				this.inputHandler.onTouchTap(() => this.updateBlockPosition(), false);
-			});
-			this.event.onPrepare(() => this.updateBlockPosition());
-
-			state.subscribeSomethingToCurrentPlot(this, () => {
-				if (InputController.inputType.get() === "Touch") {
-					return;
-				}
-
-				this.updateBlockPosition();
-			});
-			this.event.onPrepare((inputType, eh, ih) => {
-				if (inputType === "Touch") return;
-
-				eh.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
-				eh.subscribe(mouse.Move, () => this.updateBlockPosition());
-				ih.onMouse1Up(() => this.place(), false);
-			});
-
+			this.onPrepare(() => this.updateBlockPosition());
 			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
-
-			this.event.subInput((ih) => {
-				ih.onMouse3Down(() => {
-					state.pickBlock();
-					this.updateBlockPosition();
-				}, false);
-
-				ih.onKeyDown("T", () => this.rotate("x"));
-				ih.onKeyDown("R", () => this.rotate("y"));
-				ih.onKeyDown("Y", () => {
-					if (InputController.isCtrlPressed()) return;
-					this.rotate("z");
-				});
-			});
-
 			this.onDisable(() => this.destroyGhosts());
 		}
 
@@ -214,15 +344,18 @@ namespace SinglePlaceController {
 			this.blockMirrorer.updatePositions(this.plot.get().instance, this.mirrorMode.get());
 		}
 
-		private updateBlockPosition() {
-			if (Gui.isCursorOnVisibleGui()) {
-				return;
-			}
-
+		/** @param mainPosition If specified, overrides the mouse target position */
+		protected updateBlockPosition(mainPosition?: Vector3) {
 			const selectedBlock = this.selectedBlock.get();
 			if (!selectedBlock) return;
 
-			const mainPosition = getMouseTargetBlockPosition(selectedBlock, this.blockRotation.get());
+			if (!mainPosition) {
+				if (Gui.isCursorOnVisibleGui()) {
+					return;
+				}
+
+				mainPosition = getMouseTargetBlockPosition(selectedBlock, this.blockRotation.get());
+			}
 			if (!mainPosition) return;
 
 			this.mainGhost ??= createBlockGhost(selectedBlock);
@@ -283,9 +416,8 @@ namespace SinglePlaceController {
 				this.rotateFineTune(new Vector3(0, 0, inverted ? math.pi / 2 : math.pi / -2));
 			}
 		}
-		private rotateFineTune(rotationVector: Vector3): void;
-		private rotateFineTune(cframe: CFrame): void;
-		private rotateFineTune(rotation: CFrame | Vector3): void {
+
+		protected rotateFineTune(rotation: CFrame | Vector3): void {
 			if (typeIs(rotation, "Vector3")) {
 				rotation = CFrame.fromEulerAnglesXYZ(rotation.X, rotation.Y, rotation.Z);
 			}
@@ -368,12 +500,91 @@ namespace SinglePlaceController {
 			}
 		}
 	}
+	class Desktop extends Controller {
+		constructor(state: BuildTool2) {
+			super(state);
+
+			state.subscribeSomethingToCurrentPlot(this, () => this.updateBlockPosition());
+			this.onPrepare((inputType, eh, ih) => {
+				eh.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
+				eh.subscribe(mouse.Move, () => this.updateBlockPosition());
+				ih.onMouse1Up(() => this.place(), false);
+			});
+
+			this.event.subInput((ih) => {
+				ih.onMouse3Down(() => {
+					state.pickBlock();
+					this.updateBlockPosition();
+				}, false);
+
+				ih.onKeyDown("T", () => this.rotate("x"));
+				ih.onKeyDown("R", () => this.rotate("y"));
+				ih.onKeyDown("Y", () => {
+					if (InputController.isCtrlPressed()) return;
+					this.rotate("z");
+				});
+			});
+		}
+	}
+	class Touch extends Controller {
+		private prevTarget?: [target: BasePart, hit: CFrame, surface: Enum.NormalId];
+
+		constructor(state: BuildTool2) {
+			super(state);
+
+			this.event.subInput((ih) => {
+				ih.onTouchTap(() => {
+					if (!Gui.isCursorOnVisibleGui()) {
+						const target = mouse.Target;
+						if (target) {
+							this.prevTarget = [target, mouse.Hit, mouse.TargetSurface];
+						}
+					}
+
+					this.updateBlockPosition();
+				}, false);
+			});
+		}
+
+		protected rotateFineTune(rotation: CFrame | Vector3): void {
+			super.rotateFineTune(rotation);
+
+			if (this.prevTarget) {
+				const selectedBlock = this.selectedBlock.get();
+				if (!selectedBlock) return;
+
+				const mainPosition = getMouseTargetBlockPosition(
+					selectedBlock,
+					this.blockRotation.get(),
+					this.prevTarget,
+				);
+				this.updateBlockPosition(mainPosition);
+			}
+		}
+	}
+	class Gamepad extends Desktop {
+		constructor(state: BuildTool2) {
+			super(state);
+
+			this.event.subInput((ih) => {
+				ih.onMouse3Down(() => {
+					state.pickBlock();
+					this.updateBlockPosition();
+				}, false);
+
+				ih.onKeyDown("ButtonX", () => this.place());
+				ih.onKeyDown("DPadLeft", () => this.rotate("x"));
+				ih.onKeyDown("DPadUp", () => this.rotate("y"));
+				ih.onKeyDown("DPadRight", () => this.rotate("z"));
+			});
+		}
+	}
 
 	export function create(tool: BuildTool2) {
 		return ClientComponentChild.createOnceBasedOnInputType({
 			Desktop: () => new Desktop(tool),
-			Gamepad: () => new Desktop(tool),
-			Touch: () => new Desktop(tool),
+			Touch: () => new Touch(tool),
+			Gamepad: () => new Gamepad(tool),
 		});
 	}
 }
@@ -662,6 +873,10 @@ export class BuildTool2 extends ToolBase {
 
 	constructor(mode: BuildingMode) {
 		super(mode);
+
+		this.parentGui(
+			new Scene.BuildToolScene(ToolBase.getToolGui<"Build2", Scene.BuildToolSceneDefinition>().Build2, this),
+		);
 
 		this.currentMode.childSet.Connect((mode) => {
 			if (!this.isEnabled()) return;

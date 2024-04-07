@@ -6,7 +6,6 @@ import { SharedPlots } from "shared/building/SharedPlots";
 import { AABB } from "shared/fixes/AABB";
 import { JSON, JsonSerializablePrimitive } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
-import { VectorUtils } from "shared/utils/VectorUtils";
 import { BuildingWelder } from "./BuildingWelder";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
@@ -38,11 +37,6 @@ export namespace ServerBuilding {
 		}
 
 		const block = BlocksInitializer.blocks.map.get(data.id)!;
-
-		// round the coordinates
-		(data as Writable<typeof data>).location = data.location.sub(
-			data.location.Position.sub(VectorUtils.apply(data.location.Position, math.round)),
-		);
 
 		// Create a new instance of the building model
 		const model = block.model.Clone();
