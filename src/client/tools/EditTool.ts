@@ -26,6 +26,7 @@ import { TransformService } from "shared/component/TransformService";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { ObservableValue, type ReadonlyObservableValue } from "shared/event/ObservableValue";
+import { Signal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
 import { PartUtils } from "shared/utils/PartUtils";
 
@@ -417,13 +418,20 @@ namespace Controllers {
 					return true;
 				}
 
+				if (EditTool.plotMoveOffset.Magnitude > 0 && EditTool.plotMoveOffset !== diff) {
+					LogControl.instance.addLine("Wrong move tutorial offset!", Colors.red);
+					this.cancel();
+					return;
+				}
+
 				const response = await ClientBuilding.moveBlocks(plot, blocks, diff);
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
+				} else {
+					EditTool.moveDoneSignal.Fire();
 				}
 
 				tool.selected.setRange(blocks);
-				return response.success;
 			});
 		}
 
@@ -632,6 +640,7 @@ export class EditTool extends ToolBase {
 	readonly enabledModes = new ObservableValue<readonly EditToolButtons[]>(EditTool.allModes);
 
 	// Tutorial
+	static moveDoneSignal = new Signal();
 	static plotMoveOffset = Vector3.zero;
 
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
@@ -689,6 +698,7 @@ export class EditTool extends ToolBase {
 	}
 
 	toggleMode(mode: EditToolMode | undefined) {
+		// Tutorial move tool limits
 		if (EditTool.plotMoveOffset.Magnitude > 0 && mode === "Move") {
 			// Check is plot selected
 			for (const block of this.targetPlot.get().getBlocks()) {

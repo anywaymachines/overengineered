@@ -1,3 +1,4 @@
+import { TasksControl } from "client/gui/static/TasksControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { EditTool } from "client/tools/EditTool";
 import type { Tutorial } from "client/tutorial/Tutorial";
@@ -139,10 +140,18 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	disabledTools.set(toolController.allTools.filter((t) => t !== toolController.buildTool));
 	tutorial.Control.displayStep("Build a frame using ordinary blocks", false);
 
+	TasksControl.instance.addTask("Select building tool");
+	TasksControl.instance.addTask('Select "Block"');
+	TasksControl.instance.addTask("Place all highlighted blocks");
+
 	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
 	disabledTools.set(toolController.allTools);
+	TasksControl.instance.finish();
 
 	tutorial.Control.displayStep("Great job! Now delete the useless block", false);
+
+	TasksControl.instance.addTask("Select deleting tool");
+	TasksControl.instance.addTask("Delete useless block");
 
 	tutorial.deleteTool.addBlockToDelete({
 		position: new Vector3(4, 1.5, 2),
@@ -152,8 +161,13 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 
 	if (!(await tutorial.deleteTool.waitForBlocksToDelete())) return;
 	disabledTools.set(toolController.allTools);
+	TasksControl.instance.finish();
 
 	tutorial.Control.displayStep("Next, you need to install servomotors. They help the car turn", false);
+
+	TasksControl.instance.addTask("Select building tool");
+	TasksControl.instance.addTask('Select "Servo"');
+	TasksControl.instance.addTask("Place all highlighted blocks");
 
 	disabledTools.set(toolController.allTools.filter((t) => t !== toolController.buildTool));
 
@@ -196,17 +210,18 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 
 	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
 	disabledTools.set(toolController.allTools);
+	TasksControl.instance.finish();
 
 	tutorial.Control.displayStep(
 		"Now we need to lift the car, so it will be easier for us to install the wheels and motors",
-		true,
+		false,
 	);
 
 	EditTool.plotMoveOffset = new Vector3(0, 4, 0);
 	tutorial.editTool.get().enabledModes.set(["Move"]);
 	disabledTools.set(toolController.allTools.filter((t) => t !== toolController.editTool));
 
-	if (!(await tutorial.WaitForNextButtonPress())) return;
+	if (!(await tutorial.editTool.waitForMoveToolWork())) return;
 
 	tutorial.Finish();
 }

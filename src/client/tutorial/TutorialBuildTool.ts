@@ -55,6 +55,7 @@ export class TutorialBuildTool {
 					}
 				}
 
+				eventHandler.unsubscribeAll();
 				this.cleanup();
 				resolve(true);
 			});
