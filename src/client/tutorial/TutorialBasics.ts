@@ -1,4 +1,5 @@
 import { BuildingMode } from "client/modes/build/BuildingMode";
+import { EditTool } from "client/tools/EditTool";
 import type { Tutorial } from "client/tutorial/Tutorial";
 
 export async function TutorialBasics(tutorial: typeof Tutorial) {
@@ -196,7 +197,14 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
 	disabledTools.set(toolController.allTools);
 
-	tutorial.Control.displayStep("the end", true);
+	tutorial.Control.displayStep(
+		"Now we need to lift the car, so it will be easier for us to install the wheels and motors",
+		true,
+	);
+
+	EditTool.plotMoveOffset = new Vector3(0, 4, 0);
+	tutorial.editTool.get().enabledModes.set(["Move"]);
+	disabledTools.set(toolController.allTools.filter((t) => t !== toolController.editTool));
 
 	if (!(await tutorial.WaitForNextButtonPress())) return;
 

@@ -3,6 +3,7 @@ import { BuildingMode } from "client/modes/build/BuildingMode";
 import { TutorialBasics } from "client/tutorial/TutorialBasics";
 import { TutorialBuildTool } from "client/tutorial/TutorialBuildTool";
 import { TutorialDeleteTool } from "client/tutorial/TutorialDeleteTool";
+import { TutorialEditTool } from "client/tutorial/TutorialEditTool";
 import { EventHandler } from "shared/event/EventHandler";
 
 type TutorialType = "Basics";
@@ -13,6 +14,7 @@ export namespace Tutorial {
 
 	export const buildTool = new TutorialBuildTool(Tutorial);
 	export const deleteTool = new TutorialDeleteTool(Tutorial);
+	export const editTool = new TutorialEditTool(Tutorial);
 
 	export async function WaitForNextButtonPress(): Promise<boolean> {
 		return new Promise((resolve) => {

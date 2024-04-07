@@ -275,8 +275,8 @@ namespace Selectors {
 
 	export class Selector extends ClientComponent implements SelectorGuiParams {
 		private readonly plot: ReadonlyObservableValue<SharedPlot>;
-		private readonly selected: ObservableCollectionSet<BlockModel>;
 		private readonly highlighterParent = new ComponentChild<HoveredBlocksHighlighter>(this);
+		readonly selected: ObservableCollectionSet<BlockModel>;
 		readonly highlightModeName = new ObservableValue<"single" | "assembly">("single");
 
 		constructor(
@@ -342,6 +342,7 @@ namespace Selectors {
 		private selectBlock(block: BlockModel) {
 			this.selected.add(block);
 		}
+
 		/** @returns A boolean indicating whether the block was successfully deselected */
 		private deselectBlock(block: BlockModel): boolean {
 			const existing = this.selected.has(block);
@@ -630,6 +631,9 @@ export class EditTool extends ToolBase {
 	static readonly allModes: readonly EditToolButtons[] = ["Move", "Rotate", "Clone", "Paint", "Delete"];
 	readonly enabledModes = new ObservableValue<readonly EditToolButtons[]>(EditTool.allModes);
 
+	// Tutorial
+	static plotMoveOffset = Vector3.zero;
+
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
 	readonly selected = new ObservableCollectionSet<BlockModel>();
@@ -685,6 +689,16 @@ export class EditTool extends ToolBase {
 	}
 
 	toggleMode(mode: EditToolMode | undefined) {
+		if (EditTool.plotMoveOffset.Magnitude > 0 && mode === "Move") {
+			// Check is plot selected
+			for (const block of this.targetPlot.get().getBlocks()) {
+				if (!this.selector.selected.has(block)) {
+					LogControl.instance.addLine("Select all blocks in a plot!", Colors.red);
+					return;
+				}
+			}
+		}
+
 		if (mode && !this.enabledModes.get().includes(mode)) {
 			this._selectedMode.set(undefined);
 			return;
