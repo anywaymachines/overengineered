@@ -1,5 +1,6 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { ActionController } from "client/modes/build/ActionController";
+import { Operation } from "shared/Operation";
 import { Remotes } from "shared/Remotes";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
@@ -7,7 +8,13 @@ import { SharedPlot } from "shared/building/SharedPlot";
 
 /** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
 export namespace ClientBuilding {
-	export async function placeBlocks(plot: SharedPlot, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) {
+	export const placeOperation = new Operation(placeBlocks);
+	export const deleteOperation = new Operation(deleteBlocks);
+	export const moveOperation = new Operation(moveBlocks);
+	export const rotateOperation = new Operation(rotateBlocks);
+	export const paintOperation = new Operation(paintBlocks);
+
+	async function placeBlocks(plot: SharedPlot, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) {
 		let placed: readonly BlockUuid[];
 		const result = await ActionController.instance.execute(
 			"Place blocks",
@@ -54,7 +61,7 @@ export namespace ClientBuilding {
 		plot.changed.Fire();
 		return result;
 	}
-	export async function deleteBlocks(plot: SharedPlot, _blocks: readonly BlockModel[] | "all") {
+	async function deleteBlocks(plot: SharedPlot, _blocks: readonly BlockModel[] | "all") {
 		const uuids = _blocks === "all" ? "all" : _blocks.map(BlockManager.manager.uuid.get);
 		const blockCount = uuids === "all" ? plot.getBlocks().size() : uuids.size();
 
@@ -163,7 +170,7 @@ export namespace ClientBuilding {
 		plot.changed.Fire();
 		return result;
 	}
-	export async function moveBlocks(plot: SharedPlot, _blocks: readonly BlockModel[], diff: Vector3) {
+	async function moveBlocks(plot: SharedPlot, _blocks: readonly BlockModel[], diff: Vector3) {
 		const uuids = _blocks.map(BlockManager.manager.uuid.get);
 		const getBlocks = (): readonly BlockModel[] => uuids.map((uuid) => plot.getBlock(uuid));
 
@@ -186,12 +193,7 @@ export namespace ClientBuilding {
 		plot.changed.Fire();
 		return result;
 	}
-	export async function rotateBlocks(
-		plot: SharedPlot,
-		_blocks: readonly BlockModel[],
-		pivot: Vector3,
-		rotation: CFrame,
-	) {
+	async function rotateBlocks(plot: SharedPlot, _blocks: readonly BlockModel[], pivot: Vector3, rotation: CFrame) {
 		const uuids = _blocks.map(BlockManager.manager.uuid.get);
 		const getBlocks = (): readonly BlockModel[] => uuids.map((uuid) => plot.getBlock(uuid));
 
@@ -214,7 +216,7 @@ export namespace ClientBuilding {
 		plot.changed.Fire();
 		return result;
 	}
-	export async function paintBlocks(
+	async function paintBlocks(
 		plot: SharedPlot,
 		_blocks: readonly BlockModel[] | "all",
 		material: Enum.Material | undefined,

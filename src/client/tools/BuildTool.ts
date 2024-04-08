@@ -9,7 +9,6 @@ import { InputTooltips } from "client/gui/static/TooltipsControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
-import { TutorialPlaceBlockHighlight } from "client/tutorial/TutorialBuildTool";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
@@ -38,8 +37,6 @@ export class BuildTool extends ToolBase {
 	private lastMouseHit?: CFrame;
 	private lastMouseTarget?: BasePart;
 	private lastMouseSurface?: Enum.NormalId;
-
-	tutorialBlocksToPlace: (TutorialPlaceBlockHighlight & { readonly instance: Instance })[] = [];
 
 	// Signals
 	pickSignal = new Signal<(block: RegistryBlock) => void>();
@@ -239,25 +236,7 @@ export class BuildTool extends ToolBase {
 			return;
 		}
 
-		// Tutorial
-		const relativeCoordinates = this.targetPlot
-			.get()
-			.instance.BuildingArea.CFrame.ToObjectSpace(this.previewBlock!.GetPivot());
-
-		if (this.tutorialBlocksToPlace && this.tutorialBlocksToPlace.size() > 0) {
-			const block = this.tutorialBlocksToPlace.find(
-				(value) =>
-					value.id === this.selectedBlock.get()!.id && value.cframe.Position === relativeCoordinates.Position,
-			);
-			if (!block) {
-				SoundController.getSounds().Build.BlockPlaceError.Play();
-				return;
-			}
-
-			this.previewBlock.PivotTo(this.targetPlot.get().instance.BuildingArea.CFrame.ToWorldSpace(block.cframe));
-		}
-
-		const response = await ClientBuilding.placeBlocks(this.targetPlot.get(), [
+		const response = await ClientBuilding.placeOperation.execute(this.targetPlot.get(), [
 			{
 				id: this.selectedBlock.get()!.id,
 				color: this.selectedColor.get(),

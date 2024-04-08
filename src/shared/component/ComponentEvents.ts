@@ -5,7 +5,7 @@ import {
 	ReadonlyObservableValue,
 	ReadonlySubscribeObservableValue,
 } from "shared/event/ObservableValue";
-import { ReadonlySignal } from "shared/event/Signal";
+import { ReadonlyArgsSignal, ReadonlySignal } from "shared/event/Signal";
 import { JSON, JsonSerializablePrimitive } from "shared/fixes/Json";
 
 type Sub<T extends Callback> = readonly [signal: ReadonlySignal<T>, callback: T];
@@ -57,13 +57,13 @@ export class ComponentEvents {
 	}
 
 	/** Register an event */
-	subscribe<T extends Callback = Callback>(signal: ReadonlySignal<T>, callback: T): void {
+	subscribe<TArgs extends unknown[]>(signal: ReadonlyArgsSignal<TArgs>, callback: (...args: TArgs) => void): void {
 		if (this.state.isDestroyed()) return;
 		this.sub(this.events, [signal, callback]);
 	}
 
 	/** Register an event and immediately call the callback function */
-	subscribeImmediately<T extends Callback = Callback>(signal: ReadonlySignal<T>, callback: () => void): void {
+	subscribeImmediately<TArgs extends unknown[]>(signal: ReadonlyArgsSignal<TArgs>, callback: () => void): void {
 		if (this.state.isDestroyed()) return;
 		this.sub(this.events, [signal, callback]);
 		callback();

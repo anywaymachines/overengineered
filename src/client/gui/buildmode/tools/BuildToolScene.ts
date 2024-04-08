@@ -119,8 +119,6 @@ export class BuildToolScene extends Control<BuildToolSceneDefinition> {
 	show() {
 		super.show();
 
-		this.gui.Bottom.Visible = this.tool.tutorialBlocksToPlace.size() === 0;
-
 		GuiAnimator.transition(this.gui.Inventory, 0.2, "right");
 
 		GuiAnimator.transition(this.gui.Bottom.MaterialButton, 0.2, "up");

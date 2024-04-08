@@ -26,7 +26,6 @@ import { TransformService } from "shared/component/TransformService";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { ObservableValue, type ReadonlyObservableValue } from "shared/event/ObservableValue";
-import { Signal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
 import { PartUtils } from "shared/utils/PartUtils";
 
@@ -418,17 +417,10 @@ namespace Controllers {
 					return true;
 				}
 
-				if (EditTool.plotMoveOffset.Magnitude > 0 && EditTool.plotMoveOffset !== diff) {
-					LogControl.instance.addLine("Wrong move tutorial offset!", Colors.red);
-					this.cancel();
-					return;
-				}
-
-				const response = await ClientBuilding.moveBlocks(plot, blocks, diff);
+				const response = await ClientBuilding.moveOperation.execute(plot, blocks, diff);
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
-				} else {
-					EditTool.moveDoneSignal.Fire();
+					this.cancel();
 				}
 
 				tool.selected.setRange(blocks);
@@ -439,6 +431,7 @@ namespace Controllers {
 			this.mover.cancel();
 		}
 	}
+
 	export class Clone extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 		private readonly blocks;
@@ -517,7 +510,7 @@ namespace Controllers {
 					return newblocks;
 				};
 
-				const response = await ClientBuilding.placeBlocks(plot, createBlocksCopy(blocks));
+				const response = await ClientBuilding.placeOperation.execute(plot, createBlocksCopy(blocks));
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
 					this.cancel();
@@ -557,7 +550,7 @@ namespace Controllers {
 				}
 
 				const pivot = this.rotater.getPivot();
-				const response = await ClientBuilding.rotateBlocks(plot, blocks, pivot, diff);
+				const response = await ClientBuilding.rotateOperation.execute(plot, blocks, pivot, diff);
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
 					this.cancel();
@@ -608,7 +601,7 @@ namespace Controllers {
 			);
 
 			this.onDestroy(async () => {
-				const response = await ClientBuilding.paintBlocks(
+				const response = await ClientBuilding.paintOperation.execute(
 					plot,
 					blocks,
 					Paint.material.get(),
@@ -638,10 +631,6 @@ export type EditToolButtons = EditToolMode | "Delete";
 export class EditTool extends ToolBase {
 	static readonly allModes: readonly EditToolButtons[] = ["Move", "Rotate", "Clone", "Paint", "Delete"];
 	readonly enabledModes = new ObservableValue<readonly EditToolButtons[]>(EditTool.allModes);
-
-	// Tutorial
-	static moveDoneSignal = new Signal();
-	static plotMoveOffset = Vector3.zero;
 
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
@@ -698,17 +687,6 @@ export class EditTool extends ToolBase {
 	}
 
 	toggleMode(mode: EditToolMode | undefined) {
-		// Tutorial move tool limits
-		if (EditTool.plotMoveOffset.Magnitude > 0 && mode === "Move") {
-			// Check is plot selected
-			for (const block of this.targetPlot.get().getBlocks()) {
-				if (!this.selector.selected.has(block)) {
-					LogControl.instance.addLine("Select all blocks in a plot!", Colors.red);
-					return;
-				}
-			}
-		}
-
 		if (mode && !this.enabledModes.get().includes(mode)) {
 			this._selectedMode.set(undefined);
 			return;
@@ -736,7 +714,7 @@ export class EditTool extends ToolBase {
 		const selected = [...this.selected.get()];
 		this.selected.setRange([]);
 
-		await ClientBuilding.deleteBlocks(this.targetPlot.get(), selected);
+		await ClientBuilding.deleteOperation.execute(this.targetPlot.get(), selected);
 	}
 
 	getDisplayName(): string {

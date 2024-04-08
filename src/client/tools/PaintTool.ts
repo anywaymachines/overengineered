@@ -90,7 +90,7 @@ export class PaintTool extends ToolBase {
 	}
 
 	paintEverything(enableColor?: boolean, enableMaterial?: boolean) {
-		return ClientBuilding.paintBlocks(
+		return ClientBuilding.paintOperation.execute(
 			this.targetPlot.get(),
 			"all",
 			enableMaterial ?? this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
@@ -101,7 +101,7 @@ export class PaintTool extends ToolBase {
 		blocks: readonly BlockModel[],
 		original?: ReadonlyMap<BlockModel, readonly [material: Enum.Material, color: Color3]>,
 	) {
-		return ClientBuilding.paintBlocks(
+		return ClientBuilding.paintOperation.execute(
 			this.targetPlot.get(),
 			blocks,
 			this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,

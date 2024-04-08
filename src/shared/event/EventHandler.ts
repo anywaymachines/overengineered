@@ -1,23 +1,31 @@
-import { ReadonlySignal } from "shared/event/Signal";
+import { ReadonlyArgsSignal } from "shared/event/Signal";
 
 /** Killable EventHandler for roblox connections */
 export class EventHandler {
 	private readonly events: { Disconnect(): void }[] = [];
 
-	/** The function of registering an event
+	/** Register an event
 	 * @param signal A signal. Example: `UserInputService.InputChanged`
 	 * @param callback Callback
 	 */
-	subscribe<T extends Callback = Callback>(signal: ReadonlySignal<T>, callback: T) {
+	subscribe<TArgs extends unknown[]>(signal: ReadonlyArgsSignal<TArgs>, callback: (...args: TArgs) => void) {
 		this.events.push(signal.Connect(callback));
 	}
 
-	/** The function of registering an event once
+	/** Register an event once
 	 * @param signal A signal. Example: `UserInputService.InputChanged`
 	 * @param callback Callback
 	 */
-	subscribeOnce<T extends Callback = Callback>(signal: RBXScriptSignal<T>, callback: T) {
+	subscribeOnce<TArgs extends unknown[]>(
+		signal: RBXScriptSignal<(...args: TArgs) => void>,
+		callback: (...args: TArgs) => void,
+	) {
 		this.events.push(signal.Once(callback));
+	}
+
+	/** Register a disconnectable object */
+	register(disconnectable: { Disconnect(): void }) {
+		this.events.push(disconnectable);
 	}
 
 	/** Deletes and disables all events */

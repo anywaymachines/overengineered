@@ -1,14 +1,17 @@
-export interface ReadonlySignal<T extends (...args: never[]) => void = () => void> {
-	Connect(callback: T): { Disconnect(): void };
+export interface ReadonlyArgsSignal<TArgs extends unknown[]> {
+	Connect(callback: (...args: TArgs) => void): { Disconnect(): void };
 }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface ReadonlySignal<T extends (...args: any) => void = () => void>
+	extends ReadonlyArgsSignal<Parameters<T>> {}
 
 /** A signal that you can subscribe to, unsibscribe from and fire */
-export class Signal<T extends (...args: never[]) => void = () => void> implements ReadonlySignal<T> {
+export class ArgsSignal<TArgs extends unknown[]> implements ReadonlyArgsSignal<TArgs> {
 	private destroyed = false;
 	private subscribed?: Set<unknown>; // unknown instead of T to workaround the type system
 	private inSelf = 0;
 
-	Connect(callback: T): { Disconnect(): void } {
+	Connect(callback: (...args: TArgs) => void): { Disconnect(): void } {
 		if (this.destroyed) return { Disconnect() {} };
 
 		this.subscribed ??= new Set();
@@ -21,7 +24,7 @@ export class Signal<T extends (...args: never[]) => void = () => void> implement
 			},
 		};
 	}
-	Fire(...args: Parameters<T>): void {
+	Fire(...args: TArgs): void {
 		if (!this.subscribed) return;
 		if (this.inSelf > 10) {
 			print(`Signal self-calling overflow: ${debug.traceback()}`);
@@ -32,7 +35,7 @@ export class Signal<T extends (...args: never[]) => void = () => void> implement
 		try {
 			for (const sub of this.subscribed) {
 				try {
-					(sub as T)(...args);
+					(sub as (...args: TArgs) => void)(...args);
 				} catch (err) {
 					print(err, debug.traceback());
 					throw err;
@@ -48,7 +51,11 @@ export class Signal<T extends (...args: never[]) => void = () => void> implement
 		this.subscribed = undefined;
 	}
 
-	asReadonly(): ReadonlySignal<T> {
+	asReadonly(): ReadonlyArgsSignal<TArgs> {
 		return this;
 	}
 }
+
+/** A signal that you can subscribe to, unsibscribe from and fire */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class Signal<T extends (...args: any) => void = () => void> extends ArgsSignal<Parameters<T>> {}

@@ -90,7 +90,7 @@ export class ConfigControl extends Control<ConfigControlDefinition> {
 			);
 			this.add(control);
 
-			control.submitted.Connect((value) => this.configUpdated.Fire(id as string, value));
+			control.submitted.Connect((value) => this.configUpdated.Fire(id as string, value as never));
 		}
 	}
 }

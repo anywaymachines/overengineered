@@ -1,10 +1,12 @@
 import { Workspace } from "@rbxts/services";
 import { BuildingMode } from "client/modes/build/BuildingMode";
+import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { Tutorial } from "client/tutorial/Tutorial";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { EventHandler } from "shared/event/EventHandler";
+import { successResponse } from "shared/types/network/Responses";
 import { PartUtils } from "shared/utils/PartUtils";
 
 export type TutorialPlaceBlockHighlight = {
@@ -13,6 +15,8 @@ export type TutorialPlaceBlockHighlight = {
 };
 
 export class TutorialBuildTool {
+	private readonly tutorialBlocksToPlace: (TutorialPlaceBlockHighlight & { readonly instance: Instance })[] = [];
+
 	constructor(private readonly tutorial: typeof Tutorial) {}
 
 	get() {
@@ -20,11 +24,11 @@ export class TutorialBuildTool {
 	}
 
 	cleanup() {
-		this.get().tutorialBlocksToPlace.forEach((block) => {
+		this.tutorialBlocksToPlace.forEach((block) => {
 			block.instance.Destroy();
 		});
 
-		this.get().tutorialBlocksToPlace = [];
+		this.tutorialBlocksToPlace.clear();
 	}
 
 	addBlockToPlace(data: TutorialPlaceBlockHighlight) {
@@ -36,7 +40,7 @@ export class TutorialBuildTool {
 		model.PivotTo(relativePosition);
 		model.Parent = Workspace;
 
-		this.get().tutorialBlocksToPlace.push({ ...data, instance: model });
+		this.tutorialBlocksToPlace.push({ ...data, instance: model });
 	}
 
 	async waitForBlocksToPlace(): Promise<boolean> {
@@ -44,8 +48,38 @@ export class TutorialBuildTool {
 		return new Promise((resolve) => {
 			const eventHandler = new EventHandler();
 
+			eventHandler.register(
+				ClientBuilding.placeOperation.addMiddleware((plot, blocks, edit) => {
+					const block = blocks
+						.map((block) => {
+							const btp = this.tutorialBlocksToPlace.find(
+								(value) =>
+									value.id === block.id &&
+									value.cframe.Position ===
+										plot.instance.BuildingArea.CFrame.ToObjectSpace(block!.location).Position,
+							);
+
+							if (!btp) return [] as const;
+							return [block, btp] as const;
+						})
+						.find((b) => b.size() !== 0) as [(typeof blocks)[0], TutorialPlaceBlockHighlight] | undefined;
+
+					if (!block) {
+						return { success: false, message: "Invalid placement" };
+					}
+
+					edit[1] = [
+						{
+							...block[0],
+							location: plot.instance.BuildingArea.CFrame.ToWorldSpace(block[1].cframe),
+						},
+					];
+					return successResponse;
+				}),
+			);
+
 			eventHandler.subscribe(plot.instance.Blocks.ChildAdded, () => {
-				for (const blockToPlace of this.get().tutorialBlocksToPlace ?? []) {
+				for (const blockToPlace of this.tutorialBlocksToPlace ?? []) {
 					if (
 						!BuildingManager.getBlockByPosition(
 							plot.instance.BuildingArea.CFrame.ToWorldSpace(blockToPlace.cframe).Position,

@@ -1,14 +1,18 @@
 import { BuildingMode } from "client/modes/build/BuildingMode";
+import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { Tutorial } from "client/tutorial/Tutorial";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { EventHandler } from "shared/event/EventHandler";
+import { successResponse } from "shared/types/network/Responses";
 
 export type TutorialDeleteBlockHighlight = {
 	position: Vector3;
 };
 
 export class TutorialDeleteTool {
+	private readonly tutorialBlocksToRemove: (TutorialDeleteBlockHighlight & { readonly instance: Instance })[] = [];
+
 	constructor(private readonly tutorial: typeof Tutorial) {}
 
 	get() {
@@ -16,11 +20,11 @@ export class TutorialDeleteTool {
 	}
 
 	cleanup() {
-		this.get().tutorialBlocksToRemove.forEach((block) => {
+		this.tutorialBlocksToRemove.forEach((block) => {
 			block.instance.Destroy();
 		});
 
-		this.get().tutorialBlocksToRemove = [];
+		this.tutorialBlocksToRemove.clear();
 	}
 
 	addBlockToDelete(data: TutorialDeleteBlockHighlight) {
@@ -36,16 +40,39 @@ export class TutorialDeleteTool {
 		selectionBox.LineThickness = 0.05;
 		selectionBox.Parent = block;
 
-		this.get().tutorialBlocksToRemove.push({ ...data, instance: selectionBox });
+		this.tutorialBlocksToRemove.push({ ...data, instance: selectionBox });
 	}
 
 	async waitForBlocksToDelete(): Promise<boolean> {
-		const plot = SharedPlots.getOwnPlot();
 		return new Promise((resolve) => {
 			const eventHandler = new EventHandler();
 
-			eventHandler.subscribe(plot.instance.Blocks.ChildRemoved, () => {
-				for (const blockToPlace of this.get().tutorialBlocksToRemove ?? []) {
+			eventHandler.register(
+				ClientBuilding.deleteOperation.addMiddleware((plot, blocks) => {
+					if (blocks === "all") {
+						return { success: false, message: "Do not delete everything" };
+					}
+
+					if (
+						blocks.any(
+							(value) =>
+								!this.tutorialBlocksToRemove!.find(
+									(value2) =>
+										plot.instance.BuildingArea.CFrame.PointToObjectSpace(
+											value.GetPivot().Position,
+										) === value2.position,
+								),
+						)
+					) {
+						return { success: false, message: "Wrong block" };
+					}
+
+					return successResponse;
+				}),
+			);
+
+			eventHandler.subscribe(ClientBuilding.deleteOperation.executed, (plot, blocks) => {
+				for (const blockToPlace of this.tutorialBlocksToRemove ?? []) {
 					if (
 						BuildingManager.getBlockByPosition(
 							plot.instance.BuildingArea.CFrame.PointToWorldSpace(blockToPlace.position),

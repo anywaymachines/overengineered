@@ -83,7 +83,7 @@ class ConfigControl<TDef extends PlayerConfigTypes.Definitions> extends Control<
 			this.add(control);
 			this.settedElements.set(id, control);
 
-			control.submitted.Connect((value) => this.configUpdated.Fire(id as string, value));
+			control.submitted.Connect((value) => this.configUpdated.Fire(id as string, value as never));
 		}
 	}
 }

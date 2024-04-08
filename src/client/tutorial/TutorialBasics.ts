@@ -1,6 +1,5 @@
 import { TasksControl } from "client/gui/static/TasksControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
-import { EditTool } from "client/tools/EditTool";
 import type { Tutorial } from "client/tutorial/Tutorial";
 
 export async function TutorialBasics(tutorial: typeof Tutorial) {
@@ -217,11 +216,10 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 		false,
 	);
 
-	EditTool.plotMoveOffset = new Vector3(0, 4, 0);
 	tutorial.editTool.get().enabledModes.set(["Move"]);
 	disabledTools.set(toolController.allTools.filter((t) => t !== toolController.editTool));
 
-	if (!(await tutorial.editTool.waitForMoveToolWork())) return;
+	if (!(await tutorial.editTool.waitForMoveToolWork(new Vector3(0, 4, 0)))) return;
 
 	tutorial.Finish();
 }

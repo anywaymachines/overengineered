@@ -7,14 +7,12 @@ import { ToolBase } from "client/tools/ToolBase";
 import { BoxSelector } from "client/tools/selectors/BoxSelector";
 import { HoveredBlockHighlighter } from "client/tools/selectors/HoveredBlockHighlighter";
 import { SelectorParent } from "client/tools/selectors/SelectorParent";
-import { TutorialDeleteBlockHighlight } from "client/tutorial/TutorialDeleteTool";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
 
 export class DeleteTool extends ToolBase {
 	readonly onClearAllRequested = new Signal<() => void>();
 	readonly highlightedBlock = new ObservableValue<BlockModel | undefined>(undefined);
-	tutorialBlocksToRemove: (TutorialDeleteBlockHighlight & { instance: Instance })[] = [];
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -68,24 +66,7 @@ export class DeleteTool extends ToolBase {
 			return;
 		}
 
-		if (blocks !== "all" && this.tutorialBlocksToRemove && this.tutorialBlocksToRemove.size() > 0) {
-			if (
-				blocks.any(
-					(value) =>
-						!this.tutorialBlocksToRemove!.find(
-							(value2) =>
-								this.targetPlot
-									.get()
-									.instance.BuildingArea.CFrame.PointToObjectSpace(value.GetPivot().Position) ===
-								value2.position,
-						),
-				)
-			) {
-				return;
-			}
-		}
-
-		const response = await ClientBuilding.deleteBlocks(this.targetPlot.get(), blocks);
+		const response = await ClientBuilding.deleteOperation.execute(this.targetPlot.get(), blocks);
 		if (response.success) {
 			task.wait();
 

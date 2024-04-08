@@ -469,7 +469,7 @@ namespace SinglePlaceController {
 			g.Label5.Text = `new CFrame(${[...pos.GetComponents()].join()})`;
 			print(g.Label5.Text);
 
-			const response = await ClientBuilding.placeBlocks(
+			const response = await ClientBuilding.placeOperation.execute(
 				plot,
 				[
 					mainGhost,
@@ -835,7 +835,7 @@ namespace MultiPlaceController {
 				return;
 			}
 
-			const response = await ClientBuilding.placeBlocks(
+			const response = await ClientBuilding.placeOperation.execute(
 				this.plot,
 				locations.map(
 					(loc): PlaceBlockRequest => ({

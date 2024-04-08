@@ -68,6 +68,6 @@ while (!(Workspace.GetAttribute("loaded") as boolean | undefined)) {
 
 LoadingController.hide();
 
-if (Players.LocalPlayer.Name === "3QAXM" && RunService.IsStudio()) {
-	Tutorial.Begin("Basics");
-}
+//if (Players.LocalPlayer.Name === "3QAXM" && RunService.IsStudio()) {
+Tutorial.Begin("Basics");
+//}
