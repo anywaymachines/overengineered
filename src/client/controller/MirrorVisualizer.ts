@@ -14,12 +14,11 @@ export class MirrorVisualizer extends ClientComponent {
 		this.mirrorMode = mirrorMode;
 		this.template = this.asTemplate(ReplicatedStorage.WaitForChild("Assets").WaitForChild("Mirror") as Part);
 
-		this.mirrorMode.subscribe(() => this.recreate());
+		this.event.subscribeObservable(this.mirrorMode, () => this.recreate(), true);
 		this.event.subscribeObservable(this.plot, (plot, prev) => {
 			prev?.FindFirstChild("Mirrors")?.ClearAllChildren();
 			this.recreate();
 		});
-		this.recreate();
 	}
 
 	enable() {
@@ -46,9 +45,13 @@ export class MirrorVisualizer extends ClientComponent {
 
 		const mode = this.mirrorMode.get();
 		const axes = [
-			!mode.y ? undefined : CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(mode.y),
-			!mode.x ? undefined : CFrame.identity.add(mode.x),
-			!mode.z ? undefined : CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(mode.z),
+			mode.y === undefined
+				? undefined
+				: CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(new Vector3(0, mode.y, 0)),
+			mode.x === undefined ? undefined : CFrame.identity.add(new Vector3(mode.x, 0, 0)),
+			mode.z === undefined
+				? undefined
+				: CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(0, 0, mode.z)),
 		] as readonly CFrame[];
 
 		for (const cframe of axes) {

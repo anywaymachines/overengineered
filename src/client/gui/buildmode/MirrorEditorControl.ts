@@ -5,6 +5,7 @@ import { NumberTextBoxControl, NumberTextBoxControlDefinition } from "client/gui
 import { ToggleControl, ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { ObservableValue } from "shared/event/ObservableValue";
+import { ArgsSignal } from "shared/event/Signal";
 
 export type MirrorEditorSingleControlDefinition = GuiObject & {
 	readonly Toggle: ToggleControlDefinition;
@@ -13,6 +14,7 @@ export type MirrorEditorSingleControlDefinition = GuiObject & {
 	readonly Sub: GuiButton;
 };
 export class MirrorEditorSingleControl extends Control<MirrorEditorSingleControlDefinition> {
+	readonly submitted = new ArgsSignal<[number | undefined]>();
 	readonly value = new ObservableValue<number | undefined>(undefined);
 
 	private readonly enabled;
@@ -26,13 +28,13 @@ export class MirrorEditorSingleControl extends Control<MirrorEditorSingleControl
 		this.add(
 			new ButtonControl(this.gui.Add, () => {
 				this.position.value.set(this.position.value.get() + 1);
-				update();
+				submit();
 			}),
 		);
 		this.add(
 			new ButtonControl(this.gui.Sub, () => {
 				this.position.value.set(this.position.value.get() - 1);
-				update();
+				submit();
 			}),
 		);
 
@@ -40,9 +42,10 @@ export class MirrorEditorSingleControl extends Control<MirrorEditorSingleControl
 		this.position.value.set(defval);
 
 		let selfsetting = false;
-		const update = () => {
+		const submit = () => {
 			selfsetting = true;
 			this.value.set(this.enabled.value.get() ? this.position.value.get() : undefined);
+			this.submitted.Fire(this.value.get());
 			selfsetting = false;
 		};
 		this.event.subscribeObservable(
@@ -57,8 +60,8 @@ export class MirrorEditorSingleControl extends Control<MirrorEditorSingleControl
 			},
 			true,
 		);
-		this.event.subscribe(this.enabled.submitted, update);
-		this.event.subscribe(this.position.submitted, update);
+		this.event.subscribe(this.enabled.submitted, submit);
+		this.event.subscribe(this.position.submitted, submit);
 	}
 }
 
@@ -69,6 +72,7 @@ export type MirrorEditorControlDefinition = GuiObject & {
 };
 
 export class MirrorEditorControl extends Control<MirrorEditorControlDefinition> {
+	readonly submitted = new ArgsSignal<[MirrorMode]>();
 	readonly value = new ObservableValue<MirrorMode>({});
 
 	private readonly x;
@@ -86,35 +90,24 @@ export class MirrorEditorControl extends Control<MirrorEditorControlDefinition> 
 		this.event.subscribeObservable(
 			this.value,
 			(val) => {
-				this.x.value.set(val.x?.Z);
-				this.y.value.set(val.y?.Y);
-				this.z.value.set(val.z?.X);
+				this.x.value.set(val.x);
+				this.y.value.set(val.y);
+				this.z.value.set(val.z);
 			},
 			true,
 		);
 
-		const update = () => {
+		const submit = () => {
 			const x = this.x.value.get();
 			const y = this.y.value.get();
 			const z = this.z.value.get();
 
-			const frames: Writable<MirrorMode> = {};
-
-			if (x !== undefined) {
-				frames.x = new Vector3(0, 0, x);
-			}
-			if (y !== undefined) {
-				frames.y = new Vector3(0, y, 0);
-			}
-			if (z !== undefined) {
-				frames.z = new Vector3(z, 0, 0);
-			}
-
-			this.value.set(frames);
+			this.value.set({ x, y, z });
+			this.submitted.Fire(this.value.get());
 		};
 
-		this.x.value.subscribe(update);
-		this.y.value.subscribe(update);
-		this.z.value.subscribe(update);
+		this.x.submitted.Connect(submit);
+		this.y.submitted.Connect(submit);
+		this.z.submitted.Connect(submit);
 	}
 }

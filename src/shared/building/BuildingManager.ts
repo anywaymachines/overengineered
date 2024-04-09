@@ -165,9 +165,15 @@ export namespace BuildingManager {
 		const plotframe = plot.BuildingArea.GetPivot();
 
 		const axes: ["x" | "y" | "z", CFrame][] = [];
-		if (mode.y) axes.push(["y", CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(mode.y)]);
-		if (mode.x) axes.push(["x", CFrame.identity.add(mode.x)]);
-		if (mode.z) axes.push(["z", CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(mode.z)]);
+		if (mode.y !== undefined) {
+			axes.push(["y", CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(new Vector3(0, mode.y, 0))]);
+		}
+		if (mode.x !== undefined) {
+			axes.push(["x", CFrame.identity.add(new Vector3(mode.x, 0, 0))]);
+		}
+		if (mode.z !== undefined) {
+			axes.push(["z", CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(0, 0, mode.z))]);
+		}
 
 		const ret: CFrame[] = [cframeToMirror];
 		for (const [axe, axis] of axes) {

@@ -109,13 +109,13 @@ export class ToolController extends ClientComponent {
 
 		// array instead of an object for ordering purposes
 		const tools = [
-			["buildTool", (this.buildTool = new BuildTool(mode))],
+			["buildTool2", (this.buildTool2 = new BuildTool2(mode))],
 			["editTool", new EditTool(mode)],
 			["deleteTool", (this.deleteTool = new DeleteTool(mode))],
 			["configTool", (this.configTool = new ConfigTool(mode))],
 			["paintTool", (this.paintTool = new PaintTool(mode))],
 			["wireTool", (this.wireTool = new WireTool(mode))],
-			["buildTool2", (this.buildTool2 = new BuildTool2(mode))],
+			["buildTool", (this.buildTool = new BuildTool(mode))],
 		] as const;
 
 		this.allTools = Objects.fromEntries(tools);

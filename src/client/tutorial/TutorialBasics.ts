@@ -136,12 +136,16 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 		cframe: new CFrame(18, 5.5, 6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
 
-	toolEnabler.enableOnly(allTools.buildTool);
-	tutorial.Control.displayStep("Build a frame using ordinary blocks", false);
+	toolEnabler.enableOnly(allTools.buildTool, allTools.buildTool2);
+	allTools.buildTool2.mirrorMode.set({});
 
-	TasksControl.instance.addTask("Select building tool");
-	TasksControl.instance.addTask('Select "Block"');
-	TasksControl.instance.addTask("Place all highlighted blocks");
+	spawn(() => {
+		tutorial.Control.displayStep("Build a frame using ordinary blocks", false);
+
+		TasksControl.instance.addTask("Select building tool");
+		TasksControl.instance.addTask('Select "Block"');
+		TasksControl.instance.addTask("Place all highlighted blocks");
+	});
 
 	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
 	toolEnabler.disableAll();
@@ -168,7 +172,7 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	TasksControl.instance.addTask('Select "Servo"');
 	TasksControl.instance.addTask("Place all highlighted blocks");
 
-	toolEnabler.enableOnly(allTools.buildTool);
+	toolEnabler.enableOnly(allTools.buildTool, allTools.buildTool2);
 
 	tutorial.buildTool.addBlockToPlace({
 		id: "servomotorblock",

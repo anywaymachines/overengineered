@@ -1,0 +1,31 @@
+import { TasksControl } from "client/gui/static/TasksControl";
+import { BuildingMode } from "client/modes/build/BuildingMode";
+import type { Tutorial } from "client/tutorial/Tutorial";
+
+export async function TestTutorial(tutorial: typeof Tutorial) {
+	tutorial.Control.startTutorial("TEST", tutorial.Cancellable);
+	const toolController = BuildingMode.instance.toolController;
+	const allTools = toolController.allTools;
+	const toolEnabler = toolController.enabledTools;
+
+	// Main
+	tutorial.buildTool.addBlockToPlace({
+		id: "block",
+		cframe: new CFrame(0, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+	});
+
+	toolEnabler.enableOnly(allTools.buildTool, allTools.buildTool2);
+	allTools.buildTool2.mirrorMode.set({});
+
+	spawn(() => {
+		tutorial.Control.displayStep("Build a frame using ordinary blocks", false);
+
+		TasksControl.instance.addTask("Select building tool");
+		TasksControl.instance.addTask('Select "Block"');
+		TasksControl.instance.addTask("Place all highlighted blocks");
+	});
+
+	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
+	TasksControl.instance.finish();
+	tutorial.Finish();
+}

@@ -32,3 +32,6 @@ declare global {
 }
 
 export const successResponse: SuccessResponse = { success: true };
+const emptyErrorResponse: ErrorResponse = { success: false, message: "" };
+export const errorResponse = (text?: string): ErrorResponse =>
+	text === undefined ? emptyErrorResponse : { success: false, message: text };

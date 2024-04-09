@@ -12,6 +12,7 @@ import { Gui } from "client/gui/Gui";
 import { DebugControl } from "client/gui/static/DebugControl";
 import { LogControl } from "client/gui/static/LogControl";
 import { PlayModeController } from "client/modes/PlayModeController";
+import { ClientBuildingValidation } from "client/modes/build/ClientBuildingValidation";
 import { Tutorial } from "client/tutorial/Tutorial";
 import { $compileTime } from "rbxts-transformer-macros";
 import { BlocksInitializer } from "shared/BlocksInitializer";
@@ -44,6 +45,7 @@ CharacterController.initialize();
 InputTypeChangeEvent.subscribe();
 RemoteEvents.initialize();
 AdminMessageController.initialize();
+ClientBuildingValidation.initialize();
 
 if (RunService.IsStudio()) {
 	DebugControl.instance.show();

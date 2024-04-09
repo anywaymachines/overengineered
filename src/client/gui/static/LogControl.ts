@@ -24,6 +24,10 @@ export class LogControl extends Control<LogControlDefinition> {
 	}
 
 	addLine(text: string, color: Color3 = Colors.white) {
+		if (text === undefined || text.size() === 0) {
+			return;
+		}
+
 		const line = this.lineTemplate();
 		line.TextLabel.Text = text;
 		line.TextLabel.TextColor3 = color;

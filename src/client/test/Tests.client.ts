@@ -5,6 +5,7 @@ import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
 import { ComponentDisablerTests } from "client/test/tests/ComponentDisablerTests";
 import { LoadingTests } from "client/test/tests/LoadingTests";
+import { TutorialTests } from "client/test/tests/TutorialTests";
 import { WireToolTests } from "client/tools/WireTool";
 import { Element } from "shared/Element";
 import { InstanceComponent } from "shared/component/InstanceComponent";
@@ -97,6 +98,7 @@ const create = () => {
 		wrapNonVisual("AABB", AABBTests),
 		wrapNonVisual("Loading", LoadingTests),
 		wrapNonVisual("ComponentDisabler", ComponentDisablerTests),
+		wrapNonVisual("Tutorial", TutorialTests),
 	];
 	for (const [name, content] of tests) {
 		content.hide();

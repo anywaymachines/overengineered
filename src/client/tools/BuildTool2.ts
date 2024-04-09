@@ -24,7 +24,6 @@ import { ToolBase } from "client/tools/ToolBase";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
 import { BlocksInitializer } from "shared/BlocksInitializer";
-import { Logger } from "shared/Logger";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
@@ -33,7 +32,6 @@ import { ComponentChild } from "shared/component/ComponentChild";
 import { EventHandler } from "shared/event/EventHandler";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
-import { PlayerUtils } from "shared/utils/PlayerUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
 const allowedColor = Colors.blue;
@@ -43,6 +41,10 @@ const mouse = Players.LocalPlayer.GetMouse();
 const createBlockGhost = (block: RegistryBlock): Model => {
 	const model = block.model.Clone();
 	BlockGhoster.ghostModel(model);
+
+	// build tool 1 part coloring via transparency instead of highlighter
+	// PartUtils.switchDescendantsMaterial(this.previewBlock, this.selectedMaterial.get());
+	// PartUtils.switchDescendantsColor(this.previewBlock, this.selectedColor.get());
 
 	return model;
 };
@@ -163,6 +165,21 @@ const getMouseTargetBlockPositionV2 = (
 };
 const getMouseTargetBlockPosition = getMouseTargetBlockPositionV2;
 
+const processPlaceResponse = (response: Response) => {
+	if (response?.success) {
+		SoundController.getSounds().Build.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
+		SoundController.getSounds().Build.BlockPlace.Play();
+
+		task.wait();
+	} else {
+		if (response) {
+			LogControl.instance.addLine(response.message, Colors.red);
+		}
+
+		SoundController.getSounds().Build.BlockPlaceError.Play();
+	}
+};
+
 namespace Scene {
 	export type BuildToolSceneDefinition = GuiObject & {
 		readonly ActionBar: GuiObject & {
@@ -202,8 +219,9 @@ namespace Scene {
 			this.add(this.blockSelector);
 
 			const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content));
-			mirrorEditor.value.set(tool.mirrorMode.get());
-			this.event.subscribeObservable(mirrorEditor.value, (val) => tool.mirrorMode.set(val), true);
+			this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
+			this.event.subscribe(mirrorEditor.submitted, (val) => tool.mirrorMode.set(val));
+
 			this.onEnable(() => (this.gui.Mirror.Visible = false));
 			this.add(
 				new ButtonControl(
@@ -322,6 +340,7 @@ namespace SinglePlaceController {
 
 			this.onPrepare(() => this.updateBlockPosition());
 			this.event.subscribeObservable(this.mirrorMode, () => this.updateBlockPosition());
+			this.event.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
 			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
 			this.onDisable(() => this.destroyGhosts());
 		}
@@ -437,71 +456,39 @@ namespace SinglePlaceController {
 
 		async place() {
 			const selected = this.selectedBlock.get();
-
-			// Non-alive players bypass
-			if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
-				return;
-			}
-
-			// ERROR: Block is not selected
 			if (!selected) {
-				LogControl.instance.addLine("Block is not selected!");
-
 				return;
 			}
 
 			const mainGhost = this.mainGhost;
-			if (!mainGhost || !mainGhost.PrimaryPart) {
+			if (!mainGhost?.PrimaryPart) {
 				return;
 			}
 
-			const plot = this.plot.get();
-			if (
-				![
-					mainGhost,
-					...this.blockMirrorer
-						.getMirroredModels()
-						.values()
-						.flatmap((m) => m),
-				].all((ghost) => BuildingManager.blockCanBePlacedAt(plot, selected, ghost.GetPivot()))
-			) {
-				LogControl.instance.addLine("Out of bounds!", Colors.red);
-
-				// Play sound
-				SoundController.getSounds().Build.BlockPlaceError.Play();
-				return;
+			{
+				const pos = this.plot.get().instance.BuildingArea.CFrame.ToObjectSpace(mainGhost!.PrimaryPart!.CFrame);
+				g.Label5.Text = `new CFrame(${[...pos.GetComponents()].join()})`;
 			}
-			const pos = plot.instance.BuildingArea.CFrame.ToObjectSpace(mainGhost!.PrimaryPart!.CFrame);
-			g.Label5.Text = `new CFrame(${[...pos.GetComponents()].join()})`;
 
-			const response = await ClientBuilding.placeOperation.execute(
-				plot,
-				[
-					mainGhost,
-					...this.blockMirrorer
-						.getMirroredModels()
-						.values()
-						.flatmap((m) => m),
-				].map(
-					(g): PlaceBlockRequest => ({
-						id: selected.id,
-						color: this.selectedColor.get(),
-						material: this.selectedMaterial.get(),
-						location: g.PrimaryPart!.CFrame,
-					}),
-				),
+			const blocks = [
+				mainGhost,
+				...this.blockMirrorer
+					.getMirroredModels()
+					.values()
+					.flatmap((m) => m),
+			].map(
+				(g): PlaceBlockRequest => ({
+					id: selected.id,
+					color: this.selectedColor.get(),
+					material: this.selectedMaterial.get(),
+					location: g.PrimaryPart!.CFrame,
+				}),
 			);
 
+			const response = await ClientBuilding.placeOperation.execute(this.plot.get(), blocks);
+			processPlaceResponse(response);
 			if (response.success) {
-				// Play sound
-				SoundController.getSounds().Build.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
-				SoundController.getSounds().Build.BlockPlace.Play();
-
-				task.wait();
 				this.updateBlockPosition();
-			} else {
-				Logger.err(response.message);
-				SoundController.getSounds().Build.BlockPlaceError.Play();
 			}
 		}
 	}
@@ -510,13 +497,9 @@ namespace SinglePlaceController {
 			super(state);
 
 			state.subscribeSomethingToCurrentPlot(this, () => this.updateBlockPosition());
-			this.onPrepare((inputType, eh, ih) => {
-				eh.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
-				eh.subscribe(mouse.Move, () => this.updateBlockPosition());
-				ih.onMouse1Up(() => this.place(), false);
-			});
-
+			this.event.subscribe(mouse.Move, () => this.updateBlockPosition());
 			this.event.subInput((ih) => {
+				ih.onMouse1Up(() => this.place(), false);
 				ih.onMouse3Down(() => {
 					state.pickBlock();
 					this.updateBlockPosition();
@@ -812,11 +795,6 @@ namespace MultiPlaceController {
 		}
 
 		async place() {
-			// Non-alive players bypass
-			if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
-				return;
-			}
-
 			const locations = this.drawnGhostsMap.flatmap((_, m) => [
 				m.GetPivot(),
 				...BuildingManager.getMirroredBlocksCFrames(
@@ -826,11 +804,6 @@ namespace MultiPlaceController {
 					this.mirrorModes,
 				),
 			]);
-			if (!locations.all((loc) => BuildingManager.blockCanBePlacedAt(this.plot, this.selectedBlock, loc))) {
-				LogControl.instance.addLine("Out of bounds!", Colors.red);
-				SoundController.getSounds().Build.BlockPlaceError.Play();
-				return;
-			}
 
 			const response = await ClientBuilding.placeOperation.execute(
 				this.plot,
@@ -843,17 +816,7 @@ namespace MultiPlaceController {
 					}),
 				),
 			);
-
-			if (response.success) {
-				// Play sound
-				SoundController.getSounds().Build.BlockPlace.PlaybackSpeed = SoundController.randomSoundSpeed();
-				SoundController.getSounds().Build.BlockPlace.Play();
-
-				task.wait();
-			} else {
-				Logger.err(response.message);
-				SoundController.getSounds().Build.BlockPlaceError.Play();
-			}
+			processPlaceResponse(response);
 
 			return response;
 		}
@@ -878,6 +841,7 @@ export class BuildTool2 extends ToolBase {
 		this.currentMode.childSet.Connect((mode) => {
 			if (!this.isEnabled()) return;
 			if (mode) return;
+
 			this.currentMode.set(SinglePlaceController.create(this));
 		});
 		this.onEnable(() => this.currentMode.set(SinglePlaceController.create(this)));

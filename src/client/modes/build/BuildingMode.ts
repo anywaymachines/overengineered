@@ -11,16 +11,16 @@ import { ObservableValue } from "shared/event/ObservableValue";
 
 declare global {
 	type MirrorMode = {
-		readonly x?: Vector3;
-		readonly y?: Vector3;
-		readonly z?: Vector3;
+		readonly x?: number;
+		readonly y?: number;
+		readonly z?: number;
 	};
 }
 
 export class BuildingMode extends PlayMode {
 	static readonly instance = new BuildingMode();
 
-	readonly mirrorMode = new ObservableValue<MirrorMode>({ x: Vector3.zero });
+	readonly mirrorMode = new ObservableValue<MirrorMode>({});
 	readonly targetPlot = new ObservableValue<SharedPlot | undefined>(undefined).withDefault(
 		SharedPlots.getPlotComponentByOwnerID(Players.LocalPlayer.UserId),
 	);
