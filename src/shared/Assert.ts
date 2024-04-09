@@ -30,4 +30,29 @@ export namespace Assert {
 			}
 		}
 	}
+
+	export namespace Testing {
+		export function test(description: string, test: () => void) {
+			print(`  Running [${description}]`);
+			test();
+		}
+
+		export function expect<T>(value: T): Expect<T> {
+			return new Expect(value);
+		}
+
+		export class Expect<T> {
+			constructor(private readonly value: T) {}
+
+			toBe<T extends boolean | number | string>(this: Expect<T>, value: T) {
+				Assert.equals(this.value, value);
+				return this;
+			}
+
+			toEqual<T extends readonly unknown[]>(this: Expect<T>, value: T) {
+				Assert.sequenceEquals(this.value, value);
+				return this;
+			}
+		}
+	}
 }
