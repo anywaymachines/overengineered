@@ -15,8 +15,7 @@
 		"@typescript-eslint",
 		"roblox-ts",
 		"prettier",
-		"no-relative-import-paths",
-		"import"
+		"no-relative-import-paths"
 	],
 	"extends": [
 		"eslint:recommended",
@@ -50,9 +49,6 @@
 			{
 				"accessibility": "no-public"
 			}
-		],
-		"import/no-named-as-default": "off",
-		"import/no-unresolved": "off",
-		"import/no-default-export": "error"
+		]
 	}
 }
