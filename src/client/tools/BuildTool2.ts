@@ -139,6 +139,13 @@ const getMouseTargetBlockPositionV2 = (
 			.sub(pos.sub(target.Position).mul(VectorUtils.apply(normal, math.abs)))
 			.add(AABB.fromPart(target).getSize().div(2).mul(normal));
 	};
+	const offsetBlockPivotToCenter = (selectedBlock: RegistryBlock, pos: Vector3) => {
+		const pivot = selectedBlock.model.GetPivot().Position;
+		const center = AABB.fromModel(selectedBlock.model).getCenter();
+		const offset = rotation.mul(center.sub(pivot));
+
+		return pos.sub(offset);
+	};
 	const addBlockSize = (selectedBlock: RegistryBlock, normal: Vector3, pos: Vector3) => {
 		return pos.add(AABB.fromModel(selectedBlock.model, rotation).getSize().mul(normal).div(2));
 	};
@@ -158,6 +165,7 @@ const getMouseTargetBlockPositionV2 = (
 
 	let targetPosition = globalMouseHitPos;
 	targetPosition = addTargetSize(target, normal, targetPosition);
+	targetPosition = offsetBlockPivotToCenter(block, targetPosition);
 	targetPosition = addBlockSize(block, normal, targetPosition);
 	targetPosition = constrainPositionToGrid(normal, targetPosition);
 

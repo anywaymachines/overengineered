@@ -19,7 +19,7 @@ ClientBuilding.placeOperation.addMiddleware((plot, blocks) => {
 			BuildingManager.blockCanBePlacedAt(plot, BlocksInitializer.blocks.map.get(block.id)!, block.location),
 		)
 	) {
-		return errorResponse("Out of bounds!");
+		return errorResponse("Can't be placed here");
 	}
 
 	return successResponse;

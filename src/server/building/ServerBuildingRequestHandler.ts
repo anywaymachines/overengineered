@@ -24,7 +24,7 @@ export namespace ServerBuildingRequestHandler {
 					player,
 				)
 			) {
-				return err("Out of bounds");
+				return err("Can't be placed here");
 			}
 
 			// if block with the same uuid already exists

@@ -1,4 +1,4 @@
-import { Players, RunService } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import { BlockDataRegistry } from "shared/BlockDataRegistry";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -69,12 +69,13 @@ export namespace BuildingManager {
 			return false;
 		}
 
-		if (RunService.IsClient()) {
+		// temporarily removed because useless and easily bypassable by other tools
+		/*if (RunService.IsClient()) {
 			const collideBlock = getBlockByPosition(pivot.Position);
 			if (collideBlock) {
 				return false;
 			}
-		}
+		}*/
 
 		// OK
 		return true;

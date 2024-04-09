@@ -22,7 +22,7 @@ export class AABB {
 		if (cframe) {
 			cf = cframe;
 		} else {
-			cf = block.GetPivot();
+			//cf = block.GetPivot();
 		}
 
 		const sx = size.X - (size.X % 0.1);
