@@ -173,6 +173,7 @@ namespace Selectors {
 		readonly MobileSelection: GuiObject & {
 			readonly SingleSelection: TextButtonDefinition;
 			readonly AssemblySelection: TextButtonDefinition;
+			readonly MachineSelection: TextButtonDefinition;
 		};
 		readonly Top: GuiObject & {
 			readonly SelectAllButton: TextButtonDefinition;
@@ -180,7 +181,7 @@ namespace Selectors {
 		};
 	};
 	interface SelectorGuiParams {
-		readonly highlightModeName: ObservableValue<"single" | "assembly">;
+		readonly highlightModeName: ObservableValue<"single" | "assembly" | "machine">;
 
 		selectPlot(): void;
 		deselectAll(): void;
@@ -199,10 +200,17 @@ namespace Selectors {
 					const assembly = this.add(
 						new TextButtonControl(gui.AssemblySelection, () => params.highlightModeName.set("assembly")),
 					);
+					const machine = this.add(
+						new TextButtonControl(gui.MachineSelection, () => params.highlightModeName.set("machine")),
+					);
 					this.event.subscribeObservable(
 						params.highlightModeName,
 						(active) => {
-							const buttons: { readonly [k in typeof active]: TextButtonControl } = { single, assembly };
+							const buttons: { readonly [k in typeof active]: TextButtonControl } = {
+								single,
+								assembly,
+								machine,
+							};
 							for (const [name, button] of Objects.pairs_(buttons)) {
 								TransformService.run(button.instance, (builder, instance) =>
 									builder
@@ -278,7 +286,7 @@ namespace Selectors {
 		private readonly plot: ReadonlyObservableValue<SharedPlot>;
 		private readonly highlighterParent = new ComponentChild<HoveredBlocksHighlighter>(this);
 		readonly selected: ObservableCollectionSet<BlockModel>;
-		readonly highlightModeName = new ObservableValue<"single" | "assembly">("single");
+		readonly highlightModeName = new ObservableValue<"single" | "assembly" | "machine">("single");
 
 		constructor(
 			plot: ReadonlyObservableValue<SharedPlot>,
@@ -293,13 +301,19 @@ namespace Selectors {
 			this.highlighterParent = new ComponentChild<HoveredBlocksHighlighter>(this, true);
 			this.event.subInput((ih) => {
 				ih.onKeyDown("LeftControl", () => this.highlightModeName.set("assembly"));
+				ih.onKeyDown("LeftShift", () => this.highlightModeName.set("machine"));
 				ih.onKeyUp("LeftControl", () => this.highlightModeName.set("single"));
+				ih.onKeyUp("LeftShift", () => this.highlightModeName.set("single"));
 			});
 
 			const getHighlightModeFunc = (
 				name: ReturnType<typeof this.highlightModeName.get>,
 			): ((block: BlockModel) => readonly BlockModel[]) =>
-				name === "assembly" ? (block) => this.getConnected(block) : (block) => [block];
+				name === "assembly"
+					? (block) => this.getAssemblyConnected(block)
+					: name === "machine"
+						? (block) => this.getConnected(block)
+						: (block) => [block];
 
 			const updateHighlighter = () =>
 				this.highlighterParent.set(
@@ -322,13 +336,38 @@ namespace Selectors {
 			this.onDestroy(() => this.selected.clear());
 		}
 
-		private getConnected(block: BlockModel) {
+		private getAssemblyConnected(block: BlockModel) {
 			// using set to prevent duplicates
 			return [
 				...new Set(
 					block.PrimaryPart!.GetConnectedParts(true).map((b) => BlockManager.getBlockDataByPart(b)!.instance),
 				),
 			];
+		}
+		private getConnected(block: BlockModel) {
+			const find = (result: Set<BlockModel>, visited: Set<Instance>, instance: BlockModel) => {
+				for (const part of instance.GetDescendants()) {
+					if (!part.IsA("BasePart")) continue;
+
+					const assemblyConnected = part.GetConnectedParts(false);
+					for (const cpart of assemblyConnected) {
+						if (visited.has(cpart)) {
+							continue;
+						}
+
+						visited.add(cpart);
+
+						const connected = BlockManager.getBlockDataByPart(cpart)!.instance;
+						result.add(connected);
+						find(result, visited, connected);
+					}
+				}
+			};
+
+			const result = new Set<BlockModel>();
+			find(result, new Set(), block);
+
+			return [...result];
 		}
 
 		selectPlot() {
