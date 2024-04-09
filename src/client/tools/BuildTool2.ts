@@ -48,9 +48,10 @@ const createBlockGhost = (block: RegistryBlock): Model => {
 };
 
 // eslint-disable-next-line prettier/prettier
-const g = Gui.getGameUI<{ BuildingMode: { Tools: { Build2: { Debug: Instance & { Label1: TextLabel; Label2: TextLabel; Label3: TextLabel; Label4: TextLabel; Label5: TextLabel; }; }; }; }; }>().BuildingMode.Tools.Build2.Debug;
+const g = Gui.getGameUI<{ BuildingMode: { Tools: { Build2: { Debug: GuiObject & { Label1: TextLabel; Label2: TextLabel; Label3: TextLabel; Label4: TextLabel; Label5: TextLabel; }; }; }; }; }>().BuildingMode.Tools.Build2.Debug;
 if (!RunService.IsStudio()) {
-	g.Destroy();
+	g.Interactable = false;
+	g.Visible = false;
 }
 
 // old block positioning from build tool 1
