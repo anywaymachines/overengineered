@@ -347,6 +347,10 @@ namespace SinglePlaceController {
 
 		/** @param mainPosition If specified, overrides the mouse target position */
 		protected updateBlockPosition(mainPosition?: Vector3) {
+			if (!this.isEnabled()) {
+				return;
+			}
+
 			const selectedBlock = this.selectedBlock.get();
 			if (!selectedBlock) return;
 
