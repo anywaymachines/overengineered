@@ -21,6 +21,15 @@ export class BlockPipetteButton extends ButtonControl {
 		const bg = this.gui.BackgroundColor3;
 		let stop: (() => void) | undefined;
 
+		const g = (part: BasePart): BasePart | BlockModel | undefined => {
+			if (!this.filter.Fire(part)) return;
+
+			if (BlockManager.isBlockPart(part)) {
+				return part.Parent;
+			}
+			return part;
+		};
+
 		this.event.onDisable(() => stop?.());
 		this.activated.Connect(() => {
 			if (stop) {
@@ -31,16 +40,7 @@ export class BlockPipetteButton extends ButtonControl {
 			this.onStart.Fire();
 			this.gui.BackgroundColor3 = Colors.accentLight;
 
-			const visualizer = this.add(
-				new HoveredPartHighlighter((part) => {
-					if (!this.filter.Fire(part)) return;
-
-					if (BlockManager.isBlockPart(part)) {
-						return part.Parent;
-					}
-					return part;
-				}),
-			);
+			const visualizer = this.add(new HoveredPartHighlighter(g));
 			visualizer.enable();
 
 			const eh = new EventHandler();
@@ -57,6 +57,16 @@ export class BlockPipetteButton extends ButtonControl {
 				if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
 
 				const selected = visualizer.highlightedPart.get();
+				if (!selected) return stop?.();
+
+				this.onSelect.Fire(selected);
+				stop?.();
+			});
+			eh.subscribe(UserInputService.TouchTap, (positions, gameProcessed) => {
+				if (gameProcessed) return;
+
+				let selected: BasePart | BlockModel | undefined = Players.LocalPlayer.GetMouse().Target;
+				selected = selected && g(selected);
 				if (!selected) return stop?.();
 
 				this.onSelect.Fire(selected);
