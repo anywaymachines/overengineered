@@ -124,7 +124,11 @@ export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 			(tool && this.scenes.get(tool))?.show();
 		};
 
-		this.event.subscribeObservable(tools.tools, () => selectedToolUpdated(tools.selectedTool.get()), true);
+		this.event.subscribeObservable(
+			tools.visibleTools.enabled,
+			() => selectedToolUpdated(tools.selectedTool.get()),
+			true,
+		);
 		tools.selectedTool.subscribe(selectedToolUpdated, true);
 	}
 }

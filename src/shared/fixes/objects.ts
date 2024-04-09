@@ -49,7 +49,7 @@ export namespace Objects {
 
 	export function fromEntries<T extends readonly Readonly<[key: string | number, value: unknown]>[]>(
 		entries: T,
-	): { [key in T[number][0]]: T[number][1] } {
+	): { [k in T[number][0]]: Extract<T[number], readonly [k, unknown]>[1] } {
 		const result: Record<string | number, unknown> = {};
 
 		if (entries) {

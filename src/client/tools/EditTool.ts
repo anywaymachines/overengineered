@@ -22,6 +22,7 @@ import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { ComponentChild } from "shared/component/ComponentChild";
+import { ComponentDisabler } from "shared/component/ComponentDisabler";
 import { TransformService } from "shared/component/TransformService";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
@@ -104,7 +105,7 @@ namespace Scene {
 				Delete: delmvs,
 			};
 			this.event.subscribeObservable(
-				tool.enabledModes,
+				tool.enabledModes.enabled,
 				(enabledModes) => {
 					for (const [name, button] of Objects.pairs_(buttons)) {
 						button.set(2, enabledModes.includes(name));
@@ -629,8 +630,7 @@ export type EditToolMode = "Move" | "Clone" | "Rotate" | "Paint";
 export type EditToolButtons = EditToolMode | "Delete";
 
 export class EditTool extends ToolBase {
-	static readonly allModes: readonly EditToolButtons[] = ["Move", "Rotate", "Clone", "Paint", "Delete"];
-	readonly enabledModes = new ObservableValue<readonly EditToolButtons[]>(EditTool.allModes);
+	readonly enabledModes = new ComponentDisabler(["Move", "Rotate", "Clone", "Paint", "Delete"]);
 
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
@@ -687,7 +687,7 @@ export class EditTool extends ToolBase {
 	}
 
 	toggleMode(mode: EditToolMode | undefined) {
-		if (mode && !this.enabledModes.get().includes(mode)) {
+		if (mode && !this.enabledModes.enabled.get().includes(mode)) {
 			this._selectedMode.set(undefined);
 			return;
 		}

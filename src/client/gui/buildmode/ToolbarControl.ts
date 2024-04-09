@@ -86,12 +86,16 @@ export class ToolbarControl extends Control<ToolbarControlDefinition> {
 		this.nameLabel = this.add(new Control(this.gui.Info.NameLabel));
 
 		this.event.subscribeObservable(
-			tools.tools,
-			(toollist) => {
+			tools.visibleTools.enabled,
+			(visible) => {
 				toolButtons.clear();
 
 				let index = 0;
-				for (const tool of toollist) {
+				for (const tool of tools.allToolsOrdered) {
+					if (!visible.includes(tool)) {
+						continue;
+					}
+
 					const button = new ToolbarButtonControl(template(), tools, tool, ++index);
 					toolButtons.keyedChildren.add(tool, button);
 				}
@@ -99,15 +103,15 @@ export class ToolbarControl extends Control<ToolbarControlDefinition> {
 			true,
 		);
 		this.event.subscribeObservable(
-			tools.disabledTools,
-			(disabled) => {
+			tools.enabledTools.enabled,
+			(enabled) => {
 				for (const [tool, control] of toolButtons.keyedChildren.getAll()) {
-					const isdisabled = disabled.includes(tool);
+					const isenabled = enabled.includes(tool);
 
-					control.instance.BackgroundTransparency = isdisabled ? 0.8 : 0.2;
-					control.instance.Active = !isdisabled;
-					control.instance.Interactable = !isdisabled;
-					control.instance.AutoButtonColor = !isdisabled;
+					control.instance.BackgroundTransparency = isenabled ? 0.2 : 0.8;
+					control.instance.Active = isenabled;
+					control.instance.Interactable = isenabled;
+					control.instance.AutoButtonColor = isenabled;
 				}
 			},
 			true,

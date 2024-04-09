@@ -50,7 +50,7 @@ export namespace Tutorial {
 		buildTool.cleanup();
 		deleteTool.cleanup();
 
-		BuildingMode.instance.toolController.disabledTools.set([]);
+		BuildingMode.instance.toolController.enabledTools.enableAll();
 
 		Control.finish();
 	}

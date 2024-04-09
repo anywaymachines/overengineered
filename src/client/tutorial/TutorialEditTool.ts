@@ -1,6 +1,5 @@
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { EditTool } from "client/tools/EditTool";
 import { Tutorial } from "client/tutorial/Tutorial";
 import { EventHandler } from "shared/event/EventHandler";
 import { successResponse } from "shared/types/network/Responses";
@@ -9,11 +8,11 @@ export class TutorialEditTool {
 	constructor(private readonly tutorial: typeof Tutorial) {}
 
 	get() {
-		return BuildingMode.instance.toolController.editTool;
+		return BuildingMode.instance.toolController.allTools.editTool;
 	}
 
 	cleanup() {
-		this.get().enabledModes.set(EditTool.allModes);
+		this.get().enabledModes.enableAll();
 	}
 
 	async waitForMoveToolWork(distance: Vector3): Promise<boolean> {
@@ -22,12 +21,12 @@ export class TutorialEditTool {
 
 			eventHandler.register(
 				ClientBuilding.moveOperation.addMiddleware((plot, blocks, diff, edit) => {
-					if (distance !== diff) {
-						return { success: false, message: "Wrong move tutorial offset!" };
-					}
-
 					if (blocks.size() !== plot.getBlocks().size()) {
 						return { success: false, message: "Select the full plot before moving!" };
+					}
+
+					if (distance !== diff) {
+						return { success: false, message: "Wrong move tutorial offset!" };
 					}
 
 					return successResponse;

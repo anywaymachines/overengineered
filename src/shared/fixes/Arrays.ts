@@ -241,6 +241,7 @@ declare global {
 		flatmap<TOut extends defined>(func: (item: T) => readonly TOut[]): TOut[];
 		mapToSet<TOut extends defined>(func: (item: T) => TOut): Set<TOut>;
 		groupBy<TKey extends defined>(keyfunc: (value: T) => TKey): Map<TKey, T[]>;
+		except(items: readonly T[]): T[];
 
 		count(func: (value: T) => boolean): number;
 		all(func: (value: T) => boolean): boolean;
@@ -292,6 +293,15 @@ export const ArrayMacros = $defineCallMacros<ReadonlyArray<defined>>({
 		}
 
 		return groups;
+	},
+
+	except: <T extends defined>(array: readonly T[], items: readonly T[]): T[] => {
+		const result = [...array];
+		for (const item of items) {
+			result.remove(result.indexOf(item));
+		}
+
+		return result;
 	},
 
 	count: <T extends defined>(array: readonly T[], func: (value: T) => boolean): number => {
