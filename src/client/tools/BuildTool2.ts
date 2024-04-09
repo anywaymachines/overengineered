@@ -2,6 +2,7 @@ import { Players, RunService, UserInputService, Workspace } from "@rbxts/service
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientComponentChild } from "client/component/ClientComponentChild";
 import { InputController } from "client/controller/InputController";
+import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { SoundController } from "client/controller/SoundController";
 import { Signals } from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
@@ -618,9 +619,14 @@ namespace MultiPlaceController {
 				const stateeh = state as unknown as { readonly eventHandler: EventHandler };
 				stateeh.eventHandler.subscribe(UserInputService.TouchStarted, (input, gameProcessedEvent) => {
 					if (gameProcessedEvent) return;
+
 					const thread = task.delay(0.4, () => {
 						eh.unsubscribeAll();
 						Workspace.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
+						if (InputController.inputType.get() === "Touch") {
+							LocalPlayerController.getPlayerModule().GetControls().Disable();
+						}
+
 						buttonPress();
 					});
 
@@ -696,6 +702,10 @@ namespace MultiPlaceController {
 				this.blockMirrorer.updatePositions(plot.instance, mirrorModes);
 			};
 
+			this.onDisable(() => {
+				Workspace.CurrentCamera!.CameraType = Desktop.defaultCameraType;
+				LocalPlayerController.getPlayerModule().GetControls().Enable();
+			});
 			this.event.subInput((ih) => {
 				const buttonUnpress = async () => {
 					const result = await this.place();
@@ -707,10 +717,7 @@ namespace MultiPlaceController {
 				};
 				ih.onMouse1Up(buttonUnpress, true);
 				ih.onKeyUp("ButtonR2", buttonUnpress);
-				this.eventHandler.subscribe(UserInputService.TouchEnded, () => {
-					Workspace.CurrentCamera!.CameraType = Desktop.defaultCameraType;
-					buttonUnpress();
-				});
+				this.eventHandler.subscribe(UserInputService.TouchEnded, buttonUnpress);
 			});
 
 			this.event.subscribe(mouse.Move, updateGhosts);
