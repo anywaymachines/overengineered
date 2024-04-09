@@ -320,6 +320,7 @@ namespace SinglePlaceController {
 			this.blockMirrorer = this.parent(new BlockMirrorer());
 
 			this.onPrepare(() => this.updateBlockPosition());
+			this.event.subscribeObservable(this.mirrorMode, () => this.updateBlockPosition());
 			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
 			this.onDisable(() => this.destroyGhosts());
 		}
@@ -467,7 +468,6 @@ namespace SinglePlaceController {
 			}
 			const pos = plot.instance.BuildingArea.CFrame.ToObjectSpace(mainGhost!.PrimaryPart!.CFrame);
 			g.Label5.Text = `new CFrame(${[...pos.GetComponents()].join()})`;
-			print(g.Label5.Text);
 
 			const response = await ClientBuilding.placeOperation.execute(
 				plot,
@@ -546,20 +546,12 @@ namespace SinglePlaceController {
 			});
 		}
 
-		protected rotateFineTune(rotation: CFrame | Vector3): void {
-			super.rotateFineTune(rotation);
+		protected updateBlockPosition(): void {
+			const selectedBlock = this.selectedBlock.get();
+			if (!selectedBlock) return;
 
-			if (this.prevTarget) {
-				const selectedBlock = this.selectedBlock.get();
-				if (!selectedBlock) return;
-
-				const mainPosition = getMouseTargetBlockPosition(
-					selectedBlock,
-					this.blockRotation.get(),
-					this.prevTarget,
-				);
-				this.updateBlockPosition(mainPosition);
-			}
+			const mainPosition = getMouseTargetBlockPosition(selectedBlock, this.blockRotation.get(), this.prevTarget);
+			super.updateBlockPosition(mainPosition);
 		}
 	}
 	class Gamepad extends Desktop {
