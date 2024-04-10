@@ -301,9 +301,9 @@ namespace Selectors {
 			this.highlighterParent = new ComponentChild<HoveredBlocksHighlighter>(this, true);
 			this.event.subInput((ih) => {
 				ih.onKeyDown("LeftControl", () => this.highlightModeName.set("assembly"));
-				ih.onKeyDown("LeftShift", () => this.highlightModeName.set("machine"));
+				ih.onKeyDown("LeftAlt", () => this.highlightModeName.set("machine"));
 				ih.onKeyUp("LeftControl", () => this.highlightModeName.set("single"));
-				ih.onKeyUp("LeftShift", () => this.highlightModeName.set("single"));
+				ih.onKeyUp("LeftAlt", () => this.highlightModeName.set("single"));
 			});
 
 			const getHighlightModeFunc = (
