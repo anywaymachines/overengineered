@@ -21,14 +21,9 @@ class MaterialButton extends ButtonControl {
 			const lockFrame = gui.FindFirstChild("Lock") as Frame;
 			const priceLabel = lockFrame.FindFirstChild("TextLabel") as TextLabel;
 
-			const onBuy = () => {
+			if (MarketplaceService.UserOwnsGamePassAsync(Players.LocalPlayer.UserId, gamePass)) {
 				bought = true;
 				lockFrame.Visible = false;
-				set(material);
-			};
-
-			if (MarketplaceService.UserOwnsGamePassAsync(Players.LocalPlayer.UserId, gamePass)) {
-				onBuy();
 			} else {
 				const price = MarketplaceService.GetProductInfo(gamePass, Enum.InfoType.GamePass).PriceInRobux ?? "N/A";
 				priceLabel.Text = `${price} R$`;
@@ -38,7 +33,9 @@ class MaterialButton extends ButtonControl {
 					if (!wasPurchased) return;
 					if (gamePassId !== gamePass) return;
 
-					onBuy();
+					bought = true;
+					lockFrame.Visible = false;
+					set(material);
 				});
 
 				this.event.subscribe(this.activated, () => {
