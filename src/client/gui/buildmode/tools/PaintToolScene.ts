@@ -1,5 +1,4 @@
 import { Control } from "client/gui/Control";
-import { GuiAnimator } from "client/gui/GuiAnimator";
 import {
 	MaterialColorEditControl,
 	MaterialColorEditControlDefinition,
@@ -7,23 +6,25 @@ import {
 import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
 import { ToggleControl, ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import { PaintTool } from "client/tools/PaintTool";
+import { TransformService } from "shared/component/TransformService";
 
 export type PaintToolSceneDefinition = GuiObject & {
 	readonly Bottom: MaterialColorEditControlDefinition & {
 		readonly Material: {
-			readonly SetMaterialsButton: ButtonDefinition;
 			readonly Header: {
 				readonly EnabledToggle: ToggleControlDefinition;
 			};
 		};
 		readonly Color: {
-			readonly SetColorsButton: ButtonDefinition;
 			readonly Header: {
 				readonly EnabledToggle: ToggleControlDefinition;
 			};
 		};
 	};
-	//readonly PaintEverythingButton: GuiButton;
+	readonly Top: GuiObject & {
+		readonly SetMaterialsButton: ButtonDefinition;
+		readonly SetColorsButton: ButtonDefinition;
+	};
 };
 
 export class PaintToolScene extends Control<PaintToolSceneDefinition> {
@@ -33,10 +34,8 @@ export class PaintToolScene extends Control<PaintToolSceneDefinition> {
 		super(gui);
 		this.tool = tool;
 
-		this.add(
-			new ButtonControl(this.gui.Bottom.Material.SetMaterialsButton, () => this.paintEverything(false, true)),
-		);
-		this.add(new ButtonControl(this.gui.Bottom.Color.SetColorsButton, () => this.paintEverything(true, false)));
+		this.add(new ButtonControl(this.gui.Top.SetMaterialsButton, () => this.paintEverything(false, true)));
+		this.add(new ButtonControl(this.gui.Top.SetColorsButton, () => this.paintEverything(true, false)));
 
 		const enable = () => {
 			// to not paint a block
@@ -68,10 +67,23 @@ export class PaintToolScene extends Control<PaintToolSceneDefinition> {
 		this.tool.paintEverything(enableColor, enableMaterial);
 	}
 
-	show() {
-		super.show();
-
-		GuiAnimator.transition(this.gui.Bottom, 0.2, "up");
-		//GuiAnimator.transition(this.gui.PaintEverythingButton, 0.2, "up");
+	private readonly visibilityStateMachine = TransformService.multi(
+		TransformService.boolStateMachine(
+			this.gui.Top,
+			TransformService.commonProps.quadOut02,
+			{ AnchorPoint: this.gui.Top.AnchorPoint },
+			{ AnchorPoint: new Vector2(0.5, 1) },
+		),
+		TransformService.boolStateMachine(
+			this.gui.Bottom,
+			TransformService.commonProps.quadOut02,
+			{ Position: this.gui.Bottom.Position },
+			{ Position: this.gui.Bottom.Position.add(new UDim2(0, 0, 0, 40)) },
+			(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),
+			(tr, enabled) => (enabled ? 0 : tr.func(() => super.setInstanceVisibilityFunction(false))),
+		),
+	);
+	protected setInstanceVisibilityFunction(visible: boolean): void {
+		this.visibilityStateMachine(visible);
 	}
 }

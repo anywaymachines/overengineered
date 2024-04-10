@@ -30,6 +30,7 @@ import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
+import { TransformService } from "shared/component/TransformService";
 import { EventHandler } from "shared/event/EventHandler";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
@@ -310,9 +311,24 @@ namespace Scene {
 			);
 		}
 
-		show() {
-			super.show();
-			GuiAnimator.transition(this.gui.Inventory, 0.2, "right");
+		private readonly visibilityStateMachine = TransformService.multi(
+			TransformService.boolStateMachine(
+				this.gui.Inventory,
+				TransformService.commonProps.quadOut02,
+				{ AnchorPoint: this.gui.Inventory.AnchorPoint },
+				{ AnchorPoint: new Vector2(1.2, this.gui.Inventory.AnchorPoint.Y) },
+			),
+			TransformService.boolStateMachine(
+				this.gui.Bottom,
+				TransformService.commonProps.quadOut02,
+				{ Position: this.gui.Bottom.Position },
+				{ Position: this.gui.Bottom.Position.add(new UDim2(0, 0, 0, 40)) },
+				(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),
+				(tr, enabled) => (enabled ? 0 : tr.func(() => super.setInstanceVisibilityFunction(false))),
+			),
+		);
+		protected setInstanceVisibilityFunction(visible: boolean): void {
+			this.visibilityStateMachine(visible);
 		}
 	}
 }

@@ -620,7 +620,8 @@ namespace Controllers {
 
 			const ui = tool.gui.instance.Paint.Clone();
 			ui.Parent = tool.gui.instance.Paint.Parent;
-			this.parentGui(new MaterialColorEditControl(ui, Paint.material, Paint.color));
+			this.parentGui(new MaterialColorEditControl(ui, Paint.material, Paint.color, true));
+
 			this.event.subscribeObservable(
 				Paint.material,
 				(material) => {

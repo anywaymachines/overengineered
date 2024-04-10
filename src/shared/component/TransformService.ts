@@ -9,9 +9,9 @@ import { Objects } from "shared/fixes/objects";
 type State<T extends Instance> = { readonly [k in TweenableProperties<T>]?: T[k] };
 export namespace TransformService {
 	const transforms = new Map<object, TransformContainer<Instance>>();
-	export const commonProps: Readonly<Record<string, TransformProps>> = {
+	export const commonProps = {
 		quadOut02: { style: "Quad", direction: "Out", duration: 0.2 },
-	};
+	} as const satisfies Record<string, TransformProps>;
 
 	export function run<T extends Instance>(
 		instance: T,
@@ -30,6 +30,9 @@ export namespace TransformService {
 		});
 		container.enable();
 	}
+	export function finish(instance: object) {
+		transforms.get(instance)?.finish();
+	}
 	export function cancel(instance: object) {
 		const transform = transforms.get(instance);
 		if (!transform) return;
@@ -39,9 +42,11 @@ export namespace TransformService {
 		transforms.delete(instance);
 	}
 
-	export function stateMachine<T extends Instance, TStates extends { readonly [k in string]: State<T> }>(
+	export function stateMachineFunc<
+		T extends Instance,
+		TStates extends { readonly [k in string]: (builder: TransformBuilder<T>) => void },
+	>(
 		instance: T,
-		props: TransformProps,
 		states: TStates,
 		setupStart?: (transform: TransformBuilder<T>, state: keyof TStates) => void,
 		setupEnd?: (transform: TransformBuilder<T>, state: keyof TStates) => void,
@@ -55,9 +60,7 @@ export namespace TransformService {
 						tr.then();
 					}
 
-					for (const [key, value] of Objects.pairs_(state)) {
-						tr.transform(key as never, value as never, props);
-					}
+					state(tr);
 
 					if (setupEnd) {
 						tr.then();
@@ -70,6 +73,32 @@ export namespace TransformService {
 		}
 
 		return result as Readonly<Record<keyof TStates, () => void>>;
+	}
+	export function stateMachine<T extends Instance, TStates extends { readonly [k in string]: State<T> }>(
+		instance: T,
+		props: TransformProps,
+		states: TStates,
+		setupStart?: (transform: TransformBuilder<T>, state: keyof TStates) => void,
+		setupEnd?: (transform: TransformBuilder<T>, state: keyof TStates) => void,
+	): { readonly [k in keyof TStates & string]: () => void } {
+		return stateMachineFunc(
+			instance,
+			Objects.fromEntries(
+				Objects.entriesArray(states).map(
+					([k, state]) =>
+						[
+							k as keyof TStates & string,
+							(tr: TransformBuilder<T>) => {
+								for (const [key, value] of Objects.pairs_(state)) {
+									tr.transform(key as TweenableProperties<T>, value as never, props);
+								}
+							},
+						] as const,
+				),
+			),
+			setupStart,
+			setupEnd,
+		);
 	}
 	export function boolStateMachine<T extends Instance>(
 		instance: T,

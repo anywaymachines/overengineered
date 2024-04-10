@@ -3,11 +3,10 @@ import { LoadingController } from "client/controller/LoadingController";
 import { SoundController } from "client/controller/SoundController";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
-import { GuiAnimator } from "client/gui/GuiAnimator";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { ToolBase } from "client/tools/ToolBase";
 import { ToolController } from "client/tools/ToolController";
-import { TransformProps } from "shared/component/Transform";
+import { TransformService } from "shared/component/TransformService";
 
 export type ToolbarButtonControlDefinition = TextButton & {
 	readonly ImageLabel: ImageLabel;
@@ -15,12 +14,6 @@ export type ToolbarButtonControlDefinition = TextButton & {
 };
 
 export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition> {
-	// Colors
-	private readonly activeColor = Colors.accent;
-	private readonly inactiveColor = Colors.staticBackground;
-	private readonly activeImageColor = Colors.black;
-	private readonly inactiveImageColor = Colors.accentLight;
-
 	constructor(gui: ToolbarButtonControlDefinition, tools: ToolController, tool: ToolBase, index: number) {
 		super(gui);
 
@@ -32,26 +25,30 @@ export class ToolbarButtonControl extends Control<ToolbarButtonControlDefinition
 			if (LoadingController.isLoading.get()) return;
 			tools.selectedTool.set(tool === tools.selectedTool.get() ? undefined : tool);
 		});
+
+		const selectedToolStateMachine = TransformService.multi(
+			TransformService.boolStateMachine(
+				this.gui,
+				TransformService.commonProps.quadOut02,
+				{ BackgroundColor3: Colors.accent },
+				{ BackgroundColor3: Colors.staticBackground },
+			),
+			TransformService.boolStateMachine(
+				this.gui.ImageLabel,
+				TransformService.commonProps.quadOut02,
+				{ ImageColor3: Colors.black },
+				{ ImageColor3: Colors.accentLight },
+			),
+			TransformService.boolStateMachine(
+				this.gui.KeyboardNumberLabel,
+				TransformService.commonProps.quadOut02,
+				{ TextColor3: Colors.staticBackground, TextTransparency: 0.4 },
+				{ TextColor3: Colors.accentLight, TextTransparency: 0 },
+			),
+		);
 		this.event.subscribeObservable(
 			tools.selectedTool,
-			(newtool) => {
-				// Update GUI
-				if (newtool === tool) {
-					GuiAnimator.tweenColor(this.gui, this.activeColor, 0.2);
-					GuiAnimator.tween(
-						this.gui.ImageLabel,
-						{ ImageColor3: this.activeImageColor },
-						new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-					);
-				} else {
-					GuiAnimator.tweenColor(this.gui, this.inactiveColor, 0.2);
-					GuiAnimator.tween(
-						this.gui.ImageLabel,
-						{ ImageColor3: this.inactiveImageColor },
-						new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-					);
-				}
-			},
+			(newtool) => selectedToolStateMachine(newtool === tool),
 			true,
 		);
 	}
@@ -118,21 +115,12 @@ export class ToolbarControl extends Control<ToolbarControlDefinition> {
 		);
 
 		this.event.onPrepare((inputType) => {
-			const tween = (element: GuiObject, enabled: boolean) => {
-				if (enabled) {
-					GuiAnimator.tweenTransparency(element, 0, 0.2);
-					GuiAnimator.transition(element, 0.2, "up");
-				} else {
-					GuiAnimator.tweenTransparency(element, 1, 0.2);
-				}
-			};
-
 			for (const button of toolButtons.getChildren()) {
-				tween(button.instance.KeyboardNumberLabel, inputType === "Desktop");
+				button.instance.KeyboardNumberLabel.Visible = inputType === "Desktop";
 			}
 
-			tween(this.gui.Info.GamepadBack, inputType === "Gamepad");
-			tween(this.gui.Info.GamepadNext, inputType === "Gamepad");
+			this.gui.Info.GamepadBack.Visible = inputType === "Gamepad";
+			this.gui.Info.GamepadNext.Visible = inputType === "Gamepad";
 		});
 
 		this.event.onPrepareGamepad(() => {
@@ -144,32 +132,16 @@ export class ToolbarControl extends Control<ToolbarControlDefinition> {
 		this.resetLabels();
 	}
 
-	show(): void {
-		super.show();
-		return;
-
-		const params: TransformProps = {
-			style: "Quad",
-			direction: "Out",
-			duration: 0.3,
-		};
-		this.transform((tr) => tr.transform("AnchorPoint", new Vector2(0, 1), params));
-	}
-	hide(): void {
-		super.hide();
-		return;
-
-		const params: TransformProps = {
-			style: "Quad",
-			direction: "Out",
-			duration: 0.3,
-		};
-		this.transform((tr) =>
-			tr
-				.transform("AnchorPoint", new Vector2(0, 0), params)
-				.then()
-				.func(() => super.hide()),
-		);
+	private readonly visibilityFunction = TransformService.boolStateMachine(
+		this.gui,
+		TransformService.commonProps.quadOut02,
+		{ AnchorPoint: new Vector2(0, 1) },
+		{ AnchorPoint: new Vector2(0, 0) },
+		(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),
+		(tr, enabled) => (enabled ? 0 : tr.func(() => super.setInstanceVisibilityFunction(false))),
+	);
+	protected setInstanceVisibilityFunction(visible: boolean): void {
+		this.visibilityFunction(visible);
 	}
 
 	private toolChanged(tool: ToolBase | undefined, prev: ToolBase | undefined) {
