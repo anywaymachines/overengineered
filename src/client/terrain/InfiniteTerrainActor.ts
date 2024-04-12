@@ -1,4 +1,5 @@
 import { ReplicatedFirst, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { ChunkGenerator } from "client/terrain/ChunkLoader";
 import { TerrainData, TerrainInfo } from "shared/TerrainDataInfo";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
@@ -12,7 +13,6 @@ if (!terrainChild) {
 
 const aprilFools = GameDefinitions.APRIL_FOOLS;
 
-const chunkSize = folder.Configuration.ChunkSize.Value;
 const terrainData = require(folder.Data.TerrainData) as TerrainData;
 const heightData: number[][] = [];
 const materialData: number[][] = [];
@@ -68,33 +68,20 @@ for (const item of Enum.Material.GetEnumItems()) {
 	materialEnums[item.Value] = item;
 }
 
-const GetHeight = (x: number, z: number) => {
-	if (heightData[x]?.[z] !== undefined) {
-		return heightData[x][z];
-	}
+let chunkSize: number = undefined!;
+let generator: ChunkGenerator = undefined!;
 
-	let height = 0;
-	for (const data of terrainData.noises) {
-		const noise = math.noise((x + 1) * data[3], data[1], (z + 1) * data[3]);
-		height += math.clamp(noise, data[4], data[5]) * data[2];
-	}
-
-	height += terrainData.shift;
-	height = math.clamp(height, terrainData.minimumHeight, terrainData.maximumHeight);
-	return height;
-};
-
-export type TerrainActor = {
-	Load: BindableEvent<(chunkX: number, chunkZ: number, loadFoliage: boolean) => void>;
-	Unload: BindableEvent<(chunkX: number, chunkZ: number) => void>;
-	Loaded: BindableEvent<(chunkX: number, chunkZ: number) => void>;
-};
 const infterrainActor = {
 	Load: new Instance("BindableEvent") as BindableEvent<
 		(chunkX: number, chunkZ: number, loadFoliage: boolean) => void
 	>,
 	Loaded: new Instance("BindableEvent") as BindableEvent<(chunkX: number, chunkZ: number) => void>,
 	Unload: new Instance("BindableEvent") as BindableEvent<(chunkX: number, chunkZ: number) => void>,
+
+	initialize: (_chunkSize: number, _generator: ChunkGenerator) => {
+		chunkSize = _chunkSize;
+		generator = _generator;
+	},
 } as const;
 
 const terrain = Workspace.Terrain;
@@ -114,7 +101,7 @@ infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, load
 		heights[x] = [];
 
 		for (let z = startZ - 1 - 1; z < endZ + 1; z++) {
-			const height = GetHeight(x, z);
+			const height = generator.getHeight(x, z);
 			minimumHeight = math.min(height, minimumHeight);
 			maximumHeight = math.max(height, maximumHeight);
 			heights[x][z] = height;
@@ -378,7 +365,7 @@ if (fastunload) {
 
 		for (let x = startX - 1 - 1; x < endX + 1; x++) {
 			for (let z = startZ - 1 - 1; z < endZ + 1; z++) {
-				const height = GetHeight(x, z);
+				const height = generator.getHeight(x, z);
 				minimumHeight = math.min(height, minimumHeight);
 				maximumHeight = math.max(height, maximumHeight);
 			}
@@ -410,5 +397,5 @@ if (fastunload) {
 }
 
 // uses default as a name in InfiniteTerrain.ts
-// eslint-disable-next-line import/no-default-export
 export default infterrainActor;
+export type InfiniteTerrainActor = typeof infterrainActor;
