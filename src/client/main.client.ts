@@ -1,9 +1,19 @@
 import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { LoadingController } from "client/controller/LoadingController";
+import { SharedPlots } from "shared/building/SharedPlots";
+
+// wait for assets to be copied
+ReplicatedStorage.WaitForChild("Assets");
+LoadingController.show("Waiting for the plot");
+
+while (!SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)) {
+	task.wait(0.2);
+}
+
 import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { CharacterController } from "client/controller/CharacterController";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
-import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { SoundController } from "client/controller/SoundController";
 import { WindController } from "client/controller/WindController";
@@ -17,18 +27,9 @@ import { Tutorial } from "client/tutorial/Tutorial";
 import { $compileTime } from "rbxts-transformer-macros";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { RemoteEvents } from "shared/RemoteEvents";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { AdminMessageController } from "./AdminMessageController";
 import { ClientContainerComponent } from "./component/ClientContainerComponent";
 import { rootComponents } from "./test/RootComponents";
-
-// wait for assets to be copied
-ReplicatedStorage.WaitForChild("Assets");
-LoadingController.show("Waiting for the plot");
-
-while (!SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)) {
-	task.wait(0.2);
-}
 
 LoadingController.show("Loading the game");
 
