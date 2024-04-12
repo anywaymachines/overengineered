@@ -82,6 +82,32 @@ export class TooltipsHolder extends ClientInstanceComponent<
 				key.Parent = button.Keys;
 			}
 
+			const sub = (key: KeyCode): string => {
+				if (key === "Zero") return "0";
+				if (key === "One") return "1";
+				if (key === "Two") return "2";
+				if (key === "Three") return "3";
+				if (key === "Four") return "4";
+				if (key === "Five") return "5";
+				if (key === "Six") return "6";
+				if (key === "Seven") return "7";
+				if (key === "Eight") return "8";
+				if (key === "Nine") return "9";
+
+				if (key === "KeypadZero") return "k0";
+				if (key === "KeypadOne") return "k1";
+				if (key === "KeypadTwo") return "k2";
+				if (key === "KeypadThree") return "k3";
+				if (key === "KeypadFour") return "k4";
+				if (key === "KeypadFive") return "k5";
+				if (key === "KeypadSix") return "k6";
+				if (key === "KeypadSeven") return "k7";
+				if (key === "KeypadEight") return "k8";
+				if (key === "KeypadNine") return "k9";
+
+				return key;
+			};
+
 			if (tooltip.keys[i].sub(0, "Button".size()) === "Button") {
 				// gamepad button
 				key.KeyLabel.Text = "";
@@ -91,7 +117,7 @@ export class TooltipsHolder extends ClientInstanceComponent<
 				key.KeyLabel.Text = "";
 				key.Image = UserInputService.GetImageForKeyCode(tooltip.keys[i]);
 			} else {
-				key.KeyLabel.Text = tooltip.keys[i];
+				key.KeyLabel.Text = sub(tooltip.keys[i]);
 			}
 		}
 
