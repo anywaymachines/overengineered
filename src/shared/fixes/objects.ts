@@ -17,6 +17,15 @@ export namespace Objects {
 		return result;
 	}
 
+	export function size(object: object): number {
+		let size = 0;
+		for (const [_] of pairs(object)) {
+			size++;
+		}
+
+		return size;
+	}
+
 	export function pairs_<T extends object>(
 		object: T,
 	): IterableFunction<LuaTuple<[keyof T, Exclude<T[keyof T], undefined> & defined]>> {
