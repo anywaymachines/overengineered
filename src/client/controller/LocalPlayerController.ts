@@ -1,4 +1,4 @@
-import { ContextActionService, Players } from "@rbxts/services";
+import { ContextActionService, Players, RunService } from "@rbxts/services";
 import { Signals } from "client/event/Signals";
 import { PlayerModule } from "client/types/PlayerModule";
 import { ObservableValue } from "shared/event/ObservableValue";
@@ -11,7 +11,7 @@ export namespace LocalPlayerController {
 
 	// Player settings
 	const WALKSPEED_DEFAULT = 20;
-	const WALKSPEED_SPRINT = 60;
+	const WALKSPEED_SPRINT = RunService.IsStudio() ? 200 : 60;
 
 	// Properties
 	export const isSprinting = new ObservableValue<boolean>(false);
