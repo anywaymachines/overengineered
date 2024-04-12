@@ -185,6 +185,57 @@ const rocketengine = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
+const piston = {
+	input: {
+		extend: {
+			displayName: "Extend",
+			type: "thrust",
+			default: 0 as number,
+			config: {
+				thrust: {
+					add: "R" as KeyCode,
+					sub: "F" as KeyCode,
+				},
+				switchmode: true as boolean,
+			},
+			canBeSwitch: true as boolean,
+		},
+
+		speed: {
+			displayName: "Speed",
+			type: "clampedNumber",
+			min: 0,
+			max: 10,
+			step: 0.01,
+			default: 4 as number,
+			config: 4 as number,
+			connectorHidden: true,
+		},
+
+		maxforce: {
+			displayName: "Max Force",
+			type: "clampedNumber",
+			min: 0,
+			max: 2000,
+			step: 0.01,
+			default: 500 as number,
+			config: 500 as number,
+			connectorHidden: true,
+		},
+
+		distance: {
+			displayName: "Distance",
+			type: "clampedNumber",
+			min: 0,
+			max: 8,
+			step: 0.01,
+			default: 1 as number,
+			config: 1 as number,
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
 const rope = {
 	input: {
 		length: {
@@ -960,6 +1011,7 @@ export const blockConfigRegistry = {
 	suspensionblock,
 	vehicleseat,
 	magnet,
+	piston,
 
 	wing1x1: wing,
 	wing1x2: wing,

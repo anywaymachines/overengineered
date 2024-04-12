@@ -323,6 +323,10 @@ const logic: Record<string, BlockDataRegistry> = {
 /** Registry for the block information, for easier editing (compared to Roblox Studio) */
 export const BlockDataRegistry: BlockDataRegistry = {
 	...flatten(logic),
+	piston: {
+		name: "Piston",
+		description: "N/A", // TODO:
+	},
 	anchorblock: {
 		name: "Anchor",
 		description: "An immovable block",

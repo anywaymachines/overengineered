@@ -1,3 +1,4 @@
+import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { BlockLogic } from "./BlockLogic";
 import { DisconnectBlockLogic } from "./logic/DisconnectBlockLogic";
@@ -62,6 +63,8 @@ export const logicRegistry = {
 	tnt: TNTBlockLogic,
 	suspensionblock: SuspensionLogic,
 	magnet: MagnetBlockLogic,
+
+	piston: PistonLogic,
 
 	lamp: LampBlockLogic,
 	screen: ScreenBlockLogic,
