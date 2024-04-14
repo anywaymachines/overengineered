@@ -25,11 +25,13 @@ import { ToolBase } from "client/tools/ToolBase";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
 import { BlocksInitializer } from "shared/BlocksInitializer";
+import { Element } from "shared/Element";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
+import { InstanceComponent } from "shared/component/InstanceComponent";
 import { TransformService } from "shared/component/TransformService";
 import { EventHandler } from "shared/event/EventHandler";
 import { ObservableValue } from "shared/event/ObservableValue";
@@ -595,6 +597,94 @@ namespace SinglePlaceController {
 }
 
 namespace MultiPlaceController {
+	type FloatingTextDefinition = BasePart & {
+		readonly billboard: BillboardGui & {
+			readonly text: TextLabel;
+		};
+	};
+	class FloatingText extends InstanceComponent<FloatingTextDefinition> {
+		static create(adornee: Model) {
+			const instance = Element.create(
+				"Part",
+				{ Anchored: true, Transparency: 1, Size: new Vector3(1, 1, 1) },
+				{
+					billboard: Element.create(
+						"BillboardGui",
+						{ Size: new UDim2(0, 200, 0, 50), AlwaysOnTop: true },
+						{
+							text: Element.create("TextLabel", {
+								Size: new UDim2(1, 0, 1, 0),
+								AutoLocalize: false,
+								BackgroundTransparency: 1,
+								FontFace: Element.newFont(Enum.Font.Ubuntu, Enum.FontWeight.Bold),
+								TextSize: 20,
+								TextColor3: Colors.black,
+								TextStrokeColor3: Colors.white,
+								TextStrokeTransparency: 0,
+							}),
+						},
+					),
+				},
+			);
+			instance.billboard.Adornee = instance;
+			instance.Parent = Workspace;
+
+			return new FloatingText(instance, adornee);
+		}
+
+		readonly counts = new ObservableValue<Vector3int16>(new Vector3int16());
+
+		constructor(instance: FloatingTextDefinition, adornee: Model) {
+			super(instance);
+
+			this.event.subscribe(RunService.Heartbeat, () => {
+				const closest = (origin: Vector3, points: readonly Vector3[]) => {
+					let result = new Vector3(math.huge, math.huge, math.huge);
+					let magnitude = math.huge;
+
+					for (const point of points) {
+						const mg = origin.sub(point).Magnitude;
+						if (mg < magnitude) {
+							result = point;
+							magnitude = mg;
+						}
+					}
+
+					return result;
+				};
+
+				const [mcf, ms] = adornee.GetBoundingBox();
+				const points: Vector3[] = [];
+				const addIfVisible = (point: Vector3) => {
+					const [, visible] = Workspace.CurrentCamera!.WorldToScreenPoint(point);
+					if (visible) points.push(point);
+				};
+
+				if (true as boolean) {
+					addIfVisible(mcf.Position);
+				} else {
+					addIfVisible(mcf.mul(new Vector3(ms.X / 2, ms.Y / 2, ms.Z / 2)));
+					addIfVisible(mcf.mul(new Vector3(-ms.X / 2, ms.Y / 2, ms.Z / 2)));
+					addIfVisible(mcf.mul(new Vector3(-ms.X / 2, -ms.Y / 2, ms.Z / 2)));
+					addIfVisible(mcf.mul(new Vector3(-ms.X / 2, ms.Y / 2, -ms.Z / 2)));
+					addIfVisible(mcf.mul(new Vector3(-ms.X / 2, -ms.Y / 2, -ms.Z / 2)));
+					addIfVisible(mcf.mul(new Vector3(ms.X / 2, -ms.Y / 2, ms.Z / 2)));
+					addIfVisible(mcf.mul(new Vector3(ms.X / 2, -ms.Y / 2, -ms.Z / 2)));
+					addIfVisible(mcf.mul(new Vector3(ms.X / 2, ms.Y / 2, -ms.Z / 2)));
+				}
+
+				const origin = Workspace.CurrentCamera?.CFrame?.Position;
+				if (!origin) return;
+
+				const fx = closest(origin, points);
+				instance.Position = fx;
+
+				const counts = this.counts.get();
+				instance.billboard.text.Text = `${counts.X}, ${counts.Y}, ${counts.Z}`;
+			});
+		}
+	}
+
 	export class Desktop extends ClientComponent implements IController {
 		static subscribe(state: BuildTool2, parent: ComponentChild<IController>) {
 			const buttonPress = () => {
@@ -661,6 +751,7 @@ namespace MultiPlaceController {
 		private readonly drawnGhostsMap = new Map<Vector3, Model>();
 		private static defaultCameraType = Workspace.CurrentCamera!.CameraType; //Enum.CameraType.Custom
 		private readonly blockMirrorer;
+		private readonly floatingText;
 		private oldPositions?: {
 			readonly positions: Set<Vector3>;
 			endPoint: Vector3;
@@ -679,6 +770,7 @@ namespace MultiPlaceController {
 		) {
 			super();
 			this.blockMirrorer = this.parent(new BlockMirrorer());
+			this.floatingText = this.parent(FloatingText.create(BlockGhoster.parent));
 
 			const updateGhosts = () => {
 				const cameraPostion = Workspace.CurrentCamera!.CFrame.Position;
@@ -779,6 +871,11 @@ namespace MultiPlaceController {
 			const toY = math.min(math.abs(diff.Y), this.fillLimit);
 			const toZ = math.min(math.abs(diff.Z), this.fillLimit);
 			const result: Vector3[] = [];
+
+			const xs = math.floor(toX / blockSize.X) + 1;
+			const ys = math.floor(toY / blockSize.Y) + 1;
+			const zs = math.floor(toZ / blockSize.Z) + 1;
+			this.floatingText.counts.set(new Vector3int16(xs, ys, zs));
 
 			for (let x = 0; x <= toX; x += blockSize.X) {
 				for (let y = 0; y <= toY; y += blockSize.Y) {
