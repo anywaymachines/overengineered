@@ -1,5 +1,6 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
+import { SharedPlots } from "shared/building/SharedPlots";
 import { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 export class MirrorVisualizer extends ClientComponent {
@@ -44,19 +45,28 @@ export class MirrorVisualizer extends ClientComponent {
 		mirrors.ClearAllChildren();
 
 		const mode = this.mirrorMode.get();
-		const axes = [
-			mode.y === undefined
-				? undefined
-				: CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(new Vector3(0, mode.y, 0)),
-			mode.x === undefined ? undefined : CFrame.identity.add(new Vector3(mode.x, 0, 0)),
-			mode.z === undefined
-				? undefined
-				: CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(0, 0, mode.z)),
-		] as readonly CFrame[];
+		const axes: (readonly [CFrame, number])[] = [];
 
-		for (const cframe of axes) {
+		if (mode.y !== undefined)
+			axes.push([
+				CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(new Vector3(0, mode.y, 0)),
+				SharedPlots.getPlotBuildingRegion(plot).getSize().X,
+			]);
+		if (mode.x !== undefined)
+			axes.push([
+				CFrame.identity.add(new Vector3(mode.x, 0, 0)),
+				SharedPlots.getPlotBuildingRegion(plot).getSize().X,
+			]);
+		if (mode.z !== undefined)
+			axes.push([
+				CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(0, 0, mode.z)),
+				SharedPlots.getPlotBuildingRegion(plot).getSize().Z,
+			]);
+
+		for (const [cframe, size] of axes) {
 			const mirror = this.template();
 			mirror.PivotTo(plot.BuildingArea.GetPivot().ToWorldSpace(cframe));
+			mirror.Size = new Vector3(size, 1, 0.001);
 			mirror.Parent = mirrors;
 		}
 	}
