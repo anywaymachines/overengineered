@@ -13,6 +13,8 @@ export namespace ClientBuilding {
 	export const moveOperation = new Operation(moveBlocks);
 	export const rotateOperation = new Operation(rotateBlocks);
 	export const paintOperation = new Operation(paintBlocks);
+	export const updateConfigOperation = new Operation(updateConfig);
+	export const resetConfigOperation = new Operation(resetConfig);
 
 	async function placeBlocks(plot: SharedPlot, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) {
 		let placed: readonly BlockUuid[];
@@ -289,5 +291,15 @@ export namespace ClientBuilding {
 
 		plot.changed.Fire();
 		return result;
+	}
+	async function updateConfig(plot: SharedPlot, configs: ConfigUpdateRequest["configs"]) {
+		return await Remotes.Client.GetNamespace("Building")
+			.Get("UpdateConfigRequest")
+			.CallServerAsync({ plot: plot.instance, configs });
+	}
+	async function resetConfig(plot: SharedPlot, _blocks: readonly BlockModel[]) {
+		return await Remotes.Client.GetNamespace("Building")
+			.Get("ResetConfigRequest")
+			.CallServerAsync({ plot: plot.instance, blocks: _blocks });
 	}
 }

@@ -3,10 +3,10 @@ import { Control } from "client/gui/Control";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { ConfigControl, ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
 import { LogControl } from "client/gui/static/LogControl";
+import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ConfigTool } from "client/tools/ConfigTool";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Logger } from "shared/Logger";
-import { Remotes } from "shared/Remotes";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { Config } from "shared/config/Config";
@@ -41,22 +41,20 @@ export class ConfigToolScene extends Control<ConfigToolSceneDefinition> {
 		this.event.subscribe(this.configControl.configUpdated, async (key, value) => {
 			Logger.info(`Sending (${selected.get().size()}) block config values ${key} ${JSON.serialize(value)}`);
 
-			const response = await Remotes.Client.GetNamespace("Building")
-				.Get("UpdateConfigRequest")
-				.CallServerAsync({
-					plot: tool.targetPlot.get().instance,
-					configs: selected
-						.get()
-						.map((p) => p.Parent)
-						.map(
-							(b) =>
-								({
-									block: b,
-									key,
-									value: JSON.serialize(value),
-								}) satisfies ConfigUpdateRequest["configs"][number],
-						),
-				});
+			const response = await ClientBuilding.updateConfigOperation.execute(
+				tool.targetPlot.get(),
+				selected
+					.get()
+					.map((p) => p.Parent)
+					.map(
+						(b) =>
+							({
+								block: b,
+								key,
+								value: JSON.serialize(value),
+							}) satisfies ConfigUpdateRequest["configs"][number],
+					),
+			);
 			if (!response.success) {
 				LogControl.instance.addLine(response.message, Colors.red);
 			}
@@ -73,12 +71,10 @@ export class ConfigToolScene extends Control<ConfigToolSceneDefinition> {
 		this.gui.Bottom.ResetButton.Activated.Connect(async () => {
 			Logger.info(`Resetting (${selected.get().size()}) block config values`);
 
-			const response = await Remotes.Client.GetNamespace("Building")
-				.Get("ResetConfigRequest")
-				.CallServerAsync({
-					plot: tool.targetPlot.get().instance,
-					blocks: selected.get().map((p) => p.Parent),
-				});
+			const response = await ClientBuilding.resetConfigOperation.execute(
+				tool.targetPlot.get(),
+				selected.get().map((p) => p.Parent),
+			);
 
 			if (!response.success) {
 				LogControl.instance.addLine(response.message, Colors.red);
