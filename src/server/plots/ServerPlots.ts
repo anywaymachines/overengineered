@@ -1,6 +1,7 @@
 import { Players } from "@rbxts/services";
 import { ServerBuilding } from "server/building/ServerBuilding";
 import { SlotDatabase } from "server/database/SlotDatabase";
+import { PlayModeController } from "server/modes/PlayModeController";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { Element } from "shared/Element";
 import { SlotsMeta } from "shared/SlotsMeta";
@@ -20,6 +21,10 @@ const assignPlotTo = (player: Player): void => {
 	}
 };
 const savePlotOf = (player: Player): void => {
+	if (PlayModeController.getPlayerMode(player) !== "build") {
+		return;
+	}
+
 	const plot = SharedPlots.getPlotComponentByOwnerID(player.UserId);
 	if (plot.getBlocks().size() === 0) return;
 

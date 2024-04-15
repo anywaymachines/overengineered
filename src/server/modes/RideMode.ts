@@ -44,10 +44,17 @@ export class RideMode implements PlayModeBase {
 		const copy = blocks.Clone();
 		this.cache.set(player, copy);
 
+		const serialized = BlocksSerializer.serialize(plot);
 		SlotDatabase.instance.setBlocks(
 			player.UserId,
 			SlotsMeta.autosaveSlotIndex,
-			BlocksSerializer.serialize(plot),
+			serialized,
+			SharedPlots.getPlotComponent(plot).getBlocks().size(),
+		);
+		SlotDatabase.instance.setBlocks(
+			player.UserId,
+			SlotsMeta.quitSlotIndex,
+			serialized,
 			SharedPlots.getPlotComponent(plot).getBlocks().size(),
 		);
 
