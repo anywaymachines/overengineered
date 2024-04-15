@@ -89,7 +89,7 @@ export const TerrainChunkRenderer = (generator: ChunkGenerator): ChunkRenderer<t
 
 		renderChunk(chunkX: number, chunkZ: number): true {
 			actorSemaphore.wait();
-			findAvailableActor().Load.Fire(chunkX, chunkZ, PlayerDataStorage.config.get().terrainFoliage);
+			findAvailableActor().Load.Fire(chunkX, chunkZ, PlayerDataStorage.config.get().terrain.foliage);
 
 			return true;
 		},

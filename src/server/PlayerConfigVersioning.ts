@@ -84,7 +84,25 @@ const v5: UpdatablePlayerConfigVersion<PlayerConfigV5, PlayerConfigV4> = {
 	},
 };
 
-const versions = [v1, v2, v3, v4, v5] as const;
+// Added terrain config
+type PlayerConfigV6 = PlayerConfigV5 & { terrain: TerrainConfiguration };
+const v6: UpdatablePlayerConfigVersion<PlayerConfigV6, PlayerConfigV5> = {
+	version: 6,
+
+	update(prev: Partial<PlayerConfigV5>): Partial<PlayerConfigV6> {
+		return {
+			...prev,
+			version: this.version,
+			terrain: {
+				kind: "Terrain",
+				resolution: 2,
+				foliage: prev.terrainFoliage ?? true,
+			},
+		};
+	},
+};
+
+const versions = [v1, v2, v3, v4, v5, v6] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 export namespace PlayerConfigUpdater {

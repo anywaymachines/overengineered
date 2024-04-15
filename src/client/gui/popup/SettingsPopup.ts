@@ -3,7 +3,7 @@ import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "client/gui/controls/Button";
-import { DropdownListDefinition } from "client/gui/controls/DropdownList";
+import { DropdownList, DropdownListDefinition } from "client/gui/controls/DropdownList";
 import { NumberTextBoxControl, NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl, SliderControlDefinition } from "client/gui/controls/SliderControl";
 import { ToggleControl, ToggleControlDefinition } from "client/gui/controls/ToggleControl";
@@ -162,6 +162,29 @@ export class ClampedNumberConfigValueControl extends ConfigValueControl<SliderCo
 	}
 }
 
+export class DropdownConfigValueControl<T extends string = string> extends ConfigValueControl<DropdownListDefinition> {
+	readonly submitted = new Signal<(config: PlayerConfigTypes.Dropdown<T>["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: PlayerConfigTypes.Dropdown<T>["config"],
+		definition: ConfigTypeToDefinition<PlayerConfigTypes.Dropdown<T>>,
+	) {
+		super(templates.dropdown(), definition.displayName);
+
+		const control = this.add(new DropdownList<T>(this.gui.Control, "down"));
+		for (const item of definition.items) {
+			control.addItem(item);
+		}
+		control.selectedItem.set(config);
+
+		this.event.subscribeObservable(
+			control.selectedItem,
+			(value) => value !== undefined && this.submitted.Fire(value),
+		);
+	}
+}
+
 type MultiTemplate = GuiObject & {};
 export class DayCycleValueControl extends ConfigValueControl<MultiTemplate> {
 	readonly submitted = new Signal<(config: PlayerConfigTypes.DayCycle["config"]) => void>();
@@ -306,16 +329,68 @@ export class GraphicsValueControl extends ConfigValueControl<MultiTemplate> {
 	}
 }
 
+export class TerrainValueControl extends ConfigValueControl<MultiTemplate> {
+	readonly submitted = new Signal<(config: PlayerConfigTypes.Terrain["config"]) => void>();
+
+	constructor(
+		templates: Templates,
+		config: PlayerConfigTypes.Terrain["config"],
+		definition: ConfigTypeToDefinition<PlayerConfigTypes.Terrain>,
+	) {
+		super(templates.multi(), definition.displayName);
+
+		const items: { readonly [k in typeof config.kind]: true } = { Flat: true, Terrain: true, Triangle: true };
+		const def = {
+			kind: {
+				displayName: "Type",
+				type: "dropdown",
+				config: definition.config.kind,
+				items: Objects.keys(items),
+			},
+			resolution: {
+				displayName: "Resolution",
+				type: "clampedNumber",
+				config: definition.config.kind === "Triangle" ? definition.config.resolution : 2,
+				min: 2,
+				max: 16,
+				step: 2,
+			},
+			foliage: {
+				displayName: "Foliage",
+				type: "bool",
+				config: true as boolean,
+			},
+		} as const satisfies PlayerConfigTypes.Definitions;
+		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
+
+		const control = this.add(new ConfigControl(this.gui.Control, config, def));
+		this.event.subscribe(control.configUpdated, (key, value) => {
+			this.submitted.Fire((config = { ...config, [key]: value }));
+		});
+
+		const resolutionControl = control.get("resolution") as ClampedNumberConfigValueControl;
+		const kindControl = control.get("kind") as DropdownConfigValueControl<typeof config.kind>;
+
+		const setImprovedControlsEnabled = (kind: string & typeof config.kind) => {
+			resolutionControl.setVisible(kind === "Triangle");
+		};
+		this.event.subscribe(kindControl.submitted, setImprovedControlsEnabled);
+		setImprovedControlsEnabled(config.kind);
+	}
+}
+
 //
 
 export const configControls = {
 	bool: BoolConfigValueControl,
 	number: NumberConfigValueControl,
 	clampedNumber: ClampedNumberConfigValueControl,
+	dropdown: DropdownConfigValueControl,
 	dayCycle: DayCycleValueControl,
 	beacons: BeaconsValueControl,
 	camera: CameraValueControl,
 	graphics: GraphicsValueControl,
+	terrain: TerrainValueControl,
 } as const satisfies {
 	readonly [k in keyof PlayerConfigTypes.Types]: {
 		new (

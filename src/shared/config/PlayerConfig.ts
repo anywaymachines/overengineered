@@ -16,10 +16,18 @@ declare global {
 		readonly localShadows: boolean;
 		readonly othersShadows: boolean;
 	};
+	type TerrainConfiguration = {
+		readonly kind: "Terrain" | "Triangle" | "Flat";
+		readonly resolution: number;
+		readonly foliage: boolean;
+	};
 
 	namespace PlayerConfigTypes {
 		export type Bool = ConfigType<"bool", boolean>;
 		export type Number = ConfigType<"number", number>;
+		export type Dropdown<T extends string = string> = ConfigType<"dropdown", T> & {
+			readonly items: readonly T[];
+		};
 		export type ClampedNumber = ConfigType<"clampedNumber", number> & {
 			readonly min: number;
 			readonly max: number;
@@ -29,15 +37,18 @@ declare global {
 		export type Beacons = ConfigType<"beacons", BeaconsConfiguration>;
 		export type Camera = ConfigType<"camera", CameraConfiguration>;
 		export type Graphics = ConfigType<"graphics", GraphicsConfiguration>;
+		export type Terrain = ConfigType<"terrain", TerrainConfiguration>;
 
 		export interface Types {
 			readonly bool: Bool;
 			readonly number: Number;
+			readonly dropdown: Dropdown;
 			readonly clampedNumber: ClampedNumber;
 			readonly dayCycle: DayCycle;
 			readonly beacons: Beacons;
 			readonly camera: Camera;
 			readonly graphics: Graphics;
+			readonly terrain: Terrain;
 		}
 
 		export type Definitions = ConfigTypesToDefinition<keyof Types, Types>;
@@ -89,11 +100,6 @@ export const PlayerConfigDefinition = {
 		type: "bool",
 		config: true as boolean,
 	},
-	terrainFoliage: {
-		displayName: "Terrain Foliage",
-		type: "bool",
-		config: true as boolean,
-	},
 	dayCycle: {
 		displayName: "Day cycle",
 		type: "dayCycle",
@@ -110,5 +116,14 @@ export const PlayerConfigDefinition = {
 		min: 0.5,
 		max: 1.5,
 		step: 0.01,
+	},
+	terrain: {
+		displayName: "Terrain",
+		type: "terrain",
+		config: {
+			kind: "Terrain" as TerrainConfiguration["kind"],
+			resolution: 2 as number,
+			foliage: true as boolean,
+		},
 	},
 } as const satisfies ConfigTypesToDefinition<keyof PlayerConfigTypes.Types, PlayerConfigTypes.Types>;
