@@ -1,3 +1,4 @@
+import { Workspace } from "@rbxts/services";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { TransformProps } from "shared/component/Transform";
@@ -97,6 +98,20 @@ class LoadingPopup extends Control<LoadingPopupDefinition> {
 		this.gui.TextLabel.Text = text;
 	}
 }
+
+spawn(() => {
+	const gui = Workspace.WaitForChild("Obstacles")
+		.WaitForChild("Baseplate 2")
+		.WaitForChild("Part")
+		.WaitForChild("SurfaceGui")
+		.WaitForChild("Spinner") as GuiObject;
+
+	const loading = new LoadingImage(gui);
+	loading.enable();
+	loading.runShowAnimation();
+
+	task.delay(10_000, () => loading.disable());
+});
 
 const control = new LoadingPopup(Gui.getGameUI<{ Loading: LoadingPopupDefinition }>().Loading);
 control.hide();
