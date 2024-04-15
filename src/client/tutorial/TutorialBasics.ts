@@ -181,16 +181,18 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 
 	tutorial.buildTool.addBlockToPlace({
 		id: "servomotorblock",
-		cframe: new CFrame(18, 3.5, -6, 1, 0, 0, 0, -1, 8.742277657347586e-8, 0, -8.742277657347586e-8, -1),
-	});
-	tutorial.buildTool.addBlockToPlace({
-		id: "servomotorblock",
 		cframe: new CFrame(0, 3.5, 6, 1, 0, 0, 0, -1, 8.742277657347586e-8, 0, -8.742277657347586e-8, -1),
 	});
-	tutorial.buildTool.addBlockToPlace({
-		id: "servomotorblock",
-		cframe: new CFrame(18, 3.5, 6, 1, 0, 0, 0, -1, 8.742277657347586e-8, 0, -8.742277657347586e-8, -1),
-	});
+
+	// tutorial.buildTool.addBlockToPlace({
+	// 	id: "servomotorblock",
+	// 	cframe: new CFrame(18, 3.5, -6, 1, 0, 0, 0, -1, 8.742277657347586e-8, 0, -8.742277657347586e-8, -1),
+	// });
+
+	// tutorial.buildTool.addBlockToPlace({
+	// 	id: "servomotorblock",
+	// 	cframe: new CFrame(18, 3.5, 6, 1, 0, 0, 0, -1, 8.742277657347586e-8, 0, -8.742277657347586e-8, -1),
+	// });
 
 	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
 
@@ -202,6 +204,7 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 		id: "block",
 		cframe: new CFrame(0, 1.5, -6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
+
 	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(18, 1.5, -6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
@@ -209,6 +212,14 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	tutorial.buildTool.addBlockToPlace({
 		id: "block",
 		cframe: new CFrame(18, 1.5, 6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+	});
+	tutorial.buildTool.addBlockToPlace({
+		id: "block",
+		cframe: new CFrame(18, 3.5, 6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+	});
+	tutorial.buildTool.addBlockToPlace({
+		id: "block",
+		cframe: new CFrame(18, 3.5, -6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
 
 	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
@@ -220,10 +231,207 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 		false,
 	);
 
+	TasksControl.instance.addTask("Select editing tool");
+	TasksControl.instance.addTask("Select plot");
+	TasksControl.instance.addTask("Select move mode");
+	TasksControl.instance.addTask("Move building up 4 times (2 blocks)");
+
 	tutorial.editTool.get().enabledModes.enableOnly("Move");
 	toolEnabler.enableOnly(allTools.editTool);
 
 	if (!(await tutorial.editTool.waitForMoveToolWork(new Vector3(0, 4, 0)))) return;
+	TasksControl.instance.finish();
+
+	toolEnabler.disableAll();
+	tutorial.Control.displayStep("Great! Let's install motors that will turn the wheels and move the car!", false);
+	toolEnabler.enableOnly(allTools.buildTool, allTools.buildTool2);
+
+	TasksControl.instance.addTask("Select building tool");
+	TasksControl.instance.addTask('Select "Motor"');
+	TasksControl.instance.addTask("Place all highlighted blocks");
+
+	tutorial.buildTool.addBlockToPlace({
+		id: "motorblock",
+		cframe: new CFrame(0, 5.5, 8.0006103515625, 1, 0, 0, 0, -4.371138828673793e-8, -1, 0, 1, -4.371138828673793e-8),
+	});
+
+	tutorial.buildTool.addBlockToPlace({
+		id: "motorblock",
+		cframe: new CFrame(
+			18,
+			5.5,
+			8.0006103515625,
+			1,
+			0,
+			0,
+			0,
+			-4.371138828673793e-8,
+			-1,
+			0,
+			1,
+			-4.371138828673793e-8,
+		),
+	});
+
+	tutorial.buildTool.addBlockToPlace({
+		id: "motorblock",
+		cframe: new CFrame(
+			18,
+			5.5,
+			-8.0006103515625,
+			1,
+			-1.528548372131764e-14,
+			-1.7484555314695172e-7,
+			1.7484555314695172e-7,
+			1.3113415775478643e-7,
+			1,
+			7.64274186065882e-15,
+			-1,
+			1.3113415775478643e-7,
+		),
+	});
+
+	tutorial.buildTool.addBlockToPlace({
+		id: "motorblock",
+		cframe: new CFrame(
+			0,
+			5.5,
+			-8.0006103515625,
+			1,
+			-1.528548372131764e-14,
+			-1.7484555314695172e-7,
+			1.7484555314695172e-7,
+			1.3113415775478643e-7,
+			1,
+			7.64274186065882e-15,
+			-1,
+			1.3113415775478643e-7,
+		),
+	});
+
+	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
+	toolEnabler.disableAll();
+	TasksControl.instance.finish();
+
+	tutorial.Control.displayStep("Nice, now you can install wheels", false);
+	toolEnabler.enableOnly(allTools.buildTool, allTools.buildTool2);
+
+	TasksControl.instance.addTask("Select building tool");
+	TasksControl.instance.addTask('Select "Small Wheel"');
+	TasksControl.instance.addTask("Place all highlighted blocks");
+
+	tutorial.buildTool.addBlockToPlace({
+		id: "smallwheel",
+		cframe: new CFrame(
+			0,
+			5.5,
+			-10.00042724609375,
+			1,
+			-1.528548372131764e-14,
+			-1.7484555314695172e-7,
+			1.7484555314695172e-7,
+			1.3113415775478643e-7,
+			1,
+			7.64274186065882e-15,
+			-1,
+			1.3113415775478643e-7,
+		),
+	});
+
+	tutorial.buildTool.addBlockToPlace({
+		id: "smallwheel",
+		cframe: new CFrame(
+			18,
+			5.5,
+			-10.00042724609375,
+			1,
+			-1.528548372131764e-14,
+			-1.7484555314695172e-7,
+			1.7484555314695172e-7,
+			1.3113415775478643e-7,
+			1,
+			7.64274186065882e-15,
+			-1,
+			1.3113415775478643e-7,
+		),
+	});
+
+	tutorial.buildTool.addBlockToPlace({
+		id: "smallwheel",
+		cframe: new CFrame(
+			18,
+			5.5,
+			10.00079345703125,
+			1,
+			-1.528548372131764e-14,
+			-1.7484555314695172e-7,
+			1.7484555314695172e-7,
+			1.3113415775478643e-7,
+			1,
+			7.64274186065882e-15,
+			-1,
+			1.3113415775478643e-7,
+		),
+	});
+
+	tutorial.buildTool.addBlockToPlace({
+		id: "smallwheel",
+		cframe: new CFrame(
+			0,
+			5.5,
+			10.00079345703125,
+			1,
+			-1.528548372131764e-14,
+			-1.7484555314695172e-7,
+			1.7484555314695172e-7,
+			1.3113415775478643e-7,
+			1,
+			7.64274186065882e-15,
+			-1,
+			1.3113415775478643e-7,
+		),
+	});
+
+	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
+	toolEnabler.disableAll();
+	TasksControl.instance.finish();
+
+	tutorial.Control.displayStep(
+		"The last step before setting up the motors is to install the seat where you will be sitting",
+		false,
+	);
+	toolEnabler.enableOnly(allTools.buildTool, allTools.buildTool2);
+
+	TasksControl.instance.addTask("Select building tool");
+	TasksControl.instance.addTask('Select "Vehicle Seat"');
+	TasksControl.instance.addTask("Place highlighted block");
+
+	tutorial.buildTool.addBlockToPlace({
+		id: "vehicleseat",
+		cframe: new CFrame(
+			9,
+			8.5006103515625,
+			0,
+			-2.18556948539117e-7,
+			0,
+			1,
+			1.7484555314695172e-7,
+			1,
+			3.821370845626115e-14,
+			-1,
+			1.7484555314695172e-7,
+			-2.18556948539117e-7,
+		),
+	});
+
+	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
+	toolEnabler.disableAll();
+	TasksControl.instance.finish();
+
+	// tutorial.Control.displayStep(
+	// 	"It's time to adjust the controls, let's start with the rotary mechanism",
+	// 	false,
+	// );
 
 	tutorial.Finish();
 }

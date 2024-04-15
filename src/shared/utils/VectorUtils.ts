@@ -73,6 +73,13 @@ export namespace VectorUtils {
 		return new Vector3(x, y, z);
 	}
 
+	export function roundVector(vector: Vector3): Vector3 {
+		const x = math.round(vector.X);
+		const y = math.round(vector.Y);
+		const z = math.round(vector.Z);
+		return new Vector3(x, y, z);
+	}
+
 	export function normalIdToNormalVector(
 		mouse_surface: Enum.NormalId,
 		part: BasePart,
