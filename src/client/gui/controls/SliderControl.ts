@@ -56,11 +56,7 @@ export class SliderControl<T extends SliderControlDefinition = SliderControlDefi
 				);
 			} else {
 				const x = Players.LocalPlayer.GetMouse().X;
-				this.value.set(
-					((x - startpos) / this.gui.AbsoluteSize.X) * this.value.getRange() +
-						this.value.min +
-						this.value.step / 2,
-				);
+				this.value.set(((x - startpos) / this.gui.AbsoluteSize.X) * this.value.getRange() + this.value.min);
 			}
 		};
 
