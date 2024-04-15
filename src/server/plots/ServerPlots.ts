@@ -21,6 +21,7 @@ const assignPlotTo = (player: Player): void => {
 };
 const savePlotOf = (player: Player): void => {
 	const plot = SharedPlots.getPlotComponentByOwnerID(player.UserId);
+	if (plot.getBlocks().size() === 0) return;
 
 	SlotDatabase.instance.setBlocks(
 		player.UserId,
