@@ -29,6 +29,7 @@ export namespace GameDefinitions {
 
 	export const MAX_LINEAR_SPEED = RobloxUnit.Meters_To_Studs(1000);
 	export const MAX_ANGULAR_SPEED = 40;
+	export const HEIGHT_OFFSET = -16384;
 
 	export function isAdmin(player: Player) {
 		if (player.Name === "i3ymm" || player.Name === "3QAXM" || player.Name === "samlovebutter") return true;

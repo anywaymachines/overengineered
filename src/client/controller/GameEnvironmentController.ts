@@ -1,4 +1,5 @@
 import { RunService, Workspace } from "@rbxts/services";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { GameEnvironment } from "shared/data/GameEnvironment";
 import { LocalPlayerController } from "./LocalPlayerController";
 
@@ -12,13 +13,8 @@ export namespace GameEnvironmentController {
 	export function update() {
 		if (!LocalPlayerController.rootPart) return;
 
-		let position = LocalPlayerController.rootPart.Position;
-
-		if (position.Y <= 0) {
-			position = new Vector3(0, 1, 0);
-		}
-
-		currentHeight = position.Y;
+		const position = LocalPlayerController.rootPart.Position;
+		currentHeight = position.Y - GameDefinitions.HEIGHT_OFFSET;
 
 		Workspace.AirDensity = math.max(
 			GameEnvironment.EarthAirDensity -

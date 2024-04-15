@@ -20,6 +20,7 @@ declare global {
 		readonly kind: "Terrain" | "Triangle" | "Flat";
 		readonly resolution: number;
 		readonly foliage: boolean;
+		readonly loadDistance: number;
 	};
 
 	namespace PlayerConfigTypes {
@@ -121,9 +122,10 @@ export const PlayerConfigDefinition = {
 		displayName: "Terrain",
 		type: "terrain",
 		config: {
-			kind: "Terrain" as TerrainConfiguration["kind"],
+			kind: "Triangle" as TerrainConfiguration["kind"],
 			resolution: 8 as number,
 			foliage: true as boolean,
+			loadDistance: 24 as number,
 		},
 	},
 } as const satisfies ConfigTypesToDefinition<keyof PlayerConfigTypes.Types, PlayerConfigTypes.Types>;

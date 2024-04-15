@@ -1,67 +1,12 @@
-import { ReplicatedFirst, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { ReplicatedStorage, Workspace } from "@rbxts/services";
 import { ChunkGenerator } from "client/terrain/ChunkLoader";
-import { TerrainData, TerrainInfo } from "shared/TerrainDataInfo";
+import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-
-const folder = ReplicatedFirst.WaitForChild("Terrain") as Folder & TerrainInfo;
-const terrainChild = folder.Data.TerrainData;
-const heightChild = folder.Data.HeightData;
-const materialChild = folder.Data.MaterialData;
-if (!terrainChild) {
-	throw "No terrin";
-}
 
 const aprilFools = GameDefinitions.APRIL_FOOLS;
 
-const terrainData = require(folder.Data.TerrainData) as TerrainData;
-const heightData: number[][] = [];
+const terrainData = TerrainDataInfo.data;
 const materialData: number[][] = [];
-
-if (heightChild) {
-	for (const child of heightChild.GetDescendants()) {
-		if (child.ClassName !== "ModuleScript") {
-			continue;
-		}
-
-		const data = require(child as ModuleScript) as [...[n: number, a: number[]]];
-		const position = child.GetAttribute("Position") as Vector3;
-
-		for (let i = 0; i < data.size(); i += 2) {
-			const x = position.X + (data[i] as number);
-			const zData = data[i + 1] as number[];
-
-			heightData[x] ??= [];
-			for (let j = 0; j < zData.size(); j += 2) {
-				const z = position.Y + zData[j];
-				const height = zData[j + 1];
-				heightData[x][z] = height;
-			}
-		}
-	}
-}
-
-if (materialChild) {
-	for (const child of materialChild.GetDescendants()) {
-		if (child.ClassName !== "ModuleScript") {
-			continue;
-		}
-
-		const data = require(child as ModuleScript) as [...[n: number, a: number[]]];
-		const position = child.GetAttribute("Position") as Vector3;
-
-		for (let i = 0; i < data.size(); i += 2) {
-			const x = position.X + (data[i] as number);
-			const zData = data[i + 1] as number[];
-			materialData[x] ??= [];
-
-			for (let j = 1; j < zData.size(); j += 2) {
-				const z = position.Y + zData[j];
-				const material = zData[j + 1];
-				materialData[x][z] = material;
-			}
-		}
-	}
-}
 
 const materialEnums: Record<number, Enum.Material> = {};
 for (const item of Enum.Material.GetEnumItems()) {
@@ -115,8 +60,8 @@ infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, load
 	minimumHeight = math.floor(minimumHeight / 4) * 4;
 	maximumHeight = math.ceil(maximumHeight / 4) * 4;
 	const region = new Region3(
-		new Vector3(startX * 4, minimumHeight, startZ * 4),
-		new Vector3(endX * 4 + 4, maximumHeight, endZ * 4 + 4),
+		new Vector3(startX * 4, minimumHeight + GameDefinitions.HEIGHT_OFFSET, startZ * 4),
+		new Vector3(endX * 4 + 4, maximumHeight + GameDefinitions.HEIGHT_OFFSET, endZ * 4 + 4),
 	);
 	debug.profileend();
 	debug.profilebegin("reading");

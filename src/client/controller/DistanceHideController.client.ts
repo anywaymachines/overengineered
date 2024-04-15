@@ -1,6 +1,7 @@
 import { Players, Workspace } from "@rbxts/services";
 import { Logger } from "shared/Logger";
 import { RobloxUnit } from "shared/RobloxUnit";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 
 // wait for everything to spawn
 task.wait(1);
@@ -24,7 +25,10 @@ let visible = true;
 while (true as boolean) {
 	task.wait(1);
 
-	const newVisible = (Players.LocalPlayer.Character?.GetPivot().Position.Magnitude ?? 0) < maxDistance;
+	const newVisible =
+		(new Vector3(0, GameDefinitions.HEIGHT_OFFSET, 0).sub(
+			Players.LocalPlayer.Character?.GetPivot().Position ?? Vector3.zero,
+		).Magnitude ?? 0) < maxDistance;
 	if (visible === newVisible) continue;
 
 	visible = newVisible;

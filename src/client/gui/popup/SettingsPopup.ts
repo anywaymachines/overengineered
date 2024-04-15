@@ -360,6 +360,14 @@ export class TerrainValueControl extends ConfigValueControl<MultiTemplate> {
 				type: "bool",
 				config: true as boolean,
 			},
+			loadDistance: {
+				displayName: "Load distance",
+				type: "clampedNumber",
+				config: 24 as number,
+				min: 1,
+				max: 96,
+				step: 1,
+			},
 		} as const satisfies PlayerConfigTypes.Definitions;
 		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 

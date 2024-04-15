@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import { TerrainDataInfo } from "shared/TerrainDataInfo";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { Component } from "shared/component/Component";
 import { Objects } from "shared/fixes/objects";
 
@@ -19,8 +19,6 @@ export interface ChunkRenderer<T = defined> {
 	destroy(): void;
 }
 
-const folder = TerrainDataInfo.getInfo();
-
 /** Controls chunk loading and unloading in relation to the player position */
 export class ChunkLoader<T = defined> extends Component {
 	private loadedChunks: Record<number, Record<number, { chunk?: T }>> = {};
@@ -28,13 +26,13 @@ export class ChunkLoader<T = defined> extends Component {
 
 	private readonly loadDistance;
 	private readonly loadDistancePow;
-	private readonly maxVisibleHeight = 1500;
+	private readonly maxVisibleHeight = 3000;
 
 	constructor(private readonly chunkRenderer: ChunkRenderer<T>) {
 		super();
 
 		this.loadDistance =
-			(folder.Configuration.LoadDistance.Value / chunkRenderer.chunkSize) *
+			(PlayerDataStorage.config.get().terrain.loadDistance / chunkRenderer.chunkSize) *
 			(16 * 4) *
 			(chunkRenderer.loadDistanceMultiplier ?? 1);
 		this.loadDistancePow = math.pow(this.loadDistance, 2);

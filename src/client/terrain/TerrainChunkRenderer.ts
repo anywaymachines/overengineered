@@ -1,8 +1,7 @@
-import { Workspace } from "@rbxts/services";
+import { ReplicatedFirst, Workspace } from "@rbxts/services";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { ChunkGenerator, ChunkRenderer } from "client/terrain/ChunkLoader";
 import type { InfiniteTerrainActor } from "client/terrain/InfiniteTerrainActor";
-import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
 if (GameDefinitions.APRIL_FOOLS) {
@@ -11,9 +10,9 @@ if (GameDefinitions.APRIL_FOOLS) {
 
 export const TerrainChunkRenderer = (generator: ChunkGenerator): ChunkRenderer<true> => {
 	const chunkSize = 16;
+	const actorAmount = 8;
 
-	const folder = TerrainDataInfo.getInfo();
-	const actorAmount = folder.Configuration.ActorAmount.Value;
+	const folder = new Instance("Folder", ReplicatedFirst);
 	const actors: InfiniteTerrainActor[] = [];
 	let selectedActor = 0;
 

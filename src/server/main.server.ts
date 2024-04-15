@@ -130,11 +130,6 @@ namespace RemoteHandlers {
 	}
 }
 
-if (RunService.IsStudio()) {
-	const terragen = new TerrainModelGenerator(new Vector3(25, 50, 25));
-	task.spawn(() => new AutoTerrainGenerator(terragen));
-}
-
 // Plots
 ServerPlots.initialize();
 

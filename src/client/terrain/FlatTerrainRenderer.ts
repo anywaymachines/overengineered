@@ -1,6 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import { ChunkRenderer } from "client/terrain/ChunkLoader";
 import { Element } from "shared/Element";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 
 const parent = Element.create("Folder", { Name: "Flaterra", Parent: Workspace.WaitForChild("Obstacles") });
 
@@ -13,7 +14,11 @@ export const FlatTerrainRenderer = (height: number, chunkSize: number = 1024): C
 		part.Anchored = true;
 		part.CastShadow = false;
 
-		part.Position = new Vector3(chunkX * this.chunkSize, height, chunkZ * this.chunkSize);
+		part.Position = new Vector3(
+			chunkX * this.chunkSize,
+			height + GameDefinitions.HEIGHT_OFFSET,
+			chunkZ * this.chunkSize,
+		);
 		part.Size = new Vector3(this.chunkSize, 2, this.chunkSize);
 
 		part.Material = Enum.Material.Sand;

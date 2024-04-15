@@ -1,6 +1,7 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { Machine } from "client/blocks/Machine";
+import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { InputController } from "client/controller/InputController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
@@ -400,8 +401,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			init("Altitude", "%.2f m", this.infoTextTemplate(), 0, maxAltitude, 0.1, (control) => {
 				if (!LocalPlayerController.rootPart) return;
 
-				const alt = RobloxUnit.Studs_To_Meters(LocalPlayerController.rootPart.Position.Y);
-
+				const alt = RobloxUnit.Studs_To_Meters(GameEnvironmentController.currentHeight);
 				control.slider.value.set(alt);
 				control.text.value.set(alt);
 			});

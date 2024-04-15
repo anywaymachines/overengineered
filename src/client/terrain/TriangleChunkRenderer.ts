@@ -1,6 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import type { ChunkGenerator, ChunkRenderer } from "client/terrain/ChunkLoader";
 import { Element } from "shared/Element";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 
 const parent = Element.create("Folder", { Name: "Triterra", Parent: Workspace.WaitForChild("Obstacles") });
 export const TriangleChunkRenderer = (
@@ -17,6 +18,7 @@ export const TriangleChunkRenderer = (
 		wedge.CFrame = cframe;
 		wedge.Anchored = true;
 		wedge.CastShadow = false;
+		wedge.Locked = true;
 
 		return wedge;
 	};
@@ -69,7 +71,7 @@ export const TriangleChunkRenderer = (
 			}
 		} else if (maxHeight > 250) {
 			for (const wedge of [w11, w12, w21, w22]) {
-				wedge.Material = Enum.Material.Snow;
+				wedge.Material = Enum.Material.Ice;
 				wedge.Color = new Color3(1, 1, 1);
 			}
 		} else {
@@ -102,10 +104,18 @@ export const TriangleChunkRenderer = (
 					const absz = chunkz * chunkSize + relz;
 
 					debug.profilebegin("Generating height");
-					const xpzp = generator.getHeight((absx + squareHalfSize) / 4, (absz + squareHalfSize) / 4);
-					const xpzn = generator.getHeight((absx + squareHalfSize) / 4, (absz - squareHalfSize) / 4);
-					const xnzp = generator.getHeight((absx - squareHalfSize) / 4, (absz + squareHalfSize) / 4);
-					const xnzn = generator.getHeight((absx - squareHalfSize) / 4, (absz - squareHalfSize) / 4);
+					const xpzp =
+						generator.getHeight((absx + squareHalfSize) / 4, (absz + squareHalfSize) / 4) +
+						GameDefinitions.HEIGHT_OFFSET;
+					const xpzn =
+						generator.getHeight((absx + squareHalfSize) / 4, (absz - squareHalfSize) / 4) +
+						GameDefinitions.HEIGHT_OFFSET;
+					const xnzp =
+						generator.getHeight((absx - squareHalfSize) / 4, (absz + squareHalfSize) / 4) +
+						GameDefinitions.HEIGHT_OFFSET;
+					const xnzn =
+						generator.getHeight((absx - squareHalfSize) / 4, (absz - squareHalfSize) / 4) +
+						GameDefinitions.HEIGHT_OFFSET;
 					debug.profileend();
 
 					debug.profilebegin("Generating triangles");
