@@ -352,7 +352,7 @@ export class TerrainValueControl extends ConfigValueControl<MultiTemplate> {
 				type: "clampedNumber",
 				config: definition.config.resolution,
 				min: 1,
-				max: 4,
+				max: 16,
 				step: 1,
 			},
 			foliage: {

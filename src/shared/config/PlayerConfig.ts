@@ -122,7 +122,7 @@ export const PlayerConfigDefinition = {
 		type: "terrain",
 		config: {
 			kind: "Terrain" as TerrainConfiguration["kind"],
-			resolution: 1 as number,
+			resolution: 8 as number,
 			foliage: true as boolean,
 		},
 	},

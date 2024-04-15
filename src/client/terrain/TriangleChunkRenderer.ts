@@ -5,9 +5,9 @@ import { Element } from "shared/Element";
 const parent = Element.create("Folder", { Name: "Triterra", Parent: Workspace.WaitForChild("Obstacles") });
 export const TriangleChunkRenderer = (
 	generator: ChunkGenerator,
-	chunkResolution: number = 1,
+	chunkResolution: number = 8,
 ): ChunkRenderer<Instance> => {
-	const chunkSize = 16 * 4;
+	const chunkSize = 128 * 4;
 	const squareSize = chunkSize / chunkResolution;
 	const squareHalfSize = squareSize / 2;
 
@@ -62,7 +62,7 @@ export const TriangleChunkRenderer = (
 		const maxHeight = math.max(xpzp, xpzn, xnzp, xnzn);
 		const heightDiff = maxHeight - minHeight;
 
-		if (heightDiff > 80) {
+		if (heightDiff > 80 / math.sqrt(chunkResolution / 8)) {
 			for (const wedge of [w11, w12, w21, w22]) {
 				wedge.Material = Enum.Material.Basalt;
 				wedge.Color = new Color3(0.2, 0.2, 0.2);
