@@ -263,7 +263,26 @@ namespace Scene {
 				true,
 			);
 
-			this.add(new MaterialColorEditControl(this.gui.Bottom, tool.selectedMaterial, tool.selectedColor));
+			{
+				const enable = () => {
+					// to not place a block
+					task.wait();
+
+					this.tool.enable();
+				};
+				const disable = () => {
+					this.tool.disable();
+				};
+				const materialColorEditor = this.add(
+					new MaterialColorEditControl(this.gui.Bottom, tool.selectedMaterial, tool.selectedColor),
+				);
+				materialColorEditor.materialPipette.onStart.Connect(disable);
+				materialColorEditor.materialPipette.onEnd.Connect(enable);
+				materialColorEditor.colorPipette.onStart.Connect(disable);
+				materialColorEditor.colorPipette.onEnd.Connect(enable);
+				this.blockSelector.pipette.onStart.Connect(disable);
+				this.blockSelector.pipette.onEnd.Connect(enable);
+			}
 
 			const updateTouchControls = () => {
 				const visible =
