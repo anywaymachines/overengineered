@@ -45,8 +45,7 @@ export class SlotDatabase {
 	}
 
 	private ensureValidSlotIndex(userId: number, index: number) {
-		if (index === SlotsMeta.autosaveSlotIndex) return;
-		if (index === SlotsMeta.quitSlotIndex) return;
+		if (index in SlotsMeta.specialSlots) return;
 
 		const pdata = PlayerDatabase.instance.get(userId);
 		const player = Players.GetPlayerByUserId(userId);

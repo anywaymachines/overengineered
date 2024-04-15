@@ -1,8 +1,25 @@
+import { Objects } from "shared/fixes/objects";
+
 /** Slots storage for a single user */
 export namespace SlotsMeta {
+	type SpecialSlotInfo = {
+		readonly name: string;
+		readonly color: string;
+	};
+
 	export const autosaveSlotIndex = -1;
 	export const quitSlotIndex = -2;
-	const minSlot = -2;
+	export const specialSlots: Readonly<Record<number, SpecialSlotInfo>> = {
+		[autosaveSlotIndex]: {
+			name: "Last run",
+			color: "57dbfa",
+		},
+		[quitSlotIndex]: {
+			name: "Last exit",
+			color: "ff1f5a",
+		},
+	};
+	const minSlot = math.min(...Objects.keys(specialSlots));
 
 	function defaultSlot(index: number): SlotMeta {
 		const def: SlotMeta = {
@@ -14,18 +31,11 @@ export namespace SlotsMeta {
 			touchControls: {},
 		};
 
-		if (index === SlotsMeta.autosaveSlotIndex) {
+		const slot = specialSlots[index];
+		if (slot) {
 			return {
 				...def,
-				name: "Autosave",
-				color: "6ccfe6",
-			};
-		}
-		if (index === SlotsMeta.quitSlotIndex) {
-			return {
-				...def,
-				name: "Last exit",
-				color: "ff6b54",
+				...slot,
 			};
 		}
 
@@ -38,6 +48,13 @@ export namespace SlotsMeta {
 	export function get(slots: readonly SlotMeta[], index: number): SlotMeta {
 		const idx = indexOf(slots, index);
 		if (idx === undefined) return defaultSlot(index);
+
+		if (index < 0) {
+			return {
+				...slots[idx],
+				...specialSlots[index],
+			};
+		}
 
 		return slots[idx] ?? defaultSlot(index);
 	}
