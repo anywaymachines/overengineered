@@ -1,3 +1,4 @@
+import { ControllableNumberConfigLogicValue } from "client/blocks/config/ControllableNumberLogicValue";
 import { BoolConfigLogicValue } from "./BoolConfigLogicValue";
 import { ClampedNumberConfigLogicValue } from "./ClampedNumberConfigLogicValue";
 import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
@@ -29,4 +30,5 @@ export const blockConfigRegistryClient = {
 	motorRotationSpeed: MotorRotationSpeedConfigLogicValue,
 	servoMotorAngle: ServoMotorAngleConfigLogicValue,
 	or: OrConfigLogicValue,
+	controllableNumber: ControllableNumberConfigLogicValue,
 } as const satisfies blockConfigRegistryClient;

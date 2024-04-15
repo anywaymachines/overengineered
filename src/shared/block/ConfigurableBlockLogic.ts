@@ -30,6 +30,8 @@ const BlockConfigValueRegistry = {
 	motorRotationSpeed: (def) => new NumberBlockLogicValue(0, -def.maxSpeed, def.maxSpeed, 0.01),
 	servoMotorAngle: () => new NumberBlockLogicValue(0, -180, 180, 0.01),
 	or: createObservable,
+	controllableNumber: (definition) =>
+		new NumberBlockLogicValue(definition.config.value, definition.min, definition.max, definition.step),
 } as const satisfies BlockConfigValueRegistry;
 
 export abstract class ConfigurableBlockLogic<

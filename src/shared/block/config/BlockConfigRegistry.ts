@@ -236,6 +236,27 @@ const piston = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
+const ballast = {
+	input: {
+		density: {
+			displayName: "Density",
+			type: "controllableNumber",
+			min: 0.15,
+			max: 10,
+			step: 0.01,
+			default: 0.15 as number,
+			config: {
+				value: 0.15 as number,
+				control: {
+					add: "R" as KeyCode,
+					sub: "F" as KeyCode,
+				},
+			},
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
 const rope = {
 	input: {
 		length: {
@@ -1012,6 +1033,7 @@ export const blockConfigRegistry = {
 	vehicleseat,
 	magnet,
 	piston,
+	ballast,
 
 	wing1x1: wing,
 	wing1x2: wing,

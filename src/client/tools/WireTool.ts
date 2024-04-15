@@ -50,6 +50,7 @@ const groups = {
 	string: "string",
 	key: "never",
 	multikey: "never",
+	controllableNumber: "number",
 } as const satisfies Record<keyof BlockConfigTypes.Types, keyof typeof typeGroups>;
 
 type DataType = keyof typeof typeGroups;

@@ -443,7 +443,9 @@ export class ThrustConfigValueControl extends ConfigValueControl<ThrustConfigVal
 			config = { ...config, [key]: value };
 		});
 
-		const def = {
+		const def: Partial<
+			Record<keyof BlockConfigDefinitionRegistry["thrust"]["config"], BlockConfigTypes.Definition>
+		> = {
 			thrust: {
 				displayName: "Thrust",
 				type: "multikey",
@@ -470,19 +472,76 @@ export class ThrustConfigValueControl extends ConfigValueControl<ThrustConfigVal
 					},
 				},
 			},
-			switchmode: {
+		} satisfies BlockConfigDefinitions;
+
+		if (definition.canBeSwitch) {
+			def.switchmode = {
 				displayName: "Toggle Mode",
 				type: "bool",
 				default: false as boolean,
 				config: false as boolean,
-			},
-		} as const satisfies BlockConfigDefinitions;
+			};
+		}
 		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
 		control.set(config, def);
 	}
 }
 
+export class ControllableNumberConfigValueControl extends ConfigValueControl<ThrustConfigValueControlDefinition> {
+	readonly submitted = new Signal<
+		(config: Partial<BlockConfigDefinitionRegistry["controllableNumber"]["config"]>) => void
+	>();
+
+	constructor(
+		templates: Templates,
+		config: BlockConfigDefinitionRegistry["controllableNumber"]["config"],
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["controllableNumber"]>,
+	) {
+		super(templates.multi(), definition.displayName);
+
+		const control = this.add(new ConfigControl(this.gui.Control));
+		this.event.subscribe(control.configUpdated, (key, value) => {
+			this.submitted.Fire({ [key]: value });
+			config = { ...config, [key]: value };
+		});
+
+		const def = {
+			value: {
+				displayName: "Value",
+				type: "clampedNumber",
+				min: definition.min,
+				max: definition.max,
+				step: definition.step,
+				default: definition.default,
+				config: definition.config.value,
+			},
+			control: {
+				displayName: "Thrust",
+				type: "multikey",
+				default: definition.config.control,
+				config: definition.config.control,
+				keyDefinitions: {
+					add: {
+						displayName: "+",
+						type: "key",
+						default: definition.config.control.add,
+						config: definition.config.control.add,
+					},
+					sub: {
+						displayName: "-",
+						type: "key",
+						default: definition.config.control.sub,
+						config: definition.config.control.sub,
+					},
+				},
+			},
+		} satisfies BlockConfigDefinitions;
+		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
+
+		control.set(config, def);
+	}
+}
 export class MotorRotationSpeedConfigValueControl extends ConfigValueControl<ConfigControlDefinition> {
 	readonly submitted = new Signal<
 		(config: Partial<BlockConfigDefinitionRegistry["motorRotationSpeed"]["config"]>) => void
@@ -707,6 +766,7 @@ const configControls = {
 	motorRotationSpeed: MotorRotationSpeedConfigValueControl,
 	servoMotorAngle: ServoMotorAngleConfigValueControl,
 	or: OrConfigValueControl,
+	controllableNumber: ControllableNumberConfigValueControl,
 } as const satisfies {
 	readonly [k in keyof BlockConfigDefinitionRegistry]: {
 		new (

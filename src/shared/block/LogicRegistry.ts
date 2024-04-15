@@ -1,6 +1,7 @@
 import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { BlockLogic } from "./BlockLogic";
+import { BallastBlockLogic } from "./logic/BallastBlockLogic";
 import { DisconnectBlockLogic } from "./logic/DisconnectBlockLogic";
 import { HeliumBlockLogic } from "./logic/HeliumBlockLogic";
 import { MagnetBlockLogic } from "./logic/MagnetBlockLogic";
@@ -65,6 +66,7 @@ export const logicRegistry = {
 	magnet: MagnetBlockLogic,
 
 	piston: PistonLogic,
+	ballast: BallastBlockLogic,
 
 	lamp: LampBlockLogic,
 	screen: ScreenBlockLogic,

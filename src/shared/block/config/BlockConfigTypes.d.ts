@@ -93,6 +93,21 @@ declare namespace BlockConfigTypes {
 	> & {
 		readonly canBeSwitch: boolean;
 	};
+	export type ControllableNumber = BlockConfigType<
+		"controllableNumber",
+		number,
+		{
+			readonly value: number;
+			readonly control: {
+				readonly add: KeyCode;
+				readonly sub: KeyCode;
+			};
+		}
+	> & {
+		readonly min: number;
+		readonly max: number;
+		readonly step: number;
+	};
 
 	//
 
@@ -116,5 +131,6 @@ declare namespace BlockConfigTypes {
 		readonly motorRotationSpeed: MotorRotationSpeed;
 		readonly servoMotorAngle: ServoMotorAngle;
 		readonly thrust: Thrust;
+		readonly controllableNumber: ControllableNumber;
 	}
 }
