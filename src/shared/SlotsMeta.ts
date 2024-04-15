@@ -51,7 +51,7 @@ export namespace SlotsMeta {
 
 		if (index < 0) {
 			return {
-				...slots[idx],
+				...(slots[idx] ?? defaultSlot(index)),
 				...specialSlots[index],
 			};
 		}
