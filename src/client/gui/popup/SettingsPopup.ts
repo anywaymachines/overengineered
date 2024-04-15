@@ -350,10 +350,10 @@ export class TerrainValueControl extends ConfigValueControl<MultiTemplate> {
 			resolution: {
 				displayName: "Resolution",
 				type: "clampedNumber",
-				config: definition.config.kind === "Triangle" ? definition.config.resolution : 2,
-				min: 2,
-				max: 16,
-				step: 2,
+				config: definition.config.resolution,
+				min: 1,
+				max: 4,
+				step: 1,
 			},
 			foliage: {
 				displayName: "Foliage",
@@ -369,10 +369,12 @@ export class TerrainValueControl extends ConfigValueControl<MultiTemplate> {
 		});
 
 		const resolutionControl = control.get("resolution") as ClampedNumberConfigValueControl;
+		const foliageControl = control.get("foliage") as BoolConfigValueControl;
 		const kindControl = control.get("kind") as DropdownConfigValueControl<typeof config.kind>;
 
 		const setImprovedControlsEnabled = (kind: string & typeof config.kind) => {
 			resolutionControl.setVisible(kind === "Triangle");
+			foliageControl.setVisible(kind === "Terrain");
 		};
 		this.event.subscribe(kindControl.submitted, setImprovedControlsEnabled);
 		setImprovedControlsEnabled(config.kind);

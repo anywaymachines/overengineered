@@ -7,6 +7,7 @@ import { FlatTerrainRenderer } from "client/terrain/FlatTerrainRenderer";
 import { TerrainChunkRenderer } from "client/terrain/TerrainChunkRenderer";
 import { TriangleChunkRenderer } from "client/terrain/TriangleChunkRenderer";
 import { rootComponents } from "client/test/RootComponents";
+import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
 while (!PlayerDataStorage.data.get()) {
@@ -47,7 +48,7 @@ const multirender = (): ChunkRenderer<Instance> => {
 	};
 };
 
-if (RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer)) {
+if ((false as boolean) && (RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer))) {
 	const tooltips = TooltipsHolder.createComponent("Terrain");
 	tooltips.set({
 		Desktop: [
@@ -89,7 +90,29 @@ if (RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer)) {
 		}
 	});
 } else {
-	const chunkLoader = new ChunkLoader(TerrainChunkRenderer(DefaultChunkGenerator));
-	chunkLoader.enable();
-	rootComponents.push(chunkLoader);
+	let current: ChunkLoader | undefined;
+	const terrain = PlayerDataStorage.config.createChild("terrain", PlayerConfigDefinition.terrain.config);
+
+	terrain.subscribe((terrain) => {
+		let chunkLoader: ChunkLoader | undefined;
+		if (terrain.kind === "Triangle") {
+			chunkLoader = new ChunkLoader(TriangleChunkRenderer(DefaultChunkGenerator, terrain.resolution));
+		} else if (terrain.kind === "Terrain") {
+			chunkLoader = new ChunkLoader(TerrainChunkRenderer(DefaultChunkGenerator));
+		} else if (terrain.kind === "Flat") {
+			chunkLoader = new ChunkLoader(FlatTerrainRenderer(0.5 - 0.01));
+		}
+
+		if (current) {
+			rootComponents.remove(rootComponents.indexOf(current));
+			current?.destroy();
+		}
+
+		current = chunkLoader;
+
+		if (chunkLoader) {
+			chunkLoader.enable();
+			rootComponents.push(chunkLoader);
+		}
+	}, true);
 }
