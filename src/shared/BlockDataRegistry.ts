@@ -325,7 +325,11 @@ export const BlockDataRegistry: BlockDataRegistry = {
 	...flatten(logic),
 	piston: {
 		name: "Piston",
-		description: "N/A", // TODO:
+		description: "No Pi jokes here. It just moves stuff..",
+	},
+	ballast: {
+		name: "Ballast",
+		description: "(Un)managable weight of existence. Now in compact form!",
 	},
 	anchorblock: {
 		name: "Anchor",
