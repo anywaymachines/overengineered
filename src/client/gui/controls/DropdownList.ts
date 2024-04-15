@@ -1,14 +1,15 @@
 import { Control } from "client/gui/Control";
 import { TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import { TransformService } from "shared/component/TransformService";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { DropdownDefinition } from "./Dropdown";
 
-export type DropdownListDefinition = DropdownDefinition &
-	TextButtonDefinition & {
-		readonly Content: {
-			readonly Template: TextButtonDefinition;
-		};
+export type DropdownListDefinition = DropdownDefinition & {
+	readonly Button: TextButtonDefinition;
+	readonly Content: {
+		readonly Template: TextButtonDefinition;
 	};
+};
 export class DropdownList<TValue extends string = string> extends Control<DropdownListDefinition> {
 	readonly selectedItem = new ObservableValue<TValue | undefined>(undefined);
 
@@ -22,8 +23,8 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 
 		this.itemTemplate = this.asTemplate(this.gui.Content.Template);
 
-		this.button = this.add(new TextButtonControl(this.gui));
-		this.contents = this.add(new Control(this.gui.Content));
+		this.button = this.add(new TextButtonControl(this.gui.Button));
+		this.contents = this.add(new Control<GuiObject, TextButtonControl>(this.gui.Content));
 
 		this.event.subscribe(this.button.activated, () => this.toggle());
 		this.event.subscribeObservable(
@@ -33,8 +34,29 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 		);
 	}
 
+	private contentsVisible = false;
 	private toggle() {
-		this.contents.isVisible() ? this.contents.hide() : this.contents.show();
+		this.contentsVisible = !this.contentsVisible;
+		for (const button of this.contents.getChildren()) {
+			TransformService.run(button.instance, (tr) =>
+				tr
+					.func(() => {
+						if (!this.contentsVisible) {
+							button.instance.Interactable = false;
+						}
+					})
+					.moveY(
+						new UDim(0, this.contentsVisible ? button.instance.LayoutOrder * (45 + 2) : 0),
+						TransformService.commonProps.quadOut02,
+					)
+					.then()
+					.func(() => {
+						if (this.contentsVisible) {
+							button.instance.Interactable = true;
+						}
+					}),
+			);
+		}
 	}
 
 	addItem(name: TValue, text?: string) {
@@ -48,8 +70,6 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 		}
 
 		btn.text.set(text ?? name);
-		btn.instance.Parent = this.gui.Content;
-
-		this.add(btn);
+		this.contents.add(btn);
 	}
 }
