@@ -1,12 +1,10 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
-import { AutoTerrainGenerator } from "shared/AutoTerrainGenerator";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Logger } from "shared/Logger";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { Remotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
-import { TerrainModelGenerator } from "shared/TerrainModelGenerator";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -64,7 +62,7 @@ namespace RemoteHandlers {
 		key: TKey,
 		value: PlayerConfig[TKey],
 	): Response {
-		const playerData = PlayerDatabase.instance.get(tostring(player.UserId));
+		const playerData = PlayerDatabase.instance.get(player.UserId);
 
 		const newPlayerData: PlayerData = {
 			...playerData,
@@ -74,13 +72,13 @@ namespace RemoteHandlers {
 			},
 		};
 
-		PlayerDatabase.instance.set(tostring(player.UserId), newPlayerData);
+		PlayerDatabase.instance.set(player.UserId, newPlayerData);
 		return {
 			success: true,
 		};
 	}
 	export function fetchSettings(player: Player): PlayerDataResponse {
-		const data = PlayerDatabase.instance.get(tostring(player.UserId)) ?? {};
+		const data = PlayerDatabase.instance.get(player.UserId) ?? {};
 
 		return {
 			purchasedSlots: data.purchasedSlots,

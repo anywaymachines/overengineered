@@ -11,6 +11,7 @@ import { PlayerDatabase } from "./PlayerDatabase";
 export class SlotDatabase {
 	static readonly instance = new SlotDatabase();
 
+	private readonly onlinePlayers = new Set<number>();
 	private readonly datastore: DataStore = DataStoreService.GetDataStore("slots");
 	private readonly blocksdb;
 
@@ -22,7 +23,10 @@ export class SlotDatabase {
 			(data) => data,
 		);
 
+		Players.PlayerAdded.Connect((plr) => this.onlinePlayers.add(plr.UserId));
 		Players.PlayerRemoving.Connect((plr) => {
+			this.onlinePlayers.delete(plr.UserId);
+
 			// Roblox Stuido Local Server
 			if (plr.UserId <= 0) return;
 
@@ -42,8 +46,9 @@ export class SlotDatabase {
 
 	private ensureValidSlotIndex(userId: number, index: number) {
 		if (index === SlotsMeta.autosaveSlotIndex) return;
+		if (index === SlotsMeta.quitSlotIndex) return;
 
-		const pdata = PlayerDatabase.instance.get(tostring(userId));
+		const pdata = PlayerDatabase.instance.get(userId);
 		const player = Players.GetPlayerByUserId(userId);
 		if (!player) return;
 
@@ -55,13 +60,19 @@ export class SlotDatabase {
 	}
 
 	private getMeta(userId: number) {
-		return PlayerDatabase.instance.get(tostring(userId)).slots ?? [];
+		return PlayerDatabase.instance.get(userId).slots ?? [];
 	}
 	private setMeta(userId: number, slots: readonly SlotMeta[]) {
-		PlayerDatabase.instance.set(tostring(userId), {
-			...PlayerDatabase.instance.get(tostring(userId)),
+		PlayerDatabase.instance.set(userId, {
+			...PlayerDatabase.instance.get(userId),
 			slots,
 		});
+
+		if (!this.onlinePlayers.has(userId)) {
+			this.blocksdb.save(tostring(userId));
+			this.blocksdb.free(tostring(userId));
+			print("SAVING AFTER QUIT2");
+		}
 	}
 
 	private toKey(userId: number, index: number) {

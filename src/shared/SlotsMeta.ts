@@ -1,6 +1,8 @@
 /** Slots storage for a single user */
 export namespace SlotsMeta {
 	export const autosaveSlotIndex = -1;
+	export const quitSlotIndex = -2;
+	const minSlot = -2;
 
 	function defaultSlot(index: number): SlotMeta {
 		const def: SlotMeta = {
@@ -16,7 +18,14 @@ export namespace SlotsMeta {
 			return {
 				...def,
 				name: "Autosave",
-				color: "55aaff",
+				color: "6ccfe6",
+			};
+		}
+		if (index === SlotsMeta.quitSlotIndex) {
+			return {
+				...def,
+				name: "Last exit",
+				color: "ff6b54",
 			};
 		}
 
@@ -54,7 +63,7 @@ export namespace SlotsMeta {
 
 	export function getAll(slots: readonly SlotMeta[], min: number): readonly SlotMeta[] {
 		const ret: SlotMeta[] = [];
-		for (let i = -1; i < min; i++) {
+		for (let i = minSlot; i < min; i++) {
 			ret.push(get(slots, i));
 		}
 

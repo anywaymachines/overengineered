@@ -1,6 +1,9 @@
 import { Players } from "@rbxts/services";
 import { ServerBuilding } from "server/building/ServerBuilding";
+import { SlotDatabase } from "server/database/SlotDatabase";
+import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { Element } from "shared/Element";
+import { SlotsMeta } from "shared/SlotsMeta";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { PlotFloatingImageController } from "./PlotsFloatingImageController";
 
@@ -15,6 +18,16 @@ const assignPlotTo = (player: Player): void => {
 	} catch {
 		player.Kick("No free plot found, try again later");
 	}
+};
+const savePlotOf = (player: Player): void => {
+	const plot = SharedPlots.getPlotComponentByOwnerID(player.UserId);
+
+	SlotDatabase.instance.setBlocks(
+		player.UserId,
+		SlotsMeta.quitSlotIndex,
+		BlocksSerializer.serialize(plot.instance),
+		plot.getBlocks().size(),
+	);
 };
 const resetPlotOf = (player: Player): void => {
 	const plot = SharedPlots.getPlotComponentByOwnerID(player.UserId);
@@ -31,7 +44,10 @@ const resetPlotOf = (player: Player): void => {
 
 // Plot assignment
 Players.PlayerAdded.Connect((player) => assignPlotTo(player));
-Players.PlayerRemoving.Connect((player) => resetPlotOf(player));
+Players.PlayerRemoving.Connect((player) => {
+	savePlotOf(player);
+	resetPlotOf(player);
+});
 
 // Floating username+image controller
 for (const plot of SharedPlots.plots) {

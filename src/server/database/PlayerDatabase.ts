@@ -11,6 +11,7 @@ export type PlayerData = {
 export class PlayerDatabase {
 	static readonly instance = new PlayerDatabase();
 
+	private readonly onlinePlayers = new Set<number>();
 	private readonly datastore: DataStore = DataStoreService.GetDataStore("players");
 	private readonly db;
 
@@ -28,7 +29,10 @@ export class PlayerDatabase {
 			},
 		);
 
+		Players.PlayerAdded.Connect((plr) => this.onlinePlayers.add(plr.UserId));
 		Players.PlayerRemoving.Connect((plr) => {
+			this.onlinePlayers.delete(plr.UserId);
+
 			// Roblox Stuido Local Server
 			if (plr.UserId <= 0) return;
 
@@ -37,11 +41,15 @@ export class PlayerDatabase {
 		});
 	}
 
-	get(userId: string) {
-		return this.db.get(userId);
+	get(userId: number) {
+		return this.db.get(tostring(userId));
 	}
 
-	set(userId: string, data: PlayerData) {
-		this.db.set(userId, data);
+	set(userId: number, data: PlayerData) {
+		this.db.set(tostring(userId), data);
+
+		if (!this.onlinePlayers.has(userId)) {
+			this.db.save(tostring(userId));
+		}
 	}
 }

@@ -30,8 +30,7 @@ const burnEvent = (parts: BasePart[]) => {
 };
 
 EffectBase.staticMustSendToPlayer = (player) =>
-	PlayerDatabase.instance.get(tostring(player.UserId)).settings?.others_gfx ??
-	PlayerConfigDefinition.others_gfx.config;
+	PlayerDatabase.instance.get(player.UserId).settings?.others_gfx ?? PlayerConfigDefinition.others_gfx.config;
 
 RemoteEvents.ImpactBreak.invoked.Connect(impactBreakEvent);
 RemoteEvents.Burn.invoked.Connect((_, parts) => burnEvent(parts));
