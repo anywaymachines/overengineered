@@ -1,8 +1,7 @@
-import { Players, Workspace } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { Component } from "shared/component/Component";
 import { Objects } from "shared/fixes/objects";
-import { PlayerUtils } from "shared/utils/PlayerUtils";
 
 /** Generates terrain height */
 export interface ChunkGenerator {
@@ -69,7 +68,7 @@ export class ChunkLoader<T = defined> extends Component {
 			if (!this.isEnabled()) continue;
 			if (!Workspace.CurrentCamera) continue;
 
-			if (this.isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer)) {
+			if (this.isTooHigh()) {
 				for (const [x, c] of Objects.pairs_(this.loadedChunks)) {
 					for (const [y] of Objects.pairs_(c)) {
 						this.unloadChunk(x, y);
@@ -80,7 +79,7 @@ export class ChunkLoader<T = defined> extends Component {
 
 				do {
 					task.wait();
-				} while (this.isTooHigh() || !PlayerUtils.isAlive(Players.LocalPlayer));
+				} while (this.isTooHigh());
 
 				continue;
 			}
