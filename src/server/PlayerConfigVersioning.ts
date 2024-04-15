@@ -1,3 +1,5 @@
+import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
+
 interface PlayerConfigVersion<TCurrent> {
 	version: number;
 }
@@ -85,7 +87,7 @@ const v5: UpdatablePlayerConfigVersion<PlayerConfigV5, PlayerConfigV4> = {
 };
 
 // Added terrain config
-type PlayerConfigV6 = PlayerConfigV5 & { terrain: TerrainConfiguration };
+type PlayerConfigV6 = PlayerConfigV5 & { terrain: Omit<TerrainConfiguration, "loadDistance"> };
 const v6: UpdatablePlayerConfigVersion<PlayerConfigV6, PlayerConfigV5> = {
 	version: 6,
 
@@ -94,15 +96,31 @@ const v6: UpdatablePlayerConfigVersion<PlayerConfigV6, PlayerConfigV5> = {
 			...prev,
 			version: this.version,
 			terrain: {
-				kind: "Terrain",
-				resolution: 2,
+				...PlayerConfigDefinition.terrain.config,
 				foliage: prev.terrainFoliage ?? true,
 			},
 		};
 	},
 };
 
-const versions = [v1, v2, v3, v4, v5, v6] as const;
+// Added terrain load distance
+type PlayerConfigV7 = PlayerConfigV6 & { terrain: TerrainConfiguration };
+const v7: UpdatablePlayerConfigVersion<PlayerConfigV7, PlayerConfigV6> = {
+	version: 7,
+
+	update(prev: Partial<PlayerConfigV6>): Partial<PlayerConfigV7> {
+		return {
+			...prev,
+			version: this.version,
+			terrain: {
+				...PlayerConfigDefinition.terrain.config,
+				...prev.terrain,
+			},
+		};
+	},
+};
+
+const versions = [v1, v2, v3, v4, v5, v6, v7] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 export namespace PlayerConfigUpdater {
