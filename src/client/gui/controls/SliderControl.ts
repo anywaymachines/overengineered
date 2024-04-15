@@ -1,4 +1,4 @@
-import { Players, UserInputService, Workspace } from "@rbxts/services";
+import { Players, UserInputService } from "@rbxts/services";
 import { Control } from "client/gui/Control";
 import { EventHandler } from "shared/event/EventHandler";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
@@ -23,6 +23,7 @@ export class SliderControl<T extends SliderControlDefinition = SliderControlDefi
 		super(gui);
 
 		this.progressBar = new ProgressBarControl<T>(this.gui, min, max, step);
+		this.progressBar.instance.Active = true;
 		this.add(this.progressBar);
 
 		this.value = new NumberObservableValue(min, min, max, step);
@@ -63,17 +64,11 @@ export class SliderControl<T extends SliderControlDefinition = SliderControlDefi
 			}
 		};
 
-		let cameraType: Enum.CameraType | undefined;
-
 		let st = false;
 		const unsub = () => {
 			st = false;
 			startpos = undefined;
 			eh.unsubscribeAll();
-
-			if (Workspace.CurrentCamera && cameraType) {
-				Workspace.CurrentCamera.CameraType = cameraType;
-			}
 
 			this.submitted.Fire(this.value.get());
 		};
@@ -84,11 +79,6 @@ export class SliderControl<T extends SliderControlDefinition = SliderControlDefi
 					(input.UserInputType === Enum.UserInputType.MouseButton1 ||
 						input.UserInputType === Enum.UserInputType.Touch)
 				) {
-					if (Workspace.CurrentCamera) {
-						cameraType = Workspace.CurrentCamera.CameraType;
-						Workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable;
-					}
-
 					startpos = this.progressBar.vertical
 						? this.gui.AbsoluteSize.Y - this.gui.AbsolutePosition.Y + this.gui.AbsoluteSize.Y
 						: this.gui.AbsolutePosition.X;
