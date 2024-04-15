@@ -8,6 +8,7 @@ import { SharedPlots } from "shared/building/SharedPlots";
 import { EventHandler } from "shared/event/EventHandler";
 import { successResponse } from "shared/types/network/Responses";
 import { PartUtils } from "shared/utils/PartUtils";
+import { VectorUtils } from "shared/utils/VectorUtils";
 
 export type TutorialPlaceBlockHighlight = {
 	id: string;
@@ -55,8 +56,10 @@ export class TutorialBuildTool {
 							const btp = this.tutorialBlocksToPlace.find(
 								(value) =>
 									value.id === block.id &&
-									value.cframe.Position ===
-										plot.instance.BuildingArea.CFrame.ToObjectSpace(block!.location).Position,
+									VectorUtils.roundVector(value.cframe.Position) ===
+										VectorUtils.roundVector(
+											plot.instance.BuildingArea.CFrame.ToObjectSpace(block!.location).Position,
+										),
 							);
 
 							if (!btp) return [] as const;

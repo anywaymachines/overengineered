@@ -13,6 +13,10 @@ export async function TestTutorial(tutorial: typeof Tutorial) {
 		id: "block",
 		cframe: new CFrame(0, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
+	tutorial.buildTool.addBlockToPlace({
+		id: "servomotorblock",
+		cframe: new CFrame(0, 1.5, -6, 1, 0, 0, 0, -1, 0, 0, -0, -1),
+	});
 
 	toolEnabler.enableOnly(allTools.buildTool, allTools.buildTool2);
 	allTools.buildTool2.mirrorMode.set({});
