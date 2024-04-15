@@ -263,7 +263,7 @@ export class CameraValueControl extends ConfigValueControl<MultiTemplate> {
 
 		const def = {
 			improved: {
-				displayName: "Improved",
+				displayName: "Enable",
 				type: "bool",
 				config: definition.config.improved,
 			},
