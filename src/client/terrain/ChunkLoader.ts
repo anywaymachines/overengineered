@@ -1,6 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { Component } from "shared/component/Component";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Objects } from "shared/fixes/objects";
 
 /** Generates terrain height */
@@ -26,7 +27,7 @@ export class ChunkLoader<T = defined> extends Component {
 
 	private readonly loadDistance;
 	private readonly loadDistancePow;
-	private readonly maxVisibleHeight = 3000;
+	private readonly maxVisibleHeight = 3000 + GameDefinitions.HEIGHT_OFFSET;
 
 	constructor(private readonly chunkRenderer: ChunkRenderer<T>) {
 		super();
