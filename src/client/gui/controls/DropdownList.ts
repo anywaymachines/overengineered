@@ -37,6 +37,8 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 	private contentsVisible = false;
 	private toggle() {
 		this.contentsVisible = !this.contentsVisible;
+
+		let height = this.button.instance.Size.Y.Offset;
 		for (const button of this.contents.getChildren()) {
 			TransformService.run(button.instance, (tr) =>
 				tr
@@ -45,10 +47,7 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 							button.instance.Interactable = false;
 						}
 					})
-					.moveY(
-						new UDim(0, this.contentsVisible ? button.instance.LayoutOrder * (45 + 2) : 0),
-						TransformService.commonProps.quadOut02,
-					)
+					.moveY(new UDim(0, this.contentsVisible ? height : 0), TransformService.commonProps.quadOut02)
 					.then()
 					.func(() => {
 						if (this.contentsVisible) {
@@ -56,6 +55,8 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 						}
 					}),
 			);
+
+			height += button.instance.Size.Y.Offset;
 		}
 	}
 
