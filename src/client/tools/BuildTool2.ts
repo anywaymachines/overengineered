@@ -625,7 +625,13 @@ namespace MultiPlaceController {
 		static create(adornee: Model) {
 			const instance = Element.create(
 				"Part",
-				{ Anchored: true, Transparency: 1, Size: new Vector3(1, 1, 1) },
+				{
+					Anchored: true,
+					Transparency: 1,
+					CanCollide: false,
+					CanTouch: false,
+					Size: new Vector3(1, 1, 1),
+				},
 				{
 					billboard: Element.create(
 						"BillboardGui",
