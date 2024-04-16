@@ -2,7 +2,6 @@ import { Players, RunService, UserInputService, Workspace } from "@rbxts/service
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientComponentChild } from "client/component/ClientComponentChild";
 import { InputController } from "client/controller/InputController";
-import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { SoundController } from "client/controller/SoundController";
 import { Signals } from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
@@ -33,7 +32,6 @@ import { SharedPlots } from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { TransformService } from "shared/component/TransformService";
-import { EventHandler } from "shared/event/EventHandler";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
 import { VectorUtils } from "shared/utils/VectorUtils";
@@ -211,6 +209,7 @@ namespace Scene {
 		readonly Inventory: BlockSelectionControlDefinition;
 		readonly Touch: Frame & {
 			readonly PlaceButton: GuiButton;
+			readonly MultiPlaceButton: GuiButton;
 			readonly RotateRButton: GuiButton;
 			readonly RotateTButton: GuiButton;
 			readonly RotateYButton: GuiButton;
@@ -321,6 +320,9 @@ namespace Scene {
 		protected prepareTouch(): void {
 			// Touchscreen controls
 			this.eventHandler.subscribe(this.gui.Touch.PlaceButton.MouseButton1Click, () => this.tool.placeBlock());
+			this.eventHandler.subscribe(this.gui.Touch.MultiPlaceButton.MouseButton1Click, () =>
+				this.tool.multiPlaceBlock(),
+			);
 			this.eventHandler.subscribe(this.gui.Touch.RotateRButton.MouseButton1Click, () =>
 				this.tool.rotateBlock("x", true),
 			);
@@ -561,7 +563,7 @@ namespace SinglePlaceController {
 		}
 	}
 	class Touch extends Controller {
-		private prevTarget?: [target: BasePart, hit: CFrame, surface: Enum.NormalId];
+		private prevTarget: [target: BasePart, hit: CFrame, surface: Enum.NormalId] | undefined;
 
 		constructor(state: BuildTool2) {
 			super(state);
@@ -710,71 +712,10 @@ namespace MultiPlaceController {
 		}
 	}
 
-	export class Desktop extends ClientComponent implements IController {
-		static subscribe(state: BuildTool2, parent: ComponentChild<IController>) {
-			const buttonPress = () => {
-				const selectedBlock = state.selectedBlock.get();
-				if (!selectedBlock) return;
-
-				const pressPosition = getMouseTargetBlockPosition(selectedBlock, state.blockRotation.get());
-				if (!pressPosition) return;
-
-				const plot = state.targetPlot.get();
-				parent.set(
-					new Desktop(
-						pressPosition,
-						selectedBlock,
-						state.selectedColor.get(),
-						state.selectedMaterial.get(),
-						state.mirrorMode.get(),
-						plot,
-						state.blockRotation.get(),
-					),
-				);
-			};
-
-			state.event.subInput((ih) => {
-				ih.onKeyDown("ButtonR2", () => {
-					if (InputController.isShiftPressed()) {
-						//shift with controller??
-						buttonPress();
-					}
-				});
-				ih.onMouse1Down(() => {
-					if (InputController.isShiftPressed()) {
-						buttonPress();
-					}
-				}, false);
-
-				const eh = new EventHandler();
-				const stateeh = state as unknown as { readonly eventHandler: EventHandler };
-				stateeh.eventHandler.subscribe(UserInputService.TouchStarted, (input, gameProcessedEvent) => {
-					if (gameProcessedEvent) return;
-
-					const thread = task.delay(0.4, () => {
-						eh.unsubscribeAll();
-						Workspace.CurrentCamera!.CameraType = Enum.CameraType.Scriptable;
-						if (InputController.inputType.get() === "Touch") {
-							LocalPlayerController.getPlayerModule().GetControls().Disable();
-						}
-
-						buttonPress();
-					});
-
-					const cancel = () => {
-						task.cancel(thread);
-						eh.unsubscribeAll();
-					};
-					eh.subscribe(Signals.CAMERA.MOVED, cancel);
-					eh.subscribe(UserInputService.TouchEnded, cancel);
-				});
-			});
-		}
-
+	export abstract class Base extends ClientComponent implements IController {
 		private readonly possibleFillRotationAxis = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis] as const;
 		private readonly fillLimit = 32;
 		private readonly drawnGhostsMap = new Map<Vector3, Model>();
-		private static defaultCameraType = Workspace.CurrentCamera!.CameraType; //Enum.CameraType.Custom
 		private readonly blockMirrorer;
 		private readonly floatingText;
 		private oldPositions?: {
@@ -785,7 +726,7 @@ namespace MultiPlaceController {
 		private fillRotationMode = 1;
 
 		constructor(
-			private readonly pressPosition: Vector3,
+			protected readonly pressPosition: Vector3,
 			private readonly selectedBlock: RegistryBlock,
 			private readonly selectedColor: Color3,
 			private readonly selectedMaterial: Enum.Material,
@@ -797,65 +738,6 @@ namespace MultiPlaceController {
 			this.blockMirrorer = this.parent(new BlockMirrorer());
 			this.floatingText = this.parent(FloatingText.create(BlockGhoster.parent));
 
-			const updateGhosts = () => {
-				const cameraPostion = Workspace.CurrentCamera!.CFrame.Position;
-				const hit = mouse.Hit.Position;
-				const clickDirection = cameraPostion.sub(hit).Unit;
-				let pos = this.getPositionOnBuildingPlane(this.pressPosition, cameraPostion, clickDirection);
-				const plotRegion = SharedPlots.getPlotBuildingRegion(plot.instance);
-				pos = plotRegion.clampVector(pos);
-				const positionsData = this.calculateGhostBlockPositions(
-					this.selectedBlock.model,
-					this.pressPosition,
-					pos,
-				);
-				if (!positionsData) return;
-				if (!plotRegion.contains(this.pressPosition)) return;
-				if (this.oldPositions?.positions === positionsData.positions) return;
-
-				const oldPositions = this.oldPositions?.positions ?? new Set();
-				const newPositions = positionsData.positions;
-
-				const toDelete = oldPositions.filter((p) => !newPositions.has(p));
-				for (const pos of toDelete) {
-					this.drawnGhostsMap.get(pos)?.Destroy();
-					this.drawnGhostsMap.delete(pos);
-				}
-
-				const newposs = newPositions.filter((p) => !oldPositions.has(p));
-				const newModels = this.drawModels(newposs, positionsData.rotation);
-
-				for (const model of newModels) {
-					this.drawnGhostsMap.set(model.GetPivot().Position, model);
-				}
-
-				this.oldPositions = positionsData;
-
-				this.blockMirrorer.blocks.set(this.drawnGhostsMap.map((_, m) => ({ id: selectedBlock.id, model: m })));
-				this.blockMirrorer.updatePositions(plot.instance, mirrorModes);
-			};
-
-			this.onDisable(() => {
-				Workspace.CurrentCamera!.CameraType = Desktop.defaultCameraType;
-				LocalPlayerController.getPlayerModule().GetControls().Enable();
-			});
-			this.event.subInput((ih) => {
-				const buttonUnpress = async () => {
-					const result = await this.place();
-					if (result && !result.success) {
-						LogControl.instance.addLine(result.message, Colors.red);
-					}
-
-					this.destroy();
-				};
-				ih.onMouse1Up(buttonUnpress, true);
-				ih.onKeyUp("ButtonR2", buttonUnpress);
-				this.eventHandler.subscribe(UserInputService.TouchEnded, buttonUnpress);
-			});
-
-			this.event.subscribe(mouse.Move, updateGhosts);
-			this.event.subscribe(Signals.CAMERA.MOVED, updateGhosts);
-			this.event.subInput((ih) => ih.onKeyDown("R", () => this.rotateFillAxis()));
 			this.onDisable(() => {
 				for (const [, ghost] of this.drawnGhostsMap) {
 					ghost.Destroy();
@@ -864,7 +746,43 @@ namespace MultiPlaceController {
 				this.drawnGhostsMap.clear();
 			});
 
-			this.onEnable(updateGhosts);
+			this.onEnable(() => this.updateGhosts());
+		}
+		protected updateGhosts(pos?: Vector3) {
+			if (!pos) {
+				const cameraPostion = Workspace.CurrentCamera!.CFrame.Position;
+				const hit = mouse.Hit.Position;
+				const clickDirection = cameraPostion.sub(hit).Unit;
+				pos = this.getPositionOnBuildingPlane(this.pressPosition, cameraPostion, clickDirection);
+			}
+
+			const plotRegion = SharedPlots.getPlotBuildingRegion(this.plot.instance);
+			pos = plotRegion.clampVector(pos);
+			const positionsData = this.calculateGhostBlockPositions(this.selectedBlock.model, this.pressPosition, pos);
+			if (!positionsData) return;
+			if (!plotRegion.contains(this.pressPosition)) return;
+			if (this.oldPositions?.positions === positionsData.positions) return;
+
+			const oldPositions = this.oldPositions?.positions ?? new Set();
+			const newPositions = positionsData.positions;
+
+			const toDelete = oldPositions.filter((p) => !newPositions.has(p));
+			for (const pos of toDelete) {
+				this.drawnGhostsMap.get(pos)?.Destroy();
+				this.drawnGhostsMap.delete(pos);
+			}
+
+			const newposs = newPositions.filter((p) => !oldPositions.has(p));
+			const newModels = this.drawModels(newposs, positionsData.rotation);
+
+			for (const model of newModels) {
+				this.drawnGhostsMap.set(model.GetPivot().Position, model);
+			}
+
+			this.oldPositions = positionsData;
+
+			this.blockMirrorer.blocks.set(this.drawnGhostsMap.map((_, m) => ({ id: this.selectedBlock.id, model: m })));
+			this.blockMirrorer.updatePositions(this.plot.instance, this.mirrorModes);
 		}
 
 		rotate(axis: "x" | "y" | "z", inverted?: boolean | undefined): void {
@@ -919,7 +837,7 @@ namespace MultiPlaceController {
 				rotation: this.blockRotation,
 			};
 		}
-		private getPositionOnBuildingPlane(blockPosition: Vector3, cameraPostion: Vector3, lookVector: Vector3) {
+		protected getPositionOnBuildingPlane(blockPosition: Vector3, cameraPostion: Vector3, lookVector: Vector3) {
 			const rotation = this.getCurrentFillRotation();
 			const plane = blockPosition.mul(VectorUtils.apply(rotation, (v) => math.abs(v)));
 			const diff = cameraPostion.sub(plane);
@@ -940,7 +858,7 @@ namespace MultiPlaceController {
 			return lookVector.mul(-distance).add(cameraPostion);
 		}
 
-		private rotateFillAxis() {
+		protected rotateFillAxis() {
 			this.fillRotationMode = (this.fillRotationMode + 1) % this.possibleFillRotationAxis.size();
 		}
 		private getCurrentFillRotation() {
@@ -974,6 +892,162 @@ namespace MultiPlaceController {
 			return response;
 		}
 	}
+	class Desktop extends Base {
+		constructor(
+			pressPosition: Vector3,
+			selectedBlock: RegistryBlock,
+			selectedColor: Color3,
+			selectedMaterial: Enum.Material,
+			mirrorModes: MirrorMode,
+			plot: SharedPlot,
+			blockRotation: CFrame,
+		) {
+			super(pressPosition, selectedBlock, selectedColor, selectedMaterial, mirrorModes, plot, blockRotation);
+
+			this.event.subInput((ih) => {
+				const buttonUnpress = async () => {
+					const result = await this.place();
+					if (result && !result.success) {
+						LogControl.instance.addLine(result.message, Colors.red);
+					}
+
+					this.destroy();
+				};
+				ih.onMouse1Up(buttonUnpress, true);
+				ih.onKeyUp("ButtonR2", buttonUnpress);
+				this.eventHandler.subscribe(UserInputService.TouchEnded, buttonUnpress);
+			});
+
+			this.event.subscribe(mouse.Move, () => this.updateGhosts());
+			this.event.subscribe(Signals.CAMERA.MOVED, () => this.updateGhosts());
+			this.event.subInput((ih) => ih.onKeyDown("R", () => this.rotateFillAxis()));
+		}
+	}
+	class Touch extends Base {
+		private prevTarget: [cameraPostion: Vector3, lookVector: Vector3] | undefined;
+
+		constructor(
+			pressPosition: Vector3,
+			selectedBlock: RegistryBlock,
+			selectedColor: Color3,
+			selectedMaterial: Enum.Material,
+			mirrorModes: MirrorMode,
+			plot: SharedPlot,
+			blockRotation: CFrame,
+		) {
+			super(pressPosition, selectedBlock, selectedColor, selectedMaterial, mirrorModes, plot, blockRotation);
+
+			this.event.subInput((ih) => {
+				ih.onTouchTap(() => {
+					const cameraPostion = Workspace.CurrentCamera!.CFrame.Position;
+					const hit = mouse.Hit.Position;
+					const clickDirection = cameraPostion.sub(hit).Unit;
+					this.prevTarget = [cameraPostion, clickDirection];
+
+					this.updateGhosts();
+				}, false);
+			});
+		}
+
+		protected updateGhosts(): void {
+			if (this.prevTarget) {
+				const pos = this.getPositionOnBuildingPlane(this.pressPosition, this.prevTarget[0], this.prevTarget[1]);
+				super.updateGhosts(pos);
+			} else {
+				super.updateGhosts(this.pressPosition);
+			}
+		}
+	}
+
+	abstract class Starter extends ClientComponent {
+		constructor(state: BuildTool2, parent: ComponentChild<IController>) {
+			super();
+		}
+	}
+	class DesktopStarter extends Starter {
+		constructor(state: BuildTool2, parent: ComponentChild<IController>) {
+			super(state, parent);
+
+			this.event.subInput((ih) => {
+				ih.onMouse1Down(() => {
+					if (InputController.isShiftPressed()) {
+						init(state, parent);
+					}
+				}, false);
+			});
+		}
+	}
+	class TouchStarter extends Starter {
+		constructor(state: BuildTool2, parent: ComponentChild<IController>) {
+			super(state, parent);
+		}
+	}
+	class GamepadStarter extends Starter {
+		constructor(state: BuildTool2, parent: ComponentChild<IController>) {
+			super(state, parent);
+
+			this.event.subInput((ih) => {
+				ih.onKeyDown("ButtonR2", () => {
+					if (InputController.isShiftPressed()) {
+						// TODO: shift with controller??
+						init(state, parent);
+					}
+				});
+			});
+		}
+	}
+
+	export function subscribe(state: BuildTool2, parent: ComponentChild<IController>) {
+		ClientComponentChild.registerBasedOnInputType(state, {
+			Desktop: () => new DesktopStarter(state, parent),
+			Touch: () => new TouchStarter(state, parent),
+			Gamepad: () => new GamepadStarter(state, parent),
+		});
+	}
+	export function init(
+		state: BuildTool2,
+		parent: ComponentChild<IController>,
+		prevTarget?: [target: BasePart, hit: CFrame, surface: Enum.NormalId],
+	) {
+		const selectedBlock = state.selectedBlock.get();
+		if (!selectedBlock) return;
+
+		const pressPosition = getMouseTargetBlockPosition(selectedBlock, state.blockRotation.get(), prevTarget);
+		if (!pressPosition) return;
+
+		const plot = state.targetPlot.get();
+
+		const ctor =
+			(
+				ctor: new (
+					pressPosition: Vector3,
+					selectedBlock: RegistryBlock,
+					selectedColor: Color3,
+					selectedMaterial: Enum.Material,
+					mirrorModes: MirrorMode,
+					plot: SharedPlot,
+					blockRotation: CFrame,
+				) => IController,
+			) =>
+			() =>
+				new ctor(
+					pressPosition,
+					selectedBlock,
+					state.selectedColor.get(),
+					state.selectedMaterial.get(),
+					state.mirrorMode.get(),
+					plot,
+					state.blockRotation.get(),
+				);
+
+		parent.set(
+			ClientComponentChild.createOnceBasedOnInputType({
+				Desktop: ctor(Desktop),
+				Touch: ctor(Touch),
+				Gamepad: ctor(Desktop),
+			}),
+		);
+	}
 }
 
 /** A tool for building in the world with blocks */
@@ -999,7 +1073,7 @@ export class BuildTool2 extends ToolBase {
 		});
 		this.onEnable(() => this.currentMode.set(SinglePlaceController.create(this)));
 
-		MultiPlaceController.Desktop.subscribe(this, this.currentMode);
+		MultiPlaceController.subscribe(this, this.currentMode);
 	}
 
 	supportsMirror() {
@@ -1008,6 +1082,20 @@ export class BuildTool2 extends ToolBase {
 
 	placeBlock() {
 		return this.currentMode.get()?.place();
+	}
+	multiPlaceBlock() {
+		if (this.currentMode.get() instanceof MultiPlaceController.Base) {
+			this.placeBlock();
+			return;
+		}
+
+		const current = this.currentMode.get();
+
+		MultiPlaceController.init(
+			this,
+			this.currentMode,
+			current && "prevTarget" in current ? (current.prevTarget as never) : undefined,
+		);
 	}
 	rotateBlock(axis: "x" | "y" | "z", inverted = true) {
 		return this.currentMode.get()?.rotate(axis, inverted);
