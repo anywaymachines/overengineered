@@ -18,8 +18,8 @@ export async function TestTutorial(tutorial: typeof Tutorial) {
 		cframe: new CFrame(0, 1.5, -6, 1, 0, 0, 0, -1, 0, 0, -0, -1),
 	});
 
-	toolEnabler.enableOnly(allTools.buildTool, allTools.buildTool2);
-	allTools.buildTool2.mirrorMode.set({});
+	toolEnabler.enableOnly(allTools.buildTool);
+	allTools.buildTool.mirrorMode.set({});
 
 	spawn(() => {
 		tutorial.Control.displayStep("Build a frame using ordinary blocks", false);

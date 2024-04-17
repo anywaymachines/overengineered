@@ -136,8 +136,8 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 		cframe: new CFrame(18, 5.5, 6, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
 
-	toolEnabler.enableOnly(allTools.buildTool, allTools.buildTool2);
-	allTools.buildTool2.mirrorMode.set({});
+	toolEnabler.enableOnly(allTools.buildTool);
+	allTools.buildTool.mirrorMode.set({});
 
 	spawn(() => {
 		tutorial.Control.displayStep("Build a frame using ordinary blocks", false);
@@ -172,7 +172,7 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	TasksControl.instance.addTask('Select "Servo"');
 	TasksControl.instance.addTask("Place all highlighted blocks");
 
-	toolEnabler.enableOnly(allTools.buildTool, allTools.buildTool2);
+	toolEnabler.enableOnly(allTools.buildTool);
 
 	tutorial.buildTool.addBlockToPlace({
 		id: "servomotorblock",
@@ -244,7 +244,7 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 
 	toolEnabler.disableAll();
 	tutorial.Control.displayStep("Great! Let's install motors that will turn the wheels and move the car!", false);
-	toolEnabler.enableOnly(allTools.buildTool, allTools.buildTool2);
+	toolEnabler.enableOnly(allTools.buildTool);
 
 	TasksControl.instance.addTask("Select building tool");
 	TasksControl.instance.addTask('Select "Motor"');
@@ -314,7 +314,7 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	TasksControl.instance.finish();
 
 	tutorial.Control.displayStep("Nice, now you can install wheels", false);
-	toolEnabler.enableOnly(allTools.buildTool, allTools.buildTool2);
+	toolEnabler.enableOnly(allTools.buildTool);
 
 	TasksControl.instance.addTask("Select building tool");
 	TasksControl.instance.addTask('Select "Small Wheel"');
@@ -400,7 +400,7 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 		"The last step before setting up the motors is to install the seat where you will be sitting",
 		false,
 	);
-	toolEnabler.enableOnly(allTools.buildTool, allTools.buildTool2);
+	toolEnabler.enableOnly(allTools.buildTool);
 
 	TasksControl.instance.addTask("Select building tool");
 	TasksControl.instance.addTask('Select "Vehicle Seat"');

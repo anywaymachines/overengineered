@@ -1,5 +1,4 @@
 import { Workspace } from "@rbxts/services";
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { Tutorial } from "client/tutorial/Tutorial";
 import { BlocksInitializer } from "shared/BlocksInitializer";
@@ -19,10 +18,6 @@ export class TutorialBuildTool {
 	private readonly tutorialBlocksToPlace: (TutorialPlaceBlockHighlight & { readonly instance: Instance })[] = [];
 
 	constructor(private readonly tutorial: typeof Tutorial) {}
-
-	get() {
-		return BuildingMode.instance.toolController.buildTool;
-	}
 
 	cleanup() {
 		this.tutorialBlocksToPlace.forEach((block) => {

@@ -3,7 +3,6 @@ import { LoadingController } from "client/controller/LoadingController";
 import { Signals } from "client/event/Signals";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { BuildTool } from "client/tools/BuildTool";
-import { BuildTool2 } from "client/tools/BuildTool2";
 import { ConfigTool } from "client/tools/ConfigTool";
 import { DeleteTool } from "client/tools/DeleteTool";
 import { PaintTool } from "client/tools/PaintTool";
@@ -70,11 +69,9 @@ export class ToolController extends ClientComponent {
 	readonly visibleTools: ComponentDisabler<ToolBase>;
 	readonly enabledTools: ComponentDisabler<ToolBase>;
 
-	readonly buildTool;
 	readonly deleteTool;
 	readonly configTool;
 	readonly paintTool;
-	readonly buildTool2;
 	readonly wireTool;
 
 	readonly allTools;
@@ -109,13 +106,12 @@ export class ToolController extends ClientComponent {
 
 		// array instead of an object for ordering purposes
 		const tools = [
-			["buildTool2", (this.buildTool2 = new BuildTool2(mode))],
+			["buildTool", new BuildTool(mode)],
 			["editTool", new EditTool(mode)],
 			["deleteTool", (this.deleteTool = new DeleteTool(mode))],
 			["configTool", (this.configTool = new ConfigTool(mode))],
 			["paintTool", (this.paintTool = new PaintTool(mode))],
 			["wireTool", (this.wireTool = new WireTool(mode))],
-			["buildTool", (this.buildTool = new BuildTool(mode))],
 		] as const;
 
 		this.allTools = Objects.fromEntries(tools);
