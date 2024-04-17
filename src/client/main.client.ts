@@ -1,4 +1,4 @@
-import { Debris, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { SharedPlots } from "shared/building/SharedPlots";
 
@@ -74,13 +74,3 @@ LoadingController.hide();
 if (Players.LocalPlayer.Name === "3QAXM" && RunService.IsStudio()) {
 	Tutorial.Begin("Basics");
 }
-
-const lava = Workspace.WaitForChild("Obstacles").WaitForChild("Ramps").WaitForChild("lava") as BasePart;
-lava.Touched.Connect((part) => {
-	part.BreakJoints();
-	part.AssemblyLinearVelocity = part.AssemblyLinearVelocity.add(
-		new Vector3(math.random() * 18 - 6, 25, math.random() * 18 - 6),
-	);
-	RemoteEvents.Burn.send([part]);
-	Debris.AddItem(part, 10);
-});
