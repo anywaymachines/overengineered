@@ -284,6 +284,11 @@ const logic: Record<string, BlockDataRegistry> = {
 			description: "Display all your data for everyone to see!",
 			autoWeldShape: "cube",
 		},
+		laser: {
+			name: "Laser pointer",
+			description: "shoot beem boom target!",
+			autoWeldShape: "cube",
+		},
 	},
 	sensors: {
 		accelerometer: {

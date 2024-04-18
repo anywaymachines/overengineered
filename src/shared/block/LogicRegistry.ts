@@ -1,4 +1,5 @@
 import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
+import { LaserBlockLogic } from "shared/block/logic/operations/output/LaserBlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { BlockLogic } from "./BlockLogic";
 import { BallastBlockLogic } from "./logic/BallastBlockLogic";
@@ -70,6 +71,7 @@ export const logicRegistry = {
 
 	lamp: LampBlockLogic,
 	screen: ScreenBlockLogic,
+	laser: LaserBlockLogic,
 
 	constant: ConstantBlockLogic,
 	delayblock: DelayBlockLogic,

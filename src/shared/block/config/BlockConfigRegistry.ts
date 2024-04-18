@@ -687,6 +687,60 @@ const screen = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
+const laser = {
+	input: {
+		maxDistance: {
+			displayName: "Max distance",
+			type: "clampedNumber",
+			config: 200 as number,
+			default: 200 as number,
+			min: 0.1,
+			max: 200,
+			step: 0.1,
+		},
+		rayTransparency: {
+			displayName: "Ray transparency",
+			type: "clampedNumber",
+			config: 0 as number,
+			default: 0 as number,
+			min: 0,
+			max: 1,
+			step: 0.01,
+		},
+		dotTransparency: {
+			displayName: "Dot transparency",
+			type: "clampedNumber",
+			config: 0 as number,
+			default: 0 as number,
+			min: 0,
+			max: 1,
+			step: 0.01,
+		},
+		dotSize: {
+			displayName: "Dot size",
+			type: "clampedNumber",
+			config: 0.3 as number,
+			default: 0.3 as number,
+			min: 0.1,
+			max: 2,
+			step: 0.01,
+		},
+		rayColor: {
+			displayName: "Ray color",
+			type: "color",
+			config: Color3.fromRGB(255, 0, 0),
+			default: Color3.fromRGB(255, 0, 0),
+		},
+		dotColor: {
+			displayName: "Dot color",
+			type: "color",
+			config: Color3.fromRGB(255, 255, 0),
+			default: Color3.fromRGB(255, 255, 0),
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
 const twoNumbersInputBooleanOutput = {
 	input: {
 		value1: {
@@ -1045,6 +1099,7 @@ export const blockConfigRegistry = {
 	wedgewing1x4: wing,
 	lamp,
 	screen,
+	laser,
 
 	multiplexer,
 	relay,
