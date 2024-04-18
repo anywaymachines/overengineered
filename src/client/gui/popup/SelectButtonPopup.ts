@@ -3,6 +3,7 @@ import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
 import { ButtonControl, ButtonDefinition, TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { Signal } from "shared/event/Signal";
 
 export type SelectButtonPopupDefinition = GuiObject & {
@@ -10,6 +11,8 @@ export type SelectButtonPopupDefinition = GuiObject & {
 		readonly ScrollingFrame: ScrollingFrame & {
 			readonly ButtonTemplate: TextButtonDefinition;
 		};
+		readonly AcceptButton: GuiButton;
+		readonly CustomTextBox: TextBox;
 	};
 	readonly Buttons: {
 		readonly CancelButton: GuiButton;
@@ -24,7 +27,7 @@ export class SelectButtonPopup extends Popup<SelectButtonPopupDefinition> {
 	private readonly cancelButton;
 	private readonly closeButton;
 
-	static showPopup(confirmFunc: (key: KeyCode) => void, cancelFunc: () => void) {
+	static showPopup(confirmFunc: (key: string) => void, cancelFunc: () => void) {
 		const popup = new SelectButtonPopup(
 			Gui.getGameUI<{
 				Popup: { MobileSelectButton: SelectButtonPopupDefinition };
@@ -35,10 +38,18 @@ export class SelectButtonPopup extends Popup<SelectButtonPopupDefinition> {
 
 		popup.show();
 	}
-	constructor(gui: SelectButtonPopupDefinition, confirmFunc: (key: KeyCode) => void, cancelFunc: () => void) {
+	constructor(gui: SelectButtonPopupDefinition, confirmFunc: (key: string) => void, cancelFunc: () => void) {
 		super(gui);
 		this.cancelButton = this.add(new ButtonControl(gui.Buttons.CancelButton));
 		this.closeButton = this.add(new ButtonControl(gui.Head.CloseButton));
+
+		const customTextBox = this.add(new TextBoxControl(gui.Content.CustomTextBox));
+		this.add(
+			new ButtonControl(gui.Content.AcceptButton, () => {
+				this.hide();
+				confirmFunc(customTextBox.text.get());
+			}),
+		);
 
 		const list = new Control(gui.Content.ScrollingFrame);
 		this.add(list);

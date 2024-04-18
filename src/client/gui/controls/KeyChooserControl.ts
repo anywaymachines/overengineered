@@ -10,8 +10,8 @@ export type KeyChooserControlDefinition = TextButton;
 
 /** Control that represents a key */
 export class KeyChooserControl extends Control<KeyChooserControlDefinition> {
-	readonly submitted = new Signal<(value: KeyCode, prev: KeyCode) => void>();
-	readonly value = new ObservableValue<KeyCode>("P");
+	readonly submitted = new Signal<(value: string, prev: string) => void>();
+	readonly value = new ObservableValue<string>("P");
 
 	private readonly color = Colors.accentDark;
 	private readonly activeColor = Colors.accent;

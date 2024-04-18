@@ -10,14 +10,14 @@ declare namespace BlockConfigTypes {
 
 	export type Bool = BlockConfigPrimitiveType<"bool", boolean>;
 	export type Vec3 = BlockConfigPrimitiveType<"vector3", Vector3>;
-	export type Key = BlockConfigPrimitiveType<"key", KeyCode>;
+	export type Key = BlockConfigPrimitiveType<"key", string>;
 	export type Number = BlockConfigPrimitiveType<"number", number>;
 	export type String = BlockConfigPrimitiveType<"string", string>;
 	export type Color = BlockConfigPrimitiveType<"color", Color3>;
 
 	export type MultiKey<TKeys extends string = string> = BlockConfigPrimitiveType<
 		"multikey",
-		Readonly<Record<TKeys, KeyCode>>
+		Readonly<Record<TKeys, string>>
 	> & {
 		readonly keyDefinitions: ConfigTypesToDefinition<string, Readonly<Record<TKeys, Key>>>;
 	};
@@ -26,7 +26,7 @@ declare namespace BlockConfigTypes {
 		"keybool",
 		boolean,
 		{
-			readonly key: KeyCode;
+			readonly key: string;
 			readonly switch: boolean;
 			readonly touchName: string;
 			readonly reversed: boolean;
