@@ -60,8 +60,8 @@ export const TriangleChunkRenderer = (
 		const [w11, w12] = createTriangle(vpp, vpn, vnp);
 		const [w21, w22] = createTriangle(vnp, vnn, vpn);
 
-		const minHeight = math.min(xpzp, xpzn, xnzp, xnzn);
-		const maxHeight = math.max(xpzp, xpzn, xnzp, xnzn);
+		const minHeight = math.min(xpzp, xpzn, xnzp, xnzn) - GameDefinitions.HEIGHT_OFFSET;
+		const maxHeight = math.max(xpzp, xpzn, xnzp, xnzn) - GameDefinitions.HEIGHT_OFFSET;
 		const heightDiff = maxHeight - minHeight;
 
 		if (heightDiff > 80 / math.sqrt(chunkResolution / 8)) {
