@@ -3,6 +3,7 @@ import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl, SliderControlDefinition } from "client/gui/controls/SliderControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { ObservableValue } from "shared/event/ObservableValue";
+import { Signal } from "shared/event/Signal";
 
 export type ColorChooserDefinition = GuiObject & {
 	readonly Preview: GuiObject;
@@ -27,6 +28,8 @@ export type ColorChooserDefinition = GuiObject & {
 
 /** Color chooser, not an actual wheel */
 export class ColorChooser extends Control<ColorChooserDefinition> {
+	private readonly _submitted = new Signal<(color: Color3) => void>();
+	readonly submitted = this._submitted.asReadonly();
 	readonly value = new ObservableValue<Color3>(new Color3(1, 1, 1));
 
 	constructor(gui: ColorChooserDefinition) {
@@ -126,5 +129,14 @@ export class ColorChooser extends Control<ColorChooserDefinition> {
 			true,
 			true,
 		);
+
+		const onsubmit = () => this._submitted.Fire(this.value.get());
+		hue.submitted.Connect(onsubmit);
+		sat.submitted.Connect(onsubmit);
+		bri.submitted.Connect(onsubmit);
+		rtext.submitted.Connect(onsubmit);
+		gtext.submitted.Connect(onsubmit);
+		btext.submitted.Connect(onsubmit);
+		hextext.submitted.Connect(onsubmit);
 	}
 }

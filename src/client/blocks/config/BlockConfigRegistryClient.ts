@@ -1,3 +1,4 @@
+import { ColorConfigLogicValue } from "client/blocks/config/ColorConfigLogicValue";
 import { ControllableNumberConfigLogicValue } from "client/blocks/config/ControllableNumberLogicValue";
 import { BoolConfigLogicValue } from "./BoolConfigLogicValue";
 import { ClampedNumberConfigLogicValue } from "./ClampedNumberConfigLogicValue";
@@ -25,6 +26,7 @@ export const blockConfigRegistryClient = {
 	keybool: KeyBoolConfigLogicValue,
 	number: NumberConfigLogicValue,
 	string: StringConfigLogicValue,
+	color: ColorConfigLogicValue,
 	clampedNumber: ClampedNumberConfigLogicValue,
 	thrust: ThrustConfigLogicValue,
 	motorRotationSpeed: MotorRotationSpeedConfigLogicValue,

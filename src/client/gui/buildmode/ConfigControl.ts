@@ -1,3 +1,4 @@
+import { ColorChooser, ColorChooserDefinition } from "client/gui/ColorChooser";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { ButtonControl } from "client/gui/controls/Button";
@@ -35,6 +36,7 @@ export class ConfigControl extends Control<ConfigControlDefinition> {
 	private readonly sliderTemplate;
 	private readonly numberTemplate;
 	private readonly stringTemplate;
+	private readonly colorTemplate;
 	private readonly multiTemplate;
 	private readonly multiMultiTemplate;
 
@@ -48,6 +50,7 @@ export class ConfigControl extends Control<ConfigControlDefinition> {
 		this.sliderTemplate = this.asTemplate(templates.SliderTemplate, false);
 		this.numberTemplate = this.asTemplate(templates.NumberTemplate, false);
 		this.stringTemplate = this.asTemplate(templates.StringTemplate, false);
+		this.colorTemplate = this.asTemplate(templates.ColorTemplate, false);
 		this.multiTemplate = this.asTemplate(templates.MultiTemplate, false);
 		this.multiMultiTemplate = this.asTemplate(templates.MultiMultiTemplate, false);
 	}
@@ -81,6 +84,7 @@ export class ConfigControl extends Control<ConfigControlDefinition> {
 					key: this.keyTemplate,
 					number: this.numberTemplate,
 					string: this.stringTemplate,
+					color: this.colorTemplate,
 					slider: this.sliderTemplate,
 					multi: this.multiTemplate,
 					multiMulti: this.multiMultiTemplate,
@@ -109,6 +113,7 @@ export class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control
 	private readonly sliderTemplate;
 	private readonly numberTemplate;
 	private readonly stringTemplate;
+	private readonly colorTemplate;
 	private readonly thrustTemplate;
 	private readonly multiMultiTemplate;
 
@@ -127,6 +132,7 @@ export class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control
 		this.sliderTemplate = this.asTemplate(templates.SliderTemplate, false);
 		this.numberTemplate = this.asTemplate(templates.NumberTemplate, false);
 		this.stringTemplate = this.asTemplate(templates.StringTemplate, false);
+		this.colorTemplate = this.asTemplate(templates.ColorTemplate, false);
 		this.thrustTemplate = this.asTemplate(templates.MultiTemplate, false);
 		this.multiMultiTemplate = this.asTemplate(templates.MultiMultiTemplate, false);
 
@@ -143,6 +149,7 @@ export class ConfigControl2<TDef extends BlockConfigDefinitions> extends Control
 					key: this.keyTemplate,
 					number: this.numberTemplate,
 					string: this.stringTemplate,
+					color: this.colorTemplate,
 					slider: this.sliderTemplate,
 					multi: this.thrustTemplate,
 					multiMulti: this.multiMultiTemplate,
@@ -404,6 +411,25 @@ export class StringConfigValueControl extends ConfigValueControl<TextBoxControlD
 		const control = this.add(new TextBoxControl(this.gui.Control));
 		this.value = control.text;
 		control.text.set(config);
+
+		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
+	}
+}
+
+export class ColorConfigValueControl extends ConfigValueControl<ColorChooserDefinition> {
+	readonly submitted = new Signal<(config: BlockConfigDefinitionRegistry["color"]["config"]) => void>();
+	readonly value;
+
+	constructor(
+		templates: Templates,
+		config: BlockConfigDefinitionRegistry["color"]["config"],
+		definition: ConfigTypeToDefinition<BlockConfigDefinitionRegistry["color"]>,
+	) {
+		super(templates.color(), definition.displayName);
+
+		const control = this.add(new ColorChooser(this.gui.Control));
+		this.value = control.value;
+		control.value.set(config);
 
 		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
 	}
@@ -761,6 +787,7 @@ const configControls = {
 	keybool: KeyBoolConfigValueControl,
 	number: NumberConfigValueControl,
 	string: StringConfigValueControl,
+	color: ColorConfigValueControl,
 	clampedNumber: SliderConfigValueControl,
 	thrust: ThrustConfigValueControl,
 	motorRotationSpeed: MotorRotationSpeedConfigValueControl,
@@ -792,6 +819,7 @@ export type Templates = {
 	slider: () => ConfigPartDefinition<SliderControlDefinition>;
 	number: () => ConfigPartDefinition<NumberTextBoxControlDefinition>;
 	string: () => ConfigPartDefinition<TextBoxControlDefinition>;
+	color: () => ConfigPartDefinition<ColorChooserDefinition>;
 	multi: () => ConfigPartDefinition<ConfigControlDefinition>;
 	multiMulti: () => ConfigPartDefinition<MultiConfigControlDefinition>;
 };
@@ -803,6 +831,7 @@ export type Template = {
 	SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 	NumberTemplate: ConfigPartDefinition<NumberTextBoxControlDefinition>;
 	StringTemplate: ConfigPartDefinition<TextBoxControlDefinition>;
+	ColorTemplate: ConfigPartDefinition<ColorChooserDefinition>;
 	MultiTemplate: ConfigPartDefinition<ConfigControlDefinition>;
 	MultiMultiTemplate: ConfigPartDefinition<MultiConfigControlDefinition>;
 };

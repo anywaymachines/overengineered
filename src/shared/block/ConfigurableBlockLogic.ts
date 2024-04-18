@@ -24,6 +24,7 @@ const BlockConfigValueRegistry = {
 	keybool: createObservable,
 	number: createObservable,
 	string: createObservable,
+	color: createObservable,
 	clampedNumber: (definition) =>
 		new NumberBlockLogicValue(definition.default, definition.min, definition.max, definition.step),
 	thrust: () => new NumberBlockLogicValue(0, 0, 100, 0.01),

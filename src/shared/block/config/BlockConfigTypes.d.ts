@@ -13,6 +13,7 @@ declare namespace BlockConfigTypes {
 	export type Key = BlockConfigPrimitiveType<"key", KeyCode>;
 	export type Number = BlockConfigPrimitiveType<"number", number>;
 	export type String = BlockConfigPrimitiveType<"string", string>;
+	export type Color = BlockConfigPrimitiveType<"color", Color3>;
 
 	export type MultiKey<TKeys extends string = string> = BlockConfigPrimitiveType<
 		"multikey",
@@ -123,6 +124,7 @@ declare namespace BlockConfigTypes {
 		readonly vector3: Vec3;
 		readonly number: Number;
 		readonly string: String;
+		readonly color: Color;
 		readonly clampedNumber: ClampedNumber;
 		readonly key: Key;
 		readonly multikey: MultiKey;

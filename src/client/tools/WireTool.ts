@@ -33,6 +33,9 @@ const typeGroups = {
 	string: {
 		color: Colors.purple,
 	},
+	color: {
+		color: Colors.red,
+	},
 	never: {
 		color: Colors.black,
 	},
@@ -48,6 +51,7 @@ const groups = {
 	servoMotorAngle: "number",
 	or: "number",
 	string: "string",
+	color: "color",
 	key: "never",
 	multikey: "never",
 	controllableNumber: "number",
