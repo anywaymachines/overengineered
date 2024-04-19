@@ -61,7 +61,7 @@ export namespace Easing {
 				) as T;
 			}
 
-			throw "Untweenable type";
+			throw `Untweenable type ${typeOf(from)}`;
 		};
 
 		alpha = Easing.ease(alpha, easing, direction);

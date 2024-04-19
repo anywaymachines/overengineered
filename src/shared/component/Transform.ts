@@ -47,7 +47,7 @@ class DelayTransform implements Transform {
 	finish() {}
 }
 
-export type TweenableProperties<T> = ExtractKeys<T, Easable>;
+export type TweenableProperties<T> = ExtractKeys<Required<T>, Easable>;
 export type TransformProps = {
 	readonly duration?: number;
 	readonly style?: EasingStyle;
@@ -300,9 +300,17 @@ export class TransformBuilder<T extends object> {
 		return this.push(transform.buildSequence());
 	}
 
+	transformMulti<TKey extends TweenableProperties<T>>(
+		value: { readonly [k in TKey]?: T[TKey] & defined },
+		params?: TransformProps,
+	) {
+		for (const [key, val] of Objects.pairs_(value)) {
+			this.transform(key, val, params);
+		}
+	}
 	transform<TKey extends TweenableProperties<T>>(
 		key: TKey,
-		value: T[TKey] | (() => T[TKey]),
+		value: (T[TKey] & defined) | (() => T[TKey] & defined),
 		params?: TransformProps,
 	) {
 		return this.push(
@@ -379,12 +387,17 @@ export class TransformBuilder<T extends object> {
 	}
 	flash<TKey extends TweenableProperties<T>>(
 		this: TransformBuilder<T>,
-		value: T[TKey],
+		value: T[TKey] & defined,
 		property: TKey,
 		props?: TransformProps,
 	) {
 		return this.transform(property, value, { style: "Quad", direction: "Out", ...props }) //
-			.transform(property, this.instance[property], { duration: 0.4, style: "Quad", direction: "Out", ...props });
+			.transform(property, this.instance[property]!, {
+				duration: 0.4,
+				style: "Quad",
+				direction: "Out",
+				...props,
+			});
 	}
 
 	flashColor<TKey extends ExtractKeys<T & GuiObject, Color3>>(
@@ -399,7 +412,7 @@ export class TransformBuilder<T extends object> {
 
 //
 
-export class TransformContainer<T extends Instance> extends ContainerComponent<TransformRunner> {
+export class TransformContainer<T extends object> extends ContainerComponent<TransformRunner> {
 	private readonly instance;
 
 	constructor(instance: T) {
