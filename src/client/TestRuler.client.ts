@@ -3,6 +3,8 @@ import { Colors } from "client/gui/Colors";
 import { DebugLog } from "client/gui/DebugLog";
 import { Element } from "shared/Element";
 
+new Instance("BindableEvent").Event.Wait();
+
 const createSegment = () => {
 	return Element.create("Frame", {
 		Size: new UDim2(0, 4, 1, 0),
