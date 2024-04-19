@@ -1,20 +1,16 @@
 import { Debris, Workspace } from "@rbxts/services";
-import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { RemoteEvents } from "shared/RemoteEvents";
 
 const initKillPlane = (instance: BasePart, onTouch?: (part: BasePart) => void) => {
 	instance.Touched.Connect((part) => {
-		const player = LocalPlayerController.humanoid?.Parent;
-		if (player) {
-			let parent: Instance = part;
-			while (true as boolean) {
-				if (parent === player) return;
+		let parent: Instance = part;
+		while (true as boolean) {
+			if (parent.FindFirstChild("Humanoid")) return;
 
-				const nextparent = parent.Parent;
-				if (!nextparent) break;
+			const nextparent = parent.Parent;
+			if (!nextparent) break;
 
-				parent = nextparent;
-			}
+			parent = nextparent;
 		}
 
 		part.BreakJoints();
