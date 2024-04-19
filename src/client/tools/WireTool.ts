@@ -158,10 +158,10 @@ namespace Markers {
 		sameGroupMarkers?: readonly Marker[];
 		protected pauseColors = false;
 
-		constructor(instance: MarkerComponentDefinition, data: MarkerData, plot: PlotModel) {
+		constructor(instance: MarkerComponentDefinition, data: MarkerData, plot: PlotModel, visible: boolean) {
 			super(instance);
 
-			this.onEnable(() => (this.instance.Enabled = true));
+			this.onEnable(() => (this.instance.Enabled = visible));
 			this.onDisable(() => (this.instance.Enabled = false));
 
 			this.instance = instance;
@@ -170,8 +170,10 @@ namespace Markers {
 			this.position = data.blockData.instance.GetPivot().PointToWorldSpace(instance.StudsOffsetWorldSpace);
 			this.availableTypes = new ObservableValue<readonly DataType[]>(data.dataTypes);
 
-			this.initTooltips();
-			this.initColors();
+			if (visible) {
+				this.initTooltips();
+				this.initColors();
+			}
 		}
 
 		private initTooltips() {
@@ -301,8 +303,8 @@ namespace Markers {
 			readonly wire: WireComponent;
 		};
 
-		constructor(gui: MarkerComponentDefinition, data: MarkerData, plot: PlotModel) {
-			super(gui, data, plot);
+		constructor(gui: MarkerComponentDefinition, data: MarkerData, plot: PlotModel, visible: boolean = true) {
+			super(gui, data, plot, visible);
 
 			this.instance.TextButton.White.Visible = true;
 			this.updateConnectedVisual(false);
@@ -339,8 +341,8 @@ namespace Markers {
 	export class Output extends Marker {
 		private readonly connected = new Map<Marker, WireComponent>();
 
-		constructor(gui: MarkerComponentDefinition, data: MarkerData, plot: PlotModel) {
-			super(gui, data, plot);
+		constructor(gui: MarkerComponentDefinition, data: MarkerData, plot: PlotModel, visible: boolean = true) {
+			super(gui, data, plot, visible);
 
 			this.instance.TextButton.White.Visible = false;
 			this.instance.TextButton.Filled.Visible = false;
@@ -769,8 +771,6 @@ export class WireTool extends ToolBase {
 				.size();
 			for (const markerType of ["output", "input"] as const) {
 				for (const [key, config] of Objects.pairs_(configDef[markerType])) {
-					if (config.connectorHidden) continue;
-
 					let narrow = false;
 					let dataTypes: readonly DataType[];
 					if (config.type === "or") {
@@ -800,8 +800,8 @@ export class WireTool extends ToolBase {
 					);
 					const marker =
 						markerType === "input"
-							? new Markers.Input(markerInstance, data, plot)
-							: new Markers.Output(markerInstance, data, plot);
+							? new Markers.Input(markerInstance, data, plot, !config.connectorHidden)
+							: new Markers.Output(markerInstance, data, plot, !config.connectorHidden);
 
 					if (narrow) {
 						toNarrow.push(marker);
