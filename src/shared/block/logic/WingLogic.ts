@@ -2,6 +2,8 @@ import { RunService, Workspace } from "@rbxts/services";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
+import { GameDefinitions } from "shared/data/GameDefinitions";
+import { GameEnvironment } from "shared/data/GameEnvironment";
 
 type Wing = BlockModel & {
 	readonly WingSurface:
@@ -23,11 +25,11 @@ export class WingLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry
 	}
 
 	private initializeForces() {
-		// FIXME: Wait for fluid forces to exit Beta
-		if (RunService.IsStudio()) {
-			this.wingSurface.EnableFluidForces = true;
-			return;
-		}
+		// FIXME: Wait for fluid forces to exit Beta (NORMAL BETA)
+		// if (RunService.IsStudio()) {
+		// 	this.wingSurface.EnableFluidForces = true;
+		// 	return;
+		// }
 
 		if (this.input.enabled.get() === false) return;
 
@@ -54,7 +56,24 @@ export class WingLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry
 				)
 				.mul(21)
 				.add(vectorForce.Force)
-				.div(2);
+				.div(2)
+				.mul(
+					math.clamp(
+						1 -
+							math.pow(
+								(this.wingSurface.Position.Y - GameDefinitions.HEIGHT_OFFSET) /
+									GameEnvironment.ZeroAirHeight,
+								2,
+							),
+						0,
+						1,
+					),
+				);
+
+			// - ((0 - -16000 + 10000) / (-16000 - 10000))
+			// (10000 - -16000) / (-16000 - 10000)
+			// 1 - height / max height
+
 			vectorForce.Force = force;
 		});
 	}
