@@ -1,19 +1,30 @@
-import { RunService } from "@rbxts/services";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
+import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
 
 type Piston = BlockModel & {
 	readonly Top: Part & {
+		readonly Beam: Beam;
+	};
+	readonly Bottom: Part & {
 		PrismaticConstraint: PrismaticConstraint;
 	};
-	readonly Beam: Part;
-	readonly Bottom: Part;
 	readonly ColBox: Part;
 };
 export class PistonLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.piston, Piston> {
-	private readonly top;
-	private readonly beam;
+	static readonly events = {
+		updateMaxForce: new AutoC2SRemoteEvent<{
+			readonly block: BlockModel;
+			readonly force: number;
+		}>("piston_update_max_force"),
+
+		updatePosition: new AutoC2SRemoteEvent<{
+			readonly block: BlockModel;
+			readonly position: number;
+		}>("piston_update_position"),
+	} as const;
+
 	private readonly prismaticConstraint;
 	private readonly bottom;
 
@@ -21,20 +32,24 @@ export class PistonLogic extends ConfigurableBlockLogic<typeof blockConfigRegist
 		super(block, blockConfigRegistry.piston);
 
 		this.onDescendantDestroyed(() => {
+			block.instance.FindFirstChild("Top")?.FindFirstChild("Beam")?.Destroy();
 			this.update();
 			this.disable();
 		});
 
 		// Instances
-		this.top = this.instance.Top;
-		this.beam = this.instance.Beam;
 		this.bottom = this.instance.Bottom;
-		this.prismaticConstraint = this.instance.Top.PrismaticConstraint;
+		this.prismaticConstraint = this.bottom.PrismaticConstraint;
 
 		this.event.subscribeObservable(
 			this.input.maxforce,
 			(value) => {
 				this.prismaticConstraint.ServoMaxForce = value * 1000;
+
+				PistonLogic.events.updateMaxForce.send({
+					block: this.instance,
+					force: value * 1000,
+				});
 			},
 			true,
 		);
@@ -62,14 +77,14 @@ export class PistonLogic extends ConfigurableBlockLogic<typeof blockConfigRegist
 			},
 			true,
 		);
-
-		this.event.subscribe(RunService.Heartbeat, () => {
-			this.beam.Position = this.bottom.Position.Lerp(this.top.Position, 0.5);
-			this.beam.Size = new Vector3(this.top.Position.sub(this.bottom.Position).Magnitude, 0.5, 0.5);
-		});
 	}
 
 	private update() {
-		this.prismaticConstraint.TargetPosition = ((-1 * this.input.distance.get()) / 100) * this.input.extend.get();
+		this.prismaticConstraint.TargetPosition = (this.input.distance.get() / 100) * this.input.extend.get();
+
+		PistonLogic.events.updatePosition.send({
+			block: this.instance,
+			position: this.prismaticConstraint.TargetPosition,
+		});
 	}
 }

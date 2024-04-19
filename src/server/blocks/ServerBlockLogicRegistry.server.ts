@@ -1,3 +1,4 @@
+import { PistonBlockServerLogic } from "server/blocks/logic/PistonBlockServerLogic";
 import { Logger } from "shared/Logger";
 import { logicRegistry } from "shared/block/LogicRegistry";
 import { Objects } from "shared/fixes/objects";
@@ -17,6 +18,7 @@ const serverBlockLogicRegistry: ServerBlockLogicRegistry = {
 	disconnectblock: DisconnectBlockServerLogic,
 	lamp: LampServerLogic,
 	screen: ScreenServerLogic,
+	piston: PistonBlockServerLogic,
 };
 
 //
