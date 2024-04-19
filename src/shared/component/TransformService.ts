@@ -1,3 +1,4 @@
+import { ObjectOverlayStorage } from "shared/component/ObjectOverlayStorage";
 import {
 	TransformContainer,
 	type TransformBuilder,
@@ -6,14 +7,14 @@ import {
 } from "shared/component/Transform";
 import { Objects } from "shared/fixes/objects";
 
-type State<T extends Instance> = { readonly [k in TweenableProperties<T>]?: T[k] };
+type State<T extends object> = { readonly [k in TweenableProperties<T>]?: T[k] };
 export namespace TransformService {
-	const transforms = new Map<object, TransformContainer<Instance>>();
+	const transforms = new Map<object, TransformContainer<object>>();
 	export const commonProps = {
 		quadOut02: { style: "Quad", direction: "Out", duration: 0.2 },
 	} as const satisfies Record<string, TransformProps>;
 
-	export function run<T extends Instance>(
+	export function run<T extends object>(
 		instance: T,
 		setup: (transform: TransformBuilder<T>, instance: T) => void,
 	): void {
@@ -43,7 +44,7 @@ export namespace TransformService {
 	}
 
 	export function stateMachineFunc<
-		T extends Instance,
+		T extends object,
 		TStates extends { readonly [k in string]: (builder: TransformBuilder<T>) => void },
 	>(
 		instance: T,
@@ -74,7 +75,7 @@ export namespace TransformService {
 
 		return result as Readonly<Record<keyof TStates, () => void>>;
 	}
-	export function stateMachine<T extends Instance, TStates extends { readonly [k in string]: State<T> }>(
+	export function stateMachine<T extends object, TStates extends { readonly [k in string]: State<T> }>(
 		instance: T,
 		props: TransformProps,
 		states: TStates,
@@ -100,7 +101,7 @@ export namespace TransformService {
 			setupEnd,
 		);
 	}
-	export function boolStateMachine<T extends Instance>(
+	export function boolStateMachine<T extends object>(
 		instance: T,
 		props: TransformProps,
 		trueState: State<T>,
@@ -117,7 +118,7 @@ export namespace TransformService {
 		);
 		return (value) => (value ? sm.true() : sm.false());
 	}
-	export function lazyBoolStateMachine<T extends Instance>(
+	export function lazyBoolStateMachine<T extends object>(
 		instance: T,
 		props: TransformProps,
 		trueState: State<T>,
@@ -136,5 +137,15 @@ export namespace TransformService {
 				state(value);
 			}
 		};
+	}
+
+	export function overlay<T extends object, TInstance extends T>(
+		instance: TInstance,
+		defaultValues: T,
+		props: TransformProps,
+	) {
+		return new ObjectOverlayStorage(defaultValues, (vis) =>
+			TransformService.run(instance, (tr) => tr.transformMulti(vis, props)),
+		);
 	}
 }

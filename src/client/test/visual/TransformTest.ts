@@ -135,6 +135,19 @@ export const TransformTest: ControlTest = {
 			);
 		}
 
+		{
+			const bvisible = newbtn("Visible", 6 + 1);
+			const bnotvisible = newbtn("Not visible", 7 + 1);
+			const binteractable = newbtn("Interactable", 8 + 1);
+			const bnotinteractable = newbtn("Not interactable", 9 + 1);
+			const visual = list.add(new ButtonControl(newbtn("Button", 10 + 1)));
+
+			list.add(new ButtonControl(bvisible, () => visual.show()));
+			list.add(new ButtonControl(bnotvisible, () => visual.hide()));
+			list.add(new ButtonControl(binteractable, () => visual.setInteractable(true)));
+			list.add(new ButtonControl(bnotinteractable, () => visual.setInteractable(false)));
+		}
+
 		return [["Transforms", list]];
 	},
 };
