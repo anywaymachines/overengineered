@@ -536,6 +536,11 @@ export const BlockDataRegistry: BlockDataRegistry = {
 		description: "A box of explosives. DO NOT HIT!",
 		limit: 200,
 	},
+	cylindricaltnt: {
+		name: "Cylindrical TNT",
+		description: "Not a boxed version",
+		limit: 200,
+	},
 	vehicleseat: {
 		name: "Vehicle Seat",
 		description: "A seat for your vehicle. Allows you to control your contraption",

@@ -1083,6 +1083,7 @@ export const blockConfigRegistry = {
 	rope,
 	servomotorblock,
 	tnt,
+	cylindricaltnt: tnt,
 	suspensionblock,
 	vehicleseat,
 	magnet,

@@ -1,3 +1,4 @@
+import { type BlockDataRegistry } from "shared/BlockDataRegistry";
 import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
 import { LaserBlockLogic } from "shared/block/logic/operations/output/LaserBlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -63,6 +64,7 @@ export const logicRegistry = {
 	rope: RopeLogic,
 	heliumblock: HeliumBlockLogic,
 	tnt: TNTBlockLogic,
+	cylindricaltnt: TNTBlockLogic,
 	suspensionblock: SuspensionLogic,
 	magnet: MagnetBlockLogic,
 
@@ -111,7 +113,7 @@ export const logicRegistry = {
 
 	operationclamp: OperationClampBlockLogic,
 	operationabs: OperationAbsBlockLogic,
-} as const;
+} as const satisfies { readonly [k in keyof typeof BlockDataRegistry]: unknown };
 
 export type LogicRegistry = Readonly<
 	Record<keyof typeof logicRegistry, { new (block: PlacedBlockData): BlockLogic } | undefined>

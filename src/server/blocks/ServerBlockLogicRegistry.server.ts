@@ -15,6 +15,7 @@ type ServerBlockLogicRegistry = {
 
 const serverBlockLogicRegistry: ServerBlockLogicRegistry = {
 	tnt: TNTServerBlockLogic,
+	cylindricaltnt: TNTServerBlockLogic,
 	disconnectblock: DisconnectBlockServerLogic,
 	lamp: LampServerLogic,
 	screen: ScreenServerLogic,
