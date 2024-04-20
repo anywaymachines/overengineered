@@ -1,4 +1,5 @@
 import { RunService, Workspace } from "@rbxts/services";
+import { BlockManager, PlacedBlockData } from "shared/building/BlockManager";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { Signal } from "shared/event/Signal";
 import { AABB } from "shared/fixes/AABB";
@@ -54,11 +55,20 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 		);
 	}
 
+	getBlockDatas(): readonly PlacedBlockData[] {
+		return this.getBlocks().map(BlockManager.getBlockDataByBlockModel);
+	}
 	getBlocks(): readonly BlockModel[] {
 		return this.instance.Blocks.GetChildren(undefined);
 	}
 	getBlock(uuid: BlockUuid): BlockModel {
 		return (this.instance.Blocks as unknown as Record<BlockUuid, BlockModel>)[uuid];
+	}
+
+	getSpawnPosition() {
+		return this.instance.BuildingArea.GetPivot().Position.add(
+			new Vector3(this.instance.BuildingArea.ExtentsSize.X / 2 + 2, 10, 0),
+		);
 	}
 
 	/** Is the provided `Instance` is a plot model */

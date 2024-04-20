@@ -5,6 +5,7 @@ import { PlayModeController } from "server/modes/PlayModeController";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { Element } from "shared/Element";
 import { SlotsMeta } from "shared/SlotsMeta";
+import { SharedPlot } from "shared/building/SharedPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { PlotFloatingImageController } from "./PlotsFloatingImageController";
 
@@ -16,6 +17,7 @@ const assignPlotTo = (player: Player): void => {
 
 		plot.ownerId.set(player.UserId);
 		plot.instance.Blocks.ClearAllChildren();
+		player.RespawnLocation = plot.instance.WaitForChild("SpawnLocation") as SpawnLocation;
 	} catch {
 		player.Kick("No free plot found, try again later");
 	}
@@ -76,8 +78,20 @@ const initializeBlocksFolder = (plot: PlotModel) => {
 
 	create();
 };
+const initializeSpawnLocation = (plot: SharedPlot) => {
+	const spawnLocation = new Instance("SpawnLocation");
+	spawnLocation.Name = "SpawnLocation";
+	spawnLocation.Anchored = true;
+	spawnLocation.Transparency = 1;
+	spawnLocation.CanCollide = false;
+	spawnLocation.PivotTo(new CFrame(plot.getSpawnPosition()));
+
+	spawnLocation.Parent = plot.instance;
+};
+
 for (const plot of SharedPlots.plots) {
 	initializeBlocksFolder(plot.instance);
+	initializeSpawnLocation(plot);
 }
 
 export namespace ServerPlots {

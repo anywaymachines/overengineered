@@ -52,29 +52,23 @@ export class BuildingMode extends PlayMode {
 
 	onSwitchToNext(mode: PlayModes | undefined) {}
 	onSwitchFromPrev(prev: PlayModes | undefined) {
+		const plot = SharedPlots.getPlotComponentByOwnerID(Players.LocalPlayer.UserId);
+
 		const tp = () => {
 			if (!LocalPlayerController.rootPart) return;
 
-			const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
-			const pos = plot.BuildingArea.GetPivot().Position.add(
-				new Vector3(plot.BuildingArea.ExtentsSize.X / 2 + 2, 10, 0),
-			);
+			const pos = plot.getSpawnPosition();
+			if (LocalPlayerController.rootPart.Position.sub(pos).Magnitude < plot.instance.BuildingArea.ExtentsSize.X) {
+				return;
+			}
 
-			if (LocalPlayerController.rootPart.Position.sub(pos).Magnitude < plot.BuildingArea.ExtentsSize.X) return;
-
-			LocalPlayerController.rootPart.CFrame = new CFrame(pos);
-			LocalPlayerController.rootPart.AssemblyLinearVelocity = Vector3.zero;
-			LocalPlayerController.rootPart.AssemblyAngularVelocity = Vector3.zero;
+			forcetp();
 		};
 
 		const forcetp = () => {
 			if (!LocalPlayerController.rootPart) return;
 
-			const plot = SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId);
-			const pos = plot.BuildingArea.GetPivot().Position.add(
-				new Vector3(plot.BuildingArea.ExtentsSize.X / 2 + 2, 10, 0),
-			);
-
+			const pos = plot.getSpawnPosition();
 			LocalPlayerController.rootPart.CFrame = new CFrame(pos);
 			LocalPlayerController.rootPart.AssemblyLinearVelocity = Vector3.zero;
 			LocalPlayerController.rootPart.AssemblyAngularVelocity = Vector3.zero;
