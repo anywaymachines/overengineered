@@ -13,6 +13,7 @@ export const TriangleChunkRenderer = (
 	const squareHalfSize = squareSize / 2;
 	const thicccccness = 10;
 	const half_thicccccness = thicccccness / 2;
+	const errorAngle = 90;
 	const newWedge = (size: Vector3, cframe: CFrame) => {
 		const wedge = new Instance("WedgePart");
 		wedge.Size = size;
@@ -41,13 +42,30 @@ export const TriangleChunkRenderer = (
 
 		const height = math.abs(ab.Dot(up));
 
+		const w1CFrame = CFrame.fromMatrix(a.add(b).div(2), right, up, back);
 		const w1 = newWedge(
 			new Vector3(thicccccness, height, math.abs(ab.Dot(back))),
-			CFrame.fromMatrix(a.add(b).div(2).add(right.mul(half_thicccccness)), right, up, back),
+			w1CFrame.add(
+				right.mul(
+					//nothing to see here 👀
+					math.floor(math.deg(math.abs(w1CFrame.ToOrientation()[1]))) === errorAngle
+						? -half_thicccccness
+						: half_thicccccness,
+				),
+			),
 		);
+
+		const w2CFrame = CFrame.fromMatrix(a.add(c).div(2), right.mul(-1), up, back.mul(-1));
 		const w2 = newWedge(
 			new Vector3(thicccccness, height, math.abs(ac.Dot(back))),
-			CFrame.fromMatrix(a.add(c).div(2).add(right.mul(half_thicccccness)), right.mul(-1), up, back.mul(-1)),
+			w2CFrame.add(
+				right.mul(
+					//nothing to see here 👀
+					math.floor(math.deg(math.abs(w2CFrame.ToOrientation()[1]))) === errorAngle
+						? -half_thicccccness
+						: half_thicccccness,
+				),
+			),
 		);
 
 		return $tuple(w1, w2);
