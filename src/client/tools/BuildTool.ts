@@ -1,4 +1,4 @@
-import { Players, RunService, UserInputService, Workspace } from "@rbxts/services";
+import { Players, ReplicatedStorage, RunService, UserInputService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientComponentChild } from "client/component/ClientComponentChild";
 import { InputController } from "client/controller/InputController";
@@ -339,6 +339,18 @@ namespace SinglePlaceController {
 			this.event.subscribe(Signals.CAMERA.MOVED, () => this.updateBlockPosition());
 			this.event.subscribeObservable(this.selectedBlock, () => this.destroyGhosts());
 			this.onDisable(() => this.destroyGhosts());
+
+			const axis = ReplicatedStorage.Assets.Axis.Clone();
+			axis.Parent = Workspace;
+			this.onDestroy(() => axis.Destroy());
+
+			this.event.subscribe(RunService.Heartbeat, () => {
+				if (this.mainGhost) {
+					axis.PivotTo(this.mainGhost.GetPivot());
+				} else {
+					axis.PivotTo(new CFrame(0, -987654312, 0));
+				}
+			});
 		}
 
 		private destroyGhosts(destroyMain = true) {
