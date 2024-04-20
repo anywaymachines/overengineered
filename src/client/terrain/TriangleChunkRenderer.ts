@@ -11,7 +11,8 @@ export const TriangleChunkRenderer = (
 	const chunkSize = 128 * 4;
 	const squareSize = chunkSize / chunkResolution;
 	const squareHalfSize = squareSize / 2;
-
+	const thicccccness = 10;
+	const half_thicccccness = thicccccness / 2;
 	const newWedge = (size: Vector3, cframe: CFrame) => {
 		const wedge = new Instance("WedgePart");
 		wedge.Size = size;
@@ -41,12 +42,12 @@ export const TriangleChunkRenderer = (
 		const height = math.abs(ab.Dot(up));
 
 		const w1 = newWedge(
-			new Vector3(0, height, math.abs(ab.Dot(back))),
-			CFrame.fromMatrix(a.add(b).div(2), right, up, back),
+			new Vector3(thicccccness, height, math.abs(ab.Dot(back))),
+			CFrame.fromMatrix(a.add(b).div(2).add(right.mul(half_thicccccness)), right, up, back),
 		);
 		const w2 = newWedge(
-			new Vector3(0, height, math.abs(ac.Dot(back))),
-			CFrame.fromMatrix(a.add(c).div(2), right.mul(-1), up, back.mul(-1)),
+			new Vector3(thicccccness, height, math.abs(ac.Dot(back))),
+			CFrame.fromMatrix(a.add(c).div(2).add(right.mul(half_thicccccness)), right.mul(-1), up, back.mul(-1)),
 		);
 
 		return $tuple(w1, w2);
