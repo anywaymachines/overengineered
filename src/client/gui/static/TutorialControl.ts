@@ -1,4 +1,4 @@
-import { LocalizationService, Players } from "@rbxts/services";
+import { LocalizationService, Players, RunService } from "@rbxts/services";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
@@ -59,7 +59,7 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 		// Animated text for tutorial
 		for (const symbol of translatedText) {
 			this.gui.TextLabel.Text = this.gui.TextLabel.Text + symbol;
-			task.wait(0.05);
+			task.wait(RunService.IsStudio() ? 0 : 0.05);
 		}
 
 		this.gui.Header.Next.Visible = nextButtonActive ?? false;

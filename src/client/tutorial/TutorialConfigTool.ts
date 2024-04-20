@@ -3,13 +3,14 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { Tutorial } from "client/tutorial/Tutorial";
 import { BlockManager } from "shared/building/BlockManager";
 import { EventHandler } from "shared/event/EventHandler";
+import { JSON } from "shared/fixes/Json";
+import { Objects } from "shared/fixes/objects";
 import { successResponse } from "shared/types/network/Responses";
-import { VectorUtils } from "shared/utils/VectorUtils";
 
 export type TutorialConfigBlockHighlight = {
-	position: Vector3;
 	key: string;
-	value: BlockConfigTypes.Types[keyof BlockConfigTypes.Types]["config"];
+	position: Vector3;
+	value: unknown;
 };
 
 export class TutorialConfigTool {
@@ -36,27 +37,50 @@ export class TutorialConfigTool {
 		this.get().blocksToConfigure.clear();
 	}
 
+	private tableEquals(table1: object, table2: object): boolean {
+		for (const [key] of Objects.pairs_(table1)) {
+			if (!(key in table2)) {
+				return false;
+			}
+
+			if (typeIs(table1[key], "table")) {
+				if (!this.tableEquals(table1[key], table2[key])) return false;
+			} else {
+				if (table1[key] !== table2[key]) {
+					return false;
+				}
+			}
+		}
+
+		for (const [key] of Objects.pairs_(table2)) {
+			if (!(key in table1)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	async waitForBlocksConfigure(): Promise<boolean> {
 		return new Promise((resolve) => {
 			const eventHandler = new EventHandler();
 
 			eventHandler.register(
 				ClientBuilding.updateConfigOperation.addMiddleware((plot, configs) => {
-					configs.forEach((config) => {
+					for (const config of configs) {
 						if (
-							!this.get().blocksToConfigure.any(
+							!this.get().blocksToConfigure.find(
 								(value) =>
 									value.key === config.key &&
-									value.value === config.value &&
-									value.position === VectorUtils.roundVector(config.block.GetPivot().Position),
+									this.tableEquals(value.value as object, JSON.deserialize(config.value)),
 							)
 						) {
 							return {
 								success: false,
-								message: `This config value required to be ${config.value} by tutorial`,
+								message: "Wrong value",
 							};
 						}
-					});
+					}
 
 					return successResponse;
 				}),
@@ -69,16 +93,19 @@ export class TutorialConfigTool {
 				const positions = this.get().blocksToConfigure.map((value) => value.position);
 
 				const configs_filtered = configs.filter((value) => positions.includes(value.GetPivot().Position));
-				configs_filtered.forEach((config) => {
-					const block = this.get().blocksToConfigure.find((value) => value.position === config.position)!;
-					if (block.key === config.key && block.value !== config.value) {
+
+				for (const data of configs_filtered) {
+					const block = this.get().blocksToConfigure.find((value) => value.position === data[1].position)!;
+					if (block.key !== data[1].key || block.value !== data[1].value) {
 						return;
 					}
-				});
+				}
+
+				// configs_filtered.forEach((config) => {});
 
 				eventHandler.unsubscribeAll();
 				this.tutorial.Finish();
-				resolve(false);
+				resolve(true);
 			});
 
 			eventHandler.subscribeOnce(this.tutorial.Control.instance.Header.Cancel.MouseButton1Click, () => {

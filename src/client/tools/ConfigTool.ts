@@ -1,5 +1,4 @@
 import { InputController } from "client/controller/InputController";
-import { Colors } from "client/gui/Colors";
 import { LogControl } from "client/gui/static/LogControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ToolBase } from "client/tools/ToolBase";
@@ -69,6 +68,23 @@ export class ConfigTool extends ToolBase {
 	}
 
 	private canBeSelected(block: BlockModel): boolean {
+		if (this.blocksToConfigure.size() > 0) {
+			if (
+				!this.blocksToConfigure.any(
+					(value) =>
+						VectorUtils.roundVector(value.position) ===
+						VectorUtils.roundVector(
+							this.targetPlot
+								.get()
+								.instance.BuildingArea.GetPivot()
+								.PointToObjectSpace(block.GetPivot().Position),
+						),
+				)
+			) {
+				return false;
+			}
+		}
+
 		const config = blockConfigRegistry[BlockManager.manager.id.get(block) as keyof typeof blockConfigRegistry];
 		if (!config) return false;
 
@@ -89,18 +105,6 @@ export class ConfigTool extends ToolBase {
 		return differentId === undefined;
 	}
 	private selectBlock(block: BlockModel) {
-		if (this.blocksToConfigure.size() > 0) {
-			if (
-				!this.blocksToConfigure.any(
-					(value) =>
-						VectorUtils.roundVector(value.position) === VectorUtils.roundVector(block.GetPivot().Position),
-				)
-			) {
-				LogControl.instance.addLine("Not this block!", Colors.red);
-				return false;
-			}
-		}
-
 		const instance = new Instance("SelectionBox") as SelectionBox & { Parent: BlockModel };
 		instance.Parent = block;
 		instance.Adornee = block;

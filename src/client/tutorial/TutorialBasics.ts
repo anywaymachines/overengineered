@@ -428,10 +428,22 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	toolEnabler.disableAll();
 	TasksControl.instance.finish();
 
-	// tutorial.Control.displayStep(
-	// 	"It's time to adjust the controls, let's start with the rotary mechanism",
-	// 	false,
-	// );
+	tutorial.Control.displayStep("It's time to adjust the controls, let's start with the rotary mechanism", false);
+	toolEnabler.enableOnly(allTools.configTool);
+
+	tutorial.configTool.addBlockToConfigure({
+		position: new Vector3(0, 5.5, -8),
+		key: "rotationSpeed",
+		value: {
+			rotation: {
+				add: "E",
+			},
+		},
+	});
+
+	if (!(await tutorial.configTool.waitForBlocksConfigure())) return;
+	toolEnabler.disableAll();
+	TasksControl.instance.finish();
 
 	tutorial.Finish();
 }

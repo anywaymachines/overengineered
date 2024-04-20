@@ -11,9 +11,7 @@ export class TutorialEditTool {
 		return BuildingMode.instance.toolController.allTools.editTool;
 	}
 
-	cleanup() {
-		this.get().enabledModes.enableAll();
-	}
+	cleanup() {}
 
 	async waitForMoveToolWork(distance: Vector3): Promise<boolean> {
 		return new Promise((resolve) => {
