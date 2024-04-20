@@ -1,11 +1,19 @@
 import { Debris, Workspace } from "@rbxts/services";
+import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { RemoteEvents } from "shared/RemoteEvents";
 
 const initKillPlane = (instance: BasePart, onTouch?: (part: BasePart) => void) => {
 	instance.Touched.Connect((part) => {
 		let parent: Instance = part;
 		while (true as boolean) {
-			if (parent.FindFirstChild("Humanoid")) return;
+			if (parent.FindFirstChild("Humanoid")) {
+				const human = parent.WaitForChild("Humanoid") as Humanoid | undefined;
+				if (human && human === LocalPlayerController.humanoid) {
+					human.Health -= human.MaxHealth * 0.1;
+				}
+
+				return;
+			}
 
 			const nextparent = parent.Parent;
 			if (!nextparent) break;
