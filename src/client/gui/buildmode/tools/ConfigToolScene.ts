@@ -57,6 +57,7 @@ export class ConfigToolScene extends Control<ConfigToolSceneDefinition> {
 			);
 			if (!response.success) {
 				LogControl.instance.addLine(response.message, Colors.red);
+				this.updateConfigs(selected.get());
 			}
 		});
 
