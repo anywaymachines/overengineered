@@ -543,7 +543,7 @@ const registry = {
 	},
 	sphericaltnt: {
 		name: "Spherical TNT",
-		description: "boom",
+		description: "Catch this anarchid-man!",
 		limit: 200,
 	},
 	vehicleseat: {
@@ -622,11 +622,11 @@ const registry = {
 	},
 	radiotransmitter: {
 		name: "Radio Transmitter",
-		description: "Radio Transmitter (?)",
+		description: "Transmits data over air! True magic for a caveman!",
 	},
 	radioreciever: {
 		name: "Radio Reciever",
-		description: "Radio Transmitter (!)",
+		description: "Love is in the air? Wrong! Radio wave radia-tion!",
 	},
 } as const;
 
