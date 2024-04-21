@@ -12,17 +12,17 @@ export type SliderControlDefinition = GuiObject &
 	};
 
 /** Control that represents a number via a slider. */
-export class SliderControl<T extends SliderControlDefinition = SliderControlDefinition> extends Control<T> {
+export class SliderControl extends Control<SliderControlDefinition> {
 	readonly submitted = new Signal<(value: number) => void>();
 	readonly value;
 	readonly visualValue;
 
 	private readonly progressBar;
 
-	constructor(gui: T, min: number, max: number, step: number) {
+	constructor(gui: SliderControlDefinition, min: number, max: number, step: number) {
 		super(gui);
 
-		this.progressBar = new ProgressBarControl<T>(this.gui, min, max, step);
+		this.progressBar = new ProgressBarControl(this.gui, min, max, step);
 		this.progressBar.instance.Active = true;
 		this.add(this.progressBar);
 

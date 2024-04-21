@@ -74,9 +74,12 @@ export class ColorChooser extends Control<ColorChooserDefinition> {
 			s ??= sat.value.get();
 			v ??= bri.value.get();
 
-			sat.instance.UIGradient.Color = new ColorSequence(Color3.fromHSV(h, 0, v), Color3.fromHSV(h, 1, v));
-			bri.instance.UIGradient.Color = new ColorSequence(
-				bri.instance.UIGradient.Color.Keypoints[0].Value,
+			gui.Sliders.Saturation.UIGradient.Color = new ColorSequence(
+				Color3.fromHSV(h, 0, v),
+				Color3.fromHSV(h, 1, v),
+			);
+			gui.Sliders.Brightness.UIGradient.Color = new ColorSequence(
+				gui.Sliders.Brightness.UIGradient.Color.Keypoints[0].Value,
 				Color3.fromHSV(h, s, 1),
 			);
 		};

@@ -9,13 +9,11 @@ export type ProgressBarControlDefinition = GuiObject & {
 };
 
 /** Control that represents a number as a progress bar. */
-export class ProgressBarControl<
-	T extends ProgressBarControlDefinition = ProgressBarControlDefinition,
-> extends Control<T> {
+export class ProgressBarControl extends Control<ProgressBarControlDefinition> {
 	readonly value;
 	readonly vertical;
 
-	constructor(gui: T, min: number, max: number, step: number) {
+	constructor(gui: ProgressBarControlDefinition, min: number, max: number, step: number) {
 		super(gui);
 		this.value = new NumberObservableValue(min, min, max, step);
 		this.vertical = this.getAttribute<boolean>("Vertical") === true;
