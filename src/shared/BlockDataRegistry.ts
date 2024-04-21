@@ -541,6 +541,11 @@ export const BlockDataRegistry: BlockDataRegistry = {
 		description: "Not a boxed version",
 		limit: 200,
 	},
+	sphericaltnt: {
+		name: "Spherical TNT",
+		description: "boom",
+		limit: 200,
+	},
 	vehicleseat: {
 		name: "Vehicle Seat",
 		description: "A seat for your vehicle. Allows you to control your contraption",

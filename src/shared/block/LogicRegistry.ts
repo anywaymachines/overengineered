@@ -65,6 +65,7 @@ export const logicRegistry = {
 	heliumblock: HeliumBlockLogic,
 	tnt: TNTBlockLogic,
 	cylindricaltnt: TNTBlockLogic,
+	sphericaltnt: TNTBlockLogic,
 	suspensionblock: SuspensionLogic,
 	magnet: MagnetBlockLogic,
 

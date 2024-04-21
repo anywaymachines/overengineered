@@ -1007,6 +1007,33 @@ const counter = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const radiotransmitter = {
+	input: {
+		value: connectors.any("Input", "1"),
+		frequency: {
+			displayName: "Frequency",
+			type: "number",
+			default: 868 as number,
+			config: 868 as number,
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
+const radioreciever = {
+	input: {
+		frequency: {
+			displayName: "Frequency",
+			type: "number",
+			default: 868 as number,
+			config: 868 as number,
+		},
+	},
+	output: {
+		value: connectors.any("Output", "1"),
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const delayBlock = {
 	input: {
 		value: connectors.any("Value", "1"),
@@ -1084,6 +1111,7 @@ export const blockConfigRegistry = {
 	servomotorblock,
 	tnt,
 	cylindricaltnt: tnt,
+	sphericaltnt: tnt,
 	suspensionblock,
 	vehicleseat,
 	magnet,
@@ -1112,6 +1140,8 @@ export const blockConfigRegistry = {
 	altimeter,
 	accelerometer,
 	lidarsensor,
+	radiotransmitter,
+	radioreciever,
 
 	constant,
 	delayblock: delayBlock,

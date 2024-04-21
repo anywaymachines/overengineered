@@ -24,7 +24,9 @@ export namespace BuildingWelder {
 		const createAutomatic = (block: RegistryBlock): readonly Region3[] | undefined => {
 			const autoShape = block.autoWeldShape ?? "none";
 			if (
-				(block.model.GetChildren().size() === 1 && block.model.PrimaryPart!.IsA("Part")) ||
+				(block.model.GetChildren().size() === 1 &&
+					block.model.PrimaryPart!.IsA("Part") &&
+					block.model.PrimaryPart!.Shape === Enum.PartType.Block) ||
 				autoShape === "cube"
 			) {
 				const part = block.model.FindFirstChildWhichIsA("Part");
