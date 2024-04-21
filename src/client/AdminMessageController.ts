@@ -21,7 +21,7 @@ Remotes.Client.GetNamespace("Admin")
 
 		GuiAnimator.transition(label, 0.33, "down");
 		task.delay(duration ?? 3, () => {
-			GuiAnimator.hide(label, 0.33, "down");
+			GuiAnimator.hide(label, 0.33, "up");
 			task.delay(0.33, () => label.Destroy());
 		});
 	});

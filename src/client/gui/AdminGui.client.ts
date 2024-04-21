@@ -1,5 +1,6 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
+import { ServerRestartController } from "client/ServerRestartController";
 import { InputController } from "client/controller/InputController";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
@@ -63,6 +64,7 @@ const create = () => {
 	const tests: readonly (readonly [name: string, test: Control])[] = [
 		...LoadSlotTest.createTests(),
 		["Global message", AdminMessageController.createControl()],
+		wrapNonVisual("Restart", { restart: ServerRestartController.sendToServer }),
 	];
 	for (const [name, content] of tests) {
 		content.hide();

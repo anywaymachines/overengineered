@@ -123,4 +123,5 @@ export const Remotes = Definitions.Create({
 		>(),
 		Restart: Definitions.ClientToServerEvent<[]>(),
 	}),
+	ServerRestartProgress: Definitions.ServerToClientEvent<[atmosphereColor: number]>(),
 });

@@ -11,6 +11,7 @@ while (!SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)) {
 }
 
 import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { ServerRestartController } from "client/ServerRestartController";
 import { CharacterController } from "client/controller/CharacterController";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
@@ -46,6 +47,7 @@ CharacterController.initialize();
 InputTypeChangeEvent.subscribe();
 RemoteEvents.initialize();
 AdminMessageController.initialize();
+ServerRestartController.initialize();
 ClientBuildingValidation.initialize();
 
 if (RunService.IsStudio()) {
