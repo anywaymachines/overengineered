@@ -27,8 +27,8 @@ export class NumberTextBoxControl<
 			this.value,
 			(value) => {
 				let text = tostring(value ?? "");
-				if (step !== undefined && max !== undefined) {
-					text = text.sub(1, tostring(step + max).size() + ((value ?? 0) < 0 ? 1 : 0));
+				if (step !== undefined) {
+					text = string.format(`%.${math.max(0, math.ceil(-math.log(step, 10)))}f`, value ?? 0);
 				}
 
 				this.gui.Text = text;
