@@ -58,9 +58,9 @@ export namespace SoundController {
 	}
 
 	function updateSound(sound: Sound) {
-		const underwaterEffect = sound.FindFirstChild(ReplicatedStorage.Assets.Sounds.Effects.Underwater.Name);
+		const underwaterEffect = sound.FindFirstChild(ReplicatedStorage.Assets.Effects.Sounds.Effects.Underwater.Name);
 		if (underwater && !underwaterEffect) {
-			ReplicatedStorage.Assets.Sounds.Effects.Underwater.Clone().Parent = sound;
+			ReplicatedStorage.Assets.Effects.Sounds.Effects.Underwater.Clone().Parent = sound;
 		} else if (!underwater && underwaterEffect) {
 			underwaterEffect.Destroy();
 		}

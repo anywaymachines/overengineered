@@ -53,8 +53,24 @@ interface ReplicatedStorage {
 		};
 		MoveHandles: MoveHandles;
 		RotateHandles: RotateHandles;
-		Fire: Folder;
-		Sparks: ParticleEmitter;
+		Effects: Folder & {
+			Fire: Folder;
+			Explosion: Folder;
+			Sparks: ParticleEmitter;
+			Sounds: Folder & {
+				Impact: Folder & {
+					Materials: Folder & {
+						Metal: SoundGroup;
+						Glass: SoundGroup;
+						Wood: SoundGroup;
+					};
+				};
+				Effects: Folder & {
+					Underwater: EqualizerSoundEffect;
+				};
+				Explosion: Folder & { [key: string]: Sound };
+			};
+		};
 		PlotOwnerGui: BillboardGui & {
 			UserImage: ImageLabel;
 			DisplayNameLabel: TextLabel;
@@ -79,19 +95,6 @@ interface ReplicatedStorage {
 			WireInfo: BillboardGui & {
 				TextLabel: TextLabel;
 			};
-		};
-		Sounds: Folder & {
-			Impact: Folder & {
-				Materials: Folder & {
-					Metal: SoundGroup;
-					Glass: SoundGroup;
-					Wood: SoundGroup;
-				};
-			};
-			Effects: Folder & {
-				Underwater: EqualizerSoundEffect;
-			};
-			Explosion: Folder & { [key: string]: Sound };
 		};
 	};
 }

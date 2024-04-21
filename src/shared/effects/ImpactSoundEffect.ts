@@ -9,12 +9,12 @@ type Args = {
 };
 export class ImpactSoundEffect extends EffectBase<Args> {
 	private readonly materialSounds: { readonly [key: string]: Instance[] } = {
-		Default: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
+		Default: ReplicatedStorage.Assets.Effects.Sounds.Impact.Materials.Metal.GetChildren(),
 
-		Metal: ReplicatedStorage.Assets.Sounds.Impact.Materials.Metal.GetChildren(),
-		Glass: ReplicatedStorage.Assets.Sounds.Impact.Materials.Glass.GetChildren(),
-		Wood: ReplicatedStorage.Assets.Sounds.Impact.Materials.Wood.GetChildren(),
-		WoodPlanks: ReplicatedStorage.Assets.Sounds.Impact.Materials.Wood.GetChildren(),
+		Metal: ReplicatedStorage.Assets.Effects.Sounds.Impact.Materials.Metal.GetChildren(),
+		Glass: ReplicatedStorage.Assets.Effects.Sounds.Impact.Materials.Glass.GetChildren(),
+		Wood: ReplicatedStorage.Assets.Effects.Sounds.Impact.Materials.Wood.GetChildren(),
+		WoodPlanks: ReplicatedStorage.Assets.Effects.Sounds.Impact.Materials.Wood.GetChildren(),
 	};
 
 	constructor() {

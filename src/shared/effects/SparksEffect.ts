@@ -12,7 +12,7 @@ export class SparksEffect extends EffectBase<Args> {
 	justRun({ part }: Args): void {
 		if (!part) return;
 
-		const sparks = ReplicatedStorage.Assets.Sparks.Clone();
+		const sparks = ReplicatedStorage.Assets.Effects.Sparks.Clone();
 		sparks.Parent = part;
 
 		// Delete effect

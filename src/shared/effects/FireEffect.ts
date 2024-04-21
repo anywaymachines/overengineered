@@ -13,7 +13,7 @@ export class FireEffect extends EffectBase<Args> {
 	justRun({ part, duration }: Args): void {
 		if (!part) return;
 
-		const effects = ReplicatedStorage.Assets.Fire.GetChildren();
+		const effects = ReplicatedStorage.Assets.Effects.Fire.GetChildren();
 		effects.forEach((value) => {
 			const obj = value.Clone();
 			obj.Parent = part;
