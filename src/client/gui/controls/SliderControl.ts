@@ -6,16 +6,16 @@ import { Signal } from "shared/event/Signal";
 import { NumberTextBoxControl } from "./NumberTextBoxControl";
 import { ProgressBarControl, ProgressBarControlDefinition } from "./ProgressBarControl";
 
+type ToNum<TAllowNull extends boolean> = TAllowNull extends false ? number : number | undefined;
 export type SliderControlDefinition = GuiObject &
 	ProgressBarControlDefinition & {
 		TextBox?: TextBox;
 	};
 
 /** Control that represents a number via a slider. */
-export class SliderControl extends Control<SliderControlDefinition> {
+export class SliderControl<TAllowNull extends boolean = false> extends Control<SliderControlDefinition> {
 	readonly submitted = new Signal<(value: number) => void>();
 	readonly value;
-	readonly visualValue;
 
 	private readonly progressBar;
 
@@ -26,14 +26,13 @@ export class SliderControl extends Control<SliderControlDefinition> {
 		this.progressBar.instance.Active = true;
 		this.add(this.progressBar);
 
-		this.value = new NumberObservableValue(min, min, max, step);
-		this.value.subscribe((value) => this.visualValue.set(value));
-		this.visualValue = this.progressBar.value;
+		this.value = new NumberObservableValue<ToNum<TAllowNull>>(min, min, max, step);
+		this.value.subscribe((value) => this.progressBar.value.set(value ?? 0));
 
 		this.subscribeMovement();
 
 		if (Control.exists(this.gui, "TextBox")) {
-			const num = new NumberTextBoxControl(this.gui.TextBox, min, max, step);
+			const num = new NumberTextBoxControl<TAllowNull>(this.gui.TextBox, min, max, step);
 			num.value.bindTo(this.value);
 			this.event.subscribe(num.submitted, (value) => this.submitted.Fire(value));
 			this.add(num);
@@ -66,7 +65,10 @@ export class SliderControl extends Control<SliderControlDefinition> {
 			startpos = undefined;
 			eh.unsubscribeAll();
 
-			this.submitted.Fire(this.value.get());
+			const value = this.value.get();
+			if (value !== undefined) {
+				this.submitted.Fire(value);
+			}
 		};
 		const sub = (signal: RBXScriptSignal<(input: InputObject) => void>) => {
 			this.event.subscribe(signal, (input) => {
@@ -102,7 +104,7 @@ export class SliderControl extends Control<SliderControlDefinition> {
 		}
 
 		const moveGamepad = (posx: boolean) => {
-			this.value.set(this.value.get() + (posx ? this.value.step : -this.value.step));
+			this.value.set((this.value.get() ?? 0) + (posx ? this.value.step : -this.value.step));
 		};
 
 		if (Control.exists(this.gui, "Knob")) {

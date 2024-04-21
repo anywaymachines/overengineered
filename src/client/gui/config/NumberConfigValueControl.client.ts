@@ -11,11 +11,10 @@ class ConfigNumberControl extends Control<NumberTextBoxControlDefinition> {
 	constructor(gui: NumberTextBoxControlDefinition, def: number | undefined) {
 		super(gui);
 
-		const cb = this.add(new NumberTextBoxControl<number | undefined>(gui));
+		const cb = this.add(new NumberTextBoxControl<true>(gui));
 		this.submitted = cb.submitted;
 
 		cb.value.set(def);
-		// TODO: def
 	}
 }
 

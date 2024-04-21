@@ -63,6 +63,27 @@ export const ConfigTest: ControlTest = {
 					config: Vector3.zero,
 					default: Vector3.zero,
 				},
+				str: {
+					displayName: "STR ING",
+					type: "string",
+					config: "",
+					default: "",
+				},
+				num: {
+					displayName: "NUMERO",
+					type: "number",
+					config: 1,
+					default: 1,
+				},
+				cnum: {
+					displayName: "NUMERO",
+					type: "clampedNumber",
+					config: 1,
+					default: 1,
+					min: 0,
+					max: 10,
+					step: 1,
+				},
 			};
 
 			const frame = Element.create(
@@ -90,6 +111,9 @@ export const ConfigTest: ControlTest = {
 						av: Vector3.one,
 						bv: Vector3.zero,
 						cv: new Vector3(1, 2, 3),
+						str: "asd",
+						num: 1,
+						cnum: 2,
 					},
 					["2" as BlockUuid]: {
 						a: true,
@@ -98,6 +122,9 @@ export const ConfigTest: ControlTest = {
 						av: Vector3.one,
 						bv: Vector3.zero,
 						cv: new Vector3(1, 4, 3),
+						str: "dsa",
+						num: 2,
+						cnum: 3,
 					},
 				},
 				multidef,
