@@ -117,6 +117,10 @@ export const Remotes = Definitions.Create({
 	}),
 	Admin: Definitions.Namespace({
 		LoadSlot: Definitions.ClientToServerEvent<[userid: number, slot: number]>(),
-		SendMessage: Definitions.BidirectionalEvent<[text: string], [text: string]>(),
+		SendMessage: Definitions.BidirectionalEvent<
+			[text: string, color?: Color3, duration?: number],
+			[text: string, color?: Color3, duration?: number]
+		>(),
+		Restart: Definitions.ClientToServerEvent<[]>(),
 	}),
 });

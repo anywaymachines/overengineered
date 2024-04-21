@@ -9,18 +9,18 @@ import { TextBoxControl } from "./gui/controls/TextBoxControl";
 
 Remotes.Client.GetNamespace("Admin")
 	.Get("SendMessage")
-	.Connect((text) => {
+	.Connect((text, color, duration) => {
 		const label = Element.create("TextLabel", {
 			Text: text,
 			BackgroundTransparency: 1,
 			Size: new UDim2(1, 0, 1, 0),
 			TextScaled: true,
-			TextColor3: Colors.red,
+			TextColor3: color ?? Colors.red,
 			Parent: Gui.getGameUI(),
 		});
 
 		GuiAnimator.transition(label, 0.33, "down");
-		task.delay(3, () => {
+		task.delay(duration ?? 3, () => {
 			GuiAnimator.hide(label, 0.33, "down");
 			task.delay(0.33, () => label.Destroy());
 		});
@@ -30,8 +30,8 @@ export namespace AdminMessageController {
 	// empty method to trigger subscription
 	export function initialize() {}
 
-	export function send(text: string) {
-		Remotes.Client.GetNamespace("Admin").Get("SendMessage").SendToServer(text);
+	export function send(text: string, color?: Color3, duration?: number) {
+		Remotes.Client.GetNamespace("Admin").Get("SendMessage").SendToServer(text, color, duration);
 	}
 
 	export function createControl() {

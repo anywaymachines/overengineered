@@ -440,6 +440,15 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 			},
 		},
 	});
+	tutorial.configTool.addBlockToConfigure({
+		position: new Vector3(0, 5.5, -8),
+		key: "rotationSpeed",
+		value: {
+			rotation: {
+				sub: "S",
+			},
+		},
+	});
 
 	tutorial.configTool.addBlockToConfigure({
 		position: new Vector3(18, 5.5, -8),
@@ -447,6 +456,15 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 		value: {
 			rotation: {
 				add: "W",
+			},
+		},
+	});
+	tutorial.configTool.addBlockToConfigure({
+		position: new Vector3(18, 5.5, -8),
+		key: "rotationSpeed",
+		value: {
+			rotation: {
+				add: "S",
 			},
 		},
 	});

@@ -1,4 +1,5 @@
 import { RunService, Workspace } from "@rbxts/services";
+import { ServerRestartController } from "server/ServerRestartController";
 import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Logger } from "shared/Logger";
@@ -33,9 +34,9 @@ namespace RemoteHandlers {
 		return RemoteHandlers.loadAdminSlot(SharedPlots.getPlotByOwnerID(player.UserId), userid, index);
 	}
 
-	export function sendMessageAsAdmin(player: Player, text: string) {
+	export function sendMessageAsAdmin(player: Player, text: string, color?: Color3, duration?: number) {
 		if (!GameDefinitions.isAdmin(player)) return;
-		Remotes.Server.GetNamespace("Admin").Get("SendMessage").SendToAllPlayers(text);
+		Remotes.Server.GetNamespace("Admin").Get("SendMessage").SendToAllPlayers(text, color, duration);
 	}
 
 	export function loadAdminSlot(plot: PlotModel, userid: number, index: number): LoadSlotResponse {
@@ -149,6 +150,7 @@ registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
 registerOnRemoteEvent("Admin", "LoadSlot", RemoteHandlers.loadSlotAsAdmin);
 registerOnRemoteEvent("Admin", "SendMessage", RemoteHandlers.sendMessageAsAdmin);
+registerOnRemoteEvent("Admin", "Restart", ServerRestartController.restart);
 UnreliableRemoteHandler.initialize();
 
 BlocksInitializer.initialize();
