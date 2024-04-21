@@ -1,17 +1,22 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
+import { SpreadingFireController } from "server/SpreadingFireController";
+import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { Remotes } from "shared/Remotes";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
+import { BlockManager } from "shared/building/BlockManager";
+import { PartUtils } from "shared/utils/PartUtils";
 
 export namespace ServerRestartController {
 	export function restart() {
 		const maxTime = 30;
 		let timePassed = 0;
-
 		const meteorsSpawnChance = 0.6;
-		const meteorSpeed = new Vector3(math.random(150, 600), math.random(-250, -700), math.random(150, 600));
+		const meteorSpeed = new Vector3(math.random(150, 600), math.random(-750, -200), math.random(150, 600));
 		const meteor = new Instance("Part");
 		meteor.Material = Enum.Material.CrackedLava;
 		meteor.Color = Color3.fromRGB(255, 0, 0);
+		//meteor.AssemblyLinearVelocity = meteorSpeed;
 		meteor.Shape = Enum.PartType.Ball;
 
 		const textStartColor = Color3.fromRGB(255, 255, 255);
@@ -40,7 +45,7 @@ export namespace ServerRestartController {
 			Players.GetPlayers().forEach((p) => {
 				const pos = p.Character?.GetPivot();
 				if (!pos) return;
-				if (math.random() <= math.max(meteorsSpawnChance / progress, meteorsSpawnChance)) {
+				if (math.random() <= math.max(meteorsSpawnChance / progress, meteorsSpawnChance / 2)) {
 					const sz = 5 - (math.random() - 0.5) * 2;
 					const clone = meteor.Clone();
 					clone.Size = new Vector3(sz, sz, sz);
@@ -49,10 +54,57 @@ export namespace ServerRestartController {
 					);
 					clone.Parent = Workspace;
 					clone.AssemblyLinearVelocity = meteorSpeed;
-					RemoteEvents.Burn.send([clone]);
-					task.delay(10, () => clone.Destroy());
+					for (const child of ReplicatedAssets.get<{
+						Effects: { Fire: Folder };
+					}>().Effects.Fire.GetChildren()) {
+						child.Clone().Parent = clone;
+					}
+
+					clone.Touched.Connect(() => explode(clone, true, 123456, 456));
 				}
 			});
 		});
+
+		const explode = (part: BasePart, isFlammable: boolean, pressure: number, radius: number) => {
+			radius = math.clamp(radius, 0, 16);
+			pressure = math.clamp(pressure, 0, 2500);
+
+			const hitParts = Workspace.GetPartBoundsInRadius(part.Position, radius);
+
+			if (isFlammable) {
+				const flameHitParts = Workspace.GetPartBoundsInRadius(part.Position, radius * 1.5);
+
+				flameHitParts.forEach((part) => {
+					if (math.random(1, 3) === 1) SpreadingFireController.burn(part);
+				});
+			}
+
+			hitParts.forEach((part) => {
+				if (!BlockManager.isActiveBlockPart(part)) {
+					return;
+				}
+
+				if (math.random(1, 2) === 1) {
+					ServerPartUtils.BreakJoints(part);
+				}
+
+				part.Velocity = new Vector3(
+					math.random(0, pressure / 40),
+					math.random(0, pressure / 40),
+					math.random(0, pressure / 40),
+				);
+			});
+
+			part.Transparency = 1;
+			PartUtils.applyToAllDescendantsOfType("Decal", part, (decal) => {
+				decal.Destroy();
+			});
+
+			// Explosion sound
+			RemoteEvents.Effects.Explosion.send("everyone", {
+				part: part,
+				index: undefined,
+			});
+		};
 	}
 }
