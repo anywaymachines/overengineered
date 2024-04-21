@@ -6,7 +6,7 @@ import { TabControl } from "client/gui/controls/TabControl";
 import { ComponentDisablerTests } from "client/test/tests/ComponentDisablerTests";
 import { LoadingTests } from "client/test/tests/LoadingTests";
 import { TutorialTests } from "client/test/tests/TutorialTests";
-import { WireToolTests } from "client/tools/WireTool";
+import { WireToolTests } from "client/test/tests/WireManagerTests";
 import { Element } from "shared/Element";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { Objects } from "shared/fixes/objects";
