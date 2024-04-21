@@ -623,10 +623,12 @@ const registry = {
 	radiotransmitter: {
 		name: "Radio Transmitter",
 		description: "Transmits data over air! True magic for a caveman!",
+		limit: 10,
 	},
 	radioreciever: {
 		name: "Radio Reciever",
 		description: "Love is in the air? Wrong! Radio wave radia-tion!",
+		limit: 10,
 	},
 } as const;
 

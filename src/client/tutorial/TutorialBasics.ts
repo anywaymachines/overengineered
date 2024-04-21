@@ -436,7 +436,17 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 		key: "rotationSpeed",
 		value: {
 			rotation: {
-				add: "E",
+				add: "W",
+			},
+		},
+	});
+
+	tutorial.configTool.addBlockToConfigure({
+		position: new Vector3(18, 5.5, -8),
+		key: "rotationSpeed",
+		value: {
+			rotation: {
+				add: "W",
 			},
 		},
 	});
