@@ -1012,9 +1012,12 @@ const radiotransmitter = {
 		value: connectors.any("Input", "1"),
 		frequency: {
 			displayName: "Frequency",
-			type: "number",
+			type: "clampedNumber",
 			default: 868 as number,
 			config: 868 as number,
+			min: 434,
+			max: 1500,
+			step: 0.1,
 		},
 	},
 	output: {},
@@ -1024,9 +1027,12 @@ const radioreciever = {
 	input: {
 		frequency: {
 			displayName: "Frequency",
-			type: "number",
+			type: "clampedNumber",
 			default: 868 as number,
 			config: 868 as number,
+			min: 434,
+			max: 1500,
+			step: 0.1,
 		},
 	},
 	output: {

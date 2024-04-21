@@ -17,7 +17,7 @@ interface BlockSetupInformation {
 type BlockDataRegistry = Record<string, BlockSetupInformation>;
 type BlockDataRegistryRegistry = { readonly [key: string]: BlockSetupInformation | BlockDataRegistryRegistry };
 
-const flatten = (data: BlockDataRegistryRegistry): BlockDataRegistry => {
+const flatten = <T extends Record<string, BlockDataRegistry>>(data: BlockDataRegistryRegistry): BlockDataRegistry => {
 	const push = (result: BlockDataRegistry, key: string, item: BlockDataRegistryRegistry | BlockSetupInformation) => {
 		if ("name" in item) {
 			ret[key] = item as BlockSetupInformation;
@@ -46,7 +46,7 @@ const process = (block: BlockSetupInformation): BlockSetupInformation => {
 	return block;
 };
 
-const logic: Record<string, BlockDataRegistry> = {
+const logic = {
 	gate: {
 		counter: {
 			name: "Counter",
@@ -323,10 +323,10 @@ const logic: Record<string, BlockDataRegistry> = {
 			autoWeldShape: "cube",
 		},
 	},
-};
+} as const satisfies Record<string, BlockDataRegistry>;
 
 /** Registry for the block information, for easier editing (compared to Roblox Studio) */
-export const BlockDataRegistry: BlockDataRegistry = {
+const registry = {
 	...flatten(logic),
 	piston: {
 		name: "Piston",
@@ -620,7 +620,18 @@ export const BlockDataRegistry: BlockDataRegistry = {
 		name: "Wing Sharper",
 		description: "An evil brother of the wing rounding",
 	},
-};
+	radiotransmitter: {
+		name: "Radio Transmitter",
+		description: "Radio Transmitter (?)",
+	},
+	radioreciever: {
+		name: "Radio Reciever",
+		description: "Radio Transmitter (!)",
+	},
+} as const;
+
+export const BlockDataRegistry: BlockDataRegistry = registry;
+export type BlockId = keyof typeof registry;
 
 for (const [key, info] of Objects.pairs_(BlockDataRegistry)) {
 	BlockDataRegistry[key] = process(info);

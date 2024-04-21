@@ -1,5 +1,7 @@
 import { type BlockDataRegistry } from "shared/BlockDataRegistry";
 import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
+import { RadioRecieverBlockLogic } from "shared/block/logic/RadioRecieverBlockLogic";
+import { RadioTransmitterBlockLogic } from "shared/block/logic/RadioTransmitterBlockLogic";
 import { LaserBlockLogic } from "shared/block/logic/operations/output/LaserBlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { BlockLogic } from "./BlockLogic";
@@ -80,6 +82,9 @@ export const logicRegistry = {
 	delayblock: DelayBlockLogic,
 	counter: CounterBlockLogic,
 	relay: RelayBlockLogic,
+
+	radioreciever: RadioRecieverBlockLogic,
+	radiotransmitter: RadioTransmitterBlockLogic,
 
 	multiplexer: Multiplexer,
 

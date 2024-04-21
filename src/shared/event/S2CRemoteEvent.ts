@@ -1,5 +1,5 @@
 import { Players, RunService } from "@rbxts/services";
-import { SlimSignal } from "shared/event/SlimSignal";
+import { Signal } from "shared/event/Signal";
 import { CreatableRemoteEvents, RemoteEventBase } from "./RemoteEventBase";
 
 type CustomRemoteEvent<T extends Callback> = Instance & {
@@ -65,7 +65,7 @@ export abstract class S2CRemoteEvent<T> extends RemoteEventBase<TweenInfo, Custo
 	}
 }
 export class AutoS2CRemoteEvent<T> extends S2CRemoteEvent<T> {
-	readonly invoked = new SlimSignal<(arg: T) => void>();
+	readonly invoked = new Signal<(arg: T) => void>();
 
 	justRun(arg: T): void {
 		this.invoked.Fire(arg);
