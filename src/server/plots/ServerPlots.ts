@@ -84,6 +84,8 @@ const initializeSpawnLocation = (plot: SharedPlot) => {
 	spawnLocation.Anchored = true;
 	spawnLocation.Transparency = 1;
 	spawnLocation.CanCollide = false;
+	spawnLocation.CanQuery = false;
+	spawnLocation.CanTouch = false;
 	spawnLocation.PivotTo(new CFrame(plot.getSpawnPosition()));
 
 	spawnLocation.Parent = plot.instance;
