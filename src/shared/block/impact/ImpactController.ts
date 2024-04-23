@@ -4,6 +4,7 @@ import { RemoteEvents } from "shared/RemoteEvents";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { BlockManager, PlacedBlockData } from "shared/building/BlockManager";
 import { Component } from "shared/component/Component";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Objects } from "shared/fixes/objects";
 import { PartUtils } from "shared/utils/PartUtils";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
@@ -114,7 +115,7 @@ export class ImpactController extends Component {
 			allowedDifference += math.random(0, 30);
 
 			// Terrain Water
-			if (part.CFrame.Y < TerrainDataInfo.waterLevel + 4) {
+			if (part.CFrame.Y < TerrainDataInfo.waterLevel + 4 + GameDefinitions.HEIGHT_OFFSET) {
 				allowedDifference *= this.waterDiffMultiplier;
 			}
 
