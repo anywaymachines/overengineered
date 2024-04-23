@@ -13,6 +13,10 @@ export namespace GameDefinitions {
 			name: "Developer",
 			rainbow: true,
 		},
+		253: {
+			name: "Roblox Staff",
+			color: Color3.fromRGB(255, 255, 255),
+		},
 		2: {
 			name: "Game Test",
 			color: Color3.fromRGB(170, 255, 255),
