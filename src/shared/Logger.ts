@@ -23,10 +23,10 @@ export namespace Logger {
 		if (RunService.IsClient() === true) {
 			// Show logs only to maintainers
 			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
-				warn(`[WARN] [CLIENT] ${msg}`);
+				print(`[WARN] [CLIENT] ${msg}`);
 			}
 		} else {
-			warn(`[WARN] [SERVER] ${msg}`);
+			print(`[WARN] [SERVER] ${msg}`);
 		}
 
 		_onLog.Fire(msg, false);
