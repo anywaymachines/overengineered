@@ -1,6 +1,5 @@
 import { ReplicatedStorage, StarterGui, Workspace } from "@rbxts/services";
 import { Signals } from "client/event/Signals";
-import { Logger } from "shared/Logger";
 import { Sound } from "shared/Sound";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { PartUtils } from "shared/utils/PartUtils";
@@ -52,10 +51,6 @@ export namespace SoundController {
 		const list: string[] = [];
 
 		sounds.forEach((sound) => {
-			if (sound.TimeLength === 0) {
-				Logger.warn(`Sound ${sound.Name} (rbxassetid://${sound.SoundId}) is unavailable`);
-				return;
-			}
 			list.push(sound.SoundId);
 		});
 
