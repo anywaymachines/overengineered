@@ -1,11 +1,13 @@
+import { type ColorChooserDefinition } from "client/gui/ColorChooser";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
-import { ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
-import { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
-import { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
-import { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
-import { SliderControlDefinition } from "client/gui/controls/SliderControl";
-import { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
+import { type ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
+import { type OrConfigControlDefinition } from "client/gui/config/OrConfigValueControl.client";
+import { type CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
+import { type KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
+import { type NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
+import { type SliderControlDefinition } from "client/gui/controls/SliderControl";
+import { type TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
 
 type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	readonly HeadingLabel: TextLabel;
@@ -20,6 +22,8 @@ type Templates = {
 	readonly NumberTemplate: ConfigPartDefinition<NumberTextBoxControlDefinition>;
 	readonly StringTemplate: ConfigPartDefinition<TextBoxControlDefinition>;
 	readonly MultiTemplate: ConfigPartDefinition<ConfigControlDefinition>;
+	readonly MultiMultiTemplate: ConfigPartDefinition<OrConfigControlDefinition>;
+	readonly ColorTemplate: ConfigPartDefinition<ColorChooserDefinition>;
 };
 const templates = Gui.getGameUI<{ Templates: { Config: Templates } }>().Templates.Config;
 
@@ -31,5 +35,7 @@ export const configValueTemplateStorage = {
 	number: Control.asTemplateWithMemoryLeak(templates.NumberTemplate, false),
 	string: Control.asTemplateWithMemoryLeak(templates.StringTemplate, false),
 	multi: Control.asTemplateWithMemoryLeak(templates.MultiTemplate, false),
+	multiMulti: Control.asTemplateWithMemoryLeak(templates.MultiMultiTemplate, false),
+	color: Control.asTemplateWithMemoryLeak(templates.ColorTemplate, false),
 } as const;
 export type ConfigValueTemplateStorage = typeof configValueTemplateStorage;

@@ -8,10 +8,11 @@ import { Signal } from "shared/event/Signal";
 
 export type KeyChooserControlDefinition = TextButton;
 
+type ToStr<TAllowNull extends boolean> = TAllowNull extends false ? string : string | undefined;
 /** Control that represents a key */
-export class KeyChooserControl extends Control<KeyChooserControlDefinition> {
-	readonly submitted = new Signal<(value: string, prev: string) => void>();
-	readonly value = new ObservableValue<string>("P");
+export class KeyChooserControl<TAllowNull extends boolean = false> extends Control<KeyChooserControlDefinition> {
+	readonly submitted = new Signal<(value: string, prev: ToStr<TAllowNull>) => void>();
+	readonly value = new ObservableValue<ToStr<TAllowNull>>("P");
 
 	private readonly color = Colors.accentDark;
 	private readonly activeColor = Colors.accent;

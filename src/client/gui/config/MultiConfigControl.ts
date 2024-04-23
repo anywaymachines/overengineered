@@ -18,7 +18,7 @@ type ConfigUpdatedCallback<TDef extends BlockConfigTypes.Definitions, TKey exten
 export class MultiConfigControl<
 	TDef extends BlockConfigTypes.Definitions,
 > extends Control<MultiConfigControlDefinition> {
-	readonly configUpdated = new Signal<ConfigUpdatedCallback<TDef, keyof TDef>>();
+	readonly configUpdated = new Signal<ConfigUpdatedCallback<TDef, keyof TDef>>(); // TODO: wrong
 
 	constructor(
 		gui: MultiConfigControlDefinition,

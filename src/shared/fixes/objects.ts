@@ -1,4 +1,15 @@
 export namespace Objects {
+	export function firstKey<T extends object>(object: T): keyof T | undefined {
+		for (const [key] of pairs_(object)) {
+			return key;
+		}
+	}
+	export function firstValue<T extends object>(object: T): T[keyof T] | undefined {
+		for (const [, value] of pairs_(object)) {
+			return value;
+		}
+	}
+
 	export function keys<T extends object>(object: T): (keyof T)[] {
 		const result: (keyof T)[] = [];
 		for (const [key] of Objects.pairs_(object)) {
