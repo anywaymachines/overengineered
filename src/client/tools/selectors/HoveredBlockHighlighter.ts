@@ -3,6 +3,7 @@ import { ClientComponent } from "client/component/ClientComponent";
 import { InputController } from "client/controller/InputController";
 import { Signals } from "client/event/Signals";
 import { Gui } from "client/gui/Gui";
+import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -120,10 +121,10 @@ export class HoveredBlockHighlighter extends ClientComponent {
 
 			destroyHighlight();
 
-			highlight = new Instance("Highlight") as typeof highlight & defined;
-			highlight.Parent = target.Parent;
-			highlight.Adornee = target.Parent;
-			highlight.DepthMode = Enum.HighlightDepthMode.Occluded;
+			highlight = BlockGhoster.createHighlight({
+				Adornee: target.Parent,
+				Parent: target.Parent,
+			}) as typeof highlight & defined;
 
 			this.highlightedBlock.set(highlight.Parent);
 		};

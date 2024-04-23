@@ -7,15 +7,17 @@ export namespace BlockGhoster {
 	export const parent = Element.create(
 		"Model",
 		{ Name: "Ghosts", Parent: Workspace },
-		{
-			highlight: Element.create("Highlight", {
-				FillColor: Colors.blue,
-				FillTransparency: 0.4,
-				OutlineTransparency: 0.5,
-				DepthMode: Enum.HighlightDepthMode.Occluded,
-			}),
-		},
+		{ highlight: createHighlight() },
 	);
+	export function createHighlight(additional?: Partial<Highlight>) {
+		return Element.create("Highlight", {
+			FillColor: Colors.red,
+			FillTransparency: 0.4,
+			OutlineTransparency: 0.5,
+			DepthMode: Enum.HighlightDepthMode.Occluded,
+			...(additional ?? {}),
+		});
+	}
 
 	export function setColor(color: Color3) {
 		parent.highlight.FillColor = color;

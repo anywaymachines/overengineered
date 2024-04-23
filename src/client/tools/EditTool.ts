@@ -13,6 +13,7 @@ import { InputTooltips } from "client/gui/static/TooltipsControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
+import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockMover } from "client/tools/selectors/BlockMover";
 import { BlockRotater } from "client/tools/selectors/BlockRotater";
 import { HoveredBlocksHighlighter } from "client/tools/selectors/HoveredBlocksHighlighter";
@@ -483,14 +484,7 @@ namespace Controllers {
 			const ghostParent = Element.create(
 				"Model",
 				{ Parent: Workspace },
-				{
-					highlight: Element.create("Highlight", {
-						FillColor: Colors.blue,
-						FillTransparency: 0.4,
-						OutlineTransparency: 0.5,
-						DepthMode: Enum.HighlightDepthMode.Occluded,
-					}),
-				},
+				{ highlight: BlockGhoster.createHighlight({ FillColor: Colors.blue }) },
 			);
 			this.onDestroy(() => ghostParent.Destroy());
 

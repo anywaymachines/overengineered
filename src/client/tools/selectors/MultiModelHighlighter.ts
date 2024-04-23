@@ -1,3 +1,4 @@
+import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { Element } from "shared/Element";
 import { Component } from "shared/component/Component";
 
@@ -11,12 +12,7 @@ export class MultiModelHighlighter extends Component {
 		super();
 
 		this.model = Element.create("Model", { Name: "MultiHighlighter", Parent: modelParent });
-		this.highlightInstance = Element.create("Highlight", {
-			FillTransparency: 0.4,
-			OutlineTransparency: 0.5,
-			DepthMode: Enum.HighlightDepthMode.Occluded,
-			Parent: this.model,
-		});
+		this.highlightInstance = BlockGhoster.createHighlight({ Parent: this.model });
 		modifyFunc?.(this.highlightInstance);
 
 		this.onDisable(() => this.stop());
