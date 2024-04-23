@@ -150,8 +150,10 @@ registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
 registerOnRemoteEvent("Admin", "LoadSlot", RemoteHandlers.loadSlotAsAdmin);
 registerOnRemoteEvent("Admin", "SendMessage", RemoteHandlers.sendMessageAsAdmin);
-registerOnRemoteEvent("Admin", "Restart", ServerRestartController.restart);
+registerOnRemoteEvent("Admin", "Restart", () => ServerRestartController.restart(false));
 UnreliableRemoteHandler.initialize();
+
+ServerRestartController.init();
 
 BlocksInitializer.initialize();
 BuildingWelder.initialize();

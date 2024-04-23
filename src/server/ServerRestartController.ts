@@ -1,4 +1,4 @@
-import { Players, RunService, Workspace } from "@rbxts/services";
+import { MessagingService, Players, RunService, Workspace } from "@rbxts/services";
 import { SpreadingFireController } from "server/SpreadingFireController";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { RemoteEvents } from "shared/RemoteEvents";
@@ -8,7 +8,17 @@ import { BlockManager } from "shared/building/BlockManager";
 import { PartUtils } from "shared/utils/PartUtils";
 
 export namespace ServerRestartController {
-	export function restart() {
+	export function init() {
+		MessagingService.SubscribeAsync("Restart", () => {
+			restart(true);
+		});
+	}
+
+	export function restart(networkReceived: boolean = false) {
+		if (!networkReceived) {
+			MessagingService.PublishAsync("Restart", undefined);
+		}
+
 		const maxTime = 30;
 		let timePassed = 0;
 		const meteorsSpawnChance = 0.6;
