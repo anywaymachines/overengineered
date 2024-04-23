@@ -49,7 +49,19 @@ export class PlayModeController {
 		Logger.info(`${player.Name}'s mode: '${PlayModeController.playerModes[player.UserId]}' => '${mode}'`);
 		PlayModeController.playerModes[player.UserId] = mode;
 
-		await Remotes.Server.GetNamespace("Ride").Get("SetPlayModeOnClient").CallPlayerAsync(player, mode);
+		for (let i = 0; i < 3; i++) {
+			try {
+				if (!Players.GetPlayers().includes(player)) {
+					return { success: true };
+				}
+
+				await Remotes.Server.GetNamespace("Ride").Get("SetPlayModeOnClient").CallPlayerAsync(player, mode);
+				break;
+			} catch (err) {
+				//
+			}
+		}
+
 		return { success: true };
 	}
 }
