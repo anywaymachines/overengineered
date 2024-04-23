@@ -77,9 +77,19 @@ const getMouseTargetBlockPositionV2 = (
 		);
 	};
 	const addTargetSize = (target: BasePart, normal: Vector3, pos: Vector3) => {
-		return pos
-			.sub(pos.sub(target.Position).mul(VectorUtils.apply(normal, math.abs)))
-			.add(AABB.fromPart(target).getSize().div(2).mul(normal));
+		let position: Vector3;
+		let size: Vector3;
+
+		if (BlockManager.isBlockPart(target)) {
+			const block = target.Parent;
+			position = block.GetPivot().Position;
+			size = AABB.fromModel(block).getSize();
+		} else {
+			position = target.Position;
+			size = AABB.fromPart(target).getSize();
+		}
+
+		return pos.sub(pos.sub(position).mul(VectorUtils.apply(normal, math.abs))).add(size.div(2).mul(normal));
 	};
 	const offsetBlockPivotToCenter = (selectedBlock: RegistryBlock, pos: Vector3) => {
 		const pivot = selectedBlock.model.GetPivot().Position;

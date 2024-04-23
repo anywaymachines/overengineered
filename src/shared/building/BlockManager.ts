@@ -49,13 +49,13 @@ export namespace BlockManager {
 	}
 
 	export function isBlockPart(part: Instance | undefined): part is BasePart & { Parent: BlockModel } {
-		if (
-			!part ||
-			!part.Parent ||
-			!part.Parent.IsA("Model") ||
-			manager.id.get(part.Parent as BlockModel) === undefined
-		)
+		if (!part?.Parent?.IsA("Model")) {
 			return false;
+		}
+		if (manager.id.get(part.Parent as BlockModel) === undefined) {
+			return false;
+		}
+
 		return true;
 	}
 
