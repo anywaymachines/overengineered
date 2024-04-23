@@ -19,6 +19,19 @@ export namespace Logger {
 		_onLog.Fire(msg, false);
 	}
 
+	export function warn(msg: string) {
+		if (RunService.IsClient() === true) {
+			// Show logs only to maintainers
+			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
+				warn(`[WARN] [CLIENT] ${msg}`);
+			}
+		} else {
+			warn(`[WARN] [SERVER] ${msg}`);
+		}
+
+		_onLog.Fire(msg, false);
+	}
+
 	export function err(msg: string) {
 		if (RunService.IsClient() === true) {
 			try {

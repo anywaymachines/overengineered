@@ -53,7 +53,7 @@ export namespace SoundController {
 
 		sounds.forEach((sound) => {
 			if (sound.TimeLength === 0) {
-				Logger.err(`Sound ${sound.Name} (rbxassetid://${sound.SoundId}) is unavailable`);
+				Logger.warn(`Sound ${sound.Name} (rbxassetid://${sound.SoundId}) is unavailable`);
 				return;
 			}
 			list.push(sound.SoundId);
