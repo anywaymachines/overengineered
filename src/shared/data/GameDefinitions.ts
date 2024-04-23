@@ -52,6 +52,21 @@ export namespace GameDefinitions {
 		return false;
 	}
 
+	export function isRobloxEngineer(player: Player) {
+		let err: string | undefined;
+		for (let i = 0; i < 3; i++) {
+			try {
+				return player.IsInGroup(1200769);
+			} catch (error) {
+				// eslint-disable-next-line no-ex-assign
+				error = err;
+				task.wait(1 + i);
+			}
+		}
+
+		return false;
+	}
+
 	export function getMaxSlots(player: Player, additional: number) {
 		let max = FREE_SLOTS + additional;
 		if (isAdmin(player)) max += ADMIN_SLOTS;

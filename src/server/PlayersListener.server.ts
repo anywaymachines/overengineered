@@ -16,10 +16,10 @@ if (!RunService.IsStudio()) {
 			return;
 		}
 
-		DiscordWebhook.log(`${player.DisplayName} (@${player.Name}) joined to "${game.JobId}" (${game.GetFullName()})`);
+		DiscordWebhook.log(`${player.DisplayName} (@${player.Name}) joined to "${game.JobId}"`);
 	});
 
 	Players.PlayerRemoving.Connect((player) => {
-		DiscordWebhook.log(`${player.DisplayName} (@${player.Name}) left from "${game.JobId}" (${game.GetFullName()})`);
+		DiscordWebhook.log(`${player.DisplayName} (@${player.Name}) left from "${game.JobId}"`);
 	});
 }

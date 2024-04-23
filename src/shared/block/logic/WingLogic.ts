@@ -25,8 +25,8 @@ export class WingLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry
 	}
 
 	private initializeForces() {
-		// FIXME: Enable fluidforces for roblox engineers
-		if (RunService.IsStudio() || Players.LocalPlayer.IsInGroup(1200769)) {
+		// Enable fluidforces for roblox engineers
+		if (RunService.IsStudio() || GameDefinitions.isRobloxEngineer(Players.LocalPlayer)) {
 			this.wingSurface.EnableFluidForces = true;
 			return;
 		}
