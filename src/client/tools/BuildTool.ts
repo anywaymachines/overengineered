@@ -344,7 +344,7 @@ namespace SinglePlaceController {
 			axis.Parent = Workspace;
 			this.onDestroy(() => axis.Destroy());
 
-			this.event.subscribe(RunService.Heartbeat, () => {
+			this.event.subscribe(RunService.PreRender, () => {
 				if (this.mainGhost) {
 					axis.PivotTo(this.mainGhost.GetPivot());
 				} else {
