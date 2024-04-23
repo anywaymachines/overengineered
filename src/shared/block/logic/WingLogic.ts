@@ -1,4 +1,4 @@
-import { RunService, Workspace } from "@rbxts/services";
+import { Players, RunService, Workspace } from "@rbxts/services";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -25,11 +25,11 @@ export class WingLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry
 	}
 
 	private initializeForces() {
-		// FIXME: Wait for fluid forces to exit Beta (NORMAL BETA)
-		// if (RunService.IsStudio()) {
-		// 	this.wingSurface.EnableFluidForces = true;
-		// 	return;
-		// }
+		// FIXME: Enable fluidforces for roblox engineers
+		if (RunService.IsStudio() || Players.LocalPlayer.IsInGroup(1200769)) {
+			this.wingSurface.EnableFluidForces = true;
+			return;
+		}
 
 		if (this.input.enabled.get() === false) return;
 
