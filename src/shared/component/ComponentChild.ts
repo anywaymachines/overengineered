@@ -48,7 +48,7 @@ export class ComponentChild<T extends IComponent = IComponent>
 		prev?.destroy();
 		this.childSet.Fire(child);
 
-		if (child) {
+		if (child && this.child === child) {
 			child.onDestroy(() => {
 				if (this.child !== child) return;
 				this.set(undefined);

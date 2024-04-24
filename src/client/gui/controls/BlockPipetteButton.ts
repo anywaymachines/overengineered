@@ -1,7 +1,7 @@
 import { Players, UserInputService } from "@rbxts/services";
 import { Colors } from "client/gui/Colors";
 import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
-import { HoveredPartHighlighter } from "client/tools/selectors/HoveredPartHighlighter";
+import { HoveredPartHighlighter } from "client/tools/highlighters/HoveredPartHighlighter";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";

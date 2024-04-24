@@ -6,6 +6,7 @@ import { PartUtils } from "shared/utils/PartUtils";
 import { InputController } from "./InputController";
 
 export namespace LocalPlayerController {
+	export const mouse = Players.LocalPlayer.GetMouse();
 	export let humanoid: Humanoid | undefined;
 	export let rootPart: BasePart | undefined;
 

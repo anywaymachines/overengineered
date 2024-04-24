@@ -1,12 +1,8 @@
-import { InputController } from "client/controller/InputController";
 import { Gui } from "client/gui/Gui";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
-import { BoxSelector } from "client/tools/selectors/BoxSelector";
-import { HoveredBlockHighlighter } from "client/tools/selectors/HoveredBlockHighlighter";
-import { MovingSelector } from "client/tools/selectors/MovingSelector";
-import { SelectorParent } from "client/tools/selectors/SelectorParent";
+import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { ObservableValue } from "shared/event/ObservableValue";
@@ -20,47 +16,13 @@ export class PaintTool extends ToolBase {
 	constructor(mode: BuildingMode) {
 		super(mode);
 
-		const hoverHighlighter = this.parent(new HoveredBlockHighlighter((b) => this.targetPlot.get().hasBlock(b)));
-		this.onPrepare((inputType) => {
-			if (inputType !== "Touch") {
-				hoverHighlighter.enable();
-			} else {
-				hoverHighlighter.disable();
-			}
-		});
+		const fireSelected = async (blocks: readonly BlockModel[]) => {
+			if (!blocks || blocks.size() === 0) return;
 
-		const selectorParent = this.parent(new SelectorParent());
-		selectorParent.childSet.Connect((child) => {
-			hoverHighlighter.setEnabled(this.isEnabled() && (!child || child instanceof MovingSelector));
-		});
-		this.event.subInput((ih) => {
-			ih.onMouse1Down(() => {
-				if (InputController.isCtrlPressed()) {
-					selectorParent.tryEnableSelector(() => {
-						return new BoxSelector(async (blocks) => await this.paint(blocks));
-					});
-				} else {
-					selectorParent.tryEnableSelector(() => {
-						const selected = new Map<BlockModel, readonly [material: Enum.Material, color: Color3]>();
-						return new MovingSelector(
-							(part) => {
-								const block = BlockManager.getBlockDataByPart(part);
-								if (!block) return;
-
-								if (selected.has(block.instance)) return;
-
-								selected.set(block.instance, [block.material, block.color]);
-								this.paintClientSide(block.instance);
-							},
-							() => {
-								if (selected.size() === 0) return;
-								this.paint(selected.keys(), selected);
-							},
-						);
-					});
-				}
-			}, false);
-		});
+			await this.paint(blocks);
+		};
+		const stuff = this.parent(new MultiBlockSelector(mode.targetPlot));
+		stuff.submit.Connect(fireSelected);
 
 		this.event.subInput((ih) => {
 			ih.onMouse3Down(() => {
@@ -81,7 +43,7 @@ export class PaintTool extends ToolBase {
 		this.selectedColor.set(block.color);
 	}
 
-	async paintClientSide(block: BlockModel) {
+	private paintClientSide(block: BlockModel) {
 		SharedBuilding.paint(
 			[block],
 			this.enableColor.get() ? this.selectedColor.get() : undefined,

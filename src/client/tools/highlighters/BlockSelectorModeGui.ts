@@ -1,0 +1,78 @@
+import { Control } from "client/gui/Control";
+import { TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import { HoveredBlocksSelectorMode } from "client/tools/highlighters/HoveredBlocksSelector";
+import { Colors } from "shared/Colors";
+import { TransformService } from "shared/component/TransformService";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { Objects } from "shared/fixes/objects";
+
+export type BlockSelectorModeGuiDefinition = GuiObject & {
+	readonly SingleSelection: TextButtonDefinition;
+	readonly AssemblySelection: TextButtonDefinition;
+	readonly MachineSelection: TextButtonDefinition;
+};
+export class BlockSelectorModeGui extends Control {
+	constructor(gui: BlockSelectorModeGuiDefinition, mode: ObservableValue<HoveredBlocksSelectorMode>) {
+		super(gui);
+
+		class MobileSelection extends Control<BlockSelectorModeGuiDefinition> {
+			constructor(gui: BlockSelectorModeGuiDefinition) {
+				super(gui);
+
+				const single = this.add(new TextButtonControl(gui.SingleSelection, () => mode.set("single")));
+				const assembly = this.add(new TextButtonControl(gui.AssemblySelection, () => mode.set("assembly")));
+				const machine = this.add(new TextButtonControl(gui.MachineSelection, () => mode.set("machine")));
+
+				this.event.subscribeObservable(
+					mode,
+					(active) => {
+						const buttons: { readonly [k in HoveredBlocksSelectorMode]: TextButtonControl } = {
+							single,
+							assembly,
+							machine,
+						};
+						for (const [name, button] of Objects.pairs_(buttons)) {
+							TransformService.run(button.instance, (builder, instance) =>
+								builder
+									.func(() => (instance.AutoButtonColor = instance.Active = active !== name))
+									.transform(
+										"BackgroundColor3",
+										active === name ? Colors.accentDark : Colors.staticBackground,
+										animationProps,
+									),
+							);
+						}
+					},
+					true,
+				);
+
+				const animate = (enable: boolean) => {
+					const buttonsAreActive = enable;
+
+					TransformService.run(gui, (builder) =>
+						builder.transform("AnchorPoint", new Vector2(buttonsAreActive ? 1 : 0, 0.5), animationProps),
+					);
+
+					for (const control of [single, assembly]) {
+						const button = control.instance;
+
+						button.AutoButtonColor = button.Active = buttonsAreActive;
+						TransformService.run(button, (builder) =>
+							builder.transform("Transparency", buttonsAreActive ? 0 : 0.6, animationProps),
+						);
+					}
+				};
+
+				this.onEnable(() => animate(true));
+				this.onDisable(() => animate(false));
+			}
+		}
+
+		const animationProps = TransformService.commonProps.quadOut02;
+
+		const control = this.add(new MobileSelection(gui));
+		this.onPrepare((inputType) =>
+			control.setVisible(inputType === "Touch" || inputType === "Gamepad" || (true as boolean)),
+		);
+	}
+}

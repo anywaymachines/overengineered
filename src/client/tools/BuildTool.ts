@@ -488,7 +488,7 @@ namespace SinglePlaceController {
 				g.Label5.Text = `new CFrame(${[...pos.GetComponents()].join()})`;
 			}
 
-			const blocks = [
+			let blocks = [
 				mainGhost,
 				...this.blockMirrorer
 					.getMirroredModels()
@@ -502,6 +502,11 @@ namespace SinglePlaceController {
 					location: g.PrimaryPart!.CFrame,
 				}),
 			);
+
+			// filter out the blocks on the same location
+			blocks = new Map(
+				blocks.map((b) => [VectorUtils.roundVectorToNearestHalf(b.location.Position), b] as const),
+			).map((_, b) => b);
 
 			const response = await ClientBuilding.placeOperation.execute(this.plot.get(), blocks);
 			processPlaceResponse(response);
@@ -836,7 +841,7 @@ namespace MultiPlaceController {
 		}
 
 		async place() {
-			const locations = this.drawnGhostsMap.flatmap((_, m) => [
+			let locations = this.drawnGhostsMap.flatmap((_, m) => [
 				m.GetPivot(),
 				...BuildingManager.getMirroredBlocksCFrames(
 					this.plot.instance,
@@ -845,6 +850,10 @@ namespace MultiPlaceController {
 					this.mirrorModes,
 				),
 			]);
+			// filter out the blocks on the same location
+			locations = new Map(
+				locations.map((b) => [VectorUtils.roundVectorToNearestHalf(b.Position), b] as const),
+			).map((_, b) => b);
 
 			const response = await ClientBuilding.placeOperation.execute(
 				this.plot,

@@ -6,7 +6,9 @@ import { LogControl } from "client/gui/static/LogControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
-import { HoveredBlockHighlighter } from "client/tools/selectors/HoveredBlockHighlighter";
+import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
+import { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
+import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Colors } from "shared/Colors";
@@ -15,8 +17,7 @@ import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { Config } from "shared/config/Config";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { Signal } from "shared/event/Signal";
+import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { VectorUtils } from "shared/utils/VectorUtils";
@@ -44,32 +45,29 @@ namespace Scene {
 				tool.selectBlockByUuid(uuid);
 			});
 
-			const selected = ObservableValue.fromSignal(tool.selectedBlocksChanged, []);
+			const selected = tool.selected;
 			this.event.subscribe(this.configControl.configUpdated, async (key, value) => {
 				Logger.info(`Sending (${selected.get().size()}) block config values ${key} ${JSON.serialize(value)}`);
 
 				const response = await ClientBuilding.updateConfigOperation.execute(
 					tool.targetPlot.get(),
-					selected
-						.get()
-						.map((p) => p.Parent)
-						.map(
-							(b) =>
-								({
-									block: b,
-									key,
-									value: JSON.serialize(value),
-								}) satisfies ConfigUpdateRequest["configs"][number],
-						),
+					selected.get().map(
+						(b) =>
+							({
+								block: b,
+								key,
+								value: JSON.serialize(value),
+							}) satisfies ConfigUpdateRequest["configs"][number],
+					),
 				);
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
-					this.updateConfigs(selected.get());
+					this.updateConfigs(selected.getArr());
 				}
 			});
 
-			tool.selectedBlocksChanged.Connect((selected) => {
-				this.updateConfigs(selected);
+			this.event.subscribeCollection(selected, () => {
+				this.updateConfigs(selected.getArr());
 			});
 
 			this.gui.Bottom.DeselectButton.Activated.Connect(() => {
@@ -81,14 +79,14 @@ namespace Scene {
 
 				const response = await ClientBuilding.resetConfigOperation.execute(
 					tool.targetPlot.get(),
-					selected.get().map((p) => p.Parent),
+					selected.getArr(),
 				);
 
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
 				}
 
-				this.updateConfigs(selected.get());
+				this.updateConfigs(selected.getArr());
 			});
 
 			this.onPrepare((inputType) => {
@@ -105,14 +103,14 @@ namespace Scene {
 			this.updateConfigs([]);
 		}
 
-		private updateConfigs(selected: readonly (SelectionBox & { Parent: BlockModel })[]) {
+		private updateConfigs(selected: readonly BlockModel[]) {
 			const wasVisible = this.gui.Visible;
 
 			this.gui.Visible = selected.size() !== 0;
 			if (!this.gui.Visible) return;
 
 			if (!wasVisible) GuiAnimator.transition(this.gui, 0.2, "up");
-			const blockmodel = selected[0].Parent;
+			const blockmodel = selected[0];
 			const block = BlocksInitializer.blocks.map.get(BlockManager.manager.id.get(blockmodel))!;
 			const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
 				.input as BlockConfigTypes.Definitions;
@@ -124,7 +122,7 @@ namespace Scene {
 
 			const configs = selected
 				.map((selected) => {
-					const blockmodel = selected.Parent;
+					const blockmodel = selected;
 					const block = BlocksInitializer.blocks.map.get(BlockManager.manager.id.get(blockmodel))!;
 
 					const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
@@ -150,10 +148,8 @@ namespace Scene {
 
 export class ConfigTool extends ToolBase {
 	readonly blocksToConfigure: TutorialConfigBlockHighlight[] = [];
+	readonly selected = new ObservableCollectionSet<BlockModel>();
 	private readonly gui;
-
-	readonly selectedBlocksChanged = new Signal<(selected: (SelectionBox & { Parent: BlockModel })[]) => void>();
-	private readonly selected: (SelectionBox & { Parent: BlockModel })[] = [];
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -161,7 +157,69 @@ export class ConfigTool extends ToolBase {
 			new Scene.ConfigToolScene(ToolBase.getToolGui<"Config", Scene.ConfigToolSceneDefinition>().Config, this),
 		);
 
-		const hoverSelector = this.parent(new HoveredBlockHighlighter((block) => this.canBeSelected(block)));
+		this.parent(new SelectedBlocksHighlighter(this.selected));
+
+		const canBeSelected = (block: BlockModel): boolean => {
+			if (this.blocksToConfigure.size() > 0) {
+				if (
+					!this.blocksToConfigure.any(
+						(value) =>
+							VectorUtils.roundVector(value.position) ===
+							VectorUtils.roundVector(
+								this.targetPlot
+									.get()
+									.instance.BuildingArea.GetPivot()
+									.PointToObjectSpace(block.GetPivot().Position),
+							),
+					)
+				) {
+					return false;
+				}
+			}
+
+			const config = blockConfigRegistry[BlockManager.manager.id.get(block) as keyof typeof blockConfigRegistry];
+			if (!config) return false;
+
+			if (!Objects.values(config.input).find((v) => !(v as BlockConfigTypes.Definition).configHidden)) {
+				return false;
+			}
+
+			return true;
+		};
+		const canBeSelectedConsideringCurrentSelection = (block: BlockModel): boolean => {
+			if (!canBeSelected(block)) {
+				return false;
+			}
+
+			if (this.selected.size() === 0) {
+				return true;
+			}
+
+			if (InputController.isShiftPressed()) {
+				const differentId = this.selected
+					.get()
+					.find((s) => BlockManager.manager.id.get(s) !== BlockManager.manager.id.get(block));
+				return differentId === undefined;
+			}
+
+			return true;
+		};
+
+		const config: MultiBlockSelectorConfiguration = {
+			filter: canBeSelectedConsideringCurrentSelection,
+			modeSetMiddleware: (mode, prev) => {
+				if (!InputController.isShiftPressed()) {
+					if (mode === "assembly" || mode === "machine" || mode === "box") {
+						return prev;
+					}
+				}
+
+				return mode;
+			},
+		};
+		const mbs = this.parent(new MultiBlockHighlightedSelector(mode.targetPlot, this.selected, undefined, config));
+
+		/*const hoverSelector = this.parent(new HoveredBlockHighlighter((block) => this.canBeSelected(block)));
 		const fireSelected = () => {
 			const block = hoverSelector.highlightedBlock.get();
 			if (!block) return;
@@ -180,7 +238,7 @@ export class ConfigTool extends ToolBase {
 			} else if (input === "Touch") {
 				this.inputHandler.onTouchTap(fireSelected, false);
 			}
-		});
+		});*/
 
 		// removed because doesnt follow the "single block type" rule
 		/*
@@ -195,113 +253,19 @@ export class ConfigTool extends ToolBase {
 		// TODO: remove false later, deselects everything after any change
 		if (false as boolean)
 			this.subscribeToCurrentPlot((plot) => {
-				if (!this.selected.any((s) => s.IsDescendantOf(plot.instance))) {
+				if (!this.selected.get().find((s) => s.IsDescendantOf(plot.instance))) {
 					return;
-				}
-
-				for (const sel of this.selected) {
-					sel.Destroy();
 				}
 
 				this.selected.clear();
-				this.selectedBlocksChanged.Fire(this.selected);
 			});
 	}
 
-	private canBeSelected(block: BlockModel): boolean {
-		if (this.blocksToConfigure.size() > 0) {
-			if (
-				!this.blocksToConfigure.any(
-					(value) =>
-						VectorUtils.roundVector(value.position) ===
-						VectorUtils.roundVector(
-							this.targetPlot
-								.get()
-								.instance.BuildingArea.GetPivot()
-								.PointToObjectSpace(block.GetPivot().Position),
-						),
-				)
-			) {
-				return false;
-			}
-		}
-
-		const config = blockConfigRegistry[BlockManager.manager.id.get(block) as keyof typeof blockConfigRegistry];
-		if (!config) return false;
-
-		if (!Objects.values(config.input).find((v) => !(v as BlockConfigTypes.Definition).configHidden)) {
-			return false;
-		}
-
-		return true;
-	}
-	private canBeSelectedConsideringCurrentSelection(block: BlockModel): boolean {
-		if (!this.canBeSelected(block)) {
-			return false;
-		}
-
-		const differentId = this.selected.find(
-			(s) => BlockManager.manager.id.get(s.Parent) !== (BlockManager.manager.id.get(block) as string),
-		);
-		return differentId === undefined;
-	}
-	private selectBlock(block: BlockModel) {
-		const instance = new Instance("SelectionBox") as SelectionBox & { Parent: BlockModel };
-		instance.Parent = block;
-		instance.Adornee = block;
-		instance.LineThickness = 0.05;
-		instance.Color3 = Color3.fromRGB(0, 255 / 2, 255);
-
-		this.selected.push(instance);
-		this.selectedBlocksChanged.Fire(this.selected);
-	}
-	private selectBlockByClick(block: BlockModel | undefined) {
-		const pc = InputController.inputType.get() === "Desktop";
-		const add = InputController.inputType.get() === "Gamepad" || InputController.isShiftPressed();
-
-		if (pc && !add) {
-			for (const sel of this.selected) sel.Destroy();
-
-			this.selected.clear();
-
-			if (!block) this.selectedBlocksChanged.Fire(this.selected);
-		}
-
-		if (!block) {
-			if (!pc) LogControl.instance.addLine("Block is not targeted!");
-			return;
-		}
-
-		const removeOrAddHighlight = () => {
-			const existing = this.selected.findIndex((sel) => sel.Parent === block);
-			if (existing !== -1) {
-				this.selected[existing].Destroy();
-				this.selected.remove(existing);
-				this.selectedBlocksChanged.Fire(this.selected);
-			} else {
-				if (!this.canBeSelectedConsideringCurrentSelection(block)) {
-					LogControl.instance.addLine("Could not select different blocks");
-					return;
-				}
-
-				this.selectBlock(block);
-			}
-		};
-
-		if (pc) removeOrAddHighlight();
-		else {
-			if (add) this.selectBlock(block);
-			else removeOrAddHighlight();
-		}
-	}
-
 	selectBlockByUuid(uuid: BlockUuid) {
-		this.selectBlock(SharedPlots.getBlockByUuid(this.targetPlot.get().instance, uuid));
+		this.selected.push(SharedPlots.getBlockByUuid(this.targetPlot.get().instance, uuid));
 	}
 	unselectAll() {
-		this.selected.forEach((element) => element.Destroy());
 		this.selected.clear();
-		this.selectedBlocksChanged.Fire(this.selected);
 	}
 
 	getDisplayName(): string {

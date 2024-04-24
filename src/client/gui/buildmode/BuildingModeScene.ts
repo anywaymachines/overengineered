@@ -1,7 +1,6 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { Control } from "client/gui/Control";
 import { ToolbarControl, ToolbarControlDefinition } from "client/gui/buildmode/ToolbarControl";
-import { DeleteToolScene, DeleteToolSceneDefinition } from "client/gui/buildmode/tools/DeleteToolScene";
 import { PaintToolScene, PaintToolSceneDefinition } from "client/gui/buildmode/tools/PaintToolScene";
 import { ButtonControl } from "client/gui/controls/Button";
 import { SavePopup } from "client/gui/popup/SavePopup";
@@ -75,7 +74,6 @@ export type BuildingModeSceneDefinition = GuiObject & {
 	readonly ActionBar: ActionBarControlDefinition;
 	readonly Hotbar: ToolbarControlDefinition;
 	readonly Tools: Folder & {
-		readonly Delete: DeleteToolSceneDefinition;
 		readonly Paint: PaintToolSceneDefinition;
 		readonly Wire: WireToolSceneDefinition;
 	};
@@ -102,7 +100,6 @@ export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 		this.onEnable(updateToolbarVisibility);
 
 		const types = [
-			[tools.deleteTool, DeleteToolScene, this.gui.Tools.Delete],
 			[tools.paintTool, PaintToolScene, this.gui.Tools.Paint],
 			[tools.wireTool, WireToolScene, this.gui.Tools.Wire],
 		] as const;

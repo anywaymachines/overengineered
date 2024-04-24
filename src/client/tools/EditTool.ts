@@ -1,23 +1,23 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import { InputController } from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import {
 	MaterialColorEditControl,
 	MaterialColorEditControlDefinition,
 } from "client/gui/buildmode/MaterialColorEditControl";
-import { ButtonControl, TextButtonControl, type TextButtonDefinition } from "client/gui/controls/Button";
+import { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import { LogControl } from "client/gui/static/LogControl";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
-import { BlockMover } from "client/tools/selectors/BlockMover";
-import { BlockRotater } from "client/tools/selectors/BlockRotater";
-import { HoveredBlocksHighlighter } from "client/tools/selectors/HoveredBlocksHighlighter";
-import { SelectedBlocksHighlighter } from "client/tools/selectors/SelectedBlocksHighlighter";
+import { BlockMover } from "client/tools/additional/BlockMover";
+import { BlockRotater } from "client/tools/additional/BlockRotater";
+import { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
+import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
+import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { Element } from "shared/Element";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
@@ -27,12 +27,53 @@ import { ComponentDisabler } from "shared/component/ComponentDisabler";
 import { TransformService } from "shared/component/TransformService";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
-import { ObservableValue, type ReadonlyObservableValue } from "shared/event/ObservableValue";
+import { ObservableValue } from "shared/event/ObservableValue";
 import { Objects } from "shared/fixes/objects";
 import { PartUtils } from "shared/utils/PartUtils";
 
 namespace Scene {
-	export interface EditToolSceneDefinition extends GuiObject, Selectors.SelectorGuiDefinition {
+	type MultiBlockSelectorGuiDefinition = GuiObject & {
+		readonly MobileSelection: BlockSelectorModeGuiDefinition;
+		readonly Top: GuiObject & {
+			readonly SelectAllButton: TextButtonDefinition;
+			readonly DeselectAllButton: TextButtonDefinition;
+		};
+	};
+	interface MultiBlockSelectorGuiParams {
+		selectPlot(): void;
+		deselectAll(): void;
+	}
+	class MultiBlockSelectorGui extends ClientComponent {
+		constructor(gui: MultiBlockSelectorGuiDefinition, params: MultiBlockSelectorGuiParams) {
+			super();
+
+			const animationProps = TransformService.commonProps.quadOut02;
+			const selectPlot = this.parent(new ButtonControl(gui.Top.SelectAllButton, () => params.selectPlot()));
+			const deselectAll = this.parent(new ButtonControl(gui.Top.DeselectAllButton, () => params.deselectAll()));
+
+			const animate = (enable: boolean) => {
+				const buttonsAreActive = enable;
+
+				TransformService.run(gui.Top, (builder) =>
+					builder.transform("AnchorPoint", new Vector2(0.5, buttonsAreActive ? 0 : 0.8), animationProps),
+				);
+
+				for (const control of [selectPlot, deselectAll]) {
+					const button = control.instance;
+
+					button.AutoButtonColor = button.Active = buttonsAreActive;
+					TransformService.run(button, (builder) =>
+						builder.transform("Transparency", buttonsAreActive ? 0 : 0.6, animationProps),
+					);
+				}
+			};
+
+			this.onEnable(() => animate(true));
+			this.onDisable(() => animate(false));
+		}
+	}
+
+	export interface EditToolSceneDefinition extends GuiObject, MultiBlockSelectorGuiDefinition {
 		readonly CancelButton: GuiButton;
 		readonly Paint: MaterialColorEditControlDefinition;
 		readonly Bottom: GuiObject & {
@@ -165,278 +206,6 @@ namespace Scene {
 			}
 
 			this.bottomVisibilityFunction(visible);
-		}
-	}
-}
-
-namespace Selectors {
-	export type SelectorGuiDefinition = GuiObject & {
-		readonly MobileSelection: GuiObject & {
-			readonly SingleSelection: TextButtonDefinition;
-			readonly AssemblySelection: TextButtonDefinition;
-			readonly MachineSelection: TextButtonDefinition;
-		};
-		readonly Top: GuiObject & {
-			readonly SelectAllButton: TextButtonDefinition;
-			readonly DeselectAllButton: TextButtonDefinition;
-		};
-	};
-	interface SelectorGuiParams {
-		readonly highlightModeName: ObservableValue<"single" | "assembly" | "machine">;
-
-		selectPlot(): void;
-		deselectAll(): void;
-	}
-	class SelectorGui extends ClientComponent {
-		constructor(gui: SelectorGuiDefinition, params: SelectorGuiParams) {
-			super();
-
-			class MobileSelection extends Control<SelectorGuiDefinition["MobileSelection"]> {
-				constructor(gui: SelectorGuiDefinition["MobileSelection"]) {
-					super(gui);
-
-					const single = this.add(
-						new TextButtonControl(gui.SingleSelection, () => params.highlightModeName.set("single")),
-					);
-					const assembly = this.add(
-						new TextButtonControl(gui.AssemblySelection, () => params.highlightModeName.set("assembly")),
-					);
-					const machine = this.add(
-						new TextButtonControl(gui.MachineSelection, () => params.highlightModeName.set("machine")),
-					);
-					this.event.subscribeObservable(
-						params.highlightModeName,
-						(active) => {
-							const buttons: { readonly [k in typeof active]: TextButtonControl } = {
-								single,
-								assembly,
-								machine,
-							};
-							for (const [name, button] of Objects.pairs_(buttons)) {
-								TransformService.run(button.instance, (builder, instance) =>
-									builder
-										.func(() => (instance.AutoButtonColor = instance.Active = active !== name))
-										.transform(
-											"BackgroundColor3",
-											active === name ? Colors.accentDark : Colors.staticBackground,
-											animationProps,
-										),
-								);
-							}
-						},
-						true,
-					);
-
-					const animate = (enable: boolean) => {
-						const buttonsAreActive = enable;
-
-						TransformService.run(gui, (builder) =>
-							builder.transform(
-								"AnchorPoint",
-								new Vector2(buttonsAreActive ? 1 : 0, 0.5),
-								animationProps,
-							),
-						);
-
-						for (const control of [single, assembly]) {
-							const button = control.instance;
-
-							button.AutoButtonColor = button.Active = buttonsAreActive;
-							TransformService.run(button, (builder) =>
-								builder.transform("Transparency", buttonsAreActive ? 0 : 0.6, animationProps),
-							);
-						}
-					};
-
-					this.onEnable(() => animate(true));
-					this.onDisable(() => animate(false));
-				}
-			}
-
-			const animationProps = TransformService.commonProps.quadOut02;
-
-			const mobile = this.parent(new MobileSelection(gui.MobileSelection));
-			this.onPrepare((inputType) => mobile.setVisible(inputType === "Touch"));
-
-			const selectPlot = this.parent(new ButtonControl(gui.Top.SelectAllButton, () => params.selectPlot()));
-			const deselectAll = this.parent(new ButtonControl(gui.Top.DeselectAllButton, () => params.deselectAll()));
-
-			const animate = (enable: boolean) => {
-				const buttonsAreActive = enable;
-
-				TransformService.run(gui.Top, (builder) =>
-					builder.transform("AnchorPoint", new Vector2(0.5, buttonsAreActive ? 0 : 0.8), animationProps),
-				);
-
-				for (const control of [selectPlot, deselectAll]) {
-					const button = control.instance;
-
-					button.AutoButtonColor = button.Active = buttonsAreActive;
-					TransformService.run(button, (builder) =>
-						builder.transform("Transparency", buttonsAreActive ? 0 : 0.6, animationProps),
-					);
-				}
-			};
-
-			this.onEnable(() => animate(true));
-			this.onDisable(() => animate(false));
-		}
-	}
-
-	export class Selector extends ClientComponent implements SelectorGuiParams {
-		private readonly plot: ReadonlyObservableValue<SharedPlot>;
-		private readonly highlighterParent = new ComponentChild<HoveredBlocksHighlighter>(this);
-		readonly selected: ObservableCollectionSet<BlockModel>;
-		readonly highlightModeName = new ObservableValue<"single" | "assembly" | "machine">("single");
-
-		constructor(
-			plot: ReadonlyObservableValue<SharedPlot>,
-			selected: ObservableCollectionSet<BlockModel>,
-			gui: SelectorGuiDefinition,
-		) {
-			super();
-			this.plot = plot;
-			this.selected = selected;
-			this.parent(new SelectorGui(gui, this));
-
-			this.highlighterParent = new ComponentChild<HoveredBlocksHighlighter>(this, true);
-			this.event.subInput((ih) => {
-				ih.onKeyDown("LeftControl", () => this.highlightModeName.set("assembly"));
-				ih.onKeyDown("LeftAlt", () => this.highlightModeName.set("machine"));
-				ih.onKeyUp("LeftControl", () => this.highlightModeName.set("single"));
-				ih.onKeyUp("LeftAlt", () => this.highlightModeName.set("single"));
-			});
-
-			const getHighlightModeFunc = (
-				name: ReturnType<typeof this.highlightModeName.get>,
-			): ((block: BlockModel) => readonly BlockModel[]) =>
-				name === "assembly"
-					? (block) => this.getAssemblyConnected(block)
-					: name === "machine"
-						? (block) => this.getConnected(block)
-						: (block) => [block];
-
-			const updateHighlighter = () =>
-				this.highlighterParent.set(
-					new HoveredBlocksHighlighter(
-						this.plot.get().instance,
-						getHighlightModeFunc(this.highlightModeName.get()),
-					),
-				);
-			this.event.subscribeObservable(this.plot, updateHighlighter);
-			this.event.subscribeObservable(this.highlightModeName, updateHighlighter);
-			this.onEnable(updateHighlighter);
-
-			this.event.subInput((ih) => {
-				const sel = () => this.selectBlocksByClick(this.highlighterParent.get()?.highlighted.get() ?? []);
-				ih.onMouse1Down(sel, false);
-				ih.onKeyDown("ButtonY", sel);
-				ih.onTouchTap(sel, false);
-			});
-
-			this.onDestroy(() => this.selected.clear());
-		}
-
-		private getAssemblyConnected(block: BlockModel) {
-			// using set to prevent duplicates
-			return [
-				...new Set(
-					block.PrimaryPart!.GetConnectedParts(true).map((b) => BlockManager.getBlockDataByPart(b)!.instance),
-				),
-			];
-		}
-		private getConnected(block: BlockModel) {
-			const find = (result: Set<BlockModel>, visited: Set<Instance>, instance: BlockModel) => {
-				for (const part of instance.GetDescendants()) {
-					if (!part.IsA("BasePart")) continue;
-
-					const assemblyConnected = part.GetConnectedParts(false);
-					for (const cpart of assemblyConnected) {
-						if (visited.has(cpart)) {
-							continue;
-						}
-
-						visited.add(cpart);
-
-						const connected = BlockManager.getBlockDataByPart(cpart)!.instance;
-						result.add(connected);
-						find(result, visited, connected);
-					}
-				}
-			};
-
-			const result = new Set<BlockModel>();
-			find(result, new Set(), block);
-
-			return [...result];
-		}
-
-		selectPlot() {
-			for (const block of this.plot.get().getBlocks()) {
-				this.selectBlock(block);
-			}
-		}
-		deselectAll() {
-			this.selected.clear();
-		}
-
-		private selectBlock(block: BlockModel) {
-			this.selected.add(block);
-		}
-
-		/** @returns A boolean indicating whether the block was successfully deselected */
-		private deselectBlock(block: BlockModel): boolean {
-			const existing = this.selected.has(block);
-			if (!existing) return false;
-
-			this.selected.remove(block);
-			return true;
-		}
-
-		private selectBlocksByClick(blocks: readonly BlockModel[]) {
-			const pc = InputController.inputType.get() === "Desktop";
-			const add = InputController.isShiftPressed();
-			const selectConnected = this.highlightModeName.get() === "assembly";
-
-			if (pc && !add) {
-				this.selected.clear();
-			}
-
-			if (blocks.size() === 0) {
-				if (!pc) LogControl.instance.addLine("Block is not targeted!");
-				return;
-			}
-
-			const toggleBlocksSelection = () => {
-				for (const block of blocks) {
-					if (this.deselectBlock(block)) {
-						continue;
-					}
-
-					this.selectBlock(block);
-				}
-			};
-
-			if (selectConnected) {
-				const allBlocksAlreadySelected = blocks.all((b) => this.selected.has(b));
-				if (!allBlocksAlreadySelected) {
-					for (const block of blocks) {
-						this.selectBlock(block);
-					}
-				} else {
-					toggleBlocksSelection();
-				}
-			} else if (pc) {
-				toggleBlocksSelection();
-			} else {
-				if (add) {
-					for (const block of blocks) {
-						this.selectBlock(block);
-					}
-				} else {
-					toggleBlocksSelection();
-				}
-			}
 		}
 	}
 }
@@ -682,7 +451,9 @@ export class EditTool extends ToolBase {
 		this.parent(new SelectedBlocksHighlighter(this.selected));
 
 		{
-			this.selector = this.parent(new Selectors.Selector(this.targetPlot, this.selected, this.gui.instance));
+			this.selector = this.parent(
+				new MultiBlockHighlightedSelector(this.targetPlot, this.selected, this.gui.instance.MobileSelection),
+			);
 			this.event.subscribeObservable(
 				this.selectedMode,
 				(mode) => this.selector?.setEnabled(mode === undefined),

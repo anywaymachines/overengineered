@@ -1,3 +1,4 @@
+import { UserInputService } from "@rbxts/services";
 import { GlobalInputHandler } from "client/event/GlobalInputHandler";
 import { ISignalWrapper, ThinSignalWrapper } from "client/event/SignalWrapper";
 
@@ -5,13 +6,6 @@ type InputCallback = (input: InputObject) => void;
 type FullInputCallback = (input: InputObject, gameProcessedEvent: boolean) => void;
 type TouchCallback = (inputPositions: readonly Vector2[], gameProcessedEvent: boolean) => void;
 
-const filterKeyboard = (callback: InputCallback, allowGameProcessedEvents: boolean): FullInputCallback => {
-	return (input, gameProcessedEvent) => {
-		if (!allowGameProcessedEvents && gameProcessedEvent) return;
-		if (input.UserInputType !== Enum.UserInputType.Keyboard) return;
-		callback(input);
-	};
-};
 const filterMouse1 = (callback: InputCallback, allowGameProcessedEvents: boolean): FullInputCallback => {
 	return (input, gameProcessedEvent) => {
 		if (!allowGameProcessedEvents && gameProcessedEvent) return;
@@ -93,10 +87,9 @@ export class InputHandler {
 		}
 	}
 
-	onKeysDown(callback: InputCallback, allowGameProcessedEvents = true) {
-		this.onInputBegan(filterKeyboard(callback, allowGameProcessedEvents));
-	}
-	onKeyDown(key: KeyCode, callback: InputCallback) {
+	onKeyDown(key: KeyCode, callback: () => void, executeImmediately: true): void;
+	onKeyDown(key: KeyCode, callback: InputCallback | (() => void)): void;
+	onKeyDown(key: KeyCode, callback: InputCallback | (() => void), executeImmediately = false): void {
 		let map = keyPressed.get(key);
 		if (!map) keyPressed.set(key, (map = new Map()));
 		maps.add(map);
@@ -105,9 +98,12 @@ export class InputHandler {
 		if (!selfmap) map.set(this, (selfmap = []));
 
 		selfmap.push(callback);
-	}
-	onKeysUp(callback: InputCallback, allowGameProcessedEvents = true) {
-		this.onInputEnded(filterKeyboard(callback, allowGameProcessedEvents));
+
+		if (executeImmediately) {
+			if (UserInputService.IsKeyDown(key)) {
+				callback(undefined!);
+			}
+		}
 	}
 	onKeyUp(key: KeyCode, callback: InputCallback) {
 		let map = keyReleased.get(key);

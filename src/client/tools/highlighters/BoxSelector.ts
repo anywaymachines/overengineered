@@ -2,10 +2,15 @@ import { Players, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { InputController } from "client/controller/InputController";
 import { Gui } from "client/gui/Gui";
+import { BlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { SharedPlots } from "shared/building/SharedPlots";
+import { ArgsSignal } from "shared/event/Signal";
 
-export class BoxSelector extends ClientComponent {
-	constructor(submitted: (blocks: readonly BlockModel[]) => void, filter = (block: BlockModel) => true) {
+export class BoxSelector extends ClientComponent implements BlockSelector {
+	private readonly _submit = new ArgsSignal<[blocks: readonly BlockModel[]]>();
+	readonly submit = this._submit.asReadonly();
+
+	constructor(filter = (block: BlockModel) => true) {
 		super();
 
 		const camera = Workspace.CurrentCamera!;
@@ -53,6 +58,7 @@ export class BoxSelector extends ClientComponent {
 
 		let selection: GuiObject | undefined;
 		const highlights: (SelectionBox & { Parent: BlockModel })[] = [];
+		let selected: readonly BlockModel[] | undefined;
 		const clearHighlights = () => {
 			for (const highlight of highlights) {
 				highlight.Destroy();
@@ -80,6 +86,7 @@ export class BoxSelector extends ClientComponent {
 				selection!.Size = new UDim2(0, mouse.X, 0, mouse.Y).sub(startpos);
 
 				const inside = searchBlocks();
+				selected = inside;
 				clearHighlights();
 
 				for (const block of inside) {
@@ -92,21 +99,16 @@ export class BoxSelector extends ClientComponent {
 					highlights.push(highlight);
 				}
 			});
-			this.event.subInput((ih) =>
-				ih.onMouse1Up(() => {
-					const inside = searchBlocks();
-					if (inside.size() !== 0) {
-						submitted(inside);
-					}
-
-					this.destroy();
-				}, true),
-			);
 		}
 
 		this.onDisable(() => {
 			clearHighlights();
 			selection?.Destroy();
+		});
+		this.onDestroy(() => {
+			if (selected && selected.size() !== 0) {
+				this._submit.Fire(selected);
+			}
 		});
 	}
 }
