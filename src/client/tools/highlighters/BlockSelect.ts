@@ -1,4 +1,4 @@
-import { GuiService, Players } from "@rbxts/services";
+import { GuiService, Players, Workspace } from "@rbxts/services";
 import { InputController } from "client/controller/InputController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { Gui } from "client/gui/Gui";
@@ -8,12 +8,16 @@ import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 
 export namespace BlockSelect {
+	export const blockRaycastParams = new RaycastParams();
+	blockRaycastParams.FilterType = Enum.RaycastFilterType.Include;
+
 	export function getTargetedPart(): BasePart | undefined {
 		if (GuiService.MenuIsOpen || !PlayerUtils.isAlive(Players.LocalPlayer) || Gui.isCursorOnVisibleGui()) {
 			return;
 		}
 
-		return LocalPlayerController.mouse.Target;
+		const mouseRay = LocalPlayerController.mouse.UnitRay;
+		return Workspace.Raycast(mouseRay.Origin, mouseRay.Direction.mul(1000), blockRaycastParams)?.Instance;
 	}
 	export function getTargetedBlock(): BlockModel | undefined {
 		const target = getTargetedPart();

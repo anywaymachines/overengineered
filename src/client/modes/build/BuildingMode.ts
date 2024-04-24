@@ -5,6 +5,7 @@ import { Gui } from "client/gui/Gui";
 import { BuildingModeScene, BuildingModeSceneDefinition } from "client/gui/buildmode/BuildingModeScene";
 import { PlayMode } from "client/modes/PlayMode";
 import { ToolController } from "client/tools/ToolController";
+import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { ObservableValue } from "shared/event/ObservableValue";
@@ -29,6 +30,15 @@ export class BuildingMode extends PlayMode {
 
 	private constructor() {
 		super();
+
+		this.targetPlot.subscribe((plot, prev) => {
+			const index = BlockSelect.blockRaycastParams.FilterDescendantsInstances.indexOf(prev.instance);
+			if (index !== -1) {
+				BlockSelect.blockRaycastParams.FilterDescendantsInstances.remove(index);
+			}
+
+			BlockSelect.blockRaycastParams.AddToFilter(plot.instance);
+		}, true);
 
 		this.mirrorVisualizer = this.add(
 			new MirrorVisualizer(

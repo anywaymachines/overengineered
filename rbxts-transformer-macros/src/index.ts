@@ -58,11 +58,11 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 
 			const functionDeclarations: ts.FunctionDeclaration[] = [];
 			const namespaceDeclarations: ts.Statement[] = [];
-			const variableDeclarations: ts.VariableStatement[] = [];
+			const variableDeclarations: (ts.VariableStatement | ts.ExpressionStatement | ts.Block)[] = [];
 			const anyDeclarations: ts.Statement[] = [];
 
 			for (const child of node.body.statements) {
-				if (ts.isVariableStatement(child)) {
+				if (ts.isVariableStatement(child) || ts.isExpressionStatement(child) || ts.isBlock(child)) {
 					variableDeclarations.push(child);
 				}
 				else if (ts.isFunctionDeclaration(child)) {
