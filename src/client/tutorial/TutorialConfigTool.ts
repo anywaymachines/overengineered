@@ -6,6 +6,7 @@ import { EventHandler } from "shared/event/EventHandler";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { successResponse } from "shared/types/network/Responses";
+import { VectorUtils } from "shared/utils/VectorUtils";
 
 export type TutorialConfigBlockHighlight = {
 	key: string;
@@ -90,18 +91,35 @@ export class TutorialConfigTool {
 				const configs = new Map(
 					plot.getBlocks().map((block) => [block, BlockManager.manager.config.get(block)] as const),
 				);
-				const positions = this.get().blocksToConfigure.map((value) => value.position);
+				const positions = this.get().blocksToConfigure.map((value) => VectorUtils.roundVector(value.position));
+				const configs_filtered = configs.filter((value) =>
+					positions.includes(
+						VectorUtils.roundVector(
+							plot.instance.BuildingArea.CFrame.PointToObjectSpace(value.GetPivot().Position),
+						),
+					),
+				);
 
-				const configs_filtered = configs.filter((value) => positions.includes(value.GetPivot().Position));
+				for (const [blockModel, config] of configs_filtered) {
+					const block = this.get().blocksToConfigure.find(
+						(value) =>
+							VectorUtils.roundVector(
+								plot.instance.BuildingArea.CFrame.PointToObjectSpace(blockModel.GetPivot().Position),
+							) === VectorUtils.roundVector(value.position),
+					);
+					if (!block) throw "what";
 
-				for (const data of configs_filtered) {
-					const block = this.get().blocksToConfigure.find((value) => value.position === data[1].position)!;
-					if (block.key !== data[1].key || block.value !== data[1].value) {
+					// configs[number] = { rotationSpeed = { rotation = { add = "W" } } }
+					// { rotation: { add: "W" } }
+
+					// block.value.forEach((element) => {
+					// 	block.value; // [{"key": value}]
+					// });
+
+					if (config[block.key] !== block.value) {
 						return;
 					}
 				}
-
-				// configs_filtered.forEach((config) => {});
 
 				eventHandler.unsubscribeAll();
 				this.tutorial.Finish();

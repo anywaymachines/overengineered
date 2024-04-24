@@ -14,7 +14,7 @@ export async function TestTutorial(tutorial: typeof Tutorial) {
 		cframe: new CFrame(0, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1),
 	});
 	tutorial.buildTool.addBlockToPlace({
-		id: "servomotorblock",
+		id: "motorblock",
 		cframe: new CFrame(0, 1.5, -6, 1, 0, 0, 0, -1, 0, 0, -0, -1),
 	});
 
@@ -30,6 +30,28 @@ export async function TestTutorial(tutorial: typeof Tutorial) {
 	});
 
 	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
+
+	toolEnabler.enableOnly(allTools.configTool);
+	spawn(() => {
+		tutorial.Control.displayStep("Build a plane to crash", false);
+
+		TasksControl.instance.addTask("Select CONFIGF tool");
+		TasksControl.instance.addTask('Select "Block"');
+		TasksControl.instance.addTask("Place all highlighted blocks");
+	});
+
+	tutorial.configTool.addBlockToConfigure({
+		position: new Vector3(0, 1.5, -6),
+		key: "rotationSpeed",
+		value: { rotation: { add: "W" } },
+	});
+	tutorial.configTool.addBlockToConfigure({
+		position: new Vector3(0, 1.5, -6),
+		key: "rotationSpeed",
+		value: { rotation: { sub: "S" } },
+	});
+	if (!(await tutorial.configTool.waitForBlocksConfigure())) return;
+
 	TasksControl.instance.finish();
 	tutorial.Finish();
 }
