@@ -4,30 +4,15 @@ import { Element } from "shared/Element";
 import { Component } from "shared/component/Component";
 import { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
-const globalModel = Element.create("Model", { Name: "MultiHighlighterGlobal", Parent: Workspace });
-const globalHighlightInstance = BlockGhoster.createHighlight({ Parent: globalModel });
+const model = Element.create("Model", { Name: "MultiHighlighterGlobal", Parent: Workspace });
+const highlightInstance = BlockGhoster.createHighlight({ Parent: model });
 
 /** Highlights multiple {@link PVInstance}s by cloning them and putting them in a single {@link Model} */
 export class MultiModelHighlighter extends Component {
-	private readonly model: Model;
-	private readonly highlightInstance: Highlight;
 	private highlighted?: readonly PVInstance[];
 
-	constructor(
-		modelParent: Instance,
-		instances: ReadonlyObservableValue<readonly PVInstance[]>,
-		modifyFunc?: (highlight: Highlight) => void,
-	) {
+	constructor(instances: ReadonlyObservableValue<readonly PVInstance[]>) {
 		super();
-
-		if (modifyFunc) {
-			this.model = Element.create("Model", { Name: "MultiHighlighter", Parent: modelParent });
-			this.highlightInstance = BlockGhoster.createHighlight({ Parent: this.model });
-			modifyFunc(this.highlightInstance);
-		} else {
-			this.model = globalModel;
-			this.highlightInstance = globalHighlightInstance;
-		}
 
 		const highlight = (instances: readonly PVInstance[]) => {
 			stop();
@@ -35,16 +20,23 @@ export class MultiModelHighlighter extends Component {
 
 			const cloned = instances.map((i) => i.Clone());
 			for (const instance of cloned) {
-				instance.Parent = this.model;
+				for (const desc of instance.GetDescendants()) {
+					if (desc.IsA("WeldConstraint")) {
+						desc.Destroy();
+					}
+				}
+
+				instance.Name += "_CLONED";
+				instance.Parent = model;
 			}
 
-			this.highlightInstance.Adornee = this.model;
+			highlightInstance.Adornee = model;
 			this.highlighted = cloned;
 		};
 		const stop = () => {
 			if (!this.highlighted) return;
 
-			this.highlightInstance.Adornee = undefined;
+			highlightInstance.Adornee = undefined;
 			for (const instance of this.highlighted) {
 				instance.Destroy();
 			}
@@ -54,10 +46,5 @@ export class MultiModelHighlighter extends Component {
 
 		this.event.subscribeObservable(instances, highlight, true);
 		this.onDisable(stop);
-		this.onDestroy(() => {
-			if (this.model !== globalModel) {
-				this.model.Destroy();
-			}
-		});
 	}
 }

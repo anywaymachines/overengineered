@@ -14,7 +14,7 @@ import { ObservableValue, ReadonlyObservableValue } from "shared/event/Observabl
 export class MultiBlockHighlightedSelector extends ClientComponent {
 	readonly selected: ObservableCollectionSet<BlockModel>;
 	private readonly plot: ReadonlyObservableValue<SharedPlot>;
-	private readonly mode = new ObservableValue<HoveredBlocksSelectorMode>("single");
+	readonly mode = new ObservableValue<HoveredBlocksSelectorMode>("single");
 
 	constructor(
 		plot: ReadonlyObservableValue<SharedPlot>,

@@ -56,7 +56,7 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 	constructor(parent: Instance, getTargets: (block: BlockModel) => readonly BlockModel[]) {
 		super();
 
-		const highlighter = this.parent(new MultiModelHighlighter(parent, this.highlighted));
+		const highlighter = this.parent(new MultiModelHighlighter(this.highlighted));
 		let prevTarget: Instance | undefined;
 
 		const empty = [] as const;
