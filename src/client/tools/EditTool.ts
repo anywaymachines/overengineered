@@ -43,7 +43,7 @@ namespace Scene {
 		selectPlot(): void;
 		deselectAll(): void;
 	}
-	class MultiBlockSelectorGui extends ClientComponent {
+	export class MultiBlockSelectorGui extends ClientComponent {
 		constructor(gui: MultiBlockSelectorGuiDefinition, params: MultiBlockSelectorGuiParams) {
 			super();
 
@@ -459,6 +459,8 @@ export class EditTool extends ToolBase {
 				(mode) => this.selector?.setEnabled(mode === undefined),
 				true,
 			);
+
+			this.parent(new Scene.MultiBlockSelectorGui(this.gui.instance, this));
 		}
 
 		this.event.subscribeObservable(this.selectedMode, (mode) =>
