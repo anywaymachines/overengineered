@@ -207,7 +207,7 @@ export class ConfigTool extends ToolBase {
 
 		const config: MultiBlockSelectorConfiguration = {
 			filter: canBeSelectedConsideringCurrentSelection,
-			modeSetMiddleware: (mode, prev) => {
+			/*modeSetMiddleware: (mode, prev) => {
 				if (!InputController.isShiftPressed()) {
 					if (mode === "assembly" || mode === "machine" || mode === "box") {
 						return prev;
@@ -215,7 +215,7 @@ export class ConfigTool extends ToolBase {
 				}
 
 				return mode;
-			},
+			},*/
 		};
 		this.parent(new MultiBlockHighlightedSelector(mode.targetPlot, this.selected, undefined, config));
 

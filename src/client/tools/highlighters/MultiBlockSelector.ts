@@ -14,7 +14,6 @@ export interface BlockSelector extends IComponent {
 export type BlockSelectorMode = HoveredBlocksSelectorMode | "box";
 export type MultiBlockSelectorConfiguration = {
 	readonly filter?: (block: BlockModel) => boolean;
-	readonly modeSetMiddleware?: (mode: BlockSelectorMode, prev: BlockSelectorMode) => BlockSelectorMode;
 };
 export class MultiBlockSelector extends ClientComponent {
 	private readonly _submit = new ArgsSignal<[blocks: readonly BlockModel[]]>();
@@ -34,7 +33,7 @@ export class MultiBlockSelector extends ClientComponent {
 			for (const [bmode, button] of pairs(buttons)) {
 				if (button === undefined) continue;
 
-				ih.onKeyDown(button, () => mode.set(config?.modeSetMiddleware?.(bmode, mode.get()) ?? bmode));
+				ih.onKeyDown(button, () => mode.set(bmode));
 				ih.onKeyUp(button, () => {
 					if (mode.get() === bmode) {
 						mode.set("single");

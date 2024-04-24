@@ -1,7 +1,7 @@
 import { UserInputService } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { Signals } from "client/event/Signals";
-import { MultiBlockSelect } from "client/tools/highlighters/MultiBlockSelect";
+import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { type BlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { MultiModelHighlighter } from "client/tools/highlighters/MultiModelHighlighter";
 import { BlockManager } from "shared/building/BlockManager";
@@ -70,7 +70,7 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 				UserInputService.IsMouseButtonPressed(Enum.UserInputType.MouseButton1) ||
 				UserInputService.IsKeyDown("ButtonX");
 
-			const target = MultiBlockSelect.getTargetedBlock();
+			const target = BlockSelect.getTargetedBlock();
 			if (!target) {
 				if (!add) destroyHighlight();
 				return;

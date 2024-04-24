@@ -1,8 +1,8 @@
 import { ClientComponent } from "client/component/ClientComponent";
 import { InputController } from "client/controller/InputController";
+import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { BlockSelectorModeGui, BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
 import { HoveredBlocksSelectorMode } from "client/tools/highlighters/HoveredBlocksSelector";
-import { MultiBlockSelect } from "client/tools/highlighters/MultiBlockSelect";
 import {
 	MultiBlockSelector as MBS,
 	MultiBlockSelectorConfiguration,
@@ -32,7 +32,7 @@ export class MultiBlockHighlightedSelector extends ClientComponent {
 
 		const fireSelected = (blocks: readonly BlockModel[]) => {
 			if (!blocks || blocks.size() === 0) return;
-			MultiBlockSelect.selectBlocksByClick(this.selected, blocks, InputController.isShiftPressed());
+			BlockSelect.selectBlocksByClick(this.selected, blocks, InputController.isShiftPressed());
 		};
 		const stuff = this.parent(new MBS(plot, config));
 		stuff.submit.Connect(fireSelected);

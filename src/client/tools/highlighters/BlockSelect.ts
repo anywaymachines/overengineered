@@ -7,7 +7,7 @@ import { SharedPlots } from "shared/building/SharedPlots";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 
-export namespace MultiBlockSelect {
+export namespace BlockSelect {
 	export function getTargetedPart(): BasePart | undefined {
 		if (GuiService.MenuIsOpen || !PlayerUtils.isAlive(Players.LocalPlayer) || Gui.isCursorOnVisibleGui()) {
 			return;
