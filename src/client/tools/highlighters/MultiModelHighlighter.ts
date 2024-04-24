@@ -22,7 +22,12 @@ export class MultiModelHighlighter extends Component {
 			for (const instance of cloned) {
 				for (const desc of instance.GetDescendants()) {
 					if (desc.IsA("WeldConstraint")) {
-						desc.Destroy();
+						if (
+							desc.Part0?.IsDescendantOf(instance) === false ||
+							desc.Part1?.IsDescendantOf(instance) === false
+						) {
+							desc.Destroy();
+						}
 					}
 				}
 
