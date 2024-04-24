@@ -15,6 +15,8 @@ export namespace ClientBuilding {
 	export const paintOperation = new Operation(paintBlocks);
 	export const updateConfigOperation = new Operation(updateConfig);
 	export const resetConfigOperation = new Operation(resetConfig);
+	export const logicConnectOperation = new Operation(logicConnect);
+	export const logicDisconnectOperation = new Operation(logicDisconnect);
 
 	async function placeBlocks(plot: SharedPlot, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) {
 		let placed: readonly BlockUuid[];
@@ -301,5 +303,37 @@ export namespace ClientBuilding {
 		return await Remotes.Client.GetNamespace("Building")
 			.Get("ResetConfigRequest")
 			.CallServerAsync({ plot: plot.instance, blocks: _blocks });
+	}
+
+	async function logicConnect(
+		plot: SharedPlot,
+		_inputBlock: BlockModel,
+		inputConnection: BlockConnectionName,
+		_outputBlock: BlockModel,
+		outputConnection: BlockConnectionName,
+	) {
+		const inputBlock = BlockManager.manager.uuid.get(_inputBlock);
+		const outputBlock = BlockManager.manager.uuid.get(_outputBlock);
+
+		return await Remotes.Client.GetNamespace("Building")
+			.Get("LogicConnect")
+			.CallServerAsync({
+				plot: plot.instance,
+				inputBlock: plot.getBlock(inputBlock),
+				inputConnection,
+				outputBlock: plot.getBlock(outputBlock),
+				outputConnection,
+			});
+	}
+	async function logicDisconnect(plot: SharedPlot, _inputBlock: BlockModel, inputConnection: BlockConnectionName) {
+		const inputBlock = BlockManager.manager.uuid.get(_inputBlock);
+
+		return await Remotes.Client.GetNamespace("Building")
+			.Get("LogicDisconnect")
+			.CallServerAsync({
+				plot: plot.instance,
+				inputBlock: plot.getBlock(inputBlock),
+				inputConnection,
+			});
 	}
 }

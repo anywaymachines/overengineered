@@ -7,13 +7,14 @@ import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
+import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
 import { Element } from "shared/Element";
-import { Remotes } from "shared/Remotes";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import { BlockWireManager } from "shared/block/BlockWireManager";
 import { BlockConfigRegistryNonGeneric, blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
+import { SharedPlot } from "shared/building/SharedPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
@@ -114,7 +115,7 @@ namespace Markers {
 		constructor(
 			instance: MarkerComponentDefinition,
 			marker: BlockWireManager.Markers.Marker,
-			readonly plot: PlotModel,
+			readonly plot: SharedPlot,
 		) {
 			super(instance);
 
@@ -203,7 +204,7 @@ namespace Markers {
 		constructor(
 			gui: MarkerComponentDefinition,
 			readonly marker: BlockWireManager.Markers.Input,
-			plot: PlotModel,
+			plot: SharedPlot,
 			componentMap: ReadonlyMap<BlockWireManager.Markers.Marker, Marker>,
 		) {
 			super(gui, marker, plot);
@@ -238,7 +239,7 @@ namespace Markers {
 		constructor(
 			gui: MarkerComponentDefinition,
 			readonly marker: BlockWireManager.Markers.Output,
-			plot: PlotModel,
+			plot: SharedPlot,
 		) {
 			super(gui, marker, plot);
 
@@ -348,13 +349,20 @@ namespace Controllers {
 
 		from.marker.connect(to.marker);
 		task.spawn(async () => {
-			const result = await Remotes.Client.GetNamespace("Building").Get("LogicConnect").CallServerAsync({
+			const result = await ClientBuilding.logicConnectOperation.execute(
+				from.plot,
+				to.data.blockData.instance,
+				to.data.id,
+				from.data.blockData.instance,
+				from.data.id,
+			);
+			/*const result = await Remotes.Client.GetNamespace("Building").Get("LogicConnect").CallServerAsync({
 				plot: from.plot,
-				inputBlock: to.data.blockData.instance,
-				inputConnection: to.data.id,
-				outputBlock: from.data.blockData.instance,
-				outputConnection: from.data.id,
-			});
+				inputblock: to.data.blockdata.instance,
+				inputconnection: to.data.id,
+				outputblock: from.data.blockdata.instance,
+				outputconnection: from.data.id,
+			});*/
 
 			if (!result.success) {
 				LogControl.instance.addLine(result.message, Colors.red);
@@ -365,11 +373,11 @@ namespace Controllers {
 		marker.marker.disconnect();
 
 		task.spawn(async () => {
-			const result = await Remotes.Client.GetNamespace("Building").Get("LogicDisconnect").CallServerAsync({
-				plot: marker.plot,
-				inputBlock: marker.data.blockData.instance,
-				inputConnection: marker.data.id,
-			});
+			const result = await ClientBuilding.logicDisconnectOperation.execute(
+				marker.plot,
+				marker.data.blockData.instance,
+				marker.data.id,
+			);
 
 			if (!result.success) {
 				LogControl.instance.addLine(result.message, Colors.red);
@@ -585,11 +593,11 @@ export class WireTool extends ToolBase {
 	}
 
 	private createEverything() {
-		this.createEverythingOnPlot(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId));
+		this.createEverythingOnPlot(SharedPlots.getOwnPlot());
 	}
-	private createEverythingOnPlot(plot: PlotModel) {
+	private createEverythingOnPlot(plot: SharedPlot) {
 		const components = new Map<BlockWireManager.Markers.Marker, Markers.Marker>();
-		for (const [, markers] of BlockWireManager.fromPlot(SharedPlots.getPlotComponent(plot))) {
+		for (const [, markers] of BlockWireManager.fromPlot(plot)) {
 			let index = 0;
 			const size = markers.size();
 
