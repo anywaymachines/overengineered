@@ -217,38 +217,7 @@ export class ConfigTool extends ToolBase {
 				return mode;
 			},
 		};
-		const mbs = this.parent(new MultiBlockHighlightedSelector(mode.targetPlot, this.selected, undefined, config));
-
-		/*const hoverSelector = this.parent(new HoveredBlockHighlighter((block) => this.canBeSelected(block)));
-		const fireSelected = () => {
-			const block = hoverSelector.highlightedBlock.get();
-			if (!block) return;
-			this.selectBlockByClick(block);
-		};
-
-		this.onPrepare((input) => {
-			if (input === "Desktop") {
-				this.inputHandler.onMouse1Down(() => {
-					if (!InputController.isCtrlPressed()) {
-						fireSelected();
-					}
-				}, false);
-			} else if (input === "Gamepad") {
-				this.inputHandler.onKeyDown("ButtonX", fireSelected);
-			} else if (input === "Touch") {
-				this.inputHandler.onTouchTap(fireSelected, false);
-			}
-		});*/
-
-		// removed because doesnt follow the "single block type" rule
-		/*
-		const boxSelector = this.add(new BoxSelector(filter));
-		this.event.subscribe(boxSelector.submitted, (blocks) => {
-			for (const block of blocks) {
-				this.trySelectBlock(block);
-			}
-		});
-		*/
+		this.parent(new MultiBlockHighlightedSelector(mode.targetPlot, this.selected, undefined, config));
 
 		// TODO: remove false later, deselects everything after any change
 		if (false as boolean)
