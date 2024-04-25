@@ -6,6 +6,7 @@ import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
 import { InputTooltips } from "client/gui/static/TooltipsControl";
+import { ActionController } from "client/modes/build/ActionController";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
@@ -356,13 +357,6 @@ namespace Controllers {
 				from.data.blockData.instance,
 				from.data.id,
 			);
-			/*const result = await Remotes.Client.GetNamespace("Building").Get("LogicConnect").CallServerAsync({
-				plot: from.plot,
-				inputblock: to.data.blockdata.instance,
-				inputconnection: to.data.id,
-				outputblock: from.data.blockdata.instance,
-				outputconnection: from.data.id,
-			});*/
 
 			if (!result.success) {
 				LogControl.instance.addLine(result.message, Colors.red);
@@ -571,6 +565,15 @@ export class WireTool extends ToolBase {
 		this.onEnable(() => this.createEverything());
 		this.onDisable(() => this.markers.clear());
 
+		this.event.subscribe(ActionController.instance.onUndo, () => {
+			this.disable();
+			this.enable();
+		});
+		this.event.subscribe(ActionController.instance.onRedo, () => {
+			this.disable();
+			this.enable();
+		});
+
 		{
 			const controllers = {
 				Desktop: Controllers.Desktop,
@@ -586,6 +589,10 @@ export class WireTool extends ToolBase {
 				controller.selectedMarker.subscribe((m) => this.selectedMarker.set(m), true);
 			});
 		}
+
+		this.event.subscribe(ClientBuilding.logicDisconnectOperation.executed, (plot, _inputBlock, inputConnection) => {
+			//
+		});
 	}
 
 	stopDragging() {
@@ -596,6 +603,8 @@ export class WireTool extends ToolBase {
 		this.createEverythingOnPlot(SharedPlots.getOwnPlot());
 	}
 	private createEverythingOnPlot(plot: SharedPlot) {
+		this.markers.clear();
+
 		const components = new Map<BlockWireManager.Markers.Marker, Markers.Marker>();
 		for (const [, markers] of BlockWireManager.fromPlot(plot)) {
 			let index = 0;

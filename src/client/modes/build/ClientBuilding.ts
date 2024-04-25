@@ -315,25 +315,56 @@ export namespace ClientBuilding {
 		const inputBlock = BlockManager.manager.uuid.get(_inputBlock);
 		const outputBlock = BlockManager.manager.uuid.get(_outputBlock);
 
-		return await Remotes.Client.GetNamespace("Building")
-			.Get("LogicConnect")
-			.CallServerAsync({
-				plot: plot.instance,
-				inputBlock: plot.getBlock(inputBlock),
-				inputConnection,
-				outputBlock: plot.getBlock(outputBlock),
-				outputConnection,
-			});
+		return await ActionController.instance.execute(
+			"Connect logic",
+			async () => {
+				return await Remotes.Client.GetNamespace("Building")
+					.Get("LogicDisconnect")
+					.CallServerAsync({
+						plot: plot.instance,
+						inputBlock: plot.getBlock(inputBlock),
+						inputConnection,
+					});
+			},
+			async () => {
+				return await Remotes.Client.GetNamespace("Building")
+					.Get("LogicConnect")
+					.CallServerAsync({
+						plot: plot.instance,
+						inputBlock: plot.getBlock(inputBlock),
+						inputConnection,
+						outputBlock: plot.getBlock(outputBlock),
+						outputConnection,
+					});
+			},
+		);
 	}
 	async function logicDisconnect(plot: SharedPlot, _inputBlock: BlockModel, inputConnection: BlockConnectionName) {
 		const inputBlock = BlockManager.manager.uuid.get(_inputBlock);
+		const output = BlockManager.manager.connections.get(_inputBlock)[inputConnection];
 
-		return await Remotes.Client.GetNamespace("Building")
-			.Get("LogicDisconnect")
-			.CallServerAsync({
-				plot: plot.instance,
-				inputBlock: plot.getBlock(inputBlock),
-				inputConnection,
-			});
+		return await ActionController.instance.execute(
+			"Disconnect logic",
+			async () => {
+				return await Remotes.Client.GetNamespace("Building")
+					.Get("LogicConnect")
+					.CallServerAsync({
+						plot: plot.instance,
+						inputBlock: plot.getBlock(inputBlock),
+						inputConnection,
+						outputBlock: plot.getBlock(output.blockUuid),
+						outputConnection: output.connectionName,
+					});
+			},
+			async () => {
+				return await Remotes.Client.GetNamespace("Building")
+					.Get("LogicDisconnect")
+					.CallServerAsync({
+						plot: plot.instance,
+						inputBlock: plot.getBlock(inputBlock),
+						inputConnection,
+					});
+			},
+		);
 	}
 }

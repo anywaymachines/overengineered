@@ -15,6 +15,7 @@ export class ActionController extends ClientComponent {
 	static readonly instance = new ActionController();
 
 	readonly onUndo = new Signal<(operation: Operation) => void>();
+	readonly onRedo = new Signal<(operation: Operation) => void>();
 	private readonly _history = new ObservableCollectionArr<Operation>();
 	private readonly _redoHistory = new ObservableCollectionArr<Operation>();
 	readonly history = this._history.asReadonly();
@@ -51,6 +52,9 @@ export class ActionController extends ClientComponent {
 		return result;
 	}
 
+	appendRedo(operation: Operation) {
+		this._redoHistory.push(operation);
+	}
 	appendOperation(operation: Operation) {
 		this._history.push(operation);
 		this._redoHistory.clear();
@@ -67,6 +71,7 @@ export class ActionController extends ClientComponent {
 			return true;
 		}
 
+		this.onRedo.Fire(operation);
 		LogControl.instance.addLine(`Redone "${operation.description}"`);
 		return true;
 	}
@@ -82,6 +87,7 @@ export class ActionController extends ClientComponent {
 			return true;
 		}
 
+		this.onUndo.Fire(operation);
 		LogControl.instance.addLine(`Undone "${operation.description}"`);
 		return true;
 	}

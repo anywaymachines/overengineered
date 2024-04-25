@@ -1,7 +1,7 @@
 import { Signal } from "shared/event/Signal";
 
 export class Operation<TArgs extends unknown[], TResult extends {} = {}> {
-	private readonly _executed = new Signal<(...args: TArgs) => void>();
+	private readonly _executed = new Signal<(...args: [...TArgs, result: TResult]) => void>();
 	readonly executed = this._executed.asReadonly();
 	private readonly middlewares: ((...args: [...TArgs, TArgs]) => Response)[] = [];
 
@@ -34,7 +34,7 @@ export class Operation<TArgs extends unknown[], TResult extends {} = {}> {
 			return response;
 		}
 
-		this._executed.Fire(...args);
+		this._executed.Fire(...[...args, response]);
 		return response;
 	}
 }
