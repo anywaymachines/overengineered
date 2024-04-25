@@ -31,6 +31,14 @@ export namespace ServerBuilding {
 			return { success: false, message: "Player quit." };
 		}
 
+		if (
+			SharedPlots.getPlotComponent(plot)
+				.getBlocks()
+				.any((b) => b.GetPivot().Position === data.location.Position)
+		) {
+			return { success: true, model: undefined };
+		}
+
 		const uuid = data.uuid ?? (HttpService.GenerateGUID(false) as BlockUuid);
 		if (SharedPlots.tryGetBlockByUuid(plot, uuid)) {
 			throw "Block with this uuid already exists";

@@ -64,7 +64,9 @@ export namespace ServerBuildingRequestHandler {
 				return placedBlock;
 			}
 
-			placed.push(placedBlock.model);
+			if (placedBlock.model) {
+				placed.push(placedBlock.model);
+			}
 		}
 
 		return {

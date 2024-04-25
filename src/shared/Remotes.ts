@@ -2,7 +2,7 @@ import { Definitions, Middleware } from "@rbxts/net";
 import { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 declare global {
-	type BuildResponse = Response<{ readonly model: BlockModel }>;
+	type BuildResponse = Response<{ readonly model: BlockModel | undefined }>;
 	type MultiBuildResponse = Response<{ readonly models: readonly BlockModel[] }>;
 
 	interface PlaceBlockRequest {
