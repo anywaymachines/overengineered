@@ -698,6 +698,12 @@ const laser = {
 			max: 200,
 			step: 0.1,
 		},
+		alwaysEnabled: {
+			displayName: "Always enabled",
+			type: "bool",
+			config: false as boolean,
+			default: false as boolean,
+		},
 		rayTransparency: {
 			displayName: "Ray transparency",
 			type: "clampedNumber",

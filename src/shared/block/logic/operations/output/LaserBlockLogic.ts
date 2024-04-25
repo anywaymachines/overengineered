@@ -34,17 +34,19 @@ export class LaserBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRe
 			.LookVector.mul(RobloxUnit.Meters_To_Studs(this.input.maxDistance.get()));
 
 		const raycastResult = Workspace.Raycast(raycastOrigin, raycastDirection, this.raycastParams);
+		const distance = raycastResult?.Distance ?? this.input.maxDistance.get();
+		const endpos = raycastOrigin.add(this.block.instance.GetPivot().LookVector.mul(distance));
 
-		if (raycastResult?.Distance !== undefined) {
+		if (raycastResult || this.input.alwaysEnabled.get()) {
 			this.ray.Transparency = this.input.rayTransparency.get();
-			this.ray.Size = new Vector3(raycastResult.Distance, 0.1, 0.1);
-			this.ray.CFrame = new CFrame(raycastOrigin, raycastResult.Position)
-				.mul(new CFrame(0, 0, -raycastResult.Distance / 2))
+			this.ray.Size = new Vector3(distance, 0.1, 0.1);
+			this.ray.CFrame = new CFrame(raycastOrigin, endpos)
+				.mul(new CFrame(0, 0, -distance / 2))
 				.mul(CFrame.Angles(0, math.rad(90), 0));
 
 			this.dot.Transparency = this.input.dotTransparency.get();
 			this.dot.Size = new Vector3(this.input.dotSize.get(), this.input.dotSize.get(), this.input.dotSize.get());
-			this.dot.CFrame = CFrame.lookAlong(raycastResult.Position, raycastDirection);
+			this.dot.CFrame = CFrame.lookAlong(endpos, raycastDirection);
 		} else {
 			this.ray.Transparency = 1;
 			this.dot.Transparency = 1;
