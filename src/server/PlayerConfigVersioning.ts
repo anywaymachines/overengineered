@@ -81,6 +81,7 @@ const v5: UpdatablePlayerConfigVersion<PlayerConfigV5, PlayerConfigV4> = {
 			graphics: {
 				localShadows: false,
 				othersShadows: false,
+				othersEffects: true,
 			},
 		};
 	},
@@ -115,6 +116,24 @@ const v7: UpdatablePlayerConfigVersion<PlayerConfigV7, PlayerConfigV6> = {
 			terrain: {
 				...PlayerConfigDefinition.terrain.config,
 				...prev.terrain,
+			},
+		};
+	},
+};
+
+// Moved others_gfx to graphics
+type PlayerConfigV8 = Omit<PlayerConfigV6, "others_gfx">;
+const v8: UpdatablePlayerConfigVersion<PlayerConfigV8, PlayerConfigV7> = {
+	version: 8,
+
+	update(prev: Partial<PlayerConfigV7>): Partial<PlayerConfigV8> {
+		return {
+			...prev,
+			version: this.version,
+			graphics: {
+				...PlayerConfigDefinition.graphics.config,
+				...prev.graphics,
+				othersEffects: prev.others_gfx ?? true,
 			},
 		};
 	},

@@ -15,6 +15,7 @@ declare global {
 	type GraphicsConfiguration = {
 		readonly localShadows: boolean;
 		readonly othersShadows: boolean;
+		readonly othersEffects: boolean;
 	};
 	type TerrainConfiguration = {
 		readonly kind: "Terrain" | "Triangle" | "Flat";
@@ -65,17 +66,18 @@ export const PlayerConfigDefinition = {
 		displayName: "Better camera",
 		type: "camera",
 		config: {
-			improved: false as boolean,
+			improved: true as boolean,
 			strictFollow: false as boolean,
-			playerCentered: false as boolean,
+			playerCentered: true as boolean,
 		},
 	},
 	graphics: {
 		displayName: "Graphics",
 		type: "graphics",
 		config: {
-			localShadows: false as boolean,
-			othersShadows: false as boolean,
+			localShadows: true as boolean,
+			othersShadows: true as boolean,
+			othersEffects: true as boolean,
 		},
 	},
 	music: {
@@ -96,18 +98,13 @@ export const PlayerConfigDefinition = {
 		type: "bool",
 		config: true as boolean,
 	},
-	others_gfx: {
-		displayName: "Others effects & sounds",
-		type: "bool",
-		config: true as boolean,
-	},
 	dayCycle: {
 		displayName: "Day cycle",
 		type: "dayCycle",
 		config: {
 			automatic: true as boolean,
 			/** Hours, 0-24 */
-			manual: 0 as number,
+			manual: 14 as number,
 		},
 	},
 	uiScale: {

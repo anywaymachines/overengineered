@@ -319,6 +319,11 @@ export class GraphicsValueControl extends ConfigValueControl<MultiTemplate> {
 				type: "bool",
 				config: definition.config.othersShadows,
 			},
+			othersEffects: {
+				displayName: "Others effects and sounds",
+				type: "bool",
+				config: definition.config.othersEffects,
+			},
 		} as const satisfies PlayerConfigTypes.Definitions;
 		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
