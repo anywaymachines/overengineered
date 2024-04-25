@@ -122,7 +122,7 @@ const v7: UpdatablePlayerConfigVersion<PlayerConfigV7, PlayerConfigV6> = {
 };
 
 // Moved others_gfx to graphics
-type PlayerConfigV8 = Omit<PlayerConfigV6, "others_gfx">;
+type PlayerConfigV8 = Omit<PlayerConfigV7, "others_gfx">;
 const v8: UpdatablePlayerConfigVersion<PlayerConfigV8, PlayerConfigV7> = {
 	version: 8,
 
