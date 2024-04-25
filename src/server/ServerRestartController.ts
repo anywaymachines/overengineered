@@ -35,15 +35,25 @@ export namespace ServerRestartController {
 
 		task.spawn(() => {
 			let timeLeft = maxTime;
+
 			while (true as boolean) {
-				if (timeLeft <= 1) Players.GetPlayers().forEach((p) => p.Kick("Got boned!"));
-				Remotes.Server.GetNamespace("Admin")
-					.Get("SendMessage")
-					.SendToAllPlayers(
-						`YOU ARE GOING TO BAD TO THE BONE IN ${timeLeft--}...`,
-						textStartColor.Lerp(textEndColor, progress),
-						0.5,
-					);
+				if (timeLeft <= 1) {
+					Players.GetPlayers().forEach((p) => p.Kick("Got boned!"));
+					continue;
+				}
+
+				timeLeft--;
+
+				if (timeLeft % 10 === 0) {
+					Remotes.Server.GetNamespace("Admin")
+						.Get("SendMessage")
+						.SendToAllPlayers(
+							`YOU ARE GOING TO BAD TO THE BONE IN ${timeLeft}...`,
+							textStartColor.Lerp(textEndColor, progress),
+							0.5,
+						);
+				}
+
 				task.wait(1);
 			}
 		});
