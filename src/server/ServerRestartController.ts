@@ -42,8 +42,6 @@ export namespace ServerRestartController {
 					continue;
 				}
 
-				timeLeft--;
-
 				if (timeLeft % 10 === 0) {
 					Remotes.Server.GetNamespace("Admin")
 						.Get("SendMessage")
@@ -54,6 +52,7 @@ export namespace ServerRestartController {
 						);
 				}
 
+				timeLeft--;
 				task.wait(1);
 			}
 		});
