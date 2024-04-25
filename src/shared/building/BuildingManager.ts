@@ -176,13 +176,16 @@ export namespace BuildingManager {
 			axes.push(["z", CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(0, 0, mode.z))]);
 		}
 
-		const ret: CFrame[] = [cframeToMirror];
+		const origPos = VectorUtils.roundVector(cframeToMirror.Position);
+		const ret = new Map<Vector3, CFrame>([[origPos, cframeToMirror]]);
 		for (const [axe, axis] of axes) {
-			for (const frame of [...ret]) {
-				ret.push(reflect(frame, axe, plotframe.ToWorldSpace(axis)));
+			for (const [, frame] of [...ret]) {
+				const reflected = reflect(frame, axe, plotframe.ToWorldSpace(axis));
+				ret.set(VectorUtils.roundVector(reflected.Position), reflected);
 			}
 		}
-		ret.remove(0);
-		return ret;
+		ret.delete(origPos);
+
+		return ret.values();
 	}
 }
