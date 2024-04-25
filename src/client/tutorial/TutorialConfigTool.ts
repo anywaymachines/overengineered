@@ -118,13 +118,13 @@ export class TutorialConfigTool {
 				}
 
 				eventHandler.unsubscribeAll();
-				this.tutorial.Finish();
+				this.cleanup();
 				resolve(true);
 			});
 
 			eventHandler.subscribeOnce(this.tutorial.Control.instance.Header.Cancel.MouseButton1Click, () => {
 				eventHandler.unsubscribeAll();
-				this.tutorial.Finish();
+				this.cleanup();
 				resolve(false);
 			});
 		});

@@ -83,11 +83,13 @@ export class TutorialDeleteTool {
 				}
 
 				this.cleanup();
+				eventHandler.unsubscribeAll();
 				resolve(true);
 			});
 
 			eventHandler.subscribeOnce(this.tutorial.Control.instance.Header.Cancel.MouseButton1Click, () => {
 				eventHandler.unsubscribeAll();
+				this.cleanup();
 				this.tutorial.Finish();
 				resolve(false);
 			});

@@ -189,16 +189,6 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 		cframe: new CFrame(0, 3.5, 6, 1, 0, 0, 0, -1, 8.742277657347586e-8, 0, -8.742277657347586e-8, -1),
 	});
 
-	// tutorial.buildTool.addBlockToPlace({
-	// 	id: "servomotorblock",
-	// 	cframe: new CFrame(18, 3.5, -6, 1, 0, 0, 0, -1, 8.742277657347586e-8, 0, -8.742277657347586e-8, -1),
-	// });
-
-	// tutorial.buildTool.addBlockToPlace({
-	// 	id: "servomotorblock",
-	// 	cframe: new CFrame(18, 3.5, 6, 1, 0, 0, 0, -1, 8.742277657347586e-8, 0, -8.742277657347586e-8, -1),
-	// });
-
 	if (!(await tutorial.buildTool.waitForBlocksToPlace())) return;
 
 	tutorial.buildTool.addBlockToPlace({
@@ -433,8 +423,15 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	toolEnabler.disableAll();
 	TasksControl.instance.finish();
 
-	tutorial.Control.displayStep("It's time to adjust the controls, let's start with the rotary mechanism", false);
+	tutorial.Control.displayStep(
+		"It's time to adjust the controls, let's start with the rotary mechanism. Configure the right side motors first",
+		false,
+	);
 	toolEnabler.enableOnly(allTools.configTool);
+	TasksControl.instance.addTask("Select configuring tool");
+	TasksControl.instance.addTask("Select all motors");
+	TasksControl.instance.addTask("Set Rotation+ to key W");
+	TasksControl.instance.addTask("Set Rotation- to key S");
 
 	tutorial.configTool.addBlockToConfigure({
 		position: new Vector3(0, 5.5, -8),
@@ -449,6 +446,71 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	});
 
 	if (!(await tutorial.configTool.waitForBlocksConfigure())) return;
+	toolEnabler.disableAll();
+	TasksControl.instance.finish();
+
+	tutorial.Control.displayStep(
+		"Great! Now configure the left side motors of your car. It's like left side, but inversed",
+		false,
+	);
+	toolEnabler.enableOnly(allTools.configTool);
+	TasksControl.instance.addTask("Select configuring tool");
+	TasksControl.instance.addTask("Select all motors");
+	TasksControl.instance.addTask("Set Rotation+ to key S");
+	TasksControl.instance.addTask("Set Rotation- to key W");
+
+	tutorial.configTool.addBlockToConfigure({
+		position: new Vector3(0, 5.5, 8),
+		key: "rotationSpeed",
+		value: { rotation: { add: "S", sub: "W" } },
+	});
+
+	tutorial.configTool.addBlockToConfigure({
+		position: new Vector3(18, 5.5, 8),
+		key: "rotationSpeed",
+		value: { rotation: { add: "S", sub: "W" } },
+	});
+
+	if (!(await tutorial.configTool.waitForBlocksConfigure())) return;
+	toolEnabler.disableAll();
+	TasksControl.instance.finish();
+
+	tutorial.Control.displayStep(
+		"Great, the motors are tuned! After the tutorial, try to set the speed higher so that your car is not slow",
+		true,
+	);
+	if (!(await tutorial.WaitForNextButtonPress())) return;
+
+	tutorial.Control.displayStep("Time to configure servomotors. This is necessary so that the car can turn", false);
+
+	toolEnabler.enableOnly(allTools.configTool);
+	TasksControl.instance.addTask("Select configuring tool");
+	TasksControl.instance.addTask("Select all servo motors");
+	TasksControl.instance.addTask("Set Rotation+ to key D");
+	TasksControl.instance.addTask("Set Rotation- to key A");
+
+	tutorial.configTool.addBlockToConfigure({
+		position: new Vector3(0, 7.5, -6),
+		key: "angle",
+		value: { rotation: { add: "D", sub: "A" } },
+	});
+
+	tutorial.configTool.addBlockToConfigure({
+		position: new Vector3(0, 7.5, 6),
+		key: "angle",
+		value: { rotation: { add: "D", sub: "A" } },
+	});
+
+	if (!(await tutorial.configTool.waitForBlocksConfigure())) return;
+	toolEnabler.disableAll();
+	TasksControl.instance.finish();
+
+	tutorial.Control.displayStep(
+		"Your car is ready! Press run triangle button on the top of your screen to test. Good luck!",
+		true,
+	);
+	if (!(await tutorial.WaitForNextButtonPress())) return;
+
 	toolEnabler.disableAll();
 	TasksControl.instance.finish();
 	BuildingMode.instance.gui.actionbar.enabledButtons.enableAll();

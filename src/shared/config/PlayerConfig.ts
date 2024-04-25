@@ -23,6 +23,9 @@ declare global {
 		readonly foliage: boolean;
 		readonly loadDistance: number;
 	};
+	type TutorialConfiguration = {
+		readonly basics: boolean;
+	};
 
 	namespace PlayerConfigTypes {
 		export type Bool = ConfigType<"bool", boolean>;
@@ -40,6 +43,7 @@ declare global {
 		export type Camera = ConfigType<"camera", CameraConfiguration>;
 		export type Graphics = ConfigType<"graphics", GraphicsConfiguration>;
 		export type Terrain = ConfigType<"terrain", TerrainConfiguration>;
+		export type Tutorial = ConfigType<"tutorial", TutorialConfiguration>;
 
 		export interface Types {
 			readonly bool: Bool;
@@ -51,6 +55,7 @@ declare global {
 			readonly camera: Camera;
 			readonly graphics: Graphics;
 			readonly terrain: Terrain;
+			readonly tutorial: Tutorial;
 		}
 
 		export type Definitions = ConfigTypesToDefinition<keyof Types, Types>;
@@ -119,10 +124,17 @@ export const PlayerConfigDefinition = {
 		displayName: "Terrain",
 		type: "terrain",
 		config: {
-			kind: "Triangle" as TerrainConfiguration["kind"],
+			kind: "Terrain" as TerrainConfiguration["kind"],
 			resolution: 8 as number,
 			foliage: true as boolean,
 			loadDistance: 24 as number,
+		},
+	},
+	tutorial: {
+		displayName: "Tutorial",
+		type: "tutorial",
+		config: {
+			basics: false as boolean,
 		},
 	},
 } as const satisfies ConfigTypesToDefinition<keyof PlayerConfigTypes.Types, PlayerConfigTypes.Types>;

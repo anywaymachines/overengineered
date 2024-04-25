@@ -1,3 +1,4 @@
+import { TasksControl } from "client/gui/static/TasksControl";
 import { TutorialControl } from "client/gui/static/TutorialControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { TutorialBasics } from "client/tutorial/TutorialBasics";
@@ -55,6 +56,7 @@ export namespace Tutorial {
 		configTool.cleanup();
 
 		BuildingMode.instance.toolController.enabledTools.enableAll();
+		TasksControl.instance.finish();
 
 		Control.finish();
 	}

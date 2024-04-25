@@ -24,7 +24,6 @@ import { DebugControl } from "client/gui/static/DebugControl";
 import { LogControl } from "client/gui/static/LogControl";
 import { PlayModeController } from "client/modes/PlayModeController";
 import { ClientBuildingValidation } from "client/modes/build/ClientBuildingValidation";
-import { Tutorial } from "client/tutorial/Tutorial";
 import { $compileTime } from "rbxts-transformer-macros";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { RemoteEvents } from "shared/RemoteEvents";
@@ -72,7 +71,3 @@ while (!(Workspace.GetAttribute("loaded") as boolean | undefined)) {
 }
 
 LoadingController.hide();
-
-if (Players.LocalPlayer.Name === "3QAXM" && RunService.IsStudio()) {
-	Tutorial.Begin("Basics");
-}

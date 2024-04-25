@@ -3,7 +3,11 @@ import { Colors } from "client/gui/Colors";
 import { DebugLog } from "client/gui/DebugLog";
 import { Element } from "shared/Element";
 
-new Instance("BindableEvent").Event.Wait();
+if (true as boolean) {
+	Workspace.WaitForChild("test1").Destroy();
+	Workspace.WaitForChild("test3").Destroy();
+	new Instance("BindableEvent").Event.Wait();
+}
 
 const createSegment = () => {
 	return Element.create("Frame", {

@@ -139,7 +139,21 @@ const v8: UpdatablePlayerConfigVersion<PlayerConfigV8, PlayerConfigV7> = {
 	},
 };
 
-const versions = [v1, v2, v3, v4, v5, v6, v7, v8] as const;
+// Added tutorial
+type PlayerConfigV9 = PlayerConfigV8 & { readonly tutorial: TutorialConfiguration };
+const v9: UpdatablePlayerConfigVersion<PlayerConfigV9, PlayerConfigV8> = {
+	version: 9,
+
+	update(prev: Partial<PlayerConfigV8>): Partial<PlayerConfigV9> {
+		return {
+			...prev,
+			version: this.version,
+			tutorial: PlayerConfigDefinition.tutorial.config,
+		};
+	},
+};
+
+const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 export namespace PlayerConfigUpdater {
