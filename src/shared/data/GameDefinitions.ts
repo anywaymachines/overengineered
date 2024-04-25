@@ -17,9 +17,13 @@ export namespace GameDefinitions {
 			name: "Roblox Staff",
 			color: Color3.fromRGB(255, 255, 255),
 		},
+		3: {
+			name: "Tester",
+			color: Color3.fromRGB(255, 180, 40),
+		},
 		2: {
-			name: "Game Test",
-			color: Color3.fromRGB(170, 255, 255),
+			name: "Pre-Beta 2024",
+			color: Color3.fromRGB(118, 249, 249),
 		},
 	} as { readonly [rank: number]: { name: string; color?: Color3; rainbow?: boolean } };
 
