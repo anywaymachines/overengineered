@@ -1,12 +1,17 @@
 import { TasksControl } from "client/gui/static/TasksControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
+import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { Tutorial } from "client/tutorial/Tutorial";
+import { SharedPlots } from "shared/building/SharedPlots";
 
 export async function TestTutorial(tutorial: typeof Tutorial) {
 	tutorial.Control.startTutorial("TEST", tutorial.Cancellable);
 	const toolController = BuildingMode.instance.toolController;
 	const allTools = toolController.allTools;
 	const toolEnabler = toolController.enabledTools;
+
+	await ClientBuilding.deleteOperation.execute(SharedPlots.getOwnPlot(), "all");
+	BuildingMode.instance.gui.actionbar.enabledButtons.enableOnly("settings");
 
 	// Main
 	tutorial.buildTool.addBlockToPlace({
@@ -43,15 +48,11 @@ export async function TestTutorial(tutorial: typeof Tutorial) {
 	tutorial.configTool.addBlockToConfigure({
 		position: new Vector3(0, 1.5, -6),
 		key: "rotationSpeed",
-		value: { rotation: { add: "W" } },
-	});
-	tutorial.configTool.addBlockToConfigure({
-		position: new Vector3(0, 1.5, -6),
-		key: "rotationSpeed",
-		value: { rotation: { sub: "S" } },
+		value: { rotation: { add: "W", sub: "S" } },
 	});
 	if (!(await tutorial.configTool.waitForBlocksConfigure())) return;
 
+	BuildingMode.instance.gui.actionbar.enabledButtons.enableAll();
 	TasksControl.instance.finish();
 	tutorial.Finish();
 }

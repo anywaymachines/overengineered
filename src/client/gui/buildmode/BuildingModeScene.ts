@@ -9,6 +9,7 @@ import { requestMode } from "client/modes/PlayModeRequest";
 import { ActionController } from "client/modes/build/ActionController";
 import { ToolBase } from "client/tools/ToolBase";
 import { ToolController } from "client/tools/ToolController";
+import { ComponentDisabler } from "shared/component/ComponentDisabler";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 import { TransformProps } from "shared/component/Transform";
 import { WireToolScene, WireToolSceneDefinition } from "./tools/WireToolScene";
@@ -21,12 +22,25 @@ type ActionBarControlDefinition = GuiObject & {
 	};
 };
 class ActionBarControl extends Control<ActionBarControlDefinition> {
+	readonly allButtons = ["run", "save", "settings"] as const;
+	readonly enabledButtons = new ComponentDisabler(this.allButtons);
+
 	constructor(gui: ActionBarControlDefinition) {
 		super(gui);
 
 		const runButton = this.add(new ButtonControl(this.gui.Buttons.Run));
 		const saveButton = this.add(new ButtonControl(this.gui.Buttons.Save));
 		const settingsButton = this.add(new ButtonControl(this.gui.Buttons.Settings));
+
+		this.event.subscribeObservable(
+			this.enabledButtons.enabled,
+			(enabled) => {
+				runButton.setVisible(enabled.includes("run"));
+				saveButton.setVisible(enabled.includes("save"));
+				settingsButton.setVisible(enabled.includes("settings"));
+			},
+			true,
+		);
 
 		this.event.subscribe(runButton.activated, async () => {
 			await requestMode("ride");
@@ -80,15 +94,16 @@ export type BuildingModeSceneDefinition = GuiObject & {
 };
 export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 	private readonly scenes = new ComponentKeyedChildren<ToolBase, Control>(this);
+	readonly actionbar;
 
 	constructor(gui: BuildingModeSceneDefinition, tools: ToolController) {
 		super(gui);
 
 		this.add(ActionController.instance);
 
-		const actionbar = this.add(new ActionBarControl(gui.ActionBar));
+		this.actionbar = this.add(new ActionBarControl(gui.ActionBar));
 		const updateActionBarVisibility = () =>
-			actionbar.setVisible(!tools.selectedTool.get() && !LoadingController.isLoading.get());
+			this.actionbar.setVisible(!tools.selectedTool.get() && !LoadingController.isLoading.get());
 
 		this.event.subscribeObservable(LoadingController.isLoading, updateActionBarVisibility);
 		this.event.subscribeObservable(tools.selectedTool, updateActionBarVisibility);

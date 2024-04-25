@@ -27,6 +27,7 @@ export class BuildingMode extends PlayMode {
 	);
 	readonly mirrorVisualizer;
 	readonly toolController;
+	readonly gui;
 
 	private constructor() {
 		super();
@@ -48,7 +49,7 @@ export class BuildingMode extends PlayMode {
 		);
 
 		this.toolController = this.add(new ToolController(this));
-		this.add(
+		this.gui = this.add(
 			new BuildingModeScene(
 				Gui.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode,
 				this.toolController,

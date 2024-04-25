@@ -1,6 +1,8 @@
 import { TasksControl } from "client/gui/static/TasksControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
+import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { Tutorial } from "client/tutorial/Tutorial";
+import { SharedPlots } from "shared/building/SharedPlots";
 
 export async function TutorialBasics(tutorial: typeof Tutorial) {
 	tutorial.Control.startTutorial("BASICS", tutorial.Cancellable);
@@ -8,6 +10,9 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	const allTools = toolController.allTools;
 	const toolEnabler = toolController.enabledTools;
 	toolEnabler.disableAll();
+
+	await ClientBuilding.deleteOperation.execute(SharedPlots.getOwnPlot(), "all");
+	BuildingMode.instance.gui.actionbar.enabledButtons.enableOnly("settings");
 
 	tutorial.Control.displayStep(
 		"Welcome to Plane Engineers! Now we will bring you up to date. Let's build a car!",
@@ -434,44 +439,19 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	tutorial.configTool.addBlockToConfigure({
 		position: new Vector3(0, 5.5, -8),
 		key: "rotationSpeed",
-		value: {
-			rotation: {
-				add: "W",
-			},
-		},
-	});
-	tutorial.configTool.addBlockToConfigure({
-		position: new Vector3(0, 5.5, -8),
-		key: "rotationSpeed",
-		value: {
-			rotation: {
-				sub: "S",
-			},
-		},
+		value: { rotation: { add: "W", sub: "S" } },
 	});
 
 	tutorial.configTool.addBlockToConfigure({
 		position: new Vector3(18, 5.5, -8),
 		key: "rotationSpeed",
-		value: {
-			rotation: {
-				add: "W",
-			},
-		},
-	});
-	tutorial.configTool.addBlockToConfigure({
-		position: new Vector3(18, 5.5, -8),
-		key: "rotationSpeed",
-		value: {
-			rotation: {
-				add: "S",
-			},
-		},
+		value: { rotation: { add: "W", sub: "S" } },
 	});
 
 	if (!(await tutorial.configTool.waitForBlocksConfigure())) return;
 	toolEnabler.disableAll();
 	TasksControl.instance.finish();
+	BuildingMode.instance.gui.actionbar.enabledButtons.enableAll();
 
 	tutorial.Finish();
 }
