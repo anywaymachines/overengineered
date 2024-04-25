@@ -139,7 +139,7 @@ const v8: UpdatablePlayerConfigVersion<PlayerConfigV8, PlayerConfigV7> = {
 	},
 };
 
-const versions = [v1, v2, v3, v4, v5, v6, v7] as const;
+const versions = [v1, v2, v3, v4, v5, v6, v7, v8] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 export namespace PlayerConfigUpdater {
