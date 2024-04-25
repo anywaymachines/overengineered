@@ -3,7 +3,6 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { Tutorial } from "client/tutorial/Tutorial";
 import { BlockManager } from "shared/building/BlockManager";
 import { EventHandler } from "shared/event/EventHandler";
-import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { successResponse } from "shared/types/network/Responses";
 import { VectorUtils } from "shared/utils/VectorUtils";
@@ -38,25 +37,28 @@ export class TutorialConfigTool {
 		this.get().blocksToConfigure.clear();
 	}
 
-	private tableEquals(table1: object, table2: object): boolean {
-		for (const [key] of Objects.pairs_(table1)) {
-			if (!(key in table2)) {
-				return false;
-			}
+	/** Recursively checks for value equality, but only for keys of {@link checkTo}.
+	 * @example
+	 * tableEquals({ a: 1, b: 2 }, { b: 2 }) // returns true
+	 * tableEquals({ a: 1, b: 2 }, { a: 2, b: 2 }) // returns false
+	 */
+	private sparseEquals(orig: unknown, checkTo: unknown): boolean {
+		if (typeOf(orig) !== typeOf(checkTo)) {
+			return false;
+		}
 
-			if (typeIs(table1[key], "table")) {
-				if (!this.tableEquals(table1[key], table2[key])) return false;
-			} else {
-				if (table1[key] !== table2[key]) {
+		if (typeIs(orig, "table") && typeIs(checkTo, "table")) {
+			for (const [key] of Objects.pairs_(checkTo)) {
+				if (!(key in orig)) {
+					return false;
+				}
+
+				if (!this.sparseEquals(orig[key], checkTo[key])) {
 					return false;
 				}
 			}
-		}
-
-		for (const [key] of Objects.pairs_(table2)) {
-			if (!(key in table1)) {
-				return false;
-			}
+		} else {
+			return orig === checkTo;
 		}
 
 		return true;
@@ -66,7 +68,8 @@ export class TutorialConfigTool {
 		return new Promise((resolve) => {
 			const eventHandler = new EventHandler();
 
-			eventHandler.register(
+			// Disabled due to not working alnd also not making much sense
+			/*eventHandler.register(
 				ClientBuilding.updateConfigOperation.addMiddleware((plot, configs) => {
 					for (const config of configs) {
 						if (
@@ -85,7 +88,7 @@ export class TutorialConfigTool {
 
 					return successResponse;
 				}),
-			);
+			);*/
 
 			eventHandler.subscribe(ClientBuilding.updateConfigOperation.executed, (plot) => {
 				const configs = new Map(
@@ -109,14 +112,7 @@ export class TutorialConfigTool {
 					);
 					if (!block) throw "what";
 
-					// configs[number] = { rotationSpeed = { rotation = { add = "W" } } }
-					// { rotation: { add: "W" } }
-
-					// block.value.forEach((element) => {
-					// 	block.value; // [{"key": value}]
-					// });
-
-					if (config[block.key] !== block.value) {
+					if (!this.sparseEquals(config[block.key], block.value)) {
 						return;
 					}
 				}
