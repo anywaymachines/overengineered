@@ -87,7 +87,7 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 		const submit = () => {
 			highlighter.disable();
 			this._submit.Fire(this.highlighted.get());
-			this.destroy();
+			highlighter.enable();
 		};
 
 		this.onPrepare((inputType, eh, ih) => {

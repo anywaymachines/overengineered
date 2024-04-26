@@ -1,6 +1,7 @@
 import { Control } from "client/gui/Control";
 import { TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import { HoveredBlocksSelectorMode } from "client/tools/highlighters/HoveredBlocksSelector";
+import { type BlockSelectorMode } from "client/tools/highlighters/MultiBlockSelector";
 import { Colors } from "shared/Colors";
 import { TransformService } from "shared/component/TransformService";
 import { ObservableValue } from "shared/event/ObservableValue";
@@ -12,7 +13,7 @@ export type BlockSelectorModeGuiDefinition = GuiObject & {
 	readonly MachineSelection: TextButtonDefinition;
 };
 export class BlockSelectorModeGui extends Control {
-	constructor(gui: BlockSelectorModeGuiDefinition, mode: ObservableValue<HoveredBlocksSelectorMode>) {
+	constructor(gui: BlockSelectorModeGuiDefinition, mode: ObservableValue<BlockSelectorMode>) {
 		super(gui);
 
 		class MobileSelection extends Control<BlockSelectorModeGuiDefinition> {

@@ -19,11 +19,11 @@ export type MultiBlockSelectorConfiguration = {
 export class MultiBlockSelector extends ClientComponent {
 	private readonly _submit = new ArgsSignal<[blocks: readonly BlockModel[]]>();
 	readonly submit = this._submit.asReadonly();
+	readonly mode = new ObservableValue<BlockSelectorMode>("single");
 
 	constructor(plot: ReadonlyObservableValue<SharedPlot>, config?: MultiBlockSelectorConfiguration) {
 		super();
 
-		const mode = new ObservableValue<BlockSelectorMode>("single");
 		const buttons: Readonly<Record<BlockSelectorMode, KeyCode | undefined>> = {
 			single: undefined,
 			assembly: config?.enabled?.includes("assembly") === false ? undefined : "LeftControl",
@@ -32,10 +32,10 @@ export class MultiBlockSelector extends ClientComponent {
 		};
 		this.event.subInput((ih) => {
 			for (const [bmode, button] of pairs(buttons)) {
-				ih.onKeyDown(button, () => mode.set(bmode));
+				ih.onKeyDown(button, () => this.mode.set(bmode));
 				ih.onKeyUp(button, () => {
-					if (mode.get() === bmode) {
-						mode.set("single");
+					if (this.mode.get() === bmode) {
+						this.mode.set("single");
 					}
 				});
 			}
@@ -45,11 +45,11 @@ export class MultiBlockSelector extends ClientComponent {
 			for (const [bmode, button] of pairs(buttons)) {
 				if (!UserInputService.IsKeyDown(button)) continue;
 
-				mode.set(bmode);
+				this.mode.set(bmode);
 				return;
 			}
 
-			mode.set("single");
+			this.mode.set("single");
 		};
 		this.onEnable(setBasedOnCurrentInput);
 
@@ -80,12 +80,12 @@ export class MultiBlockSelector extends ClientComponent {
 
 			setBasedOnCurrentInput();
 			if (!selectorParent.get()) {
-				selectorParent.set(modes[mode.get()]());
+				selectorParent.set(modes[this.mode.get()]());
 			}
 		});
 
-		const updateSelector = () => selectorParent.set(modes[mode.get()]());
-		this.event.subscribeObservable(mode, updateSelector);
+		const updateSelector = () => selectorParent.set(modes[this.mode.get()]());
+		this.event.subscribeObservable(this.mode, updateSelector);
 		this.event.subscribeObservable(plot, updateSelector);
 		this.onEnable(updateSelector);
 	}
