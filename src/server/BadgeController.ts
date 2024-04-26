@@ -9,7 +9,7 @@ export namespace BadgeController {
 
 	export function initialize() {
 		if (game.PlaceId !== GameDefinitions.PRODUCTION_PLACE_ID) {
-			Logger.warn("[BadgeController] Disabling on non-production place");
+			Logger.warning("[BadgeController] Disabling on non-production place");
 			return;
 		}
 
@@ -18,10 +18,10 @@ export namespace BadgeController {
 			try {
 				if ([2, 3].includes(player.GetRankInGroup(GameDefinitions.GROUP)) || (true as boolean)) {
 					BadgeService.AwardBadge(player.UserId, badges.PRE_BETA_2024);
-					Logger.warn(`[BadgeController] Awarded PRE_BETA_2024 to ${player.Name}`);
+					Logger.warning(`[BadgeController] Awarded PRE_BETA_2024 to ${player.Name}`);
 				}
 			} catch {
-				Logger.warn(`[BadgeController] Failed to give PRE_BETA_2024 to ${player.Name}`);
+				Logger.warning(`[BadgeController] Failed to give PRE_BETA_2024 to ${player.Name}`);
 			}
 		});
 
