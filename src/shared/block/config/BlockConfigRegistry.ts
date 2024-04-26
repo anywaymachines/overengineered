@@ -257,6 +257,21 @@ const ballast = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
+const heliumblock = {
+	input: {
+		density: {
+			displayName: "Density",
+			type: "clampedNumber",
+			default: 1 as number,
+			config: 1 as number,
+			min: 0.55,
+			max: 2,
+			step: 0.01,
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
 const rope = {
 	input: {
 		length: {
@@ -1129,6 +1144,7 @@ export const blockConfigRegistry = {
 	magnet,
 	piston,
 	ballast,
+	heliumblock,
 
 	wing1x1: wing,
 	wing1x2: wing,
