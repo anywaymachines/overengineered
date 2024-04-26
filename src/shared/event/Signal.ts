@@ -1,5 +1,3 @@
-import { Logger } from "shared/Logger";
-
 export interface ReadonlyArgsSignal<TArgs extends unknown[]> {
 	Connect(callback: (...args: TArgs) => void): { Disconnect(): void };
 }
@@ -29,7 +27,7 @@ export class ArgsSignal<TArgs extends unknown[]> implements ReadonlyArgsSignal<T
 	Fire(...args: TArgs): void {
 		if (!this.subscribed) return;
 		if (this.inSelf > 10) {
-			Logger.err(`Signal self-calling overflow: ${debug.traceback()}`);
+			print(`Signal self-calling overflow: ${debug.traceback()}`);
 			throw "Signal self-calling overflow.";
 		}
 
