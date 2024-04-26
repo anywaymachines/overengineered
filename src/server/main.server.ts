@@ -1,4 +1,5 @@
 import { RunService, Workspace } from "@rbxts/services";
+import { BadgeController } from "server/BadgeController";
 import { ServerRestartController } from "server/ServerRestartController";
 import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
 import { BlocksInitializer } from "shared/BlocksInitializer";
@@ -52,7 +53,7 @@ namespace RemoteHandlers {
 		Logger.info(`Loading ${userid}'s slot ${index}`);
 		ServerBuilding.deleteBlocks({ plot, blocks: "all" });
 		const dblocks = BlocksSerializer.deserialize(blocks, plot);
-		print(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
+		Logger.info(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
 
 		return { success: true, isEmpty: dblocks === 0 };
 	}
@@ -128,9 +129,11 @@ namespace RemoteHandlers {
 		vehicleSeat.Sit(hrp);
 	}
 }
-
 // Plots
 ServerPlots.initialize();
+
+// Badges
+BadgeController.initialize();
 
 // Initializing event workders
 registerOnRemoteFunction("Ride", "SetPlayMode", PlayModeController.changeModeForPlayer);

@@ -167,10 +167,10 @@ export namespace BuildingWelder {
 				union.Parent = weldParent;
 			}
 
-			print(`[BLOCKINIT] Adding automatic region to ${block.Name}`);
+			Logger.info(`[BLOCKINIT] Adding automatic region to ${block.Name}`);
 		}
 
-		print("[BLOCKINIT] Block welding initialized");
+		Logger.info("[BLOCKINIT] Block welding initialized");
 	}
 
 	function getPlotColliders(plot: PlotModel): WorldModel {

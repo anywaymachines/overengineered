@@ -70,7 +70,7 @@ export class SlotDatabase {
 		if (!this.onlinePlayers.has(userId)) {
 			this.blocksdb.save(tostring(userId));
 			this.blocksdb.free(tostring(userId));
-			print("SAVING AFTER QUIT2");
+			Logger.info("SAVING AFTER QUIT2");
 		}
 	}
 

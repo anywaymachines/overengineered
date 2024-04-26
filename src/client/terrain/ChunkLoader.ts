@@ -104,7 +104,7 @@ export class ChunkLoader<T = defined> extends Component {
 				this.loadChunksNextSingleRadius(chunkX, chunkZ);
 				continue;
 			} else if (c !== undefined) {
-				print(os.clock() - c);
+				// print(os.clock() - c);
 				c = undefined;
 			}
 		}

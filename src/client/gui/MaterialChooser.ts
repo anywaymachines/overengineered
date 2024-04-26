@@ -60,10 +60,7 @@ export class MaterialChooser extends Control<MaterialChooserDefinition> {
 		for (const instance of this.gui.GetChildren(undefined)) {
 			if (!instance.IsA("ImageButton")) continue;
 
-			const gamepassid =
-				instance.Name === "Neon"
-					? GameDefinitions.GAMEPASSES.NeonMaterial //
-					: undefined;
+			const gamepassid = instance.Name === "Neon" ? GameDefinitions.GAMEPASSES.NeonMaterial : undefined;
 
 			this.add(new MaterialButton(instance, (material) => this.value.set(material), gamepassid));
 		}

@@ -28,8 +28,10 @@ export namespace GameDefinitions {
 	} as { readonly [rank: number]: { name: string; color?: Color3; rainbow?: boolean } };
 
 	export const GAMEPASSES = {
-		NeonMaterial: 748518813,
+		NeonMaterial: 793888123,
 	};
+
+	export const PRODUCTION_PLACE_ID = 17282606569;
 
 	// Building
 	export const FREE_SLOTS = 15;
