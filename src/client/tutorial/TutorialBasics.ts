@@ -236,6 +236,7 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 
 	if (!(await tutorial.editTool.waitForMoveToolWork(new Vector3(0, 4, 0)))) return;
 	TasksControl.instance.finish();
+	tutorial.editTool.get().enabledModes.enableAll();
 
 	toolEnabler.disableAll();
 	tutorial.Control.displayStep("Great! Let's install motors that will turn the wheels and move the car!", false);
