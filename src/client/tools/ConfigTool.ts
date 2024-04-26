@@ -207,6 +207,7 @@ export class ConfigTool extends ToolBase {
 
 		const config: MultiBlockSelectorConfiguration = {
 			filter: canBeSelectedConsideringCurrentSelection,
+			enabled: ["single"],
 			/*modeSetMiddleware: (mode, prev) => {
 				if (!InputController.isShiftPressed()) {
 					if (mode === "assembly" || mode === "machine" || mode === "box") {

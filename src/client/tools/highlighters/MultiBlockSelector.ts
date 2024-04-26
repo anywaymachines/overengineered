@@ -13,6 +13,7 @@ export interface BlockSelector extends IComponent {
 
 export type BlockSelectorMode = HoveredBlocksSelectorMode | "box";
 export type MultiBlockSelectorConfiguration = {
+	readonly enabled?: readonly BlockSelectorMode[];
 	readonly filter?: (block: BlockModel) => boolean;
 };
 export class MultiBlockSelector extends ClientComponent {
@@ -25,14 +26,12 @@ export class MultiBlockSelector extends ClientComponent {
 		const mode = new ObservableValue<BlockSelectorMode>("single");
 		const buttons: Readonly<Record<BlockSelectorMode, KeyCode | undefined>> = {
 			single: undefined,
-			assembly: "LeftControl",
-			machine: "LeftAlt",
-			box: "E",
+			assembly: config?.enabled?.includes("assembly") === false ? undefined : "LeftControl",
+			machine: config?.enabled?.includes("machine") === false ? undefined : "LeftAlt",
+			box: config?.enabled?.includes("box") === false ? undefined : "E",
 		};
 		this.event.subInput((ih) => {
 			for (const [bmode, button] of pairs(buttons)) {
-				if (button === undefined) continue;
-
 				ih.onKeyDown(button, () => mode.set(bmode));
 				ih.onKeyUp(button, () => {
 					if (mode.get() === bmode) {
@@ -44,7 +43,6 @@ export class MultiBlockSelector extends ClientComponent {
 
 		const setBasedOnCurrentInput = () => {
 			for (const [bmode, button] of pairs(buttons)) {
-				if (button === undefined) continue;
 				if (!UserInputService.IsKeyDown(button)) continue;
 
 				mode.set(bmode);
