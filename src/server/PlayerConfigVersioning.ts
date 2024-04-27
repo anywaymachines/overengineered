@@ -173,7 +173,6 @@ const logger = new Logger("PlayerConfigUpdater");
 export namespace PlayerConfigUpdater {
 	export function update(config: object | { readonly version: number }) {
 		const version = "version" in config ? config.version : versions[versions.size() - 1].version;
-		print("ASDKLSAJHKD", version, config);
 
 		for (let i = version + 1; i <= current.version; i++) {
 			const newver = versions.find((v) => v.version === i);
