@@ -13,22 +13,35 @@ export namespace Config {
 					typeOf(config[key]) !== typeOf(def.config)
 				) {
 					config[key] = def.config;
-				} else {
+				} else if (
+					(config[key] === undefined || typeIs(config[key], "table")) &&
+					(def.config === undefined || typeIs(def.config, "table"))
+				) {
 					config[key] = {
 						...((def.config as object) ?? {}),
 						...(config[key] ?? {}),
 					} as (typeof config)[typeof key];
 				}
 
-				for (const [k, v] of Objects.pairs_(config[key]!)) {
-					if (!typeIs(v, "table")) continue;
+				if (typeIs(config[key], "table") && typeIs(def.config, "table")) {
+					for (const [k, v] of Objects.pairs_(config[key]!)) {
+						if (!typeIs(v, "table")) continue;
+						if (
+							typeIs(def.config, "table") &&
+							!typeIs((def.config as never as Record<keyof TDef, unknown>)[k], "table")
+						) {
+							continue;
+						}
 
-					config[key]![k] = {
-						...((def.config as object)[k as keyof typeof def.config] as object),
-						...(v ?? {}),
-					};
+						config[key]![k] = {
+							...((def.config as object)[k as keyof typeof def.config] as object),
+							...(v ?? {}),
+						};
+					}
 				}
-			} else config[key] ??= def.config;
+			} else {
+				config[key] ??= def.config;
+			}
 		}
 
 		return config as ConfigDefinitionsToConfig<TKeys, TDef>;

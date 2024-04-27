@@ -38,6 +38,8 @@ export namespace PlayerDataStorage {
 
 	export async function refetchData() {
 		const d = await Remotes.Client.GetNamespace("Player").Get("FetchData").CallServerAsync();
+		logger.info("Configuration received: " + HttpService.JSONEncode(config.get()));
+
 		data.set({
 			purchasedSlots: d.purchasedSlots ?? 0,
 			settings: Config.addDefaults(d.settings ?? {}, PlayerConfigDefinition),
