@@ -19,6 +19,8 @@ export namespace BadgeController {
 		Players.PlayerAdded.Connect((player) => {
 			try {
 				if ([2, 3].includes(player.GetRankInGroup(GameDefinitions.GROUP))) {
+					if (BadgeService.UserHasBadgeAsync(player.UserId, badges.PRE_BETA_2024)) return;
+
 					BadgeService.AwardBadge(player.UserId, badges.PRE_BETA_2024);
 					logger.warn(`Awarded PRE_BETA_2024 to ${player.Name}`);
 				}
