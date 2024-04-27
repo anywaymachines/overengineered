@@ -11,19 +11,19 @@ export namespace BadgeController {
 
 	export function initialize() {
 		if (game.PlaceId !== GameDefinitions.PRODUCTION_PLACE_ID) {
-			logger.warn("Disabling on non-production place");
+			logger.info("Disabling on non-production place");
 			return;
 		}
 
 		// PRE_BETA_2024
 		Players.PlayerAdded.Connect((player) => {
 			try {
-				if ([2, 3].includes(player.GetRankInGroup(GameDefinitions.GROUP)) || (true as boolean)) {
+				if ([2, 3].includes(player.GetRankInGroup(GameDefinitions.GROUP))) {
 					BadgeService.AwardBadge(player.UserId, badges.PRE_BETA_2024);
 					logger.warn(`Awarded PRE_BETA_2024 to ${player.Name}`);
 				}
 			} catch {
-				logger.warn(`Failed to give PRE_BETA_2024 to ${player.Name}`);
+				logger.info(`Failed to give PRE_BETA_2024 to ${player.Name}`);
 			}
 		});
 
