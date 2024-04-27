@@ -1102,7 +1102,7 @@ export class BuildTool extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Building (TEST)";
+		return "Building";
 	}
 	getImageID(): string {
 		return "rbxassetid://12539295858";
