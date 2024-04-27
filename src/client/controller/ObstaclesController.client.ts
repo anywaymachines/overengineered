@@ -1,6 +1,7 @@
-import { Debris, Workspace } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { CustomDebrisService } from "shared/service/CustomDebrisService";
 
 const initKillPlane = (instance: BasePart, onTouch?: (part: BasePart) => void) => {
 	instance.Touched.Connect((part) => {
@@ -22,7 +23,7 @@ const initKillPlane = (instance: BasePart, onTouch?: (part: BasePart) => void) =
 		}
 
 		part.BreakJoints();
-		Debris.AddItem(part, 10);
+		CustomDebrisService.set(part, math.random(20, 60));
 
 		onTouch?.(part);
 	});

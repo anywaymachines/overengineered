@@ -3,6 +3,7 @@ import { LocalInstanceData } from "shared/LocalInstanceData";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { BlockManager } from "shared/building/BlockManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { CustomDebrisService } from "shared/service/CustomDebrisService";
 import { ServerPartUtils } from "./plots/ServerPartUtils";
 
 const overlapParams = new OverlapParams();
@@ -27,6 +28,7 @@ export namespace SpreadingFireController {
 		}
 
 		LocalInstanceData.AddLocalTag(part, "Burn");
+		if (CustomDebrisService.exists(part)) CustomDebrisService.remove(part);
 
 		// Apply color
 		const rand_rgb = math.random(0, 50);

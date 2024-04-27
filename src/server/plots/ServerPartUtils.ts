@@ -1,3 +1,4 @@
+import { CustomDebrisService } from "shared/service/CustomDebrisService";
 import { PartUtils } from "shared/utils/PartUtils";
 
 /** Methods to edit block part information */
@@ -14,20 +15,11 @@ export namespace ServerPartUtils {
 		});
 	}
 
-	const removeQueue = new Set<Instance>();
 	export function BreakJoints(part: BasePart) {
 		PartUtils.BreakJoints(part);
 
 		if (part.IsA("VehicleSeat")) return;
 
-		if (game.PrivateServerOwnerId === 0 && !removeQueue.has(part)) {
-			const time = math.random(20, 60);
-			game.GetService("Debris").AddItem(part, time);
-
-			removeQueue.add(part);
-			task.delay(time, () => {
-				removeQueue.delete(part);
-			});
-		}
+		CustomDebrisService.set(part, math.random(20, 60));
 	}
 }
