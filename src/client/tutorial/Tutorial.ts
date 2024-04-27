@@ -56,6 +56,7 @@ export namespace Tutorial {
 		configTool.cleanup();
 
 		BuildingMode.instance.toolController.enabledTools.enableAll();
+		BuildingMode.instance.gui.actionbar.enabledButtons.enableAll();
 		TasksControl.instance.finish();
 
 		Control.finish();
