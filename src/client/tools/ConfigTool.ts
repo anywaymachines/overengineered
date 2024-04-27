@@ -42,11 +42,6 @@ namespace Scene {
 		) {
 			super(gui);
 
-			/*this.configControl.travelToConnectedPressed.Connect((uuid) => {
-				tool.unselectAll();
-				tool.selectBlockByUuid(uuid);
-			});*/
-
 			const selected = tool.selected;
 			this.event.subscribeCollection(selected, () => {
 				this.updateConfigs(selected.getArr());
@@ -134,11 +129,15 @@ namespace Scene {
 					Objects.fromEntries(configs.map((c) => [c.uuid, c.config] as const)),
 					onedef,
 					configs[0].connections,
-					//configs[0][0],
+					configs[0].blockmodel,
 				),
 			);
 			this.currentConfigControl = configControl;
 
+			configControl.travelToConnectedPressed.Connect((uuid) => {
+				this.tool.unselectAll();
+				this.tool.selectBlockByUuid(uuid);
+			});
 			configControl.configUpdated.Connect(async (key, values) => {
 				const selected = this.tool.selected.get();
 				logger.info(

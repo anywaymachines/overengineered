@@ -14,7 +14,7 @@ type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 };
 
 type Templates = {
-	readonly ConnectedTemplate: ConfigPartDefinition<GuiObject>;
+	readonly ConnectedTemplate: ConfigPartDefinition<GuiButton>;
 	readonly CheckboxTemplate: ConfigPartDefinition<CheckBoxControlDefinition>;
 	readonly KeyTemplate: ConfigPartDefinition<KeyChooserControlDefinition>;
 	readonly SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;

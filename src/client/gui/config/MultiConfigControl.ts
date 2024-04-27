@@ -1,5 +1,8 @@
 import { Control } from "client/gui/Control";
-import { Signal } from "shared/event/Signal";
+import { ButtonControl } from "client/gui/controls/Button";
+import { type ConfigPartDefinition } from "client/gui/popup/SettingsPopup";
+import { BlockManager } from "shared/building/BlockManager";
+import { ArgsSignal, Signal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";
@@ -14,6 +17,8 @@ type ConfigUpdatedCallback<TDef extends BlockConfigTypes.Definitions, TKey exten
 export class MultiConfigControl<
 	TDef extends BlockConfigTypes.Definitions,
 > extends Control<MultiConfigControlDefinition> {
+	private readonly _travelToConnectedPressed = new ArgsSignal<[uuid: BlockUuid]>();
+	readonly travelToConnectedPressed = this._travelToConnectedPressed.asReadonly();
 	readonly configUpdated = new Signal<ConfigUpdatedCallback<TDef, keyof TDef & string>>();
 
 	constructor(
@@ -21,13 +26,22 @@ export class MultiConfigControl<
 		configs: Readonly<Record<BlockUuid, ConfigDefinitionsToConfig<keyof TDef, TDef>>>,
 		definition: Partial<TDef>,
 		connected: readonly (keyof TDef)[] = [],
+		block?: BlockModel,
 	) {
 		super(gui);
 
 		for (const [id, def] of Objects.pairs_(definition)) {
 			if (def.configHidden) continue;
 			if (connected.includes(id)) {
-				this.add(new ConfigValueControl(configValueTemplateStorage.connected(), def.displayName));
+				const connectedControl = this.add(
+					new ConnectedValueControl(configValueTemplateStorage.connected(), def.displayName),
+				);
+				connectedControl.travelToConnectedPressed.Connect(() =>
+					this._travelToConnectedPressed.Fire(
+						BlockManager.manager.connections.get(block!)?.[id as BlockConnectionName].blockUuid,
+					),
+				);
+
 				continue;
 			}
 
@@ -46,5 +60,18 @@ export class MultiConfigControl<
 				),
 			);
 		}
+	}
+}
+
+type ConnectedValueControlDefinition = GuiButton;
+class ConnectedValueControl extends ConfigValueControl<ConnectedValueControlDefinition, UnknownConfigType> {
+	private readonly _travelToConnectedPressed = new Signal();
+	readonly travelToConnectedPressed = this._travelToConnectedPressed.asReadonly();
+
+	constructor(gui: ConfigPartDefinition<ConnectedValueControlDefinition>, name: string) {
+		super(gui, name);
+
+		const locate = this.add(new ButtonControl(gui.Control));
+		locate.activated.Connect(() => this._travelToConnectedPressed.Fire());
 	}
 }
