@@ -1,4 +1,4 @@
-import { RunService, Workspace } from "@rbxts/services";
+import { MessagingService, RunService, Workspace } from "@rbxts/services";
 import { BadgeController } from "server/BadgeController";
 import { ServerRestartController } from "server/ServerRestartController";
 import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
@@ -39,6 +39,13 @@ namespace RemoteHandlers {
 
 	export function sendMessageAsAdmin(player: Player, text: string, color?: Color3, duration?: number) {
 		if (!GameDefinitions.isAdmin(player)) return;
+
+		MessagingService.PublishAsync("global_message", {
+			text: text,
+			color: color,
+			duration: duration,
+		});
+
 		Remotes.Server.GetNamespace("Admin").Get("SendMessage").SendToAllPlayers(text, color, duration);
 	}
 
@@ -162,6 +169,12 @@ registerOnRemoteEvent("Admin", "LoadSlot", RemoteHandlers.loadSlotAsAdmin);
 registerOnRemoteEvent("Admin", "SendMessage", RemoteHandlers.sendMessageAsAdmin);
 registerOnRemoteEvent("Admin", "Restart", () => ServerRestartController.restart(false));
 UnreliableRemoteHandler.initialize();
+
+// Global message networking, TODO: Move away
+MessagingService.SubscribeAsync("global_message", (message) => {
+	const msg = message as unknown as { text: string; color: Color3; duration: number };
+	Remotes.Server.GetNamespace("Admin").Get("SendMessage").SendToAllPlayers(msg.text, msg.color, msg.duration);
+});
 
 ServerRestartController.init();
 
