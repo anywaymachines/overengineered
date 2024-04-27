@@ -1,4 +1,4 @@
-import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { Players, ReplicatedStorage, RunService, TextChatService, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { SharedPlots } from "shared/building/SharedPlots";
 
@@ -27,6 +27,7 @@ import { ClientBuildingValidation } from "client/modes/build/ClientBuildingValid
 import { $compileTime } from "rbxts-transformer-macros";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { AdminMessageController } from "./AdminMessageController";
 import { ClientContainerComponent } from "./component/ClientContainerComponent";
 import { rootComponents } from "./test/RootComponents";
@@ -63,7 +64,10 @@ root.add(playModeController);
 root.enable();
 
 const updated = DateTime.fromUnixTimestamp($compileTime()).FormatUniversalTime("DDMMYY_HHmm", "en-us");
-Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `DEVTEST | v${game.PlaceVersion} | ${updated}`;
+Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =
+	GameDefinitions.PRODUCTION_PLACE_ID === game.PlaceId
+		? GameDefinitions.VERSION
+		: `v${game.PlaceVersion} | ${updated}`;
 
 dataLoading.await();
 while (!(Workspace.GetAttribute("loaded") as boolean | undefined)) {
@@ -71,3 +75,18 @@ while (!(Workspace.GetAttribute("loaded") as boolean | undefined)) {
 }
 
 LoadingController.hide();
+
+// Prefixes
+TextChatService.OnIncomingMessage = function (message: TextChatMessage) {
+	const props = new Instance("TextChatMessageProperties");
+
+	if (message.TextSource) {
+		const player = Players.GetPlayerByUserId(message.TextSource.UserId);
+
+		if (player && GameDefinitions.isAdmin(player)) {
+			props.PrefixText = `<font color='#ff5555'>[Developer]</font> ` + message.PrefixText;
+		}
+	}
+
+	return props;
+};

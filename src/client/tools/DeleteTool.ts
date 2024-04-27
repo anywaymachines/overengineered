@@ -147,7 +147,7 @@ export class DeleteTool extends ToolBase {
 	}
 
 	supportsMirror() {
-		return true;
+		return false;
 	}
 
 	protected prepareGamepad(): void {

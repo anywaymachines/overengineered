@@ -1,8 +1,7 @@
 import { Control } from "client/gui/Control";
 import { NumberTextBoxControl, NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
-import { Signal } from "shared/event/Signal";
 import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl } from "./ConfigValueControl";
+import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
 
 class ConfigNumberControl extends Control<NumberTextBoxControlDefinition> {
@@ -18,20 +17,17 @@ class ConfigNumberControl extends Control<NumberTextBoxControlDefinition> {
 	}
 }
 
-class NumberConfigValueControl extends ConfigValueControl<NumberTextBoxControlDefinition> {
-	readonly submitted = new Signal<(config: Readonly<Record<BlockUuid, BlockConfigTypes.Number["config"]>>) => void>();
-
-	constructor(
-		configs: Readonly<Record<BlockUuid, BlockConfigTypes.Number["config"]>>,
-		definition: ConfigTypeToDefinition<BlockConfigTypes.Number>,
-	) {
+type Type = BlockConfigTypes.Number;
+class ValueControl extends ConfigValueControl<NumberTextBoxControlDefinition, Type> {
+	constructor({ configs, definition }: ConfigValueControlParams<Type>) {
 		super(configValueTemplateStorage.number(), definition.displayName);
 
 		const control = this.add(new ConfigNumberControl(this.gui.Control, this.sameOrUndefined(configs)));
-		this.event.subscribe(control.submitted, (value) =>
-			this.submitted.Fire((configs = this.map(configs, () => value))),
-		);
+		this.event.subscribe(control.submitted, (value) => {
+			const prev = configs;
+			this._submitted.Fire((configs = this.map(configs, () => value)), prev);
+		});
 	}
 }
 
-configControlRegistry.set("number", NumberConfigValueControl);
+configControlRegistry.set("number", ValueControl);

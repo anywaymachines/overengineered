@@ -1,8 +1,7 @@
 import { Control } from "client/gui/Control";
 import { SliderControl, SliderControlDefinition } from "client/gui/controls/SliderControl";
-import { Signal } from "shared/event/Signal";
 import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl } from "./ConfigValueControl";
+import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
 
 class ClampedConfigNumberControl extends Control<SliderControlDefinition> {
@@ -18,15 +17,9 @@ class ClampedConfigNumberControl extends Control<SliderControlDefinition> {
 	}
 }
 
-class ClampedNumberConfigValueControl extends ConfigValueControl<SliderControlDefinition> {
-	readonly submitted = new Signal<
-		(config: Readonly<Record<BlockUuid, BlockConfigTypes.ClampedNumber["config"]>>) => void
-	>();
-
-	constructor(
-		configs: Readonly<Record<BlockUuid, BlockConfigTypes.ClampedNumber["config"]>>,
-		definition: ConfigTypeToDefinition<BlockConfigTypes.ClampedNumber>,
-	) {
+type Type = BlockConfigTypes.ClampedNumber;
+class ValueControl extends ConfigValueControl<SliderControlDefinition, Type> {
+	constructor({ configs, definition }: ConfigValueControlParams<Type>) {
 		super(configValueTemplateStorage.slider(), definition.displayName);
 
 		const control = this.add(
@@ -38,10 +31,11 @@ class ClampedNumberConfigValueControl extends ConfigValueControl<SliderControlDe
 				definition.step,
 			),
 		);
-		this.event.subscribe(control.submitted, (value) =>
-			this.submitted.Fire((configs = this.map(configs, () => value))),
-		);
+		this.event.subscribe(control.submitted, (value) => {
+			const prev = configs;
+			this._submitted.Fire((configs = this.map(configs, () => value)), prev);
+		});
 	}
 }
 
-configControlRegistry.set("clampedNumber", ClampedNumberConfigValueControl);
+configControlRegistry.set("clampedNumber", ValueControl);

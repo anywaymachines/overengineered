@@ -1,7 +1,7 @@
 import { InputController } from "client/controller/InputController";
 import { Control } from "client/gui/Control";
 import { GuiAnimator } from "client/gui/GuiAnimator";
-import { ConfigControl, ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
+import { MultiConfigControl } from "client/gui/config/MultiConfigControl";
 import { LogControl } from "client/gui/static/LogControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
@@ -22,10 +22,12 @@ import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
+const logger = new Logger("ConfigTool");
+
 namespace Scene {
 	export type ConfigToolSceneDefinition = GuiObject & {
 		readonly ParamsSelection: Frame & {
-			readonly Buttons: ConfigControlDefinition;
+			readonly Buttons: GuiObject;
 			readonly HeaderLabel: TextLabel;
 		};
 		readonly Bottom: {
@@ -34,38 +36,18 @@ namespace Scene {
 		};
 	};
 	export class ConfigToolScene extends Control<ConfigToolSceneDefinition> {
-		private readonly configControl;
-
-		constructor(gui: ConfigToolSceneDefinition, tool: ConfigTool) {
+		constructor(
+			gui: ConfigToolSceneDefinition,
+			private readonly tool: ConfigTool,
+		) {
 			super(gui);
 
-			this.configControl = this.add(new ConfigControl(this.gui.ParamsSelection.Buttons));
-			this.configControl.travelToConnectedPressed.Connect((uuid) => {
+			/*this.configControl.travelToConnectedPressed.Connect((uuid) => {
 				tool.unselectAll();
 				tool.selectBlockByUuid(uuid);
-			});
+			});*/
 
 			const selected = tool.selected;
-			this.event.subscribe(this.configControl.configUpdated, async (key, value) => {
-				Logger.info(`Sending (${selected.get().size()}) block config values ${key} ${JSON.serialize(value)}`);
-
-				const response = await ClientBuilding.updateConfigOperation.execute(
-					tool.targetPlot.get(),
-					selected.get().map(
-						(b) =>
-							({
-								block: b,
-								key,
-								value: JSON.serialize(value),
-							}) satisfies ConfigUpdateRequest["configs"][number],
-					),
-				);
-				if (!response.success) {
-					LogControl.instance.addLine(response.message, Colors.red);
-					this.updateConfigs(selected.getArr());
-				}
-			});
-
 			this.event.subscribeCollection(selected, () => {
 				this.updateConfigs(selected.getArr());
 			});
@@ -75,7 +57,7 @@ namespace Scene {
 			});
 
 			this.gui.Bottom.ResetButton.Activated.Connect(async () => {
-				Logger.info(`Resetting (${selected.get().size()}) block config values`);
+				logger.info(`Resetting (${selected.get().size()}) block config values`);
 
 				const response = await ClientBuilding.resetConfigOperation.execute(
 					tool.targetPlot.get(),
@@ -103,6 +85,7 @@ namespace Scene {
 			this.updateConfigs([]);
 		}
 
+		private currentConfigControl?: MultiConfigControl<BlockConfigTypes.Definitions>;
 		private updateConfigs(selected: readonly BlockModel[]) {
 			const wasVisible = this.gui.Visible;
 
@@ -120,28 +103,64 @@ namespace Scene {
 
 			this.gui.ParamsSelection.HeaderLabel.Text = `CONFIGURATION (${selected.size()})`;
 
-			const configs = selected
-				.map((selected) => {
-					const blockmodel = selected;
-					const block = BlocksInitializer.blocks.map.get(BlockManager.manager.id.get(blockmodel))!;
+			const configs = selected.map((selected) => {
+				const blockmodel = selected;
+				const id = BlockManager.manager.id.get(blockmodel)!;
+				const block = BlocksInitializer.blocks.map.get(id)!;
 
-					const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
-						.input as BlockConfigTypes.Definitions;
-					if (!defs) return undefined!;
+				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
+					.input as BlockConfigTypes.Definitions;
+				if (!defs) return undefined!;
 
-					const config = Config.addDefaults(
-						BlockManager.manager.config.get(blockmodel) as Record<string, number>,
-						defs,
-					);
-					return [
-						blockmodel,
-						config,
-						Objects.keys(BlockManager.manager.connections.get(blockmodel)),
-					] as const;
-				})
-				.filter((x) => x !== undefined);
+				const config = Config.addDefaults(
+					BlockManager.manager.config.get(blockmodel) as Record<string, number>,
+					defs,
+				);
+				return {
+					blockmodel,
+					uuid: BlockManager.manager.uuid.get(blockmodel),
+					config,
+					connections: Objects.keys(BlockManager.manager.connections.get(blockmodel)),
+				} as const;
+			});
 
-			this.configControl.set(configs[0][1], onedef, configs[0][2], configs[0][0]);
+			this.currentConfigControl?.destroy();
+
+			const gui = this.gui.ParamsSelection.Buttons.Clone();
+			gui.Parent = this.gui.ParamsSelection;
+			const configControl = this.add(
+				new MultiConfigControl(
+					gui,
+					Objects.fromEntries(configs.map((c) => [c.uuid, c.config] as const)),
+					onedef,
+					configs[0].connections,
+					//configs[0][0],
+				),
+			);
+			this.currentConfigControl = configControl;
+
+			configControl.configUpdated.Connect(async (key, values) => {
+				const selected = this.tool.selected.get();
+				logger.info(
+					`Sending (${selected.size()}) block config values for ${Objects.keys(values).join()} .${key} ${JSON.serialize(Objects.values(values))}`,
+				);
+
+				const response = await ClientBuilding.updateConfigOperation.execute(
+					this.tool.targetPlot.get(),
+					selected.map(
+						(b) =>
+							({
+								block: b,
+								key,
+								value: JSON.serialize(values[BlockManager.manager.uuid.get(b)]),
+							}) satisfies ConfigUpdateRequest["configs"][number],
+					),
+				);
+				if (!response.success) {
+					LogControl.instance.addLine(response.message, Colors.red);
+					this.updateConfigs([...selected]);
+				}
+			});
 		}
 	}
 }

@@ -12,6 +12,8 @@ import { BlockConfigRegistry, blockConfigRegistry } from "shared/block/config/Bl
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { Objects } from "shared/fixes/objects";
 
+const logger = new Logger("AutoBlockCreator");
+
 interface BlockResult extends BlockAdditional {
 	readonly id: string;
 	readonly displayName: string;
@@ -528,7 +530,7 @@ const create = (info: BlocksInitializeData) => {
 	}
 	for (const [optype, ops] of Objects.pairs_(operations as NonGenericOperations)) {
 		for (const [name, data] of Objects.pairs_(ops)) {
-			Logger.info(`[BAC] Creating block ${name}`);
+			logger.info(`Creating block ${name}`);
 
 			const block = createBase(name, "OperationPrefab", data);
 			const setupinfo = BlockDataRegistry[block.id];

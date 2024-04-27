@@ -1,19 +1,11 @@
-import { ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
 import { MultiConfigControl } from "client/gui/config/MultiConfigControl";
-import { Signal } from "shared/event/Signal";
 import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl } from "./ConfigValueControl";
+import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
 
-class KeyBoolConfigValueControl extends ConfigValueControl<ConfigControlDefinition> {
-	readonly submitted = new Signal<
-		(config: Readonly<Record<BlockUuid, BlockConfigTypes.KeyBool["config"]>>) => void
-	>();
-
-	constructor(
-		configs: Readonly<Record<BlockUuid, BlockConfigTypes.KeyBool["config"]>>,
-		definition: ConfigTypeToDefinition<BlockConfigTypes.KeyBool>,
-	) {
+type Type = BlockConfigTypes.KeyBool;
+class ValueControl extends ConfigValueControl<GuiObject, Type> {
+	constructor({ configs, definition }: ConfigValueControlParams<Type>) {
 		super(configValueTemplateStorage.multi(), definition.displayName);
 		const controlTemplate = this.asTemplate(this.gui.Control);
 
@@ -43,10 +35,11 @@ class KeyBoolConfigValueControl extends ConfigValueControl<ConfigControlDefiniti
 		}
 
 		const control = this.add(new MultiConfigControl(controlTemplate(), configs, def));
-		this.event.subscribe(control.configUpdated, (key, value) => {
-			this.submitted.Fire((configs = this.map(configs, (c) => ({ ...c, [key]: value }))));
+		this.event.subscribe(control.configUpdated, (key, values) => {
+			const prev = configs;
+			this._submitted.Fire((configs = this.map(configs, (c, k) => ({ ...c, [key]: values[k] }))), prev);
 		});
 	}
 }
 
-configControlRegistry.set("keybool", KeyBoolConfigValueControl);
+configControlRegistry.set("keybool", ValueControl);

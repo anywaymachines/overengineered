@@ -6,6 +6,8 @@ import { LogControl } from "client/gui/static/LogControl";
 import { Logger } from "shared/Logger";
 import { Remotes } from "shared/Remotes";
 
+const logger = new Logger("PlayModeRequest");
+
 export const requestMode = async (mode: PlayModes) => {
 	LoadingController.show(`Changing play mode to ${mode}...`);
 
@@ -14,7 +16,7 @@ export const requestMode = async (mode: PlayModes) => {
 
 		const response = await Remotes.Client.GetNamespace("Ride").Get("SetPlayMode").CallServerAsync(mode);
 		if (!response.success) {
-			Logger.err(response.message);
+			logger.error(response.message);
 			LogControl.instance.addLine(response.message!, Colors.red);
 			SoundController.getSounds().Build.BlockPlaceError.Play();
 

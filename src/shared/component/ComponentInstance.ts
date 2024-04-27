@@ -1,5 +1,7 @@
 import { Logger } from "shared/Logger";
 
+const logger = new Logger("ComponentInstance");
+
 /** Handles the destruction of the provided instance, along with the component. */
 export namespace ComponentInstance {
 	export function init<T extends Instance>(state: IComponent, instance: T | undefined) {
@@ -17,7 +19,7 @@ export namespace ComponentInstance {
 				destroyingSignal.Disconnect();
 				instance.Destroy();
 			} catch (error) {
-				Logger.err(`Could not destroy instance ${instance}: ${error}`);
+				logger.error(`Could not destroy instance ${instance}: ${error}`);
 			}
 		});
 	}

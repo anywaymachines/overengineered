@@ -20,6 +20,8 @@ import { registerOnRemoteEvent, registerOnRemoteFunction } from "./network/event
 import { BlocksSerializer } from "./plots/BlocksSerializer";
 import { ServerPlots } from "./plots/ServerPlots";
 
+const logger = new Logger("MAIN");
+
 namespace RemoteHandlers {
 	export function loadSlot(player: Player, index: number): LoadSlotResponse {
 		return RemoteHandlers.loadAdminSlot(SharedPlots.getPlotByOwnerID(player.UserId), player.UserId, index);
@@ -50,10 +52,10 @@ namespace RemoteHandlers {
 			};
 		}
 
-		Logger.info(`Loading ${userid}'s slot ${index}`);
+		logger.info(`Loading ${userid}'s slot ${index}`);
 		ServerBuilding.deleteBlocks({ plot, blocks: "all" });
 		const dblocks = BlocksSerializer.deserialize(blocks, plot);
-		Logger.info(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
+		logger.info(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
 
 		return { success: true, isEmpty: dblocks === 0 };
 	}
@@ -90,7 +92,7 @@ namespace RemoteHandlers {
 	}
 
 	export function saveSlot(player: Player, data: PlayerSaveSlotRequest): SaveSlotResponse {
-		Logger.info(`Saving ${player.Name}'s slot ${data.index}`);
+		logger.info(`Saving ${player.Name}'s slot ${data.index}`);
 
 		const output = SlotDatabase.instance.update(
 			player.UserId,

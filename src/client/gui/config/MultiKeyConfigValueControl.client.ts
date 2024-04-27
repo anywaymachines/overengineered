@@ -1,23 +1,19 @@
-import { ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
 import { type KeyConfigValueControl } from "client/gui/config/KeyConfigValueControl.client";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
-import { Signal } from "shared/event/Signal";
+import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl } from "./ConfigValueControl";
+import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
 
-type MultiKeyConfigValueControlDefinition = ConfigControlDefinition;
-class MultiKeyConfigValueControl extends ConfigValueControl<MultiKeyConfigValueControlDefinition> {
-	readonly submitted = new Signal<
-		(config: Readonly<Record<BlockUuid, BlockConfigTypes.MultiKey["config"]>>) => void
-	>();
-
-	constructor(
-		configs: Readonly<Record<BlockUuid, BlockConfigTypes.MultiKey["config"]>>,
-		definition: ConfigTypeToDefinition<BlockConfigTypes.MultiKey>,
-	) {
+type Type = BlockConfigTypes.MultiKey;
+class ValueControl extends ConfigValueControl<GuiObject, Type> {
+	constructor({ configs, definition }: ConfigValueControlParams<Type>) {
 		super(configValueTemplateStorage.multi(), definition.displayName);
+
+		if (Objects.size(definition.keyDefinitions) !== 2) {
+			throw "Unsupported keydef size";
+		}
 
 		const list = this.add(new DictionaryControl<GuiObject, string, KeyConfigValueControl>(this.gui.Control));
 		for (const [name, _] of Objects.pairs_(definition.default)) {
@@ -25,35 +21,42 @@ class MultiKeyConfigValueControl extends ConfigValueControl<MultiKeyConfigValueC
 				Objects.entriesArray(configs).map(([uuid, config]) => [uuid, config[name]]),
 			);
 
-			const control = new configControlRegistry.key(
-				cfgs,
-				definition.keyDefinitions[name],
-			) as unknown as KeyConfigValueControl;
+			const control = new configControlRegistry.key({
+				configs: cfgs,
+				definition: definition.keyDefinitions[name],
+			}) as KeyConfigValueControl;
 			list.keyedChildren.add(name, control);
 
 			this.event.subscribe(control.submitted, (value, prev) => {
 				const changed: (keyof (typeof configs)[BlockUuid])[] = [name];
-				const val = Objects.firstValue(value);
-				const prevval = Objects.firstValue(prev);
+				const newvalue = Objects.firstValue(value)!;
+				const prevval = Objects.values(prev).find((p) => p !== newvalue);
+				if (prevval === undefined) {
+					throw "what";
+				}
 
 				for (const [key, child] of list.keyedChildren.getAll()) {
 					if (child === control) continue;
 
-					if (child.value.get() === val) {
-						child.value.set(prevval);
-						changed.push(key);
+					for (const [, value] of Objects.pairs_(child.values.get())) {
+						if (newvalue === value) {
+							child.values.set(this.map(configs, () => prevval));
+							print("setting mega cvhild values", JSON.serialize(child.values.get()));
+							changed.push(key);
+							break;
+						}
 					}
 				}
 
+				const thisprev = configs;
 				const update = Objects.fromEntries(
-					changed.map((c) => [c, list.keyedChildren.get(c)!.value.get()!] as const),
+					changed.map((c) => [c, Objects.firstValue(list.keyedChildren.get(c)!.values.get()!)!] as const),
 				);
 				configs = this.map(configs, (c) => ({ ...c, ...update }));
-
-				this.submitted.Fire(configs);
+				this._submitted.Fire(configs, thisprev);
 			});
 		}
 	}
 }
 
-configControlRegistry.set("multikey", MultiKeyConfigValueControl);
+configControlRegistry.set("multikey", ValueControl);

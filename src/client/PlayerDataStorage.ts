@@ -14,6 +14,8 @@ type NonNullableFields<T> = {
 };
 
 export namespace PlayerDataStorage {
+	const logger = new Logger("PlayerDataStorage");
+
 	export const loadedSlot = new ObservableValue<number | undefined>(undefined);
 
 	export const data = new ObservableValue<NonNullableFields<PlayerDataResponse> | undefined>(undefined);
@@ -27,7 +29,7 @@ export namespace PlayerDataStorage {
 		await refetchData();
 
 		config.createNullableChild("betterCamera", undefined).subscribe((betterCamera) => {
-			Logger.info("better_camera set to " + HttpService.JSONEncode(betterCamera));
+			logger.info("better_camera set to " + HttpService.JSONEncode(betterCamera));
 			Workspace.SetAttribute("camera_improved", betterCamera?.improved);
 			Workspace.SetAttribute("camera_playerCentered", betterCamera?.playerCentered);
 			Workspace.SetAttribute("camera_strictFollow", betterCamera?.strictFollow);
@@ -45,14 +47,14 @@ export namespace PlayerDataStorage {
 			),
 		});
 
-		Logger.info("Configuration loaded: " + HttpService.JSONEncode(config.get()));
+		logger.info("Configuration loaded: " + HttpService.JSONEncode(config.get()));
 	}
 
 	export async function sendPlayerConfigValue<TKey extends keyof PlayerConfig>(
 		key: TKey,
 		value: PlayerConfig[TKey] & defined,
 	) {
-		Logger.info(`Setting player config value ${key} to ${JSON.serialize(value as JsonSerializablePrimitive)}`);
+		logger.info(`Setting player config value ${key} to ${JSON.serialize(value as JsonSerializablePrimitive)}`);
 		await Remotes.Client.GetNamespace("Player").Get("UpdateSettings").CallServerAsync(key, value);
 
 		config.set({
@@ -62,7 +64,7 @@ export namespace PlayerDataStorage {
 	}
 
 	export async function sendPlayerSlot(req: PlayerSaveSlotRequest) {
-		Logger.info("Setting slot " + req.index + " to " + HttpService.JSONEncode(req));
+		logger.info("Setting slot " + req.index + " to " + HttpService.JSONEncode(req));
 
 		let d = data.get();
 		if (d) {
@@ -74,7 +76,7 @@ export namespace PlayerDataStorage {
 
 		const response = await Remotes.Client.GetNamespace("Slots").Get("Save").CallServerAsync(req);
 		if (!response.success) {
-			Logger.err(response.message);
+			logger.error(response.message);
 			return;
 		}
 
@@ -91,7 +93,7 @@ export namespace PlayerDataStorage {
 	}
 
 	export async function loadPlayerSlot(index: number) {
-		Logger.info("Loading slot " + index);
+		logger.info("Loading slot " + index);
 		LoadingController.show("Loading a slot");
 
 		try {

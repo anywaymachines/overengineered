@@ -1,16 +1,9 @@
-import { ReadonlySignal } from "shared/event/Signal";
-import { ConfigValueControl } from "./ConfigValueControl";
+import { type ConfigValueControl, type ConfigValueControlParams } from "./ConfigValueControl";
 
-export interface ConfigControl<TKey extends keyof BlockConfigTypes.Types> extends ConfigValueControl<GuiObject> {
-	readonly submitted: ReadonlySignal<
-		(config: Readonly<Record<BlockUuid, BlockConfigTypes.Types[TKey]["config"]>>) => void
-	>;
-}
 type Ctor<TKey extends keyof BlockConfigTypes.Types> = {
 	new (
-		configs: Readonly<Record<BlockUuid, BlockConfigTypes.Types[TKey]["config"]>>,
-		definition: ConfigTypeToDefinition<BlockConfigTypes.Types[TKey]>,
-	): ConfigControl<TKey>;
+		params: ConfigValueControlParams<BlockConfigTypes.Types[TKey]>,
+	): ConfigValueControl<GuiObject, BlockConfigTypes.Types[TKey]>;
 };
 
 type ConfigControlRegistry = {
@@ -21,6 +14,6 @@ type ConfigControlRegistry = {
 
 export const configControlRegistry: ConfigControlRegistry = {
 	set<TKey extends keyof BlockConfigTypes.Types>(key: TKey, value: Ctor<TKey>): void {
-		(this as Writable<ConfigControlRegistry>)[key] = value as ConfigControlRegistry[TKey];
+		(this as Writable<ConfigControlRegistry>)[key] = value as never;
 	},
 } as ConfigControlRegistry;

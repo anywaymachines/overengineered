@@ -5,6 +5,8 @@ import { Logger } from "shared/Logger";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 
+const logger = new Logger("BuildingWelder");
+
 type CollidersModel = Model & { readonly ___nominal: "CollidersModel" };
 export namespace BuildingWelder {
 	const weldColliders = new Map<string, CollidersModel>();
@@ -167,10 +169,10 @@ export namespace BuildingWelder {
 				union.Parent = weldParent;
 			}
 
-			Logger.info(`[BLOCKINIT] Adding automatic region to ${block.Name}`);
+			logger.info(`Adding automatic region to ${block.Name}`);
 		}
 
-		Logger.info("[BLOCKINIT] Block welding initialized");
+		logger.info("Block welding initialized");
 	}
 
 	function getPlotColliders(plot: PlotModel): WorldModel {
@@ -223,7 +225,7 @@ export namespace BuildingWelder {
 
 		for (const collider of colliders.GetChildren()) {
 			if (!collider.IsA("BasePart")) {
-				Logger.err("Found a non-BasePart in a collider!!!");
+				logger.error("Found a non-BasePart in a collider!!!");
 				continue;
 			}
 

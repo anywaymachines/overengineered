@@ -1,4 +1,4 @@
-import { BoolConfigValueControl } from "client/gui/buildmode/ConfigControl";
+import { type BoolConfigValueControl } from "client/gui/playerConfig/BoolConfigValueControl.client";
 import { ConfigValueControl } from "client/gui/playerConfig/ConfigValueControl";
 import { MultiPlayerConfigControl } from "client/gui/playerConfig/MultiConfigControl";
 import { playerConfigControlRegistry } from "client/gui/playerConfig/PlayerConfigControlRegistry";

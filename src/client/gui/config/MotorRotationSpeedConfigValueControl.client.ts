@@ -1,19 +1,11 @@
-import { ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
 import { MultiConfigControl } from "client/gui/config/MultiConfigControl";
-import { Signal } from "shared/event/Signal";
 import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl } from "./ConfigValueControl";
+import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
 
-class MotorRotationSpeedConfigValueControl extends ConfigValueControl<ConfigControlDefinition> {
-	readonly submitted = new Signal<
-		(config: Readonly<Record<BlockUuid, BlockConfigTypes.MotorRotationSpeed["config"]>>) => void
-	>();
-
-	constructor(
-		configs: Readonly<Record<BlockUuid, BlockConfigTypes.MotorRotationSpeed["config"]>>,
-		definition: ConfigTypeToDefinition<BlockConfigTypes.MotorRotationSpeed>,
-	) {
+type Type = BlockConfigTypes.MotorRotationSpeed;
+class ValueControl extends ConfigValueControl<GuiObject, Type> {
+	constructor({ configs, definition }: ConfigValueControlParams<Type>) {
 		super(configValueTemplateStorage.multi(), definition.displayName);
 
 		const def: Partial<Record<keyof BlockConfigTypes.MotorRotationSpeed["config"], BlockConfigTypes.Definition>> = {
@@ -62,10 +54,11 @@ class MotorRotationSpeedConfigValueControl extends ConfigValueControl<ConfigCont
 
 		const controlTemplate = this.asTemplate(this.gui.Control);
 		const control = this.add(new MultiConfigControl(controlTemplate(), configs, def));
-		this.event.subscribe(control.configUpdated, (key, value) => {
-			this.submitted.Fire((configs = this.map(configs, (c) => ({ ...c, [key]: value }))));
+		this.event.subscribe(control.configUpdated, (key, values) => {
+			const prev = configs;
+			this._submitted.Fire((configs = this.map(configs, (c, k) => ({ ...c, [key]: values[k] }))), prev);
 		});
 	}
 }
 
-configControlRegistry.set("motorRotationSpeed", MotorRotationSpeedConfigValueControl);
+configControlRegistry.set("motorRotationSpeed", ValueControl);

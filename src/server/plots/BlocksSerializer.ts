@@ -9,6 +9,8 @@ import { BlockManager, PlacedBlockDataConnection } from "shared/building/BlockMa
 import { SharedPlots } from "shared/building/SharedPlots";
 import { Objects } from "shared/fixes/objects";
 
+const logger = new Logger("BlocksSerializer");
+
 type SerializedBlocks<TBlocks extends SerializedBlockBase> = {
 	readonly version: number;
 	readonly blocks: readonly TBlocks[];
@@ -66,7 +68,7 @@ const place = {
 
 	blockOnPlotV3: (plot: PlotModel, blockData: SerializedBlockV3, buildingCenter: CFrame) => {
 		if (!BlocksInitializer.blocks.map.has(blockData.id)) {
-			Logger.err(`Could not load ${blockData.id} from slot: Block does not exists`);
+			logger.error(`Could not load ${blockData.id} from slot: Block does not exists`);
 			return;
 		}
 
@@ -632,7 +634,7 @@ export namespace BlocksSerializer {
 	}
 	export function deserialize(data: string, plot: PlotModel): number {
 		let deserialized = HttpService.JSONDecode(data) as SerializedBlocks<SerializedBlockBase>;
-		Logger.info(`Loaded a slot using savev${deserialized.version}`);
+		logger.info(`Loaded a slot using savev${deserialized.version}`);
 
 		const version = deserialized.version;
 		for (let i = version + 1; i <= current.version; i++) {
@@ -641,7 +643,7 @@ export namespace BlocksSerializer {
 			if (!("upgradeFrom" in version)) continue;
 
 			deserialized = version.upgradeFrom(data, deserialized as never);
-			Logger.info(`Upgrading a slot to savev${version.version}`);
+			logger.info(`Upgrading a slot to savev${version.version}`);
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any

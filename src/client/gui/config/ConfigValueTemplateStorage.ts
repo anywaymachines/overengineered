@@ -1,7 +1,6 @@
 import { type ColorChooserDefinition } from "client/gui/ColorChooser";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
-import { type ConfigControlDefinition } from "client/gui/buildmode/ConfigControl";
 import { type OrConfigControlDefinition } from "client/gui/config/OrConfigValueControl.client";
 import { type CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import { type KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
@@ -21,7 +20,7 @@ type Templates = {
 	readonly SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 	readonly NumberTemplate: ConfigPartDefinition<NumberTextBoxControlDefinition>;
 	readonly StringTemplate: ConfigPartDefinition<TextBoxControlDefinition>;
-	readonly MultiTemplate: ConfigPartDefinition<ConfigControlDefinition>;
+	readonly MultiTemplate: ConfigPartDefinition<GuiObject>;
 	readonly MultiMultiTemplate: ConfigPartDefinition<OrConfigControlDefinition>;
 	readonly ColorTemplate: ConfigPartDefinition<ColorChooserDefinition>;
 };

@@ -5,20 +5,16 @@ import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
 
-type PartialIfObject<T> = T extends CheckableTypes[Exclude<keyof CheckableTypes, keyof CheckablePrimitives>]
-	? T
-	: Partial<T>;
-
 type MultiConfigControlDefinition = GuiObject;
-type ConfigUpdatedCallback<TDef extends BlockConfigTypes.Definitions, TKey extends keyof TDef> = (
+type ConfigUpdatedCallback<TDef extends BlockConfigTypes.Definitions, TKey extends keyof TDef & string> = (
 	key: TKey,
-	value: Readonly<Record<BlockUuid, PartialIfObject<TDef[TKey]["config"]>>>,
+	values: Readonly<Record<BlockUuid, TDef[TKey]["config"]>>,
 ) => void;
 
 export class MultiConfigControl<
 	TDef extends BlockConfigTypes.Definitions,
 > extends Control<MultiConfigControlDefinition> {
-	readonly configUpdated = new Signal<ConfigUpdatedCallback<TDef, keyof TDef>>(); // TODO: wrong
+	readonly configUpdated = new Signal<ConfigUpdatedCallback<TDef, keyof TDef & string>>();
 
 	constructor(
 		gui: MultiConfigControlDefinition,
@@ -35,16 +31,18 @@ export class MultiConfigControl<
 				continue;
 			}
 
-			const control = new configControlRegistry[def.type](
-				Objects.fromEntries(Objects.entriesArray(configs).map((e) => [e[0], e[1][id]] as const)) as never,
-				def as never,
-			);
+			const control = new configControlRegistry[def.type]({
+				configs: Objects.fromEntries(
+					Objects.entriesArray(configs).map((e) => [e[0], e[1][id]] as const),
+				) as never,
+				definition: def as never,
+			});
 			this.add(control);
 
-			control.submitted.Connect((value) =>
+			control.submitted.Connect((values) =>
 				this.configUpdated.Fire(
 					id as string,
-					value as Readonly<Record<BlockUuid, PartialIfObject<TDef[keyof TDef]["config"]>>>,
+					values as Readonly<Record<BlockUuid, TDef[keyof TDef]["config"]>>,
 				),
 			);
 		}

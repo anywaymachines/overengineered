@@ -1,34 +1,32 @@
 import { KeyChooserControl, KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
-import { Signal } from "shared/event/Signal";
+import { ObservableValue } from "shared/event/ObservableValue";
 import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl } from "./ConfigValueControl";
+import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
 
-class KeyConfigValueControl extends ConfigValueControl<KeyChooserControlDefinition> {
-	readonly submitted = new Signal<
-		(
-			config: Readonly<Record<BlockUuid, BlockConfigTypes.Key["config"]>>,
-			prev: Readonly<Record<BlockUuid, BlockConfigTypes.Key["config"]>>,
-		) => void
-	>();
-	readonly value;
+type Type = BlockConfigTypes.Key;
+class ValueControl extends ConfigValueControl<KeyChooserControlDefinition, Type> {
+	readonly values = new ObservableValue<Readonly<Record<BlockUuid, string>>>({});
 
-	constructor(
-		configs: Readonly<Record<BlockUuid, BlockConfigTypes.Key["config"]>>,
-		definition: ConfigTypeToDefinition<BlockConfigTypes.Key>,
-	) {
+	constructor({ configs, definition }: ConfigValueControlParams<Type>) {
 		super(configValueTemplateStorage.key(), definition.displayName);
 
 		const control = this.add(new KeyChooserControl<true>(this.gui.Control));
-		this.value = control.value;
+		this.values.set(configs);
+		this.event.subscribeObservable(this.values, (values) =>
+			control.value.set(this.sameOrUndefined((configs = values))),
+		);
 
 		control.value.set(this.sameOrUndefined(configs));
 		this.event.subscribe(control.submitted, (value) => {
 			const prev = configs;
-			this.submitted.Fire((configs = this.map(configs, () => value)), prev);
+
+			configs = this.map(configs, () => value);
+			this.values.set(configs);
+			this._submitted.Fire(configs, prev);
 		});
 	}
 }
-export type { KeyConfigValueControl };
+export type { ValueControl as KeyConfigValueControl };
 
-configControlRegistry.set("key", KeyConfigValueControl);
+configControlRegistry.set("key", ValueControl);

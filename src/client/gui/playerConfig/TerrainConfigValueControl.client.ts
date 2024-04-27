@@ -1,4 +1,4 @@
-import { BoolConfigValueControl } from "client/gui/buildmode/ConfigControl";
+import { BoolConfigValueControl } from "client/gui/playerConfig/BoolConfigValueControl.client";
 import { ClampedNumberConfigValueControl } from "client/gui/playerConfig/ClampedNumberConfigValueControl.client";
 import { ConfigValueControl } from "client/gui/playerConfig/ConfigValueControl";
 import { DropdownConfigValueControl } from "client/gui/playerConfig/DropdownConfigValueControl.client";

@@ -9,6 +9,8 @@ import { Objects } from "shared/fixes/objects";
 import { PartUtils } from "shared/utils/PartUtils";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 
+const logger = new Logger("ImpactController");
+
 const overlapParams = new OverlapParams();
 overlapParams.CollisionGroup = "Blocks";
 
@@ -16,7 +18,7 @@ const materialStrongness: { readonly [k in Enum.Material["Name"]]: number } = Ob
 	Enum.Material.GetEnumItems().map((material) => {
 		const physicalProperties = new PhysicalProperties(material);
 		const strongness = math.max(0.5, physicalProperties.Density / 3.5);
-		Logger.info(`Strongness of '${material.Name}' set to ${strongness}`);
+		logger.info(`Strength of '${material.Name}' set to ${strongness}`);
 
 		return [material.Name, strongness] as const;
 	}),

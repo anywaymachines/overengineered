@@ -1,6 +1,8 @@
 import { Logger } from "shared/Logger";
 import { Objects } from "shared/fixes/objects";
 
+const logger = new Logger("Database");
+
 export abstract class DbBase<T> {
 	private readonly datastore;
 	private readonly cache: Record<string, { changed: boolean; value: T }> = {};
@@ -9,7 +11,7 @@ export abstract class DbBase<T> {
 		this.datastore = datastore;
 
 		game.BindToClose(() => {
-			Logger.info("Game termination detected");
+			logger.info("Game termination detected");
 
 			this.saveChanged();
 			this.freeAll();

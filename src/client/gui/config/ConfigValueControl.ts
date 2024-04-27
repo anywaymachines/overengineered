@@ -1,8 +1,23 @@
 import { Control } from "client/gui/Control";
 import { ConfigPartDefinition } from "client/gui/popup/SettingsPopup";
+import { Signal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
 
-export class ConfigValueControl<TGui extends GuiObject> extends Control<ConfigPartDefinition<TGui>> {
+export type ConfigValueControlParams<T extends UnknownConfigType> = {
+	readonly configs: Readonly<Record<BlockUuid, T["config"]>>;
+	readonly definition: ConfigTypeToDefinition<T>;
+};
+export class ConfigValueControl<TGui extends GuiObject, TType extends UnknownConfigType> extends Control<
+	ConfigPartDefinition<TGui>
+> {
+	protected readonly _submitted = new Signal<
+		(
+			config: Readonly<Record<BlockUuid, TType["config"]>>,
+			prev: Readonly<Record<BlockUuid, TType["config"]>>,
+		) => void
+	>();
+	readonly submitted = this._submitted.asReadonly();
+
 	constructor(gui: ConfigPartDefinition<TGui>, name: string) {
 		super(gui);
 		this.gui.HeadingLabel.Text = name;

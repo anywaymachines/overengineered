@@ -16,5 +16,6 @@ class BoolConfigValueControl extends ConfigValueControl<ToggleControlDefinition>
 		this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
 	}
 }
+export type { BoolConfigValueControl };
 
 playerConfigControlRegistry.set("bool", BoolConfigValueControl);

@@ -8,6 +8,8 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Db } from "./Database";
 import { PlayerDatabase } from "./PlayerDatabase";
 
+const logger = new Logger("SlotDatabase");
+
 export class SlotDatabase {
 	static readonly instance = new SlotDatabase();
 
@@ -37,7 +39,7 @@ export class SlotDatabase {
 					continue;
 				}
 
-				Logger.info("Saving " + key);
+				logger.info("Saving " + key);
 				this.blocksdb.save(key);
 				this.blocksdb.free(key);
 			}
@@ -70,7 +72,7 @@ export class SlotDatabase {
 		if (!this.onlinePlayers.has(userId)) {
 			this.blocksdb.save(tostring(userId));
 			this.blocksdb.free(tostring(userId));
-			Logger.info("SAVING AFTER QUIT2");
+			logger.info("SAVING AFTER QUIT2");
 		}
 	}
 
@@ -144,7 +146,7 @@ export class SlotDatabase {
 
 				this.blocksdb.set(id, serialized);
 			} catch (err) {
-				Logger.err(err as string);
+				logger.error(err as string);
 			}
 		}
 

@@ -2,51 +2,57 @@ import { Players, RunService } from "@rbxts/services";
 import { Signal } from "shared/event/Signal";
 import { GameDefinitions } from "./data/GameDefinitions";
 
-export namespace Logger {
-	const _onLog = new Signal<(text: string, error: boolean) => void>();
-	export const onLog = _onLog.asReadonly();
+const isActive = () => {
+	return (
+		!RunService.IsClient() ||
+		GameDefinitions.isTestPlace() ||
+		(RunService.IsClient() && GameDefinitions.isAdmin(Players.LocalPlayer))
+	);
+};
 
-	export function info(msg: string) {
-		if (RunService.IsClient() === true) {
-			// Show logs only to maintainers
-			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
-				print(`[INFO] [CLIENT] ${msg}`);
-			}
-		} else {
-			print(`[INFO] [SERVER] ${msg}`);
+export class Logger {
+	private static readonly _onLog = new Signal<(text: string, error: boolean) => void>();
+	static readonly onLog = this._onLog.asReadonly();
+
+	constructor(private readonly name: string) {}
+
+	info(...params: unknown[]) {
+		if (!isActive()) return;
+
+		Logger._onLog.Fire(params.filterUndefined().join(" "), false);
+
+		if (RunService.IsClient()) {
+			return print(`[INFO] [CLIENT] [${this.name}]`, ...params);
 		}
 
-		_onLog.Fire(msg, false);
+		return print(`[INFO] [SERVER] [${this.name}]`, ...params);
 	}
 
-	export function warning(msg: string) {
-		if (RunService.IsClient() === true) {
-			// Show logs only to maintainers
-			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
-				warn(`[WARN] [CLIENT] ${msg}`);
-			}
-		} else {
-			warn(`[WARN] [SERVER] ${msg}`);
+	warn(...params: unknown[]) {
+		if (!isActive()) return;
+
+		Logger._onLog.Fire(params.filterUndefined().join(" "), false);
+
+		if (RunService.IsClient()) {
+			return warn(`[WARN] [CLIENT] [${this.name}]`, ...params);
 		}
 
-		_onLog.Fire(msg, false);
+		return warn(`[WARN] [SERVER] [${this.name}]`, ...params);
 	}
 
-	export function err(msg: string) {
-		if (RunService.IsClient() === true) {
-			try {
-				error(`[ERROR] [CLIENT] ${msg}`);
-			} catch {
-				// empty
-			}
-		} else {
-			try {
-				error(`[ERROR] [SERVER] ${msg}`);
-			} catch {
-				// empty
-			}
-		}
+	error(message: string, alwaysVisible: boolean = true) {
+		if (!isActive() && !alwaysVisible) return;
 
-		_onLog.Fire(msg, true);
+		Logger._onLog.Fire(message, true);
+
+		try {
+			if (RunService.IsClient()) {
+				return error(`[ERROR] [CLIENT] [${this.name}] ${message}`);
+			}
+
+			return error(`[ERROR] [SERVER] [${this.name}] ${message}`);
+		} catch {
+			// empty
+		}
 	}
 }

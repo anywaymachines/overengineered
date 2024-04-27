@@ -3,6 +3,8 @@ import { Logger } from "shared/Logger";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
+const logger = new Logger("DistanceHideController");
+
 // wait for everything to spawn
 task.wait(1);
 
@@ -17,7 +19,7 @@ for (const part of parts.map((p) => [p, ...p.GetDescendants()])) {
 	}
 }
 
-Logger.info(`[DHC] Initializing ${transparencies.size()} instances`);
+logger.info(`Initializing ${transparencies.size()} instances`);
 const debug = false;
 const maxDistance = RobloxUnit.Meters_To_Studs(1024);
 let visible = true;
@@ -32,7 +34,7 @@ while (true as boolean) {
 	if (visible === newVisible) continue;
 
 	visible = newVisible;
-	if (debug) Logger.info(`[DHC] ${visible ? "visible" : "non visible"}`);
+	if (debug) logger.info(`${visible ? "visible" : "non visible"}`);
 
 	for (const [part, transparency] of transparencies) {
 		part.Transparency = visible ? transparency ?? 0 : 1;

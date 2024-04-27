@@ -6,6 +6,8 @@ import { BuildMode } from "./BuildMode";
 import { PlayModeBase } from "./PlayModeBase";
 import { RideMode } from "./RideMode";
 
+const logger = new Logger("PlayModeController");
+
 export class PlayModeController {
 	private static readonly playerModes: Record<number, PlayModes | undefined> = {};
 	private static readonly modes = {
@@ -46,7 +48,7 @@ export class PlayModeController {
 			}
 		}
 
-		Logger.info(`${player.Name}'s mode: '${PlayModeController.playerModes[player.UserId]}' => '${mode}'`);
+		logger.info(`${player.Name}'s mode: '${PlayModeController.playerModes[player.UserId]}' => '${mode}'`);
 		PlayModeController.playerModes[player.UserId] = mode;
 
 		for (let i = 0; i < 3; i++) {

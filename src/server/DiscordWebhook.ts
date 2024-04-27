@@ -1,6 +1,8 @@
 import { HttpService } from "@rbxts/services";
 import { Logger } from "shared/Logger";
 
+const logger = new Logger("DiscordWebhook");
+
 export namespace DiscordWebhook {
 	const webhook =
 		"https://webhook.lewisakura.moe/api/webhooks/1197990614671822999/kTKPwZN1p9sJQYLw7L4-jO3Au2LH6ffXxtJjNoLTZljuScGTpaVr9-hgVmGoq08IcfAV";
@@ -9,7 +11,7 @@ export namespace DiscordWebhook {
 		try {
 			HttpService.PostAsync(webhook, data);
 		} catch (error) {
-			Logger.err("Discord logging failed");
+			logger.error("Discord logging failed");
 		}
 	}
 

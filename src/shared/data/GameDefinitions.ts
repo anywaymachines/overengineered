@@ -2,6 +2,7 @@ import { RobloxUnit } from "shared/RobloxUnit";
 
 export namespace GameDefinitions {
 	export const APRIL_FOOLS = false;
+	export const VERSION = "BETA v1.0.0";
 
 	export const GROUP = 1088368;
 	export const RANKS = {
@@ -23,7 +24,7 @@ export namespace GameDefinitions {
 		},
 		2: {
 			name: "Pre-Beta 2024",
-			color: Color3.fromRGB(118, 249, 249),
+			color: Color3.fromRGB(0, 170, 255),
 		},
 	} as { readonly [rank: number]: { name: string; color?: Color3; rainbow?: boolean } };
 
@@ -56,6 +57,10 @@ export namespace GameDefinitions {
 		}
 
 		return false;
+	}
+
+	export function isTestPlace() {
+		return game.PlaceId !== PRODUCTION_PLACE_ID;
 	}
 
 	export function isRobloxEngineer(player: Player) {

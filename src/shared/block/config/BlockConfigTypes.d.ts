@@ -42,7 +42,7 @@ declare namespace BlockConfigTypes {
 		readonly step: number;
 	};
 
-	export type OrConfigType<TType extends keyof Types> = Types[TType]["default"];
+	export type OrConfigType<TType extends keyof Types> = Types[TType]["config"];
 	export type Or<
 		T extends readonly Types[Exclude<keyof Types, "or">][] = readonly Types[Exclude<keyof Types, "or">][],
 	> = BlockConfigType<

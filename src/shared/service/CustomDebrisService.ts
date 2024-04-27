@@ -1,9 +1,11 @@
 import { RunService } from "@rbxts/services";
 import { Logger } from "shared/Logger";
 
+const logger = new Logger("CustomDebrisService");
+
 let active = true;
 if (!RunService.IsClient() && game.PrivateServerOwnerId !== 0) {
-	Logger.warning("[CustomDebrisService] Private server detected, disabling");
+	logger.warn("Private server detected, disabling");
 	active = false;
 }
 

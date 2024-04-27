@@ -6,6 +6,8 @@ import { ComponentChild } from "shared/component/ComponentChild";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
+const logger = new Logger("PlotsFloatingImageController");
+
 export class PlotFloatingImageController extends Component {
 	constructor(plot: SharedPlot) {
 		super();
@@ -27,7 +29,7 @@ export class PlotFloatingImageController extends Component {
 			try {
 				rank = player.GetRankInGroup(GameDefinitions.GROUP);
 			} catch {
-				Logger.err("Unable to get player rank");
+				logger.error("Unable to get player rank");
 			}
 
 			const rankData = GameDefinitions.RANKS[rank];

@@ -14,6 +14,8 @@ import { LogicRegistry, logicRegistry } from "./LogicRegistry";
 import { ImpactController } from "./impact/ImpactController";
 import { VehicleSeatBlockLogic } from "./logic/VehicleSeatBlockLogic";
 
+const logger = new Logger("SharedMachine");
+
 export class SharedMachine extends ContainerComponent {
 	readonly blocks: BlockLogic[] = [];
 	readonly occupiedByLocalPlayer = new ObservableValue(true);
@@ -52,7 +54,7 @@ export class SharedMachine extends ContainerComponent {
 			const id = block.id;
 
 			if (!BlocksInitializer.blocks.map.get(id)) {
-				Logger.err(`Unknown block id ${id}`);
+				logger.error(`Unknown block id ${id}`);
 				continue;
 			}
 
