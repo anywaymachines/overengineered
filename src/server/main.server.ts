@@ -131,6 +131,11 @@ namespace RemoteHandlers {
 		vehicleSeat.Sit(hrp);
 	}
 }
+
+if (game.PrivateServerOwnerId !== 0 || RunService.IsStudio()) {
+	Workspace.AddTag("PrivateServer");
+}
+
 // Plots
 ServerPlots.initialize();
 

@@ -1,4 +1,5 @@
-import { Players, RunService } from "@rbxts/services";
+import { Players, RunService, Workspace } from "@rbxts/services";
+import { $compileTime } from "rbxts-transformer-macros";
 import { Signal } from "shared/event/Signal";
 import { GameDefinitions } from "./data/GameDefinitions";
 
@@ -9,6 +10,20 @@ const isActive = () => {
 		(RunService.IsClient() && GameDefinitions.isAdmin(Players.LocalPlayer))
 	);
 };
+
+if (RunService.IsClient()) {
+	const compileTime = DateTime.fromUnixTimestamp($compileTime()).FormatUniversalTime("DD MMM YYYY (HH:mm)", "en-us");
+
+	print(`🛠️ Plane Engineers 🛠️`);
+	print();
+	print(`ℹ️ Environment: ${GameDefinitions.isTestPlace() ? "⚠️ Testing" : "✅ Production"}`);
+	print(`ℹ️ Version: ${GameDefinitions.VERSION} (upload ${game.PlaceVersion})`);
+	print(`ℹ️ Build: ${RunService.IsStudio() ? "🔒 Internal" : game.PlaceVersion} [ ${compileTime} ]`);
+	print(`ℹ️ Server: ${RunService.IsStudio() ? "🔒 Local" : game.JobId}`);
+	print();
+	print(`ℹ️ Debris: ${Workspace.HasTag("PrivateServer") ? "🔓 Everlasting" : "🔒 Default"}`);
+	print();
+}
 
 export class Logger {
 	private static readonly _onLog = new Signal<(text: string, error: boolean) => void>();
