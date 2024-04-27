@@ -69,7 +69,12 @@ Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =
 		? GameDefinitions.VERSION
 		: `v${game.PlaceVersion} | ${updated}`;
 
-dataLoading.await();
+{
+	const [success, result] = dataLoading.await();
+	if (!success) {
+		throw result;
+	}
+}
 while (!(Workspace.GetAttribute("loaded") as boolean | undefined)) {
 	task.wait();
 }
