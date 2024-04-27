@@ -48,46 +48,8 @@ namespace Scene {
 					() => (this.gui.Mirror.Visible = !this.gui.Mirror.Visible),
 				),
 			);
-
-			// TODO: do something
-			const e = (element: GuiObject, duration = 0.2) => {
-				return {
-					startPos: element.Position,
-					offset: new UDim2(0, 100, 0, 0),
-					show() {
-						element.Position = this.startPos.add(this.offset);
-						element.Visible = true;
-						GuiAnimator.tween(
-							element,
-							{ Position: this.startPos },
-							new TweenInfo(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-						);
-					},
-					hide() {
-						element.Position = this.startPos;
-						GuiAnimator.tween(
-							element,
-							{ Position: this.startPos.add(this.offset) },
-							new TweenInfo(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-						);
-
-						spawn(() => {
-							wait(duration);
-							element.Visible = false;
-						});
-					},
-				};
-			};
-
-			//const aboba = e(this.gui.TouchControls);
-
 			this.onPrepare((inputType) => {
-				//if (inputType === "Touch") aboba.hide();
-				//else aboba.show();
-
 				this.gui.TouchControls.Visible = false;
-			});
-			this.onPrepare((inputType) => {
 				this.gui.Bottom.DeleteAllButton.Visible = inputType !== "Gamepad";
 			});
 

@@ -60,7 +60,6 @@ export namespace ServerBuilding {
 			BlockManager.manager.connections.set(model, data.connections);
 		}
 
-		// TODO: remove attribute uuid because Name exists?
 		BlockManager.manager.uuid.set(model, uuid);
 		model.Name = uuid;
 

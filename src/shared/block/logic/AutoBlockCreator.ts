@@ -188,8 +188,6 @@ const logicReg = {
 				const update = () => this.output.result.set(func(this.input.min.get(), this.input.max.get(), this));
 				this.input.min.subscribe(update);
 				this.input.max.subscribe(update);
-
-				// TODO: Remove after logic ticking
 				this.event.subscribe(RunService.Heartbeat, update);
 			}
 		};

@@ -18,7 +18,6 @@ export class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBlockLogic> 
 	}
 
 	explode(player: Player | undefined, block: BlockModel, isFlammable: boolean, pressure: number, radius: number) {
-		// TODO: temporary until block configuration moved to shared
 		radius = math.clamp(radius, 0, 16);
 		pressure = math.clamp(pressure, 0, 2500);
 

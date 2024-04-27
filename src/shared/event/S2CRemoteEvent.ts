@@ -35,7 +35,7 @@ export abstract class S2CRemoteEvent<T> extends RemoteEventBase<TweenInfo, Custo
 	protected abstract justRun(arg: T): void;
 
 	sendToNetworkOwnerOrEveryone(part: BasePart | undefined, arg: T) {
-		if (!part) return; // TODO: idk whats the best action
+		if (!part) return;
 
 		const owner = RunService.IsServer() ? part.GetNetworkOwner() : Players.LocalPlayer;
 		this.send(owner ? [owner] : "everyone", arg);
