@@ -1,3 +1,4 @@
+import { MessagingService } from "@rbxts/services";
 import { Element } from "shared/Element";
 import { Remotes } from "shared/Remotes";
 import { Colors } from "./gui/Colors";
@@ -28,10 +29,20 @@ Remotes.Client.GetNamespace("Admin")
 
 export namespace AdminMessageController {
 	// empty method to trigger subscription
-	export function initialize() {}
+	export function initialize() {
+		MessagingService.SubscribeAsync("global_message", (message) => {
+			const msg = message as unknown as { text: string; color: Color3; duration: number };
+			send(msg.text, msg.color, msg.duration);
+		});
+	}
 
 	export function send(text: string, color?: Color3, duration?: number) {
 		Remotes.Client.GetNamespace("Admin").Get("SendMessage").SendToServer(text, color, duration);
+		MessagingService.PublishAsync("global_message", {
+			text: text,
+			color: color,
+			duration: duration,
+		});
 	}
 
 	export function createControl() {

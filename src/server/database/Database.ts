@@ -31,9 +31,7 @@ export abstract class DbBase<T> {
 	}
 
 	private load(key: string) {
-		const [response] = this.datastore.GetAsync<string>(key, {
-			UseCache: false,
-		} as DataStoreGetOptions);
+		const [response] = this.datastore.GetAsync<string>(key);
 		if (response !== undefined) {
 			return (this.cache[key] = { changed: false, value: this.deserialize(response) });
 		}
