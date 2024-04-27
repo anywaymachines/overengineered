@@ -36,11 +36,16 @@ export class MultiConfigControl<
 				const connectedControl = this.add(
 					new ConnectedValueControl(configValueTemplateStorage.connected(), def.displayName),
 				);
-				connectedControl.travelToConnectedPressed.Connect(() =>
-					this._travelToConnectedPressed.Fire(
-						BlockManager.manager.connections.get(block!)?.[id as BlockConnectionName].blockUuid,
-					),
-				);
+
+				if (block) {
+					connectedControl.travelToConnectedPressed.Connect(() =>
+						this._travelToConnectedPressed.Fire(
+							BlockManager.manager.connections.get(block!)?.[id as BlockConnectionName].blockUuid,
+						),
+					);
+				} else {
+					connectedControl.disableButton();
+				}
 
 				continue;
 			}
@@ -68,10 +73,17 @@ class ConnectedValueControl extends ConfigValueControl<ConnectedValueControlDefi
 	private readonly _travelToConnectedPressed = new Signal();
 	readonly travelToConnectedPressed = this._travelToConnectedPressed.asReadonly();
 
+	private readonly button;
+
 	constructor(gui: ConfigPartDefinition<ConnectedValueControlDefinition>, name: string) {
 		super(gui, name);
 
-		const locate = this.add(new ButtonControl(gui.Control));
-		locate.activated.Connect(() => this._travelToConnectedPressed.Fire());
+		this.button = this.add(new ButtonControl(gui.Control));
+		this.button.activated.Connect(() => this._travelToConnectedPressed.Fire());
+	}
+
+	disableButton() {
+		//this.button.instance.BackgroundColor3 = Colors.accentDark;
+		this.button.setInteractable(false);
 	}
 }

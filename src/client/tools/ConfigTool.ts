@@ -129,7 +129,7 @@ namespace Scene {
 					Objects.fromEntries(configs.map((c) => [c.uuid, c.config] as const)),
 					onedef,
 					configs[0].connections,
-					configs[0].blockmodel,
+					Objects.size(configs) === 1 ? configs[0].blockmodel : undefined,
 				),
 			);
 			this.currentConfigControl = configControl;
