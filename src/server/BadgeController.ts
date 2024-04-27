@@ -17,16 +17,18 @@ export namespace BadgeController {
 
 		// PRE_BETA_2024
 		Players.PlayerAdded.Connect((player) => {
-			try {
-				if ([2, 3].includes(player.GetRankInGroup(GameDefinitions.GROUP))) {
-					if (BadgeService.UserHasBadgeAsync(player.UserId, badges.PRE_BETA_2024)) return;
+			player.CharacterAdded.Once(() => {
+				try {
+					if ([2, 3].includes(player.GetRankInGroup(GameDefinitions.GROUP))) {
+						if (BadgeService.UserHasBadgeAsync(player.UserId, badges.PRE_BETA_2024)) return;
 
-					BadgeService.AwardBadge(player.UserId, badges.PRE_BETA_2024);
-					logger.warn(`Awarded PRE_BETA_2024 to ${player.Name}`);
+						BadgeService.AwardBadge(player.UserId, badges.PRE_BETA_2024);
+						logger.warn(`Awarded PRE_BETA_2024 to ${player.Name}`);
+					}
+				} catch {
+					logger.info(`Failed to give PRE_BETA_2024 to ${player.Name}`);
 				}
-			} catch {
-				logger.info(`Failed to give PRE_BETA_2024 to ${player.Name}`);
-			}
+			});
 		});
 
 		logger.info("Loaded");
