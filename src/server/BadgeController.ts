@@ -23,7 +23,7 @@ export namespace BadgeController {
 						if (BadgeService.UserHasBadgeAsync(player.UserId, badges.PRE_BETA_2024)) return;
 
 						BadgeService.AwardBadge(player.UserId, badges.PRE_BETA_2024);
-						logger.warn(`Awarded PRE_BETA_2024 to ${player.Name}`);
+						logger.info(`Awarded PRE_BETA_2024 to ${player.Name}`);
 					}
 				} catch {
 					logger.info(`Failed to give PRE_BETA_2024 to ${player.Name}`);
