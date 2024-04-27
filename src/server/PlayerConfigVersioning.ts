@@ -155,12 +155,14 @@ const v9: UpdatablePlayerConfigVersion<PlayerConfigV9, PlayerConfigV8> = {
 };
 
 // Reset the config to fix all bugs
-type PlayerConfigV10 = PlayerConfig;
+type PlayerConfigV10 = PlayerConfig & { readonly version: number };
 const v10: UpdatablePlayerConfigVersion<PlayerConfigV10, PlayerConfigV9> = {
 	version: 10,
 
 	update(prev: Partial<PlayerConfigV9>): Partial<PlayerConfigV10> {
-		return {};
+		return {
+			version: this.version,
+		};
 	},
 };
 
@@ -171,6 +173,7 @@ const logger = new Logger("PlayerConfigUpdater");
 export namespace PlayerConfigUpdater {
 	export function update(config: object | { readonly version: number }) {
 		const version = "version" in config ? config.version : versions[versions.size() - 1].version;
+		print("ASDKLSAJHKD", version, config);
 
 		for (let i = version + 1; i <= current.version; i++) {
 			const newver = versions.find((v) => v.version === i);
