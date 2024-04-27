@@ -107,7 +107,7 @@ export const PlayerConfigDefinition = {
 		displayName: "Day cycle",
 		type: "dayCycle",
 		config: {
-			automatic: true as boolean,
+			automatic: false as boolean,
 			/** Hours, 0-24 */
 			manual: 14 as number,
 		},
