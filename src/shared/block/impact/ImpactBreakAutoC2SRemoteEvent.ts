@@ -6,7 +6,7 @@ export class ImpactBreakAutoC2SRemoteEvent extends AutoC2SRemoteEvent<BasePart[]
 
 		arg.forEach((part) => {
 			part.CustomPhysicalProperties = new PhysicalProperties(
-				part.CurrentPhysicalProperties.Density * 3,
+				math.clamp(part.CurrentPhysicalProperties.Density * 3, 0.01, 100),
 				math.clamp(part.CurrentPhysicalProperties.Friction * 3.5, 0, 2),
 				part.CurrentPhysicalProperties.Elasticity,
 			);
