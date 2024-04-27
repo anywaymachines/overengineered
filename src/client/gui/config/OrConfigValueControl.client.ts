@@ -45,9 +45,7 @@ class OrConfigValueControl extends ConfigValueControl<OrConfigControlDefinition,
 			});
 
 			const defs = { value: definition.types[currentType]! };
-			mcontrol = this.add(
-				new MultiConfigControl<typeof defs>(gui, configs, defs, []), // TODO: connected
-			);
+			mcontrol = this.add(new MultiConfigControl<typeof defs>(gui, configs, defs));
 			mcontrol.configUpdated.Connect((_, values) => submit(values));
 		};
 		updateControl();
