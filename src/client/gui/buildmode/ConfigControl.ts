@@ -618,7 +618,7 @@ export class MotorRotationSpeedConfigValueControl extends ConfigValueControl<Con
 				type: "clampedNumber",
 				min: 0,
 				max: 50,
-				step: 1,
+				step: 0.01,
 				default: 15 as number,
 				config: 0 as number,
 			},

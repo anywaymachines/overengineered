@@ -374,7 +374,7 @@ const tnt = {
 			default: 12 as number,
 			min: 1,
 			max: 12,
-			step: 1,
+			step: 0.01,
 			config: 12 as number,
 		},
 		pressure: {
@@ -383,7 +383,7 @@ const tnt = {
 			default: 2500 as number,
 			min: 0,
 			max: 2500,
-			step: 1,
+			step: 0.01,
 			config: 2500 as number,
 		},
 		flammable: {
