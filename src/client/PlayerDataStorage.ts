@@ -30,9 +30,9 @@ export namespace PlayerDataStorage {
 
 		config.createNullableChild("betterCamera", undefined).subscribe((betterCamera) => {
 			logger.info("better_camera set to " + HttpService.JSONEncode(betterCamera));
-			Workspace.SetAttribute("camera_improved", betterCamera?.improved);
-			Workspace.SetAttribute("camera_playerCentered", betterCamera?.playerCentered);
-			Workspace.SetAttribute("camera_strictFollow", betterCamera?.strictFollow);
+			Workspace.SetAttribute("camera_improved", betterCamera?.improved === true);
+			Workspace.SetAttribute("camera_playerCentered", betterCamera?.playerCentered === true);
+			Workspace.SetAttribute("camera_strictFollow", betterCamera?.strictFollow === true);
 		}, true);
 	}
 
