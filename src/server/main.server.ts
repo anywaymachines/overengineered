@@ -132,7 +132,7 @@ namespace RemoteHandlers {
 	}
 }
 
-if (game.PrivateServerOwnerId !== 0 || RunService.IsStudio()) {
+if (game.PrivateServerOwnerId !== 0) {
 	Workspace.AddTag("PrivateServer");
 }
 

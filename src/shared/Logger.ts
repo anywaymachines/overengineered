@@ -17,10 +17,9 @@ if (RunService.IsClient()) {
 	print(`🛠️ Plane Engineers 🛠️`);
 	print();
 	print(`ℹ️ Environment: ${GameDefinitions.isTestPlace() ? "⚠️ Testing" : "✅ Production"}`);
-	print(`ℹ️ Version: ${GameDefinitions.VERSION} (upload ${game.PlaceVersion})`);
+	print(`ℹ️ Version: ${GameDefinitions.VERSION} (native ${game.PlaceVersion})`);
 	print(`ℹ️ Build: ${RunService.IsStudio() ? "🔒 Internal" : game.PlaceVersion} [ ${compileTime} ]`);
 	print(`ℹ️ Server: ${RunService.IsStudio() ? "🔒 Local" : game.JobId}`);
-	print();
 	print(`ℹ️ Debris: ${Workspace.HasTag("PrivateServer") ? "🔓 Everlasting" : "🔒 Default"}`);
 	print();
 }
