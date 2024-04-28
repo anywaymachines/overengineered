@@ -1,5 +1,6 @@
 import { type BlockDataRegistry } from "shared/BlockDataRegistry";
 import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
+import { RadarSectionBlockLogic } from "shared/block/logic/RadarSectionBlockLogic";
 import { RadioRecieverBlockLogic } from "shared/block/logic/RadioRecieverBlockLogic";
 import { RadioTransmitterBlockLogic } from "shared/block/logic/RadioTransmitterBlockLogic";
 import { LaserBlockLogic } from "shared/block/logic/operations/output/LaserBlockLogic";
@@ -96,6 +97,7 @@ export const logicRegistry = {
 	altimeter: AltimeterBlockLogic,
 	accelerometer: AccelerometerBlockLogic,
 	lidarsensor: LidarSensorBlockLogic,
+	radarsection: RadarSectionBlockLogic,
 
 	logicmemory: LogicMemoryBlockLogic,
 	stackmemory: StackMemoryBlockLogic,

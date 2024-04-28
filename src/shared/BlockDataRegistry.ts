@@ -322,6 +322,10 @@ const logic = {
 			description: "Maks, delete this ####",
 			autoWeldShape: "cube",
 		},
+		radarsection: {
+			name: "Radar Section",
+			description: "wip",
+		},
 	},
 } as const satisfies Record<string, BlockDataRegistry>;
 

@@ -1061,6 +1061,37 @@ const radioreciever = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const radarsection = {
+	input: {
+		maxDistance: {
+			displayName: "Max distance",
+			type: "clampedNumber",
+			default: 100 as number,
+			config: 100 as number,
+			min: 1,
+			max: 500,
+			step: 1,
+		},
+		detectionSize: {
+			displayName: "Detection Size",
+			type: "clampedNumber",
+			default: 2.2 as number,
+			config: 2.2 as number,
+			min: 1,
+			max: 3,
+			step: 0.1,
+		},
+	},
+	output: {
+		distance: {
+			displayName: "Distance",
+			type: "number",
+			default: -1 as number,
+			config: -1 as number,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const delayBlock = {
 	input: {
 		value: connectors.any("Value", "1"),
@@ -1170,6 +1201,8 @@ export const blockConfigRegistry = {
 	lidarsensor,
 	radiotransmitter,
 	radioreciever,
+
+	radarsection,
 
 	constant,
 	delayblock: delayBlock,
