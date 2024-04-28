@@ -1,3 +1,4 @@
+import { Element } from "shared/Element";
 import { Logger } from "shared/Logger";
 import { Objects } from "shared/fixes/objects";
 
@@ -30,8 +31,9 @@ export abstract class DbBase<T> {
 		this.cache[key] = { changed: true, value };
 	}
 
+	private readonly getOptions = Element.create("DataStoreGetOptions", { UseCache: false });
 	private load(key: string) {
-		const [response] = this.datastore.GetAsync<string>(key);
+		const [response] = this.datastore.GetAsync<string>(key, this.getOptions);
 		if (response !== undefined) {
 			return (this.cache[key] = { changed: false, value: this.deserialize(response) });
 		}
