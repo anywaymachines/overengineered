@@ -26,6 +26,7 @@ declare global {
 		readonly purchasedSlots: number | undefined;
 		readonly settings: Partial<PlayerConfig> | undefined;
 		readonly slots: readonly SlotMeta[] | undefined;
+		readonly imported_slots: readonly SlotMeta[] | undefined;
 	};
 
 	type SaveSlotResponse = Response<{ readonly blocks: number | undefined; readonly size: number | undefined }>;

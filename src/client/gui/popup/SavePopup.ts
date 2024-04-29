@@ -8,6 +8,7 @@ import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { Serializer } from "shared/Serializer";
 import { SlotsMeta } from "shared/SlotsMeta";
 import { TransformService } from "shared/component/TransformService";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
 
@@ -46,7 +47,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 	readonly onLoad = this._onLoad.asReadonly();
 	readonly onOpened = this._onOpened.asReadonly();
 
-	constructor(gui: SlotRecordDefinition, index: number) {
+	constructor(gui: SlotRecordDefinition, index: number, isImported: boolean = false) {
 		super(gui);
 
 		const save = () => {
@@ -100,14 +101,16 @@ class SaveItem extends Control<SlotRecordDefinition> {
 
 		const slot = SlotsMeta.get(slots, index);
 
-		this.gui.Content.SlotButton.ImageColor3 = Serializer.Color3Serializer.deserialize(slot.color);
+		this.gui.Content.SlotButton.ImageColor3 = isImported
+			? Color3.fromRGB(150, 150, 150)
+			: Serializer.Color3Serializer.deserialize(slot.color);
 		nametb.text.set(slot.name);
 		this.gui.Deep.SaveDateTextLabel.Text = ""; // TODO:
 
 		//this.gui.Content.BlocksLabel.Text = `Blocks: ${slot.blocks}; Size: ${slot.size}b`;
 		this.gui.Content.BlocksLabel.Text = slot.blocks === 0 ? "Empty" : `Blocks: ${slot.blocks}`;
 
-		const interactable = index >= 0;
+		const interactable = index >= 0 && !isImported;
 		const setControlActive = (gui: GuiObject) => {
 			gui.Interactable = gui.Active = interactable;
 			gui.BackgroundTransparency = interactable ? 0 : 0.8;
@@ -125,8 +128,8 @@ class SaveItem extends Control<SlotRecordDefinition> {
 			setControlActive(child.instance);
 		}
 
-		const fromInternal = false;
-		this.gui.Content.BadgeTextLabel.Visible = fromInternal;
+		this.gui.Content.BadgeTextLabel.Visible = isImported;
+		this.gui.Content.BadgeTextLabel.Text = GameDefinitions.isTestPlace() ? "FROM PRODUCTION" : "FROM INTERNAL";
 
 		this.setOpened(false);
 		TransformService.finish(this.instance);
@@ -212,6 +215,37 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 						slot.setOpened(false);
 					}
 				});
+				this.slots.add(item);
+			}
+
+			const externalSlots = PlayerDataStorage.imported_slots.get();
+			if (!externalSlots || externalSlots.size() === 0) return;
+
+			// TODO: Label position fix
+			// const label = new LabelControl(this.commentTemplate());
+			// label.value.set("Other slots");
+			// this.add(label);
+
+			for (const slot of [...externalSlots].sort((left, right) => left.index < right.index)) {
+				if (filter !== undefined && filter.size() !== 0 && slot.name.lower().find(filter)[0] === undefined) {
+					continue;
+				}
+
+				const item = new SaveItem(this.template(), slot.index, true);
+				// item.onSave.Connect(() => {
+				// 	this.selectedSlot.set(slot.index);
+				// 	this._onSave.Fire();
+				// });
+				// item.onLoad.Connect(() => {
+				// 	this.selectedSlot.set(slot.index);
+				// 	this._onLoad.Fire();
+				// });
+				// item.onOpened.Connect(() => {
+				// 	for (const slot of this.slots.getChildren()) {
+				// 		if (slot === item) continue;
+				// 		slot.setOpened(false);
+				// 	}
+				// });
 				this.slots.add(item);
 			}
 		};

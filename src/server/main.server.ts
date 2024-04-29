@@ -1,4 +1,5 @@
-import { MessagingService, RunService, Workspace } from "@rbxts/services";
+import { HttpService, MessagingService, RunService, Workspace } from "@rbxts/services";
+import { Backend } from "server/Backend";
 import { BadgeController } from "server/BadgeController";
 import { ServerRestartController } from "server/ServerRestartController";
 import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
@@ -91,10 +92,33 @@ namespace RemoteHandlers {
 	export function fetchSettings(player: Player): PlayerDataResponse {
 		const data = PlayerDatabase.instance.get(player.UserId) ?? {};
 
+		const universeId = GameDefinitions.isTestPlace()
+			? GameDefinitions.PRODUCTION_UNIVERSE_ID
+			: GameDefinitions.INTERNAL_UNIVERSE_ID;
+
+		const slots: SlotMeta[] = [];
+
+		try {
+			const externalData = HttpService.JSONDecode(
+				Backend.Datastores.GetEntry(universeId, "players", tostring(player.UserId)) as string,
+			);
+
+			const externalSlots = (externalData as { slots: readonly SlotMeta[] })["slots"];
+
+			for (const slot of externalSlots) {
+				if (slot.blocks > 0) {
+					slots.push(slot);
+				}
+			}
+		} catch (err) {
+			logger.error(err as string);
+		}
+
 		return {
 			purchasedSlots: data.purchasedSlots,
 			settings: data.settings,
 			slots: data.slots,
+			imported_slots: slots,
 		};
 	}
 

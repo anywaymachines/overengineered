@@ -24,6 +24,7 @@ export namespace PlayerDataStorage {
 		Config.addDefaults({}, PlayerConfigDefinition),
 	) as ObservableValue<Required<PlayerConfig>>;
 	export const slots = data.createChild("slots", []);
+	export const imported_slots = data.createChild("imported_slots", []);
 
 	export async function init() {
 		await refetchData();
@@ -47,6 +48,7 @@ export namespace PlayerDataStorage {
 				d.slots ?? [],
 				GameDefinitions.getMaxSlots(Players.LocalPlayer, d.purchasedSlots ?? 0),
 			),
+			imported_slots: d.imported_slots ?? [],
 		});
 
 		logger.info("Configuration loaded: " + HttpService.JSONEncode(config.get()));
