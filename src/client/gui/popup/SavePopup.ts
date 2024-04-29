@@ -1,57 +1,175 @@
-import { Players } from "@rbxts/services";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
-import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
+import { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { Serializer } from "shared/Serializer";
 import { SlotsMeta } from "shared/SlotsMeta";
 import { TransformService } from "shared/component/TransformService";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
 
-type SaveItemDefinition = GuiButton & {
-	readonly ImageLabel: ImageLabel;
-	readonly TextBox: TextBox;
+const NOT_EDITABLE_IMAGE = "rbxassetid://15428855911";
+const EDITABLE_IMAGE = "rbxassetid://17320900740";
+const UNKNOWN_DATE = "Unknown date";
+
+const FROM_INTERNAL_BADGE = "FROM INTERNAL";
+const FROM_PRODUCTION_BADGE = "FROM PRODUCTION";
+const IMPORT_SECTION = "Other slots";
+const BACKEND_ISSUES = "⚠️ Importing from other experiences may not be available";
+
+type SlotRecordDefinition = GuiObject & {
+	readonly Content: Frame & {
+		readonly SlotButton: ImageButton;
+		readonly LoadButton: TextButton;
+		readonly SaveButton: TextButton;
+		readonly SlotName: Frame & {
+			readonly SlotNameTextBox: TextBox;
+			readonly ImageLabel: ImageLabel;
+		};
+		readonly BlocksLabel: TextLabel;
+		readonly BadgeTextLabel: TextLabel;
+	};
+	readonly Deep: Frame & {
+		readonly ColorSelection: GuiObject & Record<string, TextButtonDefinition>;
+		readonly SaveDateTextLabel: TextLabel;
+	};
 };
 
-class SaveItem extends ButtonControl<SaveItemDefinition> {
-	private readonly index;
-	readonly selected = new ObservableValue(false);
+class SaveItem extends Control<SlotRecordDefinition> {
+	private readonly _onOpened = new Signal();
+	private readonly _onSave = new Signal();
+	private readonly _onLoad = new Signal();
+	readonly onSave = this._onSave.asReadonly();
+	readonly onLoad = this._onLoad.asReadonly();
+	readonly onOpened = this._onOpened.asReadonly();
 
-	constructor(gui: SaveItemDefinition, index: number) {
+	constructor(gui: SlotRecordDefinition, index: number) {
 		super(gui);
-		this.index = index;
 
-		this.event.subscribeObservable(
-			PlayerDataStorage.slots,
-			(slots) => {
-				const slot = SlotsMeta.get(slots, this.index);
-				this.gui.TextBox.Text = slot.name;
-				this.gui.ImageLabel.ImageColor3 = Serializer.Color3Serializer.deserialize(slot.color);
-			},
-			true,
+		const save = () => {
+			ConfirmPopup.showPopup(
+				"Save to this slot?",
+				"It will be impossible to undo this action",
+				() => {
+					try {
+						saveButton.disable();
+						PlayerDataStorage.sendPlayerSlot({ index, save: true });
+						this._onSave.Fire();
+					} finally {
+						saveButton.enable();
+					}
+				},
+				() => {},
+			);
+		};
+		const load = async () => {
+			try {
+				loadButton.disable();
+				this._onLoad.Fire();
+				await PlayerDataStorage.loadPlayerSlot(index);
+			} finally {
+				loadButton.enable();
+			}
+		};
+
+		const saveButton = this.add(new ButtonControl(this.gui.Content.SaveButton, save));
+		const loadButton = this.add(new ButtonControl(this.gui.Content.LoadButton, load));
+		const nametb = this.add(new TextBoxControl(this.gui.Content.SlotName.SlotNameTextBox));
+		nametb.submitted.Connect(() => send({ name: nametb.text.get() }));
+
+		const send = async (slotData: Readonly<Partial<SlotMeta>>) =>
+			await PlayerDataStorage.sendPlayerSlot({ ...slotData, index, save: false });
+
+		const buttons: ButtonControl[] = [];
+		for (const child of this.gui.Deep.ColorSelection.GetChildren()) {
+			if (!child.IsA("GuiButton")) continue;
+
+			const button = this.add(
+				new ButtonControl(child, () =>
+					send({ color: Serializer.Color3Serializer.serialize(child.BackgroundColor3) }),
+				),
+			);
+			buttons.push(button);
+		}
+
+		const slots = PlayerDataStorage.slots.get();
+		if (!slots) throw "what";
+
+		const slot = SlotsMeta.get(slots, index);
+
+		this.gui.Content.SlotButton.ImageColor3 = Serializer.Color3Serializer.deserialize(slot.color);
+		nametb.text.set(slot.name);
+		this.gui.Deep.SaveDateTextLabel.Text = ""; // TODO:
+
+		//this.gui.Content.BlocksLabel.Text = `Blocks: ${slot.blocks}; Size: ${slot.size}b`;
+		this.gui.Content.BlocksLabel.Text = slot.blocks === 0 ? "Empty" : `Blocks: ${slot.blocks}`;
+
+		const interactable = index >= 0;
+		const setControlActive = (gui: GuiObject) => {
+			gui.Interactable = gui.Active = interactable;
+			gui.BackgroundTransparency = interactable ? 0 : 0.8;
+
+			if (gui.IsA("TextBox")) {
+				gui.TextEditable = interactable;
+			}
+		};
+
+		saveButton.setInteractable(interactable);
+		this.gui.Content.SlotName.ImageLabel.Image = interactable ? EDITABLE_IMAGE : NOT_EDITABLE_IMAGE;
+
+		setControlActive(this.gui.Content.SlotName.SlotNameTextBox);
+		for (const child of buttons) {
+			setControlActive(child.instance);
+		}
+
+		const fromInternal = false;
+		this.gui.Content.BadgeTextLabel.Visible = fromInternal;
+
+		this.setOpened(false);
+		TransformService.finish(this.instance);
+
+		this.add(
+			new ButtonControl(this.gui.Content.SlotButton, () => {
+				this.setOpened((this.opened = !this.opened));
+				this._onOpened.Fire();
+			}),
 		);
+	}
 
-		this.selected.subscribe((selected) => {
-			this.gui.BackgroundColor3 = selected ? Colors.accentDark : Colors.accentBlack;
-		}, true);
+	private readonly heightStateMachine = TransformService.boolStateMachine(
+		this.instance,
+		TransformService.commonProps.quadOut02,
+		{ Size: this.instance.Size },
+		{ Size: this.instance.Size.sub(new UDim2(new UDim(), this.instance.Deep.Size.Y)) },
+	);
+
+	private opened = false;
+	setOpened(opened: boolean) {
+		this.opened = opened;
+		this.heightStateMachine(opened);
 	}
 }
 
 type SaveSlotsDefinition = ScrollingFrame & {
-	readonly Template: SaveItemDefinition;
+	readonly Template: SlotRecordDefinition;
+	readonly CommentTemplate: TextLabel;
 };
 
 class SaveSlots extends Control<SaveSlotsDefinition> {
 	private static staticSelected?: number;
-	readonly selectedSlot = new ObservableValue<number | undefined>(undefined);
 
+	private readonly _onSave = new Signal();
+	private readonly _onLoad = new Signal();
+	readonly onSave = this._onSave.asReadonly();
+	readonly onLoad = this._onLoad.asReadonly();
+
+	readonly search = new ObservableValue<string | undefined>(undefined);
+	readonly selectedSlot = new ObservableValue<number | undefined>(undefined);
 	private readonly template;
+	private readonly commentTemplate;
 	private readonly slots;
 
 	constructor(gui: SaveSlotsDefinition) {
@@ -62,204 +180,63 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 		this.selectedSlot.subscribe((value) => (SaveSlots.staticSelected = value));
 
 		this.template = this.asTemplate(this.gui.Template);
+		this.commentTemplate = this.asTemplate(this.gui.CommentTemplate);
 
 		this.slots = new Control<SaveSlotsDefinition, SaveItem>(this.gui);
 		this.add(this.slots);
 
-		this.event.subscribeObservable(
-			PlayerDataStorage.slots,
-			(slots) => {
-				if (!slots) return;
-
-				this.slots.clear();
-				[...slots]
-					.sort((left, right) => left.index < right.index)
-					.forEach((slot) => {
-						const item = new SaveItem(this.template(), slot.index);
-						item.activated.Connect(() => this.selectedSlot.set(slot.index));
-						this.selectedSlot.subscribe((index) => item.selected.set(index === slot.index));
-						this.slots.add(item);
-					});
-
-				/*const add = new Control(this.buyNewTemplate());
-			add.instance.Activated.Connect(() => {
-				const slotcount = this.slots.getChildren().size();
-
-				if (slotcount + 1 > GameDefinitions.FREE_SLOTS + (data.purchasedSlots ?? 0)) {
-					return;
-				}
-			});
-			this.add(add);*/
-			},
-			true,
-		);
-	}
-}
-
-type SavePreviewDefinition = GuiButton & {
-	readonly Buttons: {
-		readonly LoadButton: GuiButton;
-		readonly SaveButton: GuiButton;
-	};
-	readonly Content: {
-		readonly TextBox: TextBox;
-		readonly Colors: GuiObject;
-		readonly ImageLabel: ImageLabel;
-		readonly HeaderLabel: TextLabel;
-	};
-};
-
-class SavePreview extends Control<SavePreviewDefinition> {
-	readonly onSave = new Signal();
-	readonly onLoad = new Signal();
-
-	readonly selectedSlotIndex = new ObservableValue<number | undefined>(undefined);
-
-	constructor(gui: SavePreviewDefinition) {
-		super(gui);
-
-		const saveButton = this.add(new ButtonControl(this.gui.Buttons.SaveButton));
-		const loadButton = this.add(new ButtonControl(this.gui.Buttons.LoadButton));
-
-		this.event.subscribe(saveButton.activated, () => {
-			ConfirmPopup.showPopup(
-				"Save to this slot?",
-				"It will be impossible to undo this action",
-				() => {
-					try {
-						saveButton.disable();
-
-						const index = this.selectedSlotIndex.get();
-						if (index === undefined) return;
-
-						PlayerDataStorage.sendPlayerSlot({
-							index,
-							save: true,
-						});
-
-						this.onSave.Fire();
-					} finally {
-						saveButton.enable();
-					}
-				},
-				() => {},
-			);
-		});
-
-		this.event.subscribe(loadButton.activated, async () => {
-			try {
-				loadButton.disable();
-
-				const index = this.selectedSlotIndex.get();
-				if (index === undefined) return;
-
-				this.onLoad.Fire();
-				await PlayerDataStorage.loadPlayerSlot(index);
-			} finally {
-				loadButton.enable();
-			}
-		});
-
-		const textbox = new TextBoxControl(this.gui.Content.TextBox);
-		this.add(textbox);
-
-		const send = async (slotData: Readonly<Partial<SlotMeta>>) => {
-			const slotIndex = this.selectedSlotIndex.get();
-			if (slotIndex === undefined) return;
-
-			await PlayerDataStorage.sendPlayerSlot({
-				...slotData,
-				index: slotIndex,
-				save: false,
-			});
-		};
-
-		const update = () => {
+		const recreate = () => {
 			const slots = PlayerDataStorage.slots.get();
-			if (!slots) {
-				this.gui.Visible = false;
-				return;
-			}
+			if (!slots) return;
 
-			const slotIndex = this.selectedSlotIndex.get();
-			if (slotIndex === undefined) {
-				this.gui.Visible = false;
-				return;
-			}
+			this.slots.clear();
 
-			this.gui.Visible = true;
-			const slot = SlotsMeta.get(slots, slotIndex);
-
-			this.gui.Content.ImageLabel.ImageColor3 = Serializer.Color3Serializer.deserialize(slot.color);
-			textbox.text.set(slot.name);
-
-			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
-				this.gui.Content.HeaderLabel.Text = `Blocks: ${slot.blocks}; Size: ${slot.size}b`;
-			} else {
-				this.gui.Content.HeaderLabel.Text = `Blocks: ${slot.blocks}`;
-			}
-
-			// lock
-			const interactable = slotIndex >= 0;
-			const setControlActive = (gui: GuiObject) => {
-				gui.Interactable = gui.Active = interactable;
-				gui.BackgroundTransparency = interactable ? 0 : 0.8;
-
-				if (gui.IsA("TextBox")) {
-					gui.TextEditable = interactable;
+			const filter = this.search.get()?.lower();
+			for (const slot of [...slots].sort((left, right) => left.index < right.index)) {
+				if (filter !== undefined && filter.size() !== 0 && slot.name.lower().find(filter)[0] === undefined) {
+					continue;
 				}
-			};
 
-			setControlActive(this.gui.Content.TextBox);
-			setControlActive(this.gui.Buttons.SaveButton);
-
-			for (const child of buttons) {
-				setControlActive(child.instance);
+				const item = new SaveItem(this.template(), slot.index);
+				item.onSave.Connect(() => {
+					this.selectedSlot.set(slot.index);
+					this._onSave.Fire();
+				});
+				item.onLoad.Connect(() => {
+					this.selectedSlot.set(slot.index);
+					this._onLoad.Fire();
+				});
+				item.onOpened.Connect(() => {
+					for (const slot of this.slots.getChildren()) {
+						if (slot === item) continue;
+						slot.setOpened(false);
+					}
+				});
+				this.slots.add(item);
 			}
 		};
 
-		this.event.subscribeObservable(this.selectedSlotIndex, update);
-		this.event.subscribeObservable(PlayerDataStorage.slots, update);
-		update();
-
-		const buttons: ButtonControl[] = [];
-		for (const child of this.gui.Content.Colors.GetChildren()) {
-			if (child.IsA("GuiButton")) {
-				const button = this.add(new ButtonControl(child));
-				buttons.push(button);
-
-				button.activated.Connect(() => {
-					send({ color: Serializer.Color3Serializer.serialize(button.instance.BackgroundColor3) });
-				});
-			}
-		}
-		textbox.submitted.Connect(() => {
-			send({ name: textbox.text.get() });
-		});
+		this.event.subscribeObservable(PlayerDataStorage.slots, recreate);
+		this.event.subscribeObservable(this.search, recreate);
+		recreate();
 	}
 }
 
-export type SavePopupDefinition = GuiObject & {
-	readonly Slots: GuiObject & {
-		readonly Content: {
-			readonly ScrollingFrame: SaveSlotsDefinition;
-		};
-		readonly Buttons: {
-			readonly CancelButton: GuiButton;
-		};
-		readonly Head: {
-			readonly CloseButton: ButtonDefinition;
-		};
+export type SlotsPopupDefinition = GuiObject & {
+	readonly Heading: Frame & {
+		readonly CloseButton: TextButton;
+		// readonly TitleLabel: TextLabel;
 	};
-	readonly Slot: SavePreviewDefinition;
+	readonly Content: SaveSlotsDefinition;
+	readonly Search: TextBox;
 };
 
-export class SavePopup extends Popup<SavePopupDefinition> {
+export class SavePopup extends Popup<SlotsPopupDefinition> {
 	static showPopup() {
 		const popup = new SavePopup(
 			Gui.getGameUI<{
 				Popup: {
-					Slots: SavePopupDefinition;
+					Slots: SlotsPopupDefinition;
 				};
 			}>().Popup.Slots.Clone(),
 		);
@@ -267,26 +244,19 @@ export class SavePopup extends Popup<SavePopupDefinition> {
 		popup.show();
 	}
 
-	private readonly preview;
-	constructor(gui: SavePopupDefinition) {
+	constructor(gui: SlotsPopupDefinition) {
 		super(gui);
 
-		const slots = new SaveSlots(this.gui.Slots.Content.ScrollingFrame);
-		this.add(slots);
+		const slots = this.add(new SaveSlots(this.gui.Content));
+		this.event.subscribe(slots.onLoad, () => this.hide());
+		this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
 
-		this.preview = new SavePreview(this.gui.Slot);
-		this.add(this.preview);
-		this.preview.selectedSlotIndex.bindTo(slots.selectedSlot);
-
-		this.event.subscribe(this.preview.onLoad, () => this.hide());
-
-		this.add(new ButtonControl(this.gui.Slots.Buttons.CancelButton, () => this.hide()));
-		this.add(new ButtonControl(this.gui.Slots.Head.CloseButton, () => this.hide()));
+		const search = this.add(new TextBoxControl(gui.Search));
+		this.event.subscribeObservable(search.text, (text) => slots.search.set(text), true);
 	}
 
 	show() {
 		super.show();
-		this.preview.selectedSlotIndex.triggerChanged();
 		TransformService.run(this.instance, (transform) => transform.slideIn("top", 50, { duration: 0.2 }));
 	}
 }

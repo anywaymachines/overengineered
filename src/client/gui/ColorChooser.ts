@@ -106,7 +106,7 @@ export class ColorChooser extends Control<ColorChooserDefinition> {
 		});
 
 		const hextext = this.add(new TextBoxControl(this.gui.Inputs.ManualHex));
-		this.event.subscribeObservable(hextext.text, (hex) => {
+		this.event.subscribe(hextext.submitted, (hex) => {
 			if (hex.sub(1, 1) !== "#") {
 				hextext.text.set("#" + hex);
 				return;
