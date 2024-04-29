@@ -84,6 +84,11 @@ namespace Checks {
 
 		throw `No parts in block '${block.Name}' are anchored!`;
 	}
+	function assertHasDataInRegistry(block: Model) {
+		if (!BlockDataRegistry[block.Name.lower()]) {
+			throw `No registry data found for block ${block.Name}`;
+		}
+	}
 
 	export function checkAll(block: Model) {
 		assertPrimaryPartSet(block);
@@ -91,6 +96,7 @@ namespace Checks {
 		assertColboxWeldedIfExists(block);
 		assertValidVelds(block);
 		assertSomethingAnchored(block);
+		assertHasDataInRegistry(block);
 	}
 }
 

@@ -1069,7 +1069,7 @@ const radarsection = {
 			default: 100 as number,
 			config: 100 as number,
 			min: 1,
-			max: 500,
+			max: 1000,
 			step: 1,
 		},
 		detectionSize: {
@@ -1080,6 +1080,12 @@ const radarsection = {
 			min: 1,
 			max: 3,
 			step: 0.1,
+		},
+		visibility: {
+			displayName: "Area Visibility",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
 		},
 	},
 	output: {

@@ -324,7 +324,52 @@ const logic = {
 		},
 		radarsection: {
 			name: "Radar Section",
-			description: "wip",
+			description: "Returns the closest object that got into the block's sight",
+			limit: 40,
+		},
+		beam2x1: {
+			name: "Beam 2x1",
+			description: "A block, but 2x1!",
+		},
+		beam3x1: {
+			name: "Beam 3x1",
+			description: "A block, but 3x1!",
+		},
+		beam4x1: {
+			name: "Beam 4x1",
+			description: "A block, but 4x1!",
+		},
+		halfcornerwedge1x1: {
+			name: "Half Corner Wedge 1x1",
+			description: "A corner wedge 1x1, but it's.. half.. the size?",
+		},
+		halfcornerwedge2x1: {
+			name: "Half Corner Wedge 2x1",
+			description: "A corner wedge 2x1, but it's.. half.. the size?",
+		},
+		halfcornerwedge3x1: {
+			name: "Half Corner Wedge 3x1",
+			description: "A corner wedge 3x1, but it's.. half.. the size?",
+		},
+		halfcornerwedge4x1: {
+			name: "Half Corner Wedge 4x1",
+			description: "It stopped making any sense..",
+		},
+		halfwedge1x1: {
+			name: "Half Wedge 1x1",
+			description: "A wedge 1x1, but it's.. half.. the size?",
+		},
+		halfwedge1x2: {
+			name: "Half Wedge 1x2",
+			description: "A wedge 1x2, but it's.. half.. the size?",
+		},
+		halfwedge1x3: {
+			name: "Half Wedge 1x3",
+			description: "A wedge 1x3, but it's.. half.. the size?",
+		},
+		halfwedge1x4: {
+			name: "Half Wedge 1x4",
+			description: "A wedge 1x4, but it's.. half.. the size?",
 		},
 	},
 } as const satisfies Record<string, BlockDataRegistry>;
@@ -353,6 +398,14 @@ const registry = {
 		description: "Makes you question why every engineering game has it",
 		mirrorBehaviour: "none",
 	},
+	ball: {
+		name: "Ball",
+		description: "it could be a cannon ball.. Or anything else, really..",
+	},
+	halfball: {
+		name: "Half Ball",
+		description: "It's rolling around.. half of the time..",
+	},
 	concavecornerwedge: {
 		name: "Concave Corner Wedge",
 		description: "The convex corner wedge, but concave",
@@ -379,7 +432,7 @@ const registry = {
 	},
 	halfblock: {
 		name: "Half Block",
-		description: "Good enough",
+		description: "Like a block, but with a small caveat....",
 	},
 	cornerwedge1x1: {
 		name: "Corner Wedge 1x1",
