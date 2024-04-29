@@ -4,7 +4,7 @@ import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
-import { ButtonControl, ButtonDefinition, TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { Serializer } from "shared/Serializer";
@@ -14,41 +14,18 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
 
-type SlotRecordDefinition = GuiButton & {
-	readonly Content: Frame & {
-		readonly SlotButton: ImageButton;
-		readonly LoadButton: TextButton;
-		readonly SaveButton: TextButton;
-		readonly SlotNameTextBox: TextBox;
-		readonly BlocksLabel: TextLabel;
-	};
-	readonly Deep: Frame & {
-		readonly ColorSelection: GuiObject & Record<string, TextButtonDefinition>;
-		readonly SaveDateTextLabel: TextLabel;
-	};
+type SaveItemDefinition = GuiButton & {
+	readonly ImageLabel: ImageLabel;
+	readonly TextBox: TextBox;
 };
 
-type SlotsPopupDefinition = {
-	Heading: Frame & {
-		CloseButton: TextButton;
-		// TitleLabel: TextLabel;
-	};
-	Content: ScrollingFrame & {
-		Template: SlotRecordDefinition;
-		CommentTemplate: TextLabel;
-	};
-	Search: TextBox;
-};
-
-class SaveItem extends ButtonControl<SlotRecordDefinition> {
+class SaveItem extends ButtonControl<SaveItemDefinition> {
 	private readonly index;
 	readonly selected = new ObservableValue(false);
 
-	constructor(gui: SlotRecordDefinition, index: number) {
+	constructor(gui: SaveItemDefinition, index: number) {
 		super(gui);
 		this.index = index;
-
-		this.add(new TextButtonControl(this.gui.Content.SlotNameTextBox));
 
 		this.event.subscribeObservable(
 			PlayerDataStorage.slots,
@@ -67,7 +44,7 @@ class SaveItem extends ButtonControl<SlotRecordDefinition> {
 }
 
 type SaveSlotsDefinition = ScrollingFrame & {
-	readonly Template: SlotRecordDefinition;
+	readonly Template: SaveItemDefinition;
 };
 
 class SaveSlots extends Control<SaveSlotsDefinition> {
