@@ -17,6 +17,7 @@ type ListEntriesResponse = {
 
 export namespace Backend {
 	const DIST = "https://api.mgcode.ru/roblox";
+	const AccessToken = "d81b0f61-7f62-4016-b5fe-8c5904c9be7d";
 
 	function getRequest(endpoint: string) {
 		const _data = {
@@ -28,6 +29,10 @@ export namespace Backend {
 				`${DIST}/open-cloud/get`,
 				HttpService.JSONEncode(_data),
 				Enum.HttpContentType.ApplicationJson,
+				undefined,
+				{
+					Authorization: `Bearer ${AccessToken}`,
+				},
 			),
 		);
 	}
@@ -35,6 +40,10 @@ export namespace Backend {
 	function combineParametersForGetRequest(data: Record<string, unknown>): string {
 		// in lua, a Map<T, K> is the same as Record<T, K> so we use a cast to Map to use more performant methods
 		return (data as unknown as ReadonlyMap<string, defined>).map((k, v) => `${k}=${v}`).join("&");
+	}
+
+	export function isAlive() {
+		return HttpService.GetAsync(`${DIST}/`) === "OK";
 	}
 
 	/** https://create.roblox.com/docs/reference/cloud/datastores-api/ */

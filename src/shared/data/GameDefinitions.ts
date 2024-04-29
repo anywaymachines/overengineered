@@ -33,6 +33,8 @@ export namespace GameDefinitions {
 	};
 
 	export const PRODUCTION_PLACE_ID = 17282606569;
+	export const PRODUCTION_UNIVERSE_ID = 5912710468;
+	export const INTERNAL_UNIVERSE_ID = 5244408961;
 
 	// Building
 	export const FREE_SLOTS = 15;
