@@ -69,7 +69,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 			try {
 				loadButton.disable();
 				this._onLoad.Fire();
-				await PlayerDataStorage.loadPlayerSlot(meta.index);
+				await PlayerDataStorage.loadPlayerSlot(meta.index, isImported);
 			} finally {
 				loadButton.enable();
 			}
@@ -171,6 +171,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 	readonly selectedSlot = new ObservableValue<number | undefined>(undefined);
 	private readonly template;
 	private readonly commentTemplate;
+
 	private readonly slots;
 
 	constructor(gui: SaveSlotsDefinition) {
@@ -187,10 +188,10 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 		this.add(this.slots);
 
 		const recreate = () => {
+			this.slots.clear();
+
 			const slots = PlayerDataStorage.slots.get();
 			if (!slots) return;
-
-			this.slots.clear();
 
 			const filter = this.search.get()?.lower();
 			for (const slot of [...slots].sort((left, right) => left.index < right.index)) {
@@ -219,31 +220,26 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 			const externalSlots = PlayerDataStorage.imported_slots.get();
 			if (!externalSlots || externalSlots.size() === 0) return;
 
-			// TODO: Label position fix
-			// const label = new LabelControl(this.commentTemplate());
-			// label.value.set("Other slots");
-			// this.add(label);
-
 			for (const slot of [...externalSlots].sort((left, right) => left.index < right.index)) {
 				if (filter !== undefined && filter.size() !== 0 && slot.name.lower().find(filter)[0] === undefined) {
 					continue;
 				}
 
 				const item = new SaveItem(this.template(), slot, true);
-				// item.onSave.Connect(() => {
-				// 	this.selectedSlot.set(slot.index);
-				// 	this._onSave.Fire();
-				// });
-				// item.onLoad.Connect(() => {
-				// 	this.selectedSlot.set(slot.index);
-				// 	this._onLoad.Fire();
-				// });
-				// item.onOpened.Connect(() => {
-				// 	for (const slot of this.slots.getChildren()) {
-				// 		if (slot === item) continue;
-				// 		slot.setOpened(false);
-				// 	}
-				// });
+				item.onSave.Connect(() => {
+					this.selectedSlot.set(slot.index);
+					this._onSave.Fire();
+				});
+				item.onLoad.Connect(() => {
+					this.selectedSlot.set(slot.index);
+					this._onLoad.Fire();
+				});
+				item.onOpened.Connect(() => {
+					for (const slot of this.slots.getChildren()) {
+						if (slot === item) continue;
+						slot.setOpened(false);
+					}
+				});
 				this.slots.add(item);
 			}
 		};

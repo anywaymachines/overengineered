@@ -96,12 +96,14 @@ export namespace PlayerDataStorage {
 		}
 	}
 
-	export async function loadPlayerSlot(index: number) {
+	export async function loadPlayerSlot(index: number, isImported: boolean) {
 		logger.info("Loading slot " + index);
 		LoadingController.show("Loading a slot");
 
 		try {
-			const response = await Remotes.Client.GetNamespace("Slots").Get("Load").CallServerAsync(index);
+			const response = await Remotes.Client.GetNamespace("Slots")
+				.Get(isImported ? "LoadImported" : "Load")
+				.CallServerAsync(index);
 			if (response.success && !response.isEmpty) {
 				loadedSlot.set(index);
 			}

@@ -101,13 +101,22 @@ export const Remotes = Definitions.Create({
 		Load: Definitions.ServerAsyncFunction<(index: number) => LoadSlotResponse>([
 			Middleware.RateLimit({ MaxRequestsPerMinute: 8 }),
 		]),
+		LoadImported: Definitions.ServerAsyncFunction<(index: number) => LoadSlotResponse>([
+			Middleware.RateLimit({
+				MaxRequestsPerMinute: 4,
+			}),
+		]),
 		Save: Definitions.ServerAsyncFunction<(data: PlayerSaveSlotRequest) => SaveSlotResponse>([
-			Middleware.RateLimit({ MaxRequestsPerMinute: 60 }),
+			Middleware.RateLimit({
+				MaxRequestsPerMinute: 60,
+			}),
 		]),
 	}),
 	Ride: Definitions.Namespace({
 		SetPlayMode: Definitions.ServerAsyncFunction<(mode: PlayModes) => Response>([
-			Middleware.RateLimit({ MaxRequestsPerMinute: 30 }),
+			Middleware.RateLimit({
+				MaxRequestsPerMinute: 30,
+			}),
 		]),
 		SetPlayModeOnClient: Definitions.ClientAsyncFunction<(mode: PlayModes | undefined) => Response>(),
 		Sit: Definitions.ClientToServerEvent<[]>(),

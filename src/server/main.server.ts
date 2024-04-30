@@ -27,6 +27,11 @@ namespace RemoteHandlers {
 	export function loadSlot(player: Player, index: number): LoadSlotResponse {
 		return RemoteHandlers.loadAdminSlot(SharedPlots.getPlotByOwnerID(player.UserId), player.UserId, index);
 	}
+
+	export function loadImportedSlot(player: Player, index: number): LoadSlotResponse {
+		return RemoteHandlers.loadAdminImportedSlot(SharedPlots.getPlotByOwnerID(player.UserId), player.UserId, index);
+	}
+
 	export function loadSlotAsAdmin(player: Player, userid: number, index: number): LoadSlotResponse {
 		if (!GameDefinitions.isAdmin(player)) {
 			return {
@@ -50,9 +55,17 @@ namespace RemoteHandlers {
 		Remotes.Server.GetNamespace("Admin").Get("SendMessage").SendToAllPlayers(text, color, duration);
 	}
 
-	export function loadAdminSlot(plot: PlotModel, userid: number, index: number): LoadSlotResponse {
+	export function loadAdminImportedSlot(plot: PlotModel, userid: number, index: number): LoadSlotResponse {
+		warn("LOAD IMPORTED SLOT");
 		const start = os.clock();
-		const blocks = SlotDatabase.instance.getBlocks(userid, index);
+		// const blocks = SlotDatabase.instance.getBlocks(userid, index);
+		const universeId = GameDefinitions.isTestPlace()
+			? GameDefinitions.PRODUCTION_UNIVERSE_ID
+			: GameDefinitions.INTERNAL_UNIVERSE_ID;
+		const blocks = Backend.Datastores.GetEntry(universeId, "slots", `${userid}_${index}`) as string;
+
+		ServerBuilding.deleteBlocks({ plot, blocks: "all" });
+
 		if (blocks === undefined || blocks.size() === 0) {
 			return {
 				success: false,
@@ -61,7 +74,26 @@ namespace RemoteHandlers {
 		}
 
 		logger.info(`Loading ${userid}'s slot ${index}`);
+		const dblocks = BlocksSerializer.deserialize(blocks, plot);
+		logger.info(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
+
+		return { success: true, isEmpty: dblocks === 0 };
+	}
+
+	export function loadAdminSlot(plot: PlotModel, userid: number, index: number): LoadSlotResponse {
+		const start = os.clock();
+		const blocks = SlotDatabase.instance.getBlocks(userid, index);
+
 		ServerBuilding.deleteBlocks({ plot, blocks: "all" });
+
+		if (blocks === undefined || blocks.size() === 0) {
+			return {
+				success: false,
+				message: "Slot is empty",
+			};
+		}
+
+		logger.info(`Loading ${userid}'s slot ${index}`);
 		const dblocks = BlocksSerializer.deserialize(blocks, plot);
 		logger.info(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
 
@@ -89,6 +121,7 @@ namespace RemoteHandlers {
 			success: true,
 		};
 	}
+
 	export function fetchSettings(player: Player): PlayerDataResponse {
 		const data = PlayerDatabase.instance.get(player.UserId) ?? {};
 
@@ -177,6 +210,7 @@ BadgeController.initialize();
 registerOnRemoteFunction("Ride", "SetPlayMode", PlayModeController.changeModeForPlayer);
 registerOnRemoteFunction("Slots", "Save", RemoteHandlers.saveSlot);
 registerOnRemoteFunction("Slots", "Load", RemoteHandlers.loadSlot);
+registerOnRemoteFunction("Slots", "LoadImported", RemoteHandlers.loadImportedSlot);
 registerOnRemoteFunction("Building", "UpdateConfigRequest", ServerBuildingRequestHandler.updateConfig);
 registerOnRemoteFunction("Building", "ResetConfigRequest", ServerBuildingRequestHandler.resetConfig);
 registerOnRemoteFunction("Building", "PlaceBlocks", ServerBuildingRequestHandler.placeBlocks);
