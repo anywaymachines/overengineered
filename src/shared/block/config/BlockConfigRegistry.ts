@@ -1069,7 +1069,7 @@ const radarsection = {
 			default: 100 as number,
 			config: 100 as number,
 			min: 1,
-			max: 1000,
+			max: 5000,
 			step: 1,
 		},
 		detectionSize: {
