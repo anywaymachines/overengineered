@@ -105,7 +105,6 @@ class SaveItem extends Control<SlotRecordDefinition> {
 		this.gui.Content.SlotButton.ImageColor3 = Serializer.Color3Serializer.deserialize(meta.color);
 		this.gui.Content.SlotButton.ImageTransparency = isImported ? 0.5 : 0;
 		nametb.text.set(meta.name);
-		print(meta.saveTime);
 		this.gui.Deep.SaveDateTextLabel.Text =
 			meta.saveTime === undefined
 				? ""
