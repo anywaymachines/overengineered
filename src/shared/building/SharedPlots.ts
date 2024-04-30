@@ -1,4 +1,4 @@
-import { Players, Workspace } from "@rbxts/services";
+import { Players, RunService, Workspace } from "@rbxts/services";
 import { BlockManager, PlacedBlockData } from "shared/building/BlockManager";
 import { AABB } from "shared/fixes/AABB";
 import { SharedPlot } from "./SharedPlot";
@@ -25,9 +25,9 @@ export namespace SharedPlots {
 		.sort((left, right) => left.instance.Name < right.instance.Name);
 	const plotComponents: ReadonlyMap<PlotModel, SharedPlot> = new Map(plots.map((p) => [p.instance, p]));
 
-	//if (RunService.IsClient()) {
-	//	waitForPlot(Players.LocalPlayer.UserId);
-	//}
+	if (RunService.IsClient()) {
+		waitForPlot(Players.LocalPlayer.UserId);
+	}
 
 	export function waitForPlot(userid: number) {
 		while (!tryGetPlotByOwnerID(userid)) {
