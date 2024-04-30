@@ -14,11 +14,6 @@ import { Signal } from "shared/event/Signal";
 
 const NOT_EDITABLE_IMAGE = "rbxassetid://15428855911";
 const EDITABLE_IMAGE = "rbxassetid://17320900740";
-const UNKNOWN_DATE = "Unknown date";
-
-const FROM_INTERNAL_BADGE = "FROM INTERNAL";
-const FROM_PRODUCTION_BADGE = "FROM PRODUCTION";
-const IMPORT_SECTION = "Other slots";
 const BACKEND_ISSUES = "⚠️ Importing from other experiences may not be available";
 
 type SlotRecordDefinition = GuiObject & {
@@ -48,7 +43,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 	readonly onLoad = this._onLoad.asReadonly();
 	readonly onOpened = this._onOpened.asReadonly();
 
-	constructor(gui: SlotRecordDefinition, meta: SlotMeta, from: SlotSource) {
+	constructor(gui: SlotRecordDefinition, meta: SlotMeta, from: SlotSource, wasSelected: boolean) {
 		super(gui);
 
 		const isImported = from !== "this";
@@ -133,8 +128,8 @@ class SaveItem extends Control<SlotRecordDefinition> {
 			setControlActive(child.instance);
 		}
 
-		this.gui.Content.BadgeTextLabel.Visible = isImported;
-		this.gui.Content.BadgeTextLabel.Text = from.upper();
+		this.gui.Content.BadgeTextLabel.Visible = isImported || wasSelected;
+		this.gui.Content.BadgeTextLabel.Text = wasSelected ? "CURRENT" : from.upper();
 
 		this.setOpened(false);
 		TransformService.finish(this.instance);
@@ -175,7 +170,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 	readonly onLoad = this._onLoad.asReadonly();
 
 	readonly search = new ObservableValue<string | undefined>(undefined);
-	readonly selectedSlot = new ObservableValue<number | undefined>(undefined);
+	private readonly selectedSlot = new ObservableValue<number | undefined>(undefined);
 	private readonly template;
 	private readonly commentTemplate;
 
@@ -211,13 +206,14 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 						continue;
 					}
 
-					const item = new SaveItem(this.template(), slot, from);
+					const wasSelected = from === "this" && this.selectedSlot.get() === slot.index;
+					const item = new SaveItem(this.template(), slot, from, wasSelected);
 					item.onSave.Connect(() => {
-						this.selectedSlot.set(slot.index);
+						this.selectedSlot.set(from === "this" ? slot.index : undefined);
 						this._onSave.Fire();
 					});
 					item.onLoad.Connect(() => {
-						this.selectedSlot.set(slot.index);
+						this.selectedSlot.set(from === "this" ? slot.index : undefined);
 						this._onLoad.Fire();
 					});
 					item.onOpened.Connect(() => {
@@ -229,6 +225,11 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 						}
 					});
 					this.slots.add(item);
+
+					if (wasSelected) {
+						// show the current save first
+						item.instance.LayoutOrder = -1;
+					}
 				}
 			};
 
