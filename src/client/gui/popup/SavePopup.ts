@@ -1,3 +1,4 @@
+import { LocalizationService } from "@rbxts/services";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
@@ -38,6 +39,7 @@ type SlotRecordDefinition = GuiObject & {
 	};
 };
 
+type SlotSource = "this" | "internal" | "production";
 class SaveItem extends Control<SlotRecordDefinition> {
 	private readonly _onOpened = new Signal();
 	private readonly _onSave = new Signal();
@@ -46,9 +48,10 @@ class SaveItem extends Control<SlotRecordDefinition> {
 	readonly onLoad = this._onLoad.asReadonly();
 	readonly onOpened = this._onOpened.asReadonly();
 
-	constructor(gui: SlotRecordDefinition, meta: SlotMeta, isImported: boolean = false) {
+	constructor(gui: SlotRecordDefinition, meta: SlotMeta, from: SlotSource) {
 		super(gui);
 
+		const isImported = from !== "this";
 		const save = () => {
 			ConfirmPopup.showPopup(
 				"Save to this slot?",
@@ -99,13 +102,18 @@ class SaveItem extends Control<SlotRecordDefinition> {
 		const slots = PlayerDataStorage.slots.get();
 		if (!slots) throw "what";
 
-		this.gui.Content.SlotButton.ImageColor3 = isImported
-			? Color3.fromRGB(150, 150, 150)
-			: Serializer.Color3Serializer.deserialize(meta.color);
+		this.gui.Content.SlotButton.ImageColor3 = Serializer.Color3Serializer.deserialize(meta.color);
+		this.gui.Content.SlotButton.ImageTransparency = isImported ? 0.5 : 0;
 		nametb.text.set(meta.name);
-		this.gui.Deep.SaveDateTextLabel.Text = ""; // TODO:
+		print(meta.saveTime);
+		this.gui.Deep.SaveDateTextLabel.Text =
+			meta.saveTime === undefined
+				? ""
+				: DateTime.fromUnixTimestampMillis(meta.saveTime).FormatLocalTime(
+						"DD MMMM YYYY (HH:mm)",
+						LocalizationService.RobloxLocaleId,
+					);
 
-		//this.gui.Content.BlocksLabel.Text = `Blocks: ${slot.blocks}; Size: ${slot.size}b`;
 		this.gui.Content.BlocksLabel.Text = meta.blocks === 0 ? "Empty" : `Blocks: ${meta.blocks}`;
 
 		const interactable = meta.index >= 0 && !isImported;
@@ -127,7 +135,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 		}
 
 		this.gui.Content.BadgeTextLabel.Visible = isImported;
-		this.gui.Content.BadgeTextLabel.Text = GameDefinitions.isTestPlace() ? "FROM PRODUCTION" : "FROM INTERNAL";
+		this.gui.Content.BadgeTextLabel.Text = from.upper();
 
 		this.setOpened(false);
 		TransformService.finish(this.instance);
@@ -184,7 +192,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 		this.template = this.asTemplate(this.gui.Template);
 		this.commentTemplate = this.asTemplate(this.gui.CommentTemplate);
 
-		this.slots = new Control<SaveSlotsDefinition, SaveItem>(this.gui);
+		this.slots = new Control(this.gui);
 		this.add(this.slots);
 
 		const recreate = () => {
@@ -194,53 +202,45 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 			if (!slots) return;
 
 			const filter = this.search.get()?.lower();
-			for (const slot of [...slots].sort((left, right) => left.index < right.index)) {
-				if (filter !== undefined && filter.size() !== 0 && slot.name.lower().find(filter)[0] === undefined) {
-					continue;
-				}
-
-				const item = new SaveItem(this.template(), slot);
-				item.onSave.Connect(() => {
-					this.selectedSlot.set(slot.index);
-					this._onSave.Fire();
-				});
-				item.onLoad.Connect(() => {
-					this.selectedSlot.set(slot.index);
-					this._onLoad.Fire();
-				});
-				item.onOpened.Connect(() => {
-					for (const slot of this.slots.getChildren()) {
-						if (slot === item) continue;
-						slot.setOpened(false);
+			const addSlots = (slots: readonly SlotMeta[], from: SlotSource) => {
+				for (const slot of [...slots].sort((left, right) => left.index < right.index)) {
+					if (
+						filter !== undefined &&
+						filter.size() !== 0 &&
+						slot.name.lower().find(filter)[0] === undefined
+					) {
+						continue;
 					}
-				});
-				this.slots.add(item);
-			}
+
+					const item = new SaveItem(this.template(), slot, from);
+					item.onSave.Connect(() => {
+						this.selectedSlot.set(slot.index);
+						this._onSave.Fire();
+					});
+					item.onLoad.Connect(() => {
+						this.selectedSlot.set(slot.index);
+						this._onLoad.Fire();
+					});
+					item.onOpened.Connect(() => {
+						for (const slot of this.slots.getChildren()) {
+							if (!(slot instanceof SaveItem)) continue;
+							if (slot === item) continue;
+
+							slot.setOpened(false);
+						}
+					});
+					this.slots.add(item);
+				}
+			};
+
+			addSlots(slots, "this");
 
 			const externalSlots = PlayerDataStorage.imported_slots.get();
-			if (!externalSlots || externalSlots.size() === 0) return;
+			if (externalSlots && externalSlots.size() > 0) {
+				const comment = this.slots.add(new Control(this.commentTemplate()));
+				comment.instance.Text = "Other slots";
 
-			for (const slot of [...externalSlots].sort((left, right) => left.index < right.index)) {
-				if (filter !== undefined && filter.size() !== 0 && slot.name.lower().find(filter)[0] === undefined) {
-					continue;
-				}
-
-				const item = new SaveItem(this.template(), slot, true);
-				item.onSave.Connect(() => {
-					this.selectedSlot.set(slot.index);
-					this._onSave.Fire();
-				});
-				item.onLoad.Connect(() => {
-					this.selectedSlot.set(slot.index);
-					this._onLoad.Fire();
-				});
-				item.onOpened.Connect(() => {
-					for (const slot of this.slots.getChildren()) {
-						if (slot === item) continue;
-						slot.setOpened(false);
-					}
-				});
-				this.slots.add(item);
+				addSlots(externalSlots, GameDefinitions.isTestPlace() ? "production" : "internal");
 			}
 		};
 

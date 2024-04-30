@@ -11,6 +11,7 @@ declare global {
 		readonly size: number;
 		readonly touchControls: TouchControlInfo;
 		readonly index: number;
+		readonly saveTime: number | undefined;
 	};
 
 	type LoadSlotResponse = Response<{

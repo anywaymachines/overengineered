@@ -29,6 +29,7 @@ export namespace SlotsMeta {
 			blocks: 0,
 			size: 0,
 			touchControls: {},
+			saveTime: undefined,
 		};
 
 		const slot = specialSlots[index];

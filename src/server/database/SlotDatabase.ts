@@ -88,7 +88,13 @@ export class SlotDatabase {
 		this.blocksdb.set(this.toKey(userId, index), blocks);
 
 		const meta = [...this.getMeta(userId)];
-		SlotsMeta.set(meta, { ...SlotsMeta.get(meta, index), blocks: blockCount, size: blocks.size(), index });
+		SlotsMeta.set(meta, {
+			...SlotsMeta.get(meta, index),
+			blocks: blockCount,
+			size: blocks.size(),
+			saveTime: DateTime.now().UnixTimestampMillis,
+			index,
+		});
 		this.setMeta(userId, meta);
 	}
 	setBlocksFromAnotherSlot(userId: number, index: number, indexfrom: number) {
