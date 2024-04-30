@@ -52,7 +52,13 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 				buildingPlane.Position.Y + heightLimit - buildingPlane.Size.Y / 2,
 				buildingPlane.Position.Z + buildingPlane.Size.Z / 2,
 			),
-		);
+		).withSize((s) => new Vector3(s.X + 0.02, s.Y + 0.02, s.Z + 0.02));
+	}
+
+	toLocal(pos: CFrame | Vector3) {
+		if (typeIs(pos, "CFrame")) {
+			return;
+		}
 	}
 
 	getBlockDatas(): readonly PlacedBlockData[] {
@@ -106,7 +112,7 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 
 	/** Is model fully inside this plot */
 	isModelInside(model: Model, pivot?: CFrame): boolean {
-		const modelRegion = AABB.fromModel(model, pivot).withSize((s) => s.mul(0.99));
+		const modelRegion = AABB.fromModel(model, pivot);
 		return this.bounds.contains(modelRegion);
 	}
 }
