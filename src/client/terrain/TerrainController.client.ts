@@ -1,3 +1,4 @@
+import { GameLoader } from "client/GameLoader";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { ChunkLoader, ChunkRenderer } from "client/terrain/ChunkLoader";
 import { DefaultChunkGenerator } from "client/terrain/DefaultChunkGenerator";
@@ -7,9 +8,7 @@ import { TriangleChunkRenderer } from "client/terrain/TriangleChunkRenderer";
 import { rootComponents } from "client/test/RootComponents";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 
-while (!PlayerDataStorage.data.get()) {
-	task.wait();
-}
+GameLoader.waitForEverything();
 
 const multirender = (): ChunkRenderer<Instance> => {
 	const terracr = TriangleChunkRenderer(DefaultChunkGenerator);

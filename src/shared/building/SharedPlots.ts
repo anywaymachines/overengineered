@@ -3,7 +3,9 @@ import { BlockManager, PlacedBlockData } from "shared/building/BlockManager";
 import { AABB } from "shared/fixes/AABB";
 import { SharedPlot } from "./SharedPlot";
 
-const count = Workspace.WaitForChild("Plots").GetAttribute("count") as number;
+Workspace.WaitForChild("Plots");
+
+const count = Workspace.Plots.GetAttribute("count") as number;
 if (Workspace.Plots.GetChildren().size() !== count) {
 	print(
 		`!! Target plot count ${count} is not equal to loaded plot count ${Workspace.Plots.GetChildren().size()}, waiting...`,
@@ -22,6 +24,18 @@ export namespace SharedPlots {
 		.map((p) => new SharedPlot(p).with((c) => c.enable()))
 		.sort((left, right) => left.instance.Name < right.instance.Name);
 	const plotComponents: ReadonlyMap<PlotModel, SharedPlot> = new Map(plots.map((p) => [p.instance, p]));
+
+	//if (RunService.IsClient()) {
+	//	waitForPlot(Players.LocalPlayer.UserId);
+	//}
+
+	export function waitForPlot(userid: number) {
+		while (!tryGetPlotByOwnerID(userid)) {
+			task.wait(0.2);
+		}
+
+		return getPlotComponentByOwnerID(userid);
+	}
 
 	/** Checks if the provided `Instance` is a plot model */
 	export function isPlot(model: Instance | undefined): model is PlotModel {

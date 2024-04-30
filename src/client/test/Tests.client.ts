@@ -1,4 +1,5 @@
 import { Players, RunService } from "@rbxts/services";
+import { GameLoader } from "client/GameLoader";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { TextButtonControl } from "client/gui/controls/Button";
@@ -20,9 +21,10 @@ import { PopupTest } from "./visual/PopupTest";
 import { TransformTest } from "./visual/TransformTest";
 import { WorldPipetteTest } from "./visual/WorldPipetteTest";
 
+GameLoader.waitForEverything();
+
 const enabled = RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm";
 if (!enabled) new Instance("BindableEvent").Event.Wait();
-task.wait(0.5); // wait for the controls to enable
 
 let destroy: (() => void) | undefined;
 const create = () => {

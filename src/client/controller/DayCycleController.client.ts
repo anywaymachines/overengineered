@@ -1,5 +1,9 @@
 import { Lighting } from "@rbxts/services";
+import { GameLoader } from "client/GameLoader";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
+
+Lighting.SetMinutesAfterMidnight(14 * 60);
+GameLoader.waitForEverything();
 
 const timePerDayCycle = 20 * 60;
 const getMinutesAfterMidnightTime = () => {

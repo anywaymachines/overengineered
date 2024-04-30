@@ -1,15 +1,9 @@
-import { Workspace } from "@rbxts/services";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { GameLoader } from "client/GameLoader";
 import { Tutorial } from "client/tutorial/Tutorial";
 
-while (!PlayerDataStorage.data.get()) {
-	task.wait();
-}
+GameLoader.waitForEverything();
+const data = GameLoader.waitForDataStorage();
 
-while (!(Workspace.GetAttribute("loaded") as boolean | undefined)) {
-	task.wait();
-}
-
-if (!PlayerDataStorage.data.get()!.slots.any((t) => t.blocks !== 0)) {
+if (!data.slots.any((t) => t.blocks !== 0)) {
 	Tutorial.Begin("Basics");
 }

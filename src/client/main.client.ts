@@ -1,16 +1,12 @@
-import { Players, ReplicatedStorage, RunService, TextChatService, Workspace } from "@rbxts/services";
-import { LoadingController } from "client/controller/LoadingController";
-import { SharedPlots } from "shared/building/SharedPlots";
-
-// wait for assets to be copied
-ReplicatedStorage.WaitForChild("Assets");
-LoadingController.show("Waiting for the plot");
-
-while (!SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)) {
-	task.wait(0.2);
-}
-
+import { GameLoader } from "client/GameLoader";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { LoadingController } from "client/controller/LoadingController";
+
+const dataLoading = PlayerDataStorage.init();
+GameLoader.waitForEverything(LoadingController.show);
+LoadingController.show("Loading the dependencies");
+
+import { Players, RunService, TextChatService } from "@rbxts/services";
 import { ServerRestartController } from "client/ServerRestartController";
 import { CharacterController } from "client/controller/CharacterController";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
@@ -34,8 +30,6 @@ import { rootComponents } from "./test/RootComponents";
 
 LoadingController.show("Loading the game");
 
-const dataLoading = PlayerDataStorage.init();
-
 BlocksInitializer.initialize();
 GameEnvironmentController.initialize();
 
@@ -57,12 +51,6 @@ if (RunService.IsStudio()) {
 SoundController.initialize();
 GraphicsSettingsController.initialize();
 
-const root = new ClientContainerComponent();
-rootComponents.push(root);
-const playModeController = new PlayModeController();
-root.add(playModeController);
-root.enable();
-
 const updated = DateTime.fromUnixTimestamp($compileTime()).FormatUniversalTime("DDMMYY_HHmm", "en-us");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =
 	GameDefinitions.PRODUCTION_PLACE_ID === game.PlaceId
@@ -75,9 +63,15 @@ Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =
 		throw result;
 	}
 }
-while (!(Workspace.GetAttribute("loaded") as boolean | undefined)) {
-	task.wait();
-}
+GameLoader.waitForDataStorage();
+
+const root = new ClientContainerComponent();
+rootComponents.push(root);
+const playModeController = new PlayModeController();
+root.add(playModeController);
+root.enable();
+
+GameLoader.waitForServer();
 
 LoadingController.hide();
 

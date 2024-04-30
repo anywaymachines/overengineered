@@ -1,18 +1,16 @@
 import { Players } from "@rbxts/services";
 import { Beacon } from "client/gui/Beacon";
+import { rootComponents } from "client/test/RootComponents";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { Component } from "shared/component/Component";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 
 // plot beacon
 spawn(() => {
-	let plot: PVInstance | undefined;
-	while (!plot) {
-		plot = SharedPlots.tryGetPlotByOwnerID(Players.LocalPlayer.UserId)?.instance?.BuildingArea;
-		wait(0.1);
-	}
-
-	new Beacon(plot, "Plot", "plot").enable();
+	const plot = SharedPlots.waitForPlot(Players.LocalPlayer.UserId).instance.BuildingArea;
+	const beacon = new Beacon(plot, "Plot", "plot");
+	rootComponents.push(beacon);
+	beacon.enable();
 });
 
 // players beacon

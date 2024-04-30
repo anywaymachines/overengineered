@@ -1,5 +1,6 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
+import { GameLoader } from "client/GameLoader";
 import { ServerRestartController } from "client/ServerRestartController";
 import { InputController } from "client/controller/InputController";
 import { Control } from "client/gui/Control";
@@ -11,6 +12,8 @@ import { Element } from "shared/Element";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Objects } from "shared/fixes/objects";
+
+GameLoader.waitForEverything();
 
 const enabled = RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer);
 if (!enabled) new Instance("BindableEvent").Event.Wait();
