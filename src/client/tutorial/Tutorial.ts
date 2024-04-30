@@ -57,6 +57,7 @@ export namespace Tutorial {
 
 		BuildingMode.instance.toolController.enabledTools.enableAll();
 		BuildingMode.instance.gui.actionbar.enabledButtons.enableAll();
+		BuildingMode.instance.toolController.allTools.editTool.enabledModes.enableAll();
 		TasksControl.instance.finish();
 
 		Control.finish();
