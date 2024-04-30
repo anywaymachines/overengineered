@@ -6,7 +6,6 @@ import { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button"
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { Serializer } from "shared/Serializer";
-import { SlotsMeta } from "shared/SlotsMeta";
 import { TransformService } from "shared/component/TransformService";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
@@ -47,7 +46,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 	readonly onLoad = this._onLoad.asReadonly();
 	readonly onOpened = this._onOpened.asReadonly();
 
-	constructor(gui: SlotRecordDefinition, index: number, isImported: boolean = false) {
+	constructor(gui: SlotRecordDefinition, meta: SlotMeta, isImported: boolean = false) {
 		super(gui);
 
 		const save = () => {
@@ -57,7 +56,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 				() => {
 					try {
 						saveButton.disable();
-						PlayerDataStorage.sendPlayerSlot({ index, save: true });
+						PlayerDataStorage.sendPlayerSlot({ index: meta.index, save: true });
 						this._onSave.Fire();
 					} finally {
 						saveButton.enable();
@@ -70,7 +69,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 			try {
 				loadButton.disable();
 				this._onLoad.Fire();
-				await PlayerDataStorage.loadPlayerSlot(index);
+				await PlayerDataStorage.loadPlayerSlot(meta.index);
 			} finally {
 				loadButton.enable();
 			}
@@ -81,8 +80,9 @@ class SaveItem extends Control<SlotRecordDefinition> {
 		const nametb = this.add(new TextBoxControl(this.gui.Content.SlotName.SlotNameTextBox));
 		nametb.submitted.Connect(() => send({ name: nametb.text.get() }));
 
-		const send = async (slotData: Readonly<Partial<SlotMeta>>) =>
-			await PlayerDataStorage.sendPlayerSlot({ ...slotData, index, save: false });
+		const send = async (slotData: Readonly<Partial<SlotMeta>>) => {
+			await PlayerDataStorage.sendPlayerSlot({ ...slotData, index: meta.index, save: false });
+		};
 
 		const buttons: ButtonControl[] = [];
 		for (const child of this.gui.Deep.ColorSelection.GetChildren()) {
@@ -99,18 +99,16 @@ class SaveItem extends Control<SlotRecordDefinition> {
 		const slots = PlayerDataStorage.slots.get();
 		if (!slots) throw "what";
 
-		const slot = SlotsMeta.get(slots, index);
-
 		this.gui.Content.SlotButton.ImageColor3 = isImported
 			? Color3.fromRGB(150, 150, 150)
-			: Serializer.Color3Serializer.deserialize(slot.color);
-		nametb.text.set(slot.name);
+			: Serializer.Color3Serializer.deserialize(meta.color);
+		nametb.text.set(meta.name);
 		this.gui.Deep.SaveDateTextLabel.Text = ""; // TODO:
 
 		//this.gui.Content.BlocksLabel.Text = `Blocks: ${slot.blocks}; Size: ${slot.size}b`;
-		this.gui.Content.BlocksLabel.Text = slot.blocks === 0 ? "Empty" : `Blocks: ${slot.blocks}`;
+		this.gui.Content.BlocksLabel.Text = meta.blocks === 0 ? "Empty" : `Blocks: ${meta.blocks}`;
 
-		const interactable = index >= 0 && !isImported;
+		const interactable = meta.index >= 0 && !isImported;
 		const setControlActive = (gui: GuiObject) => {
 			gui.Interactable = gui.Active = interactable;
 			gui.BackgroundTransparency = interactable ? 0 : 0.8;
@@ -200,7 +198,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 					continue;
 				}
 
-				const item = new SaveItem(this.template(), slot.index);
+				const item = new SaveItem(this.template(), slot);
 				item.onSave.Connect(() => {
 					this.selectedSlot.set(slot.index);
 					this._onSave.Fire();
@@ -231,7 +229,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 					continue;
 				}
 
-				const item = new SaveItem(this.template(), slot.index, true);
+				const item = new SaveItem(this.template(), slot, true);
 				// item.onSave.Connect(() => {
 				// 	this.selectedSlot.set(slot.index);
 				// 	this._onSave.Fire();
