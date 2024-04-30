@@ -1,19 +1,18 @@
 import { ClientComponent } from "client/component/ClientComponent";
 import { Element } from "shared/Element";
-import type { ReadonlyObservableCollectionSet } from "shared/event/ObservableCollection";
+import { type ReadonlyObservableCollectionSet } from "shared/event/ObservableCollection";
 
 export class SelectedBlocksHighlighter extends ClientComponent {
 	private readonly selectionBoxName = "selectionBox";
-	private readonly selected: ReadonlyObservableCollectionSet<BlockModel>;
 	private readonly selections = new Map<BlockModel, SelectionBox>();
 
 	constructor(selected: ReadonlyObservableCollectionSet<BlockModel>) {
 		super();
-		this.selected = selected;
 
 		this.onDisable(() => this.clearAllSelections());
+
 		this.event.subscribeCollection(
-			this.selected,
+			selected,
 			(update) => {
 				if (update.kind === "add") {
 					for (const block of update.added) {
@@ -27,7 +26,7 @@ export class SelectedBlocksHighlighter extends ClientComponent {
 					this.clearAllSelections();
 				} else if (update.kind === "reset") {
 					this.clearAllSelections();
-					for (const block of this.selected.get()) {
+					for (const block of selected.get()) {
 						this.createBlockSelection(block);
 					}
 				} else {

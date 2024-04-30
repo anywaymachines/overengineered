@@ -10,7 +10,8 @@ import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
-import { ObservableValue } from "shared/event/ObservableValue";
+import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
+import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { Signal } from "shared/event/Signal";
 
 namespace Scene {
@@ -66,8 +67,8 @@ namespace Scene {
 			this.add(new ButtonControl(this.gui.Bottom.DeleteAllButton, suggestClearAll));
 			this.add(new ButtonControl(this.gui.TouchControls.DeleteButton, () => this.tool.deleteHighlightedBlocks()));
 
-			this.event.subscribeObservable(this.tool.highlightedBlocks, (blocks) => {
-				if (blocks.size() !== 0) {
+			this.event.subscribeCollection(this.tool.highlightedBlocks, () => {
+				if (this.tool.highlightedBlocks.size() !== 0) {
 					this.gui.TouchControls.Visible = true;
 					GuiAnimator.transition(this.gui.TouchControls, 0.1, "left");
 				} else {
@@ -85,7 +86,7 @@ namespace Scene {
 
 export class DeleteTool extends ToolBase {
 	readonly onClearAllRequested = new Signal<() => void>();
-	readonly highlightedBlocks = new ObservableValue<readonly BlockModel[]>([]);
+	readonly highlightedBlocks = new ObservableCollectionSet<BlockModel>();
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -94,11 +95,13 @@ export class DeleteTool extends ToolBase {
 			new Scene.DeleteToolScene(ToolBase.getToolGui<"Delete", Scene.DeleteToolSceneDefinition>().Delete, this),
 		);
 
+		this.parent(new SelectedBlocksHighlighter(this.highlightedBlocks));
+
 		const fireSelected = async (blocks: readonly BlockModel[]) => {
 			if (!blocks || blocks.size() === 0) return;
 
 			if (InputController.inputType.get() === "Touch") {
-				this.highlightedBlocks.set(blocks);
+				this.highlightedBlocks.setRange(blocks);
 				return;
 			}
 
@@ -117,7 +120,10 @@ export class DeleteTool extends ToolBase {
 	}
 
 	deleteHighlightedBlocks() {
-		return this.deleteBlocks(this.highlightedBlocks.get());
+		const blocks = this.highlightedBlocks.getArr();
+		this.highlightedBlocks.clear();
+
+		return this.deleteBlocks(blocks);
 	}
 	async deleteBlocks(blocks: readonly BlockModel[] | "all") {
 		if (blocks !== "all" && blocks.size() === 0) {

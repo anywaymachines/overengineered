@@ -99,7 +99,10 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 			});
 			ih.onInputChanged(updateTarget);
 			ih.onInputEnded((input) => {
-				if (input.UserInputType === Enum.UserInputType.MouseButton1) {
+				if (
+					input.UserInputType === Enum.UserInputType.MouseButton1 ||
+					input.UserInputType === Enum.UserInputType.Touch
+				) {
 					return;
 				}
 
@@ -115,10 +118,12 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 				this.inputHandler.onKeyDown("ButtonX", () => (pressing = true));
 				this.inputHandler.onKeyUp("ButtonX", submit);
 			} else if (inputType === "Touch") {
-				this.inputHandler.onTouchTap(() => {
+				this.inputHandler.onInputEnded((input) => {
+					if (input.UserInputType !== Enum.UserInputType.Touch) return;
+
 					pressing = true;
 					submit();
-				}, false);
+				});
 			}
 
 			updateTarget();
