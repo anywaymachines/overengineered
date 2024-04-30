@@ -51,12 +51,6 @@ export class RideMode implements PlayModeBase {
 			serialized,
 			SharedPlots.getPlotComponent(plot).getBlocks().size(),
 		);
-		SlotDatabase.instance.setBlocks(
-			player.UserId,
-			SlotsMeta.quitSlotIndex,
-			serialized,
-			SharedPlots.getPlotComponent(plot).getBlocks().size(),
-		);
 
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
 		const vehicleSeatModel = blocksChildren.find(

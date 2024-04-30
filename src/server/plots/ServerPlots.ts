@@ -23,19 +23,23 @@ const assignPlotTo = (player: Player): void => {
 	}
 };
 const savePlotOf = (player: Player): void => {
-	if (PlayModeController.getPlayerMode(player) !== "build") {
-		return;
-	}
-
 	const plot = SharedPlots.getPlotComponentByOwnerID(player.UserId);
-	if (plot.getBlocks().size() === 0) return;
+	const save = PlayModeController.getPlayerMode(player) === "build" && plot.getBlocks().size() !== 0;
 
-	SlotDatabase.instance.setBlocks(
-		player.UserId,
-		SlotsMeta.quitSlotIndex,
-		BlocksSerializer.serialize(plot.instance),
-		plot.getBlocks().size(),
-	);
+	if (save) {
+		SlotDatabase.instance.setBlocks(
+			player.UserId,
+			SlotsMeta.quitSlotIndex,
+			BlocksSerializer.serialize(plot.instance),
+			plot.getBlocks().size(),
+		);
+	} else {
+		SlotDatabase.instance.setBlocksFromAnotherSlot(
+			player.UserId,
+			SlotsMeta.quitSlotIndex,
+			SlotsMeta.autosaveSlotIndex,
+		);
+	}
 };
 const resetPlotOf = (player: Player): void => {
 	const plot = SharedPlots.getPlotComponentByOwnerID(player.UserId);
