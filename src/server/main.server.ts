@@ -56,7 +56,6 @@ namespace RemoteHandlers {
 	}
 
 	export function loadAdminImportedSlot(plot: PlotModel, userid: number, index: number): LoadSlotResponse {
-		warn("LOAD IMPORTED SLOT");
 		const start = os.clock();
 		// const blocks = SlotDatabase.instance.getBlocks(userid, index);
 		const universeId = GameDefinitions.isTestPlace()
