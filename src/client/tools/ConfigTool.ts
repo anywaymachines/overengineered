@@ -213,7 +213,7 @@ export class ConfigTool extends ToolBase {
 				return true;
 			}
 
-			if (InputController.isShiftPressed()) {
+			if (InputController.isShiftPressed() || InputController.inputType.get() === "Touch") {
 				const differentId = this.selected
 					.get()
 					.find((s) => BlockManager.manager.id.get(s) !== BlockManager.manager.id.get(block));

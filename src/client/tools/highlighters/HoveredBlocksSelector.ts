@@ -52,7 +52,7 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 	private readonly _submit = new ArgsSignal<[blocks: readonly BlockModel[]]>();
 	readonly submit = this._submit.asReadonly();
 
-	constructor(parent: Instance, getTargets: (block: BlockModel) => readonly BlockModel[]) {
+	constructor(getTargets: (block: BlockModel) => readonly BlockModel[]) {
 		super();
 
 		const highlighter = this.parent(new MultiModelHighlighter(this.highlighted));
@@ -115,7 +115,10 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 				this.inputHandler.onKeyDown("ButtonX", () => (pressing = true));
 				this.inputHandler.onKeyUp("ButtonX", submit);
 			} else if (inputType === "Touch") {
-				this.inputHandler.onTouchTap(submit, false);
+				this.inputHandler.onTouchTap(() => {
+					pressing = true;
+					submit();
+				}, false);
 			}
 
 			updateTarget();

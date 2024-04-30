@@ -63,9 +63,9 @@ export class MultiBlockSelector extends ClientComponent {
 		};
 
 		const modes: Readonly<Record<BlockSelectorMode, () => BlockSelector>> = {
-			single: () => new HoveredBlocksSelector(plot.get().instance, functions.single),
-			assembly: () => new HoveredBlocksSelector(plot.get().instance, functions.assembly),
-			machine: () => new HoveredBlocksSelector(plot.get().instance, functions.machine),
+			single: () => new HoveredBlocksSelector(functions.single),
+			assembly: () => new HoveredBlocksSelector(functions.assembly),
+			machine: () => new HoveredBlocksSelector(functions.machine),
 			box: () => new BoxSelector(filter),
 		};
 
