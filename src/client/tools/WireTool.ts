@@ -40,6 +40,7 @@ const markerParent = Element.create("ScreenGui", {
 	IgnoreGuiInset: true,
 	DisplayOrder: -1, // to draw behind the wires
 	Parent: Gui.getPlayerGui(),
+	ResetOnSpawn: false,
 });
 const wireParent = Element.create("ViewportFrame", {
 	Name: "WireViewportFrame",
