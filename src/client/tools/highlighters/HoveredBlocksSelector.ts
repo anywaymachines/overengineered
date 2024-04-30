@@ -1,4 +1,3 @@
-import { UserInputService } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { Signals } from "client/event/Signals";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
@@ -65,10 +64,9 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 			this._highlighted.set(empty);
 		};
 
+		let pressing = false;
 		const updateTarget = () => {
-			const add =
-				UserInputService.IsMouseButtonPressed(Enum.UserInputType.MouseButton1) ||
-				UserInputService.IsKeyDown("ButtonX");
+			const add = pressing;
 
 			const target = BlockSelect.getTargetedBlock();
 			if (!target) {
@@ -85,6 +83,9 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 			this._highlighted.set(add ? [...new Set([...this._highlighted.get(), ...targets])] : targets);
 		};
 		const submit = () => {
+			if (!pressing) return;
+
+			pressing = false;
 			highlighter.disable();
 			this._submit.Fire(this.highlighted.get());
 			highlighter.enable();
@@ -108,8 +109,10 @@ export class HoveredBlocksSelector extends ClientComponent implements BlockSelec
 			eh.subscribe(Signals.CAMERA.MOVED, updateTarget);
 
 			if (inputType === "Desktop") {
+				ih.onMouse1Down(() => (pressing = true), false);
 				ih.onMouse1Up(submit, true);
 			} else if (inputType === "Gamepad") {
+				this.inputHandler.onKeyDown("ButtonX", () => (pressing = true));
 				this.inputHandler.onKeyUp("ButtonX", submit);
 			} else if (inputType === "Touch") {
 				this.inputHandler.onTouchTap(submit, false);
