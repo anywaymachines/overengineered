@@ -237,7 +237,7 @@ namespace Markers {
 		}
 
 		isConnected() {
-			return this.connected !== undefined;
+			return this.connected;
 		}
 	}
 	export class Output extends Marker {
@@ -451,7 +451,7 @@ namespace Controllers {
 			}
 		});
 	};
-	const hideNonConnectableMarkers = (from: Markers.Output, markers: readonly Markers.Marker[]) => {
+	export const hideNonConnectableMarkers = (from: Markers.Output, markers: readonly Markers.Marker[]) => {
 		for (const marker of markers) {
 			if (marker === from) {
 				if (marker instanceof Markers.Output) {
@@ -469,7 +469,15 @@ namespace Controllers {
 			}
 		}
 	};
-	const showAllMarkers = (markers: readonly Markers.Marker[]) => {
+	export const hideConnectedMarkers = (markers: readonly Markers.Marker[]) => {
+		for (const marker of markers) {
+			if (!(marker instanceof Markers.Input)) continue;
+			if (!marker.isConnected()) continue;
+
+			marker.disable();
+		}
+	};
+	export const showAllMarkers = (markers: readonly Markers.Marker[]) => {
 		for (const marker of markers) {
 			marker.enable();
 		}
@@ -667,6 +675,11 @@ export class WireTool extends ToolBase {
 			});
 		}
 
+		this.event.subInput((ih) => {
+			ih.onKeyDown("F", () => Controllers.hideConnectedMarkers(this.markers.getAll()));
+			ih.onKeyUp("F", () => Controllers.showAllMarkers(this.markers.getAll()));
+		});
+
 		this.event.subscribe(ClientBuilding.logicDisconnectOperation.executed, (plot, _inputBlock, inputConnection) => {
 			//
 		});
@@ -727,6 +740,7 @@ export class WireTool extends ToolBase {
 
 	protected getTooltips(): InputTooltips {
 		return {
+			Desktop: [{ keys: ["F"], text: "Hide connected markers" }],
 			Gamepad: [
 				{ keys: ["ButtonY"], text: "Marker selection mode" },
 				{ keys: ["ButtonA"], text: "Click on marker" },
