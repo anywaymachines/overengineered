@@ -1,4 +1,5 @@
 import { TasksControl } from "client/gui/static/TasksControl";
+import { ActionController } from "client/modes/build/ActionController";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { Tutorial } from "client/tutorial/Tutorial";
@@ -10,6 +11,7 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 	const allTools = toolController.allTools;
 	const toolEnabler = toolController.enabledTools;
 	toolEnabler.disableAll();
+	ActionController.instance.disable();
 
 	await ClientBuilding.deleteOperation.execute(SharedPlots.getOwnPlot(), "all");
 	BuildingMode.instance.gui.actionbar.enabledButtons.enableOnly("settings");

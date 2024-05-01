@@ -1,5 +1,6 @@
 import { TasksControl } from "client/gui/static/TasksControl";
 import { TutorialControl } from "client/gui/static/TutorialControl";
+import { ActionController } from "client/modes/build/ActionController";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { TutorialBasics } from "client/tutorial/TutorialBasics";
 import { TutorialBuildTool } from "client/tutorial/TutorialBuildTool";
@@ -59,6 +60,7 @@ export namespace Tutorial {
 		BuildingMode.instance.gui.actionbar.enabledButtons.enableAll();
 		BuildingMode.instance.toolController.allTools.editTool.enabledModes.enableAll();
 		TasksControl.instance.finish();
+		ActionController.instance.enable();
 
 		Control.finish();
 	}
