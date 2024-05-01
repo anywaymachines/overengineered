@@ -1178,6 +1178,7 @@ export const blockConfigRegistry = {
 	sphericaltnt: tnt,
 	suspensionblock,
 	vehicleseat,
+	passengerseat: vehicleseat,
 	magnet,
 	piston,
 	ballast,

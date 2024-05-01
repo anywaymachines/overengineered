@@ -1,4 +1,5 @@
 import { type BlockDataRegistry } from "shared/BlockDataRegistry";
+import { PassengerSeatBlockLogic } from "shared/block/logic/PassengerSeatBlockLogic";
 import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
 import { RadarSectionBlockLogic } from "shared/block/logic/RadarSectionBlockLogic";
 import { RadioRecieverBlockLogic } from "shared/block/logic/RadioRecieverBlockLogic";
@@ -58,6 +59,7 @@ export const logicRegistry = {
 	wing1x4: WingLogic,
 
 	vehicleseat: VehicleSeatBlockLogic,
+	passengerseat: PassengerSeatBlockLogic,
 	disconnectblock: DisconnectBlockLogic,
 
 	smallrocketengine: RocketEngineLogic,
