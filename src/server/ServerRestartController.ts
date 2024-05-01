@@ -10,23 +10,26 @@ import { PartUtils } from "shared/utils/PartUtils";
 export namespace ServerRestartController {
 	export function init() {
 		MessagingService.SubscribeAsync("Restart", () => {
+			if (RunService.IsStudio()) {
+				return;
+			}
+
 			restart(true);
 		});
 	}
 
 	export function restart(networkReceived: boolean = false) {
-		if (!networkReceived) {
+		if (!networkReceived && !RunService.IsStudio()) {
 			MessagingService.PublishAsync("Restart", undefined);
 		}
 
 		const maxTime = 30;
 		let timePassed = 0;
-		const meteorsSpawnChance = 0.6;
+		const meteorsSpawnChance = 0.3;
 		const meteorSpeed = new Vector3(math.random(150, 600), math.random(-750, -200), math.random(150, 600));
 		const meteor = new Instance("Part");
 		meteor.Material = Enum.Material.CrackedLava;
 		meteor.Color = Color3.fromRGB(255, 0, 0);
-		//meteor.AssemblyLinearVelocity = meteorSpeed;
 		meteor.Shape = Enum.PartType.Ball;
 
 		const textStartColor = Color3.fromRGB(255, 255, 255);
@@ -39,10 +42,11 @@ export namespace ServerRestartController {
 			while (true as boolean) {
 				if (timeLeft <= 1) {
 					Players.GetPlayers().forEach((p) => p.Kick("Got boned!"));
+					task.wait(1);
 					continue;
 				}
 
-				if (timeLeft % 10 === 0) {
+				if (timeLeft % 10 === 0 || timeLeft < 10) {
 					Remotes.Server.GetNamespace("Admin")
 						.Get("SendMessage")
 						.SendToAllPlayers(
@@ -52,8 +56,8 @@ export namespace ServerRestartController {
 						);
 				}
 
-				timeLeft--;
 				task.wait(1);
+				timeLeft--;
 			}
 		});
 
@@ -61,10 +65,12 @@ export namespace ServerRestartController {
 			timePassed += dt;
 			progress = timePassed / maxTime;
 			Remotes.Server.Get("ServerRestartProgress").SendToAllPlayers(progress);
-			Players.GetPlayers().forEach((p) => {
+			const pl = Players.GetPlayers();
+			pl.forEach((p) => {
 				const pos = p.Character?.GetPivot();
 				if (!pos) return;
-				if (math.random() <= math.max(meteorsSpawnChance / progress, meteorsSpawnChance / 2)) {
+				const newChance = meteorsSpawnChance * pl.size();
+				if (math.random() <= newChance / (1 + progress)) {
 					const sz = 5 - (math.random() - 0.5) * 2;
 					const clone = meteor.Clone();
 					clone.Size = new Vector3(sz, sz, sz);
