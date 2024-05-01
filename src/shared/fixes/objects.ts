@@ -80,4 +80,10 @@ export namespace Objects {
 
 		return result as { [key in T[number][0]]: T[number][1] };
 	}
+
+	export function asMap<TKey extends string, TValue extends defined>(
+		object: object & Record<TKey, TValue>,
+	): Map<TKey, TValue> {
+		return object as Map<TKey, TValue>;
+	}
 }

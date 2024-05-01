@@ -1,5 +1,5 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { BlockDataRegistry } from "./BlockDataRegistry";
+import { AutoWeldColliderBlockShape, BlockDataRegistry, BlockMirrorBehaviour } from "./BlockDataRegistry";
 import { AutoBlockCreator } from "./block/logic/AutoBlockCreator";
 import { Objects } from "./fixes/objects";
 

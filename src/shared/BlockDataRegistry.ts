@@ -1,15 +1,14 @@
 import { Objects } from "shared/fixes/objects";
 
-declare global {
-	type AutoWeldColliderBlockShape = "none" | "cube";
-	type BlockMirrorBehaviour = "offset90" | "offset180" | "offset270" | "normal" | "none" | "wedgeWing";
-}
+export type AutoWeldColliderBlockShape = "none" | "cube";
+export type BlockMirrorBehaviour = "offset90" | "offset180" | "offset270" | "normal" | "none" | "wedgeWing";
 
 interface BlockSetupInformation {
 	readonly name: string;
 	readonly description: string;
 	readonly autoWeldShape?: AutoWeldColliderBlockShape;
 	readonly mirrorBehaviour?: BlockMirrorBehaviour;
+	readonly mirrorReplacementId?: string;
 	readonly required?: boolean;
 	readonly limit?: number;
 }
@@ -327,50 +326,6 @@ const logic = {
 			description: "Returns the closest object that got into the block's sight",
 			limit: 40,
 		},
-		beam2x1: {
-			name: "Beam 2x1",
-			description: "A block, but 2x1!",
-		},
-		beam3x1: {
-			name: "Beam 3x1",
-			description: "A block, but 3x1!",
-		},
-		beam4x1: {
-			name: "Beam 4x1",
-			description: "A block, but 4x1!",
-		},
-		halfcornerwedge1x1: {
-			name: "Half Corner Wedge 1x1",
-			description: "A corner wedge 1x1, but it's.. half.. the size?",
-		},
-		halfcornerwedge2x1: {
-			name: "Half Corner Wedge 2x1",
-			description: "A corner wedge 2x1, but it's.. half.. the size?",
-		},
-		halfcornerwedge3x1: {
-			name: "Half Corner Wedge 3x1",
-			description: "A corner wedge 3x1, but it's.. half.. the size?",
-		},
-		halfcornerwedge4x1: {
-			name: "Half Corner Wedge 4x1",
-			description: "It stopped making any sense..",
-		},
-		halfwedge1x1: {
-			name: "Half Wedge 1x1",
-			description: "A wedge 1x1, but it's.. half.. the size?",
-		},
-		halfwedge1x2: {
-			name: "Half Wedge 1x2",
-			description: "A wedge 1x2, but it's.. half.. the size?",
-		},
-		halfwedge1x3: {
-			name: "Half Wedge 1x3",
-			description: "A wedge 1x3, but it's.. half.. the size?",
-		},
-		halfwedge1x4: {
-			name: "Half Wedge 1x4",
-			description: "A wedge 1x4, but it's.. half.. the size?",
-		},
 	},
 } as const satisfies Record<string, BlockDataRegistry>;
 
@@ -405,6 +360,7 @@ const registry = {
 	halfball: {
 		name: "Half Ball",
 		description: "It's rolling around.. half of the time..",
+		mirrorBehaviour: "offset180",
 	},
 	concavecornerwedge: {
 		name: "Concave Corner Wedge",
@@ -677,6 +633,88 @@ const registry = {
 		name: "Wing Sharper",
 		description: "An evil brother of the wing rounding",
 	},
+	beam2x1: {
+		name: "Beam 2x1",
+		description: "A block, but 2x1!",
+	},
+	beam3x1: {
+		name: "Beam 3x1",
+		description: "A block, but 3x1!",
+	},
+	beam4x1: {
+		name: "Beam 4x1",
+		description: "A block, but 4x1!",
+	},
+	halfcornerwedge1x1: {
+		name: "Half Corner Wedge 1x1",
+		description: "A corner wedge 1x1, but it's.. half.. the size?",
+		mirrorBehaviour: "offset270",
+		mirrorReplacementId: "halfcornerwedge1x1mirrored",
+	},
+	halfcornerwedge2x1: {
+		name: "Half Corner Wedge 2x1",
+		description: "A corner wedge 2x1, but it's.. half.. the size?",
+		mirrorBehaviour: "offset270",
+		mirrorReplacementId: "halfcornerwedge2x1mirrored",
+	},
+	halfcornerwedge3x1: {
+		name: "Half Corner Wedge 3x1",
+		description: "A corner wedge 3x1, but it's.. half.. the size?",
+		mirrorBehaviour: "offset270",
+		mirrorReplacementId: "halfcornerwedge3x1mirrored",
+	},
+	halfcornerwedge4x1: {
+		name: "Half Corner Wedge 4x1",
+		description: "It stopped making any sense..",
+		mirrorBehaviour: "offset270",
+		mirrorReplacementId: "halfcornerwedge4x1mirrored",
+	},
+
+	halfcornerwedge1x1mirrored: {
+		name: "Half Corner Wedge 1x1 (Mirrored)",
+		description: "Same halved corner wedge, but mirrored!",
+		mirrorBehaviour: "offset270",
+		mirrorReplacementId: "halfcornerwedge1x1",
+	},
+	halfcornerwedge2x1mirrored: {
+		name: "Half Corner Wedge 2x1 (Mirrored)",
+		description: "Same halved corner wedge, but mirrored!",
+		mirrorBehaviour: "offset270",
+		mirrorReplacementId: "halfcornerwedge2x1",
+	},
+	halfcornerwedge3x1mirrored: {
+		name: "Half Corner Wedge 3x1 (Mirrored)",
+		description: "Same halved corner wedge, but mirrored!",
+		mirrorBehaviour: "offset270",
+		mirrorReplacementId: "halfcornerwedge3x1",
+	},
+	halfcornerwedge4x1mirrored: {
+		name: "Half Corner Wedge 4x1 (Mirrored)",
+		description: "Same halved corner wedge, but mirrored!",
+		mirrorBehaviour: "offset270",
+		mirrorReplacementId: "halfcornerwedge4x1",
+	},
+
+	halfwedge1x1: {
+		name: "Half Wedge 1x1",
+		description: "A wedge 1x1, but it's.. half.. the size?",
+		mirrorBehaviour: "offset180",
+	},
+	halfwedge1x2: {
+		name: "Half Wedge 1x2",
+		description: "A wedge 1x2, but it's.. half.. the size?",
+		mirrorBehaviour: "offset180",
+	},
+	halfwedge1x3: {
+		name: "Half Wedge 1x3",
+		description: "A wedge 1x3, but it's.. half.. the size?",
+		mirrorBehaviour: "offset180",
+	},
+	halfwedge1x4: {
+		name: "Half Wedge 1x4",
+		description: "A wedge 1x4, but it's.. half.. the size?",
+		mirrorBehaviour: "offset180",
+	},
 	radiotransmitter: {
 		name: "Radio Transmitter",
 		description: "Transmits data over air! True magic for a caveman!",
@@ -687,7 +725,7 @@ const registry = {
 		description: "Love is in the air? Wrong! Radio wave radia-tion!",
 		limit: 10,
 	},
-} as const;
+} as const satisfies BlockDataRegistry;
 
 export const BlockDataRegistry: BlockDataRegistry = registry;
 export type BlockId = keyof typeof registry;

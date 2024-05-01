@@ -34,6 +34,7 @@ import { InstanceComponent } from "shared/component/InstanceComponent";
 import { TransformService } from "shared/component/TransformService";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
+import { Objects } from "shared/fixes/objects";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
 const allowedColor = Colors.blue;
@@ -427,9 +428,9 @@ namespace SinglePlaceController {
 			const plot = this.plot.get();
 			const areAllBlocksInsidePlot =
 				plot.isModelInside(this.mainGhost) &&
-				this.blockMirrorer
-					.getMirroredModels()
-					.all((_, ghosts) => ghosts.all((ghost) => plot.isModelInside(ghost)));
+				Objects.asMap(this.blockMirrorer.getMirroredModels()).all((k, ghosts) =>
+					ghosts.all((ghost) => plot.isModelInside(ghost)),
+				);
 
 			if (areAllBlocksInsidePlot) {
 				this.updateMirrorGhostBlocksPosition();
@@ -439,13 +440,9 @@ namespace SinglePlaceController {
 
 			const canBePlaced =
 				areAllBlocksInsidePlot &&
-				this.blockMirrorer
-					.getMirroredModels()
-					.all((_, ghosts) =>
-						ghosts.all((ghost) =>
-							BuildingManager.blockCanBePlacedAt(plot, selectedBlock, ghost.GetPivot()),
-						),
-					);
+				Objects.asMap(this.blockMirrorer.getMirroredModels()).all((k, ghosts) =>
+					ghosts.all((ghost) => BuildingManager.blockCanBePlacedAt(plot, selectedBlock, ghost.GetPivot())),
+				);
 
 			BlockGhoster.setColor(canBePlaced ? allowedColor : forbiddenColor);
 		}
@@ -489,17 +486,16 @@ namespace SinglePlaceController {
 			}
 
 			let blocks = [
-				mainGhost,
-				...this.blockMirrorer
-					.getMirroredModels()
-					.values()
-					.flatmap((m) => m),
+				{ id: selected.id, pos: mainGhost.PrimaryPart!.CFrame },
+				...Objects.asMap(this.blockMirrorer.getMirroredModels()).flatmap((k, v) =>
+					v.map((v) => ({ id: k, pos: v.PrimaryPart!.CFrame })),
+				),
 			].map(
 				(g): PlaceBlockRequest => ({
-					id: selected.id,
+					id: g.id,
 					color: this.selectedColor.get(),
 					material: this.selectedMaterial.get(),
-					location: g.PrimaryPart!.CFrame,
+					location: g.pos,
 				}),
 			);
 
@@ -845,8 +841,7 @@ namespace MultiPlaceController {
 				{ id: this.selectedBlock.id, pos: m.GetPivot() },
 				...BuildingManager.getMirroredBlocks(
 					this.plot.instance,
-					this.selectedBlock.id,
-					m.GetPivot(),
+					{ id: this.selectedBlock.id, pos: m.GetPivot() },
 					this.mirrorModes,
 				),
 			]);

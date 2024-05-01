@@ -81,16 +81,20 @@ export namespace BuildingManager {
 		return true;
 	}
 
-	export function getMirroredBlocksCFrames(
+	type MirroredBlock = {
+		readonly id: string;
+		readonly pos: CFrame;
+	};
+	export function getMirroredBlocks(
 		plot: PlotModel,
-		blockid: string,
-		cframeToMirror: CFrame,
+		origBlock: MirroredBlock,
 		mode: MirrorMode,
-	): readonly CFrame[] {
-		const method = BlockDataRegistry[blockid]?.mirrorBehaviour ?? "normal";
+	): readonly MirroredBlock[] {
+		const method = BlockDataRegistry[origBlock.id]?.mirrorBehaviour ?? "normal";
 		const [xAxis, yAxis, zAxis] = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis];
 
-		const reflect = (cframe: CFrame, mode: "x" | "y" | "z", mirrorCFrame: CFrame) => {
+		const reflect = (block: MirroredBlock, mode: "x" | "y" | "z", mirrorCFrame: CFrame): MirroredBlock => {
+			let cframe = block.pos;
 			const pos = cframe.Position;
 
 			function normalRotation() {
@@ -158,9 +162,12 @@ export namespace BuildingManager {
 
 			// apply position \/
 			const rpos = mirrorCFrame.PointToObjectSpace(pos);
-			return new CFrame(mirrorCFrame.ToWorldSpace(new CFrame(rpos.X, rpos.Y, -rpos.Z)).Position).mul(
-				cframe.Rotation,
-			);
+			return {
+				id: BlockDataRegistry[block.id]?.mirrorReplacementId ?? block.id,
+				pos: new CFrame(mirrorCFrame.ToWorldSpace(new CFrame(rpos.X, rpos.Y, -rpos.Z)).Position).mul(
+					cframe.Rotation,
+				),
+			};
 		};
 
 		const plotframe = plot.BuildingArea.GetPivot();
@@ -176,12 +183,12 @@ export namespace BuildingManager {
 			axes.push(["z", CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(0, 0, mode.z))]);
 		}
 
-		const origPos = VectorUtils.roundVector(cframeToMirror.Position);
-		const ret = new Map<Vector3, CFrame>([[origPos, cframeToMirror]]);
+		const origPos = VectorUtils.roundVector(origBlock.pos.Position);
+		const ret = new Map<Vector3, MirroredBlock>([[origPos, origBlock]]);
 		for (const [axe, axis] of axes) {
 			for (const [, frame] of [...ret]) {
 				const reflected = reflect(frame, axe, plotframe.ToWorldSpace(axis));
-				ret.set(VectorUtils.roundVector(reflected.Position), reflected);
+				ret.set(VectorUtils.roundVector(reflected.pos.Position), reflected);
 			}
 		}
 		ret.delete(origPos);
