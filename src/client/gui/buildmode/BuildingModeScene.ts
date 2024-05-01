@@ -1,18 +1,14 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { Control } from "client/gui/Control";
 import { ToolbarControl, ToolbarControlDefinition } from "client/gui/buildmode/ToolbarControl";
-import { PaintToolScene, PaintToolSceneDefinition } from "client/gui/buildmode/tools/PaintToolScene";
 import { ButtonControl } from "client/gui/controls/Button";
 import { SavePopup } from "client/gui/popup/SavePopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { ActionController } from "client/modes/build/ActionController";
-import { ToolBase } from "client/tools/ToolBase";
 import { ToolController } from "client/tools/ToolController";
 import { ComponentDisabler } from "shared/component/ComponentDisabler";
-import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 import { TransformProps } from "shared/component/Transform";
-import { WireToolScene, WireToolSceneDefinition } from "./tools/WireToolScene";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {
@@ -87,13 +83,8 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 export type BuildingModeSceneDefinition = GuiObject & {
 	readonly ActionBar: ActionBarControlDefinition;
 	readonly Hotbar: ToolbarControlDefinition;
-	readonly Tools: Folder & {
-		readonly Paint: PaintToolSceneDefinition;
-		readonly Wire: WireToolSceneDefinition;
-	};
 };
 export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
-	private readonly scenes = new ComponentKeyedChildren<ToolBase, Control>(this);
 	readonly actionbar;
 
 	constructor(gui: BuildingModeSceneDefinition, tools: ToolController) {
@@ -113,28 +104,5 @@ export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 		const updateToolbarVisibility = () => toolbar.setVisible(!LoadingController.isLoading.get());
 		this.event.subscribeObservable(LoadingController.isLoading, updateToolbarVisibility);
 		this.onEnable(updateToolbarVisibility);
-
-		const types = [
-			[tools.paintTool, PaintToolScene, this.gui.Tools.Paint],
-			[tools.wireTool, WireToolScene, this.gui.Tools.Wire],
-		] as const;
-		for (const [tool, scenetype, scenegui] of types) {
-			this.scenes.add(tool, new scenetype(scenegui as never, tool as never));
-		}
-
-		const selectedToolUpdated = (tool: ToolBase | undefined) => {
-			for (const [, scene] of this.scenes.getAll()) {
-				scene.hide();
-			}
-
-			(tool && this.scenes.get(tool))?.show();
-		};
-
-		this.event.subscribeObservable(
-			tools.visibleTools.enabled,
-			() => selectedToolUpdated(tools.selectedTool.get()),
-			true,
-		);
-		tools.selectedTool.subscribe(selectedToolUpdated, true);
 	}
 }

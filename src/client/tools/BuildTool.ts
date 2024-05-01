@@ -842,8 +842,8 @@ namespace MultiPlaceController {
 
 		async place() {
 			let locations = this.drawnGhostsMap.flatmap((_, m) => [
-				m.GetPivot(),
-				...BuildingManager.getMirroredBlocksCFrames(
+				{ id: this.selectedBlock.id, pos: m.GetPivot() },
+				...BuildingManager.getMirroredBlocks(
 					this.plot.instance,
 					this.selectedBlock.id,
 					m.GetPivot(),
@@ -852,17 +852,17 @@ namespace MultiPlaceController {
 			]);
 			// filter out the blocks on the same location
 			locations = new Map(
-				locations.map((b) => [VectorUtils.roundVectorToNearestHalf(b.Position), b] as const),
+				locations.map((b) => [VectorUtils.roundVectorToNearestHalf(b.pos.Position), b] as const),
 			).map((_, b) => b);
 
 			const response = await ClientBuilding.placeOperation.execute(
 				this.plot,
 				locations.map(
 					(loc): PlaceBlockRequest => ({
-						id: this.selectedBlock.id,
+						id: loc.id,
 						color: this.selectedColor,
 						material: this.selectedMaterial,
-						location: loc,
+						location: loc.pos,
 					}),
 				),
 			);
