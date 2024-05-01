@@ -26,6 +26,7 @@ import { RemoteEvents } from "shared/RemoteEvents";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { AdminMessageController } from "./AdminMessageController";
 import { ClientContainerComponent } from "./component/ClientContainerComponent";
+import { ClientCustomReplicationService } from "./service/ClientCustomReplicationService";
 import { rootComponents } from "./test/RootComponents";
 
 LoadingController.show("Loading the game");
@@ -89,3 +90,8 @@ TextChatService.OnIncomingMessage = function (message: TextChatMessage) {
 
 	return props;
 };
+
+if (RunService.IsStudio()) {
+	warn("REPLICATION TESTING IS ACTIVE");
+	ClientCustomReplicationService.initialize();
+}

@@ -1,4 +1,4 @@
-import { HttpService, MessagingService, RunService, Workspace } from "@rbxts/services";
+import { HttpService, MessagingService, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { Backend } from "server/Backend";
 import { BadgeController } from "server/BadgeController";
 import { ServerRestartController } from "server/ServerRestartController";
@@ -248,3 +248,18 @@ if (RunService.IsStudio()) {
 }
 
 Workspace.SetAttribute("loaded", true);
+
+if (RunService.IsStudio()) {
+	warn("REPLICATION TESTING IS ACTIVE");
+	Remotes.Server.GetNamespace("Replication")
+		.Get("ClientBasePartInitialize")
+		.SendToAllPlayers({
+			cframe: new CFrame(0, 0, 0),
+			parentUUID: undefined,
+			prefab: ReplicatedStorage.Assets.Placeable.FindFirstChild("Blocks")!
+				.FindFirstChild("Block")!
+				.FindFirstChild("Part")! as Part,
+			uuid: "nope",
+			owner: false,
+		});
+}
