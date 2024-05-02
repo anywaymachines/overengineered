@@ -69,11 +69,6 @@ export class ToolController extends ClientComponent {
 	readonly visibleTools: ComponentDisabler<ToolBase>;
 	readonly enabledTools: ComponentDisabler<ToolBase>;
 
-	readonly deleteTool;
-	readonly configTool;
-	readonly paintTool;
-	readonly wireTool;
-
 	readonly allTools;
 	readonly allToolsOrdered: readonly ToolBase[];
 
@@ -108,10 +103,10 @@ export class ToolController extends ClientComponent {
 		const tools = [
 			["buildTool", new BuildTool(mode)],
 			["editTool", new EditTool(mode)],
-			["deleteTool", (this.deleteTool = new DeleteTool(mode))],
-			["configTool", (this.configTool = new ConfigTool(mode))],
-			["paintTool", (this.paintTool = new PaintTool(mode))],
-			["wireTool", (this.wireTool = new WireTool(mode))],
+			["deleteTool", new DeleteTool(mode)],
+			["configTool", new ConfigTool(mode)],
+			["paintTool", new PaintTool(mode)],
+			["wireTool", new WireTool(mode)],
 		] as const;
 
 		this.allTools = Objects.fromEntries(tools);

@@ -16,7 +16,7 @@ export class TutorialDeleteTool {
 	constructor(private readonly tutorial: typeof Tutorial) {}
 
 	get() {
-		return BuildingMode.instance.toolController.deleteTool;
+		return BuildingMode.instance.toolController.allTools.deleteTool;
 	}
 
 	cleanup() {

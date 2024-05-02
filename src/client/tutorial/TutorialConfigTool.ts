@@ -29,7 +29,7 @@ export class TutorialConfigTool {
 	}
 
 	get() {
-		return BuildingMode.instance.toolController.configTool;
+		return BuildingMode.instance.toolController.allTools.configTool;
 	}
 
 	cleanup() {
