@@ -55,12 +55,6 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 		).withSize((s) => new Vector3(s.X + 0.02, s.Y + 0.02, s.Z + 0.02));
 	}
 
-	toLocal(pos: CFrame | Vector3) {
-		if (typeIs(pos, "CFrame")) {
-			return;
-		}
-	}
-
 	getBlockDatas(): readonly PlacedBlockData[] {
 		return this.getBlocks().map(BlockManager.getBlockDataByBlockModel);
 	}
