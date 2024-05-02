@@ -64,17 +64,21 @@ const getMouseTargetBlockPositionV2 = (
 	rotation: CFrame,
 	info?: [target: BasePart, hit: CFrame, surface: Enum.NormalId],
 ): Vector3 | undefined => {
-	const constrainPositionToGrid = (normal: Vector3, pos: Vector3) => {
-		const roundByStep = (number: number) => {
-			const step = 1;
-			return number - (((number + step / 2) % step) - step / 2);
+	const constrainPositionToGrid = (selectedBlock: RegistryBlock, normal: Vector3, pos: Vector3) => {
+		const from = (coord: number, size: number) => {
+			const offset = (size % 2) / 2;
+
+			coord -= offset;
+			const pos = math.round(coord);
+			return pos + offset;
 		};
-		const constrain = math.round;
+
+		const size = AABB.fromModel(selectedBlock.model, rotation).getSize();
 
 		return new Vector3(
-			normal.X === 0 ? constrain(pos.X) : pos.X,
-			normal.Y === 0 ? constrain(pos.Y) : pos.Y,
-			normal.Z === 0 ? constrain(pos.Z) : pos.Z,
+			normal.X === 0 ? from(pos.X, size.X) : pos.X,
+			normal.Y === 0 ? from(pos.Y, size.Y) : pos.Y,
+			normal.Z === 0 ? from(pos.Z, size.Z) : pos.Z,
 		);
 	};
 	const addTargetSize = (target: BasePart, normal: Vector3, pos: Vector3) => {
@@ -120,7 +124,7 @@ const getMouseTargetBlockPositionV2 = (
 	targetPosition = addTargetSize(target, normal, targetPosition);
 	targetPosition = offsetBlockPivotToCenter(block, targetPosition);
 	targetPosition = addBlockSize(block, normal, targetPosition);
-	targetPosition = constrainPositionToGrid(normal, targetPosition);
+	targetPosition = constrainPositionToGrid(block, normal, targetPosition);
 
 	return targetPosition;
 };
