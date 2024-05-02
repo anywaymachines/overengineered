@@ -107,6 +107,7 @@ export class ToolController extends ClientComponent {
 			["configTool", new ConfigTool(mode)],
 			["paintTool", new PaintTool(mode)],
 			["wireTool", new WireTool(mode)],
+			// ["buildTool3", new BuildTool3(mode)],
 		] as const;
 
 		this.allTools = Objects.fromEntries(tools);
