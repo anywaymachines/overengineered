@@ -27,6 +27,8 @@ export class MotorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRe
 
 		// Stop on motor corruption
 		this.onDescendantDestroyed(() => {
+			this.hingeConstraint.AngularVelocity = 0;
+
 			this.disable();
 		});
 
