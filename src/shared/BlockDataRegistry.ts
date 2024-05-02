@@ -1,4 +1,4 @@
-import { Objects } from "shared/fixes/objects";
+import { Objects, pairs_ } from "shared/fixes/objects";
 
 export type AutoWeldColliderBlockShape = "none" | "cube";
 export type BlockMirrorBehaviour = "offset90" | "offset180" | "offset270" | "normal" | "none" | "wedgeWing";
@@ -18,9 +18,11 @@ type BlockDataRegistry = Record<string, BlockSetupInformation>;
 const flatten = <T extends Record<string, BlockDataRegistry>>(
 	data: T,
 ): { [kk in { [k in keyof T]: keyof T[k] }[keyof T]]: BlockSetupInformation } => {
-	const ret: Partial<Record<keyof T, T[keyof T]>> = {};
-	for (const [key, item] of Objects.pairs_(data)) {
-		ret[key] = item;
+	const ret: Partial<Record<string, BlockSetupInformation>> = {};
+	for (const [, items] of Objects.pairs_(data)) {
+		for (const [key, value] of pairs_(items as BlockDataRegistry)) {
+			ret[key] = value;
+		}
 	}
 
 	return ret as never;
