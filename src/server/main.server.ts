@@ -3,6 +3,7 @@ import { Backend } from "server/Backend";
 import { BadgeController } from "server/BadgeController";
 import { ServerRestartController } from "server/ServerRestartController";
 import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
+import { CustomReplicationService } from "server/service/CustomReplicationService";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Logger } from "shared/Logger";
 import { RemoteEvents } from "shared/RemoteEvents";
@@ -251,15 +252,10 @@ Workspace.SetAttribute("loaded", true);
 
 if (RunService.IsStudio()) {
 	warn("REPLICATION TESTING IS ACTIVE");
-	Remotes.Server.GetNamespace("Replication")
-		.Get("ClientBasePartInitialize")
-		.SendToAllPlayers({
-			cframe: new CFrame(0, 0, 0),
-			parentUUID: undefined,
-			prefab: ReplicatedStorage.Assets.Placeable.FindFirstChild("Blocks")!
-				.FindFirstChild("Block")!
-				.FindFirstChild("Part")! as Part,
-			uuid: "nope",
-			owner: false,
-		});
+	CustomReplicationService.spawnBlock(
+		ReplicatedStorage.Assets.Placeable.FindFirstChild("Movement")!
+			.FindFirstChild("Rocket")!
+			.FindFirstChild("RocketEngine")! as BlockModel,
+		new CFrame(0, 0, 0),
+	);
 }
