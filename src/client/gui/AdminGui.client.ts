@@ -22,7 +22,7 @@ task.wait(0.5); // wait for the controls to enable
 let destroy: (() => void) | undefined;
 const create = () => {
 	const parent = new InstanceComponent(
-		Element.create("ScreenGui", { Name: "TestScreenGui", Parent: Gui.getPlayerGui() }),
+		Element.create("ScreenGui", { AutoLocalize: false, Name: "TestScreenGui", Parent: Gui.getPlayerGui() }),
 	);
 
 	const tabs = TabControl.create();

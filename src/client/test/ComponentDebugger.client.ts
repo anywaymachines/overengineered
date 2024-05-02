@@ -73,6 +73,7 @@ const create = (): TreeControl => {
 		"ScrollingFrame",
 		{
 			Name: "DebugROOT",
+			AutoLocalize: false,
 			Size: new UDim2(1, 0, 1, 0),
 			BackgroundColor3: Colors.black,
 			BackgroundTransparency: 1,
