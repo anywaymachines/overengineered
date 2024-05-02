@@ -1,10 +1,10 @@
 import { HttpService } from "@rbxts/services";
 import { ServerBuilding } from "server/building/ServerBuilding";
+import { BlockId } from "shared/BlockDataRegistry";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Logger } from "shared/Logger";
 import { Serializer } from "shared/Serializer";
-import { LogicRegistry } from "shared/block/LogicRegistry";
-import { BlockConfigRegistry, blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockManager, PlacedBlockDataConnection } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { Objects } from "shared/fixes/objects";
@@ -20,7 +20,7 @@ interface SerializedBlockBase {
 	readonly id: string;
 }
 interface SerializedBlockV0 extends SerializedBlockBase {
-	readonly id: (keyof BlockConfigRegistry | keyof LogicRegistry) & string;
+	readonly id: BlockId;
 	readonly mat: SerializedEnum;
 	readonly col: SerializedColor;
 	readonly loc: SerializedCFrame;
@@ -598,13 +598,87 @@ const v17: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 };
 
 // fix de/serialization of color & material from v17
-const v18: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v17> = {
+const v18: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v17> = {
 	version: 18,
 
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		return {
 			version: this.version,
 			blocks: prev.blocks,
+		};
+	},
+};
+
+// remove coblox from some blocks
+const v19: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v18> = {
+	version: 19,
+
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
+			if (block.id === "halfblock") {
+				return {
+					...block,
+					loc: Serializer.CFrameSerializer.serialize(
+						Serializer.CFrameSerializer.deserialize(block.loc).ToWorldSpace(new CFrame(0, -0.5, 0)),
+					),
+				};
+			}
+			if (block.id === "halfball") {
+				return {
+					...block,
+					loc: Serializer.CFrameSerializer.serialize(
+						Serializer.CFrameSerializer.deserialize(block.loc).ToWorldSpace(new CFrame(-0.5, 0, 0)),
+					),
+				};
+			}
+			if (
+				block.id === "halfwedge1x1" ||
+				block.id === "halfwedge1x2" ||
+				block.id === "halfwedge1x3" ||
+				block.id === "halfwedge1x4"
+			) {
+				return {
+					...block,
+					loc: Serializer.CFrameSerializer.serialize(
+						Serializer.CFrameSerializer.deserialize(block.loc).ToWorldSpace(new CFrame(0, -0.5, 0)),
+					),
+				};
+			}
+			if (
+				block.id === "halfcornerwedge1x1mirrored" ||
+				block.id === "halfcornerwedge2x1mirrored" ||
+				block.id === "halfcornerwedge3x1mirrored" ||
+				block.id === "halfcornerwedge4x1mirrored"
+			) {
+				return {
+					...block,
+					loc: Serializer.CFrameSerializer.serialize(
+						Serializer.CFrameSerializer.deserialize(block.loc).ToWorldSpace(new CFrame(0, 0, -0.5)),
+					),
+				};
+			}
+			if (
+				block.id === "halfcornerwedge1x1" ||
+				block.id === "halfcornerwedge2x1" ||
+				block.id === "halfcornerwedge3x1" ||
+				block.id === "halfcornerwedge4x1"
+			) {
+				return {
+					...block,
+					loc: Serializer.CFrameSerializer.serialize(
+						Serializer.CFrameSerializer.deserialize(block.loc).ToWorldSpace(
+							CFrame.Angles(0, -90, 0).add(new Vector3(0, 0, 0.5)),
+						),
+					),
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
 		};
 	},
 
@@ -622,7 +696,7 @@ const v18: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 
 //
 
-const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18] as const;
+const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const getVersion = (version: number) => versions.find((v) => v.version === version);
