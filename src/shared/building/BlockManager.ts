@@ -13,7 +13,7 @@ export type PlacedBlockDataConnection = {
 };
 
 export type PlacedBlockConfig = {
-	readonly [k in string]: JsonSerializablePrimitive;
+	readonly [k in string]: JsonSerializablePrimitive & defined;
 };
 
 export type PlacedBlockData<T extends BlockModel = BlockModel> = {

@@ -24,7 +24,7 @@ interface SerializedBlockV0 extends SerializedBlockBase {
 	readonly mat: SerializedEnum;
 	readonly col: SerializedColor;
 	readonly loc: SerializedCFrame;
-	readonly config: Readonly<Record<string, unknown>> | undefined;
+	readonly config: Readonly<Record<string, defined>> | undefined;
 }
 interface SerializedBlockV2 extends SerializedBlockV0 {
 	readonly uuid: BlockUuid;

@@ -54,10 +54,10 @@ export namespace ServerBuilding {
 		model.PivotTo(data.location);
 
 		// Set material & color
-		if (data.config && Objects.keys(data.config).size() !== 0) {
+		if (data.config && Objects.size(data.config) !== 0) {
 			BlockManager.manager.config.set(model, data.config);
 		}
-		if (data.connections !== undefined && Objects.keys(data.connections).size() !== 0) {
+		if (data.connections !== undefined && Objects.size(data.connections) !== 0) {
 			BlockManager.manager.connections.set(model, data.connections);
 		}
 

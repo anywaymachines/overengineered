@@ -2,7 +2,7 @@ import { Workspace } from "@rbxts/services";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { Component } from "shared/component/Component";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { Objects } from "shared/fixes/objects";
+import { Objects, asMap } from "shared/fixes/objects";
 
 /** Generates terrain height */
 export interface ChunkGenerator {
@@ -41,10 +41,11 @@ export class ChunkLoader<T = defined> extends Component {
 		task.spawn(() => this.createChunkLoader());
 		this.onDisable(() => {
 			chunkRenderer.unloadAll(
-				Objects.values(this.loadedChunks)
-					.flatmap(Objects.values)
-					.filter((c) => c.chunk !== undefined)
-					.map((c) => c.chunk!),
+				asMap(this.loadedChunks).flatmap((k, v) =>
+					asMap(v)
+						.filter((k, c) => c.chunk !== undefined)
+						.map((k, c) => c.chunk!),
+				),
 			);
 
 			this.loadedChunks = {};

@@ -36,7 +36,7 @@ export class ConfigValueControl<TGui extends GuiObject, TType extends UnknownCon
 
 		return value;
 	}
-	protected map<T, TOut>(
+	protected map<T, TOut extends defined>(
 		configs: Readonly<Record<BlockUuid, T>>,
 		mapfunc: (value: T, key: BlockUuid) => TOut,
 	): Readonly<Record<BlockUuid, TOut>> {

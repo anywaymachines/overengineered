@@ -1,7 +1,7 @@
 import { type KeyConfigValueControl } from "client/gui/config/KeyConfigValueControl.client";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { JSON } from "shared/fixes/Json";
-import { Objects } from "shared/fixes/objects";
+import { Objects, asMap } from "shared/fixes/objects";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
@@ -30,7 +30,7 @@ class ValueControl extends ConfigValueControl<GuiObject, Type> {
 			this.event.subscribe(control.submitted, (value, prev) => {
 				const changed: (keyof (typeof configs)[BlockUuid])[] = [name];
 				const newvalue = Objects.firstValue(value)!;
-				const prevval = Objects.values(prev).find((p) => p !== newvalue);
+				const prevval = asMap(prev).findValue((p) => p !== newvalue);
 				if (prevval === undefined) {
 					throw "what";
 				}

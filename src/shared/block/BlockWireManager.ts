@@ -1,7 +1,8 @@
 import { BlockConfigRegistryNonGeneric, blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { Objects } from "shared/fixes/objects";
+import { JsonSerializablePrimitive } from "shared/fixes/Json";
+import { Objects, asMap } from "shared/fixes/objects";
 
 export namespace BlockWireManager {
 	export type DataType = "bool" | "vector3" | "number" | "string" | "color" | "never";
@@ -89,10 +90,12 @@ export namespace BlockWireManager {
 					let narrow = false;
 					let dataTypes: readonly DataType[];
 					if (config.type === "or") {
-						const existingcfg = (block.config as Record<string, typeof config.config | undefined>)[key];
+						const existingcfg = (
+							block.config as Record<string, typeof config.config & defined & JsonSerializablePrimitive>
+						)[key];
 
-						if (!existingcfg || existingcfg.type === "unset") {
-							dataTypes = Objects.keys(config.types).map((k) => groups[k]);
+						if (existingcfg === undefined || existingcfg.type === "unset") {
+							dataTypes = asMap(config.types).map((k) => groups[k]);
 						} else {
 							dataTypes = [groups[existingcfg.type]];
 							narrow = true;

@@ -4,7 +4,6 @@ import ts from "typescript";
 const TRANSFORMER_DIR = path.join(__dirname, "../");
 const INDEX_FILE = path.join(TRANSFORMER_DIR, "index.d.ts");
 const defineCallMacrosName = "$defineCallMacros";
-const compileTimeName = "$compileTime";
 
 type Macro = {
 	exportDeclaration: ts.Declaration;
@@ -20,38 +19,14 @@ type ImportInfo = {
 	imports: Array<[string, ts.Identifier]>;
 };
 
-function createTransformer(program: ts.Program, context: ts.TransformationContext) {
+const newtr = (program: ts.Program, context: ts.TransformationContext) => {
 	const typeChecker = program.getTypeChecker();
 	const macroList: MacroList = new Map();
 	const importList = new Map<ts.Symbol, Array<ImportInfo>>();
 	const factory = ts.factory;
-	return transformFiles;
-
-	function addImport(sourceFile: ts.SourceFile, specifier: string, importId: string): ts.Identifier {
-		const symbol = typeChecker.getSymbolAtLocation(sourceFile);
-		if (!symbol) throw "Could not find symbol for sourcefile";
-
-		const imports = importList.get(symbol) ?? [];
-		importList.set(symbol, imports);
-
-		let existingImportInfo = imports.find((x) => x.specifier === specifier);
-		if (existingImportInfo) {
-			const existingImport = existingImportInfo.imports.find((x) => x[0] === importId);
-			if (existingImport) {
-				return existingImport[1];
-			}
-		} else {
-			existingImportInfo = { specifier, imports: [] };
-			imports.push(existingImportInfo);
-		}
-
-		const generatedUID = factory.createUniqueName("macro");
-		existingImportInfo.imports.push([importId, generatedUID]);
-		return generatedUID;
-	}
 
 	/** Fix namespace function hoisting by moving any variable and inside namespace declarations to the bottom */
-	function transformNamespaces(file: ts.SourceFile): ts.SourceFile {
+	const transformNamespaces = (file: ts.SourceFile): ts.SourceFile => {
 		const fixNamespace = (node: ts.ModuleDeclaration): ts.ModuleDeclaration => {
 			if ((node.flags & ts.NodeFlags.Namespace) === 0 || !node.body || !ts.isModuleBlock(node.body))
 				return node;
@@ -98,9 +73,9 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 		}, context);
 	}
 
-	function transformCompileTime(file: ts.SourceFile): ts.SourceFile {
+	const transformCompileTime = (file: ts.SourceFile): ts.SourceFile => {
 		const visit = (node: ts.Node): ts.Node => {
-			if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === compileTimeName) {
+			if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === "$compileTime") {
 				return factory.createNumericLiteral(Date.now() / 1000);
 			}
 
@@ -110,13 +85,77 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 		return ts.visitEachChild(file, visit, context);
 	}
 
-	function transformFiles(files: Map<string, ts.SourceFile>): Map<string, ts.SourceFile> {
+	// DOES NOT WORK because the types are still being checked
+	const transformObjects = (file: ts.SourceFile): ts.SourceFile => {
+		const visit = (node: ts.Node): ts.Node => {
+			if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)
+				&& ts.isIdentifier(node.expression.expression) && node.expression.expression.text === "Objects"
+				&& ts.isIdentifier(node.expression.name) && node.expression.name.text === "pairs_"
+			) {
+
+				let newnode = factory.createCallExpression(
+					factory.createIdentifier('pairs'),
+					undefined,
+					node.arguments,
+				);
+				newnode = ts.visitEachChild(newnode, visit, context);
+
+				return newnode;
+			}
+
+			return ts.visitEachChild(node, visit, context);
+		};
+		
+		return ts.visitEachChild(file, visit, context);
+	}
+
+
+	const functions = [transformNamespaces, transformCompileTime];
+	return (files: Map<string, ts.SourceFile>): Map<string, ts.SourceFile> => {
 		files.forEach((file, fileName) => {
-			file = transformNamespaces(file);
-			file = transformCompileTime(file);
+			for (const func of functions) {
+				file = func(file);
+			}
+
 			files.set(fileName, file);
 		});
 
+		createMacroTransformer(program, context)(files);
+		return files;
+	}
+}
+
+function createMacroTransformer(program: ts.Program, context: ts.TransformationContext) {
+	const typeChecker = program.getTypeChecker();
+	const macroList: MacroList = new Map();
+	const importList = new Map<ts.Symbol, Array<ImportInfo>>();
+	const factory = ts.factory;
+	return transformFiles;
+
+	function addImport(sourceFile: ts.SourceFile, specifier: string, importId: string): ts.Identifier {
+		const symbol = typeChecker.getSymbolAtLocation(sourceFile);
+		if (!symbol) throw "Could not find symbol for sourcefile";
+
+		const imports = importList.get(symbol) ?? [];
+		importList.set(symbol, imports);
+
+		let existingImportInfo = imports.find((x) => x.specifier === specifier);
+		if (existingImportInfo) {
+			const existingImport = existingImportInfo.imports.find((x) => x[0] === importId);
+			if (existingImport) {
+				return existingImport[1];
+			}
+		} else {
+			existingImportInfo = { specifier, imports: [] };
+			imports.push(existingImportInfo);
+		}
+
+		const generatedUID = factory.createUniqueName("macro");
+		existingImportInfo.imports.push([importId, generatedUID]);
+		return generatedUID;
+	}
+
+	function transformFiles(files: Map<string, ts.SourceFile>): Map<string, ts.SourceFile> {
 		for (const transformer of [defineMacroTransform, removeImportTransform, macroTransform, addImportTransform]) {
 			files.forEach((file, fileName) => {
 				file = transformer(file);
@@ -348,7 +387,7 @@ function createTransformer(program: ts.Program, context: ts.TransformationContex
 }
 export default function (program: ts.Program) {
 	return (context: ts.TransformationContext) => {
-		const transformer = createTransformer(program, context);
+		const transformer = newtr(program, context);
 		let transformed: Map<string, ts.SourceFile>;
 		return (file: ts.SourceFile) => {
 			if (!transformed) transformed = transformer(new Map(program.getSourceFiles().map((x) => [x.fileName, x])));

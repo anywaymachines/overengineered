@@ -19,7 +19,7 @@ import { SharedPlots } from "shared/building/SharedPlots";
 import { Config } from "shared/config/Config";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { JSON } from "shared/fixes/Json";
-import { Objects } from "shared/fixes/objects";
+import { Objects, asMap } from "shared/fixes/objects";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
 const logger = new Logger("ConfigTool");
@@ -93,7 +93,7 @@ namespace Scene {
 			const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
 				.input as BlockConfigTypes.Definitions;
 
-			this.gui.Visible = Objects.keys(onedef).size() !== 0;
+			this.gui.Visible = Objects.size(onedef) !== 0;
 			if (!this.gui.Visible) return;
 
 			this.gui.ParamsSelection.HeaderLabel.Text = `CONFIGURATION (${selected.size()})`;
@@ -198,7 +198,7 @@ export class ConfigTool extends ToolBase {
 			const config = blockConfigRegistry[BlockManager.manager.id.get(block) as keyof typeof blockConfigRegistry];
 			if (!config) return false;
 
-			if (!Objects.values(config.input).find((v) => !(v as BlockConfigTypes.Definition).configHidden)) {
+			if (!asMap(config.input).findKey((v) => !(v as BlockConfigTypes.Definition).configHidden)) {
 				return false;
 			}
 

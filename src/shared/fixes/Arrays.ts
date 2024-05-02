@@ -132,13 +132,15 @@ export const SetMacros = $defineCallMacros<ReadonlySet<defined>>({
 declare global {
 	interface ReadonlyMap<K, V> {
 		keys(): K[];
-		values(): V[];
+		values(): (V & defined)[];
 
 		count(func: (key: K, value: V) => boolean): number;
 		filter(func: (key: K, value: V) => boolean): Map<K, V>;
 		map<TOut extends defined>(func: (key: K, value: V) => TOut): TOut[];
 		flatmap<TOut extends defined>(func: (key: K, value: V) => readonly TOut[]): TOut[];
 		find(func: (key: K, value: V) => boolean): readonly [key: K, value: V] | undefined;
+		findKey(func: (key: K, value: V) => boolean): K | undefined;
+		findValue(func: (key: K, value: V) => boolean): V | undefined;
 
 		all(func: (key: K, value: V) => boolean): boolean;
 		any(func: (key: K, value: V) => boolean): boolean;
@@ -153,10 +155,21 @@ type maps = {
 };
 export const MapMacros = $defineCallMacros<ReadonlyMap<defined, defined>>({
 	keys: <K extends defined, V extends defined>(map: ReadonlyMap<K, V>): K[] => {
-		return map.map((k, v) => k);
+		const result: K[] = [];
+		for (const [key] of map) {
+			result.push(key);
+		}
+
+		return result;
 	},
-	values: <K extends defined, V extends defined>(map: ReadonlyMap<K, V>): V[] => {
-		return map.map((k, v) => v);
+	values: <K extends defined, V>(map: ReadonlyMap<K, V>): (V & defined)[] => {
+		const result: (V & defined)[] = [];
+		for (const [_, value] of map) {
+			// value is never undefined in for loop
+			result.push(value!);
+		}
+
+		return result;
 	},
 
 	count: <K extends defined, V extends defined>(
@@ -215,6 +228,28 @@ export const MapMacros = $defineCallMacros<ReadonlyMap<defined, defined>>({
 		for (const [key, value] of map) {
 			if (!func(key, value)) continue;
 			return [key, value];
+		}
+
+		return undefined;
+	},
+	findKey: <K extends defined, V extends defined>(
+		map: ReadonlyMap<K, V>,
+		func: (key: K, value: V) => boolean,
+	): K | undefined => {
+		for (const [key, value] of map) {
+			if (!func(key, value)) continue;
+			return key;
+		}
+
+		return undefined;
+	},
+	findValue: <K extends defined, V extends defined>(
+		map: ReadonlyMap<K, V>,
+		func: (key: K, value: V) => boolean,
+	): V | undefined => {
+		for (const [key, value] of map) {
+			if (!func(key, value)) continue;
+			return value;
 		}
 
 		return undefined;
