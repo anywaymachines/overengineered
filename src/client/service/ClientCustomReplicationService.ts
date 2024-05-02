@@ -3,41 +3,44 @@ import { Remotes } from "shared/Remotes";
 
 export namespace ClientCustomReplicationService {
 	const storage: Map<string, Instance> = new Map();
-	const defaultFolder = Workspace;
 
 	export function initialize() {
-		Remotes.Client.GetNamespace("Replication").Get("ClientBlockInitialize").Connect(onBlockInitializePacket);
-		Remotes.Client.GetNamespace("Replication").Get("ClientBasePartInitialize").Connect(onPartInitializePacket);
+		Remotes.Client.GetNamespace("Replication").Get("ClientSpawnBlock").Connect(onSpawnBlockEvent);
 	}
 
-	function onBlockInitializePacket(data: ReplicationClientBlockInitialize) {
-		const blockModel = new Instance("Model");
-		blockModel.Name = data.uuid;
+	export function onSpawnBlockEvent(data: ReplicationSpawnBlock) {
+		const block = new Instance("Model");
+		block.Name = data.model.Name;
 
-		if (data.attributes) {
-			for (const [name, value] of pairs(data.attributes)) {
-				blockModel.SetAttribute(name, value);
-			}
+		const modelMap: { instance: Instance; instanceAddress: string; modelAddress: Instance }[] = [];
+
+		// Create parts
+		const modelParts = data.model.GetChildren().filter((value) => value.IsA("BasePart")) as BasePart[];
+		for (const modelPart of modelParts) {
+			// Get part definition address
+			const instanceAddress = data.instanceAddressMap.get(modelPart)!;
+
+			// Create part
+			const workspacePart = modelPart.Clone();
+			workspacePart.Parent = block;
+
+			// Save data
+			modelMap.push({
+				instance: workspacePart,
+				modelAddress: modelPart,
+				instanceAddress,
+			});
+			storage.set(instanceAddress, workspacePart);
 		}
 
-		blockModel.Parent = defaultFolder;
-		storage.set(data.uuid, blockModel);
-	}
+		// Fix constraints (TODO)
 
-	function onPartInitializePacket(data: ReplicationClientBasePartInitialize) {
-		const part = data.prefab.Clone();
-		part.Anchored = true;
-		part.CFrame = data.cframe;
+		// Fix welds (TODO)
 
-		// Define PrimaryPart
-		const parent = data.parentUUID !== undefined ? storage.get(data.parentUUID)! : defaultFolder;
+		// Fix primary part
+		const primaryPart = modelMap.find((value) => data.model.PrimaryPart === value.modelAddress)!;
+		block.PrimaryPart = primaryPart.instance as BasePart;
 
-		if ((data.prefab.Parent as Model).PrimaryPart === data.prefab) {
-			(parent as Model).PrimaryPart = part;
-		}
-
-		part.Parent = parent;
-
-		storage.set(data.uuid, part);
+		block.Parent = Workspace;
 	}
 }

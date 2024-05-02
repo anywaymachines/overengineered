@@ -1,9 +1,8 @@
-import { HttpService, MessagingService, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { HttpService, MessagingService, RunService, Workspace } from "@rbxts/services";
 import { Backend } from "server/Backend";
 import { BadgeController } from "server/BadgeController";
 import { ServerRestartController } from "server/ServerRestartController";
 import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
-import { CustomReplicationService } from "server/service/CustomReplicationService";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Logger } from "shared/Logger";
 import { RemoteEvents } from "shared/RemoteEvents";
@@ -12,6 +11,7 @@ import { SlotsMeta } from "shared/SlotsMeta";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { Replicator } from "shared/replication/Replicator";
 import { BuildingWelder } from "./building/BuildingWelder";
 import { ServerBuilding } from "./building/ServerBuilding";
 import { ServerBuildingRequestHandler } from "./building/ServerBuildingRequestHandler";
@@ -250,12 +250,14 @@ if (RunService.IsStudio()) {
 
 Workspace.SetAttribute("loaded", true);
 
-if (RunService.IsStudio()) {
-	warn("REPLICATION TESTING IS ACTIVE");
-	CustomReplicationService.spawnBlock(
-		ReplicatedStorage.Assets.Placeable.FindFirstChild("Movement")!
-			.FindFirstChild("Rocket")!
-			.FindFirstChild("RocketEngine")! as BlockModel,
-		new CFrame(0, 0, 0),
-	);
-}
+// if (RunService.IsStudio()) {
+// 	warn("REPLICATION TESTING IS ACTIVE");
+// 	CustomReplicationService.spawnBlock(
+// 		ReplicatedStorage.Assets.Placeable.FindFirstChild("Movement")!
+// 			.FindFirstChild("Rocket")!
+// 			.FindFirstChild("RocketEngine")! as BlockModel,
+// 		new CFrame(0, 0, 0),
+// 	);
+// }
+
+const _ = Replicator;

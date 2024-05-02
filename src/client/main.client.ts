@@ -24,6 +24,7 @@ import { $compileTime } from "rbxts-transformer-macros";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { Replicator } from "shared/replication/Replicator";
 import { AdminMessageController } from "./AdminMessageController";
 import { ClientContainerComponent } from "./component/ClientContainerComponent";
 import { ClientCustomReplicationService } from "./service/ClientCustomReplicationService";
@@ -94,4 +95,5 @@ TextChatService.OnIncomingMessage = function (message: TextChatMessage) {
 if (RunService.IsStudio()) {
 	warn("REPLICATION TESTING IS ACTIVE");
 	ClientCustomReplicationService.initialize();
+	const _ = Replicator;
 }

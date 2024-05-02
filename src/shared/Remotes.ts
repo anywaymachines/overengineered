@@ -133,8 +133,7 @@ export const Remotes = Definitions.Create({
 		Restart: Definitions.ClientToServerEvent<[]>(),
 	}),
 	Replication: Definitions.Namespace({
-		ClientBlockInitialize: Definitions.ServerToClientEvent<[data: ReplicationClientBlockInitialize]>(),
-		ClientBasePartInitialize: Definitions.ServerToClientEvent<[data: ReplicationClientBasePartInitialize]>(),
+		ClientSpawnBlock: Definitions.ServerToClientEvent<[data: ReplicationSpawnBlock]>(),
 	}),
 	ServerRestartProgress: Definitions.ServerToClientEvent<[atmosphereColor: number]>(),
 });
