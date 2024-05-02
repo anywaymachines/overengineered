@@ -14,25 +14,16 @@ interface BlockSetupInformation {
 }
 
 type BlockDataRegistry = Record<string, BlockSetupInformation>;
-type BlockDataRegistryRegistry = { readonly [key: string]: BlockSetupInformation | BlockDataRegistryRegistry };
 
-const flatten = <T extends Record<string, BlockDataRegistry>>(data: BlockDataRegistryRegistry): BlockDataRegistry => {
-	const push = (result: BlockDataRegistry, key: string, item: BlockDataRegistryRegistry | BlockSetupInformation) => {
-		if ("name" in item) {
-			ret[key] = item as BlockSetupInformation;
-		} else {
-			for (const [nextkey, nextitem] of Objects.pairs_(item)) {
-				push(result, nextkey as string, nextitem);
-			}
-		}
-	};
-
-	const ret: BlockDataRegistry = {};
+const flatten = <T extends Record<string, BlockDataRegistry>>(
+	data: T,
+): { [kk in { [k in keyof T]: keyof T[k] }[keyof T]]: BlockSetupInformation } => {
+	const ret: Partial<Record<keyof T, T[keyof T]>> = {};
 	for (const [key, item] of Objects.pairs_(data)) {
-		push(ret, key as string, item);
+		ret[key] = item;
 	}
 
-	return ret;
+	return ret as never;
 };
 const process = (block: BlockSetupInformation): BlockSetupInformation => {
 	if (![".", "!", "?", " "].includes(block.description.sub(block.description.size()))) {
@@ -389,6 +380,10 @@ const registry = {
 	halfblock: {
 		name: "Half Block",
 		description: "Like a block, but with a small caveat....",
+	},
+	halfblock2: {
+		name: "Half Block 4",
+		description: "Half block 4",
 	},
 	cornerwedge1x1: {
 		name: "Corner Wedge 1x1",
