@@ -1,3 +1,5 @@
+import { BlockId } from "shared/BlockDataRegistry";
+
 const connectors = {
 	boolOrNumberOrVector(
 		name: string,
@@ -1242,7 +1244,7 @@ export const blockConfigRegistry = {
 
 	operationvec3splitter,
 	operationvec3combiner,
-} as const satisfies Record<string, BlockConfigBothDefinitions>;
+} as const satisfies { [k in BlockId]?: BlockConfigBothDefinitions };
 
 type BlockConfigDefinitions = ConfigTypesToDefinition<keyof BlockConfigTypes.Types, BlockConfigTypes.Types>;
 type BlockConfigBothDefinitions = {

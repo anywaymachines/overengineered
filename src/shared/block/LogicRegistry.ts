@@ -1,4 +1,4 @@
-import { type BlockDataRegistry } from "shared/BlockDataRegistry";
+import { BlockId } from "shared/BlockDataRegistry";
 import { PassengerSeatBlockLogic } from "shared/block/logic/PassengerSeatBlockLogic";
 import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
 import { RadarSectionBlockLogic } from "shared/block/logic/RadarSectionBlockLogic";
@@ -123,7 +123,7 @@ export const logicRegistry = {
 
 	operationclamp: OperationClampBlockLogic,
 	operationabs: OperationAbsBlockLogic,
-} as const satisfies { readonly [k in keyof typeof BlockDataRegistry]: unknown };
+} as const satisfies { readonly [k in BlockId]?: unknown };
 
 export type LogicRegistry = Readonly<
 	Record<keyof typeof logicRegistry, { new (block: PlacedBlockData): BlockLogic } | undefined>
