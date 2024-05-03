@@ -14,6 +14,7 @@ type TutorialType = "Basics";
 export namespace Tutorial {
 	export const Control = new TutorialControl();
 	export const Cancellable = true;
+	let isActive = false;
 
 	export const buildTool = new TutorialBuildTool(Tutorial);
 	export const deleteTool = new TutorialDeleteTool(Tutorial);
@@ -39,9 +40,12 @@ export namespace Tutorial {
 
 	/** Starts the tutorial scenery */
 	export function Begin(tutorial: TutorialType) {
+		if (isActive) return;
+
 		switch (tutorial) {
 			case "Basics":
 				TutorialBasics(Tutorial);
+				isActive = true;
 				break;
 
 			default:
@@ -63,5 +67,7 @@ export namespace Tutorial {
 		ActionController.instance.enable();
 
 		Control.finish();
+
+		isActive = false;
 	}
 }
