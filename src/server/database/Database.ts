@@ -8,7 +8,7 @@ export abstract class DbBase<T> {
 	private readonly datastore;
 	private readonly cache: Record<string, { changed: boolean; value: T }> = {};
 
-	constructor(datastore: DataStore) {
+	constructor(datastore: DataStore | undefined) {
 		this.datastore = datastore;
 
 		game.BindToClose(() => {
@@ -33,6 +33,8 @@ export abstract class DbBase<T> {
 
 	private readonly getOptions = Element.create("DataStoreGetOptions", { UseCache: false });
 	private load(key: string) {
+		if (!this.datastore) return { changed: false, value: this.createDefault() };
+
 		const [response] = this.datastore.GetAsync<string>(key, this.getOptions);
 		if (response !== undefined) {
 			return (this.cache[key] = { changed: false, value: this.deserialize(response) });
@@ -63,8 +65,9 @@ export abstract class DbBase<T> {
 		if (!value || !value.changed) return;
 
 		// delay between saves?
-		this.datastore.SetAsync(key, this.serialize(value.value));
 		value.changed = false;
+		if (!this.datastore) return;
+		this.datastore.SetAsync(key, this.serialize(value.value));
 	}
 
 	saveChanged() {
@@ -72,8 +75,9 @@ export abstract class DbBase<T> {
 			if (!value.changed) continue;
 
 			// delay between saves?
-			this.datastore.SetAsync(key, this.serialize(value.value));
 			value.changed = false;
+			if (!this.datastore) return;
+			this.datastore.SetAsync(key, this.serialize(value.value));
 		}
 	}
 }
@@ -84,7 +88,7 @@ export class Db<T> extends DbBase<T> {
 	private readonly deserializeFunc;
 
 	constructor(
-		datastore: DataStore,
+		datastore: DataStore | undefined,
 		createDefaultFunc: () => T,
 		serializeFunc: (data: T) => string | undefined,
 		deserializeFunc: (data: string) => T,

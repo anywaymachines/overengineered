@@ -1,5 +1,4 @@
 import { DataStoreService, Players } from "@rbxts/services";
-import { ServerBuilding } from "server/building/ServerBuilding";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { Logger } from "shared/Logger";
 import { SlotsMeta } from "shared/SlotsMeta";
@@ -14,10 +13,16 @@ export class SlotDatabase {
 	static readonly instance = new SlotDatabase();
 
 	private readonly onlinePlayers = new Set<number>();
-	private readonly datastore: DataStore = DataStoreService.GetDataStore("slots");
+	private readonly datastore;
 	private readonly blocksdb;
 
 	constructor() {
+		try {
+			this.datastore = DataStoreService.GetDataStore("slots");
+		} catch {
+			warn("Place datastore is not available. All requests will be dropped.");
+		}
+
 		this.blocksdb = new Db<string | undefined>(
 			this.datastore,
 			() => undefined,
@@ -130,41 +135,5 @@ export class SlotDatabase {
 		}
 
 		return { blocks: blocksCount, size: size };
-	}
-
-	/** @deprecated don't use */
-	triggerFullUpgrade() {
-		const pager = this.datastore.ListKeysAsync();
-		const ids: string[] = [];
-
-		while (!pager.IsFinished) {
-			for (const item of pager.GetCurrentPage() as DataStoreKey[]) {
-				ids.push(item.KeyName);
-			}
-			try {
-				pager.AdvanceToNextPageAsync();
-			} catch {
-				// empty
-			}
-		}
-
-		for (const id of ids) {
-			try {
-				const bs = this.blocksdb.get(id) as string | undefined;
-				if (bs === undefined) continue;
-
-				const plot = SharedPlots.getPlotByOwnerID(Players.GetPlayers()[0].UserId);
-				ServerBuilding.clearPlot(plot);
-
-				BlocksSerializer.deserialize(bs, plot);
-				const serialized = BlocksSerializer.serialize(plot);
-
-				this.blocksdb.set(id, serialized);
-			} catch (err) {
-				logger.error(err as string);
-			}
-		}
-
-		this.blocksdb.saveChanged();
 	}
 }

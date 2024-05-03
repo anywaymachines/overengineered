@@ -229,10 +229,12 @@ registerOnRemoteEvent("Admin", "Restart", () => ServerRestartController.restart(
 UnreliableRemoteHandler.initialize();
 
 // Global message networking, TODO: Move away
-MessagingService.SubscribeAsync("global_message", (message) => {
-	const msg = message as unknown as { text: string; color: Color3; duration: number };
-	Remotes.Server.GetNamespace("Admin").Get("SendMessage").SendToAllPlayers(msg.text, msg.color, msg.duration);
-});
+if (!RunService.IsStudio()) {
+	MessagingService.SubscribeAsync("global_message", (message) => {
+		const msg = message as unknown as { text: string; color: Color3; duration: number };
+		Remotes.Server.GetNamespace("Admin").Get("SendMessage").SendToAllPlayers(msg.text, msg.color, msg.duration);
+	});
+}
 
 ServerRestartController.init();
 

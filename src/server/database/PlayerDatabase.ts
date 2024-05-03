@@ -12,10 +12,16 @@ export class PlayerDatabase {
 	static readonly instance = new PlayerDatabase();
 
 	private readonly onlinePlayers = new Set<number>();
-	private readonly datastore: DataStore = DataStoreService.GetDataStore("players");
+	private readonly datastore;
 	private readonly db;
 
 	constructor() {
+		try {
+			this.datastore = DataStoreService.GetDataStore("players");
+		} catch {
+			warn("Place datastore is not available. All requests will be dropped.");
+		}
+
 		this.db = new Db<PlayerData>(
 			this.datastore,
 			() => ({}),

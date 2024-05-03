@@ -9,11 +9,9 @@ import { PartUtils } from "shared/utils/PartUtils";
 
 export namespace ServerRestartController {
 	export function init() {
-		MessagingService.SubscribeAsync("Restart", () => {
-			if (RunService.IsStudio()) {
-				return;
-			}
+		if (RunService.IsStudio()) return;
 
+		MessagingService.SubscribeAsync("Restart", () => {
 			restart(true);
 		});
 	}
