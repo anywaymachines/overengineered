@@ -5,7 +5,7 @@ import { JsonSerializablePrimitive } from "shared/fixes/Json";
 import { Objects, asMap } from "shared/fixes/objects";
 
 export namespace BlockWireManager {
-	export type DataType = "bool" | "vector3" | "number" | "string" | "color" | "never";
+	export type DataType = "bool" | "vector3" | "number" | "string" | "color" | "byte" | "never";
 	export type MarkerData = {
 		readonly id: BlockConnectionName;
 		readonly name: string;
@@ -32,6 +32,7 @@ export namespace BlockWireManager {
 		key: "never",
 		multikey: "never",
 		controllableNumber: "number",
+		byte: "byte",
 	};
 
 	export function intersectTypes(types: readonly (readonly DataType[])[]): readonly DataType[] {

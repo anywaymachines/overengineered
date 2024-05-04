@@ -1,5 +1,6 @@
 import { RemoteEvents } from "shared/RemoteEvents";
 import { BlockLogicValue, IBlockLogicValue, ReadonlyBlockLogicValue } from "shared/block/BlockLogicValue";
+import { ByteBlockLogicValue } from "shared/block/ByteBlockLogicValue";
 import { NumberBlockLogicValue } from "shared/block/NumberBlockLogicValue";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Objects } from "shared/fixes/objects";
@@ -25,6 +26,7 @@ const BlockConfigValueRegistry = {
 	number: createObservable,
 	string: createObservable,
 	color: createObservable,
+	byte: (definition) => new ByteBlockLogicValue(definition.default),
 	clampedNumber: (definition) =>
 		new NumberBlockLogicValue(definition.default, definition.min, definition.max, definition.step),
 	thrust: () => new NumberBlockLogicValue(0, 0, 100, 0.01),

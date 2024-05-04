@@ -392,6 +392,20 @@ export const ConfigTest: ControlTest = {
 						},
 					},
 				},
+				byte: {
+					byte: {
+						displayName: "Byte",
+						type: "byte",
+						config: { type: "byte", value: 0 },
+						default: { type: "byte", value: 0 },
+					},
+					byteMixed: {
+						displayName: "Byte MIXED",
+						type: "byte",
+						config: { type: "byte", value: 0 },
+						default: { type: "byte", value: 0 },
+					},
+				},
 			} satisfies Readonly<Record<keyof BlockConfigTypes.Types, BlockConfigTypes.Definitions>>;
 
 			const multidef = Objects.fromEntries(
@@ -448,6 +462,8 @@ export const ConfigTest: ControlTest = {
 					or: { type: "bool", value: false },
 					orMixedValue: { type: "bool", value: false },
 					orMixedType: { type: "bool", value: false },
+					byte: { type: "byte", value: 123 },
+					byteMixed: { type: "byte", value: 123 },
 				},
 				["2" as BlockUuid]: {
 					boolTrue: true,
@@ -481,6 +497,8 @@ export const ConfigTest: ControlTest = {
 					or: { type: "bool", value: false },
 					orMixedValue: { type: "bool", value: true },
 					orMixedType: { type: "number", value: 0 },
+					byte: { type: "byte", value: 123 },
+					byteMixed: { type: "byte", value: 124 },
 				},
 			} satisfies Record<BlockUuid, ConfigDefinitionsToConfig<string, BlockConfigTypes.Definitions>>;
 

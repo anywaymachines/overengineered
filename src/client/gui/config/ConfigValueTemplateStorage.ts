@@ -2,6 +2,7 @@ import { type ColorChooserDefinition } from "client/gui/ColorChooser";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { type OrConfigControlDefinition } from "client/gui/config/OrConfigValueControl.client";
+import { ByteEditorDefinition } from "client/gui/controls/ByteEditorControl";
 import { type CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import { type KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import { type NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
@@ -23,6 +24,7 @@ type Templates = {
 	readonly MultiTemplate: ConfigPartDefinition<GuiObject>;
 	readonly MultiMultiTemplate: ConfigPartDefinition<OrConfigControlDefinition>;
 	readonly ColorTemplate: ConfigPartDefinition<ColorChooserDefinition>;
+	readonly ByteTemplate: ConfigPartDefinition<ByteEditorDefinition>;
 };
 const templates = Gui.getGameUI<{ Templates: { Config: Templates } }>().Templates.Config;
 
@@ -36,5 +38,6 @@ export const configValueTemplateStorage = {
 	multi: Control.asTemplateWithMemoryLeak(templates.MultiTemplate, false),
 	multiMulti: Control.asTemplateWithMemoryLeak(templates.MultiMultiTemplate, false),
 	color: Control.asTemplateWithMemoryLeak(templates.ColorTemplate, false),
+	byte: Control.asTemplateWithMemoryLeak(templates.ByteTemplate, false),
 } as const;
 export type ConfigValueTemplateStorage = typeof configValueTemplateStorage;

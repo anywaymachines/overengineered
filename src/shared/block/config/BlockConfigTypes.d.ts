@@ -14,6 +14,7 @@ declare namespace BlockConfigTypes {
 	export type Number = BlockConfigPrimitiveType<"number", number>;
 	export type String = BlockConfigPrimitiveType<"string", string>;
 	export type Color = BlockConfigPrimitiveType<"color", Color3>;
+	export type Byte = BlockConfigPrimitiveType<"byte", { readonly type: "byte"; readonly value: number }>;
 
 	export type MultiKey<TKeys extends string = string> = BlockConfigPrimitiveType<
 		"multikey",
@@ -134,5 +135,6 @@ declare namespace BlockConfigTypes {
 		readonly servoMotorAngle: ServoMotorAngle;
 		readonly thrust: Thrust;
 		readonly controllableNumber: ControllableNumber;
+		readonly byte: Byte;
 	}
 }

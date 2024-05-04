@@ -1,3 +1,4 @@
+import { ByteConfigLogicValue } from "client/blocks/config/ByteConfigLogicValue";
 import { ColorConfigLogicValue } from "client/blocks/config/ColorConfigLogicValue";
 import { ControllableNumberConfigLogicValue } from "client/blocks/config/ControllableNumberLogicValue";
 import { BoolConfigLogicValue } from "./BoolConfigLogicValue";
@@ -33,4 +34,5 @@ export const blockConfigRegistryClient = {
 	servoMotorAngle: ServoMotorAngleConfigLogicValue,
 	or: OrConfigLogicValue,
 	controllableNumber: ControllableNumberConfigLogicValue,
+	byte: ByteConfigLogicValue,
 } as const satisfies blockConfigRegistryClient;

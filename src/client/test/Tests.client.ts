@@ -1,4 +1,4 @@
-import { Players, RunService } from "@rbxts/services";
+import { RunService } from "@rbxts/services";
 import { GameLoader } from "client/GameLoader";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
@@ -23,7 +23,7 @@ import { WorldPipetteTest } from "./visual/WorldPipetteTest";
 
 GameLoader.waitForEverything();
 
-const enabled = RunService.IsStudio() && Players.LocalPlayer.Name === "i3ymm";
+const enabled = RunService.IsStudio(); // && Players.LocalPlayer.Name === "i3ymm";
 if (!enabled) new Instance("BindableEvent").Event.Wait();
 
 let destroy: (() => void) | undefined;
