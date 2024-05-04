@@ -1106,7 +1106,7 @@ const delayBlock = {
 		duration: {
 			displayName: "Duration",
 			type: "number",
-			default: 2 as number,
+			default: 0 as number,
 			config: 2 as number,
 		},
 	},

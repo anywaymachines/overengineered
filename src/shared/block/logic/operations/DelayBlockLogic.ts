@@ -7,7 +7,9 @@ export class DelayBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRe
 		super(block, blockConfigRegistry.delayblock);
 
 		this.event.subscribeObservable(this.input.value, (value) => {
-			task.delay(this.input.duration.get(), () => this.output.result.set(value));
+			if (this.input.duration.get() > 0) {
+				task.delay(this.input.duration.get(), () => this.output.result.set(value));
+			}
 		});
 	}
 }
