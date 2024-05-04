@@ -1097,7 +1097,12 @@ export class BuildTool extends ToolBase {
 		this.selectedBlock.set(block);
 		this.selectedMaterial.set(BlockManager.manager.material.get(model));
 		this.selectedColor.set(BlockManager.manager.color.get(model));
-		this.blockRotation.set(model.GetPivot().Rotation);
+
+		if (!target.IsDescendantOf(this.targetPlot.get().instance)) {
+			this.blockRotation.set(CFrame.identity);
+		} else {
+			this.blockRotation.set(model.GetPivot().Rotation);
+		}
 	}
 
 	getDisplayName(): string {
