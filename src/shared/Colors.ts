@@ -14,4 +14,8 @@ export namespace Colors {
 	export const yellow = Color3.fromRGB(252, 252, 105);
 	export const pink = Color3.fromRGB(244, 142, 255);
 	export const purple = Color3.fromRGB(120, 18, 120);
+
+	export function toInt(color: Color3) {
+		return math.floor(color.B * 255) + (math.floor(color.G * 255) << 8) + (math.floor(color.R * 255) << 16);
+	}
 }
