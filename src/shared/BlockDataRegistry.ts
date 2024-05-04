@@ -383,9 +383,9 @@ const registry = {
 		name: "Half Block",
 		description: "Like a block, but with a small caveat....",
 	},
-	halfblock2: {
-		name: "Half Block 4",
-		description: "Half block 4",
+	leddisplay: {
+		name: "asd",
+		description: "asd",
 	},
 	cornerwedge1x1: {
 		name: "Corner Wedge 1x1",
