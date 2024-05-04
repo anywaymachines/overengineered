@@ -4,7 +4,6 @@ import { Sound } from "shared/Sound";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { PartUtils } from "shared/utils/PartUtils";
 import { GameEnvironmentController } from "./GameEnvironmentController";
-import { MusicController } from "./sound/MusicController";
 
 type Sounds = {
 	readonly Build: {
@@ -26,8 +25,6 @@ export namespace SoundController {
 	let underwater = false;
 
 	export function initialize() {
-		MusicController.initialize();
-
 		Signals.CAMERA.MOVED.Connect(() => {
 			const newState = Workspace.CurrentCamera!.CFrame.Y <= TerrainDataInfo.waterLevel - 5;
 			if (newState === underwater) return;

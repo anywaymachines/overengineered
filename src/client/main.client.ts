@@ -14,6 +14,7 @@ import { GraphicsSettingsController } from "client/controller/GraphicsSettingsCo
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { SoundController } from "client/controller/SoundController";
 import { WindController } from "client/controller/WindController";
+import { MusicController } from "client/controller/sound/MusicController";
 import { InputTypeChangeEvent } from "client/event/InputTypeChangeEvent";
 import { Gui } from "client/gui/Gui";
 import { DebugControl } from "client/gui/static/DebugControl";
@@ -51,6 +52,7 @@ if (RunService.IsStudio()) {
 }
 
 SoundController.initialize();
+MusicController.initialize();
 GraphicsSettingsController.initialize();
 
 const updated = DateTime.fromUnixTimestamp($compileTime()).FormatUniversalTime("DDMMYY_HHmm", "en-us");
