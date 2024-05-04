@@ -1,4 +1,3 @@
-import { HttpService } from "@rbxts/services";
 import { ServerBuilding } from "server/building/ServerBuilding";
 import { BlockId } from "shared/BlockDataRegistry";
 import { BlocksInitializer } from "shared/BlocksInitializer";
@@ -7,6 +6,7 @@ import { Serializer } from "shared/Serializer";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockManager, PlacedBlockDataConnection } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
+import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 
 const logger = new Logger("BlocksSerializer");
@@ -704,10 +704,10 @@ const getVersion = (version: number) => versions.find((v) => v.version === versi
 /** Methods to save and load buildings */
 export namespace BlocksSerializer {
 	export function serialize(plot: PlotModel): string {
-		return HttpService.JSONEncode(current.read(plot));
+		return JSON.serialize(current.read(plot) as never);
 	}
 	export function deserialize(data: string, plot: PlotModel): number {
-		let deserialized = HttpService.JSONDecode(data) as SerializedBlocks<SerializedBlockBase>;
+		let deserialized = JSON.deserialize(data) as SerializedBlocks<SerializedBlockBase>;
 		logger.info(`Loaded a slot using savev${deserialized.version}`);
 
 		const version = deserialized.version;
