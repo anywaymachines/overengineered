@@ -1,3 +1,4 @@
+import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic";
 import { PistonBlockServerLogic } from "server/blocks/logic/PistonBlockServerLogic";
 import { Logger } from "shared/Logger";
 import { logicRegistry } from "shared/block/LogicRegistry";
@@ -21,6 +22,7 @@ const serverBlockLogicRegistry: ServerBlockLogicRegistry = {
 	sphericaltnt: TNTServerBlockLogic,
 	disconnectblock: DisconnectBlockServerLogic,
 	lamp: LampServerLogic,
+	leddisplay: LEDDisplayServerLogic,
 	screen: ScreenServerLogic,
 	piston: PistonBlockServerLogic,
 };

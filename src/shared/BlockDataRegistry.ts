@@ -384,8 +384,8 @@ const registry = {
 		description: "Like a block, but with a small caveat....",
 	},
 	leddisplay: {
-		name: "asd",
-		description: "asd",
+		name: "Display",
+		description: "Simple 8x8 pixel display. Wonder what can you do with it..",
 	},
 	cornerwedge1x1: {
 		name: "Corner Wedge 1x1",

@@ -416,6 +416,46 @@ const lamp = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
+const leddisplay = {
+	input: {
+		posx: {
+			displayName: "Pos X",
+			type: "clampedNumber",
+			default: 0 as number,
+			config: 0 as number,
+			configHidden: true,
+			min: 0,
+			max: 7,
+			step: 1,
+		},
+		posy: {
+			displayName: "Pos Y",
+			type: "clampedNumber",
+			default: 0 as number,
+			config: 0 as number,
+			configHidden: true,
+			min: 0,
+			max: 7,
+			step: 1,
+		},
+		color: {
+			displayName: "Color",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+			configHidden: true,
+		},
+		update: {
+			displayName: "Update",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+			configHidden: true,
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
 const suspensionblock = {
 	input: {
 		damping: {
@@ -1195,6 +1235,7 @@ export const blockConfigRegistry = {
 	wedgewing1x3: wing,
 	wedgewing1x4: wing,
 	lamp,
+	leddisplay,
 	screen,
 	laser,
 
