@@ -5,23 +5,32 @@ import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
 
 export class LEDDisplayBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.leddisplay> {
 	static readonly events = {
+		prepare: new AutoC2SRemoteEvent<{
+			readonly block: BlockModel;
+		}>("leddisplay_prepare"), // TODO: fix this shit crap
 		update: new AutoC2SRemoteEvent<{
 			readonly block: BlockModel;
 			readonly color: Color3;
-			readonly part: BasePart;
+			readonly frame: Frame;
 		}>("leddisplay_update"),
 	} as const;
 
-	private readonly display: BasePart[][] = new Array(8);
+	private readonly display: Frame[][] = new Array(8);
 
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.leddisplay);
 
-		const folder = block.instance.WaitForChild("Display");
+		LEDDisplayBlockLogic.events.prepare.send({
+			block: block.instance,
+		});
+
+		const gui = block.instance.WaitForChild("Screen").WaitForChild("SurfaceGui");
+
+		// ???
 		for (let x = 0; x < 8; x++) {
 			this.display[x] = new Array(8);
 			for (let y = 0; y < 8; y++) {
-				this.display[x][y] = folder.WaitForChild(`Pixel x${x}y${y}`) as BasePart;
+				this.display[x][y] = gui.WaitForChild(`x${x}y${y}`) as Frame;
 			}
 		}
 
@@ -32,7 +41,7 @@ export class LEDDisplayBlockLogic extends ConfigurableBlockLogic<typeof blockCon
 			LEDDisplayBlockLogic.events.update.send({
 				block: block.instance,
 				color: Color3.fromRGB(color.X, color.Y, color.Z),
-				part: this.display[this.input.posx.get()][this.input.posy.get()],
+				frame: this.display[this.input.posx.get()][this.input.posy.get()],
 			});
 		};
 
