@@ -35,6 +35,7 @@ const BlockConfigValueRegistry = {
 	or: createObservable,
 	controllableNumber: (definition) =>
 		new NumberBlockLogicValue(definition.config.value, definition.min, definition.max, definition.step),
+	bytearray: createObservable,
 } as const satisfies BlockConfigValueRegistry;
 
 export abstract class ConfigurableBlockLogic<

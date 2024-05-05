@@ -1,3 +1,4 @@
+import { ByteArrayConfigLogicValue } from "client/blocks/config/ByteArrayConfigLogicValue";
 import { ByteConfigLogicValue } from "client/blocks/config/ByteConfigLogicValue";
 import { ColorConfigLogicValue } from "client/blocks/config/ColorConfigLogicValue";
 import { ControllableNumberConfigLogicValue } from "client/blocks/config/ControllableNumberLogicValue";
@@ -35,4 +36,5 @@ export const blockConfigRegistryClient = {
 	or: OrConfigLogicValue,
 	controllableNumber: ControllableNumberConfigLogicValue,
 	byte: ByteConfigLogicValue,
+	bytearray: ByteArrayConfigLogicValue,
 } as const satisfies blockConfigRegistryClient;

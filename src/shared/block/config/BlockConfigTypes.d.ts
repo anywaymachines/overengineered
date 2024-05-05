@@ -15,6 +15,9 @@ declare namespace BlockConfigTypes {
 	export type String = BlockConfigPrimitiveType<"string", string>;
 	export type Color = BlockConfigPrimitiveType<"color", Color3>;
 	export type Byte = BlockConfigPrimitiveType<"byte", { readonly type: "byte"; readonly value: number }>;
+	export type ByteArray = BlockConfigPrimitiveType<"bytearray", readonly number[]> & {
+		readonly lengthLimit: number;
+	};
 
 	export type MultiKey<TKeys extends string = string> = BlockConfigPrimitiveType<
 		"multikey",
@@ -136,5 +139,6 @@ declare namespace BlockConfigTypes {
 		readonly thrust: Thrust;
 		readonly controllableNumber: ControllableNumber;
 		readonly byte: Byte;
+		readonly bytearray: ByteArray;
 	}
 }

@@ -33,6 +33,7 @@ import { OperationXorBlockLogic } from "./logic/operations/boolean/OperationXorB
 import { CounterBlockLogic } from "./logic/operations/memory/CounterBlockLogic";
 import { LogicMemoryBlockLogic } from "./logic/operations/memory/LogicMemoryBlockLogic";
 import { RandomAccessMemoryBlockLogic } from "./logic/operations/memory/RandomAccessMemoryBlockLogic";
+import { ReadOnlyMemoryBlockLogic } from "./logic/operations/memory/ReadOnlyMemoryBlockLogic";
 import { StackMemoryBlockLogic } from "./logic/operations/memory/StackMemoryBlockLogic";
 import { Multiplexer } from "./logic/operations/number/Multiplexer";
 import { OperationAbsBlockLogic } from "./logic/operations/number/OperationAbsBlockLogic";
@@ -106,6 +107,7 @@ export const logicRegistry = {
 	logicmemory: LogicMemoryBlockLogic,
 	stackmemory: StackMemoryBlockLogic,
 	randomaccessmemory: RandomAccessMemoryBlockLogic,
+	readonlymemory: ReadOnlyMemoryBlockLogic,
 
 	operationbuffer: OperationBufferBlockLogic,
 	operationnot: OperationNotBlockLogic,

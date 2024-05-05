@@ -25,6 +25,7 @@ type Templates = {
 	readonly MultiMultiTemplate: ConfigPartDefinition<OrConfigControlDefinition>;
 	readonly ColorTemplate: ConfigPartDefinition<ColorChooserDefinition>;
 	readonly ByteTemplate: ConfigPartDefinition<ByteEditorDefinition>;
+	readonly ByteArrayTemplate: ConfigPartDefinition<GuiButton>;
 };
 const templates = Gui.getGameUI<{ Templates: { Config: Templates } }>().Templates.Config;
 
@@ -39,5 +40,6 @@ export const configValueTemplateStorage = {
 	multiMulti: Control.asTemplateWithMemoryLeak(templates.MultiMultiTemplate, false),
 	color: Control.asTemplateWithMemoryLeak(templates.ColorTemplate, false),
 	byte: Control.asTemplateWithMemoryLeak(templates.ByteTemplate, false),
+	bytearray: Control.asTemplateWithMemoryLeak(templates.ByteArrayTemplate, false),
 } as const;
 export type ConfigValueTemplateStorage = typeof configValueTemplateStorage;

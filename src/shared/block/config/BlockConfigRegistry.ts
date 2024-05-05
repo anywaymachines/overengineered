@@ -1037,6 +1037,41 @@ const randomaccessmemory = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const readonlymemory = {
+	input: {
+		read: {
+			displayName: "Read",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+			configHidden: true,
+		},
+		address: {
+			displayName: "Address",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		menu: {
+			displayName: "Menu",
+			type: "bytearray",
+			config: [],
+			default: [],
+			lengthLimit: 0xffff,
+			connectorHidden: true,
+		},
+	},
+	output: {
+		size: {
+			displayName: "Size",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		result: connectors.any("Output", "1"),
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const counter = {
 	input: {
 		value: {
@@ -1261,6 +1296,7 @@ export const blockConfigRegistry = {
 	logicmemory,
 	stackmemory,
 	randomaccessmemory,
+	readonlymemory,
 	operationbuffer: anyProcessing,
 	operationnot: booleanProcessing,
 	operationand: twoBooleanInputsOneBooleanOutput,

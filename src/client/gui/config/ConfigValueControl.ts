@@ -23,10 +23,10 @@ export class ConfigValueControl<TGui extends GuiObject, TType extends UnknownCon
 		this.gui.HeadingLabel.Text = name;
 	}
 
-	protected sameOrUndefined<T>(configs: Readonly<Record<BlockUuid, T>>) {
+	protected sameOrUndefined<T>(configs: Readonly<Record<BlockUuid, T>>, comparer?: (left: T, right: T) => boolean) {
 		let value: T | undefined;
 		for (const [_, config] of Objects.pairs_(configs)) {
-			if (value !== undefined && value !== config) {
+			if (value !== undefined && !(comparer?.(value, config) ?? value === config)) {
 				value = undefined;
 				break;
 			}
