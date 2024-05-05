@@ -18,7 +18,7 @@ export class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 		Popup.onAllHide.Connect(() => Popup.tweenBlur(0));
 	}
 
-	private readonly parentScreen: ScaledScreenGui<ScreenGui>;
+	protected readonly parentScreen: ScaledScreenGui<ScreenGui>;
 	constructor(gui: T) {
 		super(gui);
 

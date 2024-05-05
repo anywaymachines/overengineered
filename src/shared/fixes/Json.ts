@@ -172,8 +172,8 @@ const serializerValues = Objects.values(serializers) as readonly Serializer<unkn
 
 /** JSON de/serializer with the support of some roblox native types like `Vector3` or `CFrame` */
 export namespace JSON {
-	export function serialize<T>(value: JsonSerializable<T>): string {
-		const process = <T extends defined | undefined>(obj: T): JsonSerializedProperty => {
+	export function serialize(value: unknown): string {
+		const process = (obj: unknown): unknown => {
 			if (typeIs(obj, "number")) return obj;
 			if (typeIs(obj, "string")) return obj;
 			if (typeIs(obj, "boolean")) return obj;
@@ -186,12 +186,12 @@ export namespace JSON {
 			}
 
 			if (typeIs(obj, "table")) {
-				const toserialize: Partial<Record<keyof T, JsonSerializedProperty>> = {};
+				const toserialize: Partial<Record<string | number | symbol, unknown>> = {};
 				for (const [key, value] of Objects.pairs_(obj)) {
 					toserialize[key as keyof typeof toserialize] = process(value as JsonSerializedProperty);
 				}
 
-				return toserialize as T;
+				return toserialize;
 			}
 
 			return obj;

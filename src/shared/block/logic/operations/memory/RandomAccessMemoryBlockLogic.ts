@@ -12,30 +12,32 @@ export class RandomAccessMemoryBlockLogic extends ConfigurableBlockLogic<
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.randomaccessmemory);
 
-		this.input.write.subscribe((v) => (v ? this.writeValue() : undefined));
-		this.input.read.subscribe((v) => (v ? this.readValue() : undefined));
-	}
+		const isReady = () => {
+			if (!this.input.enabled.get()) return false;
+			if (!this.input.read.get()) return false;
+			if (this.input.address.get() >= this.size || this.input.address.get() < 0) {
+				this.burn();
+				return false;
+			}
+			return true;
+		};
 
-	private writeValue() {
-		if (!this.input.enabled.get()) return;
-		if (this.input.address.get() >= this.size || this.input.address.get() < 0) {
-			this.burn();
-			return;
-		}
-		const value = this.input.value.get();
-		this.internalMemory[this.input.address.get()] = value;
-		this.output.size.set(this.internalMemory.size());
-	}
+		const writeValue = () => {
+			if (!isReady()) return;
 
-	private readValue() {
-		if (!this.input.enabled.get()) return;
-		if (this.input.address.get() >= this.size || this.input.address.get() < 0) {
-			this.burn();
-			return;
-		}
-		const value = this.internalMemory[this.input.address.get()];
-		this.output.result.set(value);
-		this.output.size.set(this.internalMemory.size());
+			this.internalMemory[this.input.address.get()] = this.input.value.get();
+			this.output.size.set(this.internalMemory.size());
+		};
+
+		const readValue = () => {
+			if (!isReady()) return;
+
+			this.output.result.set(this.internalMemory[this.input.address.get()]);
+			this.output.size.set(this.internalMemory.size());
+		};
+
+		this.input.address.subscribe(writeValue);
+		this.input.address.subscribe(readValue);
 	}
 
 	private burn() {

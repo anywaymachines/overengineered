@@ -35,6 +35,7 @@ const typeGroups: { readonly [k in BlockWireManager.DataType]: TypeGroup } = {
 	string: { color: Colors.purple },
 	color: { color: Colors.red },
 	byte: { color: Color3.fromRGB(167, 255, 0) },
+	bytearray: { color: Colors.black },
 	never: { color: Colors.black },
 };
 

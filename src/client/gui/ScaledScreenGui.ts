@@ -5,6 +5,8 @@ import { InstanceComponent } from "shared/component/InstanceComponent";
 const logger = new Logger("ScaledScreenGui");
 
 export class ScaledScreenGui<T extends ScreenGui> extends InstanceComponent<T> {
+	private readonly uiscale: UIScale;
+
 	constructor(gui: T) {
 		super(gui);
 
@@ -13,9 +15,10 @@ export class ScaledScreenGui<T extends ScreenGui> extends InstanceComponent<T> {
 			uiscale = new Instance("UIScale");
 			uiscale.Parent = gui;
 		}
+		this.uiscale = uiscale;
 
 		const update = () => {
-			const asize = gui.AbsoluteSize;
+			const asize = this.instance.AbsoluteSize;
 			const mult = PlayerDataStorage.config.get().uiScale;
 
 			const scale = math.min((asize.Y / 1080) * mult, 9999999);
@@ -29,5 +32,9 @@ export class ScaledScreenGui<T extends ScreenGui> extends InstanceComponent<T> {
 		);
 		this.event.subscribeObservable(PlayerDataStorage.config.createChild("uiScale", 1), update);
 		update();
+	}
+
+	getScale() {
+		return this.uiscale.Scale;
 	}
 }

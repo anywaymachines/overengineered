@@ -1,4 +1,5 @@
 import { ButtonControl } from "client/gui/controls/Button";
+import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
@@ -8,15 +9,7 @@ class ValueControl extends ConfigValueControl<GuiButton, Type> {
 	constructor({ configs, definition }: ConfigValueControlParams<Type>) {
 		super(configValueTemplateStorage.bytearray(), definition.displayName);
 
-		const control = this.add(
-			new ButtonControl(this.gui.Control, () => {
-				// TODO: open popup
-				// and then
-				// const prev = configs;
-				// this._submitted.Fire((configs = this.map(configs, () => value)), prev);
-			}),
-		);
-		const value = this.sameOrUndefined(configs, (left, right) => {
+		let value = this.sameOrUndefined(configs, (left, right) => {
 			if (left.size() !== right.size()) {
 				return false;
 			}
@@ -29,6 +22,16 @@ class ValueControl extends ConfigValueControl<GuiButton, Type> {
 
 			return true;
 		});
+
+		const control = this.add(
+			new ButtonControl(this.gui.Control, () => {
+				MemoryEditorPopup.showPopup(definition.lengthLimit, [...(value ?? [])], (newval) => {
+					value = newval;
+					const prev = configs;
+					this._submitted.Fire((configs = this.map(configs, () => newval)), prev);
+				});
+			}),
+		);
 
 		if (!value) {
 			control.setInteractable(false);
