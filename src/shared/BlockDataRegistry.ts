@@ -488,6 +488,7 @@ const registry = {
 	readonlymemory: {
 		name: "ROM",
 		description: "A programmable memory. Allows you to read values you've written in",
+		limit: 1,
 	},
 	relay: {
 		name: "Relay",
