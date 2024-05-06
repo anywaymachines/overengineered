@@ -58,9 +58,9 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 		}
 		if (num === this.value.get()) return;
 
-		this.gui.Text = tostring(num);
 		this.value.set(num);
-		this.submitted.Fire(num);
+		this.submitted.Fire(this.value.get()!);
+		this.gui.Text = tostring(this.value.get());
 	}
 
 	destroy() {

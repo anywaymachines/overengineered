@@ -7,10 +7,9 @@ import { NumberTextBoxControl } from "./NumberTextBoxControl";
 import { ProgressBarControl, ProgressBarControlDefinition } from "./ProgressBarControl";
 
 type ToNum<TAllowNull extends boolean> = TAllowNull extends false ? number : number | undefined;
-export type SliderControlDefinition = GuiObject &
-	ProgressBarControlDefinition & {
-		TextBox?: TextBox;
-	};
+export type SliderControlDefinition = ProgressBarControlDefinition & {
+	readonly TextBox?: TextBox;
+};
 
 /** Control that represents a number via a slider. */
 export class SliderControl<TAllowNull extends boolean = false> extends Control<SliderControlDefinition> {
