@@ -83,6 +83,7 @@ class MemoryEditorRow extends Control<MemoryEditorRecordDefinition, ByteTextBoxC
 
 				data[address * 16 + i] = value;
 				recolorPreviousUntil(address * 16 + idx);
+				updateAsciiLabel();
 			});
 		}
 	}
