@@ -18,7 +18,7 @@ export class Control<
 			// needed because `instanceof Control` results in `instance` being `Control<any, any>`
 			const isControl = (instance: IComponent): instance is Control => instance instanceof Control;
 
-			if (isControl(instance) && instance.instance.Parent === this.gui) {
+			if (isControl(instance) && instance.instance.Parent === this.gui && instance.instance.LayoutOrder === 0) {
 				instance.instance.LayoutOrder = this.getChildren().size();
 			}
 		});
