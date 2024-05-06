@@ -10,6 +10,10 @@ export const FlatTerrainRenderer = (height: number, chunkSize: number = 1024): C
 	loadDistanceMultiplier: 4,
 
 	renderChunk(chunkX, chunkZ) {
+		if (math.random() > 0.95) {
+			task.wait();
+		}
+
 		const part = new Instance("Part");
 		part.Anchored = true;
 		part.CastShadow = false;
