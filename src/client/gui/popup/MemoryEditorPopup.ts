@@ -4,6 +4,8 @@ import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "client/gui/controls/Button";
 import { ByteTextBoxControl } from "client/gui/controls/ByteTextBoxControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
+import { TextPopup } from "client/gui/popup/TextPopup";
+import { LogControl } from "client/gui/static/LogControl";
 import { Colors } from "shared/Colors";
 import { TransformService } from "shared/component/TransformService";
 
@@ -13,7 +15,6 @@ export type MemoryEditorPopupDefinition = GuiObject & {
 		readonly TitleLabel: TextLabel;
 	};
 	readonly AddressTextBox: TextBox;
-	readonly ExportButton: TextButton;
 	readonly ImportButton: TextButton;
 	readonly ClearButton: TextButton;
 	readonly Content: MemoryEditorRecordsDefinition;
@@ -59,7 +60,7 @@ class MemoryEditorRow extends Control<MemoryEditorRecordDefinition, ByteTextBoxC
 			let str = "";
 			for (let i = 0; i < 16; i++) {
 				const c = data[address * 16 + i] ?? 0;
-				str += c >= 32 ? string.char(c) : ".";
+				str += c >= 32 && c <= 126 ? string.char(c) : ".";
 			}
 
 			this.gui.AsciiLabel.Text = str;
@@ -172,7 +173,7 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 			const children = this.rows.getChildren();
 			this.rows.add(
 				new MemoryEditorRow(this.template(), address, this.data, (index) => {
-					for (let i = 0; i < math.ceil(index / 16); i++) {
+					for (let i = 0; i < math.ceil(index / 16) + 2; i++) {
 						for (let j = 0; j < 16; j++) {
 							children[i].updateColor(j);
 						}
@@ -219,6 +220,33 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 					() => {
 						data.clear();
 						rows.recreate();
+					},
+					() => {},
+				);
+			}),
+		);
+
+		this.add(
+			new ButtonControl(this.gui.ImportButton, () => {
+				TextPopup.showPopup(
+					"IMPORT",
+					"00 01 02 03 04 ...",
+					(text) => {
+						const spacelessText = string.gsub(text, "%s+", "")[0];
+
+						if (spacelessText.size() % 2 !== 0 || string.match(text, "^[0-9a-fA-F%s]+$")[0] === undefined) {
+							LogControl.instance.addLine("Invalid data format!", Colors.red);
+							return;
+						}
+
+						data.clear();
+						for (const [value] of spacelessText.gmatch("%S%S")) {
+							data.push(tonumber(value, 16)!);
+						}
+
+						rows.recreate();
+
+						LogControl.instance.addLine("Import successful!");
 					},
 					() => {},
 				);

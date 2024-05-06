@@ -73,35 +73,6 @@ const connectors = {
 			},
 		};
 	},
-	raw(
-		name: string,
-		group?: string,
-	): ConfigTypeToDefinition<BlockConfigTypes.Or<[BlockConfigTypes.Byte, BlockConfigTypes.Number]>> {
-		return {
-			displayName: name,
-			type: "or",
-			default: 0 as number,
-			config: {
-				type: "unset",
-				value: 0,
-			},
-			group,
-			types: {
-				byte: {
-					displayName: name,
-					type: "byte",
-					config: 0 as number,
-					default: 0 as number,
-				},
-				number: {
-					displayName: name,
-					type: "number",
-					default: 0 as number,
-					config: 0 as number,
-				},
-			},
-		};
-	},
 	any(
 		name: string,
 		group?: string,
@@ -1093,8 +1064,8 @@ const readonlymemory = {
 			default: 0 as number,
 			config: 0 as number,
 		},
-		menu: {
-			displayName: "Menu",
+		data: {
+			displayName: "Byte Array",
 			type: "bytearray",
 			config: [],
 			default: [],
@@ -1109,7 +1080,12 @@ const readonlymemory = {
 			default: 0 as number,
 			config: 0 as number,
 		},
-		result: connectors.raw("Output", "1"),
+		result: {
+			displayName: "Output",
+			type: "byte",
+			default: 0 as number,
+			config: 0 as number,
+		},
 	},
 } as const satisfies BlockConfigBothDefinitions;
 

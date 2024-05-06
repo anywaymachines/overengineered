@@ -1,5 +1,4 @@
 import { GuiService } from "@rbxts/services";
-import { SoundController } from "client/controller/SoundController";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "client/gui/controls/Button";
@@ -17,7 +16,7 @@ export class TextPopup extends Popup<TextPopupDefinition> {
 	private readonly doneButton;
 	private readonly closeButton;
 
-	static showPopup(text: string, ps: string = "", okFunc: () => void, noFunc: () => void) {
+	static showPopup(text: string, ps: string = "", okFunc: (text: string) => void, noFunc: () => void) {
 		const popup = new TextPopup(
 			Gui.getGameUI<{ Popup: { Text: TextPopupDefinition } }>().Popup.Text.Clone(),
 			text,
@@ -39,8 +38,6 @@ export class TextPopup extends Popup<TextPopupDefinition> {
 
 		this.doneButton = this.add(new ButtonControl(gui.DoneButton));
 		this.closeButton = this.add(new ButtonControl(gui.Heading.CloseButton));
-
-		SoundController.getSounds().Warning.Play();
 
 		this.gui.Heading.TitleLabel.Text = text;
 		this.gui.TextBox.PlaceholderText = ps;

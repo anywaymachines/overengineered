@@ -4,7 +4,7 @@ import { PlacedBlockData } from "shared/building/BlockManager";
 import { RemoteEvents } from "shared/RemoteEvents";
 
 export class ReadOnlyMemoryBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.readonlymemory> {
-	private readonly LIMIT = blockConfigRegistry.readonlymemory.input.menu.lengthLimit;
+	private readonly LIMIT = blockConfigRegistry.readonlymemory.input.data.lengthLimit;
 
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.readonlymemory);
@@ -19,13 +19,13 @@ export class ReadOnlyMemoryBlockLogic extends ConfigurableBlockLogic<typeof bloc
 				return;
 			}
 
-			const value = this.input.menu.get()[address] ?? 0;
+			const value = this.input.data.get()[address] ?? 0;
 			this.output.result.set(value);
 		};
 
 		this.input.address.subscribe(readValue);
 		this.input.read.subscribe(readValue);
 
-		this.event.subscribeObservable(this.input.menu, (menu) => this.output.size.set(menu.size()));
+		this.event.subscribeObservable(this.input.data, (menu) => this.output.size.set(menu.size()));
 	}
 }
