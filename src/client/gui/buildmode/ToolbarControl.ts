@@ -135,8 +135,8 @@ export class ToolbarControl extends Control<ToolbarControlDefinition> {
 	private readonly visibilityFunction = TransformService.boolStateMachine(
 		this.gui,
 		TransformService.commonProps.quadOut02,
-		{ AnchorPoint: new Vector2(0, 1) },
-		{ AnchorPoint: new Vector2(0, 0) },
+		{ AnchorPoint: new Vector2(0.5, 1) },
+		{ AnchorPoint: new Vector2(0.5, 0) },
 		(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),
 		(tr, enabled) => (enabled ? 0 : tr.func(() => super.setInstanceVisibilityFunction(false))),
 	);
