@@ -396,14 +396,14 @@ export const ConfigTest: ControlTest = {
 					byte: {
 						displayName: "Byte",
 						type: "byte",
-						config: { type: "byte", value: 0 },
-						default: { type: "byte", value: 0 },
+						config: 0,
+						default: 0,
 					},
 					byteMixed: {
 						displayName: "Byte MIXED",
 						type: "byte",
-						config: { type: "byte", value: 0 },
-						default: { type: "byte", value: 0 },
+						config: 0,
+						default: 0,
 					},
 				},
 				bytearray: {

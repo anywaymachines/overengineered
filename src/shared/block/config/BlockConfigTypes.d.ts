@@ -14,7 +14,7 @@ declare namespace BlockConfigTypes {
 	export type Number = BlockConfigPrimitiveType<"number", number>;
 	export type String = BlockConfigPrimitiveType<"string", string>;
 	export type Color = BlockConfigPrimitiveType<"color", Color3>;
-	export type Byte = BlockConfigPrimitiveType<"byte", { readonly type: "byte"; readonly value: number }>;
+	export type Byte = BlockConfigPrimitiveType<"byte", number>;
 	export type ByteArray = BlockConfigPrimitiveType<"bytearray", readonly number[]> & {
 		readonly lengthLimit: number;
 	};

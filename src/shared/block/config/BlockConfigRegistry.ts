@@ -1068,7 +1068,12 @@ const readonlymemory = {
 			default: 0 as number,
 			config: 0 as number,
 		},
-		result: connectors.any("Output", "1"),
+		result: {
+			displayName: "Output",
+			type: "byte",
+			default: 0 as number,
+			config: 0 as number,
+		},
 	},
 } as const satisfies BlockConfigBothDefinitions;
 

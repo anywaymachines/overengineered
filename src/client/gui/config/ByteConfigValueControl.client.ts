@@ -10,10 +10,10 @@ class ValueControl extends ConfigValueControl<ByteEditorDefinition, Type> {
 
 		// TODO: Mixed values
 		const control = this.add(new ByteEditor(this.gui.Control));
-		control.value.set(this.sameOrUndefined(this.map(configs, (c) => c.value)) ?? 0);
+		control.value.set(this.sameOrUndefined(this.map(configs, (c) => c)) ?? 0);
 		this.event.subscribe(control.submitted, (value) => {
 			const prev = configs;
-			this._submitted.Fire((configs = this.map(configs, () => ({ type: "byte", value }))), prev);
+			this._submitted.Fire((configs = this.map(configs, () => value)), prev);
 		});
 	}
 }
