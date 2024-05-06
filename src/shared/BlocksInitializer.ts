@@ -1,4 +1,4 @@
-import { ReplicatedStorage } from "@rbxts/services";
+import { ReplicatedStorage, RunService } from "@rbxts/services";
 import { Logger } from "shared/Logger";
 import { AABB } from "shared/fixes/AABB";
 import { AutoWeldColliderBlockShape, BlockDataRegistry, BlockMirrorBehaviour } from "./BlockDataRegistry";
@@ -143,7 +143,9 @@ const readFromAssets = (data: BlocksInitializeData) => {
 	};
 
 	const readBlock = (block: Model, categoryName: string) => {
-		Checks.checkAll(block);
+		if (RunService.IsServer()) {
+			Checks.checkAll(block);
+		}
 
 		const id = block.Name.lower();
 
