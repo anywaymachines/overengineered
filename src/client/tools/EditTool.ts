@@ -18,6 +18,7 @@ import { BlockRotater } from "client/tools/additional/BlockRotater";
 import { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
+import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
@@ -79,7 +80,8 @@ namespace Scene {
 		readonly Bottom: GuiObject & {
 			readonly MoveButton: GuiButton;
 			readonly RotateButton: GuiButton;
-			readonly CloneButton: GuiButton;
+			readonly CopyButton: GuiButton;
+			readonly PasteButton: GuiButton;
 			readonly DeleteButton: GuiButton;
 			readonly PaintButton: GuiButton;
 		};
@@ -113,7 +115,13 @@ namespace Scene {
 
 			const move = this.add(new ButtonControl(this.gui.Bottom.MoveButton, () => tool.toggleMode("Move")));
 			const rotate = this.add(new ButtonControl(this.gui.Bottom.RotateButton, () => tool.toggleMode("Rotate")));
-			const clone = this.add(new ButtonControl(this.gui.Bottom.CloneButton, () => tool.toggleMode("Clone")));
+			const copy = this.add(
+				new ButtonControl(this.gui.Bottom.CopyButton, () => {
+					tool.copySelectedBlocks();
+					paste.setInteractable(true);
+				}),
+			);
+			const paste = this.add(new ButtonControl(this.gui.Bottom.PasteButton, () => tool.toggleMode("Paste")));
 			const paint = this.add(new ButtonControl(this.gui.Bottom.PaintButton, () => tool.toggleMode("Paint")));
 			const del = this.add(new ButtonControl(this.gui.Bottom.DeleteButton, () => tool.deleteSelectedBlocks()));
 
@@ -132,7 +140,8 @@ namespace Scene {
 
 			const movemvs = multiValueSetter(move, (v) => move.setInteractable(v));
 			const rotatemvs = multiValueSetter(rotate, (v) => rotate.setInteractable(v));
-			const clonemvs = multiValueSetter(clone, (v) => clone.setInteractable(v));
+			const copymvs = multiValueSetter(copy, (v) => copy.setInteractable(v));
+			const pastemvs = multiValueSetter(paste, (v) => paste.setInteractable(v));
 			const paintmvs = multiValueSetter(paint, (v) => paint.setInteractable(v));
 			const delmvs = multiValueSetter(del, (v) => del.setInteractable(v));
 
@@ -140,10 +149,11 @@ namespace Scene {
 				// edit tool modes
 				Move: movemvs,
 				Rotate: rotatemvs,
-				Clone: clonemvs,
+				Paste: pastemvs,
 				Paint: paintmvs,
 
 				// other buttons
+				Copy: copymvs,
 				Delete: delmvs,
 			};
 			this.event.subscribeObservable(
@@ -156,16 +166,13 @@ namespace Scene {
 				true,
 			);
 
-			this.event.subscribeCollection(
-				tool.selected,
-				() => {
-					const enabled = tool.selected.size() !== 0;
-					for (const [, button] of Objects.pairs_(buttons)) {
-						button.set(0, enabled);
-					}
-				},
-				true,
-			);
+			const updateButtonInteractability = () => {
+				for (const [name, button] of Objects.pairs_(buttons)) {
+					button.set(0, canBeSelected(tool, name));
+				}
+			};
+			this.event.subscribeCollection(tool.selected, updateButtonInteractability, true);
+			this.event.subscribeObservable(tool.copied, updateButtonInteractability, true);
 
 			this.event.subscribeObservable(
 				tool.selectedMode,
@@ -210,6 +217,45 @@ namespace Scene {
 	}
 }
 
+const placeToBlocksRequests = (blocks: readonly BlockModel[]): readonly PlaceBlockRequest[] => {
+	const existingBlocks = new Map<BlockUuid, BlockData>();
+	for (const block of blocks) {
+		const data = BlockManager.getBlockDataByBlockModel(block);
+		existingBlocks.set(data.uuid, data);
+	}
+
+	// <old, new>
+	const uuidmap = new Map<BlockUuid, Writable<PlaceBlockRequest & { uuid: BlockUuid }>>();
+
+	const newblocks = existingBlocks.map((_, data): Writable<PlaceBlockRequest> => {
+		const request = {
+			id: data.id,
+			uuid: HttpService.GenerateGUID(false) as BlockUuid,
+			location: data.instance.GetPivot(),
+			color: data.color,
+			material: data.material,
+			config: data.config,
+		} satisfies PlaceBlockRequest;
+
+		uuidmap.set(data.uuid, request);
+		return request;
+	});
+
+	for (const [olduuid, newblock] of uuidmap) {
+		const connections = { ...(existingBlocks.get(olduuid)?.connections ?? {}) };
+		for (const [, connection] of Objects.pairs_(connections)) {
+			const neww = uuidmap.get(connection.blockUuid);
+			if (!neww) continue;
+
+			(connection as Writable<typeof connection>).blockUuid = neww.uuid;
+		}
+
+		newblock.connections = connections;
+	}
+
+	return newblocks;
+};
+
 namespace Controllers {
 	export class Move extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
@@ -241,13 +287,12 @@ namespace Controllers {
 			this.mover.cancel();
 		}
 	}
-
-	export class Clone extends ClientComponent {
+	export class Paste extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 		private readonly blocks;
 		private readonly mover;
 
-		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
+		constructor(tool: EditTool, plot: SharedPlot) {
 			super();
 
 			const ghostParent = Element.create(
@@ -257,8 +302,10 @@ namespace Controllers {
 			);
 			this.onDestroy(() => ghostParent.Destroy());
 
-			this.blocks = blocks.map((b) => {
-				b = b.Clone();
+			const blocks = tool.copied.get();
+			this.blocks = blocks.map((block) => {
+				const b = BlocksInitializer.blocks.map.get(block.id)!.model.Clone();
+				b.PivotTo(block.location);
 				PartUtils.ghostModel(b, Colors.blue);
 				b.Parent = ghostParent;
 
@@ -270,50 +317,10 @@ namespace Controllers {
 
 			this.onDestroy(async () => {
 				const diff = this.mover.getDifference();
-				if (diff === Vector3.zero) {
-					return true;
-				}
-
-				const createBlocksCopy = (blocks: readonly BlockModel[]): readonly PlaceBlockRequest[] => {
-					const existingBlocks = new Map<BlockUuid, BlockData>();
-					for (const block of blocks) {
-						const data = BlockManager.getBlockDataByBlockModel(block);
-						existingBlocks.set(data.uuid, data);
-					}
-
-					// <old, new>
-					const uuidmap = new Map<BlockUuid, Writable<PlaceBlockRequest & { uuid: BlockUuid }>>();
-
-					const newblocks = existingBlocks.map((_, data): Writable<PlaceBlockRequest> => {
-						const request = {
-							id: data.id,
-							uuid: HttpService.GenerateGUID(false) as BlockUuid,
-							location: data.instance.GetPivot().add(diff),
-							color: data.color,
-							material: data.material,
-							config: data.config,
-						} satisfies PlaceBlockRequest;
-
-						uuidmap.set(data.uuid, request);
-						return request;
-					});
-
-					for (const [olduuid, newblock] of uuidmap) {
-						const connections = { ...(existingBlocks.get(olduuid)?.connections ?? {}) };
-						for (const [, connection] of Objects.pairs_(connections)) {
-							const neww = uuidmap.get(connection.blockUuid);
-							if (!neww) continue;
-
-							(connection as Writable<typeof connection>).blockUuid = neww.uuid;
-						}
-
-						newblock.connections = connections;
-					}
-
-					return newblocks;
-				};
-
-				const response = await ClientBuilding.placeOperation.execute(plot, createBlocksCopy(blocks));
+				const response = await ClientBuilding.placeOperation.execute(
+					plot,
+					blocks.map((b) => ({ ...b, location: b.location.add(diff) })),
+				);
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
 					this.cancel();
@@ -429,15 +436,31 @@ namespace Controllers {
 	}
 }
 
-export type EditToolMode = "Move" | "Clone" | "Rotate" | "Paint";
-export type EditToolButtons = EditToolMode | "Delete";
+const canBeSelected = (tool: EditTool, mode: EditToolButtons): boolean => {
+	if (mode === "Paste") {
+		return tool.copied.get().size() !== 0;
+	}
+
+	return tool.selected.get().size() !== 0;
+};
+
+export type EditToolMode = "Move" | "Paste" | "Rotate" | "Paint";
+export type EditToolButtons = EditToolMode | "Copy" | "Delete";
 
 export class EditTool extends ToolBase {
-	readonly enabledModes = new ComponentDisabler(["Move", "Rotate", "Clone", "Paint", "Delete"]);
+	readonly enabledModes = new ComponentDisabler<EditToolButtons>([
+		"Move",
+		"Rotate",
+		"Copy",
+		"Paste",
+		"Paint",
+		"Delete",
+	]);
 
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
 	readonly selected = new ObservableCollectionSet<BlockModel>();
+	readonly copied = new ObservableValue<readonly PlaceBlockRequest[]>([]);
 	private readonly controller = new ComponentChild<IComponent & { cancel(): void }>(this, true);
 	private readonly selector;
 	readonly gui;
@@ -477,7 +500,7 @@ export class EditTool extends ToolBase {
 			}
 
 			const selected = this.selected.get();
-			if (selected.size() === 0) {
+			if (!canBeSelected(this, mode)) {
 				return;
 			}
 
@@ -502,7 +525,7 @@ export class EditTool extends ToolBase {
 		if (mode === undefined || mode === this.selectedMode.get()) {
 			this._selectedMode.set(undefined);
 		} else {
-			if (this.selected.size() === 0) {
+			if (!canBeSelected(this, mode)) {
 				return;
 			}
 
@@ -517,6 +540,9 @@ export class EditTool extends ToolBase {
 		this.selector.deselectAll();
 	}
 
+	copySelectedBlocks() {
+		this.copied.set(placeToBlocksRequests([...this.selected.get()]));
+	}
 	async deleteSelectedBlocks() {
 		const selected = [...this.selected.get()];
 		this.selected.setRange([]);
