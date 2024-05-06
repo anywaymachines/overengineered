@@ -1,4 +1,4 @@
-import { Workspace } from "@rbxts/services";
+import { CollectionService, Workspace } from "@rbxts/services";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomDebrisService } from "shared/service/CustomDebrisService";
@@ -29,14 +29,20 @@ const initKillPlane = (instance: BasePart, onTouch?: (part: BasePart) => void) =
 	});
 };
 
-const obstacles = Workspace.WaitForChild("Obstacles") as Folder;
+Workspace.WaitForChild("Obstacles");
 
-const lava = obstacles.WaitForChild("Ramps").WaitForChild("lava") as BasePart;
-initKillPlane(lava, (part) => {
-	RemoteEvents.Burn.send([part]);
-	part.AssemblyLinearVelocity = part.AssemblyLinearVelocity.add(
-		new Vector3(math.random() * 18 - 6, 25, math.random() * 18 - 6),
-	);
-});
+for (const lava of CollectionService.GetTagged("Lava")) {
+	if (!lava.IsA("BasePart")) continue;
 
-initKillPlane(obstacles.WaitForChild("Crashing Wheels Course").WaitForChild("Breaker") as BasePart);
+	initKillPlane(lava, (part) => {
+		RemoteEvents.Burn.send([part]);
+		part.AssemblyLinearVelocity = part.AssemblyLinearVelocity.add(
+			new Vector3(math.random() * 18 - 6, 25, math.random() * 18 - 6),
+		);
+	});
+}
+
+for (const destroyer of CollectionService.GetTagged("Destroyer")) {
+	if (!destroyer.IsA("BasePart")) continue;
+	initKillPlane(destroyer);
+}
