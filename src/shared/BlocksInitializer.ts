@@ -1,4 +1,6 @@
 import { ReplicatedStorage } from "@rbxts/services";
+import { Logger } from "shared/Logger";
+import { AABB } from "shared/fixes/AABB";
 import { AutoWeldColliderBlockShape, BlockDataRegistry, BlockMirrorBehaviour } from "./BlockDataRegistry";
 import { AutoBlockCreator } from "./block/logic/AutoBlockCreator";
 import { Objects } from "./fixes/objects";
@@ -89,6 +91,30 @@ namespace Checks {
 			throw `No registry data found for block ${block.Name}`;
 		}
 	}
+	function assertSize(block: AssertedModel) {
+		const check = (num: number, axis: "X" | "Y" | "Z") => {
+			if (num % 1 === 0) return;
+
+			if (num % 1 < 0.01) {
+				new Logger("BlocksInitializer").warn(
+					`Potential floating point problem: ${block.Name}.Size.${axis} = ${num}`,
+				);
+			}
+		};
+
+		let aabb = AABB.fromPart(block.PrimaryPart);
+		for (const part of block.GetDescendants()) {
+			if (!part.IsA("BasePart")) continue;
+			if (part.Parent?.Name === "WeldRegions") continue;
+
+			aabb = aabb.expanded(AABB.fromPart(part));
+		}
+
+		const size = aabb.getSize();
+		check(size.X, "X");
+		check(size.Y, "Y");
+		check(size.Z, "Z");
+	}
 
 	export function checkAll(block: Model) {
 		assertPrimaryPartSet(block);
@@ -97,6 +123,7 @@ namespace Checks {
 		assertValidVelds(block);
 		assertSomethingAnchored(block);
 		assertHasDataInRegistry(block);
+		assertSize(block);
 	}
 }
 
