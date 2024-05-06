@@ -6,6 +6,7 @@ import { RadioRecieverBlockLogic } from "shared/block/logic/RadioRecieverBlockLo
 import { RadioTransmitterBlockLogic } from "shared/block/logic/RadioTransmitterBlockLogic";
 import { LEDDisplayBlockLogic } from "shared/block/logic/operations/output/LEDDisplayBlockLogic";
 import { LaserBlockLogic } from "shared/block/logic/operations/output/LaserBlockLogic";
+import { SevenSegmentDisplayBlockLogic } from "shared/block/logic/operations/output/SevenSegmentDisplayBlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { BlockLogic } from "./BlockLogic";
 import { BallastBlockLogic } from "./logic/BallastBlockLogic";
@@ -83,6 +84,7 @@ export const logicRegistry = {
 	screen: ScreenBlockLogic,
 	laser: LaserBlockLogic,
 	leddisplay: LEDDisplayBlockLogic,
+	sevensegmentdisplay: SevenSegmentDisplayBlockLogic,
 
 	constant: ConstantBlockLogic,
 	delayblock: DelayBlockLogic,

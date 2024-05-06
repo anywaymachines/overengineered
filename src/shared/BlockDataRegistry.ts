@@ -387,6 +387,10 @@ const registry = {
 		name: "Display",
 		description: "Simple 8x8 pixel display. Wonder what can you do with it..",
 	},
+	sevensegmentdisplay: {
+		name: "7-Segment Display",
+		description: "Simple 7-Segment display. Opcode viewer? OwO",
+	},
 	cornerwedge1x1: {
 		name: "Corner Wedge 1x1",
 		description: "A simple corner wedge",

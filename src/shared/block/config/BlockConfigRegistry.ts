@@ -88,13 +88,13 @@ const connectors = {
 			group,
 			types: {
 				byte: {
-					displayName: "",
+					displayName: name,
 					type: "byte",
 					config: 0 as number,
 					default: 0 as number,
 				},
 				number: {
-					displayName: "",
+					displayName: name,
 					type: "number",
 					default: 0 as number,
 					config: 0 as number,
@@ -480,6 +480,18 @@ const leddisplay = {
 			default: false as boolean,
 			config: false as boolean,
 			configHidden: true,
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
+const sevensegmentdisplay = {
+	input: {
+		value: {
+			displayName: "Byte",
+			type: "byte",
+			default: 0 as number,
+			config: 0 as number,
 		},
 	},
 	output: {},
@@ -1300,6 +1312,7 @@ export const blockConfigRegistry = {
 	wedgewing1x4: wing,
 	lamp,
 	leddisplay,
+	sevensegmentdisplay,
 	screen,
 	laser,
 
