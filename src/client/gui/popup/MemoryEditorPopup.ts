@@ -171,7 +171,7 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 			const children = this.rows.getChildren();
 			this.rows.add(
 				new MemoryEditorRow(this.template(), address, this.data, (index) => {
-					for (let i = 0; i < index / 16; i++) {
+					for (let i = 0; i < math.ceil(index / 16); i++) {
 						for (let j = 0; j < 16; j++) {
 							children[i].updateColor(j);
 						}
