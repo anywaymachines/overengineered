@@ -21,6 +21,14 @@ export class ServoMotorBlockLogic extends ConfigurableBlockLogic<
 
 		this.hingeConstraint = this.instance.Base.HingeConstraint;
 
+		this.block.instance.GetDescendants().forEach((desc) => {
+			if (!desc.IsA("BasePart")) return;
+
+			const materialPhysProp = new PhysicalProperties(desc.Material);
+			const newPhysProp = new PhysicalProperties(materialPhysProp.Density, materialPhysProp.Friction, 0);
+			desc.CustomPhysicalProperties = newPhysProp;
+		});
+
 		this.input.stiffness.subscribe((value, prev) => {
 			this.hingeConstraint.AngularResponsiveness = value;
 		});
