@@ -100,7 +100,7 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 	private readonly template;
 	private readonly rows;
 
-	private cursor = 0;
+	cursor = 0;
 	private readonly contentSize = 80;
 
 	constructor(
@@ -118,7 +118,7 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 		this.add(this.rows);
 
 		this.gui.GetPropertyChangedSignal("CanvasPosition").Connect(() => {
-			const onStart = this.gui.CanvasPosition.Y === VectorUtils.roundVector2(this.gui.AbsoluteSize).Y;
+			const onStart = VectorUtils.roundVector2(this.gui.CanvasPosition).Y === 0;
 			const endReached =
 				VectorUtils.roundVector2(this.gui.AbsoluteCanvasSize.sub(this.gui.CanvasPosition)).Y ===
 				VectorUtils.roundVector2(this.gui.AbsoluteSize).Y;
@@ -203,6 +203,16 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 		super(gui);
 
 		const rows = this.add(new MemoryEditorRows(this.gui.Content, this.parentScreen, limit, data));
+
+		this.gui.Content.GetPropertyChangedSignal("CanvasPosition").Connect(() => {
+			const scale = this.parentScreen.getScale();
+			const currentRow =
+				rows.cursor +
+				math.round(this.gui.Content.CanvasPosition.Y / (this.gui.Content.Template.Size.Y.Offset * scale));
+			const currentAddress = currentRow * 16;
+
+			this.gui.AddressTextBox.Text = `${currentAddress}`;
+		});
 
 		this.add(
 			new ButtonControl(this.gui.Heading.CloseButton, () => {
