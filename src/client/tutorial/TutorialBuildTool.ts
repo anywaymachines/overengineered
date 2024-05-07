@@ -51,8 +51,8 @@ export class TutorialBuildTool {
 							const btp = this.tutorialBlocksToPlace.find(
 								(value) =>
 									value.id === block.id &&
-									VectorUtils.roundVector(value.cframe.Position) ===
-										VectorUtils.roundVector(
+									VectorUtils.roundVector3(value.cframe.Position) ===
+										VectorUtils.roundVector3(
 											plot.instance.BuildingArea.CFrame.ToObjectSpace(block!.location).Position,
 										),
 							);

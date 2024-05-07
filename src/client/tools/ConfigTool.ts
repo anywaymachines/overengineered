@@ -182,8 +182,8 @@ export class ConfigTool extends ToolBase {
 				if (
 					!this.blocksToConfigure.any(
 						(value) =>
-							VectorUtils.roundVector(value.position) ===
-							VectorUtils.roundVector(
+							VectorUtils.roundVector3(value.position) ===
+							VectorUtils.roundVector3(
 								this.targetPlot
 									.get()
 									.instance.BuildingArea.GetPivot()

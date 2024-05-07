@@ -94,10 +94,10 @@ export class TutorialConfigTool {
 				const configs = new Map(
 					plot.getBlocks().map((block) => [block, BlockManager.manager.config.get(block)] as const),
 				);
-				const positions = this.get().blocksToConfigure.map((value) => VectorUtils.roundVector(value.position));
+				const positions = this.get().blocksToConfigure.map((value) => VectorUtils.roundVector3(value.position));
 				const configs_filtered = configs.filter((value) =>
 					positions.includes(
-						VectorUtils.roundVector(
+						VectorUtils.roundVector3(
 							plot.instance.BuildingArea.CFrame.PointToObjectSpace(value.GetPivot().Position),
 						),
 					),
@@ -106,9 +106,9 @@ export class TutorialConfigTool {
 				for (const [blockModel, config] of configs_filtered) {
 					const block = this.get().blocksToConfigure.find(
 						(value) =>
-							VectorUtils.roundVector(
+							VectorUtils.roundVector3(
 								plot.instance.BuildingArea.CFrame.PointToObjectSpace(blockModel.GetPivot().Position),
-							) === VectorUtils.roundVector(value.position),
+							) === VectorUtils.roundVector3(value.position),
 					);
 					if (!block) throw "what";
 

@@ -8,6 +8,7 @@ import { TextPopup } from "client/gui/popup/TextPopup";
 import { LogControl } from "client/gui/static/LogControl";
 import { Colors } from "shared/Colors";
 import { TransformService } from "shared/component/TransformService";
+import { VectorUtils } from "shared/utils/VectorUtils";
 
 export type MemoryEditorPopupDefinition = GuiObject & {
 	readonly Heading: Frame & {
@@ -117,12 +118,10 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 		this.add(this.rows);
 
 		this.gui.GetPropertyChangedSignal("CanvasPosition").Connect(() => {
-			const onStart = this.gui.CanvasPosition === new Vector2();
+			const onStart = this.gui.CanvasPosition.Y === VectorUtils.roundVector2(this.gui.AbsoluteSize).Y;
 			const endReached =
-				new Vector2(
-					math.round(this.gui.AbsoluteCanvasSize.sub(this.gui.CanvasPosition).X),
-					math.round(this.gui.AbsoluteCanvasSize.sub(this.gui.CanvasPosition).Y),
-				) === new Vector2(math.round(this.gui.AbsoluteSize.X), math.round(this.gui.AbsoluteSize.Y));
+				VectorUtils.roundVector2(this.gui.AbsoluteCanvasSize.sub(this.gui.CanvasPosition)).Y ===
+				VectorUtils.roundVector2(this.gui.AbsoluteSize).Y;
 
 			if (onStart) {
 				loadBehind();
