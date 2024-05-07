@@ -1069,7 +1069,7 @@ const readonlymemory = {
 			type: "bytearray",
 			config: [],
 			default: [],
-			lengthLimit: 0x0fff,
+			lengthLimit: 4096,
 			connectorHidden: true,
 		},
 	},

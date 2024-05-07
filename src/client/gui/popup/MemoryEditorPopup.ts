@@ -3,6 +3,7 @@ import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "client/gui/controls/Button";
 import { ByteTextBoxControl } from "client/gui/controls/ByteTextBoxControl";
+import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TextPopup } from "client/gui/popup/TextPopup";
 import { LogControl } from "client/gui/static/LogControl";
@@ -49,50 +50,54 @@ export type MemoryEditorRecordsDefinition = ScrollingFrame & {
 class MemoryEditorRow extends Control<MemoryEditorRecordDefinition, ByteTextBoxControl> {
 	constructor(
 		gui: MemoryEditorRecordDefinition,
-		private readonly address: number,
-		private readonly data: number[],
+		private readonly popup: MemoryEditorPopup,
+		private readonly row: number,
 		recolorPreviousUntil: (index: number) => void,
 	) {
 		super(gui);
 
-		this.gui.AddressLabel.Text = string.format("0x%04X", address * 16);
+		// Address
+		this.gui.AddressLabel.Text = popup.numberToHex(row * 16);
 
-		const updateAsciiLabel = () => {
-			let str = "";
-			for (let i = 0; i < 16; i++) {
-				const c = data[address * 16 + i] ?? 0;
-				str += c >= 32 && c <= 126 ? string.char(c) : ".";
-			}
-
-			this.gui.AsciiLabel.Text = str;
-		};
-		updateAsciiLabel();
+		this.updateAsciiLabel();
 
 		for (let i = 0; i < 16; i++) {
+			// Get [i] byte TextBox
 			const tb = this.gui.WaitForChild(`b${i}`) as TextBox;
 
-			tb.TextColor3 = data[address * 16 + i] !== undefined ? Colors.white : Color3.fromRGB(180, 180, 180);
+			// Color gray if no data
+			tb.TextColor3 = popup.data[row * 16 + i] !== undefined ? Colors.white : Color3.fromRGB(180, 180, 180);
 
 			const idx = i;
 			const control = this.add(new ByteTextBoxControl(tb));
-			control.value.set(data[address * 16 + i] ?? 0);
+			control.value.set(popup.data[row * 16 + i] ?? 0);
 			control.submitted.Connect((value) => {
 				tb.TextColor3 = Colors.white;
 
-				for (let j = 0; j < address * 16 + i; j++) {
-					data[j] ??= 0;
+				for (let j = 0; j < row * 16 + i; j++) {
+					popup.data[j] ??= 0;
 				}
 
-				data[address * 16 + i] = value;
-				recolorPreviousUntil(address * 16 + idx);
-				updateAsciiLabel();
+				popup.data[row * 16 + i] = value;
+				recolorPreviousUntil(row * 16 + idx);
+				this.updateAsciiLabel();
 			});
 		}
 	}
 
+	private updateAsciiLabel() {
+		let str = "";
+		for (let i = 0; i < 16; i++) {
+			const c = this.popup.data[this.row * 16 + i] ?? 0;
+			str += c >= 32 && c <= 126 ? string.char(c) : ".";
+		}
+
+		this.gui.AsciiLabel.Text = str;
+	}
+
 	updateColor(index: number) {
 		this.getChildren()[index].instance.TextColor3 =
-			this.data[this.address * 16 + index] !== undefined ? Colors.white : Color3.fromRGB(180, 180, 180);
+			this.popup.data[this.row * 16 + index] !== undefined ? Colors.white : Color3.fromRGB(180, 180, 180);
 	}
 }
 
@@ -100,14 +105,16 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 	private readonly template;
 	private readonly rows;
 
-	cursor = 0;
-	private readonly contentSize = 80;
+	rowCursor = 0;
+	readonly contentSize = 128;
+
+	getContentSection() {
+		return this.contentSize / 4;
+	}
 
 	constructor(
 		gui: MemoryEditorRecordsDefinition,
-		scaler: { getScale(): number },
-		private readonly limit: number,
-		private readonly data: number[],
+		readonly popup: MemoryEditorPopup,
 	) {
 		super(gui);
 
@@ -133,45 +140,44 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 		});
 
 		const loadBehind = () => {
-			if (this.cursor <= 0) return;
-			this.cursor -= this.contentSize / 4;
-			if (this.cursor < 0) this.cursor = 0;
+			if (this.rowCursor <= 0) return;
+			this.rowCursor -= this.getContentSection();
+			if (this.rowCursor < 0) this.rowCursor = 0;
 
-			this.recreate();
-			const scale = scaler.getScale();
+			this.spawnRows();
 
 			// Scroll
 			this.gui.CanvasPosition = this.gui.CanvasPosition.add(
-				new Vector2(0, this.gui.Template.Size.Y.Offset * (this.contentSize / 4) * scale),
+				new Vector2(0, this.gui.Template.Size.Y.Offset * this.getContentSection() * popup.getScale()),
 			);
 		};
 
 		const loadBelow = () => {
-			if (this.cursor >= limit) return;
-			this.cursor += this.contentSize / 4;
+			if (this.rowCursor >= this.popup.bytesLimit / 16) return;
+			if (this.rows.getChildren().size() < this.contentSize) return;
+			this.rowCursor += this.getContentSection();
 
-			this.recreate();
-			const scale = scaler.getScale();
+			this.spawnRows();
 
 			// Scroll
 			this.gui.CanvasPosition = this.gui.CanvasPosition.sub(
-				new Vector2(0, this.gui.Template.Size.Y.Offset * (this.contentSize / 4) * scale),
+				new Vector2(0, this.gui.Template.Size.Y.Offset * this.getContentSection() * popup.getScale()),
 			);
 		};
 
-		this.recreate();
+		this.spawnRows();
 	}
 
-	recreate() {
+	spawnRows() {
 		this.rows.clear();
 
 		for (let i = 0; i < this.contentSize; i++) {
-			const address = i + this.cursor;
-			if (address > this.limit) break;
+			const row = i + this.rowCursor;
+			if (row >= this.popup.bytesLimit / 16) break;
 
 			const children = this.rows.getChildren();
 			this.rows.add(
-				new MemoryEditorRow(this.template(), address, this.data, (index) => {
+				new MemoryEditorRow(this.template(), this.popup, row, (index) => {
 					for (let i = 0; i < math.ceil(index / 16) + 2; i++) {
 						for (let j = 0; j < 16; j++) {
 							children[i].updateColor(j);
@@ -184,14 +190,14 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 }
 
 export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
-	static showPopup(limit: number, data: number[], callback: (data: number[]) => void) {
+	static showPopup(bytesLimit: number, data: number[], callback: (data: number[]) => void) {
 		const popup = new MemoryEditorPopup(
 			Gui.getGameUI<{
 				Popup: {
 					MemoryEditor: MemoryEditorPopupDefinition;
 				};
 			}>().Popup.MemoryEditor.Clone(),
-			limit,
+			bytesLimit,
 			data,
 			callback,
 		);
@@ -199,21 +205,29 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 		popup.show();
 	}
 
-	constructor(gui: MemoryEditorPopupDefinition, limit: number, data: number[], callback: (data: number[]) => void) {
+	constructor(
+		gui: MemoryEditorPopupDefinition,
+		readonly bytesLimit: number,
+		readonly data: number[],
+		callback: (data: number[]) => void,
+	) {
 		super(gui);
 
-		const rows = this.add(new MemoryEditorRows(this.gui.Content, this.parentScreen, limit, data));
+		const rows = this.add(new MemoryEditorRows(this.gui.Content, this));
 
+		// Update AddressTextBox on scroll
 		this.gui.Content.GetPropertyChangedSignal("CanvasPosition").Connect(() => {
-			const scale = this.parentScreen.getScale();
 			const currentRow =
-				rows.cursor +
-				math.round(this.gui.Content.CanvasPosition.Y / (this.gui.Content.Template.Size.Y.Offset * scale));
-			const currentAddress = currentRow * 16;
+				rows.rowCursor +
+				math.round(
+					this.gui.Content.CanvasPosition.Y /
+						(this.gui.Content.Template.Size.Y.Offset * this.parentScreen.getScale()),
+				);
 
-			this.gui.AddressTextBox.Text = `${currentAddress}`;
+			this.gui.AddressTextBox.Text = this.numberToHex(currentRow * 16);
 		});
 
+		// Close button
 		this.add(
 			new ButtonControl(this.gui.Heading.CloseButton, () => {
 				this.hide();
@@ -221,6 +235,7 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 			}),
 		);
 
+		// Clear data button
 		this.add(
 			new ButtonControl(this.gui.ClearButton, () => {
 				ConfirmPopup.showPopup(
@@ -228,13 +243,14 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 					"It will be impossible to undo this action",
 					() => {
 						data.clear();
-						rows.recreate();
+						rows.spawnRows();
 					},
 					() => {},
 				);
 			}),
 		);
 
+		// Import hex button
 		this.add(
 			new ButtonControl(this.gui.ImportButton, () => {
 				TextPopup.showPopup(
@@ -248,12 +264,17 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 							return;
 						}
 
+						if (spacelessText.size() / 2 > this.bytesLimit) {
+							LogControl.instance.addLine("Too long!", Colors.red);
+							return;
+						}
+
 						data.clear();
 						for (const [value] of spacelessText.gmatch("%S%S")) {
 							data.push(tonumber(value, 16)!);
 						}
 
-						rows.recreate();
+						rows.spawnRows();
 
 						LogControl.instance.addLine("Import successful!");
 					},
@@ -262,12 +283,53 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 			}),
 		);
 
-		// const search = this.add(new TextBoxControl(gui.Search));
-		// this.event.subscribeObservable(search.text, (text) => slots.search.set(text), true);
+		const addressTextBox = new TextBoxControl(this.gui.AddressTextBox);
+		addressTextBox.text.set(this.numberToHex(0));
+		addressTextBox.submitted.Connect((value) => {
+			if (value === "") {
+				rows.rowCursor = 0;
+				rows.spawnRows();
+				addressTextBox.text.set(this.numberToHex(0));
+				return;
+			}
+
+			const rawRowHEX = string.match(value, "^0x(%x+)$")[0] ?? string.match(value, "^(%x+)$")[0];
+
+			if (rawRowHEX !== undefined) {
+				const byte = (tonumber(rawRowHEX, 16) ?? 0) + 1;
+				const row = byte / 16;
+				const cursorRow =
+					math.floor((row + rows.getContentSection() / 2) / rows.getContentSection()) *
+					rows.getContentSection();
+
+				rows.rowCursor = cursorRow;
+				rows.spawnRows();
+
+				// Scroll
+				const scale = this.parentScreen.getScale();
+				this.gui.Content.CanvasPosition = new Vector2(
+					0,
+					this.gui.Content.Template.Size.Y.Offset * math.abs(cursorRow - row) * scale,
+				);
+
+				return;
+			}
+
+			LogControl.instance.addLine("Invalid address format!", Colors.red);
+		});
+		this.add(addressTextBox);
 	}
 
 	show() {
 		super.show();
 		TransformService.run(this.instance, (transform) => transform.slideIn("top", 50, { duration: 0.2 }));
+	}
+
+	getScale() {
+		return this.parentScreen.getScale();
+	}
+
+	numberToHex(value: number) {
+		return string.format(`0x%0${string.format("%X", this.bytesLimit).size()}X`, value);
 	}
 }
