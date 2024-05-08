@@ -1,5 +1,3 @@
-import { Assert } from "shared/Assert";
-
 interface BL<T> {
 	readonly holderId: string;
 	readonly connections: readonly T[];
@@ -7,8 +5,29 @@ interface BL<T> {
 interface Block<T> {
 	readonly id: string;
 	readonly values: readonly T[];
-	readonly connections: Block<T>[];
+	readonly children: Block<T>[];
 }
+
+/** From a circular connection, remove items that are not the part of the actual circlularity */
+const filterActualCircular = <B extends { readonly children: readonly B[] }>(items: ReadonlySet<B>): Set<B> => {
+	const deleted = new Set<B>();
+
+	let cont = true;
+	while (cont) {
+		cont = false;
+
+		for (const item of items) {
+			if (deleted.has(item)) continue;
+
+			if (item.children.size() === 0 || item.children.all((item) => deleted.has(item))) {
+				deleted.add(item);
+				cont = true;
+			}
+		}
+	}
+
+	return items.filterToSet((item) => !deleted.has(item));
+};
 
 export namespace BlockLogicValueGroup {
 	export function group<BLV extends BL<BLV>>(
@@ -23,7 +42,7 @@ export namespace BlockLogicValueGroup {
 					(id, values): B => ({
 						id,
 						values,
-						connections: [],
+						children: [],
 					}),
 				);
 
@@ -37,7 +56,7 @@ export namespace BlockLogicValueGroup {
 			for (const block of blocks) {
 				for (const value of block.values) {
 					for (const connection of value.connections) {
-						block.connections.push(blocksByConnections.get(connection)!);
+						block.children.push(blocksByConnections.get(connection)!);
 					}
 				}
 			}
@@ -48,7 +67,7 @@ export namespace BlockLogicValueGroup {
 			const findWithoutParents = (values: readonly B[]): B[] => {
 				const hasParents = new Set<B>();
 				for (const value of values) {
-					for (const child of value.connections) {
+					for (const child of value.children) {
 						hasParents.add(child);
 					}
 				}
@@ -62,7 +81,7 @@ export namespace BlockLogicValueGroup {
 					}
 
 					result.add(value);
-					visitChildren(result, value.connections);
+					visitChildren(result, value.children);
 				}
 			};
 			const groupCircularConnections = (values: readonly B[]): Set<B>[] => {
@@ -72,44 +91,52 @@ export namespace BlockLogicValueGroup {
 					}
 
 					result.add(value);
-					for (const child of value.connections) {
+					for (const child of value.children) {
 						addAllConnected(result, child);
 					}
 				};
 
-				let rest = new Set(values);
+				const rest = new Set(values);
 				const groups: Set<B>[] = [];
-				for (const value of values) {
+				for (const value of filterActualCircular(rest)) {
 					if (!rest.has(value)) {
 						continue;
 					}
 
 					const group = new Set<B>();
-					groups.push(group);
 					addAllConnected(group, value);
+					groups.push(group);
 
-					rest = rest.filterToSet((v) => !groups.any((g) => g.has(v)));
+					for (const item of group) {
+						rest.delete(item);
+					}
 				}
 
 				return groups;
 			};
 			const pickRootFromCircularGroup = (group: ReadonlySet<B>): B => {
 				let min: B = undefined!;
-				for (const item of group) {
+				const actualCircular = filterActualCircular(group);
+
+				for (const item of actualCircular) {
+					if (item.children.size() === 0) {
+						continue;
+					}
+
 					if (!min) {
 						min = item;
 						continue;
 					}
 
-					if (item.connections.size() !== 0 && min.id > item.id) {
+					if (item.children.size() !== 0 && min.id > item.id) {
 						min = item;
 					}
 				}
 
-				for (const item of group) {
-					const index = item.connections.indexOf(min);
+				for (const item of actualCircular) {
+					const index = item.children.indexOf(min);
 					if (index !== -1) {
-						item.connections.remove(index);
+						item.children.remove(index);
 					}
 				}
 
@@ -122,7 +149,7 @@ export namespace BlockLogicValueGroup {
 
 			const unvisited = values.filter((v) => !visited.has(v));
 			const groupedCircular = groupCircularConnections(unvisited);
-			const circularRoots = groupedCircular.map((g) => pickRootFromCircularGroup(g));
+			const circularRoots = groupedCircular.map(pickRootFromCircularGroup);
 
 			return [...roots, ...circularRoots];
 		};
@@ -138,7 +165,7 @@ export namespace BlockLogicValueGroup {
 					numbers.set(value, index);
 				}
 
-				for (const child of value.connections) {
+				for (const child of value.children) {
 					calc(numbers, child, visited, index + 1);
 				}
 			};
@@ -167,102 +194,12 @@ export namespace BlockLogicValueGroup {
 		const roots = findRoots(blocks);
 		const order = calculateOrder(roots);
 
+		print(order);
 		return order;
 	}
 }
 
-const test = () => {
-	type BL = {
-		readonly holderId: string;
-		connections: readonly BL[];
-	};
-
-	// 1 => 1
-	{
-		const l1: BL = {
-			holderId: "1",
-			connections: [],
-		};
-		l1.connections = [l1];
-
-		const grouping = BlockLogicValueGroup.group([l1]);
-		print("grouping", grouping);
-
-		Assert.equals(grouping.size(), 1);
-		Assert.equals(grouping[0].size(), 1);
-		Assert.equals(grouping[0][0].id, l1.holderId);
-
-		print("DONE1");
-	}
-
-	// 1 => 2
-	{
-		const l1: BL = {
-			holderId: "1",
-			connections: [],
-		};
-		const l2: BL = {
-			holderId: "2",
-			connections: [],
-		};
-		l1.connections = [l2];
-
-		const grouping = BlockLogicValueGroup.group([l1, l2]);
-		print("grouping", grouping);
-
-		Assert.equals(grouping.size(), 2);
-		Assert.equals(grouping[0].size(), 1);
-		Assert.equals(grouping[1].size(), 1);
-		Assert.equals(grouping[0][0].id, l1.holderId);
-		Assert.equals(grouping[1][0].id, l2.holderId);
-
-		print("DONE2");
-	}
-
-	// 1 => 1`
-	{
-		const l1: BL = {
-			holderId: "1",
-			connections: [],
-		};
-		const l2: BL = {
-			holderId: "1",
-			connections: [],
-		};
-		l1.connections = [l2];
-
-		const grouping = BlockLogicValueGroup.group([l1, l2]);
-		print("grouping", grouping);
-
-		Assert.equals(grouping.size(), 1);
-		Assert.equals(grouping[0].size(), 1);
-		Assert.equals(grouping[0][0].id, l1.holderId);
-
-		print("DONE3");
-	}
-
-	// 1 => 2 => 1
-	{
-		const l1: BL = {
-			holderId: "1",
-			connections: [],
-		};
-		const l2: BL = {
-			holderId: "2",
-			connections: [],
-		};
-		l1.connections = [l2];
-		l2.connections = [l1];
-
-		const grouping = BlockLogicValueGroup.group([l1, l2]);
-		print("grouping", grouping);
-
-		Assert.equals(grouping.size(), 2);
-		Assert.equals(grouping[0].size(), 1);
-		Assert.equals(grouping[1].size(), 1);
-		Assert.equals(grouping[0][0].id, l1.holderId);
-		Assert.equals(grouping[1][0].id, l2.holderId);
-
-		print("DONE4");
-	}
-};
+export const _Internal = {
+	...BlockLogicValueGroup,
+	filterActualCircular,
+} as const;
