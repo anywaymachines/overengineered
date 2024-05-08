@@ -8,8 +8,11 @@ import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TextPopup } from "client/gui/popup/TextPopup";
 import { LogControl } from "client/gui/static/LogControl";
 import { Colors } from "shared/Colors";
+import { Logger } from "shared/Logger";
 import { TransformService } from "shared/component/TransformService";
 import { VectorUtils } from "shared/utils/VectorUtils";
+
+const logger = new Logger("MemoryEditorPopup");
 
 export type MemoryEditorPopupDefinition = GuiObject & {
 	readonly Heading: Frame & {
@@ -124,17 +127,16 @@ class MemoryEditorRows extends Control<MemoryEditorRecordsDefinition> {
 		this.rows = new Control<GuiObject, MemoryEditorRow>(this.gui);
 		this.add(this.rows);
 
+		// Dynamic scroll
 		this.gui.GetPropertyChangedSignal("CanvasPosition").Connect(() => {
 			const onStart = VectorUtils.roundVector2(this.gui.CanvasPosition).Y === 0;
-			const endReached =
+			const onEnd =
 				VectorUtils.roundVector2(this.gui.AbsoluteCanvasSize.sub(this.gui.CanvasPosition)).Y ===
 				VectorUtils.roundVector2(this.gui.AbsoluteSize).Y;
 
 			if (onStart) {
 				loadBehind();
-			}
-
-			if (endReached) {
+			} else if (onEnd) {
 				loadBelow();
 			}
 		});
@@ -212,6 +214,12 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 		callback: (data: number[]) => void,
 	) {
 		super(gui);
+
+		if (bytesLimit % 128 !== 0) {
+			logger.error(`Bytes limit must be a multiple of ${bytesLimit}`);
+			callback(data);
+			return;
+		}
 
 		const rows = this.add(new MemoryEditorRows(this.gui.Content, this));
 
