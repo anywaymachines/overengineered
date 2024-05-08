@@ -9,7 +9,9 @@ export type TextPopupDefinition = GuiObject & {
 		readonly TitleLabel: TextLabel;
 	};
 	readonly DoneButton: TextButton;
-	readonly TextBox: TextBox;
+	readonly ScrollingFrame: ScrollingFrame & {
+		readonly TextBox: TextBox;
+	};
 };
 
 export class TextPopup extends Popup<TextPopupDefinition> {
@@ -40,9 +42,9 @@ export class TextPopup extends Popup<TextPopupDefinition> {
 		this.closeButton = this.add(new ButtonControl(gui.Heading.CloseButton));
 
 		this.gui.Heading.TitleLabel.Text = text;
-		this.gui.TextBox.PlaceholderText = ps;
+		this.gui.ScrollingFrame.TextBox.PlaceholderText = ps;
 		this.event.subscribe(this.doneButton.activated, () => {
-			okFunc(this.gui.TextBox.Text);
+			okFunc(this.gui.ScrollingFrame.TextBox.Text);
 			this.hide();
 		});
 		this.event.subscribe(this.closeButton.activated, () => {
@@ -52,6 +54,6 @@ export class TextPopup extends Popup<TextPopupDefinition> {
 	}
 
 	protected prepareGamepad(): void {
-		GuiService.SelectedObject = this.gui.TextBox;
+		GuiService.SelectedObject = this.gui.ScrollingFrame.TextBox;
 	}
 }

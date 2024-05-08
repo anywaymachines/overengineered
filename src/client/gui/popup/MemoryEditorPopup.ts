@@ -217,6 +217,7 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 
 		if (bytesLimit % 128 !== 0) {
 			logger.error(`Bytes limit must be a multiple of ${bytesLimit}`);
+			this.hide();
 			callback(data);
 			return;
 		}
@@ -265,7 +266,7 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 					"IMPORT",
 					"00 01 02 03 04 ...",
 					(text) => {
-						const spacelessText = string.gsub(text, "%s+", "")[0];
+						const spacelessText = string.gsub(string.gsub(text, "%s+", "")[0], "\n", "")[0];
 
 						if (spacelessText.size() % 2 !== 0 || string.match(text, "^[0-9a-fA-F%s]+$")[0] === undefined) {
 							LogControl.instance.addLine("Invalid data format!", Colors.red);
