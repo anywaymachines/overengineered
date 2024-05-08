@@ -955,7 +955,7 @@ const altimeter = {
 	input: {},
 	output: {
 		result: {
-			displayName: "Height",
+			displayName: "Altitude",
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
