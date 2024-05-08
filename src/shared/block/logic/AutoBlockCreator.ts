@@ -382,6 +382,18 @@ const operations = {
 			category: mathCategory,
 			func: (value) => math.sign(value),
 		},
+
+		FLOOR: {
+			modelTextOverride: "Floor",
+			category: mathCategory,
+			func: (value) => math.floor(value),
+		},
+
+		CEIL: {
+			modelTextOverride: "Ceil",
+			category: mathCategory,
+			func: (value) => math.ceil(value),
+		},
 	},
 	rand: {
 		RAND: {

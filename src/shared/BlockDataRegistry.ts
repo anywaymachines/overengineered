@@ -142,6 +142,16 @@ const logic = {
 			description: "Returns rounded input value",
 			autoWeldShape: "cube",
 		},
+		operationfloor: {
+			name: "Floor",
+			description: "N/A",
+			autoWeldShape: "cube",
+		},
+		operationceil: {
+			name: "Ceil",
+			description: "N/A",
+			autoWeldShape: "cube",
+		},
 		operationsign: {
 			name: "Sign",
 			description: "Returns -1 if input value is less than zero, 1 if greater than zero and zero if equals zero",
