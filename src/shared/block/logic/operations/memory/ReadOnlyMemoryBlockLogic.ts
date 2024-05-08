@@ -19,8 +19,10 @@ export class ReadOnlyMemoryBlockLogic extends ConfigurableBlockLogic<typeof bloc
 				return;
 			}
 
-			const value = this.input.data.get()[address] ?? 0;
-			this.output.result.set(value);
+			this.output.output1.set(this.input.data.get()[address] ?? 0);
+			this.output.output2.set(this.input.data.get()[address + 1] ?? 0);
+			this.output.output3.set(this.input.data.get()[address + 2] ?? 0);
+			this.output.output4.set(this.input.data.get()[address + 3] ?? 0);
 		};
 
 		this.input.address.subscribe(readValue);

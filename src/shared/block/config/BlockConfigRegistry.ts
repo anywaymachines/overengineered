@@ -1080,9 +1080,27 @@ const readonlymemory = {
 			default: 0 as number,
 			config: 0 as number,
 		},
-		result: {
-			displayName: "Output",
-			type: "byte",
+		output1: {
+			displayName: "Output 1",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		output2: {
+			displayName: "Output 2",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		output3: {
+			displayName: "Output 3",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		output4: {
+			displayName: "Output 4",
+			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
