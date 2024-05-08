@@ -412,14 +412,14 @@ export const ConfigTest: ControlTest = {
 						type: "bytearray",
 						config: [1, 2, 3],
 						default: [1, 2, 3],
-						lengthLimit: 2000,
+						lengthLimit: 512,
 					},
 					byteArrayMixed: {
 						displayName: "Byte Array MIXED",
 						type: "bytearray",
 						config: [1, 2, 3],
 						default: [1, 2, 3],
-						lengthLimit: 2000,
+						lengthLimit: 512,
 					},
 				},
 			} satisfies Readonly<Record<keyof BlockConfigTypes.Types, BlockConfigTypes.Definitions>>;
