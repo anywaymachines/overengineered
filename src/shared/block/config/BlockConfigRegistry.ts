@@ -459,8 +459,8 @@ const leddisplay = {
 const sevensegmentdisplay = {
 	input: {
 		value: {
-			displayName: "Byte",
-			type: "byte",
+			displayName: "Value",
+			type: "number",
 			default: 0 as number,
 			config: 0 as number,
 		},
