@@ -106,6 +106,7 @@ namespace Checks {
 		for (const part of block.GetDescendants()) {
 			if (!part.IsA("BasePart")) continue;
 			if (part.Parent?.Name === "WeldRegions") continue;
+			if (part.Parent?.Name === "MarkerPoints") continue;
 
 			aabb = aabb.expanded(AABB.fromPart(part));
 		}
