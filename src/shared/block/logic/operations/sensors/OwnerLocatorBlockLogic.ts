@@ -1,4 +1,4 @@
-import { Players, RunService } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { BlockLogicData } from "shared/block/BlockLogic";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
@@ -8,11 +8,14 @@ export class OwnerLocatorBlockLogic extends ConfigurableBlockLogic<typeof blockC
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.ownerlocator.input>) {
 		super(block, blockConfigRegistry.ownerlocator);
 
-		this.event.subscribe(RunService.Heartbeat, () => this.update());
-
 		this.onDescendantDestroyed(() => {
 			this.disable();
 		});
+	}
+
+	tick(tick: number): void {
+		this.update();
+		super.tick(tick);
 	}
 
 	private update() {

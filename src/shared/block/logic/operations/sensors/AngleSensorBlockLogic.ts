@@ -1,4 +1,3 @@
-import { RunService } from "@rbxts/services";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -6,7 +5,11 @@ import { PlacedBlockData } from "shared/building/BlockManager";
 export class AngleSensorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.anglesensor> {
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.anglesensor);
-		this.event.subscribe(RunService.Heartbeat, () => this.update());
+	}
+
+	tick(tick: number): void {
+		this.update();
+		super.tick(tick);
 	}
 
 	private update() {

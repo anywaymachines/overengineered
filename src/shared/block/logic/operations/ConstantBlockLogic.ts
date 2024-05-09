@@ -6,6 +6,6 @@ export class ConstantBlockLogic extends ConfigurableBlockLogic<typeof blockConfi
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.constant.input>) {
 		super(block, blockConfigRegistry.constant);
 
-		this.event.subscribeObservable(this.input.value, (value) => this.output.result.set(value), true);
+		this.event.subscribeObservable(this.input.value, (value) => this.output.result.set(value));
 	}
 }

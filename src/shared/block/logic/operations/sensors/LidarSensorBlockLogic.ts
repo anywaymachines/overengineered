@@ -1,4 +1,4 @@
-import { RunService, Workspace } from "@rbxts/services";
+import { Workspace } from "@rbxts/services";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { BlockLogicData } from "shared/block/BlockLogic";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
@@ -10,7 +10,6 @@ export class LidarSensorBlockLogic extends ConfigurableBlockLogic<typeof blockCo
 
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.lidarsensor.input>) {
 		super(block, blockConfigRegistry.lidarsensor);
-		this.event.subscribe(RunService.Heartbeat, () => this.update());
 
 		this.ray = this.block.instance.FindFirstChild("Ray") as BasePart;
 		this.ray.Anchored = true;
@@ -18,6 +17,11 @@ export class LidarSensorBlockLogic extends ConfigurableBlockLogic<typeof blockCo
 		this.raycastParams = new RaycastParams();
 		this.raycastParams.FilterDescendantsInstances = [this.block.instance];
 		this.raycastParams.FilterType = Enum.RaycastFilterType.Exclude;
+	}
+
+	tick(tick: number): void {
+		this.update();
+		super.tick(tick);
 	}
 
 	private update() {

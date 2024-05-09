@@ -1,4 +1,3 @@
-import { RunService } from "@rbxts/services";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { BlockLogicData } from "shared/block/BlockLogic";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
@@ -7,7 +6,11 @@ import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 export class AccelerometerBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.accelerometer> {
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.accelerometer.input>) {
 		super(block, blockConfigRegistry.accelerometer);
-		this.event.subscribe(RunService.Heartbeat, () => this.update());
+	}
+
+	tick(tick: number): void {
+		this.update();
+		super.tick(tick);
 	}
 
 	private update() {
