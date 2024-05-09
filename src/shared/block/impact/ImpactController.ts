@@ -6,7 +6,6 @@ import { BlockManager, PlacedBlockData } from "shared/building/BlockManager";
 import { Component } from "shared/component/Component";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Objects } from "shared/fixes/objects";
-import { PartUtils } from "shared/utils/PartUtils";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 
 const logger = new Logger("ImpactController");
@@ -146,7 +145,7 @@ export class ImpactController extends Component {
 					}
 
 					this.breakQueue.push(partInRadius);
-					PartUtils.BreakJoints(partInRadius);
+					// PartUtils.BreakJoints(partInRadius);
 
 					const predictedVelocity = partInRadius.Position.sub(part.Position)
 						.Unit.mul(2000)
