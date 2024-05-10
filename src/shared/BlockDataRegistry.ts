@@ -13,14 +13,14 @@ interface BlockSetupInformation {
 	readonly limit?: number;
 }
 
-type BlockDataRegistry = Record<string, BlockSetupInformation>;
+type GenericBlockDataRegistry = Record<string, BlockSetupInformation>;
 
-const flatten = <T extends Record<string, BlockDataRegistry>>(
+const flatten = <T extends Partial<Record<string, GenericBlockDataRegistry>>>(
 	data: T,
 ): { [kk in { [k in keyof T]: keyof T[k] }[keyof T]]: BlockSetupInformation } => {
 	const ret: Partial<Record<string, BlockSetupInformation>> = {};
 	for (const [, items] of Objects.pairs_(data)) {
-		for (const [key, value] of pairs_(items as BlockDataRegistry)) {
+		for (const [key, value] of pairs_(items as GenericBlockDataRegistry)) {
 			ret[key] = value;
 		}
 	}
@@ -381,7 +381,7 @@ const logic = {
 			limit: 400,
 		},
 	},
-} as const satisfies Record<string, BlockDataRegistry>;
+} satisfies Record<string, GenericBlockDataRegistry>;
 
 /** Registry for the block information, for easier editing (compared to Roblox Studio) */
 const registry = {
@@ -792,12 +792,14 @@ const registry = {
 		description: "Love is in the air? Wrong! Radio wave radia-tion!",
 		limit: 10,
 	},
-} as const satisfies BlockDataRegistry;
+} satisfies GenericBlockDataRegistry;
 
-export const BlockDataRegistry: BlockDataRegistry = registry;
-export const TypedBlockDataRegistry = registry;
+export const BlockDataRegistry: { readonly [id in BlockId]: BlockSetupInformation } = registry;
+
 export type BlockId = string & keyof typeof registry;
+export const BlockIds = Objects.keys(registry);
 
-for (const [key, info] of Objects.pairs_(BlockDataRegistry)) {
-	BlockDataRegistry[key] = process(info);
+const writableRegistry: Writable<typeof BlockDataRegistry> = registry;
+for (const [key, info] of Objects.pairs_(writableRegistry)) {
+	writableRegistry[key] = process(info);
 }

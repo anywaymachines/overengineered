@@ -1,5 +1,5 @@
 import { BlockMarkers } from "server/building/BlockMarkers";
-import { BlockId, TypedBlockDataRegistry } from "shared/BlockDataRegistry";
+import { BlockId, BlockIds } from "shared/BlockDataRegistry";
 
 export namespace GameInfo {
 	function toBlock(id: BlockId): GameInfoBlock | undefined {
@@ -14,7 +14,7 @@ export namespace GameInfo {
 	}
 
 	const blocks: { [id in BlockId]?: GameInfoBlock } = {};
-	for (const [id] of pairs(TypedBlockDataRegistry)) {
+	for (const id of BlockIds) {
 		blocks[id] = toBlock(id);
 	}
 

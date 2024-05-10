@@ -954,6 +954,7 @@ const create = (info: BlocksInitializeData) => {
 				autoWeldShape: setupinfo.autoWeldShape,
 				limit: setupinfo.limit,
 				mirrorBehaviour: setupinfo.mirrorBehaviour,
+				mirrorReplacementId: setupinfo.mirrorReplacementId as BlockId | undefined,
 				required: setupinfo.required,
 			};
 			info.blocks.set(regblock.id, regblock);

@@ -16,6 +16,7 @@ declare global {
 		readonly limit: number | undefined;
 		readonly autoWeldShape: AutoWeldColliderBlockShape | undefined;
 		readonly mirrorBehaviour: BlockMirrorBehaviour | undefined;
+		readonly mirrorReplacementId: BlockId | undefined;
 	};
 
 	type CategoryName = string & { readonly ___nominal: "CategoryName" };
@@ -87,7 +88,7 @@ namespace Checks {
 		throw `No parts in block '${block.Name}' are anchored!`;
 	}
 	function assertHasDataInRegistry(block: Model) {
-		if (!BlockDataRegistry[block.Name.lower()]) {
+		if (!BlockDataRegistry[block.Name.lower() as BlockId]) {
 			throw `No registry data found for block ${block.Name}`;
 		}
 	}
@@ -171,6 +172,7 @@ const readFromAssets = (data: BlocksInitializeData) => {
 			limit: attributes.limit,
 			autoWeldShape: attributes.autoWeldShape,
 			mirrorBehaviour: attributes.mirrorBehaviour,
+			mirrorReplacementId: attributes.mirrorReplacementId as BlockId | undefined,
 			model: block as BlockModel,
 			category: categoryName as CategoryName,
 		};
