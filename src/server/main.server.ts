@@ -205,7 +205,7 @@ namespace RemoteHandlers {
 	}
 
 	export function getGameData(): GameInfo {
-		return GameInfo.info;
+		return GameInfo.getInfo();
 	}
 }
 
