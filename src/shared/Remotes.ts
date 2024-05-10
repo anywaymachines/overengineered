@@ -1,4 +1,5 @@
 import { Definitions, Middleware } from "@rbxts/net";
+import { BlockId } from "shared/BlockDataRegistry";
 import { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 declare global {
@@ -6,7 +7,7 @@ declare global {
 	type MultiBuildResponse = Response<{ readonly models: readonly BlockModel[] }>;
 
 	interface PlaceBlockRequest {
-		readonly id: string;
+		readonly id: BlockId;
 		readonly color: Color3;
 		readonly material: Enum.Material;
 		readonly location: CFrame;
@@ -74,6 +75,13 @@ declare global {
 		readonly touchControls?: TouchControlInfo;
 		readonly save: boolean;
 	};
+
+	type GameInfoBlock = {
+		readonly markerPositions: { readonly [name: BlockConnectionName]: Vector3 };
+	};
+	type GameInfo = {
+		readonly blocks: { readonly [k in BlockId]?: GameInfoBlock };
+	};
 }
 
 export const Remotes = Definitions.Create({
@@ -136,4 +144,7 @@ export const Remotes = Definitions.Create({
 		ClientSpawnBlock: Definitions.ServerToClientEvent<[data: ReplicationSpawnBlock]>(),
 	}),
 	ServerRestartProgress: Definitions.ServerToClientEvent<[atmosphereColor: number]>(),
+	Game: Definitions.Namespace({
+		GameInfo: Definitions.ServerAsyncFunction<() => GameInfo>(),
+	}),
 });

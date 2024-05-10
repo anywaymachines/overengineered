@@ -8,6 +8,7 @@ import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { JSON, JsonSerializablePrimitive } from "shared/fixes/Json";
+import { Objects } from "shared/fixes/objects";
 
 type NonNullableFields<T> = {
 	[P in keyof T]: NonNullable<T[P]>;
@@ -18,6 +19,8 @@ export namespace PlayerDataStorage {
 
 	export const loadedSlot = new ObservableValue<number | undefined>(undefined);
 
+	export const gameData = new ObservableValue<GameInfo>({ blocks: {} });
+
 	export const data = new ObservableValue<NonNullableFields<PlayerDataResponse> | undefined>(undefined);
 	export const config = data.createChild(
 		"settings",
@@ -27,7 +30,7 @@ export namespace PlayerDataStorage {
 	export const imported_slots = data.createChild("imported_slots", []);
 
 	export async function init() {
-		await refetchData();
+		await refetchPlayerData();
 
 		config.createNullableChild("betterCamera", undefined).subscribe((betterCamera) => {
 			logger.info("better_camera set to " + HttpService.JSONEncode(betterCamera));
@@ -37,9 +40,8 @@ export namespace PlayerDataStorage {
 		}, true);
 	}
 
-	export async function refetchData() {
+	async function refetchPlayerData() {
 		const d = await Remotes.Client.GetNamespace("Player").Get("FetchData").CallServerAsync();
-		logger.info("Configuration received: " + HttpService.JSONEncode(config.get()));
 
 		data.set({
 			purchasedSlots: d.purchasedSlots ?? 0,
@@ -52,6 +54,11 @@ export namespace PlayerDataStorage {
 		});
 
 		logger.info("Configuration loaded: " + HttpService.JSONEncode(config.get()));
+	}
+	export async function refetchGameData() {
+		const d = await Remotes.Client.GetNamespace("Game").Get("GameInfo").CallServerAsync();
+		gameData.set(d);
+		logger.info(`Loaded ${Objects.size(d.blocks)} block infos`);
 	}
 
 	export async function sendPlayerConfigValue<TKey extends keyof PlayerConfig>(

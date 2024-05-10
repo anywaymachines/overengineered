@@ -1,0 +1,24 @@
+import { BlockMarkers } from "server/building/BlockMarkers";
+import { BlockId, TypedBlockDataRegistry } from "shared/BlockDataRegistry";
+
+export namespace GameInfo {
+	function toBlock(id: BlockId): GameInfoBlock | undefined {
+		const markerPositions = BlockMarkers.markers[id];
+		if (markerPositions === undefined) {
+			return undefined;
+		}
+
+		return {
+			markerPositions,
+		};
+	}
+
+	const blocks: { [id in BlockId]?: GameInfoBlock } = {};
+	for (const [id] of pairs(TypedBlockDataRegistry)) {
+		blocks[id] = toBlock(id);
+	}
+
+	export const info: GameInfo = {
+		blocks,
+	};
+}

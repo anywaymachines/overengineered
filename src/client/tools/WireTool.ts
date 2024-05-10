@@ -1,4 +1,5 @@
 import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientInstanceComponent } from "client/component/ClientInstanceComponent";
 import { InputController } from "client/controller/InputController";
@@ -712,9 +713,11 @@ export class WireTool extends ToolBase {
 					continue;
 				}
 
+				const blockid = (marker.data.blockData as PlacedBlockData).id;
+				const markerpos = PlayerDataStorage.gameData.get().blocks[blockid]?.markerPositions?.[marker.data.id];
 				const markerInstance = Markers.Marker.createInstance(
 					marker.data.blockData.instance.PrimaryPart!,
-					size === 1 ? "center" : index++,
+					markerpos !== undefined ? markerpos : size === 1 ? "center" : index++,
 				);
 
 				const component =

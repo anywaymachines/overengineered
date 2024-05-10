@@ -76,6 +76,7 @@ root.add(playModeController);
 root.enable();
 
 GameLoader.waitForServer();
+PlayerDataStorage.refetchGameData().await();
 
 LoadingController.hide();
 

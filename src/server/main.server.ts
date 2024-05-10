@@ -9,6 +9,8 @@ import { HttpService, MessagingService, RunService, Workspace } from "@rbxts/ser
 import { Backend } from "server/Backend";
 import { BadgeController } from "server/BadgeController";
 import { ServerRestartController } from "server/ServerRestartController";
+import { BlockMarkers } from "server/building/BlockMarkers";
+import { GameInfo } from "server/building/GameInfo";
 import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Logger } from "shared/Logger";
@@ -201,6 +203,10 @@ namespace RemoteHandlers {
 
 		vehicleSeat.Sit(hrp);
 	}
+
+	export function getGameData(): GameInfo {
+		return GameInfo.info;
+	}
 }
 
 if (game.PrivateServerOwnerId !== 0) {
@@ -229,6 +235,7 @@ registerOnRemoteFunction("Building", "LogicDisconnect", ServerBuildingRequestHan
 registerOnRemoteFunction("Building", "PaintBlocks", ServerBuildingRequestHandler.paintBlocks);
 registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSetting);
 registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
+registerOnRemoteFunction("Game", "GameInfo", RemoteHandlers.getGameData);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
 registerOnRemoteEvent("Admin", "LoadSlot", RemoteHandlers.loadSlotAsAdmin);
 registerOnRemoteEvent("Admin", "SendMessage", RemoteHandlers.sendMessageAsAdmin);
@@ -247,6 +254,7 @@ ServerRestartController.init();
 
 BlocksInitializer.initialize();
 BuildingWelder.initialize();
+BlockMarkers.initialize();
 
 PlayModeController.init();
 RemoteEvents.initialize();
