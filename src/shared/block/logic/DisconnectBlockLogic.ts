@@ -14,7 +14,7 @@ export class DisconnectBlockLogic extends ConfigurableBlockLogic<typeof blockCon
 		this.event.subscribeObservable(
 			this.input.disconnect,
 			(disconnect) => {
-				if (!disconnect) return;
+				if (disconnect !== true) return;
 				this.disconnect();
 			},
 			true,
