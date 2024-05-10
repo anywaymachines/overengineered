@@ -1,5 +1,5 @@
 import { RunService } from "@rbxts/services";
-import { BlockDataRegistry } from "shared/BlockDataRegistry";
+import { BlockDataRegistry, BlockId } from "shared/BlockDataRegistry";
 import type { BlocksInitializeData } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
 import { Logger } from "shared/Logger";
@@ -15,7 +15,7 @@ import { Objects } from "shared/fixes/objects";
 const logger = new Logger("AutoBlockCreator");
 
 interface BlockResult extends BlockAdditional {
-	readonly id: string;
+	readonly id: BlockId;
 	readonly displayName: string;
 	readonly info: string;
 	readonly prefab: string;
@@ -911,7 +911,7 @@ const create = (info: BlocksInitializeData) => {
 	};
 
 	const createBase = (displayName: string, prefab: string, additional: BlockAdditional): BlockResult => {
-		const id = `operation${displayName.lower()}`;
+		const id = `operation${displayName.lower()}` as BlockId;
 		if (!(id in BlockDataRegistry)) {
 			throw `Block ${id} was not found in the data registry`;
 		}

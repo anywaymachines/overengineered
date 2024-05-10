@@ -1,13 +1,13 @@
 import { ReplicatedStorage, RunService } from "@rbxts/services";
 import { Logger } from "shared/Logger";
 import { AABB } from "shared/fixes/AABB";
-import { AutoWeldColliderBlockShape, BlockDataRegistry, BlockMirrorBehaviour } from "./BlockDataRegistry";
+import { AutoWeldColliderBlockShape, BlockDataRegistry, BlockId, BlockMirrorBehaviour } from "./BlockDataRegistry";
 import { AutoBlockCreator } from "./block/logic/AutoBlockCreator";
 import { Objects } from "./fixes/objects";
 
 declare global {
 	type RegistryBlock = {
-		readonly id: string;
+		readonly id: string & BlockId;
 		readonly displayName: string;
 		readonly info: string;
 		readonly model: BlockModel;
@@ -148,7 +148,7 @@ const readFromAssets = (data: BlocksInitializeData) => {
 			Checks.checkAll(block);
 		}
 
-		const id = block.Name.lower();
+		const id = block.Name.lower() as BlockId;
 
 		const attributes = BlockDataRegistry[id];
 		const regblock: RegistryBlock = {
