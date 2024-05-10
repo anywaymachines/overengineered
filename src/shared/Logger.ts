@@ -92,11 +92,11 @@ export namespace Logger {
 		log(levels.error, ...args);
 	}
 
-	function addAdditional(additional: string, ...args: unknown[]) {
+	function addAdditional(additional: defined[], ...args: unknown[]) {
 		if (printAdditional) {
 			return [
 				...(Objects.asArray(Objects.asMap(args).map((k, a) => (a === undefined ? "nil" : a))) as defined[]),
-				additional,
+				...additional,
 			];
 		}
 
@@ -104,15 +104,15 @@ export namespace Logger {
 	}
 
 	/** @deprecated For internal usage */
-	export function _info(additional: string, ...args: unknown[]) {
+	export function _info(additional: defined[], ...args: unknown[]) {
 		info(...addAdditional(additional, ...args));
 	}
 	/** @deprecated For internal usage */
-	export function _warn(additional: string, ...args: unknown[]) {
+	export function _warn(additional: defined[], ...args: unknown[]) {
 		warn(...addAdditional(additional, ...args));
 	}
 	/** @deprecated For internal usage */
-	export function _err(additional: string, ...args: unknown[]) {
+	export function _err(additional: defined[], ...args: unknown[]) {
 		err(...addAdditional(additional, ...args));
 	}
 }

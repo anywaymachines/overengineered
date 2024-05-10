@@ -89,9 +89,6 @@ const newtr = (program: ts.Program, context: ts.TransformationContext) => {
 		const constructLog = (expression: ts.CallExpression, name: string): ts.Node => {
 			needsImport = true;
 
-			const spt = file.fileName.split('/')
-			const filename = spt[spt.length - 1];
-
 			return factory.createCallExpression(
 				factory.createPropertyAccessExpression(
 					factory.createIdentifier('__logger'),
@@ -99,7 +96,12 @@ const newtr = (program: ts.Program, context: ts.TransformationContext) => {
 				),
 				expression.typeArguments,
 				[
-					factory.createStringLiteral(`\t [${filename}:${file.getLineAndCharacterOfPosition(expression.getStart()).line}]`),
+					factory.createArrayLiteralExpression([
+
+						factory.createStringLiteral('\t -'),
+						factory.createIdentifier('script'),
+						factory.createStringLiteral(`:${file.getLineAndCharacterOfPosition(expression.getStart()).line}`),
+					]),
 					...expression.arguments,
 				],
 			);
