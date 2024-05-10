@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import { BlockDataRegistry } from "shared/BlockDataRegistry";
+import { BlockDataRegistry, BlockId } from "shared/BlockDataRegistry";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { VectorUtils } from "shared/utils/VectorUtils";
@@ -82,7 +82,7 @@ export namespace BuildingManager {
 	}
 
 	type MirroredBlock = {
-		readonly id: string;
+		readonly id: BlockId;
 		readonly pos: CFrame;
 	};
 	export function getMirroredBlocks(
@@ -163,7 +163,7 @@ export namespace BuildingManager {
 			// apply position \/
 			const rpos = mirrorCFrame.PointToObjectSpace(pos);
 			return {
-				id: BlockDataRegistry[block.id]?.mirrorReplacementId ?? block.id,
+				id: (BlockDataRegistry[block.id]?.mirrorReplacementId as BlockId | undefined) ?? block.id,
 				pos: new CFrame(mirrorCFrame.ToWorldSpace(new CFrame(rpos.X, rpos.Y, -rpos.Z)).Position).mul(
 					cframe.Rotation,
 				),

@@ -6,27 +6,27 @@ import { Component } from "shared/component/Component";
 import { ObservableValue } from "shared/event/ObservableValue";
 
 export class BlockMirrorer extends Component {
-	readonly blocks = new ObservableValue<readonly { readonly id: string; readonly model: Model }[]>([]);
-	private readonly tracking = new Map<Model, Record<string, Model[]>>();
+	readonly blocks = new ObservableValue<readonly { readonly id: BlockId; readonly model: Model }[]>([]);
+	private readonly tracking = new Map<Model, Partial<Record<BlockId, Model[]>>>();
 
 	constructor() {
 		super();
 		this.onDisable(() => this.destroyMirrors());
 	}
 
-	getMirroredModels(): Readonly<Record<string, readonly Model[]>> {
-		const ret: Record<string, Model[]> = {};
+	getMirroredModels(): Readonly<Record<BlockId, readonly Model[]>> {
+		const ret: Partial<Record<BlockId, Model[]>> = {};
 		for (const [, track] of this.tracking) {
 			for (const [id, models] of pairs(track)) {
 				ret[id] ??= [];
 
 				for (const model of models) {
-					ret[id].push(model);
+					ret[id]!.push(model);
 				}
 			}
 		}
 
-		return ret;
+		return ret as Record<BlockId, readonly Model[]>;
 	}
 
 	updatePositions(plot: PlotModel, mode: MirrorMode) {
@@ -73,24 +73,24 @@ export class BlockMirrorer extends Component {
 			const types: Partial<Record<BlockId, number>> = {};
 			for (let i = 0; i < mirrored.size(); i++) {
 				const mirror = mirrored[i];
-				const id = mirror.id as BlockId;
+				const id = mirror.id;
 
 				types[id] ??= 0;
-				tracked[id] ??= [];
-				if (tracked[id].size() <= types[id]!) {
+				const track = (tracked[id] ??= []);
+				if (track.size() <= types[id]!) {
 					const instance = BlocksInitializer.blocks.map.get(mirror.id)!.model.Clone();
 					BlockGhoster.ghostModel(instance);
-					tracked[id].push(instance);
+					track.push(instance);
 				}
 
-				tracked[id][types[id]!].PivotTo(mirror.pos);
+				track[types[id]!].PivotTo(mirror.pos);
 				types[id]!++;
 			}
 
 			for (const mirror of mirrored) {
-				const track = tracked[mirror.id];
+				const track = (tracked[mirror.id] ??= []);
 				const size = track.size();
-				for (let i = types[mirror.id as BlockId] ?? 0; i < size; i++) {
+				for (let i = types[mirror.id] ?? 0; i < size; i++) {
 					track.pop()?.Destroy();
 				}
 			}

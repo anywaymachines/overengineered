@@ -795,6 +795,7 @@ const registry = {
 } as const satisfies BlockDataRegistry;
 
 export const BlockDataRegistry: BlockDataRegistry = registry;
+export const TypedBlockDataRegistry = registry;
 export type BlockId = string & keyof typeof registry;
 
 for (const [key, info] of Objects.pairs_(BlockDataRegistry)) {

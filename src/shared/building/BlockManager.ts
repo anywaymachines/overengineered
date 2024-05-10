@@ -1,3 +1,4 @@
+import { BlockId } from "shared/BlockDataRegistry";
 import { Serializer } from "shared/Serializer";
 import { JSON, JsonSerializablePrimitive } from "shared/fixes/Json";
 
@@ -20,7 +21,7 @@ export type PlacedBlockData<T extends BlockModel = BlockModel> = {
 	readonly instance: T;
 	readonly color: Color3;
 	readonly material: Enum.Material;
-	readonly id: string;
+	readonly id: BlockId;
 	readonly uuid: BlockUuid;
 	readonly config: PlacedBlockConfig | undefined;
 	readonly connections: PlacedBlockLogicConnections | undefined;
@@ -71,7 +72,7 @@ export namespace BlockManager {
 		{
 			id: {
 				set: (block, value) => block.SetAttribute("id", value),
-				get: (block) => block.GetAttribute("id") as string,
+				get: (block) => block.GetAttribute("id") as BlockId,
 			},
 			uuid: {
 				set: (block, value) => block.SetAttribute("uuid", value),
