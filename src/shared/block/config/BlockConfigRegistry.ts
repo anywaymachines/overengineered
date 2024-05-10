@@ -78,7 +78,13 @@ const connectors = {
 		group?: string,
 	): ConfigTypeToDefinition<
 		BlockConfigTypes.Or<
-			[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3, BlockConfigTypes.String]
+			[
+				BlockConfigTypes.Bool,
+				BlockConfigTypes.Number,
+				BlockConfigTypes.Vec3,
+				BlockConfigTypes.String,
+				BlockConfigTypes.Byte,
+			]
 		>
 	> {
 		return {
@@ -114,6 +120,12 @@ const connectors = {
 					type: "string",
 					default: "" as string,
 					config: "" as string,
+				},
+				byte: {
+					displayName: "Byte",
+					type: "byte",
+					default: 0 as number,
+					config: 0 as number,
 				},
 			},
 		};
@@ -794,27 +806,11 @@ const multiplexer = {
 			config: false as boolean,
 		},
 
-		truenumber: {
-			displayName: "True number",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-
-		falsenumber: {
-			displayName: "False number",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
+		truevalue: connectors.any("True Value", "1"),
+		falsevalue: connectors.any("False Value", "1"),
 	},
 	output: {
-		result: {
-			displayName: "Result",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
+		result: connectors.any("Result", "1"),
 	},
 } as const satisfies BlockConfigBothDefinitions;
 

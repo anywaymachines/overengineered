@@ -6,14 +6,14 @@ export class Multiplexer extends ConfigurableBlockLogic<typeof blockConfigRegist
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.multiplexer);
 
-		this.input.falsenumber.subscribe(() => this.update());
-		this.input.truenumber.subscribe(() => this.update());
+		this.input.falsevalue.subscribe(() => this.update());
+		this.input.truevalue.subscribe(() => this.update());
 		this.input.value.subscribe(() => this.update());
 	}
 
 	private update() {
 		this.output.result.set(
-			this.input.value.get() === true ? this.input.truenumber.get() : this.input.falsenumber.get(),
+			this.input.value.get() === true ? this.input.truevalue.get() : this.input.falsevalue.get(),
 		);
 	}
 }
