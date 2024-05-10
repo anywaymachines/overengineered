@@ -96,7 +96,7 @@ namespace Scene {
 			this.gui.Visible = Objects.size(onedef) !== 0;
 			if (!this.gui.Visible) return;
 
-			this.gui.ParamsSelection.HeaderLabel.Text = `CONFIGURATION (${selected.size()})`;
+			this.gui.ParamsSelection.HeaderLabel.Text = `${block.displayName.upper()} x${selected.size()}`;
 
 			const configs = selected.map((selected) => {
 				const blockmodel = selected;
