@@ -117,6 +117,14 @@ const logic = {
 			name: "Byte Splitter",
 			description: "N/A", // TODO: @samlovebutter
 		},
+		operationbytetonumber: {
+			name: "Byte To Number",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationnumbertobyte: {
+			name: "Number to Byte",
+			description: "N/A", // TODO: @samlovebutter
+		},
 		operationbytexor: {
 			name: "Byte XOR",
 			description: "N/A", // TODO: @samlovebutter

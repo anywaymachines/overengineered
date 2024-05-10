@@ -200,6 +200,22 @@ const defs = {
 			result: defcs.byte("Result"),
 		},
 	},
+	byteToNumber: {
+		input: {
+			value: defcs.byte("Value"),
+		},
+		output: {
+			result: defcs.number("Result"),
+		},
+	},
+	numberToByte: {
+		input: {
+			value: defcs.number("Value"),
+		},
+		output: {
+			result: defcs.byte("Result"),
+		},
+	},
 	byte1byte: {
 		input: {
 			value: defcs.byte("Value"),
@@ -400,6 +416,28 @@ const logicReg = {
 			}
 		};
 	},
+
+	byteToNumber: (func: (value: number, logic: BlockLogic) => number) => {
+		return class Logic extends ConfigurableBlockLogic<typeof defs.byteToNumber> {
+			constructor(block: PlacedBlockData) {
+				super(block, defs.byteToNumber);
+
+				const update = () => this.output.result.set(func(this.input.value.get(), this));
+				this.input.value.subscribe(update);
+			}
+		};
+	},
+
+	numberToByte: (func: (value: number, logic: BlockLogic) => number) => {
+		return class Logic extends ConfigurableBlockLogic<typeof defs.numberToByte> {
+			constructor(block: PlacedBlockData) {
+				super(block, defs.numberToByte);
+
+				const update = () => this.output.result.set(func(this.input.value.get(), this));
+				this.input.value.subscribe(update);
+			}
+		};
+	},
 } as const satisfies Record<keyof typeof defs, unknown>;
 
 //
@@ -432,6 +470,7 @@ const multiifunc =
 
 const mathCategory = ["Logic", "Math"];
 const byteCategory = ["Logic", "Math", "Byte"];
+const converterByteCategory = ["Logic", "Converter", "Byte"];
 const otherCategory = ["Logic", "Other"];
 const boolCategory = ["Logic", "Gate"];
 
@@ -832,6 +871,22 @@ const operations = {
 			category: boolCategory,
 			prefab: smallGenericPrefab,
 			func: (x) => !x,
+		},
+	},
+	numberToByte: {
+		NumberToByte: {
+			modelTextOverride: "TO BYTE",
+			category: converterByteCategory,
+			prefab: smallGenericPrefab,
+			func: (value) => math.clamp(value, 0, 255),
+		},
+	},
+	byteToNumber: {
+		ByteToNumber: {
+			modelTextOverride: "TO NUMBER",
+			category: converterByteCategory,
+			prefab: smallBytePrefab,
+			func: (value) => value,
 		},
 	},
 } as const satisfies NonGenericOperations;
