@@ -700,7 +700,7 @@ export class WireTool extends ToolBase {
 
 		const components = new Map<BlockWireManager.Markers.Marker, Markers.Marker>();
 		for (const [, markers] of BlockWireManager.fromPlot(plot)) {
-			let index = 0;
+			let [ii, oi, ai] = [0, 0, 0];
 			const size = markers.size();
 
 			for (const marker of markers) {
@@ -714,10 +714,21 @@ export class WireTool extends ToolBase {
 				}
 
 				const blockid = (marker.data.blockData as PlacedBlockData).id;
-				const markerpos = PlayerDataStorage.gameData.get().blocks[blockid]?.markerPositions?.[marker.data.id];
+				const positions = PlayerDataStorage.gameData.get().blocks[blockid]?.markerPositions;
+				let markerpos = positions?.[marker.data.id];
+				if (!markerpos) {
+					if (marker instanceof BlockWireManager.Markers.Input) {
+						markerpos = positions?.[`@i${ii}` as BlockConnectionName];
+						if (markerpos) ii++;
+					} else {
+						markerpos = positions?.[`@o${oi}` as BlockConnectionName];
+						if (markerpos) oi++;
+					}
+				}
+
 				const markerInstance = Markers.Marker.createInstance(
 					marker.data.blockData.instance.PrimaryPart!,
-					markerpos !== undefined ? markerpos : size === 1 ? "center" : index++,
+					markerpos !== undefined ? markerpos : size === 1 ? "center" : ai++,
 				);
 
 				const component =

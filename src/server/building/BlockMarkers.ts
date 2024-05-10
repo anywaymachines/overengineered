@@ -6,7 +6,9 @@ import { Objects } from "shared/fixes/objects";
 const logger = new Logger("BlockMarkers");
 
 export namespace BlockMarkers {
-	export const markers: { readonly [id in BlockId]?: { readonly [name: BlockConnectionName]: Vector3 } } = {};
+	export const markers: {
+		readonly [id in BlockId]?: { readonly [name in BlockConnectionName]?: Vector3 };
+	} = {};
 
 	export function initialize() {
 		initPartBlockCollisions(BlocksInitializer.blocks.sorted);
