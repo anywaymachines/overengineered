@@ -21,12 +21,14 @@ export class RadioRecieverBlockLogic extends ConfigurableBlockLogic<typeof block
 		this.originalColor = this.led.Color;
 
 		const changeFrequency = (freq: number, prev: number) => {
-			RadioRecieverBlockLogic.allRecievers.get(prev)?.delete(this);
 			if (!RadioRecieverBlockLogic.allRecievers.get(freq))
 				RadioRecieverBlockLogic.allRecievers.set(freq, new Set());
+			RadioRecieverBlockLogic.allRecievers.get(prev)?.delete(this);
 			RadioRecieverBlockLogic.allRecievers.get(freq)?.add(this);
 		};
 
 		this.event.subscribeObservable(this.input.frequency, changeFrequency);
+
+		this.onDisable(() => RadioRecieverBlockLogic.allRecievers.get(this.input.frequency.get())?.delete(this));
 	}
 }
