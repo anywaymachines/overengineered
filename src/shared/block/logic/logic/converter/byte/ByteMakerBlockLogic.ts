@@ -6,27 +6,27 @@ export class ByteMakerBlockLogic extends ConfigurableBlockLogic<typeof blockConf
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.bytemaker.input>) {
 		super(block, blockConfigRegistry.bytemaker);
 
-		this.input[1].subscribe(() => this.update());
-		this.input[2].subscribe(() => this.update());
-		this.input[4].subscribe(() => this.update());
-		this.input[8].subscribe(() => this.update());
-		this.input[16].subscribe(() => this.update());
-		this.input[32].subscribe(() => this.update());
-		this.input[64].subscribe(() => this.update());
-		this.input[128].subscribe(() => this.update());
+		this.input["1"].subscribe(() => this.update());
+		this.input["2"].subscribe(() => this.update());
+		this.input["4"].subscribe(() => this.update());
+		this.input["8"].subscribe(() => this.update());
+		this.input["16"].subscribe(() => this.update());
+		this.input["32"].subscribe(() => this.update());
+		this.input["64"].subscribe(() => this.update());
+		this.input["128"].subscribe(() => this.update());
 	}
 
 	private update() {
 		this.output.value.set(
 			this.booleansToNumber([
-				this.input[128].get(),
-				this.input[64].get(),
-				this.input[32].get(),
-				this.input[16].get(),
-				this.input[8].get(),
-				this.input[4].get(),
-				this.input[2].get(),
-				this.input[1].get(),
+				this.input["128"].get(),
+				this.input["64"].get(),
+				this.input["32"].get(),
+				this.input["16"].get(),
+				this.input["8"].get(),
+				this.input["4"].get(),
+				this.input["2"].get(),
+				this.input["1"].get(),
 			]),
 		);
 	}
