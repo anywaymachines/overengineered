@@ -116,6 +116,17 @@ namespace Checks {
 		check(size.Y, "Y");
 		check(size.Z, "Z");
 	}
+	function assertCollisionGroup(block: Model) {
+		for (const child of block.GetDescendants()) {
+			if (child.Parent?.Name === "WeldRegions") continue;
+			if (!child.IsA("BasePart")) continue;
+			if (!child.CanCollide) continue;
+
+			if (child.CollisionGroup !== "Blocks") {
+				throw `Block ${block.Name} part ${child.Name} has a wrong collision group ${child.CollisionGroup}!`;
+			}
+		}
+	}
 
 	export function checkAll(block: Model) {
 		assertPrimaryPartSet(block);
@@ -125,6 +136,7 @@ namespace Checks {
 		assertSomethingAnchored(block);
 		assertHasDataInRegistry(block);
 		assertSize(block);
+		assertCollisionGroup(block);
 	}
 }
 
