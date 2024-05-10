@@ -6,7 +6,7 @@ const dataLoading = PlayerDataStorage.init();
 GameLoader.waitForEverything(LoadingController.show);
 LoadingController.show("Loading the dependencies");
 
-import { Players, RunService, TextChatService } from "@rbxts/services";
+import { Players, TextChatService } from "@rbxts/services";
 import { ServerRestartController } from "client/ServerRestartController";
 import { CharacterController } from "client/controller/CharacterController";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
@@ -17,7 +17,6 @@ import { WindController } from "client/controller/WindController";
 import { MusicController } from "client/controller/sound/MusicController";
 import { InputTypeChangeEvent } from "client/event/InputTypeChangeEvent";
 import { Gui } from "client/gui/Gui";
-import { DebugControl } from "client/gui/static/DebugControl";
 import { LogControl } from "client/gui/static/LogControl";
 import { PlayModeController } from "client/modes/PlayModeController";
 import { ClientBuildingValidation } from "client/modes/build/ClientBuildingValidation";
@@ -25,10 +24,8 @@ import { $compileTime } from "rbxts-transformer-macros";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { Replicator } from "shared/replication/Replicator";
 import { AdminMessageController } from "./AdminMessageController";
 import { ClientContainerComponent } from "./component/ClientContainerComponent";
-import { ClientCustomReplicationService } from "./service/ClientCustomReplicationService";
 import { rootComponents } from "./test/RootComponents";
 
 LoadingController.show("Loading the game");
@@ -46,10 +43,6 @@ RemoteEvents.initialize();
 AdminMessageController.initialize();
 ServerRestartController.initialize();
 ClientBuildingValidation.initialize();
-
-if (RunService.IsStudio()) {
-	DebugControl.instance.show();
-}
 
 SoundController.initialize();
 MusicController.initialize();
@@ -94,9 +87,3 @@ TextChatService.OnIncomingMessage = function (message: TextChatMessage) {
 
 	return props;
 };
-
-if (RunService.IsStudio()) {
-	warn("REPLICATION TESTING IS ACTIVE");
-	ClientCustomReplicationService.initialize();
-	const _ = Replicator;
-}

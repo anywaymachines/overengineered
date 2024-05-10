@@ -1,6 +1,5 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
 import { $compileTime } from "rbxts-transformer-macros";
-import { Signal } from "shared/event/Signal";
 import { GameDefinitions } from "./data/GameDefinitions";
 
 const isActive = () => {
@@ -25,15 +24,10 @@ if (RunService.IsClient()) {
 }
 
 export class Logger {
-	private static readonly _onLog = new Signal<(text: string, error: boolean) => void>();
-	static readonly onLog = this._onLog.asReadonly();
-
 	constructor(private readonly name: string) {}
 
 	info(...params: unknown[]) {
 		if (!isActive()) return;
-
-		Logger._onLog.Fire(params.filterUndefined().join(" "), false);
 
 		if (RunService.IsClient()) {
 			return print(`[INFO] [CLIENT] [${this.name}]`, ...params);
@@ -45,8 +39,6 @@ export class Logger {
 	warn(...params: unknown[]) {
 		if (!isActive()) return;
 
-		Logger._onLog.Fire(params.filterUndefined().join(" "), false);
-
 		if (RunService.IsClient()) {
 			return warn(`[WARN] [CLIENT] [${this.name}]`, ...params);
 		}
@@ -56,8 +48,6 @@ export class Logger {
 
 	error(message: string, alwaysVisible: boolean = true) {
 		if (!isActive() && !alwaysVisible) return;
-
-		Logger._onLog.Fire(message, true);
 
 		try {
 			if (RunService.IsClient()) {

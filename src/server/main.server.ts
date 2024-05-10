@@ -256,25 +256,9 @@ BlocksInitializer.initialize();
 BuildingWelder.initialize();
 BlockMarkers.initialize();
 
-PlayModeController.init();
 RemoteEvents.initialize();
 
-if (RunService.IsStudio()) {
-	Logger.onLog.Connect((text, isError) => {
-		Remotes.Server.GetNamespace("Debug").Get("DisplayLine").SendToAllPlayers(text, false, isError);
-	});
-}
-
+PlayModeController.init();
 Workspace.SetAttribute("loaded", true);
-
-// if (RunService.IsStudio()) {
-// 	warn("REPLICATION TESTING IS ACTIVE");
-// 	CustomReplicationService.spawnBlock(
-// 		ReplicatedStorage.Assets.Placeable.FindFirstChild("Movement")!
-// 			.FindFirstChild("Rocket")!
-// 			.FindFirstChild("RocketEngine")! as BlockModel,
-// 		new CFrame(0, 0, 0),
-// 	);
-// }
 
 const _ = Replicator;

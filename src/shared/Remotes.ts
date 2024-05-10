@@ -77,7 +77,7 @@ declare global {
 	};
 
 	type GameInfoBlock = {
-		readonly markerPositions: { readonly [name: BlockConnectionName]: Vector3 };
+		readonly markerPositions: { readonly [name in BlockConnectionName]?: Vector3 };
 	};
 	type GameInfo = {
 		readonly blocks: { readonly [k in BlockId]?: GameInfoBlock };
@@ -129,9 +129,6 @@ export const Remotes = Definitions.Create({
 		SetPlayModeOnClient: Definitions.ClientAsyncFunction<(mode: PlayModes | undefined) => Response>(),
 		Sit: Definitions.ClientToServerEvent<[]>(),
 	}),
-	Debug: Definitions.Namespace({
-		DisplayLine: Definitions.ServerToClientEvent<[text: string, isClient: boolean, isError: boolean]>(),
-	}),
 	Admin: Definitions.Namespace({
 		LoadSlot: Definitions.ClientToServerEvent<[userid: number, slot: number]>(),
 		SendMessage: Definitions.BidirectionalEvent<
@@ -139,9 +136,6 @@ export const Remotes = Definitions.Create({
 			[text: string, color?: Color3, duration?: number]
 		>(),
 		Restart: Definitions.ClientToServerEvent<[]>(),
-	}),
-	Replication: Definitions.Namespace({
-		ClientSpawnBlock: Definitions.ServerToClientEvent<[data: ReplicationSpawnBlock]>(),
 	}),
 	ServerRestartProgress: Definitions.ServerToClientEvent<[atmosphereColor: number]>(),
 	Game: Definitions.Namespace({
