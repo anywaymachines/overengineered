@@ -3,10 +3,10 @@ import { Assert } from "shared/Assert";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { SharedMachine } from "shared/block/SharedMachine";
-import { ConstantBlockLogic } from "shared/block/logic/operations/ConstantBlockLogic";
-import { AltimeterBlockLogic } from "shared/block/logic/operations/sensors/AltimeterBlockLogic";
-import { OperationVec3CombinerBlockLogic } from "shared/block/logic/converter/vector/OperationVec3CombinerBlockLogic";
-import { OperationVec3SplitterBlockLogic } from "shared/block/logic/converter/vector/OperationVec3SplitterBlockLogic";
+import { OperationVec3CombinerBlockLogic } from "shared/block/logic/logic/converter/vector/OperationVec3CombinerBlockLogic";
+import { OperationVec3SplitterBlockLogic } from "shared/block/logic/logic/converter/vector/OperationVec3SplitterBlockLogic";
+import { ConstantBlockLogic } from "shared/block/logic/logic/other/ConstantBlockLogic";
+import { AltimeterBlockLogic } from "shared/block/logic/logic/sensor/AltimeterBlockLogic";
 import { Objects } from "shared/fixes/objects";
 
 export namespace _Tests {

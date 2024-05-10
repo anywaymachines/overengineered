@@ -19,7 +19,6 @@ export class RadioTransmitterBlockLogic extends ConfigurableBlockLogic<typeof bl
 		super(block, blockConfigRegistry.radiotransmitter);
 
 		this.event.subscribe(sendEvent.invoked, ({ frequency, value }) => {
-			// print("reveicesa", frequency, value);
 			RadioRecieverBlockLogic.allRecievers.get(frequency)?.forEach((v) => v.output.value.set(value));
 		});
 
