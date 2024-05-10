@@ -18,7 +18,7 @@ export class LampBlockLogic extends ConfigurableBlockLogic<typeof blockConfigReg
 		this.event.subscribeObservable(this.input.enabled, (enabled) => {
 			LampBlockLogic.events.update.send({
 				block: this.instance,
-				state: enabled,
+				state: enabled === true, // to account the other types
 				color: this.block.color,
 			});
 		});
