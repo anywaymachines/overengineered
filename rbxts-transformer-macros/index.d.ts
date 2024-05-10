@@ -3,3 +3,8 @@ type MacroList<T> = { readonly [key: string]: (self: T, ...args: any[]) => unkno
 export function $defineCallMacros<T, R extends MacroList<T> = MacroList<T>>(macros: R): R;
 
 export function $compileTime(): number;
+
+export function $beginScope(name: string): void;
+export function $log(...args: unknown[]): void;
+export function $warn(...args: unknown[]): void;
+export function $err(...args: unknown[]): void;

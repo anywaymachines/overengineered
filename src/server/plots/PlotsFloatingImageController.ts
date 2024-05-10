@@ -1,12 +1,10 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
-import { Logger } from "shared/Logger";
+import { $err } from "rbxts-transformer-macros";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-
-const logger = new Logger("PlotsFloatingImageController");
 
 export class PlotFloatingImageController extends Component {
 	constructor(plot: SharedPlot) {
@@ -29,7 +27,7 @@ export class PlotFloatingImageController extends Component {
 			try {
 				rank = player.GetRankInGroup(GameDefinitions.GROUP);
 			} catch {
-				logger.error("Unable to get player rank");
+				$err("Unable to get player rank");
 			}
 
 			const rankData = GameDefinitions.RANKS[rank];

@@ -1,11 +1,9 @@
 import { RunService, ServerStorage, Workspace } from "@rbxts/services";
+import { $err, $log } from "rbxts-transformer-macros";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
-import { Logger } from "shared/Logger";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
-
-const logger = new Logger("BuildingWelder");
 
 type CollidersModel = Model & { readonly ___nominal: "CollidersModel" };
 export namespace BuildingWelder {
@@ -169,10 +167,10 @@ export namespace BuildingWelder {
 				union.Parent = weldParent;
 			}
 
-			logger.info(`Adding automatic region to ${block.Name}`);
+			$log(`Adding automatic region to ${block.Name}`);
 		}
 
-		logger.info("Block welding initialized");
+		$log("Block welding initialized");
 	}
 
 	function getPlotColliders(plot: PlotModel): WorldModel {
@@ -225,7 +223,7 @@ export namespace BuildingWelder {
 
 		for (const collider of colliders.GetChildren()) {
 			if (!collider.IsA("BasePart")) {
-				logger.error("Found a non-BasePart in a collider!!!");
+				$err("Found a non-BasePart in a collider!!!");
 				continue;
 			}
 

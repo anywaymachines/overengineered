@@ -6,6 +6,7 @@ if (!game.GetService("RunService").IsStudio()) {
 }
 
 import { HttpService, MessagingService, RunService, Workspace } from "@rbxts/services";
+import { $err, $log } from "rbxts-transformer-macros";
 import { Backend } from "server/Backend";
 import { BadgeController } from "server/BadgeController";
 import { ServerRestartController } from "server/ServerRestartController";
@@ -13,7 +14,6 @@ import { BlockMarkers } from "server/building/BlockMarkers";
 import { GameInfo } from "server/building/GameInfo";
 import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
 import { BlocksInitializer } from "shared/BlocksInitializer";
-import { Logger } from "shared/Logger";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { Remotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
@@ -30,8 +30,6 @@ import { PlayModeController } from "./modes/PlayModeController";
 import { registerOnRemoteEvent, registerOnRemoteFunction } from "./network/event/RemoteHandler";
 import { BlocksSerializer } from "./plots/BlocksSerializer";
 import { ServerPlots } from "./plots/ServerPlots";
-
-const logger = new Logger("MAIN");
 
 namespace RemoteHandlers {
 	export function loadSlot(player: Player, index: number): LoadSlotResponse {
@@ -82,9 +80,9 @@ namespace RemoteHandlers {
 			};
 		}
 
-		logger.info(`Loading ${userid}'s slot ${index}`);
+		$log(`Loading ${userid}'s slot ${index}`);
 		const dblocks = BlocksSerializer.deserialize(blocks, plot);
-		logger.info(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
+		$log(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
 
 		return { success: true, isEmpty: dblocks === 0 };
 	}
@@ -102,9 +100,9 @@ namespace RemoteHandlers {
 			};
 		}
 
-		logger.info(`Loading ${userid}'s slot ${index}`);
+		$log(`Loading ${userid}'s slot ${index}`);
 		const dblocks = BlocksSerializer.deserialize(blocks, plot);
-		logger.info(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
+		$log(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
 
 		return { success: true, isEmpty: dblocks === 0 };
 	}
@@ -153,7 +151,7 @@ namespace RemoteHandlers {
 				}
 			}
 		} catch (err) {
-			logger.error(err as string);
+			$err(err as string);
 		}
 
 		return {
@@ -165,7 +163,7 @@ namespace RemoteHandlers {
 	}
 
 	export function saveSlot(player: Player, data: PlayerSaveSlotRequest): SaveSlotResponse {
-		logger.info(`Saving ${player.Name}'s slot ${data.index}`);
+		$log(`Saving ${player.Name}'s slot ${data.index}`);
 
 		const output = SlotDatabase.instance.update(
 			player.UserId,

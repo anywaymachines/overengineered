@@ -1,12 +1,10 @@
 import { Players } from "@rbxts/services";
-import { Logger } from "shared/Logger";
+import { $log } from "rbxts-transformer-macros";
 import { Remotes } from "shared/Remotes";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 import { BuildMode } from "./BuildMode";
 import { PlayModeBase } from "./PlayModeBase";
 import { RideMode } from "./RideMode";
-
-const logger = new Logger("PlayModeController");
 
 export class PlayModeController {
 	private static readonly playerModes: Record<number, PlayModes | undefined> = {};
@@ -48,7 +46,7 @@ export class PlayModeController {
 			}
 		}
 
-		logger.info(`${player.Name}'s mode: '${PlayModeController.playerModes[player.UserId]}' => '${mode}'`);
+		$log(`${player.Name}'s mode: '${PlayModeController.playerModes[player.UserId]}' => '${mode}'`);
 		PlayModeController.playerModes[player.UserId] = mode;
 
 		for (let i = 0; i < 3; i++) {

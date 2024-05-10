@@ -11,10 +11,8 @@ import {
 	InferServerConnect,
 	RemoteDeclarations,
 } from "@rbxts/net/out/definitions/Types";
-import { Logger } from "shared/Logger";
+import { $log } from "rbxts-transformer-macros";
 import { Remotes } from "shared/Remotes";
-
-const logger = new Logger("RemoteHandler");
 
 // Types copied from rbxts
 type ServerEventDeclarationKeys<T extends RemoteDeclarations> = keyof DeclarationsOf<
@@ -66,7 +64,7 @@ export const registerOnRemoteFunction = <
 	funcname: TFunction,
 	func: TFunc,
 ) => {
-	logger.info(`Registering ${namespace}.${funcname} function remote handler`);
+	$log(`Registering ${namespace}.${funcname} function remote handler`);
 	Remotes.Server.GetNamespace(namespace).OnFunction(funcname, wrapError(func));
 };
 
@@ -79,7 +77,7 @@ export const registerOnRemoteEvent = <
 	funcname: TFunction,
 	func: TFunc,
 ) => {
-	logger.info(`Registering ${namespace}.${funcname} event remote handler`);
+	$log(`Registering ${namespace}.${funcname} event remote handler`);
 	Remotes.Server.GetNamespace(namespace).OnEvent(funcname, wrapError(func));
 };
 
@@ -94,7 +92,7 @@ export const registerOnRemoteFunction2 = <
 	funcname: TFunction,
 	func: TFunc,
 ) => {
-	logger.info(`Registering ${namespace}.${funcname} function remote handler`);
+	$log(`Registering ${namespace}.${funcname} function remote handler`);
 	Remotes.Server.GetNamespace(namespace).GetNamespace(namespace2).OnFunction(funcname, wrapError(func));
 };
 
@@ -109,6 +107,6 @@ export const registerOnRemoteEvent2 = <
 	funcname: TFunction,
 	func: TFunc,
 ) => {
-	logger.info(`Registering ${namespace}.${funcname} event remote handler`);
+	$log(`Registering ${namespace}.${funcname} event remote handler`);
 	Remotes.Server.GetNamespace(namespace).GetNamespace(namespace2).OnEvent(funcname, wrapError(func));
 };

@@ -1,8 +1,6 @@
 import { Players } from "@rbxts/services";
-import { Logger } from "shared/Logger";
+import { $err } from "rbxts-transformer-macros";
 import { PlayModeBase } from "./PlayModeBase";
-
-const logger = new Logger("BuildMode");
 
 export type PlayModeControllerType = {
 	getPlayerMode(player: Player): PlayModes | undefined;
@@ -15,14 +13,14 @@ export class BuildMode implements PlayModeBase {
 			// on spawn
 			plr.CharacterAdded.Connect(async (character) => {
 				const response = await controller.changeModeForPlayer(plr, "build");
-				if (!response.success) logger.error(response.message);
+				if (!response.success) $err(response.message);
 
 				// on death
 				(character.WaitForChild("Humanoid") as Humanoid).Died.Once(async () => {
 					if (controller.getPlayerMode(plr) !== "build") return;
 
 					const response = await controller.changeModeForPlayer(plr, undefined);
-					if (!response.success) logger.error(response.message);
+					if (!response.success) $err(response.message);
 				});
 			});
 		});

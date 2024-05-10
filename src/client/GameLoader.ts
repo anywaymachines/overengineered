@@ -1,8 +1,9 @@
 import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { Logger } from "shared/Logger";
+import { $log } from "rbxts-transformer-macros";
 import { SharedPlots } from "shared/building/SharedPlots";
 
+print("`INGAMELOADER", debug.traceback());
 export namespace GameLoader {
 	export function waitForDataStorage() {
 		while (!PlayerDataStorage.data.get()) {
@@ -26,10 +27,11 @@ export namespace GameLoader {
 	}
 
 	export function waitForEverything(progress?: (operation: string) => void) {
+		print("`waiting for EVERYUTHGUING", debug.traceback());
 		const pp = progress;
 		progress = (operation) => {
 			pp?.(operation);
-			new Logger("GameLoader").info(operation);
+			$log(operation);
 		};
 
 		progress?.("Waiting for the assets");

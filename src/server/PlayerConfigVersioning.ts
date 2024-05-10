@@ -1,4 +1,4 @@
-import { Logger } from "shared/Logger";
+import { $log } from "rbxts-transformer-macros";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 
 interface PlayerConfigVersion<TCurrent> {
@@ -168,7 +168,6 @@ const v10: UpdatablePlayerConfigVersion<PlayerConfigV10, PlayerConfigV9> = {
 
 const versions = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
-const logger = new Logger("PlayerConfigUpdater");
 
 export namespace PlayerConfigUpdater {
 	export function update(config: object | { readonly version: number }) {
@@ -178,7 +177,7 @@ export namespace PlayerConfigUpdater {
 			const newver = versions.find((v) => v.version === i);
 			if (!newver || !("update" in newver)) continue;
 
-			logger.info(`Updating player config to v${newver.version}`);
+			$log(`Updating player config to v${newver.version}`);
 			config = newver.update(config as never);
 		}
 

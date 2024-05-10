@@ -1,6 +1,6 @@
 import { RunService } from "@rbxts/services";
+import { $err } from "rbxts-transformer-macros";
 import { BlocksInitializer } from "shared/BlocksInitializer";
-import { Logger } from "shared/Logger";
 import { BlockLogicValue } from "shared/block/BlockLogicValue";
 import { BlockLogicValueGroup } from "shared/block/BlockLogicValueGroup";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -13,8 +13,6 @@ import { ConfigurableBlockLogic } from "./ConfigurableBlockLogic";
 import { LogicRegistry, logicRegistry } from "./LogicRegistry";
 import { ImpactController } from "./impact/ImpactController";
 import { VehicleSeatBlockLogic } from "./logic/VehicleSeatBlockLogic";
-
-const logger = new Logger("SharedMachine");
 
 export class SharedMachine extends ContainerComponent {
 	readonly blocks: BlockLogic[] = [];
@@ -54,7 +52,7 @@ export class SharedMachine extends ContainerComponent {
 			const id = block.id;
 
 			if (!BlocksInitializer.blocks.map.get(id)) {
-				logger.error(`Unknown block id ${id}`);
+				$err(`Unknown block id ${id}`);
 				continue;
 			}
 

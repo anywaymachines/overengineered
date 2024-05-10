@@ -1,8 +1,6 @@
+import { $log } from "rbxts-transformer-macros";
 import { Element } from "shared/Element";
-import { Logger } from "shared/Logger";
 import { Objects } from "shared/fixes/objects";
-
-const logger = new Logger("Database");
 
 export abstract class DbBase<T> {
 	private readonly datastore;
@@ -12,7 +10,7 @@ export abstract class DbBase<T> {
 		this.datastore = datastore;
 
 		game.BindToClose(() => {
-			logger.info("Game termination detected");
+			$log("Game termination detected");
 
 			this.saveChanged();
 			this.freeAll();

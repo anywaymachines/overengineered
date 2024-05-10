@@ -1,6 +1,4 @@
-import { Logger } from "shared/Logger";
-
-const logger = new Logger("ComponentInstance");
+import { $err } from "rbxts-transformer-macros";
 
 /** Handles the destruction of the provided instance, along with the component. */
 export namespace ComponentInstance {
@@ -19,7 +17,7 @@ export namespace ComponentInstance {
 				destroyingSignal.Disconnect();
 				instance.Destroy();
 			} catch (error) {
-				logger.error(`Could not destroy instance ${instance}: ${error}`);
+				$err(`Could not destroy instance ${instance}: ${error}`);
 			}
 		});
 	}

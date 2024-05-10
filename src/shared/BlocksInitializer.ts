@@ -1,5 +1,5 @@
 import { ReplicatedStorage, RunService } from "@rbxts/services";
-import { Logger } from "shared/Logger";
+import { $warn } from "rbxts-transformer-macros";
 import { AABB } from "shared/fixes/AABB";
 import { AutoWeldColliderBlockShape, BlockDataRegistry, BlockId, BlockMirrorBehaviour } from "./BlockDataRegistry";
 import { AutoBlockCreator } from "./block/logic/AutoBlockCreator";
@@ -97,9 +97,7 @@ namespace Checks {
 			if (num % 1 === 0) return;
 
 			if (num % 1 < 0.01) {
-				new Logger("BlocksInitializer").warn(
-					`Potential floating point problem: ${block.Name}.Size.${axis} = ${num}`,
-				);
+				$warn(`Potential floating point problem: ${block.Name}.Size.${axis} = ${num}`);
 			}
 		};
 

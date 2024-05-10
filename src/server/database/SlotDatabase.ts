@@ -1,13 +1,11 @@
 import { DataStoreService, Players } from "@rbxts/services";
+import { $log } from "rbxts-transformer-macros";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
-import { Logger } from "shared/Logger";
 import { SlotsMeta } from "shared/SlotsMeta";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Db } from "./Database";
 import { PlayerDatabase } from "./PlayerDatabase";
-
-const logger = new Logger("SlotDatabase");
 
 export class SlotDatabase {
 	static readonly instance = new SlotDatabase();
@@ -44,7 +42,7 @@ export class SlotDatabase {
 					continue;
 				}
 
-				logger.info("Saving " + key);
+				$log("Saving " + key);
 				this.blocksdb.save(key);
 				this.blocksdb.free(key);
 			}
@@ -77,7 +75,7 @@ export class SlotDatabase {
 		if (!this.onlinePlayers.has(userId)) {
 			this.blocksdb.save(tostring(userId));
 			this.blocksdb.free(tostring(userId));
-			logger.info("SAVING AFTER QUIT2");
+			$log("SAVING AFTER QUIT2");
 		}
 	}
 

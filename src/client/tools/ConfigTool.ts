@@ -10,9 +10,9 @@ import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBl
 import { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
+import { $log } from "rbxts-transformer-macros";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Colors } from "shared/Colors";
-import { Logger } from "shared/Logger";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -21,8 +21,6 @@ import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { JSON } from "shared/fixes/Json";
 import { Objects, asMap } from "shared/fixes/objects";
 import { VectorUtils } from "shared/utils/VectorUtils";
-
-const logger = new Logger("ConfigTool");
 
 namespace Scene {
 	export type ConfigToolSceneDefinition = GuiObject & {
@@ -52,7 +50,7 @@ namespace Scene {
 			});
 
 			this.gui.Bottom.ResetButton.Activated.Connect(async () => {
-				logger.info(`Resetting (${selected.get().size()}) block config values`);
+				$log(`Resetting (${selected.get().size()}) block config values`);
 
 				const response = await ClientBuilding.resetConfigOperation.execute(
 					tool.targetPlot.get(),
@@ -140,7 +138,7 @@ namespace Scene {
 			});
 			configControl.configUpdated.Connect(async (key, values) => {
 				const selected = this.tool.selected.get();
-				logger.info(
+				$log(
 					`Sending (${selected.size()}) block config values for ${Objects.keys(values).join()} .${key} ${JSON.serialize(Objects.values(values))}`,
 				);
 

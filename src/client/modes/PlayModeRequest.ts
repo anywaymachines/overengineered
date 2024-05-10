@@ -3,10 +3,8 @@ import { SoundController } from "client/controller/SoundController";
 import { Signals } from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
 import { LogControl } from "client/gui/static/LogControl";
-import { Logger } from "shared/Logger";
+import { $err } from "rbxts-transformer-macros";
 import { Remotes } from "shared/Remotes";
-
-const logger = new Logger("PlayModeRequest");
 
 export const requestMode = async (mode: PlayModes) => {
 	LoadingController.show(`Changing play mode to ${mode}...`);
@@ -16,7 +14,7 @@ export const requestMode = async (mode: PlayModes) => {
 
 		const response = await Remotes.Client.GetNamespace("Ride").Get("SetPlayMode").CallServerAsync(mode);
 		if (!response.success) {
-			logger.error(response.message);
+			$err(response.message);
 			LogControl.instance.addLine(response.message!, Colors.red);
 			SoundController.getSounds().Build.BlockPlaceError.Play();
 

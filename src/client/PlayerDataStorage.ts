@@ -1,6 +1,6 @@
 import { HttpService, Players, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
-import { Logger } from "shared/Logger";
+import { $err, $log } from "rbxts-transformer-macros";
 import { Remotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import { Config } from "shared/config/Config";
@@ -14,9 +14,8 @@ type NonNullableFields<T> = {
 	[P in keyof T]: NonNullable<T[P]>;
 };
 
+print("`INPLAYERDATASTORAGE", debug.traceback());
 export namespace PlayerDataStorage {
-	const logger = new Logger("PlayerDataStorage");
-
 	export const loadedSlot = new ObservableValue<number | undefined>(undefined);
 
 	export const gameData = new ObservableValue<GameInfo>({ blocks: {} });
@@ -33,7 +32,7 @@ export namespace PlayerDataStorage {
 		await refetchPlayerData();
 
 		config.createNullableChild("betterCamera", undefined).subscribe((betterCamera) => {
-			logger.info("better_camera set to " + HttpService.JSONEncode(betterCamera));
+			$log("better_camera set to " + HttpService.JSONEncode(betterCamera));
 			Workspace.SetAttribute("camera_improved", betterCamera?.improved === true);
 			Workspace.SetAttribute("camera_playerCentered", betterCamera?.playerCentered === true);
 			Workspace.SetAttribute("camera_strictFollow", betterCamera?.strictFollow === true);
@@ -53,19 +52,19 @@ export namespace PlayerDataStorage {
 			imported_slots: d.imported_slots ?? [],
 		});
 
-		logger.info("Configuration loaded: " + HttpService.JSONEncode(config.get()));
+		$log("Configuration loaded: " + HttpService.JSONEncode(config.get()));
 	}
 	export async function refetchGameData() {
 		const d = await Remotes.Client.GetNamespace("Game").Get("GameInfo").CallServerAsync();
 		gameData.set(d);
-		logger.info(`Loaded ${Objects.size(d.blocks)} block infos`);
+		$log(`Loaded ${Objects.size(d.blocks)} block infos`);
 	}
 
 	export async function sendPlayerConfigValue<TKey extends keyof PlayerConfig>(
 		key: TKey,
 		value: PlayerConfig[TKey] & defined,
 	) {
-		logger.info(`Setting player config value ${key} to ${JSON.serialize(value as JsonSerializablePrimitive)}`);
+		$log(`Setting player config value ${key} to ${JSON.serialize(value as JsonSerializablePrimitive)}`);
 		await Remotes.Client.GetNamespace("Player").Get("UpdateSettings").CallServerAsync(key, value);
 
 		config.set({
@@ -75,7 +74,7 @@ export namespace PlayerDataStorage {
 	}
 
 	export async function sendPlayerSlot(req: PlayerSaveSlotRequest) {
-		logger.info("Setting slot " + req.index + " to " + HttpService.JSONEncode(req));
+		$log("Setting slot " + req.index + " to " + HttpService.JSONEncode(req));
 
 		let d = data.get();
 		if (d) {
@@ -87,7 +86,7 @@ export namespace PlayerDataStorage {
 
 		const response = await Remotes.Client.GetNamespace("Slots").Get("Save").CallServerAsync(req);
 		if (!response.success) {
-			logger.error(response.message);
+			$err(response.message);
 			return;
 		}
 
@@ -104,7 +103,7 @@ export namespace PlayerDataStorage {
 	}
 
 	export async function loadPlayerSlot(index: number, isImported: boolean) {
-		logger.info("Loading slot " + index);
+		$log("Loading slot " + index);
 		LoadingController.show("Loading a slot");
 
 		try {

@@ -1,8 +1,6 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
-import { Logger } from "shared/Logger";
+import { $err } from "rbxts-transformer-macros";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-
-const logger = new Logger("UsernameGui");
 
 Players.PlayerAdded.Connect((player) => {
 	player.CharacterAdded.Connect((character) => {
@@ -24,7 +22,7 @@ Players.PlayerAdded.Connect((player) => {
 		try {
 			rank = player.GetRankInGroup(GameDefinitions.GROUP);
 		} catch {
-			logger.error("Unable to get player rank");
+			$err("Unable to get player rank");
 		}
 		const rankData = GameDefinitions.RANKS[rank];
 		if (rankData) {

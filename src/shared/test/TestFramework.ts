@@ -1,9 +1,7 @@
 import { Players, ReplicatedStorage, RunService, ServerScriptService } from "@rbxts/services";
-import { Logger } from "shared/Logger";
+import { $err, $log } from "rbxts-transformer-macros";
 
 export namespace TestFramework {
-	const logger = new Logger("Tests");
-
 	export function findAllTestScripts(): readonly ModuleScript[] {
 		const ret: ModuleScript[] = [];
 		const visit = (instance: Instance) => {
@@ -40,14 +38,14 @@ export namespace TestFramework {
 
 	export function run(name: string, test: Tests, offset = 0) {
 		const offsetstr = string.rep(" ", offset);
-		logger.info(`${offsetstr}[${name}] Running`);
+		$log(`${offsetstr}[${name}] Running`);
 
 		if (typeIs(test, "function")) {
 			try {
 				test();
 				return;
 			} catch (err) {
-				logger.error(tostring(err ?? "Unknown error"));
+				$err(tostring(err ?? "Unknown error"));
 				return;
 			}
 		}
@@ -56,6 +54,6 @@ export namespace TestFramework {
 			run(name, tests, offset + 1);
 		}
 
-		logger.info(`${offsetstr}[${name}] SUCCESS`);
+		$log(`${offsetstr}[${name}] SUCCESS`);
 	}
 }

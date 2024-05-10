@@ -5,6 +5,7 @@ import { TransformProps } from "shared/component/Transform";
 import { TransformService } from "shared/component/TransformService";
 import { ObservableValue } from "shared/event/ObservableValue";
 
+print("`INLOADINGCONTROLLERSTART", debug.traceback());
 class LoadingImage extends Control {
 	runShowAnimation() {
 		const startanim = () => {
@@ -117,6 +118,7 @@ const control = new LoadingPopup(Gui.getGameUI<{ Loading: LoadingPopupDefinition
 control.hide();
 
 const state = new ObservableValue<boolean>(false);
+print("`INLOADINGCONTROLLEREND", debug.traceback());
 export namespace LoadingController {
 	export const isLoading = state.asReadonly();
 

@@ -1,8 +1,8 @@
 import { RunService } from "@rbxts/services";
+import { $log } from "rbxts-transformer-macros";
 import { BlockDataRegistry, BlockId } from "shared/BlockDataRegistry";
 import type { BlocksInitializeData } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
-import { Logger } from "shared/Logger";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import { BlockLogic } from "shared/block/BlockLogic";
@@ -11,8 +11,6 @@ import { LogicRegistry, logicRegistry } from "shared/block/LogicRegistry";
 import { BlockConfigRegistry, blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { Objects } from "shared/fixes/objects";
-
-const logger = new Logger("AutoBlockCreator");
 
 interface BlockResult extends BlockAdditional {
 	readonly id: BlockId;
@@ -24,7 +22,7 @@ interface BlockAdditional {
 	readonly category: readonly string[];
 	readonly required?: boolean;
 	readonly limit?: number;
-	readonly prefab?: string;
+	readonly prefab: string;
 }
 interface CreateInfo<TFunc> extends BlockAdditional {
 	readonly func: TFunc;
@@ -474,21 +472,24 @@ const converterByteCategory = ["Logic", "Converter", "Byte"];
 const otherCategory = ["Logic", "Other"];
 const boolCategory = ["Logic", "Gate"];
 
-const smallGenericPrefab = "SmallGenericLogicBlockPrefab";
-const bigGenericPrefab = "BigGenericLogicBlockPrefab";
-const smallBytePrefab = "SmallByteLogicBlockPrefab";
-const bigBytePrefab = "BigByteLogicBlockPrefab";
+const constPrefab = "ConstLogicBlockPrefab";
+const smallGenericPrefab = "GenericLogicBlockPrefab";
+const doubleGenericPrefab = "DoubleGenericLogicBlockPrefab";
+const smallBytePrefab = "ByteLogicBlockPrefab";
+const doubleBytePrefab = "DoubleByteLogicBlockPrefab";
 
 const operations = {
 	const: {
 		PI: {
 			modelTextOverride: "π",
 			category: otherCategory,
+			prefab: constPrefab,
 			func: () => math.pi,
 		},
 		E: {
 			modelTextOverride: "e",
 			category: otherCategory,
+			prefab: constPrefab,
 			func: () => 2.718281828459,
 		},
 	},
@@ -604,6 +605,7 @@ const operations = {
 		RAND: {
 			modelTextOverride: "RAND",
 			category: mathCategory,
+			prefab: doubleGenericPrefab,
 			func: (min, max, logic) => {
 				if (max <= min) {
 					RemoteEvents.Burn.send([logic.instance.PrimaryPart!]);
@@ -619,7 +621,7 @@ const operations = {
 		CLAMP: {
 			modelTextOverride: "CLAMP",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (value, min, max) => math.clamp(value, min, max),
 		},
 	},
@@ -627,7 +629,7 @@ const operations = {
 		POW: {
 			modelTextOverride: "POW",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (value, power) => math.pow(value, power),
 		},
 	},
@@ -635,7 +637,7 @@ const operations = {
 		NSQRT: {
 			modelTextOverride: "NSQRT",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (value, root) => value ** (1 / root),
 		},
 	},
@@ -643,7 +645,7 @@ const operations = {
 		ATAN2: {
 			modelTextOverride: "ATAN2",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (y, x) => math.atan2(y, x),
 		},
 	},
@@ -651,7 +653,7 @@ const operations = {
 		MOD: {
 			modelTextOverride: "MOD",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (value1, value2) => value1 % value2,
 		},
 	},
@@ -659,37 +661,37 @@ const operations = {
 		EQUALS: {
 			modelTextOverride: "=",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (value1, value2) => value1 === value2,
 		},
 		NOTEQUALS: {
 			modelTextOverride: "≠",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (value1, value2) => value1 === value2,
 		},
 		GREATERTHAN: {
 			modelTextOverride: ">",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (value1, value2) => value1 > value2,
 		},
 		GREATERTHANOREQUALS: {
 			modelTextOverride: "≥",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (value1, value2) => value1 >= value2,
 		},
 		LESSTHAN: {
 			modelTextOverride: "<",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (value1, value2) => value1 < value2,
 		},
 		LESSTHANOREQUALS: {
 			modelTextOverride: "≤",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (value1, value2) => value1 <= value2,
 		},
 	},
@@ -697,7 +699,7 @@ const operations = {
 		ADD: {
 			modelTextOverride: "ADD",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: multiifunc({
 				number: (left, right) => left + right,
 				Vector3: (left, right) => left.add(right),
@@ -706,7 +708,7 @@ const operations = {
 		SUB: {
 			modelTextOverride: "SUB",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: multiifunc({
 				number: (left, right) => left - right,
 				Vector3: (left, right) => left.sub(right),
@@ -715,7 +717,7 @@ const operations = {
 		MUL: {
 			modelTextOverride: "MUL",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: multiifunc({
 				number: (left, right) => left * right,
 				Vector3: (left, right) => left.mul(right),
@@ -724,7 +726,7 @@ const operations = {
 		DIV: {
 			modelTextOverride: "DIV",
 			category: mathCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: multiifunc({
 				number: (left, right, logic) => {
 					if (right === 0) {
@@ -749,13 +751,13 @@ const operations = {
 		byteNOT: {
 			modelTextOverride: "BNOT",
 			category: byteCategory,
-			prefab: bigBytePrefab,
+			prefab: doubleBytePrefab,
 			func: (num) => ~num & 0xff,
 		},
 		byteNEG: {
 			modelTextOverride: "BNEG",
 			category: byteCategory,
-			prefab: bigBytePrefab,
+			prefab: doubleBytePrefab,
 			func: (num) => -num & 0xff,
 		},
 	},
@@ -763,67 +765,67 @@ const operations = {
 		byteXOR: {
 			modelTextOverride: "BXOR",
 			category: byteCategory,
-			prefab: bigBytePrefab,
+			prefab: doubleBytePrefab,
 			func: (a, b) => a ^ b,
 		},
 		byteXNOR: {
 			modelTextOverride: "BXNOR",
 			category: byteCategory,
-			prefab: bigBytePrefab,
+			prefab: doubleBytePrefab,
 			func: (a, b) => ~(a ^ b) & 0xff,
 		},
 		byteAND: {
 			modelTextOverride: "BAND",
 			category: byteCategory,
-			prefab: bigBytePrefab,
+			prefab: doubleBytePrefab,
 			func: (a, b) => a & b,
 		},
 		byteNAND: {
 			modelTextOverride: "BNAND",
 			category: byteCategory,
-			prefab: bigBytePrefab,
+			prefab: doubleBytePrefab,
 			func: (a, b) => ~(a & b) & 0xff,
 		},
 		byteOR: {
 			modelTextOverride: "BOR",
 			category: byteCategory,
-			prefab: bigBytePrefab,
+			prefab: doubleBytePrefab,
 			func: (a, b) => a | b,
 		},
 		byteNOR: {
 			modelTextOverride: "BNOR",
 			category: byteCategory,
-			prefab: bigBytePrefab,
+			prefab: doubleBytePrefab,
 			func: (a, b) => ~(a | b) & 0xff,
 		},
 		byteRotateRight: {
 			modelTextOverride: "ROT. RIGHT",
 			category: byteCategory,
-			prefab: bigBytePrefab,
+			prefab: doubleBytePrefab,
 			func: (num, shift) => ((num >>> shift) | (num << (8 - shift))) & 0xff,
 		},
 		byteRotateLeft: {
 			modelTextOverride: "ROT. LEFT",
 			category: byteCategory,
-			prefab: bigBytePrefab,
+			prefab: doubleBytePrefab,
 			func: (num, shift) => ((num << shift) | (num >>> (8 - shift))) & 0xff,
 		},
 		byteShiftRight: {
 			modelTextOverride: "Shift RIGHT",
 			category: byteCategory,
-			prefab: bigBytePrefab,
+			prefab: doubleBytePrefab,
 			func: (num, shift) => (num >> shift) & 0xff,
 		},
 		byteShiftLEFT: {
 			modelTextOverride: "Shift LEFT",
 			category: byteCategory,
-			prefab: bigBytePrefab,
+			prefab: doubleBytePrefab,
 			func: (num, shift) => (num << shift) & 0xff,
 		},
 		byteArithmeticShiftRight: {
 			modelTextOverride: "Arithmetic Shift RIGHT",
 			category: byteCategory,
-			prefab: bigBytePrefab,
+			prefab: doubleBytePrefab,
 			func: (num, shift) => (num >> shift) | ((num & 0x80) !== 0 ? 0xff << (8 - shift) : 0),
 		},
 	},
@@ -831,37 +833,37 @@ const operations = {
 		XOR: {
 			modelTextOverride: "XOR",
 			category: boolCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (x, y) => x !== y,
 		},
 		XNOR: {
 			modelTextOverride: "XNOR",
 			category: boolCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (x, y) => !(x !== y),
 		},
 		AND: {
 			modelTextOverride: "AND",
 			category: boolCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (x, y) => x && y,
 		},
 		NAND: {
 			modelTextOverride: "NAND",
 			category: boolCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (x, y) => !(x && y),
 		},
 		OR: {
 			modelTextOverride: "OR",
 			category: boolCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (x, y) => x || y,
 		},
 		NOR: {
 			modelTextOverride: "NOR",
 			category: boolCategory,
-			prefab: bigGenericPrefab,
+			prefab: doubleGenericPrefab,
 			func: (x, y) => !(x || y),
 		},
 	},
@@ -909,8 +911,7 @@ const create = (info: BlocksInitializeData) => {
 
 		return model;
 	};
-
-	const createBase = (displayName: string, prefab: string, additional: BlockAdditional): BlockResult => {
+	const createBase = (displayName: string, additional: BlockAdditional): BlockResult => {
 		const id = `operation${displayName.lower()}` as BlockId;
 		if (!(id in BlockDataRegistry)) {
 			throw `Block ${id} was not found in the data registry`;
@@ -924,7 +925,6 @@ const create = (info: BlocksInitializeData) => {
 			id,
 			displayName,
 			info,
-			prefab,
 			...additional,
 		};
 	};
@@ -937,9 +937,9 @@ const create = (info: BlocksInitializeData) => {
 	}
 	for (const [optype, ops] of Objects.pairs_(operations as NonGenericOperations)) {
 		for (const [name, data] of Objects.pairs_(ops)) {
-			logger.info(`Creating block ${name}`);
+			$log(`Creating block ${name}`);
 
-			const block = createBase(name, "OperationPrefab", data);
+			const block = createBase(name, data);
 			const setupinfo = BlockDataRegistry[block.id];
 			const regblock: RegistryBlock = {
 				id: block.id,

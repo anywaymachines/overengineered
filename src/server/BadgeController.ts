@@ -1,8 +1,6 @@
 import { BadgeService, Players } from "@rbxts/services";
-import { Logger } from "shared/Logger";
+import { $log } from "rbxts-transformer-macros";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-
-const logger = new Logger("BadgeController");
 
 export namespace BadgeController {
 	const badges = {
@@ -11,7 +9,7 @@ export namespace BadgeController {
 
 	export function initialize() {
 		if (game.PlaceId !== GameDefinitions.PRODUCTION_PLACE_ID) {
-			logger.info("Disabling on non-production place");
+			$log("Disabling on non-production place");
 			return;
 		}
 
@@ -23,14 +21,14 @@ export namespace BadgeController {
 						if (BadgeService.UserHasBadgeAsync(player.UserId, badges.PRE_BETA_2024)) return;
 
 						BadgeService.AwardBadge(player.UserId, badges.PRE_BETA_2024);
-						logger.info(`Awarded PRE_BETA_2024 to ${player.Name}`);
+						$log(`Awarded PRE_BETA_2024 to ${player.Name}`);
 					}
 				} catch {
-					logger.info(`Failed to give PRE_BETA_2024 to ${player.Name}`);
+					$log(`Failed to give PRE_BETA_2024 to ${player.Name}`);
 				}
 			});
 		});
 
-		logger.info("Loaded");
+		$log("Loaded");
 	}
 }

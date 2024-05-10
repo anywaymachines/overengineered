@@ -7,12 +7,10 @@ import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TextPopup } from "client/gui/popup/TextPopup";
 import { LogControl } from "client/gui/static/LogControl";
+import { $err } from "rbxts-transformer-macros";
 import { Colors } from "shared/Colors";
-import { Logger } from "shared/Logger";
 import { TransformService } from "shared/component/TransformService";
 import { VectorUtils } from "shared/utils/VectorUtils";
-
-const logger = new Logger("MemoryEditorPopup");
 
 export type MemoryEditorPopupDefinition = GuiObject & {
 	readonly Heading: Frame & {
@@ -216,7 +214,7 @@ export class MemoryEditorPopup extends Popup<MemoryEditorPopupDefinition> {
 		super(gui);
 
 		if (bytesLimit % 128 !== 0) {
-			logger.error(`Bytes limit must be a multiple of ${bytesLimit}`);
+			$err(`Bytes limit must be a multiple of ${bytesLimit}`);
 			this.hide();
 			callback(data);
 			return;

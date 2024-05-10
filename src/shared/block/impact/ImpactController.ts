@@ -1,5 +1,5 @@
 import { RunService, Workspace } from "@rbxts/services";
-import { Logger } from "shared/Logger";
+import { $log } from "rbxts-transformer-macros";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { BlockManager, PlacedBlockData } from "shared/building/BlockManager";
@@ -8,8 +8,6 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Objects } from "shared/fixes/objects";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 
-const logger = new Logger("ImpactController");
-
 const overlapParams = new OverlapParams();
 overlapParams.CollisionGroup = "Blocks";
 
@@ -17,7 +15,7 @@ const materialStrongness: { readonly [k in Enum.Material["Name"]]: number } = Ob
 	Enum.Material.GetEnumItems().map((material) => {
 		const physicalProperties = new PhysicalProperties(material);
 		const strongness = math.max(0.5, physicalProperties.Density / 3.5);
-		logger.info(`Strength of '${material.Name}' set to ${strongness}`);
+		$log(`Strength of '${material.Name}' set to ${strongness}`);
 
 		return [material.Name, strongness] as const;
 	}),

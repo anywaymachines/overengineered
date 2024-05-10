@@ -1,15 +1,13 @@
+import { $err, $log } from "rbxts-transformer-macros";
 import { ServerBuilding } from "server/building/ServerBuilding";
 import { BlockId } from "shared/BlockDataRegistry";
 import { BlocksInitializer } from "shared/BlocksInitializer";
-import { Logger } from "shared/Logger";
 import { Serializer } from "shared/Serializer";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockManager, PlacedBlockDataConnection } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
-
-const logger = new Logger("BlocksSerializer");
 
 type SerializedBlocks<TBlocks extends SerializedBlockBase> = {
 	readonly version: number;
@@ -68,7 +66,7 @@ const place = {
 
 	blockOnPlotV3: (plot: PlotModel, blockData: SerializedBlockV3, buildingCenter: CFrame) => {
 		if (!BlocksInitializer.blocks.map.has(blockData.id)) {
-			logger.error(`Could not load ${blockData.id} from slot: Block does not exists`);
+			$err(`Could not load ${blockData.id} from slot: Block does not exists`);
 			return;
 		}
 
@@ -708,7 +706,7 @@ export namespace BlocksSerializer {
 	}
 	export function deserialize(data: string, plot: PlotModel): number {
 		let deserialized = JSON.deserialize(data) as SerializedBlocks<SerializedBlockBase>;
-		logger.info(`Loaded a slot using savev${deserialized.version}`);
+		$log(`Loaded a slot using savev${deserialized.version}`);
 
 		const version = deserialized.version;
 		for (let i = version + 1; i <= current.version; i++) {
@@ -717,7 +715,7 @@ export namespace BlocksSerializer {
 			if (!("upgradeFrom" in version)) continue;
 
 			deserialized = version.upgradeFrom(data, deserialized as never);
-			logger.info(`Upgrading a slot to savev${version.version}`);
+			$log(`Upgrading a slot to savev${version.version}`);
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any

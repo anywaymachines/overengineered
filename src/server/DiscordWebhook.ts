@@ -1,7 +1,5 @@
 import { HttpService } from "@rbxts/services";
-import { Logger } from "shared/Logger";
-
-const logger = new Logger("DiscordWebhook");
+import { $err } from "rbxts-transformer-macros";
 
 type Field = {
 	name: string;
@@ -54,7 +52,7 @@ export namespace DiscordWebhook {
 		try {
 			HttpService.PostAsync(webhook, data);
 		} catch (error) {
-			logger.error("Discord logging failed");
+			$err("Discord logging failed");
 		}
 	}
 }

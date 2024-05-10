@@ -1,11 +1,9 @@
 import { RunService } from "@rbxts/services";
-import { Logger } from "shared/Logger";
-
-const logger = new Logger("CustomDebrisService");
+import { $warn } from "rbxts-transformer-macros";
 
 let active = true;
 if (!RunService.IsClient() && game.PrivateServerOwnerId !== 0) {
-	logger.warn("Private server detected, disabling");
+	$warn("Private server detected, disabling");
 	active = false;
 }
 
