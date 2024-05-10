@@ -159,6 +159,128 @@ const motorblock = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
+const bytesplitter = {
+	input: {
+		value: {
+			displayName: "Byte",
+			type: "byte",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+	output: {
+		"1": {
+			displayName: "1",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"2": {
+			displayName: "2",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"4": {
+			displayName: "4",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"8": {
+			displayName: "8",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"16": {
+			displayName: "16",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"32": {
+			displayName: "32",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"64": {
+			displayName: "64",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"128": {
+			displayName: "128",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
+const bytemaker = {
+	input: {
+		"1": {
+			displayName: "1",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"2": {
+			displayName: "2",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"4": {
+			displayName: "4",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"8": {
+			displayName: "8",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"16": {
+			displayName: "16",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"32": {
+			displayName: "32",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"64": {
+			displayName: "64",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+		"128": {
+			displayName: "128",
+			type: "bool",
+			default: true as boolean,
+			config: true as boolean,
+		},
+	},
+	output: {
+		result: {
+			displayName: "Byte",
+			type: "byte",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const rocketengine = {
 	input: {
 		thrust: {
@@ -1264,6 +1386,9 @@ export const blockConfigRegistry = {
 	piston,
 	ballast,
 	heliumblock,
+
+	bytemaker,
+	bytesplitter,
 
 	wing1x1: wing,
 	wing1x2: wing,

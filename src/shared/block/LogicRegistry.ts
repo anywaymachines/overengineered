@@ -4,6 +4,8 @@ import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
 import { RadarSectionBlockLogic } from "shared/block/logic/RadarSectionBlockLogic";
 import { RadioRecieverBlockLogic } from "shared/block/logic/RadioRecieverBlockLogic";
 import { RadioTransmitterBlockLogic } from "shared/block/logic/RadioTransmitterBlockLogic";
+import { ByteMakerBlockLogic } from "shared/block/logic/converter/byte/ByteMakerBlockLogic";
+import { ByteSplitterBlockLogic } from "shared/block/logic/converter/byte/ByteSplitterBlockLogic";
 import { LEDDisplayBlockLogic } from "shared/block/logic/operations/output/LEDDisplayBlockLogic";
 import { LaserBlockLogic } from "shared/block/logic/operations/output/LaserBlockLogic";
 import { SevenSegmentDisplayBlockLogic } from "shared/block/logic/operations/output/SevenSegmentDisplayBlockLogic";
@@ -103,6 +105,9 @@ export const logicRegistry = {
 
 	operationvec3splitter: OperationVec3SplitterBlockLogic,
 	operationvec3combiner: OperationVec3CombinerBlockLogic,
+
+	bytemaker: ByteMakerBlockLogic,
+	bytesplitter: ByteSplitterBlockLogic,
 } as const satisfies { readonly [k in BlockId]?: unknown };
 
 export type LogicRegistry = Readonly<
