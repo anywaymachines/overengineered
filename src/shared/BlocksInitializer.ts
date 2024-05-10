@@ -7,7 +7,7 @@ import { Objects } from "./fixes/objects";
 
 declare global {
 	type RegistryBlock = {
-		readonly id: string & BlockId;
+		readonly id: BlockId;
 		readonly displayName: string;
 		readonly info: string;
 		readonly model: BlockModel;
