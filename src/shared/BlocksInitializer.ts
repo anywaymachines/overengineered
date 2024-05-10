@@ -144,7 +144,7 @@ const readFromAssets = (data: BlocksInitializeData) => {
 	};
 
 	const readBlock = (block: Model, categoryName: string) => {
-		if (RunService.IsServer()) {
+		if (RunService.IsStudio() && RunService.IsServer()) {
 			Checks.checkAll(block);
 		}
 
