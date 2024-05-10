@@ -6,9 +6,9 @@ import { RadioRecieverBlockLogic } from "shared/block/logic/RadioRecieverBlockLo
 import { RadioTransmitterBlockLogic } from "shared/block/logic/RadioTransmitterBlockLogic";
 import { ByteMakerBlockLogic } from "shared/block/logic/converter/byte/ByteMakerBlockLogic";
 import { ByteSplitterBlockLogic } from "shared/block/logic/converter/byte/ByteSplitterBlockLogic";
-import { LEDDisplayBlockLogic } from "shared/block/logic/operations/output/LEDDisplayBlockLogic";
-import { LaserBlockLogic } from "shared/block/logic/operations/output/LaserBlockLogic";
-import { SevenSegmentDisplayBlockLogic } from "shared/block/logic/operations/output/SevenSegmentDisplayBlockLogic";
+import { LEDDisplayBlockLogic } from "shared/block/logic/logic/display/LEDDisplayBlockLogic";
+import { LaserBlockLogic } from "shared/block/logic/logic/display/LaserBlockLogic";
+import { SevenSegmentDisplayBlockLogic } from "shared/block/logic/logic/display/SevenSegmentDisplayBlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { BlockLogic } from "./BlockLogic";
 import { BallastBlockLogic } from "./logic/BallastBlockLogic";
@@ -23,6 +23,10 @@ import { SuspensionLogic } from "./logic/SuspensionLogic";
 import { TNTBlockLogic } from "./logic/TNTBlockLogic";
 import { VehicleSeatBlockLogic } from "./logic/VehicleSeatBlockLogic";
 import { WingLogic } from "./logic/WingLogic";
+import { OperationVec3CombinerBlockLogic } from "./logic/converter/vector/OperationVec3CombinerBlockLogic";
+import { OperationVec3SplitterBlockLogic } from "./logic/converter/vector/OperationVec3SplitterBlockLogic";
+import { LampBlockLogic } from "./logic/logic/display/LampBlockLogic";
+import { ScreenBlockLogic } from "./logic/logic/display/ScreenBlockLogic";
 import { ConstantBlockLogic } from "./logic/operations/ConstantBlockLogic";
 import { DelayBlockLogic } from "./logic/operations/DelayBlockLogic";
 import { OperationBufferBlockLogic } from "./logic/operations/boolean/OperationBufferBlockLogic";
@@ -33,8 +37,6 @@ import { ReadOnlyMemoryBlockLogic } from "./logic/operations/memory/ReadOnlyMemo
 import { StackMemoryBlockLogic } from "./logic/operations/memory/StackMemoryBlockLogic";
 import { Multiplexer } from "./logic/operations/number/Multiplexer";
 import { RelayBlockLogic } from "./logic/operations/number/RelayBlockLogic";
-import { LampBlockLogic } from "./logic/operations/output/LampBlockLogic";
-import { ScreenBlockLogic } from "./logic/operations/output/ScreenBlockLogic";
 import { AccelerometerBlockLogic } from "./logic/operations/sensors/AccelerometerBlockLogic";
 import { AltimeterBlockLogic } from "./logic/operations/sensors/AltimeterBlockLogic";
 import { AngleSensorBlockLogic } from "./logic/operations/sensors/AngleSensorBlockLogic";
@@ -42,8 +44,6 @@ import { KeySensorBlockLogic } from "./logic/operations/sensors/KeySensorBlockLo
 import { LidarSensorBlockLogic } from "./logic/operations/sensors/LidarSensorBlockLogic";
 import { OwnerLocatorBlockLogic } from "./logic/operations/sensors/OwnerLocatorBlockLogic";
 import { SpeedometerBlockLogic } from "./logic/operations/sensors/SpeedometerBlockLogic";
-import { OperationVec3CombinerBlockLogic } from "./logic/operations/vector/OperationVec3CombinerBlockLogic";
-import { OperationVec3SplitterBlockLogic } from "./logic/operations/vector/OperationVec3SplitterBlockLogic";
 
 export const logicRegistry = {
 	wing1x1: WingLogic,

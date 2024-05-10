@@ -1,6 +1,6 @@
 import { TextService } from "@rbxts/services";
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
-import { ScreenBlockLogic } from "shared/block/logic/operations/output/ScreenBlockLogic";
+import { ScreenBlockLogic } from "shared/block/logic/logic/display/ScreenBlockLogic";
 
 export class ScreenServerLogic extends ServerBlockLogic<typeof ScreenBlockLogic> {
 	constructor(logic: typeof ScreenBlockLogic) {

@@ -1,5 +1,5 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
-import { LampBlockLogic } from "shared/block/logic/operations/output/LampBlockLogic";
+import { LampBlockLogic } from "shared/block/logic/logic/display/LampBlockLogic";
 
 export class LampServerLogic extends ServerBlockLogic<typeof LampBlockLogic> {
 	constructor(logic: typeof LampBlockLogic) {

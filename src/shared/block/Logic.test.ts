@@ -5,8 +5,8 @@ import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { SharedMachine } from "shared/block/SharedMachine";
 import { ConstantBlockLogic } from "shared/block/logic/operations/ConstantBlockLogic";
 import { AltimeterBlockLogic } from "shared/block/logic/operations/sensors/AltimeterBlockLogic";
-import { OperationVec3CombinerBlockLogic } from "shared/block/logic/operations/vector/OperationVec3CombinerBlockLogic";
-import { OperationVec3SplitterBlockLogic } from "shared/block/logic/operations/vector/OperationVec3SplitterBlockLogic";
+import { OperationVec3CombinerBlockLogic } from "shared/block/logic/converter/vector/OperationVec3CombinerBlockLogic";
+import { OperationVec3SplitterBlockLogic } from "shared/block/logic/converter/vector/OperationVec3SplitterBlockLogic";
 import { Objects } from "shared/fixes/objects";
 
 export namespace _Tests {
