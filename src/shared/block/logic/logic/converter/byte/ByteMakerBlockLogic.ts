@@ -19,14 +19,14 @@ export class ByteMakerBlockLogic extends ConfigurableBlockLogic<typeof blockConf
 	private update() {
 		this.output.result.set(
 			this.booleansToNumber([
-				this.input[1].get(),
-				this.input[2].get(),
-				this.input[4].get(),
-				this.input[8].get(),
-				this.input[16].get(),
-				this.input[32].get(),
-				this.input[64].get(),
 				this.input[128].get(),
+				this.input[64].get(),
+				this.input[32].get(),
+				this.input[16].get(),
+				this.input[8].get(),
+				this.input[4].get(),
+				this.input[2].get(),
+				this.input[1].get(),
 			]),
 		);
 	}
