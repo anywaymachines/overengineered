@@ -95,7 +95,7 @@ const connectors = {
 		return {
 			displayName: name,
 			type: "or",
-			default: 0 as number,
+			default: "" as string,
 			config: {
 				type: "unset",
 				value: 0,
