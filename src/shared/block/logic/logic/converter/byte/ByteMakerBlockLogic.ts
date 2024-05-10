@@ -17,7 +17,7 @@ export class ByteMakerBlockLogic extends ConfigurableBlockLogic<typeof blockConf
 	}
 
 	private update() {
-		this.output.result.set(
+		this.output.value.set(
 			this.booleansToNumber([
 				this.input[128].get(),
 				this.input[64].get(),
