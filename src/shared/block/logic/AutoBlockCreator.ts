@@ -8,7 +8,7 @@ import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import { BlockLogic } from "shared/block/BlockLogic";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { LogicRegistry, logicRegistry } from "shared/block/LogicRegistry";
-import { BlockConfigRegistry, blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { BlockConfigRegistry, blockConfigRegistry, connectors } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { Objects } from "shared/fixes/objects";
 
@@ -103,6 +103,14 @@ const defcs = {
 
 const defs = {
 	const: {
+		input: {
+			value: connectors.any("Value", "1", { connectorHidden: true }),
+		},
+		output: {
+			result: connectors.any("Value", "1"),
+		},
+	},
+	constnumber: {
 		input: {},
 		output: {
 			value: defcs.number("Value"),
@@ -250,10 +258,25 @@ const reglogic = (
 	(blockConfigRegistry as Writable<BlockConfigRegistry>)[name as keyof BlockConfigRegistry] = def;
 };
 const logicReg = {
-	const: (func: (logic: BlockLogic) => number) => {
+	const: (
+		func: (
+			value: ReturnType<typeof connectors.any>["default"],
+			logic: BlockLogic,
+		) => ReturnType<typeof connectors.any>["default"],
+	) => {
 		return class Logic extends ConfigurableBlockLogic<typeof defs.const> {
 			constructor(block: PlacedBlockData) {
 				super(block, defs.const);
+
+				const update = () => this.output.result.set(func(this.input.value.get(), this));
+				this.onEnable(update);
+			}
+		};
+	},
+	constnumber: (func: (logic: BlockLogic) => number) => {
+		return class Logic extends ConfigurableBlockLogic<typeof defs.constnumber> {
+			constructor(block: PlacedBlockData) {
+				super(block, defs.constnumber);
 
 				const update = () => this.output.value.set(func(this));
 				this.onEnable(update);
@@ -480,6 +503,14 @@ const doubleBytePrefab = "DoubleByteLogicBlockPrefab";
 
 const operations = {
 	const: {
+		Constant: {
+			modelTextOverride: "CONST",
+			category: otherCategory,
+			prefab: constPrefab,
+			func: (value) => value,
+		},
+	},
+	constnumber: {
 		PI: {
 			modelTextOverride: "π",
 			category: otherCategory,

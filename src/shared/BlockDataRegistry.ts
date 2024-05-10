@@ -315,10 +315,9 @@ const logic = {
 		},
 	},
 	number: {
-		constant: {
+		operationconstant: {
 			name: "Constant",
 			description: "Always returns the value you've set",
-			autoWeldShape: "cube",
 		},
 		multiplexer: {
 			name: "Multiplexer",

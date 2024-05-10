@@ -31,7 +31,6 @@ import { LogicMemoryBlockLogic } from "./logic/logic/memory/LogicMemoryBlockLogi
 import { RandomAccessMemoryBlockLogic } from "./logic/logic/memory/RandomAccessMemoryBlockLogic";
 import { ReadOnlyMemoryBlockLogic } from "./logic/logic/memory/ReadOnlyMemoryBlockLogic";
 import { StackMemoryBlockLogic } from "./logic/logic/memory/StackMemoryBlockLogic";
-import { ConstantBlockLogic } from "./logic/logic/other/ConstantBlockLogic";
 import { CounterBlockLogic } from "./logic/logic/other/CounterBlockLogic";
 import { DelayBlockLogic } from "./logic/logic/other/DelayBlockLogic";
 import { Multiplexer } from "./logic/logic/other/Multiplexer";
@@ -76,7 +75,6 @@ export const logicRegistry = {
 	leddisplay: LEDDisplayBlockLogic,
 	sevensegmentdisplay: SevenSegmentDisplayBlockLogic,
 
-	constant: ConstantBlockLogic,
 	delayblock: DelayBlockLogic,
 	counter: CounterBlockLogic,
 	relay: RelayBlockLogic,

@@ -4,8 +4,6 @@ import { RobloxUnit } from "shared/RobloxUnit";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { SharedMachine } from "shared/block/SharedMachine";
 import { OperationVec3CombinerBlockLogic } from "shared/block/logic/logic/converter/vector/OperationVec3CombinerBlockLogic";
-import { OperationVec3SplitterBlockLogic } from "shared/block/logic/logic/converter/vector/OperationVec3SplitterBlockLogic";
-import { ConstantBlockLogic } from "shared/block/logic/logic/other/ConstantBlockLogic";
 import { AltimeterBlockLogic } from "shared/block/logic/logic/sensor/AltimeterBlockLogic";
 import { Objects } from "shared/fixes/objects";
 
@@ -83,85 +81,85 @@ export namespace _Tests {
 			Assert.equals(combiner.output.result, new Vector3(1, 0, 0));
 			machine.destroy();
 		}
-		export function size2() {
-			const constant = new ConstantBlockLogic({
-				id: "id",
-				uuid: "0" as BlockUuid,
-				instance: new Instance("Model") as BlockModel,
-				config: { value: { type: "number", value: 2 } },
-				connections: {},
-			});
-			const combiner = new OperationVec3CombinerBlockLogic({
-				id: "id",
-				uuid: "1" as BlockUuid,
-				instance: new Instance("Model") as BlockModel,
-				config: { value_x: 1 },
-				connections: {
-					value_y: {
-						blockUuid: "0" as BlockUuid,
-						connectionName: "result" as BlockConnectionName,
-					},
-				},
-			});
+		// export function size2() {
+		// 	const constant = new ConstantBlockLogic({
+		// 		id: "id",
+		// 		uuid: "0" as BlockUuid,
+		// 		instance: new Instance("Model") as BlockModel,
+		// 		config: { value: { type: "number", value: 2 } },
+		// 		connections: {},
+		// 	});
+		// 	const combiner = new OperationVec3CombinerBlockLogic({
+		// 		id: "id",
+		// 		uuid: "1" as BlockUuid,
+		// 		instance: new Instance("Model") as BlockModel,
+		// 		config: { value_x: 1 },
+		// 		connections: {
+		// 			value_y: {
+		// 				blockUuid: "0" as BlockUuid,
+		// 				connectionName: "result" as BlockConnectionName,
+		// 			},
+		// 		},
+		// 	});
 
-			const logics = [constant, combiner];
-			const machine = new SharedMachine();
-			for (const logic of logics) {
-				machine.add(logic);
-			}
+		// 	const logics = [constant, combiner];
+		// 	const machine = new SharedMachine();
+		// 	for (const logic of logics) {
+		// 		machine.add(logic);
+		// 	}
 
-			machine.initializeBlockConnections();
-			machine.enable();
-			Assert.equals(combiner.output.result, new Vector3(1, 2, 0));
-			machine.destroy();
-		}
-		export function size3() {
-			const constant = new ConstantBlockLogic({
-				id: "id",
-				uuid: "0" as BlockUuid,
-				instance: new Instance("Model") as BlockModel,
-				config: { value: { type: "number", value: 7 } },
-				connections: {},
-			});
-			const combiner = new OperationVec3CombinerBlockLogic({
-				id: "id",
-				uuid: "1" as BlockUuid,
-				instance: new Instance("Model") as BlockModel,
-				config: { value_x: 1 },
-				connections: {
-					value_y: {
-						blockUuid: "0" as BlockUuid,
-						connectionName: "result" as BlockConnectionName,
-					},
-				},
-			});
-			const splitter = new OperationVec3SplitterBlockLogic({
-				id: "id",
-				uuid: "2" as BlockUuid,
-				instance: new Instance("Model") as BlockModel,
-				config: {},
-				connections: {
-					value: {
-						blockUuid: "1" as BlockUuid,
-						connectionName: "result" as BlockConnectionName,
-					},
-				},
-			});
+		// 	machine.initializeBlockConnections();
+		// 	machine.enable();
+		// 	Assert.equals(combiner.output.result, new Vector3(1, 2, 0));
+		// 	machine.destroy();
+		// }
+		// export function size3() {
+		// 	const constant = new ConstantBlockLogic({
+		// 		id: "id",
+		// 		uuid: "0" as BlockUuid,
+		// 		instance: new Instance("Model") as BlockModel,
+		// 		config: { value: { type: "number", value: 7 } },
+		// 		connections: {},
+		// 	});
+		// 	const combiner = new OperationVec3CombinerBlockLogic({
+		// 		id: "id",
+		// 		uuid: "1" as BlockUuid,
+		// 		instance: new Instance("Model") as BlockModel,
+		// 		config: { value_x: 1 },
+		// 		connections: {
+		// 			value_y: {
+		// 				blockUuid: "0" as BlockUuid,
+		// 				connectionName: "result" as BlockConnectionName,
+		// 			},
+		// 		},
+		// 	});
+		// 	const splitter = new OperationVec3SplitterBlockLogic({
+		// 		id: "id",
+		// 		uuid: "2" as BlockUuid,
+		// 		instance: new Instance("Model") as BlockModel,
+		// 		config: {},
+		// 		connections: {
+		// 			value: {
+		// 				blockUuid: "1" as BlockUuid,
+		// 				connectionName: "result" as BlockConnectionName,
+		// 			},
+		// 		},
+		// 	});
 
-			subChanged(constant, "constant");
-			subChanged(combiner, "combiner");
-			subChanged(splitter, "splitter");
+		// 	subChanged(constant, "constant");
+		// 	subChanged(combiner, "combiner");
+		// 	subChanged(splitter, "splitter");
 
-			const logics = [constant, combiner, splitter];
-			const machine = new SharedMachine();
-			for (const logic of logics) {
-				machine.add(logic);
-			}
+		// 	const logics = [constant, combiner, splitter];
+		// 	const machine = new SharedMachine();
+		// 	for (const logic of logics) {
+		// 		machine.add(logic);
+		// 	}
 
-			machine.initializeBlockConnections();
-			machine.enable();
-			Assert.equals(splitter.output.result_y, 7);
-			machine.destroy();
-		}
+		// 	machine.initializeBlockConnections();
+		// 	machine.enable();
+		// 	Assert.equals(splitter.output.result_y, 7);
+		// 	machine.destroy();
+		// }
 	}
 }

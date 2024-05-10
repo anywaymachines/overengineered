@@ -528,7 +528,7 @@ const v15: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 	version: 15,
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
-			if (block.id === "constant") {
+			if (block.id === ("constant" as BlockId)) {
 				return {
 					...block,
 					config: Objects.fromEntries(

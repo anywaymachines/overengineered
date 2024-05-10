@@ -1,6 +1,6 @@
 import { BlockId } from "shared/BlockDataRegistry";
 
-const connectors = {
+export const connectors = {
 	boolOrNumberOrVector(
 		name: string,
 		group?: string,
@@ -78,7 +78,15 @@ const connectors = {
 		group?: string,
 		additional?: Partial<
 			ConfigTypeToDefinition<
-				BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
+				BlockConfigTypes.Or<
+					[
+						BlockConfigTypes.Bool,
+						BlockConfigTypes.Number,
+						BlockConfigTypes.Vec3,
+						BlockConfigTypes.Byte,
+						BlockConfigTypes.String,
+					]
+				>
 			>
 		>,
 	): ConfigTypeToDefinition<
@@ -1259,28 +1267,6 @@ const delayBlock = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const constant = {
-	input: {
-		value: connectors.any("Value", "1", { connectorHidden: true }),
-		/*value: {
-			displayName: "Value",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-			connectorHidden: true,
-		},*/
-	},
-	output: {
-		result: connectors.any("Value", "1"),
-		/*result: {
-			displayName: "Value",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},*/
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 export const blockConfigRegistry = {
 	disconnectblock,
 	motorblock,
@@ -1331,7 +1317,6 @@ export const blockConfigRegistry = {
 
 	radarsection,
 
-	constant,
 	delayblock: delayBlock,
 
 	counter,
