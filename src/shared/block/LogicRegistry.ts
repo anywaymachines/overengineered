@@ -23,25 +23,13 @@ import { VehicleSeatBlockLogic } from "./logic/VehicleSeatBlockLogic";
 import { WingLogic } from "./logic/WingLogic";
 import { ConstantBlockLogic } from "./logic/operations/ConstantBlockLogic";
 import { DelayBlockLogic } from "./logic/operations/DelayBlockLogic";
-import { OperationAndBlockLogic } from "./logic/operations/boolean/OperationAndBlockLogic";
 import { OperationBufferBlockLogic } from "./logic/operations/boolean/OperationBufferBlockLogic";
-import { OperationNandBlockLogic } from "./logic/operations/boolean/OperationNandBlockLogic";
-import { OperationNorBlockLogic } from "./logic/operations/boolean/OperationNorBlockLogic";
-import { OperationNotBlockLogic } from "./logic/operations/boolean/OperationNotBlockLogic";
-import { OperationOrBlockLogic } from "./logic/operations/boolean/OperationOrBlockLogic";
-import { OperationXnorBlockLogic } from "./logic/operations/boolean/OperationXnorBlockLogic";
-import { OperationXorBlockLogic } from "./logic/operations/boolean/OperationXorBlockLogic";
 import { CounterBlockLogic } from "./logic/operations/memory/CounterBlockLogic";
 import { LogicMemoryBlockLogic } from "./logic/operations/memory/LogicMemoryBlockLogic";
 import { RandomAccessMemoryBlockLogic } from "./logic/operations/memory/RandomAccessMemoryBlockLogic";
 import { ReadOnlyMemoryBlockLogic } from "./logic/operations/memory/ReadOnlyMemoryBlockLogic";
 import { StackMemoryBlockLogic } from "./logic/operations/memory/StackMemoryBlockLogic";
 import { Multiplexer } from "./logic/operations/number/Multiplexer";
-import { OperationAbsBlockLogic } from "./logic/operations/number/OperationAbsBlockLogic";
-import { OperationClampBlockLogic } from "./logic/operations/number/OperationClampBlockLogic";
-import { OperationEqualsBlockLogic } from "./logic/operations/number/OperationEqualsBlockLogic";
-import { OperationGreaterThanBlockLogic } from "./logic/operations/number/OperationGreaterThanBlockLogic";
-import { OperationRoundBlockLogic } from "./logic/operations/number/OperationRoundBlockLogic";
 import { RelayBlockLogic } from "./logic/operations/number/RelayBlockLogic";
 import { LampBlockLogic } from "./logic/operations/output/LampBlockLogic";
 import { ScreenBlockLogic } from "./logic/operations/output/ScreenBlockLogic";
@@ -112,26 +100,11 @@ export const logicRegistry = {
 	readonlymemory: ReadOnlyMemoryBlockLogic,
 
 	operationbuffer: OperationBufferBlockLogic,
-	operationnot: OperationNotBlockLogic,
-	operationand: OperationAndBlockLogic,
-	operationnand: OperationNandBlockLogic,
-	operationor: OperationOrBlockLogic,
-	operationxor: OperationXorBlockLogic,
-	operationxnor: OperationXnorBlockLogic,
-	operationnor: OperationNorBlockLogic,
 
 	operationvec3splitter: OperationVec3SplitterBlockLogic,
 	operationvec3combiner: OperationVec3CombinerBlockLogic,
-
-	operationequals: OperationEqualsBlockLogic,
-	operationgreaterthan: OperationGreaterThanBlockLogic,
-	operationround: OperationRoundBlockLogic,
-
-	operationclamp: OperationClampBlockLogic,
-	operationabs: OperationAbsBlockLogic,
 } as const satisfies { readonly [k in BlockId]?: unknown };
 
 export type LogicRegistry = Readonly<
 	Record<keyof typeof logicRegistry, { new (block: PlacedBlockData): BlockLogic } | undefined>
-> &
-	AutoCreatedLogicRegistryTypes;
+>;

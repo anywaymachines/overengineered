@@ -1225,37 +1225,6 @@ const delayBlock = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const operationclamp = {
-	input: {
-		value: {
-			displayName: "Value",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-		min: {
-			displayName: "Min",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-		max: {
-			displayName: "Max",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-	},
-	output: {
-		result: {
-			displayName: "Result",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const constant = {
 	input: {
 		value: connectors.boolOrNumberOrVector("Value", "1", { connectorHidden: true }),
@@ -1334,26 +1303,6 @@ export const blockConfigRegistry = {
 	randomaccessmemory,
 	readonlymemory,
 	operationbuffer: anyProcessing,
-	operationnot: booleanProcessing,
-	operationand: twoBooleanInputsOneBooleanOutput,
-	operationnand: twoBooleanInputsOneBooleanOutput,
-	operationor: twoBooleanInputsOneBooleanOutput,
-	operationxor: twoBooleanInputsOneBooleanOutput,
-	operationxnor: twoBooleanInputsOneBooleanOutput,
-	operationnor: twoBooleanInputsOneBooleanOutput,
-
-	operationequals: twoNumbersOrBooleansInputBooleanOutput,
-	operationgreaterthan: twoNumbersInputBooleanOutput,
-	operationround: numberProcessing,
-
-	operationmod: twoNumberInputsNumberOutput,
-
-	operationrad: numberProcessing,
-	operationdeg: numberProcessing,
-
-	operationclamp,
-	operationabs: numberProcessing,
-	operationsign: numberProcessing,
 
 	operationvec3splitter,
 	operationvec3combiner,

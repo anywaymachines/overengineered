@@ -53,37 +53,30 @@ const logic = {
 		operationand: {
 			name: '"AND" Gate',
 			description: "Returns true when both inputs are true",
-			autoWeldShape: "cube",
 		},
 		operationnand: {
 			name: '"NAND" Gate',
 			description: "Returns true when both value are not true",
-			autoWeldShape: "cube",
 		},
 		operationnor: {
 			name: '"NOR" Gate',
 			description: "Returns true when none of the values are true",
-			autoWeldShape: "cube",
 		},
 		operationnot: {
 			name: '"NOT" Gate',
 			description: "Returns true when false is given, and vice versa",
-			autoWeldShape: "cube",
 		},
 		operationor: {
 			name: '"OR" Gate',
 			description: "Returns true when any of the inputs are true",
-			autoWeldShape: "cube",
 		},
 		operationxnor: {
 			name: '"XNOR" Gate',
 			description: "Returns true only if both inputs are the same",
-			autoWeldShape: "cube",
 		},
 		operationxor: {
 			name: '"XOR" Gate',
 			description: "Returns true only if both inputs are not the same",
-			autoWeldShape: "cube",
 		},
 		operationbuffer: {
 			name: "Buffer",
@@ -93,69 +86,134 @@ const logic = {
 		operationequals: {
 			name: "Equals",
 			description: "Returns true if two given values are the exact same",
-			autoWeldShape: "cube",
+		},
+		operationnotequals: {
+			name: "NOT Equals",
+			description: "N/A", // TODO: @samlovebutter
 		},
 		operationgreaterthan: {
 			name: "Greater Than",
 			description: "Returns true if first value greater than second one",
-			autoWeldShape: "cube",
+		},
+		operationgreaterthanorequals: {
+			name: "Greater Than or Equals",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationlessthanorequals: {
+			name: "Less Than or Equals",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationlessthan: {
+			name: "Less Than",
+			description: "N/A", // TODO: @samlovebutter
+		},
+	},
+	byte: {
+		bytemaker: {
+			name: "Byte Maker",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		bytesplitter: {
+			name: "Byte Splitter",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationbytexor: {
+			name: "Byte XOR",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationbytexnor: {
+			name: "Byte XNOR",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationbyteand: {
+			name: "Byte AND",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationbytenand: {
+			name: "Byte NAND",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationbyteor: {
+			name: "Byte OR",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationbytenor: {
+			name: "Byte NOR",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationbyterotateright: {
+			name: "Byte Rotate Right",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationbyterotateleft: {
+			name: "Byte Rotate Left",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationbyteshiftright: {
+			name: "Byte Shift Right",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationbyteshiftleft: {
+			name: "Byte Shift Left",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationbytearithmeticshiftright: {
+			name: "Byte Arithmetic Shift Right",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationbytenot: {
+			name: "Byte NOT",
+			description: "N/A", // TODO: @samlovebutter
+		},
+		operationbyteneg: {
+			name: "Byte NEGATE",
+			description: "N/A", // TODO: @samlovebutter
 		},
 	},
 	math: {
 		operationadd: {
 			name: "Addition",
 			description: "Returns a sum of input values",
-			autoWeldShape: "cube",
 		},
 		operationsub: {
 			name: "Subtraction",
 			description: "Returns the result of substruction of two given values",
-			autoWeldShape: "cube",
 		},
 		operationmul: {
 			name: "Multiplication",
 			description: "Returns the result of multiplication of two given values",
-			autoWeldShape: "cube",
 		},
 		operationdiv: {
 			name: "Division",
 			description: "Returns the result of division of two given values",
-			autoWeldShape: "cube",
 		},
 		operationabs: {
 			name: "Absolute",
 			description: "Returns the modulus of incoming number",
-			autoWeldShape: "cube",
 		},
 		operationclamp: {
 			name: "Clamp",
 			description: "Limits the output between max and min.",
-			autoWeldShape: "cube",
 		},
 		operationmod: {
 			name: "Mod",
 			description: "Returns the remainder of a division",
-			autoWeldShape: "cube",
 		},
 		operationround: {
 			name: "Round",
 			description: "Returns rounded input value",
-			autoWeldShape: "cube",
 		},
 		operationfloor: {
 			name: "Floor",
 			description: "N/A",
-			autoWeldShape: "cube",
 		},
 		operationceil: {
 			name: "Ceil",
 			description: "N/A",
-			autoWeldShape: "cube",
 		},
 		operationsign: {
 			name: "Sign",
 			description: "Returns -1 if input value is less than zero, 1 if greater than zero and zero if equals zero",
-			autoWeldShape: "cube",
 		},
 	},
 	trigonometry: {
@@ -178,77 +236,62 @@ const logic = {
 		operationsqrt: {
 			name: "Square Root",
 			description: "Square the root out of input value",
-			autoWeldShape: "cube",
 		},
 		operationnsqrt: {
 			name: "Custom Degree Root",
 			description: "Same as the square root but you're allowed to change the degree of it",
-			autoWeldShape: "cube",
 		},
 		operationpow: {
 			name: "Power",
 			description: "Buffs input values",
-			autoWeldShape: "cube",
 		},
 		operationtan: {
 			name: "Tangent",
 			description: "Calculates a tangent of input",
-			autoWeldShape: "cube",
 		},
 		operationatan: {
 			name: "Arctangent",
 			description: "The opposite of the Tangent",
-			autoWeldShape: "cube",
 		},
 		operationatan2: {
 			name: "Arctangent 2",
 			description: "No way they made a sequel",
-			autoWeldShape: "cube",
 		},
 		operationsin: {
 			name: "Sine",
 			description: "Calculates a sine of input",
-			autoWeldShape: "cube",
 		},
 		operationasin: {
 			name: "Arcsine",
 			description: "The opposite of the Sine",
-			autoWeldShape: "cube",
 		},
 		operationcos: {
 			name: "Cosine",
 			description: "Calculates a cosine of input",
-			autoWeldShape: "cube",
 		},
 		operationacos: {
 			name: "Arccosine",
 			description: "The opposite of the Cosine",
-			autoWeldShape: "cube",
 		},
 		operationlog: {
 			name: "Logarithm",
 			description: "Calculates a logarithm of the input value with selected base",
-			autoWeldShape: "cube",
 		},
 		operationlog10: {
 			name: "Logarithm (10 base)",
 			description: "Calculates a base 10 logarithm of the input value",
-			autoWeldShape: "cube",
 		},
 		operationloge: {
 			name: "Logarithm (natural)",
 			description: "Returns a natural Logarithm of inputed value. Unlike it's evil artificial counterparts..",
-			autoWeldShape: "cube",
 		},
 		operationdeg: {
 			name: "Degrees",
 			description: "Returns input value converted to degrees",
-			autoWeldShape: "cube",
 		},
 		operationrad: {
 			name: "Radians",
 			description: "Returns input value converted to radians",
-			autoWeldShape: "cube",
 		},
 	},
 	vector3: {
