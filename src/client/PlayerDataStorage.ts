@@ -40,6 +40,7 @@ export namespace PlayerDataStorage {
 	}
 
 	async function refetchPlayerData() {
+		await Remotes.Client.GetNamespace("Player").Get("FetchData").SetCallTimeout(1);
 		const d = await Remotes.Client.GetNamespace("Player").Get("FetchData").CallServerAsync();
 
 		data.set({
