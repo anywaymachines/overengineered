@@ -22,7 +22,11 @@ export namespace BlockMarkers {
 
 			const positions = new Map(
 				(folder.GetChildren() as BasePart[]).map(
-					(p) => [p.Name as BlockConnectionName, p.GetPivot().Position] as const,
+					(p) =>
+						[
+							p.Name as BlockConnectionName,
+							block.model.GetPivot().PointToObjectSpace(p.GetPivot().Position),
+						] as const,
 				),
 			);
 
