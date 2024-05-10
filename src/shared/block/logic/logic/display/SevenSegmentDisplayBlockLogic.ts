@@ -23,6 +23,6 @@ export class SevenSegmentDisplayBlockLogic extends ConfigurableBlockLogic<
 			});
 		};
 
-		this.event.subscribeObservable(this.input.value, updateState, true);
+		this.event.subscribeObservable(this.input.value, updateState);
 	}
 }

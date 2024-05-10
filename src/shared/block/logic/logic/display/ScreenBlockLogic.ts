@@ -23,16 +23,12 @@ export class ScreenBlockLogic extends ConfigurableBlockLogic<typeof blockConfigR
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.screen);
 
-		this.event.subscribeObservable(
-			this.input.data,
-			(data) => {
-				ScreenBlockLogic.events.update.send({
-					block: this.instance,
-					text: tostring(data),
-					translate: typeIs(data, "string"),
-				});
-			},
-			true,
-		);
+		this.event.subscribeObservable(this.input.data, (data) => {
+			ScreenBlockLogic.events.update.send({
+				block: this.instance,
+				text: tostring(data),
+				translate: typeIs(data, "string"),
+			});
+		});
 	}
 }
