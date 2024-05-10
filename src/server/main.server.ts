@@ -1,3 +1,10 @@
+import { TestFramework } from "shared/test/TestFramework";
+if (!game.GetService("RunService").IsStudio()) {
+	for (const testscript of TestFramework.findAllTestScripts()) {
+		testscript.Destroy();
+	}
+}
+
 import { HttpService, MessagingService, RunService, Workspace } from "@rbxts/services";
 import { Backend } from "server/Backend";
 import { BadgeController } from "server/BadgeController";

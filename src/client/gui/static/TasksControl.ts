@@ -17,7 +17,7 @@ export class TasksControl extends Control<TasksControlDefinition> {
 	private readonly taskTemplate;
 	private readonly tasks: Instance[] = [];
 
-	constructor() {
+	private constructor() {
 		super(Gui.getGameUI().FindFirstChild("Tasks") as TasksControlDefinition);
 
 		this.taskTemplate = this.asTemplate(this.gui.TaskList.Task);

@@ -30,6 +30,18 @@ export namespace Assert {
 			}
 		}
 	}
+	export function setEquals<T>(left: ReadonlySet<T>, right: ReadonlySet<T>, message?: string) {
+		if (left.size() !== right.size())
+			throw `Array sizes are not equal: ${left.size()} vs ${right.size()}: ${message}`;
+
+		const leftcopy = new Set([...left]);
+
+		for (const item of right) {
+			if (!leftcopy.delete(item)) {
+				throw `Left set does not containt an item from the right set: ${item}: ${message}`;
+			}
+		}
+	}
 
 	export namespace Testing {
 		export function test(description: string, test: () => void) {
