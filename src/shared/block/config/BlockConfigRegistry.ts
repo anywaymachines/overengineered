@@ -76,6 +76,11 @@ const connectors = {
 	any(
 		name: string,
 		group?: string,
+		additional?: Partial<
+			ConfigTypeToDefinition<
+				BlockConfigTypes.Or<[BlockConfigTypes.Bool, BlockConfigTypes.Number, BlockConfigTypes.Vec3]>
+			>
+		>,
 	): ConfigTypeToDefinition<
 		BlockConfigTypes.Or<
 			[
@@ -128,6 +133,7 @@ const connectors = {
 					config: 0 as number,
 				},
 			},
+			...(additional ?? {}),
 		};
 	},
 } as const;
@@ -1255,7 +1261,7 @@ const delayBlock = {
 
 const constant = {
 	input: {
-		value: connectors.boolOrNumberOrVector("Value", "1", { connectorHidden: true }),
+		value: connectors.any("Value", "1", { connectorHidden: true }),
 		/*value: {
 			displayName: "Value",
 			type: "number",
@@ -1265,7 +1271,7 @@ const constant = {
 		},*/
 	},
 	output: {
-		result: connectors.boolOrNumberOrVector("Value", "1"),
+		result: connectors.any("Value", "1"),
 		/*result: {
 			displayName: "Value",
 			type: "number",
