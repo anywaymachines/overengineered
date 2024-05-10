@@ -89,7 +89,7 @@ const logic = {
 		},
 		operationnotequals: {
 			name: "NOT Equals",
-			description: "N/A", // TODO: @samlovebutter
+			description: "Returns true if values are not the same",
 		},
 		operationgreaterthan: {
 			name: "Greater Than",
@@ -97,85 +97,85 @@ const logic = {
 		},
 		operationgreaterthanorequals: {
 			name: "Greater Than or Equals",
-			description: "N/A", // TODO: @samlovebutter
+			description: "Returns true if the first value greater than second one",
 		},
 		operationlessthanorequals: {
 			name: "Less Than or Equals",
-			description: "N/A", // TODO: @samlovebutter
+			description: "Returns true if the first value equal to or lesser than second one",
 		},
 		operationlessthan: {
 			name: "Less Than",
-			description: "N/A", // TODO: @samlovebutter
+			description: "Returns true if the first value or lesser than second one",
 		},
 	},
 	byte: {
 		bytemaker: {
 			name: "Byte Maker",
-			description: "N/A", // TODO: @samlovebutter
+			description: "Makes bytes from bits and pieces",
 		},
 		bytesplitter: {
 			name: "Byte Splitter",
-			description: "N/A", // TODO: @samlovebutter
+			description: "Another one bytes to bits",
 		},
 		operationbytetonumber: {
 			name: "Byte To Number",
-			description: "N/A", // TODO: @samlovebutter
+			description: "Numbers the bytes! Oh, wait.. no.. It converts Bytes to numbers!",
 		},
 		operationnumbertobyte: {
 			name: "Number to Byte",
-			description: "N/A", // TODO: @samlovebutter
+			description: "Converts number value to the byte value! It's like clamping number between 0 and 255.",
 		},
 		operationbytexor: {
 			name: "Byte XOR",
-			description: "N/A", // TODO: @samlovebutter
+			description: "It's the same XOR operation but for each bit of input bytes.",
 		},
 		operationbytexnor: {
 			name: "Byte XNOR",
-			description: "N/A", // TODO: @samlovebutter
+			description: "It's the same XNOR operation but for each bit of input bytes.",
 		},
 		operationbyteand: {
 			name: "Byte AND",
-			description: "N/A", // TODO: @samlovebutter
+			description: "It's the same AND operation but for each bit of input bytes.",
 		},
 		operationbytenand: {
 			name: "Byte NAND",
-			description: "N/A", // TODO: @samlovebutter
+			description: "It's the same NAND operation but for each bit of input bytes.",
 		},
 		operationbyteor: {
 			name: "Byte OR",
-			description: "N/A", // TODO: @samlovebutter
+			description: "It's the same OR operation but for each bit of input bytes.",
 		},
 		operationbytenor: {
 			name: "Byte NOR",
-			description: "N/A", // TODO: @samlovebutter
+			description: "It's the same NOR operation but for each bit of input bytes.",
 		},
 		operationbyterotateright: {
 			name: "Byte Rotate Right",
-			description: "N/A", // TODO: @samlovebutter
+			description: "It rotates the byte right! Don't ask me, don't know either",
 		},
 		operationbyterotateleft: {
 			name: "Byte Rotate Left",
-			description: "N/A", // TODO: @samlovebutter
+			description: "It rotates the left! Don't ask me, don't know either",
 		},
 		operationbyteshiftright: {
 			name: "Byte Shift Right",
-			description: "N/A", // TODO: @samlovebutter
+			description: "Shifts bits to right!",
 		},
 		operationbyteshiftleft: {
 			name: "Byte Shift Left",
-			description: "N/A", // TODO: @samlovebutter
+			description: "Shifts bits to left!",
 		},
 		operationbytearithmeticshiftright: {
 			name: "Byte Arithmetic Shift Right",
-			description: "N/A", // TODO: @samlovebutter
+			description: "Honestly, I have ZERO idea what it does, Maks made it.",
 		},
 		operationbytenot: {
 			name: "Byte NOT",
-			description: "N/A", // TODO: @samlovebutter
+			description: "It's the same NOT operation but for each bit of input bytes.",
 		},
 		operationbyteneg: {
 			name: "Byte NEGATE",
-			description: "N/A", // TODO: @samlovebutter
+			description: "Negates the input byte.",
 		},
 	},
 	math: {
@@ -378,7 +378,7 @@ const logic = {
 		radarsection: {
 			name: "Radar Section",
 			description: "Returns the closest object that got into the block's sight",
-			limit: 40,
+			limit: 400,
 		},
 	},
 } as const satisfies Record<string, BlockDataRegistry>;
