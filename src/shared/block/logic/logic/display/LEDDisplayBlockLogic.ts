@@ -26,7 +26,6 @@ export class LEDDisplayBlockLogic extends ConfigurableBlockLogic<typeof blockCon
 
 		const gui = block.instance.WaitForChild("Screen").WaitForChild("SurfaceGui");
 
-		// ???
 		for (let x = 0; x < 8; x++) {
 			this.display[x] = new Array(8);
 			for (let y = 0; y < 8; y++) {

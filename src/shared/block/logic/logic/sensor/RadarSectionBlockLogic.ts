@@ -1,4 +1,3 @@
-import { RunService } from "@rbxts/services";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -23,8 +22,18 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		return closestPart;
 	}
 
+	tick(tick: number): void {
+		if (this.closestDetectedPart !== undefined)
+			this.output.distance.set(this.getDistanceTo(this.closestDetectedPart));
+
+		super.tick(tick);
+	}
+
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.radarsection);
+
+		const maxDist = blockConfigRegistry.radarsection.input.maxDistance.max;
+		const halvedMaxDist = maxDist / 2;
 
 		const view = this.instance.WaitForChild("RadarView");
 		if (!view) return;
@@ -36,22 +45,22 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 			this.input.detectionSize.get(),
 		);
 
-		this.event.subscribe(RunService.Heartbeat, () => {
-			if (this.closestDetectedPart === undefined) return;
-			this.output.distance.set(this.getDistanceTo(this.closestDetectedPart));
-		});
+		const updateDistance = (detectionSize: number) => {
+			const md = this.input.maxDistance.get();
+			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (md + halvedMaxDist)));
+			view.Size = new Vector3(ds, view.Size.Y, ds);
+		};
 
 		this.event.subscribeObservable(this.input.visibility, (state) => {
 			view.Transparency = state ? 0.8 : 1;
 		});
 
-		this.event.subscribeObservable(this.input.detectionSize, (detectionSize) => {
-			view.Size = new Vector3(detectionSize, view.Size.Y, detectionSize);
-		});
+		this.event.subscribeObservable(this.input.detectionSize, updateDistance);
 
 		this.event.subscribeObservable(this.input.maxDistance, (maxDistance) => {
 			const halfDistance = maxDistance / 2;
 			view.Size = new Vector3(view.Size.X, halfDistance, view.Size.Z);
+			updateDistance(this.input.detectionSize.get());
 		});
 
 		this.event.subscribe(view.Touched, (part) => {

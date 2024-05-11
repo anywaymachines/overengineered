@@ -446,6 +446,7 @@ const registry = {
 	leddisplay: {
 		name: "Display",
 		description: "Simple 8x8 pixel display. Wonder what can you do with it..",
+		limit: 16,
 	},
 	sevensegmentdisplay: {
 		name: "7-Segment Display",

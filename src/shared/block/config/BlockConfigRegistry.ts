@@ -1123,7 +1123,6 @@ const counter = {
 			type: "number",
 			default: 0 as number,
 			config: 0 as number,
-			configHidden: true,
 		},
 		triggerStep: {
 			displayName: "Step",
