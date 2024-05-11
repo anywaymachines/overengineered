@@ -741,17 +741,24 @@ const operations = {
 		},
 
 		FLOOR: {
-			modelTextOverride: "Floor",
+			modelTextOverride: "FLOOR",
 			category: mathCategory,
 			prefab: smallGenericPrefab,
 			func: (value) => math.floor(value),
 		},
 
 		CEIL: {
-			modelTextOverride: "Ceil",
+			modelTextOverride: "CEIL",
 			category: mathCategory,
 			prefab: smallGenericPrefab,
 			func: (value) => math.ceil(value),
+		},
+
+		ROUND: {
+			modelTextOverride: "ROUND",
+			category: mathCategory,
+			prefab: smallGenericPrefab,
+			func: (value) => math.round(value),
 		},
 
 		ABS: {
