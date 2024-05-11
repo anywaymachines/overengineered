@@ -1060,7 +1060,7 @@ const operations = {
 	},
 	number3tovector3: {
 		Vec3Combiner: {
-			modelTextOverride: "VEC3 SPLIT",
+			modelTextOverride: "VEC3 COMB",
 			category: converterVectorCategory,
 			prefab: tripleGenericPrefab,
 			func: (numbers) => new Vector3(numbers[0], numbers[1], numbers[2]),
@@ -1068,7 +1068,7 @@ const operations = {
 	},
 	vector3tonumber3: {
 		Vec3Splitter: {
-			modelTextOverride: "VEC3 COMB",
+			modelTextOverride: "VEC3 SPLIT",
 			category: converterVectorCategory,
 			prefab: tripleGenericPrefab,
 			func: (vector3) => [vector3.X, vector3.Y, vector3.Z],
