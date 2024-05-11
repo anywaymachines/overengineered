@@ -42,6 +42,18 @@ const defcs = {
 			...(additional ?? {}),
 		};
 	},
+	vector3(
+		name: string,
+		additional?: Partial<ConfigTypeToDefinition<BlockConfigTypes.Vec3>>,
+	): ConfigTypeToDefinition<BlockConfigTypes.Vec3> {
+		return {
+			displayName: name,
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+			...(additional ?? {}),
+		};
+	},
 	number(
 		name: string,
 		additional?: Partial<ConfigTypeToDefinition<BlockConfigTypes.Number>>,
@@ -102,6 +114,26 @@ const defcs = {
 } as const;
 
 const defs = {
+	number3tovector3: {
+		input: {
+			x: defcs.number("X"),
+			y: defcs.number("Y"),
+			z: defcs.number("Z"),
+		},
+		output: {
+			result: defcs.vector3("Result"),
+		},
+	},
+	vector3tonumber3: {
+		input: {
+			value: defcs.vector3("Value"),
+		},
+		output: {
+			x: defcs.number("X"),
+			y: defcs.number("Y"),
+			z: defcs.number("Z"),
+		},
+	},
 	const: {
 		input: {
 			value: connectors.any("Value", "1", { connectorHidden: true }),
@@ -459,6 +491,37 @@ const logicReg = {
 			}
 		};
 	},
+
+	vector3tonumber3: (func: (value: Vector3, logic: BlockLogic) => number[]) => {
+		return class Logic extends ConfigurableBlockLogic<typeof defs.vector3tonumber3> {
+			constructor(block: PlacedBlockData) {
+				super(block, defs.vector3tonumber3);
+
+				const update = () => {
+					const axis = func(this.input.value.get(), this);
+					this.output.x.set(axis[0]);
+					this.output.x.set(axis[1]);
+					this.output.x.set(axis[2]);
+				};
+				this.input.value.subscribe(update);
+			}
+		};
+	},
+
+	number3tovector3: (func: (value: number[], logic: BlockLogic) => Vector3) => {
+		return class Logic extends ConfigurableBlockLogic<typeof defs.number3tovector3> {
+			constructor(block: PlacedBlockData) {
+				super(block, defs.number3tovector3);
+
+				const update = () =>
+					this.output.result.set(func([this.input.x.get(), this.input.y.get(), this.input.z.get()], this));
+
+				this.input.x.subscribe(update);
+				this.input.y.subscribe(update);
+				this.input.z.subscribe(update);
+			}
+		};
+	},
 } as const satisfies Record<keyof typeof defs, unknown>;
 
 //
@@ -492,12 +555,14 @@ const multiifunc =
 const mathCategory = ["Logic", "Math"];
 const byteCategory = ["Logic", "Math", "Byte"];
 const converterByteCategory = ["Logic", "Converter", "Byte"];
+const converterVectorCategory = ["Logic", "Converter", "Vector"];
 const otherCategory = ["Logic", "Other"];
 const boolCategory = ["Logic", "Gate"];
 
 const constPrefab = "ConstLogicBlockPrefab";
 const smallGenericPrefab = "GenericLogicBlockPrefab";
 const doubleGenericPrefab = "DoubleGenericLogicBlockPrefab";
+const tripleGenericPrefab = "TripleGenericLogicBlockPrefab";
 const smallBytePrefab = "ByteLogicBlockPrefab";
 const doubleBytePrefab = "DoubleByteLogicBlockPrefab";
 
@@ -652,7 +717,7 @@ const operations = {
 		CLAMP: {
 			modelTextOverride: "CLAMP",
 			category: mathCategory,
-			prefab: doubleGenericPrefab,
+			prefab: tripleGenericPrefab,
 			func: (value, min, max) => math.clamp(value, min, max),
 		},
 	},
@@ -920,6 +985,22 @@ const operations = {
 			category: converterByteCategory,
 			prefab: smallBytePrefab,
 			func: (value) => value,
+		},
+	},
+	number3tovector3: {
+		Vec3Splitter: {
+			modelTextOverride: "VEC3 SPLIT",
+			category: converterVectorCategory,
+			prefab: tripleGenericPrefab,
+			func: (numbers) => new Vector3(numbers[0], numbers[1], numbers[2]),
+		},
+	},
+	vector3tonumber3: {
+		Vec3Combiner: {
+			modelTextOverride: "VEC3 COMB",
+			category: converterVectorCategory,
+			prefab: tripleGenericPrefab,
+			func: (vector3) => [vector3.X, vector3.Y, vector3.Z],
 		},
 	},
 } as const satisfies NonGenericOperations;
