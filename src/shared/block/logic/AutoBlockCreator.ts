@@ -519,8 +519,8 @@ const logicReg = {
 				const update = () => {
 					const axis = func(this.input.value.get(), this);
 					this.output.x.set(axis[0]);
-					this.output.x.set(axis[1]);
-					this.output.x.set(axis[2]);
+					this.output.y.set(axis[1]);
+					this.output.z.set(axis[2]);
 				};
 				this.input.value.subscribe(update);
 			}
