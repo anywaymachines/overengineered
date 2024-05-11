@@ -1052,7 +1052,7 @@ const operations = {
 		},
 	},
 	number3tovector3: {
-		Vec3Splitter: {
+		Vec3Combiner: {
 			modelTextOverride: "VEC3 SPLIT",
 			category: converterVectorCategory,
 			prefab: tripleGenericPrefab,
@@ -1060,7 +1060,7 @@ const operations = {
 		},
 	},
 	vector3tonumber3: {
-		Vec3Combiner: {
+		Vec3Splitter: {
 			modelTextOverride: "VEC3 COMB",
 			category: converterVectorCategory,
 			prefab: tripleGenericPrefab,
