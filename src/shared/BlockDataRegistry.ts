@@ -554,7 +554,7 @@ const registry = {
 		description: "A programmable memory. Allows you to read values you've written in",
 		limit: 1,
 	},
-	relay: {
+	operationrelay: {
 		name: "Relay",
 		description: "Returns an input value only when told to",
 	},

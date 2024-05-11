@@ -721,22 +721,6 @@ const keysensor = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const relay = {
-	input: {
-		value: connectors.any("Value", "1"),
-
-		state: {
-			displayName: "State",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-	},
-	output: {
-		result: connectors.any("Output", "1"),
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const wing = {
 	input: {
 		enabled: {
@@ -1284,8 +1268,6 @@ export const blockConfigRegistry = {
 	sevensegmentdisplay,
 	screen,
 	laser,
-
-	relay,
 
 	ownerlocator,
 	speedometer,

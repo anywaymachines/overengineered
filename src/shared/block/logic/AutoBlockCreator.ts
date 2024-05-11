@@ -124,6 +124,15 @@ const defs = {
 			output: connectors.any("Output", "1"),
 		},
 	},
+	relay: {
+		input: {
+			enabled: defcs.bool("Switch"),
+			value: connectors.any("Value", "1"),
+		},
+		output: {
+			output: connectors.any("Output", "1"),
+		},
+	},
 	number3tovector3: {
 		input: {
 			x: defcs.number("X"),
@@ -552,6 +561,28 @@ const logicReg = {
 				this.input.selector.subscribe(update);
 				this.input.channel1.subscribe(update);
 				this.input.channel2.subscribe(update);
+			}
+		};
+	},
+	relay: (
+		func: (
+			enabled: boolean,
+			value: ReturnType<typeof connectors.any>["default"],
+			logic: BlockLogic,
+		) => ReturnType<typeof connectors.any>["default"] | undefined,
+	) => {
+		return class Logic extends ConfigurableBlockLogic<typeof defs.relay> {
+			constructor(block: PlacedBlockData) {
+				super(block, defs.relay);
+
+				const update = () => {
+					const value = func(this.input.enabled.get(), this.input.value.get(), this);
+					if (value === undefined) return;
+
+					this.output.output.set(value);
+				};
+
+				this.input.value.subscribe(update);
 			}
 		};
 	},
@@ -1042,6 +1073,14 @@ const operations = {
 			category: converterVectorCategory,
 			prefab: tripleGenericPrefab,
 			func: (selector, channel1, channel2) => (selector ? channel2 : channel1),
+		},
+	},
+	relay: {
+		Relay: {
+			modelTextOverride: "RELAY",
+			category: converterVectorCategory,
+			prefab: doubleGenericPrefab,
+			func: (enabled, value) => (enabled ? value : undefined),
 		},
 	},
 } as const satisfies NonGenericOperations;
