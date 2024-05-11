@@ -33,7 +33,6 @@ import { ReadOnlyMemoryBlockLogic } from "./logic/logic/memory/ReadOnlyMemoryBlo
 import { StackMemoryBlockLogic } from "./logic/logic/memory/StackMemoryBlockLogic";
 import { CounterBlockLogic } from "./logic/logic/other/CounterBlockLogic";
 import { DelayBlockLogic } from "./logic/logic/other/DelayBlockLogic";
-import { Multiplexer } from "./logic/logic/other/Multiplexer";
 import { OperationBufferBlockLogic } from "./logic/logic/other/OperationBufferBlockLogic";
 import { RelayBlockLogic } from "./logic/logic/other/RelayBlockLogic";
 import { AccelerometerBlockLogic } from "./logic/logic/sensor/AccelerometerBlockLogic";
@@ -81,8 +80,6 @@ export const logicRegistry = {
 
 	radioreciever: RadioRecieverBlockLogic,
 	radiotransmitter: RadioTransmitterBlockLogic,
-
-	multiplexer: Multiplexer,
 
 	ownerlocator: OwnerLocatorBlockLogic,
 

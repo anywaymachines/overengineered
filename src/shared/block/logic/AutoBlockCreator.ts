@@ -114,6 +114,16 @@ const defcs = {
 } as const;
 
 const defs = {
+	multiplexer: {
+		input: {
+			selector: defcs.bool("Value 1/2"),
+			channel1: connectors.any("Channel 1", "1"),
+			channel2: connectors.any("Channel 2", "1"),
+		},
+		output: {
+			output: connectors.any("Output", "1"),
+		},
+	},
 	number3tovector3: {
 		input: {
 			x: defcs.number("X"),
@@ -519,6 +529,29 @@ const logicReg = {
 				this.input.x.subscribe(update);
 				this.input.y.subscribe(update);
 				this.input.z.subscribe(update);
+			}
+		};
+	},
+	multiplexer: (
+		func: (
+			selector: boolean,
+			channel1: ReturnType<typeof connectors.any>["default"],
+			channel2: ReturnType<typeof connectors.any>["default"],
+			logic: BlockLogic,
+		) => ReturnType<typeof connectors.any>["default"],
+	) => {
+		return class Logic extends ConfigurableBlockLogic<typeof defs.multiplexer> {
+			constructor(block: PlacedBlockData) {
+				super(block, defs.multiplexer);
+
+				const update = () =>
+					this.output.output.set(
+						func(this.input.selector.get(), this.input.channel1.get(), this.input.channel2.get(), this),
+					);
+
+				this.input.selector.subscribe(update);
+				this.input.channel1.subscribe(update);
+				this.input.channel2.subscribe(update);
 			}
 		};
 	},
@@ -1001,6 +1034,14 @@ const operations = {
 			category: converterVectorCategory,
 			prefab: tripleGenericPrefab,
 			func: (vector3) => [vector3.X, vector3.Y, vector3.Z],
+		},
+	},
+	multiplexer: {
+		Multiplexer: {
+			modelTextOverride: "MUX",
+			category: converterVectorCategory,
+			prefab: tripleGenericPrefab,
+			func: (selector, channel1, channel2) => (selector ? channel2 : channel1),
 		},
 	},
 } as const satisfies NonGenericOperations;

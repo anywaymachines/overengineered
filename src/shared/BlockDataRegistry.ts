@@ -319,7 +319,7 @@ const logic = {
 			name: "Constant",
 			description: "Always returns the value you've set",
 		},
-		multiplexer: {
+		operationmultiplexer: {
 			name: "Multiplexer",
 			description: "Outputs values depending on the incoming boolean",
 			autoWeldShape: "cube",

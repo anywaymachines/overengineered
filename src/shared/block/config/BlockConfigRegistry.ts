@@ -721,23 +721,6 @@ const keysensor = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const multiplexer = {
-	input: {
-		value: {
-			displayName: "Value",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
-
-		truevalue: connectors.any("True Value", "1"),
-		falsevalue: connectors.any("False Value", "1"),
-	},
-	output: {
-		result: connectors.any("Result", "1"),
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const relay = {
 	input: {
 		value: connectors.any("Value", "1"),
@@ -1302,7 +1285,6 @@ export const blockConfigRegistry = {
 	screen,
 	laser,
 
-	multiplexer,
 	relay,
 
 	ownerlocator,
