@@ -31,11 +31,11 @@ export class LaserBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRe
 		const raycastOrigin = this.block.instance.GetPivot().Position;
 		const raycastDirection = this.block.instance
 			.GetPivot()
-			.LookVector.mul(RobloxUnit.Meters_To_Studs(this.input.maxDistance.get()));
+			.UpVector.mul(RobloxUnit.Meters_To_Studs(this.input.maxDistance.get()));
 
 		const raycastResult = Workspace.Raycast(raycastOrigin, raycastDirection, this.raycastParams);
 		const distance = raycastResult?.Distance ?? this.input.maxDistance.get();
-		const endpos = raycastOrigin.add(this.block.instance.GetPivot().LookVector.mul(distance));
+		const endpos = raycastOrigin.add(this.block.instance.GetPivot().UpVector.mul(distance));
 
 		if (raycastResult || this.input.alwaysEnabled.get()) {
 			this.ray.Transparency = this.input.rayTransparency.get();
