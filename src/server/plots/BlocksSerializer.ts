@@ -691,6 +691,42 @@ const v19: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 	},
 };
 
+// update lots of blocks
+const v20: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v19> = {
+	version: 20,
+
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
+			if (block.id === "halfblock") {
+				return {
+					...block,
+					loc: Serializer.CFrameSerializer.serialize(
+						Serializer.CFrameSerializer.deserialize(block.loc).ToWorldSpace(new CFrame(0, -0.5, 0)),
+					),
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+
+	read(plot: PlotModel): SerializedBlocks<SerializedBlockV3> {
+		return {
+			version: this.version,
+			blocks: read.blocksFromPlot(plot, read.blockV3),
+		};
+	},
+	place(data: SerializedBlocks<SerializedBlockV3>, plot: PlotModel): number {
+		place.blocksOnPlot(plot, data.blocks, place.blockOnPlotV3);
+		return data.blocks.size();
+	},
+};
+
 //
 
 const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19] as const;

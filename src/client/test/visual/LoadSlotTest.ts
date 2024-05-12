@@ -3,10 +3,9 @@ import { TextButtonControl } from "client/gui/controls/Button";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { Element } from "shared/Element";
 import { Remotes } from "shared/Remotes";
-import { ControlTest } from "./ControlTest";
 
-export const LoadSlotTest: ControlTest = {
-	createTests() {
+export const LoadSlotTest = {
+	create() {
 		const loadControl = new Control(
 			Element.create(
 				"Frame",
@@ -47,6 +46,6 @@ export const LoadSlotTest: ControlTest = {
 			Remotes.Client.GetNamespace("Admin").Get("LoadSlot").SendToServer(userid.value.get(), slotid.value.get()),
 		);
 
-		return [["Load", loadControl]];
+		return loadControl;
 	},
 };
