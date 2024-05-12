@@ -34,7 +34,6 @@ import { StackMemoryBlockLogic } from "./logic/logic/memory/StackMemoryBlockLogi
 import { CounterBlockLogic } from "./logic/logic/other/CounterBlockLogic";
 import { DelayBlockLogic } from "./logic/logic/other/DelayBlockLogic";
 import { OperationBufferBlockLogic } from "./logic/logic/other/OperationBufferBlockLogic";
-import { AccelerometerBlockLogic } from "./logic/logic/sensor/AccelerometerBlockLogic";
 import { AltimeterBlockLogic } from "./logic/logic/sensor/AltimeterBlockLogic";
 import { AngleSensorBlockLogic } from "./logic/logic/sensor/AngleSensorBlockLogic";
 import { KeySensorBlockLogic } from "./logic/logic/sensor/KeySensorBlockLogic";
@@ -85,7 +84,6 @@ export const logicRegistry = {
 	anglesensor: AngleSensorBlockLogic,
 	keysensor: KeySensorBlockLogic,
 	altimeter: AltimeterBlockLogic,
-	accelerometer: AccelerometerBlockLogic,
 	lidarsensor: LidarSensorBlockLogic,
 	radarsection: RadarSectionBlockLogic,
 

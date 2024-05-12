@@ -685,11 +685,17 @@ const lidarsensor = {
 const speedometer = {
 	input: {},
 	output: {
-		result: {
-			displayName: "Speed m/s",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
+		linear: {
+			displayName: "Linear",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+		angular: {
+			displayName: "Angular",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
 		},
 	},
 } as const satisfies BlockConfigBothDefinitions;
@@ -917,24 +923,6 @@ const anglesensor = {
 	output: {
 		result: {
 			displayName: "Angle",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
-const accelerometer = {
-	input: {},
-	output: {
-		linear: {
-			displayName: "Linear",
-			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
-		},
-		angular: {
-			displayName: "Angular",
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
@@ -1273,7 +1261,6 @@ export const blockConfigRegistry = {
 	anglesensor,
 	keysensor,
 	altimeter,
-	accelerometer,
 	lidarsensor,
 	radiotransmitter,
 	radioreciever,

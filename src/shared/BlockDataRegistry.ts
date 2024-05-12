@@ -343,11 +343,6 @@ const logic = {
 		},
 	},
 	sensors: {
-		accelerometer: {
-			name: "Accelerometer",
-			description: "Returns acceleration",
-			autoWeldShape: "cube",
-		},
 		altimeter: {
 			name: "Altimeter",
 			description: "Returns current height",
