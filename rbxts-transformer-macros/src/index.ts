@@ -47,22 +47,20 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 		let needsImport = false;
 		const scopedBlocks = new Set<(ts.Block | ts.SourceFile)>();
 
-		const constructLog = (expression: ts.CallExpression, name: string): ts.Node => {
+		const constructLog = (expression: ts.CallExpression, logType: string): ts.Node => {
 			needsImport = true;
+			const spt = file.fileName.split('/');
+			let fileName = spt[spt.length - 1];
+			fileName = fileName.substring(0, fileName.length - '.ts'.length);
 
 			return factory.createCallExpression(
 				factory.createPropertyAccessExpression(
 					factory.createIdentifier('__logger'),
-					factory.createIdentifier(`_${name}`),
+					factory.createIdentifier(`_${logType}`),
 				),
 				expression.typeArguments,
 				[
-					factory.createArrayLiteralExpression([
-
-						factory.createStringLiteral('\t -'),
-						factory.createIdentifier('script'),
-						factory.createStringLiteral(`:${file.getLineAndCharacterOfPosition(expression.getStart()).line}`),
-					]),
+					factory.createStringLiteral(`\t - ${fileName}:${file.getLineAndCharacterOfPosition(expression.getStart()).line}`),
 					...expression.arguments,
 				],
 			);
