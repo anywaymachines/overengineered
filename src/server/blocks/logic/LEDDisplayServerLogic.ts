@@ -13,7 +13,7 @@ export class LEDDisplayServerLogic extends ServerBlockLogic<typeof LEDDisplayBlo
 				for (let y = 0; y < 8; y++) {
 					const frame = new Instance("Frame");
 					frame.BorderMode = Enum.BorderMode.Inset;
-					frame.BorderSizePixel = 1;
+					frame.BorderSizePixel = 0;
 					frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
 					frame.Parent = gui;
 					frame.Name = `x${x}y${y}`;
