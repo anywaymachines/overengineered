@@ -1,10 +1,17 @@
+const assign = <T extends object>(to: T, from: T) => {
+	for (const [key, value] of pairs(from)) {
+		to[key] = value;
+	}
+};
+
 type sets = {
 	readonly [k in keyof ReadonlySet<defined>]?: <T extends defined>(
 		set: ReadonlySet<T>,
 		...args: Parameters<ReadonlySet<T>[k]>
 	) => ReturnType<ReadonlySet<T>[k]>;
 };
-export const SetMacros = {
+export const SetMacros = {} as typeof _setMacros;
+const _setMacros = {
 	filter: <T extends defined>(set: ReadonlySet<T>, func: (item: T) => boolean): T[] => {
 		const result: T[] = [];
 		for (const item of set) {
@@ -107,6 +114,7 @@ export const SetMacros = {
 		return array.find(func) !== undefined;
 	},
 } satisfies sets;
+assign(SetMacros, _setMacros);
 
 type maps = {
 	readonly [k in keyof ReadonlyMap<defined, defined>]?: <K extends defined, V extends defined>(
@@ -114,7 +122,8 @@ type maps = {
 		...args: Parameters<ReadonlyMap<K, V>[k]>
 	) => ReturnType<ReadonlyMap<K, V>[k]>;
 };
-export const MapMacros = {
+export const MapMacros = {} as typeof _mapMacros;
+const _mapMacros = {
 	keys: <K extends defined, V extends defined>(map: ReadonlyMap<K, V>): K[] => {
 		const result: K[] = [];
 		for (const [key] of map) {
@@ -229,6 +238,7 @@ export const MapMacros = {
 		return map.findKey(func) !== undefined;
 	},
 } satisfies maps;
+assign(MapMacros, _mapMacros);
 
 type arrays = {
 	readonly [k in keyof ReadonlyArray<defined>]?: <T extends defined>(
@@ -236,7 +246,8 @@ type arrays = {
 		...args: Parameters<ReadonlyArray<T>[k]>
 	) => ReturnType<ReadonlyArray<T>[k]>;
 };
-export const ArrayMacros = {
+export const ArrayMacros = {} as typeof _arrayMacros;
+const _arrayMacros = {
 	flatmap: <T extends defined, TOut extends defined>(
 		array: readonly T[],
 		func: (item: T) => readonly TOut[],
@@ -302,3 +313,4 @@ export const ArrayMacros = {
 		return array.find(func) !== undefined;
 	},
 } satisfies arrays;
+assign(ArrayMacros, _arrayMacros);
