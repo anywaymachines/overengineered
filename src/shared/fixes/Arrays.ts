@@ -108,7 +108,7 @@ const _setMacros = {
 		return count;
 	},
 	all: <T extends defined>(array: ReadonlySet<T>, func: (value: T) => boolean): boolean => {
-		return array.find((v) => !func(v)) === undefined;
+		return !array.any((v) => !func(v));
 	},
 	any: <T extends defined>(array: ReadonlySet<T>, func: (value: T) => boolean): boolean => {
 		return array.find(func) !== undefined;
@@ -229,7 +229,7 @@ const _mapMacros = {
 		map: ReadonlyMap<K, V>,
 		func: (key: K, value: V) => boolean,
 	): boolean => {
-		return map.findKey((k, v) => !func(k, v)) === undefined;
+		return !map.any((k, v) => !func(k, v));
 	},
 	any: <K extends defined, V extends defined>(
 		map: ReadonlyMap<K, V>,
@@ -307,7 +307,7 @@ const _arrayMacros = {
 		return count;
 	},
 	all: <T extends defined>(array: readonly T[], func: (value: T) => boolean): boolean => {
-		return array.find((v) => !func(v)) === undefined;
+		return !array.any((v) => !func(v));
 	},
 	any: <T extends defined>(array: readonly T[], func: (value: T) => boolean): boolean => {
 		return array.find(func) !== undefined;

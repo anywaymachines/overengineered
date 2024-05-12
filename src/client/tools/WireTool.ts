@@ -418,8 +418,62 @@ class WireComponent extends ClientInstanceComponent<WireComponentDefinition> {
 	}
 }
 
+namespace Visual {
+	const hidden: Record<string, Set<Markers.Marker>> = {};
+
+	function hide(tipe: string, marker: Markers.Marker) {
+		(hidden[tipe] ??= new Set()).add(marker);
+	}
+	function show(tipe: string, markers: readonly Markers.Marker[]) {
+		for (const marker of markers) {
+			hidden[tipe].delete(marker);
+
+			const h = asMap(hidden).any((k, v) => v.has(marker));
+			if (h) continue;
+
+			marker.enable();
+		}
+	}
+
+	export function hideNonConnectableMarkers(from: Markers.Output, markers: readonly Markers.Marker[]) {
+		for (const marker of markers) {
+			if (marker === from) {
+				if (marker instanceof Markers.Output) {
+					marker.hideWires();
+					hide("connectable", marker);
+				}
+
+				continue;
+			}
+
+			if (
+				marker instanceof Markers.Output ||
+				(marker instanceof Markers.Input && !BlockWireManager.canConnect(from.marker, marker.marker))
+			) {
+				marker.disable();
+				hide("connectable", marker);
+			}
+		}
+	}
+	export function showNonConnectableMarkers(markers: readonly Markers.Marker[]) {
+		show("connectable", markers);
+	}
+
+	export function hideConnectedMarkers(markers: readonly Markers.Marker[]) {
+		for (const marker of markers) {
+			if (marker instanceof Markers.Input && marker.isConnected()) {
+				marker.disable();
+				hide("connected", marker);
+			}
+		}
+	}
+	export function showConnectedMarkers(markers: readonly Markers.Marker[]) {
+		show("connected", markers);
+	}
+}
+
 namespace Controllers {
-	const connectMarkers = (from: Markers.Output, to: Markers.Input, wireParent: ViewportFrame) => {
+	const connectMarkers = (from: Markers.Output, to: Markers.Input) => {
 		if (from.plot !== to.plot) {
 			throw "Interplot connections are not supported";
 		}
@@ -454,37 +508,6 @@ namespace Controllers {
 			}
 		});
 	};
-	export const hideNonConnectableMarkers = (from: Markers.Output, markers: readonly Markers.Marker[]) => {
-		for (const marker of markers) {
-			if (marker === from) {
-				if (marker instanceof Markers.Output) {
-					marker.hideWires();
-				}
-
-				continue;
-			}
-
-			if (
-				marker instanceof Markers.Output ||
-				(marker instanceof Markers.Input && !BlockWireManager.canConnect(from.marker, marker.marker))
-			) {
-				marker.disable();
-			}
-		}
-	};
-	export const hideConnectedMarkers = (markers: readonly Markers.Marker[]) => {
-		for (const marker of markers) {
-			if (!(marker instanceof Markers.Input)) continue;
-			if (!marker.isConnected()) continue;
-
-			marker.disable();
-		}
-	};
-	export const showAllMarkers = (markers: readonly Markers.Marker[]) => {
-		for (const marker of markers) {
-			marker.enable();
-		}
-	};
 
 	export interface IController extends IComponent {
 		readonly selectedMarker: ReadonlyObservableValue<Markers.Output | undefined>;
@@ -503,8 +526,8 @@ namespace Controllers {
 					super(instance);
 					this.marker = marker;
 
-					hideNonConnectableMarkers(marker, markers);
-					this.onDestroy(() => showAllMarkers(markers));
+					Visual.hideNonConnectableMarkers(marker, markers);
+					this.onDestroy(() => Visual.showNonConnectableMarkers(markers));
 
 					this.event.subscribe(RunService.Heartbeat, () => {
 						const endPosition =
@@ -517,7 +540,7 @@ namespace Controllers {
 					this.event.subInput((ih) =>
 						ih.onMouse1Up(() => {
 							if (hoverMarker) {
-								connectMarkers(this.marker, hoverMarker, wireParent);
+								connectMarkers(this.marker, hoverMarker);
 							}
 
 							this.destroy();
@@ -526,7 +549,7 @@ namespace Controllers {
 					this.event.subInput((ih) =>
 						ih.onMouse2Down(() => {
 							if (hoverMarker) {
-								connectMarkers(this.marker, hoverMarker, wireParent);
+								connectMarkers(this.marker, hoverMarker);
 							}
 						}, true),
 					);
@@ -591,7 +614,7 @@ namespace Controllers {
 							return;
 						}
 
-						connectMarkers(selected!, marker, wireParent);
+						connectMarkers(selected!, marker);
 						this.unset();
 					});
 				} else if (marker instanceof Markers.Output) {
@@ -606,14 +629,14 @@ namespace Controllers {
 		private set(marker: Markers.Output) {
 			this.selectedMarker.set(marker);
 			marker.highlight();
-			hideNonConnectableMarkers(marker, this.markers);
+			Visual.hideNonConnectableMarkers(marker, this.markers);
 		}
 		private unset() {
 			if (this.selectedMarker.get()?.isDestroyed()) return;
 			this.selectedMarker.get()?.unhighlight();
 			this.selectedMarker.set(undefined);
 
-			showAllMarkers(this.markers);
+			Visual.showNonConnectableMarkers(this.markers);
 		}
 
 		stopDragging() {
@@ -662,25 +685,24 @@ export class WireTool extends ToolBase {
 			this.enable();
 		});
 
-		{
-			const controllers = {
-				Desktop: Controllers.Desktop,
-				Touch: Controllers.Touch,
-				Gamepad: Controllers.Gamepad,
-			} as const satisfies Record<
-				InputType,
-				new (markers: readonly Markers.Marker[], wireParent: ViewportFrame) => Controllers.IController
-			>;
+		const controllers = {
+			Desktop: Controllers.Desktop,
+			Touch: Controllers.Touch,
+			Gamepad: Controllers.Gamepad,
+		} as const satisfies Record<
+			InputType,
+			new (markers: readonly Markers.Marker[], wireParent: ViewportFrame) => Controllers.IController
+		>;
 
-			this.event.onPrepare((inputType) => {
-				const controller = this.controllerContainer.set(new controllers[inputType](this.markers.getAll()));
-				controller.selectedMarker.subscribe((m) => this.selectedMarker.set(m), true);
-			});
-		}
-
+		const setController = () => {
+			const inputType = InputController.inputType.get();
+			const controller = this.controllerContainer.set(new controllers[inputType](this.markers.getAll()));
+			controller.selectedMarker.subscribe((m) => this.selectedMarker.set(m), true);
+		};
+		this.event.onPrepare(setController);
 		this.event.subInput((ih) => {
-			ih.onKeyDown("F", () => Controllers.hideConnectedMarkers(this.markers.getAll()));
-			ih.onKeyUp("F", () => Controllers.showAllMarkers(this.markers.getAll()));
+			ih.onKeyDown("F", () => Visual.hideConnectedMarkers(this.markers.getAll()));
+			ih.onKeyUp("F", () => Visual.showConnectedMarkers(this.markers.getAll()));
 		});
 
 		this.event.subscribe(ClientBuilding.logicDisconnectOperation.executed, (plot, _inputBlock, inputConnection) => {
