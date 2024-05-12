@@ -1,6 +1,4 @@
-import { $log } from "rbxts-transformer-macros";
 import { logicRegistry } from "shared/block/LogicRegistry";
-import { Objects } from "shared/fixes/objects";
 import { ClientBlockLogic } from "./ClientBlockLogic";
 
 type ShareableLogic = ExtractMembers<typeof logicRegistry, { readonly clientEvents: Record<string, unknown> }>;
@@ -12,7 +10,7 @@ const clientBlockLogicRegistry: ClientBlockLogicRegistry = {};
 
 //
 const logics: object[] = [];
-for (const [id, logic] of Objects.pairs_(clientBlockLogicRegistry)) {
+for (const [id, logic] of pairs(clientBlockLogicRegistry)) {
 	$log(`Initializing client logic for ${id}`);
 	//logics.push(new logic(logicRegistry[id] as never));
 }

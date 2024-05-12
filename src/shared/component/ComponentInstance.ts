@@ -1,5 +1,3 @@
-import { $err } from "rbxts-transformer-macros";
-
 /** Handles the destruction of the provided instance, along with the component. */
 export namespace ComponentInstance {
 	export function init<T extends Instance>(state: IComponent, instance: T | undefined) {

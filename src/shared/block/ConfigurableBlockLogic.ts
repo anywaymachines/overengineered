@@ -72,7 +72,7 @@ export abstract class ConfigurableBlockLogic<
 		//
 
 		const subInvalidValue = (values: Readonly<Record<string, ReadonlyBlockLogicValue<defined>>>) => {
-			for (const [, input] of Objects.pairs_(values)) {
+			for (const [, input] of pairs(values)) {
 				input.subscribe((value) => {
 					// if infinity or nan
 					if (value === math.huge || value === -math.huge || value !== value) {
@@ -89,19 +89,19 @@ export abstract class ConfigurableBlockLogic<
 	tick(tick: number): void {
 		if (!this.isEnabled()) return;
 
-		for (const [, value] of Objects.pairs_(this.input)) {
+		for (const [, value] of pairs(this.input)) {
 			(value as unknown as BlockLogicValue<defined>).tick(tick);
 		}
-		for (const [, value] of Objects.pairs_(this.output)) {
+		for (const [, value] of pairs(this.output)) {
 			(value as unknown as BlockLogicValue<defined>).tick(tick);
 		}
 	}
 
 	disable(): void {
-		for (const [, value] of Objects.pairs_(this.input)) {
+		for (const [, value] of pairs(this.input)) {
 			(value as unknown as BlockLogicValue<defined>).destroy();
 		}
-		for (const [, value] of Objects.pairs_(this.output)) {
+		for (const [, value] of pairs(this.output)) {
 			(value as unknown as BlockLogicValue<defined>).destroy();
 		}
 

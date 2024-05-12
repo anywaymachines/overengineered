@@ -11,7 +11,6 @@ import {
 	InferServerConnect,
 	RemoteDeclarations,
 } from "@rbxts/net/out/definitions/Types";
-import { $log } from "rbxts-transformer-macros";
 import { Remotes } from "shared/Remotes";
 
 // Types copied from rbxts

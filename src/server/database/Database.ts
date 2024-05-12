@@ -1,4 +1,3 @@
-import { $log } from "rbxts-transformer-macros";
 import { Element } from "shared/Element";
 import { Objects } from "shared/fixes/objects";
 
@@ -52,7 +51,7 @@ export abstract class DbBase<T> {
 
 	/** Clears tha cache */
 	freeAll() {
-		for (const [key, _] of Objects.pairs_(this.cache)) {
+		for (const [key, _] of pairs(this.cache)) {
 			delete this.cache[key];
 		}
 	}
@@ -69,7 +68,7 @@ export abstract class DbBase<T> {
 	}
 
 	saveChanged() {
-		for (const [key, value] of Objects.pairs_(this.cache)) {
+		for (const [key, value] of pairs(this.cache)) {
 			if (!value.changed) continue;
 
 			// delay between saves?

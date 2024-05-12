@@ -1,5 +1,4 @@
 import { DataStoreService, Players } from "@rbxts/services";
-import { $log } from "rbxts-transformer-macros";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { SlotsMeta } from "shared/SlotsMeta";
 import { SharedPlots } from "shared/building/SharedPlots";

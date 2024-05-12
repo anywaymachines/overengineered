@@ -7,7 +7,6 @@ import { ImpactController } from "shared/block/impact/ImpactController";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { Config } from "shared/config/Config";
-import { Objects } from "shared/fixes/objects";
 import { ConfigLogicValueBase } from "./config/ConfigLogicValueBase";
 
 export class Machine extends SharedMachine {
@@ -42,7 +41,7 @@ export class Machine extends SharedMachine {
 			];
 			const config = Config.addDefaults(logic.block.config, configDef.input);
 
-			for (const [key, observable] of Objects.pairs_(logic.input)) {
+			for (const [key, observable] of pairs(logic.input)) {
 				// if already connected
 				if (logic.block.connections !== undefined && key in logic.block.connections) continue;
 

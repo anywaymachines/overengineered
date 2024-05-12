@@ -7,7 +7,6 @@ import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { Objects } from "shared/fixes/objects";
 
 type CategoryControlDefinition = TextButton;
 class CategoryControl extends TextButtonControl<CategoryControlDefinition> {
@@ -129,7 +128,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 		if (this.gui.SearchTextBox.Text === "") {
 			// Category buttons
-			for (const [_, category] of Objects.pairs_(
+			for (const [_, category] of pairs(
 				selected.reduce((acc, val) => acc[val].sub, BlocksInitializer.categories.categories),
 			)) {
 				createCategoryButton(category.name, () => this.selectedCategory.set([...selected, category.name]));

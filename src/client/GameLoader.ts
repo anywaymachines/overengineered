@@ -1,6 +1,5 @@
 import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { $log } from "rbxts-transformer-macros";
 import { SharedPlots } from "shared/building/SharedPlots";
 
 print("`INGAMELOADER", debug.traceback());

@@ -33,7 +33,7 @@ export class PlayModeController extends ClientComponent {
 			ride: new RideMode(),
 		} as const;
 
-		for (const [_, mode] of Objects.pairs_(this.modes)) {
+		for (const [_, mode] of pairs(this.modes)) {
 			mode.disable();
 		}
 

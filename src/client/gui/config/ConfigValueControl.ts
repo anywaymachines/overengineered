@@ -25,7 +25,7 @@ export class ConfigValueControl<TGui extends GuiObject, TType extends UnknownCon
 
 	protected sameOrUndefined<T>(configs: Readonly<Record<BlockUuid, T>>, comparer?: (left: T, right: T) => boolean) {
 		let value: T | undefined;
-		for (const [_, config] of Objects.pairs_(configs)) {
+		for (const [_, config] of pairs(configs)) {
 			if (value !== undefined && !(comparer?.(value, config) ?? value === config)) {
 				value = undefined;
 				break;

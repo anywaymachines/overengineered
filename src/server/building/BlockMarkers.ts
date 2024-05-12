@@ -1,7 +1,5 @@
-import { $log } from "rbxts-transformer-macros";
 import { BlockId } from "shared/BlockDataRegistry";
 import { BlocksInitializer } from "shared/BlocksInitializer";
-import { Objects } from "shared/fixes/objects";
 
 export namespace BlockMarkers {
 	export const markers: {
@@ -31,7 +29,7 @@ export namespace BlockMarkers {
 			);
 
 			$log(`Block markers initialized for block ${block.id}: (${positions.size()})`);
-			markers[block.id] = Objects.asObject(positions);
+			markers[block.id] = asObject(positions);
 
 			folder.Destroy();
 		};

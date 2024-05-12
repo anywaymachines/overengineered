@@ -1,5 +1,4 @@
 import { Players } from "@rbxts/services";
-import { $err } from "rbxts-transformer-macros";
 import { PlayModeBase } from "./PlayModeBase";
 
 export type PlayModeControllerType = {

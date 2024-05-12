@@ -35,7 +35,6 @@ import { InstanceComponent } from "shared/component/InstanceComponent";
 import { TransformService } from "shared/component/TransformService";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
-import { Objects } from "shared/fixes/objects";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
 const allowedColor = Colors.blue;
@@ -440,7 +439,7 @@ namespace SinglePlaceController {
 
 			const areAllBlocksInsidePlot =
 				plot.isModelInside(this.mainGhost) &&
-				Objects.asMap(this.blockMirrorer.getMirroredModels()).all((k, ghosts) =>
+				asMap(this.blockMirrorer.getMirroredModels()).all((k, ghosts) =>
 					ghosts.all((ghost) => plot.isModelInside(ghost)),
 				);
 
@@ -452,7 +451,7 @@ namespace SinglePlaceController {
 
 			const canBePlaced =
 				areAllBlocksInsidePlot &&
-				Objects.asMap(this.blockMirrorer.getMirroredModels()).all((k, ghosts) =>
+				asMap(this.blockMirrorer.getMirroredModels()).all((k, ghosts) =>
 					ghosts.all((ghost) => BuildingManager.blockCanBePlacedAt(plot, selectedBlock, ghost.GetPivot())),
 				);
 
@@ -499,7 +498,7 @@ namespace SinglePlaceController {
 
 			let blocks = [
 				{ id: selected.id, pos: mainGhost.PrimaryPart!.CFrame },
-				...Objects.asMap(this.blockMirrorer.getMirroredModels()).flatmap((k, v) =>
+				...asMap(this.blockMirrorer.getMirroredModels()).flatmap((k, v) =>
 					v.map((v) => ({ id: k, pos: v.PrimaryPart!.CFrame })),
 				),
 			].map(

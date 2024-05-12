@@ -1,5 +1,4 @@
 import { Players, ReplicatedStorage, RunService, ServerScriptService } from "@rbxts/services";
-import { $err, $log } from "rbxts-transformer-macros";
 
 export namespace TestFramework {
 	export function findAllTestScripts(): readonly ModuleScript[] {

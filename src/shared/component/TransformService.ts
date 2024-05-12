@@ -53,7 +53,7 @@ export namespace TransformService {
 		setupEnd?: (transform: TransformBuilder<T>, state: keyof TStates) => void,
 	): { readonly [k in keyof TStates]: () => void } {
 		const result: Partial<Readonly<Record<keyof TStates, () => void>>> = {};
-		for (const [name, state] of Objects.pairs_(states)) {
+		for (const [name, state] of pairs(states)) {
 			result[name] = () => {
 				const setup = (tr: TransformBuilder<T>) => {
 					if (setupStart) {
@@ -90,7 +90,7 @@ export namespace TransformService {
 						[
 							k as keyof TStates & string,
 							(tr: TransformBuilder<T>) => {
-								for (const [key, value] of Objects.pairs_(state)) {
+								for (const [key, value] of pairs(state)) {
 									tr.transform(key as TweenableProperties<T>, value as never, props);
 								}
 							},

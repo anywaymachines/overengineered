@@ -243,7 +243,7 @@ export namespace ServerBuilding {
 			};
 
 			const ret: Record<string, JsonSerializablePrimitive | object> = { ...object };
-			for (const [key, val] of Objects.pairs_(value as Record<string, JsonSerializablePrimitive | object>)) {
+			for (const [key, val] of pairs(value as Record<string, JsonSerializablePrimitive | object>)) {
 				const rk = ret[key];
 
 				if (typeIs(rk, "Vector3") || !typeIs(rk, "table")) {

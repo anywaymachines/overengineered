@@ -5,7 +5,6 @@ import { type BlockSelectorMode } from "client/tools/highlighters/MultiBlockSele
 import { Colors } from "shared/Colors";
 import { TransformService } from "shared/component/TransformService";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { Objects } from "shared/fixes/objects";
 
 export type BlockSelectorModeGuiDefinition = GuiObject & {
 	readonly SingleSelection: TextButtonDefinition;
@@ -32,7 +31,7 @@ export class BlockSelectorModeGui extends Control {
 							assembly,
 							machine,
 						};
-						for (const [name, button] of Objects.pairs_(buttons)) {
+						for (const [name, button] of pairs(buttons)) {
 							TransformService.run(button.instance, (builder, instance) =>
 								builder
 									.func(() => (instance.AutoButtonColor = instance.Active = active !== name))

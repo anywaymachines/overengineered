@@ -89,7 +89,7 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 					gui,
 					TransformService.commonProps.quadOut02,
 					{ Size: gui.Size },
-					{ Size: gui.Size.with(undefined, undefined, 0, 40) },
+					{ Size: new UDim2(gui.Size.X, new UDim(0, 40)) },
 				),
 				TransformService.boolStateMachine(
 					gui.Header.Arrow,

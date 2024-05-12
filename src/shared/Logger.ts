@@ -1,7 +1,11 @@
 import { RunService, Workspace } from "@rbxts/services";
-import { $compileTime } from "rbxts-transformer-macros";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { Objects } from "shared/fixes/objects";
+
+declare global {
+	function $log(...args: unknown[]): void;
+	function $err(...args: unknown[]): void;
+	function $warn(...args: unknown[]): void;
+}
 
 // stuff like [CLIENT] and [Logger.ts:456] is already present in studio so we don't really need to print it
 // BUT print() only writes as a "Logger.ts:123" instead of the actual source, so we don't disable this
@@ -27,7 +31,7 @@ const levels = {
 		print: (...args) => {
 			try {
 				error(
-					Objects.asMap(args)
+					asMap(args)
 						.map((i, v) => (v === undefined ? "nil" : tostring(v)))
 						.join(", "),
 					1,
@@ -94,10 +98,7 @@ export namespace Logger {
 
 	function addAdditional(additional: defined[], ...args: unknown[]) {
 		if (printAdditional) {
-			return [
-				...(Objects.asArray(Objects.asMap(args).map((k, a) => (a === undefined ? "nil" : a))) as defined[]),
-				...additional,
-			];
+			return [...(asArray(asMap(args).map((k, a) => (a === undefined ? "nil" : a))) as defined[]), ...additional];
 		}
 
 		return args;

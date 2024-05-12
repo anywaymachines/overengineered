@@ -1,5 +1,4 @@
 import { HttpService } from "@rbxts/services";
-import { $err } from "rbxts-transformer-macros";
 
 type Field = {
 	name: string;

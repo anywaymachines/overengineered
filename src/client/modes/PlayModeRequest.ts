@@ -3,7 +3,6 @@ import { SoundController } from "client/controller/SoundController";
 import { Signals } from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
 import { LogControl } from "client/gui/static/LogControl";
-import { $err } from "rbxts-transformer-macros";
 import { Remotes } from "shared/Remotes";
 
 export const requestMode = async (mode: PlayModes) => {

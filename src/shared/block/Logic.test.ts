@@ -5,17 +5,16 @@ import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { SharedMachine } from "shared/block/SharedMachine";
 import { OperationVec3CombinerBlockLogic } from "shared/block/logic/logic/converter/vector/OperationVec3CombinerBlockLogic";
 import { AltimeterBlockLogic } from "shared/block/logic/logic/sensor/AltimeterBlockLogic";
-import { Objects } from "shared/fixes/objects";
 
 export namespace _Tests {
 	const parent = new Instance("Folder");
 	parent.Parent = Workspace;
 
 	function subChanged(block: ConfigurableBlockLogic<BlockConfigTypes.BothDefinitions>, blockname?: string) {
-		for (const [name, input] of Objects.pairs_(block.input)) {
+		for (const [name, input] of pairs(block.input)) {
 			input.subscribe((value, prev) => print(`[in ${blockname + " "}${name}] ${prev} -> ${value}`));
 		}
-		for (const [name, output] of Objects.pairs_(block.output)) {
+		for (const [name, output] of pairs(block.output)) {
 			output.subscribe((value, prev) => print(`[ou ${blockname + " "}${name}] ${prev} -> ${value}`));
 		}
 	}

@@ -1,6 +1,5 @@
 import { ClientComponent } from "client/component/ClientComponent";
 import { Signal } from "shared/event/Signal";
-import { Objects } from "shared/fixes/objects";
 
 /*
 	When a key is pressed, invoke keyDown()
@@ -118,7 +117,7 @@ export class KeyPressingDefinitionsController<T extends KeyDefinitions<string>> 
 			definitions[key]?.keyUp?.();
 		});
 
-		for (const [key, def] of Objects.pairs_(definitions)) {
+		for (const [key, def] of pairs(definitions)) {
 			this.event.onKeyDown(def.key, () => this.controller.keyDown(key as keyof T & string));
 			this.event.onKeyUp(def.key, () => this.controller.keyUp(key as keyof T & string));
 		}

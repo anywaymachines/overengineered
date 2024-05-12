@@ -1,9 +1,7 @@
 import { ReplicatedStorage, RunService } from "@rbxts/services";
-import { $warn } from "rbxts-transformer-macros";
 import { AABB } from "shared/fixes/AABB";
 import { AutoWeldColliderBlockShape, BlockDataRegistry, BlockId, BlockMirrorBehaviour } from "./BlockDataRegistry";
 import { AutoBlockCreator } from "./block/logic/AutoBlockCreator";
-import { Objects } from "./fixes/objects";
 
 declare global {
 	type RegistryBlock = {
@@ -222,7 +220,7 @@ export namespace BlocksInitializer {
 		 */
 		export function getCategoryPath(key: string, categories?: Categories): CategoryName[] | undefined {
 			categories ??= BlocksInitializer.categories.categories;
-			for (const [category, _] of Objects.pairs_(categories)) {
+			for (const [category] of pairs(categories)) {
 				if (category === key) {
 					return [category];
 				}

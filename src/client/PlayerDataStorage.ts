@@ -1,6 +1,5 @@
 import { HttpService, Players, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
-import { $err, $log } from "rbxts-transformer-macros";
 import { Remotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import { Config } from "shared/config/Config";

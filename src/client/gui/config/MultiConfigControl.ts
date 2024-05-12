@@ -30,7 +30,7 @@ export class MultiConfigControl<
 	) {
 		super(gui);
 
-		for (const [id, def] of Objects.pairs_(definition)) {
+		for (const [id, def] of pairs(definition)) {
 			if (def.configHidden) continue;
 			if (connected.includes(id)) {
 				const connectedControl = this.add(

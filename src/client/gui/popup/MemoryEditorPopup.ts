@@ -7,7 +7,6 @@ import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TextPopup } from "client/gui/popup/TextPopup";
 import { LogControl } from "client/gui/static/LogControl";
-import { $err } from "rbxts-transformer-macros";
 import { Colors } from "shared/Colors";
 import { TransformService } from "shared/component/TransformService";
 import { VectorUtils } from "shared/utils/VectorUtils";

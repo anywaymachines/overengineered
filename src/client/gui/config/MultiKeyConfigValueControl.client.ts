@@ -1,7 +1,7 @@
 import { type KeyConfigValueControl } from "client/gui/config/KeyConfigValueControl.client";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { JSON } from "shared/fixes/Json";
-import { Objects, asMap } from "shared/fixes/objects";
+import { Objects } from "shared/fixes/objects";
 import { configControlRegistry } from "./ConfigControlRegistry";
 import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
 import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
@@ -16,7 +16,7 @@ class ValueControl extends ConfigValueControl<GuiObject, Type> {
 		}
 
 		const list = this.add(new DictionaryControl<GuiObject, string, KeyConfigValueControl>(this.gui.Control));
-		for (const [name, _] of Objects.pairs_(definition.default)) {
+		for (const [name, _] of pairs(definition.default)) {
 			const cfgs = Objects.fromEntries(
 				Objects.entriesArray(configs).map(([uuid, config]) => [uuid, config[name]]),
 			);
@@ -38,7 +38,7 @@ class ValueControl extends ConfigValueControl<GuiObject, Type> {
 				for (const [key, child] of list.keyedChildren.getAll()) {
 					if (child === control) continue;
 
-					for (const [, value] of Objects.pairs_(child.values.get())) {
+					for (const [, value] of pairs(child.values.get())) {
 						if (newvalue === value) {
 							child.values.set(this.map(configs, () => prevval));
 							print("setting mega cvhild values", JSON.serialize(child.values.get()));

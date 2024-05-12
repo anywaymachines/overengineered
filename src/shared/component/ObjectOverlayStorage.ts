@@ -1,5 +1,4 @@
 import { Signal } from "shared/event/Signal";
-import { Objects } from "shared/fixes/objects";
 
 export class ObjectOverlayStorage<T extends object> {
 	private readonly _updated = new Signal<(value: T) => void>();
@@ -20,7 +19,7 @@ export class ObjectOverlayStorage<T extends object> {
 	getValues(): T {
 		const ret: Partial<T> = {};
 		for (const k of this.order) {
-			for (const [key, value] of Objects.pairs_(this.overlays[k][1])) {
+			for (const [key, value] of pairs(this.overlays[k][1])) {
 				if (key in ret) continue;
 				ret[key] = value;
 			}

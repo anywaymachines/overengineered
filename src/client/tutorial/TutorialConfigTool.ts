@@ -3,7 +3,6 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { Tutorial } from "client/tutorial/Tutorial";
 import { BlockManager } from "shared/building/BlockManager";
 import { EventHandler } from "shared/event/EventHandler";
-import { Objects } from "shared/fixes/objects";
 import { successResponse } from "shared/types/network/Responses";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
@@ -48,7 +47,7 @@ export class TutorialConfigTool {
 		}
 
 		if (typeIs(orig, "table") && typeIs(checkTo, "table")) {
-			for (const [key] of Objects.pairs_(checkTo)) {
+			for (const [key] of pairs(checkTo)) {
 				if (!(key in orig)) {
 					return false;
 				}

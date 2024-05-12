@@ -2,7 +2,6 @@ import { BlockConfigRegistryNonGeneric, blockConfigRegistry } from "shared/block
 import { SharedPlot } from "shared/building/SharedPlot";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { JsonSerializablePrimitive } from "shared/fixes/Json";
-import { Objects, asMap } from "shared/fixes/objects";
 
 export namespace BlockWireManager {
 	export type DataType = "bool" | "vector3" | "number" | "string" | "color" | "byte" | "bytearray" | "never";
@@ -88,7 +87,7 @@ export namespace BlockWireManager {
 			if (!configDef) continue;
 
 			for (const markerType of ["output", "input"] as const) {
-				for (const [key, config] of Objects.pairs_(configDef[markerType])) {
+				for (const [key, config] of pairs(configDef[markerType])) {
 					let narrow = false;
 					let dataTypes: readonly DataType[];
 					if (config.type === "or") {
@@ -136,7 +135,7 @@ export namespace BlockWireManager {
 		for (const block of plot.getBlockDatas()) {
 			if (block.connections === undefined) continue;
 
-			for (const [connectionName, connection] of Objects.pairs_(block.connections)) {
+			for (const [connectionName, connection] of pairs(block.connections)) {
 				const from = markers.get(`${block.uuid} input ${connectionName}`) as Markers.Input;
 				const to = markers.get(`${connection.blockUuid} output ${connection.connectionName}`) as Markers.Output;
 

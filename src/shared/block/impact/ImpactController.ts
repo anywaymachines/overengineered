@@ -1,5 +1,4 @@
 import { RunService, Workspace } from "@rbxts/services";
-import { $log } from "rbxts-transformer-macros";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { BlockManager, PlacedBlockData } from "shared/building/BlockManager";

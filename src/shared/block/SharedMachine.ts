@@ -1,5 +1,4 @@
 import { RunService } from "@rbxts/services";
-import { $err } from "rbxts-transformer-macros";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { BlockLogicValue } from "shared/block/BlockLogicValue";
 import { BlockLogicValueGroup } from "shared/block/BlockLogicValueGroup";
@@ -134,7 +133,7 @@ export class SharedMachine extends ContainerComponent {
 			if (!(inputLogic instanceof ConfigurableBlockLogic)) continue;
 			if (inputLogic.block.connections === undefined) continue;
 
-			for (const [connectionFrom, connection] of Objects.pairs_(inputLogic.block.connections)) {
+			for (const [connectionFrom, connection] of pairs(inputLogic.block.connections)) {
 				const outputLogic = this.childMap.get(connection.blockUuid);
 				if (!outputLogic) {
 					throw "No logic found for connecting block " + connection.blockUuid;

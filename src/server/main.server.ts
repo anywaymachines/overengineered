@@ -6,7 +6,6 @@ if (!game.GetService("RunService").IsStudio()) {
 }
 
 import { HttpService, MessagingService, RunService, Workspace } from "@rbxts/services";
-import { $err, $log } from "rbxts-transformer-macros";
 import { Backend } from "server/Backend";
 import { BadgeController } from "server/BadgeController";
 import { ServerRestartController } from "server/ServerRestartController";

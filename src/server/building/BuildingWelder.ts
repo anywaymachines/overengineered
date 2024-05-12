@@ -1,5 +1,4 @@
 import { RunService, ServerStorage, Workspace } from "@rbxts/services";
-import { $err, $log } from "rbxts-transformer-macros";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
 import { BlockManager } from "shared/building/BlockManager";

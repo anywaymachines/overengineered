@@ -1,5 +1,4 @@
 import { RunService } from "@rbxts/services";
-import { $warn } from "rbxts-transformer-macros";
 
 let active = true;
 if (!RunService.IsClient() && game.PrivateServerOwnerId !== 0) {

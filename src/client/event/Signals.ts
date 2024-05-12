@@ -14,7 +14,11 @@ export namespace Signals {
 
 	export const LOCAL_PLAY_MODE_CHANGED = new Signal<(mode: PlayModes) => void>();
 
-	function registerSignal<T extends Signal>(signal: T): T {
+	const e = 6;
+	export function registerSignal<T extends Signal>(signal: T): T {
 		return signal;
+	}
+	export function r() {
+		registerSignal(new Signal());
 	}
 }

@@ -1,9 +1,7 @@
-import { $log } from "rbxts-transformer-macros";
 import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic";
 import { PistonBlockServerLogic } from "server/blocks/logic/PistonBlockServerLogic";
 import { SevenSegmentDisplayServerLogic } from "server/blocks/logic/SevenSegmentDisplayServerLogic";
 import { logicRegistry } from "shared/block/LogicRegistry";
-import { Objects } from "shared/fixes/objects";
 import { ServerBlockLogic } from "./ServerBlockLogic";
 import { DisconnectBlockServerLogic } from "./logic/DisconnectBlockServerLogic";
 import { LampServerLogic } from "./logic/LampServerLogic";
@@ -29,7 +27,7 @@ const serverBlockLogicRegistry: ServerBlockLogicRegistry = {
 
 //
 const logics: object[] = [];
-for (const [id, logic] of Objects.pairs_(serverBlockLogicRegistry)) {
+for (const [id, logic] of pairs(serverBlockLogicRegistry)) {
 	$log(`Initializing server logic for ${id}`);
 	logics.push(new logic(logicRegistry[id] as never));
 }

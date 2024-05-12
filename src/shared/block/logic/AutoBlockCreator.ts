@@ -1,5 +1,4 @@
 import { RunService } from "@rbxts/services";
-import { $log } from "rbxts-transformer-macros";
 import { BlockDataRegistry, BlockId } from "shared/BlockDataRegistry";
 import type { BlocksInitializeData } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
@@ -10,7 +9,6 @@ import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { LogicRegistry, logicRegistry } from "shared/block/LogicRegistry";
 import { BlockConfigRegistry, blockConfigRegistry, connectors } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
-import { Objects } from "shared/fixes/objects";
 
 interface BlockResult extends BlockAdditional {
 	readonly id: BlockId;
@@ -603,7 +601,7 @@ const multiif = <TArg, T, TType extends keyof CheckableTypes, TRet extends Check
 	right: T,
 	checks: Checks<TArg>,
 ): TRet => {
-	for (const [typename, func] of Objects.pairs_(checks)) {
+	for (const [typename, func] of pairs(checks)) {
 		if (typeIs(left, typename) && typeIs(right, typename)) {
 			return func(left as never, right as never, arg) as never;
 		}
@@ -1134,8 +1132,8 @@ const create = (info: BlocksInitializeData) => {
 			Parent: ReplicatedAssets.get<Folder>(),
 		});
 	}
-	for (const [optype, ops] of Objects.pairs_(operations as NonGenericOperations)) {
-		for (const [name, data] of Objects.pairs_(ops)) {
+	for (const [optype, ops] of pairs(operations as NonGenericOperations)) {
+		for (const [name, data] of pairs(ops)) {
 			$log(`Creating block ${name}`);
 
 			const block = createBase(name, data);

@@ -1,4 +1,3 @@
-import { $log } from "rbxts-transformer-macros";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 
 interface PlayerConfigVersion<TCurrent> {

@@ -187,7 +187,7 @@ export namespace JSON {
 
 			if (typeIs(obj, "table")) {
 				const toserialize: Partial<Record<string | number | symbol, unknown>> = {};
-				for (const [key, value] of Objects.pairs_(obj)) {
+				for (const [key, value] of pairs(obj)) {
 					toserialize[key as keyof typeof toserialize] = process(value as JsonSerializedProperty);
 				}
 
@@ -212,7 +212,7 @@ export namespace JSON {
 
 			if (typeIs(obj, "table")) {
 				const toserialize: Partial<Record<keyof T, unknown>> = {};
-				for (const [key, value] of Objects.pairs_(obj)) {
+				for (const [key, value] of pairs(obj)) {
 					if (key === "__v") continue;
 					toserialize[key as keyof T] = process(value);
 				}

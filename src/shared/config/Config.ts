@@ -1,11 +1,10 @@
-import { Objects } from "shared/fixes/objects";
 
 export namespace Config {
 	export function addDefaults<TKeys extends keyof TDef & string, TDef extends UnknownConfigDefinitions>(
 		config: Partial<ConfigDefinitionsToConfig<TKeys, TDef>>,
 		definition: TDef,
 	): ConfigDefinitionsToConfig<TKeys, TDef> {
-		for (const [key, def] of Objects.pairs_(definition)) {
+		for (const [key, def] of pairs(definition)) {
 			if (typeIs(config[key], "table") || typeIs(def.config, "table")) {
 				if (
 					config[key] !== undefined &&
@@ -24,7 +23,7 @@ export namespace Config {
 				}
 
 				if (typeIs(config[key], "table") && typeIs(def.config, "table")) {
-					for (const [k, v] of Objects.pairs_(config[key]!)) {
+					for (const [k, v] of pairs(config[key]!)) {
 						if (!typeIs(v, "table")) continue;
 						if (
 							typeIs(def.config, "table") &&

@@ -11,7 +11,6 @@ import { LoadSlotTest } from "client/test/visual/LoadSlotTest";
 import { Element } from "shared/Element";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { Objects } from "shared/fixes/objects";
 
 GameLoader.waitForEverything();
 
@@ -46,7 +45,7 @@ const create = () => {
 		);
 		const control = new Control(frame);
 
-		for (const [name, test] of Objects.pairs_(tests)) {
+		for (const [name, test] of pairs(tests)) {
 			const button = TextButtonControl.create({
 				Text: name,
 				AutomaticSize: Enum.AutomaticSize.XY,

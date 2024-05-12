@@ -1,29 +1,10 @@
-import { $defineCallMacros } from "rbxts-transformer-macros";
-
-declare global {
-	interface ReadonlySet<T> {
-		filter(func: (item: T) => boolean): T[];
-		filterToSet(func: (item: T) => boolean): Set<T>;
-		map<TOut extends defined>(func: (item: T) => TOut): TOut[];
-		mapToSet<TOut extends defined>(func: (item: T) => TOut): Set<TOut>;
-		flatmap<TOut extends defined>(func: (item: T) => readonly TOut[]): TOut[];
-		flatmapToSet<TOut extends defined>(func: (item: T) => readonly TOut[]): Set<TOut>;
-		find(func: (item: T) => boolean): T | undefined;
-		groupBy<TKey extends defined, T extends defined>(keyfunc: (value: T) => TKey): Map<TKey, T[]>;
-
-		count(func: (value: T) => boolean): number;
-		all(func: (value: T) => boolean): boolean;
-		any(func: (value: T) => boolean): boolean;
-	}
-}
-
 type sets = {
 	readonly [k in keyof ReadonlySet<defined>]?: <T extends defined>(
 		set: ReadonlySet<T>,
 		...args: Parameters<ReadonlySet<T>[k]>
 	) => ReturnType<ReadonlySet<T>[k]>;
 };
-export const SetMacros = $defineCallMacros<ReadonlySet<defined>>({
+export const SetMacros = {
 	filter: <T extends defined>(set: ReadonlySet<T>, func: (item: T) => boolean): T[] => {
 		const result: T[] = [];
 		for (const item of set) {
@@ -125,27 +106,7 @@ export const SetMacros = $defineCallMacros<ReadonlySet<defined>>({
 	any: <T extends defined>(array: ReadonlySet<T>, func: (value: T) => boolean): boolean => {
 		return array.find(func) !== undefined;
 	},
-} satisfies sets);
-
-//
-
-declare global {
-	interface ReadonlyMap<K, V> {
-		keys(): K[];
-		values(): (V & defined)[];
-
-		count(func: (key: K, value: V) => boolean): number;
-		filter(func: (key: K, value: V) => boolean): Map<K, V>;
-		map<TOut extends defined>(func: (key: K, value: V) => TOut): TOut[];
-		flatmap<TOut extends defined>(func: (key: K, value: V) => readonly TOut[]): TOut[];
-		find(func: (key: K, value: V) => boolean): readonly [key: K, value: V] | undefined;
-		findKey(func: (key: K, value: V) => boolean): K | undefined;
-		findValue(func: (key: K, value: V) => boolean): V | undefined;
-
-		all(func: (key: K, value: V) => boolean): boolean;
-		any(func: (key: K, value: V) => boolean): boolean;
-	}
-}
+} satisfies sets;
 
 type maps = {
 	readonly [k in keyof ReadonlyMap<defined, defined>]?: <K extends defined, V extends defined>(
@@ -153,7 +114,7 @@ type maps = {
 		...args: Parameters<ReadonlyMap<K, V>[k]>
 	) => ReturnType<ReadonlyMap<K, V>[k]>;
 };
-export const MapMacros = $defineCallMacros<ReadonlyMap<defined, defined>>({
+export const MapMacros = {
 	keys: <K extends defined, V extends defined>(map: ReadonlyMap<K, V>): K[] => {
 		const result: K[] = [];
 		for (const [key] of map) {
@@ -259,30 +220,15 @@ export const MapMacros = $defineCallMacros<ReadonlyMap<defined, defined>>({
 		map: ReadonlyMap<K, V>,
 		func: (key: K, value: V) => boolean,
 	): boolean => {
-		return map.find((k, v) => !func(k, v)) === undefined;
+		return map.findKey((k, v) => !func(k, v)) === undefined;
 	},
 	any: <K extends defined, V extends defined>(
 		map: ReadonlyMap<K, V>,
 		func: (key: K, value: V) => boolean,
 	): boolean => {
-		return map.find(func) !== undefined;
+		return map.findKey(func) !== undefined;
 	},
-} satisfies maps);
-
-//
-
-declare global {
-	interface ReadonlyArray<T> {
-		flatmap<TOut extends defined>(func: (item: T) => readonly TOut[]): TOut[];
-		mapToSet<TOut extends defined>(func: (item: T) => TOut): Set<TOut>;
-		groupBy<TKey extends defined>(keyfunc: (value: T) => TKey): Map<TKey, T[]>;
-		except(items: readonly T[]): T[];
-
-		count(func: (value: T) => boolean): number;
-		all(func: (value: T) => boolean): boolean;
-		any(func: (value: T) => boolean): boolean;
-	}
-}
+} satisfies maps;
 
 type arrays = {
 	readonly [k in keyof ReadonlyArray<defined>]?: <T extends defined>(
@@ -290,7 +236,7 @@ type arrays = {
 		...args: Parameters<ReadonlyArray<T>[k]>
 	) => ReturnType<ReadonlyArray<T>[k]>;
 };
-export const ArrayMacros = $defineCallMacros<ReadonlyArray<defined>>({
+export const ArrayMacros = {
 	flatmap: <T extends defined, TOut extends defined>(
 		array: readonly T[],
 		func: (item: T) => readonly TOut[],
@@ -355,4 +301,4 @@ export const ArrayMacros = $defineCallMacros<ReadonlyArray<defined>>({
 	any: <T extends defined>(array: readonly T[], func: (value: T) => boolean): boolean => {
 		return array.find(func) !== undefined;
 	},
-} satisfies arrays);
+} satisfies arrays;

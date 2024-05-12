@@ -29,7 +29,6 @@ import { TransformService } from "shared/component/TransformService";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { Objects } from "shared/fixes/objects";
 import { PartUtils } from "shared/utils/PartUtils";
 
 namespace Scene {
@@ -159,7 +158,7 @@ namespace Scene {
 			this.event.subscribeObservable(
 				tool.enabledModes.enabled,
 				(enabledModes) => {
-					for (const [name, button] of Objects.pairs_(buttons)) {
+					for (const [name, button] of pairs(buttons)) {
 						button.set(2, enabledModes.includes(name));
 					}
 				},
@@ -167,7 +166,7 @@ namespace Scene {
 			);
 
 			const updateButtonInteractability = () => {
-				for (const [name, button] of Objects.pairs_(buttons)) {
+				for (const [name, button] of pairs(buttons)) {
 					button.set(0, canBeSelected(tool, name));
 				}
 			};
@@ -177,7 +176,7 @@ namespace Scene {
 			this.event.subscribeObservable(
 				tool.selectedMode,
 				(mode) => {
-					for (const [name, button] of Objects.pairs_(buttons)) {
+					for (const [name, button] of pairs(buttons)) {
 						button.instance.instance.BackgroundColor3 =
 							mode === name ? Colors.accentDark : Colors.staticBackground;
 
@@ -197,7 +196,7 @@ namespace Scene {
 				{ Position: this.instance.Bottom.Position.add(new UDim2(0, 0, 0, 20)) },
 				(tr, visible) =>
 					tr.func(() => {
-						for (const [, button] of Objects.pairs_(this.getChildren())) {
+						for (const [, button] of pairs(this.getChildren())) {
 							if (button instanceof ButtonControl) {
 								button.setVisible(visible);
 							}
@@ -243,7 +242,7 @@ const placeToBlocksRequests = (blocks: readonly BlockModel[]): readonly PlaceBlo
 
 	for (const [olduuid, newblock] of uuidmap) {
 		const connections = { ...(existingBlocks.get(olduuid)?.connections ?? {}) };
-		for (const [, connection] of Objects.pairs_(connections)) {
+		for (const [, connection] of pairs(connections)) {
 			const neww = uuidmap.get(connection.blockUuid);
 			if (!neww) continue;
 

@@ -1,5 +1,3 @@
-import { Objects } from "shared/fixes/objects";
-
 /* eslint-disable @typescript-eslint/no-this-alias */
 export class BigInt {
 	private digits: Record<number, number> = {};
@@ -45,16 +43,16 @@ export class BigInt {
 	}
 
 	private digitsSize() {
-		return Objects.asArray(this.digits).size();
+		return asArray(this.digits).size();
 	}
 	private append(value: number) {
-		Objects.asArray(this.digits).push(value);
+		asArray(this.digits).push(value);
 	}
 	private insert(index: number, value: number) {
-		return Objects.asArray(this.digits).insert(index, value);
+		return asArray(this.digits).insert(index, value);
 	}
 	private remove(index: number) {
-		return Objects.asArray(this.digits).remove(index);
+		return asArray(this.digits).remove(index);
 	}
 
 	// Return a new bigint with the same sign and digits

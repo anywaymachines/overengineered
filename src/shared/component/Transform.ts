@@ -304,7 +304,7 @@ export class TransformBuilder<T extends object> {
 		value: { readonly [k in TKey]?: T[TKey] & defined },
 		params?: TransformProps,
 	) {
-		for (const [key, val] of Objects.pairs_(value)) {
+		for (const [key, val] of pairs(value)) {
 			this.transform(key, val, params);
 		}
 	}

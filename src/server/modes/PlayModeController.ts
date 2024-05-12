@@ -1,5 +1,4 @@
 import { Players } from "@rbxts/services";
-import { $log } from "rbxts-transformer-macros";
 import { Remotes } from "shared/Remotes";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 import { BuildMode } from "./BuildMode";

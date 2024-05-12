@@ -1,5 +1,4 @@
 import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { $log } from "rbxts-transformer-macros";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 
 export class ScaledScreenGui<T extends ScreenGui> extends InstanceComponent<T> {

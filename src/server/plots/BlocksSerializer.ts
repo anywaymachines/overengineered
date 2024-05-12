@@ -1,4 +1,3 @@
-import { $err, $log } from "rbxts-transformer-macros";
 import { ServerBuilding } from "server/building/ServerBuilding";
 import { BlockId } from "shared/BlockDataRegistry";
 import { BlocksInitializer } from "shared/BlocksInitializer";

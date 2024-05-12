@@ -1,7 +1,6 @@
 import { BlockManager, PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { MaterialData } from "shared/data/MaterialData";
-import { Objects } from "shared/fixes/objects";
 import { PartUtils } from "shared/utils/PartUtils";
 
 /** Methods for editing the building */
@@ -14,7 +13,7 @@ export namespace SharedBuilding {
 		for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
 			if (otherblock.connections === undefined) continue;
 
-			for (const [connectionName, connection] of Objects.pairs_(otherblock.connections)) {
+			for (const [connectionName, connection] of pairs(otherblock.connections)) {
 				if (!uuids.has(connection.blockUuid)) continue;
 
 				let ret = result.get(connection.blockUuid);

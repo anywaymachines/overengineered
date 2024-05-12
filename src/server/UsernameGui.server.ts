@@ -1,5 +1,4 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
-import { $err } from "rbxts-transformer-macros";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
 Players.PlayerAdded.Connect((player) => {

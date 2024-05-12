@@ -6,7 +6,6 @@ import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
 import { Element } from "shared/Element";
 import { InstanceComponent } from "shared/component/InstanceComponent";
-import { pairs_ } from "shared/fixes/objects";
 import { TestFramework } from "shared/test/TestFramework";
 
 GameLoader.waitForEverything();
@@ -45,7 +44,7 @@ const create = () => {
 		};
 
 		const add = (tests: TestFramework.Tests, offset = 0) => {
-			for (const [name, test] of pairs_(tests)) {
+			for (const [name, test] of pairs(tests)) {
 				if (typeIs(test, "function")) {
 					const button = TextButtonControl.create({
 						Text: string.rep(" ", offset) + name,

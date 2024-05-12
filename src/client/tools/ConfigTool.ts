@@ -10,7 +10,6 @@ import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBl
 import { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
-import { $log } from "rbxts-transformer-macros";
 import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Colors } from "shared/Colors";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
@@ -19,7 +18,7 @@ import { SharedPlots } from "shared/building/SharedPlots";
 import { Config } from "shared/config/Config";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { JSON } from "shared/fixes/Json";
-import { Objects, asMap } from "shared/fixes/objects";
+import { Objects } from "shared/fixes/objects";
 import { VectorUtils } from "shared/utils/VectorUtils";
 
 namespace Scene {

@@ -2,7 +2,7 @@ import { Workspace } from "@rbxts/services";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { Component } from "shared/component/Component";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { Objects, asMap } from "shared/fixes/objects";
+import { Objects } from "shared/fixes/objects";
 
 /** Generates terrain height */
 export interface ChunkGenerator {
@@ -69,8 +69,8 @@ export class ChunkLoader<T = defined> extends Component {
 			if (!Workspace.CurrentCamera) continue;
 
 			if (this.isTooHigh()) {
-				for (const [x, c] of Objects.pairs_(this.loadedChunks)) {
-					for (const [y] of Objects.pairs_(c)) {
+				for (const [x, c] of pairs(this.loadedChunks)) {
+					for (const [y] of pairs(c)) {
 						this.unloadChunk(x, y);
 					}
 
@@ -152,8 +152,8 @@ export class ChunkLoader<T = defined> extends Component {
 	}
 
 	private unloadChunks(centerX: number, centerZ: number) {
-		for (const [chunkX, data] of Objects.pairs_(this.loadedChunks)) {
-			for (const [chunkZ, _] of Objects.pairs_(data)) {
+		for (const [chunkX, data] of pairs(this.loadedChunks)) {
+			for (const [chunkZ, _] of pairs(data)) {
 				if (this.loadedChunks[chunkX]?.[chunkZ] && this.loadedChunks[chunkX][chunkZ].chunk === undefined) {
 					continue;
 				}

@@ -1,5 +1,4 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
-import { $err } from "rbxts-transformer-macros";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";

@@ -32,7 +32,7 @@ export namespace Element {
 		}
 
 		if (children) {
-			for (const [name, child] of Objects.pairs_(children)) {
+			for (const [name, child] of pairs(children)) {
 				child.Name = name as string;
 				child.Parent = instance;
 			}

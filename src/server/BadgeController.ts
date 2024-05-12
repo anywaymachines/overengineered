@@ -1,5 +1,4 @@
 import { BadgeService, Players } from "@rbxts/services";
-import { $log } from "rbxts-transformer-macros";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
 export namespace BadgeController {
