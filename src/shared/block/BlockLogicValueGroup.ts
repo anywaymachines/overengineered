@@ -194,7 +194,6 @@ export namespace BlockLogicValueGroup {
 		const roots = findRoots(blocks);
 		const order = calculateOrder(roots);
 
-		print(order);
 		return order;
 	}
 }
