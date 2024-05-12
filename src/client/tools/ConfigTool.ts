@@ -195,7 +195,7 @@ export class ConfigTool extends ToolBase {
 			const config = blockConfigRegistry[BlockManager.manager.id.get(block) as keyof typeof blockConfigRegistry];
 			if (!config) return false;
 
-			if (!asMap(config.input).findKey((v) => !(v as BlockConfigTypes.Definition).configHidden)) {
+			if (!asMap((config as BlockConfigTypes.BothDefinitions).input).findValue((k, v) => !v.configHidden)) {
 				return false;
 			}
 
