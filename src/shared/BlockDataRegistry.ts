@@ -51,31 +51,31 @@ const logic = {
 			autoWeldShape: "cube",
 		},
 		operationand: {
-			name: '"AND" Gate',
+			name: "AND Gate",
 			description: "Returns true when both inputs are true",
 		},
 		operationnand: {
-			name: '"NAND" Gate',
+			name: "NAND Gate",
 			description: "Returns true when both value are not true",
 		},
 		operationnor: {
-			name: '"NOR" Gate',
+			name: "NOR Gate",
 			description: "Returns true when none of the values are true",
 		},
 		operationnot: {
-			name: '"NOT" Gate',
+			name: "NOT Gate",
 			description: "Returns true when false is given, and vice versa",
 		},
 		operationor: {
-			name: '"OR" Gate',
+			name: "OR Gate",
 			description: "Returns true when any of the inputs are true",
 		},
 		operationxnor: {
-			name: '"XNOR" Gate',
+			name: "XNOR Gate",
 			description: "Returns true only if both inputs are the same",
 		},
 		operationxor: {
-			name: '"XOR" Gate',
+			name: "XOR Gate",
 			description: "Returns true only if both inputs are not the same",
 		},
 		operationbuffer: {
