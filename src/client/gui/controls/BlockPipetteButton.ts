@@ -23,11 +23,7 @@ export class BlockPipetteButton extends ButtonControl {
 
 		const g = (part: BasePart): BasePart | BlockModel | undefined => {
 			if (!this.filter.Fire(part)) return;
-
-			if (BlockManager.isBlockPart(part)) {
-				return part.Parent;
-			}
-			return part;
+			return BlockManager.tryGetBlockModelByPart(part) ?? part;
 		};
 
 		this.event.onDisable(() => stop?.());

@@ -21,18 +21,17 @@ export namespace BlockSelect {
 	}
 	export function getTargetedBlock(): BlockModel | undefined {
 		const target = getTargetedPart();
-		if (!target?.Parent || !BlockManager.isBlockPart(target)) {
-			return;
-		}
+		const block = BlockManager.tryGetBlockModelByPart(target);
+		if (!block) return;
 
-		const parentPlot = SharedPlots.getPlotByBlock(target.Parent);
+		const parentPlot = SharedPlots.getPlotByBlock(block);
 		if (parentPlot) {
 			if (!SharedPlots.isBuildingAllowed(parentPlot, Players.LocalPlayer)) {
 				return;
 			}
 		}
 
-		return target.Parent;
+		return block;
 	}
 
 	export function selectBlocksByClick(

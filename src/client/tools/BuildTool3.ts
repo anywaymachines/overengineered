@@ -69,8 +69,8 @@ const getMouseTargetBlockPosition = (
 		let globalPos: GlobalVector3;
 		let size: LocalVector3;
 
-		if (BlockManager.isBlockPart(target)) {
-			const block = target.Parent;
+		const block = BlockManager.tryGetBlockModelByPart(target);
+		if (block) {
 			globalPos = CFraming.asGlobal(block.GetPivot().Position);
 			size = CFraming.asLocal(AABB.fromModel(block).getSize());
 		} else {

@@ -84,8 +84,8 @@ const getMouseTargetBlockPositionV2 = (
 		let position: Vector3;
 		let size: Vector3;
 
-		if (BlockManager.isBlockPart(target)) {
-			const block = target.Parent;
+		const block = BlockManager.tryGetBlockModelByPart(target);
+		if (block) {
 			position = block.GetPivot().Position;
 			size = AABB.fromModel(block).getSize();
 		} else {

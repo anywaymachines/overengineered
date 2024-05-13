@@ -37,8 +37,8 @@ interface Manager<T> {
 
 /** Methods for reading information about a block */
 export namespace BlockManager {
-	export function isActiveBlockPart(part: Instance): boolean {
-		if (!isBlockPart(part) || part.AssemblyRootPart?.Anchored || part.Anchored) {
+	export function isActiveBlockPart(part: Instance): part is BasePart & { Anchored: true } {
+		if (!isBlockPart(part) || !part.IsA("BasePart") || part.AssemblyRootPart?.Anchored || part.Anchored) {
 			return false;
 		}
 
@@ -46,26 +46,26 @@ export namespace BlockManager {
 	}
 
 	export function isBlockModel(part: Instance | undefined): part is BlockModel {
-		return part !== undefined && part.Parent?.Name === "Blocks";
+		return part !== undefined && part.IsA("Model") && part.Parent?.Name === "Blocks";
 	}
 
-	export function isBlockPart(part: Instance | undefined): part is BasePart & { Parent: BlockModel } {
-		if (!part?.Parent?.IsA("Model")) {
-			return false;
-		}
-		if (manager.id.get(part.Parent as BlockModel) === undefined) {
-			return false;
-		}
-
-		return true;
+	export function isBlockPart(part: Instance | undefined): boolean {
+		return tryGetBlockModelByPart(part) !== undefined;
 	}
 
+	export function tryGetBlockModelByPart(part: Instance | undefined): BlockModel | undefined {
+		let parent = part;
+		while (parent) {
+			if (isBlockModel(parent)) {
+				return parent;
+			}
+
+			parent = parent.Parent;
+		}
+	}
 	export function getBlockDataByPart(part: BasePart): PlacedBlockData | undefined {
-		if (isBlockPart(part)) {
-			return getBlockDataByBlockModel(part.Parent);
-		}
-
-		return;
+		const block = tryGetBlockModelByPart(part);
+		return block && getBlockDataByBlockModel(block);
 	}
 
 	export const manager: { readonly [k in Exclude<keyof PlacedBlockData, "instance">]: Manager<PlacedBlockData[k]> } =
