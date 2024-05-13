@@ -47,4 +47,8 @@ export namespace Objects {
 	): { [k in T[number][0]]: Extract<T[number], readonly [k, unknown]>[1] } {
 		return asObject(new Map(entries) as Map<T[number][0], T[number][1]>) as { [key in T[number][0]]: T[number][1] };
 	}
+
+	export function writable<T extends object>(object: T): Writable<T> {
+		return object;
+	}
 }

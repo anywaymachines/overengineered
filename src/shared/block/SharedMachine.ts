@@ -1,5 +1,6 @@
 import { RunService } from "@rbxts/services";
 import { BlocksInitializer } from "shared/BlocksInitializer";
+import { BlockLogicRegistry } from "shared/block/BlockLogicRegistry";
 import { BlockLogicValue } from "shared/block/BlockLogicValue";
 import { BlockLogicValueGroup } from "shared/block/BlockLogicValueGroup";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -9,7 +10,6 @@ import { ObservableValue } from "shared/event/ObservableValue";
 import { Objects } from "shared/fixes/objects";
 import { BlockLogic } from "./BlockLogic";
 import { ConfigurableBlockLogic } from "./ConfigurableBlockLogic";
-import { LogicRegistry, logicRegistry } from "./LogicRegistry";
 import { ImpactController } from "./impact/ImpactController";
 import { VehicleSeatBlockLogic } from "./logic/VehicleSeatBlockLogic";
 
@@ -55,7 +55,7 @@ export class SharedMachine extends ContainerComponent {
 				continue;
 			}
 
-			const ctor = (logicRegistry as unknown as LogicRegistry)[id as keyof LogicRegistry];
+			const ctor = BlockLogicRegistry.registry[id];
 			if (!ctor) {
 				continue;
 			}

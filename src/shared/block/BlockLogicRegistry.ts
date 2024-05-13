@@ -41,7 +41,11 @@ import { LidarSensorBlockLogic } from "./logic/logic/sensor/LidarSensorBlockLogi
 import { OwnerLocatorBlockLogic } from "./logic/logic/sensor/OwnerLocatorBlockLogic";
 import { SpeedometerBlockLogic } from "./logic/logic/sensor/SpeedometerBlockLogic";
 
-export const logicRegistry = {
+declare global {
+	type LogicCtor = new (block: PlacedBlockData) => BlockLogic;
+}
+
+const logicRegistry = {
 	wing1x1: WingLogic,
 	wing1x2: WingLogic,
 	wing1x3: WingLogic,
@@ -101,6 +105,13 @@ export const logicRegistry = {
 	bytesplitter: ByteSplitterBlockLogic,
 } as const satisfies { readonly [k in BlockId]?: unknown };
 
-export type LogicRegistry = Readonly<
-	Record<keyof typeof logicRegistry, { new (block: PlacedBlockData): BlockLogic } | undefined>
->;
+export type KnownBlockLogic = typeof logicRegistry;
+type WritableLogicRegistry = { [k in BlockId]?: LogicCtor };
+
+export namespace BlockLogicRegistry {
+	export const registry: Readonly<WritableLogicRegistry> = logicRegistry;
+
+	export function asWritable() {
+		return registry as WritableLogicRegistry;
+	}
+}

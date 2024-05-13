@@ -1,7 +1,7 @@
-import { ReplicatedStorage, RunService } from "@rbxts/services";
-import { AABB } from "shared/fixes/AABB";
-import { AutoWeldColliderBlockShape, BlockDataRegistry, BlockId, BlockMirrorBehaviour } from "./BlockDataRegistry";
-import { AutoBlockCreator } from "./block/logic/AutoBlockCreator";
+import { BlockCreatorFromAssets } from "shared/block/creation/BlockCreatorFromAssets";
+import { GeneratedBlocksCreator } from "shared/block/creation/GeneratedBlockCreator";
+import { AutoWeldColliderBlockShape, BlockId, BlockMirrorBehaviour } from "./BlockDataRegistry";
+import { AutoOperationsCreator } from "./block/creation/AutoOperationsCreator";
 
 declare global {
 	type RegistryBlock = {
@@ -31,159 +31,6 @@ export type BlocksInitializeData = {
 	readonly categories: Writable<Categories>;
 };
 
-namespace Checks {
-	type AssertedModel = Model & { PrimaryPart: BasePart };
-
-	function assertPrimaryPartSet(block: Model): asserts block is AssertedModel {
-		if (!block.PrimaryPart) {
-			throw `PrimaryPart in Block '${block.Name}' is not set!`;
-		}
-	}
-	function assertColboxIsPrimaryPartIfExists(block: AssertedModel) {
-		for (const child of block.GetDescendants()) {
-			if (child.Name.lower() === "colbox") {
-				if (block.PrimaryPart !== child) {
-					throw `Colbox in Block '${block.Name}' is not a primary part!`;
-				}
-			}
-		}
-	}
-	function assertColboxWeldedIfExists(block: AssertedModel) {
-		if (block.PrimaryPart.Name.lower() !== "colbox") return;
-
-		for (const weld of block.GetDescendants()) {
-			if (!weld.IsA("WeldConstraint")) continue;
-
-			if (weld.Part0 === block.PrimaryPart && weld.Part1 && weld.Part1 !== block.PrimaryPart) {
-				return;
-			}
-			if (weld.Part1 === block.PrimaryPart && weld.Part0 && weld.Part0 !== block.PrimaryPart) {
-				return;
-			}
-		}
-
-		throw `Colbox in Block '${block.Name}' is not welded to anything!`;
-	}
-	function assertValidVelds(block: AssertedModel) {
-		for (const weld of block.GetDescendants()) {
-			if (!weld.IsA("WeldConstraint")) continue;
-
-			if (!weld.Part0 || !weld.Part1) {
-				throw `Partial weld found in block ${block.Name} in weld parent ${weld.Parent}`;
-			}
-			if (!weld.Part0.IsDescendantOf(block) || !weld.Part1.IsDescendantOf(block)) {
-				throw `Outer weld reference found in block ${block.Name} in weld parent ${weld.Parent}`;
-			}
-		}
-	}
-	function assertSomethingAnchored(block: AssertedModel) {
-		for (const part of block.GetDescendants()) {
-			if (part.IsA("BasePart") && part.Anchored) {
-				return;
-			}
-		}
-
-		throw `No parts in block '${block.Name}' are anchored!`;
-	}
-	function assertHasDataInRegistry(block: Model) {
-		if (!BlockDataRegistry[block.Name.lower() as BlockId]) {
-			throw `No registry data found for block ${block.Name}`;
-		}
-	}
-	function assertSize(block: AssertedModel) {
-		const check = (num: number, axis: "X" | "Y" | "Z") => {
-			if (num % 1 === 0) return;
-
-			if (num % 1 < 0.01) {
-				$warn(`Potential floating point problem: ${block.Name}.Size.${axis} = ${num}`);
-			}
-		};
-
-		let aabb = AABB.fromPart(block.PrimaryPart);
-		for (const part of block.GetDescendants()) {
-			if (!part.IsA("BasePart")) continue;
-			if (part.Parent?.Name === "WeldRegions") continue;
-			if (part.Parent?.Name === "MarkerPoints") continue;
-
-			aabb = aabb.expanded(AABB.fromPart(part));
-		}
-
-		const size = aabb.getSize();
-		check(size.X, "X");
-		check(size.Y, "Y");
-		check(size.Z, "Z");
-	}
-	function assertCollisionGroup(block: Model) {
-		for (const child of block.GetDescendants()) {
-			if (child.Parent?.Name === "WeldRegions") continue;
-			if (!child.IsA("BasePart")) continue;
-			if (!child.CanCollide) continue;
-
-			if (child.CollisionGroup !== "Blocks") {
-				throw `Block ${block.Name} part ${child.Name} has a wrong collision group ${child.CollisionGroup}!`;
-			}
-		}
-	}
-
-	export function checkAll(block: Model) {
-		assertPrimaryPartSet(block);
-		assertColboxIsPrimaryPartIfExists(block);
-		assertColboxWeldedIfExists(block);
-		assertValidVelds(block);
-		assertSomethingAnchored(block);
-		assertHasDataInRegistry(block);
-		assertSize(block);
-		assertCollisionGroup(block);
-	}
-}
-
-/** Read blocks and categories from {@link ReplicatedStorage.Assets.Placeable} */
-const readFromAssets = (data: BlocksInitializeData) => {
-	const readCategory = (folder: Folder, prev: Writable<Categories>) => {
-		const name = folder.Name as CategoryName;
-		prev[name] = { name: name, sub: {} };
-
-		for (const child of folder.GetChildren()) {
-			if (child.IsA("Folder")) {
-				readCategory(child, prev[name].sub);
-			} else if (child.IsA("Model")) {
-				readBlock(child as BlockModel, name);
-			}
-		}
-	};
-
-	const readBlock = (block: Model, categoryName: string) => {
-		if (RunService.IsStudio() && RunService.IsServer()) {
-			Checks.checkAll(block);
-		}
-
-		const id = block.Name.lower() as BlockId;
-
-		const attributes = BlockDataRegistry[id];
-		const regblock: RegistryBlock = {
-			id,
-			displayName: attributes.name,
-			info: attributes.description,
-			required: attributes.required,
-			limit: attributes.limit,
-			autoWeldShape: attributes.autoWeldShape,
-			mirrorBehaviour: attributes.mirrorBehaviour,
-			mirrorReplacementId: attributes.mirrorReplacementId as BlockId | undefined,
-			model: block as BlockModel,
-			category: categoryName as CategoryName,
-		};
-		data.blocks.set(regblock.id, regblock);
-	};
-
-	const placeable = ReplicatedStorage.WaitForChild("Assets")
-		.WaitForChild("Placeable")
-		.GetChildren() as unknown as readonly Folder[];
-
-	for (const child of placeable) {
-		readCategory(child, data.categories);
-	}
-};
-
 //
 
 const init = (): BlocksInitializeData => {
@@ -192,8 +39,15 @@ const init = (): BlocksInitializeData => {
 		categories: {},
 	};
 
-	readFromAssets(initData);
-	AutoBlockCreator.create(initData);
+	const initializers = [
+		BlockCreatorFromAssets.readFromAssets,
+		AutoOperationsCreator.create,
+		GeneratedBlocksCreator.create,
+	];
+	for (const initializer of initializers) {
+		initializer(initData);
+	}
+
 	return initData;
 };
 
