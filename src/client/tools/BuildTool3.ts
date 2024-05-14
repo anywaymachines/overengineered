@@ -97,10 +97,6 @@ const getMouseTargetBlockPosition = (
 		return pos.add(CFraming.asLocal(AABB.fromModel(selectedBlock.model, rotation).getSize()).mul(normal).div(2));
 	};
 	const constrainPositionToGrid = (normal: LocalVector3, pos: LocalVector3): LocalVector3 => {
-		const roundByStep = (number: number) => {
-			const step = 1;
-			return number - (((number + step / 2) % step) - step / 2);
-		};
 		const constrain = math.round;
 
 		return CFraming.asLocal(

@@ -14,6 +14,15 @@ export class BlockMirrorer extends Component {
 		this.onDisable(() => this.destroyMirrors());
 	}
 
+	getCount() {
+		let count = 0;
+		for (const [, track] of this.tracking) {
+			count += asMap(track).size();
+		}
+
+		return count;
+	}
+
 	getMirroredModels(): Readonly<Record<BlockId, readonly Model[]>> {
 		const ret: Partial<Record<BlockId, Model[]>> = {};
 		for (const [, track] of this.tracking) {

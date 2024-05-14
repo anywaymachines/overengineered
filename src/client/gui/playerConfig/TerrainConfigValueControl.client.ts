@@ -17,7 +17,12 @@ class TerrainValueControl extends ConfigValueControl<GuiObject> {
 	) {
 		super(playerConfigValueTemplateStorage.multi(), definition.displayName);
 
-		const items: { readonly [k in typeof config.kind]: true } = { Flat: true, Terrain: true, Triangle: true };
+		const items: { readonly [k in typeof config.kind]: true } = {
+			Flat: true,
+			Terrain: true,
+			Triangle: true,
+			Water: true,
+		};
 		const def = {
 			kind: {
 				displayName: "Type",

@@ -1,8 +1,10 @@
+import { Players } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { LoadingController } from "client/controller/LoadingController";
 import { Signals } from "client/event/Signals";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { BuildTool } from "client/tools/BuildTool";
+import { BuildTool3 } from "client/tools/BuildTool3";
 import { ConfigTool } from "client/tools/ConfigTool";
 import { DeleteTool } from "client/tools/DeleteTool";
 import { PaintTool } from "client/tools/PaintTool";
@@ -107,8 +109,13 @@ export class ToolController extends ClientComponent {
 			["configTool", new ConfigTool(mode)],
 			["paintTool", new PaintTool(mode)],
 			["wireTool", new WireTool(mode)],
-			// ["buildTool3", new BuildTool3(mode)],
 		] as const;
+		if (Players.LocalPlayer.Name === "i3ymm") {
+			(tools as Writable<typeof tools>).push([
+				"buildTool3" as "buildTool",
+				new BuildTool3(mode) as unknown as BuildTool,
+			]);
+		}
 
 		this.allTools = Objects.fromEntries(tools);
 		this.allToolsOrdered = tools.map((t) => t[1]);

@@ -18,7 +18,7 @@ declare global {
 		readonly othersEffects: boolean;
 	};
 	type TerrainConfiguration = {
-		readonly kind: "Terrain" | "Triangle" | "Flat";
+		readonly kind: "Terrain" | "Triangle" | "Flat" | "Water";
 		readonly resolution: number;
 		readonly foliage: boolean;
 		readonly loadDistance: number;

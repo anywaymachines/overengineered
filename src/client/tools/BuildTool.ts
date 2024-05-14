@@ -429,11 +429,11 @@ namespace SinglePlaceController {
 			g.Label4.Text = `Rotation: ${prettyCFrame(this.mainGhost?.GetPivot() ?? this.blockRotation)}`;
 
 			const plot = this.plot.get();
-			const areAllBlocksInsidePlot =
-				plot.isModelInside(this.mainGhost) &&
+			const getAreAllGhostsInsidePlot = () =>
 				asMap(this.blockMirrorer.getMirroredModels()).all((k, ghosts) =>
 					ghosts.all((ghost) => plot.isModelInside(ghost)),
 				);
+			const areAllBlocksInsidePlot = plot.isModelInside(this.mainGhost) && getAreAllGhostsInsidePlot();
 
 			if (areAllBlocksInsidePlot) {
 				this.updateMirrorGhostBlocksPosition();
@@ -443,6 +443,7 @@ namespace SinglePlaceController {
 
 			const canBePlaced =
 				areAllBlocksInsidePlot &&
+				BuildingManager.blockCanBePlacedAt(plot, selectedBlock, this.mainGhost.GetPivot()) &&
 				asMap(this.blockMirrorer.getMirroredModels()).all((k, ghosts) =>
 					ghosts.all((ghost) => BuildingManager.blockCanBePlacedAt(plot, selectedBlock, ghost.GetPivot())),
 				);
@@ -840,14 +841,20 @@ namespace MultiPlaceController {
 		}
 
 		async place() {
-			let locations = this.drawnGhostsMap.flatmap((_, m) => [
+			let locations = [
+				...this.blockMirrorer.blocks.get().map(({ id, model }) => ({ id, pos: model.GetPivot() })),
+				...asMap(this.blockMirrorer.getMirroredModels()).flatmap((id, models) =>
+					models.map((model) => ({ id, pos: model.GetPivot() })),
+				),
+			];
+			/*let locations = this.drawnGhostsMap.flatmap((_, m) => [
 				{ id: this.selectedBlock.id, pos: m.GetPivot() },
 				...BuildingManager.getMirroredBlocks(
 					this.plot.instance,
 					{ id: this.selectedBlock.id, pos: m.GetPivot() },
 					this.mirrorModes,
 				),
-			]);
+			]);*/
 			// filter out the blocks on the same location
 			locations = new Map(
 				locations.map((b) => [VectorUtils.roundVectorToNearestHalf(b.pos.Position), b] as const),

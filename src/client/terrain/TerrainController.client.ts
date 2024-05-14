@@ -5,6 +5,7 @@ import { DefaultChunkGenerator } from "client/terrain/DefaultChunkGenerator";
 import { FlatTerrainRenderer } from "client/terrain/FlatTerrainRenderer";
 import { TerrainChunkRenderer } from "client/terrain/TerrainChunkRenderer";
 import { TriangleChunkRenderer } from "client/terrain/TriangleChunkRenderer";
+import { WaterTerrainChunkRenderer } from "client/terrain/WaterTerrainChunkRenderer";
 import { rootComponents } from "client/test/RootComponents";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 
@@ -49,12 +50,20 @@ const terrain = PlayerDataStorage.config.createChild("terrain", PlayerConfigDefi
 
 terrain.subscribe((terrain) => {
 	let chunkLoader: ChunkLoader | undefined;
-	if (terrain.kind === "Triangle") {
-		chunkLoader = new ChunkLoader(TriangleChunkRenderer(DefaultChunkGenerator, terrain.resolution));
-	} else if (terrain.kind === "Terrain") {
-		chunkLoader = new ChunkLoader(TerrainChunkRenderer(DefaultChunkGenerator));
-	} else if (terrain.kind === "Flat") {
-		chunkLoader = new ChunkLoader(FlatTerrainRenderer(0.5 - 0.01));
+
+	switch (terrain.kind) {
+		case "Triangle":
+			chunkLoader = new ChunkLoader(TriangleChunkRenderer(DefaultChunkGenerator, terrain.resolution));
+			break;
+		case "Terrain":
+			chunkLoader = new ChunkLoader(TerrainChunkRenderer(DefaultChunkGenerator));
+			break;
+		case "Flat":
+			chunkLoader = new ChunkLoader(FlatTerrainRenderer(0.5 - 0.01));
+			break;
+		case "Water":
+			chunkLoader = new ChunkLoader(WaterTerrainChunkRenderer());
+			break;
 	}
 
 	if (current) {
