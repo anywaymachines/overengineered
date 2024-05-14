@@ -83,9 +83,23 @@ export class MirrorEditorControl extends Control<MirrorEditorControlDefinition> 
 		super(gui);
 
 		const plot = SharedPlots.getPlotBuildingRegion(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId));
-		this.x = this.add(new MirrorEditorSingleControl(this.gui.X, -plot.getSize().X / 2, plot.getSize().X / 2, 0));
+		this.x = this.add(
+			new MirrorEditorSingleControl(
+				this.gui.X,
+				math.round(-plot.getSize().Z / 2),
+				math.round(plot.getSize().Z / 2),
+				0,
+			),
+		);
 		this.y = this.add(new MirrorEditorSingleControl(this.gui.Y, 2, math.floor(plot.getSize().Y), 4));
-		this.z = this.add(new MirrorEditorSingleControl(this.gui.Z, -plot.getSize().Z / 2, plot.getSize().Z / 2, 0));
+		this.z = this.add(
+			new MirrorEditorSingleControl(
+				this.gui.Z,
+				math.round(-plot.getSize().X / 2),
+				math.round(plot.getSize().X / 2),
+				0,
+			),
+		);
 
 		this.event.subscribeObservable(
 			this.value,

@@ -54,12 +54,12 @@ export class MirrorVisualizer extends ClientComponent {
 			]);
 		if (mode.x !== undefined)
 			axes.push([
-				CFrame.identity.add(new Vector3(mode.x, 0, 0)),
+				CFrame.identity.add(new Vector3(0, 0, mode.x)),
 				SharedPlots.getPlotBuildingRegion(plot).getSize().X,
 			]);
 		if (mode.z !== undefined)
 			axes.push([
-				CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(0, 0, mode.z)),
+				CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(mode.z, 0, 0)),
 				SharedPlots.getPlotBuildingRegion(plot).getSize().Z,
 			]);
 

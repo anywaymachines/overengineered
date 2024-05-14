@@ -180,10 +180,10 @@ export namespace BuildingManager {
 			axes.push(["y", CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(new Vector3(0, mode.y, 0))]);
 		}
 		if (mode.x !== undefined) {
-			axes.push(["x", CFrame.identity.add(new Vector3(mode.x, 0, 0))]);
+			axes.push(["x", CFrame.identity.add(new Vector3(0, 0, mode.x))]);
 		}
 		if (mode.z !== undefined) {
-			axes.push(["z", CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(0, 0, mode.z))]);
+			axes.push(["z", CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(mode.z, 0, 0))]);
 		}
 
 		const origPos = VectorUtils.roundVector3(origBlock.pos.Position);
