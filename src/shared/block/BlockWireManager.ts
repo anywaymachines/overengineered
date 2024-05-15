@@ -136,8 +136,13 @@ export namespace BlockWireManager {
 			if (block.connections === undefined) continue;
 
 			for (const [connectionName, connection] of pairs(block.connections)) {
-				const from = markers.get(`${block.uuid} input ${connectionName}`) as Markers.Input;
-				const to = markers.get(`${connection.blockUuid} output ${connection.connectionName}`) as Markers.Output;
+				const fromstr = `${block.uuid} input ${connectionName}`;
+				const tostr = `${connection.blockUuid} output ${connection.connectionName}`;
+
+				const from = markers.get(fromstr) as Markers.Input;
+				if (!from) throw `Not found '${fromstr}' to '${tostr}'`;
+				const to = markers.get(tostr) as Markers.Output;
+				if (!to) throw `Not found '${tostr}' from '${fromstr}'`;
 
 				to.connect(from);
 			}
