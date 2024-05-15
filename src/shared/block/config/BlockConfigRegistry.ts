@@ -777,12 +777,14 @@ const laser = {
 			type: "color",
 			config: Color3.fromRGB(255, 0, 0),
 			default: Color3.fromRGB(255, 0, 0),
+			connectorHidden: true,
 		},
 		dotColor: {
 			displayName: "Dot color",
 			type: "color",
 			config: Color3.fromRGB(255, 255, 0),
 			default: Color3.fromRGB(255, 255, 0),
+			connectorHidden: true,
 		},
 	},
 	output: {
