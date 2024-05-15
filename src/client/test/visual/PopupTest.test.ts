@@ -4,6 +4,7 @@ import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { SavePopup } from "client/gui/popup/SavePopup";
 import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
+import { WikiPopup } from "client/gui/popup/WikiPopup";
 import { Element } from "shared/Element";
 
 export const _Tests = () => {
@@ -77,6 +78,12 @@ export const _Tests = () => {
 					Size: new UDim2(0, 200, 0, 30),
 				})
 					.with((b) => b.activated.Connect(() => SavePopup.showPopup()))
+					.with((b) => b.enable()).instance,
+				b6: TextButtonControl.create({
+					Text: "Wiki",
+					Size: new UDim2(0, 200, 0, 30),
+				})
+					.with((b) => b.activated.Connect(() => WikiPopup.showPopup()))
 					.with((b) => b.enable()).instance,
 			},
 		),
