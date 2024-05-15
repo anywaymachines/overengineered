@@ -1,10 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import { Assert } from "shared/Assert";
-import { RobloxUnit } from "shared/RobloxUnit";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import { SharedMachine } from "shared/block/SharedMachine";
-import { OperationVec3CombinerBlockLogic } from "shared/block/logic/logic/converter/vector/OperationVec3CombinerBlockLogic";
-import { AltimeterBlockLogic } from "shared/block/logic/logic/sensor/AltimeterBlockLogic";
 
 export namespace _Tests {
 	const parent = new Instance("Folder");
@@ -20,66 +15,6 @@ export namespace _Tests {
 	}
 
 	export namespace LogicTests {
-		export function altimeter() {
-			const altimeterInstance = new Instance("Model") as BlockModel;
-			altimeterInstance.PivotTo(new CFrame(0, 5, 0));
-			altimeterInstance.Parent = parent;
-
-			const altimeter = new AltimeterBlockLogic({
-				id: "id",
-				instance: altimeterInstance,
-				uuid: "0" as BlockUuid,
-				config: {},
-				connections: {},
-			});
-			const combiner = new OperationVec3CombinerBlockLogic({
-				id: "id",
-				uuid: "1" as BlockUuid,
-				instance: new Instance("Model") as BlockModel,
-				config: { value_x: 1 },
-				connections: {
-					value_y: {
-						blockUuid: "0" as BlockUuid,
-						connectionName: "result" as BlockConnectionName,
-					},
-				},
-			});
-
-			const logics = [altimeter, combiner];
-			const machine = new SharedMachine();
-			for (const logic of logics) {
-				machine.add(logic);
-			}
-
-			machine.initializeBlockConnections();
-			machine.enable();
-
-			task.wait();
-			task.wait();
-			Assert.equals(altimeterInstance.GetPivot().Y, 5);
-			Assert.equals(combiner.output.result, new Vector3(1, RobloxUnit.Studs_To_Meters(5), 0));
-			machine.destroy();
-		}
-		export function size1() {
-			const combiner = new OperationVec3CombinerBlockLogic({
-				id: "id",
-				uuid: "0" as BlockUuid,
-				instance: new Instance("Model") as BlockModel,
-				config: { value_x: 1 },
-				connections: {},
-			});
-
-			const logics = [combiner];
-			const machine = new SharedMachine();
-			for (const logic of logics) {
-				machine.add(logic);
-			}
-
-			machine.initializeBlockConnections();
-			machine.enable();
-			Assert.equals(combiner.output.result, new Vector3(1, 0, 0));
-			machine.destroy();
-		}
 		// export function size2() {
 		// 	const constant = new ConstantBlockLogic({
 		// 		id: "id",
@@ -100,13 +35,11 @@ export namespace _Tests {
 		// 			},
 		// 		},
 		// 	});
-
 		// 	const logics = [constant, combiner];
 		// 	const machine = new SharedMachine();
 		// 	for (const logic of logics) {
 		// 		machine.add(logic);
 		// 	}
-
 		// 	machine.initializeBlockConnections();
 		// 	machine.enable();
 		// 	Assert.equals(combiner.output.result, new Vector3(1, 2, 0));
@@ -144,17 +77,14 @@ export namespace _Tests {
 		// 			},
 		// 		},
 		// 	});
-
 		// 	subChanged(constant, "constant");
 		// 	subChanged(combiner, "combiner");
 		// 	subChanged(splitter, "splitter");
-
 		// 	const logics = [constant, combiner, splitter];
 		// 	const machine = new SharedMachine();
 		// 	for (const logic of logics) {
 		// 		machine.add(logic);
 		// 	}
-
 		// 	machine.initializeBlockConnections();
 		// 	machine.enable();
 		// 	Assert.equals(splitter.output.result_y, 7);

@@ -23,21 +23,18 @@ import { SuspensionLogic } from "./logic/SuspensionLogic";
 import { TNTBlockLogic } from "./logic/TNTBlockLogic";
 import { VehicleSeatBlockLogic } from "./logic/VehicleSeatBlockLogic";
 import { WingLogic } from "./logic/WingLogic";
-import { OperationVec3CombinerBlockLogic } from "./logic/logic/converter/vector/OperationVec3CombinerBlockLogic";
-import { OperationVec3SplitterBlockLogic } from "./logic/logic/converter/vector/OperationVec3SplitterBlockLogic";
 import { LampBlockLogic } from "./logic/logic/display/LampBlockLogic";
 import { ScreenBlockLogic } from "./logic/logic/display/ScreenBlockLogic";
 import { LogicMemoryBlockLogic } from "./logic/logic/memory/LogicMemoryBlockLogic";
 import { RandomAccessMemoryBlockLogic } from "./logic/logic/memory/RandomAccessMemoryBlockLogic";
 import { ReadOnlyMemoryBlockLogic } from "./logic/logic/memory/ReadOnlyMemoryBlockLogic";
 import { StackMemoryBlockLogic } from "./logic/logic/memory/StackMemoryBlockLogic";
+import { BufferBlockLogic } from "./logic/logic/other/BufferBlockLogic";
 import { CounterBlockLogic } from "./logic/logic/other/CounterBlockLogic";
 import { DelayBlockLogic } from "./logic/logic/other/DelayBlockLogic";
-import { OperationBufferBlockLogic } from "./logic/logic/other/OperationBufferBlockLogic";
 import { AltimeterBlockLogic } from "./logic/logic/sensor/AltimeterBlockLogic";
 import { AngleSensorBlockLogic } from "./logic/logic/sensor/AngleSensorBlockLogic";
 import { KeySensorBlockLogic } from "./logic/logic/sensor/KeySensorBlockLogic";
-import { LidarSensorBlockLogic } from "./logic/logic/sensor/LidarSensorBlockLogic";
 import { OwnerLocatorBlockLogic } from "./logic/logic/sensor/OwnerLocatorBlockLogic";
 import { SpeedometerBlockLogic } from "./logic/logic/sensor/SpeedometerBlockLogic";
 
@@ -88,7 +85,6 @@ const logicRegistry = {
 	anglesensor: AngleSensorBlockLogic,
 	keysensor: KeySensorBlockLogic,
 	altimeter: AltimeterBlockLogic,
-	lidarsensor: LidarSensorBlockLogic,
 	radarsection: RadarSectionBlockLogic,
 
 	logicmemory: LogicMemoryBlockLogic,
@@ -96,10 +92,7 @@ const logicRegistry = {
 	randomaccessmemory: RandomAccessMemoryBlockLogic,
 	readonlymemory: ReadOnlyMemoryBlockLogic,
 
-	operationbuffer: OperationBufferBlockLogic,
-
-	operationvec3splitter: OperationVec3SplitterBlockLogic,
-	operationvec3combiner: OperationVec3CombinerBlockLogic,
+	buffer: BufferBlockLogic,
 
 	bytemaker: ByteMakerBlockLogic,
 	bytesplitter: ByteSplitterBlockLogic,

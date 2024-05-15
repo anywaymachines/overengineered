@@ -555,10 +555,10 @@ const v16: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			if (
-				block.id === "operationadd" ||
-				block.id === "operationsub" ||
-				block.id === "operationmul" ||
-				block.id === "operationdiv"
+				block.id === ("operationadd" as BlockId) ||
+				block.id === ("operationsub" as BlockId) ||
+				block.id === ("operationmul" as BlockId) ||
+				block.id === ("operationdiv" as BlockId)
 			) {
 				return {
 					...block,
@@ -607,7 +607,7 @@ const v18: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 };
 
 // remove coblox from some blocks
-const v19: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v18> = {
+const v19: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v18> = {
 	version: 19,
 
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
@@ -678,17 +678,6 @@ const v19: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 			blocks: prev.blocks.map(update),
 		};
 	},
-
-	read(plot: PlotModel): SerializedBlocks<SerializedBlockV3> {
-		return {
-			version: this.version,
-			blocks: read.blocksFromPlot(plot, read.blockV3),
-		};
-	},
-	place(data: SerializedBlocks<SerializedBlockV3>, plot: PlotModel): number {
-		place.blocksOnPlot(plot, data.blocks, place.blockOnPlotV3);
-		return data.blocks.size();
-	},
 };
 
 // update lots of blocks
@@ -696,14 +685,157 @@ const v20: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 	version: 20,
 
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		const fixedTripleGeneric = (block: SerializedBlockV3): SerializedBlockV3 => {
+			const fixTripleGenericOffset = (cframe: CFrame) =>
+				cframe.add(cframe.VectorToWorldSpace(new Vector3(-0.5, -0.5, 0)));
+			return {
+				...block,
+				loc: Serializer.CFrameSerializer.serialize(
+					fixTripleGenericOffset(Serializer.CFrameSerializer.deserialize(block.loc)),
+				),
+			};
+		};
+		const fixedDoubleGeneric = (block: SerializedBlockV3): SerializedBlockV3 => {
+			const fixDoubleGenericOffset = (cframe: CFrame) =>
+				cframe.add(cframe.VectorToWorldSpace(new Vector3(0, -0.5, 0)));
+			return {
+				...block,
+				loc: Serializer.CFrameSerializer.serialize(
+					fixDoubleGenericOffset(Serializer.CFrameSerializer.deserialize(block.loc)),
+				),
+			};
+		};
+		const fixedSingleGeneric = fixedTripleGeneric;
+		const withoutOperation = (block: SerializedBlockV3): SerializedBlockV3 => ({
+			...block,
+			id:
+				block.id.find("operation")[0] !== undefined
+					? (block.id.sub("operation".size() + 1) as BlockId)
+					: block.id,
+		});
+
+		const doubleGeneric = new ReadonlySet([
+			"operationrand",
+			"operationmod",
+			"operationxor",
+			"operationnor",
+			"operationxnor",
+			"operationand",
+			"operationor",
+			"operationnand",
+			"operationgreaterthanorequals",
+			"operationlessthan",
+			"operationnotequals",
+			"operationequals",
+			"operationlessthanorequals",
+			"operationgreaterthan",
+			"operationdiv",
+			"operationadd",
+			"operationsub",
+			"operationmul",
+			"operationnsqrt",
+			"operationpow",
+			"operationatan2",
+
+			"keysensor",
+			"ownerlocator",
+			"laser",
+			"anglesensor",
+			"leddisplay",
+			"screen",
+			"speedometer",
+			"altimeter",
+		]) as unknown as ReadonlySet<BlockId>;
+		const singleGeneric = new ReadonlySet([
+			"operationrad",
+			"operationatan",
+			"operationasin",
+			"operationabs",
+			"operationlog10",
+			"operationceil",
+			"operationloge",
+			"operationsign",
+			"operationfloor",
+			"operationsqrt",
+			"operationround",
+			"operationacos",
+			"operationsin",
+			"operationdeg",
+			"operationtan",
+			"operationcos",
+			"operationlog",
+			"operationnot",
+			"operationnumbertobyte",
+		]) as unknown as ReadonlySet<BlockId>;
+		const tripleGeneric = new ReadonlySet([
+			"operationvec3combiner",
+			"operationvec3splitter",
+			"operationclamp",
+			"multiplexer",
+			"constant",
+		]) as unknown as ReadonlySet<BlockId>;
+
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
-			if (block.id === "halfblock") {
-				return {
+			if (block.id === "speedometer") {
+				block = {
 					...block,
-					loc: Serializer.CFrameSerializer.serialize(
-						Serializer.CFrameSerializer.deserialize(block.loc).ToWorldSpace(new CFrame(0, -0.5, 0)),
-					),
+					connections: undefined,
 				};
+			}
+			if (block.id === ("accelerometer" as BlockId)) {
+				return {
+					...fixedDoubleGeneric(block),
+					id: "speedometer",
+					connections: {
+						// TODO: max fix
+						// ???
+					},
+				};
+			}
+			if (block.id === ("relay" as BlockId)) {
+				return {
+					...fixedDoubleGeneric(block),
+					id: "multiplexer",
+					connections: {
+						...block.connections,
+						["truevalue" as BlockConnectionName]:
+							block.connections?.["value" as BlockConnectionName] ?? undefined!,
+						["value" as BlockConnectionName]:
+							block.connections?.["state" as BlockConnectionName] ?? undefined!,
+						["state" as BlockConnectionName]: undefined!,
+					},
+				};
+			}
+			if (block.id === ("multiplexer" as BlockId)) {
+				block = {
+					...block,
+					config: {
+						truevalue: { type: "number", value: block.config?.truenumber ?? 0 },
+						falsevalue: { type: "number", value: block.config?.falsenumber ?? 0 },
+					},
+					connections: {
+						...block.connections,
+						["truevalue" as BlockConnectionName]:
+							block.connections?.["truenumber" as BlockConnectionName] ?? undefined!,
+						["falsevalue" as BlockConnectionName]:
+							block.connections?.["falsenumber" as BlockConnectionName] ?? undefined!,
+						["truenumber" as BlockConnectionName]: undefined!,
+						["falsenumber" as BlockConnectionName]: undefined!,
+					},
+				};
+			}
+
+			if (block.id === ("operationbuffer" as BlockId)) {
+				return withoutOperation(block);
+			}
+			if (singleGeneric.has(block.id)) {
+				return withoutOperation(fixedSingleGeneric(block));
+			}
+			if (doubleGeneric.has(block.id)) {
+				return withoutOperation(fixedDoubleGeneric(block));
+			}
+			if (tripleGeneric.has(block.id)) {
+				return withoutOperation(fixedTripleGeneric(block));
 			}
 
 			return block;
@@ -729,7 +861,7 @@ const v20: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 
 //
 
-const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19] as const;
+const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const getVersion = (version: number) => versions.find((v) => v.version === version);

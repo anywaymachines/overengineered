@@ -50,60 +50,60 @@ const logic = {
 			description: "Returns same value you gave it but with delay",
 			autoWeldShape: "cube",
 		},
-		operationand: {
+		and: {
 			name: "AND Gate",
 			description: "Returns true when both inputs are true",
 		},
-		operationnand: {
+		nand: {
 			name: "NAND Gate",
 			description: "Returns true when both value are not true",
 		},
-		operationnor: {
+		nor: {
 			name: "NOR Gate",
 			description: "Returns true when none of the values are true",
 		},
-		operationnot: {
+		not: {
 			name: "NOT Gate",
 			description: "Returns true when false is given, and vice versa",
 		},
-		operationor: {
+		or: {
 			name: "OR Gate",
 			description: "Returns true when any of the inputs are true",
 		},
-		operationxnor: {
+		xnor: {
 			name: "XNOR Gate",
 			description: "Returns true only if both inputs are the same",
 		},
-		operationxor: {
+		xor: {
 			name: "XOR Gate",
 			description: "Returns true only if both inputs are not the same",
 		},
-		operationbuffer: {
+		buffer: {
 			name: "Buffer",
 			description: "Returns the same value it was given. Useful for logic organization",
 			autoWeldShape: "none",
 		},
-		operationequals: {
+		equals: {
 			name: "Equals",
 			description: "Returns true if two given values are the exact same",
 		},
-		operationnotequals: {
+		notequals: {
 			name: "NOT Equals",
 			description: "Returns true if values are not the same",
 		},
-		operationgreaterthan: {
+		greaterthan: {
 			name: "Greater Than",
 			description: "Returns true if first value greater than second one",
 		},
-		operationgreaterthanorequals: {
+		greaterthanorequals: {
 			name: "Greater Than or Equals",
 			description: "Returns true if the first value greater than second one",
 		},
-		operationlessthanorequals: {
+		lessthanorequals: {
 			name: "Less Than or Equals",
 			description: "Returns true if the first value equal to or lesser than second one",
 		},
-		operationlessthan: {
+		lessthan: {
 			name: "Less Than",
 			description: "Returns true if the first value or lesser than second one",
 		},
@@ -117,209 +117,209 @@ const logic = {
 			name: "Byte Splitter",
 			description: "Another one bytes to bits",
 		},
-		operationbytetonumber: {
+		bytetonumber: {
 			name: "Byte To Number",
 			description: "Numbers the bytes! Oh, wait.. no.. It converts Bytes to numbers!",
 		},
-		operationnumbertobyte: {
+		numbertobyte: {
 			name: "Number to Byte",
 			description: "Converts number value to the byte value! It's like clamping number between 0 and 255.",
 		},
-		operationbytexor: {
+		bytexor: {
 			name: "Byte XOR",
 			description: "It's the same XOR operation but for each bit of input bytes.",
 		},
-		operationbytexnor: {
+		bytexnor: {
 			name: "Byte XNOR",
 			description: "It's the same XNOR operation but for each bit of input bytes.",
 		},
-		operationbyteand: {
+		byteand: {
 			name: "Byte AND",
 			description: "It's the same AND operation but for each bit of input bytes.",
 		},
-		operationbytenand: {
+		bytenand: {
 			name: "Byte NAND",
 			description: "It's the same NAND operation but for each bit of input bytes.",
 		},
-		operationbyteor: {
+		byteor: {
 			name: "Byte OR",
 			description: "It's the same OR operation but for each bit of input bytes.",
 		},
-		operationbytenor: {
+		bytenor: {
 			name: "Byte NOR",
 			description: "It's the same NOR operation but for each bit of input bytes.",
 		},
-		operationbyterotateright: {
+		byterotateright: {
 			name: "Byte Rotate Right",
 			description: "It rotates the byte right! Don't ask me, don't know either",
 		},
-		operationbyterotateleft: {
+		byterotateleft: {
 			name: "Byte Rotate Left",
 			description: "It rotates the left! Don't ask me, don't know either",
 		},
-		operationbyteshiftright: {
+		byteshiftright: {
 			name: "Byte Shift Right",
 			description: "Shifts bits to right!",
 		},
-		operationbyteshiftleft: {
+		byteshiftleft: {
 			name: "Byte Shift Left",
 			description: "Shifts bits to left!",
 		},
-		operationbytearithmeticshiftright: {
+		bytearithmeticshiftright: {
 			name: "Byte Arithmetic Shift Right",
 			description: "Honestly, I have ZERO idea what it does, Maks made it.",
 		},
-		operationbytenot: {
+		bytenot: {
 			name: "Byte NOT",
 			description: "It's the same NOT operation but for each bit of input bytes.",
 		},
-		operationbyteneg: {
+		byteneg: {
 			name: "Byte NEGATE",
 			description: "Negates the input byte.",
 		},
 	},
 	math: {
-		operationadd: {
+		add: {
 			name: "Addition",
 			description: "Returns a sum of input values",
 		},
-		operationsub: {
+		sub: {
 			name: "Subtraction",
 			description: "Returns the result of substruction of two given values",
 		},
-		operationmul: {
+		mul: {
 			name: "Multiplication",
 			description: "Returns the result of multiplication of two given values",
 		},
-		operationdiv: {
+		div: {
 			name: "Division",
 			description: "Returns the result of division of two given values",
 		},
-		operationabs: {
+		abs: {
 			name: "Absolute",
 			description: "Returns the modulus of incoming number",
 		},
-		operationclamp: {
+		clamp: {
 			name: "Clamp",
 			description: "Limits the output between max and min.",
 		},
-		operationmod: {
+		mod: {
 			name: "Mod",
 			description: "Returns the remainder of a division",
 		},
-		operationround: {
+		round: {
 			name: "Round",
 			description: "Returns rounded input value",
 		},
-		operationfloor: {
+		floor: {
 			name: "Floor",
 			description: "N/A",
 		},
-		operationceil: {
+		ceil: {
 			name: "Ceil",
 			description: "N/A",
 		},
-		operationsign: {
+		sign: {
 			name: "Sign",
 			description: "Returns -1 if input value is less than zero, 1 if greater than zero and zero if equals zero",
 		},
 	},
 	trigonometry: {
-		operationpi: {
+		pi: {
 			name: "Pi",
 			description: `So called "free thinkers" will make a thousand PIe jokes as soon as they'll see the PI constant..`,
 			autoWeldShape: "cube",
 		},
-		operatione: {
+		e: {
 			name: "Euler's number (e)",
 			description: "Very useful constant you'll probably never use if you doesn't already know what it is",
 			autoWeldShape: "cube",
 		},
-		operationrand: {
+		rand: {
 			name: "Random",
 			description: `Returns a "random" value between chosen minimum and maximum`,
 			autoWeldShape: "cube",
 		},
 
-		operationsqrt: {
+		sqrt: {
 			name: "Square Root",
 			description: "Square the root out of input value",
 		},
-		operationnsqrt: {
+		nsqrt: {
 			name: "Custom Degree Root",
 			description: "Same as the square root but you're allowed to change the degree of it",
 		},
-		operationpow: {
+		pow: {
 			name: "Power",
 			description: "Buffs input values",
 		},
-		operationtan: {
+		tan: {
 			name: "Tangent",
 			description: "Calculates a tangent of input",
 		},
-		operationatan: {
+		atan: {
 			name: "Arctangent",
 			description: "The opposite of the Tangent",
 		},
-		operationatan2: {
+		atan2: {
 			name: "Arctangent 2",
 			description: "No way they made a sequel",
 		},
-		operationsin: {
+		sin: {
 			name: "Sine",
 			description: "Calculates a sine of input",
 		},
-		operationasin: {
+		asin: {
 			name: "Arcsine",
 			description: "The opposite of the Sine",
 		},
-		operationcos: {
+		cos: {
 			name: "Cosine",
 			description: "Calculates a cosine of input",
 		},
-		operationacos: {
+		acos: {
 			name: "Arccosine",
 			description: "The opposite of the Cosine",
 		},
-		operationlog: {
+		log: {
 			name: "Logarithm",
 			description: "Calculates a logarithm of the input value with selected base",
 		},
-		operationlog10: {
+		log10: {
 			name: "Logarithm (10 base)",
 			description: "Calculates a base 10 logarithm of the input value",
 		},
-		operationloge: {
+		loge: {
 			name: "Logarithm (natural)",
 			description: "Returns a natural Logarithm of inputed value. Unlike it's evil artificial counterparts..",
 		},
-		operationdeg: {
+		deg: {
 			name: "Degrees",
 			description: "Returns input value converted to degrees",
 		},
-		operationrad: {
+		rad: {
 			name: "Radians",
 			description: "Returns input value converted to radians",
 		},
 	},
 	vector3: {
-		operationvec3combiner: {
+		vec3combiner: {
 			name: "Vector3 Combiner",
 			description: "Returns a vector combined from input values",
 			autoWeldShape: "cube",
 		},
-		operationvec3splitter: {
+		vec3splitter: {
 			name: "Vector3 Splitter",
 			description: "Returns splitted input vector",
 			autoWeldShape: "cube",
 		},
 	},
 	number: {
-		operationconstant: {
+		constant: {
 			name: "Constant",
 			description: "Always returns the value you've set",
 		},
-		operationmultiplexer: {
+		multiplexer: {
 			name: "Multiplexer",
 			description: "Outputs values depending on the incoming boolean",
 			autoWeldShape: "cube",
@@ -550,7 +550,7 @@ const registry = {
 		description: "A programmable memory. Allows you to read values you've written in",
 		limit: 1,
 	},
-	operationrelay: {
+	relay: {
 		name: "Relay",
 		description: "Returns an input value only when told to",
 	},

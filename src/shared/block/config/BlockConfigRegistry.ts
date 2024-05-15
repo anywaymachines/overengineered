@@ -663,25 +663,6 @@ const vehicleseat = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const lidarsensor = {
-	input: {
-		max_distance: {
-			displayName: "Max distance",
-			type: "number",
-			default: 100 as number,
-			config: 100 as number,
-		},
-	},
-	output: {
-		distance: {
-			displayName: "Distance",
-			type: "number",
-			default: 0 as number,
-			config: 0 as number,
-		},
-	},
-} as const satisfies BlockConfigBothDefinitions;
-
 const speedometer = {
 	input: {},
 	output: {
@@ -782,37 +763,13 @@ const laser = {
 			max: 200,
 			step: 0.1,
 		},
-		alwaysEnabled: {
-			displayName: "Always enabled",
-			type: "bool",
-			config: false as boolean,
-			default: false as boolean,
-		},
 		rayTransparency: {
-			displayName: "Ray transparency",
+			displayName: "Transparency",
 			type: "clampedNumber",
 			config: 0 as number,
 			default: 0 as number,
 			min: 0,
 			max: 1,
-			step: 0.01,
-		},
-		dotTransparency: {
-			displayName: "Dot transparency",
-			type: "clampedNumber",
-			config: 0 as number,
-			default: 0 as number,
-			min: 0,
-			max: 1,
-			step: 0.01,
-		},
-		dotSize: {
-			displayName: "Dot size",
-			type: "clampedNumber",
-			config: 0.3 as number,
-			default: 0.3 as number,
-			min: 0.1,
-			max: 2,
 			step: 0.01,
 		},
 		rayColor: {
@@ -828,7 +785,14 @@ const laser = {
 			default: Color3.fromRGB(255, 255, 0),
 		},
 	},
-	output: {},
+	output: {
+		distance: {
+			displayName: "Distance",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
 } as const satisfies BlockConfigBothDefinitions;
 
 const twoNumbersInputBooleanOutput = {
@@ -856,7 +820,7 @@ const twoNumbersInputBooleanOutput = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const operationvec3combiner = {
+const vec3combiner = {
 	input: {
 		value_x: {
 			displayName: "X",
@@ -887,7 +851,7 @@ const operationvec3combiner = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
-const operationvec3splitter = {
+const vec3splitter = {
 	input: {
 		value: {
 			displayName: "Vector",
@@ -1261,7 +1225,6 @@ export const blockConfigRegistry = {
 	anglesensor,
 	keysensor,
 	altimeter,
-	lidarsensor,
 	radiotransmitter,
 	radioreciever,
 
@@ -1274,10 +1237,10 @@ export const blockConfigRegistry = {
 	stackmemory,
 	randomaccessmemory,
 	readonlymemory,
-	operationbuffer: anyProcessing,
+	buffer: anyProcessing,
 
-	operationvec3splitter,
-	operationvec3combiner,
+	vec3splitter,
+	vec3combiner,
 } as const satisfies { [k in BlockId]?: BlockConfigBothDefinitions };
 
 type BlockConfigDefinitions = ConfigTypesToDefinition<keyof BlockConfigTypes.Types, BlockConfigTypes.Types>;

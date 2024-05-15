@@ -45,7 +45,10 @@ export namespace ServerBuilding {
 			throw "Block with this uuid already exists";
 		}
 
-		const block = BlocksInitializer.blocks.map.get(data.id)!;
+		const block = BlocksInitializer.blocks.map.get(data.id);
+		if (!block) {
+			return { success: false, message: `Unknown block id ${data.id}` };
+		}
 
 		// Create a new instance of the building model
 		const model = block.model.Clone();

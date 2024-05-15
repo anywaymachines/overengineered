@@ -2,9 +2,9 @@ import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { PlacedBlockData } from "shared/building/BlockManager";
 
-export class OperationBufferBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.operationbuffer> {
+export class BufferBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.buffer> {
 	constructor(block: PlacedBlockData) {
-		super(block, blockConfigRegistry.operationbuffer);
+		super(block, blockConfigRegistry.buffer);
 
 		this.input.value.subscribe(() => this.update());
 	}

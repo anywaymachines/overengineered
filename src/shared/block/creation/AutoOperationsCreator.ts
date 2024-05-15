@@ -104,28 +104,19 @@ const defcs = {
 const defs = {
 	multiplexer: {
 		input: {
-			selector: defcs.bool("Value 1/2"),
-			channel1: connectors.any("Channel 1", "1"),
-			channel2: connectors.any("Channel 2", "1"),
+			value: defcs.bool("Value 1/2"),
+			truevalue: connectors.any("Channel 1", "1"),
+			falsevalue: connectors.any("Channel 2", "1"),
 		},
 		output: {
-			output: connectors.any("Output", "1"),
-		},
-	},
-	relay: {
-		input: {
-			enabled: defcs.bool("Switch"),
-			value: connectors.any("Value", "1"),
-		},
-		output: {
-			output: connectors.any("Output", "1"),
+			result: connectors.any("Result", "1"),
 		},
 	},
 	number3tovector3: {
 		input: {
-			x: defcs.number("X"),
-			y: defcs.number("Y"),
-			z: defcs.number("Z"),
+			value_x: defcs.number("X"),
+			value_y: defcs.number("Y"),
+			value_z: defcs.number("Z"),
 		},
 		output: {
 			result: defcs.vector3("Result"),
@@ -136,9 +127,9 @@ const defs = {
 			value: defcs.vector3("Value"),
 		},
 		output: {
-			x: defcs.number("X"),
-			y: defcs.number("Y"),
-			z: defcs.number("Z"),
+			result_x: defcs.number("X"),
+			result_y: defcs.number("Y"),
+			result_z: defcs.number("Z"),
 		},
 	},
 	const: {
@@ -498,34 +489,36 @@ const logicReg = {
 
 				const update = () => {
 					const axis = func(this.input.value.get(), this);
-					this.output.x.set(axis[0]);
-					this.output.y.set(axis[1]);
-					this.output.z.set(axis[2]);
+					this.output.result_x.set(axis[0]);
+					this.output.result_y.set(axis[1]);
+					this.output.result_z.set(axis[2]);
 				};
 				this.input.value.subscribe(update);
 			}
 		};
 	},
 
-	number3tovector3: (func: (value: number[], logic: BlockLogic) => Vector3) => {
+	number3tovector3: (func: (n1: number, n2: number, n3: number, logic: BlockLogic) => Vector3) => {
 		return class Logic extends ConfigurableBlockLogic<typeof defs.number3tovector3> {
 			constructor(block: PlacedBlockData) {
 				super(block, defs.number3tovector3);
 
 				const update = () =>
-					this.output.result.set(func([this.input.x.get(), this.input.y.get(), this.input.z.get()], this));
+					this.output.result.set(
+						func(this.input.value_x.get(), this.input.value_y.get(), this.input.value_z.get(), this),
+					);
 
-				this.input.x.subscribe(update);
-				this.input.y.subscribe(update);
-				this.input.z.subscribe(update);
+				this.input.value_x.subscribe(update);
+				this.input.value_y.subscribe(update);
+				this.input.value_z.subscribe(update);
 			}
 		};
 	},
 	multiplexer: (
 		func: (
-			selector: boolean,
-			channel1: ReturnType<typeof connectors.any>["default"],
-			channel2: ReturnType<typeof connectors.any>["default"],
+			value: boolean,
+			truevalue: ReturnType<typeof connectors.any>["default"],
+			falsevalue: ReturnType<typeof connectors.any>["default"],
 			logic: BlockLogic,
 		) => ReturnType<typeof connectors.any>["default"],
 	) => {
@@ -534,35 +527,13 @@ const logicReg = {
 				super(block, defs.multiplexer);
 
 				const update = () =>
-					this.output.output.set(
-						func(this.input.selector.get(), this.input.channel1.get(), this.input.channel2.get(), this),
+					this.output.result.set(
+						func(this.input.value.get(), this.input.truevalue.get(), this.input.falsevalue.get(), this),
 					);
 
-				this.input.selector.subscribe(update);
-				this.input.channel1.subscribe(update);
-				this.input.channel2.subscribe(update);
-			}
-		};
-	},
-	relay: (
-		func: (
-			enabled: boolean,
-			value: ReturnType<typeof connectors.any>["default"],
-			logic: BlockLogic,
-		) => ReturnType<typeof connectors.any>["default"] | undefined,
-	) => {
-		return class Logic extends ConfigurableBlockLogic<typeof defs.relay> {
-			constructor(block: PlacedBlockData) {
-				super(block, defs.relay);
-
-				const update = () => {
-					const value = func(this.input.enabled.get(), this.input.value.get(), this);
-					if (value === undefined) return;
-
-					this.output.output.set(value);
-				};
-
 				this.input.value.subscribe(update);
+				this.input.truevalue.subscribe(update);
+				this.input.falsevalue.subscribe(update);
 			}
 		};
 	},
@@ -1038,7 +1009,7 @@ const operations = {
 			modelTextOverride: "VEC3 COMB",
 			category: categories.converterVector,
 			prefab: prefabs.tripleGeneric,
-			func: (numbers) => new Vector3(numbers[0], numbers[1], numbers[2]),
+			func: (n1, n2, n3) => new Vector3(n1, n2, n3),
 		},
 	},
 	vector3tonumber3: {
@@ -1054,18 +1025,20 @@ const operations = {
 			modelTextOverride: "MUX",
 			category: categories.converterVector,
 			prefab: prefabs.tripleGeneric,
-			func: (selector, channel1, channel2) => (selector ? channel2 : channel1),
-		},
-	},
-	relay: {
-		Relay: {
-			modelTextOverride: "RELAY",
-			category: categories.converterVector,
-			prefab: prefabs.doubleGeneric,
-			func: (enabled, value) => (enabled ? value : undefined),
+			func: (value, truevalue, falsevalue) => (value ? truevalue : falsevalue),
 		},
 	},
 } as const satisfies NonGenericOperations;
+
+print(
+	"DOUBLE",
+	asMap(operations as NonGenericOperations)
+		.flatmap((k, v) => asMap(v).map((k, v) => ({ k, v })))
+		.filter(({ k, v }) => v.prefab === prefabs.tripleGeneric)
+		.map(({ k, v }) => k.lower())
+		.join(", "),
+);
+
 type NonGenericOperations = {
 	readonly [k in keyof typeof logicReg]: Record<string, CreateInfo<Parameters<(typeof logicReg)[k]>[0]>>;
 };
@@ -1075,7 +1048,7 @@ export namespace AutoOperationsCreator {
 		for (const [optype, ops] of pairs(operations as NonGenericOperations)) {
 			for (const [name, data] of pairs(ops)) {
 				BlockGenerator.create(info, {
-					id: `operation${name.lower()}` as BlockId,
+					id: name.lower() as BlockId,
 					...data,
 					logic: logicReg[optype](data.func as never),
 					config: defs[optype],
