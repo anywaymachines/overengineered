@@ -1,15 +1,3 @@
-/* Source of `AutoScrollSize` for ScrollingFrame; remove after some time if fixed
-local parent = script.Parent
-local grid = parent.UIGridLayout
-local scale = game:GetService('Players').LocalPlayer.PlayerGui:WaitForChild('GameUI'):WaitForChild('UIScale')
-
-parent.AutomaticCanvasSize = Enum.AutomaticSize.None
-
-game:GetService('RunService').Heartbeat:Connect(function()
-	parent.CanvasSize = UDim2.fromOffset(grid.AbsoluteContentSize.X / scale.Scale, grid.AbsoluteContentSize.Y / scale.Scale)
-end)
-*/
-
 import { TestFramework } from "shared/test/TestFramework";
 if (!game.GetService("RunService").IsStudio()) {
 	for (const testscript of TestFramework.findAllTestScripts()) {
