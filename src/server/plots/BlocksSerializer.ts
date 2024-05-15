@@ -779,6 +779,7 @@ const v20: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 			if (block.id === "speedometer") {
 				block = {
 					...block,
+					config: undefined,
 					connections: undefined,
 				};
 			}
@@ -786,16 +787,17 @@ const v20: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 				return {
 					...fixedDoubleGeneric(block),
 					id: "speedometer",
-					connections: {
-						// TODO: max fix
-						// ???
-					},
 				};
 			}
 			if (block.id === ("relay" as BlockId)) {
 				return {
 					...fixedDoubleGeneric(block),
 					id: "multiplexer",
+					config: {
+						truevalue: block.config?.value ?? undefined!,
+						value: block.config?.state ?? undefined!,
+						state: undefined!,
+					},
 					connections: {
 						...block.connections,
 						["truevalue" as BlockConnectionName]:
@@ -812,6 +814,8 @@ const v20: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 					config: {
 						truevalue: { type: "number", value: block.config?.truenumber ?? 0 },
 						falsevalue: { type: "number", value: block.config?.falsenumber ?? 0 },
+						truenumber: undefined!,
+						falsenumber: undefined!,
 					},
 					connections: {
 						...block.connections,
@@ -822,6 +826,37 @@ const v20: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 						["truenumber" as BlockConnectionName]: undefined!,
 						["falsenumber" as BlockConnectionName]: undefined!,
 					},
+				};
+			}
+
+			if (block.id === ("lidarsensor" as BlockId)) {
+				block = {
+					...block,
+					id: "laser",
+					loc: Serializer.CFrameSerializer.serialize(
+						Serializer.CFrameSerializer.deserialize(block.loc).mul(CFrame.Angles(-math.pi / 2, 0, 0)),
+					),
+					config: {
+						maxDistance: block.config?.max_distance ?? undefined!,
+						max_distance: undefined!,
+					},
+					connections: {
+						...block.connections,
+						["maxDistance" as BlockConnectionName]:
+							block.connections?.["max_distance" as BlockConnectionName] ?? undefined,
+						["max_distance" as BlockConnectionName]: undefined!,
+					},
+				};
+			}
+
+			if (block.id === "ownerlocator") {
+				block = {
+					...block,
+					loc: Serializer.CFrameSerializer.serialize(
+						Serializer.CFrameSerializer.deserialize(block.loc).mul(
+							CFrame.Angles(0, -math.pi / 2, -math.pi / 2),
+						),
+					),
 				};
 			}
 
