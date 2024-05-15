@@ -1,3 +1,4 @@
+import { RobloxUnit } from "shared/RobloxUnit";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
@@ -24,7 +25,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 
 	tick(tick: number): void {
 		if (this.closestDetectedPart !== undefined)
-			this.output.distance.set(this.getDistanceTo(this.closestDetectedPart));
+			this.output.distance.set(RobloxUnit.Studs_To_Meters(this.getDistanceTo(this.closestDetectedPart)));
 
 		super.tick(tick);
 	}
