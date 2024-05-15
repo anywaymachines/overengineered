@@ -17,7 +17,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 				if (ts.isFunctionDeclaration(child)) {
 					functionDeclarations.push(child);
 				} else if (ts.isModuleDeclaration(child)) {
-					namespaceDeclarations.push(child);
+					namespaceDeclarations.push(fixNamespace(child));
 				} else {
 					anyDeclarations.push(child);
 				}
