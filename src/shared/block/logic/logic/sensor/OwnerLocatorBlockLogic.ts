@@ -25,11 +25,14 @@ export class OwnerLocatorBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		const playerPart = owner.Character?.FindFirstChild("HumanoidRootPart") as Part | undefined;
 		if (!playerPart) return;
 
-		const localPosition = this.block.instance.GetPivot().PointToObjectSpace(playerPart.Position);
+		const localPosition = this.block.instance
+			.GetPivot()
+			.mul(CFrame.Angles(-math.pi / 2, 0, math.pi / 2))
+			.PointToObjectSpace(playerPart.Position);
 
 		const xa = Vector3.yAxis.Angle(localPosition.mul(new Vector3(0, 1, 1)), Vector3.xAxis);
 		const ya = Vector3.zAxis.Angle(localPosition.mul(new Vector3(1, 0, 1)), Vector3.yAxis);
-		const za = Vector3.yAxis.Angle(localPosition.mul(new Vector3(1, 1, 0)), Vector3.zAxis);
+		const za = Vector3.xAxis.Angle(localPosition.mul(new Vector3(1, 1, 0)), Vector3.zAxis);
 
 		this.output.angular.set(new Vector3(math.deg(xa), math.deg(ya), math.deg(za)));
 
