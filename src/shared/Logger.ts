@@ -30,7 +30,7 @@ const levels = {
 		name: "ERR",
 		print: (...args) => {
 			try {
-				error(
+				warn(
 					asMap(args)
 						.map((i, v) => (v === undefined ? "nil" : tostring(v)))
 						.join(", "),
