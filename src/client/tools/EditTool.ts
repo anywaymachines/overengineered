@@ -278,7 +278,9 @@ namespace Controllers {
 					this.cancel();
 				}
 
-				tool.selected.setRange(blocks);
+				if (tool.isEnabled()) {
+					tool.selected.setRange(blocks);
+				}
 			});
 		}
 
