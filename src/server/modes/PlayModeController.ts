@@ -5,31 +5,31 @@ import { BuildMode } from "./BuildMode";
 import { PlayModeBase } from "./PlayModeBase";
 import { RideMode } from "./RideMode";
 
-export class PlayModeController {
-	private static readonly playerModes: Record<number, PlayModes | undefined> = {};
-	private static readonly modes = {
+export namespace PlayModeController {
+	const playerModes: Record<number, PlayModes | undefined> = {};
+	const modes = {
 		ride: new RideMode(),
 		build: new BuildMode(PlayModeController),
 	} as const satisfies Record<PlayModes, PlayModeBase>;
 
-	static init() {
+	export function init() {
 		Players.PlayerRemoving.Connect((plr) => {
-			delete this.playerModes[plr.UserId];
+			delete playerModes[plr.UserId];
 		});
 	}
 
-	static getPlayerMode(player: Player) {
-		return this.playerModes[player.UserId];
+	export function getPlayerMode(player: Player) {
+		return playerModes[player.UserId];
 	}
 
-	static async changeModeForPlayer(this: void, player: Player, mode: PlayModes | undefined): Promise<Response> {
+	export async function changeModeForPlayer(player: Player, mode: PlayModes | undefined): Promise<Response> {
 		if (mode !== undefined && !PlayerUtils.isAlive(player)) {
 			return { success: false, message: "Player is not alive" };
 		}
 
-		const prevmode = PlayModeController.playerModes[player.UserId];
+		const prevmode = playerModes[player.UserId];
 		if (prevmode) {
-			const transition = PlayModeController.modes[prevmode];
+			const transition = modes[prevmode];
 			if (transition) {
 				const result = transition.onTransitionTo(player, mode);
 				if (!result || !result.success)
@@ -37,7 +37,7 @@ export class PlayModeController {
 			}
 		}
 		if (mode) {
-			const transition = PlayModeController.modes[mode];
+			const transition = modes[mode];
 			if (transition) {
 				const result = transition.onTransitionFrom(player, prevmode);
 				if (!result || !result.success)
@@ -45,8 +45,8 @@ export class PlayModeController {
 			}
 		}
 
-		$log(`${player.Name}'s mode: '${PlayModeController.playerModes[player.UserId]}' => '${mode}'`);
-		PlayModeController.playerModes[player.UserId] = mode;
+		$log(`${player.Name}'s mode: '${playerModes[player.UserId]}' => '${mode}'`);
+		playerModes[player.UserId] = mode;
 
 		for (let i = 0; i < 3; i++) {
 			try {
