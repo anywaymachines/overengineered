@@ -876,6 +876,23 @@ const v20: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 			return block;
 		};
 
+		const blockmap = new Map(prev.blocks.map((b) => [b.uuid, b] as const));
+		for (const [, block] of blockmap) {
+			if (block.connections === undefined) continue;
+
+			for (const [name, connection] of pairs(block.connections)) {
+				if (connection.connectionName !== "result") continue;
+
+				const otherblock = blockmap.get(connection.blockUuid);
+				if (otherblock?.id !== "speedometer") continue;
+
+				Objects.writable(block).connections = {
+					...block.connections,
+					[name]: undefined!,
+				};
+			}
+		}
+
 		return {
 			version: this.version,
 			blocks: prev.blocks.map(update),
