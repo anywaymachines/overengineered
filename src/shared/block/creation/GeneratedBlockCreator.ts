@@ -25,6 +25,16 @@ const blocks = {
 		category: categories.other,
 		prefab: prefabs.tripleGeneric,
 	},
+	delayblock: {
+		modelTextOverride: "DELAY",
+		category: categories.other,
+		prefab: prefabs.doubleGeneric,
+	},
+	logicmemory: {
+		modelTextOverride: "MEMORY",
+		category: categories.other,
+		prefab: prefabs.doubleGeneric,
+	},
 } as const satisfies Record<string, CreateInfo>;
 
 export namespace GeneratedBlocksCreator {
