@@ -104,9 +104,9 @@ const defcs = {
 const defs = {
 	multiplexer: {
 		input: {
-			value: defcs.bool("Value 1/2"),
-			truevalue: connectors.any("Channel 1", "1"),
-			falsevalue: connectors.any("Channel 2", "1"),
+			value: defcs.bool("State"),
+			truevalue: connectors.any("True value", "1"),
+			falsevalue: connectors.any("False value", "1"),
 		},
 		output: {
 			result: connectors.any("Result", "1"),
