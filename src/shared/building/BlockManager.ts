@@ -56,6 +56,9 @@ export namespace BlockManager {
 	export function tryGetBlockModelByPart(part: Instance | undefined): BlockModel | undefined {
 		let parent = part;
 		while (parent) {
+			if (parent === game) {
+				break;
+			}
 			if (isBlockModel(parent)) {
 				return parent;
 			}
