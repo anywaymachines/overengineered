@@ -1,4 +1,4 @@
-import { RunService, Workspace } from "@rbxts/services";
+import { Players, RunService, Workspace } from "@rbxts/services";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
 declare global {
@@ -58,6 +58,11 @@ export namespace Logger {
 		print();
 		print(`ℹ️ Environment: ${GameDefinitions.isTestPlace() ? "⚠️ Testing" : "✅ Production"}`);
 		print(`ℹ️ Version: ${GameDefinitions.VERSION}`);
+		if (RunService.IsClient()) {
+			print(
+				`ℹ️ User: ${Players.LocalPlayer.UserId} @${Players.LocalPlayer.Name} ${Players.LocalPlayer.DisplayName}`,
+			);
+		}
 		print(`ℹ️ Build: ${RunService.IsStudio() ? "🔒 Internal" : game.PlaceVersion} [ ${compileTime} ]`);
 		print(`ℹ️ Server: ${RunService.IsStudio() ? "🔒 Local" : game.JobId}`);
 		print(`ℹ️ Debris: ${Workspace.HasTag("PrivateServer") ? "🔓 Everlasting" : "🔒 Default"}`);
