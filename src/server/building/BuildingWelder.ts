@@ -1,6 +1,6 @@
 import { RunService, ServerStorage, Workspace } from "@rbxts/services";
-import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 
@@ -10,7 +10,7 @@ export namespace BuildingWelder {
 	const plotColliders = new Map<PlotModel, WorldModel>();
 
 	export function initialize() {
-		initPartBlockCollisions(BlocksInitializer.blocks.sorted);
+		initPartBlockCollisions(BlockRegistry.sorted);
 	}
 
 	function initPartBlockCollisions(blocks: readonly RegistryBlock[]) {

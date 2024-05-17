@@ -1,8 +1,8 @@
 import { RunService } from "@rbxts/services";
-import { BlocksInitializer } from "shared/BlocksInitializer";
 import { BlockLogicRegistry } from "shared/block/BlockLogicRegistry";
 import { BlockLogicValue } from "shared/block/BlockLogicValue";
 import { BlockLogicValueGroup } from "shared/block/BlockLogicValueGroup";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { PlacedBlockData } from "shared/building/BlockManager";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -50,7 +50,7 @@ export class SharedMachine extends ContainerComponent {
 		for (const block of blocks) {
 			const id = block.id;
 
-			if (!BlocksInitializer.blocks.map.get(id)) {
+			if (!BlockRegistry.map.get(id)) {
 				$err(`Unknown block id ${id}`);
 				continue;
 			}

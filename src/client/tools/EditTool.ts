@@ -18,8 +18,8 @@ import { BlockRotater } from "client/tools/additional/BlockRotater";
 import { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
-import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { SharedPlot } from "shared/building/SharedPlot";
@@ -305,7 +305,7 @@ namespace Controllers {
 
 			const blocks = tool.copied.get();
 			this.blocks = blocks.map((block) => {
-				const b = BlocksInitializer.blocks.map.get(block.id)!.model.Clone();
+				const b = BlockRegistry.map.get(block.id)!.model.Clone();
 				b.PivotTo(block.location);
 				PartUtils.ghostModel(b, Colors.blue);
 				b.Parent = ghostParent;

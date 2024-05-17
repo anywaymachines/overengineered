@@ -20,9 +20,9 @@ import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
 import { PlayModeController } from "client/modes/PlayModeController";
 import { ClientBuildingValidation } from "client/modes/build/ClientBuildingValidation";
-import { BlocksInitializer } from "shared/BlocksInitializer";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { BlocksInitializer } from "shared/init/BlocksInitializer";
 import { AdminMessageController } from "./AdminMessageController";
 import { ClientContainerComponent } from "./component/ClientContainerComponent";
 import { rootComponents } from "./test/RootComponents";
@@ -86,3 +86,5 @@ TextChatService.OnIncomingMessage = function (message: TextChatMessage) {
 
 	return props;
 };
+
+GameLoader.mainLoaded = true;

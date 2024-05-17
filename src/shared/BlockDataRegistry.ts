@@ -791,6 +791,9 @@ const registry = {
 
 export const BlockDataRegistry: { readonly [id in BlockId]: BlockSetupInformation } = registry;
 
+declare global {
+	type BlockId = string & keyof typeof registry;
+}
 export type BlockId = string & keyof typeof registry;
 export const BlockIds = Objects.keys(registry);
 

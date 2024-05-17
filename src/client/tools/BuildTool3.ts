@@ -23,8 +23,8 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
-import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { CFraming } from "shared/building/CFraming";
@@ -254,7 +254,7 @@ namespace Scene {
 					return;
 				}
 
-				const targetCategory = BlocksInitializer.categories.getCategoryPath(block.category) ?? [];
+				const targetCategory = BlockRegistry.getCategoryPath(block.category) ?? [];
 
 				if (
 					this.blockSelector.selectedCategory.get()[this.blockSelector.selectedCategory.get().size() - 1] !==
@@ -1110,7 +1110,7 @@ export class BuildTool3 extends ToolBase {
 		const id = BlockManager.manager.id.get(model);
 		if (id === undefined) return; // not a block
 
-		const block = BlocksInitializer.blocks.map.get(id)!;
+		const block = BlockRegistry.map.get(id)!;
 
 		this.selectedBlock.set(block);
 		this.selectedMaterial.set(BlockManager.manager.material.get(model));

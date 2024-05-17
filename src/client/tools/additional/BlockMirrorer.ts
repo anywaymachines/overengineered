@@ -1,6 +1,6 @@
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockId } from "shared/BlockDataRegistry";
-import { BlocksInitializer } from "shared/BlocksInitializer";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { Component } from "shared/component/Component";
 import { ObservableValue } from "shared/event/ObservableValue";
@@ -87,7 +87,7 @@ export class BlockMirrorer extends Component {
 				types[id] ??= 0;
 				const track = (tracked[id] ??= []);
 				if (track.size() <= types[id]!) {
-					const instance = BlocksInitializer.blocks.map.get(mirror.id)!.model.Clone();
+					const instance = BlockRegistry.map.get(mirror.id)!.model.Clone();
 					BlockGhoster.ghostModel(instance);
 					track.push(instance);
 				}

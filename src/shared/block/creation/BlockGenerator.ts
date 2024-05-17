@@ -1,11 +1,11 @@
 import { RunService } from "@rbxts/services";
 import { BlockDataRegistry, BlockId } from "shared/BlockDataRegistry";
-import { BlocksInitializeData } from "shared/BlocksInitializer";
 import { Element } from "shared/Element";
 import { BlockLogicRegistry } from "shared/block/BlockLogicRegistry";
 import { BlockConfigRegistry, blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { AABB } from "shared/fixes/AABB";
 import { Instances } from "shared/fixes/Instances";
+import { BlocksInitializeData } from "shared/init/BlocksInitializer";
 
 if (RunService.IsServer()) {
 	Element.create("Folder", { Name: "PlaceableAutomatic", Parent: Instances.assets });

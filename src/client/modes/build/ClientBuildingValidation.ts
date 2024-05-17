@@ -1,6 +1,6 @@
 import { Players } from "@rbxts/services";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { BlocksInitializer } from "shared/BlocksInitializer";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { errorResponse, successResponse } from "shared/types/network/Responses";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
@@ -16,7 +16,7 @@ ClientBuilding.placeOperation.addMiddleware((plot, blocks) => {
 
 	if (
 		!blocks.all((block) =>
-			BuildingManager.blockCanBePlacedAt(plot, BlocksInitializer.blocks.map.get(block.id)!, block.location),
+			BuildingManager.blockCanBePlacedAt(plot, BlockRegistry.map.get(block.id)!, block.location),
 		)
 	) {
 		return errorResponse("Can't be placed here");

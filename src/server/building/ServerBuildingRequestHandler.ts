@@ -1,4 +1,4 @@
-import { BlocksInitializer } from "shared/BlocksInitializer";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -19,7 +19,7 @@ export namespace ServerBuildingRequestHandler {
 			if (
 				!BuildingManager.serverBlockCanBePlacedAt(
 					SharedPlots.getPlotComponent(request.plot),
-					BlocksInitializer.blocks.map.get(block.id)!,
+					BlockRegistry.map.get(block.id)!,
 					block.location,
 					player,
 				)
@@ -45,7 +45,7 @@ export namespace ServerBuildingRequestHandler {
 
 		const counts = countBy(request.blocks, (b) => b.id);
 		for (const [id, count] of counts) {
-			const regblock = BlocksInitializer.blocks.map.get(id)!;
+			const regblock = BlockRegistry.map.get(id)!;
 			const placed = SharedPlots.getPlotComponent(request.plot)
 				.getBlocks()
 				.count((placed_block) => {

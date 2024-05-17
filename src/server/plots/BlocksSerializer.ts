@@ -1,7 +1,7 @@
 import { ServerBuilding } from "server/building/ServerBuilding";
 import { BlockId } from "shared/BlockDataRegistry";
-import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Serializer } from "shared/Serializer";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockManager, PlacedBlockDataConnection } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -64,7 +64,7 @@ const place = {
 	},
 
 	blockOnPlotV3: (plot: PlotModel, blockData: SerializedBlockV3, buildingCenter: CFrame) => {
-		if (!BlocksInitializer.blocks.map.has(blockData.id)) {
+		if (!BlockRegistry.map.has(blockData.id)) {
 			$err(`Could not load ${blockData.id} from slot: Block does not exists`);
 			return;
 		}

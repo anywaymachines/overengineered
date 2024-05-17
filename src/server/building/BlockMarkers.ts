@@ -1,5 +1,5 @@
 import { BlockId } from "shared/BlockDataRegistry";
-import { BlocksInitializer } from "shared/BlocksInitializer";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 
 export namespace BlockMarkers {
 	export const markers: {
@@ -7,7 +7,7 @@ export namespace BlockMarkers {
 	} = {};
 
 	export function initialize() {
-		initPartBlockCollisions(BlocksInitializer.blocks.sorted);
+		initPartBlockCollisions(BlockRegistry.sorted);
 	}
 
 	function initPartBlockCollisions(blocks: readonly RegistryBlock[]) {

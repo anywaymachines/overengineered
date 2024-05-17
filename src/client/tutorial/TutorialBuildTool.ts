@@ -1,7 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { Tutorial } from "client/tutorial/Tutorial";
-import { BlocksInitializer } from "shared/BlocksInitializer";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { EventHandler } from "shared/event/EventHandler";
@@ -28,7 +28,7 @@ export class TutorialBuildTool {
 	}
 
 	addBlockToPlace(data: TutorialPlaceBlockHighlight) {
-		const model = BlocksInitializer.blocks.map.get(data.id)!.model.Clone();
+		const model = BlockRegistry.map.get(data.id)!.model.Clone();
 		const plot = SharedPlots.getOwnPlot();
 		const relativePosition = plot.instance.BuildingArea.CFrame.ToWorldSpace(data.cframe);
 

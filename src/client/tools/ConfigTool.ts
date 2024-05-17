@@ -10,8 +10,8 @@ import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBl
 import { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
-import { BlocksInitializer } from "shared/BlocksInitializer";
 import { Colors } from "shared/Colors";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -86,7 +86,7 @@ namespace Scene {
 
 			if (!wasVisible) GuiAnimator.transition(this.gui, 0.2, "up");
 			const blockmodel = selected[0];
-			const block = BlocksInitializer.blocks.map.get(BlockManager.manager.id.get(blockmodel))!;
+			const block = BlockRegistry.map.get(BlockManager.manager.id.get(blockmodel))!;
 			const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
 				.input as BlockConfigTypes.Definitions;
 
@@ -98,7 +98,7 @@ namespace Scene {
 			const configs = selected.map((selected) => {
 				const blockmodel = selected;
 				const id = BlockManager.manager.id.get(blockmodel)!;
-				const block = BlocksInitializer.blocks.map.get(id)!;
+				const block = BlockRegistry.map.get(id)!;
 
 				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
 					.input as BlockConfigTypes.Definitions;

@@ -9,6 +9,9 @@ import { InstanceComponent } from "shared/component/InstanceComponent";
 import { TestFramework } from "shared/test/TestFramework";
 
 GameLoader.waitForEverything();
+while (!GameLoader.mainLoaded) {
+	task.wait();
+}
 
 const enabled = RunService.IsStudio(); // && Players.LocalPlayer.Name === "i3ymm";
 if (!enabled) new Instance("BindableEvent").Event.Wait();

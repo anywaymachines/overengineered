@@ -6,6 +6,7 @@ import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { SharedGameLoader } from "shared/init/SharedGameLoader";
 
 namespace BSOD {
 	type BsodControlDefinition = ScreenGui & {
@@ -65,26 +66,16 @@ namespace BSOD {
 	}
 }
 
-print("`INGAMELOADER", debug.traceback());
-export namespace GameLoader {
-	export function lazyLoader(name: string, func: () => void) {
-		let loaded = false;
-
-		return () => {
-			if (loaded) return;
-			loaded = true;
-
-			wrapLoading(name, func);
-		};
-	}
-	export function wrapLoading(name: string, func: () => void) {
+SharedGameLoader.loadingStarted.Connect((name) => {
+	if (name !== undefined) {
 		LoadingController.show(name);
-
-		try {
-			func();
-			LoadingController.hide();
-		} catch (err) {
-			const str = `
+	}
+});
+SharedGameLoader.loadingCompleted.Connect((name) => {
+	LoadingController.hide();
+});
+SharedGameLoader.loadingError.Connect((err) => {
+	const str = `
 An error has occurred: The game has failed to load.
 
 Screenshot this screen and send it to the developers in the official Discord server.
@@ -97,10 +88,15 @@ ${GameDefinitions.getEnvironmentInfo().join("\n")}
 Error: ${err}
 `.gsub("^%s*(.-)%s*$", "%1")[0];
 
-			BSOD.show(str);
-			throw err;
-		}
-	}
+	BSOD.show(str);
+});
+
+print("`INGAMELOADER", debug.traceback());
+export namespace GameLoader {
+	export let mainLoaded = false;
+	mainLoaded = false;
+
+	export const { lazyLoader, wrapLoading } = SharedGameLoader;
 
 	export function waitForDataStorage() {
 		while (!PlayerDataStorage.data.get()) {

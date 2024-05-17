@@ -1,5 +1,5 @@
 import { HttpService } from "@rbxts/services";
-import { BlocksInitializer } from "shared/BlocksInitializer";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager, PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -45,7 +45,7 @@ export namespace ServerBuilding {
 			throw "Block with this uuid already exists";
 		}
 
-		const block = BlocksInitializer.blocks.map.get(data.id);
+		const block = BlockRegistry.map.get(data.id);
 		if (!block) {
 			return { success: false, message: `Unknown block id ${data.id}` };
 		}

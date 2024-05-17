@@ -5,7 +5,7 @@ import { GuiAnimator } from "client/gui/GuiAnimator";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
-import { BlocksInitializer } from "shared/BlocksInitializer";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { ObservableValue } from "shared/event/ObservableValue";
 
 type CategoryControlDefinition = TextButton;
@@ -67,10 +67,8 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 		this.pipette = this.add(
 			BlockPipetteButton.forBlockId(this.gui.Header.Pipette, (id) => {
-				this.selectedBlock.set(BlocksInitializer.blocks.map.get(id));
-				this.selectedCategory.set(
-					BlocksInitializer.categories.getCategoryPath(this.selectedBlock.get()!.category) ?? [],
-				);
+				this.selectedBlock.set(BlockRegistry.map.get(id));
+				this.selectedCategory.set(BlockRegistry.getCategoryPath(this.selectedBlock.get()!.category) ?? []);
 			}),
 		);
 
@@ -128,16 +126,14 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 		if (this.gui.SearchTextBox.Text === "") {
 			// Category buttons
-			for (const [_, category] of pairs(
-				selected.reduce((acc, val) => acc[val].sub, BlocksInitializer.categories.categories),
-			)) {
+			for (const [_, category] of pairs(selected.reduce((acc, val) => acc[val].sub, BlockRegistry.categories))) {
 				createCategoryButton(category.name, () => this.selectedCategory.set([...selected, category.name]));
 			}
 		}
 
 		// Block buttons
 		let prev: BlockControl | CategoryControl | undefined;
-		for (const block of BlocksInitializer.blocks.sorted) {
+		for (const block of BlockRegistry.sorted) {
 			if (
 				block.category === this.selectedCategory.get()[this.selectedCategory.get().size() - 1] ||
 				(this.gui.SearchTextBox.Text !== "" &&
@@ -146,7 +142,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 				const button = createBlockButton(block, () => {
 					if (this.gui.SearchTextBox.Text !== "") {
 						this.gui.SearchTextBox.Text = "";
-						this.selectedCategory.set(BlocksInitializer.categories.getCategoryPath(block.category) ?? []);
+						this.selectedCategory.set(BlockRegistry.getCategoryPath(block.category) ?? []);
 					}
 					this.selectedBlock.set(block);
 				});

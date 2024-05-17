@@ -1,12 +1,12 @@
 import { RunService } from "@rbxts/services";
 import { BlockId } from "shared/BlockDataRegistry";
-import type { BlocksInitializeData } from "shared/BlocksInitializer";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { BlockLogic } from "shared/block/BlockLogic";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { connectors } from "shared/block/config/BlockConfigRegistry";
 import { BlockGenerator } from "shared/block/creation/BlockGenerator";
 import { PlacedBlockData } from "shared/building/BlockManager";
+import { BlocksInitializeData } from "shared/init/BlocksInitializer";
 
 interface CreateInfo<TFunc> {
 	readonly modelTextOverride: string;
@@ -1085,15 +1085,6 @@ const operations = {
 		},
 	},
 } as const satisfies NonGenericOperations;
-
-print(
-	"DOUBLE",
-	asMap(operations as NonGenericOperations)
-		.flatmap((k, v) => asMap(v).map((k, v) => ({ k, v })))
-		.filter(({ k, v }) => v.prefab === prefabs.tripleGeneric)
-		.map(({ k, v }) => k.lower())
-		.join(", "),
-);
 
 type NonGenericOperations = {
 	readonly [k in keyof typeof logicReg]: Record<string, CreateInfo<Parameters<(typeof logicReg)[k]>[0]>>;
