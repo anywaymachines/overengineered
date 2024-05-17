@@ -8,21 +8,33 @@ export type PlayModeControllerType = {
 
 export class BuildMode implements PlayModeBase {
 	constructor(controller: PlayModeControllerType) {
-		Players.PlayerAdded.Connect((plr) => {
+		const runchar = async (plr: Player, character: Model) => {
 			// on spawn
-			plr.CharacterAdded.Connect(async (character) => {
-				const response = await controller.changeModeForPlayer(plr, "build");
+			const response = await controller.changeModeForPlayer(plr, "build");
+			if (!response.success) $err(response.message);
+
+			// on death
+			(character.WaitForChild("Humanoid") as Humanoid).Died.Once(async () => {
+				const prev = controller.getPlayerMode(plr);
+				if (prev !== "build" && prev !== undefined) return;
+
+				const response = await controller.changeModeForPlayer(plr, undefined);
 				if (!response.success) $err(response.message);
-
-				// on death
-				(character.WaitForChild("Humanoid") as Humanoid).Died.Once(async () => {
-					if (controller.getPlayerMode(plr) !== "build") return;
-
-					const response = await controller.changeModeForPlayer(plr, undefined);
-					if (!response.success) $err(response.message);
-				});
 			});
-		});
+		};
+		const sub = (plr: Player) => {
+			const char = plr.FindFirstChild("Character") as Model | undefined;
+			if (char) {
+				runchar(plr, char);
+			} else {
+				plr.CharacterAdded.Connect(async (char) => runchar(plr, char));
+			}
+		};
+
+		Players.PlayerAdded.Connect(sub);
+		for (const player of Players.GetPlayers()) {
+			sub(player);
+		}
 	}
 
 	onTransitionFrom(player: Player, prevmode: PlayModes | undefined): Response | undefined {
