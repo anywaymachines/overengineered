@@ -16,7 +16,7 @@ export class AltimeterBlockLogic extends ConfigurableBlockLogic<typeof blockConf
 
 	private update() {
 		this.output.result.set(
-			RobloxUnit.Studs_To_Meters(this.block.instance.GetPivot().Position.Y + GameDefinitions.HEIGHT_OFFSET),
+			RobloxUnit.Studs_To_Meters(this.block.instance.GetPivot().Position.Y - GameDefinitions.HEIGHT_OFFSET),
 		);
 	}
 }
