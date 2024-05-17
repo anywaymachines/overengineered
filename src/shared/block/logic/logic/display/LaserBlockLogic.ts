@@ -42,7 +42,7 @@ export class LaserBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRe
 			raycastResult?.Distance !== undefined ? RobloxUnit.Studs_To_Meters(raycastResult?.Distance) : -1,
 		);
 
-		if (raycastResult?.Distance !== undefined) {
+		if (raycastResult?.Distance !== undefined || this.input.alwaysEnabled.get()) {
 			this.ray.Transparency = this.input.rayTransparency.get();
 			this.ray.Size = new Vector3(distance, 0.1, 0.1);
 			this.ray.CFrame = new CFrame(raycastOrigin, endpos)

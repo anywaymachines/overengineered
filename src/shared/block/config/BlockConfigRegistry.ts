@@ -754,6 +754,12 @@ const screen = {
 
 const laser = {
 	input: {
+		alwaysEnabled: {
+			displayName: "Laser always enabled",
+			type: "bool",
+			config: false as boolean,
+			default: false as boolean,
+		},
 		maxDistance: {
 			displayName: "Max distance",
 			type: "clampedNumber",
