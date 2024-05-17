@@ -1,4 +1,4 @@
-import { Players, RunService, Workspace } from "@rbxts/services";
+import { RunService } from "@rbxts/services";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
 declare global {
@@ -49,23 +49,11 @@ export namespace Logger {
 	function init() {
 		if (!RunService.IsClient()) return;
 
-		const compileTime = DateTime.fromUnixTimestamp($compileTime()).FormatUniversalTime(
-			"DD MMM YYYY (HH:mm)",
-			"en-us",
-		);
-
 		print(`🛠️ Plane Engineers 🛠️`);
 		print();
-		print(`ℹ️ Environment: ${GameDefinitions.isTestPlace() ? "⚠️ Testing" : "✅ Production"}`);
-		print(`ℹ️ Version: ${GameDefinitions.VERSION}`);
-		if (RunService.IsClient()) {
-			print(
-				`ℹ️ User: ${Players.LocalPlayer.UserId} @${Players.LocalPlayer.Name} ${Players.LocalPlayer.DisplayName}`,
-			);
+		for (const env of GameDefinitions.getEnvironmentInfo()) {
+			print(`ℹ ${env}`);
 		}
-		print(`ℹ️ Build: ${RunService.IsStudio() ? "🔒 Internal" : game.PlaceVersion} [ ${compileTime} ]`);
-		print(`ℹ️ Server: ${RunService.IsStudio() ? "🔒 Local" : game.JobId}`);
-		print(`ℹ️ Debris: ${Workspace.HasTag("PrivateServer") ? "🔓 Everlasting" : "🔒 Default"}`);
 		print();
 	}
 	init();
