@@ -19,7 +19,6 @@ import { SlotsMeta } from "shared/SlotsMeta";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { Replicator } from "shared/replication/Replicator";
 import { BuildingWelder } from "./building/BuildingWelder";
 import { ServerBuilding } from "./building/ServerBuilding";
 import { ServerBuildingRequestHandler } from "./building/ServerBuildingRequestHandler";
@@ -257,5 +256,3 @@ RemoteEvents.initialize();
 
 PlayModeController.init();
 Workspace.SetAttribute("loaded", true);
-
-const _ = Replicator;
