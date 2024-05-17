@@ -870,7 +870,7 @@ const operations = {
 		byteNEG: {
 			modelTextOverride: "BNEG",
 			category: categories.byte,
-			prefab: prefabs.doubleByte,
+			prefab: prefabs.smallByte,
 			func: (num) => -num & 0xff,
 		},
 	},
