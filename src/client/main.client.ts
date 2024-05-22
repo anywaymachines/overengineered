@@ -1,6 +1,7 @@
 /* eslint-disable import/order */
 import { GameLoader } from "client/GameLoader";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { LoadingController } from "client/controller/LoadingController";
 
 const dataLoading = PlayerDataStorage.init();
 GameLoader.waitForEverything(LoadingController.show);
@@ -13,7 +14,6 @@ import { ClientContainerComponent } from "client/component/ClientContainerCompon
 import { CharacterController } from "client/controller/CharacterController";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
-import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { SoundController } from "client/controller/SoundController";
 import { WindController } from "client/controller/WindController";
