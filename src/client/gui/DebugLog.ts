@@ -1,10 +1,10 @@
 import { RunService } from "@rbxts/services";
 import { Control } from "client/gui/Control";
-import { Gui } from "client/gui/Gui";
 import { LabelControl } from "client/gui/controls/LabelControl";
-import { Element } from "shared/Element";
+import { Gui } from "client/gui/Gui";
 import { ComponentChildren } from "shared/component/ComponentChildren";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
+import { Element } from "shared/Element";
 
 class CategoryControl extends Control {
 	readonly unnamed = new ComponentChildren<LabelControl>(this);

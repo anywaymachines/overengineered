@@ -1,5 +1,5 @@
-import { RobloxUnit } from "shared/RobloxUnit";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { RobloxUnit } from "shared/RobloxUnit";
 
 export namespace GameEnvironment {
 	export const EarthGravity = GameDefinitions.APRIL_FOOLS ? 60 : 180;

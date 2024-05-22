@@ -1,8 +1,8 @@
 import { Players, ReplicatedStorage, StarterGui, UserInputService, Workspace } from "@rbxts/services";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { LoadingController } from "client/controller/LoadingController";
 import { Gui } from "client/gui/Gui";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";

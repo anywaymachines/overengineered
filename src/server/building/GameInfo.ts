@@ -1,5 +1,6 @@
 import { BlockMarkers } from "server/building/BlockMarkers";
-import { BlockId, BlockIds } from "shared/BlockDataRegistry";
+import { BlockIds } from "shared/BlockDataRegistry";
+import type { BlockId } from "shared/BlockDataRegistry";
 
 export namespace GameInfo {
 	let info: GameInfo | undefined;

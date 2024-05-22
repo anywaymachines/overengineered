@@ -1,7 +1,7 @@
 import { Workspace } from "@rbxts/services";
-import type { ChunkGenerator, ChunkRenderer } from "client/terrain/ChunkLoader";
-import { Element } from "shared/Element";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { Element } from "shared/Element";
+import type { ChunkGenerator, ChunkRenderer } from "client/terrain/ChunkLoader";
 
 const parent = Element.create("Folder", { Name: "Triterra", Parent: Workspace.WaitForChild("Obstacles") });
 export const TriangleChunkRenderer = (

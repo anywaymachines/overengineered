@@ -1,6 +1,6 @@
 import { DataStoreService, HttpService, Players } from "@rbxts/services";
+import { Db } from "server/database/Database";
 import { PlayerConfigUpdater } from "server/PlayerConfigVersioning";
-import { Db } from "./Database";
 
 export type PlayerData = {
 	readonly purchasedSlots?: number;

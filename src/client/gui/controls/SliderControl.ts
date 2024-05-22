@@ -1,10 +1,11 @@
 import { Players, UserInputService } from "@rbxts/services";
 import { Control } from "client/gui/Control";
+import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
+import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
 import { EventHandler } from "shared/event/EventHandler";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { Signal } from "shared/event/Signal";
-import { NumberTextBoxControl } from "./NumberTextBoxControl";
-import { ProgressBarControl, ProgressBarControlDefinition } from "./ProgressBarControl";
+import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
 
 type ToNum<TAllowNull extends boolean> = TAllowNull extends false ? number : number | undefined;
 export type SliderControlDefinition = ProgressBarControlDefinition & {

@@ -2,19 +2,19 @@ import { Players } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { LoadingController } from "client/controller/LoadingController";
 import { Signals } from "client/event/Signals";
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { BuildTool } from "client/tools/BuildTool";
 import { BuildTool3 } from "client/tools/BuildTool3";
 import { ConfigTool } from "client/tools/ConfigTool";
 import { DeleteTool } from "client/tools/DeleteTool";
+import { EditTool } from "client/tools/EditTool";
 import { PaintTool } from "client/tools/PaintTool";
-import { ToolBase } from "client/tools/ToolBase";
+import { WireTool } from "client/tools/WireTool";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentDisabler } from "shared/component/ComponentDisabler";
 import { MiddlewaredObservableValue } from "shared/event/MiddlewaredObservableValue";
 import { Objects } from "shared/fixes/objects";
-import { EditTool } from "./EditTool";
-import { WireTool } from "./WireTool";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ToolBase } from "client/tools/ToolBase";
 
 class ToolInputController extends ClientComponent {
 	constructor(tools: ToolController) {

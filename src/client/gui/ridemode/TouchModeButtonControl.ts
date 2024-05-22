@@ -1,7 +1,8 @@
-import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
+import { TextButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
-import { TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import { Signal } from "shared/event/Signal";
+import type { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
+import type { TextButtonDefinition } from "client/gui/controls/Button";
 
 export type TouchModeButtonData = {
 	readonly name: string;

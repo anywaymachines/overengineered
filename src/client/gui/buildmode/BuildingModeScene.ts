@@ -1,14 +1,15 @@
 import { LoadingController } from "client/controller/LoadingController";
+import { ToolbarControl } from "client/gui/buildmode/ToolbarControl";
 import { Control } from "client/gui/Control";
-import { ToolbarControl, ToolbarControlDefinition } from "client/gui/buildmode/ToolbarControl";
 import { ButtonControl } from "client/gui/controls/Button";
 import { SavePopup } from "client/gui/popup/SavePopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
-import { requestMode } from "client/modes/PlayModeRequest";
 import { ActionController } from "client/modes/build/ActionController";
-import { ToolController } from "client/tools/ToolController";
+import { requestMode } from "client/modes/PlayModeRequest";
 import { ComponentDisabler } from "shared/component/ComponentDisabler";
-import { TransformProps } from "shared/component/Transform";
+import type { ToolbarControlDefinition } from "client/gui/buildmode/ToolbarControl";
+import type { ToolController } from "client/tools/ToolController";
+import type { TransformProps } from "shared/component/Transform";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {

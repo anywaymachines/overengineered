@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
-import { type ChunkGenerator } from "client/terrain/ChunkLoader";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
+import type { ChunkGenerator } from "client/terrain/ChunkLoader";
 
 const baseplate = Workspace.WaitForChild("Obstacles").WaitForChild("Baseplate") as BasePart;
 const offset = baseplate.Position.div(4);

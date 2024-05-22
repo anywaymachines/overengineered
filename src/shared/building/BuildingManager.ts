@@ -1,9 +1,9 @@
 import { Players } from "@rbxts/services";
-import { BlockId } from "shared/BlockDataRegistry";
 import { BlockRegistry } from "shared/block/BlockRegistry";
-import { SharedPlot } from "shared/building/SharedPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { BlockId } from "shared/BlockDataRegistry";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 /** Methods for for getting information about blocks in a building */
 export namespace BuildingManager {

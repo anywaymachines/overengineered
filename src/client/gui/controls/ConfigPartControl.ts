@@ -1,7 +1,7 @@
 import { Control } from "client/gui/Control";
-import { ConfigPartDefinition } from "client/gui/popup/SettingsPopup";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { JsonSerializablePrimitive } from "shared/fixes/Json";
+import type { ConfigPartDefinition } from "client/gui/popup/SettingsPopup";
+import type { ObservableValue } from "shared/event/ObservableValue";
+import type { JsonSerializablePrimitive } from "shared/fixes/Json";
 
 export class ConfigPartControl<
 	TControl extends Control<TDef>,

@@ -1,7 +1,9 @@
-import { ColorChooser, ColorChooserDefinition } from "client/gui/ColorChooser";
-import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
-import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
+import { ColorChooser } from "client/gui/ColorChooser";
+import { configControlRegistry } from "client/gui/config/ConfigControlRegistry";
+import { ConfigValueControl } from "client/gui/config/ConfigValueControl";
+import { configValueTemplateStorage } from "client/gui/config/ConfigValueTemplateStorage";
+import type { ColorChooserDefinition } from "client/gui/ColorChooser";
+import type { ConfigValueControlParams } from "client/gui/config/ConfigValueControl";
 
 type Type = BlockConfigTypes.Color;
 class ValueControl extends ConfigValueControl<ColorChooserDefinition, Type> {

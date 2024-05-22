@@ -1,18 +1,19 @@
 import { InputController } from "client/controller/InputController";
 import { SoundController } from "client/controller/SoundController";
+import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
 import { Control } from "client/gui/Control";
-import { GuiAnimator } from "client/gui/GuiAnimator";
-import { MirrorEditorControl, MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
 import { ButtonControl } from "client/gui/controls/Button";
+import { GuiAnimator } from "client/gui/GuiAnimator";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
-import { InputTooltips } from "client/gui/static/TooltipsControl";
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { ToolBase } from "client/tools/ToolBase";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
+import { ToolBase } from "client/tools/ToolBase";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { Signal } from "shared/event/Signal";
+import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
+import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
 
 namespace Scene {
 	export type DeleteToolSceneDefinition = GuiObject & {

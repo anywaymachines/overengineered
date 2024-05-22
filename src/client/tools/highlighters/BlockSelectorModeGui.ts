@@ -1,10 +1,11 @@
 import { Control } from "client/gui/Control";
-import { TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
-import { HoveredBlocksSelectorMode } from "client/tools/highlighters/HoveredBlocksSelector";
-import { type BlockSelectorMode } from "client/tools/highlighters/MultiBlockSelector";
+import { TextButtonControl } from "client/gui/controls/Button";
 import { Colors } from "shared/Colors";
 import { TransformService } from "shared/component/TransformService";
-import { ObservableValue } from "shared/event/ObservableValue";
+import type { TextButtonDefinition } from "client/gui/controls/Button";
+import type { HoveredBlocksSelectorMode } from "client/tools/highlighters/HoveredBlocksSelector";
+import type { BlockSelectorMode } from "client/tools/highlighters/MultiBlockSelector";
+import type { ObservableValue } from "shared/event/ObservableValue";
 
 export type BlockSelectorModeGuiDefinition = GuiObject & {
 	readonly SingleSelection: TextButtonDefinition;

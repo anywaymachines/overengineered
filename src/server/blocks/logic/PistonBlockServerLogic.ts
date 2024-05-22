@@ -1,5 +1,5 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
-import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
+import type { PistonLogic } from "shared/block/logic/PistonBlockLogic";
 
 export class PistonBlockServerLogic extends ServerBlockLogic<typeof PistonLogic> {
 	constructor(logic: typeof PistonLogic) {

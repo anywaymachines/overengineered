@@ -1,9 +1,11 @@
+import { configControlRegistry } from "client/gui/config/ConfigControlRegistry";
+import { ConfigValueControl } from "client/gui/config/ConfigValueControl";
+import { configValueTemplateStorage } from "client/gui/config/ConfigValueTemplateStorage";
 import { MultiConfigControl } from "client/gui/config/MultiConfigControl";
-import { DropdownList, DropdownListDefinition } from "client/gui/controls/DropdownList";
+import { DropdownList } from "client/gui/controls/DropdownList";
 import { Element } from "shared/Element";
-import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
-import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
+import type { ConfigValueControlParams } from "client/gui/config/ConfigValueControl";
+import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 
 export type OrConfigControlDefinition = GuiObject & {
 	readonly Dropdown: DropdownListDefinition;

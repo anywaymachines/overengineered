@@ -1,6 +1,6 @@
 import { Workspace } from "@rbxts/services";
-import { ChunkRenderer } from "client/terrain/ChunkLoader";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import type { ChunkRenderer } from "client/terrain/ChunkLoader";
 
 export const WaterTerrainChunkRenderer = (): ChunkRenderer<true> => {
 	const chunkSize = 16;

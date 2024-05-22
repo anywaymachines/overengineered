@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import { PlayModeBase } from "./PlayModeBase";
+import type { PlayModeBase } from "server/modes/PlayModeBase";
 
 export type PlayModeControllerType = {
 	getPlayerMode(player: Player): PlayModes | undefined;

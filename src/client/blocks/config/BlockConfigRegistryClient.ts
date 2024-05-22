@@ -1,20 +1,20 @@
+import { BoolConfigLogicValue } from "client/blocks/config/BoolConfigLogicValue";
 import { ByteArrayConfigLogicValue } from "client/blocks/config/ByteArrayConfigLogicValue";
 import { ByteConfigLogicValue } from "client/blocks/config/ByteConfigLogicValue";
+import { ClampedNumberConfigLogicValue } from "client/blocks/config/ClampedNumberConfigLogicValue";
 import { ColorConfigLogicValue } from "client/blocks/config/ColorConfigLogicValue";
 import { ControllableNumberConfigLogicValue } from "client/blocks/config/ControllableNumberLogicValue";
-import { BoolConfigLogicValue } from "./BoolConfigLogicValue";
-import { ClampedNumberConfigLogicValue } from "./ClampedNumberConfigLogicValue";
-import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
-import { KeyBoolConfigLogicValue } from "./KeyBoolConfigLogicValue";
-import { KeyConfigLogicValue } from "./KeyConfigLogicValue";
-import { MotorRotationSpeedConfigLogicValue } from "./MotorRotationSpeedConfigLogicValue";
-import { MultiKeyConfigLogicValue } from "./MultiKeyConfigLogicValue";
-import { NumberConfigLogicValue } from "./NumberConfigLogicValue";
-import { OrConfigLogicValue } from "./OrConfigLogicValue";
-import { ServoMotorAngleConfigLogicValue } from "./ServoMotorAngleConfigLogicValue";
-import { StringConfigLogicValue } from "./StringConfigLogicValue";
-import { ThrustConfigLogicValue } from "./ThrustConfigLogicValue";
-import { Vector3ConfigLogicValue } from "./Vector3ConfigLogicValue";
+import { KeyBoolConfigLogicValue } from "client/blocks/config/KeyBoolConfigLogicValue";
+import { KeyConfigLogicValue } from "client/blocks/config/KeyConfigLogicValue";
+import { MotorRotationSpeedConfigLogicValue } from "client/blocks/config/MotorRotationSpeedConfigLogicValue";
+import { MultiKeyConfigLogicValue } from "client/blocks/config/MultiKeyConfigLogicValue";
+import { NumberConfigLogicValue } from "client/blocks/config/NumberConfigLogicValue";
+import { OrConfigLogicValue } from "client/blocks/config/OrConfigLogicValue";
+import { ServoMotorAngleConfigLogicValue } from "client/blocks/config/ServoMotorAngleConfigLogicValue";
+import { StringConfigLogicValue } from "client/blocks/config/StringConfigLogicValue";
+import { ThrustConfigLogicValue } from "client/blocks/config/ThrustConfigLogicValue";
+import { Vector3ConfigLogicValue } from "client/blocks/config/Vector3ConfigLogicValue";
+import type { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
 
 export type blockConfigRegistryClient = {
 	[k in keyof BlockConfigTypes.Types]: typeof ConfigLogicValueBase<BlockConfigTypes.Types[k]>;

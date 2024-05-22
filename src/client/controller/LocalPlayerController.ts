@@ -1,9 +1,9 @@
 import { ContextActionService, Players, RunService } from "@rbxts/services";
+import { InputController } from "client/controller/InputController";
 import { Signals } from "client/event/Signals";
-import { PlayerModule } from "client/types/PlayerModule";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { PartUtils } from "shared/utils/PartUtils";
-import { InputController } from "./InputController";
+import type { PlayerModule } from "client/types/PlayerModule";
 
 export namespace LocalPlayerController {
 	export const mouse = Players.LocalPlayer.GetMouse();

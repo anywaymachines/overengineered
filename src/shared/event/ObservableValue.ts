@@ -1,4 +1,5 @@
-import { ReadonlySignal, Signal } from "shared/event/Signal";
+import { Signal } from "shared/event/Signal";
+import type { ReadonlySignal } from "shared/event/Signal";
 
 export interface ReadonlySubscribeObservableValue<T> {
 	readonly changed: ReadonlySignal<(value: T, prev: T) => void>;

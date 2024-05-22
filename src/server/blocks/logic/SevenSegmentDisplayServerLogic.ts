@@ -1,5 +1,5 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
-import { SevenSegmentDisplayBlockLogic } from "shared/block/logic/logic/display/SevenSegmentDisplayBlockLogic";
+import type { SevenSegmentDisplayBlockLogic } from "shared/block/logic/logic/display/SevenSegmentDisplayBlockLogic";
 
 export class SevenSegmentDisplayServerLogic extends ServerBlockLogic<typeof SevenSegmentDisplayBlockLogic> {
 	private readonly SEGMENT_LETTERS: { [key: string]: string[] } = {

@@ -1,10 +1,10 @@
 import { DataStoreService, Players } from "@rbxts/services";
+import { Db } from "server/database/Database";
+import { PlayerDatabase } from "server/database/PlayerDatabase";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
-import { SlotsMeta } from "shared/SlotsMeta";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { Db } from "./Database";
-import { PlayerDatabase } from "./PlayerDatabase";
+import { SlotsMeta } from "shared/SlotsMeta";
 
 export class SlotDatabase {
 	static readonly instance = new SlotDatabase();

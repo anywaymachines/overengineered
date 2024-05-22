@@ -1,12 +1,13 @@
+import { DisconnectBlockServerLogic } from "server/blocks/logic/DisconnectBlockServerLogic";
+import { LampServerLogic } from "server/blocks/logic/LampServerLogic";
 import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic";
 import { PistonBlockServerLogic } from "server/blocks/logic/PistonBlockServerLogic";
+import { ScreenServerLogic } from "server/blocks/logic/ScreenServerLogic";
 import { SevenSegmentDisplayServerLogic } from "server/blocks/logic/SevenSegmentDisplayServerLogic";
-import { BlockLogicRegistry, KnownBlockLogic } from "shared/block/BlockLogicRegistry";
-import { ServerBlockLogic } from "./ServerBlockLogic";
-import { DisconnectBlockServerLogic } from "./logic/DisconnectBlockServerLogic";
-import { LampServerLogic } from "./logic/LampServerLogic";
-import { ScreenServerLogic } from "./logic/ScreenServerLogic";
-import { TNTServerBlockLogic } from "./logic/TNTServerLogic";
+import { TNTServerBlockLogic } from "server/blocks/logic/TNTServerLogic";
+import { BlockLogicRegistry } from "shared/block/BlockLogicRegistry";
+import type { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
+import type { KnownBlockLogic } from "shared/block/BlockLogicRegistry";
 
 type ShareableLogic = ExtractMembers<KnownBlockLogic, { readonly events: Record<string, unknown> }>;
 type ServerBlockLogicRegistry = {

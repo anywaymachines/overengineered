@@ -1,17 +1,17 @@
 import { RunService } from "@rbxts/services";
+import { BlockLogic } from "shared/block/BlockLogic";
 import { BlockLogicRegistry } from "shared/block/BlockLogicRegistry";
-import { BlockLogicValue } from "shared/block/BlockLogicValue";
 import { BlockLogicValueGroup } from "shared/block/BlockLogicValueGroup";
 import { BlockRegistry } from "shared/block/BlockRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { ImpactController } from "shared/block/impact/ImpactController";
+import { VehicleSeatBlockLogic } from "shared/block/logic/VehicleSeatBlockLogic";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Objects } from "shared/fixes/objects";
-import { BlockLogic } from "./BlockLogic";
-import { ConfigurableBlockLogic } from "./ConfigurableBlockLogic";
-import { ImpactController } from "./impact/ImpactController";
-import { VehicleSeatBlockLogic } from "./logic/VehicleSeatBlockLogic";
+import type { BlockLogicValue } from "shared/block/BlockLogicValue";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class SharedMachine extends ContainerComponent {
 	readonly blocks: BlockLogic[] = [];

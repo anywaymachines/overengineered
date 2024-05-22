@@ -1,6 +1,5 @@
 import { Workspace } from "@rbxts/services";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { Tutorial } from "client/tutorial/Tutorial";
 import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -8,6 +7,7 @@ import { EventHandler } from "shared/event/EventHandler";
 import { successResponse } from "shared/types/network/Responses";
 import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { Tutorial } from "client/tutorial/Tutorial";
 
 export type TutorialPlaceBlockHighlight = {
 	id: string;

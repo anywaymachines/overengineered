@@ -1,7 +1,7 @@
-import { RobloxUnit } from "shared/RobloxUnit";
-import { BlockLogicData } from "shared/block/BlockLogic";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { RobloxUnit } from "shared/RobloxUnit";
+import type { BlockLogicData } from "shared/block/BlockLogic";
 
 export class SpeedometerBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.speedometer> {
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.speedometer.input>) {

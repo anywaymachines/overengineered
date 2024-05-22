@@ -1,10 +1,11 @@
 import { RunService, Workspace } from "@rbxts/services";
-import { RemoteEvents } from "shared/RemoteEvents";
-import { TerrainDataInfo } from "shared/TerrainDataInfo";
-import { BlockManager, PlacedBlockData } from "shared/building/BlockManager";
+import { BlockManager } from "shared/building/BlockManager";
 import { Component } from "shared/component/Component";
 import { Objects } from "shared/fixes/objects";
+import { RemoteEvents } from "shared/RemoteEvents";
+import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 const overlapParams = new OverlapParams();
 overlapParams.CollisionGroup = "Blocks";

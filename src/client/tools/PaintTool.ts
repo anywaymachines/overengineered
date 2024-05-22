@@ -1,19 +1,19 @@
+import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { Control } from "client/gui/Control";
+import { ButtonControl } from "client/gui/controls/Button";
+import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Gui } from "client/gui/Gui";
-import {
-	MaterialColorEditControl,
-	MaterialColorEditControlDefinition,
-} from "client/gui/buildmode/MaterialColorEditControl";
-import { ButtonControl, ButtonDefinition } from "client/gui/controls/Button";
-import { ToggleControl, ToggleControlDefinition } from "client/gui/controls/ToggleControl";
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { ToolBase } from "client/tools/ToolBase";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
+import { ToolBase } from "client/tools/ToolBase";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { TransformService } from "shared/component/TransformService";
 import { ObservableValue } from "shared/event/ObservableValue";
+import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
+import type { ButtonDefinition } from "client/gui/controls/Button";
+import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
 
 namespace Scene {
 	export type PaintToolSceneDefinition = GuiObject & {

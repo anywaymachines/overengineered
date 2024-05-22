@@ -1,5 +1,5 @@
 import { HttpService } from "@rbxts/services";
-import { Objects } from "./objects";
+import { Objects } from "shared/fixes/objects";
 
 type Serializer<TActual, TSerialized extends JsonSerializedProperty> = {
 	isType(obj: unknown): obj is TActual;

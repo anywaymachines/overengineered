@@ -2,11 +2,11 @@ import { Players } from "@rbxts/services";
 import { SlotDatabase } from "server/database/SlotDatabase";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
-import { SlotsMeta } from "shared/SlotsMeta";
 import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
-import { PlayModeBase } from "./PlayModeBase";
+import { SlotsMeta } from "shared/SlotsMeta";
+import type { PlayModeBase } from "server/modes/PlayModeBase";
 
 export class RideMode implements PlayModeBase {
 	private readonly cache = new Map<Player, PlotBlocks>();

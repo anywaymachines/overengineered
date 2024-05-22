@@ -1,5 +1,5 @@
-import { Component } from "./Component";
-import { ComponentChildren } from "./ComponentChildren";
+import { Component } from "shared/component/Component";
+import { ComponentChildren } from "shared/component/ComponentChildren";
 
 /** Component with children */
 export class ContainerComponent<TChild extends IComponent = IComponent> extends Component {

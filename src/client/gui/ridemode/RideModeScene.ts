@@ -1,24 +1,26 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { Machine } from "client/blocks/Machine";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { InputController } from "client/controller/InputController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { Control } from "client/gui/Control";
-import { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import { ButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { FormattedLabelControl } from "client/gui/controls/FormattedLabelControl";
-import { ProgressBarControl, ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
+import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
-import { Remotes } from "shared/Remotes";
-import { RobloxUnit } from "shared/RobloxUnit";
-import { SlotsMeta } from "shared/SlotsMeta";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { RocketEngineLogic } from "shared/block/logic/RocketEngineLogic";
 import { EventHandler } from "shared/event/EventHandler";
 import { Signal } from "shared/event/Signal";
+import { Remotes } from "shared/Remotes";
+import { RobloxUnit } from "shared/RobloxUnit";
+import { SlotsMeta } from "shared/SlotsMeta";
+import type { Machine } from "client/blocks/Machine";
+import type { TextButtonDefinition } from "client/gui/controls/Button";
+import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
 
 export type ActionBarControlDefinition = GuiObject & {
 	readonly Stop: GuiButton;

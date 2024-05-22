@@ -1,7 +1,7 @@
 import { ReplicatedStorage, RunService } from "@rbxts/services";
-import { BlockId } from "shared/BlockDataRegistry";
 import { BlockGenerator } from "shared/block/creation/BlockGenerator";
-import { BlocksInitializeData } from "shared/init/BlocksInitializer";
+import type { BlockId } from "shared/BlockDataRegistry";
+import type { BlocksInitializeData } from "shared/init/BlocksInitializer";
 
 /** Reads blocks and categories from {@link ReplicatedStorage.Assets.Placeable} */
 export namespace BlockCreatorFromAssets {

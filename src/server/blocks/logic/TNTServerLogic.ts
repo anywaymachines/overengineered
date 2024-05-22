@@ -1,11 +1,11 @@
 import { Workspace } from "@rbxts/services";
-import { SpreadingFireController } from "server/SpreadingFireController";
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
-import { RemoteEvents } from "shared/RemoteEvents";
-import { TNTBlockLogic } from "shared/block/logic/TNTBlockLogic";
+import { SpreadingFireController } from "server/SpreadingFireController";
 import { BlockManager } from "shared/building/BlockManager";
+import { RemoteEvents } from "shared/RemoteEvents";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { TNTBlockLogic } from "shared/block/logic/TNTBlockLogic";
 
 export class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBlockLogic> {
 	constructor(logic: typeof TNTBlockLogic) {

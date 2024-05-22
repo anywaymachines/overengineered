@@ -5,10 +5,11 @@ import { InputController } from "client/controller/InputController";
 import { Signals } from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
 import { Gui } from "client/gui/Gui";
-import { InputTooltips, TooltipsHolder } from "client/gui/static/TooltipsControl";
-import { SharedPlot } from "shared/building/SharedPlot";
+import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { AABB } from "shared/fixes/AABB";
+import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 abstract class RotaterBase extends ClientComponent {
 	protected readonly tooltipHolder = this.parent(TooltipsHolder.createComponent("Rotating"));

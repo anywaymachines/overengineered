@@ -1,12 +1,12 @@
+import { configControlRegistry } from "client/gui/config/ConfigControlRegistry";
+import { ConfigValueControl } from "client/gui/config/ConfigValueControl";
+import { configValueTemplateStorage } from "client/gui/config/ConfigValueTemplateStorage";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
-import { type ConfigPartDefinition } from "client/gui/popup/SettingsPopup";
 import { BlockManager } from "shared/building/BlockManager";
 import { ArgsSignal, Signal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
-import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl } from "./ConfigValueControl";
-import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
+import type { ConfigPartDefinition } from "client/gui/popup/SettingsPopup";
 
 type MultiConfigControlDefinition = GuiObject;
 type ConfigUpdatedCallback<TDef extends BlockConfigTypes.Definitions, TKey extends keyof TDef & string> = (

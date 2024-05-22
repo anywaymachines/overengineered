@@ -1,8 +1,8 @@
 import { Players } from "@rbxts/services";
-import { RobloxUnit } from "shared/RobloxUnit";
-import { BlockLogicData } from "shared/block/BlockLogic";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { RobloxUnit } from "shared/RobloxUnit";
+import type { BlockLogicData } from "shared/block/BlockLogic";
 
 export class OwnerLocatorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.ownerlocator> {
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.ownerlocator.input>) {

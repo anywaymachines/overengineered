@@ -1,9 +1,9 @@
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
-import { DropdownListDefinition } from "client/gui/controls/DropdownList";
-import { type NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
-import { type SliderControlDefinition } from "client/gui/controls/SliderControl";
-import { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
+import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
+import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
+import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
+import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 
 type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	readonly HeadingLabel: TextLabel;

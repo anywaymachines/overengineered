@@ -1,9 +1,9 @@
 import { ReplicatedStorage, StarterGui, Workspace } from "@rbxts/services";
+import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { Signals } from "client/event/Signals";
 import { Sound } from "shared/Sound";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { PartUtils } from "shared/utils/PartUtils";
-import { GameEnvironmentController } from "./GameEnvironmentController";
 
 type Sounds = {
 	readonly Build: {

@@ -1,8 +1,8 @@
-import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { Gui } from "client/gui/Gui";
-import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "client/gui/controls/Button";
+import { Gui } from "client/gui/Gui";
 import { MultiPlayerConfigControl } from "client/gui/playerConfig/MultiConfigControl";
+import { Popup } from "client/gui/Popup";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {

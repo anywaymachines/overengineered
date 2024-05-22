@@ -1,12 +1,12 @@
 import { ClientComponent } from "client/component/ClientComponent";
 import { Signals } from "client/event/Signals";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
-import { type BlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { MultiModelHighlighter } from "client/tools/highlighters/MultiModelHighlighter";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { ArgsSignal } from "shared/event/Signal";
+import type { BlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 
 export type HoveredBlocksSelectorMode = keyof typeof HoveredBlocksSelector.Modes;
 export class HoveredBlocksSelector extends ClientComponent implements BlockSelector {

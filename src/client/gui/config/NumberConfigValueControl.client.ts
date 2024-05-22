@@ -1,8 +1,10 @@
+import { configControlRegistry } from "client/gui/config/ConfigControlRegistry";
+import { ConfigValueControl } from "client/gui/config/ConfigValueControl";
+import { configValueTemplateStorage } from "client/gui/config/ConfigValueTemplateStorage";
 import { Control } from "client/gui/Control";
-import { NumberTextBoxControl, NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
-import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
-import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
+import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
+import type { ConfigValueControlParams } from "client/gui/config/ConfigValueControl";
+import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 
 class ConfigNumberControl extends Control<NumberTextBoxControlDefinition> {
 	readonly submitted;

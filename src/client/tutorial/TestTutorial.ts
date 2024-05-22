@@ -1,8 +1,8 @@
 import { TasksControl } from "client/gui/static/TasksControl";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import type { Tutorial } from "client/tutorial/Tutorial";
 import { SharedPlots } from "shared/building/SharedPlots";
+import type { Tutorial } from "client/tutorial/Tutorial";
 
 export async function TestTutorial(tutorial: typeof Tutorial) {
 	tutorial.Control.startTutorial("TEST", tutorial.Cancellable);

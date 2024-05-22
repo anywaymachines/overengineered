@@ -19,5 +19,7 @@
 	"discord.removeRemoteRepository": true,
 	"editor.formatOnSave": true,
 	"typescript.preferences.importModuleSpecifier": "non-relative",
-	"typescript.updateImportsOnFileMove.enabled": "always"
+	"typescript.updateImportsOnFileMove.enabled": "always",
+	"typescript.preferences.preferTypeOnlyAutoImports": true,
+	"editor.insertSpaces": false
 }

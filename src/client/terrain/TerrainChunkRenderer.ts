@@ -1,8 +1,8 @@
 import { ReplicatedFirst, Workspace } from "@rbxts/services";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { ChunkGenerator, ChunkRenderer } from "client/terrain/ChunkLoader";
-import type { InfiniteTerrainActor } from "client/terrain/InfiniteTerrainActor";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import type { ChunkGenerator, ChunkRenderer } from "client/terrain/ChunkLoader";
+import type { InfiniteTerrainActor } from "client/terrain/InfiniteTerrainActor";
 
 if (GameDefinitions.APRIL_FOOLS) {
 	Workspace.Terrain.SetMaterialColor(Enum.Material.Basalt, new Color3(0.4, 0.2, 0.2));

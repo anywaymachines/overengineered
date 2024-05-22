@@ -1,8 +1,9 @@
 import { RunService, Workspace } from "@rbxts/services";
-import { BlockManager, PlacedBlockData } from "shared/building/BlockManager";
+import { BlockManager } from "shared/building/BlockManager";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { Signal } from "shared/event/Signal";
 import { AABB } from "shared/fixes/AABB";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class SharedPlot extends InstanceComponent<PlotModel> {
 	/** @client */

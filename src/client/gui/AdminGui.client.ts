@@ -1,16 +1,16 @@
 import { Players, RunService, UserInputService } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
-import { GameLoader } from "client/GameLoader";
-import { ServerRestartController } from "client/ServerRestartController";
 import { InputController } from "client/controller/InputController";
+import { GameLoader } from "client/GameLoader";
 import { Control } from "client/gui/Control";
-import { Gui } from "client/gui/Gui";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
+import { Gui } from "client/gui/Gui";
+import { ServerRestartController } from "client/ServerRestartController";
 import { LoadSlotTest } from "client/test/visual/LoadSlotTest";
-import { Element } from "shared/Element";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { Element } from "shared/Element";
 
 GameLoader.waitForEverything();
 

@@ -1,8 +1,10 @@
-import { KeyChooserControl, KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
+import { configControlRegistry } from "client/gui/config/ConfigControlRegistry";
+import { ConfigValueControl } from "client/gui/config/ConfigValueControl";
+import { configValueTemplateStorage } from "client/gui/config/ConfigValueTemplateStorage";
+import { KeyChooserControl } from "client/gui/controls/KeyChooserControl";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
-import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
+import type { ConfigValueControlParams } from "client/gui/config/ConfigValueControl";
+import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 
 type Type = BlockConfigTypes.Key;
 class ValueControl extends ConfigValueControl<KeyChooserControlDefinition, Type> {

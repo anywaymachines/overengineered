@@ -1,6 +1,7 @@
 import { UserInputService } from "@rbxts/services";
 import { GlobalInputHandler } from "client/event/GlobalInputHandler";
-import { ISignalWrapper, ThinSignalWrapper } from "client/event/SignalWrapper";
+import { ThinSignalWrapper } from "client/event/SignalWrapper";
+import type { ISignalWrapper } from "client/event/SignalWrapper";
 
 type InputCallback = (input: InputObject) => void;
 type FullInputCallback = (input: InputObject, gameProcessedEvent: boolean) => void;

@@ -1,7 +1,7 @@
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 type Piston = BlockModel & {
 	readonly Top: Part & {

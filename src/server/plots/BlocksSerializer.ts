@@ -1,12 +1,13 @@
 import { ServerBuilding } from "server/building/ServerBuilding";
-import { BlockId } from "shared/BlockDataRegistry";
-import { Serializer } from "shared/Serializer";
 import { BlockRegistry } from "shared/block/BlockRegistry";
-import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { BlockManager, PlacedBlockDataConnection } from "shared/building/BlockManager";
+import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
+import { Serializer } from "shared/Serializer";
+import type { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import type { BlockId } from "shared/BlockDataRegistry";
+import type { PlacedBlockDataConnection } from "shared/building/BlockManager";
 
 type SerializedBlocks<TBlocks extends SerializedBlockBase> = {
 	readonly version: number;

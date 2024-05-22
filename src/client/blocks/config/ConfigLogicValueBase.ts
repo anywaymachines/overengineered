@@ -1,6 +1,6 @@
 import { ClientContainerComponent } from "client/component/ClientContainerComponent";
-import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
-import { IBlockLogicValue } from "shared/block/BlockLogicValue";
+import type { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
+import type { IBlockLogicValue } from "shared/block/BlockLogicValue";
 
 export abstract class ConfigLogicValueBase<
 	T extends

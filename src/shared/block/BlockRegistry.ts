@@ -1,5 +1,5 @@
-import type { AutoWeldColliderBlockShape, BlockMirrorBehaviour } from "shared/BlockDataRegistry";
 import { Objects } from "shared/fixes/objects";
+import type { AutoWeldColliderBlockShape, BlockMirrorBehaviour } from "shared/BlockDataRegistry";
 
 declare global {
 	type RegistryBlock = {

@@ -15,7 +15,9 @@
 		"@typescript-eslint",
 		"roblox-ts",
 		"prettier",
-		"no-relative-import-paths"
+		"no-relative-import-paths",
+		"import",
+		"unused-imports"
 	],
 	"extends": [
 		"eslint:recommended",
@@ -26,6 +28,27 @@
 	"rules": {
 		"no-inner-declarations": 0,
 		"roblox-ts/no-array-pairs": [ "off" ],
+		"import/order": [
+			"warn",
+			{
+				"groups": [ "builtin", "external", [ "internal", "parent", "sibling", "index" ], "object", "type" ],
+				"alphabetize": {
+					"order": "asc",
+					"caseInsensitive": true
+				}
+			}
+		],
+		"@typescript-eslint/consistent-type-imports": [ "warn",
+			{
+				"fixStyle": "separate-type-imports",
+				"prefer": "type-imports"
+			}
+		],
+		"import/consistent-type-specifier-style": [
+			"warn",
+			"prefer-top-level"
+		],
+		"unused-imports/no-unused-imports": "warn",
 		"prettier/prettier": [
 			"warn",
 			{
@@ -41,7 +64,7 @@
 			"warn",
 			{
 				"rootDir": "src",
-				"allowSameFolder": true
+				"allowSameFolder": false
 			}
 		], "@typescript-eslint/explicit-member-accessibility": [
 			"warn",

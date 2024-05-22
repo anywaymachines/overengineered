@@ -1,9 +1,9 @@
 import { Players } from "@rbxts/services";
+import { BuildMode } from "server/modes/BuildMode";
+import { RideMode } from "server/modes/RideMode";
 import { Remotes } from "shared/Remotes";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
-import { BuildMode } from "./BuildMode";
-import { PlayModeBase } from "./PlayModeBase";
-import { RideMode } from "./RideMode";
+import type { PlayModeBase } from "server/modes/PlayModeBase";
 
 export namespace PlayModeController {
 	const playerModes: Record<number, PlayModes | undefined> = {};

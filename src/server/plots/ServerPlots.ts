@@ -3,11 +3,11 @@ import { ServerBuilding } from "server/building/ServerBuilding";
 import { SlotDatabase } from "server/database/SlotDatabase";
 import { PlayModeController } from "server/modes/PlayModeController";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
+import { PlotFloatingImageController } from "server/plots/PlotsFloatingImageController";
+import { SharedPlots } from "shared/building/SharedPlots";
 import { Element } from "shared/Element";
 import { SlotsMeta } from "shared/SlotsMeta";
-import { SharedPlot } from "shared/building/SharedPlot";
-import { SharedPlots } from "shared/building/SharedPlots";
-import { PlotFloatingImageController } from "./PlotsFloatingImageController";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 const tryGetFreePlot = () => SharedPlots.plots.find((p) => p.ownerId.get() === undefined);
 const assignPlotTo = (player: Player): void => {

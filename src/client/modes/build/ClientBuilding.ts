@@ -1,10 +1,10 @@
 import { LoadingController } from "client/controller/LoadingController";
 import { ActionController } from "client/modes/build/ActionController";
-import { Operation } from "shared/Operation";
-import { Remotes } from "shared/Remotes";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import { SharedPlot } from "shared/building/SharedPlot";
+import { Operation } from "shared/Operation";
+import { Remotes } from "shared/Remotes";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 /** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
 export namespace ClientBuilding {

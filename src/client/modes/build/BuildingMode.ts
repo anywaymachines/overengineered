@@ -1,14 +1,15 @@
 import { Players } from "@rbxts/services";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { MirrorVisualizer } from "client/controller/MirrorVisualizer";
+import { BuildingModeScene } from "client/gui/buildmode/BuildingModeScene";
 import { Gui } from "client/gui/Gui";
-import { BuildingModeScene, BuildingModeSceneDefinition } from "client/gui/buildmode/BuildingModeScene";
 import { PlayMode } from "client/modes/PlayMode";
-import { ToolController } from "client/tools/ToolController";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
-import { SharedPlot } from "shared/building/SharedPlot";
+import { ToolController } from "client/tools/ToolController";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { ObservableValue } from "shared/event/ObservableValue";
+import type { BuildingModeSceneDefinition } from "client/gui/buildmode/BuildingModeScene";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 declare global {
 	type MirrorMode = {

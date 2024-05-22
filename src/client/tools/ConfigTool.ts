@@ -1,25 +1,25 @@
 import { InputController } from "client/controller/InputController";
+import { MultiConfigControl } from "client/gui/config/MultiConfigControl";
 import { Control } from "client/gui/Control";
 import { GuiAnimator } from "client/gui/GuiAnimator";
-import { MultiConfigControl } from "client/gui/config/MultiConfigControl";
 import { LogControl } from "client/gui/static/LogControl";
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { ToolBase } from "client/tools/ToolBase";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
-import { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
-import { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
-import { Colors } from "shared/Colors";
+import { ToolBase } from "client/tools/ToolBase";
 import { BlockRegistry } from "shared/block/BlockRegistry";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
+import { Colors } from "shared/Colors";
 import { Config } from "shared/config/Config";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
+import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
 
 namespace Scene {
 	export type ConfigToolSceneDefinition = GuiObject & {

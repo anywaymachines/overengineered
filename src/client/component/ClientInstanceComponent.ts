@@ -1,7 +1,7 @@
+import { ClientComponentEvents } from "client/component/ClientComponentEvents";
 import { InputController } from "client/controller/InputController";
-import { ReadonlyInputHandler } from "client/event/InputHandler";
 import { InstanceComponent } from "shared/component/InstanceComponent";
-import { ClientComponentEvents } from "./ClientComponentEvents";
+import type { ReadonlyInputHandler } from "client/event/InputHandler";
 
 /** @inheritdoc */
 export class ClientInstanceComponent<

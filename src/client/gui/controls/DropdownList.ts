@@ -1,8 +1,9 @@
 import { Control } from "client/gui/Control";
-import { TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import { TextButtonControl } from "client/gui/controls/Button";
 import { TransformService } from "shared/component/TransformService";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { DropdownDefinition } from "./Dropdown";
+import type { TextButtonDefinition } from "client/gui/controls/Button";
+import type { DropdownDefinition } from "client/gui/controls/Dropdown";
 
 export type DropdownListDefinition = DropdownDefinition & {
 	readonly Button: TextButtonDefinition;

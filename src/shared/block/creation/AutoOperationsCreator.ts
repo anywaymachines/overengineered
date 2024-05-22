@@ -1,12 +1,12 @@
 import { RunService } from "@rbxts/services";
-import { BlockId } from "shared/BlockDataRegistry";
-import { RemoteEvents } from "shared/RemoteEvents";
-import { BlockLogic } from "shared/block/BlockLogic";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { connectors } from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { BlockGenerator } from "shared/block/creation/BlockGenerator";
-import { PlacedBlockData } from "shared/building/BlockManager";
-import { BlocksInitializeData } from "shared/init/BlocksInitializer";
+import { RemoteEvents } from "shared/RemoteEvents";
+import type { BlockLogic } from "shared/block/BlockLogic";
+import type { BlockId } from "shared/BlockDataRegistry";
+import type { PlacedBlockData } from "shared/building/BlockManager";
+import type { BlocksInitializeData } from "shared/init/BlocksInitializer";
 
 interface CreateInfo<TFunc> {
 	readonly modelTextOverride: string;

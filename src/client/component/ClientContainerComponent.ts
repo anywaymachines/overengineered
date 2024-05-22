@@ -1,7 +1,7 @@
+import { ClientComponentEvents } from "client/component/ClientComponentEvents";
 import { InputController } from "client/controller/InputController";
-import { ReadonlyInputHandler } from "client/event/InputHandler";
 import { ContainerComponent } from "shared/component/ContainerComponent";
-import { ClientComponentEvents } from "./ClientComponentEvents";
+import type { ReadonlyInputHandler } from "client/event/InputHandler";
 
 /** A component that has children. */
 export class ClientContainerComponent<TChild extends IComponent = IComponent> extends ContainerComponent<TChild> {

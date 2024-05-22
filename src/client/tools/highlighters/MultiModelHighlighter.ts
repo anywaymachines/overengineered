@@ -1,8 +1,8 @@
 import { Workspace } from "@rbxts/services";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
-import { Element } from "shared/Element";
 import { Component } from "shared/component/Component";
-import { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import { Element } from "shared/Element";
+import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 const model = Element.create("Model", { Name: "MultiHighlighterGlobal", Parent: Workspace });
 const highlightInstance = BlockGhoster.createHighlight({ Parent: model });

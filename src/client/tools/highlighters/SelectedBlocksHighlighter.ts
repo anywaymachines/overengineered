@@ -1,6 +1,6 @@
 import { ClientComponent } from "client/component/ClientComponent";
 import { Element } from "shared/Element";
-import { type ReadonlyObservableCollectionSet } from "shared/event/ObservableCollection";
+import type { ReadonlyObservableCollectionSet } from "shared/event/ObservableCollection";
 
 export class SelectedBlocksHighlighter extends ClientComponent {
 	private readonly selectionBoxName = "selectionBox";

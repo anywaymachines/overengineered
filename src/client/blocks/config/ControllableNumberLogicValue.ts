@@ -1,9 +1,10 @@
-import { KeyDefinitions, KeyPressingDefinitionsController } from "client/controller/KeyPressingController";
-import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
-import { IBlockLogicValue } from "shared/block/BlockLogicValue";
+import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
+import { KeyPressingDefinitionsController } from "client/controller/KeyPressingController";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
+import type { KeyDefinitions } from "client/controller/KeyPressingController";
+import type { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
+import type { IBlockLogicValue } from "shared/block/BlockLogicValue";
+import type { ObservableValue } from "shared/event/ObservableValue";
 
 export class ControllableNumberConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.ControllableNumber> {
 	private readonly controller;

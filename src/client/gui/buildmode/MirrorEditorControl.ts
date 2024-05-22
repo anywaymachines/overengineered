@@ -1,11 +1,13 @@
 import { Players } from "@rbxts/services";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
-import { NumberTextBoxControl, NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
-import { ToggleControl, ToggleControlDefinition } from "client/gui/controls/ToggleControl";
+import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
+import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { ArgsSignal } from "shared/event/Signal";
+import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
+import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 
 export type MirrorEditorSingleControlDefinition = GuiObject & {
 	readonly Toggle: ToggleControlDefinition;

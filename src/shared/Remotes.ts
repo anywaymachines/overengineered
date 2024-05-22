@@ -1,6 +1,6 @@
 import { Definitions, Middleware } from "@rbxts/net";
-import { BlockId } from "shared/BlockDataRegistry";
-import { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
+import type { BlockId } from "shared/BlockDataRegistry";
+import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel | undefined }>;

@@ -1,8 +1,8 @@
-import { BlockId } from "shared/BlockDataRegistry";
 import { BlockLogicRegistry } from "shared/block/BlockLogicRegistry";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockGenerator } from "shared/block/creation/BlockGenerator";
-import { BlocksInitializeData } from "shared/init/BlocksInitializer";
+import type { BlockId } from "shared/BlockDataRegistry";
+import type { BlocksInitializeData } from "shared/init/BlocksInitializer";
 
 interface CreateInfo {
 	readonly modelTextOverride: string;

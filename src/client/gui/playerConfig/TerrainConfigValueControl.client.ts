@@ -1,12 +1,12 @@
-import { BoolConfigValueControl } from "client/gui/playerConfig/BoolConfigValueControl.client";
-import { ClampedNumberConfigValueControl } from "client/gui/playerConfig/ClampedNumberConfigValueControl.client";
 import { ConfigValueControl } from "client/gui/playerConfig/ConfigValueControl";
-import { DropdownConfigValueControl } from "client/gui/playerConfig/DropdownConfigValueControl.client";
 import { MultiPlayerConfigControl } from "client/gui/playerConfig/MultiConfigControl";
 import { playerConfigControlRegistry } from "client/gui/playerConfig/PlayerConfigControlRegistry";
 import { playerConfigValueTemplateStorage } from "client/gui/playerConfig/PlayerConfigValueTemplateStorage";
 import { Signal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
+import type { BoolConfigValueControl } from "client/gui/playerConfig/BoolConfigValueControl.client";
+import type { ClampedNumberConfigValueControl } from "client/gui/playerConfig/ClampedNumberConfigValueControl.client";
+import type { DropdownConfigValueControl } from "client/gui/playerConfig/DropdownConfigValueControl.client";
 
 class TerrainValueControl extends ConfigValueControl<GuiObject> {
 	readonly submitted = new Signal<(config: PlayerConfigTypes.Terrain["config"]) => void>();

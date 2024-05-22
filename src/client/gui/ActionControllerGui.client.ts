@@ -1,6 +1,6 @@
 import { Control } from "client/gui/Control";
-import { Gui } from "client/gui/Gui";
 import { ButtonControl } from "client/gui/controls/Button";
+import { Gui } from "client/gui/Gui";
 import { ActionController } from "client/modes/build/ActionController";
 import { rootComponents } from "client/test/RootComponents";
 

@@ -4,9 +4,9 @@ import { SoundController } from "client/controller/SoundController";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
-import { ToolBase } from "client/tools/ToolBase";
-import { ToolController } from "client/tools/ToolController";
 import { TransformService } from "shared/component/TransformService";
+import type { ToolBase } from "client/tools/ToolBase";
+import type { ToolController } from "client/tools/ToolController";
 
 export type ToolbarButtonControlDefinition = TextButton & {
 	readonly ImageLabel: ImageLabel;

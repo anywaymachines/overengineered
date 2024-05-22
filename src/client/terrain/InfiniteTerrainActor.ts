@@ -1,7 +1,7 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
-import { ChunkGenerator } from "client/terrain/ChunkLoader";
-import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { TerrainDataInfo } from "shared/TerrainDataInfo";
+import type { ChunkGenerator } from "client/terrain/ChunkLoader";
 
 const aprilFools = GameDefinitions.APRIL_FOOLS;
 

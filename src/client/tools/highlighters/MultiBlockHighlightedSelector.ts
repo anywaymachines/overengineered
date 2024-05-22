@@ -1,14 +1,13 @@
 import { ClientComponent } from "client/component/ClientComponent";
 import { InputController } from "client/controller/InputController";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
-import { BlockSelectorModeGui, BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
-import {
-	MultiBlockSelector as MBS,
-	MultiBlockSelectorConfiguration,
-} from "client/tools/highlighters/MultiBlockSelector";
-import { SharedPlot } from "shared/building/SharedPlot";
-import { ObservableCollectionSet } from "shared/event/ObservableCollection";
-import { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import { BlockSelectorModeGui } from "client/tools/highlighters/BlockSelectorModeGui";
+import { MultiBlockSelector as MBS } from "client/tools/highlighters/MultiBlockSelector";
+import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
+import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
+import type { SharedPlot } from "shared/building/SharedPlot";
+import type { ObservableCollectionSet } from "shared/event/ObservableCollection";
+import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 export class MultiBlockHighlightedSelector extends ClientComponent {
 	readonly selected: ObservableCollectionSet<BlockModel>;

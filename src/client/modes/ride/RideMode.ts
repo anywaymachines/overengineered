@@ -2,9 +2,10 @@ import { Players } from "@rbxts/services";
 import { Machine } from "client/blocks/Machine";
 import { SoundController } from "client/controller/SoundController";
 import { Gui } from "client/gui/Gui";
-import { RideModeScene, RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
+import { RideModeScene } from "client/gui/ridemode/RideModeScene";
 import { PlayMode } from "client/modes/PlayMode";
 import { SharedPlots } from "shared/building/SharedPlots";
+import type { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
 
 export class RideMode extends PlayMode {
 	private currentMachine?: Machine;

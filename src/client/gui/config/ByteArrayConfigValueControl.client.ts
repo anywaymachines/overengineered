@@ -1,8 +1,9 @@
+import { configControlRegistry } from "client/gui/config/ConfigControlRegistry";
+import { ConfigValueControl } from "client/gui/config/ConfigValueControl";
+import { configValueTemplateStorage } from "client/gui/config/ConfigValueTemplateStorage";
 import { ButtonControl } from "client/gui/controls/Button";
 import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
-import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
-import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
+import type { ConfigValueControlParams } from "client/gui/config/ConfigValueControl";
 
 type Type = BlockConfigTypes.ByteArray;
 class ValueControl extends ConfigValueControl<GuiButton, Type> {

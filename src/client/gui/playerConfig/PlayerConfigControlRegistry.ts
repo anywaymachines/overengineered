@@ -1,5 +1,5 @@
-import { ReadonlySignal } from "shared/event/Signal";
-import { ConfigValueControl } from "./ConfigValueControl";
+import type { ConfigValueControl } from "client/gui/playerConfig/ConfigValueControl";
+import type { ReadonlySignal } from "shared/event/Signal";
 
 export interface ConfigControl<TKey extends keyof PlayerConfigTypes.Types> extends ConfigValueControl<GuiObject> {
 	readonly submitted: ReadonlySignal<(config: PlayerConfigTypes.Types[TKey]["config"]) => void>;

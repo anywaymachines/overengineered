@@ -1,8 +1,10 @@
+import { configControlRegistry } from "client/gui/config/ConfigControlRegistry";
+import { ConfigValueControl } from "client/gui/config/ConfigValueControl";
+import { configValueTemplateStorage } from "client/gui/config/ConfigValueTemplateStorage";
 import { Control } from "client/gui/Control";
-import { SliderControl, SliderControlDefinition } from "client/gui/controls/SliderControl";
-import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
-import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
+import { SliderControl } from "client/gui/controls/SliderControl";
+import type { ConfigValueControlParams } from "client/gui/config/ConfigValueControl";
+import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
 
 class ClampedConfigNumberControl extends Control<SliderControlDefinition> {
 	readonly submitted;

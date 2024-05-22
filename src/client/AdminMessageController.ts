@@ -1,11 +1,11 @@
+import { Colors } from "client/gui/Colors";
+import { Control } from "client/gui/Control";
+import { TextButtonControl } from "client/gui/controls/Button";
+import { TextBoxControl } from "client/gui/controls/TextBoxControl";
+import { Gui } from "client/gui/Gui";
+import { GuiAnimator } from "client/gui/GuiAnimator";
 import { Element } from "shared/Element";
 import { Remotes } from "shared/Remotes";
-import { Colors } from "./gui/Colors";
-import { Control } from "./gui/Control";
-import { Gui } from "./gui/Gui";
-import { GuiAnimator } from "./gui/GuiAnimator";
-import { TextButtonControl } from "./gui/controls/Button";
-import { TextBoxControl } from "./gui/controls/TextBoxControl";
 
 Remotes.Client.GetNamespace("Admin")
 	.Get("SendMessage")

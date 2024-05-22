@@ -1,6 +1,6 @@
 import { StarterGui, Workspace } from "@rbxts/services";
+import { MusicPlaylist } from "client/controller/sound/MusicPlaylist";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { MusicPlaylist } from "./MusicPlaylist";
 
 export namespace MusicController {
 	const playlist = new MusicPlaylist(

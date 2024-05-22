@@ -1,3 +1,4 @@
+/* eslint-disable import/order */
 import { TestFramework } from "shared/test/TestFramework";
 if (!game.GetService("RunService").IsStudio()) {
 	for (const testscript of TestFramework.findAllTestScripts()) {
@@ -8,26 +9,27 @@ if (!game.GetService("RunService").IsStudio()) {
 import { HttpService, MessagingService, RunService, Workspace } from "@rbxts/services";
 import { Backend } from "server/Backend";
 import { BadgeController } from "server/BadgeController";
-import { ServerRestartController } from "server/ServerRestartController";
 import { BlockMarkers } from "server/building/BlockMarkers";
+import { BuildingWelder } from "server/building/BuildingWelder";
 import { GameInfo } from "server/building/GameInfo";
+import { ServerBuilding } from "server/building/ServerBuilding";
+import { ServerBuildingRequestHandler } from "server/building/ServerBuildingRequestHandler";
+import type { PlayerData } from "server/database/PlayerDatabase";
+import { PlayerDatabase } from "server/database/PlayerDatabase";
+import { SlotDatabase } from "server/database/SlotDatabase";
+import { PlayModeController } from "server/modes/PlayModeController";
+import { registerOnRemoteEvent, registerOnRemoteFunction } from "server/network/event/RemoteHandler";
 import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
-import { RemoteEvents } from "shared/RemoteEvents";
-import { Remotes } from "shared/Remotes";
-import { SlotsMeta } from "shared/SlotsMeta";
+import { BlocksSerializer } from "server/plots/BlocksSerializer";
+import { ServerPlots } from "server/plots/ServerPlots";
+import { ServerRestartController } from "server/ServerRestartController";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
-import { BuildingWelder } from "./building/BuildingWelder";
-import { ServerBuilding } from "./building/ServerBuilding";
-import { ServerBuildingRequestHandler } from "./building/ServerBuildingRequestHandler";
-import { PlayerData, PlayerDatabase } from "./database/PlayerDatabase";
-import { SlotDatabase } from "./database/SlotDatabase";
-import { PlayModeController } from "./modes/PlayModeController";
-import { registerOnRemoteEvent, registerOnRemoteFunction } from "./network/event/RemoteHandler";
-import { BlocksSerializer } from "./plots/BlocksSerializer";
-import { ServerPlots } from "./plots/ServerPlots";
+import { RemoteEvents } from "shared/RemoteEvents";
+import { Remotes } from "shared/Remotes";
+import { SlotsMeta } from "shared/SlotsMeta";
 
 namespace RemoteHandlers {
 	export function loadSlot(player: Player, index: number): LoadSlotResponse {

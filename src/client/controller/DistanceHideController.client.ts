@@ -1,7 +1,7 @@
 import { Players, Workspace } from "@rbxts/services";
 import { GameLoader } from "client/GameLoader";
-import { RobloxUnit } from "shared/RobloxUnit";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { RobloxUnit } from "shared/RobloxUnit";
 
 GameLoader.waitForEverything();
 const parts: Instance[] = [Workspace.WaitForChild("Plots"), Workspace.WaitForChild("Obstacles")];

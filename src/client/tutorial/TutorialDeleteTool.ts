@@ -1,10 +1,10 @@
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { Tutorial } from "client/tutorial/Tutorial";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { EventHandler } from "shared/event/EventHandler";
 import { successResponse } from "shared/types/network/Responses";
+import type { Tutorial } from "client/tutorial/Tutorial";
 
 export type TutorialDeleteBlockHighlight = {
 	position: Vector3;

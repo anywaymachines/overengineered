@@ -1,13 +1,14 @@
 import { HttpService, Players, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
-import { Remotes } from "shared/Remotes";
-import { SlotsMeta } from "shared/SlotsMeta";
 import { Config } from "shared/config/Config";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { JSON, JsonSerializablePrimitive } from "shared/fixes/Json";
+import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
+import { Remotes } from "shared/Remotes";
+import { SlotsMeta } from "shared/SlotsMeta";
+import type { JsonSerializablePrimitive } from "shared/fixes/Json";
 
 type NonNullableFields<T> = {
 	[P in keyof T]: NonNullable<T[P]>;

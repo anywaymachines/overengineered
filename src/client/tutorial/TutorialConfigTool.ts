@@ -1,10 +1,10 @@
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { Tutorial } from "client/tutorial/Tutorial";
 import { BlockManager } from "shared/building/BlockManager";
 import { EventHandler } from "shared/event/EventHandler";
 import { successResponse } from "shared/types/network/Responses";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { Tutorial } from "client/tutorial/Tutorial";
 
 export type TutorialConfigBlockHighlight = {
 	key: string;

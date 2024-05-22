@@ -1,9 +1,9 @@
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
-import { BlockId } from "shared/BlockDataRegistry";
 import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { Component } from "shared/component/Component";
 import { ObservableValue } from "shared/event/ObservableValue";
+import type { BlockId } from "shared/BlockDataRegistry";
 
 export class BlockMirrorer extends Component {
 	readonly blocks = new ObservableValue<readonly { readonly id: BlockId; readonly model: Model }[]>([]);

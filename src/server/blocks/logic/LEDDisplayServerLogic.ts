@@ -1,5 +1,5 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
-import { LEDDisplayBlockLogic } from "shared/block/logic/logic/display/LEDDisplayBlockLogic";
+import type { LEDDisplayBlockLogic } from "shared/block/logic/logic/display/LEDDisplayBlockLogic";
 
 export class LEDDisplayServerLogic extends ServerBlockLogic<typeof LEDDisplayBlockLogic> {
 	constructor(logic: typeof LEDDisplayBlockLogic) {

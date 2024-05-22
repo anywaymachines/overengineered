@@ -1,7 +1,8 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
-import { BlockManager, PlacedBlockData } from "shared/building/BlockManager";
-import { AABB } from "shared/fixes/AABB";
-import { SharedPlot } from "./SharedPlot";
+import { BlockManager } from "shared/building/BlockManager";
+import { SharedPlot } from "shared/building/SharedPlot";
+import type { PlacedBlockData } from "shared/building/BlockManager";
+import type { AABB } from "shared/fixes/AABB";
 
 Workspace.WaitForChild("Plots");
 

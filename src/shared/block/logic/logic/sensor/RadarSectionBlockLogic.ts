@@ -1,7 +1,7 @@
-import { RobloxUnit } from "shared/RobloxUnit";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { RobloxUnit } from "shared/RobloxUnit";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.radarsection> {
 	private closestDetectedPart: BasePart | undefined = undefined;

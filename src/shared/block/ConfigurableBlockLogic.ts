@@ -1,10 +1,12 @@
-import { RemoteEvents } from "shared/RemoteEvents";
-import { BlockLogicValue, IBlockLogicValue, ReadonlyBlockLogicValue } from "shared/block/BlockLogicValue";
+import { BlockLogic } from "shared/block/BlockLogic";
+import { BlockLogicValue } from "shared/block/BlockLogicValue";
 import { ByteBlockLogicValue } from "shared/block/ByteBlockLogicValue";
 import { NumberBlockLogicValue } from "shared/block/NumberBlockLogicValue";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Objects } from "shared/fixes/objects";
-import { BlockLogic, BlockLogicData } from "./BlockLogic";
+import { RemoteEvents } from "shared/RemoteEvents";
+import type { BlockLogicData } from "shared/block/BlockLogic";
+import type { IBlockLogicValue, ReadonlyBlockLogicValue } from "shared/block/BlockLogicValue";
 
 type BlockConfigValueRegistry = {
 	readonly [k in keyof BlockConfigTypes.Types]: (

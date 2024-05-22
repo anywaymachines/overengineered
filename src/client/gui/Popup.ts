@@ -1,10 +1,10 @@
 import { Lighting, TweenService } from "@rbxts/services";
+import { Colors } from "client/gui/Colors";
+import { Control } from "client/gui/Control";
+import { Gui } from "client/gui/Gui";
+import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
 import { Element } from "shared/Element";
 import { Signal } from "shared/event/Signal";
-import { Colors } from "./Colors";
-import { Control } from "./Control";
-import { Gui } from "./Gui";
-import { ScaledScreenGui } from "./ScaledScreenGui";
 
 export class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 	static readonly onAnyShow = new Signal<() => void>();

@@ -3,11 +3,11 @@ import { ClientComponent } from "client/component/ClientComponent";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { Signals } from "client/event/Signals";
 import { Popup } from "client/gui/Popup";
-import { Remotes } from "shared/Remotes";
+import { BuildingMode } from "client/modes/build/BuildingMode";
+import { RideMode } from "client/modes/ride/RideMode";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Objects } from "shared/fixes/objects";
-import { BuildingMode } from "./build/BuildingMode";
-import { RideMode } from "./ride/RideMode";
+import { Remotes } from "shared/Remotes";
 
 export class PlayModeController extends ClientComponent {
 	readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);

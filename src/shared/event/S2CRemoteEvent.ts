@@ -1,6 +1,7 @@
 import { Players, RunService } from "@rbxts/services";
+import { RemoteEventBase } from "shared/event/RemoteEventBase";
 import { Signal } from "shared/event/Signal";
-import { CreatableRemoteEvents, RemoteEventBase } from "./RemoteEventBase";
+import type { CreatableRemoteEvents } from "shared/event/RemoteEventBase";
 
 type CustomRemoteEvent<T extends Callback> = Instance & {
 	readonly OnServerEvent: RBXScriptSignal<

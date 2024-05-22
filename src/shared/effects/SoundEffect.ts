@@ -1,5 +1,5 @@
 import { BlockManager } from "shared/building/BlockManager";
-import { EffectBase } from "./EffectBase";
+import { EffectBase } from "shared/effects/EffectBase";
 
 type Args = {
 	readonly sound: Sound;

@@ -1,6 +1,6 @@
 import { GameLoader } from "client/GameLoader";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { ChunkLoader, ChunkRenderer } from "client/terrain/ChunkLoader";
+import { ChunkLoader } from "client/terrain/ChunkLoader";
 import { DefaultChunkGenerator } from "client/terrain/DefaultChunkGenerator";
 import { FlatTerrainRenderer } from "client/terrain/FlatTerrainRenderer";
 import { TerrainChunkRenderer } from "client/terrain/TerrainChunkRenderer";
@@ -8,6 +8,7 @@ import { TriangleChunkRenderer } from "client/terrain/TriangleChunkRenderer";
 import { WaterTerrainChunkRenderer } from "client/terrain/WaterTerrainChunkRenderer";
 import { rootComponents } from "client/test/RootComponents";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
+import type { ChunkRenderer } from "client/terrain/ChunkLoader";
 
 GameLoader.waitForEverything();
 

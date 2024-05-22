@@ -1,35 +1,34 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
+import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
-import {
-	MaterialColorEditControl,
-	MaterialColorEditControlDefinition,
-} from "client/gui/buildmode/MaterialColorEditControl";
-import { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import { ButtonControl } from "client/gui/controls/Button";
 import { LogControl } from "client/gui/static/LogControl";
-import { InputTooltips } from "client/gui/static/TooltipsControl";
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { ToolBase } from "client/tools/ToolBase";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockMover } from "client/tools/additional/BlockMover";
 import { BlockRotater } from "client/tools/additional/BlockRotater";
-import { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
-import { Element } from "shared/Element";
+import { ToolBase } from "client/tools/ToolBase";
 import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import { SharedPlot } from "shared/building/SharedPlot";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentDisabler } from "shared/component/ComponentDisabler";
 import { TransformService } from "shared/component/TransformService";
+import { Element } from "shared/Element";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
+import type { TextButtonDefinition } from "client/gui/controls/Button";
+import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 namespace Scene {
 	type MultiBlockSelectorGuiDefinition = GuiObject & {

@@ -1,4 +1,4 @@
-import { ObservableValue } from "./ObservableValue";
+import { ObservableValue } from "shared/event/ObservableValue";
 
 /** ObservableValue that stores a number that can be clamped */
 export class NumberObservableValue<T extends number | undefined = number> extends ObservableValue<T> {

@@ -1,8 +1,9 @@
-import { DropdownList, DropdownListDefinition } from "client/gui/controls/DropdownList";
+import { DropdownList } from "client/gui/controls/DropdownList";
 import { ConfigValueControl } from "client/gui/playerConfig/ConfigValueControl";
 import { playerConfigControlRegistry } from "client/gui/playerConfig/PlayerConfigControlRegistry";
 import { playerConfigValueTemplateStorage } from "client/gui/playerConfig/PlayerConfigValueTemplateStorage";
 import { Signal } from "shared/event/Signal";
+import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 
 export type { DropdownConfigValueControl };
 class DropdownConfigValueControl<T extends string = string> extends ConfigValueControl<DropdownListDefinition> {

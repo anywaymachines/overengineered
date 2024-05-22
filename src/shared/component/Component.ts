@@ -1,7 +1,7 @@
-import type { Control } from "client/gui/Control";
+import { ComponentChild } from "shared/component/ComponentChild";
+import { ComponentEvents } from "shared/component/ComponentEvents";
 import { SlimSignal } from "shared/event/SlimSignal";
-import { ComponentChild } from "./ComponentChild";
-import { ComponentEvents } from "./ComponentEvents";
+import type { Control } from "client/gui/Control";
 
 class ComponentBase {
 	private readonly onEnabled = new SlimSignal();

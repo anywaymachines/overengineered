@@ -1,10 +1,10 @@
-import { SpreadingFireController } from "server/SpreadingFireController";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
-import { RemoteEvents } from "shared/RemoteEvents";
+import { SpreadingFireController } from "server/SpreadingFireController";
 import { BlockManager } from "shared/building/BlockManager";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import { EffectBase } from "shared/effects/EffectBase";
+import { RemoteEvents } from "shared/RemoteEvents";
 
 // PhysicsService.RegisterCollisionGroup("Wreckage");
 // PhysicsService.CollisionGroupSetCollidable("Wreckage", "Wreckage", false);

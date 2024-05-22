@@ -1,11 +1,11 @@
 import { RunService } from "@rbxts/services";
 import { GameLoader } from "client/GameLoader";
 import { Control } from "client/gui/Control";
-import { Gui } from "client/gui/Gui";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
-import { Element } from "shared/Element";
+import { Gui } from "client/gui/Gui";
 import { InstanceComponent } from "shared/component/InstanceComponent";
+import { Element } from "shared/Element";
 import { TestFramework } from "shared/test/TestFramework";
 
 GameLoader.waitForEverything();

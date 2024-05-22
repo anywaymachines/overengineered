@@ -1,4 +1,4 @@
-import { type ConfigValueControl, type ConfigValueControlParams } from "./ConfigValueControl";
+import type { ConfigValueControl, ConfigValueControlParams } from "client/gui/config/ConfigValueControl";
 
 type Ctor<TKey extends keyof BlockConfigTypes.Types> = {
 	new (

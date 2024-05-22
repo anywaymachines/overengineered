@@ -1,7 +1,9 @@
-import { ByteEditor, ByteEditorDefinition } from "client/gui/controls/ByteEditorControl";
-import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
-import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
+import { configControlRegistry } from "client/gui/config/ConfigControlRegistry";
+import { ConfigValueControl } from "client/gui/config/ConfigValueControl";
+import { configValueTemplateStorage } from "client/gui/config/ConfigValueTemplateStorage";
+import { ByteEditor } from "client/gui/controls/ByteEditorControl";
+import type { ConfigValueControlParams } from "client/gui/config/ConfigValueControl";
+import type { ByteEditorDefinition } from "client/gui/controls/ByteEditorControl";
 
 type Type = BlockConfigTypes.Byte;
 class ValueControl extends ConfigValueControl<ByteEditorDefinition, Type> {

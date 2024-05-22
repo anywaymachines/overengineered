@@ -1,8 +1,8 @@
 import { Assert } from "shared/Assert";
-import { Element } from "shared/Element";
 import { Component } from "shared/component/Component";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { InstanceComponent } from "shared/component/InstanceComponent";
+import { Element } from "shared/Element";
 
 export namespace _Tests {
 	export namespace ComponentTests {

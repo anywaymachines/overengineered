@@ -1,8 +1,8 @@
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { Tutorial } from "client/tutorial/Tutorial";
 import { EventHandler } from "shared/event/EventHandler";
 import { successResponse } from "shared/types/network/Responses";
+import type { Tutorial } from "client/tutorial/Tutorial";
 
 export class TutorialEditTool {
 	constructor(private readonly tutorial: typeof Tutorial) {}

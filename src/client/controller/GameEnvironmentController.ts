@@ -1,7 +1,7 @@
 import { RunService, Workspace } from "@rbxts/services";
+import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { GameEnvironment } from "shared/data/GameEnvironment";
-import { LocalPlayerController } from "./LocalPlayerController";
 
 export namespace GameEnvironmentController {
 	export let currentHeight = 0;

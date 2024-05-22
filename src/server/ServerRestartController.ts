@@ -1,10 +1,10 @@
 import { MessagingService, Players, RunService, Workspace } from "@rbxts/services";
-import { SpreadingFireController } from "server/SpreadingFireController";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
+import { SpreadingFireController } from "server/SpreadingFireController";
+import { BlockManager } from "shared/building/BlockManager";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { Remotes } from "shared/Remotes";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
-import { BlockManager } from "shared/building/BlockManager";
 import { PartUtils } from "shared/utils/PartUtils";
 
 export namespace ServerRestartController {

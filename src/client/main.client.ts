@@ -1,16 +1,19 @@
+/* eslint-disable import/order */
 import { GameLoader } from "client/GameLoader";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { LoadingController } from "client/controller/LoadingController";
 
 const dataLoading = PlayerDataStorage.init();
 GameLoader.waitForEverything(LoadingController.show);
 LoadingController.show("Loading the dependencies");
 
 import { Players, TextChatService } from "@rbxts/services";
+import { AdminMessageController } from "client/AdminMessageController";
 import { ServerRestartController } from "client/ServerRestartController";
+import { ClientContainerComponent } from "client/component/ClientContainerComponent";
 import { CharacterController } from "client/controller/CharacterController";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
+import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { SoundController } from "client/controller/SoundController";
 import { WindController } from "client/controller/WindController";
@@ -20,12 +23,10 @@ import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
 import { PlayModeController } from "client/modes/PlayModeController";
 import { ClientBuildingValidation } from "client/modes/build/ClientBuildingValidation";
+import { rootComponents } from "client/test/RootComponents";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
-import { AdminMessageController } from "./AdminMessageController";
-import { ClientContainerComponent } from "./component/ClientContainerComponent";
-import { rootComponents } from "./test/RootComponents";
 
 LoadingController.show("Loading the game");
 

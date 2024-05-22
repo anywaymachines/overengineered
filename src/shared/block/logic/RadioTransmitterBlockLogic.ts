@@ -1,8 +1,8 @@
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { RadioRecieverBlockLogic } from "shared/block/logic/RadioRecieverBlockLogic";
 import { AutoS2CRemoteEvent } from "shared/event/S2CRemoteEvent";
-import { RadioRecieverBlockLogic } from "./RadioRecieverBlockLogic";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 const sendEvent = new AutoS2CRemoteEvent<{
 	readonly frequency: number;

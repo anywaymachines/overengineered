@@ -1,7 +1,7 @@
 import { Control } from "client/gui/Control";
-import { ConfigPartDefinition } from "client/gui/popup/SettingsPopup";
 import { Signal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
+import type { ConfigPartDefinition } from "client/gui/popup/SettingsPopup";
 
 export type ConfigValueControlParams<T extends UnknownConfigType> = {
 	readonly configs: Readonly<Record<BlockUuid, T["config"]>>;

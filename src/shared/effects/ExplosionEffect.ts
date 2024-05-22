@@ -1,5 +1,5 @@
 import { Debris, ReplicatedStorage } from "@rbxts/services";
-import { EffectBase } from "./EffectBase";
+import { EffectBase } from "shared/effects/EffectBase";
 
 ReplicatedStorage.WaitForChild("Assets");
 

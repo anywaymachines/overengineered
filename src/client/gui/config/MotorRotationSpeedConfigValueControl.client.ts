@@ -1,7 +1,8 @@
+import { configControlRegistry } from "client/gui/config/ConfigControlRegistry";
+import { ConfigValueControl } from "client/gui/config/ConfigValueControl";
+import { configValueTemplateStorage } from "client/gui/config/ConfigValueTemplateStorage";
 import { MultiConfigControl } from "client/gui/config/MultiConfigControl";
-import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
-import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
+import type { ConfigValueControlParams } from "client/gui/config/ConfigValueControl";
 
 type Type = BlockConfigTypes.MotorRotationSpeed;
 class ValueControl extends ConfigValueControl<GuiObject, Type> {

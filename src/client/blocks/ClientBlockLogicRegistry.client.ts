@@ -1,5 +1,5 @@
-import { KnownBlockLogic } from "shared/block/BlockLogicRegistry";
-import { ClientBlockLogic } from "./ClientBlockLogic";
+import type { ClientBlockLogic } from "client/blocks/ClientBlockLogic";
+import type { KnownBlockLogic } from "shared/block/BlockLogicRegistry";
 
 type ShareableLogic = ExtractMembers<KnownBlockLogic, { readonly clientEvents: Record<string, unknown> }>;
 type ClientBlockLogicRegistry = {

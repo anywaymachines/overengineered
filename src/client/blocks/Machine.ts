@@ -1,13 +1,14 @@
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { blockConfigRegistryClient } from "client/blocks/config/BlockConfigRegistryClient";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { SharedMachine } from "shared/block/SharedMachine";
-import { BlockConfigRegistry, blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { ImpactController } from "shared/block/impact/ImpactController";
-import { PlacedBlockData } from "shared/building/BlockManager";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { Config } from "shared/config/Config";
-import { ConfigLogicValueBase } from "./config/ConfigLogicValueBase";
+import type { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
+import type { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import type { ImpactController } from "shared/block/impact/ImpactController";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class Machine extends SharedMachine {
 	readonly logicInputs = new ContainerComponent<

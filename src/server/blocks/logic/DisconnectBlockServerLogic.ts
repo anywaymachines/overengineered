@@ -1,5 +1,5 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
-import { DisconnectBlockLogic } from "shared/block/logic/DisconnectBlockLogic";
+import type { DisconnectBlockLogic } from "shared/block/logic/DisconnectBlockLogic";
 
 export class DisconnectBlockServerLogic extends ServerBlockLogic<typeof DisconnectBlockLogic> {
 	constructor(logic: typeof DisconnectBlockLogic) {

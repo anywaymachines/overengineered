@@ -4,8 +4,8 @@ import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { Gui } from "client/gui/Gui";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
-import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
+import type { ObservableCollectionSet } from "shared/event/ObservableCollection";
 
 export namespace BlockSelect {
 	export const blockRaycastParams = new RaycastParams();

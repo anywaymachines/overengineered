@@ -1,8 +1,8 @@
 import { RunService, ServerStorage, Workspace } from "@rbxts/services";
-import { Element } from "shared/Element";
 import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
+import { Element } from "shared/Element";
 
 type CollidersModel = Model & { readonly ___nominal: "CollidersModel" };
 export namespace BuildingWelder {

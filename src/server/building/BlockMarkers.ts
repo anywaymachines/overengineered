@@ -1,5 +1,5 @@
-import { BlockId } from "shared/BlockDataRegistry";
 import { BlockRegistry } from "shared/block/BlockRegistry";
+import type { BlockId } from "shared/BlockDataRegistry";
 
 export namespace BlockMarkers {
 	export const markers: {

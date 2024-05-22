@@ -1,6 +1,6 @@
 import { TweenService, Workspace } from "@rbxts/services";
+import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { GameEnvironment } from "shared/data/GameEnvironment";
-import { GameEnvironmentController } from "./GameEnvironmentController";
 
 export namespace WindController {
 	export function initialize() {

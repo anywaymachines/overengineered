@@ -1,9 +1,9 @@
 import { Workspace } from "@rbxts/services";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { Sound } from "shared/Sound";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 type RocketEngine = BlockModel & {
 	readonly EffectEmitter: Part & {

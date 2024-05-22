@@ -1,12 +1,14 @@
 import { HttpService } from "@rbxts/services";
+import { BuildingWelder } from "server/building/BuildingWelder";
 import { BlockRegistry } from "shared/block/BlockRegistry";
-import { BlockManager, PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
+import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { AABB } from "shared/fixes/AABB";
-import { JSON, JsonSerializablePrimitive } from "shared/fixes/Json";
+import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
-import { BuildingWelder } from "./BuildingWelder";
+import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
+import type { JsonSerializablePrimitive } from "shared/fixes/Json";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };

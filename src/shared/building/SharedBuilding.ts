@@ -1,7 +1,8 @@
-import { BlockManager, PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
+import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { MaterialData } from "shared/data/MaterialData";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
 
 /** Methods for editing the building */
 export namespace SharedBuilding {

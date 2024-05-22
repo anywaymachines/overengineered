@@ -1,9 +1,9 @@
 import { Workspace } from "@rbxts/services";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
-import { TransformProps } from "shared/component/Transform";
 import { TransformService } from "shared/component/TransformService";
 import { ObservableValue } from "shared/event/ObservableValue";
+import type { TransformProps } from "shared/component/Transform";
 
 print("`INLOADINGCONTROLLERSTART", debug.traceback());
 class LoadingImage extends Control {
