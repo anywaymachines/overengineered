@@ -215,37 +215,69 @@ namespace Scene {
 	}
 }
 
-const placeToBlocksRequests = (blocks: readonly BlockModel[]): readonly PlaceBlockRequest[] => {
-	const existingBlocks = new Map<BlockUuid, BlockData>();
-	for (const block of blocks) {
+const placeToBlocksRequests = (blocks: readonly BlockModel[]): readonly PlaceBlockRequestWithUuid[] => {
+	return blocks.map((block): PlaceBlockRequestWithUuid => {
 		const data = BlockManager.getBlockDataByBlockModel(block);
-		existingBlocks.set(data.uuid, data);
-	}
 
-	// <old, new>
-	const uuidmap = new Map<BlockUuid, Writable<PlaceBlockRequest & { uuid: BlockUuid }>>();
-
-	const newblocks = existingBlocks.map((_, data): Writable<PlaceBlockRequest> => {
-		const request = {
+		return {
 			id: data.id,
-			uuid: HttpService.GenerateGUID(false) as BlockUuid,
+			uuid: data.uuid,
 			location: data.instance.GetPivot(),
 			color: data.color,
 			material: data.material,
 			config: data.config,
-		} satisfies PlaceBlockRequest;
+			connections: data.connections,
+		};
+	});
+};
 
+type PlaceBlockRequestWithUuid = PlaceBlockRequest & { readonly uuid: BlockUuid };
+const reGenerateUuids = (
+	plot: SharedPlot,
+	_blocks: readonly PlaceBlockRequestWithUuid[],
+): readonly PlaceBlockRequest[] => {
+	const existingBlocks = new Map<BlockUuid, PlaceBlockRequestWithUuid>();
+	for (const block of _blocks) {
+		existingBlocks.set(block.uuid, block);
+	}
+
+	// <old, new>
+	const uuidmap = new Map<BlockUuid, Writable<PlaceBlockRequestWithUuid>>();
+
+	const newblocks = existingBlocks.map((_, data): Writable<PlaceBlockRequestWithUuid> => {
+		const request = { ...data, uuid: HttpService.GenerateGUID(false) as BlockUuid };
 		uuidmap.set(data.uuid, request);
+
 		return request;
 	});
 
+	const plotBlocks = plot.getBlocks().mapToSet(BlockManager.manager.uuid.get);
+
 	for (const [olduuid, newblock] of uuidmap) {
-		const connections = { ...(existingBlocks.get(olduuid)?.connections ?? {}) };
-		for (const [, connection] of pairs(connections)) {
+		const connections = asObject(
+			new Map(
+				asMap(existingBlocks.get(olduuid)?.connections ?? {}).map((k, v) => [
+					k,
+					{ ...v } as Writable<typeof v>,
+				]),
+			),
+		);
+
+		for (const [key, connection] of [...asMap(connections)]) {
+			if (!plotBlocks.has(connection.blockUuid)) {
+				$log(
+					`Deleting nonexistent connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`,
+				);
+				delete connections[key];
+			}
+		}
+
+		for (const [key, connection] of pairs(connections)) {
 			const neww = uuidmap.get(connection.blockUuid);
 			if (!neww) continue;
 
-			(connection as Writable<typeof connection>).blockUuid = neww.uuid;
+			$log(`Rerouting the connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`);
+			connection.blockUuid = neww.uuid;
 		}
 
 		newblock.connections = connections;
@@ -302,7 +334,7 @@ namespace Controllers {
 			);
 			this.onDestroy(() => ghostParent.Destroy());
 
-			const blocks = tool.copied.get();
+			const blocks = reGenerateUuids(plot, tool.copied.get());
 			this.blocks = blocks.map((block) => {
 				const b = BlockRegistry.map.get(block.id)!.model.Clone();
 				b.PivotTo(block.location);
@@ -460,7 +492,7 @@ export class EditTool extends ToolBase {
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
 	readonly selected = new ObservableCollectionSet<BlockModel>();
-	readonly copied = new ObservableValue<readonly PlaceBlockRequest[]>([]);
+	readonly copied = new ObservableValue<readonly PlaceBlockRequestWithUuid[]>([]);
 	private readonly controller = new ComponentChild<IComponent & { cancel(): void }>(this, true);
 	private readonly selector;
 	readonly gui;
