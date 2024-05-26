@@ -500,6 +500,10 @@ const registry = {
 		name: "Bearing Shaft",
 		description: "A shaft that bears",
 	},
+	bracedshaft: {
+		name: "Braced Shaft",
+		description: "A shaft with adjustable braces",
+	},
 	halfcylinder1x1: {
 		name: "Half Cylinder 1x1",
 		description: "A half of a sibling of 1x1 cyllinder",

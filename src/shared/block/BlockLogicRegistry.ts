@@ -1,4 +1,5 @@
 import { BlockId } from "shared/BlockDataRegistry";
+import { BracedShaftBlockLogic } from "shared/block/logic/BracedShaftBlockLogic";
 import { PassengerSeatBlockLogic } from "shared/block/logic/PassengerSeatBlockLogic";
 import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
 import { RadioRecieverBlockLogic } from "shared/block/logic/RadioRecieverBlockLogic";
@@ -55,6 +56,7 @@ const logicRegistry = {
 	smallrocketengine: RocketEngineLogic,
 	rocketengine: RocketEngineLogic,
 	motorblock: MotorBlockLogic,
+	bracedshaft: BracedShaftBlockLogic,
 	servomotorblock: ServoMotorBlockLogic,
 	rope: RopeLogic,
 	heliumblock: HeliumBlockLogic,

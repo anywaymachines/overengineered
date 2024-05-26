@@ -185,6 +185,22 @@ const motorblock = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
+const bracedshaft = {
+	input: {
+		angle: {
+			displayName: "Braces Angle",
+			type: "clampedNumber",
+			min: -180,
+			max: 180,
+			step: 0.1,
+			default: 0 as number,
+			config: 0 as number,
+			connectorHidden: true,
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
 const bytesplitter = {
 	input: {
 		value: {
@@ -1210,6 +1226,7 @@ export const blockConfigRegistry = {
 	piston,
 	ballast,
 	heliumblock,
+	bracedshaft,
 
 	bytemaker,
 	bytesplitter,
