@@ -404,6 +404,7 @@ const registry = {
 	ball: {
 		name: "Ball",
 		description: "it could be a cannon ball.. Or anything else, really..",
+		mirrorBehaviour: "none",
 	},
 	halfball: {
 		name: "Half Ball",
@@ -412,7 +413,12 @@ const registry = {
 	},
 	cone: {
 		name: "Cone",
-		description: "SMOOTH PIRA MIDER",
+		description: "Filled with weird geometry jokes. Sadly, no ice cream",
+		mirrorBehaviour: "normal",
+	},
+	halfcone: {
+		name: "Half Cone",
+		description: "As half as much geometry jokes in this one. Still no ice cream tho...",
 		mirrorBehaviour: "normal",
 	},
 	concavecornerwedge: {
