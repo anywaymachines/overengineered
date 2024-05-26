@@ -410,6 +410,11 @@ const registry = {
 		description: "It's rolling around.. half of the time..",
 		mirrorBehaviour: "offset180",
 	},
+	cone: {
+		name: "Cone",
+		description: "SMOOTH PIRA MIDER",
+		mirrorBehaviour: "normal",
+	},
 	concavecornerwedge: {
 		name: "Concave Corner Wedge",
 		description: "The convex corner wedge, but concave",
