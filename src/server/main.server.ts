@@ -30,6 +30,8 @@ import { BlocksInitializer } from "shared/init/BlocksInitializer";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { Remotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
+import { ServerBuildingRequestController } from "server/building/ServerBuildingRequestController";
+import { PlayersController } from "server/player/PlayersController";
 
 namespace RemoteHandlers {
 	export function loadSlot(player: Player, index: number): LoadSlotResponse {
@@ -217,6 +219,9 @@ ServerPlots.initialize();
 // Badges
 BadgeController.initialize();
 
+PlayersController.initialize();
+ServerBuildingRequestController.initialize();
+
 // Initializing event workders
 registerOnRemoteFunction("Ride", "SetPlayMode", PlayModeController.changeModeForPlayer);
 registerOnRemoteFunction("Slots", "Save", RemoteHandlers.saveSlot);
@@ -224,7 +229,7 @@ registerOnRemoteFunction("Slots", "Load", RemoteHandlers.loadSlot);
 registerOnRemoteFunction("Slots", "LoadImported", RemoteHandlers.loadImportedSlot);
 registerOnRemoteFunction("Building", "UpdateConfigRequest", ServerBuildingRequestHandler.updateConfig);
 registerOnRemoteFunction("Building", "ResetConfigRequest", ServerBuildingRequestHandler.resetConfig);
-registerOnRemoteFunction("Building", "PlaceBlocks", ServerBuildingRequestHandler.placeBlocks);
+//registerOnRemoteFunction("Building", "PlaceBlocks", ServerBuildingRequestHandler.placeBlocks);
 registerOnRemoteFunction("Building", "DeleteBlocks", ServerBuildingRequestHandler.deleteBlocks);
 registerOnRemoteFunction("Building", "MoveBlocks", ServerBuildingRequestHandler.moveBlocks);
 registerOnRemoteFunction("Building", "RotateBlocks", ServerBuildingRequestHandler.rotateBlocks);

@@ -5,7 +5,7 @@ import type { ReadonlyInputHandler } from "client/event/InputHandler";
 
 /** A component that has children. */
 export class ClientContainerComponent<TChild extends IComponent = IComponent> extends ContainerComponent<TChild> {
-	readonly event = new ClientComponentEvents(this);
+	readonly event = this.parent(new ClientComponentEvents(this));
 
 	/** Input handler for use in prepare***() */
 	protected readonly inputHandler: ReadonlyInputHandler;

@@ -1,21 +1,23 @@
 import { SlimSignal } from "shared/event/SlimSignal";
 
+type Constraint = IComponent;
+
 /** Stores keyed components. Handles its enabling, disabling and destroying. */
-export class ComponentKeyedChildren<TKey extends defined, T extends IComponent = IComponent>
+export class ComponentKeyedChildren<TKey extends defined, T extends Constraint = Constraint>
 	implements IDebuggableComponent
 {
-	private static readonly empty: ReadonlyMap<defined, IComponent> = new Map<defined, IComponent>();
+	private static readonly empty: ReadonlyMap<defined, Constraint> = new Map<defined, Constraint>();
 	private static readonly emptyarr: [] = [];
 
 	readonly onAdded = new SlimSignal<(key: TKey, child: T) => void>();
 	readonly onRemoved = new SlimSignal<(key: TKey, child: T) => void>();
 	readonly onClear = new SlimSignal();
 
-	private readonly state: IComponent;
+	private readonly state: IReadonlyComponent;
 	private children?: Map<TKey, T>;
 	private clearing = false;
 
-	constructor(state: IComponent, clearOnDisable = false) {
+	constructor(state: IReadonlyComponent, clearOnDisable = false) {
 		this.state = state;
 
 		state.onEnable(() => {

@@ -76,7 +76,7 @@ export class TutorialBuildTool {
 				}),
 			);
 
-			eventHandler.subscribe(plot.instance.Blocks.ChildAdded, () => {
+			ClientBuilding.placeOperation.executed.Connect((plot, blocks) => {
 				for (const blockToPlace of this.tutorialBlocksToPlace ?? []) {
 					if (
 						!BuildingManager.getBlockByPosition(

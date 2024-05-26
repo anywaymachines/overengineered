@@ -6,11 +6,11 @@ import type { EventHandler } from "shared/event/EventHandler";
 export class ClientComponentEvents extends ComponentEvents {
 	readonly inputHandler = new InputHandler();
 
-	constructor(state: IComponent) {
-		super(state);
+	constructor(state: IWriteonlyComponent) {
+		super();
 
-		state.onDisable(() => this.inputHandler.unsubscribeAll());
-		state.onDestroy(() => this.inputHandler.destroy());
+		this.onDisable(() => this.inputHandler.unsubscribeAll());
+		this.onDestroy(() => this.inputHandler.destroy());
 
 		this.subscribeObservable(InputController.inputType, () => {
 			state.disable();

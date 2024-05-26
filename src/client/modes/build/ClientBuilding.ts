@@ -8,15 +8,24 @@ import type { SharedPlot } from "shared/building/SharedPlot";
 
 /** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
 export namespace ClientBuilding {
-	export const placeOperation = new Operation(placeBlocks);
-	export const deleteOperation = new Operation(deleteBlocks);
-	export const moveOperation = new Operation(moveBlocks);
-	export const rotateOperation = new Operation(rotateBlocks);
-	export const paintOperation = new Operation(paintBlocks);
-	export const updateConfigOperation = new Operation(updateConfig);
-	export const resetConfigOperation = new Operation(resetConfig);
-	export const logicConnectOperation = new Operation(logicConnect);
-	export const logicDisconnectOperation = new Operation(logicDisconnect);
+	function awaited<TArgs extends unknown[], TRet>(func: (...args: TArgs) => Promise<TRet>): (...args: TArgs) => TRet {
+		return (...args: TArgs) => {
+			const response = func(...args).await();
+			if (!response[0]) throw response[1];
+
+			return response[1];
+		};
+	}
+
+	export const placeOperation = new Operation(awaited(placeBlocks));
+	export const deleteOperation = new Operation(awaited(deleteBlocks));
+	export const moveOperation = new Operation(awaited(moveBlocks));
+	export const rotateOperation = new Operation(awaited(rotateBlocks));
+	export const paintOperation = new Operation(awaited(paintBlocks));
+	export const updateConfigOperation = new Operation(awaited(updateConfig));
+	export const resetConfigOperation = new Operation(awaited(resetConfig));
+	export const logicConnectOperation = new Operation(awaited(logicConnect));
+	export const logicDisconnectOperation = new Operation(awaited(logicDisconnect));
 
 	async function placeBlocks(plot: SharedPlot, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) {
 		let placed: readonly BlockUuid[];

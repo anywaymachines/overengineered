@@ -1,3 +1,4 @@
+import { ComponentBase } from "shared/component/ComponentBase";
 import { EventHandler } from "shared/event/EventHandler";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { JSON } from "shared/fixes/Json";
@@ -9,27 +10,16 @@ import type { JsonSerializablePrimitive } from "shared/fixes/Json";
 type Sub<T extends Callback> = readonly [signal: ReadonlySignal<T>, callback: T];
 
 /** Event handler with the ability to disable event processing */
-export class ComponentEvents {
+export class ComponentEvents extends ComponentBase {
 	readonly eventHandler = new EventHandler();
 	private readonly events: Sub<Callback>[] = [];
-	private readonly state: IComponent;
 
-	constructor(state: IComponent) {
-		this.state = state;
+	constructor() {
+		super();
 
-		state.onEnable(() => this.enable());
-		state.onDisable(() => this.disable());
-		state.onDestroy(() => this.destroy());
-	}
-
-	private enable() {
-		this.events.forEach((e) => this.connect(e));
-	}
-	private disable() {
-		this.eventHandler.unsubscribeAll();
-	}
-	private destroy() {
-		this.events.clear();
+		this.onEnable(() => this.events.forEach((e) => this.connect(e)));
+		this.onDisable(() => this.eventHandler.unsubscribeAll());
+		this.onDestroy(() => this.events.clear());
 	}
 
 	/** Add event to the event list */
@@ -39,30 +29,30 @@ export class ComponentEvents {
 
 	private sub(events: Sub<Callback>[], sub: Sub<Callback>): void {
 		events.push(sub);
-		if (this.state.isEnabled()) {
+		if (this.isEnabled()) {
 			this.connect(sub);
 		}
 	}
 
 	onEnable(func: (eventHandler: EventHandler) => void, executeImmediately = false) {
-		this.state.onEnable(() => func(this.eventHandler));
+		super.onEnable(() => func(this.eventHandler));
 		if (executeImmediately) {
 			func(this.eventHandler);
 		}
 	}
 	onDisable(func: (eventHandler: EventHandler) => void) {
-		this.state.onDisable(() => func(this.eventHandler));
+		super.onDisable(() => func(this.eventHandler));
 	}
 
 	/** Register an event */
 	subscribe<TArgs extends unknown[]>(signal: ReadonlyArgsSignal<TArgs>, callback: (...args: TArgs) => void): void {
-		if (this.state.isDestroyed()) return;
+		if (this.isDestroyed()) return;
 		this.sub(this.events, [signal, callback]);
 	}
 
 	/** Register an event and immediately call the callback function */
 	subscribeImmediately<TArgs extends unknown[]>(signal: ReadonlyArgsSignal<TArgs>, callback: () => void): void {
-		if (this.state.isDestroyed()) return;
+		if (this.isDestroyed()) return;
 		this.sub(this.events, [signal, callback]);
 		callback();
 	}
@@ -164,10 +154,10 @@ export class ComponentEvents {
 
 		spawn(() => {
 			while (true as boolean) {
-				if (this.state.isDestroyed()) return;
+				if (this.isDestroyed()) return;
 				if (stop) return;
 
-				if (this.state.isEnabled()) {
+				if (this.isEnabled()) {
 					func();
 				}
 

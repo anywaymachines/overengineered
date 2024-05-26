@@ -1,67 +1,12 @@
+import { ComponentBase } from "shared/component/ComponentBase";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentEvents } from "shared/component/ComponentEvents";
-import { SlimSignal } from "shared/event/SlimSignal";
 import type { Control } from "client/gui/Control";
-
-class ComponentBase {
-	private readonly onEnabled = new SlimSignal();
-	private readonly onDisabled = new SlimSignal();
-	private readonly onDestroyed = new SlimSignal();
-
-	private selfEnabled = false;
-	private selfDestroyed = false;
-
-	isEnabled(): boolean {
-		return this.selfEnabled;
-	}
-	isDestroyed(): boolean {
-		return this.selfDestroyed;
-	}
-
-	onEnable(func: () => void): void {
-		this.onEnabled.Connect(func);
-	}
-	onDisable(func: () => void): void {
-		this.onDisabled.Connect(func);
-	}
-	onDestroy(func: () => void): void {
-		this.onDestroyed.Connect(func);
-	}
-
-	enable(): void {
-		if (this.selfDestroyed || this.selfEnabled) return;
-
-		this.selfEnabled = true;
-		this.onEnabled.Fire();
-	}
-	disable(): void {
-		if (this.selfDestroyed || !this.selfEnabled) return;
-
-		this.selfEnabled = false;
-		this.onDisabled.Fire();
-	}
-	destroy(): void {
-		if (this.selfDestroyed) return;
-
-		this.disable();
-
-		this.selfDestroyed = true;
-		this.onDestroyed.Fire();
-
-		this.onEnabled.destroy();
-		this.onDisabled.destroy();
-		this.onDestroyed.destroy();
-	}
-}
 
 /** Base of any component. Handles events and signals which can be enabled or disabled. */
 export class Component extends ComponentBase implements IComponent, IDebuggableComponent {
-	protected readonly event = new ComponentEvents(this);
+	protected readonly event = this.parent(new ComponentEvents());
 	protected readonly eventHandler = this.event.eventHandler;
-
-	constructor() {
-		super();
-	}
 
 	/**
 	 * Return a function that returns a copy of the provided Instance. Destroys the Instance if specified.
@@ -88,14 +33,14 @@ export class Component extends ComponentBase implements IComponent, IDebuggableC
 	}
 	readonly setEnabled = (enable: boolean) => (enable ? this.enable() : this.disable());
 
-	private parented?: IDebuggableComponent[];
+	private parented?: (IDebuggableComponent | object)[];
 
 	/** Subscribe a child to this component state. Return the child. */
-	protected parent<T extends IDebuggableComponent | (IComponent & IDebuggableComponent)>(child: T): T {
+	protected parent<T extends IDebuggableComponent | IWriteonlyComponent>(child: T): T {
 		this.parented ??= [];
 		this.parented.push(child);
 
-		if ("isDestroyed" in child || child instanceof ComponentBase) {
+		if ("destroy" in child || child instanceof ComponentBase) {
 			ComponentChild.init(this, child);
 		}
 
@@ -113,6 +58,6 @@ export class Component extends ComponentBase implements IComponent, IDebuggableC
 	}
 
 	getDebugChildren(): readonly IDebuggableComponent[] {
-		return this.parented ?? [];
+		return (this.parented?.filter((p) => "getDebugChildren" in p) as IDebuggableComponent[] | undefined) ?? [];
 	}
 }

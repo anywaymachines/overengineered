@@ -12,13 +12,13 @@ graphics.subscribe(({ localShadows, othersShadows }) => {
 		if (selfowned) {
 			PartUtils.applyToAllDescendantsOfType(
 				"BasePart",
-				plot.instance.Blocks,
+				plot.instance,
 				(child) => (child.CastShadow = localShadows),
 			);
 		} else {
 			PartUtils.applyToAllDescendantsOfType(
 				"BasePart",
-				plot.instance.Blocks,
+				plot.instance,
 				(child) => (child.CastShadow = othersShadows),
 			);
 		}
@@ -28,7 +28,7 @@ graphics.subscribe(({ localShadows, othersShadows }) => {
 for (const plot of SharedPlots.plots) {
 	const selfowned = plot.ownerId.get() === Players.LocalPlayer.UserId;
 
-	plot.instance.Blocks.DescendantAdded.Connect((child) => {
+	plot.instance.DescendantAdded.Connect((child) => {
 		if (!child.IsA("BasePart")) return;
 
 		const { localShadows, othersShadows } = graphics.get();

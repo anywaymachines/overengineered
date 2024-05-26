@@ -115,7 +115,7 @@ let tree: TreeControl | undefined;
 const update = () => {
 	if (!tree) throw "what";
 
-	const add = (component: IDebuggableComponent, tree: TreeControl) => {
+	const add = (component: object | IDebuggableComponent, tree: TreeControl) => {
 		const childtree = tree.childContainer.add(
 			TreeControl.createChildList(
 				Element.create("TextButton", {
@@ -128,8 +128,10 @@ const update = () => {
 			),
 		);
 
-		for (const child of component.getDebugChildren()) {
-			add(child, childtree);
+		if ("getDebugChildren" in component) {
+			for (const child of component.getDebugChildren()) {
+				add(child, childtree);
+			}
 		}
 	};
 

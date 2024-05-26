@@ -133,10 +133,10 @@ export namespace ServerBuilding {
 			return success;
 		}
 
-		let blocksRegion = blocks === "all" ? AABB.fromModel(plot.Blocks) : AABB.fromModels(blocks);
+		blocks = blocks === "all" ? SharedPlots.getPlotComponent(plot).getBlocks() : blocks;
+		let blocksRegion = AABB.fromModels(blocks);
 		blocksRegion = blocksRegion.withCenter(blocksRegion.getCenter().add(diff));
 
-		blocks = blocks === "all" ? SharedPlots.getPlotComponent(plot).getBlocks() : blocks;
 		if (!SharedPlots.getPlotBuildingRegion(plot).contains(blocksRegion)) {
 			return err("Invalid movement");
 		}
@@ -166,10 +166,10 @@ export namespace ServerBuilding {
 			return pvt.mul(diff).ToWorldSpace(loc);
 		};
 
-		let blocksRegion = blocks === "all" ? AABB.fromModel(plot.Blocks) : AABB.fromModels(blocks);
+		blocks = blocks === "all" ? SharedPlots.getPlotComponent(plot).getBlocks() : blocks;
+		let blocksRegion = AABB.fromModels(blocks);
 		blocksRegion = blocksRegion.withCenter(mul(new CFrame(blocksRegion.getCenter())));
 
-		blocks = blocks === "all" ? SharedPlots.getPlotComponent(plot).getBlocks() : blocks;
 		if (!SharedPlots.getPlotBuildingRegion(plot).contains(blocksRegion)) {
 			return err("Invalid rotation");
 		}
