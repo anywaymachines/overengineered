@@ -38,7 +38,7 @@ export class MirrorEditorSingleControl extends Control<MirrorEditorSingleControl
 			}),
 		);
 
-		this.position = this.add(new NumberTextBoxControl(this.gui.TextBox, min, max, 1));
+		this.position = this.add(new NumberTextBoxControl(this.gui.TextBox, min, max, 0.5));
 		this.position.value.set(defval);
 
 		let selfsetting = false;
