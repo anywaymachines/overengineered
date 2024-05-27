@@ -12,7 +12,14 @@ export class RideMode implements PlayModeBase {
 	private readonly cache = new Map<Player, PlotBlocks>();
 
 	constructor() {
-		Players.PlayerRemoving.Connect((player) => this.cache.delete(player));
+		Players.PlayerRemoving.Connect((player) => {
+			const instance = this.cache.get(player);
+
+			if (instance) {
+				instance.Destroy();
+				this.cache.delete(player);
+			}
+		});
 	}
 
 	onTransitionFrom(player: Player, prevmode: PlayModes | undefined): Response | undefined {
