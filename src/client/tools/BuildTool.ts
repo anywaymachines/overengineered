@@ -11,6 +11,7 @@ import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
+import { DebugLog } from "client/gui/DebugLog";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { LogControl } from "client/gui/static/LogControl";
@@ -50,13 +51,6 @@ const createBlockGhost = (block: RegistryBlock): Model => {
 
 	return model;
 };
-
-// eslint-disable-next-line prettier/prettier
-const g = Gui.getGameUI<{ BuildingMode: { Tools: { Build: { Debug: GuiObject & { Label1: TextLabel; Label2: TextLabel; Label3: TextLabel; Label4: TextLabel; Label5: TextLabel; }; }; }; }; }>().BuildingMode.Tools.Build.Debug;
-if (!RunService.IsStudio()) {
-	g.Interactable = false;
-	g.Visible = false;
-}
 
 const getMouseTargetBlockPositionV2 = (
 	block: RegistryBlock,
@@ -115,9 +109,11 @@ const getMouseTargetBlockPositionV2 = (
 	const globalMouseHitPos = mouseHit.PointToWorldSpace(Vector3.zero);
 	const normal = target.CFrame.Rotation.VectorToWorldSpace(Vector3.FromNormalId(mouseSurface));
 
-	g.Label1.Text = `Target: ${target}`;
-	g.Label2.Text = `Hit: ${mouseHit}`;
-	g.Label3.Text = `Normal: ${mouseSurface} ${normal}`;
+	DebugLog.category("BuildTool");
+	DebugLog.named("Target", target);
+	DebugLog.named("Hit", mouseHit);
+	DebugLog.named("Normal", `${mouseSurface} ${normal}`);
+	DebugLog.endCategory();
 
 	let targetPosition = globalMouseHitPos;
 	targetPosition = addTargetSize(target, normal, targetPosition);
@@ -426,7 +422,6 @@ namespace SinglePlaceController {
 					round(cframe.LookVector.mul(-1))
 				);
 			};
-			g.Label4.Text = `Rotation: ${prettyCFrame(this.mainGhost?.GetPivot() ?? this.blockRotation)}`;
 
 			const plot = this.plot.get();
 			const getAreAllGhostsInsidePlot = () =>
@@ -482,11 +477,6 @@ namespace SinglePlaceController {
 			const mainGhost = this.mainGhost;
 			if (!mainGhost?.PrimaryPart) {
 				return;
-			}
-
-			{
-				const pos = this.plot.get().instance.BuildingArea.CFrame.ToObjectSpace(mainGhost!.PrimaryPart!.CFrame);
-				g.Label5.Text = `new CFrame(${[...pos.GetComponents()].join()})`;
 			}
 
 			let blocks = [

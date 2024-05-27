@@ -902,7 +902,7 @@ const v20: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 };
 
 // fix laser
-const v21: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v20> = {
+const v21: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v20> = {
 	version: 21,
 
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
@@ -934,6 +934,31 @@ const v21: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 			blocks: prev.blocks.map(update),
 		};
 	},
+};
+
+// fix some block models
+const v22: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v21> = {
+	version: 22,
+
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
+			if (block.id === "halfball") {
+				return {
+					...block,
+					loc: Serializer.CFrameSerializer.serialize(
+						Serializer.CFrameSerializer.deserialize(block.loc).mul(CFrame.Angles(0, 0, -90)),
+					),
+				};
+			}
+
+			return block;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
 
 	read(plot: PlotModel): SerializedBlocks<SerializedBlockV3> {
 		return {
@@ -949,7 +974,7 @@ const v21: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 
 //
 
-const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21] as const;
+const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const getVersion = (version: number) => versions.find((v) => v.version === version);

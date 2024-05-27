@@ -57,6 +57,7 @@ export namespace DebugLog {
 					Padding: new UDim(0, 4),
 					FillDirection: Enum.FillDirection.Vertical,
 					SortOrder: Enum.SortOrder.LayoutOrder,
+					HorizontalAlignment: Enum.HorizontalAlignment.Right,
 				}),
 				padding: Element.create("UIPadding", { PaddingLeft: new UDim(0, 8) }),
 				title: newText(`[[[${name}]]]`).instance,
@@ -115,7 +116,7 @@ export namespace DebugLog {
 			category.named.add(name, control);
 		}
 
-		control.instance.Text = `[${name}] ${text}`;
+		control.instance.Text = `${text} [${name}]`;
 	}
 	export function log(text: string) {
 		if (disabled) return;
