@@ -1,4 +1,5 @@
 import { BallastBlockLogic } from "shared/block/logic/BallastBlockLogic";
+import { BracedShaftBlockLogic } from "shared/block/logic/BracedShaftBlockLogic";
 import { DisconnectBlockLogic } from "shared/block/logic/DisconnectBlockLogic";
 import { HeliumBlockLogic } from "shared/block/logic/HeliumBlockLogic";
 import { ByteMakerBlockLogic } from "shared/block/logic/logic/converter/byte/ByteMakerBlockLogic";
@@ -55,6 +56,7 @@ const logicRegistry = {
 	smallrocketengine: RocketEngineLogic,
 	rocketengine: RocketEngineLogic,
 	motorblock: MotorBlockLogic,
+	bracedshaft: BracedShaftBlockLogic,
 	servomotorblock: ServoMotorBlockLogic,
 	rope: RopeLogic,
 	heliumblock: HeliumBlockLogic,

@@ -404,11 +404,22 @@ const registry = {
 	ball: {
 		name: "Ball",
 		description: "it could be a cannon ball.. Or anything else, really..",
+		mirrorBehaviour: "none",
 	},
 	halfball: {
 		name: "Half Ball",
 		description: "It's rolling around.. half of the time..",
 		mirrorBehaviour: "offset180",
+	},
+	cone: {
+		name: "Cone",
+		description: "Filled with weird geometry jokes. Sadly, no ice cream",
+		mirrorBehaviour: "normal",
+	},
+	halfcone: {
+		name: "Half Cone",
+		description: "As half as much geometry jokes in this one. Still no ice cream tho...",
+		mirrorBehaviour: "normal",
 	},
 	concavecornerwedge: {
 		name: "Concave Corner Wedge",
@@ -490,6 +501,14 @@ const registry = {
 	driveshaft: {
 		name: "Driveshaft",
 		description: "A shaft that drives",
+	},
+	bearingshaft: {
+		name: "Bearing Shaft",
+		description: "A shaft that bears",
+	},
+	bracedshaft: {
+		name: "Braced Shaft",
+		description: "A shaft with adjustable braces",
 	},
 	halfcylinder1x1: {
 		name: "Half Cylinder 1x1",
