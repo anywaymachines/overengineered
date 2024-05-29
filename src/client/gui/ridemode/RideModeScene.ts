@@ -411,7 +411,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		{
 			init("Gravity", "%.1f m/s²", this.infoTextTemplate(), 0, 55, 0.1, (control) => {
-				const alt = RobloxUnit.Studs_To_Meters(Workspace.Gravity) / 5.14;
+				const alt = RobloxUnit.Studs_To_Meters(Workspace.Gravity);
 
 				control.text.value.set(alt);
 			});
