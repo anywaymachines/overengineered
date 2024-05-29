@@ -19,6 +19,7 @@ import { DelayBlockLogic } from "shared/block/logic/logic/other/DelayBlockLogic"
 import { AltimeterBlockLogic } from "shared/block/logic/logic/sensor/AltimeterBlockLogic";
 import { AngleSensorBlockLogic } from "shared/block/logic/logic/sensor/AngleSensorBlockLogic";
 import { KeySensorBlockLogic } from "shared/block/logic/logic/sensor/KeySensorBlockLogic";
+import { MassSensorBlockLogic } from "shared/block/logic/logic/sensor/MassSensorBlockLogic";
 import { OwnerLocatorBlockLogic } from "shared/block/logic/logic/sensor/OwnerLocatorBlockLogic";
 import { RadarSectionBlockLogic } from "shared/block/logic/logic/sensor/RadarSectionBlockLogic";
 import { SpeedometerBlockLogic } from "shared/block/logic/logic/sensor/SpeedometerBlockLogic";
@@ -82,6 +83,7 @@ const logicRegistry = {
 	radiotransmitter: RadioTransmitterBlockLogic,
 
 	ownerlocator: OwnerLocatorBlockLogic,
+	masssensor: MassSensorBlockLogic,
 
 	speedometer: SpeedometerBlockLogic,
 	anglesensor: AngleSensorBlockLogic,
