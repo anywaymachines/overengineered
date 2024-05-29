@@ -2,6 +2,7 @@ import { Workspace } from "@rbxts/services";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { RobloxUnit } from "shared/RobloxUnit";
 import { Sound } from "shared/Sound";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 
@@ -73,6 +74,11 @@ export class RocketEngineLogic extends ConfigurableBlockLogic<
 				this.update();
 			},
 			true,
+		);
+
+		// Max power
+		this.output.maxpower.set(
+			RobloxUnit.Rowton_To_Newton((this.power * this.multiplier * this.input.strength.get()) / 100),
 		);
 	}
 

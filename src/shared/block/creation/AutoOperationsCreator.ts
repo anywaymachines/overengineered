@@ -2,6 +2,7 @@ import { RunService } from "@rbxts/services";
 import { connectors } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { BlockGenerator } from "shared/block/creation/BlockGenerator";
+import { Objects } from "shared/fixes/objects";
 import { RemoteEvents } from "shared/RemoteEvents";
 import type { BlockLogic } from "shared/block/BlockLogic";
 import type { BlockId } from "shared/BlockDataRegistry";
@@ -614,7 +615,11 @@ const multiif = <TArg, T, TType extends keyof CheckableTypes, TRet extends Check
 		}
 	}
 
-	throw "unknown type";
+	throw `in ${(arg as ConfigurableBlockLogic<BlockConfigTypes.BothDefinitions>).instance}, unknown type ${typeOf(left)} ${typeOf(right)} insteadof ${Objects.entriesArray(
+		checks,
+	)
+		.map((e) => `${e[0]}`)
+		.join()} ${debug.traceback()}`;
 };
 const multiifunc =
 	<TArg, T>(checks: Checks<TArg>): ((left: T, right: T, arg: TArg) => T) =>

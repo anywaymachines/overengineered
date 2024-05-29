@@ -1,5 +1,6 @@
 import { Players } from "@rbxts/services";
 import { BlockRegistry } from "shared/block/BlockRegistry";
+import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BlockId } from "shared/BlockDataRegistry";
@@ -27,6 +28,38 @@ export namespace BuildingManager {
 		Enum.Material.Slate,
 		Enum.Material.Wood,
 	];
+
+	export function getAssemblyBlocks(block: BlockModel): BlockModel[] {
+		// using set to prevent duplicates
+		return [
+			...new Set(block.PrimaryPart!.GetConnectedParts(true).map((b) => BlockManager.tryGetBlockModelByPart(b)!)),
+		];
+	}
+	export function getMachineBlocks(block: BlockModel): BlockModel[] {
+		const find = (result: Set<BlockModel>, visited: Set<Instance>, instance: BlockModel) => {
+			for (const part of instance.GetDescendants()) {
+				if (!part.IsA("BasePart")) continue;
+
+				const assemblyConnected = part.GetConnectedParts(false);
+				for (const cpart of assemblyConnected) {
+					if (visited.has(cpart)) {
+						continue;
+					}
+
+					visited.add(cpart);
+
+					const connected = BlockManager.getBlockDataByPart(cpart)!.instance;
+					result.add(connected);
+					find(result, visited, connected);
+				}
+			}
+		};
+
+		const result = new Set<BlockModel>();
+		find(result, new Set(), block);
+
+		return [...result];
+	}
 
 	/** Returns the block or nothing that is set on (or near) the given vector
 	 * @param vector The vector to check
