@@ -2,21 +2,22 @@ import { MessagingService, Players, RunService, Workspace } from "@rbxts/service
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { SpreadingFireController } from "server/SpreadingFireController";
 import { BlockManager } from "shared/building/BlockManager";
+import { Controller } from "shared/component/Controller";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { Remotes } from "shared/Remotes";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import { PartUtils } from "shared/utils/PartUtils";
 
-export namespace ServerRestartController {
-	export function init() {
-		if (RunService.IsStudio()) return;
+export class ServerRestartController extends Controller {
+	constructor() {
+		super();
 
 		MessagingService.SubscribeAsync("Restart", () => {
-			restart(true);
+			this.restart(true);
 		});
 	}
 
-	export function restart(networkReceived: boolean = false) {
+	restart(networkReceived: boolean) {
 		if (!networkReceived && !RunService.IsStudio()) {
 			MessagingService.PublishAsync("Restart", undefined);
 		}

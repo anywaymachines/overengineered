@@ -5,11 +5,13 @@ import { SpreadingFireController } from "server/SpreadingFireController";
 import { BlockManager } from "shared/building/BlockManager";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { PlayModeController } from "server/modes/PlayModeController";
 import type { TNTBlockLogic } from "shared/block/logic/TNTBlockLogic";
 
+@injectable
 export class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBlockLogic> {
-	constructor(logic: typeof TNTBlockLogic) {
-		super(logic);
+	constructor(logic: typeof TNTBlockLogic, @inject playModeController: PlayModeController) {
+		super(logic, playModeController);
 
 		logic.events.explode.invoked.Connect((player, { block, isFlammable, pressure, radius }) => {
 			if (!this.isValidBlock(block, player)) return;

@@ -1,15 +1,16 @@
 import { Players } from "@rbxts/services";
-import { PlayersController } from "server/player/PlayersController";
+import { PlayerWatcher } from "server/PlayerWatcher";
 import { BuildingPlot } from "server/plots/BuildingPlot";
-import { PlotFloatingImageController } from "server/plots/PlotsFloatingImageController";
+import { PlotsFloatingImageController } from "server/plots/PlotsFloatingImageController";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { Controller } from "shared/component/Controller";
 import { Element } from "shared/Element";
 import { ArgsSignal } from "shared/event/Signal";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
+@injectable
 class ServerPlotController extends Controller {
-	static tryCreate(player: Player) {
+	static tryCreate(player: Player, di: DIContainer) {
 		const tryGetFreePlot = (): SharedPlot | undefined =>
 			SharedPlots.plots.find((p) => p.ownerId.get() === undefined);
 
@@ -19,7 +20,7 @@ class ServerPlotController extends Controller {
 			return;
 		}
 
-		return new ServerPlotController(player, plot);
+		return di.resolveForeignClass(ServerPlotController, [player, plot]);
 	}
 
 	readonly blocks;
@@ -27,6 +28,7 @@ class ServerPlotController extends Controller {
 	constructor(
 		readonly player: Player,
 		readonly plot: SharedPlot,
+		@inject di: DIContainer,
 	) {
 		super();
 
@@ -42,12 +44,12 @@ class ServerPlotController extends Controller {
 			return blocks;
 		};
 
-		this.blocks = new BuildingPlot(
+		this.blocks = di.regResolve(BuildingPlot, [
 			initializeBlocksFolder(plot),
 			plot,
 			plot.instance.BuildingArea.ExtentsCFrame,
 			plot.instance.BuildingArea.ExtentsSize,
-		);
+		]);
 
 		this.event.subscribe(Players.PlayerRemoving, (player) => {
 			if (player !== this.player) return;
@@ -64,51 +66,50 @@ class ServerPlotController extends Controller {
 }
 export type { ServerPlotController };
 
-// Floating username+image controller
-for (const plot of SharedPlots.plots) {
-	const controller = new PlotFloatingImageController(plot);
-	controller.enable();
-}
+@injectable
+export class ServerPlots extends Controller {
+	readonly onAdded = new ArgsSignal<[controller: ServerPlotController]>();
+	private readonly controllersByPlot = new Map<PlotModel, ServerPlotController>();
+	private readonly controllersByPlayer = new Map<Player, ServerPlotController>();
 
-const initializeSpawnLocation = (plot: SharedPlot) => {
-	const spawnLocation = new Instance("SpawnLocation");
-	spawnLocation.Name = "SpawnLocation";
-	spawnLocation.Anchored = true;
-	spawnLocation.Transparency = 1;
-	spawnLocation.CanCollide = false;
-	spawnLocation.CanQuery = false;
-	spawnLocation.CanTouch = false;
-	spawnLocation.PivotTo(new CFrame(plot.getSpawnPosition()));
+	constructor(@inject di: DIContainer) {
+		super();
 
-	spawnLocation.Parent = plot.instance;
-};
-for (const plot of SharedPlots.plots) {
-	initializeSpawnLocation(plot);
-}
+		this.parent(di.regResolve(PlotsFloatingImageController));
 
-export namespace ServerPlots {
-	export const onAdded = new ArgsSignal<[controller: ServerPlotController]>();
+		const initializeSpawnLocation = (plot: SharedPlot) => {
+			const spawnLocation = new Instance("SpawnLocation");
+			spawnLocation.Name = "SpawnLocation";
+			spawnLocation.Anchored = true;
+			spawnLocation.Transparency = 1;
+			spawnLocation.CanCollide = false;
+			spawnLocation.CanQuery = false;
+			spawnLocation.CanTouch = false;
+			spawnLocation.PivotTo(new CFrame(plot.getSpawnPosition()));
 
-	const controllersByPlot = new Map<PlotModel, ServerPlotController>();
-	const controllers = PlayersController.createContainer((player) => {
-		const controller = ServerPlotController.tryCreate(player);
-		if (controller) {
-			controllersByPlot.set(controller.plot.instance, controller);
-			controller.onDestroy(() => controllersByPlot.delete(controller.plot.instance));
-
-			onAdded.Fire(controller);
+			spawnLocation.Parent = plot.instance;
+		};
+		for (const plot of SharedPlots.plots) {
+			initializeSpawnLocation(plot);
 		}
 
-		return controller;
-	});
+		const sub = PlayerWatcher.onJoin((player) => {
+			const controller = ServerPlotController.tryCreate(player, di);
+			if (!controller) return;
 
-	/** Empty method to trigger initialization */
-	export function initialize() {}
+			controller.onDestroy(() => this.controllersByPlot.delete(controller.plot.instance));
 
-	export function tryGetControllerByPlayer(player: Player): ServerPlotController | undefined {
-		return controllers.get(player);
+			this.controllersByPlot.set(controller.plot.instance, controller);
+			this.controllersByPlayer.set(controller.player, controller);
+			this.onAdded.Fire(controller);
+		});
+		this.event.eventHandler.register(sub);
 	}
-	export function tryGetController(plot: PlotModel): ServerPlotController | undefined {
-		return controllersByPlot.get(plot);
+
+	tryGetControllerByPlayer(player: Player): ServerPlotController | undefined {
+		return this.controllersByPlayer.get(player);
+	}
+	tryGetController(plot: PlotModel): ServerPlotController | undefined {
+		return this.controllersByPlot.get(plot);
 	}
 }

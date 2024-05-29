@@ -2,17 +2,21 @@ import { Players } from "@rbxts/services";
 import { SlotDatabase } from "server/database/SlotDatabase";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
-import { ServerPlots } from "server/plots/ServerPlots";
-import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
+import type { ServerPlots } from "server/plots/ServerPlots";
+import type { BlockRegistryC } from "shared/block/BlockRegistry";
 
+@injectable
 export class RideMode implements PlayModeBase {
 	private readonly cache = new Map<Player, readonly BlockModel[]>();
 
-	constructor() {
+	constructor(
+		@inject private readonly serverPlots: ServerPlots,
+		@inject private readonly blockRegistry: BlockRegistryC,
+	) {
 		Players.PlayerRemoving.Connect((player) => {
 			const blocks = this.cache.get(player);
 
@@ -38,12 +42,12 @@ export class RideMode implements PlayModeBase {
 	}
 
 	private rideStart(player: Player): Response {
-		const controller = ServerPlots.tryGetControllerByPlayer(player);
+		const controller = this.serverPlots.tryGetControllerByPlayer(player);
 		if (!controller) throw "what";
 
 		const blocksChildren = controller.blocks.getBlocks();
 
-		for (const block of BlockRegistry.required) {
+		for (const block of this.blockRegistry.required) {
 			if (!blocksChildren.find((value) => BlockManager.manager.id.get(value) === block.id)) {
 				return {
 					success: false,
@@ -93,7 +97,7 @@ export class RideMode implements PlayModeBase {
 		return { success: true };
 	}
 	private rideStop(player: Player): Response {
-		const controller = ServerPlots.tryGetControllerByPlayer(player);
+		const controller = this.serverPlots.tryGetControllerByPlayer(player);
 		if (!controller) throw "what";
 
 		const plot = SharedPlots.getPlotComponentByOwnerID(player.UserId);

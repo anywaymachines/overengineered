@@ -19,8 +19,10 @@ declare global {
 	};
 }
 
+@injectable
 export class BuildingMode extends PlayMode {
-	static readonly instance = new BuildingMode();
+	/** @deprecated TOBEDELETED, only tutorial uses this */
+	static readonly instance: BuildingMode = undefined!;
 
 	readonly mirrorMode = new ObservableValue<MirrorMode>({});
 	readonly targetPlot = new ObservableValue<SharedPlot | undefined>(undefined).withDefault(
@@ -30,8 +32,11 @@ export class BuildingMode extends PlayMode {
 	readonly toolController;
 	readonly gui;
 
-	private constructor() {
+	constructor(@inject di: DIContainer) {
 		super();
+
+		di = di.beginScope();
+		di.registerSingleton(this);
 
 		this.targetPlot.subscribe((plot, prev) => {
 			const index = BlockSelect.blockRaycastParams.FilterDescendantsInstances.indexOf(prev.instance);
@@ -49,7 +54,7 @@ export class BuildingMode extends PlayMode {
 			),
 		);
 
-		this.toolController = this.parent(new ToolController(this));
+		this.toolController = this.parent(di.resolveForeignClass(ToolController));
 		this.gui = this.parentGui(
 			new BuildingModeScene(
 				Gui.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode,

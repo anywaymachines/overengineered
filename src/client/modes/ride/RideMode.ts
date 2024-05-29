@@ -7,6 +7,7 @@ import { PlayMode } from "client/modes/PlayMode";
 import { SharedPlots } from "shared/building/SharedPlots";
 import type { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
 
+@injectable
 export class RideMode extends PlayMode {
 	private currentMachine?: Machine;
 	private readonly rideModeScene;

@@ -14,19 +14,17 @@ import { BuildingWelder } from "server/building/BuildingWelder";
 import { GameInfo } from "server/building/GameInfo";
 import type { PlayerData } from "server/database/PlayerDatabase";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
-import { PlayModeController } from "server/modes/PlayModeController";
 import { registerOnRemoteEvent, registerOnRemoteFunction } from "server/network/event/RemoteHandler";
 import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
-import { ServerPlots } from "server/plots/ServerPlots";
-import { ServerRestartController } from "server/ServerRestartController";
+import type { ServerRestartController } from "server/ServerRestartController";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { BlocksInitializer } from "shared/init/BlocksInitializer";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { Remotes } from "shared/Remotes";
-import { ServerBuildingRequestController } from "server/building/ServerBuildingRequestController";
-import { PlayersController } from "server/player/PlayersController";
+import { SandboxGame } from "server/SandboxGame";
+import { DIContainer } from "shared/DI";
+import { BlocksInitializer } from "shared/init/BlocksInitializer";
 
 namespace RemoteHandlers {
 	export function sendMessageAsAdmin(player: Player, text: string, color?: Color3, duration?: number) {
@@ -122,23 +120,22 @@ if (game.PrivateServerOwnerId !== 0) {
 	Workspace.AddTag("PrivateServer");
 }
 
-// Plots
-ServerPlots.initialize();
+const di = new DIContainer();
+di.regResolve(SandboxGame);
+
+// TODO: deletethis
+BlocksInitializer.initialize();
 
 // Badges
 BadgeController.initialize();
 
-PlayersController.initialize();
-ServerBuildingRequestController.initialize();
-
 // Initializing event workders
-registerOnRemoteFunction("Ride", "SetPlayMode", PlayModeController.changeModeForPlayer);
 registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSetting);
 registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteFunction("Game", "GameInfo", RemoteHandlers.getGameData);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
 registerOnRemoteEvent("Admin", "SendMessage", RemoteHandlers.sendMessageAsAdmin);
-registerOnRemoteEvent("Admin", "Restart", () => ServerRestartController.restart(false));
+registerOnRemoteEvent("Admin", "Restart", () => di.resolve<ServerRestartController>().restart(false));
 UnreliableRemoteHandler.initialize();
 
 // Global message networking, TODO: Move away
@@ -149,13 +146,9 @@ if (!RunService.IsStudio()) {
 	});
 }
 
-ServerRestartController.init();
-
-BlocksInitializer.initialize();
 BuildingWelder.initialize();
 BlockMarkers.initialize();
 
 RemoteEvents.initialize();
 
-PlayModeController.init();
 Workspace.SetAttribute("loaded", true);

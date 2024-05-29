@@ -1,35 +1,47 @@
 import { Players } from "@rbxts/services";
 import { BuildMode } from "server/modes/BuildMode";
 import { RideMode } from "server/modes/RideMode";
+import { registerOnRemoteFunction } from "server/network/event/RemoteHandler";
+import { Controller } from "shared/component/Controller";
 import { Remotes } from "shared/Remotes";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 
-export namespace PlayModeController {
-	const playerModes: Record<number, PlayModes | undefined> = {};
-	const modes = {
-		ride: new RideMode(),
-		build: new BuildMode(PlayModeController),
-	} as const satisfies Record<PlayModes, PlayModeBase>;
+@injectable
+export class PlayModeController extends Controller {
+	private readonly playerModes: Record<number, PlayModes | undefined> = {};
+	private readonly modes;
 
-	export function init() {
+	constructor(@inject container: DIContainer) {
+		super();
+
+		container = container.beginScope();
+		container.registerSingleton(this);
+
+		this.modes = {
+			ride: container.regResolve(RideMode),
+			build: container.regResolve(BuildMode),
+		} as const satisfies Record<PlayModes, PlayModeBase>;
+
+		registerOnRemoteFunction("Ride", "SetPlayMode", this.changeModeForPlayer.bind(this));
+
 		Players.PlayerRemoving.Connect((plr) => {
-			delete playerModes[plr.UserId];
+			delete this.playerModes[plr.UserId];
 		});
 	}
 
-	export function getPlayerMode(player: Player) {
-		return playerModes[player.UserId];
+	getPlayerMode(player: Player) {
+		return this.playerModes[player.UserId];
 	}
 
-	export async function changeModeForPlayer(player: Player, mode: PlayModes | undefined): Promise<Response> {
+	async changeModeForPlayer(player: Player, mode: PlayModes | undefined): Promise<Response> {
 		if (mode !== undefined && !PlayerUtils.isAlive(player)) {
 			return { success: false, message: "Player is not alive" };
 		}
 
-		const prevmode = playerModes[player.UserId];
+		const prevmode = this.playerModes[player.UserId];
 		if (prevmode) {
-			const transition = modes[prevmode];
+			const transition = this.modes[prevmode];
 			if (transition) {
 				const result = transition.onTransitionTo(player, mode);
 				if (!result || !result.success)
@@ -37,7 +49,7 @@ export namespace PlayModeController {
 			}
 		}
 		if (mode) {
-			const transition = modes[mode];
+			const transition = this.modes[mode];
 			if (transition) {
 				const result = transition.onTransitionFrom(player, prevmode);
 				if (!result || !result.success)
@@ -45,8 +57,8 @@ export namespace PlayModeController {
 			}
 		}
 
-		$log(`${player.Name}'s mode: '${playerModes[player.UserId]}' => '${mode}'`);
-		playerModes[player.UserId] = mode;
+		$log(`${player.Name}'s mode: '${this.playerModes[player.UserId]}' => '${mode}'`);
+		this.playerModes[player.UserId] = mode;
 
 		for (let i = 0; i < 3; i++) {
 			try {

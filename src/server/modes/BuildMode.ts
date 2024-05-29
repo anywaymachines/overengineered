@@ -1,13 +1,10 @@
 import { Players } from "@rbxts/services";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
+import type { PlayModeController } from "server/modes/PlayModeController";
 
-export type PlayModeControllerType = {
-	getPlayerMode(player: Player): PlayModes | undefined;
-	changeModeForPlayer(this: void, player: Player, mode: PlayModes | undefined): Promise<Response>;
-};
-
+@injectable
 export class BuildMode implements PlayModeBase {
-	constructor(controller: PlayModeControllerType) {
+	constructor(@inject controller: PlayModeController) {
 		const runchar = async (plr: Player, character: Model) => {
 			// on spawn
 			const response = await controller.changeModeForPlayer(plr, "build");

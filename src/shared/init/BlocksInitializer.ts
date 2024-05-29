@@ -1,8 +1,7 @@
-import { BlockRegistry } from "shared/block/BlockRegistry";
+import { BlockRegistry, BlockRegistryC } from "shared/block/BlockRegistry";
 import { AutoOperationsCreator } from "shared/block/creation/AutoOperationsCreator";
 import { BlockCreatorFromAssets } from "shared/block/creation/BlockCreatorFromAssets";
 import { GeneratedBlocksCreator } from "shared/block/creation/GeneratedBlockCreator";
-import { SharedGameLoader } from "shared/init/SharedGameLoader";
 
 type Category = {
 	readonly name: CategoryName;
@@ -18,8 +17,9 @@ export type BlocksInitializeData = {
 //
 
 export namespace BlocksInitializer {
-	export const initialize = SharedGameLoader.lazyLoader("Initializing blocks", init);
-	function init() {
+	let registry: BlockRegistryC | undefined;
+
+	export function create(): BlockRegistryC {
 		const initData: BlocksInitializeData = {
 			blocks: new Map<string, RegistryBlock>(),
 			categories: {},
@@ -34,6 +34,13 @@ export namespace BlocksInitializer {
 			initializer(initData);
 		}
 
-		BlockRegistry.editable().add(initData.blocks.values(), initData.categories);
+		return (registry = new BlockRegistryC(initData.blocks.values(), initData.categories));
+	}
+
+	export function initialize() {
+		if (!registry) create();
+		assert(registry);
+
+		BlockRegistry.editable().add(registry.blocks.values(), registry.categories);
 	}
 }

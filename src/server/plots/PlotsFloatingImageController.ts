@@ -1,11 +1,24 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
+import { SharedPlots } from "shared/building/SharedPlots";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
+import { Controller } from "shared/component/Controller";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
-export class PlotFloatingImageController extends Component {
+export class PlotsFloatingImageController extends Controller {
+	constructor() {
+		super();
+
+		// Floating username+image controller
+		for (const plot of SharedPlots.plots) {
+			const controller = new PlotFloatingImageController(plot);
+			controller.enable();
+		}
+	}
+}
+class PlotFloatingImageController extends Component {
 	constructor(plot: SharedPlot) {
 		super();
 

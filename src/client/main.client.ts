@@ -1,7 +1,13 @@
 /* eslint-disable import/order */
-import { GameLoader } from "client/GameLoader";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { DIContainer } from "shared/DI";
+import { SandboxGame } from "client/SandboxGame";
 import { LoadingController } from "client/controller/LoadingController";
+import { GameLoader } from "client/GameLoader";
+
+const di = new DIContainer();
+di.regResolve(SandboxGame);
+
+import { PlayerDataStorage } from "client/PlayerDataStorage";
 
 const dataLoading = PlayerDataStorage.init();
 GameLoader.waitForEverything(LoadingController.show);
@@ -20,16 +26,14 @@ import { MusicController } from "client/controller/sound/MusicController";
 import { InputTypeChangeEvent } from "client/event/InputTypeChangeEvent";
 import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
-import { PlayModeController } from "client/modes/PlayModeController";
 import { ClientBuildingValidation } from "client/modes/build/ClientBuildingValidation";
-import { rootComponents } from "client/test/RootComponents";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
-import { ContainerComponent } from "shared/component/ContainerComponent";
 
 LoadingController.show("Loading the game");
 
+// TODO: remove delete
 BlocksInitializer.initialize();
 GameEnvironmentController.initialize();
 
@@ -61,12 +65,6 @@ Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =
 	}
 }
 GameLoader.waitForDataStorage();
-
-const root = new ContainerComponent();
-rootComponents.push(root);
-const playModeController = new PlayModeController();
-root.add(playModeController);
-root.enable();
 
 GameLoader.waitForServer();
 PlayerDataStorage.refetchGameData().await();

@@ -1,6 +1,5 @@
 import { HttpService } from "@rbxts/services";
 import { BuildingWelder } from "server/building/BuildingWelder";
-import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Component } from "shared/component/Component";
@@ -8,6 +7,7 @@ import { ComponentInstance } from "shared/component/ComponentInstance";
 import { AABB } from "shared/fixes/AABB";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
+import type { BlockRegistryC } from "shared/block/BlockRegistry";
 import type { PlacedBlockData, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -15,6 +15,7 @@ const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
 
 /** Building on a plot. */
+@injectable
 export class BuildingPlot extends Component {
 	private readonly localAABB: AABB;
 
@@ -24,6 +25,7 @@ export class BuildingPlot extends Component {
 		private readonly plot: SharedPlot,
 		readonly center: CFrame,
 		readonly size: Vector3,
+		@inject private readonly blockRegistry: BlockRegistryC,
 	) {
 		super();
 		ComponentInstance.init(this, instance);
@@ -67,7 +69,7 @@ export class BuildingPlot extends Component {
 			throw "Block with this uuid already exists";
 		}
 
-		const block = BlockRegistry.map.get(data.id);
+		const block = this.blockRegistry.blocks.get(data.id);
 		if (!block) {
 			return { success: false, message: `Unknown block id ${data.id}` };
 		}

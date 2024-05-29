@@ -35,6 +35,7 @@ import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/Ma
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { BlockRegistryC } from "shared/block/BlockRegistry";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 const allowedColor = Colors.blue;
@@ -249,7 +250,7 @@ namespace Scene {
 					return;
 				}
 
-				const targetCategory = BlockRegistry.getCategoryPath(block.category) ?? [];
+				const targetCategory = tool.blockRegistry.getCategoryPath(block.category) ?? [];
 
 				if (
 					this.blockSelector.selectedCategory.get()[this.blockSelector.selectedCategory.get().size() - 1] !==
@@ -1025,6 +1026,7 @@ namespace MultiPlaceController {
 }
 
 /** A tool for building in the world with blocks */
+@injectable
 export class BuildTool extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
@@ -1032,7 +1034,10 @@ export class BuildTool extends ToolBase {
 	readonly currentMode = new ComponentChild<IController>(this, true);
 	readonly blockRotation = new ObservableValue<CFrame>(CFrame.identity);
 
-	constructor(mode: BuildingMode) {
+	constructor(
+		@inject mode: BuildingMode,
+		@inject readonly blockRegistry: BlockRegistryC,
+	) {
 		super(mode);
 
 		this.parentGui(

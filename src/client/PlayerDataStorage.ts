@@ -14,7 +14,6 @@ type NonNullableFields<T> = {
 	[P in keyof T]: NonNullable<T[P]>;
 };
 
-print("`INPLAYERDATASTORAGE", debug.traceback());
 export namespace PlayerDataStorage {
 	export const loadedSlot = new ObservableValue<number | undefined>(undefined);
 

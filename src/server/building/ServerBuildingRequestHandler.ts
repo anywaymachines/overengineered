@@ -1,8 +1,7 @@
 import { Backend } from "server/Backend";
 import { SlotDatabase } from "server/database/SlotDatabase";
-import { PlayersController } from "server/player/PlayersController";
+import { PlayerWatcher } from "server/PlayerWatcher";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
-import { ServerPlots } from "server/plots/ServerPlots";
 import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
@@ -11,11 +10,11 @@ import { Controller } from "shared/component/Controller";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Operation } from "shared/Operation";
 import { SlotsMeta } from "shared/SlotsMeta";
-import type { ServerPlotController } from "server/plots/ServerPlots";
+import type { ServerPlotController, ServerPlots } from "server/plots/ServerPlots";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const errBuildingNotPermitted = err("Building is not permitted");
-const errDestroyed = PlayersController.errDestroyed;
+const errDestroyed = PlayerWatcher.errDestroyed;
 
 const isBlockOnPlot = (block: BlockModel, plot: PlotModel): boolean => block.IsDescendantOf(plot);
 const areAllBlocksOnPlot = (blocks: readonly BlockModel[], plot: PlotModel): boolean => {
@@ -29,7 +28,8 @@ const areAllBlocksOnPlot = (blocks: readonly BlockModel[], plot: PlotModel): boo
 };
 
 /** Receiver for player build requests */
-export class ServerBuildingRequestHandler2 extends Controller {
+@injectable
+export class ServerBuildingRequestHandler extends Controller {
 	readonly operations = {
 		placeBlocks: new Operation(this.placeBlocks.bind(this)),
 		deleteBlocks: new Operation(this.deleteBlocks.bind(this)),
@@ -48,12 +48,12 @@ export class ServerBuildingRequestHandler2 extends Controller {
 
 	readonly player: Player;
 
-	constructor(readonly controller: ServerPlotController) {
+	constructor(
+		@inject readonly controller: ServerPlotController,
+		@inject private readonly serverPlots: ServerPlots,
+	) {
 		super();
 		this.player = controller.player;
-
-		// TODO: on splotcontroller destroy, save
-		// or NOT HERE
 	}
 
 	private placeBlocks(request: PlaceBlocksRequest): MultiBuildResponse {
@@ -212,7 +212,7 @@ export class ServerBuildingRequestHandler2 extends Controller {
 
 		let output: ResponseExtract<SaveSlotResponse> | undefined;
 		if (request.save) {
-			const controller = ServerPlots.tryGetControllerByPlayer(player);
+			const controller = this.serverPlots.tryGetControllerByPlayer(player);
 			if (!controller) throw "what";
 
 			output = SlotDatabase.instance.save(player.UserId, request.index, controller.blocks);
@@ -253,12 +253,12 @@ export class ServerBuildingRequestHandler2 extends Controller {
 		let blocks: string | undefined;
 
 		if (imported) {
-			blocks = SlotDatabase.instance.getBlocks(userid, index);
-		} else {
 			const universeId = GameDefinitions.isTestPlace()
 				? GameDefinitions.PRODUCTION_UNIVERSE_ID
 				: GameDefinitions.INTERNAL_UNIVERSE_ID;
 			blocks = Backend.Datastores.GetEntry(universeId, "slots", `${userid}_${index}`) as string | undefined;
+		} else {
+			blocks = SlotDatabase.instance.getBlocks(userid, index);
 		}
 
 		this.controller.blocks.delete("all");

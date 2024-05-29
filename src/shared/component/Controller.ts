@@ -13,4 +13,13 @@ export class Controller extends DestroyableComponent {
 		this.onDestroy(() => event.destroy());
 		this.event = event;
 	}
+
+	protected parent<T extends DestroyableComponent | IComponent>(component: T): T {
+		if ("enable" in component) {
+			component.enable();
+		}
+
+		this.onDestroy(() => component.destroy());
+		return component;
+	}
 }

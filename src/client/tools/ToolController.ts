@@ -66,6 +66,7 @@ class ToolInputController extends ClientComponent {
 	}
 }
 
+@injectable
 export class ToolController extends ClientComponent {
 	readonly selectedTool = new MiddlewaredObservableValue<ToolBase | undefined>(undefined);
 	readonly visibleTools: ComponentDisabler<ToolBase>;
@@ -74,8 +75,10 @@ export class ToolController extends ClientComponent {
 	readonly allTools;
 	readonly allToolsOrdered: readonly ToolBase[];
 
-	constructor(mode: BuildingMode) {
+	constructor(@inject mode: BuildingMode, @inject di: DIContainer) {
 		super();
+		di = di.beginScope();
+		di.registerSingleton(this);
 
 		Signals.PLAYER.DIED.Connect(() => {
 			this.selectedTool.set(undefined);
@@ -103,7 +106,7 @@ export class ToolController extends ClientComponent {
 
 		// array instead of an object for ordering purposes
 		const tools = [
-			["buildTool", new BuildTool(mode)],
+			["buildTool", di.resolveForeignClass(BuildTool)],
 			["editTool", new EditTool(mode)],
 			["deleteTool", new DeleteTool(mode)],
 			["configTool", new ConfigTool(mode)],

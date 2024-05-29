@@ -1,74 +1,85 @@
-import { ServerBuildingRequestHandler2 } from "server/building/ServerBuildingRequestHandler2";
+import { ServerBuildingRequestHandler } from "server/building/ServerBuildingRequestHandler";
 import { SlotDatabase } from "server/database/SlotDatabase";
-import { PlayModeController } from "server/modes/PlayModeController";
-import { PlayersController } from "server/player/PlayersController";
+import { PlayerWatcher } from "server/PlayerWatcher";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
-import { ServerPlots } from "server/plots/ServerPlots";
+import { Controller } from "shared/component/Controller";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
+import type { PlayModeController } from "server/modes/PlayModeController";
+import type { ServerPlots } from "server/plots/ServerPlots";
+import type { DIContainer } from "shared/DI";
 import type { C2S2CRemoteFunction } from "shared/event2/PERemoteEvent";
 import type { Operation } from "shared/Operation";
 
-const children = new Map<Player, ServerBuildingRequestHandler2>();
-ServerPlots.onAdded.Connect((controller) => {
-	const handler = new ServerBuildingRequestHandler2(controller);
+@injectable
+export class ServerBuildingRequestController extends Controller {
+	constructor(
+		@inject serverPlots: ServerPlots,
+		@inject playModeController: PlayModeController,
+		@inject container: DIContainer,
+	) {
+		super();
+		container = container.beginScope();
 
-	children.set(controller.player, handler);
-	handler.onDestroy(() => children.delete(controller.player));
+		const children = new Map<Player, ServerBuildingRequestHandler>();
+		this.event.subscribe(serverPlots.onAdded, (controller) => {
+			container = container.beginScope();
+			container.registerSingleton(controller);
+			const handler = container.resolveForeignClass(ServerBuildingRequestHandler);
 
-	const savePlot = (): void => {
-		const player = controller.player;
-		const blocks = controller.blocks;
-		const save = PlayModeController.getPlayerMode(player) === "build" && blocks.getBlocks().size() !== 0;
+			children.set(controller.player, handler);
+			handler.onDestroy(() => children.delete(controller.player));
 
-		if (save) {
-			SlotDatabase.instance.setBlocks(
-				player.UserId,
-				SlotsMeta.quitSlotIndex,
-				BlocksSerializer.serialize(blocks),
-				blocks.getBlocks().size(),
-			);
-		} else {
-			SlotDatabase.instance.setBlocksFromAnotherSlot(
-				player.UserId,
-				SlotsMeta.quitSlotIndex,
-				SlotsMeta.autosaveSlotIndex,
-			);
-		}
-	};
-	controller.onDestroy(savePlot);
-});
+			const savePlot = (): void => {
+				const player = controller.player;
+				const blocks = controller.blocks;
+				const save = playModeController.getPlayerMode(player) === "build" && blocks.getBlocks().size() !== 0;
 
-const subFunc = <TArgs extends unknown[], TRet extends {}>(
-	remote: C2S2CRemoteFunction<TArgs, Response<TRet>>,
-	getfunc: (handler: ServerBuildingRequestHandler2["operations"]) => Operation<TArgs, TRet>,
-) => {
-	remote.subscribe((player, ...args) => {
-		const handler = children.get(player);
-		if (!handler) return PlayersController.errDestroyed;
+				if (save) {
+					SlotDatabase.instance.setBlocks(
+						player.UserId,
+						SlotsMeta.quitSlotIndex,
+						BlocksSerializer.serialize(blocks),
+						blocks.getBlocks().size(),
+					);
+				} else {
+					SlotDatabase.instance.setBlocksFromAnotherSlot(
+						player.UserId,
+						SlotsMeta.quitSlotIndex,
+						SlotsMeta.autosaveSlotIndex,
+					);
+				}
+			};
+			controller.onDestroy(savePlot);
+		});
 
-		return getfunc(handler.operations).execute(...args);
-	});
-};
+		const subFunc = <TArgs extends unknown[], TRet extends {}>(
+			remote: C2S2CRemoteFunction<TArgs, Response<TRet>>,
+			getfunc: (handler: ServerBuildingRequestHandler["operations"]) => Operation<TArgs, TRet>,
+		) => {
+			remote.subscribe((player, ...args) => {
+				const handler = children.get(player);
+				if (!handler) return PlayerWatcher.errDestroyed;
 
-const b = CustomRemotes.building;
-subFunc(b.placeBlocks, (c) => c.placeBlocks);
-subFunc(b.deleteBlocks, (c) => c.deleteBlocks);
-subFunc(b.moveBlocks, (c) => c.moveBlocks);
-subFunc(b.rotateBlocks, (c) => c.rotateBlocks);
-subFunc(b.logicConnect, (c) => c.logicConnect);
-subFunc(b.logicDisconnect, (c) => c.logicDisconnect);
-subFunc(b.paintBlocks, (c) => c.paintBlocks);
-subFunc(b.updateConfig, (c) => c.updateConfig);
-subFunc(b.resetConfig, (c) => c.resetConfig);
+				return getfunc(handler.operations).execute(...args);
+			});
+		};
 
-const s = CustomRemotes.slots;
-subFunc(s.load, (c) => c.loadSlot);
-subFunc(s.loadImported, (c) => c.loadImportedSlot);
-subFunc(s.loadAsAdmin, (c) => c.loadSlotAsAdmin);
-subFunc(s.save, (c) => c.saveSlot);
+		const b = CustomRemotes.building;
+		subFunc(b.placeBlocks, (c) => c.placeBlocks);
+		subFunc(b.deleteBlocks, (c) => c.deleteBlocks);
+		subFunc(b.moveBlocks, (c) => c.moveBlocks);
+		subFunc(b.rotateBlocks, (c) => c.rotateBlocks);
+		subFunc(b.logicConnect, (c) => c.logicConnect);
+		subFunc(b.logicDisconnect, (c) => c.logicDisconnect);
+		subFunc(b.paintBlocks, (c) => c.paintBlocks);
+		subFunc(b.updateConfig, (c) => c.updateConfig);
+		subFunc(b.resetConfig, (c) => c.resetConfig);
 
-export namespace ServerBuildingRequestController {
-	/** Empty function to trigger initialization */
-	export function initialize() {}
+		const s = CustomRemotes.slots;
+		subFunc(s.load, (c) => c.loadSlot);
+		subFunc(s.loadImported, (c) => c.loadImportedSlot);
+		subFunc(s.loadAsAdmin, (c) => c.loadSlotAsAdmin);
+		subFunc(s.save, (c) => c.saveSlot);
+	}
 }

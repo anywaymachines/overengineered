@@ -2,7 +2,7 @@ import { ClientComponent } from "client/component/ClientComponent";
 import { Signals } from "client/event/Signals";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { MultiModelHighlighter } from "client/tools/highlighters/MultiModelHighlighter";
-import { BlockManager } from "shared/building/BlockManager";
+import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { ArgsSignal } from "shared/event/Signal";
@@ -12,39 +12,8 @@ export type HoveredBlocksSelectorMode = keyof typeof HoveredBlocksSelector.Modes
 export class HoveredBlocksSelector extends ClientComponent implements BlockSelector {
 	static readonly Modes = {
 		single: (block: BlockModel): BlockModel[] => [block],
-		assembly: (block: BlockModel): BlockModel[] => {
-			// using set to prevent duplicates
-			return [
-				...new Set(
-					block.PrimaryPart!.GetConnectedParts(true).map((b) => BlockManager.getBlockDataByPart(b)!.instance),
-				),
-			];
-		},
-		machine: (block: BlockModel): BlockModel[] => {
-			const find = (result: Set<BlockModel>, visited: Set<Instance>, instance: BlockModel) => {
-				for (const part of instance.GetDescendants()) {
-					if (!part.IsA("BasePart")) continue;
-
-					const assemblyConnected = part.GetConnectedParts(false);
-					for (const cpart of assemblyConnected) {
-						if (visited.has(cpart)) {
-							continue;
-						}
-
-						visited.add(cpart);
-
-						const connected = BlockManager.getBlockDataByPart(cpart)!.instance;
-						result.add(connected);
-						find(result, visited, connected);
-					}
-				}
-			};
-
-			const result = new Set<BlockModel>();
-			find(result, new Set(), block);
-
-			return [...result];
-		},
+		assembly: BuildingManager.getAssemblyBlocks,
+		machine: BuildingManager.getMachineBlocks,
 	};
 
 	private readonly _highlighted = new ObservableValue<readonly BlockModel[]>([]);

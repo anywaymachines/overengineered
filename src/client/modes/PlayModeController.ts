@@ -1,25 +1,23 @@
 import { GuiService, StarterGui } from "@rbxts/services";
-import { ClientComponent } from "client/component/ClientComponent";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { Signals } from "client/event/Signals";
 import { Popup } from "client/gui/Popup";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { RideMode } from "client/modes/ride/RideMode";
+import { Controller } from "shared/component/Controller";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { Objects } from "shared/fixes/objects";
 import { Remotes } from "shared/Remotes";
 
-export class PlayModeController extends ClientComponent {
+@injectable
+export class PlayModeController extends Controller {
 	readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
 	readonly modes;
 
-	constructor() {
+	constructor(@inject di: DIContainer) {
 		super();
 
-		this.event.onPrepare(() => {
-			GuiService.SetGameplayPausedNotificationEnabled(false);
-			StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
-		});
+		GuiService.SetGameplayPausedNotificationEnabled(false);
+		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
 		Remotes.Client.GetNamespace("Ride")
 			.Get("SetPlayModeOnClient")
@@ -29,8 +27,8 @@ export class PlayModeController extends ClientComponent {
 			});
 
 		this.modes = {
-			build: BuildingMode.instance,
-			ride: new RideMode(),
+			build: di.resolveForeignClass(BuildingMode),
+			ride: di.resolveForeignClass(RideMode),
 		} as const;
 
 		for (const [_, mode] of pairs(this.modes)) {
@@ -57,10 +55,6 @@ export class PlayModeController extends ClientComponent {
 		this.setMode(this.playmode.get(), undefined);
 
 		this.event.subscribe(Signals.LOCAL_PLAY_MODE_CHANGED, (mode) => this.callImmediateSetMode(mode));
-	}
-
-	getDebugChildren(): readonly IDebuggableComponent[] {
-		return [...super.getDebugChildren(), ...Objects.values(this.modes)];
 	}
 
 	private callImmediateSetMode(mode: PlayModes) {

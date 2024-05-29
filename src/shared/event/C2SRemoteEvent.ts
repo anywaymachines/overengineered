@@ -38,8 +38,13 @@ export abstract class C2SRemoteEvent<T> extends RemoteEventBase<T, CustomRemoteE
 	}
 }
 export class AutoC2SRemoteEvent<T> extends C2SRemoteEvent<T> {
+	readonly clientInvoked = new Signal<(arg: T) => void>();
 	readonly invoked = new Signal<(player: Player | undefined, arg: T) => void>();
 
+	send(arg: T): void {
+		this.clientInvoked.Fire(arg);
+		return super.send(arg);
+	}
 	justRun(player: Player | undefined, arg: T): void {
 		this.invoked.Fire(player, arg);
 	}

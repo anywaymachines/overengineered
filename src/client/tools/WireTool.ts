@@ -567,9 +567,7 @@ namespace Controllers {
 
 			for (const marker of markers) {
 				if (marker instanceof Markers.Input) {
-					print("plane eingneer");
 					this.event.subscribe(marker.instance.TextButton.Activated, () => {
-						print("SADSDplane eingneer");
 						disconnectMarker(marker);
 					});
 

@@ -91,7 +91,6 @@ Error: ${err}
 	BSOD.show(str);
 });
 
-print("`INGAMELOADER", debug.traceback());
 export namespace GameLoader {
 	export let mainLoaded = false;
 	mainLoaded = false;
@@ -120,7 +119,6 @@ export namespace GameLoader {
 	}
 
 	export function waitForEverything(progress?: (operation: string) => void) {
-		print("`waiting for EVERYUTHGUING", debug.traceback());
 		const pp = progress;
 		progress = (operation) => {
 			pp?.(operation);
