@@ -6,7 +6,7 @@ import type { EventHandler } from "shared/event/EventHandler";
 export class ClientComponentEvents extends ComponentEvents {
 	readonly inputHandler = new InputHandler();
 
-	constructor(state: IWriteonlyComponent) {
+	constructor(private readonly state: IComponent) {
 		super();
 
 		this.onDisable(() => this.inputHandler.unsubscribeAll());
@@ -20,7 +20,7 @@ export class ClientComponentEvents extends ComponentEvents {
 
 	/** Register an event that fires on enable and input type change */
 	onPrepare(callback: (inputType: InputType, eventHandler: EventHandler, inputHandler: InputHandler) => void): void {
-		this.onEnable(() => callback(InputController.inputType.get(), this.eventHandler, this.inputHandler));
+		this.state.onEnable(() => callback(InputController.inputType.get(), this.eventHandler, this.inputHandler));
 	}
 
 	/** Register an event that fires on enable and input type change to Desktop */

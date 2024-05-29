@@ -10,7 +10,6 @@ LoadingController.show("Loading the dependencies");
 import { Players, TextChatService } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { ServerRestartController } from "client/ServerRestartController";
-import { ClientContainerComponent } from "client/component/ClientContainerComponent";
 import { CharacterController } from "client/controller/CharacterController";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
@@ -27,6 +26,7 @@ import { rootComponents } from "client/test/RootComponents";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
+import { ContainerComponent } from "shared/component/ContainerComponent";
 
 LoadingController.show("Loading the game");
 
@@ -62,7 +62,7 @@ Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =
 }
 GameLoader.waitForDataStorage();
 
-const root = new ClientContainerComponent();
+const root = new ContainerComponent();
 rootComponents.push(root);
 const playModeController = new PlayModeController();
 root.add(playModeController);

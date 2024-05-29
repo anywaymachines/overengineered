@@ -42,15 +42,15 @@ export class BuildingMode extends PlayMode {
 			BlockSelect.blockRaycastParams.AddToFilter(plot.instance);
 		}, true);
 
-		this.mirrorVisualizer = this.add(
+		this.mirrorVisualizer = this.parent(
 			new MirrorVisualizer(
 				this.targetPlot.createBased((plot) => plot.instance),
 				this.mirrorMode,
 			),
 		);
 
-		this.toolController = this.add(new ToolController(this));
-		this.gui = this.add(
+		this.toolController = this.parent(new ToolController(this));
+		this.gui = this.parentGui(
 			new BuildingModeScene(
 				Gui.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode,
 				this.toolController,

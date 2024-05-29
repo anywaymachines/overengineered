@@ -75,7 +75,7 @@ export class ThrustConfigLogicValue extends ConfigLogicValueBase<BlockConfigType
 			},
 		} as const satisfies KeyDefinitions<"add" | "sub">;
 
-		this.add((this.controller = new KeyPressingDefinitionsController(def)));
+		this.parent((this.controller = new KeyPressingDefinitionsController(def)));
 	}
 
 	getTouchButtonDatas(): readonly TouchModeButtonData[] {

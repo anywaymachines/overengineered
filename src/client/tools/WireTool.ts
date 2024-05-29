@@ -677,9 +677,6 @@ export class WireTool extends ToolBase {
 			new Scene.WireToolScene(ToolBase.getToolGui<"Wire", Scene.WireToolSceneDefinition>().Wire, this),
 		);
 
-		this.onPrepare(() => this.createEverything());
-		this.onDisable(() => this.markers.clear());
-
 		this.event.subscribe(ActionController.instance.onUndo, () => {
 			this.disable();
 			this.enable();
@@ -703,7 +700,12 @@ export class WireTool extends ToolBase {
 			const controller = this.controllerContainer.set(new controllers[inputType](this.markers.getAll()));
 			controller.selectedMarker.subscribe((m) => this.selectedMarker.set(m), true);
 		};
-		this.event.onPrepare(setController);
+		this.event.onPrepare(() => {
+			this.createEverything();
+			setController();
+		});
+		this.onDisable(() => this.markers.clear());
+
 		this.event.subInput((ih) => {
 			ih.onKeyDown("F", () => Visual.hideConnectedMarkers(this.markers.getAll()));
 			ih.onKeyUp("F", () => Visual.showConnectedMarkers(this.markers.getAll()));

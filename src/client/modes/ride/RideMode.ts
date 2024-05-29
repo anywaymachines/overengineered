@@ -15,7 +15,7 @@ export class RideMode extends PlayMode {
 		super();
 
 		this.rideModeScene = new RideModeScene(Gui.getGameUI<{ RideMode: RideModeSceneDefinition }>().RideMode);
-		this.add(this.rideModeScene);
+		this.parentGui(this.rideModeScene);
 	}
 
 	getName(): PlayModes {

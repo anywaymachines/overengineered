@@ -1,7 +1,8 @@
 import { ClientComponentEvents } from "client/component/ClientComponentEvents";
 import { InputController } from "client/controller/InputController";
 import { InstanceComponent } from "shared/component/InstanceComponent";
-import type { ReadonlyInputHandler } from "client/event/InputHandler";
+import type { InputHandler, ReadonlyInputHandler } from "client/event/InputHandler";
+import type { EventHandler } from "shared/event/EventHandler";
 
 /** @inheritdoc */
 export class ClientInstanceComponent<
@@ -20,7 +21,9 @@ export class ClientInstanceComponent<
 		this.onEnable(() => this.prepare());
 	}
 
-	protected onPrepare(callback: (inputType: InputType) => void) {
+	protected onPrepare(
+		callback: (inputType: InputType, eventHandler: EventHandler, inputHandler: InputHandler) => void,
+	) {
 		this.event.onPrepare(callback);
 	}
 

@@ -66,7 +66,7 @@ export class ControllableNumberConfigLogicValue extends ConfigLogicValueBase<Blo
 			},
 		} as const satisfies KeyDefinitions<"add" | "sub">;
 
-		this.add((this.controller = new KeyPressingDefinitionsController(def)));
+		this.parent((this.controller = new KeyPressingDefinitionsController(def)));
 	}
 
 	getTouchButtonDatas(): readonly TouchModeButtonData[] {
