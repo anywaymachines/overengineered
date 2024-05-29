@@ -2,9 +2,9 @@ import { DataStoreService, Players } from "@rbxts/services";
 import { Db } from "server/database/Database";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { SlotsMeta } from "shared/SlotsMeta";
+import type { BuildingPlot } from "server/plots/BuildingPlot";
 
 export class SlotDatabase {
 	static readonly instance = new SlotDatabase();
@@ -109,28 +109,21 @@ export class SlotDatabase {
 		this.setMeta(userId, meta);
 	}
 
-	update(
-		userId: number,
-		index: number,
-		update: (meta: readonly SlotMeta[]) => readonly SlotMeta[],
-		saveBlocks: boolean,
-	) {
+	updateMeta(userId: number, index: number, metaUpdate: (meta: readonly SlotMeta[]) => readonly SlotMeta[]): void {
 		this.ensureValidSlotIndex(userId, index);
 
-		const meta = update(this.getMeta(userId));
+		const meta = metaUpdate(this.getMeta(userId));
 		this.setMeta(userId, meta);
+	}
+	save(userId: number, index: number, plot: BuildingPlot): ResponseExtract<SaveSlotResponse> {
+		this.ensureValidSlotIndex(userId, index);
 
-		let blocksCount: number | undefined = undefined;
-		let size: number | undefined = undefined;
-		if (saveBlocks) {
-			const plot = SharedPlots.getPlotByOwnerID(userId);
-			const blocks = BlocksSerializer.serialize(plot);
-			blocksCount = SharedPlots.getPlotComponent(plot).getBlocks().size();
+		const blocks = BlocksSerializer.serialize(plot);
+		const blockCount = plot.getBlocks().size();
 
-			this.setBlocks(userId, index, blocks, blocksCount);
-			size = blocks.size();
-		}
+		this.setBlocks(userId, index, blocks, blockCount);
+		const size = blocks.size();
 
-		return { blocks: blocksCount, size: size };
+		return { blocks: blockCount, size: size };
 	}
 }

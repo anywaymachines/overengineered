@@ -1,10 +1,9 @@
-import { ServerBuilding } from "server/building/ServerBuilding";
 import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Serializer } from "shared/Serializer";
+import type { BuildingPlot } from "server/plots/BuildingPlot";
 import type { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
 import type { PlacedBlockDataConnection } from "shared/building/BlockManager";
@@ -33,13 +32,11 @@ interface SerializedBlockV3 extends SerializedBlockV2 {
 
 const read = {
 	blocksFromPlot: <T extends SerializedBlockBase>(
-		plot: PlotModel,
+		plot: BuildingPlot,
 		serialize: (block: BlockModel, index: number, buildingCenter: CFrame) => T,
 	): readonly T[] => {
-		const buildingCenter = plot.BuildingArea.CFrame;
-		return SharedPlots.getPlotComponent(plot)
-			.getBlocks()
-			.map((block, i) => serialize(block, i, buildingCenter));
+		const buildingCenter = plot.center;
+		return plot.getBlocks().map((block, i) => serialize(block, i, buildingCenter));
 	},
 
 	blockV3: (block: BlockModel, index: number, buildingCenter: CFrame): SerializedBlockV3 => {
@@ -56,15 +53,15 @@ const read = {
 } as const;
 const place = {
 	blocksOnPlot: <T extends SerializedBlockBase>(
-		plot: PlotModel,
+		plot: BuildingPlot,
 		data: readonly T[],
-		place: (plot: PlotModel, blockData: T, buildingCenter: CFrame) => void,
+		place: (plot: BuildingPlot, blockData: T, buildingCenter: CFrame) => void,
 	) => {
-		const buildingCenter = plot.BuildingArea.CFrame;
+		const buildingCenter = plot.center;
 		data.forEach((blockData) => place(plot, blockData, buildingCenter));
 	},
 
-	blockOnPlotV3: (plot: PlotModel, blockData: SerializedBlockV3, buildingCenter: CFrame) => {
+	blockOnPlotV3: (plot: BuildingPlot, blockData: SerializedBlockV3, buildingCenter: CFrame) => {
 		if (!BlockRegistry.map.has(blockData.id)) {
 			$err(`Could not load ${blockData.id} from slot: Block does not exists`);
 			return;
@@ -79,7 +76,7 @@ const place = {
 			uuid: blockData.uuid,
 		};
 
-		const response = ServerBuilding.placeBlock(plot, deserializedData);
+		const response = plot.place(deserializedData);
 		if (response.success && response.model && blockData.connections) {
 			BlockManager.manager.connections.set(response.model, blockData.connections);
 		}
@@ -99,8 +96,8 @@ interface CurrentUpgradableBlocksSerializer<
 	TBlocks extends SerializedBlocks<SerializedBlockBase>,
 	TPrev extends BlockSerializer<SerializedBlocks<SerializedBlockBase>>,
 > extends UpgradableBlocksSerializer<TBlocks, TPrev> {
-	read(plot: PlotModel): TBlocks;
-	place(data: TBlocks, plot: PlotModel): number;
+	read(plot: BuildingPlot): TBlocks;
+	place(data: TBlocks, plot: BuildingPlot): number;
 }
 
 //
@@ -960,13 +957,13 @@ const v22: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 		};
 	},
 
-	read(plot: PlotModel): SerializedBlocks<SerializedBlockV3> {
+	read(plot: BuildingPlot): SerializedBlocks<SerializedBlockV3> {
 		return {
 			version: this.version,
 			blocks: read.blocksFromPlot(plot, read.blockV3),
 		};
 	},
-	place(data: SerializedBlocks<SerializedBlockV3>, plot: PlotModel): number {
+	place(data: SerializedBlocks<SerializedBlockV3>, plot: BuildingPlot): number {
 		place.blocksOnPlot(plot, data.blocks, place.blockOnPlotV3);
 		return data.blocks.size();
 	},
@@ -981,10 +978,10 @@ const getVersion = (version: number) => versions.find((v) => v.version === versi
 
 /** Methods to save and load buildings */
 export namespace BlocksSerializer {
-	export function serialize(plot: PlotModel): string {
+	export function serialize(plot: BuildingPlot): string {
 		return JSON.serialize(current.read(plot) as never);
 	}
-	export function deserialize(data: string, plot: PlotModel): number {
+	export function deserialize(data: string, plot: BuildingPlot): number {
 		let deserialized = JSON.deserialize(data) as SerializedBlocks<SerializedBlockBase>;
 		$log(`Loaded a slot using savev${deserialized.version}`);
 
@@ -998,8 +995,7 @@ export namespace BlocksSerializer {
 			$log(`Upgrading a slot to savev${version.version}`);
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		current.place(deserialized as any, plot);
+		current.place(deserialized as SerializedBlocks<SerializedBlockV3>, plot);
 		return deserialized.blocks.size();
 	}
 }

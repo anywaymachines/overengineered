@@ -7,8 +7,8 @@ import { Signal } from "shared/event/Signal";
 
 type Operation = {
 	readonly description: string;
-	readonly undo: () => Promise<void | Response>;
-	readonly redo: () => Promise<void | Response>;
+	readonly undo: () => void | Response;
+	readonly redo: () => void | Response;
 };
 
 export class ActionController extends ClientComponent {
@@ -36,12 +36,8 @@ export class ActionController extends ClientComponent {
 		});
 	}
 
-	async execute<TResult extends Response>(
-		description: string,
-		undo: () => Promise<Response>,
-		func: () => Promise<TResult>,
-	) {
-		const result = await func();
+	execute<TResult extends Response>(description: string, undo: () => Response, func: () => TResult) {
+		const result = func();
 		if (result.success)
 			this.appendOperation({
 				description,
@@ -60,12 +56,12 @@ export class ActionController extends ClientComponent {
 		this._redoHistory.clear();
 	}
 
-	async redo() {
+	redo() {
 		const operation = this._redoHistory.pop();
 		if (!operation) return false;
 
 		this._history.push(operation);
-		const response = await operation.redo();
+		const response = operation.redo();
 		if (response && !response.success) {
 			LogControl.instance.addLine(`Error redoing "${operation.description}": ${response.message}`);
 			return true;
@@ -76,12 +72,12 @@ export class ActionController extends ClientComponent {
 		return true;
 	}
 
-	async undo() {
+	undo() {
 		const operation = this._history.pop();
 		if (!operation) return false;
 
 		this._redoHistory.push(operation);
-		const response = await operation.undo();
+		const response = operation.undo();
 		if (response && !response.success) {
 			LogControl.instance.addLine(`Error undoing "${operation.description}": ${response.message}`);
 			return true;

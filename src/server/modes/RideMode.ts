@@ -2,6 +2,7 @@ import { Players } from "@rbxts/services";
 import { SlotDatabase } from "server/database/SlotDatabase";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
+import { ServerPlots } from "server/plots/ServerPlots";
 import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -9,14 +10,17 @@ import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 
 export class RideMode implements PlayModeBase {
-	private readonly cache = new Map<Player, PlotBlocks>();
+	private readonly cache = new Map<Player, readonly BlockModel[]>();
 
 	constructor() {
 		Players.PlayerRemoving.Connect((player) => {
-			const instance = this.cache.get(player);
+			const blocks = this.cache.get(player);
 
-			if (instance) {
-				instance.Destroy();
+			if (blocks) {
+				for (const block of blocks) {
+					block.Destroy();
+				}
+
 				this.cache.delete(player);
 			}
 		});
@@ -34,10 +38,10 @@ export class RideMode implements PlayModeBase {
 	}
 
 	private rideStart(player: Player): Response {
-		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-		const blocks = plot.Blocks;
+		const controller = ServerPlots.tryGetControllerByPlayer(player);
+		if (!controller) throw "what";
 
-		const blocksChildren = blocks.GetChildren(undefined);
+		const blocksChildren = controller.blocks.getBlocks();
 
 		for (const block of BlockRegistry.required) {
 			if (!blocksChildren.find((value) => BlockManager.manager.id.get(value) === block.id)) {
@@ -48,15 +52,15 @@ export class RideMode implements PlayModeBase {
 			}
 		}
 
-		const copy = blocks.Clone();
+		const copy = blocksChildren.map((b) => b.Clone());
 		this.cache.set(player, copy);
 
-		const serialized = BlocksSerializer.serialize(plot);
+		const serialized = BlocksSerializer.serialize(controller.blocks);
 		SlotDatabase.instance.setBlocks(
 			player.UserId,
 			SlotsMeta.autosaveSlotIndex,
 			serialized,
-			SharedPlots.getPlotComponent(plot).getBlocks().size(),
+			controller.blocks.getBlocks().size(),
 		);
 
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
@@ -72,29 +76,30 @@ export class RideMode implements PlayModeBase {
 		hrp.Sit = false;
 		vehicleSeat.Sit(hrp);
 
-		//const currentMachine = new SharedMachine();
-		//currentMachine.init(SharedPlots.getPlotBlockDatas(plot));
-
-		ServerPartUtils.switchDescendantsAnchor(blocks, false);
-		if (true as boolean) {
-			ServerPartUtils.switchDescendantsNetworkOwner(blocks, player);
-		} else {
-			ServerPartUtils.switchDescendantsNetworkOwner(blocks, /*player*/ undefined);
+		for (const block of blocksChildren) {
+			// TODO: move `anchorblock` check somewhere
+			if (BlockManager.manager.id.get(block) === "anchorblock") {
+				ServerPartUtils.switchDescendantsAnchor(block, true);
+			} else {
+				ServerPartUtils.switchDescendantsAnchor(block, false);
+			}
 		}
 
 		for (const block of blocksChildren) {
-			if (BlockManager.manager.id.get(block) === "anchorblock") {
-				ServerPartUtils.switchDescendantsAnchor(block, true);
-			}
+			if (block.PrimaryPart?.Anchored) continue;
+			ServerPartUtils.switchDescendantsNetworkOwner(block, player);
 		}
 
 		return { success: true };
 	}
 	private rideStop(player: Player): Response {
+		const controller = ServerPlots.tryGetControllerByPlayer(player);
+		if (!controller) throw "what";
+
 		const plot = SharedPlots.getPlotComponentByOwnerID(player.UserId);
 		const blocks = plot.instance.Blocks;
 
-		for (const block of plot.getBlocks()) {
+		for (const block of controller.blocks.getBlocks()) {
 			block.Destroy();
 			if (math.random(6) === 1) {
 				task.wait();
@@ -104,8 +109,9 @@ export class RideMode implements PlayModeBase {
 		const cache = this.cache.get(player);
 		if (cache) {
 			const time = os.clock();
-			for (const child of cache.GetChildren()) {
-				child.Parent = blocks;
+			for (const child of cache) {
+				controller.blocks.justPlaceExisting(child);
+
 				if (math.random(3) === 1) {
 					task.wait();
 				}
@@ -115,7 +121,7 @@ export class RideMode implements PlayModeBase {
 		} else {
 			const blocksToLoad = SlotDatabase.instance.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
 			if (blocksToLoad !== undefined) {
-				BlocksSerializer.deserialize(blocksToLoad, plot.instance);
+				BlocksSerializer.deserialize(blocksToLoad, controller.blocks);
 			}
 		}
 

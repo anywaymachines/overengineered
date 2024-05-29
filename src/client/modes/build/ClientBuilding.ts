@@ -3,51 +3,43 @@ import { ActionController } from "client/modes/build/ActionController";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Operation } from "shared/Operation";
-import { Remotes } from "shared/Remotes";
+import { CustomRemotes } from "shared/Remotes";
 import type { SharedPlot } from "shared/building/SharedPlot";
+
+const building = CustomRemotes.building;
 
 /** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
 export namespace ClientBuilding {
-	function awaited<TArgs extends unknown[], TRet>(func: (...args: TArgs) => Promise<TRet>): (...args: TArgs) => TRet {
-		return (...args: TArgs) => {
-			const response = func(...args).await();
-			if (!response[0]) throw response[1];
+	export const placeOperation = new Operation(placeBlocks);
+	export const deleteOperation = new Operation(deleteBlocks);
+	export const moveOperation = new Operation(moveBlocks);
+	export const rotateOperation = new Operation(rotateBlocks);
+	export const paintOperation = new Operation(paintBlocks);
+	export const updateConfigOperation = new Operation(updateConfig);
+	export const resetConfigOperation = new Operation(resetConfig);
+	export const logicConnectOperation = new Operation(logicConnect);
+	export const logicDisconnectOperation = new Operation(logicDisconnect);
 
-			return response[1];
-		};
-	}
-
-	export const placeOperation = new Operation(awaited(placeBlocks));
-	export const deleteOperation = new Operation(awaited(deleteBlocks));
-	export const moveOperation = new Operation(awaited(moveBlocks));
-	export const rotateOperation = new Operation(awaited(rotateBlocks));
-	export const paintOperation = new Operation(awaited(paintBlocks));
-	export const updateConfigOperation = new Operation(awaited(updateConfig));
-	export const resetConfigOperation = new Operation(awaited(resetConfig));
-	export const logicConnectOperation = new Operation(awaited(logicConnect));
-	export const logicDisconnectOperation = new Operation(awaited(logicDisconnect));
-
-	async function placeBlocks(plot: SharedPlot, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) {
+	function placeBlocks(plot: SharedPlot, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) {
 		let placed: readonly BlockUuid[];
-		const result = await ActionController.instance.execute(
+		const result = ActionController.instance.execute(
 			"Place blocks",
 			() => {
 				const execute = () =>
-					Remotes.Client.GetNamespace("Building")
-						.Get("DeleteBlocks")
-						.CallServerAsync({ plot: plot.instance, blocks: placed.map((uuid) => plot.getBlock(uuid)) });
+					building.deleteBlocks.send({
+						plot: plot.instance,
+						blocks: placed.map((uuid) => plot.getBlock(uuid)),
+					});
 
 				if (blocks.size() > 10) {
-					return LoadingController.runAsync("Deleting blocks", execute);
+					return LoadingController.run("Deleting blocks", execute);
 				}
 
 				return execute();
 			},
 			() => {
-				const execute = async () => {
-					const response = await Remotes.Client.GetNamespace("Building")
-						.Get("PlaceBlocks")
-						.CallServerAsync({ plot: plot.instance, blocks });
+				const execute = () => {
+					const response = building.placeBlocks.send({ plot: plot.instance, blocks });
 					if (response.success) {
 						placed = response.models.map(BlockManager.manager.uuid.get);
 					}
@@ -56,7 +48,7 @@ export namespace ClientBuilding {
 				};
 
 				if (blocks.size() > 10) {
-					return LoadingController.runAsync("Placing blocks", execute);
+					return LoadingController.run("Placing blocks", execute);
 				}
 				return execute();
 			},
@@ -74,7 +66,7 @@ export namespace ClientBuilding {
 		plot.changed.Fire();
 		return result;
 	}
-	async function deleteBlocks(plot: SharedPlot, _blocks: readonly BlockModel[] | "all") {
+	function deleteBlocks(plot: SharedPlot, _blocks: readonly BlockModel[] | "all") {
 		const uuids = _blocks === "all" ? "all" : _blocks.map(BlockManager.manager.uuid.get);
 		const blockCount = uuids === "all" ? plot.getBlocks().size() : uuids.size();
 
@@ -87,7 +79,7 @@ export namespace ClientBuilding {
 		const connectedByLogic: SavedConnection[] = [];
 
 		if (uuids !== "all") {
-			const connections = SharedBuilding.getBlocksConnectedByLogicToMulti(plot.instance, new Set(uuids));
+			const connections = SharedBuilding.getBlocksConnectedByLogicToMulti(plot.getBlockDatas(), new Set(uuids));
 
 			for (const [blockUuid, c] of connections) {
 				for (const [otherblock, connectionName, connection] of c) {
@@ -130,21 +122,17 @@ export namespace ClientBuilding {
 			};
 		};
 
-		const result = await ActionController.instance.execute(
+		const result = ActionController.instance.execute(
 			uuids === "all" ? "Clear plot" : "Remove blocks",
 			() => {
-				const execute = async (): Promise<Response> => {
-					const response = await Remotes.Client.GetNamespace("Building")
-						.Get("PlaceBlocks")
-						.CallServerAsync(undo);
+				const execute = (): Response => {
+					const response = building.placeBlocks.send(undo);
 					if (!response.success) {
 						return response;
 					}
 
 					for (const connection of connectedByLogic) {
-						const response = await Remotes.Client.GetNamespace("Building")
-							.Get("LogicConnect")
-							.CallServerAsync(getConnectRequest(connection));
+						const response = building.logicConnect.send(getConnectRequest(connection));
 
 						if (!response.success) {
 							return response;
@@ -161,19 +149,16 @@ export namespace ClientBuilding {
 				};
 
 				if (blockCount > 10) {
-					return LoadingController.runAsync("Placing blocks", execute);
+					return LoadingController.run("Placing blocks", execute);
 				}
 
 				return execute();
 			},
 			() => {
-				const execute = () =>
-					Remotes.Client.GetNamespace("Building")
-						.Get("DeleteBlocks")
-						.CallServerAsync({ plot: plot.instance, blocks: getBlocks() });
+				const execute = () => building.deleteBlocks.send({ plot: plot.instance, blocks: getBlocks() });
 
 				if (blockCount > 10) {
-					return LoadingController.runAsync("Removing blocks", execute);
+					return LoadingController.run("Removing blocks", execute);
 				}
 
 				return execute();
@@ -183,58 +168,64 @@ export namespace ClientBuilding {
 		plot.changed.Fire();
 		return result;
 	}
-	async function moveBlocks(plot: SharedPlot, _blocks: readonly BlockModel[], diff: Vector3) {
+	function moveBlocks(plot: SharedPlot, _blocks: readonly BlockModel[], diff: Vector3) {
 		const uuids = _blocks.map(BlockManager.manager.uuid.get);
 		const getBlocks = (): readonly BlockModel[] => uuids.map((uuid) => plot.getBlock(uuid));
 
-		const result = await ActionController.instance.execute(
+		const result = ActionController.instance.execute(
 			"Move blocks",
 			() =>
-				LoadingController.runAsync("Moving blocks", async () => {
-					return Remotes.Client.GetNamespace("Building")
-						.Get("MoveBlocks")
-						.CallServerAsync({ plot: plot.instance, diff: diff.mul(-1), blocks: getBlocks() });
+				LoadingController.run("Moving blocks", () => {
+					return building.moveBlocks.send({
+						plot: plot.instance,
+						diff: diff.mul(-1),
+						blocks: getBlocks(),
+					});
 				}),
 			() =>
-				LoadingController.runAsync("Moving blocks", async () => {
-					return Remotes.Client.GetNamespace("Building")
-						.Get("MoveBlocks")
-						.CallServerAsync({ plot: plot.instance, diff, blocks: getBlocks() });
+				LoadingController.run("Moving blocks", () => {
+					return building.moveBlocks.send({ plot: plot.instance, diff, blocks: getBlocks() });
 				}),
 		);
 
 		plot.changed.Fire();
 		return result;
 	}
-	async function rotateBlocks(plot: SharedPlot, _blocks: readonly BlockModel[], pivot: Vector3, rotation: CFrame) {
+	function rotateBlocks(plot: SharedPlot, _blocks: readonly BlockModel[], pivot: Vector3, rotation: CFrame) {
 		const uuids = _blocks.map(BlockManager.manager.uuid.get);
 		const getBlocks = (): readonly BlockModel[] => uuids.map((uuid) => plot.getBlock(uuid));
 
-		const result = await ActionController.instance.execute(
+		const result = ActionController.instance.execute(
 			"Rotate blocks",
 			() =>
-				LoadingController.runAsync("Rotating blocks", async () => {
-					return Remotes.Client.GetNamespace("Building")
-						.Get("RotateBlocks")
-						.CallServerAsync({ plot: plot.instance, pivot, diff: rotation.Inverse(), blocks: getBlocks() });
+				LoadingController.run("Rotating blocks", () => {
+					return building.rotateBlocks.send({
+						plot: plot.instance,
+						pivot,
+						diff: rotation.Inverse(),
+						blocks: getBlocks(),
+					});
 				}),
 			() =>
-				LoadingController.runAsync("Rotating blocks", async () => {
-					return Remotes.Client.GetNamespace("Building")
-						.Get("RotateBlocks")
-						.CallServerAsync({ plot: plot.instance, pivot, diff: rotation, blocks: getBlocks() });
+				LoadingController.run("Rotating blocks", () => {
+					return building.rotateBlocks.send({
+						plot: plot.instance,
+						pivot,
+						diff: rotation,
+						blocks: getBlocks(),
+					});
 				}),
 		);
 
 		plot.changed.Fire();
 		return result;
 	}
-	async function paintBlocks(
+	function paintBlocks(
 		plot: SharedPlot,
 		_blocks: readonly BlockModel[] | "all",
 		material: Enum.Material | undefined,
 		color: Color3 | undefined,
-		_original?: ReadonlyMap<BlockModel, readonly [material: Enum.Material, color: Color3]>,
+		_original?: ReadonlyMap<BlockModel, { readonly material: Enum.Material; readonly color: Color3 }>,
 	) {
 		const origData = _original
 			? new ReadonlyMap(_original.map((block, value) => [BlockManager.manager.uuid.get(block), value] as const))
@@ -243,17 +234,20 @@ export namespace ClientBuilding {
 						(b) =>
 							[
 								BlockManager.manager.uuid.get(b),
-								[BlockManager.manager.material.get(b), BlockManager.manager.color.get(b)],
+								{
+									material: BlockManager.manager.material.get(b),
+									color: BlockManager.manager.color.get(b),
+								},
 							] as const,
 					),
 				);
 		const getBlocks = (): readonly BlockModel[] => origData.map((uuid) => plot.getBlock(uuid));
 
-		const result = await ActionController.instance.execute(
+		const result = ActionController.instance.execute(
 			"Paint blocks",
-			async () => {
+			() => {
 				const grouped = new Map<Enum.Material, Map<string, BlockUuid[]>>();
-				for (const [uuid, [material, color]] of origData) {
+				for (const [uuid, { material, color }] of origData) {
 					let matmap = grouped.get(material);
 					if (!matmap) {
 						matmap = new Map();
@@ -273,15 +267,13 @@ export namespace ClientBuilding {
 					for (const [color, uuids] of colorgroup) {
 						const blocks = uuids.map((uuid) => plot.getBlock(uuid));
 
-						const result = await LoadingController.runAsync("Painting blocks", async () => {
-							return Remotes.Client.GetNamespace("Building")
-								.Get("PaintBlocks")
-								.CallServerAsync({
-									plot: plot.instance,
-									material,
-									color: Color3.fromHex(color),
-									blocks,
-								});
+						const result = LoadingController.run("Painting blocks", () => {
+							return building.paintBlocks.send({
+								plot: plot.instance,
+								material,
+								color: Color3.fromHex(color),
+								blocks,
+							});
 						});
 
 						if (!result.success) {
@@ -293,28 +285,27 @@ export namespace ClientBuilding {
 				return { success: true };
 			},
 			() =>
-				LoadingController.runAsync("Painting blocks", async () => {
-					return Remotes.Client.GetNamespace("Building")
-						.Get("PaintBlocks")
-						.CallServerAsync({ plot: plot.instance, material, color, blocks: getBlocks() });
+				LoadingController.run("Painting blocks", () => {
+					return building.paintBlocks.send({
+						plot: plot.instance,
+						material,
+						color,
+						blocks: getBlocks(),
+					});
 				}),
 		);
 
 		plot.changed.Fire();
 		return result;
 	}
-	async function updateConfig(plot: SharedPlot, configs: ConfigUpdateRequest["configs"]) {
-		return await Remotes.Client.GetNamespace("Building")
-			.Get("UpdateConfigRequest")
-			.CallServerAsync({ plot: plot.instance, configs });
+	function updateConfig(plot: SharedPlot, configs: ConfigUpdateRequest["configs"]) {
+		return building.updateConfig.send({ plot: plot.instance, configs });
 	}
-	async function resetConfig(plot: SharedPlot, _blocks: readonly BlockModel[]) {
-		return await Remotes.Client.GetNamespace("Building")
-			.Get("ResetConfigRequest")
-			.CallServerAsync({ plot: plot.instance, blocks: _blocks });
+	function resetConfig(plot: SharedPlot, _blocks: readonly BlockModel[]) {
+		return building.resetConfig.send({ plot: plot.instance, blocks: _blocks });
 	}
 
-	async function logicConnect(
+	function logicConnect(
 		plot: SharedPlot,
 		_inputBlock: BlockModel,
 		inputConnection: BlockConnectionName,
@@ -324,55 +315,47 @@ export namespace ClientBuilding {
 		const inputBlock = BlockManager.manager.uuid.get(_inputBlock);
 		const outputBlock = BlockManager.manager.uuid.get(_outputBlock);
 
-		return await ActionController.instance.execute(
+		return ActionController.instance.execute(
 			"Connect logic",
-			async () => {
-				return await Remotes.Client.GetNamespace("Building")
-					.Get("LogicDisconnect")
-					.CallServerAsync({
-						plot: plot.instance,
-						inputBlock: plot.getBlock(inputBlock),
-						inputConnection,
-					});
+			() => {
+				return building.logicDisconnect.send({
+					plot: plot.instance,
+					inputBlock: plot.getBlock(inputBlock),
+					inputConnection,
+				});
 			},
-			async () => {
-				return await Remotes.Client.GetNamespace("Building")
-					.Get("LogicConnect")
-					.CallServerAsync({
-						plot: plot.instance,
-						inputBlock: plot.getBlock(inputBlock),
-						inputConnection,
-						outputBlock: plot.getBlock(outputBlock),
-						outputConnection,
-					});
+			() => {
+				return building.logicConnect.send({
+					plot: plot.instance,
+					inputBlock: plot.getBlock(inputBlock),
+					inputConnection,
+					outputBlock: plot.getBlock(outputBlock),
+					outputConnection,
+				});
 			},
 		);
 	}
-	async function logicDisconnect(plot: SharedPlot, _inputBlock: BlockModel, inputConnection: BlockConnectionName) {
+	function logicDisconnect(plot: SharedPlot, _inputBlock: BlockModel, inputConnection: BlockConnectionName) {
 		const inputBlock = BlockManager.manager.uuid.get(_inputBlock);
 		const output = BlockManager.manager.connections.get(_inputBlock)[inputConnection];
 
-		return await ActionController.instance.execute(
+		return ActionController.instance.execute(
 			"Disconnect logic",
-			async () => {
-				return await Remotes.Client.GetNamespace("Building")
-					.Get("LogicConnect")
-					.CallServerAsync({
-						plot: plot.instance,
-						inputBlock: plot.getBlock(inputBlock),
-						inputConnection,
-						outputBlock: plot.getBlock(output.blockUuid),
-						outputConnection: output.connectionName,
-					});
+			() => {
+				return building.logicConnect.send({
+					plot: plot.instance,
+					inputBlock: plot.getBlock(inputBlock),
+					inputConnection,
+					outputBlock: plot.getBlock(output.blockUuid),
+					outputConnection: output.connectionName,
+				});
 			},
-			async () => {
-				return await Remotes.Client.GetNamespace("Building")
-					.Get("LogicDisconnect")
-					.CallServerAsync({
-						plot: plot.instance,
-						inputBlock: plot.getBlock(inputBlock),
-						inputConnection,
-					});
+			() => {
+				return building.logicDisconnect.send({
+					plot: plot.instance,
+					inputBlock: plot.getBlock(inputBlock),
+					inputConnection,
+				});
 			},
 		);
 	}

@@ -12,15 +12,11 @@ import { BadgeController } from "server/BadgeController";
 import { BlockMarkers } from "server/building/BlockMarkers";
 import { BuildingWelder } from "server/building/BuildingWelder";
 import { GameInfo } from "server/building/GameInfo";
-import { ServerBuilding } from "server/building/ServerBuilding";
-import { ServerBuildingRequestHandler } from "server/building/ServerBuildingRequestHandler";
 import type { PlayerData } from "server/database/PlayerDatabase";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
-import { SlotDatabase } from "server/database/SlotDatabase";
 import { PlayModeController } from "server/modes/PlayModeController";
 import { registerOnRemoteEvent, registerOnRemoteFunction } from "server/network/event/RemoteHandler";
 import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
-import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { ServerPlots } from "server/plots/ServerPlots";
 import { ServerRestartController } from "server/ServerRestartController";
 import { BlockManager } from "shared/building/BlockManager";
@@ -29,30 +25,10 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { Remotes } from "shared/Remotes";
-import { SlotsMeta } from "shared/SlotsMeta";
 import { ServerBuildingRequestController } from "server/building/ServerBuildingRequestController";
 import { PlayersController } from "server/player/PlayersController";
 
 namespace RemoteHandlers {
-	export function loadSlot(player: Player, index: number): LoadSlotResponse {
-		return RemoteHandlers.loadAdminSlot(SharedPlots.getPlotByOwnerID(player.UserId), player.UserId, index);
-	}
-
-	export function loadImportedSlot(player: Player, index: number): LoadSlotResponse {
-		return RemoteHandlers.loadAdminImportedSlot(SharedPlots.getPlotByOwnerID(player.UserId), player.UserId, index);
-	}
-
-	export function loadSlotAsAdmin(player: Player, userid: number, index: number): LoadSlotResponse {
-		if (!GameDefinitions.isAdmin(player)) {
-			return {
-				success: false,
-				message: "Permission denied",
-			};
-		}
-
-		return RemoteHandlers.loadAdminSlot(SharedPlots.getPlotByOwnerID(player.UserId), userid, index);
-	}
-
 	export function sendMessageAsAdmin(player: Player, text: string, color?: Color3, duration?: number) {
 		if (!GameDefinitions.isAdmin(player)) return;
 
@@ -63,50 +39,6 @@ namespace RemoteHandlers {
 		});
 
 		Remotes.Server.GetNamespace("Admin").Get("SendMessage").SendToAllPlayers(text, color, duration);
-	}
-
-	export function loadAdminImportedSlot(plot: PlotModel, userid: number, index: number): LoadSlotResponse {
-		const start = os.clock();
-		// const blocks = SlotDatabase.instance.getBlocks(userid, index);
-		const universeId = GameDefinitions.isTestPlace()
-			? GameDefinitions.PRODUCTION_UNIVERSE_ID
-			: GameDefinitions.INTERNAL_UNIVERSE_ID;
-		const blocks = Backend.Datastores.GetEntry(universeId, "slots", `${userid}_${index}`) as string;
-
-		ServerBuilding.deleteBlocks({ plot, blocks: "all" });
-
-		if (blocks === undefined || blocks.size() === 0) {
-			return {
-				success: false,
-				message: "Slot is empty",
-			};
-		}
-
-		$log(`Loading ${userid}'s slot ${index}`);
-		const dblocks = BlocksSerializer.deserialize(blocks, plot);
-		$log(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
-
-		return { success: true, isEmpty: dblocks === 0 };
-	}
-
-	export function loadAdminSlot(plot: PlotModel, userid: number, index: number): LoadSlotResponse {
-		const start = os.clock();
-		const blocks = SlotDatabase.instance.getBlocks(userid, index);
-
-		ServerBuilding.deleteBlocks({ plot, blocks: "all" });
-
-		if (blocks === undefined || blocks.size() === 0) {
-			return {
-				success: false,
-				message: "Slot is empty",
-			};
-		}
-
-		$log(`Loading ${userid}'s slot ${index}`);
-		const dblocks = BlocksSerializer.deserialize(blocks, plot);
-		$log(`Loaded ${userid} slot ${index} in ${os.clock() - start}`);
-
-		return { success: true, isEmpty: dblocks === 0 };
 	}
 
 	export function updateSetting<TKey extends keyof PlayerConfig>(
@@ -164,29 +96,6 @@ namespace RemoteHandlers {
 		};
 	}
 
-	export function saveSlot(player: Player, data: PlayerSaveSlotRequest): SaveSlotResponse {
-		$log(`Saving ${player.Name}'s slot ${data.index}`);
-
-		const output = SlotDatabase.instance.update(
-			player.UserId,
-			data.index,
-			(meta) => {
-				const get = SlotsMeta.get(meta, data.index);
-				return SlotsMeta.withSlot(meta, data.index, {
-					name: data.name ?? get.name,
-					color: data.color ?? get.color,
-					touchControls: data.touchControls ?? get.touchControls,
-				});
-			},
-			data.save,
-		);
-
-		return {
-			...output,
-			success: true,
-		};
-	}
-
 	export function sit(player: Player) {
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
 		if (hrp.Sit) return;
@@ -224,23 +133,10 @@ ServerBuildingRequestController.initialize();
 
 // Initializing event workders
 registerOnRemoteFunction("Ride", "SetPlayMode", PlayModeController.changeModeForPlayer);
-registerOnRemoteFunction("Slots", "Save", RemoteHandlers.saveSlot);
-registerOnRemoteFunction("Slots", "Load", RemoteHandlers.loadSlot);
-registerOnRemoteFunction("Slots", "LoadImported", RemoteHandlers.loadImportedSlot);
-registerOnRemoteFunction("Building", "UpdateConfigRequest", ServerBuildingRequestHandler.updateConfig);
-registerOnRemoteFunction("Building", "ResetConfigRequest", ServerBuildingRequestHandler.resetConfig);
-//registerOnRemoteFunction("Building", "PlaceBlocks", ServerBuildingRequestHandler.placeBlocks);
-registerOnRemoteFunction("Building", "DeleteBlocks", ServerBuildingRequestHandler.deleteBlocks);
-registerOnRemoteFunction("Building", "MoveBlocks", ServerBuildingRequestHandler.moveBlocks);
-registerOnRemoteFunction("Building", "RotateBlocks", ServerBuildingRequestHandler.rotateBlocks);
-registerOnRemoteFunction("Building", "LogicConnect", ServerBuildingRequestHandler.logicConnect);
-registerOnRemoteFunction("Building", "LogicDisconnect", ServerBuildingRequestHandler.logicDisconnect);
-registerOnRemoteFunction("Building", "PaintBlocks", ServerBuildingRequestHandler.paintBlocks);
 registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSetting);
 registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteFunction("Game", "GameInfo", RemoteHandlers.getGameData);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
-registerOnRemoteEvent("Admin", "LoadSlot", RemoteHandlers.loadSlotAsAdmin);
 registerOnRemoteEvent("Admin", "SendMessage", RemoteHandlers.sendMessageAsAdmin);
 registerOnRemoteEvent("Admin", "Restart", () => ServerRestartController.restart(false));
 UnreliableRemoteHandler.initialize();

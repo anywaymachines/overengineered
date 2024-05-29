@@ -3,47 +3,67 @@ import { BuildingWelder } from "server/building/BuildingWelder";
 import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import { SharedPlots } from "shared/building/SharedPlots";
+import { Component } from "shared/component/Component";
+import { ComponentInstance } from "shared/component/ComponentInstance";
 import { AABB } from "shared/fixes/AABB";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
-import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
-import type { JsonSerializablePrimitive } from "shared/fixes/Json";
+import type { PlacedBlockData, PlacedBlockLogicConnections } from "shared/building/BlockManager";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
 
-/** Bumps the {@link PlotModel} `version` attribute */
-const bumpPlotVersion = (plot: PlotModel) => {
-	const component = SharedPlots.getPlotComponent(plot);
-	task.defer(() => component.version.set((component.version.get() ?? 0) + 1));
-};
+/** Building on a plot. */
+export class BuildingPlot extends Component {
+	private readonly localAABB: AABB;
 
-/** Methods for editing the buildings server-side */
-export namespace ServerBuilding {
-	export function clearPlot(plot: PlotModel): void {
-		plot.Blocks.ClearAllChildren();
-		BuildingWelder.deleteWelds(plot);
+	constructor(
+		private readonly instance: Instance,
+		/** @deprecated TOBEREMOVED */
+		private readonly plot: SharedPlot,
+		readonly center: CFrame,
+		readonly size: Vector3,
+	) {
+		super();
+		ComponentInstance.init(this, instance);
+		this.localAABB = AABB.fromCenterSize(Vector3.zero, size);
 
-		bumpPlotVersion(plot);
+		this.onDestroy(() => BuildingWelder.deleteWelds(this));
 	}
-	export function placeBlock(plot: PlotModel, data: PlaceBlockRequest): BuildResponse {
-		const plotc = SharedPlots.getPlotComponent(plot);
-		if (plotc.ownerId.get() === undefined) {
-			return { success: false, message: "Player quit." };
-		}
 
-		// validation removed as does not help with cloning
-		/*if (
-			SharedPlots.getPlotComponent(plot)
-				.getBlocks()
-				.any((b) => b.GetPivot().Position === data.location.Position)
-		) {
-			return { success: true, model: undefined };
-		}*/
+	isInside(block: BlockModel): boolean {
+		const [pos, size] = block.GetBoundingBox();
+		const localPos = this.center.ToObjectSpace(pos);
 
+		return this.localAABB.contains(AABB.fromCenterSize(localPos.Position, size).withCenter(localPos));
+	}
+
+	getBlockDatas(): readonly PlacedBlockData[] {
+		return this.getBlocks().map(BlockManager.getBlockDataByBlockModel);
+	}
+	getBlocks(): readonly BlockModel[] {
+		return this.instance.GetChildren() as unknown as readonly BlockModel[];
+	}
+	getBlock(uuid: BlockUuid): BlockModel {
+		return (this.instance as unknown as Record<BlockUuid, BlockModel>)[uuid];
+	}
+	tryGetBlock(uuid: BlockUuid): BlockModel | undefined {
+		return this.instance.FindFirstChild(uuid) as BlockModel | undefined;
+	}
+
+	clearBlocks(): void {
+		this.instance.ClearAllChildren();
+		BuildingWelder.deleteWelds(this);
+	}
+
+	/** @deprecated Used only for a specific case, do not use & do not remove */
+	justPlaceExisting(block: BlockModel): void {
+		block.Parent = this.instance;
+	}
+	place(data: PlaceBlockRequest): BuildResponse {
 		const uuid = data.uuid ?? (HttpService.GenerateGUID(false) as BlockUuid);
-		if (SharedPlots.tryGetBlockByUuid(plot, uuid)) {
+		if (this.tryGetBlock(uuid)) {
 			throw "Block with this uuid already exists";
 		}
 
@@ -74,23 +94,18 @@ export namespace ServerBuilding {
 			task.wait();
 		}
 
-		if (plotc.ownerId.get() === undefined) {
-			return { success: false, message: "Player quit." };
-		}
+		model.Parent = this.instance;
+		BuildingWelder.weldOnPlot(this, model);
 
-		model.Parent = plot.Blocks;
-		BuildingWelder.weldOnPlot(plot, model);
-
-		bumpPlotVersion(plot);
 		return { success: true, model: model };
 	}
-	export function deleteBlocks({ plot, blocks }: DeleteBlocksRequest): Response {
+	delete(blocks: readonly BlockModel[] | "all"): Response {
 		if (blocks !== "all" && blocks.size() === 0) {
 			return success;
 		}
 
 		if (blocks === "all") {
-			blocks = SharedPlots.getPlotComponent(plot).getBlocks();
+			blocks = this.getBlocks();
 			for (const block of blocks) {
 				block.Destroy();
 				if (math.random(6) === 1) {
@@ -98,16 +113,15 @@ export namespace ServerBuilding {
 				}
 			}
 
-			BuildingWelder.deleteWelds(plot);
+			BuildingWelder.deleteWelds(this);
 		} else {
 			const connections = SharedBuilding.getBlocksConnectedByLogicToMulti(
-				plot,
+				this.getBlockDatas(),
 				blocks.mapToSet(BlockManager.manager.uuid.get),
 			);
 			for (const [, c] of connections) {
 				for (const [otherblock, connectionName] of c) {
-					logicDisconnect({
-						plot,
+					this.logicDisconnect({
 						inputBlock: otherblock.instance,
 						inputConnection: connectionName,
 					});
@@ -116,7 +130,7 @@ export namespace ServerBuilding {
 
 			for (const block of blocks) {
 				BuildingWelder.unweld(block);
-				BuildingWelder.deleteWeld(plot, block);
+				BuildingWelder.deleteWeld(this, block);
 
 				block.Destroy();
 				if (math.random(3) === 1) {
@@ -125,37 +139,33 @@ export namespace ServerBuilding {
 			}
 		}
 
-		bumpPlotVersion(plot);
 		return success;
 	}
-	export function moveBlocks({ plot, blocks, diff }: MoveBlocksRequest): Response {
+	move(blocks: readonly BlockModel[] | "all", diff: Vector3): Response {
 		if (blocks !== "all" && blocks.size() === 0) {
 			return success;
 		}
 
-		blocks = blocks === "all" ? SharedPlots.getPlotComponent(plot).getBlocks() : blocks;
+		blocks = blocks === "all" ? this.getBlocks() : blocks;
 		let blocksRegion = AABB.fromModels(blocks);
 		blocksRegion = blocksRegion.withCenter(blocksRegion.getCenter().add(diff));
 
-		if (!SharedPlots.getPlotBuildingRegion(plot).contains(blocksRegion)) {
+		if (!this.plot.isInside(blocksRegion)) {
 			return err("Invalid movement");
 		}
 
 		for (const block of blocks) {
 			block.PivotTo(block.GetPivot().add(diff));
-
-			// TODO:: not unweld moved blocks between them
-			BuildingWelder.moveCollisions(plot, block, block.GetPivot());
+			BuildingWelder.moveCollisions(this, block, block.GetPivot());
 
 			if (math.random(3) === 1) {
 				task.wait();
 			}
 		}
 
-		bumpPlotVersion(plot);
 		return success;
 	}
-	export function rotateBlocks({ plot, blocks, pivot, diff }: RotateBlocksRequest): Response {
+	rotate(blocks: readonly BlockModel[] | "all", pivot: Vector3, diff: CFrame): Response {
 		if (blocks !== "all" && blocks.size() === 0) {
 			return success;
 		}
@@ -166,11 +176,11 @@ export namespace ServerBuilding {
 			return pvt.mul(diff).ToWorldSpace(loc);
 		};
 
-		blocks = blocks === "all" ? SharedPlots.getPlotComponent(plot).getBlocks() : blocks;
+		blocks = blocks === "all" ? this.getBlocks() : blocks;
 		let blocksRegion = AABB.fromModels(blocks);
 		blocksRegion = blocksRegion.withCenter(mul(new CFrame(blocksRegion.getCenter())));
 
-		if (!SharedPlots.getPlotBuildingRegion(plot).contains(blocksRegion)) {
+		if (!this.plot.isInside(blocksRegion)) {
 			return err("Invalid rotation");
 		}
 
@@ -178,17 +188,17 @@ export namespace ServerBuilding {
 			block.PivotTo(mul(block.GetPivot()));
 
 			// TODO:: not unweld moved blocks between them
-			BuildingWelder.moveCollisions(plot, block, block.GetPivot());
+			BuildingWelder.moveCollisions(this, block, block.GetPivot());
 
 			if (math.random(3) === 1) {
 				task.wait();
 			}
 		}
 
-		bumpPlotVersion(plot);
 		return success;
 	}
-	export function logicConnect(request: LogicConnectRequest): Response {
+
+	logicConnect(request: Omit<LogicConnectRequest, "plot">): Response {
 		const inputInfo = BlockManager.manager.connections.get(request.inputBlock);
 		const outputInfo = BlockManager.manager.uuid.get(request.outputBlock);
 
@@ -201,41 +211,35 @@ export namespace ServerBuilding {
 		};
 
 		BlockManager.manager.connections.set(request.inputBlock, connections);
-		bumpPlotVersion(request.plot);
 		return success;
 	}
-	export function logicDisconnect(request: LogicDisconnectRequest): Response {
-		const connections = { ...BlockManager.manager.connections.get(request.inputBlock) };
-		if (connections[request.inputConnection]) {
-			delete connections[request.inputConnection];
+	logicDisconnect({ inputBlock, inputConnection }: Omit<LogicDisconnectRequest, "plot">): Response {
+		const connections = { ...BlockManager.manager.connections.get(inputBlock) };
+		if (connections[inputConnection]) {
+			delete connections[inputConnection];
 		}
 
-		BlockManager.manager.connections.set(request.inputBlock, connections);
-		bumpPlotVersion(request.plot);
+		BlockManager.manager.connections.set(inputBlock, connections);
 		return success;
 	}
-	export function paintBlocks({ plot, blocks, color, material }: PaintBlocksRequest): Response {
+	paintBlocks({ blocks, color, material }: Omit<PaintBlocksRequest, "plot">): Response {
 		if (blocks !== "all" && blocks.size() === 0) {
 			return success;
 		}
 
-		blocks = blocks === "all" ? plot.Blocks.GetChildren(undefined) : blocks;
+		blocks = blocks === "all" ? this.getBlocks() : blocks;
 		SharedBuilding.paint(blocks, color, material, false);
-		bumpPlotVersion(plot);
 		return success;
 	}
-	export function updateConfig(request: ConfigUpdateRequest): Response {
+	updateConfig(configs: ConfigUpdateRequest["configs"]): Response {
 		/**
 		 * Assign only values, recursively.
 		 * @example assignValues({ a: { b: 'foo' } }, 'a', { c: 'bar' })
 		 * // returns:
 		 * { a: { b: 'foo', c: 'bar' } }
 		 */
-		const withValues = <T extends Record<string, JsonSerializablePrimitive | object>>(
-			object: T,
-			value: Partial<T>,
-		): object => {
-			const setobj = <T extends Record<string, JsonSerializablePrimitive | object>, TKey extends keyof T>(
+		const withValues = <T extends Record<string, unknown>>(object: T, value: Partial<T>): T => {
+			const setobj = <T extends Record<string, unknown>, TKey extends keyof T>(
 				object: T,
 				key: TKey,
 				value: T[TKey],
@@ -247,36 +251,34 @@ export namespace ServerBuilding {
 				return withValues(object, value);
 			};
 
-			const ret: Record<string, JsonSerializablePrimitive | object> = { ...object };
-			for (const [key, val] of pairs(value as Record<string, JsonSerializablePrimitive | object>)) {
+			const ret: Record<string, unknown> = { ...object };
+			for (const [key, val] of pairs(value as Record<string, object>)) {
 				const rk = ret[key];
 
 				if (typeIs(rk, "Vector3") || !typeIs(rk, "table")) {
 					ret[key] = val;
 				} else {
-					ret[key] = setobj(rk as Record<string, JsonSerializablePrimitive | object>, key, val);
+					ret[key] = setobj(rk as Record<string, object>, key, val);
 				}
 			}
 
-			return ret;
+			return ret as T;
 		};
 
-		for (const config of request.configs) {
+		for (const config of configs) {
 			const currentData = BlockManager.manager.config.get(config.block);
 			const newData = withValues(currentData, { [config.key]: JSON.deserialize(config.value) });
 
-			BlockManager.manager.config.set(config.block, newData as PlacedBlockConfig);
+			BlockManager.manager.config.set(config.block, newData);
 		}
 
-		bumpPlotVersion(request.plot);
 		return success;
 	}
-	export function resetConfig({ plot, blocks }: ConfigResetRequest): Response {
+	resetConfig(blocks: readonly BlockModel[]): Response {
 		for (const block of blocks) {
 			BlockManager.manager.config.set(block, undefined);
 		}
 
-		bumpPlotVersion(plot);
 		return success;
 	}
 }

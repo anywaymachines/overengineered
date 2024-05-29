@@ -3,6 +3,8 @@ declare global {
 	type ErrorResponse = { readonly success: false; readonly message: string };
 	type Response<T extends object = {}> = SuccessResponse<T> | ErrorResponse;
 
+	type ResponseExtract<T extends Response> = T extends SuccessResponse<infer R> ? R : never;
+
 	type TouchControlInfo = Readonly<Record<string, { readonly pos: SerializedVector2 }>>;
 	type SlotMeta = {
 		readonly name: string;

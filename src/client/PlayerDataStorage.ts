@@ -6,7 +6,7 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
-import { Remotes } from "shared/Remotes";
+import { CustomRemotes, Remotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { JsonSerializablePrimitive } from "shared/fixes/Json";
 
@@ -85,7 +85,7 @@ export namespace PlayerDataStorage {
 			});
 		}
 
-		const response = await Remotes.Client.GetNamespace("Slots").Get("Save").CallServerAsync(req);
+		const response = CustomRemotes.slots.save.send(req);
 		if (!response.success) {
 			$err(response.message);
 			return;
@@ -108,9 +108,7 @@ export namespace PlayerDataStorage {
 		LoadingController.show("Loading a slot");
 
 		try {
-			const response = await Remotes.Client.GetNamespace("Slots")
-				.Get(isImported ? "LoadImported" : "Load")
-				.CallServerAsync(index);
+			const response = CustomRemotes.slots[isImported ? "loadImported" : "load"].send(index);
 			if (response.success && !response.isEmpty) {
 				loadedSlot.set(index);
 			}

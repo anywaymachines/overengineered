@@ -132,6 +132,14 @@ export namespace LoadingController {
 		state.set(false);
 	}
 
+	export function run<T>(text: string, func: () => T) {
+		try {
+			LoadingController.show(text);
+			return func();
+		} finally {
+			LoadingController.hide();
+		}
+	}
 	export async function runAsync<T>(text: string, func: () => T | Promise<T>) {
 		try {
 			LoadingController.show(text);

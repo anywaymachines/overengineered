@@ -1,13 +1,13 @@
 import { RunService, ServerStorage, Workspace } from "@rbxts/services";
 import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { Element } from "shared/Element";
+import type { BuildingPlot } from "server/plots/BuildingPlot";
 
 type CollidersModel = Model & { readonly ___nominal: "CollidersModel" };
 export namespace BuildingWelder {
 	const weldColliders = new Map<string, CollidersModel>();
-	const plotColliders = new Map<PlotModel, WorldModel>();
+	const plotColliders = new Map<BuildingPlot, WorldModel>();
 
 	export function initialize() {
 		initPartBlockCollisions(BlockRegistry.sorted);
@@ -172,7 +172,7 @@ export namespace BuildingWelder {
 		$log("Block welding initialized");
 	}
 
-	function getPlotColliders(plot: PlotModel): WorldModel {
+	function getPlotColliders(plot: BuildingPlot): WorldModel {
 		let colliderModel = plotColliders.get(plot);
 		if (colliderModel) return colliderModel;
 
@@ -181,16 +181,16 @@ export namespace BuildingWelder {
 		return colliderModel;
 	}
 
-	export function deleteWelds(plot: PlotModel) {
+	export function deleteWelds(plot: BuildingPlot) {
 		getPlotColliders(plot).ClearAllChildren();
 	}
-	export function deleteWeld(plot: PlotModel, block: BlockModel) {
+	export function deleteWeld(plot: BuildingPlot, block: BlockModel) {
 		(getPlotColliders(plot) as unknown as Record<BlockUuid, CollidersModel>)[
 			BlockManager.manager.uuid.get(block)
 		].Destroy();
 	}
 
-	export function weldOnPlot(plot: PlotModel, block: BlockModel) {
+	export function weldOnPlot(plot: BuildingPlot, block: BlockModel) {
 		const collider = weldColliders.get(BlockManager.manager.id.get(block))?.Clone();
 		if (!collider) return;
 
@@ -201,9 +201,9 @@ export namespace BuildingWelder {
 		weld(plot, collider);
 	}
 
-	function weld(plot: PlotModel, colliders: CollidersModel) {
+	function weld(plot: BuildingPlot, colliders: CollidersModel) {
 		const getTarget = (collider: BasePart): BasePart | undefined => {
-			const targetBlock = SharedPlots.getBlockByUuid(plot, collider.Parent!.Name as BlockUuid);
+			const targetBlock = plot.getBlock(collider.Parent!.Name as BlockUuid);
 			let part: BasePart | undefined;
 
 			const targetstr = collider.GetAttribute("target") as string | undefined;
@@ -241,7 +241,7 @@ export namespace BuildingWelder {
 		}
 	}
 
-	export function moveCollisions(plot: PlotModel, block: BlockModel, newpivot: CFrame) {
+	export function moveCollisions(plot: BuildingPlot, block: BlockModel, newpivot: CFrame) {
 		const child = getPlotColliders(plot).FindFirstChild(BlockManager.manager.uuid.get(block)) as
 			| CollidersModel
 			| undefined;

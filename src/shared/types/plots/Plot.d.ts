@@ -13,6 +13,7 @@ type PlotBlocks = Folder & {
 	readonly Parent: PlotModel;
 
 	// using a dummy parameter to force use this function instead of the default one
+	/** @deprecated TOBEDELETED */
 	GetChildren(undef: undefined): readonly BlockModel[];
 };
 

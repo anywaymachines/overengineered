@@ -567,7 +567,9 @@ namespace Controllers {
 
 			for (const marker of markers) {
 				if (marker instanceof Markers.Input) {
+					print("plane eingneer");
 					this.event.subscribe(marker.instance.TextButton.Activated, () => {
+						print("SADSDplane eingneer");
 						disconnectMarker(marker);
 					});
 
@@ -675,7 +677,7 @@ export class WireTool extends ToolBase {
 			new Scene.WireToolScene(ToolBase.getToolGui<"Wire", Scene.WireToolSceneDefinition>().Wire, this),
 		);
 
-		this.onEnable(() => this.createEverything());
+		this.onPrepare(() => this.createEverything());
 		this.onDisable(() => this.markers.clear());
 
 		this.event.subscribe(ActionController.instance.onUndo, () => {

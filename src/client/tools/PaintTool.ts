@@ -110,10 +110,10 @@ export class PaintTool extends ToolBase {
 			new Scene.PaintToolScene(ToolBase.getToolGui<"Paint", Scene.PaintToolSceneDefinition>().Paint, this),
 		);
 
-		const fireSelected = async (blocks: readonly BlockModel[]) => {
+		const fireSelected = (blocks: readonly BlockModel[]) => {
 			if (!blocks || blocks.size() === 0) return;
 
-			await this.paint(blocks);
+			this.paint(blocks);
 		};
 		const stuff = this.parent(new MultiBlockSelector(mode.targetPlot));
 		stuff.submit.Connect(fireSelected);
@@ -155,7 +155,7 @@ export class PaintTool extends ToolBase {
 	}
 	paint(
 		blocks: readonly BlockModel[],
-		original?: ReadonlyMap<BlockModel, readonly [material: Enum.Material, color: Color3]>,
+		original?: ReadonlyMap<BlockModel, { readonly material: Enum.Material; readonly color: Color3 }>,
 	) {
 		return ClientBuilding.paintOperation.execute(
 			this.targetPlot.get(),

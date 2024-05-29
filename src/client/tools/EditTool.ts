@@ -409,14 +409,24 @@ namespace Controllers {
 	export class Paint extends ClientComponent {
 		private static readonly material = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 		private static readonly color = new ObservableValue<Color3>(new Color3(1, 1, 1));
-		private readonly origData: ReadonlyMap<BlockModel, readonly [material: Enum.Material, color: Color3]>;
+		private readonly origData: ReadonlyMap<
+			BlockModel,
+			{ readonly material: Enum.Material; readonly color: Color3 }
+		>;
 
 		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
 
 			this.origData = new ReadonlyMap(
 				blocks.map(
-					(b) => [b, [BlockManager.manager.material.get(b), BlockManager.manager.color.get(b)]] as const,
+					(b) =>
+						[
+							b,
+							{
+								material: BlockManager.manager.material.get(b),
+								color: BlockManager.manager.color.get(b),
+							},
+						] as const,
 				),
 			);
 
@@ -443,8 +453,8 @@ namespace Controllers {
 				true,
 			);
 
-			this.onDestroy(async () => {
-				const response = await ClientBuilding.paintOperation.execute(
+			this.onDestroy(() => {
+				const response = ClientBuilding.paintOperation.execute(
 					plot,
 					blocks,
 					Paint.material.get(),
@@ -461,7 +471,7 @@ namespace Controllers {
 		}
 
 		cancel() {
-			for (const [block, [material, color]] of this.origData) {
+			for (const [block, { material, color }] of this.origData) {
 				SharedBuilding.paint([block], color, material);
 			}
 		}

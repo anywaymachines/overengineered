@@ -56,15 +56,19 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 		).withSize((s) => new Vector3(s.X + 0.02, s.Y + 0.02, s.Z + 0.02));
 	}
 
+	/** @deprecated TOBEDELETED */
 	getBlockDatas(): readonly PlacedBlockData[] {
 		return this.getBlocks().map(BlockManager.getBlockDataByBlockModel);
 	}
+	/** @deprecated TOBEDELETED */
 	getBlocks(): readonly BlockModel[] {
 		return this.instance.Blocks.GetChildren(undefined);
 	}
+	/** @deprecated TOBEDELETED */
 	getBlock(uuid: BlockUuid): BlockModel {
 		return (this.instance.Blocks as unknown as Record<BlockUuid, BlockModel>)[uuid];
 	}
+	/** @deprecated TOBEDELETED */
 	tryGetBlock(uuid: BlockUuid): BlockModel | undefined {
 		return this.instance.Blocks.FindFirstChild(uuid) as BlockModel | undefined;
 	}
@@ -112,5 +116,10 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	isModelInside(model: Model, pivot?: CFrame): boolean {
 		const modelRegion = AABB.fromModel(model, pivot);
 		return this.bounds.contains(modelRegion);
+	}
+
+	/** Is AABB fully inside this plot */
+	isInside(aabb: AABB): boolean {
+		return this.bounds.contains(aabb);
 	}
 }
