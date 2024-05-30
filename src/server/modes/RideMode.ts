@@ -56,7 +56,7 @@ export class RideMode implements PlayModeBase {
 			}
 		}
 
-		const copy = blocksChildren.map((b) => b.Clone());
+		const copy = controller.blocks.cloneBlocks();
 		this.cache.set(player, copy);
 
 		const serialized = BlocksSerializer.serialize(controller.blocks);
@@ -123,6 +123,8 @@ export class RideMode implements PlayModeBase {
 
 			print(`Loaded the cached save in ${os.clock() - time}`);
 		} else {
+			controller.blocks.clearBlocks();
+
 			const blocksToLoad = SlotDatabase.instance.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
 			if (blocksToLoad !== undefined) {
 				BlocksSerializer.deserialize(blocksToLoad, controller.blocks);

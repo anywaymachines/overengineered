@@ -35,6 +35,9 @@ export class BuildingPlot extends Component {
 		this.onDestroy(() => buildingWelder.deleteWelds(this));
 	}
 
+	cloneBlocks(): readonly BlockModel[] {
+		return this.instance.Clone().GetChildren() as BlockModel[];
+	}
 	isInside(block: BlockModel): boolean {
 		const [pos, size] = block.GetBoundingBox();
 		const localPos = this.center.ToObjectSpace(pos);
