@@ -17,6 +17,18 @@ export namespace LocalPlayerController {
 	// Properties
 	export const isSprinting = new ObservableValue<boolean>(false);
 
+	initializeSprintLogic();
+	Players.LocalPlayer.CharacterAdded.Connect((_) => {
+		// Wait for character loading if needed
+		if (!Players.LocalPlayer.HasAppearanceLoaded()) Players.LocalPlayer.CharacterAppearanceLoaded.Wait();
+
+		playerSpawned();
+	});
+	if (Players.LocalPlayer.Character) {
+		playerSpawned();
+	}
+	Players.LocalPlayer.CameraMaxZoomDistance = 512;
+
 	function playerSpawned() {
 		const character = Players.LocalPlayer.Character!;
 		humanoid = character.WaitForChild("Humanoid") as Humanoid;
@@ -83,18 +95,5 @@ export namespace LocalPlayerController {
 		return require(instance) as PlayerModule;
 	}
 
-	export function initialize() {
-		initializeSprintLogic();
-
-		Players.LocalPlayer.CharacterAdded.Connect((_) => {
-			// Wait for character loading if needed
-			if (!Players.LocalPlayer.HasAppearanceLoaded()) Players.LocalPlayer.CharacterAppearanceLoaded.Wait();
-
-			playerSpawned();
-		});
-
-		playerSpawned();
-
-		Players.LocalPlayer.CameraMaxZoomDistance = 512;
-	}
+	export function initialize() {}
 }

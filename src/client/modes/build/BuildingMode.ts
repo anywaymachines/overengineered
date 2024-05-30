@@ -92,9 +92,9 @@ export class BuildingMode extends PlayMode {
 		};
 
 		if (!prev) {
-			delay(0.1, forcetp);
+			task.delay(0.1, forcetp);
 		} else {
-			delay(0.1, tp);
+			task.delay(0.1, tp);
 		}
 	}
 }
