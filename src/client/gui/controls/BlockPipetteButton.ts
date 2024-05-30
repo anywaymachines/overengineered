@@ -102,7 +102,7 @@ export class BlockPipetteButton extends ButtonControl {
 
 		return pipette;
 	}
-	static forBlockId(gui: ButtonDefinition, clicked: (id: string) => void) {
+	static forBlockId(gui: ButtonDefinition, clicked: (id: BlockId) => void) {
 		const pipette = new BlockPipetteButton(gui);
 		pipette.onSelect.Connect((part) => {
 			if (part.IsA("BasePart")) {

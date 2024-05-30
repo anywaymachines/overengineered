@@ -2,7 +2,6 @@ import { Backend } from "server/Backend";
 import { SlotDatabase } from "server/database/SlotDatabase";
 import { PlayerWatcher } from "server/PlayerWatcher";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
-import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -11,6 +10,7 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Operation } from "shared/Operation";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { ServerPlotController, ServerPlots } from "server/plots/ServerPlots";
+import type { BlockRegistryC } from "shared/block/BlockRegistry";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const errBuildingNotPermitted = err("Building is not permitted");
@@ -51,8 +51,10 @@ export class ServerBuildingRequestHandler extends Controller {
 	constructor(
 		@inject readonly controller: ServerPlotController,
 		@inject private readonly serverPlots: ServerPlots,
+		@inject private readonly blockRegistry: BlockRegistryC,
 	) {
 		super();
+		print("creating reqh", controller.player.Name);
 		this.player = controller.player;
 	}
 
@@ -68,7 +70,7 @@ export class ServerBuildingRequestHandler extends Controller {
 			if (
 				!BuildingManager.serverBlockCanBePlacedAt(
 					plotc.plot,
-					BlockRegistry.map.get(block.id)!,
+					this.blockRegistry.blocks.get(block.id)!,
 					block.location,
 					this.player,
 				)
@@ -94,7 +96,7 @@ export class ServerBuildingRequestHandler extends Controller {
 
 		const counts = countBy(blocks, (b) => b.id);
 		for (const [id, count] of counts) {
-			const regblock = BlockRegistry.map.get(id)!;
+			const regblock = this.blockRegistry.blocks.get(id)!;
 			const placed = plotc.blocks
 				.getBlocks()
 				.count((placed_block) => BlockManager.manager.id.get(placed_block) === id);

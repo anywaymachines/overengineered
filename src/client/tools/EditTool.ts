@@ -12,7 +12,6 @@ import { BlockRotater } from "client/tools/additional/BlockRotater";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
-import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { ComponentChild } from "shared/component/ComponentChild";
@@ -28,6 +27,7 @@ import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
+import type { BlockRegistryC } from "shared/block/BlockRegistry";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 namespace Scene {
@@ -319,12 +319,18 @@ namespace Controllers {
 			this.mover.cancel();
 		}
 	}
+	@injectable
 	export class Paste extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 		private readonly blocks;
 		private readonly mover;
 
-		constructor(tool: EditTool, plot: SharedPlot) {
+		constructor(
+			tool: EditTool,
+			plot: SharedPlot,
+			selected: readonly BlockModel[],
+			@inject blockRegistry: BlockRegistryC,
+		) {
 			super();
 
 			const ghostParent = Element.create(
@@ -336,7 +342,7 @@ namespace Controllers {
 
 			const blocks = reGenerateUuids(plot, tool.copied.get());
 			this.blocks = blocks.map((block) => {
-				const b = BlockRegistry.map.get(block.id)!.model.Clone();
+				const b = blockRegistry.blocks.get(block.id)!.model.Clone();
 				b.PivotTo(block.location);
 				PartUtils.ghostModel(b, Colors.blue);
 				b.Parent = ghostParent;
@@ -489,6 +495,7 @@ const canBeSelected = (tool: EditTool, mode: EditToolButtons): boolean => {
 export type EditToolMode = "Move" | "Paste" | "Rotate" | "Paint";
 export type EditToolButtons = EditToolMode | "Copy" | "Delete";
 
+@injectable
 export class EditTool extends ToolBase {
 	readonly enabledModes = new ComponentDisabler<EditToolButtons>([
 		"Move",
@@ -507,7 +514,7 @@ export class EditTool extends ToolBase {
 	private readonly selector;
 	readonly gui;
 
-	constructor(mode: BuildingMode) {
+	constructor(@inject mode: BuildingMode, @inject di: DIContainer) {
 		super(mode);
 
 		this.gui = this.parentGui(
@@ -546,7 +553,9 @@ export class EditTool extends ToolBase {
 				return;
 			}
 
-			this.controller.set(new Controllers[mode](this, this.targetPlot.get(), [...selected]));
+			this.controller.set(
+				di.resolveForeignClass(Controllers[mode], [this, this.targetPlot.get(), [...selected]]),
+			);
 		});
 
 		this.event.onKeyDown("F", () => this.toggleMode("Move"));

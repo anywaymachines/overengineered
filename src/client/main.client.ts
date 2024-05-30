@@ -1,7 +1,11 @@
 /* eslint-disable import/order */
+$log("Starting");
+
+import { LoadingController } from "client/controller/LoadingController";
+LoadingController.show("Loading the game");
+
 import { DIContainer } from "shared/DI";
 import { SandboxGame } from "client/SandboxGame";
-import { LoadingController } from "client/controller/LoadingController";
 import { GameLoader } from "client/GameLoader";
 
 const di = new DIContainer();
@@ -26,7 +30,6 @@ import { MusicController } from "client/controller/sound/MusicController";
 import { InputTypeChangeEvent } from "client/event/InputTypeChangeEvent";
 import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
-import { ClientBuildingValidation } from "client/modes/build/ClientBuildingValidation";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
@@ -46,7 +49,6 @@ InputTypeChangeEvent.subscribe();
 RemoteEvents.initialize();
 AdminMessageController.initialize();
 ServerRestartController.initialize();
-ClientBuildingValidation.initialize();
 
 SoundController.initialize();
 MusicController.initialize();
@@ -86,4 +88,5 @@ TextChatService.OnIncomingMessage = function (message: TextChatMessage) {
 	return props;
 };
 
+$log("Client loaded.");
 GameLoader.mainLoaded = true;

@@ -2,6 +2,7 @@ import { Players } from "@rbxts/services";
 import { BuildMode } from "server/modes/BuildMode";
 import { RideMode } from "server/modes/RideMode";
 import { registerOnRemoteFunction } from "server/network/event/RemoteHandler";
+import { PlayerWatcher } from "server/PlayerWatcher";
 import { Controller } from "shared/component/Controller";
 import { Remotes } from "shared/Remotes";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
@@ -27,6 +28,27 @@ export class PlayModeController extends Controller {
 
 		Players.PlayerRemoving.Connect((plr) => {
 			delete this.playerModes[plr.UserId];
+		});
+
+		const setBuildMode = async (plr: Player, character: Model) => {
+			// on spawn
+			const response = await this.changeModeForPlayer(plr, "build");
+			if (!response.success) $err(response.message);
+
+			// on death
+			(character.WaitForChild("Humanoid") as Humanoid).Died.Once(async () => {
+				const prev = this.getPlayerMode(plr);
+				if (prev !== "build" && prev !== undefined) return;
+
+				const response = await this.changeModeForPlayer(plr, undefined);
+				if (!response.success) $err(response.message);
+			});
+		};
+		PlayerWatcher.onJoin((plr) => {
+			const char = plr.Character;
+			if (char) setBuildMode(plr, char);
+
+			plr.CharacterAdded.Connect((char) => setBuildMode(plr, char));
 		});
 	}
 

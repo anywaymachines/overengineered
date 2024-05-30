@@ -24,11 +24,6 @@ export class SelectedBlocksHighlighter extends ClientComponent {
 					}
 				} else if (update.kind === "clear") {
 					this.clearAllSelections();
-				} else if (update.kind === "reset") {
-					this.clearAllSelections();
-					for (const block of selected.get()) {
-						this.createBlockSelection(block);
-					}
 				} else {
 					// type check; do not delete
 					const never: never = update;

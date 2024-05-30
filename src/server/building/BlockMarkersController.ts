@@ -1,19 +1,20 @@
-import { BlockRegistry } from "shared/block/BlockRegistry";
+import { Controller } from "shared/component/Controller";
+import type { BlockRegistryC } from "shared/block/BlockRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
 
-export namespace BlockMarkers {
-	export const markers: {
-		readonly [id in BlockId]?: { readonly [name in BlockConnectionName]?: Vector3 };
-	} = {};
+@injectable
+export class BlockMarkersController extends Controller {
+	readonly markers: { readonly [id in BlockId]?: { readonly [name in BlockConnectionName]?: Vector3 } } = {};
 
-	export function initialize() {
-		initPartBlockCollisions(BlockRegistry.sorted);
+	constructor(@inject blockRegistry: BlockRegistryC) {
+		super();
+		this.initPartBlockCollisions(blockRegistry.sorted);
 	}
 
-	function initPartBlockCollisions(blocks: readonly RegistryBlock[]) {
+	private initPartBlockCollisions(blocks: readonly RegistryBlock[]) {
 		const weldFolderName = "MarkerPoints";
 
-		const markers: Writable<typeof BlockMarkers.markers> = BlockMarkers.markers;
+		const markers: Writable<typeof this.markers> = this.markers;
 		const create = (block: RegistryBlock) => {
 			const folder = block.model.FindFirstChild(weldFolderName) as Folder | undefined;
 			if (!folder) return;

@@ -22,36 +22,48 @@ export class ServerBuildingRequestController extends Controller {
 		container = container.beginScope();
 
 		const children = new Map<Player, ServerBuildingRequestHandler>();
-		this.event.subscribe(serverPlots.onAdded, (controller) => {
-			container = container.beginScope();
-			container.registerSingleton(controller);
-			const handler = container.resolveForeignClass(ServerBuildingRequestHandler);
+		print("subbing stuff", serverPlots.controllers.getArr().size());
+		this.event.subscribeCollection(
+			serverPlots.controllers,
+			(update) => {
+				print("creating update", update);
+				if (update.kind !== "add") return;
 
-			children.set(controller.player, handler);
-			handler.onDestroy(() => children.delete(controller.player));
+				for (const controller of update.added) {
+					print("creating sbrc", controller.player.Name);
+					container = container.beginScope();
+					container.registerSingleton(controller);
+					const handler = container.resolveForeignClass(ServerBuildingRequestHandler);
 
-			const savePlot = (): void => {
-				const player = controller.player;
-				const blocks = controller.blocks;
-				const save = playModeController.getPlayerMode(player) === "build" && blocks.getBlocks().size() !== 0;
+					children.set(controller.player, handler);
+					handler.onDestroy(() => children.delete(controller.player));
 
-				if (save) {
-					SlotDatabase.instance.setBlocks(
-						player.UserId,
-						SlotsMeta.quitSlotIndex,
-						BlocksSerializer.serialize(blocks),
-						blocks.getBlocks().size(),
-					);
-				} else {
-					SlotDatabase.instance.setBlocksFromAnotherSlot(
-						player.UserId,
-						SlotsMeta.quitSlotIndex,
-						SlotsMeta.autosaveSlotIndex,
-					);
+					const savePlot = (): void => {
+						const player = controller.player;
+						const blocks = controller.blocks;
+						const save =
+							playModeController.getPlayerMode(player) === "build" && blocks.getBlocks().size() !== 0;
+
+						if (save) {
+							SlotDatabase.instance.setBlocks(
+								player.UserId,
+								SlotsMeta.quitSlotIndex,
+								BlocksSerializer.serialize(blocks),
+								blocks.getBlocks().size(),
+							);
+						} else {
+							SlotDatabase.instance.setBlocksFromAnotherSlot(
+								player.UserId,
+								SlotsMeta.quitSlotIndex,
+								SlotsMeta.autosaveSlotIndex,
+							);
+						}
+					};
+					controller.onDestroy(savePlot);
 				}
-			};
-			controller.onDestroy(savePlot);
-		});
+			},
+			true,
+		);
 
 		const subFunc = <TArgs extends unknown[], TRet extends {}>(
 			remote: C2S2CRemoteFunction<TArgs, Response<TRet>>,

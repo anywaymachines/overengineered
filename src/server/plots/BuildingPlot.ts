@@ -1,5 +1,4 @@
 import { HttpService } from "@rbxts/services";
-import { BuildingWelder } from "server/building/BuildingWelder";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Component } from "shared/component/Component";
@@ -7,6 +6,7 @@ import { ComponentInstance } from "shared/component/ComponentInstance";
 import { AABB } from "shared/fixes/AABB";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
+import type { BuildingWelder } from "server/building/BuildingWelder";
 import type { BlockRegistryC } from "shared/block/BlockRegistry";
 import type { PlacedBlockData, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -26,12 +26,13 @@ export class BuildingPlot extends Component {
 		readonly center: CFrame,
 		readonly size: Vector3,
 		@inject private readonly blockRegistry: BlockRegistryC,
+		@inject private readonly buildingWelder: BuildingWelder,
 	) {
 		super();
 		ComponentInstance.init(this, instance);
 		this.localAABB = AABB.fromCenterSize(Vector3.zero, size);
 
-		this.onDestroy(() => BuildingWelder.deleteWelds(this));
+		this.onDestroy(() => buildingWelder.deleteWelds(this));
 	}
 
 	isInside(block: BlockModel): boolean {
@@ -56,7 +57,7 @@ export class BuildingPlot extends Component {
 
 	clearBlocks(): void {
 		this.instance.ClearAllChildren();
-		BuildingWelder.deleteWelds(this);
+		this.buildingWelder.deleteWelds(this);
 	}
 
 	/** @deprecated Used only for a specific case, do not use & do not remove */
@@ -97,7 +98,7 @@ export class BuildingPlot extends Component {
 		}
 
 		model.Parent = this.instance;
-		BuildingWelder.weldOnPlot(this, model);
+		this.buildingWelder.weldOnPlot(this, model);
 
 		return { success: true, model: model };
 	}
@@ -115,7 +116,7 @@ export class BuildingPlot extends Component {
 				}
 			}
 
-			BuildingWelder.deleteWelds(this);
+			this.buildingWelder.deleteWelds(this);
 		} else {
 			const connections = SharedBuilding.getBlocksConnectedByLogicToMulti(
 				this.getBlockDatas(),
@@ -131,8 +132,8 @@ export class BuildingPlot extends Component {
 			}
 
 			for (const block of blocks) {
-				BuildingWelder.unweld(block);
-				BuildingWelder.deleteWeld(this, block);
+				this.buildingWelder.unweld(block);
+				this.buildingWelder.deleteWeld(this, block);
 
 				block.Destroy();
 				if (math.random(3) === 1) {
@@ -158,7 +159,7 @@ export class BuildingPlot extends Component {
 
 		for (const block of blocks) {
 			block.PivotTo(block.GetPivot().add(diff));
-			BuildingWelder.moveCollisions(this, block, block.GetPivot());
+			this.buildingWelder.moveCollisions(this, block, block.GetPivot());
 
 			if (math.random(3) === 1) {
 				task.wait();
@@ -190,7 +191,7 @@ export class BuildingPlot extends Component {
 			block.PivotTo(mul(block.GetPivot()));
 
 			// TODO:: not unweld moved blocks between them
-			BuildingWelder.moveCollisions(this, block, block.GetPivot());
+			this.buildingWelder.moveCollisions(this, block, block.GetPivot());
 
 			if (math.random(3) === 1) {
 				task.wait();

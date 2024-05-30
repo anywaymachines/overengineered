@@ -5,7 +5,7 @@ import { PlotsFloatingImageController } from "server/plots/PlotsFloatingImageCon
 import { SharedPlots } from "shared/building/SharedPlots";
 import { Controller } from "shared/component/Controller";
 import { Element } from "shared/Element";
-import { ArgsSignal } from "shared/event/Signal";
+import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 @injectable
@@ -68,7 +68,7 @@ export type { ServerPlotController };
 
 @injectable
 export class ServerPlots extends Controller {
-	readonly onAdded = new ArgsSignal<[controller: ServerPlotController]>();
+	readonly controllers = new ObservableCollectionSet<ServerPlotController>();
 	private readonly controllersByPlot = new Map<PlotModel, ServerPlotController>();
 	private readonly controllersByPlayer = new Map<Player, ServerPlotController>();
 
@@ -97,11 +97,15 @@ export class ServerPlots extends Controller {
 			const controller = ServerPlotController.tryCreate(player, di);
 			if (!controller) return;
 
-			controller.onDestroy(() => this.controllersByPlot.delete(controller.plot.instance));
+			controller.onDestroy(() => {
+				this.controllers.remove(controller);
+				this.controllersByPlayer.delete(controller.player);
+				this.controllersByPlot.delete(controller.plot.instance);
+			});
 
+			this.controllers.add(controller);
 			this.controllersByPlot.set(controller.plot.instance, controller);
 			this.controllersByPlayer.set(controller.player, controller);
-			this.onAdded.Fire(controller);
 		});
 		this.event.eventHandler.register(sub);
 	}

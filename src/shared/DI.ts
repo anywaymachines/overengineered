@@ -10,7 +10,7 @@ declare global {
 	function inject(selv: { readonly prototype: unknown }, paramName: string | undefined, paramIndex: number): void;
 }
 
-type DepsCreatable<TSelf, TArgs extends unknown[]> = {
+type DepsCreatable<TSelf, TArgs extends readonly unknown[]> = {
 	readonly prototype: unknown;
 	_depsCreate(...args: [...TArgs, deps: DIContainer]): TSelf;
 };
@@ -32,7 +32,7 @@ const getSymbol = <T extends object>(obj: T): string => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const instantiateClass = <T, TCtor extends new (...args: TArgs) => T, TArgs extends unknown[]>(
+const instantiateClass = <T, TCtor extends new (...args: TArgs) => T, TArgs extends readonly unknown[]>(
 	clazz: TCtor,
 	args: TArgs | undefined,
 	container: DIContainer,
@@ -145,7 +145,7 @@ export class DIContainer {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	resolveForeignClass<T extends new (...args: any) => unknown>(
 		clazz: T,
-		args?: Partial<[...ConstructorParameters<T>]>,
+		args?: Partial<readonly [...ConstructorParameters<T>]>,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	): T extends new (...args: any) => infer R ? R : never {
 		return instantiateClass(clazz as never, args, this);

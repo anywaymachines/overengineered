@@ -7,7 +7,6 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
-import { BlockRegistry } from "shared/block/BlockRegistry";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -20,6 +19,7 @@ import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
+import type { BlockRegistryC } from "shared/block/BlockRegistry";
 
 namespace Scene {
 	export type ConfigToolSceneDefinition = GuiObject & {
@@ -86,7 +86,7 @@ namespace Scene {
 
 			if (!wasVisible) GuiAnimator.transition(this.gui, 0.2, "up");
 			const blockmodel = selected[0];
-			const block = BlockRegistry.map.get(BlockManager.manager.id.get(blockmodel))!;
+			const block = this.tool.blockRegistry.blocks.get(BlockManager.manager.id.get(blockmodel))!;
 			const onedef = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
 				.input as BlockConfigTypes.Definitions;
 
@@ -98,7 +98,7 @@ namespace Scene {
 			const configs = selected.map((selected) => {
 				const blockmodel = selected;
 				const id = BlockManager.manager.id.get(blockmodel)!;
-				const block = BlockRegistry.map.get(id)!;
+				const block = this.tool.blockRegistry.blocks.get(id)!;
 
 				const defs = blockConfigRegistry[block.id as keyof typeof blockConfigRegistry]
 					.input as BlockConfigTypes.Definitions;
@@ -161,12 +161,16 @@ namespace Scene {
 	}
 }
 
+@injectable
 export class ConfigTool extends ToolBase {
 	readonly blocksToConfigure: TutorialConfigBlockHighlight[] = [];
 	readonly selected = new ObservableCollectionSet<BlockModel>();
 	private readonly gui;
 
-	constructor(mode: BuildingMode) {
+	constructor(
+		@inject mode: BuildingMode,
+		@inject readonly blockRegistry: BlockRegistryC,
+	) {
 		super(mode);
 		this.gui = this.parentGui(
 			new Scene.ConfigToolScene(ToolBase.getToolGui<"Config", Scene.ConfigToolSceneDefinition>().Config, this),

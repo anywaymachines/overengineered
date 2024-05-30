@@ -73,13 +73,13 @@ export class ComponentEvents extends ComponentBase {
 	/** Subscribe to an observable collection changed event */
 	subscribeCollection<T extends defined>(
 		observable: ReadonlyObservableCollection<T>,
-		callback: (update: CollectionChangedArgs<T> | { readonly kind: "reset" }) => void,
+		callback: (update: CollectionChangedArgs<T>) => void,
 		executeOnEnable = false,
 		executeImmediately = false,
 	): void {
 		this.subscribe(observable.changed, callback);
 		if (executeOnEnable) {
-			this.onEnable(() => callback({ kind: "reset" }), executeImmediately);
+			this.onEnable(() => callback({ kind: "add", added: observable.getArr() }), executeImmediately);
 		}
 	}
 

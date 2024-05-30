@@ -1,9 +1,7 @@
-import { Players } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { LoadingController } from "client/controller/LoadingController";
 import { Signals } from "client/event/Signals";
 import { BuildTool } from "client/tools/BuildTool";
-import { BuildTool3 } from "client/tools/BuildTool3";
 import { ConfigTool } from "client/tools/ConfigTool";
 import { DeleteTool } from "client/tools/DeleteTool";
 import { EditTool } from "client/tools/EditTool";
@@ -107,18 +105,12 @@ export class ToolController extends ClientComponent {
 		// array instead of an object for ordering purposes
 		const tools = [
 			["buildTool", di.resolveForeignClass(BuildTool)],
-			["editTool", new EditTool(mode)],
+			["editTool", di.resolveForeignClass(EditTool)],
 			["deleteTool", new DeleteTool(mode)],
-			["configTool", new ConfigTool(mode)],
+			["configTool", di.resolveForeignClass(ConfigTool)],
 			["paintTool", new PaintTool(mode)],
 			["wireTool", new WireTool(mode)],
 		] as const;
-		if (Players.LocalPlayer.Name === "i3ymm") {
-			(tools as Writable<typeof tools>).push([
-				"buildTool3" as "buildTool",
-				new BuildTool3(mode) as unknown as BuildTool,
-			]);
-		}
 
 		this.allTools = Objects.fromEntries(tools);
 		this.allToolsOrdered = tools.map((t) => t[1]);

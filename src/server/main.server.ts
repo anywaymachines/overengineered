@@ -9,9 +9,6 @@ if (!game.GetService("RunService").IsStudio()) {
 import { HttpService, MessagingService, RunService, Workspace } from "@rbxts/services";
 import { Backend } from "server/Backend";
 import { BadgeController } from "server/BadgeController";
-import { BlockMarkers } from "server/building/BlockMarkers";
-import { BuildingWelder } from "server/building/BuildingWelder";
-import { GameInfo } from "server/building/GameInfo";
 import type { PlayerData } from "server/database/PlayerDatabase";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
 import { registerOnRemoteEvent, registerOnRemoteFunction } from "server/network/event/RemoteHandler";
@@ -110,10 +107,6 @@ namespace RemoteHandlers {
 
 		vehicleSeat.Sit(hrp);
 	}
-
-	export function getGameData(): GameInfo {
-		return GameInfo.getInfo();
-	}
 }
 
 if (game.PrivateServerOwnerId !== 0) {
@@ -132,7 +125,6 @@ BadgeController.initialize();
 // Initializing event workders
 registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSetting);
 registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
-registerOnRemoteFunction("Game", "GameInfo", RemoteHandlers.getGameData);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
 registerOnRemoteEvent("Admin", "SendMessage", RemoteHandlers.sendMessageAsAdmin);
 registerOnRemoteEvent("Admin", "Restart", () => di.resolve<ServerRestartController>().restart(false));
@@ -146,9 +138,7 @@ if (!RunService.IsStudio()) {
 	});
 }
 
-BuildingWelder.initialize();
-BlockMarkers.initialize();
-
 RemoteEvents.initialize();
 
+$log("Server loaded.");
 Workspace.SetAttribute("loaded", true);

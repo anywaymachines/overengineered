@@ -6,7 +6,7 @@ import type { AABB } from "shared/fixes/AABB";
 
 Workspace.WaitForChild("Plots");
 
-const count = Workspace.Plots.GetAttribute("count") as number;
+const count = Workspace.Plots.GetAttribute("count") as number | undefined;
 if (Workspace.Plots.GetChildren().size() !== count) {
 	print(
 		`!! Target plot count ${count} is not equal to loaded plot count ${Workspace.Plots.GetChildren().size()}, waiting...`,

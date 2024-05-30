@@ -109,6 +109,10 @@ export namespace BlockGenerator {
 		}
 
 		export function checkAll(block: Model) {
+			if (!RunService.IsStudio() || !RunService.IsServer()) {
+				return;
+			}
+
 			assertPrimaryPartSet(block);
 			assertColboxIsPrimaryPartIfExists(block);
 			assertColboxWeldedIfExists(block);
