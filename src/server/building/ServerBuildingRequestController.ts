@@ -2,7 +2,7 @@ import { ServerBuildingRequestHandler } from "server/building/ServerBuildingRequ
 import { SlotDatabase } from "server/database/SlotDatabase";
 import { PlayerWatcher } from "server/PlayerWatcher";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
-import { Controller } from "shared/component/Controller";
+import { Component } from "shared/component/Component";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayModeController } from "server/modes/PlayModeController";
@@ -12,7 +12,7 @@ import type { C2S2CRemoteFunction } from "shared/event2/PERemoteEvent";
 import type { Operation } from "shared/Operation";
 
 @injectable
-export class ServerBuildingRequestController extends Controller {
+export class ServerBuildingRequestController extends Component {
 	constructor(
 		@inject serverPlots: ServerPlots,
 		@inject playModeController: PlayModeController,
@@ -22,15 +22,12 @@ export class ServerBuildingRequestController extends Controller {
 		container = container.beginScope();
 
 		const children = new Map<Player, ServerBuildingRequestHandler>();
-		print("subbing stuff", serverPlots.controllers.getArr().size());
 		this.event.subscribeCollection(
 			serverPlots.controllers,
 			(update) => {
-				print("creating update", update);
 				if (update.kind !== "add") return;
 
 				for (const controller of update.added) {
-					print("creating sbrc", controller.player.Name);
 					container = container.beginScope();
 					container.registerSingleton(controller);
 					const handler = container.resolveForeignClass(ServerBuildingRequestHandler);
