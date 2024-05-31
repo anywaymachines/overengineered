@@ -1,20 +1,19 @@
 import { TasksControl } from "client/gui/static/TasksControl";
 import { ActionController } from "client/modes/build/ActionController";
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { SharedPlots } from "shared/building/SharedPlots";
 import type { Tutorial } from "client/tutorial/Tutorial";
 
-export async function TutorialBasics(tutorial: typeof Tutorial) {
+export async function TutorialBasics(tutorial: Tutorial) {
 	tutorial.Control.startTutorial("BASICS", tutorial.Cancellable);
-	const toolController = BuildingMode.instance.toolController;
+	const toolController = tutorial.buildingMode.toolController;
 	const allTools = toolController.allTools;
 	const toolEnabler = toolController.enabledTools;
 	toolEnabler.disableAll();
 	ActionController.instance.disable();
 
 	await ClientBuilding.deleteOperation.execute(SharedPlots.getOwnPlot(), "all");
-	BuildingMode.instance.gui.actionbar.enabledButtons.enableOnly("settings");
+	tutorial.buildingMode.gui.actionbar.enabledButtons.enableOnly("settings");
 
 	tutorial.Control.displayStep(
 		"Welcome to Plane Engineers! Now we will bring you up to date. Let's build a car!",
@@ -516,7 +515,7 @@ export async function TutorialBasics(tutorial: typeof Tutorial) {
 
 	toolEnabler.disableAll();
 	TasksControl.instance.finish();
-	BuildingMode.instance.gui.actionbar.enabledButtons.enableAll();
+	tutorial.buildingMode.gui.actionbar.enabledButtons.enableAll();
 
 	tutorial.Finish();
 }

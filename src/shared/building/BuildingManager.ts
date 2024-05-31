@@ -1,8 +1,8 @@
 import { Players } from "@rbxts/services";
-import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -123,8 +123,9 @@ export namespace BuildingManager {
 		plot: PlotModel,
 		origBlock: MirroredBlock,
 		mode: MirrorMode,
+		blockRegistry: BlockRegistry,
 	): readonly MirroredBlock[] {
-		const method = BlockRegistry.map.get(origBlock.id)?.mirrorBehaviour ?? "normal";
+		const method = blockRegistry.blocks.get(origBlock.id)?.mirrorBehaviour ?? "normal";
 		const [xAxis, yAxis, zAxis] = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis];
 
 		const reflect = (block: MirroredBlock, mode: "x" | "y" | "z", mirrorCFrame: CFrame): MirroredBlock => {
@@ -197,7 +198,7 @@ export namespace BuildingManager {
 			// apply position \/
 			const rpos = mirrorCFrame.PointToObjectSpace(pos);
 			return {
-				id: (BlockRegistry.map.get(block.id)?.mirrorReplacementId as BlockId | undefined) ?? block.id,
+				id: (blockRegistry.blocks.get(block.id)?.mirrorReplacementId as BlockId | undefined) ?? block.id,
 				pos: new CFrame(mirrorCFrame.ToWorldSpace(new CFrame(rpos.X, rpos.Y, -rpos.Z)).Position).mul(
 					cframe.Rotation,
 				),

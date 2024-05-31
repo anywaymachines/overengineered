@@ -1,12 +1,12 @@
 import { Controller } from "shared/component/Controller";
-import type { BlockRegistryC } from "shared/block/BlockRegistry";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
 
 @injectable
 export class BlockMarkersController extends Controller {
 	readonly markers: { readonly [id in BlockId]?: { readonly [name in BlockConnectionName]?: Vector3 } } = {};
 
-	constructor(@inject blockRegistry: BlockRegistryC) {
+	constructor(@inject blockRegistry: BlockRegistry) {
 		super();
 		this.initPartBlockCollisions(blockRegistry.sorted);
 	}

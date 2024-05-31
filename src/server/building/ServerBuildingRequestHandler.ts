@@ -10,7 +10,7 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Operation } from "shared/Operation";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { ServerPlotController, ServerPlots } from "server/plots/ServerPlots";
-import type { BlockRegistryC } from "shared/block/BlockRegistry";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const errBuildingNotPermitted = err("Building is not permitted");
@@ -51,7 +51,7 @@ export class ServerBuildingRequestHandler extends Controller {
 	constructor(
 		@inject readonly controller: ServerPlotController,
 		@inject private readonly serverPlots: ServerPlots,
-		@inject private readonly blockRegistry: BlockRegistryC,
+		@inject private readonly blockRegistry: BlockRegistry,
 	) {
 		super();
 		print("creating reqh", controller.player.Name);

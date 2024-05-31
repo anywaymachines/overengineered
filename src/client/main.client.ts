@@ -32,12 +32,9 @@ import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { BlocksInitializer } from "shared/init/BlocksInitializer";
 
 LoadingController.show("Loading the game");
 
-// TODO: remove delete
-BlocksInitializer.initialize();
 GameEnvironmentController.initialize();
 
 LogControl.instance.show();

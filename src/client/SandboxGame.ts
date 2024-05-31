@@ -1,8 +1,11 @@
-import { Workspace } from "@rbxts/services";
+import { RunService, Workspace } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { GameLoader } from "client/GameLoader";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";
+import { TestRunner } from "client/test/TestRunner";
+import { Tutorial } from "client/tutorial/Tutorial";
+import { TutorialBasics } from "client/tutorial/TutorialBasics";
 import { Controller } from "shared/component/Controller";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
 
@@ -28,7 +31,20 @@ export class SandboxGame extends Controller {
 		LoadingController.show("Loading the game");
 
 		di.registerSingleton(BlocksInitializer.create());
-		this.parent(di.regResolve(PlayModeController));
+		this.parent(PlayModeController.initialize(di));
 		this.parent(di.regResolve(ClientBuildingValidationController));
+		const tutorial = di.regResolve(Tutorial);
+
+		//
+
+		task.spawn(() => {
+			const data = GameLoader.waitForDataStorage();
+			if (!data.slots.any((t) => t.blocks !== 0)) {
+				TutorialBasics(tutorial);
+			}
+		});
+
+		const testsEnabled = RunService.IsStudio(); // && Players.LocalPlayer.Name === "i3ymm";
+		if (testsEnabled) TestRunner.create(di);
 	}
 }

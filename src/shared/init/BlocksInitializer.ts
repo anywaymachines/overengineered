@@ -1,4 +1,4 @@
-import { BlockRegistry, BlockRegistryC } from "shared/block/BlockRegistry";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { AutoOperationsCreator } from "shared/block/creation/AutoOperationsCreator";
 import { BlockCreatorFromAssets } from "shared/block/creation/BlockCreatorFromAssets";
 import { GeneratedBlocksCreator } from "shared/block/creation/GeneratedBlockCreator";
@@ -17,9 +17,7 @@ export type BlocksInitializeData = {
 //
 
 export namespace BlocksInitializer {
-	let registry: BlockRegistryC | undefined;
-
-	export function create(): BlockRegistryC {
+	export function create(): BlockRegistry {
 		const initData: BlocksInitializeData = {
 			blocks: new Map<string, RegistryBlock>(),
 			categories: {},
@@ -34,13 +32,6 @@ export namespace BlocksInitializer {
 			initializer(initData);
 		}
 
-		return (registry = new BlockRegistryC(initData.blocks.values(), initData.categories));
-	}
-
-	export function initialize() {
-		if (!registry) create();
-		assert(registry);
-
-		BlockRegistry.editable().add(registry.blocks.values(), registry.categories);
+		return new BlockRegistry(initData.blocks.values(), initData.categories);
 	}
 }

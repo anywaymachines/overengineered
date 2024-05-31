@@ -1,6 +1,5 @@
 import { Workspace } from "@rbxts/services";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { EventHandler } from "shared/event/EventHandler";
@@ -8,16 +7,21 @@ import { successResponse } from "shared/types/network/Responses";
 import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { Tutorial } from "client/tutorial/Tutorial";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 export type TutorialPlaceBlockHighlight = {
-	id: string;
+	id: BlockId;
 	cframe: CFrame;
 };
 
+@injectable
 export class TutorialBuildTool {
 	private readonly tutorialBlocksToPlace: (TutorialPlaceBlockHighlight & { readonly instance: Instance })[] = [];
 
-	constructor(private readonly tutorial: typeof Tutorial) {}
+	constructor(
+		@inject private readonly tutorial: Tutorial,
+		@inject private readonly blockRegistry: BlockRegistry,
+	) {}
 
 	cleanup() {
 		this.tutorialBlocksToPlace.forEach((block) => {
@@ -28,7 +32,7 @@ export class TutorialBuildTool {
 	}
 
 	addBlockToPlace(data: TutorialPlaceBlockHighlight) {
-		const model = BlockRegistry.map.get(data.id)!.model.Clone();
+		const model = this.blockRegistry.blocks.get(data.id)!.model.Clone();
 		const plot = SharedPlots.getOwnPlot();
 		const relativePosition = plot.instance.BuildingArea.CFrame.ToWorldSpace(data.cframe);
 

@@ -3,7 +3,7 @@ import { BlockManager } from "shared/building/BlockManager";
 import { Controller } from "shared/component/Controller";
 import { Element } from "shared/Element";
 import type { BuildingPlot } from "server/plots/BuildingPlot";
-import type { BlockRegistryC } from "shared/block/BlockRegistry";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 type CollidersModel = Model & { readonly ___nominal: "CollidersModel" };
 
@@ -12,9 +12,21 @@ export class BuildingWelder extends Controller {
 	private readonly weldColliders = new Map<string, CollidersModel>();
 	private readonly plotColliders = new Map<BuildingPlot, WorldModel>();
 
-	constructor(@inject blockRegistry: BlockRegistryC) {
+	constructor(@inject blockRegistry: BlockRegistry) {
 		super();
+
 		this.initPartBlockCollisions(blockRegistry.sorted);
+		this.onDestroy(() => {
+			for (const [, collider] of this.weldColliders) {
+				collider.Destroy();
+			}
+			this.weldColliders.clear();
+
+			for (const [, collider] of this.plotColliders) {
+				collider.Destroy();
+			}
+			this.plotColliders.clear();
+		});
 	}
 
 	private initPartBlockCollisions(blocks: readonly RegistryBlock[]) {

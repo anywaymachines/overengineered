@@ -2,7 +2,6 @@ import { RunService } from "@rbxts/services";
 import { BlockLogic } from "shared/block/BlockLogic";
 import { BlockLogicRegistry } from "shared/block/BlockLogicRegistry";
 import { BlockLogicValueGroup } from "shared/block/BlockLogicValueGroup";
-import { BlockRegistry } from "shared/block/BlockRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { ImpactController } from "shared/block/impact/ImpactController";
 import { VehicleSeatBlockLogic } from "shared/block/logic/VehicleSeatBlockLogic";
@@ -11,14 +10,16 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Objects } from "shared/fixes/objects";
 import type { BlockLogicValue } from "shared/block/BlockLogicValue";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 
+@injectable
 export class SharedMachine extends ContainerComponent {
 	readonly blocks: BlockLogic[] = [];
 	readonly occupiedByLocalPlayer = new ObservableValue(true);
 	private readonly childMap = new Map<BlockUuid, ConfigurableBlockLogic<BlockConfigTypes.BothDefinitions>>();
 
-	constructor() {
+	constructor(@inject private readonly blockRegistry: BlockRegistry) {
 		super();
 
 		this.children.onAdded.Connect((child) => {
@@ -50,7 +51,7 @@ export class SharedMachine extends ContainerComponent {
 		for (const block of blocks) {
 			const id = block.id;
 
-			if (!BlockRegistry.map.get(id)) {
+			if (!this.blockRegistry.blocks.get(id)) {
 				$err(`Unknown block id ${id}`);
 				continue;
 			}

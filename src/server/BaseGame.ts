@@ -1,10 +1,10 @@
 import { RunService } from "@rbxts/services";
 import { ServerRestartController } from "server/ServerRestartController";
-import { Controller } from "shared/component/Controller";
+import { Component } from "shared/component/Component";
 import type { DIContainer } from "shared/DI";
 
 @injectable
-export class BaseGame extends Controller {
+export class BaseGame extends Component {
 	constructor(@inject di: DIContainer) {
 		super();
 

@@ -4,12 +4,14 @@ import { playerConfigControlRegistry } from "client/gui/playerConfig/PlayerConfi
 import { playerConfigValueTemplateStorage } from "client/gui/playerConfig/PlayerConfigValueTemplateStorage";
 import { Signal } from "shared/event/Signal";
 
+@injectable
 class GraphicsValueControl extends ConfigValueControl<GuiObject> {
 	readonly submitted = new Signal<(config: PlayerConfigTypes.Graphics["config"]) => void>();
 
 	constructor(
 		config: PlayerConfigTypes.Graphics["config"],
 		definition: ConfigTypeToDefinition<PlayerConfigTypes.Graphics>,
+		@inject di: DIContainer,
 	) {
 		super(playerConfigValueTemplateStorage.multi(), definition.displayName);
 
@@ -32,7 +34,8 @@ class GraphicsValueControl extends ConfigValueControl<GuiObject> {
 		} as const satisfies PlayerConfigTypes.Definitions;
 		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
-		const control = this.add(new MultiPlayerConfigControl(this.gui.Control, config, def));
+		const control = this.add(new MultiPlayerConfigControl(this.gui.Control, di));
+		control.set(config, def);
 		this.event.subscribe(control.configUpdated, (key, value) => {
 			this.submitted.Fire((config = { ...config, [key]: value }));
 		});

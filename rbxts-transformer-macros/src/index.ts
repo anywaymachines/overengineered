@@ -289,7 +289,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 								undefined,
 							),
 						],
-						factory.createTypeReferenceNode(clazz.name, undefined),
+						undefined,
 						factory.createBlock(
 							[
 								factory.createReturnStatement(

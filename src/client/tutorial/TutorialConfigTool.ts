@@ -1,4 +1,3 @@
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BlockManager } from "shared/building/BlockManager";
 import { EventHandler } from "shared/event/EventHandler";
@@ -12,10 +11,11 @@ export type TutorialConfigBlockHighlight = {
 	value: unknown;
 };
 
+@injectable
 export class TutorialConfigTool {
 	private readonly eventHandler = new EventHandler();
 
-	constructor(private readonly tutorial: typeof Tutorial) {
+	constructor(@inject private readonly tutorial: Tutorial) {
 		this.eventHandler.register(
 			ClientBuilding.resetConfigOperation.addMiddleware((plot, _blocks, args2) => {
 				if (this.get().blocksToConfigure.size() > 0) {
@@ -28,7 +28,7 @@ export class TutorialConfigTool {
 	}
 
 	get() {
-		return BuildingMode.instance.toolController.allTools.configTool;
+		return this.tutorial.buildingMode.toolController.allTools.configTool;
 	}
 
 	cleanup() {

@@ -75,6 +75,7 @@ export class DIContainer {
 			throw `Dependency ${name} is already registered`;
 		}
 
+		print("REGISTERING", name);
 		this.registrations.set(name, { get: () => value });
 	}
 

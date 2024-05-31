@@ -22,7 +22,7 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 	readonly allButtons = ["run", "save", "settings"] as const;
 	readonly enabledButtons = new ComponentDisabler(this.allButtons);
 
-	constructor(gui: ActionBarControlDefinition) {
+	constructor(gui: ActionBarControlDefinition, di: DIContainer) {
 		super(gui);
 
 		const runButton = this.add(new ButtonControl(this.gui.Buttons.Run));
@@ -48,7 +48,7 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 		});
 
 		this.event.subscribe(settingsButton.activated, async () => {
-			SettingsPopup.showPopup();
+			SettingsPopup.showPopup(di);
 		});
 	}
 
@@ -88,12 +88,12 @@ export type BuildingModeSceneDefinition = GuiObject & {
 export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 	readonly actionbar;
 
-	constructor(gui: BuildingModeSceneDefinition, tools: ToolController) {
+	constructor(gui: BuildingModeSceneDefinition, tools: ToolController, di: DIContainer) {
 		super(gui);
 
 		this.add(ActionController.instance);
 
-		this.actionbar = this.add(new ActionBarControl(gui.ActionBar));
+		this.actionbar = this.add(new ActionBarControl(gui.ActionBar, di));
 		const updateActionBarVisibility = () =>
 			this.actionbar.setVisible(!tools.selectedTool.get() && !LoadingController.isLoading.get());
 

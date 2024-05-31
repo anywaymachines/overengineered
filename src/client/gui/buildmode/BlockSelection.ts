@@ -6,7 +6,7 @@ import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { ObservableValue } from "shared/event/ObservableValue";
-import type { BlockRegistryC } from "shared/block/BlockRegistry";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 type CategoryControlDefinition = TextButton;
 class CategoryControl extends TextButtonControl<CategoryControlDefinition> {
@@ -57,7 +57,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 	constructor(
 		template: BlockSelectionControlDefinition,
-		@inject readonly blockRegistry: BlockRegistryC,
+		@inject readonly blockRegistry: BlockRegistry,
 	) {
 		super(template);
 

@@ -1,4 +1,3 @@
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlots } from "shared/building/SharedPlots";
@@ -10,13 +9,14 @@ export type TutorialDeleteBlockHighlight = {
 	position: Vector3;
 };
 
+@injectable
 export class TutorialDeleteTool {
 	private readonly tutorialBlocksToRemove: (TutorialDeleteBlockHighlight & { readonly instance: Instance })[] = [];
 
-	constructor(private readonly tutorial: typeof Tutorial) {}
+	constructor(@inject private readonly tutorial: Tutorial) {}
 
 	get() {
-		return BuildingMode.instance.toolController.allTools.deleteTool;
+		return this.tutorial.buildingMode.toolController.allTools.deleteTool;
 	}
 
 	cleanup() {

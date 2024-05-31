@@ -7,7 +7,7 @@ import { SharedPlots } from "shared/building/SharedPlots";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 import type { ServerPlots } from "server/plots/ServerPlots";
-import type { BlockRegistryC } from "shared/block/BlockRegistry";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 @injectable
 export class RideMode implements PlayModeBase {
@@ -15,7 +15,7 @@ export class RideMode implements PlayModeBase {
 
 	constructor(
 		@inject private readonly serverPlots: ServerPlots,
-		@inject private readonly blockRegistry: BlockRegistryC,
+		@inject private readonly blockRegistry: BlockRegistry,
 	) {
 		Players.PlayerRemoving.Connect((player) => {
 			const blocks = this.cache.get(player);

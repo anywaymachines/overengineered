@@ -2,7 +2,7 @@ import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { Component } from "shared/component/Component";
 import { ObservableValue } from "shared/event/ObservableValue";
-import type { BlockRegistryC } from "shared/block/BlockRegistry";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
 
 @injectable
@@ -10,7 +10,7 @@ export class BlockMirrorer extends Component {
 	readonly blocks = new ObservableValue<readonly { readonly id: BlockId; readonly model: Model }[]>([]);
 	private readonly tracking = new Map<Model, Partial<Record<BlockId, Model[]>>>();
 
-	constructor(@inject private readonly blockRegistry: BlockRegistryC) {
+	constructor(@inject private readonly blockRegistry: BlockRegistry) {
 		super();
 		this.onDisable(() => this.destroyMirrors());
 	}
@@ -59,6 +59,7 @@ export class BlockMirrorer extends Component {
 				plot,
 				{ id: block.id, pos: block.model.GetPivot() },
 				mode,
+				this.blockRegistry,
 			);
 
 			let tracked = this.tracking.get(block.model);

@@ -21,9 +21,6 @@ declare global {
 
 @injectable
 export class BuildingMode extends PlayMode {
-	/** @deprecated TOBEDELETED, only tutorial uses this */
-	static readonly instance: BuildingMode = undefined!;
-
 	readonly mirrorMode = new ObservableValue<MirrorMode>({});
 	readonly targetPlot = new ObservableValue<SharedPlot | undefined>(undefined).withDefault(
 		SharedPlots.getPlotComponentByOwnerID(Players.LocalPlayer.UserId),
@@ -59,6 +56,7 @@ export class BuildingMode extends PlayMode {
 			new BuildingModeScene(
 				Gui.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode,
 				this.toolController,
+				di,
 			),
 		);
 	}

@@ -13,6 +13,14 @@ export class PlayModeController extends Controller {
 	readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
 	readonly modes;
 
+	static initialize(di: DIContainer) {
+		const controller = di.regResolve(PlayModeController);
+		for (const [, mode] of pairs(controller.modes)) {
+			di.registerSingleton(mode);
+		}
+
+		return controller;
+	}
 	constructor(@inject di: DIContainer) {
 		super();
 

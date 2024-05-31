@@ -8,12 +8,14 @@ import type { BoolConfigValueControl } from "client/gui/playerConfig/BoolConfigV
 import type { ClampedNumberConfigValueControl } from "client/gui/playerConfig/ClampedNumberConfigValueControl.client";
 import type { DropdownConfigValueControl } from "client/gui/playerConfig/DropdownConfigValueControl.client";
 
+@injectable
 class TerrainValueControl extends ConfigValueControl<GuiObject> {
 	readonly submitted = new Signal<(config: PlayerConfigTypes.Terrain["config"]) => void>();
 
 	constructor(
 		config: PlayerConfigTypes.Terrain["config"],
 		definition: ConfigTypeToDefinition<PlayerConfigTypes.Terrain>,
+		@inject di: DIContainer,
 	) {
 		super(playerConfigValueTemplateStorage.multi(), definition.displayName);
 
@@ -54,7 +56,8 @@ class TerrainValueControl extends ConfigValueControl<GuiObject> {
 		} as const satisfies PlayerConfigTypes.Definitions;
 		const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
-		const control = this.add(new MultiPlayerConfigControl(this.gui.Control, config, def));
+		const control = this.add(new MultiPlayerConfigControl(this.gui.Control, di));
+		control.set(config, def);
 		this.event.subscribe(control.configUpdated, (key, value) => {
 			this.submitted.Fire((config = { ...config, [key]: value }));
 		});

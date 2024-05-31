@@ -1,4 +1,3 @@
-import { BlockRegistry } from "shared/block/BlockRegistry";
 import { BlockManager } from "shared/building/BlockManager";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
@@ -62,11 +61,6 @@ const place = {
 	},
 
 	blockOnPlotV3: (plot: BuildingPlot, blockData: SerializedBlockV3, buildingCenter: CFrame) => {
-		if (!BlockRegistry.map.has(blockData.id)) {
-			$err(`Could not load ${blockData.id} from slot: Block does not exists`);
-			return;
-		}
-
 		const deserializedData: PlaceBlockRequest = {
 			id: blockData.id,
 			color: Serializer.Color3Serializer.deserialize(blockData.col ?? "FFFFFF"),
@@ -77,6 +71,11 @@ const place = {
 		};
 
 		const response = plot.place(deserializedData);
+		if (!response.success) {
+			$err(`Could not place block ${blockData.id}: ${response.message}`);
+			return;
+		}
+
 		if (response.success && response.model && blockData.connections) {
 			BlockManager.manager.connections.set(response.model, blockData.connections);
 		}

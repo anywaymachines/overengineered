@@ -19,7 +19,7 @@ import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
 import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
-import type { BlockRegistryC } from "shared/block/BlockRegistry";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 namespace Scene {
 	export type ConfigToolSceneDefinition = GuiObject & {
@@ -169,7 +169,7 @@ export class ConfigTool extends ToolBase {
 
 	constructor(
 		@inject mode: BuildingMode,
-		@inject readonly blockRegistry: BlockRegistryC,
+		@inject readonly blockRegistry: BlockRegistry,
 	) {
 		super(mode);
 		this.gui = this.parentGui(

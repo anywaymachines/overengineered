@@ -8,6 +8,7 @@ type Ctor<TKey extends keyof PlayerConfigTypes.Types> = {
 	new (
 		config: PlayerConfigTypes.Types[TKey]["config"] & defined,
 		definition: ConfigTypeToDefinition<PlayerConfigTypes.Types[TKey]>,
+		...args: never
 	): ConfigControl<TKey>;
 };
 

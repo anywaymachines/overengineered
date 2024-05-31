@@ -21,7 +21,6 @@ import { RemoteEvents } from "shared/RemoteEvents";
 import { Remotes } from "shared/Remotes";
 import { SandboxGame } from "server/SandboxGame";
 import { DIContainer } from "shared/DI";
-import { BlocksInitializer } from "shared/init/BlocksInitializer";
 
 namespace RemoteHandlers {
 	export function sendMessageAsAdmin(player: Player, text: string, color?: Color3, duration?: number) {
@@ -115,9 +114,6 @@ if (game.PrivateServerOwnerId !== 0) {
 
 const di = new DIContainer();
 di.regResolve(SandboxGame);
-
-// TODO: deletethis
-BlocksInitializer.initialize();
 
 // Badges
 BadgeController.initialize();

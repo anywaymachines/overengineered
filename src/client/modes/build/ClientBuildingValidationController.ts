@@ -4,11 +4,11 @@ import { BuildingManager } from "shared/building/BuildingManager";
 import { Controller } from "shared/component/Controller";
 import { errorResponse, successResponse } from "shared/types/network/Responses";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
-import type { BlockRegistryC } from "shared/block/BlockRegistry";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 @injectable
 export class ClientBuildingValidationController extends Controller {
-	constructor(@inject blockRegistry: BlockRegistryC) {
+	constructor(@inject blockRegistry: BlockRegistry) {
 		super();
 
 		this.event.eventHandler.register(

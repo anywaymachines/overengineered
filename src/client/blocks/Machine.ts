@@ -6,17 +6,19 @@ import { SharedMachine } from "shared/block/SharedMachine";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { Config } from "shared/config/Config";
 import type { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import type { ImpactController } from "shared/block/impact/ImpactController";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 
+@injectable
 export class Machine extends SharedMachine {
 	readonly logicInputs = new ContainerComponent<
 		ConfigLogicValueBase<BlockConfigTypes.Types[keyof BlockConfigTypes.Types]>
 	>();
 
-	constructor() {
-		super();
+	constructor(@inject blockRegistry: BlockRegistry) {
+		super(blockRegistry);
 		this.add(this.logicInputs);
 	}
 

@@ -1,14 +1,14 @@
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { EventHandler } from "shared/event/EventHandler";
 import { successResponse } from "shared/types/network/Responses";
 import type { Tutorial } from "client/tutorial/Tutorial";
 
+@injectable
 export class TutorialEditTool {
-	constructor(private readonly tutorial: typeof Tutorial) {}
+	constructor(@inject private readonly tutorial: Tutorial) {}
 
 	get() {
-		return BuildingMode.instance.toolController.allTools.editTool;
+		return this.tutorial.buildingMode.toolController.allTools.editTool;
 	}
 
 	cleanup() {}

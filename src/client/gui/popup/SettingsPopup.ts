@@ -25,21 +25,24 @@ export type SettingsPopupDefinition = GuiObject & {
 export class SettingsPopup extends Popup<SettingsPopupDefinition> {
 	private readonly config;
 
-	static showPopup() {
+	static showPopup(di: DIContainer) {
 		const popup = new SettingsPopup(
 			Gui.getGameUI<{
 				Popup: {
 					Settings: SettingsPopupDefinition;
 				};
 			}>().Popup.Settings.Clone(),
+			di,
 		);
 
 		popup.show();
 	}
-	constructor(gui: SettingsPopupDefinition) {
+	constructor(gui: SettingsPopupDefinition, di: DIContainer) {
 		super(gui);
 
-		this.config = this.add(new MultiPlayerConfigControl<PlayerConfigDefinition>(this.gui.Content.ScrollingFrame));
+		this.config = this.add(
+			new MultiPlayerConfigControl<PlayerConfigDefinition>(this.gui.Content.ScrollingFrame, di),
+		);
 
 		this.event.subscribe(this.config.configUpdated, async (key, value) => {
 			await PlayerDataStorage.sendPlayerConfigValue(key, value as PlayerConfig[keyof PlayerConfig]);

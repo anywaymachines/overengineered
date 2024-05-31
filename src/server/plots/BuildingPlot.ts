@@ -7,7 +7,7 @@ import { AABB } from "shared/fixes/AABB";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import type { BuildingWelder } from "server/building/BuildingWelder";
-import type { BlockRegistryC } from "shared/block/BlockRegistry";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { PlacedBlockData, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -25,7 +25,7 @@ export class BuildingPlot extends Component {
 		private readonly plot: SharedPlot,
 		readonly center: CFrame,
 		readonly size: Vector3,
-		@inject private readonly blockRegistry: BlockRegistryC,
+		@inject private readonly blockRegistry: BlockRegistry,
 		@inject private readonly buildingWelder: BuildingWelder,
 	) {
 		super();
@@ -68,14 +68,14 @@ export class BuildingPlot extends Component {
 		block.Parent = this.instance;
 	}
 	place(data: PlaceBlockRequest): BuildResponse {
-		const uuid = data.uuid ?? (HttpService.GenerateGUID(false) as BlockUuid);
-		if (this.tryGetBlock(uuid)) {
-			throw "Block with this uuid already exists";
-		}
-
 		const block = this.blockRegistry.blocks.get(data.id);
 		if (!block) {
 			return { success: false, message: `Unknown block id ${data.id}` };
+		}
+
+		const uuid = data.uuid ?? (HttpService.GenerateGUID(false) as BlockUuid);
+		if (this.tryGetBlock(uuid)) {
+			throw "Block with this uuid already exists";
 		}
 
 		// Create a new instance of the building model

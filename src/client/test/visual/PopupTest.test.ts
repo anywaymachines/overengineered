@@ -7,7 +7,7 @@ import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
 import { Element } from "shared/Element";
 
-export const _Tests = () => {
+export const _Tests = (di: DIContainer) => {
 	return new Control(
 		Element.create(
 			"Frame",
@@ -71,7 +71,7 @@ export const _Tests = () => {
 					Text: "Settings",
 					Size: new UDim2(0, 200, 0, 30),
 				})
-					.with((b) => b.activated.Connect(() => SettingsPopup.showPopup()))
+					.with((b) => b.activated.Connect(() => SettingsPopup.showPopup(di)))
 					.with((b) => b.enable()).instance,
 				b5: TextButtonControl.create({
 					Text: "Saves",

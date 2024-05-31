@@ -34,7 +34,7 @@ import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/Ma
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
-import type { BlockRegistryC } from "shared/block/BlockRegistry";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 const allowedColor = Colors.blue;
@@ -1037,7 +1037,7 @@ export class BuildTool extends ToolBase {
 	constructor(
 		@inject mode: BuildingMode,
 		@inject readonly di: DIContainer,
-		@inject readonly blockRegistry: BlockRegistryC,
+		@inject readonly blockRegistry: BlockRegistry,
 	) {
 		super(mode);
 

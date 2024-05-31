@@ -27,7 +27,7 @@ import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
-import type { BlockRegistryC } from "shared/block/BlockRegistry";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 namespace Scene {
@@ -329,7 +329,7 @@ namespace Controllers {
 			tool: EditTool,
 			plot: SharedPlot,
 			selected: readonly BlockModel[],
-			@inject blockRegistry: BlockRegistryC,
+			@inject blockRegistry: BlockRegistry,
 		) {
 			super();
 
