@@ -1,12 +1,10 @@
 import { Players, ReplicatedStorage, StarterGui, UserInputService, Workspace } from "@rbxts/services";
-import { LoadingController } from "client/controller/LoadingController";
 import { Gui } from "client/gui/Gui";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { SharedGameLoader } from "shared/init/SharedGameLoader";
 
 namespace BSOD {
 	type BsodControlDefinition = ScreenGui & {
@@ -66,16 +64,9 @@ namespace BSOD {
 	}
 }
 
-SharedGameLoader.loadingStarted.Connect((name) => {
-	if (name !== undefined) {
-		LoadingController.show(name);
-	}
-});
-SharedGameLoader.loadingCompleted.Connect((name) => {
-	LoadingController.hide();
-});
-SharedGameLoader.loadingError.Connect((err) => {
-	const str = `
+export namespace GameLoader {
+	export function showBSOD(err: string) {
+		const str = `
 An error has occurred: The game has failed to load.
 
 Screenshot this screen and send it to the developers in the official Discord server.
@@ -88,14 +79,8 @@ ${GameDefinitions.getEnvironmentInfo().join("\n")}
 Error: ${err}
 `.gsub("^%s*(.-)%s*$", "%1")[0];
 
-	BSOD.show(str);
-});
-
-export namespace GameLoader {
-	export let mainLoaded = false;
-	mainLoaded = false;
-
-	export const { lazyLoader, wrapLoading } = SharedGameLoader;
+		BSOD.show(str);
+	}
 
 	export function waitForDataStorage() {
 		while (!PlayerDataStorage.data.get()) {

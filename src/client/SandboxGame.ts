@@ -1,9 +1,11 @@
 import { RunService } from "@rbxts/services";
+import { DayCycleController } from "client/controller/DayCycleController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { GameLoader } from "client/GameLoader";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";
+import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { TestRunner } from "client/test/TestRunner";
 import { Tutorial } from "client/tutorial/Tutorial";
 import { TutorialBasics } from "client/tutorial/TutorialBasics";
@@ -43,22 +45,41 @@ namespace Startup {
 	}
 }
 
-export class SandboxGame extends HostedService {
-	static initialize(builder: GameHostBuilder) {
+export namespace SandboxGame {
+	export function initialize(builder: GameHostBuilder) {
+		const loading = (str: string) => LoadingController.show(`Initializing ${str}`);
+
 		LoadingController.show("Pre-init");
 		LocalPlayerController.initializeSprintLogic(builder, RunService.IsStudio() ? 200 : 60);
 
 		LoadingController.show("Waiting for server");
 		GameLoader.waitForServer();
 
-		LoadingController.show("Loading the game");
+		LoadingController.show("Waiting for plot");
+		GameLoader.waitForPlot();
+
+		LoadingController.show("Waiting for data");
+		const [s, r] = PlayerDataStorage.init().await();
+		if (!s) throw r;
+		GameLoader.waitForDataStorage();
+
+		loading("blocks");
 		builder.services.registerSingleton(BlocksInitializer.create());
+		loading("play modes");
 		PlayModeController.initialize(builder);
+		loading("building validation");
 		ClientBuildingValidationController.initialize(builder);
+		loading("tutorial");
 		Tutorial.initialize(builder);
 
-		builder.services.registerService(this);
+		loading("day cycle");
+		builder.services.registerService(DayCycleController);
+
+		loading("basics tutorial");
 		Startup.initializeBasicsTutorial(builder);
+		loading("test runner");
 		Startup.initializeTestRunner(builder);
+
+		loading("something?");
 	}
 }

@@ -2,14 +2,19 @@
 $log("Starting");
 
 import { LoadingController } from "client/controller/LoadingController";
-LoadingController.show("THE START");
+LoadingController.show("Initializing the initialization");
 
 import { SandboxGame } from "client/SandboxGame";
 import { GameLoader } from "client/GameLoader";
 import { Game } from "shared/GameHost";
 
 const builder = Game.createHost();
-SandboxGame.initialize(builder);
+try {
+	SandboxGame.initialize(builder);
+} catch (err) {
+	GameLoader.showBSOD(tostring(err ?? ""));
+	throw err;
+}
 
 const host = builder.build();
 
@@ -17,7 +22,6 @@ host.run();
 
 import { PlayerDataStorage } from "client/PlayerDataStorage";
 
-const dataLoading = PlayerDataStorage.init();
 GameLoader.waitForEverything(LoadingController.show);
 LoadingController.show("Loading the dependencies");
 
@@ -61,12 +65,6 @@ Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =
 		? GameDefinitions.VERSION
 		: `v${game.PlaceVersion} | ${updated}`;
 
-{
-	const [success, result] = dataLoading.await();
-	if (!success) {
-		throw result;
-	}
-}
 GameLoader.waitForDataStorage();
 
 GameLoader.waitForServer();
@@ -90,4 +88,3 @@ TextChatService.OnIncomingMessage = function (message: TextChatMessage) {
 };
 
 $log("Client loaded.");
-GameLoader.mainLoaded = true;

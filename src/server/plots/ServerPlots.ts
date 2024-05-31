@@ -99,7 +99,6 @@ export class ServerPlots extends HostedService {
 			PlayerWatcher.players,
 			(player) => {
 				const controller = ServerPlotController.tryCreate(player, di);
-				print(controller !== undefined);
 				if (!controller) return;
 
 				controller.onDestroy(() => {

@@ -54,7 +54,6 @@ export class ServerBuildingRequestHandler extends HostedService {
 		@inject private readonly blockRegistry: BlockRegistry,
 	) {
 		super();
-		print("creating reqh", controller.player.Name);
 		this.player = controller.player;
 	}
 
