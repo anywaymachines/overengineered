@@ -4,24 +4,21 @@ import { Signals } from "client/event/Signals";
 import { Popup } from "client/gui/Popup";
 import { BuildingMode } from "client/modes/build/BuildingMode";
 import { RideMode } from "client/modes/ride/RideMode";
-import { Controller } from "shared/component/Controller";
 import { ObservableValue } from "shared/event/ObservableValue";
+import { HostedService } from "shared/GameHost";
 import { Remotes } from "shared/Remotes";
 
 @injectable
-export class PlayModeController extends Controller {
-	readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
-	readonly modes;
+export class PlayModeController extends HostedService {
+	private readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
+	private readonly modes;
 
-	static initialize(di: DIContainer) {
-		const controller = di.regResolve(PlayModeController);
-		for (const [, mode] of pairs(controller.modes)) {
-			di.registerSingleton(mode);
-		}
-
-		return controller;
+	static initialize(host: GameHostBuilder) {
+		host.services.registerSingletonClass(BuildingMode);
+		host.services.registerSingletonClass(RideMode);
+		host.services.registerService(PlayModeController);
 	}
-	constructor(@inject di: DIContainer) {
+	constructor(@inject build: BuildingMode, @inject ride: RideMode) {
 		super();
 
 		GuiService.SetGameplayPausedNotificationEnabled(false);
@@ -35,8 +32,8 @@ export class PlayModeController extends Controller {
 			});
 
 		this.modes = {
-			build: di.resolveForeignClass(BuildingMode),
-			ride: di.resolveForeignClass(RideMode),
+			build,
+			ride,
 		} as const;
 
 		for (const [_, mode] of pairs(this.modes)) {

@@ -113,7 +113,7 @@ export namespace GameLoader {
 		return SharedPlots.getPlotComponentByOwnerID(userid);
 	}
 	export function waitForServer() {
-		while (!(Workspace.GetAttribute("loaded") as boolean | undefined)) {
+		while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {
 			task.wait();
 		}
 	}

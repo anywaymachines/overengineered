@@ -2,9 +2,18 @@ type IRegistration<T> = {
 	readonly get: (...args: unknown[]) => T;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ConstructorParameters<T extends abstract new (...args: any) => any> = T extends new (...args: infer P) => any
+	? P
+	: never;
+
 declare global {
 	type DIContainer = D;
-	type DIContainerBuilder = Pick<DIContainer, `register${string}` & keyof DIContainer>;
+	type ReadonlyDIContainer = Pick<
+		DIContainer,
+		"beginScope" | "tryResolve" | (`resolve${string}` & keyof DIContainer)
+	>;
+	type WriteonlyDIContainer = Pick<DIContainer, `register${string}` & keyof DIContainer>;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	function injectable(selv: { readonly prototype: unknown; new (...args: any): unknown }): void;
@@ -33,7 +42,7 @@ const getSymbol = <T extends object>(obj: T): string => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const instantiateClass = <T, TCtor extends new (...args: TArgs) => T, TArgs extends readonly unknown[]>(
+const instantiateClass = <T, TCtor extends abstract new (...args: TArgs) => T, TArgs extends readonly unknown[]>(
 	clazz: TCtor,
 	args: TArgs | undefined,
 	container: DIContainer,
@@ -45,7 +54,7 @@ const instantiateClass = <T, TCtor extends new (...args: TArgs) => T, TArgs exte
 		return clazz._depsCreate(...[...(args ?? ([] as unknown as TArgs)), container]);
 	}
 
-	return new clazz(...(args ?? ([] as unknown as TArgs)));
+	return new (clazz as unknown as new (...args: TArgs) => T)(...(args ?? ([] as unknown as TArgs)));
 };
 
 type D = DIContainer;
@@ -57,7 +66,7 @@ export class DIContainer {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	registerSingletonClass<T extends new (...args: any) => unknown>(clazz: T, name?: string): void {
+	registerSingletonClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string): void {
 		name ??= getSymbol(clazz);
 		assert(name);
 		if (this.registrations.get(name)) {
@@ -88,7 +97,7 @@ export class DIContainer {
 		this.registrations.set(name, { get: () => func(this) });
 	}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	registerTransientClass<T extends new (...args: any) => unknown>(clazz: T, name?: string): void {
+	registerTransientClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string): void {
 		name ??= getSymbol(clazz);
 		assert(name);
 		if (this.registrations.get(name)) {
@@ -100,7 +109,7 @@ export class DIContainer {
 		});
 	}
 
-	tryGet<T extends defined>(name: string): T | undefined {
+	tryResolve<T extends defined>(name: string): T | undefined {
 		return this.registrations.get(name)?.get() as T;
 	}
 	resolve<T extends defined>(name?: string): T {
@@ -113,17 +122,17 @@ export class DIContainer {
 		return registration.get() as T;
 	}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	resolveByClass<T extends new (...args: any) => unknown>(clazz: T, name?: string) {
+	resolveByClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string) {
 		name ??= getSymbol(clazz);
 		return this.resolveClass<T>([] as never, name);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	resolveClass<T extends new (...args: any) => unknown>(
+	resolveClass<T extends abstract new (...args: never) => unknown>(
 		args: Partial<[...ConstructorParameters<T>]>,
 		name?: string,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	): T extends new (...args: any) => infer R ? R : never {
+	): T extends abstract new (...args: never) => infer R ? R : never {
 		assert(name);
 		const registration = this.registrations.get(name);
 		if (!registration) {
@@ -133,10 +142,10 @@ export class DIContainer {
 		return registration.get(args) as never;
 	}
 
-	regResolve<T extends new (...args: never) => unknown>(
+	regResolve<T extends abstract new (...args: never) => unknown>(
 		clazz: T,
 		args?: Partial<[...ConstructorParameters<T>]>,
-	): T extends new (...args: never) => infer R ? R : never {
+	): T extends abstract new (...args: never) => infer R ? R : never {
 		const name = getSymbol(clazz);
 		this.registerSingletonClass(clazz);
 
@@ -144,11 +153,11 @@ export class DIContainer {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	resolveForeignClass<T extends new (...args: any) => unknown>(
+	resolveForeignClass<T extends abstract new (...args: any) => unknown>(
 		clazz: T,
 		args?: Partial<readonly [...ConstructorParameters<T>]>,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	): T extends new (...args: any) => infer R ? R : never {
+	): T extends abstract new (...args: any) => infer R ? R : never {
 		return instantiateClass(clazz as never, args, this);
 	}
 
@@ -161,10 +170,10 @@ export class IDIContainerScope extends DIContainer {
 		super();
 	}
 
-	tryGet<T extends defined>(name: string): T | undefined {
-		return super.tryGet<T>(name) ?? this.parent.tryGet<T>(name);
+	tryResolve<T extends defined>(name: string): T | undefined {
+		return super.tryResolve<T>(name) ?? this.parent.tryResolve<T>(name);
 	}
 	resolve<T extends defined>(name: string): T {
-		return this.tryGet(name) ?? super.resolve(name);
+		return this.tryResolve(name) ?? super.resolve(name);
 	}
 }

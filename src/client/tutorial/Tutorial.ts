@@ -10,6 +10,10 @@ import type { BuildingMode } from "client/modes/build/BuildingMode";
 
 @injectable
 export class Tutorial {
+	static initialize(host: GameHostBuilder) {
+		host.services.registerSingletonClass(this);
+	}
+
 	readonly Control = new TutorialControl();
 	readonly Cancellable = true;
 	private isActive = false;

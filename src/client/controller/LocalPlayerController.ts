@@ -1,7 +1,8 @@
-import { ContextActionService, Players, RunService } from "@rbxts/services";
+import { ContextActionService, Players } from "@rbxts/services";
 import { InputController } from "client/controller/InputController";
 import { Signals } from "client/event/Signals";
 import { ObservableValue } from "shared/event/ObservableValue";
+import { HostedService } from "shared/GameHost";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { PlayerModule } from "client/types/PlayerModule";
 
@@ -10,14 +11,6 @@ export namespace LocalPlayerController {
 	export let humanoid: Humanoid | undefined;
 	export let rootPart: BasePart | undefined;
 
-	// Player settings
-	const WALKSPEED_DEFAULT = 20;
-	const WALKSPEED_SPRINT = RunService.IsStudio() ? 200 : 60;
-
-	// Properties
-	export const isSprinting = new ObservableValue<boolean>(false);
-
-	initializeSprintLogic();
 	Players.LocalPlayer.CharacterAdded.Connect((_) => {
 		// Wait for character loading if needed
 		if (!Players.LocalPlayer.HasAppearanceLoaded()) Players.LocalPlayer.CharacterAppearanceLoaded.Wait();
@@ -44,42 +37,49 @@ export namespace LocalPlayerController {
 		disableCharacterFluidForces();
 	}
 
-	function initializeSprintLogic() {
-		// ContextActionService worker
-		const runEvent = (_: string, inputState: Enum.UserInputState, inputObject: InputObject) => {
-			if (inputState !== Enum.UserInputState.Begin) {
-				isSprinting.set(false);
-				return Enum.ContextActionResult.Pass;
+	export function initializeSprintLogic(host: GameHostBuilder, sprintSpeed: number) {
+		class SprintLogic extends HostedService {
+			constructor() {
+				super();
+
+				const isSprinting = new ObservableValue<boolean>(false);
+
+				// Update character walkspeed
+				isSprinting.subscribe((value) => {
+					if (!humanoid) return;
+
+					const walkSpeed = 40;
+					humanoid.WalkSpeed = value ? sprintSpeed : walkSpeed;
+				});
+
+				this.event.subscribeObservable(
+					InputController.inputType,
+					(inputType) => {
+						// Remove old action (if exists)
+						ContextActionService.UnbindAction("Sprint");
+
+						// Bind new action
+						ContextActionService.BindAction(
+							"Sprint",
+							(name, inputState) => {
+								isSprinting.set(inputState === Enum.UserInputState.Begin);
+								return Enum.ContextActionResult.Pass;
+							},
+							inputType === "Touch",
+							Enum.KeyCode.LeftShift,
+							Enum.KeyCode.ButtonY,
+						);
+						ContextActionService.SetImage("Sprint", "rbxassetid://9555118706");
+						ContextActionService.SetDescription("Sprint", "Allows you to move more quickly");
+						ContextActionService.SetPosition("Sprint", new UDim2(0, 20, 0, 50));
+						ContextActionService.SetTitle("Sprint", "Sprint");
+					},
+					true,
+				);
 			}
-			isSprinting.set(true);
-			return Enum.ContextActionResult.Pass;
-		};
+		}
 
-		// Update character walkspeed
-		isSprinting.subscribe((value) => {
-			if (!humanoid) return;
-
-			humanoid.WalkSpeed = value ? WALKSPEED_SPRINT : WALKSPEED_DEFAULT;
-		});
-
-		// Input type handling for displaying sprint button correctly
-		InputController.inputType.subscribe((inputType) => {
-			// Remove old action (if exists)
-			ContextActionService.UnbindAction("Sprint");
-
-			// Bind new action
-			ContextActionService.BindAction(
-				"Sprint",
-				runEvent,
-				inputType === "Touch",
-				Enum.KeyCode.LeftShift,
-				Enum.KeyCode.ButtonY,
-			);
-			ContextActionService.SetImage("Sprint", "rbxassetid://9555118706");
-			ContextActionService.SetDescription("Sprint", "Allows you to move more quickly");
-			ContextActionService.SetPosition("Sprint", new UDim2(0, 20, 0, 50));
-			ContextActionService.SetTitle("Sprint", "Sprint");
-		}, true);
+		host.services.registerService(SprintLogic);
 	}
 
 	/** By default, character has `EnableFluidForces`, but because of the huge `Workspace.AirDensity`, it just flies like a feather */

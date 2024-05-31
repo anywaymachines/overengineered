@@ -1,13 +1,17 @@
 import { Players } from "@rbxts/services";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BuildingManager } from "shared/building/BuildingManager";
-import { Controller } from "shared/component/Controller";
+import { HostedService } from "shared/GameHost";
 import { errorResponse, successResponse } from "shared/types/network/Responses";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 @injectable
-export class ClientBuildingValidationController extends Controller {
+export class ClientBuildingValidationController extends HostedService {
+	static initialize(host: GameHostBuilder) {
+		host.services.registerService(this);
+	}
+
 	constructor(@inject blockRegistry: BlockRegistry) {
 		super();
 

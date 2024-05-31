@@ -133,4 +133,4 @@ if (!RunService.IsStudio()) {
 RemoteEvents.initialize();
 
 $log("Server loaded.");
-Workspace.SetAttribute("loaded", true);
+Workspace.AddTag("GameLoaded");

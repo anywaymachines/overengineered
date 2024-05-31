@@ -4,12 +4,16 @@ $log("Starting");
 import { LoadingController } from "client/controller/LoadingController";
 LoadingController.show("Loading the game");
 
-import { DIContainer } from "shared/DI";
 import { SandboxGame } from "client/SandboxGame";
 import { GameLoader } from "client/GameLoader";
+import { Game } from "shared/GameHost";
 
-const di = new DIContainer();
-di.regResolve(SandboxGame);
+const builder = Game.createHost();
+SandboxGame.initialize(builder);
+
+const host = builder.build();
+
+host.run();
 
 import { PlayerDataStorage } from "client/PlayerDataStorage";
 
