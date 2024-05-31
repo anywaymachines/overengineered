@@ -4,6 +4,7 @@ type IRegistration<T> = {
 
 declare global {
 	type DIContainer = D;
+	type DIContainerBuilder = Pick<DIContainer, `register${string}` & keyof DIContainer>;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	function injectable(selv: { readonly prototype: unknown; new (...args: any): unknown }): void;
@@ -75,7 +76,6 @@ export class DIContainer {
 			throw `Dependency ${name} is already registered`;
 		}
 
-		print("REGISTERING", name);
 		this.registrations.set(name, { get: () => value });
 	}
 

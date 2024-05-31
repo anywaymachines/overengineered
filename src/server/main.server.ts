@@ -8,7 +8,6 @@ if (!game.GetService("RunService").IsStudio()) {
 
 import { HttpService, MessagingService, RunService, Workspace } from "@rbxts/services";
 import { Backend } from "server/Backend";
-import { BadgeController } from "server/BadgeController";
 import type { PlayerData } from "server/database/PlayerDatabase";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
 import { registerOnRemoteEvent, registerOnRemoteFunction } from "server/network/event/RemoteHandler";
@@ -114,9 +113,6 @@ if (game.PrivateServerOwnerId !== 0) {
 
 const di = new DIContainer();
 di.regResolve(SandboxGame);
-
-// Badges
-BadgeController.initialize();
 
 // Initializing event workders
 registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSetting);

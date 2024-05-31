@@ -1,4 +1,5 @@
 import { Workspace } from "@rbxts/services";
+import { BadgeController } from "server/BadgeController";
 import { BaseGame } from "server/BaseGame";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
 import { BlockMarkersController } from "server/building/BlockMarkersController";
@@ -31,5 +32,7 @@ export class SandboxGame extends Controller {
 		this.parent(di.regResolve(PlayModeController));
 		this.parent(di.regResolve(ServerBuildingRequestController));
 		this.parent(di.regResolve(ServerBlockLogicController));
+
+		BadgeController.initializeIfProd(this, di);
 	}
 }
