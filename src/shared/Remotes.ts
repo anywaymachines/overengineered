@@ -100,7 +100,9 @@ export const CustomRemotes = {
 	slots: {
 		load: new C2S2CRemoteFunction<[index: number], LoadSlotResponse>("rs_load"),
 		loadImported: new C2S2CRemoteFunction<[index: number], LoadSlotResponse>("rs_loadi"),
-		loadAsAdmin: new C2S2CRemoteFunction<[userid: number, index: number], LoadSlotResponse>("rs_loadadm"),
+		loadAsAdmin: new C2S2CRemoteFunction<[userid: number, index: number, imported: boolean], LoadSlotResponse>(
+			"rs_loadadm",
+		),
 		save: new C2S2CRemoteFunction<[data: PlayerSaveSlotRequest], SaveSlotResponse>("rs_save"),
 	},
 } as const;
@@ -123,7 +125,6 @@ export const Remotes = Definitions.Create({
 		Sit: Definitions.ClientToServerEvent<[]>(),
 	}),
 	Admin: Definitions.Namespace({
-		LoadSlot: Definitions.ClientToServerEvent<[userid: number, slot: number]>(),
 		SendMessage: Definitions.BidirectionalEvent<
 			[text: string, color?: Color3, duration?: number],
 			[text: string, color?: Color3, duration?: number]

@@ -242,12 +242,12 @@ export class ServerBuildingRequestHandler extends HostedService {
 	private loadImportedSlot(index: number): LoadSlotResponse {
 		return this.forceLoadSlot(this.player.UserId, index, true);
 	}
-	private loadSlotAsAdmin(userid: number, index: number): LoadSlotResponse {
+	private loadSlotAsAdmin(userid: number, index: number, imported: boolean): LoadSlotResponse {
 		if (!GameDefinitions.isAdmin(this.player)) {
 			return err("Permission denied");
 		}
 
-		return this.forceLoadSlot(userid, index, true);
+		return this.forceLoadSlot(userid, index, imported);
 	}
 
 	private forceLoadSlot(userid: number, index: number, imported: boolean): LoadSlotResponse {

@@ -64,7 +64,8 @@ const create = () => {
 	closebtn.activated.Connect(() => destroy?.());
 
 	const tests: readonly (readonly [name: string, test: Control])[] = [
-		["Load", LoadSlotTest.create()],
+		["Load", LoadSlotTest.create(false)],
+		["Load REMOTE", LoadSlotTest.create(true)],
 		["Global message", AdminMessageController.createControl()],
 		wrapNonVisual("Restart", { restart: ServerRestartController.sendToServer }),
 	];

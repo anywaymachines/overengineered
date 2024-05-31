@@ -2,10 +2,10 @@ import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { Element } from "shared/Element";
-import { Remotes } from "shared/Remotes";
+import { CustomRemotes } from "shared/Remotes";
 
 export const LoadSlotTest = {
-	create() {
+	create(imported: boolean) {
 		const loadControl = new Control(
 			Element.create(
 				"Frame",
@@ -43,7 +43,7 @@ export const LoadSlotTest = {
 
 		userid.value.set(1745850275); // BlackWater
 		loadbtn.activated.Connect(() =>
-			Remotes.Client.GetNamespace("Admin").Get("LoadSlot").SendToServer(userid.value.get(), slotid.value.get()),
+			CustomRemotes.slots.loadAsAdmin.send(userid.value.get(), slotid.value.get(), imported),
 		);
 
 		return loadControl;
