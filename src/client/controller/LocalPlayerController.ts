@@ -48,7 +48,7 @@ export namespace LocalPlayerController {
 				isSprinting.subscribe((value) => {
 					if (!humanoid) return;
 
-					const walkSpeed = 40;
+					const walkSpeed = 20;
 					humanoid.WalkSpeed = value ? sprintSpeed : walkSpeed;
 				});
 
