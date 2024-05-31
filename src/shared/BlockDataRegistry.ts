@@ -611,6 +611,10 @@ const registry = {
 		name: "Mass Sensor",
 		description: "Returns the current contraption/assembly mass",
 	},
+	gravitysensor: {
+		name: "Gravity Sensor",
+		description: "Returns the current gravity acceleration in m/s²",
+	},
 	stackmemory: {
 		name: "Stack",
 		description: "Storage for your stacked data. Allows to store up to 32 values",

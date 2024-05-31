@@ -18,6 +18,7 @@ import { CounterBlockLogic } from "shared/block/logic/logic/other/CounterBlockLo
 import { DelayBlockLogic } from "shared/block/logic/logic/other/DelayBlockLogic";
 import { AltimeterBlockLogic } from "shared/block/logic/logic/sensor/AltimeterBlockLogic";
 import { AngleSensorBlockLogic } from "shared/block/logic/logic/sensor/AngleSensorBlockLogic";
+import { GravitySensorBlockLogic } from "shared/block/logic/logic/sensor/GravitySensorBlockLogic";
 import { KeySensorBlockLogic } from "shared/block/logic/logic/sensor/KeySensorBlockLogic";
 import { MassSensorBlockLogic } from "shared/block/logic/logic/sensor/MassSensorBlockLogic";
 import { OwnerLocatorBlockLogic } from "shared/block/logic/logic/sensor/OwnerLocatorBlockLogic";
@@ -84,6 +85,7 @@ const logicRegistry = {
 
 	ownerlocator: OwnerLocatorBlockLogic,
 	masssensor: MassSensorBlockLogic,
+	gravitysensor: GravitySensorBlockLogic,
 
 	speedometer: SpeedometerBlockLogic,
 	anglesensor: AngleSensorBlockLogic,

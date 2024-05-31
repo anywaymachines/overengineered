@@ -724,6 +724,18 @@ const masssensor = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const gravitysensor = {
+	input: {},
+	output: {
+		result: {
+			displayName: "Acceleration (m/s²)",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const keysensor = {
 	input: {
 		key: {
@@ -1288,6 +1300,7 @@ export const blockConfigRegistry = {
 	counter,
 	logicmemory,
 	stackmemory,
+	gravitysensor,
 	randomaccessmemory,
 	readonlymemory,
 	buffer: anyProcessing,
