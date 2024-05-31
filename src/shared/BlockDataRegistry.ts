@@ -783,22 +783,18 @@ const registry = {
 	halfwedge1x1: {
 		name: "Half Wedge 1x1",
 		description: "A wedge 1x1, but it's.. half.. the size?",
-		mirrorBehaviour: "offset180",
 	},
 	halfwedge1x2: {
 		name: "Half Wedge 1x2",
 		description: "A wedge 1x2, but it's.. half.. the size?",
-		mirrorBehaviour: "offset180",
 	},
 	halfwedge1x3: {
 		name: "Half Wedge 1x3",
 		description: "A wedge 1x3, but it's.. half.. the size?",
-		mirrorBehaviour: "offset180",
 	},
 	halfwedge1x4: {
 		name: "Half Wedge 1x4",
 		description: "A wedge 1x4, but it's.. half.. the size?",
-		mirrorBehaviour: "offset180",
 	},
 	radiotransmitter: {
 		name: "Radio Transmitter",
