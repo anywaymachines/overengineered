@@ -44,7 +44,7 @@ class ServerPlotController extends HostedService {
 			return blocks;
 		};
 
-		this.blocks = di.regResolve(BuildingPlot, [
+		this.blocks = di.resolveForeignClass(BuildingPlot, [
 			initializeBlocksFolder(plot),
 			plot,
 			plot.instance.BuildingArea.ExtentsCFrame,
