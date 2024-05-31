@@ -1,20 +1,17 @@
 import { BadgeService } from "@rbxts/services";
 import { PlayerWatcher } from "server/PlayerWatcher";
-import { ControllerInitializer } from "shared/component/Controller";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import type { IController } from "shared/component/Controller";
+import { HostedService } from "shared/GameHost";
 
-export namespace BadgeController {
-	export function initializeIfProd(parent: IController, di: DIContainer) {
+export class BadgeController extends HostedService {
+	static initializeIfProd(host: GameHostBuilder) {
 		if (game.PlaceId !== GameDefinitions.PRODUCTION_PLACE_ID) {
 			return;
 		}
 
-		return parent.parent(di.regResolve(BadgeControllerC));
+		host.services.registerService(this);
 	}
-}
 
-class BadgeControllerC extends ControllerInitializer {
 	private readonly badges = {
 		PRE_BETA_2024: 2652394288127295,
 	} as const;
@@ -23,7 +20,7 @@ class BadgeControllerC extends ControllerInitializer {
 		super();
 
 		// PRE_BETA_2024
-		PlayerWatcher.onJoinEvt(this.event, (player) => {
+		this.event.subscribeCollectionAdded(PlayerWatcher.players, (player) => {
 			player.CharacterAdded.Once(() => {
 				try {
 					if ([2, 3].includes(player.GetRankInGroup(GameDefinitions.GROUP))) {

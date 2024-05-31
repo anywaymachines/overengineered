@@ -5,8 +5,8 @@ import { SlimSignal } from "shared/event/SlimSignal";
 declare global {
 	interface IHostedService extends IEnableableComponent, IDestroyableComponent {}
 
-	interface GameHostBuilderServices extends WriteonlyDIContainer {
-		registerService<T extends abstract new (...args: never) => IHostedService>(service: T): void;
+	interface GameHostBuilderDIContainer extends WriteonlyDIContainer {
+		registerService<T extends abstract new (...args: never) => IHostedService>(service: T, name?: string): void;
 	}
 	type GameHostBuilder = HostBuilder;
 	interface GameHost {
@@ -18,14 +18,17 @@ declare global {
 }
 
 export class HostedService implements IHostedService {
-	protected readonly event: Omit<ComponentEvents, "destroy" | "disable" | "enable" | "isDestroyed" | "isEnabled"> =
-		this.parent(new ComponentEvents());
+	protected readonly event: Omit<ComponentEvents, "destroy" | "disable" | "enable" | "isDestroyed" | "isEnabled">;
 
 	private readonly onEnabled = new SlimSignal();
 	private readonly onDestroyed = new SlimSignal();
 
 	private selfEnabled = false;
 	private selfDestroyed = false;
+
+	constructor() {
+		this.event = this.parent(new ComponentEvents());
+	}
 
 	isEnabled(): boolean {
 		return this.selfEnabled;
@@ -47,6 +50,7 @@ export class HostedService implements IHostedService {
 
 		this.selfEnabled = true;
 		this.onEnabled.Fire();
+		this.onEnabled.destroy();
 		(this.event as ComponentEvents).enable();
 	}
 	destroy(): void {
@@ -55,7 +59,8 @@ export class HostedService implements IHostedService {
 		this.selfDestroyed = true;
 		this.onDestroyed.Fire();
 
-		this.dispose();
+		this.onEnabled.destroy();
+		this.onDestroyed.destroy();
 	}
 
 	parent<T extends IEnableableComponent & IDestroyableComponent>(component: T): T {
@@ -65,25 +70,21 @@ export class HostedService implements IHostedService {
 
 		return component;
 	}
-
-	protected dispose() {
-		this.onDestroyed.destroy();
-	}
 }
 
 type HostedServiceCtor = abstract new (...args: never) => IHostedService;
-class DIContainerBuilder extends DIContainer implements GameHostBuilderServices {
+class DIContainerBuilder extends DIContainer implements GameHostBuilderDIContainer {
 	readonly services: HostedServiceCtor[] = [];
 
-	registerService<T extends HostedServiceCtor>(service: T): void {
-		this.registerSingletonClass(service);
+	registerService<T extends HostedServiceCtor>(service: T, name?: string): void {
+		this.registerSingletonClass(service, name);
 		this.services.push(service);
 	}
 }
 
 class HostBuilder implements GameHostBuilder {
 	private readonly _services = new DIContainerBuilder();
-	readonly services: GameHostBuilderServices = this._services;
+	readonly services: GameHostBuilderDIContainer = this._services;
 
 	build(): GameHost {
 		const host = new Host(this._services);

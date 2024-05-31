@@ -340,13 +340,18 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 			if (!ts.isIdentifier(node.expression.name)) return;
 
 			const tp = typeChecker.getTypeAtLocation(node.expression.expression);
-			if (tp.symbol?.name !== 'DIContainer') return;
+			if (!(tp.aliasSymbol ?? tp.symbol)?.name.includes('DIContainer'))
+				return;
 
 			if (node.expression.name.text.startsWith('register')) {
 				const signature = typeChecker.getResolvedSignature(node);
 				if (!signature) return;
 
-				const type = typeChecker.getTypeOfSymbolAtLocation(signature.getParameters()[0], node);
+				const type =
+					node.expression.name.text.includes('Func')
+					? typeChecker.getReturnTypeOfSignature(typeChecker.getSignaturesOfType(typeChecker.getTypeOfSymbolAtLocation(signature.getParameters()[0], node), ts.SignatureKind.Call)[0])
+					: typeChecker.getTypeOfSymbolAtLocation(signature.getParameters()[0], node);
+
 				const identifier = identifierByType(type);
 				if (!identifier) return;
 
@@ -357,11 +362,11 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 						...node.arguments,
 						ts.factory.createStringLiteral(identifier),
 					],
-				)
+				);
 			}
 			if (node.expression.name.text.startsWith('resolve')) {
 				if (!node.typeArguments || node.typeArguments.length === 0) return;
-
+				
 				const type = typeChecker.getTypeFromTypeNode(node.typeArguments[0]);
 				const identifier = identifierByType(type);
 				if (!identifier) return;
@@ -374,7 +379,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 						ts.factory.createStringLiteral(identifier),
 					],
 				)
-			}
+			};
 		};
 
 		const visit = (node: ts.Node): ts.Node => {

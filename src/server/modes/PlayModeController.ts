@@ -3,25 +3,28 @@ import { BuildMode } from "server/modes/BuildMode";
 import { RideMode } from "server/modes/RideMode";
 import { registerOnRemoteFunction } from "server/network/event/RemoteHandler";
 import { PlayerWatcher } from "server/PlayerWatcher";
-import { Controller } from "shared/component/Controller";
+import { HostedService } from "shared/GameHost";
 import { Remotes } from "shared/Remotes";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 
 @injectable
-export class PlayModeController extends Controller {
+export class PlayModeController extends HostedService {
+	static initialize(host: GameHostBuilder) {
+		host.services.registerSingletonClass(RideMode);
+		host.services.registerSingletonClass(BuildMode);
+		host.services.registerService(this);
+	}
+
 	private readonly playerModes: Record<number, PlayModes | undefined> = {};
 	private readonly modes;
 
-	constructor(@inject container: DIContainer) {
+	constructor(@inject ride: RideMode, @inject build: BuildMode) {
 		super();
 
-		container = container.beginScope();
-		container.registerSingleton(this);
-
 		this.modes = {
-			ride: container.regResolve(RideMode),
-			build: container.regResolve(BuildMode),
+			ride,
+			build,
 		} as const satisfies Record<PlayModes, PlayModeBase>;
 
 		registerOnRemoteFunction("Ride", "SetPlayMode", this.changeModeForPlayer.bind(this));

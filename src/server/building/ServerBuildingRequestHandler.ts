@@ -5,8 +5,8 @@ import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedPlots } from "shared/building/SharedPlots";
-import { Controller } from "shared/component/Controller";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { HostedService } from "shared/GameHost";
 import { Operation } from "shared/Operation";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { ServerPlotController, ServerPlots } from "server/plots/ServerPlots";
@@ -29,7 +29,7 @@ const areAllBlocksOnPlot = (blocks: readonly BlockModel[], plot: PlotModel): boo
 
 /** Receiver for player build requests */
 @injectable
-export class ServerBuildingRequestHandler extends Controller {
+export class ServerBuildingRequestHandler extends HostedService {
 	readonly operations = {
 		placeBlocks: new Operation(this.placeBlocks.bind(this)),
 		deleteBlocks: new Operation(this.deleteBlocks.bind(this)),

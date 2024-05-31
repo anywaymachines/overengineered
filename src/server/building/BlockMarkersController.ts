@@ -1,20 +1,11 @@
-import { Controller } from "shared/component/Controller";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
 
-@injectable
-export class BlockMarkersController extends Controller {
-	readonly markers: { readonly [id in BlockId]?: { readonly [name in BlockConnectionName]?: Vector3 } } = {};
-
-	constructor(@inject blockRegistry: BlockRegistry) {
-		super();
-		this.initPartBlockCollisions(blockRegistry.sorted);
-	}
-
-	private initPartBlockCollisions(blocks: readonly RegistryBlock[]) {
+export class BlockMarkers {
+	static initialize(blockRegistry: BlockRegistry) {
 		const weldFolderName = "MarkerPoints";
 
-		const markers: Writable<typeof this.markers> = this.markers;
+		const markers: Writable<BlockMarkers["markers"]> = {};
 		const create = (block: RegistryBlock) => {
 			const folder = block.model.FindFirstChild(weldFolderName) as Folder | undefined;
 			if (!folder) return;
@@ -35,10 +26,17 @@ export class BlockMarkersController extends Controller {
 			folder.Destroy();
 		};
 
-		for (const block of blocks) {
+		for (const block of blockRegistry.sorted) {
 			create(block);
 		}
 
 		$log("Block markers initialized");
+		return new BlockMarkers(markers);
+	}
+
+	readonly markers: { readonly [id in BlockId]?: { readonly [name in BlockConnectionName]?: Vector3 } };
+
+	constructor(markers: BlockMarkers["markers"]) {
+		this.markers = markers;
 	}
 }

@@ -2,7 +2,7 @@
 $log("Starting");
 
 import { LoadingController } from "client/controller/LoadingController";
-LoadingController.show("Loading the game");
+LoadingController.show("THE START");
 
 import { SandboxGame } from "client/SandboxGame";
 import { GameLoader } from "client/GameLoader";

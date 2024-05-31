@@ -82,6 +82,25 @@ export class ComponentEvents extends ComponentBase {
 			this.onEnable(() => callback({ kind: "add", added: observable.getArr() }), executeImmediately);
 		}
 	}
+	/** Subscribe to an observable collection item added event */
+	subscribeCollectionAdded<T extends defined>(
+		observable: ReadonlyObservableCollection<T>,
+		callback: (item: T) => void,
+		executeOnEnable = false,
+		executeImmediately = false,
+	): void {
+		this.subscribeCollection(
+			observable,
+			(update) => {
+				if (update.kind !== "add") return;
+				for (const item of update.added) {
+					callback(item);
+				}
+			},
+			executeOnEnable,
+			executeImmediately,
+		);
+	}
 
 	/** Create an `ReadonlyObservableValue` from an `Instance` property */
 	readonlyObservableFromInstanceParam<TInstance extends Instance, TParam extends InstancePropertyNames<TInstance>>(

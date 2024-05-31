@@ -2,7 +2,7 @@ import { ServerBuildingRequestHandler } from "server/building/ServerBuildingRequ
 import { SlotDatabase } from "server/database/SlotDatabase";
 import { PlayerWatcher } from "server/PlayerWatcher";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
-import { Component } from "shared/component/Component";
+import { HostedService } from "shared/GameHost";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayModeController } from "server/modes/PlayModeController";
@@ -12,7 +12,7 @@ import type { C2S2CRemoteFunction } from "shared/event2/PERemoteEvent";
 import type { Operation } from "shared/Operation";
 
 @injectable
-export class ServerBuildingRequestController extends Component {
+export class ServerBuildingRequestController extends HostedService {
 	constructor(
 		@inject serverPlots: ServerPlots,
 		@inject playModeController: PlayModeController,

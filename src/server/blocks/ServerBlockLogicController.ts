@@ -6,7 +6,7 @@ import { ScreenServerLogic } from "server/blocks/logic/ScreenServerLogic";
 import { SevenSegmentDisplayServerLogic } from "server/blocks/logic/SevenSegmentDisplayServerLogic";
 import { TNTServerBlockLogic } from "server/blocks/logic/TNTServerLogic";
 import { BlockLogicRegistry } from "shared/block/BlockLogicRegistry";
-import { Controller } from "shared/component/Controller";
+import { HostedService } from "shared/GameHost";
 import type { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import type { KnownBlockLogic } from "shared/block/BlockLogicRegistry";
 
@@ -16,7 +16,7 @@ type ServerBlockLogicRegistry = {
 };
 
 @injectable
-export class ServerBlockLogicController extends Controller {
+export class ServerBlockLogicController extends HostedService {
 	constructor(@inject container: DIContainer) {
 		super();
 		container = container.beginScope();

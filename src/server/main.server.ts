@@ -19,7 +19,7 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { Remotes } from "shared/Remotes";
 import { SandboxGame } from "server/SandboxGame";
-import { DIContainer } from "shared/DI";
+import { Game } from "shared/GameHost";
 
 namespace RemoteHandlers {
 	export function sendMessageAsAdmin(player: Player, text: string, color?: Color3, duration?: number) {
@@ -111,15 +111,18 @@ if (game.PrivateServerOwnerId !== 0) {
 	Workspace.AddTag("PrivateServer");
 }
 
-const di = new DIContainer();
-di.regResolve(SandboxGame);
+const builder = Game.createHost();
+SandboxGame.initialize(builder);
+
+const host = builder.build();
+host.run();
 
 // Initializing event workders
 registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSetting);
 registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
 registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
 registerOnRemoteEvent("Admin", "SendMessage", RemoteHandlers.sendMessageAsAdmin);
-registerOnRemoteEvent("Admin", "Restart", () => di.resolve<ServerRestartController>().restart(false));
+registerOnRemoteEvent("Admin", "Restart", () => host.services.resolve<ServerRestartController>().restart(false));
 UnreliableRemoteHandler.initialize();
 
 // Global message networking, TODO: Move away

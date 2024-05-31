@@ -87,6 +87,16 @@ export class DIContainer {
 
 		this.registrations.set(name, { get: () => value });
 	}
+	registerSingletonFunc<T extends defined>(func: (ctx: ReadonlyDIContainer) => T, name?: string): void {
+		name ??= getSymbol(func);
+		assert(name);
+		if (this.registrations.get(name)) {
+			throw `Dependency ${name} is already registered`;
+		}
+
+		let created: T | undefined;
+		this.registrations.set(name, { get: () => (created ??= func(this)) });
+	}
 
 	registerTransient<T extends defined>(func: (ctx: DIContainer) => T, name?: string): void {
 		assert(name);

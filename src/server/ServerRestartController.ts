@@ -2,19 +2,19 @@ import { MessagingService, Players, RunService, Workspace } from "@rbxts/service
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { SpreadingFireController } from "server/SpreadingFireController";
 import { BlockManager } from "shared/building/BlockManager";
-import { Component } from "shared/component/Component";
+import { HostedService } from "shared/GameHost";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { Remotes } from "shared/Remotes";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import { PartUtils } from "shared/utils/PartUtils";
 
-export class ServerRestartController extends Component {
+export class ServerRestartController extends HostedService {
 	constructor() {
 		super();
 
-		this.onEnable(() => {
-			this.eventHandler.register(MessagingService.SubscribeAsync("Restart", () => this.restart(true)));
-		});
+		this.onEnable(() =>
+			this.event.eventHandler.register(MessagingService.SubscribeAsync("Restart", () => this.restart(true))),
+		);
 	}
 
 	restart(networkReceived: boolean) {

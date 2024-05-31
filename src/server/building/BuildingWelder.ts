@@ -1,31 +1,33 @@
 import { RunService, ServerStorage, Workspace } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
-import { Controller } from "shared/component/Controller";
 import { Element } from "shared/Element";
+import { HostedService } from "shared/GameHost";
 import type { BuildingPlot } from "server/plots/BuildingPlot";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 type CollidersModel = Model & { readonly ___nominal: "CollidersModel" };
 
 @injectable
-export class BuildingWelder extends Controller {
+export class BuildingWelder extends HostedService {
 	private readonly weldColliders = new Map<string, CollidersModel>();
 	private readonly plotColliders = new Map<BuildingPlot, WorldModel>();
 
 	constructor(@inject blockRegistry: BlockRegistry) {
 		super();
 
-		this.initPartBlockCollisions(blockRegistry.sorted);
-		this.onDestroy(() => {
-			for (const [, collider] of this.weldColliders) {
-				collider.Destroy();
-			}
-			this.weldColliders.clear();
+		this.onEnable(() => {
+			this.initPartBlockCollisions(blockRegistry.sorted);
+			this.onDestroy(() => {
+				for (const [, collider] of this.weldColliders) {
+					collider.Destroy();
+				}
+				this.weldColliders.clear();
 
-			for (const [, collider] of this.plotColliders) {
-				collider.Destroy();
-			}
-			this.plotColliders.clear();
+				for (const [, collider] of this.plotColliders) {
+					collider.Destroy();
+				}
+				this.plotColliders.clear();
+			});
 		});
 	}
 

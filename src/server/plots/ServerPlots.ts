@@ -3,13 +3,13 @@ import { PlayerWatcher } from "server/PlayerWatcher";
 import { BuildingPlot } from "server/plots/BuildingPlot";
 import { PlotsFloatingImageController } from "server/plots/PlotsFloatingImageController";
 import { SharedPlots } from "shared/building/SharedPlots";
-import { Controller } from "shared/component/Controller";
 import { Element } from "shared/Element";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
+import { HostedService } from "shared/GameHost";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 @injectable
-class ServerPlotController extends Controller {
+class ServerPlotController extends HostedService {
 	static tryCreate(player: Player, di: DIContainer) {
 		const tryGetFreePlot = (): SharedPlot | undefined =>
 			SharedPlots.plots.find((p) => p.ownerId.get() === undefined);
@@ -67,7 +67,7 @@ class ServerPlotController extends Controller {
 export type { ServerPlotController };
 
 @injectable
-export class ServerPlots extends Controller {
+export class ServerPlots extends HostedService {
 	readonly controllers = new ObservableCollectionSet<ServerPlotController>();
 	private readonly controllersByPlot = new Map<PlotModel, ServerPlotController>();
 	private readonly controllersByPlayer = new Map<Player, ServerPlotController>();
@@ -75,7 +75,7 @@ export class ServerPlots extends Controller {
 	constructor(@inject di: DIContainer) {
 		super();
 
-		this.parent(di.regResolve(PlotsFloatingImageController));
+		this.parent(new PlotsFloatingImageController());
 
 		const initializeSpawnLocation = (plot: SharedPlot) => {
 			const spawnLocation = new Instance("SpawnLocation");
@@ -89,25 +89,31 @@ export class ServerPlots extends Controller {
 
 			spawnLocation.Parent = plot.instance;
 		};
-		for (const plot of SharedPlots.plots) {
-			initializeSpawnLocation(plot);
-		}
-
-		const sub = PlayerWatcher.onJoin((player) => {
-			const controller = ServerPlotController.tryCreate(player, di);
-			if (!controller) return;
-
-			controller.onDestroy(() => {
-				this.controllers.remove(controller);
-				this.controllersByPlayer.delete(controller.player);
-				this.controllersByPlot.delete(controller.plot.instance);
-			});
-
-			this.controllers.add(controller);
-			this.controllersByPlot.set(controller.plot.instance, controller);
-			this.controllersByPlayer.set(controller.player, controller);
+		this.onEnable(() => {
+			for (const plot of SharedPlots.plots) {
+				initializeSpawnLocation(plot);
+			}
 		});
-		this.event.eventHandler.register(sub);
+
+		this.event.subscribeCollectionAdded(
+			PlayerWatcher.players,
+			(player) => {
+				const controller = ServerPlotController.tryCreate(player, di);
+				print(controller !== undefined);
+				if (!controller) return;
+
+				controller.onDestroy(() => {
+					this.controllers.remove(controller);
+					this.controllersByPlayer.delete(controller.player);
+					this.controllersByPlot.delete(controller.plot.instance);
+				});
+
+				this.controllers.add(controller);
+				this.controllersByPlot.set(controller.plot.instance, controller);
+				this.controllersByPlayer.set(controller.player, controller);
+			},
+			true,
+		);
 	}
 
 	tryGetControllerByPlayer(player: Player): ServerPlotController | undefined {
