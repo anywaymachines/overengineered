@@ -17,20 +17,16 @@ export class MassSensorBlockLogic extends ConfigurableBlockLogic<typeof blockCon
 	}
 
 	private update() {
-		task.spawn(() => {
-			if (!this.block.instance.PrimaryPart) {
-				this.disable();
-				return;
-			}
+		if (!this.block.instance.PrimaryPart) {
+			this.disable();
+			return;
+		}
 
-			this.output.result.set(
-				RobloxUnit.RMU_To_Kilograms(
-					this.input.assemblyonly.get()
-						? this.block.instance.PrimaryPart.AssemblyMass
-						: this.getBuildingMass(),
-				),
-			);
-		});
+		this.output.result.set(
+			RobloxUnit.RMU_To_Kilograms(
+				this.input.assemblyonly.get() ? this.block.instance.PrimaryPart.AssemblyMass : this.getBuildingMass(),
+			),
+		);
 	}
 
 	private getBuildingMass() {
