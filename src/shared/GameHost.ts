@@ -18,7 +18,7 @@ declare global {
 }
 
 export class HostedService implements IHostedService {
-	protected readonly event: Omit<ComponentEvents, "destroy" | "disable" | "enable" | "isDestroyed" | "isEnabled">;
+	protected readonly event: ComponentEvents;
 
 	private readonly onEnabled = new SlimSignal();
 	private readonly onDestroyed = new SlimSignal();
@@ -27,7 +27,7 @@ export class HostedService implements IHostedService {
 	private selfDestroyed = false;
 
 	constructor() {
-		this.event = this.parent(new ComponentEvents());
+		this.event = new ComponentEvents(this);
 	}
 
 	isEnabled(): boolean {
@@ -51,7 +51,6 @@ export class HostedService implements IHostedService {
 		this.selfEnabled = true;
 		this.onEnabled.Fire();
 		this.onEnabled.destroy();
-		(this.event as ComponentEvents).enable();
 	}
 	destroy(): void {
 		if (this.selfDestroyed) return;

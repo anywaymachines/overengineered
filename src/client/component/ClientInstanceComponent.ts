@@ -9,7 +9,7 @@ export class ClientInstanceComponent<
 	T extends Instance = Instance,
 	TChild extends IComponent = IComponent,
 > extends InstanceComponent<T, TChild> {
-	readonly event = this.parent(new ClientComponentEvents(this));
+	readonly event = new ClientComponentEvents(this);
 
 	/** Input handler for use in prepare***() */
 	protected readonly inputHandler: ReadonlyInputHandler;

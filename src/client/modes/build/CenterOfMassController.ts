@@ -48,7 +48,7 @@ export class CenterOfMassController extends ClientComponent {
 
 		this.event.subscribe(SharedPlot.anyChanged, update);
 		this.event.onEnable(update);
-		this.event.onDisable(() => {
+		this.onDisable(() => {
 			this.renderedBalls.forEach((element) => {
 				element.Destroy();
 			});

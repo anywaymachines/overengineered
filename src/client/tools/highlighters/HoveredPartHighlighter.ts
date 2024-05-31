@@ -85,6 +85,6 @@ export class HoveredPartHighlighter<T extends Instance> extends ClientComponent 
 		};
 
 		this.event.onPrepare(prepare);
-		this.event.onDisable(destroyHighlight);
+		this.onDisable(destroyHighlight);
 	}
 }

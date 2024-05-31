@@ -27,7 +27,7 @@ export class BlockPipetteButton extends ButtonControl {
 			return BlockManager.tryGetBlockModelByPart(part) ?? part;
 		};
 
-		this.event.onDisable(() => stop?.());
+		this.onDisable(() => stop?.());
 		this.activated.Connect(() => {
 			if (stop) {
 				stop?.();
