@@ -89,9 +89,6 @@ interface ReplicatedStorage {
 					readonly Filled: Frame;
 				};
 			};
-			WireMarkerInput: BillboardGui & { readonly TextButton: GuiButton };
-			WireMarkerInputConnected: BillboardGui & { readonly TextButton: GuiButton };
-			WireMarkerOutput: BillboardGui & { readonly TextButton: GuiButton };
 			WireInfo: BillboardGui & {
 				TextLabel: TextLabel;
 			};
