@@ -1,4 +1,4 @@
-import { HttpService } from "@rbxts/services";
+import { HttpService, Workspace } from "@rbxts/services";
 import { Backend } from "server/Backend";
 import { registerOnRemoteFunction } from "server/network/event/RemoteHandler";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -13,6 +13,8 @@ export class PlayerDataController extends HostedService {
 
 		registerOnRemoteFunction("Player", "UpdateSettings", this.updateSetting.bind(this));
 		registerOnRemoteFunction("Player", "FetchData", this.fetchSettings.bind(this));
+
+		Workspace.AddTag("data_loadable");
 	}
 
 	private updateSetting<TKey extends keyof PlayerConfig>(

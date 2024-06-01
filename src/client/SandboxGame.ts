@@ -51,6 +51,7 @@ namespace Startup {
 export namespace SandboxGame {
 	export function initialize(builder: GameHostBuilder) {
 		const loading = (str: string) => LoadingController.show(`Initializing ${str}`);
+		const dataLoading = PlayerDataStorage.init();
 
 		LoadingController.show("Pre-init");
 		LocalPlayerController.initializeSprintLogic(builder, RunService.IsStudio() ? 200 : 60);
@@ -66,9 +67,8 @@ export namespace SandboxGame {
 		);
 
 		LoadingController.show("Waiting for data");
-		const [s, r] = PlayerDataStorage.init().await();
+		const [s, r] = dataLoading.await();
 		if (!s) throw r;
-		GameLoader.waitForDataStorage();
 
 		loading("blocks");
 		builder.services.registerSingleton(BlocksInitializer.create());

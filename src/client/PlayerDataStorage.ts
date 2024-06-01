@@ -28,6 +28,10 @@ export namespace PlayerDataStorage {
 	export const imported_slots = data.createChild("imported_slots", []);
 
 	export async function init() {
+		while (!Workspace.HasTag("data_loadable")) {
+			task.wait();
+		}
+
 		await refetchPlayerData();
 
 		config.createNullableChild("betterCamera", undefined).subscribe((betterCamera) => {
