@@ -95,8 +95,10 @@ export class RideMode implements PlayModeBase {
 			task.wait(0.5);
 		}
 
-		hrp.Sit = false;
-		vehicleSeat.Sit(hrp);
+		if (vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
+			hrp.Sit = false;
+			vehicleSeat.Sit(hrp);
+		}
 
 		for (const block of blocksChildren) {
 			ServerPartUtils.switchDescendantsAnchor(block, false);
