@@ -2,15 +2,15 @@ import { Players, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { InputController } from "client/controller/InputController";
 import { Gui } from "client/gui/Gui";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { ArgsSignal } from "shared/event/Signal";
 import type { BlockSelector } from "client/tools/highlighters/MultiBlockSelector";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 export class BoxSelector extends ClientComponent implements BlockSelector {
 	private readonly _submit = new ArgsSignal<[blocks: readonly BlockModel[]]>();
 	readonly submit = this._submit.asReadonly();
 
-	constructor(filter = (block: BlockModel) => true) {
+	constructor(plot: SharedPlot, filter = (block: BlockModel) => true) {
 		super();
 
 		const camera = Workspace.CurrentCamera!;
@@ -77,7 +77,7 @@ export class BoxSelector extends ClientComponent implements BlockSelector {
 
 			const searchBlocks = () =>
 				search(
-					SharedPlots.getOwnPlot().getBlocks(),
+					plot.getBlocks(),
 					new Vector2(startpos.Width.Offset, startpos.Height.Offset),
 					new Vector2(mouse.X, mouse.Y),
 				).filter(filter);

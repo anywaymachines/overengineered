@@ -1,6 +1,5 @@
 import { Players } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
@@ -65,13 +64,8 @@ export namespace BuildingManager {
 	 * @param vector The vector to check
 	 * @deprecated slow & stupid
 	 */
-	export function getBlockByPosition(vector: Vector3): BlockModel | undefined {
-		const plot = SharedPlots.getPlotByPosition(vector);
-		if (!plot) {
-			return undefined;
-		}
-
-		const blocks = SharedPlots.getPlotComponent(plot).getBlocks();
+	export function getBlockByPosition(plot: SharedPlot, vector: Vector3): BlockModel | undefined {
+		const blocks = plot.getBlocks();
 		for (let i = 0; i < blocks.size(); i++) {
 			const block = blocks[i];
 			if (

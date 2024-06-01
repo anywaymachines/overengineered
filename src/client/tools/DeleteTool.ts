@@ -40,7 +40,7 @@ namespace Scene {
 			super(gui);
 			this.tool = tool;
 
-			const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content));
+			const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content, tool.targetPlot.get()));
 			this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
 			this.event.subscribe(mirrorEditor.submitted, (val) => tool.mirrorMode.set(val));
 			this.onEnable(() => (this.gui.Mirror.Visible = false));

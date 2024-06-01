@@ -13,8 +13,6 @@ import { PlayerDatabase } from "server/database/PlayerDatabase";
 import { registerOnRemoteEvent, registerOnRemoteFunction } from "server/network/event/RemoteHandler";
 import { UnreliableRemoteHandler } from "server/network/event/UnreliableRemoteHandler";
 import type { ServerRestartController } from "server/ServerRestartController";
-import { BlockManager } from "shared/building/BlockManager";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { Remotes } from "shared/Remotes";
@@ -88,27 +86,6 @@ namespace RemoteHandlers {
 			imported_slots: slots,
 		};
 	}
-
-	export function sit(player: Player) {
-		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
-		if (hrp.Sit) return;
-
-		const plot = SharedPlots.getPlotByOwnerID(player.UserId);
-		const blocks = SharedPlots.getPlotComponent(plot).getBlocks();
-
-		const vehicleSeatModel = blocks.find((model) => BlockManager.manager.id.get(model) === "vehicleseat") as Model;
-		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
-		if (vehicleSeat.Occupant && vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
-			vehicleSeat.Occupant.Sit = false;
-			task.wait(0.5);
-		}
-
-		vehicleSeat.Sit(hrp);
-	}
-}
-
-if (game.PrivateServerOwnerId !== 0) {
-	Workspace.AddTag("PrivateServer");
 }
 
 const builder = Game.createHost();
@@ -120,7 +97,6 @@ host.run();
 // Initializing event workders
 registerOnRemoteFunction("Player", "UpdateSettings", RemoteHandlers.updateSetting);
 registerOnRemoteFunction("Player", "FetchData", RemoteHandlers.fetchSettings);
-registerOnRemoteEvent("Ride", "Sit", RemoteHandlers.sit);
 registerOnRemoteEvent("Admin", "SendMessage", RemoteHandlers.sendMessageAsAdmin);
 registerOnRemoteEvent("Admin", "Restart", () => host.services.resolve<ServerRestartController>().restart(false));
 UnreliableRemoteHandler.initialize();

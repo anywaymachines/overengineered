@@ -2,9 +2,9 @@ import { Players, ReplicatedStorage, StarterGui, UserInputService, Workspace } f
 import { Gui } from "client/gui/Gui";
 import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
 import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import type { SharedPlots } from "shared/building/SharedPlots";
 
 namespace BSOD {
 	type BsodControlDefinition = ScreenGui & {
@@ -89,13 +89,13 @@ Error: ${err}
 
 		return PlayerDataStorage.data.get()!;
 	}
-	export function waitForPlot() {
+	export function waitForPlot(plots: SharedPlots) {
 		const userid = Players.LocalPlayer.UserId;
-		while (!SharedPlots.tryGetPlotByOwnerID(userid)) {
+		while (!plots.tryGetPlotByOwnerID(userid)) {
 			task.wait(0.2);
 		}
 
-		return SharedPlots.getPlotComponentByOwnerID(userid);
+		return plots.getPlotComponentByOwnerID(userid);
 	}
 	export function waitForServer() {
 		while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {
@@ -103,6 +103,7 @@ Error: ${err}
 		}
 	}
 
+	/** @deprecated TOBEDELETED */
 	export function waitForEverything(progress?: (operation: string) => void) {
 		const pp = progress;
 		progress = (operation) => {
@@ -116,8 +117,8 @@ Error: ${err}
 		progress?.("Waiting for the data");
 		waitForDataStorage();
 
-		progress?.("Waiting for the plot");
-		waitForPlot();
+		// progress?.("Waiting for the plot");
+		// waitForPlot();
 
 		progress?.("Waiting for the server");
 		waitForServer();

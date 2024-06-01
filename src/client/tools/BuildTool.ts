@@ -21,7 +21,6 @@ import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
 import { ToolBase } from "client/tools/ToolBase";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { TransformService } from "shared/component/TransformService";
@@ -179,7 +178,7 @@ namespace Scene {
 			this.blockSelector.show();
 			this.add(this.blockSelector);
 
-			const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content));
+			const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content, tool.targetPlot.get()));
 			this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
 			this.event.subscribe(mirrorEditor.submitted, (val) => tool.mirrorMode.set(val));
 
@@ -728,7 +727,7 @@ namespace MultiPlaceController {
 				pos = this.getPositionOnBuildingPlane(this.pressPosition, cameraPostion, clickDirection);
 			}
 
-			const plotRegion = SharedPlots.getPlotBuildingRegion(this.plot.instance);
+			const plotRegion = this.plot.bounds;
 			pos = plotRegion.clampVector(pos);
 			const positionsData = this.calculateGhostBlockPositions(this.selectedBlock.model, this.pressPosition, pos);
 			if (!positionsData) return;

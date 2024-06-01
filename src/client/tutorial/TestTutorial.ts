@@ -1,6 +1,5 @@
 import { TasksControl } from "client/gui/static/TasksControl";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { SharedPlots } from "shared/building/SharedPlots";
 import type { Tutorial } from "client/tutorial/Tutorial";
 
 export async function TestTutorial(tutorial: Tutorial) {
@@ -9,7 +8,7 @@ export async function TestTutorial(tutorial: Tutorial) {
 	const allTools = toolController.allTools;
 	const toolEnabler = toolController.enabledTools;
 
-	await ClientBuilding.deleteOperation.execute(SharedPlots.getOwnPlot(), "all");
+	await ClientBuilding.deleteOperation.execute(tutorial.plot, "all");
 	tutorial.buildingMode.gui.actionbar.enabledButtons.enableOnly("settings");
 
 	// Main

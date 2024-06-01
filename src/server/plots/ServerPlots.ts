@@ -2,17 +2,16 @@ import { Players } from "@rbxts/services";
 import { PlayerWatcher } from "server/PlayerWatcher";
 import { BuildingPlot } from "server/plots/BuildingPlot";
 import { PlotsFloatingImageController } from "server/plots/PlotsFloatingImageController";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { Element } from "shared/Element";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { HostedService } from "shared/GameHost";
 import type { SharedPlot } from "shared/building/SharedPlot";
+import type { SharedPlots } from "shared/building/SharedPlots";
 
 @injectable
 class ServerPlotController extends HostedService {
-	static tryCreate(player: Player, di: DIContainer) {
-		const tryGetFreePlot = (): SharedPlot | undefined =>
-			SharedPlots.plots.find((p) => p.ownerId.get() === undefined);
+	static tryCreate(player: Player, di: DIContainer, plots: SharedPlots) {
+		const tryGetFreePlot = (): SharedPlot | undefined => plots.plots.find((p) => p.ownerId.get() === undefined);
 
 		const plot = tryGetFreePlot();
 		if (!plot) {
@@ -72,10 +71,13 @@ export class ServerPlots extends HostedService {
 	private readonly controllersByPlot = new Map<PlotModel, ServerPlotController>();
 	private readonly controllersByPlayer = new Map<Player, ServerPlotController>();
 
-	constructor(@inject di: DIContainer) {
+	constructor(
+		@inject di: DIContainer,
+		@inject readonly plots: SharedPlots,
+	) {
 		super();
 
-		this.parent(new PlotsFloatingImageController());
+		this.parent(new PlotsFloatingImageController(plots));
 
 		const initializeSpawnLocation = (plot: SharedPlot) => {
 			const spawnLocation = new Instance("SpawnLocation");
@@ -90,7 +92,7 @@ export class ServerPlots extends HostedService {
 			spawnLocation.Parent = plot.instance;
 		};
 		this.onEnable(() => {
-			for (const plot of SharedPlots.plots) {
+			for (const plot of plots.plots) {
 				initializeSpawnLocation(plot);
 			}
 		});
@@ -98,7 +100,7 @@ export class ServerPlots extends HostedService {
 		this.event.subscribeCollectionAdded(
 			PlayerWatcher.players,
 			(player) => {
-				const controller = ServerPlotController.tryCreate(player, di);
+				const controller = ServerPlotController.tryCreate(player, di, plots);
 				if (!controller) return;
 
 				controller.onDestroy(() => {

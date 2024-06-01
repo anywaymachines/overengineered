@@ -1,9 +1,9 @@
 import { Players } from "@rbxts/services";
 import { SlotDatabase } from "server/database/SlotDatabase";
+import { registerOnRemoteEvent } from "server/network/event/RemoteHandler";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 import type { ServerPlots } from "server/plots/ServerPlots";
@@ -28,6 +28,24 @@ export class RideMode implements PlayModeBase {
 				this.cache.delete(player);
 			}
 		});
+
+		registerOnRemoteEvent("Ride", "Sit", this.sit.bind(this));
+	}
+	private sit(player: Player) {
+		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
+		if (hrp.Sit) return;
+
+		const plot = this.serverPlots.plots.getPlotByOwnerID(player.UserId);
+		const blocks = this.serverPlots.plots.getPlotComponent(plot).getBlocks();
+
+		const vehicleSeatModel = blocks.find((model) => BlockManager.manager.id.get(model) === "vehicleseat") as Model;
+		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
+		if (vehicleSeat.Occupant && vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
+			vehicleSeat.Occupant.Sit = false;
+			task.wait(0.5);
+		}
+
+		vehicleSeat.Sit(hrp);
 	}
 
 	onTransitionFrom(player: Player, prevmode: PlayModes | undefined): Response | undefined {
@@ -101,7 +119,7 @@ export class RideMode implements PlayModeBase {
 		const controller = this.serverPlots.tryGetControllerByPlayer(player);
 		if (!controller) throw "what";
 
-		const plot = SharedPlots.getPlotComponentByOwnerID(player.UserId);
+		const plot = this.serverPlots.plots.getPlotComponentByOwnerID(player.UserId);
 		const blocks = plot.instance.Blocks;
 
 		for (const block of controller.blocks.getBlocks()) {

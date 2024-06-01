@@ -58,7 +58,17 @@ export class MultiBlockSelector extends ClientComponent {
 
 		const origModeFuncs = HoveredBlocksSelector.Modes;
 		const empty = [] as const;
-		const filter = config?.filter;
+		const filter = (block: BlockModel): boolean => {
+			if (config?.filter?.(block) === false) {
+				return false;
+			}
+
+			if (!plot.get().isFromThisPlot(block)) {
+				return false;
+			}
+
+			return true;
+		};
 		const functions: Readonly<Record<HoveredBlocksSelectorMode, (block: BlockModel) => readonly BlockModel[]>> = {
 			single: !filter ? origModeFuncs.single : (block) => (filter(block) ? [block] : empty),
 			assembly: !filter ? origModeFuncs.assembly : (block) => origModeFuncs.assembly(block).filter(filter),
@@ -69,7 +79,7 @@ export class MultiBlockSelector extends ClientComponent {
 			single: () => new HoveredBlocksSelector(functions.single),
 			assembly: () => new HoveredBlocksSelector(functions.assembly),
 			machine: () => new HoveredBlocksSelector(functions.machine),
-			box: () => new BoxSelector(filter),
+			box: () => new BoxSelector(plot.get(), filter),
 		};
 
 		const selectorParent = new ComponentChild<BlockSelector>(this);

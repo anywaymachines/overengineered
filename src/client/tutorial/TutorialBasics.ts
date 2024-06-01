@@ -1,7 +1,6 @@
 import { TasksControl } from "client/gui/static/TasksControl";
 import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { SharedPlots } from "shared/building/SharedPlots";
 import type { Tutorial } from "client/tutorial/Tutorial";
 
 export async function TutorialBasics(tutorial: Tutorial) {
@@ -12,7 +11,7 @@ export async function TutorialBasics(tutorial: Tutorial) {
 	toolEnabler.disableAll();
 	ActionController.instance.disable();
 
-	await ClientBuilding.deleteOperation.execute(SharedPlots.getOwnPlot(), "all");
+	await ClientBuilding.deleteOperation.execute(tutorial.plot, "all");
 	tutorial.buildingMode.gui.actionbar.enabledButtons.enableOnly("settings");
 
 	tutorial.Control.displayStep(

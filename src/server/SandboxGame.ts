@@ -8,6 +8,7 @@ import { GameInfoController } from "server/building/GameInfoController";
 import { ServerBuildingRequestController } from "server/building/ServerBuildingRequestController";
 import { PlayModeController as PlayModeController } from "server/modes/PlayModeController";
 import { ServerPlots } from "server/plots/ServerPlots";
+import { SharedPlots } from "shared/building/SharedPlots";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 
@@ -18,6 +19,9 @@ export namespace SandboxGame {
 		}
 
 		BaseGame.initialize(builder);
+
+		builder.services.registerSingletonFunc(() => SharedPlots.initialize());
+
 		builder.services.registerSingletonFunc(BlocksInitializer.create);
 		builder.services.registerService(BuildingWelder);
 		builder.services.registerSingletonFunc((ctx) => BlockMarkers.initialize(ctx.resolve<BlockRegistry>()));

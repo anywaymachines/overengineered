@@ -1,5 +1,7 @@
-import { RunService } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
+import { BeaconController } from "client/controller/BeaconController";
 import { DayCycleController } from "client/controller/DayCycleController";
+import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { GameLoader } from "client/GameLoader";
@@ -9,6 +11,7 @@ import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { TestRunner } from "client/test/TestRunner";
 import { Tutorial } from "client/tutorial/Tutorial";
 import { TutorialBasics } from "client/tutorial/TutorialBasics";
+import { SharedPlots } from "shared/building/SharedPlots";
 import { HostedService } from "shared/GameHost";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
 
@@ -55,8 +58,12 @@ export namespace SandboxGame {
 		LoadingController.show("Waiting for server");
 		GameLoader.waitForServer();
 
+		builder.services.registerSingletonFunc(() => SharedPlots.initialize());
+
 		LoadingController.show("Waiting for plot");
-		GameLoader.waitForPlot();
+		builder.services.registerSingletonFunc((ctx) =>
+			ctx.resolve<SharedPlots>().waitForPlot(Players.LocalPlayer.UserId),
+		);
 
 		LoadingController.show("Waiting for data");
 		const [s, r] = PlayerDataStorage.init().await();
@@ -74,6 +81,10 @@ export namespace SandboxGame {
 
 		loading("day cycle");
 		builder.services.registerService(DayCycleController);
+		loading("beacons");
+		builder.services.registerService(BeaconController);
+		loading("graphics");
+		builder.services.registerService(GraphicsSettingsController);
 
 		loading("basics tutorial");
 		Startup.initializeBasicsTutorial(builder);

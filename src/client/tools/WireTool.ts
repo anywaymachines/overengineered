@@ -14,7 +14,6 @@ import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { ToolBase } from "client/tools/ToolBase";
 import { BlockWireManager } from "shared/block/BlockWireManager";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentChildren } from "shared/component/ComponentChildren";
@@ -717,7 +716,7 @@ export class WireTool extends ToolBase {
 	}
 
 	private createEverything() {
-		this.createEverythingOnPlot(SharedPlots.getOwnPlot());
+		this.createEverythingOnPlot(this.targetPlot.get());
 	}
 	private createEverythingOnPlot(plot: SharedPlot) {
 		this.markers.clear();

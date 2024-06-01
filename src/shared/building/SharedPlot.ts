@@ -37,6 +37,10 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 		this.bounds = SharedPlot.getPlotBuildingRegion(instance);
 	}
 
+	getCenter() {
+		return this.instance.BuildingArea.GetPivot();
+	}
+
 	/** Returns the {@link AABB} of the plot construction area */
 	private static getPlotBuildingRegion(plot: PlotModel): AABB {
 		const heightLimit = 400;
@@ -110,6 +114,11 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	/** Is player allowed to build on this plot */
 	isBuildingAllowed(player: Player): boolean {
 		return this.ownerId.get() === player.UserId || this.whitelistedPlayers.get()?.includes(player.UserId) === true;
+	}
+
+	/** Is an instance a descendant of this */
+	isFromThisPlot(instance: Instance): boolean {
+		return instance.IsDescendantOf(this.instance);
 	}
 
 	/** Is model fully inside this plot */

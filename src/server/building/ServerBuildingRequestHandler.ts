@@ -4,13 +4,13 @@ import { PlayerWatcher } from "server/PlayerWatcher";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { HostedService } from "shared/GameHost";
 import { Operation } from "shared/Operation";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { ServerPlotController, ServerPlots } from "server/plots/ServerPlots";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
+import type { SharedPlots } from "shared/building/SharedPlots";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const errBuildingNotPermitted = err("Building is not permitted");
@@ -47,6 +47,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 	} as const;
 
 	readonly player: Player;
+	private readonly plots: SharedPlots;
 
 	constructor(
 		@inject readonly controller: ServerPlotController,
@@ -55,10 +56,11 @@ export class ServerBuildingRequestHandler extends HostedService {
 	) {
 		super();
 		this.player = controller.player;
+		this.plots = serverPlots.plots;
 	}
 
 	private placeBlocks(request: PlaceBlocksRequest): MultiBuildResponse {
-		if (!SharedPlots.isBuildingAllowed(request.plot, this.player)) {
+		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
 			return errBuildingNotPermitted;
 		}
 
@@ -121,7 +123,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 	}
 
 	private deleteBlocks(request: DeleteBlocksRequest): Response {
-		if (!SharedPlots.isBuildingAllowed(request.plot, this.player)) {
+		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
 			return errBuildingNotPermitted;
 		}
 		if (request.blocks !== "all" && !areAllBlocksOnPlot(request.blocks, request.plot)) {
@@ -131,7 +133,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 		return this.controller.blocks.delete(request.blocks);
 	}
 	private moveBlocks(request: MoveBlocksRequest): Response {
-		if (!SharedPlots.isBuildingAllowed(request.plot, this.player)) {
+		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
 			return errBuildingNotPermitted;
 		}
 		if (request.blocks !== "all" && !areAllBlocksOnPlot(request.blocks, request.plot)) {
@@ -141,7 +143,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 		return this.controller.blocks.move(request.blocks, request.diff);
 	}
 	private rotateBlocks(request: RotateBlocksRequest): Response {
-		if (!SharedPlots.isBuildingAllowed(request.plot, this.player)) {
+		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
 			return errBuildingNotPermitted;
 		}
 		if (request.blocks !== "all" && !areAllBlocksOnPlot(request.blocks, request.plot)) {
@@ -152,7 +154,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 	}
 
 	private logicConnect(request: LogicConnectRequest): Response {
-		if (!SharedPlots.isBuildingAllowed(request.plot, this.player)) {
+		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
 			return errBuildingNotPermitted;
 		}
 		if (!isBlockOnPlot(request.inputBlock, request.plot)) {
@@ -165,7 +167,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 		return this.controller.blocks.logicConnect(request);
 	}
 	private logicDisconnect(request: LogicDisconnectRequest): Response {
-		if (!SharedPlots.isBuildingAllowed(request.plot, this.player)) {
+		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
 			return errBuildingNotPermitted;
 		}
 		if (!isBlockOnPlot(request.inputBlock, request.plot)) {
@@ -175,7 +177,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 		return this.controller.blocks.logicDisconnect(request);
 	}
 	private paintBlocks(request: PaintBlocksRequest): Response {
-		if (!SharedPlots.isBuildingAllowed(request.plot, this.player)) {
+		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
 			return errBuildingNotPermitted;
 		}
 		if (request.blocks !== "all" && !areAllBlocksOnPlot(request.blocks, request.plot)) {
@@ -185,7 +187,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 		return this.controller.blocks.paintBlocks(request);
 	}
 	private updateConfig(request: ConfigUpdateRequest): Response {
-		if (!SharedPlots.isBuildingAllowed(request.plot, this.player)) {
+		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
 			return errBuildingNotPermitted;
 		}
 		for (const config of request.configs) {
@@ -197,7 +199,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 		return this.controller.blocks.updateConfig(request.configs);
 	}
 	private resetConfig(request: ConfigResetRequest): Response {
-		if (!SharedPlots.isBuildingAllowed(request.plot, this.player)) {
+		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
 			return errBuildingNotPermitted;
 		}
 		if (!areAllBlocksOnPlot(request.blocks, request.plot)) {

@@ -9,7 +9,6 @@ import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlo
 import { ToolBase } from "client/tools/ToolBase";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { BlockManager } from "shared/building/BlockManager";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { Colors } from "shared/Colors";
 import { Config } from "shared/config/Config";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
@@ -251,7 +250,7 @@ export class ConfigTool extends ToolBase {
 	}
 
 	selectBlockByUuid(uuid: BlockUuid) {
-		this.selected.push(SharedPlots.getBlockByUuid(this.targetPlot.get().instance, uuid));
+		this.selected.push(this.targetPlot.get().getBlock(uuid));
 	}
 	unselectAll() {
 		this.selected.clear();

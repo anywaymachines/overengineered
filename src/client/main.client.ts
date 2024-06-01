@@ -30,7 +30,6 @@ import { AdminMessageController } from "client/AdminMessageController";
 import { ServerRestartController } from "client/ServerRestartController";
 import { CharacterController } from "client/controller/CharacterController";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
-import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { SoundController } from "client/controller/SoundController";
 import { WindController } from "client/controller/WindController";
@@ -57,7 +56,6 @@ ServerRestartController.initialize();
 
 SoundController.initialize();
 MusicController.initialize();
-GraphicsSettingsController.initialize();
 
 const updated = DateTime.fromUnixTimestamp($compileTime()).FormatUniversalTime("DDMMYY_HHmm", "en-us");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =

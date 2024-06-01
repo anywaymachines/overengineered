@@ -7,6 +7,7 @@ import { TutorialDeleteTool } from "client/tutorial/TutorialDeleteTool";
 import { TutorialEditTool } from "client/tutorial/TutorialEditTool";
 import { EventHandler } from "shared/event/EventHandler";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 @injectable
 export class Tutorial {
@@ -26,6 +27,7 @@ export class Tutorial {
 	constructor(
 		@inject readonly buildingMode: BuildingMode,
 		@inject di: DIContainer,
+		@inject readonly plot: SharedPlot,
 	) {
 		di = di.beginScope();
 		di.registerSingleton(this);

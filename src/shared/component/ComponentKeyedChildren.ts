@@ -13,11 +13,14 @@ export class ComponentKeyedChildren<TKey extends defined, T extends Constraint =
 	readonly onRemoved = new SlimSignal<(key: TKey, child: T) => void>();
 	readonly onClear = new SlimSignal();
 
-	private readonly state: IReadonlyComponent;
+	private readonly state: IReadonlyComponent | (IReadonlyEnableableComponent & IReadonlyDestroyableComponent);
 	private children?: Map<TKey, T>;
 	private clearing = false;
 
-	constructor(state: IReadonlyComponent, clearOnDisable = false) {
+	constructor(
+		state: IReadonlyComponent | (IReadonlyEnableableComponent & IReadonlyDestroyableComponent),
+		clearOnDisable = false,
+	) {
 		this.state = state;
 
 		state.onEnable(() => {
@@ -29,16 +32,18 @@ export class ComponentKeyedChildren<TKey extends defined, T extends Constraint =
 		});
 		state.onDestroy(() => this.clear());
 
-		if (!clearOnDisable) {
-			state.onDisable(() => {
-				if (!this.children) return;
+		if ("onDisable" in state) {
+			if (!clearOnDisable) {
+				state.onDisable(() => {
+					if (!this.children) return;
 
-				for (const [_, child] of this.children) {
-					child.disable();
-				}
-			});
-		} else {
-			state.onDisable(() => this.clear());
+					for (const [_, child] of this.children) {
+						child.disable();
+					}
+				});
+			} else {
+				state.onDisable(() => this.clear());
+			}
 		}
 	}
 
