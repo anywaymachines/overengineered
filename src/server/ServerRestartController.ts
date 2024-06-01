@@ -1,4 +1,5 @@
 import { MessagingService, Players, RunService, Workspace } from "@rbxts/services";
+import { registerOnRemoteEvent } from "server/network/event/RemoteHandler";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { SpreadingFireController } from "server/SpreadingFireController";
 import { BlockManager } from "shared/building/BlockManager";
@@ -12,9 +13,10 @@ export class ServerRestartController extends HostedService {
 	constructor() {
 		super();
 
-		this.onEnable(() =>
-			this.event.eventHandler.register(MessagingService.SubscribeAsync("Restart", () => this.restart(true))),
-		);
+		this.onEnable(() => {
+			this.event.eventHandler.register(MessagingService.SubscribeAsync("Restart", () => this.restart(true)));
+			registerOnRemoteEvent("Admin", "Restart", () => this.restart(false));
+		});
 	}
 
 	restart(networkReceived: boolean) {
