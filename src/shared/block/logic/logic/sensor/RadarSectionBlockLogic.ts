@@ -44,6 +44,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		const halvedMaxDist = maxDist / 2;
 
 		const view = this.instance.WaitForChild("RadarView");
+		const doNotReactToUnion = this.instance.WaitForChild("Union");
 		if (!view) return;
 		if (!view.IsA("BasePart")) return;
 
@@ -73,6 +74,8 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 
 		this.event.subscribe(view.Touched, (part) => {
 			if (part.CollisionGroup !== "Blocks") return;
+			if (part === doNotReactToUnion) return;
+			if (part.HasTag("RADARVIEW")) return;
 			this.allTouchedBlocks.add(part);
 			if (!this.closestDetectedPart) return (this.closestDetectedPart = part);
 			const d1 = this.getDistanceTo(part);
