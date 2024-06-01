@@ -121,6 +121,7 @@ export namespace LoadingController {
 	export const isLoading = state.asReadonly();
 
 	export function show(text: string) {
+		$log(text);
 		control.setText(`${text}...`);
 		control.show();
 		state.set(true);

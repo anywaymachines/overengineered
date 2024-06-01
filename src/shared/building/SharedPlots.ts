@@ -1,4 +1,4 @@
-import { Players, RunService, Workspace } from "@rbxts/services";
+import { Players, Workspace } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedPlot } from "shared/building/SharedPlot";
 import type { PlacedBlockData } from "shared/building/BlockManager";
@@ -33,11 +33,7 @@ export class SharedPlots {
 	constructor(
 		readonly plots: readonly SharedPlot[],
 		private readonly plotComponents: ReadonlyMap<PlotModel, SharedPlot>,
-	) {
-		if (RunService.IsClient()) {
-			this.waitForPlot(Players.LocalPlayer.UserId);
-		}
-	}
+	) {}
 
 	waitForPlot(userid: number) {
 		while (!this.tryGetPlotByOwnerID(userid)) {

@@ -100,9 +100,7 @@ export class BuildingWelder extends HostedService {
 			collider.EnableFluidForces = false;
 		};
 
-		const unionCache: [Vector3, UnionOperation][] = [];
-
-		for (const regblock of blocks) {
+		const initialize = (regblock: RegistryBlock) => {
 			const block = regblock.model;
 			block.PrimaryPart!.Anchored = true;
 
@@ -112,7 +110,7 @@ export class BuildingWelder extends HostedService {
 
 			if (block.FindFirstChild(weldFolderName)) {
 				const colliders = block.FindFirstChild(weldFolderName)?.GetChildren() as unknown as readonly BasePart[];
-				if (colliders.size() === 0) continue;
+				if (colliders.size() === 0) return;
 
 				for (const [key, group] of colliders.groupBy(
 					(g) => (g.GetAttribute("target") as string | undefined) ?? "",
@@ -147,45 +145,36 @@ export class BuildingWelder extends HostedService {
 				}
 
 				block.FindFirstChild(weldFolderName)?.Destroy();
-				continue;
+				return;
 			}
 
-			const blocksize = (block.GetChildren().filter((c) => c.IsA("BasePart")) as unknown as readonly BasePart[])
-				.map((c) => c.Size)
-				.reduce((acc, val) => (acc.Magnitude > val.Magnitude ? acc : val), Vector3.zero);
+			const regions = createAutomatic(regblock);
+			if (!regions || regions.size() === 0) return;
 
-			let union = unionCache.find(([size]) => size === blocksize)?.[1];
-			if (union) {
-				union = union.Clone();
-				union.PivotTo(block.GetPivot());
-				union.Parent = weldParent;
-			} else {
-				const regions = createAutomatic(regblock);
-				if (!regions || regions.size() === 0) continue;
-
-				const parts: BasePart[] = [];
-				for (const region of regions) {
-					const part = Element.create("Part", { Parent: Workspace, Size: region.Size });
-					part.PivotTo(region.CFrame);
-					parts.push(part);
-				}
-
-				union = parts[0].UnionAsync(
-					parts.filter((_, i) => i !== 0),
-					Enum.CollisionFidelity.PreciseConvexDecomposition,
-				);
-
-				for (const part of parts) {
-					part.Destroy();
-				}
-
-				setColliderProperties(union);
-				unionCache.push([blocksize, union]);
-				union.Parent = weldParent;
+			const parts: BasePart[] = [];
+			for (const region of regions) {
+				const part = Element.create("Part", { Parent: Workspace, Size: region.Size });
+				part.PivotTo(region.CFrame);
+				parts.push(part);
 			}
 
-			$log(`Adding automatic region to ${block.Name}`);
-		}
+			const union = parts[0].UnionAsync(
+				parts.filter((_, i) => i !== 0),
+				Enum.CollisionFidelity.PreciseConvexDecomposition,
+			);
+
+			for (const part of parts) {
+				part.Destroy();
+			}
+
+			setColliderProperties(union);
+			union.Parent = weldParent;
+
+			$log(`Adding automatic weld region to ${block.Name}`);
+		};
+
+		const [success, err] = Promise.all(blocks.map((b) => Promise.try(() => initialize(b)))).await();
+		if (!success) throw err;
 
 		$log("Block welding initialized");
 	}
