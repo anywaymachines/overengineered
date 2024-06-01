@@ -14,6 +14,7 @@ export namespace SpreadingFireController {
 		if (
 			!BlockManager.isActiveBlockPart(part) ||
 			LocalInstanceData.HasLocalTag(part, "Burn") ||
+			part.HasTag("Fireproof") ||
 			(math.random(1, 8) !== 1 && part.Position.Y < 1 + GameDefinitions.HEIGHT_OFFSET)
 		) {
 			return false;
