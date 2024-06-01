@@ -1,5 +1,4 @@
 import { Backend } from "server/Backend";
-import { SlotDatabase } from "server/database/SlotDatabase";
 import { PlayerWatcher } from "server/PlayerWatcher";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { BlockManager } from "shared/building/BlockManager";
@@ -8,6 +7,7 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { HostedService } from "shared/GameHost";
 import { Operation } from "shared/Operation";
 import { SlotsMeta } from "shared/SlotsMeta";
+import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { ServerPlotController, ServerPlots } from "server/plots/ServerPlots";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { SharedPlots } from "shared/building/SharedPlots";
@@ -53,6 +53,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 		@inject readonly controller: ServerPlotController,
 		@inject private readonly serverPlots: ServerPlots,
 		@inject private readonly blockRegistry: BlockRegistry,
+		@inject private readonly slots: SlotDatabase,
 	) {
 		super();
 		this.player = controller.player;
@@ -218,10 +219,10 @@ export class ServerBuildingRequestHandler extends HostedService {
 			const controller = this.serverPlots.tryGetControllerByPlayer(player);
 			if (!controller) throw "what";
 
-			output = SlotDatabase.instance.save(player.UserId, request.index, controller.blocks);
+			output = this.slots.save(player.UserId, request.index, controller.blocks);
 		}
 
-		SlotDatabase.instance.updateMeta(player.UserId, request.index, (meta) => {
+		this.slots.updateMeta(player.UserId, request.index, (meta) => {
 			const get = SlotsMeta.get(meta, request.index);
 			return SlotsMeta.withSlot(meta, request.index, {
 				name: request.name ?? get.name,
@@ -261,7 +262,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 				: GameDefinitions.INTERNAL_UNIVERSE_ID;
 			blocks = Backend.Datastores.GetEntry(universeId, "slots", `${userid}_${index}`) as string | undefined;
 		} else {
-			blocks = SlotDatabase.instance.getBlocks(userid, index);
+			blocks = this.slots.getBlocks(userid, index);
 		}
 
 		this.controller.blocks.delete("all");

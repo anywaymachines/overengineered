@@ -1,10 +1,10 @@
 import { Players } from "@rbxts/services";
-import { SlotDatabase } from "server/database/SlotDatabase";
 import { registerOnRemoteEvent } from "server/network/event/RemoteHandler";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
 import { SlotsMeta } from "shared/SlotsMeta";
+import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 import type { ServerPlots } from "server/plots/ServerPlots";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
@@ -16,6 +16,7 @@ export class RideMode implements PlayModeBase {
 	constructor(
 		@inject private readonly serverPlots: ServerPlots,
 		@inject private readonly blockRegistry: BlockRegistry,
+		@inject private readonly slots: SlotDatabase,
 	) {
 		Players.PlayerRemoving.Connect((player) => {
 			const blocks = this.cache.get(player);
@@ -78,7 +79,7 @@ export class RideMode implements PlayModeBase {
 		this.cache.set(player, copy);
 
 		const serialized = BlocksSerializer.serialize(controller.blocks);
-		SlotDatabase.instance.setBlocks(
+		this.slots.setBlocks(
 			player.UserId,
 			SlotsMeta.autosaveSlotIndex,
 			serialized,
@@ -146,7 +147,7 @@ export class RideMode implements PlayModeBase {
 		} else {
 			controller.blocks.clearBlocks();
 
-			const blocksToLoad = SlotDatabase.instance.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
+			const blocksToLoad = this.slots.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
 			if (blocksToLoad !== undefined) {
 				BlocksSerializer.deserialize(blocksToLoad, controller.blocks);
 			}

@@ -9,8 +9,6 @@ export type PlayerData = {
 };
 
 export class PlayerDatabase {
-	static readonly instance = new PlayerDatabase();
-
 	private readonly onlinePlayers = new Set<number>();
 	private readonly datastore;
 	private readonly db;

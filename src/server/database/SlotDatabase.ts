@@ -1,19 +1,18 @@
 import { DataStoreService, Players } from "@rbxts/services";
 import { Db } from "server/database/Database";
-import { PlayerDatabase } from "server/database/PlayerDatabase";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { SlotsMeta } from "shared/SlotsMeta";
+import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { BuildingPlot } from "server/plots/BuildingPlot";
 
+@injectable
 export class SlotDatabase {
-	static readonly instance = new SlotDatabase();
-
 	private readonly onlinePlayers = new Set<number>();
 	private readonly datastore;
 	private readonly blocksdb;
 
-	constructor() {
+	constructor(@inject private readonly players: PlayerDatabase) {
 		try {
 			this.datastore = DataStoreService.GetDataStore("slots");
 		} catch {
@@ -51,7 +50,7 @@ export class SlotDatabase {
 	private ensureValidSlotIndex(userId: number, index: number) {
 		if (index in SlotsMeta.specialSlots) return;
 
-		const pdata = PlayerDatabase.instance.get(userId);
+		const pdata = this.players.get(userId);
 		const player = Players.GetPlayerByUserId(userId);
 		if (!player) return;
 
@@ -63,11 +62,11 @@ export class SlotDatabase {
 	}
 
 	private getMeta(userId: number) {
-		return PlayerDatabase.instance.get(userId).slots ?? [];
+		return this.players.get(userId).slots ?? [];
 	}
 	private setMeta(userId: number, slots: readonly SlotMeta[]) {
-		PlayerDatabase.instance.set(userId, {
-			...PlayerDatabase.instance.get(userId),
+		this.players.set(userId, {
+			...this.players.get(userId),
 			slots,
 		});
 

@@ -1,10 +1,10 @@
 import { ServerBuildingRequestHandler } from "server/building/ServerBuildingRequestHandler";
-import { SlotDatabase } from "server/database/SlotDatabase";
 import { PlayerWatcher } from "server/PlayerWatcher";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { HostedService } from "shared/GameHost";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
+import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { ServerPlots } from "server/plots/ServerPlots";
 import type { DIContainer } from "shared/DI";
@@ -16,6 +16,7 @@ export class ServerBuildingRequestController extends HostedService {
 	constructor(
 		@inject serverPlots: ServerPlots,
 		@inject playModeController: PlayModeController,
+		@inject slots: SlotDatabase,
 		@inject container: DIContainer,
 	) {
 		super();
@@ -42,14 +43,14 @@ export class ServerBuildingRequestController extends HostedService {
 							playModeController.getPlayerMode(player) === "build" && blocks.getBlocks().size() !== 0;
 
 						if (save) {
-							SlotDatabase.instance.setBlocks(
+							slots.setBlocks(
 								player.UserId,
 								SlotsMeta.quitSlotIndex,
 								BlocksSerializer.serialize(blocks),
 								blocks.getBlocks().size(),
 							);
 						} else {
-							SlotDatabase.instance.setBlocksFromAnotherSlot(
+							slots.setBlocksFromAnotherSlot(
 								player.UserId,
 								SlotsMeta.quitSlotIndex,
 								SlotsMeta.autosaveSlotIndex,
