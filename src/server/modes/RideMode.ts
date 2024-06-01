@@ -81,17 +81,18 @@ export class RideMode implements PlayModeBase {
 		vehicleSeat.Sit(hrp);
 
 		for (const block of blocksChildren) {
-			// TODO: move `anchorblock` check somewhere
-			if (BlockManager.manager.id.get(block) === "anchorblock") {
-				ServerPartUtils.switchDescendantsAnchor(block, true);
-			} else {
-				ServerPartUtils.switchDescendantsAnchor(block, false);
-			}
+			ServerPartUtils.switchDescendantsAnchor(block, false);
 		}
 
 		for (const block of blocksChildren) {
-			if (block.PrimaryPart?.Anchored) continue;
 			ServerPartUtils.switchDescendantsNetworkOwner(block, player);
+		}
+
+		// TODO: move this somewhere
+		for (const block of blocksChildren) {
+			if (BlockManager.manager.id.get(block) === "anchorblock") {
+				ServerPartUtils.switchDescendantsAnchor(block, true);
+			}
 		}
 
 		return { success: true };
