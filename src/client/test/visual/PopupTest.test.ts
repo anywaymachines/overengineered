@@ -1,11 +1,11 @@
 import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
-import { SavePopup } from "client/gui/popup/SavePopup";
 import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
-import { SettingsPopup } from "client/gui/popup/SettingsPopup";
-import { WikiPopup } from "client/gui/popup/WikiPopup";
 import { Element } from "shared/Element";
+import type { SavePopup } from "client/gui/popup/SavePopup";
+import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
+import type { WikiPopup } from "client/gui/popup/WikiPopup";
 
 export const _Tests = (di: DIContainer) => {
 	return new Control(
@@ -71,19 +71,19 @@ export const _Tests = (di: DIContainer) => {
 					Text: "Settings",
 					Size: new UDim2(0, 200, 0, 30),
 				})
-					.with((b) => b.activated.Connect(() => SettingsPopup.showPopup(di)))
+					.with((b) => b.activated.Connect(() => di.resolve<SettingsPopup>().show()))
 					.with((b) => b.enable()).instance,
 				b5: TextButtonControl.create({
 					Text: "Saves",
 					Size: new UDim2(0, 200, 0, 30),
 				})
-					.with((b) => b.activated.Connect(() => SavePopup.showPopup()))
+					.with((b) => b.activated.Connect(() => di.resolve<SavePopup>().show()))
 					.with((b) => b.enable()).instance,
 				b6: TextButtonControl.create({
 					Text: "Wiki",
 					Size: new UDim2(0, 200, 0, 30),
 				})
-					.with((b) => b.activated.Connect(() => WikiPopup.showPopup()))
+					.with((b) => b.activated.Connect(() => di.resolve<WikiPopup>().show()))
 					.with((b) => b.enable()).instance,
 			},
 		),

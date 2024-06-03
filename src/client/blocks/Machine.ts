@@ -1,11 +1,11 @@
 import { blockConfigRegistryClient } from "client/blocks/config/BlockConfigRegistryClient";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { SharedMachine } from "shared/block/SharedMachine";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { Config } from "shared/config/Config";
 import type { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
+import type { PlayerDataStoragee } from "client/PlayerDataStorage";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import type { ImpactController } from "shared/block/impact/ImpactController";
@@ -17,7 +17,10 @@ export class Machine extends SharedMachine {
 		ConfigLogicValueBase<BlockConfigTypes.Types[keyof BlockConfigTypes.Types]>
 	>();
 
-	constructor(@inject blockRegistry: BlockRegistry) {
+	constructor(
+		@inject blockRegistry: BlockRegistry,
+		@inject private readonly playerData: PlayerDataStoragee,
+	) {
 		super(blockRegistry);
 		this.add(this.logicInputs);
 	}
@@ -27,7 +30,7 @@ export class Machine extends SharedMachine {
 		this.initializeControls();
 	}
 	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {
-		if (!PlayerDataStorage.config.get().impact_destruction) {
+		if (!this.playerData.config.get().impact_destruction) {
 			return undefined;
 		}
 

@@ -10,7 +10,6 @@ import { GuiAnimator } from "client/gui/GuiAnimator";
 import { LogControl } from "client/gui/static/LogControl";
 import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { ToolBase } from "client/tools/ToolBase";
 import { BlockWireManager } from "shared/block/BlockWireManager";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
@@ -22,6 +21,7 @@ import { ObservableValue } from "shared/event/ObservableValue";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { GameDataStorage } from "client/PlayerDataStorage";
 import type { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -662,12 +662,17 @@ namespace Controllers {
 }
 
 /** A tool for wiring */
+@injectable
 export class WireTool extends ToolBase {
 	readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
 	private readonly markers = this.parent(new ComponentChildren<Markers.Marker>(this, true));
 	private readonly controllerContainer = new ComponentChild<Controllers.IController>(this, true);
 
-	constructor(mode: BuildingMode) {
+	constructor(
+		mode: BuildingMode,
+		@inject
+		private readonly gameData: GameDataStorage,
+	) {
 		super(mode);
 
 		this.parentGui(
@@ -737,7 +742,7 @@ export class WireTool extends ToolBase {
 				}
 
 				const blockid = (marker.data.blockData as PlacedBlockData).id;
-				const positions = PlayerDataStorage.gameData.get().blocks[blockid]?.markerPositions;
+				const positions = this.gameData.data.get().blocks[blockid]?.markerPositions;
 				let markerpos = positions?.[marker.data.id];
 				if (!markerpos) {
 					if (marker instanceof BlockWireManager.Markers.Input) {

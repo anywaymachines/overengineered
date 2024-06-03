@@ -5,13 +5,13 @@ import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { TransformService } from "shared/component/TransformService";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
 import { Serializer } from "shared/Serializer";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
+import type { PlayerDataStoragee } from "client/PlayerDataStorage";
 
 const NOT_EDITABLE_IMAGE = "rbxassetid://15428855911";
 const EDITABLE_IMAGE = "rbxassetid://17320900740";
@@ -44,7 +44,13 @@ class SaveItem extends Control<SlotRecordDefinition> {
 	readonly onLoad = this._onLoad.asReadonly();
 	readonly onOpened = this._onOpened.asReadonly();
 
-	constructor(gui: SlotRecordDefinition, meta: SlotMeta, from: SlotSource, wasSelected: boolean) {
+	constructor(
+		gui: SlotRecordDefinition,
+		playerData: PlayerDataStoragee,
+		meta: SlotMeta,
+		from: SlotSource,
+		wasSelected: boolean,
+	) {
 		super(gui);
 
 		const isImported = from !== "this";
@@ -55,7 +61,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 				() => {
 					try {
 						saveButton.disable();
-						PlayerDataStorage.sendPlayerSlot({ index: meta.index, save: true });
+						playerData.sendPlayerSlot({ index: meta.index, save: true });
 						this._onSave.Fire();
 					} finally {
 						saveButton.enable();
@@ -68,7 +74,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 			try {
 				loadButton.disable();
 				this._onLoad.Fire();
-				await PlayerDataStorage.loadPlayerSlot(meta.index, isImported);
+				await playerData.loadPlayerSlot(meta.index, isImported);
 			} finally {
 				loadButton.enable();
 			}
@@ -80,7 +86,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 		nametb.submitted.Connect(() => send({ name: nametb.text.get() }));
 
 		const send = async (slotData: Readonly<Partial<SlotMeta>>) => {
-			await PlayerDataStorage.sendPlayerSlot({ ...slotData, index: meta.index, save: false });
+			await playerData.sendPlayerSlot({ ...slotData, index: meta.index, save: false });
 		};
 
 		const buttons: ButtonControl[] = [];
@@ -94,9 +100,6 @@ class SaveItem extends Control<SlotRecordDefinition> {
 			);
 			buttons.push(button);
 		}
-
-		const slots = PlayerDataStorage.slots.get();
-		if (!slots) throw "what";
 
 		this.gui.Content.SlotButton.ImageColor3 = Serializer.Color3Serializer.deserialize(meta.color);
 		this.gui.Content.SlotButton.ImageTransparency = isImported ? 0.5 : 0;
@@ -177,7 +180,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 
 	private readonly slots;
 
-	constructor(gui: SaveSlotsDefinition) {
+	constructor(gui: SaveSlotsDefinition, playerData: PlayerDataStoragee) {
 		super(gui);
 
 		const alreadySelected = SaveSlots.staticSelected;
@@ -193,9 +196,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 		const recreate = () => {
 			this.slots.clear();
 
-			const slots = PlayerDataStorage.slots.get();
-			if (!slots) return;
-
+			const slots = playerData.slots.get();
 			const filter = this.search.get()?.lower();
 			const addSlots = (slots: readonly SlotMeta[], from: SlotSource) => {
 				for (const slot of [...slots].sort((left, right) => left.index < right.index)) {
@@ -208,7 +209,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 					}
 
 					const wasSelected = from === "this" && this.selectedSlot.get() === slot.index;
-					const item = new SaveItem(this.template(), slot, from, wasSelected);
+					const item = new SaveItem(this.template(), playerData, slot, from, wasSelected);
 					item.onSave.Connect(() => {
 						this.selectedSlot.set(from === "this" ? slot.index : undefined);
 						this._onSave.Fire();
@@ -236,7 +237,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 
 			addSlots(slots, "this");
 
-			const externalSlots = PlayerDataStorage.imported_slots.get();
+			const externalSlots = playerData.imported_slots.get();
 			if (externalSlots && externalSlots.size() > 0) {
 				const comment = this.slots.add(new Control(this.commentTemplate()));
 				comment.instance.Text = "Other slots";
@@ -245,7 +246,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 			}
 		};
 
-		this.event.subscribeObservable(PlayerDataStorage.slots, recreate);
+		this.event.subscribeObservable(playerData.slots, recreate);
 		this.event.subscribeObservable(this.search, recreate);
 		recreate();
 	}
@@ -260,23 +261,17 @@ export type SlotsPopupDefinition = GuiObject & {
 	readonly Search: TextBox;
 };
 
+@injectable
 export class SavePopup extends Popup<SlotsPopupDefinition> {
-	static showPopup() {
-		const popup = new SavePopup(
-			Gui.getGameUI<{
-				Popup: {
-					Slots: SlotsPopupDefinition;
-				};
-			}>().Popup.Slots.Clone(),
-		);
-
-		popup.show();
+	static addAsService(host: GameHostBuilder) {
+		const gui = Gui.getGameUI<{ Popup: { Slots: SlotsPopupDefinition } }>().Popup.Slots;
+		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
 	}
 
-	constructor(gui: SlotsPopupDefinition) {
+	constructor(gui: SlotsPopupDefinition, @inject playerData: PlayerDataStoragee) {
 		super(gui);
 
-		const slots = this.add(new SaveSlots(this.gui.Content));
+		const slots = this.add(new SaveSlots(this.gui.Content, playerData));
 		this.event.subscribe(slots.onLoad, () => this.hide());
 		this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
 

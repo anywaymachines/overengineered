@@ -11,7 +11,6 @@ import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { RocketEngineLogic } from "shared/block/logic/RocketEngineLogic";
 import { EventHandler } from "shared/event/EventHandler";
 import { Signal } from "shared/event/Signal";
@@ -21,6 +20,7 @@ import { SlotsMeta } from "shared/SlotsMeta";
 import type { Machine } from "client/blocks/Machine";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
+import type { PlayerDataStoragee } from "client/PlayerDataStorage";
 
 export type ActionBarControlDefinition = GuiObject & {
 	readonly Stop: GuiButton;
@@ -91,7 +91,10 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 	private readonly overlayTemplate;
 	private quitSettingsMode?: () => void;
 
-	constructor(gui: RideModeControlsDefinition) {
+	constructor(
+		gui: RideModeControlsDefinition,
+		private readonly playerData: PlayerDataStoragee,
+	) {
 		super(gui);
 
 		this.overlayTemplate = this.asTemplate(this.gui.Overlay);
@@ -228,8 +231,8 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 				};
 			}
 
-			await PlayerDataStorage.sendPlayerSlot({
-				index: PlayerDataStorage.loadedSlot.get() ?? -1,
+			await this.playerData.sendPlayerSlot({
+				index: this.playerData.loadedSlot.get() ?? -1,
 				touchControls,
 				save: false,
 			});
@@ -252,11 +255,8 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			//
 		];
 
-		let controlsInfo: TouchControlInfo | undefined;
-		const slots = PlayerDataStorage.slots.get();
-		if (slots) {
-			controlsInfo = SlotsMeta.get(slots, PlayerDataStorage.loadedSlot.get() ?? -1)?.touchControls;
-		}
+		const slots = this.playerData.slots.get();
+		const controlsInfo = SlotsMeta.get(slots, this.playerData.loadedSlot.get() ?? -1)?.touchControls;
 
 		let pos = 0;
 		for (const control of controls) {
@@ -321,10 +321,10 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 	private readonly infoTemplate;
 	private readonly infoTextTemplate;
 
-	constructor(gui: RideModeSceneDefinition) {
+	constructor(gui: RideModeSceneDefinition, playerData: PlayerDataStoragee) {
 		super(gui);
 
-		this.controls = new RideModeControls(this.gui.Controls);
+		this.controls = new RideModeControls(this.gui.Controls, playerData);
 		this.add(this.controls);
 
 		this.actionbar = new ActionBarControl(gui.ActionBar, this.controls);

@@ -1,5 +1,5 @@
 import { BadgeService } from "@rbxts/services";
-import { PlayerWatcher } from "server/PlayerWatcher";
+import { PlayerWatcher } from "shared/PlayerWatcher";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { HostedService } from "shared/GameHost";
 

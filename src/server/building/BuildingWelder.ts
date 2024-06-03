@@ -192,9 +192,7 @@ export class BuildingWelder extends HostedService {
 		this.getPlotColliders(plot).ClearAllChildren();
 	}
 	deleteWeld(plot: BuildingPlot, block: BlockModel) {
-		(this.getPlotColliders(plot) as unknown as Record<BlockUuid, CollidersModel>)[
-			BlockManager.manager.uuid.get(block)
-		].Destroy();
+		this.getPlotColliders(plot).FindFirstChild(BlockManager.manager.uuid.get(block))?.Destroy();
 	}
 
 	weldOnPlot(plot: BuildingPlot, block: BlockModel) {

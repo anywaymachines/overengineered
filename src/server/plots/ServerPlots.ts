@@ -1,10 +1,10 @@
 import { Players } from "@rbxts/services";
-import { PlayerWatcher } from "server/PlayerWatcher";
 import { BuildingPlot } from "server/plots/BuildingPlot";
 import { PlotsFloatingImageController } from "server/plots/PlotsFloatingImageController";
 import { Element } from "shared/Element";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { HostedService } from "shared/GameHost";
+import { PlayerWatcher } from "shared/PlayerWatcher";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { SharedPlots } from "shared/building/SharedPlots";
 

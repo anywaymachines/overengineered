@@ -1,5 +1,5 @@
 import { Backend } from "server/Backend";
-import { PlayerWatcher } from "server/PlayerWatcher";
+import { PlayerWatcher } from "shared/PlayerWatcher";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";

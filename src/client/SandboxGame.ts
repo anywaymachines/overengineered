@@ -1,33 +1,38 @@
-import { Players, RunService } from "@rbxts/services";
+import { Players, RunService, Workspace } from "@rbxts/services";
 import { BeaconController } from "client/controller/BeaconController";
+import { CameraController } from "client/controller/CameraController";
 import { DayCycleController } from "client/controller/DayCycleController";
+import { DistanceHideController } from "client/controller/DistanceHideController";
 import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
-import { GameLoader } from "client/GameLoader";
+import { MusicController } from "client/controller/sound/MusicController";
+import { AdminGui } from "client/gui/AdminGui";
+import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
+import { SavePopup } from "client/gui/popup/SavePopup";
+import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { PlayerDataInitializer } from "client/PlayerDataStorage";
+import { TerrainController } from "client/terrain/TerrainController";
 import { TestRunner } from "client/test/TestRunner";
 import { Tutorial } from "client/tutorial/Tutorial";
 import { TutorialBasics } from "client/tutorial/TutorialBasics";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { HostedService } from "shared/GameHost";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
+import type { PlayerDataStoragee } from "client/PlayerDataStorage";
 
 namespace Startup {
 	@injectable
 	class RunTutorialIfNoSlots extends HostedService {
-		constructor(@inject tutorial: Tutorial) {
+		constructor(@inject tutorial: Tutorial, @inject playerData: PlayerDataStoragee) {
 			super();
 
 			this.onEnable(() => {
-				task.spawn(() => {
-					const data = GameLoader.waitForDataStorage();
-					if (!data.slots.any((t) => t.blocks !== 0)) {
-						TutorialBasics(tutorial);
-					}
-				});
+				if (!playerData.slots.get().any((t) => t.blocks !== 0)) {
+					TutorialBasics(tutorial);
+				}
 			});
 		}
 	}
@@ -50,14 +55,15 @@ namespace Startup {
 
 export namespace SandboxGame {
 	export function initialize(builder: GameHostBuilder) {
-		const loading = (str: string) => LoadingController.show(`Initializing ${str}`);
-		const dataLoading = PlayerDataStorage.init();
+		PlayerDataInitializer.initialize(builder);
 
 		LoadingController.show("Pre-init");
 		LocalPlayerController.initializeSprintLogic(builder, RunService.IsStudio() ? 200 : 60);
 
 		LoadingController.show("Waiting for server");
-		GameLoader.waitForServer();
+		while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {
+			task.wait();
+		}
 
 		builder.services.registerSingletonFunc(() => SharedPlots.initialize());
 
@@ -66,31 +72,32 @@ export namespace SandboxGame {
 			ctx.resolve<SharedPlots>().waitForPlot(Players.LocalPlayer.UserId),
 		);
 
-		LoadingController.show("Waiting for data");
-		const [s, r] = dataLoading.await();
-		if (!s) throw r;
+		// LoadingController.show("Waiting for data");
+		// const [s, r] = dataLoading.await();
+		// if (!s) throw r;
 
-		loading("blocks");
 		builder.services.registerSingleton(BlocksInitializer.create());
-		loading("play modes");
 		PlayModeController.initialize(builder);
-		loading("building validation");
 		ClientBuildingValidationController.initialize(builder);
-		loading("tutorial");
 		Tutorial.initialize(builder);
 
-		loading("day cycle");
-		builder.services.registerService(DayCycleController);
-		loading("beacons");
-		builder.services.registerService(BeaconController);
-		loading("graphics");
-		builder.services.registerService(GraphicsSettingsController);
+		builder.services.registerService(DistanceHideController);
+		AdminGui.initializeIfAdminOrStudio(builder);
 
-		loading("basics tutorial");
+		builder.services.registerService(DayCycleController);
+		builder.services.registerService(BeaconController);
+		builder.services.registerService(GraphicsSettingsController);
+		builder.services.registerService(CameraController);
+		builder.services.registerService(TerrainController);
+		builder.services.registerService(MusicController);
+		builder.services.registerService(GuiAutoScaleController);
+
+		SettingsPopup.addAsService(builder);
+		SavePopup.addAsService(builder);
+
 		Startup.initializeBasicsTutorial(builder);
-		loading("test runner");
 		Startup.initializeTestRunner(builder);
 
-		loading("something?");
+		LoadingController.show("Initializing something");
 	}
 }

@@ -1,24 +1,39 @@
-import { Players } from "@rbxts/services";
 import { Beacon } from "client/gui/Beacon";
+import { Component } from "shared/component/Component";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 import { HostedService } from "shared/GameHost";
+import { PlayerWatcher } from "shared/PlayerWatcher";
+import type { PlayerDataStoragee } from "client/PlayerDataStorage";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 @injectable
 export class BeaconController extends HostedService {
-	constructor(@inject plot: SharedPlot) {
+	constructor(@inject plot: SharedPlot, @inject playerData: PlayerDataStoragee) {
 		super();
 
-		this.initializePlotBeacon(plot);
-		this.initializePlayerBeacons();
+		const plotBeacon = this.initializePlotBeacon(plot);
+		const playerBeacons = this.initializePlayerBeacons();
+
+		this.event.subscribeObservable(
+			playerData.config.createBased((c) => c.beacons),
+			(beacons) => plotBeacon.setEnabled(beacons.plot),
+			true,
+		);
+
+		this.event.subscribeObservable(
+			playerData.config.createBased((c) => c.beacons),
+			(beacons) => playerBeacons.setEnabled(beacons.players),
+			true,
+		);
 	}
 
-	private initializePlotBeacon(plot: SharedPlot) {
-		this.parent(new Beacon(plot.instance.BuildingArea, "Plot", "plot"));
+	private initializePlotBeacon(plot: SharedPlot): Beacon {
+		return this.parent(new Beacon(plot.instance.BuildingArea, "Plot"));
 	}
 
-	private initializePlayerBeacons() {
-		const playerBeacons = new ComponentKeyedChildren<string, Beacon>(this);
+	private initializePlayerBeacons(): Component {
+		const component = new Component();
+		const playerBeacons = new ComponentKeyedChildren<number, Beacon>(component);
 
 		const createPlayerBeacon = (player: Player) => {
 			// spawn() just in case of infinite wait for something
@@ -32,21 +47,18 @@ export class BeaconController extends HostedService {
 					task.wait(0.1);
 				}
 
-				playerBeacons.add(player.Name, new Beacon(humanoid.RootPart, player.DisplayName, "players"));
+				playerBeacons.add(player.UserId, new Beacon(humanoid.RootPart, player.DisplayName));
 			});
 		};
 
 		const initPlayer = (player: Player) => {
+			if (player.Character) createPlayerBeacon(player);
+
 			this.event.subscribe(player.CharacterAdded, () => createPlayerBeacon(player));
-			this.event.subscribe(player.CharacterRemoving, () => playerBeacons.remove(player.Name));
+			this.event.subscribe(player.CharacterRemoving, () => playerBeacons.remove(player.UserId));
 		};
+		this.event.subscribeCollectionAdded(PlayerWatcher.players, initPlayer);
 
-		Players.PlayerAdded.Connect(initPlayer);
-		for (const player of Players.GetPlayers()) {
-			if (player === Players.LocalPlayer) continue;
-
-			createPlayerBeacon(player);
-			initPlayer(player);
-		}
+		return component;
 	}
 }

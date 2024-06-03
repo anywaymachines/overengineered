@@ -1,6 +1,5 @@
 import { Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
 import { Gui } from "client/gui/Gui";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { PartUtils } from "shared/utils/PartUtils";
@@ -15,7 +14,7 @@ type BeaconBillboardGui = GuiObject & {
 export class Beacon extends InstanceComponent<PVInstance> {
 	private readonly billboard;
 
-	constructor(part: PVInstance, name: string, config: keyof BeaconsConfiguration) {
+	constructor(part: PVInstance, name: string) {
 		super(part);
 
 		this.billboard = (
@@ -31,13 +30,6 @@ export class Beacon extends InstanceComponent<PVInstance> {
 		this.billboard.Title.Text = name;
 
 		this.event.subscribe(RunService.RenderStepped, () => {
-			if (!PlayerDataStorage.config.get().beacons[config]) {
-				this.billboard.ImageLabel.ImageTransparency = 1;
-				this.billboard.Title.TextTransparency = 1;
-				this.billboard.Distance.TextTransparency = 1;
-				return;
-			}
-
 			const character = Players.LocalPlayer.Character;
 			if (!character) return;
 

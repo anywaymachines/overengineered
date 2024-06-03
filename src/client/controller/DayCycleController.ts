@@ -1,18 +1,17 @@
 import { Lighting } from "@rbxts/services";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { HostedService } from "shared/GameHost";
+import type { PlayerDataStoragee } from "client/PlayerDataStorage";
 
 @injectable
 export class DayCycleController extends HostedService {
-	constructor() {
+	constructor(@inject playerData: PlayerDataStoragee) {
 		super();
 
 		Lighting.SetMinutesAfterMidnight(14 * 60);
 
 		const timePerDayCycle = 20 * 60;
 		const getMinutesAfterMidnightTime = () => {
-			const config = PlayerDataStorage.config.get().dayCycle;
-
+			const config = playerData.config.get().dayCycle;
 			if (config.automatic) {
 				return (((DateTime.now().UnixTimestampMillis / 1000) % timePerDayCycle) / timePerDayCycle) * (60 * 24);
 			}

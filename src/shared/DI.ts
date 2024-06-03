@@ -65,10 +65,16 @@ export class DIContainer {
 		this.registerSingleton(this);
 	}
 
+	private assertNotNull<T>(value: T, name: string | undefined): asserts name is string {
+		if (name === undefined) {
+			throw `Name is null when registering ${value}`;
+		}
+	}
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	registerSingletonClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string): void {
 		name ??= getSymbol(clazz);
-		assert(name);
+		this.assertNotNull(clazz, name);
 		if (this.registrations.get(name)) {
 			throw `Dependency ${name} is already registered`;
 		}
@@ -80,7 +86,7 @@ export class DIContainer {
 	}
 	registerSingleton<T extends defined>(value: T, name?: string): void {
 		name ??= getSymbol(value);
-		assert(name);
+		this.assertNotNull(value, name);
 		if (this.registrations.get(name)) {
 			throw `Dependency ${name} is already registered`;
 		}
@@ -89,7 +95,7 @@ export class DIContainer {
 	}
 	registerSingletonFunc<T extends defined>(func: (ctx: ReadonlyDIContainer) => T, name?: string): void {
 		name ??= getSymbol(func);
-		assert(name);
+		this.assertNotNull(func, name);
 		if (this.registrations.get(name)) {
 			throw `Dependency ${name} is already registered`;
 		}
@@ -98,8 +104,8 @@ export class DIContainer {
 		this.registrations.set(name, { get: () => (created ??= func(this)) });
 	}
 
-	registerTransient<T extends defined>(func: (ctx: DIContainer) => T, name?: string): void {
-		assert(name);
+	registerTransientFunc<T extends defined>(func: (ctx: DIContainer) => T, name?: string): void {
+		this.assertNotNull(func, name);
 		if (this.registrations.get(name)) {
 			throw `Dependency ${name} is already registered`;
 		}
@@ -109,7 +115,7 @@ export class DIContainer {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	registerTransientClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string): void {
 		name ??= getSymbol(clazz);
-		assert(name);
+		this.assertNotNull(clazz, name);
 		if (this.registrations.get(name)) {
 			throw `Dependency ${name} is already registered`;
 		}

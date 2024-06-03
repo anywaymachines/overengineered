@@ -1,16 +1,15 @@
 import { Players } from "@rbxts/services";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import { HostedService } from "shared/GameHost";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { PlayerDataStoragee } from "client/PlayerDataStorage";
 import type { SharedPlots } from "shared/building/SharedPlots";
 
 @injectable
 export class GraphicsSettingsController extends HostedService {
-	constructor(@inject plots: SharedPlots) {
+	constructor(@inject plots: SharedPlots, @inject playerData: PlayerDataStoragee) {
 		super();
 
-		const graphics = PlayerDataStorage.config.createChild("graphics", PlayerConfigDefinition.graphics.config);
+		const graphics = playerData.config.createBased((x) => x.graphics);
 		this.event.subscribeObservable(graphics, ({ localShadows, othersShadows }) => {
 			for (const plot of plots.plots) {
 				const selfowned = plot.ownerId.get() === Players.LocalPlayer.UserId;

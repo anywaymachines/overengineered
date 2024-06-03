@@ -1,9 +1,11 @@
 import { StarterGui, Workspace } from "@rbxts/services";
 import { MusicPlaylist } from "client/controller/sound/MusicPlaylist";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
+import { HostedService } from "shared/GameHost";
+import type { PlayerDataStoragee } from "client/PlayerDataStorage";
 
-export namespace MusicController {
-	const playlist = new MusicPlaylist(
+@injectable
+export class MusicController extends HostedService {
+	private readonly playlist = new MusicPlaylist(
 		(
 			StarterGui as unknown as {
 				GameUI: {
@@ -18,17 +20,19 @@ export namespace MusicController {
 		15,
 	);
 
-	export function initialize() {
-		Workspace.GetPropertyChangedSignal("Gravity").Connect(() => {
-			if (PlayerDataStorage.config.get().music === false) return;
+	constructor(@inject playerData: PlayerDataStoragee) {
+		super();
 
-			if (Workspace.Gravity <= 0 && !playlist.currentSound) {
-				playlist.play();
+		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => {
+			if (!playerData.config.get().music) return;
+
+			if (Workspace.Gravity <= 0 && !this.playlist.currentSound) {
+				this.playlist.play();
 				return;
 			}
 
-			if (Workspace.Gravity > 0 && playlist.currentSound) {
-				playlist.stop();
+			if (Workspace.Gravity > 0 && this.playlist.currentSound) {
+				this.playlist.stop();
 				return;
 			}
 		});

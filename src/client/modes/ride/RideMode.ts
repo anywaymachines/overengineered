@@ -4,7 +4,7 @@ import { Gui } from "client/gui/Gui";
 import { RideModeScene } from "client/gui/ridemode/RideModeScene";
 import { PlayMode } from "client/modes/PlayMode";
 import type { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
-import type { BlockRegistry } from "shared/block/BlockRegistry";
+import type { PlayerDataStoragee } from "client/PlayerDataStorage";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 @injectable
@@ -13,12 +13,16 @@ export class RideMode extends PlayMode {
 	private readonly rideModeScene;
 
 	constructor(
-		@inject private readonly blockRegistry: BlockRegistry,
 		@inject private readonly plot: SharedPlot,
+		@inject playerData: PlayerDataStoragee,
+		@inject private readonly di: DIContainer,
 	) {
 		super();
 
-		this.rideModeScene = new RideModeScene(Gui.getGameUI<{ RideMode: RideModeSceneDefinition }>().RideMode);
+		this.rideModeScene = new RideModeScene(
+			Gui.getGameUI<{ RideMode: RideModeSceneDefinition }>().RideMode,
+			playerData,
+		);
 		this.parentGui(this.rideModeScene);
 	}
 
@@ -40,7 +44,7 @@ export class RideMode extends PlayMode {
 		if (prev === undefined) {
 			//
 		} else if (prev === "build") {
-			this.currentMachine = new Machine(this.blockRegistry);
+			this.currentMachine = this.di.resolveForeignClass(Machine);
 			this.currentMachine.init(this.plot.getBlockDatas());
 
 			SoundController.getSounds().Start.Play();

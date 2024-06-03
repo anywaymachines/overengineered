@@ -2,12 +2,12 @@ import { LoadingController } from "client/controller/LoadingController";
 import { ToolbarControl } from "client/gui/buildmode/ToolbarControl";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
-import { SavePopup } from "client/gui/popup/SavePopup";
-import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { ActionController } from "client/modes/build/ActionController";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { ComponentDisabler } from "shared/component/ComponentDisabler";
 import type { ToolbarControlDefinition } from "client/gui/buildmode/ToolbarControl";
+import type { SavePopup } from "client/gui/popup/SavePopup";
+import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import type { ToolController } from "client/tools/ToolController";
 import type { TransformProps } from "shared/component/Transform";
 
@@ -43,13 +43,8 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 			await requestMode("ride");
 		});
 
-		this.event.subscribe(saveButton.activated, async () => {
-			SavePopup.showPopup();
-		});
-
-		this.event.subscribe(settingsButton.activated, async () => {
-			SettingsPopup.showPopup(di);
-		});
+		this.event.subscribe(saveButton.activated, () => di.resolve<SavePopup>().show());
+		this.event.subscribe(settingsButton.activated, () => di.resolve<SettingsPopup>().show());
 	}
 
 	show(): void {

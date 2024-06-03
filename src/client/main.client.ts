@@ -5,14 +5,14 @@ import { LoadingController } from "client/controller/LoadingController";
 LoadingController.show("Preparing the initialization");
 
 import { SandboxGame } from "client/SandboxGame";
-import { GameLoader } from "client/GameLoader";
 import { Game } from "shared/GameHost";
+import { BSOD } from "client/gui/BSOD";
 
 const builder = Game.createHost();
 try {
 	SandboxGame.initialize(builder);
 } catch (err) {
-	GameLoader.showBSOD(tostring(err ?? ""));
+	BSOD.showWithDefaultText(tostring(err ?? ""));
 	throw err;
 }
 
@@ -20,7 +20,6 @@ const host = builder.build();
 
 host.run();
 
-GameLoader.waitForEverything(LoadingController.show);
 LoadingController.show("Loading the dependencies");
 
 import { Players, TextChatService } from "@rbxts/services";
@@ -31,7 +30,6 @@ import { GameEnvironmentController } from "client/controller/GameEnvironmentCont
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { SoundController } from "client/controller/SoundController";
 import { WindController } from "client/controller/WindController";
-import { MusicController } from "client/controller/sound/MusicController";
 import { InputTypeChangeEvent } from "client/event/InputTypeChangeEvent";
 import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
@@ -53,7 +51,6 @@ AdminMessageController.initialize();
 ServerRestartController.initialize();
 
 SoundController.initialize();
-MusicController.initialize();
 
 const updated = DateTime.fromUnixTimestamp($compileTime()).FormatUniversalTime("DDMMYY_HHmm", "en-us");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =

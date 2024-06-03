@@ -16,6 +16,8 @@ export interface ReadonlyObservableValue<T> {
 
 	/** Automatically sets the provided ObservableValue value to the current one. */
 	autoSet(observable: ObservableValue<T>, funcProvider?: (value: T) => T): void;
+
+	createBased<TNew>(func: (value: T) => TNew): ReadonlyObservableValue<TNew>;
 }
 
 /** Stores a value and provides and event of it being changed */
@@ -112,9 +114,9 @@ export class ObservableValue<T> implements ReadonlyObservableValue<T> {
 		return observable;
 	}
 
-	static fromSignal<TSignal extends Signal<(arg: unknown) => void>>(
+	static fromSignal<TSignal extends ReadonlySignal<(arg: unknown) => void>>(
 		signal: TSignal,
-		defaultValue: TSignal extends Signal<(arg: infer T) => void> ? T : never,
+		defaultValue: TSignal extends ReadonlySignal<(arg: infer T) => void> ? T : never,
 	) {
 		const observable = new ObservableValue(defaultValue);
 		signal.Connect((arg) => observable.set(arg as typeof defaultValue));

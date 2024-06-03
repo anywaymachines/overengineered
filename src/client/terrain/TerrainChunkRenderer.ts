@@ -1,5 +1,4 @@
 import { ReplicatedFirst, Workspace } from "@rbxts/services";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { ChunkGenerator, ChunkRenderer } from "client/terrain/ChunkLoader";
 import type { InfiniteTerrainActor } from "client/terrain/InfiniteTerrainActor";
@@ -8,7 +7,7 @@ if (GameDefinitions.APRIL_FOOLS) {
 	Workspace.Terrain.SetMaterialColor(Enum.Material.Basalt, new Color3(0.4, 0.2, 0.2));
 }
 
-export const TerrainChunkRenderer = (generator: ChunkGenerator): ChunkRenderer<true> => {
+export const TerrainChunkRenderer = (generator: ChunkGenerator, foliage: boolean): ChunkRenderer<true> => {
 	const chunkSize = 16;
 	const actorAmount = 8;
 
@@ -88,7 +87,7 @@ export const TerrainChunkRenderer = (generator: ChunkGenerator): ChunkRenderer<t
 
 		renderChunk(chunkX: number, chunkZ: number): true {
 			actorSemaphore.wait();
-			findAvailableActor().Load.Fire(chunkX, chunkZ, PlayerDataStorage.config.get().terrain.foliage);
+			findAvailableActor().Load.Fire(chunkX, chunkZ, foliage);
 
 			return true;
 		},

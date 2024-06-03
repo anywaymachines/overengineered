@@ -2,7 +2,7 @@ import { Players } from "@rbxts/services";
 import { BuildMode } from "server/modes/BuildMode";
 import { RideMode } from "server/modes/RideMode";
 import { registerOnRemoteFunction } from "server/network/event/RemoteHandler";
-import { PlayerWatcher } from "server/PlayerWatcher";
+import { PlayerWatcher } from "shared/PlayerWatcher";
 import { HostedService } from "shared/GameHost";
 import { Remotes } from "shared/Remotes";
 import { PlayerUtils } from "shared/utils/PlayerUtils";

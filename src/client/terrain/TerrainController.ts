@@ -1,5 +1,3 @@
-import { GameLoader } from "client/GameLoader";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { ChunkLoader } from "client/terrain/ChunkLoader";
 import { DefaultChunkGenerator } from "client/terrain/DefaultChunkGenerator";
 import { FlatTerrainRenderer } from "client/terrain/FlatTerrainRenderer";
@@ -7,10 +5,9 @@ import { TerrainChunkRenderer } from "client/terrain/TerrainChunkRenderer";
 import { TriangleChunkRenderer } from "client/terrain/TriangleChunkRenderer";
 import { WaterTerrainChunkRenderer } from "client/terrain/WaterTerrainChunkRenderer";
 import { rootComponents } from "client/test/RootComponents";
-import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
+import { HostedService } from "shared/GameHost";
+import type { PlayerDataStoragee } from "client/PlayerDataStorage";
 import type { ChunkRenderer } from "client/terrain/ChunkLoader";
-
-GameLoader.waitForEverything();
 
 const multirender = (): ChunkRenderer<Instance> => {
 	const terracr = TriangleChunkRenderer(DefaultChunkGenerator);
@@ -46,36 +43,53 @@ const multirender = (): ChunkRenderer<Instance> => {
 	};
 };
 
-let current: ChunkLoader | undefined;
-const terrain = PlayerDataStorage.config.createChild("terrain", PlayerConfigDefinition.terrain.config);
+@injectable
+export class TerrainController extends HostedService {
+	constructor(@inject playerData: PlayerDataStoragee) {
+		super();
 
-terrain.subscribe((terrain) => {
-	let chunkLoader: ChunkLoader | undefined;
+		let current: ChunkLoader | undefined;
+		const terrain = playerData.config.createBased((c) => c.terrain);
 
-	switch (terrain.kind) {
-		case "Triangle":
-			chunkLoader = new ChunkLoader(TriangleChunkRenderer(DefaultChunkGenerator, terrain.resolution));
-			break;
-		case "Terrain":
-			chunkLoader = new ChunkLoader(TerrainChunkRenderer(DefaultChunkGenerator));
-			break;
-		case "Flat":
-			chunkLoader = new ChunkLoader(FlatTerrainRenderer(0.5 - 0.01));
-			break;
-		case "Water":
-			chunkLoader = new ChunkLoader(WaterTerrainChunkRenderer());
-			break;
+		this.event.subscribeObservable(
+			terrain,
+			(terrain) => {
+				let chunkLoader: ChunkLoader | undefined;
+
+				switch (terrain.kind) {
+					case "Triangle":
+						chunkLoader = new ChunkLoader(
+							TriangleChunkRenderer(DefaultChunkGenerator, terrain.resolution),
+							terrain.loadDistance,
+						);
+						break;
+					case "Terrain":
+						chunkLoader = new ChunkLoader(
+							TerrainChunkRenderer(DefaultChunkGenerator, terrain.foliage),
+							terrain.loadDistance,
+						);
+						break;
+					case "Flat":
+						chunkLoader = new ChunkLoader(FlatTerrainRenderer(0.5 - 0.01), terrain.loadDistance);
+						break;
+					case "Water":
+						chunkLoader = new ChunkLoader(WaterTerrainChunkRenderer(), terrain.loadDistance);
+						break;
+				}
+
+				if (current) {
+					rootComponents.remove(rootComponents.indexOf(current));
+					current?.destroy();
+				}
+
+				current = chunkLoader;
+
+				if (chunkLoader) {
+					chunkLoader.enable();
+					rootComponents.push(chunkLoader);
+				}
+			},
+			true,
+		);
 	}
-
-	if (current) {
-		rootComponents.remove(rootComponents.indexOf(current));
-		current?.destroy();
-	}
-
-	current = chunkLoader;
-
-	if (chunkLoader) {
-		chunkLoader.enable();
-		rootComponents.push(chunkLoader);
-	}
-}, true);
+}

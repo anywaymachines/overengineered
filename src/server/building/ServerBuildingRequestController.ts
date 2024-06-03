@@ -1,5 +1,5 @@
 import { ServerBuildingRequestHandler } from "server/building/ServerBuildingRequestHandler";
-import { PlayerWatcher } from "server/PlayerWatcher";
+import { PlayerWatcher } from "shared/PlayerWatcher";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { HostedService } from "shared/GameHost";
 import { CustomRemotes } from "shared/Remotes";

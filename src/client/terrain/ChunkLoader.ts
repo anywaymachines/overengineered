@@ -1,5 +1,4 @@
 import { Workspace } from "@rbxts/services";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { Component } from "shared/component/Component";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Objects } from "shared/fixes/objects";
@@ -29,13 +28,14 @@ export class ChunkLoader<T = defined> extends Component {
 	private readonly loadDistancePow;
 	private readonly maxVisibleHeight = 3000 + GameDefinitions.HEIGHT_OFFSET;
 
-	constructor(private readonly chunkRenderer: ChunkRenderer<T>) {
+	constructor(
+		private readonly chunkRenderer: ChunkRenderer<T>,
+		loadDistance: number,
+	) {
 		super();
 
 		this.loadDistance =
-			(PlayerDataStorage.config.get().terrain.loadDistance / chunkRenderer.chunkSize) *
-			(16 * 4) *
-			(chunkRenderer.loadDistanceMultiplier ?? 1);
+			(loadDistance / chunkRenderer.chunkSize) * (16 * 4) * (chunkRenderer.loadDistanceMultiplier ?? 1);
 		this.loadDistancePow = math.pow(this.loadDistance, 2);
 
 		task.spawn(() => this.createChunkLoader());
