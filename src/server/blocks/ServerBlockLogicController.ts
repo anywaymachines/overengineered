@@ -1,3 +1,4 @@
+import { BracedShaftServerLogic } from "server/blocks/logic/BracedShaftServerLogic";
 import { DisconnectBlockServerLogic } from "server/blocks/logic/DisconnectBlockServerLogic";
 import { LampServerLogic } from "server/blocks/logic/LampServerLogic";
 import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic";
@@ -31,6 +32,7 @@ export class ServerBlockLogicController extends HostedService {
 			screen: ScreenServerLogic,
 			piston: PistonBlockServerLogic,
 			sevensegmentdisplay: SevenSegmentDisplayServerLogic,
+			bracedshaft: BracedShaftServerLogic,
 		};
 
 		//
