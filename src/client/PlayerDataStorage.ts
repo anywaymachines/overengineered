@@ -8,7 +8,6 @@ import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { CustomRemotes, Remotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
-import type { JsonSerializablePrimitive } from "shared/fixes/Json";
 
 type NonNullableFields<T> = {
 	[P in keyof T]-?: NonNullable<T[P]>;
@@ -196,7 +195,7 @@ export namespace PlayerDataStorage {
 		key: TKey,
 		value: PlayerConfig[TKey] & defined,
 	) {
-		$log(`Setting player config value ${key} to ${JSON.serialize(value as JsonSerializablePrimitive)}`);
+		$log(`Setting player config value ${key} to ${JSON.serialize(value)}`);
 		await Remotes.Client.GetNamespace("Player").Get("UpdateSettings").CallServerAsync(key, value);
 
 		config.set({

@@ -1,13 +1,10 @@
 import { Control } from "client/gui/Control";
 import type { ConfigPartDefinition } from "client/gui/popup/SettingsPopup";
 import type { ObservableValue } from "shared/event/ObservableValue";
-import type { JsonSerializablePrimitive } from "shared/fixes/Json";
 
-export class ConfigPartControl<
-	TControl extends Control<TDef>,
-	TDef extends GuiObject,
-	TValue extends JsonSerializablePrimitive,
-> extends Control<ConfigPartDefinition<TDef>> {
+export class ConfigPartControl<TControl extends Control<TDef>, TDef extends GuiObject, TValue> extends Control<
+	ConfigPartDefinition<TDef>
+> {
 	readonly control: TControl & { value: ObservableValue<TValue> };
 	readonly key;
 	readonly definition;

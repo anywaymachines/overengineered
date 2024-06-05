@@ -21,21 +21,6 @@ export type JsonSerializedProperty =
 	| SerializedUDim
 	| SerializedColor3;
 
-/** A value that is serializable by `JSON.encode`
- * @deprecated TOBEDELETED
- */
-export type JsonSerializablePrimitive =
-	| number
-	| string
-	| boolean
-	| undefined
-	| Vector3
-	| Vector2
-	| CFrame
-	| UDim2
-	| UDim
-	| Color3;
-
 type SerializedCFrame = {
 	readonly __type: "cframe";
 	readonly c: readonly [

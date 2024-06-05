@@ -4,7 +4,6 @@ import { JSON } from "shared/fixes/Json";
 import type { CollectionChangedArgs, ReadonlyObservableCollection } from "shared/event/ObservableCollection";
 import type { ReadonlyObservableValue, ReadonlySubscribeObservableValue } from "shared/event/ObservableValue";
 import type { ReadonlyArgsSignal, ReadonlySignal } from "shared/event/Signal";
-import type { JsonSerializablePrimitive } from "shared/fixes/Json";
 
 type Sub<T extends Callback> = readonly [signal: ReadonlySignal<T>, callback: T];
 
@@ -163,11 +162,7 @@ export class ComponentEvents {
 		});
 		this.subscribeObservable(
 			observable,
-			(value) =>
-				instance.SetAttribute(
-					name,
-					value === undefined ? undefined : JSON.serialize(value as JsonSerializablePrimitive),
-				),
+			(value) => instance.SetAttribute(name, value === undefined ? undefined : JSON.serialize(value)),
 			true,
 		);
 
