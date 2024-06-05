@@ -5,7 +5,7 @@ import { Serializer } from "shared/Serializer";
 import type { BuildingPlot } from "server/plots/BuildingPlot";
 import type { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
-import type { PlacedBlockDataConnection } from "shared/building/BlockManager";
+import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 type SerializedBlocks<TBlocks extends SerializedBlockBase> = {
 	readonly version: number;
@@ -17,16 +17,16 @@ interface SerializedBlockBase {
 }
 interface SerializedBlockV0 extends SerializedBlockBase {
 	readonly id: BlockId;
-	readonly mat: SerializedEnum;
-	readonly col: SerializedColor;
 	readonly loc: SerializedCFrame;
-	readonly config: Readonly<Record<string, defined>> | undefined;
+	readonly mat: SerializedEnum | undefined;
+	readonly col: SerializedColor | undefined;
+	readonly config: PlacedBlockConfig | undefined;
 }
 interface SerializedBlockV2 extends SerializedBlockV0 {
 	readonly uuid: BlockUuid;
 }
 interface SerializedBlockV3 extends SerializedBlockV2 {
-	readonly connections?: Readonly<Record<BlockConnectionName, PlacedBlockDataConnection>>;
+	readonly connections: PlacedBlockLogicConnections | undefined;
 }
 
 const read = {
@@ -40,8 +40,9 @@ const read = {
 
 	blockV3: (block: BlockModel, index: number, buildingCenter: CFrame): SerializedBlockV3 => {
 		return {
-			id: BlockManager.manager.id.get(block) as SerializedBlockV3["id"],
 			loc: Serializer.CFrameSerializer.serialize(buildingCenter.ToObjectSpace(block.GetPivot())),
+
+			id: BlockManager.manager.id.get(block),
 			col: Serializer.Color3Serializer.serialize(BlockManager.manager.color.get(block)),
 			mat: Serializer.EnumMaterialSerializer.serialize(BlockManager.manager.material.get(block)),
 			uuid: BlockManager.manager.uuid.get(block),
@@ -63,21 +64,20 @@ const place = {
 	blockOnPlotV3: (plot: BuildingPlot, blockData: SerializedBlockV3, buildingCenter: CFrame) => {
 		const deserializedData: PlaceBlockRequest = {
 			id: blockData.id,
-			color: Serializer.Color3Serializer.deserialize(blockData.col ?? "FFFFFF"),
-			material: Serializer.EnumMaterialSerializer.deserialize(blockData.mat ?? Enum.Material.Plastic.Value),
 			location: buildingCenter.ToWorldSpace(Serializer.CFrameSerializer.deserialize(blockData.loc)),
-			config: blockData.config as never,
+
+			color: blockData.col === undefined ? undefined : Serializer.Color3Serializer.deserialize(blockData.col),
+			material:
+				blockData.mat === undefined ? undefined : Serializer.EnumMaterialSerializer.deserialize(blockData.mat),
+			config: blockData.config,
 			uuid: blockData.uuid,
+			connections: blockData.connections,
 		};
 
 		const response = plot.place(deserializedData);
 		if (!response.success) {
 			$err(`Could not place block ${blockData.id}: ${response.message}`);
 			return;
-		}
-
-		if (response.success && response.model && blockData.connections) {
-			BlockManager.manager.connections.set(response.model, blockData.connections);
 		}
 	},
 } as const;

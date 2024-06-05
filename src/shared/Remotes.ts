@@ -9,8 +9,13 @@ declare global {
 	type PlaceBlockRequest = ReplaceWith<
 		BlockDataBase,
 		{
-			readonly uuid: BlockUuid | undefined;
 			readonly location: CFrame;
+
+			readonly uuid: BlockUuid | undefined;
+			readonly color: BlockDataBase["color"] | undefined;
+			readonly material: BlockDataBase["material"] | undefined;
+			readonly config: BlockDataBase["config"] | undefined;
+			readonly connections: BlockDataBase["connections"] | undefined;
 		}
 	>;
 	interface PlaceBlocksRequest {
