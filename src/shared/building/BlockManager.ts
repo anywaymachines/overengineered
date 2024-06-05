@@ -18,14 +18,19 @@ export type PlacedBlockConfig = {
 	readonly [k in string]: JsonSerializablePrimitive & defined;
 };
 
-export type PlacedBlockData<T extends BlockModel = BlockModel> = {
+declare global {
+	type BlockDataBase = {
+		readonly id: BlockId;
+		readonly uuid: BlockUuid;
+		readonly color: Color3;
+		readonly material: Enum.Material;
+		readonly config: PlacedBlockConfig | undefined;
+		readonly connections: PlacedBlockLogicConnections | undefined;
+	};
+}
+
+export type PlacedBlockData<T extends BlockModel = BlockModel> = BlockDataBase & {
 	readonly instance: T;
-	readonly color: Color3;
-	readonly material: Enum.Material;
-	readonly id: BlockId;
-	readonly uuid: BlockUuid;
-	readonly config: PlacedBlockConfig | undefined;
-	readonly connections: PlacedBlockLogicConnections | undefined;
 };
 declare global {
 	type BlockData<T extends BlockModel = BlockModel> = PlacedBlockData<T>;

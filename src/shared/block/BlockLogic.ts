@@ -2,17 +2,20 @@ import { InstanceComponent } from "shared/component/InstanceComponent";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
 
-export interface BlockLogicData<TDef extends BlockConfigTypes.Definitions, TBlock extends BlockModel = BlockModel> {
-	readonly id: string;
-	readonly instance: TBlock;
-	readonly uuid: BlockUuid;
-	readonly color?: Color3;
-	readonly material?: Enum.Material;
-	readonly config: Partial<ConfigDefinitionsToConfig<keyof TDef, TDef>> | undefined;
-	readonly connections:
-		| Readonly<Partial<Record<keyof TDef & BlockConnectionName, PlacedBlockDataConnection>>>
-		| undefined;
-}
+export type BlockLogicData<
+	TDef extends BlockConfigTypes.Definitions,
+	TBlock extends BlockModel = BlockModel,
+> = ReplaceWith<
+	BlockDataBase,
+	{
+		readonly instance: TBlock;
+		readonly config: Partial<ConfigDefinitionsToConfig<keyof TDef, TDef>> | undefined;
+		readonly connections:
+			| Readonly<Partial<Record<keyof TDef & BlockConnectionName, PlacedBlockDataConnection>>>
+			| undefined;
+	}
+>;
+
 export class BlockLogic<T extends BlockModel = BlockModel> extends InstanceComponent<T> {
 	readonly block: BlockLogicData<BlockConfigTypes.Definitions, T>;
 	readonly instance: T;

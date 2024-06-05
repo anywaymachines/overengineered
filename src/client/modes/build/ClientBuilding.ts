@@ -20,7 +20,7 @@ export namespace ClientBuilding {
 	export const logicConnectOperation = new Operation(logicConnect);
 	export const logicDisconnectOperation = new Operation(logicDisconnect);
 
-	function placeBlocks(plot: SharedPlot, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) {
+	function placeBlocks(plot: SharedPlot, blocks: readonly PlaceBlockRequest[]) {
 		let placed: readonly BlockUuid[];
 		const result = ActionController.instance.execute(
 			"Place blocks",

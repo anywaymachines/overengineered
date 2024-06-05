@@ -1,21 +1,18 @@
 import { Definitions, Middleware } from "@rbxts/net";
 import { C2S2CRemoteFunction } from "shared/event2/PERemoteEvent";
 import type { BlockId } from "shared/BlockDataRegistry";
-import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel | undefined }>;
 	type MultiBuildResponse = Response<{ readonly models: readonly BlockModel[] }>;
 
-	interface PlaceBlockRequest {
-		readonly id: BlockId;
-		readonly color: Color3;
-		readonly material: Enum.Material;
-		readonly location: CFrame;
-		readonly uuid?: BlockUuid;
-		readonly config?: PlacedBlockConfig;
-		readonly connections?: PlacedBlockLogicConnections;
-	}
+	type PlaceBlockRequest = ReplaceWith<
+		BlockDataBase,
+		{
+			readonly uuid: BlockUuid | undefined;
+			readonly location: CFrame;
+		}
+	>;
 	interface PlaceBlocksRequest {
 		readonly plot: PlotModel;
 		readonly blocks: readonly PlaceBlockRequest[];

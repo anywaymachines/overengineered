@@ -489,6 +489,9 @@ namespace SinglePlaceController {
 					color: this.selectedColor.get(),
 					material: this.selectedMaterial.get(),
 					location: g.pos,
+					uuid: undefined,
+					config: undefined,
+					connections: undefined,
 				}),
 			);
 
@@ -864,6 +867,9 @@ namespace MultiPlaceController {
 						color: this.selectedColor,
 						material: this.selectedMaterial,
 						location: loc.pos,
+						uuid: undefined,
+						config: undefined,
+						connections: undefined,
 					}),
 				),
 			);

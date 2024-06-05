@@ -7,8 +7,6 @@ interface UpdatablePlayerConfigVersion<TCurrent, TPrev> extends PlayerConfigVers
 	update(prev: Partial<TPrev>): Partial<TCurrent>;
 }
 
-type Replace<T, TKey extends keyof T, TValue> = Omit<T, TKey> & { readonly [k in TKey]: TValue };
-
 type PlayerConfigV1 = {
 	readonly version: number;
 

@@ -43,7 +43,7 @@ export class WingLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry
 		const surface = findWingSurface(this.wingSurface);
 		const vectorForce = this.wingSurface.FindFirstChild("VectorForce") as VectorForce;
 
-		const density = math.max(0.7, new PhysicalProperties(this.block.material ?? Enum.Material.Plastic).Density / 2);
+		const density = math.max(0.7, new PhysicalProperties(this.block.material).Density / 2);
 		this.wingSurface.CustomPhysicalProperties = new PhysicalProperties(density, 0.3, 0.5, 1, 1);
 
 		if (!vectorForce) return;
