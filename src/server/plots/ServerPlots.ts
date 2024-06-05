@@ -112,6 +112,8 @@ export class ServerPlots extends HostedService {
 				this.controllers.add(controller);
 				this.controllersByPlot.set(controller.plot.instance, controller);
 				this.controllersByPlayer.set(controller.player, controller);
+
+				controller.enable();
 			},
 			true,
 		);

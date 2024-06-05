@@ -1,7 +1,7 @@
 import { ServerBuildingRequestHandler } from "server/building/ServerBuildingRequestHandler";
-import { PlayerWatcher } from "shared/PlayerWatcher";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { HostedService } from "shared/GameHost";
+import { PlayerWatcher } from "shared/PlayerWatcher";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { SlotDatabase } from "server/database/SlotDatabase";
@@ -23,42 +23,38 @@ export class ServerBuildingRequestController extends HostedService {
 		container = container.beginScope();
 
 		const children = new Map<Player, ServerBuildingRequestHandler>();
-		this.event.subscribeCollection(
+		this.event.subscribeCollectionAdded(
 			serverPlots.controllers,
-			(update) => {
-				if (update.kind !== "add") return;
+			(controller) => {
+				container = container.beginScope();
+				container.registerSingleton(controller);
+				const handler = container.resolveForeignClass(ServerBuildingRequestHandler);
 
-				for (const controller of update.added) {
-					container = container.beginScope();
-					container.registerSingleton(controller);
-					const handler = container.resolveForeignClass(ServerBuildingRequestHandler);
+				children.set(controller.player, handler);
+				handler.onDestroy(() => children.delete(controller.player));
 
-					children.set(controller.player, handler);
-					handler.onDestroy(() => children.delete(controller.player));
+				const savePlot = (): void => {
+					const player = controller.player;
+					const blocks = controller.blocks;
+					const save =
+						playModeController.getPlayerMode(player) === "build" && blocks.getBlocks().size() !== 0;
 
-					const savePlot = (): void => {
-						const player = controller.player;
-						const blocks = controller.blocks;
-						const save =
-							playModeController.getPlayerMode(player) === "build" && blocks.getBlocks().size() !== 0;
-
-						if (save) {
-							slots.setBlocks(
-								player.UserId,
-								SlotsMeta.quitSlotIndex,
-								BlocksSerializer.serialize(blocks),
-								blocks.getBlocks().size(),
-							);
-						} else {
-							slots.setBlocksFromAnotherSlot(
-								player.UserId,
-								SlotsMeta.quitSlotIndex,
-								SlotsMeta.autosaveSlotIndex,
-							);
-						}
-					};
-					controller.onDestroy(savePlot);
-				}
+					if (save) {
+						slots.setBlocks(
+							player.UserId,
+							SlotsMeta.quitSlotIndex,
+							BlocksSerializer.serialize(blocks),
+							blocks.getBlocks().size(),
+						);
+					} else {
+						slots.setBlocksFromAnotherSlot(
+							player.UserId,
+							SlotsMeta.quitSlotIndex,
+							SlotsMeta.autosaveSlotIndex,
+						);
+					}
+				};
+				controller.onDestroy(savePlot);
 			},
 			true,
 		);
