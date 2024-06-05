@@ -51,7 +51,7 @@ export namespace SoundController {
 			list.push(sound.SoundId);
 		});
 
-		game.GetService("ContentProvider").PreloadAsync(list);
+		// ContentProvider.PreloadAsync(list);
 	}
 
 	function updateSound(sound: Sound) {
