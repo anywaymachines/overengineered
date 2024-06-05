@@ -1,15 +1,16 @@
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
-import { BlockId } from "shared/BlockDataRegistry";
-import { BlocksInitializer } from "shared/BlocksInitializer";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { Component } from "shared/component/Component";
 import { ObservableValue } from "shared/event/ObservableValue";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
+import type { BlockId } from "shared/BlockDataRegistry";
 
+@injectable
 export class BlockMirrorer extends Component {
 	readonly blocks = new ObservableValue<readonly { readonly id: BlockId; readonly model: Model }[]>([]);
 	private readonly tracking = new Map<Model, Partial<Record<BlockId, Model[]>>>();
 
-	constructor() {
+	constructor(@inject private readonly blockRegistry: BlockRegistry) {
 		super();
 		this.onDisable(() => this.destroyMirrors());
 	}
@@ -58,6 +59,7 @@ export class BlockMirrorer extends Component {
 				plot,
 				{ id: block.id, pos: block.model.GetPivot() },
 				mode,
+				this.blockRegistry,
 			);
 
 			let tracked = this.tracking.get(block.model);
@@ -87,7 +89,7 @@ export class BlockMirrorer extends Component {
 				types[id] ??= 0;
 				const track = (tracked[id] ??= []);
 				if (track.size() <= types[id]!) {
-					const instance = BlocksInitializer.blocks.map.get(mirror.id)!.model.Clone();
+					const instance = this.blockRegistry.blocks.get(mirror.id)!.model.Clone();
 					BlockGhoster.ghostModel(instance);
 					track.push(instance);
 				}

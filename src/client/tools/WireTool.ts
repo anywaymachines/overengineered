@@ -1,30 +1,31 @@
 import { GamepadService, GuiService, Players, ReplicatedStorage, RunService, Workspace } from "@rbxts/services";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { ClientComponent } from "client/component/ClientComponent";
 import { ClientInstanceComponent } from "client/component/ClientInstanceComponent";
 import { InputController } from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
+import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
-import { ButtonControl } from "client/gui/controls/Button";
 import { LogControl } from "client/gui/static/LogControl";
-import { InputTooltips } from "client/gui/static/TooltipsControl";
 import { ActionController } from "client/modes/build/ActionController";
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { ToolBase } from "client/tools/ToolBase";
-import { Element } from "shared/Element";
-import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import { BlockWireManager } from "shared/block/BlockWireManager";
-import { BlockConfigRegistryNonGeneric, blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
-import { SharedPlot } from "shared/building/SharedPlot";
-import { SharedPlots } from "shared/building/SharedPlots";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentChildren } from "shared/component/ComponentChildren";
-import { ObservableValue, ReadonlyObservableValue } from "shared/event/ObservableValue";
+import { Element } from "shared/Element";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { ReplicatedAssets } from "shared/ReplicatedAssets";
+import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { GameDataStorage } from "client/PlayerDataStorage";
+import type { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
+import type { PlacedBlockData } from "shared/building/BlockManager";
+import type { SharedPlot } from "shared/building/SharedPlot";
+import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 type TypeGroup = {
 	readonly color: Color3;
@@ -565,7 +566,7 @@ namespace Controllers {
 
 			for (const marker of markers) {
 				if (marker instanceof Markers.Input) {
-					this.event.subscribe(marker.instance.TextButton.Activated, () => {
+					this.event.subscribe(marker.instance.TextButton.MouseButton1Click, () => {
 						disconnectMarker(marker);
 					});
 
@@ -661,19 +662,24 @@ namespace Controllers {
 }
 
 /** A tool for wiring */
+@injectable
 export class WireTool extends ToolBase {
 	readonly selectedMarker = new ObservableValue<Markers.Output | undefined>(undefined);
 	private readonly markers = this.parent(new ComponentChildren<Markers.Marker>(this, true));
 	private readonly controllerContainer = new ComponentChild<Controllers.IController>(this, true);
 
-	constructor(mode: BuildingMode) {
+	constructor(
+		mode: BuildingMode,
+		@inject
+		private readonly gameData: GameDataStorage,
+	) {
 		super(mode);
 
 		this.parentGui(
 			new Scene.WireToolScene(ToolBase.getToolGui<"Wire", Scene.WireToolSceneDefinition>().Wire, this),
 		);
 
-		this.onEnable(() => this.createEverything());
+		this.onPrepare(() => this.createEverything());
 		this.onDisable(() => this.markers.clear());
 
 		this.event.subscribe(ActionController.instance.onUndo, () => {
@@ -715,7 +721,7 @@ export class WireTool extends ToolBase {
 	}
 
 	private createEverything() {
-		this.createEverythingOnPlot(SharedPlots.getOwnPlot());
+		this.createEverythingOnPlot(this.targetPlot.get());
 	}
 	private createEverythingOnPlot(plot: SharedPlot) {
 		this.markers.clear();
@@ -736,7 +742,7 @@ export class WireTool extends ToolBase {
 				}
 
 				const blockid = (marker.data.blockData as PlacedBlockData).id;
-				const positions = PlayerDataStorage.gameData.get().blocks[blockid]?.markerPositions;
+				const positions = this.gameData.data.get().blocks[blockid]?.markerPositions;
 				let markerpos = positions?.[marker.data.id];
 				if (!markerpos) {
 					if (marker instanceof BlockWireManager.Markers.Input) {

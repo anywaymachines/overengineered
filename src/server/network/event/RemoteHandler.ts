@@ -1,5 +1,6 @@
-import { InferDefinition } from "@rbxts/net/out/definitions/NamespaceBuilder";
-import {
+import { Remotes } from "shared/Remotes";
+import type { InferDefinition } from "@rbxts/net/out/definitions/NamespaceBuilder";
+import type {
 	AsyncServerFunctionDeclaration,
 	BidirectionalEventDeclaration,
 	ClientToServerEventDeclaration,
@@ -11,7 +12,6 @@ import {
 	InferServerConnect,
 	RemoteDeclarations,
 } from "@rbxts/net/out/definitions/Types";
-import { Remotes } from "shared/Remotes";
 
 // Types copied from rbxts
 type ServerEventDeclarationKeys<T extends RemoteDeclarations> = keyof DeclarationsOf<

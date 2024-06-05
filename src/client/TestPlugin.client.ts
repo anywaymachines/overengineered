@@ -29,16 +29,19 @@ copyScripts(game.GetService("ReplicatedStorage"), script.Parent!);
 
 import { StarterGui } from "@rbxts/services";
 import { Control } from "client/gui/Control";
-import { ButtonControl, TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
 import { LabelControl } from "client/gui/controls/LabelControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
-import { ComponentEvents } from "shared/component/ComponentEvents";
 import { ContainerComponent } from "shared/component/ContainerComponent";
-import { Easable, Easing } from "shared/component/Easing";
+import { Easing } from "shared/component/Easing";
 import { EventHandler } from "shared/event/EventHandler";
-import { ObservableValue, ReadonlyObservableValue } from "shared/event/ObservableValue";
+import { ObservableValue } from "shared/event/ObservableValue";
 import { ArgsSignal } from "shared/event/Signal";
+import type { TextButtonDefinition } from "client/gui/controls/Button";
+import type { ComponentEvents } from "shared/component/ComponentEvents";
+import type { Easable } from "shared/component/Easing";
+import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 TS.import = previmport;
 

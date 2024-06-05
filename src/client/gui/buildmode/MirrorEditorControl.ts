@@ -1,11 +1,12 @@
-import { Players } from "@rbxts/services";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
-import { NumberTextBoxControl, NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
-import { ToggleControl, ToggleControlDefinition } from "client/gui/controls/ToggleControl";
-import { SharedPlots } from "shared/building/SharedPlots";
+import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
+import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { ArgsSignal } from "shared/event/Signal";
+import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
+import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 export type MirrorEditorSingleControlDefinition = GuiObject & {
 	readonly Toggle: ToggleControlDefinition;
@@ -79,24 +80,24 @@ export class MirrorEditorControl extends Control<MirrorEditorControlDefinition> 
 	private readonly y;
 	private readonly z;
 
-	constructor(gui: MirrorEditorControlDefinition) {
+	constructor(gui: MirrorEditorControlDefinition, plot: SharedPlot) {
 		super(gui);
 
-		const plot = SharedPlots.getPlotBuildingRegion(SharedPlots.getPlotByOwnerID(Players.LocalPlayer.UserId));
+		const plotRegion = plot.bounds;
 		this.x = this.add(
 			new MirrorEditorSingleControl(
 				this.gui.X,
-				math.round(-plot.getSize().Z / 2),
-				math.round(plot.getSize().Z / 2),
+				math.round(-plotRegion.getSize().Z / 2),
+				math.round(plotRegion.getSize().Z / 2),
 				0,
 			),
 		);
-		this.y = this.add(new MirrorEditorSingleControl(this.gui.Y, 2, math.floor(plot.getSize().Y), 4));
+		this.y = this.add(new MirrorEditorSingleControl(this.gui.Y, 2, math.floor(plotRegion.getSize().Y), 4));
 		this.z = this.add(
 			new MirrorEditorSingleControl(
 				this.gui.Z,
-				math.round(-plot.getSize().X / 2),
-				math.round(plot.getSize().X / 2),
+				math.round(-plotRegion.getSize().X / 2),
+				math.round(plotRegion.getSize().X / 2),
 				0,
 			),
 		);

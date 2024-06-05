@@ -1,6 +1,6 @@
-import { BlockLogicData } from "shared/block/BlockLogic";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import type { BlockLogicData } from "shared/block/BlockLogic";
 
 export class ByteMakerBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.bytemaker> {
 	constructor(block: BlockLogicData<typeof blockConfigRegistry.bytemaker.input>) {

@@ -1,11 +1,7 @@
 import { ObjectOverlayStorage } from "shared/component/ObjectOverlayStorage";
-import {
-	TransformContainer,
-	type TransformBuilder,
-	type TransformProps,
-	type TweenableProperties,
-} from "shared/component/Transform";
+import { TransformContainer } from "shared/component/Transform";
 import { Objects } from "shared/fixes/objects";
+import type { TransformBuilder, TransformProps, TweenableProperties } from "shared/component/Transform";
 
 type State<T extends object> = { readonly [k in TweenableProperties<T>]?: T[k] };
 export namespace TransformService {

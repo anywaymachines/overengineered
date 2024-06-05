@@ -1,4 +1,4 @@
-import { GameEnvironment } from "./data/GameEnvironment";
+import { GameEnvironment } from "shared/data/GameEnvironment";
 
 export namespace Sound {
 	export function getWorldVolume(height: number) {

@@ -1,4 +1,4 @@
-import { ReadonlyArgsSignal } from "shared/event/Signal";
+import type { ReadonlyArgsSignal } from "shared/event/Signal";
 
 /** Killable EventHandler for roblox connections */
 export class EventHandler {

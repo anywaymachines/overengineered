@@ -5,7 +5,7 @@ import { ImpactSoundEffect } from "shared/effects/ImpactSoundEffect";
 import { ParticleEffect } from "shared/effects/ParticleEffect";
 import { SoundEffect } from "shared/effects/SoundEffect";
 import { SparksEffect } from "shared/effects/SparksEffect";
-import { AutoC2SRemoteEvent } from "./event/C2SRemoteEvent";
+import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
 
 export namespace RemoteEvents {
 	export namespace Effects {

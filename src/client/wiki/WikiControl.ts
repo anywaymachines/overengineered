@@ -1,6 +1,6 @@
 import { Control } from "client/gui/Control";
-import { TextButtonDefinition } from "client/gui/controls/Button";
 import { Element } from "shared/Element";
+import type { TextButtonDefinition } from "client/gui/controls/Button";
 
 export type WikiCategoriesControlDefinition = GuiObject & {
 	readonly ScrollingFrame: ScrollingFrame & {

@@ -1,5 +1,5 @@
 import { UserInputService } from "@rbxts/services";
-import { SignalWrapper } from "./SignalWrapper";
+import { SignalWrapper } from "client/event/SignalWrapper";
 
 export namespace GlobalInputHandler {
 	export const inputBegan = new SignalWrapper(UserInputService.InputBegan);

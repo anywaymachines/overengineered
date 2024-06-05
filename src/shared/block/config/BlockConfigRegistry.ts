@@ -1,4 +1,4 @@
-import { BlockId } from "shared/BlockDataRegistry";
+import type { BlockId } from "shared/BlockDataRegistry";
 
 export const connectors = {
 	boolOrNumberOrVector(
@@ -326,7 +326,7 @@ const bytemaker = {
 const rocketengine = {
 	input: {
 		thrust: {
-			displayName: "Thrust",
+			displayName: "Thrust (%)",
 			type: "thrust",
 			default: 0 as number,
 			config: {
@@ -339,7 +339,7 @@ const rocketengine = {
 			canBeSwitch: true as boolean,
 		},
 		strength: {
-			displayName: "Strength",
+			displayName: "Strength (%)",
 			type: "clampedNumber",
 			min: 0,
 			max: 100,
@@ -348,7 +348,14 @@ const rocketengine = {
 			config: 100 as number,
 		},
 	},
-	output: {},
+	output: {
+		maxpower: {
+			displayName: "Max Power (Newtons)",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
 } as const satisfies BlockConfigBothDefinitions;
 
 const piston = {
@@ -693,6 +700,38 @@ const speedometer = {
 			type: "vector3",
 			default: Vector3.zero,
 			config: Vector3.zero,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
+const masssensor = {
+	input: {
+		assemblyonly: {
+			displayName: "Assembly Only",
+			type: "bool",
+			connectorHidden: true,
+			default: false as boolean,
+			config: false as boolean,
+		},
+	},
+	output: {
+		result: {
+			displayName: "Mass (kg)",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
+const gravitysensor = {
+	input: {},
+	output: {
+		result: {
+			displayName: "Acceleration (m/s²)",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
 		},
 	},
 } as const satisfies BlockConfigBothDefinitions;
@@ -1247,6 +1286,7 @@ export const blockConfigRegistry = {
 
 	ownerlocator,
 	speedometer,
+	masssensor,
 	anglesensor,
 	keysensor,
 	altimeter,
@@ -1260,6 +1300,7 @@ export const blockConfigRegistry = {
 	counter,
 	logicmemory,
 	stackmemory,
+	gravitysensor,
 	randomaccessmemory,
 	readonlymemory,
 	buffer: anyProcessing,

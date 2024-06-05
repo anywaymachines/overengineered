@@ -1,10 +1,10 @@
 import { Workspace } from "@rbxts/services";
-import { LocalInstanceData } from "shared/LocalInstanceData";
-import { RemoteEvents } from "shared/RemoteEvents";
+import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { LocalInstanceData } from "shared/LocalInstanceData";
+import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomDebrisService } from "shared/service/CustomDebrisService";
-import { ServerPartUtils } from "./plots/ServerPartUtils";
 
 const overlapParams = new OverlapParams();
 overlapParams.CollisionGroup = "Blocks";
@@ -14,6 +14,7 @@ export namespace SpreadingFireController {
 		if (
 			!BlockManager.isActiveBlockPart(part) ||
 			LocalInstanceData.HasLocalTag(part, "Burn") ||
+			part.HasTag("Fireproof") ||
 			(math.random(1, 8) !== 1 && part.Position.Y < 1 + GameDefinitions.HEIGHT_OFFSET)
 		) {
 			return false;

@@ -1,6 +1,6 @@
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class RadioRecieverBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.radioreciever> {
 	static readonly allRecievers = new Map<number, Set<RadioRecieverBlockLogic>>();

@@ -1,8 +1,8 @@
 import { Workspace } from "@rbxts/services";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { GameEnvironment } from "shared/data/GameEnvironment";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 type HeliumBlock = BlockModel & {
 	readonly Part: BasePart & {

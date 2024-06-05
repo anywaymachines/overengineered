@@ -1,9 +1,9 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { GameEnvironment } from "shared/data/GameEnvironment";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 type Wing = BlockModel & {
 	readonly WingSurface:

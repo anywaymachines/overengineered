@@ -1,8 +1,9 @@
-import { SliderControl, SliderControlDefinition } from "client/gui/controls/SliderControl";
+import { SliderControl } from "client/gui/controls/SliderControl";
 import { ConfigValueControl } from "client/gui/playerConfig/ConfigValueControl";
 import { playerConfigControlRegistry } from "client/gui/playerConfig/PlayerConfigControlRegistry";
 import { playerConfigValueTemplateStorage } from "client/gui/playerConfig/PlayerConfigValueTemplateStorage";
 import { Signal } from "shared/event/Signal";
+import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
 
 export type { ClampedNumberConfigValueControl };
 class ClampedNumberConfigValueControl extends ConfigValueControl<SliderControlDefinition> {

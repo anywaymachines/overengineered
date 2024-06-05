@@ -2,11 +2,11 @@ import { Players, RunService, UserInputService } from "@rbxts/services";
 import { InputController } from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
-import { Gui } from "client/gui/Gui";
 import { ButtonControl } from "client/gui/controls/Button";
+import { Gui } from "client/gui/Gui";
 import { rootComponents } from "client/test/RootComponents";
-import { Element } from "shared/Element";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { Element } from "shared/Element";
 
 type TreeControlDefinition = GuiObject & {
 	readonly Main: GuiButton;
@@ -115,7 +115,7 @@ let tree: TreeControl | undefined;
 const update = () => {
 	if (!tree) throw "what";
 
-	const add = (component: IDebuggableComponent, tree: TreeControl) => {
+	const add = (component: object | IDebuggableComponent, tree: TreeControl) => {
 		const childtree = tree.childContainer.add(
 			TreeControl.createChildList(
 				Element.create("TextButton", {
@@ -128,8 +128,10 @@ const update = () => {
 			),
 		);
 
-		for (const child of component.getDebugChildren()) {
-			add(child, childtree);
+		if ("getDebugChildren" in component) {
+			for (const child of component.getDebugChildren()) {
+				add(child, childtree);
+			}
 		}
 	};
 

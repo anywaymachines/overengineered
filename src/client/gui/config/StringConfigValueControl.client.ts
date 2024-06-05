@@ -1,7 +1,9 @@
 import { configControlRegistry } from "client/gui/config/ConfigControlRegistry";
-import { ConfigValueControl, ConfigValueControlParams } from "client/gui/config/ConfigValueControl";
+import { ConfigValueControl } from "client/gui/config/ConfigValueControl";
 import { configValueTemplateStorage } from "client/gui/config/ConfigValueTemplateStorage";
-import { TextBoxControl, TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
+import { TextBoxControl } from "client/gui/controls/TextBoxControl";
+import type { ConfigValueControlParams } from "client/gui/config/ConfigValueControl";
+import type { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
 
 type Type = BlockConfigTypes.String;
 class ValueControl extends ConfigValueControl<TextBoxControlDefinition, Type> {

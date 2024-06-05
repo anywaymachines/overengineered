@@ -1,73 +1,74 @@
 import { TasksControl } from "client/gui/static/TasksControl";
 import { TutorialControl } from "client/gui/static/TutorialControl";
 import { ActionController } from "client/modes/build/ActionController";
-import { BuildingMode } from "client/modes/build/BuildingMode";
-import { TutorialBasics } from "client/tutorial/TutorialBasics";
 import { TutorialBuildTool } from "client/tutorial/TutorialBuildTool";
+import { TutorialConfigTool } from "client/tutorial/TutorialConfigTool";
 import { TutorialDeleteTool } from "client/tutorial/TutorialDeleteTool";
 import { TutorialEditTool } from "client/tutorial/TutorialEditTool";
 import { EventHandler } from "shared/event/EventHandler";
-import { TutorialConfigTool } from "./TutorialConfigTool";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
-type TutorialType = "Basics";
+@injectable
+export class Tutorial {
+	static initialize(host: GameHostBuilder) {
+		host.services.registerSingletonClass(this);
+	}
 
-export namespace Tutorial {
-	export const Control = new TutorialControl();
-	export const Cancellable = true;
-	let isActive = false;
+	readonly Control = new TutorialControl();
+	readonly Cancellable = true;
+	private isActive = false;
 
-	export const buildTool = new TutorialBuildTool(Tutorial);
-	export const deleteTool = new TutorialDeleteTool(Tutorial);
-	export const editTool = new TutorialEditTool(Tutorial);
-	export const configTool = new TutorialConfigTool(Tutorial);
+	readonly buildTool: TutorialBuildTool;
+	readonly deleteTool: TutorialDeleteTool;
+	readonly editTool: TutorialEditTool;
+	readonly configTool: TutorialConfigTool;
 
-	export async function WaitForNextButtonPress(): Promise<boolean> {
+	constructor(
+		@inject readonly buildingMode: BuildingMode,
+		@inject di: DIContainer,
+		@inject readonly plot: SharedPlot,
+	) {
+		di = di.beginScope();
+		di.registerSingleton(this);
+
+		this.buildTool = di.resolveForeignClass(TutorialBuildTool);
+		this.deleteTool = di.resolveForeignClass(TutorialDeleteTool);
+		this.editTool = di.resolveForeignClass(TutorialEditTool);
+		this.configTool = di.resolveForeignClass(TutorialConfigTool);
+	}
+
+	async WaitForNextButtonPress(): Promise<boolean> {
 		return new Promise((resolve) => {
 			const eventHandler = new EventHandler();
 
-			eventHandler.subscribeOnce(Control.instance.Header.Next.MouseButton1Click, () => {
+			eventHandler.subscribeOnce(this.Control.instance.Header.Next.MouseButton1Click, () => {
 				eventHandler.unsubscribeAll();
 				resolve(true);
 			});
 
-			eventHandler.subscribeOnce(Control.instance.Header.Cancel.MouseButton1Click, () => {
+			eventHandler.subscribeOnce(this.Control.instance.Header.Cancel.MouseButton1Click, () => {
 				eventHandler.unsubscribeAll();
-				Finish();
+				this.Finish();
 				resolve(false);
 			});
 		});
 	}
 
-	/** Starts the tutorial scenery */
-	export function Begin(tutorial: TutorialType) {
-		if (isActive) return;
-
-		switch (tutorial) {
-			case "Basics":
-				TutorialBasics(Tutorial);
-				isActive = true;
-				break;
-
-			default:
-				break;
-		}
-	}
-
 	/** Ends the tutorial */
-	export function Finish() {
-		buildTool.cleanup();
-		deleteTool.cleanup();
-		editTool.cleanup();
-		configTool.cleanup();
+	Finish() {
+		this.buildTool.cleanup();
+		this.deleteTool.cleanup();
+		this.editTool.cleanup();
+		this.configTool.cleanup();
 
-		BuildingMode.instance.toolController.enabledTools.enableAll();
-		BuildingMode.instance.gui.actionbar.enabledButtons.enableAll();
-		BuildingMode.instance.toolController.allTools.editTool.enabledModes.enableAll();
+		this.buildingMode.toolController.enabledTools.enableAll();
+		this.buildingMode.gui.actionbar.enabledButtons.enableAll();
+		this.buildingMode.toolController.allTools.editTool.enabledModes.enableAll();
 		TasksControl.instance.finish();
 		ActionController.instance.enable();
 
-		Control.finish();
-
-		isActive = false;
+		this.Control.finish();
+		this.isActive = false;
 	}
 }

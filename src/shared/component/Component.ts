@@ -1,7 +1,42 @@
-import type { Control } from "client/gui/Control";
+import { ComponentChild } from "shared/component/ComponentChild";
+import { ComponentEvents } from "shared/component/ComponentEvents";
 import { SlimSignal } from "shared/event/SlimSignal";
-import { ComponentChild } from "./ComponentChild";
-import { ComponentEvents } from "./ComponentEvents";
+import type { Control } from "client/gui/Control";
+
+declare global {
+	interface IReadonlyEnableableComponent {
+		isEnabled(): boolean;
+		onEnable(func: () => void): void;
+	}
+	interface IReadonlyDisableableComponent {
+		onDisable(func: () => void): void;
+	}
+	interface IReadonlyDestroyableComponent {
+		isDestroyed(): boolean;
+		onDestroy(func: () => void): void;
+	}
+	interface IReadonlyComponent
+		extends IReadonlyEnableableComponent,
+			IReadonlyDisableableComponent,
+			IReadonlyDestroyableComponent {}
+
+	interface IEnableableComponent {
+		enable(): void;
+	}
+	interface IDisableableComponent {
+		disable(): void;
+	}
+	interface IDestroyableComponent {
+		destroy(): void;
+	}
+	interface IWriteonlyComponent extends IEnableableComponent, IDisableableComponent, IDestroyableComponent {}
+
+	interface IComponent extends IReadonlyComponent, IWriteonlyComponent {}
+
+	interface IDebuggableComponent {
+		getDebugChildren(): readonly object[];
+	}
+}
 
 class ComponentBase {
 	private readonly onEnabled = new SlimSignal();

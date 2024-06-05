@@ -1,11 +1,13 @@
 import { SlimSignal } from "shared/event/SlimSignal";
 
-export interface ReadonlyComponentChildren<T extends IComponent = IComponent> extends IDebuggableComponent {
+type Constraint = IWriteonlyComponent & IReadonlyDestroyableComponent;
+
+export interface ReadonlyComponentChildren<T extends Constraint = Constraint> extends IDebuggableComponent {
 	getAll(): readonly T[];
 }
 
 /** Stores components. Handles its enabling, disabling and destroying. */
-export class ComponentChildren<T extends IComponent = IComponent> implements ReadonlyComponentChildren<T> {
+export class ComponentChildren<T extends Constraint = Constraint> implements ReadonlyComponentChildren<T> {
 	private static readonly empty: [] = [];
 
 	readonly onAdded = new SlimSignal<(child: T) => void>();

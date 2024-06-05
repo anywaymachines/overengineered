@@ -1,106 +1,126 @@
 import { Players } from "@rbxts/services";
-import { ServerBuilding } from "server/building/ServerBuilding";
-import { SlotDatabase } from "server/database/SlotDatabase";
-import { PlayModeController } from "server/modes/PlayModeController";
-import { BlocksSerializer } from "server/plots/BlocksSerializer";
+import { BuildingPlot } from "server/plots/BuildingPlot";
+import { PlotsFloatingImageController } from "server/plots/PlotsFloatingImageController";
 import { Element } from "shared/Element";
-import { SlotsMeta } from "shared/SlotsMeta";
-import { SharedPlot } from "shared/building/SharedPlot";
-import { SharedPlots } from "shared/building/SharedPlots";
-import { PlotFloatingImageController } from "./PlotsFloatingImageController";
+import { ObservableCollectionSet } from "shared/event/ObservableCollection";
+import { HostedService } from "shared/GameHost";
+import { PlayerWatcher } from "shared/PlayerWatcher";
+import type { SharedPlot } from "shared/building/SharedPlot";
+import type { SharedPlots } from "shared/building/SharedPlots";
 
-const tryGetFreePlot = () => SharedPlots.plots.find((p) => p.ownerId.get() === undefined);
-const assignPlotTo = (player: Player): void => {
-	try {
+@injectable
+class ServerPlotController extends HostedService {
+	static tryCreate(player: Player, di: DIContainer, plots: SharedPlots) {
+		const tryGetFreePlot = (): SharedPlot | undefined => plots.plots.find((p) => p.ownerId.get() === undefined);
+
 		const plot = tryGetFreePlot();
-		if (!plot) throw "No free plot available";
+		if (!plot) {
+			player.Kick("No free plot found, try again later");
+			return;
+		}
+
+		return di.resolveForeignClass(ServerPlotController, [player, plot]);
+	}
+
+	readonly blocks;
+
+	constructor(
+		readonly player: Player,
+		readonly plot: SharedPlot,
+		@inject di: DIContainer,
+	) {
+		super();
 
 		plot.ownerId.set(player.UserId);
-		plot.instance.Blocks.ClearAllChildren();
 		player.RespawnLocation = plot.instance.WaitForChild("SpawnLocation") as SpawnLocation;
-	} catch {
-		player.Kick("No free plot found, try again later");
+
+		const initializeBlocksFolder = (plot: SharedPlot) => {
+			plot.instance.FindFirstChild("Blocks")?.Destroy();
+
+			const blocks = Element.create("Folder", { Name: "Blocks" });
+			blocks.Parent = plot.instance;
+
+			return blocks;
+		};
+
+		this.blocks = di.resolveForeignClass(BuildingPlot, [
+			initializeBlocksFolder(plot),
+			plot,
+			plot.instance.BuildingArea.ExtentsCFrame,
+			plot.instance.BuildingArea.ExtentsSize,
+		]);
+
+		this.event.subscribe(Players.PlayerRemoving, (player) => {
+			if (player !== this.player) return;
+			this.destroy();
+		});
+		this.onDestroy(() => {
+			this.plot.ownerId.set(undefined);
+			this.plot.whitelistedPlayers.set([5243461283]);
+			this.plot.blacklistedPlayers.set(undefined);
+
+			this.blocks.destroy();
+		});
 	}
-};
-const savePlotOf = (player: Player): void => {
-	const plot = SharedPlots.getPlotComponentByOwnerID(player.UserId);
-	const save = PlayModeController.getPlayerMode(player) === "build" && plot.getBlocks().size() !== 0;
-
-	if (save) {
-		SlotDatabase.instance.setBlocks(
-			player.UserId,
-			SlotsMeta.quitSlotIndex,
-			BlocksSerializer.serialize(plot.instance),
-			plot.getBlocks().size(),
-		);
-	} else {
-		SlotDatabase.instance.setBlocksFromAnotherSlot(
-			player.UserId,
-			SlotsMeta.quitSlotIndex,
-			SlotsMeta.autosaveSlotIndex,
-		);
-	}
-};
-const resetPlotOf = (player: Player): void => {
-	const plot = SharedPlots.getPlotComponentByOwnerID(player.UserId);
-	plot.ownerId.set(undefined);
-	plot.whitelistedPlayers.set([5243461283]);
-	plot.blacklistedPlayers.set(undefined);
-
-	ServerBuilding.clearPlot(plot.instance);
-
-	if (plot.instance.Blocks.GetPersistentPlayers().includes(player)) {
-		plot.instance.Blocks.RemovePersistentPlayer(player);
-	}
-};
-
-// Plot assignment
-Players.PlayerAdded.Connect((player) => assignPlotTo(player));
-Players.PlayerRemoving.Connect((player) => {
-	savePlotOf(player);
-	resetPlotOf(player);
-});
-
-// Floating username+image controller
-for (const plot of SharedPlots.plots) {
-	const controller = new PlotFloatingImageController(plot);
-	controller.enable();
 }
+export type { ServerPlotController };
 
-// Plot.Blocks initialization
-const initializeBlocksFolder = (plot: PlotModel) => {
-	const create = () => {
-		plot.FindFirstChild("Blocks")?.Destroy();
-		const blocks = Element.create("Model", {
-			Name: "Blocks",
-			ModelStreamingMode: Enum.ModelStreamingMode.Nonatomic,
+@injectable
+export class ServerPlots extends HostedService {
+	readonly controllers = new ObservableCollectionSet<ServerPlotController>();
+	private readonly controllersByPlot = new Map<PlotModel, ServerPlotController>();
+	private readonly controllersByPlayer = new Map<Player, ServerPlotController>();
+
+	constructor(
+		@inject di: DIContainer,
+		@inject readonly plots: SharedPlots,
+	) {
+		super();
+
+		this.parent(new PlotsFloatingImageController(plots));
+
+		const initializeSpawnLocation = (plot: SharedPlot) => {
+			const spawnLocation = new Instance("SpawnLocation");
+			spawnLocation.Name = "SpawnLocation";
+			spawnLocation.Anchored = true;
+			spawnLocation.Transparency = 1;
+			spawnLocation.CanCollide = false;
+			spawnLocation.CanQuery = false;
+			spawnLocation.CanTouch = false;
+			spawnLocation.PivotTo(new CFrame(plot.getSpawnPosition()));
+
+			spawnLocation.Parent = plot.instance;
+		};
+		this.onEnable(() => {
+			for (const plot of plots.plots) {
+				initializeSpawnLocation(plot);
+			}
 		});
 
-		blocks.Parent = plot;
-		blocks.GetPropertyChangedSignal("Parent").Once(create);
-	};
+		this.event.subscribeCollectionAdded(
+			PlayerWatcher.players,
+			(player) => {
+				const controller = ServerPlotController.tryCreate(player, di, plots);
+				if (!controller) return;
 
-	create();
-};
-const initializeSpawnLocation = (plot: SharedPlot) => {
-	const spawnLocation = new Instance("SpawnLocation");
-	spawnLocation.Name = "SpawnLocation";
-	spawnLocation.Anchored = true;
-	spawnLocation.Transparency = 1;
-	spawnLocation.CanCollide = false;
-	spawnLocation.CanQuery = false;
-	spawnLocation.CanTouch = false;
-	spawnLocation.PivotTo(new CFrame(plot.getSpawnPosition()));
+				controller.onDestroy(() => {
+					this.controllers.remove(controller);
+					this.controllersByPlayer.delete(controller.player);
+					this.controllersByPlot.delete(controller.plot.instance);
+				});
 
-	spawnLocation.Parent = plot.instance;
-};
+				this.controllers.add(controller);
+				this.controllersByPlot.set(controller.plot.instance, controller);
+				this.controllersByPlayer.set(controller.player, controller);
+			},
+			true,
+		);
+	}
 
-for (const plot of SharedPlots.plots) {
-	initializeBlocksFolder(plot.instance);
-	initializeSpawnLocation(plot);
-}
-
-export namespace ServerPlots {
-	/** Empty method to trigger initialization */
-	export function initialize() {}
+	tryGetControllerByPlayer(player: Player): ServerPlotController | undefined {
+		return this.controllersByPlayer.get(player);
+	}
+	tryGetController(plot: PlotModel): ServerPlotController | undefined {
+		return this.controllersByPlot.get(plot);
+	}
 }

@@ -1,8 +1,9 @@
 import { RunService, Workspace } from "@rbxts/services";
-import { BlockManager, PlacedBlockData } from "shared/building/BlockManager";
+import { BlockManager } from "shared/building/BlockManager";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { Signal } from "shared/event/Signal";
 import { AABB } from "shared/fixes/AABB";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class SharedPlot extends InstanceComponent<PlotModel> {
 	/** @client */
@@ -36,6 +37,10 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 		this.bounds = SharedPlot.getPlotBuildingRegion(instance);
 	}
 
+	getCenter() {
+		return this.instance.BuildingArea.GetPivot();
+	}
+
 	/** Returns the {@link AABB} of the plot construction area */
 	private static getPlotBuildingRegion(plot: PlotModel): AABB {
 		const heightLimit = 400;
@@ -55,14 +60,21 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 		).withSize((s) => new Vector3(s.X + 0.02, s.Y + 0.02, s.Z + 0.02));
 	}
 
+	/** @deprecated TOBEDELETED */
 	getBlockDatas(): readonly PlacedBlockData[] {
 		return this.getBlocks().map(BlockManager.getBlockDataByBlockModel);
 	}
+	/** @deprecated TOBEDELETED */
 	getBlocks(): readonly BlockModel[] {
 		return this.instance.Blocks.GetChildren(undefined);
 	}
+	/** @deprecated TOBEDELETED */
 	getBlock(uuid: BlockUuid): BlockModel {
 		return (this.instance.Blocks as unknown as Record<BlockUuid, BlockModel>)[uuid];
+	}
+	/** @deprecated TOBEDELETED */
+	tryGetBlock(uuid: BlockUuid): BlockModel | undefined {
+		return this.instance.Blocks.FindFirstChild(uuid) as BlockModel | undefined;
 	}
 
 	getSpawnPosition() {
@@ -104,9 +116,19 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 		return this.ownerId.get() === player.UserId || this.whitelistedPlayers.get()?.includes(player.UserId) === true;
 	}
 
+	/** Is an instance a descendant of this */
+	isFromThisPlot(instance: Instance): boolean {
+		return instance.IsDescendantOf(this.instance);
+	}
+
 	/** Is model fully inside this plot */
 	isModelInside(model: Model, pivot?: CFrame): boolean {
 		const modelRegion = AABB.fromModel(model, pivot);
 		return this.bounds.contains(modelRegion);
+	}
+
+	/** Is AABB fully inside this plot */
+	isInside(aabb: AABB): boolean {
+		return this.bounds.contains(aabb);
 	}
 }

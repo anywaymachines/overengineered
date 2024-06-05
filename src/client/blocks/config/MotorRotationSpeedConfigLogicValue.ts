@@ -1,7 +1,8 @@
-import { KeyDefinitions, KeyPressingDefinitionsController } from "client/controller/KeyPressingController";
-import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
-import { IBlockLogicValue } from "shared/block/BlockLogicValue";
-import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
+import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
+import { KeyPressingDefinitionsController } from "client/controller/KeyPressingController";
+import type { KeyDefinitions } from "client/controller/KeyPressingController";
+import type { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
+import type { IBlockLogicValue } from "shared/block/BlockLogicValue";
 
 export class MotorRotationSpeedConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.MotorRotationSpeed> {
 	private readonly controller;
@@ -49,7 +50,7 @@ export class MotorRotationSpeedConfigLogicValue extends ConfigLogicValueBase<Blo
 			},
 		} as const satisfies KeyDefinitions<"add" | "sub">;
 
-		this.add((this.controller = new KeyPressingDefinitionsController(def)));
+		this.parent((this.controller = new KeyPressingDefinitionsController(def)));
 	}
 
 	getTouchButtonDatas(): readonly TouchModeButtonData[] {

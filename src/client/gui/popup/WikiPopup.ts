@@ -1,12 +1,8 @@
+import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
-import { ButtonControl } from "client/gui/controls/Button";
-import {
-	WikiCategoriesControl,
-	WikiCategoriesControlDefinition,
-	WikiContentControl,
-	WikiContentControlDefinition,
-} from "client/wiki/WikiControl";
+import { WikiCategoriesControl, WikiContentControl } from "client/wiki/WikiControl";
+import type { WikiCategoriesControlDefinition, WikiContentControlDefinition } from "client/wiki/WikiControl";
 
 export type WikiPopupDefinition = GuiObject & {
 	readonly Heading: Frame & {

@@ -1,42 +1,45 @@
-import { SpreadingFireController } from "server/SpreadingFireController";
-import { PlayerDatabase } from "server/database/PlayerDatabase";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
-import { RemoteEvents } from "shared/RemoteEvents";
+import { SpreadingFireController } from "server/SpreadingFireController";
 import { BlockManager } from "shared/building/BlockManager";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import { EffectBase } from "shared/effects/EffectBase";
+import { HostedService } from "shared/GameHost";
+import { RemoteEvents } from "shared/RemoteEvents";
+import type { PlayerDatabase } from "server/database/PlayerDatabase";
 
-// PhysicsService.RegisterCollisionGroup("Wreckage");
-// PhysicsService.CollisionGroupSetCollidable("Wreckage", "Wreckage", false);
+@injectable
+export class UnreliableRemoteController extends HostedService {
+	constructor(@inject players: PlayerDatabase) {
+		super();
 
-const impactBreakEvent = (player: Player | undefined, parts: BasePart[]) => {
-	parts.forEach((part) => {
-		if (!BlockManager.isActiveBlockPart(part)) return;
+		// PhysicsService.RegisterCollisionGroup("Wreckage");
+		// PhysicsService.CollisionGroupSetCollidable("Wreckage", "Wreckage", false);
 
-		ServerPartUtils.BreakJoints(part);
-		// part.CollisionGroup = "Wreckage";
+		const impactBreakEvent = (player: Player | undefined, parts: BasePart[]) => {
+			parts.forEach((part) => {
+				if (!BlockManager.isActiveBlockPart(part)) return;
 
-		// Play sounds
-		RemoteEvents.Effects.ImpactSound.send(player ? [player] : "everyone", { part, index: undefined });
-	});
-};
+				ServerPartUtils.BreakJoints(part);
+				// part.CollisionGroup = "Wreckage";
 
-const burnEvent = (parts: BasePart[]) => {
-	parts.forEach((part) => {
-		if (!BlockManager.isActiveBlockPart(part)) return;
+				// Play sounds
+				RemoteEvents.Effects.ImpactSound.send(player ? [player] : "everyone", { part, index: undefined });
+			});
+		};
 
-		SpreadingFireController.burn(part);
-	});
-};
+		const burnEvent = (parts: BasePart[]) => {
+			parts.forEach((part) => {
+				if (!BlockManager.isActiveBlockPart(part)) return;
 
-EffectBase.staticMustSendToPlayer = (player) =>
-	PlayerDatabase.instance.get(player.UserId).settings?.graphics?.othersEffects ??
-	PlayerConfigDefinition.graphics.config.othersEffects;
+				SpreadingFireController.burn(part);
+			});
+		};
 
-RemoteEvents.ImpactBreak.invoked.Connect(impactBreakEvent);
-RemoteEvents.Burn.invoked.Connect((_, parts) => burnEvent(parts));
+		EffectBase.staticMustSendToPlayer = (player) =>
+			players.get(player.UserId).settings?.graphics?.othersEffects ??
+			PlayerConfigDefinition.graphics.config.othersEffects;
 
-export namespace UnreliableRemoteHandler {
-	/** Empty method just to trigger the import */
-	export function initialize() {}
+		this.event.subscribe(RemoteEvents.ImpactBreak.invoked, impactBreakEvent);
+		this.event.subscribe(RemoteEvents.Burn.invoked, (_, parts) => burnEvent(parts));
+	}
 }

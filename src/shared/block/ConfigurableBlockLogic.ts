@@ -1,10 +1,12 @@
-import { RemoteEvents } from "shared/RemoteEvents";
-import { BlockLogicValue, IBlockLogicValue, ReadonlyBlockLogicValue } from "shared/block/BlockLogicValue";
+import { BlockLogic } from "shared/block/BlockLogic";
+import { BlockLogicValue } from "shared/block/BlockLogicValue";
 import { ByteBlockLogicValue } from "shared/block/ByteBlockLogicValue";
 import { NumberBlockLogicValue } from "shared/block/NumberBlockLogicValue";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Objects } from "shared/fixes/objects";
-import { BlockLogic, BlockLogicData } from "./BlockLogic";
+import { RemoteEvents } from "shared/RemoteEvents";
+import type { BlockLogicData } from "shared/block/BlockLogic";
+import type { IBlockLogicValue, ReadonlyBlockLogicValue } from "shared/block/BlockLogicValue";
 
 type BlockConfigValueRegistry = {
 	readonly [k in keyof BlockConfigTypes.Types]: (
@@ -29,9 +31,9 @@ const BlockConfigValueRegistry = {
 	byte: (definition) => new ByteBlockLogicValue(definition.default),
 	clampedNumber: (definition) =>
 		new NumberBlockLogicValue(definition.default, definition.min, definition.max, definition.step),
-	thrust: () => new NumberBlockLogicValue(0, 0, 100, 0.01),
-	motorRotationSpeed: (def) => new NumberBlockLogicValue(0, -def.maxSpeed, def.maxSpeed, 0.01),
-	servoMotorAngle: () => new NumberBlockLogicValue(0, -180, 180, 0.01),
+	thrust: () => new NumberBlockLogicValue(0, 0, 100, 0.001),
+	motorRotationSpeed: (def) => new NumberBlockLogicValue(0, -def.maxSpeed, def.maxSpeed, 0.001),
+	servoMotorAngle: () => new NumberBlockLogicValue(0, -180, 180, 0.001),
 	or: createObservable,
 	controllableNumber: (definition) =>
 		new NumberBlockLogicValue(definition.config.value, definition.min, definition.max, definition.step),

@@ -1,9 +1,11 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
-import { LEDDisplayBlockLogic } from "shared/block/logic/logic/display/LEDDisplayBlockLogic";
+import type { PlayModeController } from "server/modes/PlayModeController";
+import type { LEDDisplayBlockLogic } from "shared/block/logic/logic/display/LEDDisplayBlockLogic";
 
+@injectable
 export class LEDDisplayServerLogic extends ServerBlockLogic<typeof LEDDisplayBlockLogic> {
-	constructor(logic: typeof LEDDisplayBlockLogic) {
-		super(logic);
+	constructor(logic: typeof LEDDisplayBlockLogic, @inject playModeController: PlayModeController) {
+		super(logic, playModeController);
 
 		logic.events.prepare.invoked.Connect((player, { block }) => {
 			if (!this.isValidBlock(block, player)) return;

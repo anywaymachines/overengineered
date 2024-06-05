@@ -1,16 +1,19 @@
-import { BlockManager, PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
-import { SharedPlots } from "shared/building/SharedPlots";
+import { BlockManager } from "shared/building/BlockManager";
 import { MaterialData } from "shared/data/MaterialData";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
 
 /** Methods for editing the building */
 export namespace SharedBuilding {
-	export function getBlocksConnectedByLogicToMulti(plot: PlotModel, uuids: ReadonlySet<BlockUuid>) {
+	export function getBlocksConnectedByLogicToMulti(
+		blocks: readonly PlacedBlockData[],
+		uuids: ReadonlySet<BlockUuid>,
+	) {
 		const result = new Map<
 			BlockUuid,
 			(readonly [PlacedBlockData, BlockConnectionName, PlacedBlockDataConnection])[]
 		>();
-		for (const otherblock of SharedPlots.getPlotBlockDatas(plot)) {
+		for (const otherblock of blocks) {
 			if (otherblock.connections === undefined) continue;
 
 			for (const [connectionName, connection] of pairs(otherblock.connections)) {

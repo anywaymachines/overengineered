@@ -1,9 +1,9 @@
 import { Control } from "client/gui/Control";
-import { Gui } from "client/gui/Gui";
-import { Popup } from "client/gui/Popup";
 import { ButtonControl } from "client/gui/controls/Button";
 import { ByteTextBoxControl } from "client/gui/controls/ByteTextBoxControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
+import { Gui } from "client/gui/Gui";
+import { Popup } from "client/gui/Popup";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TextPopup } from "client/gui/popup/TextPopup";
 import { LogControl } from "client/gui/static/LogControl";

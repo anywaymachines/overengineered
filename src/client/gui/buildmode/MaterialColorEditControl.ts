@@ -1,11 +1,14 @@
-import { ColorChooser, ColorChooserDefinition } from "client/gui/ColorChooser";
+import { ColorChooser } from "client/gui/ColorChooser";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
-import { MaterialChooser, MaterialChooserDefinition } from "client/gui/MaterialChooser";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
-import { ButtonControl, TextButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import { TextButtonControl } from "client/gui/controls/Button";
+import { MaterialChooser } from "client/gui/MaterialChooser";
 import { TransformService } from "shared/component/TransformService";
-import { ObservableValue } from "shared/event/ObservableValue";
+import type { ColorChooserDefinition } from "client/gui/ColorChooser";
+import type { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import type { MaterialChooserDefinition } from "client/gui/MaterialChooser";
+import type { ObservableValue } from "shared/event/ObservableValue";
 
 export type MaterialColorEditControlDefinition = GuiObject & {
 	readonly Color: GuiObject & {

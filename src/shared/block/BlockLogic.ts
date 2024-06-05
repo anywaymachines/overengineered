@@ -1,6 +1,6 @@
-import { PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { PlacedBlockData, PlacedBlockDataConnection } from "shared/building/BlockManager";
 
 export interface BlockLogicData<TDef extends BlockConfigTypes.Definitions, TBlock extends BlockModel = BlockModel> {
 	readonly id: string;

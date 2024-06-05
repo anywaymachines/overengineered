@@ -1,22 +1,21 @@
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { Tutorial } from "client/tutorial/Tutorial";
 import { BuildingManager } from "shared/building/BuildingManager";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { EventHandler } from "shared/event/EventHandler";
 import { successResponse } from "shared/types/network/Responses";
+import type { Tutorial } from "client/tutorial/Tutorial";
 
 export type TutorialDeleteBlockHighlight = {
 	position: Vector3;
 };
 
+@injectable
 export class TutorialDeleteTool {
 	private readonly tutorialBlocksToRemove: (TutorialDeleteBlockHighlight & { readonly instance: Instance })[] = [];
 
-	constructor(private readonly tutorial: typeof Tutorial) {}
+	constructor(@inject private readonly tutorial: Tutorial) {}
 
 	get() {
-		return BuildingMode.instance.toolController.allTools.deleteTool;
+		return this.tutorial.buildingMode.toolController.allTools.deleteTool;
 	}
 
 	cleanup() {
@@ -28,9 +27,9 @@ export class TutorialDeleteTool {
 	}
 
 	addBlockToDelete(data: TutorialDeleteBlockHighlight) {
-		const plot = SharedPlots.getOwnPlot();
+		const plot = this.tutorial.plot;
 		const worldPosition = plot.instance.BuildingArea.CFrame.PointToWorldSpace(data.position);
-		const block = BuildingManager.getBlockByPosition(worldPosition)!;
+		const block = BuildingManager.getBlockByPosition(this.tutorial.plot, worldPosition)!;
 
 		const selectionBox = new Instance("SelectionBox");
 		selectionBox.Adornee = block;
@@ -75,6 +74,7 @@ export class TutorialDeleteTool {
 				for (const blockToPlace of this.tutorialBlocksToRemove ?? []) {
 					if (
 						BuildingManager.getBlockByPosition(
+							this.tutorial.plot,
 							plot.instance.BuildingArea.CFrame.PointToWorldSpace(blockToPlace.position),
 						)
 					) {

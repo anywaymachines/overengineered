@@ -1,5 +1,5 @@
-import { Component } from "./Component";
-import { ComponentChildren } from "./ComponentChildren";
+import { Component } from "shared/component/Component";
+import { ComponentChildren } from "shared/component/ComponentChildren";
 
 /** Component with children */
 export class ContainerComponent<TChild extends IComponent = IComponent> extends Component {
@@ -21,6 +21,11 @@ export class ContainerComponent<TChild extends IComponent = IComponent> extends 
 	readonly clear = () => this.children.clear();
 
 	getDebugChildren(): readonly IDebuggableComponent[] {
-		return [...super.getDebugChildren(), ...this.children.getDebugChildren()];
+		return [
+			...super.getDebugChildren(),
+			...(this.children
+				.getDebugChildren()
+				.filter((c) => "getDebugChildren" in c) as unknown as readonly IDebuggableComponent[]),
+		];
 	}
 }

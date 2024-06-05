@@ -1,7 +1,8 @@
-import { BlockConfigRegistryNonGeneric, blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { SharedPlot } from "shared/building/SharedPlot";
+import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { JsonSerializablePrimitive } from "shared/fixes/Json";
+import type { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
+import type { SharedPlot } from "shared/building/SharedPlot";
+import type { JsonSerializablePrimitive } from "shared/fixes/Json";
 
 export namespace BlockWireManager {
 	export type DataType = "bool" | "vector3" | "number" | "string" | "color" | "byte" | "bytearray" | "never";

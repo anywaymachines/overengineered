@@ -1,25 +1,28 @@
 import { GuiService, StarterGui } from "@rbxts/services";
-import { ClientComponent } from "client/component/ClientComponent";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { Signals } from "client/event/Signals";
 import { Popup } from "client/gui/Popup";
-import { Remotes } from "shared/Remotes";
+import { BuildingMode } from "client/modes/build/BuildingMode";
+import { RideMode } from "client/modes/ride/RideMode";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { Objects } from "shared/fixes/objects";
-import { BuildingMode } from "./build/BuildingMode";
-import { RideMode } from "./ride/RideMode";
+import { HostedService } from "shared/GameHost";
+import { Remotes } from "shared/Remotes";
 
-export class PlayModeController extends ClientComponent {
-	readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
-	readonly modes;
+@injectable
+export class PlayModeController extends HostedService {
+	private readonly playmode = new ObservableValue<PlayModes | undefined>(undefined);
+	private readonly modes;
 
-	constructor() {
+	static initialize(host: GameHostBuilder) {
+		host.services.registerSingletonClass(BuildingMode);
+		host.services.registerSingletonClass(RideMode);
+		host.services.registerService(PlayModeController);
+	}
+	constructor(@inject build: BuildingMode, @inject ride: RideMode) {
 		super();
 
-		this.event.onPrepare(() => {
-			GuiService.SetGameplayPausedNotificationEnabled(false);
-			StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
-		});
+		GuiService.SetGameplayPausedNotificationEnabled(false);
+		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
 		Remotes.Client.GetNamespace("Ride")
 			.Get("SetPlayModeOnClient")
@@ -29,8 +32,8 @@ export class PlayModeController extends ClientComponent {
 			});
 
 		this.modes = {
-			build: BuildingMode.instance,
-			ride: new RideMode(),
+			build,
+			ride,
 		} as const;
 
 		for (const [_, mode] of pairs(this.modes)) {
@@ -57,10 +60,6 @@ export class PlayModeController extends ClientComponent {
 		this.setMode(this.playmode.get(), undefined);
 
 		this.event.subscribe(Signals.LOCAL_PLAY_MODE_CHANGED, (mode) => this.callImmediateSetMode(mode));
-	}
-
-	getDebugChildren(): readonly IDebuggableComponent[] {
-		return [...super.getDebugChildren(), ...Objects.values(this.modes)];
 	}
 
 	private callImmediateSetMode(mode: PlayModes) {

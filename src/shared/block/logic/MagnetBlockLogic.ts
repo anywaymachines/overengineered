@@ -1,9 +1,9 @@
 import { RunService } from "@rbxts/services";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 const magicNumber = 60 * 1; // dt
 const magnets: MagnetBlockLogic[] = [];

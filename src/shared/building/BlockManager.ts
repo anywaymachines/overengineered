@@ -1,6 +1,7 @@
-import { BlockId } from "shared/BlockDataRegistry";
+import { JSON } from "shared/fixes/Json";
 import { Serializer } from "shared/Serializer";
-import { JSON, JsonSerializablePrimitive } from "shared/fixes/Json";
+import type { BlockId } from "shared/BlockDataRegistry";
+import type { JsonSerializablePrimitive } from "shared/fixes/Json";
 
 /** Connections to the INPUT connectors */
 export type PlacedBlockLogicConnections = {

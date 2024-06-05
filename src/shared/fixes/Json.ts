@@ -1,10 +1,10 @@
 import { HttpService } from "@rbxts/services";
-import { Objects } from "./objects";
+import { Objects } from "shared/fixes/objects";
 
 type Serializer<TActual, TSerialized extends JsonSerializedProperty> = {
 	isType(obj: unknown): obj is TActual;
-	serialize(value: JsonSerializable<TActual>): TSerialized;
-	deserialize(value: TSerialized): JsonSerializable<TActual>;
+	serialize(value: TActual): TSerialized;
+	deserialize(value: TSerialized): TActual;
 };
 
 /** A value or that is serializable by `HTTPService.JSONEncode` */
@@ -21,7 +21,9 @@ export type JsonSerializedProperty =
 	| SerializedUDim
 	| SerializedColor3;
 
-/** A value that is serializable by `JSON.encode` */
+/** A value that is serializable by `JSON.encode`
+ * @deprecated TOBEDELETED
+ */
 export type JsonSerializablePrimitive =
 	| number
 	| string
@@ -33,25 +35,6 @@ export type JsonSerializablePrimitive =
 	| UDim2
 	| UDim
 	| Color3;
-
-/** A value or that is serializable by `JSON.encode` */
-export type JsonSerializable<T> = T extends JsonSerializablePrimitive
-	? T
-	: T extends
-				| CheckableTypes[Exclude<keyof CheckableTypes, keyof CheckablePrimitives>]
-				| CreatableInstances[keyof CreatableInstances]
-		? never
-		: T extends () => void
-			? never
-			: T extends unknown[]
-				? T
-				: T extends object
-					? T extends Readonly<Record<string, JsonSerializable<infer _>>>
-						? T
-						: never
-					: never;
-
-//
 
 type SerializedCFrame = {
 	readonly __type: "cframe";
@@ -199,7 +182,7 @@ export namespace JSON {
 
 		return HttpService.JSONEncode(process(value));
 	}
-	export function deserialize<T>(data: string): JsonSerializable<T> {
+	export function deserialize<T>(data: string): T {
 		const process = <T>(obj: JsonSerializedProperty): unknown => {
 			if (typeIs(obj, "table") && "__type" in obj && obj["__type"] in serializers) {
 				return serializers[obj["__type"]].deserialize(obj as never);
@@ -223,6 +206,6 @@ export namespace JSON {
 			return obj;
 		};
 
-		return process(HttpService.JSONDecode(data) as JsonSerializedProperty) as JsonSerializable<T>;
+		return process(HttpService.JSONDecode(data) as JsonSerializedProperty) as T;
 	}
 }

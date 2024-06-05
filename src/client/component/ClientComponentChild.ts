@@ -1,6 +1,7 @@
-import type { ClientComponentEvents } from "client/component/ClientComponentEvents";
 import { InputController } from "client/controller/InputController";
-import { ComponentChild, ReadonlyComponentChild } from "shared/component/ComponentChild";
+import { ComponentChild } from "shared/component/ComponentChild";
+import type { ClientComponentEvents } from "client/component/ClientComponentEvents";
+import type { ReadonlyComponentChild } from "shared/component/ComponentChild";
 
 export namespace ClientComponentChild {
 	export function createOnceBasedOnInputType<T extends IComponent>(types: Readonly<Record<InputType, () => T>>): T {

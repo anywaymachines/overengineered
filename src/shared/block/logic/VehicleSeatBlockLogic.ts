@@ -1,8 +1,8 @@
 import { Players, RunService } from "@rbxts/services";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { ObservableValue } from "shared/event/ObservableValue";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 type _VehicleSeat = BlockModel & {
 	readonly VehicleSeat: VehicleSeat;

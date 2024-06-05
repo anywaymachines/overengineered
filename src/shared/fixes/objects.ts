@@ -51,4 +51,10 @@ export namespace Objects {
 	export function writable<T extends object>(object: T): Writable<T> {
 		return object;
 	}
+	export function awaitThrow<T>(promise: Promise<T>): T {
+		const [success, ret] = promise.await();
+		if (!success) throw ret;
+
+		return ret;
+	}
 }

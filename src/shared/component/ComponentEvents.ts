@@ -1,12 +1,10 @@
 import { EventHandler } from "shared/event/EventHandler";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { JSON } from "shared/fixes/Json";
 import type { CollectionChangedArgs, ReadonlyObservableCollection } from "shared/event/ObservableCollection";
-import {
-	ObservableValue,
-	ReadonlyObservableValue,
-	ReadonlySubscribeObservableValue,
-} from "shared/event/ObservableValue";
-import { ReadonlyArgsSignal, ReadonlySignal } from "shared/event/Signal";
-import { JSON, JsonSerializablePrimitive } from "shared/fixes/Json";
+import type { ReadonlyObservableValue, ReadonlySubscribeObservableValue } from "shared/event/ObservableValue";
+import type { ReadonlyArgsSignal, ReadonlySignal } from "shared/event/Signal";
+import type { JsonSerializablePrimitive } from "shared/fixes/Json";
 
 type Sub<T extends Callback> = readonly [signal: ReadonlySignal<T>, callback: T];
 
@@ -14,13 +12,15 @@ type Sub<T extends Callback> = readonly [signal: ReadonlySignal<T>, callback: T]
 export class ComponentEvents {
 	readonly eventHandler = new EventHandler();
 	private readonly events: Sub<Callback>[] = [];
-	private readonly state: IComponent;
 
-	constructor(state: IComponent) {
-		this.state = state;
-
+	constructor(
+		private readonly state: IReadonlyComponent | (IReadonlyDestroyableComponent & IReadonlyEnableableComponent),
+	) {
 		state.onEnable(() => this.enable());
-		state.onDisable(() => this.disable());
+		if ("onDisable" in state) {
+			state.onDisable(() => this.disable());
+		}
+
 		state.onDestroy(() => this.destroy());
 	}
 
@@ -52,9 +52,6 @@ export class ComponentEvents {
 			func(this.eventHandler);
 		}
 	}
-	onDisable(func: (eventHandler: EventHandler) => void) {
-		this.state.onDisable(() => func(this.eventHandler));
-	}
 
 	/** Register an event */
 	subscribe<TArgs extends unknown[]>(signal: ReadonlyArgsSignal<TArgs>, callback: (...args: TArgs) => void): void {
@@ -85,14 +82,33 @@ export class ComponentEvents {
 	/** Subscribe to an observable collection changed event */
 	subscribeCollection<T extends defined>(
 		observable: ReadonlyObservableCollection<T>,
-		callback: (update: CollectionChangedArgs<T> | { readonly kind: "reset" }) => void,
+		callback: (update: CollectionChangedArgs<T>) => void,
 		executeOnEnable = false,
 		executeImmediately = false,
 	): void {
 		this.subscribe(observable.changed, callback);
 		if (executeOnEnable) {
-			this.onEnable(() => callback({ kind: "reset" }), executeImmediately);
+			this.onEnable(() => callback({ kind: "add", added: observable.getArr() }), executeImmediately);
 		}
+	}
+	/** Subscribe to an observable collection item added event */
+	subscribeCollectionAdded<T extends defined>(
+		observable: ReadonlyObservableCollection<T>,
+		callback: (item: T) => void,
+		executeOnEnable = false,
+		executeImmediately = false,
+	): void {
+		this.subscribeCollection(
+			observable,
+			(update) => {
+				if (update.kind !== "add") return;
+				for (const item of update.added) {
+					callback(item);
+				}
+			},
+			executeOnEnable,
+			executeImmediately,
+		);
 	}
 
 	/** Create an `ReadonlyObservableValue` from an `Instance` property */

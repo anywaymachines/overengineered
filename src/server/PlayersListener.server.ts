@@ -1,6 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
+import { DiscordWebhook } from "server/DiscordWebhook";
 import { Colors } from "shared/Colors";
-import { DiscordWebhook } from "./DiscordWebhook";
 
 if (!RunService.IsStudio()) {
 	Players.PlayerAdded.Connect((player) => {

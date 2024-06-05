@@ -1,20 +1,18 @@
-import { Players } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { LoadingController } from "client/controller/LoadingController";
 import { Signals } from "client/event/Signals";
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { BuildTool } from "client/tools/BuildTool";
-import { BuildTool3 } from "client/tools/BuildTool3";
 import { ConfigTool } from "client/tools/ConfigTool";
 import { DeleteTool } from "client/tools/DeleteTool";
+import { EditTool } from "client/tools/EditTool";
 import { PaintTool } from "client/tools/PaintTool";
-import { ToolBase } from "client/tools/ToolBase";
+import { WireTool } from "client/tools/WireTool";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentDisabler } from "shared/component/ComponentDisabler";
 import { MiddlewaredObservableValue } from "shared/event/MiddlewaredObservableValue";
 import { Objects } from "shared/fixes/objects";
-import { EditTool } from "./EditTool";
-import { WireTool } from "./WireTool";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { ToolBase } from "client/tools/ToolBase";
 
 class ToolInputController extends ClientComponent {
 	constructor(tools: ToolController) {
@@ -66,6 +64,7 @@ class ToolInputController extends ClientComponent {
 	}
 }
 
+@injectable
 export class ToolController extends ClientComponent {
 	readonly selectedTool = new MiddlewaredObservableValue<ToolBase | undefined>(undefined);
 	readonly visibleTools: ComponentDisabler<ToolBase>;
@@ -74,8 +73,10 @@ export class ToolController extends ClientComponent {
 	readonly allTools;
 	readonly allToolsOrdered: readonly ToolBase[];
 
-	constructor(mode: BuildingMode) {
+	constructor(@inject mode: BuildingMode, @inject di: DIContainer) {
 		super();
+		di = di.beginScope();
+		di.registerSingleton(this);
 
 		Signals.PLAYER.DIED.Connect(() => {
 			this.selectedTool.set(undefined);
@@ -103,19 +104,13 @@ export class ToolController extends ClientComponent {
 
 		// array instead of an object for ordering purposes
 		const tools = [
-			["buildTool", new BuildTool(mode)],
-			["editTool", new EditTool(mode)],
+			["buildTool", di.resolveForeignClass(BuildTool)],
+			["editTool", di.resolveForeignClass(EditTool)],
 			["deleteTool", new DeleteTool(mode)],
-			["configTool", new ConfigTool(mode)],
+			["configTool", di.resolveForeignClass(ConfigTool)],
 			["paintTool", new PaintTool(mode)],
-			["wireTool", new WireTool(mode)],
+			["wireTool", di.resolveForeignClass(WireTool, [mode])],
 		] as const;
-		if (Players.LocalPlayer.Name === "i3ymm") {
-			(tools as Writable<typeof tools>).push([
-				"buildTool3" as "buildTool",
-				new BuildTool3(mode) as unknown as BuildTool,
-			]);
-		}
 
 		this.allTools = Objects.fromEntries(tools);
 		this.allToolsOrdered = tools.map((t) => t[1]);

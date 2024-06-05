@@ -1,6 +1,8 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
-import { SevenSegmentDisplayBlockLogic } from "shared/block/logic/logic/display/SevenSegmentDisplayBlockLogic";
+import type { PlayModeController } from "server/modes/PlayModeController";
+import type { SevenSegmentDisplayBlockLogic } from "shared/block/logic/logic/display/SevenSegmentDisplayBlockLogic";
 
+@injectable
 export class SevenSegmentDisplayServerLogic extends ServerBlockLogic<typeof SevenSegmentDisplayBlockLogic> {
 	private readonly SEGMENT_LETTERS: { [key: string]: string[] } = {
 		"0": ["A", "B", "C", "D", "E", "F"],
@@ -21,10 +23,12 @@ export class SevenSegmentDisplayServerLogic extends ServerBlockLogic<typeof Seve
 		F: ["A", "B", "C", "G"],
 	};
 
-	constructor(logic: typeof SevenSegmentDisplayBlockLogic) {
-		super(logic);
+	constructor(logic: typeof SevenSegmentDisplayBlockLogic, @inject playModeController: PlayModeController) {
+		super(logic, playModeController);
 
 		logic.events.update.invoked.Connect((player, { block, code }) => {
+			if (!this.isValidBlock(block, player)) return;
+
 			const letters = string.format("%02X", code).split("");
 			this.setEnabled(block, "L", this.SEGMENT_LETTERS[letters[0]]);
 			this.setEnabled(block, "R", this.SEGMENT_LETTERS[letters[1]]);

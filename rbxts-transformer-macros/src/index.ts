@@ -1,7 +1,9 @@
+import path from "path";
 import ts from "typescript";
 
 const create = (program: ts.Program, context: ts.TransformationContext) => {
 	const factory = ts.factory;
+	const typeChecker = program.getTypeChecker();
 
 	/** Fix namespace function hoisting by moving any variable and inside namespace declarations to the bottom */
 	const transformNamespaces = (file: ts.SourceFile): ts.SourceFile => {
@@ -98,7 +100,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 				if (node.expression.text === "$err") {
 					return constructLog(node, "err");
 				}
-			
+
 				if (node.expression.text === "$beginScope") {
 					return constructScope(node);
 				}
@@ -155,7 +157,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 
 			return ts.visitEachChild(node, addEndScopes, context);
 		};
-		
+
 		file = addEndScopes(file) as ts.SourceFile;
 		file = ts.visitEachChild(file, visit, context);
 		if (needsImport) {
@@ -189,10 +191,214 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 
 		return file;
 	}
+	const transformDI = (file: ts.SourceFile): ts.SourceFile => {
+		const identifierByTypeNode = (typeNode: ts.TypeNode) =>
+			identifierByType(typeChecker.getTypeFromTypeNode(typeNode));
+		const identifierByType = (type: ts.Type) => {
+			if (!type?.symbol?.valueDeclaration) return;
+
+			const pth = path.relative("src", type.symbol.valueDeclaration.getSourceFile().fileName)
+			return pth + "$" + type.symbol.name;
+		};
+
+		const modifyParameters = (clazz: ts.ClassDeclaration): ts.ClassDeclaration => {
+			if (!clazz.name) return clazz;
+			if (!clazz.modifiers?.find(m => ts.isDecorator(m) && ts.isIdentifier(m.expression) && m.expression.text === 'injectable')) {
+				return clazz;
+			}
+
+			type decl = {
+				readonly name: ts.Identifier;
+				readonly type: ts.TypeReferenceNode;
+			}
+			let added: decl[] = [];
+			let classsymb: ts.Symbol | undefined = undefined;
+			let constr: ts.ConstructorDeclaration | undefined = undefined;
+
+			for (const ctor of clazz.members) {
+				if (ts.isConstructorDeclaration(ctor)) {
+					constr = ctor;
+
+					for (const parameter of ctor.parameters) {
+						if (!parameter.modifiers || parameter.modifiers.length === 0) {
+							if (added && added.length !== 0) {
+								throw 'Can not have @inject declarations before non-inject ones';
+							}
+
+							continue;
+						}
+
+						for (const decorator of parameter.modifiers) {
+							if (!ts.isDecorator(decorator)) continue;
+							if (!ts.isIdentifier(decorator.expression)) continue;
+							if (decorator.expression.text !== 'inject') continue;
+							if (!ts.isIdentifier(parameter.name)) continue;
+							if (!parameter.type || !ts.isTypeReferenceNode(parameter.type)) continue;
+							if (!ts.isIdentifier(parameter.type.typeName)) continue;
+
+							classsymb ??= program.getTypeChecker().getSymbolAtLocation(clazz.name);
+							if (!classsymb) {
+								throw `Could not find symbol for class ${clazz.name.text}`;
+							}
+
+							added ??= [];
+							identifierByTypeNode(parameter.type);
+							added.push({
+								name: parameter.name,
+								type: parameter.type,
+							});
+						}
+					}
+				}
+			}
+
+			if (added.find(a => !identifierByTypeNode(a.type)))
+				return clazz;
+
+			return ts.factory.createClassDeclaration(
+				clazz.modifiers?.filter(m => !(ts.isDecorator(m) && ts.isIdentifier(m.expression) && m.expression.text === 'injectable')),
+				clazz.name,
+				clazz.typeParameters,
+				clazz.heritageClauses,
+				[
+					factory.createMethodDeclaration(
+						[factory.createToken(ts.SyntaxKind.StaticKeyword)],
+						undefined,
+						factory.createIdentifier("_depsCreate"),
+						undefined,
+						undefined,
+						[
+							...(constr?.parameters.filter(p => !added.find(a => a.name.text === (p.name as ts.Identifier).text)) ?? [])
+								.map(p => ts.factory.createParameterDeclaration(
+									p.modifiers?.filter(m => m.kind !== ts.SyntaxKind.PrivateKeyword && m.kind !== ts.SyntaxKind.ReadonlyKeyword),
+									p.dotDotDotToken,
+									p.name,
+									p.questionToken,
+									p.type,
+									p.initializer,
+								)),
+							factory.createParameterDeclaration(
+								undefined,
+								undefined,
+								factory.createIdentifier("deps"),
+								undefined,
+								factory.createTypeReferenceNode(
+									factory.createIdentifier("DIContainer"),
+									undefined,
+								),
+								undefined,
+							),
+						],
+						undefined,
+						factory.createBlock(
+							[
+								factory.createReturnStatement(
+									factory.createNewExpression(
+										clazz.name,
+										undefined,
+										[
+											...(constr?.parameters.filter(p => !added.find(a => a.name.text === (p.name as ts.Identifier).text)).map(p => p.name as ts.Identifier) ?? []),
+											...added.map(a =>
+												factory.createCallExpression(
+													factory.createPropertyAccessExpression(
+														factory.createIdentifier("deps"),
+														factory.createIdentifier("resolve"),
+													),
+													[a.type],
+													[factory.createStringLiteral(identifierByTypeNode(a.type)!)],
+												),
+											),
+										],
+									),
+								),
+							],
+							true,
+						),
+					),
+					...clazz.members.map(m => {
+						if (!ts.isConstructorDeclaration(m)) return m;
+
+						return ts.factory.createConstructorDeclaration(
+							m.modifiers,
+							m.parameters.map(p => ts.factory.createParameterDeclaration(
+								p.modifiers?.filter(m => !(ts.isDecorator(m) && ts.isIdentifier(m.expression) && m.expression.text === 'inject')),
+								p.dotDotDotToken,
+								p.name,
+								p.questionToken,
+								p.type,
+								p.initializer,
+							)),
+							m.body,
+						)
+					}),
+				],
+			);
+		};
+		const modifyRegistration = (node: ts.Node): ts.Node | undefined => {
+			if (!ts.isCallExpression(node)) return;
+			if (!ts.isPropertyAccessExpression(node.expression)) return;
+			if (!ts.isIdentifier(node.expression.name)) return;
+
+			const tp = typeChecker.getTypeAtLocation(node.expression.expression);
+			if (!(tp.aliasSymbol ?? tp.symbol)?.name.includes('DIContainer'))
+				return;
+
+			if (node.expression.name.text.startsWith('register')) {
+				const signature = typeChecker.getResolvedSignature(node);
+				if (!signature) return;
+
+				const type =
+					node.expression.name.text.includes('Func')
+					? typeChecker.getReturnTypeOfSignature(typeChecker.getSignaturesOfType(typeChecker.getTypeOfSymbolAtLocation(signature.getParameters()[0], node), ts.SignatureKind.Call)[0])
+					: typeChecker.getTypeOfSymbolAtLocation(signature.getParameters()[0], node);
+
+				const identifier = identifierByType(type);
+				if (!identifier) return;
+
+				return ts.factory.createCallExpression(
+					node.expression,
+					node.typeArguments,
+					[
+						...node.arguments,
+						ts.factory.createStringLiteral(identifier),
+					],
+				);
+			}
+			if (node.expression.name.text.startsWith('resolve')) {
+				if (!node.typeArguments || node.typeArguments.length === 0) return;
+				
+				const type = typeChecker.getTypeFromTypeNode(node.typeArguments[0]);
+				const identifier = identifierByType(type);
+				if (!identifier) return;
+
+				return ts.factory.createCallExpression(
+					node.expression,
+					node.typeArguments,
+					[
+						...node.arguments,
+						ts.factory.createStringLiteral(identifier),
+					],
+				)
+			};
+		};
+
+		const visit = (node: ts.Node): ts.Node => {
+			if (ts.isClassDeclaration(node) && node.name) {
+				node = modifyParameters(node);
+			}
+
+			node = modifyRegistration(node) ?? node;
+
+			return ts.visitEachChild(node, visit, context);
+		};
+
+		return ts.visitEachChild(file, visit, context);
+	}
 
 	return (file: ts.SourceFile): ts.SourceFile => {
 		file = transformNamespaces(file);
 		file = transformLogs(file);
+		file = transformDI(file);
 
 		return file;
 	}

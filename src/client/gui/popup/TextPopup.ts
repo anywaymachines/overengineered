@@ -1,7 +1,7 @@
 import { GuiService } from "@rbxts/services";
+import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
-import { ButtonControl } from "client/gui/controls/Button";
 
 export type TextPopupDefinition = GuiObject & {
 	readonly Heading: Frame & {

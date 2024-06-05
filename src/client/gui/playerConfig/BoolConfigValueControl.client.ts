@@ -1,8 +1,9 @@
-import { ToggleControl, ToggleControlDefinition } from "client/gui/controls/ToggleControl";
+import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { ConfigValueControl } from "client/gui/playerConfig/ConfigValueControl";
 import { playerConfigControlRegistry } from "client/gui/playerConfig/PlayerConfigControlRegistry";
 import { playerConfigValueTemplateStorage } from "client/gui/playerConfig/PlayerConfigValueTemplateStorage";
 import { Signal } from "shared/event/Signal";
+import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 
 class BoolConfigValueControl extends ConfigValueControl<ToggleControlDefinition> {
 	readonly submitted = new Signal<(config: PlayerConfigTypes.Bool["config"]) => void>();

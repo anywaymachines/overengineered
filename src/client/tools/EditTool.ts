@@ -1,35 +1,34 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
+import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
-import {
-	MaterialColorEditControl,
-	MaterialColorEditControlDefinition,
-} from "client/gui/buildmode/MaterialColorEditControl";
-import { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import { ButtonControl } from "client/gui/controls/Button";
 import { LogControl } from "client/gui/static/LogControl";
-import { InputTooltips } from "client/gui/static/TooltipsControl";
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { ToolBase } from "client/tools/ToolBase";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockMover } from "client/tools/additional/BlockMover";
 import { BlockRotater } from "client/tools/additional/BlockRotater";
-import { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
 import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBlockHighlightedSelector";
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
-import { BlocksInitializer } from "shared/BlocksInitializer";
-import { Element } from "shared/Element";
+import { ToolBase } from "client/tools/ToolBase";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import { SharedPlot } from "shared/building/SharedPlot";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentDisabler } from "shared/component/ComponentDisabler";
 import { TransformService } from "shared/component/TransformService";
+import { Element } from "shared/Element";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
+import type { TextButtonDefinition } from "client/gui/controls/Button";
+import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 namespace Scene {
 	type MultiBlockSelectorGuiDefinition = GuiObject & {
@@ -216,37 +215,69 @@ namespace Scene {
 	}
 }
 
-const placeToBlocksRequests = (blocks: readonly BlockModel[]): readonly PlaceBlockRequest[] => {
-	const existingBlocks = new Map<BlockUuid, BlockData>();
-	for (const block of blocks) {
+const placeToBlocksRequests = (blocks: readonly BlockModel[]): readonly PlaceBlockRequestWithUuid[] => {
+	return blocks.map((block): PlaceBlockRequestWithUuid => {
 		const data = BlockManager.getBlockDataByBlockModel(block);
-		existingBlocks.set(data.uuid, data);
-	}
 
-	// <old, new>
-	const uuidmap = new Map<BlockUuid, Writable<PlaceBlockRequest & { uuid: BlockUuid }>>();
-
-	const newblocks = existingBlocks.map((_, data): Writable<PlaceBlockRequest> => {
-		const request = {
+		return {
 			id: data.id,
-			uuid: HttpService.GenerateGUID(false) as BlockUuid,
+			uuid: data.uuid,
 			location: data.instance.GetPivot(),
 			color: data.color,
 			material: data.material,
 			config: data.config,
-		} satisfies PlaceBlockRequest;
+			connections: data.connections,
+		};
+	});
+};
 
+type PlaceBlockRequestWithUuid = PlaceBlockRequest & { readonly uuid: BlockUuid };
+const reGenerateUuids = (
+	plot: SharedPlot,
+	_blocks: readonly PlaceBlockRequestWithUuid[],
+): readonly PlaceBlockRequest[] => {
+	const existingBlocks = new Map<BlockUuid, PlaceBlockRequestWithUuid>();
+	for (const block of _blocks) {
+		existingBlocks.set(block.uuid, block);
+	}
+
+	// <old, new>
+	const uuidmap = new Map<BlockUuid, Writable<PlaceBlockRequestWithUuid>>();
+
+	const newblocks = existingBlocks.map((_, data): Writable<PlaceBlockRequestWithUuid> => {
+		const request = { ...data, uuid: HttpService.GenerateGUID(false) as BlockUuid };
 		uuidmap.set(data.uuid, request);
+
 		return request;
 	});
 
+	const plotBlocks = plot.getBlocks().mapToSet(BlockManager.manager.uuid.get);
+
 	for (const [olduuid, newblock] of uuidmap) {
-		const connections = { ...(existingBlocks.get(olduuid)?.connections ?? {}) };
-		for (const [, connection] of pairs(connections)) {
+		const connections = asObject(
+			new Map(
+				asMap(existingBlocks.get(olduuid)?.connections ?? {}).map((k, v) => [
+					k,
+					{ ...v } as Writable<typeof v>,
+				]),
+			),
+		);
+
+		for (const [key, connection] of [...asMap(connections)]) {
+			if (!plotBlocks.has(connection.blockUuid)) {
+				$log(
+					`Deleting nonexistent connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`,
+				);
+				delete connections[key];
+			}
+		}
+
+		for (const [key, connection] of pairs(connections)) {
 			const neww = uuidmap.get(connection.blockUuid);
 			if (!neww) continue;
 
-			(connection as Writable<typeof connection>).blockUuid = neww.uuid;
+			$log(`Rerouting the connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`);
+			connection.blockUuid = neww.uuid;
 		}
 
 		newblock.connections = connections;
@@ -288,12 +319,18 @@ namespace Controllers {
 			this.mover.cancel();
 		}
 	}
+	@injectable
 	export class Paste extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 		private readonly blocks;
 		private readonly mover;
 
-		constructor(tool: EditTool, plot: SharedPlot) {
+		constructor(
+			tool: EditTool,
+			plot: SharedPlot,
+			selected: readonly BlockModel[],
+			@inject blockRegistry: BlockRegistry,
+		) {
 			super();
 
 			const ghostParent = Element.create(
@@ -303,9 +340,9 @@ namespace Controllers {
 			);
 			this.onDestroy(() => ghostParent.Destroy());
 
-			const blocks = tool.copied.get();
+			const blocks = reGenerateUuids(plot, tool.copied.get());
 			this.blocks = blocks.map((block) => {
-				const b = BlocksInitializer.blocks.map.get(block.id)!.model.Clone();
+				const b = blockRegistry.blocks.get(block.id)!.model.Clone();
 				b.PivotTo(block.location);
 				PartUtils.ghostModel(b, Colors.blue);
 				b.Parent = ghostParent;
@@ -378,14 +415,24 @@ namespace Controllers {
 	export class Paint extends ClientComponent {
 		private static readonly material = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 		private static readonly color = new ObservableValue<Color3>(new Color3(1, 1, 1));
-		private readonly origData: ReadonlyMap<BlockModel, readonly [material: Enum.Material, color: Color3]>;
+		private readonly origData: ReadonlyMap<
+			BlockModel,
+			{ readonly material: Enum.Material; readonly color: Color3 }
+		>;
 
 		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
 
 			this.origData = new ReadonlyMap(
 				blocks.map(
-					(b) => [b, [BlockManager.manager.material.get(b), BlockManager.manager.color.get(b)]] as const,
+					(b) =>
+						[
+							b,
+							{
+								material: BlockManager.manager.material.get(b),
+								color: BlockManager.manager.color.get(b),
+							},
+						] as const,
 				),
 			);
 
@@ -412,8 +459,8 @@ namespace Controllers {
 				true,
 			);
 
-			this.onDestroy(async () => {
-				const response = await ClientBuilding.paintOperation.execute(
+			this.onDestroy(() => {
+				const response = ClientBuilding.paintOperation.execute(
 					plot,
 					blocks,
 					Paint.material.get(),
@@ -430,7 +477,7 @@ namespace Controllers {
 		}
 
 		cancel() {
-			for (const [block, [material, color]] of this.origData) {
+			for (const [block, { material, color }] of this.origData) {
 				SharedBuilding.paint([block], color, material);
 			}
 		}
@@ -448,6 +495,7 @@ const canBeSelected = (tool: EditTool, mode: EditToolButtons): boolean => {
 export type EditToolMode = "Move" | "Paste" | "Rotate" | "Paint";
 export type EditToolButtons = EditToolMode | "Copy" | "Delete";
 
+@injectable
 export class EditTool extends ToolBase {
 	readonly enabledModes = new ComponentDisabler<EditToolButtons>([
 		"Move",
@@ -461,12 +509,12 @@ export class EditTool extends ToolBase {
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
 	readonly selectedMode = this._selectedMode.asReadonly();
 	readonly selected = new ObservableCollectionSet<BlockModel>();
-	readonly copied = new ObservableValue<readonly PlaceBlockRequest[]>([]);
+	readonly copied = new ObservableValue<readonly PlaceBlockRequestWithUuid[]>([]);
 	private readonly controller = new ComponentChild<IComponent & { cancel(): void }>(this, true);
 	private readonly selector;
 	readonly gui;
 
-	constructor(mode: BuildingMode) {
+	constructor(@inject mode: BuildingMode, @inject di: DIContainer) {
 		super(mode);
 
 		this.gui = this.parentGui(
@@ -505,7 +553,9 @@ export class EditTool extends ToolBase {
 				return;
 			}
 
-			this.controller.set(new Controllers[mode](this, this.targetPlot.get(), [...selected]));
+			this.controller.set(
+				di.resolveForeignClass(Controllers[mode], [this, this.targetPlot.get(), [...selected]]),
+			);
 		});
 
 		this.event.onKeyDown("F", () => this.toggleMode("Move"));

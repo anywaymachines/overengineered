@@ -1,11 +1,14 @@
 import { UserInputService } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { BoxSelector } from "client/tools/highlighters/BoxSelector";
-import { HoveredBlocksSelector, HoveredBlocksSelectorMode } from "client/tools/highlighters/HoveredBlocksSelector";
-import { SharedPlot } from "shared/building/SharedPlot";
+import { HoveredBlocksSelector } from "client/tools/highlighters/HoveredBlocksSelector";
 import { ComponentChild } from "shared/component/ComponentChild";
-import { ObservableValue, ReadonlyObservableValue } from "shared/event/ObservableValue";
-import { ArgsSignal, ReadonlyArgsSignal } from "shared/event/Signal";
+import { ObservableValue } from "shared/event/ObservableValue";
+import { ArgsSignal } from "shared/event/Signal";
+import type { HoveredBlocksSelectorMode } from "client/tools/highlighters/HoveredBlocksSelector";
+import type { SharedPlot } from "shared/building/SharedPlot";
+import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import type { ReadonlyArgsSignal } from "shared/event/Signal";
 
 export interface BlockSelector extends IComponent {
 	readonly submit: ReadonlyArgsSignal<[blocks: readonly BlockModel[]]>;
@@ -55,7 +58,17 @@ export class MultiBlockSelector extends ClientComponent {
 
 		const origModeFuncs = HoveredBlocksSelector.Modes;
 		const empty = [] as const;
-		const filter = config?.filter;
+		const filter = (block: BlockModel): boolean => {
+			if (config?.filter?.(block) === false) {
+				return false;
+			}
+
+			if (!plot.get().isFromThisPlot(block)) {
+				return false;
+			}
+
+			return true;
+		};
 		const functions: Readonly<Record<HoveredBlocksSelectorMode, (block: BlockModel) => readonly BlockModel[]>> = {
 			single: !filter ? origModeFuncs.single : (block) => (filter(block) ? [block] : empty),
 			assembly: !filter ? origModeFuncs.assembly : (block) => origModeFuncs.assembly(block).filter(filter),
@@ -66,7 +79,7 @@ export class MultiBlockSelector extends ClientComponent {
 			single: () => new HoveredBlocksSelector(functions.single),
 			assembly: () => new HoveredBlocksSelector(functions.assembly),
 			machine: () => new HoveredBlocksSelector(functions.machine),
-			box: () => new BoxSelector(filter),
+			box: () => new BoxSelector(plot.get(), filter),
 		};
 
 		const selectorParent = new ComponentChild<BlockSelector>(this);

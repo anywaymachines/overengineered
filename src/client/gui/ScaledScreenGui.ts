@@ -1,11 +1,18 @@
-import { PlayerDataStorage } from "client/PlayerDataStorage";
 import { InstanceComponent } from "shared/component/InstanceComponent";
+import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
+let globalScale: ReadonlyObservableValue<number>;
 export class ScaledScreenGui<T extends ScreenGui> extends InstanceComponent<T> {
+	static initializeGlobalScale(scale: ReadonlyObservableValue<number>) {
+		// scale.subscribe((scale) => globalScale.set(scale));
+		globalScale = scale;
+	}
+
 	private readonly uiscale: UIScale;
 
 	constructor(gui: T) {
 		super(gui);
+		if (!globalScale) throw "Global scale was not set";
 
 		let uiscale = gui.FindFirstChild("UIScale") as UIScale | undefined;
 		if (!uiscale) {
@@ -16,18 +23,17 @@ export class ScaledScreenGui<T extends ScreenGui> extends InstanceComponent<T> {
 
 		const update = () => {
 			const asize = this.instance.AbsoluteSize;
-			const mult = PlayerDataStorage.config.get().uiScale;
+			const mult = globalScale.get();
 
-			const scale = math.min((asize.Y / 1080) * mult, 9999999);
-			uiscale!.Scale = scale;
-			$log("GUI scaling set to " + scale);
+			uiscale.Scale = math.min((asize.Y / 1080) * mult, 9999999);
+			$log(`GUI scaling set to ${uiscale.Scale}`);
 		};
 
 		this.event.subscribeObservable(
 			this.event.readonlyObservableFromInstanceParam(gui as ScreenGui, "AbsoluteSize"),
 			update,
 		);
-		this.event.subscribeObservable(PlayerDataStorage.config.createChild("uiScale", 1), update);
+		this.event.subscribeObservable(globalScale, update);
 		update();
 	}
 

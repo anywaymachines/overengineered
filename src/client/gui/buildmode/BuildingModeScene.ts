@@ -1,14 +1,15 @@
 import { LoadingController } from "client/controller/LoadingController";
+import { ToolbarControl } from "client/gui/buildmode/ToolbarControl";
 import { Control } from "client/gui/Control";
-import { ToolbarControl, ToolbarControlDefinition } from "client/gui/buildmode/ToolbarControl";
 import { ButtonControl } from "client/gui/controls/Button";
-import { SavePopup } from "client/gui/popup/SavePopup";
-import { SettingsPopup } from "client/gui/popup/SettingsPopup";
-import { requestMode } from "client/modes/PlayModeRequest";
 import { ActionController } from "client/modes/build/ActionController";
-import { ToolController } from "client/tools/ToolController";
+import { requestMode } from "client/modes/PlayModeRequest";
 import { ComponentDisabler } from "shared/component/ComponentDisabler";
-import { TransformProps } from "shared/component/Transform";
+import type { ToolbarControlDefinition } from "client/gui/buildmode/ToolbarControl";
+import type { SavePopup } from "client/gui/popup/SavePopup";
+import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
+import type { ToolController } from "client/tools/ToolController";
+import type { TransformProps } from "shared/component/Transform";
 
 type ActionBarControlDefinition = GuiObject & {
 	Buttons: {
@@ -21,7 +22,7 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 	readonly allButtons = ["run", "save", "settings"] as const;
 	readonly enabledButtons = new ComponentDisabler(this.allButtons);
 
-	constructor(gui: ActionBarControlDefinition) {
+	constructor(gui: ActionBarControlDefinition, di: DIContainer) {
 		super(gui);
 
 		const runButton = this.add(new ButtonControl(this.gui.Buttons.Run));
@@ -42,13 +43,8 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 			await requestMode("ride");
 		});
 
-		this.event.subscribe(saveButton.activated, async () => {
-			SavePopup.showPopup();
-		});
-
-		this.event.subscribe(settingsButton.activated, async () => {
-			SettingsPopup.showPopup();
-		});
+		this.event.subscribe(saveButton.activated, () => di.resolve<SavePopup>().show());
+		this.event.subscribe(settingsButton.activated, () => di.resolve<SettingsPopup>().show());
 	}
 
 	show(): void {
@@ -87,12 +83,12 @@ export type BuildingModeSceneDefinition = GuiObject & {
 export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 	readonly actionbar;
 
-	constructor(gui: BuildingModeSceneDefinition, tools: ToolController) {
+	constructor(gui: BuildingModeSceneDefinition, tools: ToolController, di: DIContainer) {
 		super(gui);
 
 		this.add(ActionController.instance);
 
-		this.actionbar = this.add(new ActionBarControl(gui.ActionBar));
+		this.actionbar = this.add(new ActionBarControl(gui.ActionBar, di));
 		const updateActionBarVisibility = () =>
 			this.actionbar.setVisible(!tools.selectedTool.get() && !LoadingController.isLoading.get());
 

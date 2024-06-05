@@ -1,12 +1,13 @@
 import { RunService } from "@rbxts/services";
-import { BlockId } from "shared/BlockDataRegistry";
-import type { BlocksInitializeData } from "shared/BlocksInitializer";
-import { RemoteEvents } from "shared/RemoteEvents";
-import { BlockLogic } from "shared/block/BlockLogic";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { connectors } from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { BlockGenerator } from "shared/block/creation/BlockGenerator";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import { Objects } from "shared/fixes/objects";
+import { RemoteEvents } from "shared/RemoteEvents";
+import type { BlockLogic } from "shared/block/BlockLogic";
+import type { BlockId } from "shared/BlockDataRegistry";
+import type { PlacedBlockData } from "shared/building/BlockManager";
+import type { BlocksInitializeData } from "shared/init/BlocksInitializer";
 
 interface CreateInfo<TFunc> {
 	readonly modelTextOverride: string;
@@ -614,7 +615,11 @@ const multiif = <TArg, T, TType extends keyof CheckableTypes, TRet extends Check
 		}
 	}
 
-	throw "unknown type";
+	throw `in ${(arg as ConfigurableBlockLogic<BlockConfigTypes.BothDefinitions>).instance}, unknown type ${typeOf(left)} ${typeOf(right)} insteadof ${Objects.entriesArray(
+		checks,
+	)
+		.map((e) => `${e[0]}`)
+		.join()} ${debug.traceback()}`;
 };
 const multiifunc =
 	<TArg, T>(checks: Checks<TArg>): ((left: T, right: T, arg: TArg) => T) =>
@@ -1085,15 +1090,6 @@ const operations = {
 		},
 	},
 } as const satisfies NonGenericOperations;
-
-print(
-	"DOUBLE",
-	asMap(operations as NonGenericOperations)
-		.flatmap((k, v) => asMap(v).map((k, v) => ({ k, v })))
-		.filter(({ k, v }) => v.prefab === prefabs.tripleGeneric)
-		.map(({ k, v }) => k.lower())
-		.join(", "),
-);
 
 type NonGenericOperations = {
 	readonly [k in keyof typeof logicReg]: Record<string, CreateInfo<Parameters<(typeof logicReg)[k]>[0]>>;

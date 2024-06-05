@@ -1,7 +1,7 @@
 import { Control } from "client/gui/Control";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
-import { Element } from "shared/Element";
 import { BlockManager } from "shared/building/BlockManager";
+import { Element } from "shared/Element";
 
 export const _Tests = () => {
 	const newpipettebtn = (text: string) => {

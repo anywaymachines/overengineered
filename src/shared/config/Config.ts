@@ -1,4 +1,3 @@
-
 export namespace Config {
 	export function addDefaults<TKeys extends keyof TDef & string, TDef extends UnknownConfigDefinitions>(
 		config: Partial<ConfigDefinitionsToConfig<TKeys, TDef>>,

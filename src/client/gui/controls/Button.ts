@@ -1,8 +1,9 @@
 import { SoundController } from "client/controller/SoundController";
 import { Control } from "client/gui/Control";
-import { Element, ElementProperties } from "shared/Element";
 import { TransformService } from "shared/component/TransformService";
+import { Element } from "shared/Element";
 import { Signal } from "shared/event/Signal";
+import type { ElementProperties } from "shared/Element";
 
 export type ButtonDefinition = GuiButton;
 export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extends Control<T> {

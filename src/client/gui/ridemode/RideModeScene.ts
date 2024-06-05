@@ -1,24 +1,26 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { Machine } from "client/blocks/Machine";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { InputController } from "client/controller/InputController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { Control } from "client/gui/Control";
-import { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
+import { ButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { FormattedLabelControl } from "client/gui/controls/FormattedLabelControl";
-import { ProgressBarControl, ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
+import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
 import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
-import { Remotes } from "shared/Remotes";
-import { RobloxUnit } from "shared/RobloxUnit";
-import { SlotsMeta } from "shared/SlotsMeta";
 import { RocketEngineLogic } from "shared/block/logic/RocketEngineLogic";
 import { EventHandler } from "shared/event/EventHandler";
 import { Signal } from "shared/event/Signal";
+import { Remotes } from "shared/Remotes";
+import { RobloxUnit } from "shared/RobloxUnit";
+import { SlotsMeta } from "shared/SlotsMeta";
+import type { Machine } from "client/blocks/Machine";
+import type { TextButtonDefinition } from "client/gui/controls/Button";
+import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
+import type { PlayerDataStoragee } from "client/PlayerDataStorage";
 
 export type ActionBarControlDefinition = GuiObject & {
 	readonly Stop: GuiButton;
@@ -89,12 +91,15 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 	private readonly overlayTemplate;
 	private quitSettingsMode?: () => void;
 
-	constructor(gui: RideModeControlsDefinition) {
+	constructor(
+		gui: RideModeControlsDefinition,
+		private readonly playerData: PlayerDataStoragee,
+	) {
 		super(gui);
 
 		this.overlayTemplate = this.asTemplate(this.gui.Overlay);
 
-		this.event.onDisable(() => {
+		this.onDisable(() => {
 			if (this.quitSettingsMode) {
 				this.toggleSettingsMode();
 			}
@@ -226,8 +231,8 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 				};
 			}
 
-			await PlayerDataStorage.sendPlayerSlot({
-				index: PlayerDataStorage.loadedSlot.get() ?? -1,
+			await this.playerData.sendPlayerSlot({
+				index: this.playerData.loadedSlot.get() ?? -1,
 				touchControls,
 				save: false,
 			});
@@ -250,11 +255,8 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 			//
 		];
 
-		let controlsInfo: TouchControlInfo | undefined;
-		const slots = PlayerDataStorage.slots.get();
-		if (slots) {
-			controlsInfo = SlotsMeta.get(slots, PlayerDataStorage.loadedSlot.get() ?? -1)?.touchControls;
-		}
+		const slots = this.playerData.slots.get();
+		const controlsInfo = SlotsMeta.get(slots, this.playerData.loadedSlot.get() ?? -1)?.touchControls;
 
 		let pos = 0;
 		for (const control of controls) {
@@ -319,10 +321,10 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 	private readonly infoTemplate;
 	private readonly infoTextTemplate;
 
-	constructor(gui: RideModeSceneDefinition) {
+	constructor(gui: RideModeSceneDefinition, playerData: PlayerDataStoragee) {
 		super(gui);
 
-		this.controls = new RideModeControls(this.gui.Controls);
+		this.controls = new RideModeControls(this.gui.Controls, playerData);
 		this.add(this.controls);
 
 		this.actionbar = new ActionBarControl(gui.ActionBar, this.controls);
@@ -409,7 +411,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		{
 			init("Gravity", "%.1f m/s²", this.infoTextTemplate(), 0, 55, 0.1, (control) => {
-				const alt = RobloxUnit.Studs_To_Meters(Workspace.Gravity) / 5.14;
+				const alt = RobloxUnit.Studs_To_Meters(Workspace.Gravity);
 
 				control.text.value.set(alt);
 			});

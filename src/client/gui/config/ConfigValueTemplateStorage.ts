@@ -1,13 +1,13 @@
-import { type ColorChooserDefinition } from "client/gui/ColorChooser";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
-import { type OrConfigControlDefinition } from "client/gui/config/OrConfigValueControl.client";
-import { ByteEditorDefinition } from "client/gui/controls/ByteEditorControl";
-import { type CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
-import { type KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
-import { type NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
-import { type SliderControlDefinition } from "client/gui/controls/SliderControl";
-import { type TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
+import type { ColorChooserDefinition } from "client/gui/ColorChooser";
+import type { OrConfigControlDefinition } from "client/gui/config/OrConfigValueControl.client";
+import type { ByteEditorDefinition } from "client/gui/controls/ByteEditorControl";
+import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
+import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
+import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
+import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
+import type { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
 
 type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	readonly HeadingLabel: TextLabel;

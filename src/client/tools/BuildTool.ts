@@ -4,38 +4,37 @@ import { ClientComponentChild } from "client/component/ClientComponentChild";
 import { InputController } from "client/controller/InputController";
 import { SoundController } from "client/controller/SoundController";
 import { Signals } from "client/event/Signals";
+import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
+import { BlockSelectionControl } from "client/gui/buildmode/BlockSelection";
+import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
+import { MirrorEditorControl } from "client/gui/buildmode/MirrorEditorControl";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
+import { ButtonControl } from "client/gui/controls/Button";
 import { DebugLog } from "client/gui/DebugLog";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
-import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
-import { BlockSelectionControl, BlockSelectionControlDefinition } from "client/gui/buildmode/BlockSelection";
-import {
-	MaterialColorEditControl,
-	MaterialColorEditControlDefinition,
-} from "client/gui/buildmode/MaterialColorEditControl";
-import { MirrorEditorControl, MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
-import { ButtonControl } from "client/gui/controls/Button";
 import { LogControl } from "client/gui/static/LogControl";
-import { InputTooltips } from "client/gui/static/TooltipsControl";
-import { BuildingMode } from "client/modes/build/BuildingMode";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { ToolBase } from "client/tools/ToolBase";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
 import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
-import { BlocksInitializer } from "shared/BlocksInitializer";
-import { Element } from "shared/Element";
+import { ToolBase } from "client/tools/ToolBase";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
-import { SharedPlot } from "shared/building/SharedPlot";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { TransformService } from "shared/component/TransformService";
+import { Element } from "shared/Element";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { BlockSelectionControlDefinition } from "client/gui/buildmode/BlockSelection";
+import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
+import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
+import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 const allowedColor = Colors.blue;
 const forbiddenColor = Colors.red;
@@ -175,11 +174,11 @@ namespace Scene {
 			super(gui);
 			this.tool = tool;
 
-			this.blockSelector = new BlockSelectionControl(gui.Inventory);
+			this.blockSelector = tool.di.resolveForeignClass(BlockSelectionControl, [gui.Inventory]);
 			this.blockSelector.show();
 			this.add(this.blockSelector);
 
-			const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content));
+			const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content, tool.targetPlot.get()));
 			this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
 			this.event.subscribe(mirrorEditor.submitted, (val) => tool.mirrorMode.set(val));
 
@@ -249,7 +248,7 @@ namespace Scene {
 					return;
 				}
 
-				const targetCategory = BlocksInitializer.categories.getCategoryPath(block.category) ?? [];
+				const targetCategory = tool.blockRegistry.getCategoryPath(block.category) ?? [];
 
 				if (
 					this.blockSelector.selectedCategory.get()[this.blockSelector.selectedCategory.get().size() - 1] !==
@@ -331,7 +330,7 @@ namespace SinglePlaceController {
 		protected readonly plot;
 		protected readonly blockMirrorer;
 
-		constructor(state: BuildTool) {
+		protected constructor(state: BuildTool, di: DIContainer) {
 			super();
 
 			this.state = state;
@@ -342,7 +341,7 @@ namespace SinglePlaceController {
 			this.plot = state.targetPlot;
 			this.blockRotation = state.blockRotation;
 
-			this.blockMirrorer = this.parent(new BlockMirrorer());
+			this.blockMirrorer = this.parent(di.resolveForeignClass(BlockMirrorer));
 
 			this.onPrepare(() => this.updateBlockPosition());
 			this.event.subscribeObservable(this.mirrorMode, () => this.updateBlockPosition());
@@ -505,9 +504,10 @@ namespace SinglePlaceController {
 			}
 		}
 	}
+	@injectable
 	class Desktop extends Controller {
-		constructor(state: BuildTool) {
-			super(state);
+		constructor(@inject state: BuildTool, @inject di: DIContainer) {
+			super(state, di);
 
 			state.subscribeSomethingToCurrentPlot(this, () => this.updateBlockPosition());
 			this.event.subscribe(mouse.Move, () => this.updateBlockPosition());
@@ -527,11 +527,12 @@ namespace SinglePlaceController {
 			});
 		}
 	}
+	@injectable
 	class Touch extends Controller {
 		private prevTarget: [target: BasePart, hit: CFrame, surface: Enum.NormalId] | undefined;
 
-		constructor(state: BuildTool) {
-			super(state);
+		constructor(@inject state: BuildTool, @inject di: DIContainer) {
+			super(state, di);
 
 			this.event.subInput((ih) => {
 				ih.onTouchTap(() => {
@@ -555,9 +556,10 @@ namespace SinglePlaceController {
 			super.updateBlockPosition(mainPosition);
 		}
 	}
+	@injectable
 	class Gamepad extends Desktop {
-		constructor(state: BuildTool) {
-			super(state);
+		constructor(@inject state: BuildTool, @inject di: DIContainer) {
+			super(state, di);
 
 			this.event.subInput((ih) => {
 				ih.onMouse3Down(() => {
@@ -573,11 +575,14 @@ namespace SinglePlaceController {
 		}
 	}
 
-	export function create(tool: BuildTool) {
+	export function create(tool: BuildTool, di: DIContainer) {
+		di = di.beginScope();
+		di.registerSingleton(tool);
+
 		return ClientComponentChild.createOnceBasedOnInputType({
-			Desktop: () => new Desktop(tool),
-			Touch: () => new Touch(tool),
-			Gamepad: () => new Gamepad(tool),
+			Desktop: () => di.resolveForeignClass(Desktop),
+			Touch: () => di.resolveForeignClass(Touch),
+			Gamepad: () => di.resolveForeignClass(Gamepad),
 		});
 	}
 }
@@ -690,7 +695,7 @@ namespace MultiPlaceController {
 		};
 		private fillRotationMode = 1;
 
-		constructor(
+		protected constructor(
 			protected readonly pressPosition: Vector3,
 			private readonly selectedBlock: RegistryBlock,
 			private readonly selectedColor: Color3,
@@ -698,9 +703,10 @@ namespace MultiPlaceController {
 			private readonly mirrorModes: MirrorMode,
 			private readonly plot: SharedPlot,
 			private readonly blockRotation: CFrame,
+			di: DIContainer,
 		) {
 			super();
-			this.blockMirrorer = this.parent(new BlockMirrorer());
+			this.blockMirrorer = this.parent(di.resolveForeignClass(BlockMirrorer));
 			this.floatingText = this.parent(FloatingText.create(BlockGhoster.parent));
 
 			this.onDisable(() => {
@@ -721,7 +727,7 @@ namespace MultiPlaceController {
 				pos = this.getPositionOnBuildingPlane(this.pressPosition, cameraPostion, clickDirection);
 			}
 
-			const plotRegion = SharedPlots.getPlotBuildingRegion(this.plot.instance);
+			const plotRegion = this.plot.bounds;
 			pos = plotRegion.clampVector(pos);
 			const positionsData = this.calculateGhostBlockPositions(this.selectedBlock.model, this.pressPosition, pos);
 			if (!positionsData) return;
@@ -866,6 +872,7 @@ namespace MultiPlaceController {
 			return response;
 		}
 	}
+	@injectable
 	class Desktop extends Base {
 		constructor(
 			pressPosition: Vector3,
@@ -875,8 +882,9 @@ namespace MultiPlaceController {
 			mirrorModes: MirrorMode,
 			plot: SharedPlot,
 			blockRotation: CFrame,
+			@inject di: DIContainer,
 		) {
-			super(pressPosition, selectedBlock, selectedColor, selectedMaterial, mirrorModes, plot, blockRotation);
+			super(pressPosition, selectedBlock, selectedColor, selectedMaterial, mirrorModes, plot, blockRotation, di);
 
 			this.event.subInput((ih) => {
 				const buttonUnpress = async () => {
@@ -897,6 +905,7 @@ namespace MultiPlaceController {
 			this.event.subInput((ih) => ih.onKeyDown("R", () => this.rotateFillAxis()));
 		}
 	}
+	@injectable
 	class Touch extends Base {
 		private prevTarget: [cameraPostion: Vector3, lookVector: Vector3] | undefined;
 
@@ -908,8 +917,9 @@ namespace MultiPlaceController {
 			mirrorModes: MirrorMode,
 			plot: SharedPlot,
 			blockRotation: CFrame,
+			@inject di: DIContainer,
 		) {
-			super(pressPosition, selectedBlock, selectedColor, selectedMaterial, mirrorModes, plot, blockRotation);
+			super(pressPosition, selectedBlock, selectedColor, selectedMaterial, mirrorModes, plot, blockRotation, di);
 
 			this.event.subInput((ih) => {
 				ih.onTouchTap(() => {
@@ -938,49 +948,53 @@ namespace MultiPlaceController {
 			super();
 		}
 	}
+	@injectable
 	class DesktopStarter extends Starter {
-		constructor(state: BuildTool, parent: ComponentChild<IController>) {
+		constructor(state: BuildTool, parent: ComponentChild<IController>, @inject di: DIContainer) {
 			super(state, parent);
 
 			this.event.subInput((ih) => {
 				ih.onMouse1Down(() => {
 					if (InputController.isShiftPressed()) {
-						init(state, parent);
+						init(state, parent, di);
 					}
 				}, false);
 			});
 		}
 	}
+	@injectable
 	class TouchStarter extends Starter {
-		constructor(state: BuildTool, parent: ComponentChild<IController>) {
+		constructor(state: BuildTool, parent: ComponentChild<IController>, @inject di: DIContainer) {
 			super(state, parent);
 		}
 	}
+	@injectable
 	class GamepadStarter extends Starter {
-		constructor(state: BuildTool, parent: ComponentChild<IController>) {
+		constructor(state: BuildTool, parent: ComponentChild<IController>, @inject di: DIContainer) {
 			super(state, parent);
 
 			this.event.subInput((ih) => {
 				ih.onKeyDown("ButtonR2", () => {
 					if (InputController.isShiftPressed()) {
 						// TODO: shift with controller??
-						init(state, parent);
+						init(state, parent, di);
 					}
 				});
 			});
 		}
 	}
 
-	export function subscribe(state: BuildTool, parent: ComponentChild<IController>) {
+	export function subscribe(state: BuildTool, parent: ComponentChild<IController>, di: DIContainer) {
 		ClientComponentChild.registerBasedOnInputType(state, {
-			Desktop: () => new DesktopStarter(state, parent),
-			Touch: () => new TouchStarter(state, parent),
-			Gamepad: () => new GamepadStarter(state, parent),
+			Desktop: () => di.resolveForeignClass(DesktopStarter, [state, parent]),
+			Touch: () => di.resolveForeignClass(TouchStarter, [state, parent]),
+			Gamepad: () => di.resolveForeignClass(GamepadStarter, [state, parent]),
 		});
 	}
 	export function init(
 		state: BuildTool,
 		parent: ComponentChild<IController>,
+		di: DIContainer,
 		prevTarget?: [target: BasePart, hit: CFrame, surface: Enum.NormalId],
 	) {
 		const selectedBlock = state.selectedBlock.get();
@@ -990,41 +1004,28 @@ namespace MultiPlaceController {
 		if (!pressPosition) return;
 
 		const plot = state.targetPlot.get();
-
-		const ctor =
-			(
-				ctor: new (
-					pressPosition: Vector3,
-					selectedBlock: RegistryBlock,
-					selectedColor: Color3,
-					selectedMaterial: Enum.Material,
-					mirrorModes: MirrorMode,
-					plot: SharedPlot,
-					blockRotation: CFrame,
-				) => IController,
-			) =>
-			() =>
-				new ctor(
-					pressPosition,
-					selectedBlock,
-					state.selectedColor.get(),
-					state.selectedMaterial.get(),
-					state.mirrorMode.get(),
-					plot,
-					state.blockRotation.get(),
-				);
+		const args = [
+			pressPosition,
+			selectedBlock,
+			state.selectedColor.get(),
+			state.selectedMaterial.get(),
+			state.mirrorMode.get(),
+			plot,
+			state.blockRotation.get(),
+		] as const;
 
 		parent.set(
 			ClientComponentChild.createOnceBasedOnInputType({
-				Desktop: ctor(Desktop),
-				Touch: ctor(Touch),
-				Gamepad: ctor(Desktop),
+				Desktop: () => di.resolveForeignClass(Desktop, args),
+				Touch: () => di.resolveForeignClass(Touch, args),
+				Gamepad: () => di.resolveForeignClass(Desktop, args),
 			}),
 		);
 	}
 }
 
 /** A tool for building in the world with blocks */
+@injectable
 export class BuildTool extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
@@ -1032,7 +1033,11 @@ export class BuildTool extends ToolBase {
 	readonly currentMode = new ComponentChild<IController>(this, true);
 	readonly blockRotation = new ObservableValue<CFrame>(CFrame.identity);
 
-	constructor(mode: BuildingMode) {
+	constructor(
+		@inject mode: BuildingMode,
+		@inject readonly di: DIContainer,
+		@inject readonly blockRegistry: BlockRegistry,
+	) {
 		super(mode);
 
 		this.parentGui(
@@ -1043,11 +1048,11 @@ export class BuildTool extends ToolBase {
 			if (!this.isEnabled()) return;
 			if (mode) return;
 
-			this.currentMode.set(SinglePlaceController.create(this));
+			this.currentMode.set(SinglePlaceController.create(this, di));
 		});
-		this.onEnable(() => this.currentMode.set(SinglePlaceController.create(this)));
+		this.onEnable(() => this.currentMode.set(SinglePlaceController.create(this, di)));
 
-		MultiPlaceController.subscribe(this, this.currentMode);
+		MultiPlaceController.subscribe(this, this.currentMode, di);
 	}
 
 	supportsMirror() {
@@ -1068,6 +1073,7 @@ export class BuildTool extends ToolBase {
 		MultiPlaceController.init(
 			this,
 			this.currentMode,
+			this.di,
 			current && "prevTarget" in current ? (current.prevTarget as never) : undefined,
 		);
 	}
@@ -1088,7 +1094,7 @@ export class BuildTool extends ToolBase {
 		const id = BlockManager.manager.id.get(model);
 		if (id === undefined) return; // not a block
 
-		const block = BlocksInitializer.blocks.map.get(id)!;
+		const block = this.blockRegistry.blocks.get(id)!;
 
 		this.selectedBlock.set(block);
 		this.selectedMaterial.set(BlockManager.manager.material.get(model));

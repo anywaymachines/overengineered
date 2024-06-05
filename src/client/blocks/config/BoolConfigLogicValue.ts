@@ -1,5 +1,5 @@
-import { IBlockLogicValue } from "shared/block/BlockLogicValue";
-import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
+import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
+import type { IBlockLogicValue } from "shared/block/BlockLogicValue";
 
 export class BoolConfigLogicValue extends ConfigLogicValueBase<BlockConfigTypes.Bool> {
 	constructor(

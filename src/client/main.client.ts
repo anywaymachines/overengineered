@@ -1,35 +1,43 @@
-import { GameLoader } from "client/GameLoader";
-import { PlayerDataStorage } from "client/PlayerDataStorage";
-import { LoadingController } from "client/controller/LoadingController";
+/* eslint-disable import/order */
+$log("Starting");
 
-const dataLoading = PlayerDataStorage.init();
-GameLoader.waitForEverything(LoadingController.show);
+import { LoadingController } from "client/controller/LoadingController";
+LoadingController.show("Preparing the initialization");
+
+import { SandboxGame } from "client/SandboxGame";
+import { Game } from "shared/GameHost";
+import { BSOD } from "client/gui/BSOD";
+
+const builder = Game.createHost();
+try {
+	SandboxGame.initialize(builder);
+} catch (err) {
+	BSOD.showWithDefaultText(tostring(err ?? ""));
+	throw err;
+}
+
+const host = builder.build();
+
+host.run();
+
 LoadingController.show("Loading the dependencies");
 
 import { Players, TextChatService } from "@rbxts/services";
+import { AdminMessageController } from "client/AdminMessageController";
 import { ServerRestartController } from "client/ServerRestartController";
 import { CharacterController } from "client/controller/CharacterController";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
-import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { SoundController } from "client/controller/SoundController";
 import { WindController } from "client/controller/WindController";
-import { MusicController } from "client/controller/sound/MusicController";
 import { InputTypeChangeEvent } from "client/event/InputTypeChangeEvent";
 import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
-import { PlayModeController } from "client/modes/PlayModeController";
-import { ClientBuildingValidation } from "client/modes/build/ClientBuildingValidation";
-import { BlocksInitializer } from "shared/BlocksInitializer";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { AdminMessageController } from "./AdminMessageController";
-import { ClientContainerComponent } from "./component/ClientContainerComponent";
-import { rootComponents } from "./test/RootComponents";
 
 LoadingController.show("Loading the game");
 
-BlocksInitializer.initialize();
 GameEnvironmentController.initialize();
 
 LogControl.instance.show();
@@ -41,36 +49,14 @@ InputTypeChangeEvent.subscribe();
 RemoteEvents.initialize();
 AdminMessageController.initialize();
 ServerRestartController.initialize();
-ClientBuildingValidation.initialize();
 
 SoundController.initialize();
-MusicController.initialize();
-GraphicsSettingsController.initialize();
 
 const updated = DateTime.fromUnixTimestamp($compileTime()).FormatUniversalTime("DDMMYY_HHmm", "en-us");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =
 	GameDefinitions.PRODUCTION_PLACE_ID === game.PlaceId
 		? GameDefinitions.VERSION
 		: `v${game.PlaceVersion} | ${updated}`;
-
-{
-	const [success, result] = dataLoading.await();
-	if (!success) {
-		throw result;
-	}
-}
-GameLoader.waitForDataStorage();
-
-const root = new ClientContainerComponent();
-rootComponents.push(root);
-const playModeController = new PlayModeController();
-root.add(playModeController);
-root.enable();
-
-GameLoader.waitForServer();
-PlayerDataStorage.refetchGameData().await();
-
-LoadingController.hide();
 
 // Prefixes
 TextChatService.OnIncomingMessage = function (message: TextChatMessage) {
@@ -86,3 +72,6 @@ TextChatService.OnIncomingMessage = function (message: TextChatMessage) {
 
 	return props;
 };
+
+LoadingController.hide();
+$log("Client loaded.");

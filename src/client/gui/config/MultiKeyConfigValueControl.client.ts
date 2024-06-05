@@ -1,10 +1,11 @@
-import { type KeyConfigValueControl } from "client/gui/config/KeyConfigValueControl.client";
+import { configControlRegistry } from "client/gui/config/ConfigControlRegistry";
+import { ConfigValueControl } from "client/gui/config/ConfigValueControl";
+import { configValueTemplateStorage } from "client/gui/config/ConfigValueTemplateStorage";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
-import { configControlRegistry } from "./ConfigControlRegistry";
-import { ConfigValueControl, ConfigValueControlParams } from "./ConfigValueControl";
-import { configValueTemplateStorage } from "./ConfigValueTemplateStorage";
+import type { ConfigValueControlParams } from "client/gui/config/ConfigValueControl";
+import type { KeyConfigValueControl } from "client/gui/config/KeyConfigValueControl.client";
 
 type Type = BlockConfigTypes.MultiKey;
 class ValueControl extends ConfigValueControl<GuiObject, Type> {

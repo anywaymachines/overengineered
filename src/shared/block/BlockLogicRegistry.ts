@@ -1,43 +1,45 @@
-import { BlockId } from "shared/BlockDataRegistry";
+import { BallastBlockLogic } from "shared/block/logic/BallastBlockLogic";
 import { BracedShaftBlockLogic } from "shared/block/logic/BracedShaftBlockLogic";
+import { DisconnectBlockLogic } from "shared/block/logic/DisconnectBlockLogic";
+import { HeliumBlockLogic } from "shared/block/logic/HeliumBlockLogic";
+import { ByteMakerBlockLogic } from "shared/block/logic/logic/converter/byte/ByteMakerBlockLogic";
+import { ByteSplitterBlockLogic } from "shared/block/logic/logic/converter/byte/ByteSplitterBlockLogic";
+import { LampBlockLogic } from "shared/block/logic/logic/display/LampBlockLogic";
+import { LaserBlockLogic } from "shared/block/logic/logic/display/LaserBlockLogic";
+import { LEDDisplayBlockLogic } from "shared/block/logic/logic/display/LEDDisplayBlockLogic";
+import { ScreenBlockLogic } from "shared/block/logic/logic/display/ScreenBlockLogic";
+import { SevenSegmentDisplayBlockLogic } from "shared/block/logic/logic/display/SevenSegmentDisplayBlockLogic";
+import { LogicMemoryBlockLogic } from "shared/block/logic/logic/memory/LogicMemoryBlockLogic";
+import { RandomAccessMemoryBlockLogic } from "shared/block/logic/logic/memory/RandomAccessMemoryBlockLogic";
+import { ReadOnlyMemoryBlockLogic } from "shared/block/logic/logic/memory/ReadOnlyMemoryBlockLogic";
+import { StackMemoryBlockLogic } from "shared/block/logic/logic/memory/StackMemoryBlockLogic";
+import { BufferBlockLogic } from "shared/block/logic/logic/other/BufferBlockLogic";
+import { CounterBlockLogic } from "shared/block/logic/logic/other/CounterBlockLogic";
+import { DelayBlockLogic } from "shared/block/logic/logic/other/DelayBlockLogic";
+import { AltimeterBlockLogic } from "shared/block/logic/logic/sensor/AltimeterBlockLogic";
+import { AngleSensorBlockLogic } from "shared/block/logic/logic/sensor/AngleSensorBlockLogic";
+import { GravitySensorBlockLogic } from "shared/block/logic/logic/sensor/GravitySensorBlockLogic";
+import { KeySensorBlockLogic } from "shared/block/logic/logic/sensor/KeySensorBlockLogic";
+import { MassSensorBlockLogic } from "shared/block/logic/logic/sensor/MassSensorBlockLogic";
+import { OwnerLocatorBlockLogic } from "shared/block/logic/logic/sensor/OwnerLocatorBlockLogic";
+import { RadarSectionBlockLogic } from "shared/block/logic/logic/sensor/RadarSectionBlockLogic";
+import { SpeedometerBlockLogic } from "shared/block/logic/logic/sensor/SpeedometerBlockLogic";
+import { MagnetBlockLogic } from "shared/block/logic/MagnetBlockLogic";
+import { MotorBlockLogic } from "shared/block/logic/MotorBlockLogic";
 import { PassengerSeatBlockLogic } from "shared/block/logic/PassengerSeatBlockLogic";
 import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
 import { RadioRecieverBlockLogic } from "shared/block/logic/RadioRecieverBlockLogic";
 import { RadioTransmitterBlockLogic } from "shared/block/logic/RadioTransmitterBlockLogic";
-import { ByteMakerBlockLogic } from "shared/block/logic/logic/converter/byte/ByteMakerBlockLogic";
-import { ByteSplitterBlockLogic } from "shared/block/logic/logic/converter/byte/ByteSplitterBlockLogic";
-import { LEDDisplayBlockLogic } from "shared/block/logic/logic/display/LEDDisplayBlockLogic";
-import { LaserBlockLogic } from "shared/block/logic/logic/display/LaserBlockLogic";
-import { SevenSegmentDisplayBlockLogic } from "shared/block/logic/logic/display/SevenSegmentDisplayBlockLogic";
-import { RadarSectionBlockLogic } from "shared/block/logic/logic/sensor/RadarSectionBlockLogic";
-import { PlacedBlockData } from "shared/building/BlockManager";
-import { BlockLogic } from "./BlockLogic";
-import { BallastBlockLogic } from "./logic/BallastBlockLogic";
-import { DisconnectBlockLogic } from "./logic/DisconnectBlockLogic";
-import { HeliumBlockLogic } from "./logic/HeliumBlockLogic";
-import { MagnetBlockLogic } from "./logic/MagnetBlockLogic";
-import { MotorBlockLogic } from "./logic/MotorBlockLogic";
-import { RocketEngineLogic } from "./logic/RocketEngineLogic";
-import { RopeLogic } from "./logic/RopeLogic";
-import { ServoMotorBlockLogic } from "./logic/ServoMotorBlockLogic";
-import { SuspensionLogic } from "./logic/SuspensionLogic";
-import { TNTBlockLogic } from "./logic/TNTBlockLogic";
-import { VehicleSeatBlockLogic } from "./logic/VehicleSeatBlockLogic";
-import { WingLogic } from "./logic/WingLogic";
-import { LampBlockLogic } from "./logic/logic/display/LampBlockLogic";
-import { ScreenBlockLogic } from "./logic/logic/display/ScreenBlockLogic";
-import { LogicMemoryBlockLogic } from "./logic/logic/memory/LogicMemoryBlockLogic";
-import { RandomAccessMemoryBlockLogic } from "./logic/logic/memory/RandomAccessMemoryBlockLogic";
-import { ReadOnlyMemoryBlockLogic } from "./logic/logic/memory/ReadOnlyMemoryBlockLogic";
-import { StackMemoryBlockLogic } from "./logic/logic/memory/StackMemoryBlockLogic";
-import { BufferBlockLogic } from "./logic/logic/other/BufferBlockLogic";
-import { CounterBlockLogic } from "./logic/logic/other/CounterBlockLogic";
-import { DelayBlockLogic } from "./logic/logic/other/DelayBlockLogic";
-import { AltimeterBlockLogic } from "./logic/logic/sensor/AltimeterBlockLogic";
-import { AngleSensorBlockLogic } from "./logic/logic/sensor/AngleSensorBlockLogic";
-import { KeySensorBlockLogic } from "./logic/logic/sensor/KeySensorBlockLogic";
-import { OwnerLocatorBlockLogic } from "./logic/logic/sensor/OwnerLocatorBlockLogic";
-import { SpeedometerBlockLogic } from "./logic/logic/sensor/SpeedometerBlockLogic";
+import { RocketEngineLogic } from "shared/block/logic/RocketEngineLogic";
+import { RopeLogic } from "shared/block/logic/RopeLogic";
+import { ServoMotorBlockLogic } from "shared/block/logic/ServoMotorBlockLogic";
+import { SuspensionLogic } from "shared/block/logic/SuspensionLogic";
+import { TNTBlockLogic } from "shared/block/logic/TNTBlockLogic";
+import { VehicleSeatBlockLogic } from "shared/block/logic/VehicleSeatBlockLogic";
+import { WingLogic } from "shared/block/logic/WingLogic";
+import type { BlockLogic } from "shared/block/BlockLogic";
+import type { BlockId } from "shared/BlockDataRegistry";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 declare global {
 	type LogicCtor = new (block: PlacedBlockData) => BlockLogic;
@@ -82,6 +84,8 @@ const logicRegistry = {
 	radiotransmitter: RadioTransmitterBlockLogic,
 
 	ownerlocator: OwnerLocatorBlockLogic,
+	masssensor: MassSensorBlockLogic,
+	gravitysensor: GravitySensorBlockLogic,
 
 	speedometer: SpeedometerBlockLogic,
 	anglesensor: AngleSensorBlockLogic,

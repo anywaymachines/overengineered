@@ -1,6 +1,7 @@
 import { Definitions, Middleware } from "@rbxts/net";
-import { BlockId } from "shared/BlockDataRegistry";
-import { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
+import { C2S2CRemoteFunction } from "shared/event2/PERemoteEvent";
+import type { BlockId } from "shared/BlockDataRegistry";
+import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel | undefined }>;
@@ -84,6 +85,27 @@ declare global {
 	};
 }
 
+export const CustomRemotes = {
+	building: {
+		placeBlocks: new C2S2CRemoteFunction<[data: PlaceBlocksRequest], MultiBuildResponse>("rb_place"),
+		deleteBlocks: new C2S2CRemoteFunction<[data: DeleteBlocksRequest]>("rb_delete"),
+		moveBlocks: new C2S2CRemoteFunction<[data: MoveBlocksRequest]>("rb_move"),
+		rotateBlocks: new C2S2CRemoteFunction<[data: RotateBlocksRequest]>("rb_rotate"),
+		logicConnect: new C2S2CRemoteFunction<[data: LogicConnectRequest]>("rb_lconnect"),
+		logicDisconnect: new C2S2CRemoteFunction<[data: LogicDisconnectRequest]>("rb_ldisconnect"),
+		paintBlocks: new C2S2CRemoteFunction<[data: PaintBlocksRequest]>("rb_paint"),
+		updateConfig: new C2S2CRemoteFunction<[data: ConfigUpdateRequest]>("rb_updatecfg"),
+		resetConfig: new C2S2CRemoteFunction<[data: ConfigResetRequest]>("rb_resetcfg"),
+	},
+	slots: {
+		load: new C2S2CRemoteFunction<[index: number], LoadSlotResponse>("rs_load"),
+		loadImported: new C2S2CRemoteFunction<[index: number], LoadSlotResponse>("rs_loadi"),
+		loadAsAdmin: new C2S2CRemoteFunction<[userid: number, index: number, imported: boolean], LoadSlotResponse>(
+			"rs_loadadm",
+		),
+		save: new C2S2CRemoteFunction<[data: PlayerSaveSlotRequest], SaveSlotResponse>("rs_save"),
+	},
+} as const;
 export const Remotes = Definitions.Create({
 	Player: Definitions.Namespace({
 		InputTypeInfo: Definitions.ClientToServerEvent<[inputType: InputType]>(),
@@ -92,33 +114,6 @@ export const Remotes = Definitions.Create({
 				<TKey extends keyof PlayerConfig>(key: TKey, value: PlayerConfig[TKey]) => Response
 			>(),
 		FetchData: Definitions.ServerAsyncFunction<() => PlayerDataResponse>(),
-	}),
-	Building: Definitions.Namespace({
-		UpdateConfigRequest: Definitions.ServerAsyncFunction<(data: ConfigUpdateRequest) => Response>(),
-		ResetConfigRequest: Definitions.ServerAsyncFunction<(data: ConfigResetRequest) => Response>(),
-
-		PlaceBlocks: Definitions.ServerAsyncFunction<(data: PlaceBlocksRequest) => MultiBuildResponse>(),
-		DeleteBlocks: Definitions.ServerAsyncFunction<(data: DeleteBlocksRequest) => Response>(),
-		MoveBlocks: Definitions.ServerAsyncFunction<(data: MoveBlocksRequest) => Response>(),
-		RotateBlocks: Definitions.ServerAsyncFunction<(data: RotateBlocksRequest) => Response>(),
-		LogicConnect: Definitions.ServerAsyncFunction<(data: LogicConnectRequest) => Response>(),
-		LogicDisconnect: Definitions.ServerAsyncFunction<(data: LogicDisconnectRequest) => Response>(),
-		PaintBlocks: Definitions.ServerAsyncFunction<(data: PaintBlocksRequest) => Response>(),
-	}),
-	Slots: Definitions.Namespace({
-		Load: Definitions.ServerAsyncFunction<(index: number) => LoadSlotResponse>([
-			Middleware.RateLimit({ MaxRequestsPerMinute: 8 }),
-		]),
-		LoadImported: Definitions.ServerAsyncFunction<(index: number) => LoadSlotResponse>([
-			Middleware.RateLimit({
-				MaxRequestsPerMinute: 4,
-			}),
-		]),
-		Save: Definitions.ServerAsyncFunction<(data: PlayerSaveSlotRequest) => SaveSlotResponse>([
-			Middleware.RateLimit({
-				MaxRequestsPerMinute: 60,
-			}),
-		]),
 	}),
 	Ride: Definitions.Namespace({
 		SetPlayMode: Definitions.ServerAsyncFunction<(mode: PlayModes) => Response>([
@@ -130,7 +125,6 @@ export const Remotes = Definitions.Create({
 		Sit: Definitions.ClientToServerEvent<[]>(),
 	}),
 	Admin: Definitions.Namespace({
-		LoadSlot: Definitions.ClientToServerEvent<[userid: number, slot: number]>(),
 		SendMessage: Definitions.BidirectionalEvent<
 			[text: string, color?: Color3, duration?: number],
 			[text: string, color?: Color3, duration?: number]

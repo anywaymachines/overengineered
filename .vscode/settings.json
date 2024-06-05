@@ -13,11 +13,13 @@
 	"eslint.format.enable": true,
 
 	"editor.codeActionsOnSave": {
-		"source.organizeImports": "explicit"
+		"source.organizeImports": "never"
 	},
 
 	"discord.removeRemoteRepository": true,
 	"editor.formatOnSave": true,
 	"typescript.preferences.importModuleSpecifier": "non-relative",
-	"typescript.updateImportsOnFileMove.enabled": "always"
+	"typescript.updateImportsOnFileMove.enabled": "always",
+	"typescript.preferences.preferTypeOnlyAutoImports": true,
+	"editor.insertSpaces": false
 }

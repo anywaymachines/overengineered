@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import type { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 
 export namespace _Tests {
 	const parent = new Instance("Folder");

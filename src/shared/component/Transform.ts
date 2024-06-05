@@ -1,9 +1,10 @@
 import { RunService } from "@rbxts/services";
+import { Component } from "shared/component/Component";
+import { ContainerComponent } from "shared/component/ContainerComponent";
+import { Easing } from "shared/component/Easing";
 import { SlimSignal } from "shared/event/SlimSignal";
 import { Objects } from "shared/fixes/objects";
-import { Component } from "./Component";
-import { ContainerComponent } from "./ContainerComponent";
-import { Easable, Easing, EasingDirection, EasingStyle } from "./Easing";
+import type { Easable, EasingDirection, EasingStyle } from "shared/component/Easing";
 
 interface Transform {
 	/** @returns True if completed */

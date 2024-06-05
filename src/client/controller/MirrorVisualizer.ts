@@ -1,14 +1,14 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
-import { SharedPlots } from "shared/building/SharedPlots";
-import { ReadonlyObservableValue } from "shared/event/ObservableValue";
+import type { SharedPlot } from "shared/building/SharedPlot";
+import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 export class MirrorVisualizer extends ClientComponent {
-	private readonly plot: ReadonlyObservableValue<PlotModel>;
+	private readonly plot: ReadonlyObservableValue<SharedPlot>;
 	private readonly mirrorMode: ReadonlyObservableValue<MirrorMode>;
 	private readonly template;
 
-	constructor(plot: ReadonlyObservableValue<PlotModel>, mirrorMode: ReadonlyObservableValue<MirrorMode>) {
+	constructor(plot: ReadonlyObservableValue<SharedPlot>, mirrorMode: ReadonlyObservableValue<MirrorMode>) {
 		super();
 
 		this.plot = plot;
@@ -17,7 +17,7 @@ export class MirrorVisualizer extends ClientComponent {
 
 		this.event.subscribeObservable(this.mirrorMode, () => this.recreate(), true);
 		this.event.subscribeObservable(this.plot, (plot, prev) => {
-			prev?.FindFirstChild("Mirrors")?.ClearAllChildren();
+			prev?.instance.FindFirstChild("Mirrors")?.ClearAllChildren();
 			this.recreate();
 		});
 	}
@@ -29,17 +29,17 @@ export class MirrorVisualizer extends ClientComponent {
 
 	disable() {
 		super.disable();
-		this.plot.get()?.FindFirstChild("Mirrors")?.ClearAllChildren();
+		this.plot.get()?.instance.FindFirstChild("Mirrors")?.ClearAllChildren();
 	}
 
 	private recreate() {
 		const plot = this.plot.get();
 
-		let mirrors = plot.FindFirstChild("Mirrors");
+		let mirrors = plot.instance.FindFirstChild("Mirrors");
 		if (!mirrors) {
 			mirrors = new Instance("Folder");
 			mirrors.Name = "Mirrors";
-			mirrors.Parent = plot;
+			mirrors.Parent = plot.instance;
 		}
 
 		mirrors.ClearAllChildren();
@@ -50,22 +50,18 @@ export class MirrorVisualizer extends ClientComponent {
 		if (mode.y !== undefined)
 			axes.push([
 				CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(new Vector3(0, mode.y, 0)),
-				SharedPlots.getPlotBuildingRegion(plot).getSize().X,
+				plot.bounds.getSize().X,
 			]);
-		if (mode.x !== undefined)
-			axes.push([
-				CFrame.identity.add(new Vector3(0, 0, mode.x)),
-				SharedPlots.getPlotBuildingRegion(plot).getSize().X,
-			]);
+		if (mode.x !== undefined) axes.push([CFrame.identity.add(new Vector3(0, 0, mode.x)), plot.bounds.getSize().X]);
 		if (mode.z !== undefined)
 			axes.push([
 				CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(mode.z, 0, 0)),
-				SharedPlots.getPlotBuildingRegion(plot).getSize().Z,
+				plot.bounds.getSize().Z,
 			]);
 
 		for (const [cframe, size] of axes) {
 			const mirror = this.template();
-			mirror.PivotTo(plot.BuildingArea.GetPivot().ToWorldSpace(cframe));
+			mirror.PivotTo(plot.getCenter().ToWorldSpace(cframe));
 			mirror.Size = new Vector3(size, 1, 0.001);
 			mirror.Parent = mirrors;
 		}

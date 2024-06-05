@@ -1,6 +1,7 @@
-import { ColorChooser, ColorChooserDefinition } from "client/gui/ColorChooser";
+import { ColorChooser } from "client/gui/ColorChooser";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
+import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 
 export const _Tests = () => {
 	const colorparent = Gui.getGameUI<{

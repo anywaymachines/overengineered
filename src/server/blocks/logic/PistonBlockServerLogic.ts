@@ -1,9 +1,11 @@
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
-import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
+import type { PlayModeController } from "server/modes/PlayModeController";
+import type { PistonLogic } from "shared/block/logic/PistonBlockLogic";
 
+@injectable
 export class PistonBlockServerLogic extends ServerBlockLogic<typeof PistonLogic> {
-	constructor(logic: typeof PistonLogic) {
-		super(logic);
+	constructor(logic: typeof PistonLogic, @inject playModeController: PlayModeController) {
+		super(logic, playModeController);
 
 		logic.events.updatePosition.invoked.Connect((player, { block, position }) => {
 			if (!this.isValidBlock(block, player)) return;

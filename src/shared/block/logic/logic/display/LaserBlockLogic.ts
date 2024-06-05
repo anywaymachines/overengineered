@@ -1,8 +1,8 @@
 import { RunService, Workspace } from "@rbxts/services";
-import { RobloxUnit } from "shared/RobloxUnit";
-import { BlockLogicData } from "shared/block/BlockLogic";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { RobloxUnit } from "shared/RobloxUnit";
+import type { BlockLogicData } from "shared/block/BlockLogic";
 
 export class LaserBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.laser> {
 	private raycastParams;

@@ -1,7 +1,8 @@
-import { RobloxUnit } from "shared/RobloxUnit";
-import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { Workspace } from "@rbxts/services";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { RobloxUnit } from "shared/RobloxUnit";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.radarsection> {
 	private closestDetectedPart: BasePart | undefined = undefined;
@@ -9,6 +10,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 
 	private getDistanceTo(part: BasePart) {
 		if (!this.closestDetectedPart) return -1;
+		if (!part.IsDescendantOf(Workspace)) return;
 		return this.instance.GetPivot().Position.sub(part.Position).Magnitude;
 	}
 
@@ -18,16 +20,21 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		let closestPart: BasePart | undefined;
 		for (const bp of this.allTouchedBlocks) {
 			const d = this.getDistanceTo(bp);
+			if (d === undefined) {
+				this.allTouchedBlocks.delete(bp);
+				continue;
+			}
+
 			if (smallestDistance === undefined || d < smallestDistance) [smallestDistance, closestPart] = [d, bp];
 		}
 		return closestPart;
 	}
 
 	tick(tick: number): void {
-		if (this.closestDetectedPart !== undefined)
-			this.output.distance.set(RobloxUnit.Studs_To_Meters(this.getDistanceTo(this.closestDetectedPart)));
-
 		super.tick(tick);
+
+		if (this.closestDetectedPart !== undefined)
+			this.output.distance.set(RobloxUnit.Studs_To_Meters(this.getDistanceTo(this.closestDetectedPart) ?? -1));
 	}
 
 	constructor(block: PlacedBlockData) {
@@ -37,6 +44,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		const halvedMaxDist = maxDist / 2;
 
 		const view = this.instance.WaitForChild("RadarView");
+		const doNotReactToUnion = this.instance.WaitForChild("Union");
 		if (!view) return;
 		if (!view.IsA("BasePart")) return;
 
@@ -66,9 +74,15 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 
 		this.event.subscribe(view.Touched, (part) => {
 			if (part.CollisionGroup !== "Blocks") return;
+			if (part === doNotReactToUnion) return;
+			if (part.HasTag("RADARVIEW")) return;
 			this.allTouchedBlocks.add(part);
 			if (!this.closestDetectedPart) return (this.closestDetectedPart = part);
-			if (this.getDistanceTo(part) > this.getDistanceTo(this.closestDetectedPart)) return;
+			const d1 = this.getDistanceTo(part);
+			const d2 = this.getDistanceTo(this.closestDetectedPart);
+			if (d1 === undefined) return;
+			if (d2 === undefined) return (this.closestDetectedPart = part);
+			if (d1 > d2) return;
 			this.closestDetectedPart = part;
 		});
 
@@ -79,6 +93,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		});
 
 		this.onDescendantDestroyed(() => {
+			if (view) view.Transparency = 1;
 			this.disable();
 		});
 	}

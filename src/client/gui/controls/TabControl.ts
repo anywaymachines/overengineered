@@ -1,6 +1,6 @@
 import { Control } from "client/gui/Control";
+import { TextButtonControl } from "client/gui/controls/Button";
 import { Element } from "shared/Element";
-import { TextButtonControl } from "./Button";
 
 export type TabControlDefinition = Frame & {
 	readonly Tabs: ScrollingFrame & {

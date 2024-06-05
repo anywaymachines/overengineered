@@ -24,7 +24,7 @@ export namespace TestFramework {
 		return ret;
 	}
 
-	export type Tests = { readonly [k in string]: Tests } | (() => void);
+	export type Tests = { readonly [k in string]: Tests } | ((di?: ReadonlyDIContainer) => void);
 	export function loadTestsFromScript(mscript: ModuleScript): Tests {
 		const ts = require(
 			ReplicatedStorage.WaitForChild("rbxts_include").WaitForChild("RuntimeLib") as ModuleScript,
@@ -35,24 +35,28 @@ export namespace TestFramework {
 		return (ts.import(script, mscript) as { _Tests: Tests })._Tests;
 	}
 
-	export function run(name: string, test: Tests, offset = 0) {
-		const offsetstr = string.rep(" ", offset);
-		$log(`${offsetstr}[${name}] Running`);
+	export function run(name: string, test: Tests, di: ReadonlyDIContainer) {
+		const run = (name: string, test: Tests, offset: number) => {
+			const offsetstr = string.rep(" ", offset);
+			$log(`${offsetstr}[${name}] Running`);
 
-		if (typeIs(test, "function")) {
-			try {
-				test();
-				return;
-			} catch (err) {
-				$err(tostring(err ?? "Unknown error"));
-				return;
+			if (typeIs(test, "function")) {
+				try {
+					test(di);
+					return;
+				} catch (err) {
+					$err(tostring(err ?? "Unknown error"));
+					return;
+				}
 			}
-		}
 
-		for (const [name, tests] of pairs(test)) {
-			run(name, tests, offset + 1);
-		}
+			for (const [name, tests] of pairs(test)) {
+				run(name, tests, offset + 1);
+			}
 
-		$log(`${offsetstr}[${name}] SUCCESS`);
+			$log(`${offsetstr}[${name}] SUCCESS`);
+		};
+
+		run(name, test, 0);
 	}
 }

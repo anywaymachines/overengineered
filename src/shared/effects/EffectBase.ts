@@ -1,5 +1,5 @@
-import { CreatableRemoteEvents } from "shared/event/RemoteEventBase";
 import { S2CRemoteEvent } from "shared/event/S2CRemoteEvent";
+import type { CreatableRemoteEvents } from "shared/event/RemoteEventBase";
 
 export abstract class EffectBase<T> extends S2CRemoteEvent<T> {
 	static staticMustSendToPlayer?: (player: Player) => boolean;

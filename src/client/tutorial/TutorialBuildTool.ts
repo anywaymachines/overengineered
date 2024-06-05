@@ -1,23 +1,26 @@
 import { Workspace } from "@rbxts/services";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
-import { Tutorial } from "client/tutorial/Tutorial";
-import { BlocksInitializer } from "shared/BlocksInitializer";
 import { BuildingManager } from "shared/building/BuildingManager";
-import { SharedPlots } from "shared/building/SharedPlots";
 import { EventHandler } from "shared/event/EventHandler";
 import { successResponse } from "shared/types/network/Responses";
 import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { Tutorial } from "client/tutorial/Tutorial";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 export type TutorialPlaceBlockHighlight = {
-	id: string;
+	id: BlockId;
 	cframe: CFrame;
 };
 
+@injectable
 export class TutorialBuildTool {
 	private readonly tutorialBlocksToPlace: (TutorialPlaceBlockHighlight & { readonly instance: Instance })[] = [];
 
-	constructor(private readonly tutorial: typeof Tutorial) {}
+	constructor(
+		@inject private readonly tutorial: Tutorial,
+		@inject private readonly blockRegistry: BlockRegistry,
+	) {}
 
 	cleanup() {
 		this.tutorialBlocksToPlace.forEach((block) => {
@@ -28,8 +31,8 @@ export class TutorialBuildTool {
 	}
 
 	addBlockToPlace(data: TutorialPlaceBlockHighlight) {
-		const model = BlocksInitializer.blocks.map.get(data.id)!.model.Clone();
-		const plot = SharedPlots.getOwnPlot();
+		const model = this.blockRegistry.blocks.get(data.id)!.model.Clone();
+		const plot = this.tutorial.plot;
 		const relativePosition = plot.instance.BuildingArea.CFrame.ToWorldSpace(data.cframe);
 
 		PartUtils.ghostModel(model, Color3.fromRGB(255, 255, 255));
@@ -40,7 +43,7 @@ export class TutorialBuildTool {
 	}
 
 	async waitForBlocksToPlace(): Promise<boolean> {
-		const plot = SharedPlots.getOwnPlot();
+		const plot = this.tutorial.plot;
 		return new Promise((resolve) => {
 			const eventHandler = new EventHandler();
 
@@ -76,10 +79,11 @@ export class TutorialBuildTool {
 				}),
 			);
 
-			eventHandler.subscribe(plot.instance.Blocks.ChildAdded, () => {
+			ClientBuilding.placeOperation.executed.Connect((plot, blocks) => {
 				for (const blockToPlace of this.tutorialBlocksToPlace ?? []) {
 					if (
 						!BuildingManager.getBlockByPosition(
+							this.tutorial.plot,
 							plot.instance.BuildingArea.CFrame.ToWorldSpace(blockToPlace.cframe).Position,
 						)
 					) {

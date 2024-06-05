@@ -1,7 +1,7 @@
-import { TransformBuilder } from "shared/component/Transform";
+import { ComponentInstance } from "shared/component/ComponentInstance";
+import { ContainerComponent } from "shared/component/ContainerComponent";
 import { TransformService } from "shared/component/TransformService";
-import { ComponentInstance } from "./ComponentInstance";
-import { ContainerComponent } from "./ContainerComponent";
+import type { TransformBuilder } from "shared/component/Transform";
 
 /** Component with an `Instance` and children */
 export class InstanceComponent<

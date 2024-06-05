@@ -3,13 +3,12 @@ import { ClientComponent } from "client/component/ClientComponent";
 import { Colors } from "client/gui/Colors";
 import { Gui } from "client/gui/Gui";
 import { SharedPlot } from "shared/building/SharedPlot";
-import { SharedPlots } from "shared/building/SharedPlots";
 
 export class CenterOfMassController extends ClientComponent {
 	private readonly viewportFrame;
 	private renderedBalls: Model[] = [];
 
-	constructor() {
+	constructor(plot: SharedPlot) {
 		super();
 
 		this.viewportFrame = new Instance("ViewportFrame");
@@ -23,7 +22,7 @@ export class CenterOfMassController extends ClientComponent {
 		this.viewportFrame.ZIndex = -1000;
 
 		const update = () => {
-			const blocks = SharedPlots.getOwnPlot().getBlocks();
+			const blocks = plot.getBlocks();
 			const pos = this.calculateCentersOfMass(blocks);
 
 			if (pos.size() > this.renderedBalls.size()) {
@@ -48,7 +47,7 @@ export class CenterOfMassController extends ClientComponent {
 
 		this.event.subscribe(SharedPlot.anyChanged, update);
 		this.event.onEnable(update);
-		this.event.onDisable(() => {
+		this.onDisable(() => {
 			this.renderedBalls.forEach((element) => {
 				element.Destroy();
 			});

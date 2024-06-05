@@ -1,9 +1,10 @@
 import { Control } from "client/gui/Control";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
-import { SliderControl, SliderControlDefinition } from "client/gui/controls/SliderControl";
+import { SliderControl } from "client/gui/controls/SliderControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
+import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
 
 export type ColorChooserDefinition = GuiObject & {
 	readonly Preview: GuiObject;

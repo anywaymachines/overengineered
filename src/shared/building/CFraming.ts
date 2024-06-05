@@ -1,4 +1,4 @@
-import { SharedPlot } from "shared/building/SharedPlot";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 type LG = "Local" | "Global";
 

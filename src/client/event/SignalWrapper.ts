@@ -1,11 +1,13 @@
-export type SignalWrapperConnection = (this: void) => void;
-type CallbackOf<TArgs extends readonly unknown[]> = (...args: TArgs) => void;
+import type { ReadonlyArgsSignal } from "shared/event/Signal";
 
-export interface ISignalWrapper<TArgs extends readonly unknown[]> {
+export type SignalWrapperConnection = (this: void) => void;
+type CallbackOf<TArgs extends unknown[]> = (...args: TArgs) => void;
+
+export interface ISignalWrapper<TArgs extends unknown[]> {
 	subscribe(callback: CallbackOf<TArgs>): SignalWrapperConnection;
 }
 
-class SignalWrapperBase<TArgs extends readonly unknown[]> {
+class SignalWrapperBase<TArgs extends unknown[]> {
 	protected readonly signal: ISignalWrapper<TArgs>;
 
 	constructor(signal: RBXScriptSignal<CallbackOf<TArgs>> | ISignalWrapper<TArgs>) {
@@ -16,7 +18,7 @@ class SignalWrapperBase<TArgs extends readonly unknown[]> {
 		this.signal = signal;
 	}
 
-	private static wrapSignal<TArgs extends readonly unknown[]>(
+	private static wrapSignal<TArgs extends unknown[]>(
 		signal: RBXScriptSignal<CallbackOf<TArgs>>,
 	): ISignalWrapper<TArgs> {
 		return {
@@ -28,9 +30,9 @@ class SignalWrapperBase<TArgs extends readonly unknown[]> {
 	}
 }
 
-export class SignalWrapper<TArgs extends readonly unknown[]>
+export class SignalWrapper<TArgs extends unknown[]>
 	extends SignalWrapperBase<TArgs>
-	implements ISignalWrapper<TArgs>
+	implements ISignalWrapper<TArgs>, ReadonlyArgsSignal<TArgs>
 {
 	private readonly events = new Map<Callback, Callback>();
 	private connection: SignalWrapperConnection | undefined;
@@ -38,6 +40,15 @@ export class SignalWrapper<TArgs extends readonly unknown[]>
 
 	constructor(signal: RBXScriptSignal<CallbackOf<TArgs>> | ISignalWrapper<TArgs>) {
 		super(signal);
+	}
+
+	Connect(callback: CallbackOf<TArgs>): { Disconnect(): void } {
+		const unsub = this.subscribe(callback);
+		return {
+			Disconnect() {
+				unsub();
+			},
+		};
 	}
 
 	subscribe(callback: CallbackOf<TArgs>): SignalWrapperConnection {
@@ -64,7 +75,7 @@ export class SignalWrapper<TArgs extends readonly unknown[]>
 	}
 }
 
-export class ThinSignalWrapper<TArgs extends readonly unknown[]> extends SignalWrapperBase<TArgs> {
+export class ThinSignalWrapper<TArgs extends unknown[]> extends SignalWrapperBase<TArgs> {
 	private readonly events: Callback[] = [];
 	private connection: SignalWrapperConnection | undefined;
 	private destroyed = false;

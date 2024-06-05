@@ -3,9 +3,9 @@ import { ClientInstanceComponent } from "client/component/ClientInstanceComponen
 import { InputController } from "client/controller/InputController";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
-import { Element } from "shared/Element";
-import { InstanceComponent } from "shared/component/InstanceComponent";
 import { TransformService } from "shared/component/TransformService";
+import { Element } from "shared/Element";
+import type { InstanceComponent } from "shared/component/InstanceComponent";
 
 const tooltipsGui = Gui.getGameUI<{ ControlsInfo: TooltipsControlDefinition }>().ControlsInfo;
 tooltipsGui.Visible = true;

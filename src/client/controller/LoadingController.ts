@@ -1,11 +1,10 @@
 import { Workspace } from "@rbxts/services";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
-import { TransformProps } from "shared/component/Transform";
 import { TransformService } from "shared/component/TransformService";
 import { ObservableValue } from "shared/event/ObservableValue";
+import type { TransformProps } from "shared/component/Transform";
 
-print("`INLOADINGCONTROLLERSTART", debug.traceback());
 class LoadingImage extends Control {
 	runShowAnimation() {
 		const startanim = () => {
@@ -118,11 +117,11 @@ const control = new LoadingPopup(Gui.getGameUI<{ Loading: LoadingPopupDefinition
 control.hide();
 
 const state = new ObservableValue<boolean>(false);
-print("`INLOADINGCONTROLLEREND", debug.traceback());
 export namespace LoadingController {
 	export const isLoading = state.asReadonly();
 
 	export function show(text: string) {
+		$log(text);
 		control.setText(`${text}...`);
 		control.show();
 		state.set(true);
@@ -132,6 +131,14 @@ export namespace LoadingController {
 		state.set(false);
 	}
 
+	export function run<T>(text: string, func: () => T) {
+		try {
+			LoadingController.show(text);
+			return func();
+		} finally {
+			LoadingController.hide();
+		}
+	}
 	export async function runAsync<T>(text: string, func: () => T | Promise<T>) {
 		try {
 			LoadingController.show(text);

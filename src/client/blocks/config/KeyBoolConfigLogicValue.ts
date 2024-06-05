@@ -1,6 +1,6 @@
-import { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
-import { IBlockLogicValue } from "shared/block/BlockLogicValue";
-import { ConfigLogicValueBase } from "./ConfigLogicValueBase";
+import { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
+import type { TouchModeButtonData } from "client/gui/ridemode/TouchModeButtonControl";
+import type { IBlockLogicValue } from "shared/block/BlockLogicValue";
 
 const keys = new Set<string>(Enum.KeyCode.GetEnumItems().map((v) => v.Name));
 const isKeyCode = (key: string): key is KeyCode => keys.has(key);

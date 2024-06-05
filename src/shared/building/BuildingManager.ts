@@ -1,9 +1,9 @@
 import { Players } from "@rbxts/services";
-import { BlockId } from "shared/BlockDataRegistry";
-import { BlocksInitializer } from "shared/BlocksInitializer";
-import { SharedPlot } from "shared/building/SharedPlot";
-import { SharedPlots } from "shared/building/SharedPlots";
+import { BlockManager } from "shared/building/BlockManager";
 import { VectorUtils } from "shared/utils/VectorUtils";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
+import type { BlockId } from "shared/BlockDataRegistry";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 /** Methods for for getting information about blocks in a building */
 export namespace BuildingManager {
@@ -28,17 +28,44 @@ export namespace BuildingManager {
 		Enum.Material.Wood,
 	];
 
+	export function getAssemblyBlocks(block: BlockModel): BlockModel[] {
+		// using set to prevent duplicates
+		return [
+			...new Set(block.PrimaryPart!.GetConnectedParts(true).map((b) => BlockManager.tryGetBlockModelByPart(b)!)),
+		];
+	}
+	export function getMachineBlocks(block: BlockModel): BlockModel[] {
+		const find = (result: Set<BlockModel>, visited: Set<Instance>, instance: BlockModel) => {
+			for (const part of instance.GetDescendants()) {
+				if (!part.IsA("BasePart")) continue;
+
+				const assemblyConnected = part.GetConnectedParts(false);
+				for (const cpart of assemblyConnected) {
+					if (visited.has(cpart)) {
+						continue;
+					}
+
+					visited.add(cpart);
+
+					const connected = BlockManager.getBlockDataByPart(cpart)!.instance;
+					result.add(connected);
+					find(result, visited, connected);
+				}
+			}
+		};
+
+		const result = new Set<BlockModel>();
+		find(result, new Set(), block);
+
+		return [...result];
+	}
+
 	/** Returns the block or nothing that is set on (or near) the given vector
 	 * @param vector The vector to check
 	 * @deprecated slow & stupid
 	 */
-	export function getBlockByPosition(vector: Vector3): BlockModel | undefined {
-		const plot = SharedPlots.getPlotByPosition(vector);
-		if (!plot) {
-			return undefined;
-		}
-
-		const blocks = SharedPlots.getPlotComponent(plot).getBlocks();
+	export function getBlockByPosition(plot: SharedPlot, vector: Vector3): BlockModel | undefined {
+		const blocks = plot.getBlocks();
 		for (let i = 0; i < blocks.size(); i++) {
 			const block = blocks[i];
 			if (
@@ -90,8 +117,9 @@ export namespace BuildingManager {
 		plot: PlotModel,
 		origBlock: MirroredBlock,
 		mode: MirrorMode,
+		blockRegistry: BlockRegistry,
 	): readonly MirroredBlock[] {
-		const method = BlocksInitializer.blocks.map.get(origBlock.id)?.mirrorBehaviour ?? "normal";
+		const method = blockRegistry.blocks.get(origBlock.id)?.mirrorBehaviour ?? "normal";
 		const [xAxis, yAxis, zAxis] = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis];
 
 		const reflect = (block: MirroredBlock, mode: "x" | "y" | "z", mirrorCFrame: CFrame): MirroredBlock => {
@@ -164,9 +192,7 @@ export namespace BuildingManager {
 			// apply position \/
 			const rpos = mirrorCFrame.PointToObjectSpace(pos);
 			return {
-				id:
-					(BlocksInitializer.blocks.map.get(block.id)?.mirrorReplacementId as BlockId | undefined) ??
-					block.id,
+				id: (blockRegistry.blocks.get(block.id)?.mirrorReplacementId as BlockId | undefined) ?? block.id,
 				pos: new CFrame(mirrorCFrame.ToWorldSpace(new CFrame(rpos.X, rpos.Y, -rpos.Z)).Position).mul(
 					cframe.Rotation,
 				),

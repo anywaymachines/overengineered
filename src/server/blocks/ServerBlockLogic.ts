@@ -1,12 +1,15 @@
 import { Workspace } from "@rbxts/services";
-import { PlayModeController } from "server/modes/PlayModeController";
-import { BlockLogic } from "shared/block/BlockLogic";
-import { PlacedBlockData } from "shared/building/BlockManager";
+import type { PlayModeController } from "server/modes/PlayModeController";
+import type { BlockLogic } from "shared/block/BlockLogic";
+import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export abstract class ServerBlockLogic<T extends new (block: PlacedBlockData) => BlockLogic> {
 	readonly logic;
 
-	constructor(logic: T) {
+	constructor(
+		logic: T,
+		private readonly playModeController: PlayModeController,
+	) {
 		this.logic = logic;
 	}
 
@@ -15,7 +18,7 @@ export abstract class ServerBlockLogic<T extends new (block: PlacedBlockData) =>
 		if (!block.IsDescendantOf(Workspace)) return false;
 
 		if (player) {
-			if (PlayModeController.getPlayerMode(player) !== "ride") {
+			if (this.playModeController.getPlayerMode(player) !== "ride") {
 				return false;
 			}
 

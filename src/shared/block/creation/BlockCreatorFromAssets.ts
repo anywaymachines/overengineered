@@ -1,7 +1,7 @@
-import { ReplicatedStorage, RunService } from "@rbxts/services";
-import { BlockId } from "shared/BlockDataRegistry";
-import { BlocksInitializeData } from "shared/BlocksInitializer";
+import { ReplicatedStorage } from "@rbxts/services";
 import { BlockGenerator } from "shared/block/creation/BlockGenerator";
+import type { BlockId } from "shared/BlockDataRegistry";
+import type { BlocksInitializeData } from "shared/init/BlocksInitializer";
 
 /** Reads blocks and categories from {@link ReplicatedStorage.Assets.Placeable} */
 export namespace BlockCreatorFromAssets {
@@ -28,9 +28,7 @@ export namespace BlockCreatorFromAssets {
 		}
 	}
 	function readBlock(data: BlocksInitializeData, block: Model, categoryName: string) {
-		if (RunService.IsStudio() && RunService.IsServer()) {
-			BlockGenerator.Assertions.checkAll(block);
-		}
+		BlockGenerator.Assertions.checkAll(block);
 
 		const id = block.Name.lower() as BlockId;
 		const regblock = BlockGenerator.construct(id, block as BlockModel, categoryName as CategoryName);
