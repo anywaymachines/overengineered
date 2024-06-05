@@ -51,15 +51,16 @@ export class PlayerDataController extends HostedService {
 				Backend.Datastores.GetEntry(universeId, "players", tostring(player.UserId)) as string,
 			);
 
-			const externalSlots = (externalData as { slots: readonly SlotMeta[] })["slots"];
-
-			for (const slot of externalSlots) {
-				if (slot.blocks > 0) {
-					slots.push(slot);
+			const externalSlots = (externalData as { slots: readonly SlotMeta[] | undefined })?.slots;
+			if (externalSlots) {
+				for (const slot of externalSlots) {
+					if (slot.blocks > 0) {
+						slots.push(slot);
+					}
 				}
 			}
 		} catch (err) {
-			$err(err as string);
+			$err("Error while loading the external slots:", err, "skipping...");
 		}
 
 		return {
