@@ -14,14 +14,19 @@ export class ServerRestartController extends HostedService {
 		super();
 
 		this.onEnable(() => {
-			this.event.eventHandler.register(MessagingService.SubscribeAsync("Restart", () => this.restart(true)));
+			task.spawn(() => {
+				this.event.eventHandler.register(MessagingService.SubscribeAsync("Restart", () => this.restart(true)));
+			});
+
 			registerOnRemoteEvent("Admin", "Restart", () => this.restart(false));
 		});
 	}
 
 	restart(networkReceived: boolean) {
 		if (!networkReceived && !RunService.IsStudio()) {
-			MessagingService.PublishAsync("Restart", undefined);
+			task.spawn(() => {
+				MessagingService.PublishAsync("Restart", undefined);
+			});
 		}
 
 		const maxTime = 30;
