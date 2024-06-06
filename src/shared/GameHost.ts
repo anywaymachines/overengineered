@@ -102,7 +102,23 @@ class Host extends HostedService implements GameHost {
 		this.services = services;
 	}
 
+	private readonly parented: (IEnableableComponent & IDestroyableComponent)[] = [];
+	parent<T extends IEnableableComponent & IDestroyableComponent>(component: T): T {
+		$log(`[Host] Registering service ${getmetatable(component) ?? component}`);
+
+		this.parented.push(component);
+		return super.parent(component);
+	}
+
 	run() {
+		for (const child of this.parented) {
+			const meta = getmetatable(child) ?? child;
+
+			$log(`[Host] Enabling service ${meta}`);
+			child.enable();
+			$log(`[Host] Enabled service ${meta}`);
+		}
+
 		this.enable();
 	}
 }

@@ -72,10 +72,6 @@ export namespace SandboxGame {
 			ctx.resolve<SharedPlots>().waitForPlot(Players.LocalPlayer.UserId),
 		);
 
-		// LoadingController.show("Waiting for data");
-		// const [s, r] = dataLoading.await();
-		// if (!s) throw r;
-
 		builder.services.registerSingleton(BlocksInitializer.create());
 		PlayModeController.initialize(builder);
 		ClientBuildingValidationController.initialize(builder);
