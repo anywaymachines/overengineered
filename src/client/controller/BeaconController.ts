@@ -54,10 +54,10 @@ export class BeaconController extends HostedService {
 		const initPlayer = (player: Player) => {
 			if (player.Character) createPlayerBeacon(player);
 
-			this.event.subscribe(player.CharacterAdded, () => createPlayerBeacon(player));
-			this.event.subscribe(player.CharacterRemoving, () => playerBeacons.remove(player.UserId));
+			player.CharacterAdded.Connect(() => createPlayerBeacon(player));
+			player.CharacterRemoving.Connect(() => playerBeacons.remove(player.UserId));
 		};
-		this.event.subscribeCollectionAdded(PlayerWatcher.players, initPlayer);
+		this.event.subscribeCollectionAdded(PlayerWatcher.players, initPlayer, true);
 
 		return component;
 	}
