@@ -95,7 +95,9 @@ export namespace GameDefinitions {
 		);
 		const ret = [];
 
-		ret.push(`Environment: ${GameDefinitions.isTestPlace() ? "⚠️ Testing" : "✅ Production"}`);
+		ret.push(
+			`Environment: ${GameDefinitions.isTestPlace() ? "⚠️ Testing" : "✅ Production"} in ${RunService.IsStudio() ? "studio" : "player"}`,
+		);
 		ret.push(`Version: ${GameDefinitions.VERSION}`);
 		ret.push(`User: ${Players.LocalPlayer.UserId} @${Players.LocalPlayer.Name} ${Players.LocalPlayer.DisplayName}`);
 		ret.push(`Build: ${RunService.IsStudio() ? "🔒 Internal" : game.PlaceVersion} [ ${compileTime} ]`);
