@@ -87,6 +87,11 @@ export namespace LocalPlayerController {
 		PartUtils.applyToAllDescendantsOfType("BasePart", Players.LocalPlayer.Character!, (part) => {
 			part.EnableFluidForces = false;
 		});
+		Players.LocalPlayer.Character?.DescendantAdded.Connect((child) => {
+			if (child.IsA("BasePart")) {
+				child.EnableFluidForces = false;
+			}
+		});
 	}
 
 	/** Native `PlayerModule` library */
