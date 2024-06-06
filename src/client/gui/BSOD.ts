@@ -43,7 +43,7 @@ export namespace BSOD {
 		const str = `
 An error has occurred: The game has failed to load.
 
-Screenshot this screen and send it to the developers in the official Discord server.
+Screenshot this screen and send it to the developers in the official community server.
 
 Press quit to return to Roblox, or
 Press Alt+F4 to restart Roblox. If you do this, you will not lose any unsaved information in your slot.
