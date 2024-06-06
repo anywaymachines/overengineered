@@ -1,5 +1,5 @@
 import { GuiService, StarterGui } from "@rbxts/services";
-import { LocalPlayerController } from "client/controller/LocalPlayerController";
+import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Signals } from "client/event/Signals";
 import { Popup } from "client/gui/Popup";
 import { BuildingMode } from "client/modes/build/BuildingMode";
@@ -40,7 +40,7 @@ export class PlayModeController extends HostedService {
 			mode.disable();
 		}
 
-		const controls = LocalPlayerController.getPlayerModule().GetControls();
+		const controls = LocalPlayer.getPlayerModule().GetControls();
 		this.event.subscribe(Popup.onAnyShow, () => {
 			controls.Disable();
 

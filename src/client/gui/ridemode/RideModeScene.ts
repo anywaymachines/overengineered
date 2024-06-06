@@ -2,7 +2,7 @@ import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { InputController } from "client/controller/InputController";
 import { LoadingController } from "client/controller/LoadingController";
-import { LocalPlayerController } from "client/controller/LocalPlayerController";
+import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
@@ -364,11 +364,11 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 			const maxSpdShow = RobloxUnit.getSpeedFromMagnitude(800, "MetersPerSecond");
 
 			init("Speed", "%.1f m/s", this.infoTemplate(), 0, maxSpdShow, 0.1, (control) => {
-				if (!LocalPlayerController.rootPart) return;
+				const rootPart = LocalPlayer.rootPart.get();
+				if (!rootPart) return;
 
 				const spd = RobloxUnit.getSpeedFromMagnitude(
-					LocalPlayerController.rootPart.GetVelocityAtPosition(LocalPlayerController.rootPart.Position)
-						.Magnitude,
+					rootPart.GetVelocityAtPosition(rootPart.Position).Magnitude,
 					"MetersPerSecond",
 				);
 
@@ -401,7 +401,8 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		{
 			const maxAltitude = RobloxUnit.Studs_To_Meters(1500);
 			init("Altitude", "%.2f m", this.infoTextTemplate(), 0, maxAltitude, 0.1, (control) => {
-				if (!LocalPlayerController.rootPart) return;
+				const rootPart = LocalPlayer.rootPart.get();
+				if (!rootPart) return;
 
 				const alt = RobloxUnit.Studs_To_Meters(GameEnvironmentController.currentHeight);
 				control.slider.value.set(alt);
@@ -419,12 +420,13 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 		{
 			init("Position", "%s m", this.infoTextTemplate(), 0, 1, 1, (control) => {
-				if (!LocalPlayerController.rootPart) return;
+				const rootPart = LocalPlayer.rootPart.get();
+				if (!rootPart) return;
 
 				control.text.value.set(
-					math.floor(RobloxUnit.Studs_To_Meters(LocalPlayerController.rootPart.Position.X)) +
+					math.floor(RobloxUnit.Studs_To_Meters(rootPart.Position.X)) +
 						" m " +
-						math.floor(RobloxUnit.Studs_To_Meters(LocalPlayerController.rootPart.Position.Z)),
+						math.floor(RobloxUnit.Studs_To_Meters(rootPart.Position.Z)),
 				);
 			});
 		}

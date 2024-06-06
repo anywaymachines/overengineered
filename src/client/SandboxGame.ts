@@ -1,6 +1,7 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
 import { BeaconController } from "client/controller/BeaconController";
 import { CameraController } from "client/controller/CameraController";
+import { ChatController } from "client/controller/ChatController";
 import { DayCycleController } from "client/controller/DayCycleController";
 import { DistanceHideController } from "client/controller/DistanceHideController";
 import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
@@ -58,7 +59,9 @@ export namespace SandboxGame {
 		PlayerDataInitializer.initialize(builder);
 
 		LoadingController.show("Pre-init");
+		LocalPlayerController.initializeDisablingFluidForces(builder);
 		LocalPlayerController.initializeSprintLogic(builder, RunService.IsStudio() ? 200 : 60);
+		LocalPlayerController.initializeCameraMaxZoomDistance(builder, 512);
 
 		LoadingController.show("Waiting for server");
 		while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {
@@ -88,6 +91,7 @@ export namespace SandboxGame {
 		builder.services.registerService(MusicController);
 		builder.services.registerService(GuiAutoScaleController);
 
+		ChatController.initializeAdminPrefix();
 		SettingsPopup.addAsService(builder);
 		SavePopup.addAsService(builder);
 

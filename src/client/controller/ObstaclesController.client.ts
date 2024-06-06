@@ -1,5 +1,5 @@
 import { CollectionService, Workspace } from "@rbxts/services";
-import { LocalPlayerController } from "client/controller/LocalPlayerController";
+import { LocalPlayer } from "client/controller/LocalPlayer";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomDebrisService } from "shared/service/CustomDebrisService";
 
@@ -9,7 +9,7 @@ const initKillPlane = (instance: BasePart, onTouch?: (part: BasePart) => void) =
 		while (true as boolean) {
 			if (parent.FindFirstChild("Humanoid")) {
 				const human = parent.WaitForChild("Humanoid") as Humanoid | undefined;
-				if (human && human === LocalPlayerController.humanoid) {
+				if (human && human === LocalPlayer.humanoid.get()) {
 					human.Health -= human.MaxHealth * 0.1;
 				}
 

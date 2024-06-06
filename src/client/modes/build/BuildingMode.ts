@@ -1,4 +1,4 @@
-import { LocalPlayerController } from "client/controller/LocalPlayerController";
+import { LocalPlayer } from "client/controller/LocalPlayer";
 import { MirrorVisualizer } from "client/controller/MirrorVisualizer";
 import { BuildingModeScene } from "client/gui/buildmode/BuildingModeScene";
 import { Gui } from "client/gui/Gui";
@@ -62,10 +62,11 @@ export class BuildingMode extends PlayMode {
 		const plot = this.targetPlot.get();
 
 		const tp = () => {
-			if (!LocalPlayerController.rootPart) return;
+			const rootPart = LocalPlayer.rootPart.get();
+			if (!rootPart) return;
 
 			const pos = plot.getSpawnPosition();
-			if (LocalPlayerController.rootPart.Position.sub(pos).Magnitude < plot.instance.BuildingArea.ExtentsSize.X) {
+			if (rootPart.Position.sub(pos).Magnitude < plot.instance.BuildingArea.ExtentsSize.X) {
 				return;
 			}
 
@@ -73,12 +74,13 @@ export class BuildingMode extends PlayMode {
 		};
 
 		const forcetp = () => {
-			if (!LocalPlayerController.rootPart) return;
+			const rootPart = LocalPlayer.rootPart.get();
+			if (!rootPart) return;
 
 			const pos = plot.getSpawnPosition();
-			LocalPlayerController.rootPart.CFrame = new CFrame(pos);
-			LocalPlayerController.rootPart.AssemblyLinearVelocity = Vector3.zero;
-			LocalPlayerController.rootPart.AssemblyAngularVelocity = Vector3.zero;
+			rootPart.CFrame = new CFrame(pos);
+			rootPart.AssemblyLinearVelocity = Vector3.zero;
+			rootPart.AssemblyAngularVelocity = Vector3.zero;
 		};
 
 		if (!prev) {

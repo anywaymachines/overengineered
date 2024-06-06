@@ -1,5 +1,5 @@
 type IRegistration<T> = {
-	readonly get: (...args: unknown[]) => T;
+	readonly get: () => T;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,6 +57,9 @@ const instantiateClass = <T, TCtor extends abstract new (...args: TArgs) => T, T
 	return new (clazz as unknown as new (...args: TArgs) => T)(...(args ?? ([] as unknown as TArgs)));
 };
 
+export type DIRegistrationContext<T extends abstract new (...args: never) => unknown> = {
+	withArgs(args: Partial<[...ConstructorParameters<T>]>): DIRegistrationContext<T>;
+};
 type D = DIContainer;
 export class DIContainer {
 	private readonly registrations = new Map<string, IRegistration<unknown>>();
@@ -72,17 +75,29 @@ export class DIContainer {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	registerSingletonClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string): void {
+	registerSingletonClass<T extends abstract new (...args: any) => unknown>(
+		clazz: T,
+		name?: string,
+	): DIRegistrationContext<T> {
 		name ??= getSymbol(clazz);
 		this.assertNotNull(clazz, name);
 		if (this.registrations.get(name)) {
 			throw `Dependency ${name} is already registered`;
 		}
 
+		let savedArgs: Partial<[...ConstructorParameters<T>]> | undefined = undefined;
+
 		let created: unknown | undefined;
 		this.registrations.set(name, {
-			get: (args) => (created ??= instantiateClass(clazz, args as [] | undefined, this)),
+			get: () => (created ??= instantiateClass(clazz, savedArgs, this)),
 		});
+
+		return {
+			withArgs(args: Partial<[...ConstructorParameters<T>]>) {
+				savedArgs = args;
+				return this;
+			},
+		};
 	}
 	registerSingleton<T extends defined>(value: T, name?: string): void {
 		name ??= getSymbol(value);
@@ -113,17 +128,19 @@ export class DIContainer {
 		this.registrations.set(name, { get: () => func(this) });
 	}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	registerTransientClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string): void {
+	/*registerTransientClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string): void {
 		name ??= getSymbol(clazz);
 		this.assertNotNull(clazz, name);
 		if (this.registrations.get(name)) {
 			throw `Dependency ${name} is already registered`;
 		}
 
+		const args: [] | undefined = undefined;
+
 		this.registrations.set(name, {
-			get: (args) => instantiateClass(clazz, args as [] | undefined, this),
+			get: () => instantiateClass(clazz, args, this),
 		});
-	}
+	}*/
 
 	tryResolve<T extends defined>(name: string): T | undefined {
 		return this.registrations.get(name)?.get() as T;
@@ -139,13 +156,11 @@ export class DIContainer {
 	}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	resolveByClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string) {
-		name ??= getSymbol(clazz);
-		return this.resolveClass<T>([] as never, name);
+		return this.resolveClass<T>(name ?? getSymbol(clazz));
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	resolveClass<T extends abstract new (...args: never) => unknown>(
-		args: Partial<[...ConstructorParameters<T>]>,
 		name?: string,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	): T extends abstract new (...args: never) => infer R ? R : never {
@@ -155,17 +170,7 @@ export class DIContainer {
 			throw `Dependency ${name} is not registered`;
 		}
 
-		return registration.get(args) as never;
-	}
-
-	regResolve<T extends abstract new (...args: never) => unknown>(
-		clazz: T,
-		args?: Partial<[...ConstructorParameters<T>]>,
-	): T extends abstract new (...args: never) => infer R ? R : never {
-		const name = getSymbol(clazz);
-		this.registerSingletonClass(clazz);
-
-		return this.resolveClass(args as never, name) as never;
+		return registration.get() as never;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,6 +1,6 @@
 import { GuiService, Players, Workspace } from "@rbxts/services";
 import { InputController } from "client/controller/InputController";
-import { LocalPlayerController } from "client/controller/LocalPlayerController";
+import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Gui } from "client/gui/Gui";
 import { BlockManager } from "shared/building/BlockManager";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
@@ -15,7 +15,7 @@ export namespace BlockSelect {
 			return;
 		}
 
-		const mouseRay = LocalPlayerController.mouse.UnitRay;
+		const mouseRay = LocalPlayer.mouse.UnitRay;
 		return Workspace.Raycast(mouseRay.Origin, mouseRay.Direction.mul(1000), blockRaycastParams)?.Instance;
 	}
 	export function getTargetedBlock(): BlockModel | undefined {
