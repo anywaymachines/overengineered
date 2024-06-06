@@ -48,10 +48,12 @@ export namespace DiscordWebhook {
 	}
 
 	function request(data: string) {
-		try {
-			HttpService.PostAsync(webhook, data);
-		} catch (error) {
-			$err("Discord logging failed", error);
-		}
+		task.spawn(() => {
+			try {
+				HttpService.PostAsync(webhook, data);
+			} catch (error) {
+				$err("Discord logging failed", error);
+			}
+		});
 	}
 }
