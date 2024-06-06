@@ -1,11 +1,11 @@
 import { Backend } from "server/Backend";
-import { PlayerWatcher } from "shared/PlayerWatcher";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { HostedService } from "shared/GameHost";
 import { Operation } from "shared/Operation";
+import { PlayerWatcher } from "shared/PlayerWatcher";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { ServerPlotController, ServerPlots } from "server/plots/ServerPlots";
@@ -33,8 +33,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 	readonly operations = {
 		placeBlocks: new Operation(this.placeBlocks.bind(this)),
 		deleteBlocks: new Operation(this.deleteBlocks.bind(this)),
-		moveBlocks: new Operation(this.moveBlocks.bind(this)),
-		rotateBlocks: new Operation(this.rotateBlocks.bind(this)),
+		editBlocks: new Operation(this.editBlocks.bind(this)),
 		logicConnect: new Operation(this.logicConnect.bind(this)),
 		logicDisconnect: new Operation(this.logicDisconnect.bind(this)),
 		paintBlocks: new Operation(this.paintBlocks.bind(this)),
@@ -133,25 +132,17 @@ export class ServerBuildingRequestHandler extends HostedService {
 
 		return this.controller.blocks.delete(request.blocks);
 	}
-	private moveBlocks(request: MoveBlocksRequest): Response {
+	private editBlocks(request: EditBlocksRequest): Response {
 		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
 			return errBuildingNotPermitted;
 		}
-		if (request.blocks !== "all" && !areAllBlocksOnPlot(request.blocks, request.plot)) {
-			return errBuildingNotPermitted;
+		for (const { instance } of request.blocks) {
+			if (!isBlockOnPlot(instance, request.plot)) {
+				return errBuildingNotPermitted;
+			}
 		}
 
-		return this.controller.blocks.move(request.blocks, request.diff);
-	}
-	private rotateBlocks(request: RotateBlocksRequest): Response {
-		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
-			return errBuildingNotPermitted;
-		}
-		if (request.blocks !== "all" && !areAllBlocksOnPlot(request.blocks, request.plot)) {
-			return errBuildingNotPermitted;
-		}
-
-		return this.controller.blocks.rotate(request.blocks, request.pivot, request.diff);
+		return this.controller.blocks.edit(request.blocks);
 	}
 
 	private logicConnect(request: LogicConnectRequest): Response {

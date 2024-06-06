@@ -12,15 +12,14 @@ const building = CustomRemotes.building;
 export namespace ClientBuilding {
 	export const placeOperation = new Operation(placeBlocks);
 	export const deleteOperation = new Operation(deleteBlocks);
-	export const moveOperation = new Operation(moveBlocks);
-	export const rotateOperation = new Operation(rotateBlocks);
+	export const editOperation = new Operation(editBlocks);
 	export const paintOperation = new Operation(paintBlocks);
 	export const updateConfigOperation = new Operation(updateConfig);
 	export const resetConfigOperation = new Operation(resetConfig);
 	export const logicConnectOperation = new Operation(logicConnect);
 	export const logicDisconnectOperation = new Operation(logicDisconnect);
 
-	function placeBlocks(plot: SharedPlot, blocks: readonly PlaceBlockRequest[]) {
+	function placeBlocks(plot: SharedPlot, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) {
 		let placed: readonly BlockUuid[];
 		const result = ActionController.instance.execute(
 			"Place blocks",
@@ -99,13 +98,9 @@ export namespace ClientBuilding {
 				const data = BlockManager.getBlockDataByBlockModel(block);
 
 				return {
-					id: data.id,
+					...data,
 					location: block.GetPivot(),
-					color: data.color,
-					material: data.material,
-					uuid: data.uuid,
-					config: data.config,
-					connections: data.connections,
+					["instance" as never]: undefined,
 				};
 			}),
 		};
@@ -168,53 +163,45 @@ export namespace ClientBuilding {
 		plot.changed.Fire();
 		return result;
 	}
-	function moveBlocks(plot: SharedPlot, _blocks: readonly BlockModel[], diff: Vector3) {
-		const uuids = _blocks.map(BlockManager.manager.uuid.get);
-		const getBlocks = (): readonly BlockModel[] => uuids.map((uuid) => plot.getBlock(uuid));
+
+	type EditBlockInfoBase = {
+		readonly origPosition: CFrame;
+		readonly newPosition?: CFrame;
+	};
+	export type EditBlockInfo = EditBlockInfoBase & { readonly instance: BlockModel };
+	type EditBlockRequestInfo = EditBlocksRequest["blocks"][number];
+	function editBlocks(plot: SharedPlot, _blocks: readonly EditBlockInfo[]) {
+		const blocks = _blocks.map((b): EditBlockInfoBase & { readonly uuid: BlockUuid } => ({
+			uuid: BlockManager.manager.uuid.get(b.instance),
+			newPosition: b.newPosition,
+			origPosition: b.origPosition,
+		}));
+
+		const getOrigBlocks = (): readonly EditBlockRequestInfo[] =>
+			blocks.map(
+				(b): EditBlockRequestInfo => ({
+					instance: plot.getBlock(b.uuid),
+					position: b.origPosition,
+				}),
+			);
+		const getBlocks = (): readonly EditBlockRequestInfo[] =>
+			blocks.map(
+				(b): EditBlockRequestInfo => ({
+					instance: plot.getBlock(b.uuid),
+					position: b.newPosition,
+				}),
+			);
 
 		const result = ActionController.instance.execute(
-			"Move blocks",
+			"Edit blocks",
 			() =>
-				LoadingController.run("Moving blocks", () => {
-					return building.moveBlocks.send({
-						plot: plot.instance,
-						diff: diff.mul(-1),
-						blocks: getBlocks(),
-					});
-				}),
+				LoadingController.run("Editing blocks", () =>
+					building.editBlocks.send({ plot: plot.instance, blocks: getOrigBlocks() }),
+				),
 			() =>
-				LoadingController.run("Moving blocks", () => {
-					return building.moveBlocks.send({ plot: plot.instance, diff, blocks: getBlocks() });
-				}),
-		);
-
-		plot.changed.Fire();
-		return result;
-	}
-	function rotateBlocks(plot: SharedPlot, _blocks: readonly BlockModel[], pivot: Vector3, rotation: CFrame) {
-		const uuids = _blocks.map(BlockManager.manager.uuid.get);
-		const getBlocks = (): readonly BlockModel[] => uuids.map((uuid) => plot.getBlock(uuid));
-
-		const result = ActionController.instance.execute(
-			"Rotate blocks",
-			() =>
-				LoadingController.run("Rotating blocks", () => {
-					return building.rotateBlocks.send({
-						plot: plot.instance,
-						pivot,
-						diff: rotation.Inverse(),
-						blocks: getBlocks(),
-					});
-				}),
-			() =>
-				LoadingController.run("Rotating blocks", () => {
-					return building.rotateBlocks.send({
-						plot: plot.instance,
-						pivot,
-						diff: rotation,
-						blocks: getBlocks(),
-					});
-				}),
+				LoadingController.run("Editing blocks", () =>
+					building.editBlocks.send({ plot: plot.instance, blocks: getBlocks() }),
+				),
 		);
 
 		plot.changed.Fire();
@@ -360,3 +347,4 @@ export namespace ClientBuilding {
 		);
 	}
 }
+

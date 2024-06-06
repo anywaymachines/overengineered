@@ -234,7 +234,8 @@ export async function TutorialBasics(tutorial: Tutorial) {
 	tutorial.editTool.get().enabledModes.enableOnly("Move");
 	toolEnabler.enableOnly(allTools.editTool);
 
-	if (!(await tutorial.editTool.waitForMoveToolWork(new Vector3(0, 4, 0)))) return;
+	const blocks = new ReadonlyMap(tutorial.plot.getBlocks().map((b) => [b, b.GetPivot().add(new Vector3(0, 4, 0))]));
+	if (!(await tutorial.editTool.waitForMoveToolWork(blocks))) return;
 	TasksControl.instance.finish();
 	tutorial.editTool.get().enabledModes.enableAll();
 

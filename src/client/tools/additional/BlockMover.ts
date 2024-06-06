@@ -1,54 +1,31 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
-import { ClientComponent } from "client/component/ClientComponent";
 import { ClientComponentChild } from "client/component/ClientComponentChild";
 import { InputController } from "client/controller/InputController";
 import { Signals } from "client/event/Signals";
 import { Gui } from "client/gui/Gui";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
+import { BlockEditorBase } from "client/tools/additional/BlockEditorBase";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { AABB } from "shared/fixes/AABB";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
-abstract class MoveBase extends ClientComponent {
+abstract class MoveBase extends BlockEditorBase {
 	protected readonly tooltipHolder = this.parent(TooltipsHolder.createComponent("Moving"));
-	protected readonly plot: SharedPlot;
-	protected readonly blocks: readonly BlockModel[];
-	protected readonly pivots: readonly (readonly [BlockModel, CFrame])[];
-	protected readonly plotBounds: AABB;
+
 	protected difference: Vector3 = Vector3.zero;
 	readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 
 	constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
-		super();
-
-		this.plot = plot;
-		this.blocks = blocks;
-		this.plotBounds = plot.bounds;
-		this.pivots = blocks.map((p) => [p, p.GetPivot()] as const);
-
-		const moveHandles = this.initializeHandles();
-		this.onDisable(async () => moveHandles.Destroy());
+		super(plot, blocks);
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
 	}
 
-	getDifference(): Vector3 {
-		return this.difference;
-	}
-
 	protected moveBlocksTo(difference: Vector3) {
-		for (const [block, startpos] of this.pivots) {
-			block.PivotTo(startpos.add(difference));
+		for (const { instance, origPosition } of this.original) {
+			instance.PivotTo(origPosition.add(difference));
 		}
 	}
-
-	cancel() {
-		this.difference = Vector3.zero;
-		this.moveBlocksTo(this.difference);
-	}
-
-	protected abstract initializeHandles(): Instance;
-	protected abstract getTooltips(): InputTooltips;
 }
 class DesktopMove extends MoveBase {
 	protected initializeHandles() {
@@ -217,3 +194,4 @@ export namespace BlockMover {
 		});
 	}
 }
+

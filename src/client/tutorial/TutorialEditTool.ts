@@ -13,25 +13,27 @@ export class TutorialEditTool {
 
 	cleanup() {}
 
-	async waitForMoveToolWork(distance: Vector3): Promise<boolean> {
+	async waitForMoveToolWork(update: ReadonlyMap<BlockModel, CFrame>): Promise<boolean> {
 		return new Promise((resolve) => {
 			const eventHandler = new EventHandler();
 
 			eventHandler.register(
-				ClientBuilding.moveOperation.addMiddleware((plot, blocks, diff, edit) => {
+				ClientBuilding.editOperation.addMiddleware((plot, blocks) => {
 					if (blocks.size() !== plot.getBlocks().size()) {
 						return { success: false, message: "Select the full plot before moving!" };
 					}
 
-					if (distance !== diff) {
-						return { success: false, message: "Wrong move tutorial offset!" };
+					for (const block of blocks) {
+						if (!block.newPosition || update.get(block.instance) !== block.newPosition) {
+							return { success: false, message: "Wrong movement!" };
+						}
 					}
 
 					return successResponse;
 				}),
 			);
 
-			eventHandler.subscribe(ClientBuilding.moveOperation.executed, () => {
+			eventHandler.subscribe(ClientBuilding.editOperation.executed, () => {
 				eventHandler.unsubscribeAll();
 				this.cleanup();
 				resolve(true);

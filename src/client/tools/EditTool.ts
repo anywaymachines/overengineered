@@ -78,6 +78,7 @@ namespace Scene {
 		readonly Bottom: GuiObject & {
 			readonly MoveButton: GuiButton;
 			readonly RotateButton: GuiButton;
+			readonly ScaleButton: GuiButton;
 			readonly CopyButton: GuiButton;
 			readonly PasteButton: GuiButton;
 			readonly DeleteButton: GuiButton;
@@ -220,13 +221,9 @@ const placeToBlocksRequests = (blocks: readonly BlockModel[]): readonly PlaceBlo
 		const data = BlockManager.getBlockDataByBlockModel(block);
 
 		return {
-			id: data.id,
-			uuid: data.uuid,
+			...data,
 			location: data.instance.GetPivot(),
-			color: data.color,
-			material: data.material,
-			config: data.config,
-			connections: data.connections,
+			["instance" as never]: undefined,
 		};
 	});
 };
@@ -235,7 +232,7 @@ type PlaceBlockRequestWithUuid = PlaceBlockRequest & { readonly uuid: BlockUuid 
 const reGenerateUuids = (
 	plot: SharedPlot,
 	_blocks: readonly PlaceBlockRequestWithUuid[],
-): readonly PlaceBlockRequest[] => {
+): readonly PlaceBlockRequestWithUuid[] => {
 	const existingBlocks = new Map<BlockUuid, PlaceBlockRequestWithUuid>();
 	for (const block of _blocks) {
 		existingBlocks.set(block.uuid, block);
@@ -289,21 +286,23 @@ const reGenerateUuids = (
 namespace Controllers {
 	export class Move extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
-		private readonly mover;
+		private readonly editor;
 
 		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
 
-			this.mover = this.parent(BlockMover.create(plot, blocks));
-			this.step.autoSet(this.mover.step);
+			this.editor = this.parent(BlockMover.create(plot, blocks));
+			this.step.autoSet(this.editor.step);
 
-			this.onDestroy(async () => {
-				const diff = this.mover.getDifference();
-				if (diff === Vector3.zero) {
-					return true;
+			this.onDestroy(() => {
+				const update = this.editor.getUpdate();
+				for (const block of update) {
+					if (block.newPosition && block.newPosition !== block.origPosition) continue;
+
+					return;
 				}
 
-				const response = await ClientBuilding.moveOperation.execute(plot, blocks, diff);
+				const response = ClientBuilding.editOperation.execute(plot, update);
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
 					this.cancel();
@@ -316,14 +315,15 @@ namespace Controllers {
 		}
 
 		cancel() {
-			this.mover.cancel();
+			this.editor.cancel();
 		}
 	}
+
 	@injectable
 	export class Paste extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 		private readonly blocks;
-		private readonly mover;
+		private readonly editor;
 
 		constructor(
 			tool: EditTool,
@@ -350,14 +350,24 @@ namespace Controllers {
 				return b;
 			});
 
-			this.mover = this.parent(BlockMover.create(plot, this.blocks));
-			this.step.autoSet(this.mover.step);
+			this.editor = this.parent(BlockMover.create(plot, this.blocks));
+			this.step.autoSet(this.editor.step);
 
-			this.onDestroy(async () => {
-				const diff = this.mover.getDifference();
-				const response = await ClientBuilding.placeOperation.execute(
+			this.onDestroy(() => {
+				const update = this.editor.getUpdate();
+				for (const block of update) {
+					if (block.newPosition && block.newPosition !== block.origPosition) continue;
+
+					return;
+				}
+				const updateMap = new Map(update.map((u) => [BlockManager.manager.uuid.get(u.instance), u] as const));
+
+				const response = ClientBuilding.placeOperation.execute(
 					plot,
-					blocks.map((b) => ({ ...b, location: b.location.add(diff) })),
+					blocks.map((b) => ({
+						...b,
+						location: updateMap.get(b.uuid)?.newPosition ?? b.location,
+					})),
 				);
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
@@ -369,7 +379,7 @@ namespace Controllers {
 		}
 
 		cancel() {
-			this.mover.cancel();
+			this.editor.cancel();
 			for (const block of this.blocks) {
 				block.Destroy();
 			}
@@ -377,28 +387,29 @@ namespace Controllers {
 	}
 	export class Rotate extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(0, 90, 180, 90);
-		private readonly rotater;
+		private readonly editor;
 
 		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
 
-			this.rotater = this.parent(BlockRotater.create(plot, blocks));
-			this.step.autoSet(this.rotater.step);
+			this.editor = this.parent(BlockRotater.create(plot, blocks));
+			this.step.autoSet(this.editor.step);
 
-			this.onDestroy(async () => {
-				if (!this.rotater.isValidRotation()) {
+			this.onDestroy(() => {
+				if (!this.editor.isValidRotation()) {
 					LogControl.instance.addLine("Invalid rotation", Colors.red);
 					this.cancel();
 					return;
 				}
 
-				const diff = this.rotater.getDifference();
-				if (diff === CFrame.identity) {
-					return true;
+				const update = this.editor.getUpdate();
+				for (const block of update) {
+					if (block.newPosition && block.newPosition !== block.origPosition) continue;
+
+					return;
 				}
 
-				const pivot = this.rotater.getPivot();
-				const response = await ClientBuilding.rotateOperation.execute(plot, blocks, pivot, diff);
+				const response = ClientBuilding.editOperation.execute(plot, update);
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
 					this.cancel();
@@ -409,7 +420,7 @@ namespace Controllers {
 		}
 
 		cancel() {
-			this.rotater.cancel();
+			this.editor.cancel();
 		}
 	}
 	export class Paint extends ClientComponent {

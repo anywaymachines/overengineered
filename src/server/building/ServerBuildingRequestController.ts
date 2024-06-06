@@ -23,38 +23,42 @@ export class ServerBuildingRequestController extends HostedService {
 		container = container.beginScope();
 
 		const children = new Map<Player, ServerBuildingRequestHandler>();
-		this.event.subscribeCollectionAdded(
+		this.event.subscribeCollection(
 			serverPlots.controllers,
-			(controller) => {
-				container = container.beginScope();
-				container.registerSingleton(controller);
-				const handler = container.resolveForeignClass(ServerBuildingRequestHandler);
+			(update) => {
+				if (update.kind !== "add") return;
 
-				children.set(controller.player, handler);
-				handler.onDestroy(() => children.delete(controller.player));
+				for (const controller of update.added) {
+					container = container.beginScope();
+					container.registerSingleton(controller);
+					const handler = container.resolveForeignClass(ServerBuildingRequestHandler);
 
-				const savePlot = (): void => {
-					const player = controller.player;
-					const blocks = controller.blocks;
-					const save =
-						playModeController.getPlayerMode(player) === "build" && blocks.getBlocks().size() !== 0;
+					children.set(controller.player, handler);
+					handler.onDestroy(() => children.delete(controller.player));
 
-					if (save) {
-						slots.setBlocks(
-							player.UserId,
-							SlotsMeta.quitSlotIndex,
-							BlocksSerializer.serialize(blocks),
-							blocks.getBlocks().size(),
-						);
-					} else {
-						slots.setBlocksFromAnotherSlot(
-							player.UserId,
-							SlotsMeta.quitSlotIndex,
-							SlotsMeta.autosaveSlotIndex,
-						);
-					}
-				};
-				controller.onDestroy(savePlot);
+					const savePlot = (): void => {
+						const player = controller.player;
+						const blocks = controller.blocks;
+						const save =
+							playModeController.getPlayerMode(player) === "build" && blocks.getBlocks().size() !== 0;
+
+						if (save) {
+							slots.setBlocks(
+								player.UserId,
+								SlotsMeta.quitSlotIndex,
+								BlocksSerializer.serialize(blocks),
+								blocks.getBlocks().size(),
+							);
+						} else {
+							slots.setBlocksFromAnotherSlot(
+								player.UserId,
+								SlotsMeta.quitSlotIndex,
+								SlotsMeta.autosaveSlotIndex,
+							);
+						}
+					};
+					controller.onDestroy(savePlot);
+				}
 			},
 			true,
 		);
@@ -74,8 +78,7 @@ export class ServerBuildingRequestController extends HostedService {
 		const b = CustomRemotes.building;
 		subFunc(b.placeBlocks, (c) => c.placeBlocks);
 		subFunc(b.deleteBlocks, (c) => c.deleteBlocks);
-		subFunc(b.moveBlocks, (c) => c.moveBlocks);
-		subFunc(b.rotateBlocks, (c) => c.rotateBlocks);
+		subFunc(b.editBlocks, (c) => c.editBlocks);
 		subFunc(b.logicConnect, (c) => c.logicConnect);
 		subFunc(b.logicDisconnect, (c) => c.logicDisconnect);
 		subFunc(b.paintBlocks, (c) => c.paintBlocks);

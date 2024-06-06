@@ -203,6 +203,31 @@ export class BuildingPlot extends Component {
 
 		return success;
 	}
+	edit(blocks: EditBlocksRequest["blocks"]): Response {
+		if (blocks.size() === 0) {
+			return success;
+		}
+
+		for (const { instance, position } of blocks) {
+			let aabb = AABB.fromModel(instance);
+			if (position) aabb = aabb.withCenter(position);
+
+			if (!this.plot.isInside(aabb)) {
+				return err("Invalid edit");
+			}
+		}
+
+		for (const { instance, position } of blocks) {
+			if (position) instance.PivotTo(position);
+			this.buildingWelder.moveCollisions(this, instance, instance.GetPivot());
+
+			if (math.random(3) === 1) {
+				task.wait();
+			}
+		}
+
+		return success;
+	}
 
 	logicConnect(request: Omit<LogicConnectRequest, "plot">): Response {
 		const inputInfo = BlockManager.manager.connections.get(request.inputBlock);

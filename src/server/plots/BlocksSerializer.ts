@@ -66,9 +66,14 @@ const place = {
 			id: blockData.id,
 			location: buildingCenter.ToWorldSpace(Serializer.CFrameSerializer.deserialize(blockData.loc)),
 
-			color: blockData.col === undefined ? undefined : Serializer.Color3Serializer.deserialize(blockData.col),
+			color:
+				blockData.col === undefined
+					? Color3.fromRGB(255, 255, 255)
+					: Serializer.Color3Serializer.deserialize(blockData.col),
 			material:
-				blockData.mat === undefined ? undefined : Serializer.EnumMaterialSerializer.deserialize(blockData.mat),
+				blockData.mat === undefined
+					? Enum.Material.Plastic
+					: Serializer.EnumMaterialSerializer.deserialize(blockData.mat),
 			config: blockData.config,
 			uuid: blockData.uuid,
 			connections: blockData.connections,

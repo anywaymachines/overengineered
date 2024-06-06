@@ -1,59 +1,37 @@
 import { ReplicatedStorage, Workspace } from "@rbxts/services";
-import { ClientComponent } from "client/component/ClientComponent";
 import { ClientComponentChild } from "client/component/ClientComponentChild";
 import { InputController } from "client/controller/InputController";
 import { Signals } from "client/event/Signals";
 import { Colors } from "client/gui/Colors";
 import { Gui } from "client/gui/Gui";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
+import { BlockEditorBase } from "client/tools/additional/BlockEditorBase";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { AABB } from "shared/fixes/AABB";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
-abstract class RotaterBase extends ClientComponent {
+abstract class RotaterBase extends BlockEditorBase {
 	protected readonly tooltipHolder = this.parent(TooltipsHolder.createComponent("Rotating"));
-	protected readonly plot: SharedPlot;
-	protected readonly blocks: readonly BlockModel[];
-	protected readonly pivots: readonly (readonly [BlockModel, CFrame])[];
-	protected readonly plotBounds: AABB;
+
 	protected difference: CFrame = CFrame.identity;
 	protected pivot: Vector3 = Vector3.zero;
 	protected isValid: boolean = true;
 	readonly step = new NumberObservableValue<number>(0, 90, 180, 1);
 
 	constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
-		super();
-
-		this.plot = plot;
-		this.blocks = blocks;
-		this.plotBounds = plot.bounds;
-		this.pivots = blocks.map((p) => [p, p.GetPivot()] as const);
-
-		const moveHandles = this.initializeHandles();
-		this.onDisable(async () => moveHandles.Destroy());
+		super(plot, blocks);
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
 	}
 
-	getPivot() {
-		return this.pivot;
-	}
-	getDifference() {
-		return this.difference;
-	}
 	isValidRotation() {
 		return this.isValid;
 	}
 
 	protected pivotBlocksTo(rotatedCenter: CFrame, fullStartPos: CFrame) {
-		for (const [block, startpos] of this.pivots) {
-			block.PivotTo(rotatedCenter.ToWorldSpace(fullStartPos.ToObjectSpace(startpos)));
+		for (const { instance, origPosition } of this.original) {
+			instance.PivotTo(rotatedCenter.ToWorldSpace(fullStartPos.ToObjectSpace(origPosition)));
 		}
-	}
-
-	cancel() {
-		this.difference = CFrame.identity;
-		this.pivotBlocksTo(CFrame.identity, CFrame.identity);
 	}
 
 	protected abstract initializeHandles(): Instance;

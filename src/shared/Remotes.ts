@@ -1,42 +1,35 @@
 import { Definitions, Middleware } from "@rbxts/net";
 import { C2S2CRemoteFunction } from "shared/event2/PERemoteEvent";
 import type { BlockId } from "shared/BlockDataRegistry";
+import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel | undefined }>;
 	type MultiBuildResponse = Response<{ readonly models: readonly BlockModel[] }>;
 
-	type PlaceBlockRequest = ReplaceWith<
-		BlockDataBase,
-		{
-			readonly location: CFrame;
-
-			readonly uuid: BlockUuid | undefined;
-			readonly color: BlockDataBase["color"] | undefined;
-			readonly material: BlockDataBase["material"] | undefined;
-			readonly config: BlockDataBase["config"] | undefined;
-			readonly connections: BlockDataBase["connections"] | undefined;
-		}
-	>;
+	interface PlaceBlockRequest {
+		readonly id: BlockId;
+		readonly color: Color3;
+		readonly material: Enum.Material;
+		readonly location: CFrame;
+		readonly uuid?: BlockUuid;
+		readonly config?: PlacedBlockConfig;
+		readonly connections?: PlacedBlockLogicConnections;
+	}
 	interface PlaceBlocksRequest {
 		readonly plot: PlotModel;
 		readonly blocks: readonly PlaceBlockRequest[];
 	}
-
 	interface DeleteBlocksRequest {
 		readonly plot: PlotModel;
 		readonly blocks: readonly BlockModel[] | "all";
 	}
-	interface MoveBlocksRequest {
+	interface EditBlocksRequest {
 		readonly plot: PlotModel;
-		readonly blocks: readonly BlockModel[] | "all";
-		readonly diff: Vector3;
-	}
-	interface RotateBlocksRequest {
-		readonly plot: PlotModel;
-		readonly blocks: readonly BlockModel[] | "all";
-		readonly pivot: Vector3;
-		readonly diff: CFrame;
+		readonly blocks: readonly {
+			readonly instance: BlockModel;
+			readonly position: CFrame | undefined;
+		}[];
 	}
 
 	interface LogicConnectRequest {
@@ -91,8 +84,7 @@ export const CustomRemotes = {
 	building: {
 		placeBlocks: new C2S2CRemoteFunction<[data: PlaceBlocksRequest], MultiBuildResponse>("rb_place"),
 		deleteBlocks: new C2S2CRemoteFunction<[data: DeleteBlocksRequest]>("rb_delete"),
-		moveBlocks: new C2S2CRemoteFunction<[data: MoveBlocksRequest]>("rb_move"),
-		rotateBlocks: new C2S2CRemoteFunction<[data: RotateBlocksRequest]>("rb_rotate"),
+		editBlocks: new C2S2CRemoteFunction<[data: EditBlocksRequest]>("rb_edit"),
 		logicConnect: new C2S2CRemoteFunction<[data: LogicConnectRequest]>("rb_lconnect"),
 		logicDisconnect: new C2S2CRemoteFunction<[data: LogicDisconnectRequest]>("rb_ldisconnect"),
 		paintBlocks: new C2S2CRemoteFunction<[data: PaintBlocksRequest]>("rb_paint"),
