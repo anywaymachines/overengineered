@@ -66,7 +66,9 @@ class DesktopRotater extends RotaterBase {
 				const centerframe = fullStartPos.mul(
 					startDifference.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle)),
 				);
-				relativeAngle = math.rad(roundByStep(math.deg(relativeAngle)));
+				if (!InputController.isCtrlPressed()) {
+					relativeAngle = math.rad(roundByStep(math.deg(relativeAngle)));
+				}
 
 				this.difference = startDifference.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle));
 				this.isValid = this.plotBounds.contains(aabb.withCenter(fullStartPos.mul(this.difference)));
@@ -100,7 +102,12 @@ class DesktopRotater extends RotaterBase {
 	}
 
 	protected getTooltips(): InputTooltips {
-		return { Desktop: [{ keys: ["F"], text: "Stop moving" }] };
+		return {
+			Desktop: [
+				{ keys: ["F"], text: "Stop moving" },
+				{ keys: ["LeftControl"], text: "Disable grid" },
+			],
+		};
 	}
 }
 class TouchRotater extends DesktopRotater {}

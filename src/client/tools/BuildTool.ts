@@ -118,7 +118,10 @@ const getMouseTargetBlockPositionV2 = (
 	targetPosition = addTargetSize(target, normal, targetPosition);
 	targetPosition = offsetBlockPivotToCenter(block, targetPosition);
 	targetPosition = addBlockSize(block, normal, targetPosition);
-	targetPosition = constrainPositionToGrid(block, normal, targetPosition);
+
+	if (!InputController.isCtrlPressed()) {
+		targetPosition = constrainPositionToGrid(block, normal, targetPosition);
+	}
 
 	return targetPosition;
 };
@@ -1129,6 +1132,7 @@ export class BuildTool extends ToolBase {
 				{ keys: ["R"], text: "Rotate by Y" },
 				{ keys: ["T"], text: "Rotate by X" },
 				{ keys: ["Y"], text: "Rotate by Z" },
+				{ keys: ["LeftControl"], text: "Disable grid" },
 			],
 			Gamepad: [
 				{ keys: ["ButtonX"], text: "Place" },

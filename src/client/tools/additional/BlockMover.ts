@@ -77,7 +77,9 @@ class DesktopMove extends MoveBase {
 					distance,
 					this.plotBounds,
 				);
-				distance = roundByStep(distance);
+				if (!InputController.isCtrlPressed()) {
+					distance = roundByStep(distance);
+				}
 
 				this.difference = startDifference.add(Vector3.FromNormalId(face).mul(distance));
 				if (!this.plotBounds.contains(aabb.withCenter(fullStartPos.add(this.difference)))) {
@@ -105,7 +107,12 @@ class DesktopMove extends MoveBase {
 	}
 
 	protected getTooltips(): InputTooltips {
-		return { Desktop: [{ keys: ["F"], text: "Stop moving" }] };
+		return {
+			Desktop: [
+				{ keys: ["F"], text: "Stop moving" },
+				{ keys: ["LeftControl"], text: "Disable grid" },
+			],
+		};
 	}
 }
 class TouchMove extends DesktopMove {}
@@ -194,4 +201,3 @@ export namespace BlockMover {
 		});
 	}
 }
-
