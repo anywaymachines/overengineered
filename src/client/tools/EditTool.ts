@@ -430,6 +430,7 @@ namespace Controllers {
 			BlockModel,
 			{ readonly material: Enum.Material; readonly color: Color3 }
 		>;
+		private canceled = false;
 
 		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
@@ -475,6 +476,8 @@ namespace Controllers {
 			);
 
 			this.onDestroy(() => {
+				if (this.canceled) return;
+
 				const response = ClientBuilding.paintOperation.execute(
 					plot,
 					blocks,
@@ -492,6 +495,8 @@ namespace Controllers {
 		}
 
 		cancel() {
+			this.canceled = true;
+
 			for (const [block, { material, color }] of this.origData) {
 				SharedBuilding.paint([block], color, material);
 			}
