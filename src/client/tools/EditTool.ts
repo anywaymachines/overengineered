@@ -38,20 +38,16 @@ namespace Scene {
 			readonly DeselectAllButton: TextButtonDefinition;
 		};
 	};
-	interface MultiBlockSelectorGuiParams {
-		selectPlot(): void;
-		deselectAll(): void;
-	}
 	export class MultiBlockSelectorGui extends ClientComponent {
-		constructor(gui: MultiBlockSelectorGuiDefinition, params: MultiBlockSelectorGuiParams) {
+		constructor(gui: MultiBlockSelectorGuiDefinition, tool: EditTool) {
 			super();
 
 			const animationProps = TransformService.commonProps.quadOut02;
-			const selectPlot = this.parent(new ButtonControl(gui.Top.SelectAllButton, () => params.selectPlot()));
-			const deselectAll = this.parent(new ButtonControl(gui.Top.DeselectAllButton, () => params.deselectAll()));
+			const selectPlot = this.parent(new ButtonControl(gui.Top.SelectAllButton, () => tool.selectPlot()));
+			const deselectAll = this.parent(new ButtonControl(gui.Top.DeselectAllButton, () => tool.deselectAll()));
 
-			const animate = (enable: boolean) => {
-				const buttonsAreActive = enable;
+			const animate = () => {
+				const buttonsAreActive = this.isEnabled() && tool.selectedMode.get() === undefined;
 
 				TransformService.run(gui.Top, (builder) =>
 					builder.transform("AnchorPoint", new Vector2(0.5, buttonsAreActive ? 0 : 0.8), animationProps),
@@ -67,8 +63,9 @@ namespace Scene {
 				}
 			};
 
-			this.onEnable(() => animate(true));
-			this.onDisable(() => animate(false));
+			this.event.subscribeObservable(tool.selectedMode, animate);
+			this.onEnable(animate);
+			this.onDisable(animate);
 		}
 	}
 
