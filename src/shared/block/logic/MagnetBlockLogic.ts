@@ -8,8 +8,6 @@ const magicNumber = 60 * 1; // dt
 const magnets: MagnetBlockLogic[] = [];
 const forcesApplied: Map<MagnetBlockLogic, Vector3> = new Map<MagnetBlockLogic, Vector3>();
 
-type CalculationCache = ReadonlyMap<MagnetBlockLogic, BasePart | undefined>;
-
 const calculateForce = (block1: MagnetBlockLogic, block2: MagnetBlockLogic): Vector3 | undefined => {
 	const pos1 = block1.part.Position;
 	const pos2 = block2.part.Position;
@@ -32,10 +30,10 @@ const calculateForce = (block1: MagnetBlockLogic, block2: MagnetBlockLogic): Vec
 };
 
 RunService.PostSimulation.Connect((dt) => {
-	const clock = os.clock();
-
 	forcesApplied.clear();
-	const assemblies: CalculationCache = magnets.mapToMap((m) => [m, m.part.AssemblyRootPart]);
+
+	// Getting AssemblyRootPart is slow and it's happening several times per magnet, so we cache it
+	const assemblies = magnets.mapToMap((m) => $tuple(m, m.part.AssemblyRootPart));
 
 	for (let i = 0; i < magnets.size(); i++) {
 		const magneti = magnets[i];
