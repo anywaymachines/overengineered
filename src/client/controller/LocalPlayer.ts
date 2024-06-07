@@ -1,5 +1,6 @@
 import { Players } from "@rbxts/services";
 import { Signals } from "client/event/Signals";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
 import type { PlayerModule } from "client/types/PlayerModule";
 
@@ -20,7 +21,10 @@ export namespace LocalPlayer {
 		playerSpawned();
 	}
 
-	Players.LocalPlayer.CameraMaxZoomDistance = 512;
+	/** Current player height in studs, relative to {@link GameDefinitions.HEIGHT_OFFSET} */
+	export function getPlayerRelativeHeight() {
+		return (rootPart.get()?.Position?.Y ?? GameDefinitions.HEIGHT_OFFSET) - GameDefinitions.HEIGHT_OFFSET;
+	}
 
 	function playerSpawned() {
 		const char = Players.LocalPlayer.Character!;

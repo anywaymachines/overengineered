@@ -1,5 +1,5 @@
 import { ReplicatedStorage, StarterGui, Workspace } from "@rbxts/services";
-import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
+import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Signals } from "client/event/Signals";
 import { Sound } from "shared/Sound";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
@@ -81,6 +81,6 @@ export namespace SoundController {
 	}
 
 	export function getWorldVolume(volume: number) {
-		return Sound.getWorldVolume(GameEnvironmentController.currentHeight) * volume;
+		return Sound.getWorldVolume(LocalPlayer.getPlayerRelativeHeight()) * volume;
 	}
 }

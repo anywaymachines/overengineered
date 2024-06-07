@@ -404,7 +404,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 				const rootPart = LocalPlayer.rootPart.get();
 				if (!rootPart) return;
 
-				const alt = RobloxUnit.Studs_To_Meters(GameEnvironmentController.currentHeight);
+				const alt = RobloxUnit.Studs_To_Meters(LocalPlayer.getPlayerRelativeHeight());
 				control.slider.value.set(alt);
 				control.text.value.set(alt);
 			});
