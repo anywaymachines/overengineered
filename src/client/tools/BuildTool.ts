@@ -200,6 +200,7 @@ namespace Scene {
 					this.gui.Info.Visible = block !== undefined;
 					this.blockInfoPreviewControl.set(block?.model);
 					this.tool.selectedBlock.set(block);
+					this.tool.blockRotation.set(CFrame.identity);
 
 					if (block) {
 						this.gui.Info.NameLabel.Text = block.displayName;
