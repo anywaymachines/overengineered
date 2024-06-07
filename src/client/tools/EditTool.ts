@@ -340,6 +340,7 @@ namespace Controllers {
 			const blocks = reGenerateUuids(plot, tool.copied.get());
 			this.blocks = blocks.map((block) => {
 				const b = blockRegistry.blocks.get(block.id)!.model.Clone();
+				BlockManager.manager.uuid.set(b, block.uuid);
 				b.PivotTo(block.location);
 				PartUtils.ghostModel(b, Colors.blue);
 				b.Parent = ghostParent;
@@ -357,7 +358,7 @@ namespace Controllers {
 
 					return;
 				}
-				const updateMap = new Map(update.map((u) => [BlockManager.manager.uuid.get(u.instance), u] as const));
+				const updateMap = update.mapToMap((u) => $tuple(BlockManager.manager.uuid.get(u.instance), u));
 
 				const response = ClientBuilding.placeOperation.execute(
 					plot,
