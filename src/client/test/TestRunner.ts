@@ -76,19 +76,9 @@ export namespace TestRunner {
 		closebtn.text.set("Close");
 		closebtn.activated.Connect(() => destroy?.());
 
-		const tests = new ReadonlyMap(
-			TestFramework.findAllTestScripts().map((t) =>
-				testFrom(t.Name.sub(0, t.Name.size() - ".test".size()), TestFramework.loadTestsFromScript(t)),
-			),
-		);
-
-		/*const tests: readonly (readonly [name: string, test: Control])[] = [
-		...WorldPipetteTest.createTests(),
-		...TransformTest.createTests(),
-		...ConfigTest.createTests(),
-		...PopupTest.createTests(),
-		...LoadSlotTest.createTests(),
-	];*/
+		const tests = TestFramework.findAllTestScripts()
+			.map((t) => testFrom(t.Name.sub(0, t.Name.size() - ".test".size()), TestFramework.loadTestsFromScript(t)))
+			.sort((l, r) => l[0] < r[0]);
 
 		for (const [name, content] of tests) {
 			content.hide();
