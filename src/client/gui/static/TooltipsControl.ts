@@ -105,6 +105,11 @@ export class TooltipsHolder extends ClientInstanceComponent<
 				if (key === "KeypadEight") return "k8";
 				if (key === "KeypadNine") return "k9";
 
+				if (key === "LeftControl") return "Ctrl";
+				if (key === "LeftShift") return "Shift";
+				if (key === "RightControl") return "RShift";
+				if (key === "RightShift") return "RShift";
+
 				return key;
 			};
 
