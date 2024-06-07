@@ -221,9 +221,12 @@ namespace Scene {
 				const disable = () => {
 					this.tool.disable();
 				};
-				const materialColorEditor = this.add(
-					new MaterialColorEditControl(this.gui.Bottom, tool.selectedMaterial, tool.selectedColor),
-				);
+				const materialColorEditor = this.add(new MaterialColorEditControl(this.gui.Bottom));
+				materialColorEditor.material.set(tool.selectedMaterial.get());
+				materialColorEditor.color.set(tool.selectedColor.get());
+				materialColorEditor.material.submitted.Connect((v) => tool.selectedMaterial.set(v));
+				materialColorEditor.color.submitted.Connect((v) => tool.selectedColor.set(v));
+
 				materialColorEditor.materialPipette.onStart.Connect(disable);
 				materialColorEditor.materialPipette.onEnd.Connect(enable);
 				materialColorEditor.colorPipette.onStart.Connect(disable);

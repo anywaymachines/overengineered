@@ -8,7 +8,6 @@ import { TransformService } from "shared/component/TransformService";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 import type { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import type { MaterialChooserDefinition } from "client/gui/MaterialChooser";
-import type { ObservableValue } from "shared/event/ObservableValue";
 
 export type MaterialColorEditControlDefinition = GuiObject & {
 	readonly Color: GuiObject & {
@@ -36,21 +35,16 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 	readonly materialPipette;
 	readonly colorPipette;
 
-	constructor(
-		gui: MaterialColorEditControlDefinition,
-		selectedMaterial: ObservableValue<Enum.Material>,
-		selectedColor: ObservableValue<Color3>,
-		defaultVisibility = false,
-	) {
+	readonly material;
+	readonly color;
+
+	constructor(gui: MaterialColorEditControlDefinition, defaultVisibility = false) {
 		super(gui);
 
 		const material = this.add(new MaterialChooser(gui.Material.Content));
+		this.material = material;
 		const color = this.add(new ColorChooser(gui.Color.Content));
-
-		this.event.subscribeObservable(color.value, (value) => selectedColor.set(value));
-		this.event.subscribeObservable(material.value, (value) => selectedMaterial.set(value));
-		this.event.subscribeObservable(selectedColor, (value) => color.value.set(value));
-		this.event.subscribeObservable(selectedMaterial, (value) => material.value.set(value));
+		this.color = color;
 
 		const materialbtn = this.add(new TextButtonControl(this.gui.Material.Header));
 		this.event.subscribeObservable(
@@ -130,8 +124,6 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 		this.materialPipette = this.add(
 			BlockPipetteButton.forMaterial(this.gui.Material.Header.Pipette, (m) => material.value.set(m)),
 		);
-		this.colorPipette = this.add(
-			BlockPipetteButton.forColor(this.gui.Color.Header.Pipette, (c) => color.value.set(c)),
-		);
+		this.colorPipette = this.add(BlockPipetteButton.forColor(this.gui.Color.Header.Pipette, (c) => color.set(c)));
 	}
 }

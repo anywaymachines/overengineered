@@ -14,7 +14,10 @@ export type SliderControlDefinition = ProgressBarControlDefinition & {
 
 /** Control that represents a number via a slider. */
 export class SliderControl<TAllowNull extends boolean = false> extends Control<SliderControlDefinition> {
-	readonly submitted = new Signal<(value: number) => void>();
+	private readonly _submitted = new Signal<(value: number) => void>();
+	readonly submitted = this._submitted.asReadonly();
+	private readonly _moved = new Signal<(value: number) => void>();
+	readonly moved = this._moved.asReadonly();
 	readonly value;
 
 	private readonly progressBar;
@@ -27,14 +30,14 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 		this.add(this.progressBar);
 
 		this.value = new NumberObservableValue<ToNum<TAllowNull>>(min, min, max, step);
-		this.value.subscribe((value) => this.progressBar.value.set(value ?? 0));
+		this.value.subscribe((value) => this.progressBar.value.set(value ?? 0), true);
 
 		this.subscribeMovement();
 
 		if (Control.exists(this.gui, "TextBox")) {
 			const num = new NumberTextBoxControl<TAllowNull>(this.gui.TextBox, min, max, step);
 			num.value.bindTo(this.value);
-			this.event.subscribe(num.submitted, (value) => this.submitted.Fire(value));
+			this.event.subscribe(num.submitted, (value) => this._submitted.Fire(value));
 			this.add(num);
 		}
 	}
@@ -48,14 +51,19 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 
 			if (this.progressBar.vertical) {
 				const y = this.gui.AbsoluteSize.Y - Players.LocalPlayer.GetMouse().Y;
-				this.value.set(
+
+				const value =
 					((y - startpos) / this.gui.AbsoluteSize.Y) * this.value.getRange() +
-						this.value.min +
-						this.value.step / 2,
-				);
+					this.value.min +
+					this.value.step / 2;
+				this.value.set(value);
+				this._moved.Fire(value);
 			} else {
 				const x = Players.LocalPlayer.GetMouse().X;
-				this.value.set(((x - startpos) / this.gui.AbsoluteSize.X) * this.value.getRange() + this.value.min);
+
+				const value = ((x - startpos) / this.gui.AbsoluteSize.X) * this.value.getRange() + this.value.min;
+				this.value.set(value);
+				this._moved.Fire(value);
 			}
 		};
 
@@ -67,7 +75,7 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 
 			const value = this.value.get();
 			if (value !== undefined) {
-				this.submitted.Fire(value);
+				this._submitted.Fire(value);
 			}
 		};
 		const sub = (signal: RBXScriptSignal<(input: InputObject) => void>) => {
@@ -104,7 +112,9 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 		}
 
 		const moveGamepad = (posx: boolean) => {
-			this.value.set((this.value.get() ?? 0) + (posx ? this.value.step : -this.value.step));
+			const value = (this.value.get() ?? 0) + (posx ? this.value.step : -this.value.step);
+			this.value.set(value);
+			this._moved.Fire(value);
 		};
 
 		if (Control.exists(this.gui, "Knob")) {

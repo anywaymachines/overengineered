@@ -3,8 +3,9 @@ import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { Signal } from "shared/event/Signal";
+import { ArgsSignal, Signal } from "shared/event/Signal";
 import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
+import type { ReadonlyArgsSignal } from "shared/event/Signal";
 
 export type ColorChooserDefinition = GuiObject & {
 	readonly Preview: GuiObject;
@@ -27,86 +28,78 @@ export type ColorChooserDefinition = GuiObject & {
 	};
 };
 
-/** Color chooser, not an actual wheel */
-export class ColorChooser extends Control<ColorChooserDefinition> {
-	private readonly _submitted = new Signal<(color: Color3) => void>();
-	readonly submitted = this._submitted.asReadonly();
-	readonly value = new ObservableValue<Color3>(new Color3(1, 1, 1));
+class ColorChooserSliders extends Control<ColorChooserDefinition["Sliders"]> {
+	readonly submitted: ReadonlyArgsSignal<[color: Color3]>;
+	readonly moved: ReadonlyArgsSignal<[color: Color3]>;
+	private readonly sliders;
 
-	constructor(gui: ColorChooserDefinition) {
+	constructor(gui: ColorChooserDefinition["Sliders"]) {
 		super(gui);
 
-		let settingBySlider = false;
-		const createSlider = <T extends SliderControlDefinition>(gui: T, hsvIndex: number) => {
-			const slider = new SliderControl(gui, 0, 1, 1 / 255);
-			slider.value.set(this.value.get().ToHSV()[hsvIndex]);
-			slider.value.subscribe(() => {
-				if (settingBySlider) return;
+		const submitted = new ArgsSignal<[color: Color3]>();
+		this.submitted = submitted;
 
-				settingBySlider = true;
-				this.value.set(Color3.fromHSV(hue.value.get(), sat.value.get(), bri.value.get()));
-				settingBySlider = false;
-			});
+		const moved = new ArgsSignal<[color: Color3]>();
+		this.moved = moved;
+
+		const updateSliderColors = () => {
+			const [h, s, v] = [hue.value.get(), sat.value.get(), bri.value.get()];
+
+			gui.Saturation.UIGradient.Color = new ColorSequence(Color3.fromHSV(h, 0, v), Color3.fromHSV(h, 1, v));
+			gui.Brightness.UIGradient.Color = new ColorSequence(
+				gui.Brightness.UIGradient.Color.Keypoints[0].Value,
+				Color3.fromHSV(h, s, 1),
+			);
+		};
+		this.onEnable(updateSliderColors);
+
+		const getColorFromSliders = () => Color3.fromHSV(hue.value.get(), sat.value.get(), bri.value.get());
+		const createSlider = <T extends SliderControlDefinition>(gui: T) => {
+			const slider = new SliderControl(gui, 0, 1, 1 / 255);
+			slider.submitted.Connect(() => submitted.Fire(getColorFromSliders()));
+			slider.moved.Connect(() => moved.Fire(getColorFromSliders()));
+			slider.value.subscribe(updateSliderColors);
 			this.add(slider);
 
 			return slider;
 		};
 
-		const hue = createSlider(this.gui.Sliders.Hue, 0);
-		const sat = createSlider(this.gui.Sliders.Saturation, 1);
-		const bri = createSlider(this.gui.Sliders.Brightness, 2);
+		const hue = createSlider(this.gui.Hue);
+		const sat = createSlider(this.gui.Saturation);
+		const bri = createSlider(this.gui.Brightness);
+		this.sliders = { hue, sat, bri } as const;
+	}
 
-		this.event.subscribeObservable(
-			this.value,
-			(color) => {
-				if (settingBySlider) return;
+	set(value: Color3) {
+		const [h, s, v] = value.ToHSV();
 
-				const [h, s, v] = color.ToHSV();
-				hue.value.set(h);
-				sat.value.set(s);
-				bri.value.set(v);
-			},
-			true,
-			true,
-		);
+		this.sliders.hue.value.set(h);
+		this.sliders.sat.value.set(s);
+		this.sliders.bri.value.set(v);
+	}
+}
+class ColorChooserInputs extends Control<ColorChooserDefinition["Inputs"]> {
+	readonly submitted: ReadonlyArgsSignal<[color: Color3]>;
+	private readonly texts;
 
-		const updateColorBySlider = (h: number | undefined, s: number | undefined, v: number | undefined) => {
-			h ??= hue.value.get();
-			s ??= sat.value.get();
-			v ??= bri.value.get();
+	constructor(gui: ColorChooserDefinition["Inputs"]) {
+		super(gui);
 
-			gui.Sliders.Saturation.UIGradient.Color = new ColorSequence(
-				Color3.fromHSV(h, 0, v),
-				Color3.fromHSV(h, 1, v),
-			);
-			gui.Sliders.Brightness.UIGradient.Color = new ColorSequence(
-				gui.Sliders.Brightness.UIGradient.Color.Keypoints[0].Value,
-				Color3.fromHSV(h, s, 1),
-			);
-		};
-		hue.value.subscribe((h) => updateColorBySlider(h, undefined, undefined), true);
-		sat.value.subscribe((s) => updateColorBySlider(undefined, s, undefined), true);
-		bri.value.subscribe((v) => updateColorBySlider(undefined, undefined, v), true);
+		const submitted = new ArgsSignal<[color: Color3]>();
+		this.submitted = submitted;
 
-		const rtext = this.add(new NumberTextBoxControl(this.gui.Inputs.ManualRed, 0, 255, 1));
-		this.event.subscribeObservable(rtext.value, (r) => {
-			const color = this.value.get();
-			this.value.set(new Color3(r / 255, color.G, color.B));
-		});
+		const getColorFromRgbTextBoxes = () => Color3.fromRGB(rtext.value.get(), gtext.value.get(), btext.value.get());
+		const submitFromRgb = () => submitted.Fire(getColorFromRgbTextBoxes());
 
-		const gtext = this.add(new NumberTextBoxControl(this.gui.Inputs.ManualGreen, 0, 255, 1));
-		this.event.subscribeObservable(gtext.value, (g) => {
-			const color = this.value.get();
-			this.value.set(new Color3(color.R, g / 255, color.B));
-		});
+		const rtext = this.add(new NumberTextBoxControl(this.gui.ManualRed, 0, 255, 1));
+		const gtext = this.add(new NumberTextBoxControl(this.gui.ManualGreen, 0, 255, 1));
+		const btext = this.add(new NumberTextBoxControl(this.gui.ManualBlue, 0, 255, 1));
 
-		const btext = this.add(new NumberTextBoxControl(this.gui.Inputs.ManualBlue, 0, 255, 1));
-		this.event.subscribeObservable(btext.value, (b) => {
-			const color = this.value.get();
-			this.value.set(new Color3(color.R, color.G, b / 255));
-		});
+		this.event.subscribe(rtext.submitted, submitFromRgb);
+		this.event.subscribe(gtext.submitted, submitFromRgb);
+		this.event.subscribe(btext.submitted, submitFromRgb);
 
-		const hextext = this.add(new TextBoxControl(this.gui.Inputs.ManualHex));
+		const hextext = this.add(new TextBoxControl(this.gui.ManualHex));
 		this.event.subscribe(hextext.submitted, (hex) => {
 			if (hex.sub(1, 1) !== "#") {
 				hextext.text.set("#" + hex);
@@ -114,33 +107,72 @@ export class ColorChooser extends Control<ColorChooserDefinition> {
 			}
 
 			try {
-				this.value.set(Color3.fromHex(hex));
+				submitted.Fire(Color3.fromHex(hex));
 			} catch {
-				hextext.text.set("#" + this.value.get().ToHex().upper());
+				hextext.text.set("#" + getColorFromRgbTextBoxes().ToHex().upper());
+				return;
 			}
 		});
 
-		this.event.subscribeObservable(
-			this.value,
-			(color) => {
-				this.gui.Preview.BackgroundColor3 = this.value.get();
+		this.texts = { rtext, gtext, btext, hextext } as const;
+		submitted.Connect((color) => this.set(color));
+	}
 
-				rtext.value.set(math.floor(color.R * 255));
-				gtext.value.set(math.floor(color.G * 255));
-				btext.value.set(math.floor(color.B * 255));
-				hextext.text.set("#" + this.value.get().ToHex().upper());
-			},
-			true,
-			true,
-		);
+	set(color: Color3) {
+		this.texts.rtext.value.set(math.floor(color.R * 255));
+		this.texts.gtext.value.set(math.floor(color.G * 255));
+		this.texts.btext.value.set(math.floor(color.B * 255));
+		this.texts.hextext.text.set("#" + color.ToHex().upper());
+	}
+}
 
-		const onsubmit = () => this._submitted.Fire(this.value.get());
-		hue.submitted.Connect(onsubmit);
-		sat.submitted.Connect(onsubmit);
-		bri.submitted.Connect(onsubmit);
-		rtext.submitted.Connect(onsubmit);
-		gtext.submitted.Connect(onsubmit);
-		btext.submitted.Connect(onsubmit);
-		hextext.submitted.Connect(onsubmit);
+/** Color chooser, not an actual wheel */
+export class ColorChooser extends Control<ColorChooserDefinition> {
+	private readonly _submitted = new Signal<(color: Color3) => void>();
+	readonly submitted = this._submitted.asReadonly();
+	readonly value;
+
+	private readonly sliders;
+	private readonly inputs;
+
+	constructor(gui: ColorChooserDefinition) {
+		super(gui);
+
+		const value = new ObservableValue<Color3>(new Color3(1, 1, 1));
+		this.value = value.asReadonly();
+
+		const sliders = this.add(new ColorChooserSliders(gui.Sliders));
+		this.sliders = sliders;
+		sliders.moved.Connect((v) => {
+			value.set(v);
+			inputs.set(v);
+		});
+		sliders.submitted.Connect((v) => {
+			value.set(v);
+			inputs.set(v);
+			this._submitted.Fire(v);
+		});
+
+		const inputs = this.add(new ColorChooserInputs(gui.Inputs));
+		this.inputs = inputs;
+		inputs.submitted.Connect((v) => {
+			value.set(v);
+			sliders.set(v);
+			this._submitted.Fire(v);
+		});
+
+		this.onEnable(() => {
+			const v = this.value.get();
+
+			sliders.set(v);
+			inputs.set(v);
+		});
+
+		this.event.subscribeObservable(this.value, (color) => (this.gui.Preview.BackgroundColor3 = color), true);
+	}
+
+	set(color: Color3) {
+		this.inputs.set(color);
+		this.sliders.set(color);
 	}
 }
