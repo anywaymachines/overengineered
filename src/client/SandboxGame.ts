@@ -4,6 +4,7 @@ import { CameraController } from "client/controller/CameraController";
 import { ChatController } from "client/controller/ChatController";
 import { DayCycleController } from "client/controller/DayCycleController";
 import { DistanceHideController } from "client/controller/DistanceHideController";
+import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { GraphicsSettingsController } from "client/controller/GraphicsSettingsController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
@@ -80,6 +81,7 @@ export namespace SandboxGame {
 		ClientBuildingValidationController.initialize(builder);
 		Tutorial.initialize(builder);
 
+		builder.services.registerService(GameEnvironmentController);
 		builder.services.registerService(DistanceHideController);
 		AdminGui.initializeIfAdminOrStudio(builder);
 

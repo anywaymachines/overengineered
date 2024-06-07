@@ -1,23 +1,24 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { LocalPlayer } from "client/controller/LocalPlayer";
 import { GameEnvironment } from "shared/data/GameEnvironment";
+import { HostedService } from "shared/GameHost";
 
-export namespace GameEnvironmentController {
-	export function initialize() {
-		RunService.Heartbeat.Connect(update);
-	}
+export class GameEnvironmentController extends HostedService {
+	constructor() {
+		super();
 
-	export function update() {
-		const playerHeight = LocalPlayer.getPlayerRelativeHeight();
+		this.event.subscribe(RunService.Heartbeat, () => {
+			const playerHeight = LocalPlayer.getPlayerRelativeHeight();
 
-		Workspace.AirDensity = math.max(
-			GameEnvironment.EarthAirDensity -
-				playerHeight * (GameEnvironment.EarthAirDensity / GameEnvironment.ZeroAirHeight),
-		);
-		Workspace.Gravity = math.max(
-			GameEnvironment.EarthGravity -
-				playerHeight * (GameEnvironment.EarthGravity / GameEnvironment.ZeroGravityHeight),
-			0,
-		);
+			Workspace.AirDensity = math.max(
+				GameEnvironment.EarthAirDensity -
+					playerHeight * (GameEnvironment.EarthAirDensity / GameEnvironment.ZeroAirHeight),
+			);
+			Workspace.Gravity = math.max(
+				GameEnvironment.EarthGravity -
+					playerHeight * (GameEnvironment.EarthGravity / GameEnvironment.ZeroGravityHeight),
+				0,
+			);
+		});
 	}
 }

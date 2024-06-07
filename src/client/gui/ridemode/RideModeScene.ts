@@ -1,5 +1,4 @@
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
-import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { InputController } from "client/controller/InputController";
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayer } from "client/controller/LocalPlayer";

@@ -25,7 +25,6 @@ LoadingController.show("Loading the dependencies");
 import { AdminMessageController } from "client/AdminMessageController";
 import { ServerRestartController } from "client/ServerRestartController";
 import { CharacterController } from "client/controller/CharacterController";
-import { GameEnvironmentController } from "client/controller/GameEnvironmentController";
 import { SoundController } from "client/controller/SoundController";
 import { WindController } from "client/controller/WindController";
 import { InputTypeChangeEvent } from "client/event/InputTypeChangeEvent";
@@ -35,8 +34,6 @@ import { RemoteEvents } from "shared/RemoteEvents";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
 LoadingController.show("Loading the game");
-
-GameEnvironmentController.initialize();
 
 LogControl.instance.show();
 WindController.initialize();
