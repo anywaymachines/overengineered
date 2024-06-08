@@ -1,4 +1,4 @@
-import { UserInputService } from "@rbxts/services";
+import { ContextActionService } from "@rbxts/services";
 import { InputController } from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
@@ -35,12 +35,33 @@ export class KeyChooserControl<TAllowNull extends boolean = false> extends Contr
 				);
 			} else {
 				this.gui.BackgroundColor3 = this.activeColor;
-				this.eventHandler.subscribeOnce(UserInputService.InputBegan, (input) => {
-					const prev = this.value.get();
-					this.value.set(input.KeyCode.Name);
-					this.submitted.Fire(input.KeyCode.Name, prev);
-					this.gui.BackgroundColor3 = this.color;
-				});
+
+				const actionName = "peKeySelection";
+				ContextActionService.BindActionAtPriority(
+					actionName,
+					(name, state, input) => {
+						if (actionName === name) {
+							if (input.KeyCode === Enum.KeyCode.Escape || input.KeyCode === Enum.KeyCode.Unknown) {
+								return Enum.ContextActionResult.Sink;
+							}
+
+							ContextActionService.UnbindAction(actionName);
+
+							const prev = this.value.get();
+							this.value.set(input.KeyCode.Name);
+							this.submitted.Fire(input.KeyCode.Name, prev);
+							this.gui.BackgroundColor3 = this.color;
+						}
+
+						Enum.ContextActionResult.Sink;
+					},
+					true,
+					2000 + 1,
+					Enum.UserInputType.Keyboard,
+					Enum.UserInputType.Gamepad1,
+				);
+
+				this.onDisable(() => ContextActionService.UnbindAction(actionName));
 			}
 		});
 	}
