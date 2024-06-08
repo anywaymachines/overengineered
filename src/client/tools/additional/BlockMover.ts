@@ -8,6 +8,7 @@ import { BlockEditorBase } from "client/tools/additional/BlockEditorBase";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { AABB } from "shared/fixes/AABB";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 abstract class MoveBase extends BlockEditorBase {
@@ -16,7 +17,11 @@ abstract class MoveBase extends BlockEditorBase {
 	protected difference: Vector3 = Vector3.zero;
 	readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 
-	constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
+	constructor(
+		protected readonly mode: BuildingMode,
+		plot: SharedPlot,
+		blocks: readonly BlockModel[],
+	) {
 		super(plot, blocks);
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
 	}
@@ -77,7 +82,7 @@ class DesktopMove extends MoveBase {
 					distance,
 					this.plotBounds,
 				);
-				if (!InputController.isCtrlPressed()) {
+				if (this.mode.gridEnabled.get()) {
 					distance = roundByStep(distance);
 				}
 
@@ -193,11 +198,11 @@ class GamepadMove extends MoveBase {
 }
 
 export namespace BlockMover {
-	export function create(plot: SharedPlot, blocks: readonly BlockModel[]) {
+	export function create(mode: BuildingMode, plot: SharedPlot, blocks: readonly BlockModel[]) {
 		return ClientComponentChild.createOnceBasedOnInputType<MoveBase>({
-			Desktop: () => new DesktopMove(plot, blocks),
-			Touch: () => new TouchMove(plot, blocks),
-			Gamepad: () => new GamepadMove(plot, blocks),
+			Desktop: () => new DesktopMove(mode, plot, blocks),
+			Touch: () => new TouchMove(mode, plot, blocks),
+			Gamepad: () => new GamepadMove(mode, plot, blocks),
 		});
 	}
 }

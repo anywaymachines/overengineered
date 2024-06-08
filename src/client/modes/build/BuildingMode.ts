@@ -2,11 +2,13 @@ import { LocalPlayer } from "client/controller/LocalPlayer";
 import { MirrorVisualizer } from "client/controller/MirrorVisualizer";
 import { BuildingModeScene } from "client/gui/buildmode/BuildingModeScene";
 import { Gui } from "client/gui/Gui";
+import { TouchActionControllerGui } from "client/gui/TouchActionControllerGui";
 import { PlayMode } from "client/modes/PlayMode";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { ToolController } from "client/tools/ToolController";
 import { ObservableValue } from "shared/event/ObservableValue";
 import type { BuildingModeSceneDefinition } from "client/gui/buildmode/BuildingModeScene";
+import type { TouchActionControllerGuiDefinition } from "client/gui/TouchActionControllerGui";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 declare global {
@@ -24,12 +26,18 @@ export class BuildingMode extends PlayMode {
 	readonly mirrorVisualizer;
 	readonly toolController;
 	readonly gui;
+	readonly gridEnabled = new ObservableValue(true);
 
 	constructor(@inject di: DIContainer, @inject plot: SharedPlot) {
 		super();
 
 		di = di.beginScope();
 		di.registerSingleton(this);
+
+		this.event.subInput((ih) => {
+			ih.onKeyDown("LeftControl", () => this.gridEnabled.set(false));
+			ih.onKeyUp("LeftControl", () => this.gridEnabled.set(true));
+		});
 
 		this.targetPlot = new ObservableValue<SharedPlot | undefined>(undefined).withDefault(plot);
 		this.targetPlot.subscribe((plot, prev) => {
@@ -49,6 +57,13 @@ export class BuildingMode extends PlayMode {
 				Gui.getGameUI<{ BuildingMode: BuildingModeSceneDefinition }>().BuildingMode,
 				this.toolController,
 				di,
+			),
+		);
+
+		this.parentGui(
+			new TouchActionControllerGui(
+				Gui.getGameUI<{ readonly Action: TouchActionControllerGuiDefinition }>().Action,
+				this.gridEnabled,
 			),
 		);
 	}

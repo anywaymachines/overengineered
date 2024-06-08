@@ -1,15 +1,16 @@
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
-import { Gui } from "client/gui/Gui";
 import { ActionController } from "client/modes/build/ActionController";
-import { rootComponents } from "client/test/RootComponents";
+import { TransformService } from "shared/component/TransformService";
+import type { ObservableValue } from "shared/event/ObservableValue";
 
-type ActionControllerGuiDefinition = GuiObject & {
+export type TouchActionControllerGuiDefinition = GuiObject & {
 	readonly Undo: GuiButton;
 	readonly Redo: GuiButton;
+	readonly Grid: GuiButton;
 };
-class ActionControllerGui extends Control<ActionControllerGuiDefinition> {
-	constructor(gui: ActionControllerGuiDefinition) {
+export class TouchActionControllerGui extends Control<TouchActionControllerGuiDefinition> {
+	constructor(gui: TouchActionControllerGuiDefinition, gridEnabled: ObservableValue<boolean>) {
 		super(gui);
 
 		const undo = this.add(new ButtonControl(gui.Undo, () => ActionController.instance.undo()));
@@ -24,10 +25,13 @@ class ActionControllerGui extends Control<ActionControllerGuiDefinition> {
 			redo.setInteractable(hasRedo);
 		});
 
-		this.onPrepare((inputType) => (this.gui.Visible = inputType === "Touch"));
+		const grid = this.add(new ButtonControl(gui.Grid, () => gridEnabled.set(!gridEnabled.get())));
+		const animateGridEnabled = TransformService.boolStateMachine(
+			grid.instance,
+			TransformService.commonProps.quadOut02,
+			{ Transparency: grid.instance.Transparency },
+			{ Transparency: 0.6 },
+		);
+		this.event.subscribeObservable(gridEnabled, animateGridEnabled, true);
 	}
 }
-
-const controller = new ActionControllerGui(Gui.getGameUI<{ readonly Action: ActionControllerGuiDefinition }>().Action);
-controller.show();
-rootComponents.push(controller);

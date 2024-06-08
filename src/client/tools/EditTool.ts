@@ -288,7 +288,7 @@ namespace Controllers {
 		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
 
-			this.editor = this.parent(BlockMover.create(plot, blocks));
+			this.editor = this.parent(BlockMover.create(tool.mode, plot, blocks));
 			this.step.autoSet(this.editor.step);
 
 			this.onDestroy(() => {
@@ -348,7 +348,7 @@ namespace Controllers {
 				return b;
 			});
 
-			this.editor = this.parent(BlockMover.create(plot, this.blocks));
+			this.editor = this.parent(BlockMover.create(tool.mode, plot, this.blocks));
 			this.step.autoSet(this.editor.step);
 
 			this.onDestroy(() => {
@@ -390,7 +390,7 @@ namespace Controllers {
 		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
 
-			this.editor = this.parent(BlockRotater.create(plot, blocks));
+			this.editor = this.parent(BlockRotater.create(tool.mode, plot, blocks));
 			this.step.autoSet(this.editor.step);
 
 			this.onDestroy(() => {
@@ -532,7 +532,10 @@ export class EditTool extends ToolBase {
 	private readonly selector;
 	readonly gui;
 
-	constructor(@inject mode: BuildingMode, @inject di: DIContainer) {
+	constructor(
+		@inject readonly mode: BuildingMode,
+		@inject di: DIContainer,
+	) {
 		super(mode);
 
 		this.gui = this.parentGui(

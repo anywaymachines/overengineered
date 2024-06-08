@@ -9,6 +9,7 @@ import { BlockEditorBase } from "client/tools/additional/BlockEditorBase";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { AABB } from "shared/fixes/AABB";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 abstract class RotaterBase extends BlockEditorBase {
@@ -19,7 +20,11 @@ abstract class RotaterBase extends BlockEditorBase {
 	protected isValid: boolean = true;
 	readonly step = new NumberObservableValue<number>(0, 90, 180, 1);
 
-	constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
+	constructor(
+		protected readonly mode: BuildingMode,
+		plot: SharedPlot,
+		blocks: readonly BlockModel[],
+	) {
 		super(plot, blocks);
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
 	}
@@ -66,7 +71,7 @@ class DesktopRotater extends RotaterBase {
 				const centerframe = fullStartPos.mul(
 					startDifference.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle)),
 				);
-				if (!InputController.isCtrlPressed()) {
+				if (this.mode.gridEnabled.get()) {
 					relativeAngle = math.rad(roundByStep(math.deg(relativeAngle)));
 				}
 
@@ -193,11 +198,11 @@ class GamepadRotater extends RotaterBase {
 }
 
 export namespace BlockRotater {
-	export function create(plot: SharedPlot, blocks: readonly BlockModel[]) {
+	export function create(mode: BuildingMode, plot: SharedPlot, blocks: readonly BlockModel[]) {
 		return ClientComponentChild.createOnceBasedOnInputType<RotaterBase>({
-			Desktop: () => new DesktopRotater(plot, blocks),
-			Touch: () => new TouchRotater(plot, blocks),
-			Gamepad: () => new GamepadRotater(plot, blocks),
+			Desktop: () => new DesktopRotater(mode, plot, blocks),
+			Touch: () => new TouchRotater(mode, plot, blocks),
+			Gamepad: () => new GamepadRotater(mode, plot, blocks),
 		});
 	}
 }

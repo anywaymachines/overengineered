@@ -31,6 +31,8 @@ import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BlockSelectionControlDefinition } from "client/gui/buildmode/BlockSelection";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
 import type { MirrorEditorControlDefinition } from "client/gui/buildmode/MirrorEditorControl";
+import type { DropdownDefinition } from "client/gui/controls/Dropdown";
+import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
@@ -54,6 +56,7 @@ const createBlockGhost = (block: RegistryBlock): Model => {
 const getMouseTargetBlockPositionV2 = (
 	block: RegistryBlock,
 	rotation: CFrame,
+	gridEnabled: boolean,
 	info?: [target: BasePart, hit: CFrame, surface: Enum.NormalId],
 ): Vector3 | undefined => {
 	const constrainPositionToGrid = (selectedBlock: RegistryBlock, normal: Vector3, pos: Vector3) => {
@@ -119,7 +122,7 @@ const getMouseTargetBlockPositionV2 = (
 	targetPosition = offsetBlockPivotToCenter(block, targetPosition);
 	targetPosition = addBlockSize(block, normal, targetPosition);
 
-	if (!InputController.isCtrlPressed()) {
+	if (gridEnabled) {
 		targetPosition = constrainPositionToGrid(block, normal, targetPosition);
 	}
 
@@ -153,6 +156,14 @@ namespace Scene {
 			readonly Content: MirrorEditorControlDefinition;
 		};
 		readonly Bottom: MaterialColorEditControlDefinition;
+		readonly Settings: DropdownDefinition & {
+			readonly Content: {
+				readonly ToggleTemplate: GuiObject & {
+					readonly HeadingLabel: GuiLabel;
+					readonly Control: ToggleControlDefinition;
+				};
+			};
+		};
 		readonly Info: Frame & {
 			readonly ViewportFrame: ViewportFrame;
 			readonly DescriptionLabel: TextLabel;
@@ -192,6 +203,33 @@ namespace Scene {
 					() => (this.gui.Mirror.Visible = !this.gui.Mirror.Visible),
 				),
 			);
+
+			/*const settings = this.add(new Dropdown(gui.Settings));
+			this.event.subscribeObservable(
+				settings.isOpen,
+				(open) => {
+					settings.transform((tr) =>
+						tr.transform("BackgroundTransparency", open ? 0 : 0.8, {
+							...TransformService.commonProps.quadOut02,
+							duration: 0.1,
+						}),
+					);
+				},
+				true,
+			);
+			class Settings extends Control<BuildToolSceneDefinition["Settings"]["Content"]> {
+				constructor(gui: BuildToolSceneDefinition["Settings"]["Content"]) {
+					super(gui);
+
+					const toggleTemplate = this.asTemplate(gui.ToggleTemplate, true);
+
+					const gridc = this.add(new Control( toggleTemplate()))
+					const grid = gridc.add(new ToggleControl( gridc.instance.Control))
+
+					grid.
+				}
+			}
+			this.add(new Settings(gui.Settings.Content));*/
 
 			this.blockInfoPreviewControl = this.add(new BlockPreviewControl(this.gui.Info.ViewportFrame));
 			this.event.subscribeObservable(
@@ -403,7 +441,11 @@ namespace SinglePlaceController {
 					return;
 				}
 
-				mainPosition = getMouseTargetBlockPosition(selectedBlock, this.blockRotation.get());
+				mainPosition = getMouseTargetBlockPosition(
+					selectedBlock,
+					this.blockRotation.get(),
+					this.state.mode.gridEnabled.get(),
+				);
 			}
 			if (!mainPosition) return;
 
@@ -562,7 +604,12 @@ namespace SinglePlaceController {
 			const selectedBlock = this.selectedBlock.get();
 			if (!selectedBlock) return;
 
-			const mainPosition = getMouseTargetBlockPosition(selectedBlock, this.blockRotation.get(), this.prevTarget);
+			const mainPosition = getMouseTargetBlockPosition(
+				selectedBlock,
+				this.blockRotation.get(),
+				this.state.mode.gridEnabled.get(),
+				this.prevTarget,
+			);
 			super.updateBlockPosition(mainPosition);
 		}
 	}
@@ -1013,7 +1060,12 @@ namespace MultiPlaceController {
 		const selectedBlock = state.selectedBlock.get();
 		if (!selectedBlock) return;
 
-		const pressPosition = getMouseTargetBlockPosition(selectedBlock, state.blockRotation.get(), prevTarget);
+		const pressPosition = getMouseTargetBlockPosition(
+			selectedBlock,
+			state.blockRotation.get(),
+			state.mode.gridEnabled.get(),
+			prevTarget,
+		);
 		if (!pressPosition) return;
 
 		const plot = state.targetPlot.get();
@@ -1047,7 +1099,7 @@ export class BuildTool extends ToolBase {
 	readonly blockRotation = new ObservableValue<CFrame>(CFrame.identity);
 
 	constructor(
-		@inject mode: BuildingMode,
+		@inject readonly mode: BuildingMode,
 		@inject readonly di: DIContainer,
 		@inject readonly blockRegistry: BlockRegistry,
 	) {
