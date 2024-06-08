@@ -604,6 +604,11 @@ namespace Controllers {
 			super();
 			this.markers = markers;
 
+			this.onEnable(() => {
+				for (const marker of markers) {
+					marker.instance.TextButton.Active = true;
+				}
+			});
 			this.onDisable(() => this.unset());
 
 			for (const marker of markers) {
