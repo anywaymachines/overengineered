@@ -52,15 +52,15 @@ export class ServerRestartController extends HostedService {
 					continue;
 				}
 
-				if (timeLeft % 10 === 0 || timeLeft < 10) {
-					Remotes.Server.GetNamespace("Admin")
-						.Get("SendMessage")
-						.SendToAllPlayers(
-							`YOU ARE GOING TO BAD TO THE BONE IN ${timeLeft}...`,
-							textStartColor.Lerp(textEndColor, progress),
-							0.5,
-						);
-				}
+				// if (timeLeft % 10 === 0 || timeLeft < 10) {
+				// 	Remotes.Server.GetNamespace("Admin")
+				// 		.Get("SendMessage")
+				// 		.SendToAllPlayers(
+				// 			`YOU ARE GOING TO BAD TO THE BONE IN ${timeLeft}...`,
+				// 			textStartColor.Lerp(textEndColor, progress),
+				// 			0.5,
+				// 		);
+				// }
 
 				task.wait(1);
 				timeLeft--;
