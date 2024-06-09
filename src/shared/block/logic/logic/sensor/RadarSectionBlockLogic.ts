@@ -92,6 +92,8 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 			if (part.CollisionGroup !== "Blocks") return;
 			if (part === doNotReactToUnion) return;
 			if (part.HasTag("RADARVIEW")) return;
+			if (part.IsDescendantOf(this.instance)) return;
+
 			this.allTouchedBlocks.add(part);
 			if (!this.closestDetectedPart) return (this.closestDetectedPart = part);
 			const d1 = this.getDistanceTo(part);
