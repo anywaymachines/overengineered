@@ -452,7 +452,7 @@ export async function TutorialBasics(tutorial: Tutorial) {
 	TasksControl.instance.finish();
 
 	tutorial.Control.displayStep(
-		"Great! Now configure the left side motors of your car. It's like left side, but inversed",
+		"Great! Now configure the left side motors of your car. It's like the right side, but inversed",
 		false,
 	);
 	toolEnabler.enableOnly(allTools.configTool);
