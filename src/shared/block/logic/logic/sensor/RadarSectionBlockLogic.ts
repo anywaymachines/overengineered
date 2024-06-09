@@ -25,7 +25,8 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 				continue;
 			}
 
-			if (smallestDistance === undefined || d < smallestDistance) [smallestDistance, closestPart] = [d, bp];
+			if (smallestDistance === undefined || (d < smallestDistance && d > this.input.minimalDistance.get()))
+				[smallestDistance, closestPart] = [d, bp];
 		}
 		return closestPart;
 	}
@@ -40,7 +41,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.radarsection);
 
-		const maxDist = blockConfigRegistry.radarsection.input.maxDistance.max;
+		const maxDist = RobloxUnit.Meters_To_Studs(blockConfigRegistry.radarsection.input.maxDistance.max);
 		const halvedMaxDist = maxDist / 2;
 
 		const view = this.instance.WaitForChild("RadarView");
@@ -50,12 +51,12 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 
 		view.Size = new Vector3(
 			this.input.detectionSize.get(),
-			this.input.maxDistance.get(),
+			RobloxUnit.Meters_To_Studs(this.input.maxDistance.get()),
 			this.input.detectionSize.get(),
 		);
 
 		const updateDistance = (detectionSize: number) => {
-			const md = this.input.maxDistance.get();
+			const md = RobloxUnit.Meters_To_Studs(this.input.maxDistance.get());
 			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (md + halvedMaxDist)));
 			view.Size = new Vector3(ds, view.Size.Y, ds);
 		};
@@ -67,7 +68,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		this.event.subscribeObservable(this.input.detectionSize, updateDistance);
 
 		this.event.subscribeObservable(this.input.maxDistance, (maxDistance) => {
-			const halfDistance = maxDistance / 2;
+			const halfDistance = RobloxUnit.Meters_To_Studs(maxDistance) / 2;
 			view.Size = new Vector3(view.Size.X, halfDistance, view.Size.Z);
 			updateDistance(this.input.detectionSize.get());
 		});
@@ -94,9 +95,10 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 			if (part.HasTag("RADARVIEW")) return;
 			if (part.IsDescendantOf(this.instance)) return;
 
+			const d1 = this.getDistanceTo(part);
+			if (d1 !== undefined && d1 < this.input.minimalDistance.get()) return;
 			this.allTouchedBlocks.add(part);
 			if (!this.closestDetectedPart) return (this.closestDetectedPart = part);
-			const d1 = this.getDistanceTo(part);
 			const d2 = this.getDistanceTo(this.closestDetectedPart);
 			if (d1 === undefined) return;
 			if (d2 === undefined) return (this.closestDetectedPart = part);

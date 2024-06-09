@@ -1228,6 +1228,15 @@ const radarsection = {
 			default: Vector3.zero,
 			config: Vector3.zero,
 		},
+		minimalDistance: {
+			displayName: "Minimal Detection Distance",
+			type: "clampedNumber",
+			default: 0 as number,
+			config: 0 as number,
+			min: 0,
+			max: 5000,
+			step: 0,
+		},
 	},
 	output: {
 		distance: {
