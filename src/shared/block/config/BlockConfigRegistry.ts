@@ -1222,6 +1222,12 @@ const radarsection = {
 			default: false as boolean,
 			config: false as boolean,
 		},
+		angleOffset: {
+			displayName: "Angle Offset",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
 	},
 	output: {
 		distance: {

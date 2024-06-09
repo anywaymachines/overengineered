@@ -72,6 +72,22 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 			updateDistance(this.input.detectionSize.get());
 		});
 
+		this.event.subscribeObservable(this.input.angleOffset, (angle, prev) => {
+			const maxAngle = 45;
+			prev = new Vector3(
+				math.clamp(prev.X, -maxAngle, maxAngle),
+				math.clamp(prev.Y, -maxAngle, maxAngle),
+				math.clamp(prev.Z, -maxAngle, maxAngle),
+			);
+			angle = new Vector3(
+				math.clamp(angle.X, -maxAngle, maxAngle),
+				math.clamp(angle.Y, -maxAngle, maxAngle),
+				math.clamp(angle.Z, -maxAngle, maxAngle),
+			);
+
+			view.Rotation = view.Rotation.sub(prev).add(angle);
+		});
+
 		this.event.subscribe(view.Touched, (part) => {
 			if (part.CollisionGroup !== "Blocks") return;
 			if (part === doNotReactToUnion) return;
