@@ -102,7 +102,6 @@ export const CustomRemotes = {
 } as const;
 export const Remotes = Definitions.Create({
 	Player: Definitions.Namespace({
-		InputTypeInfo: Definitions.ClientToServerEvent<[inputType: InputType]>(),
 		UpdateSettings:
 			Definitions.ServerAsyncFunction<
 				<TKey extends keyof PlayerConfig>(key: TKey, value: PlayerConfig[TKey]) => Response
