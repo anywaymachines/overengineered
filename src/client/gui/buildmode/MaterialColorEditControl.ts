@@ -145,8 +145,5 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 
 		this.event.subscribeObservable(color, (m) => this.colorv.set(m), true, true);
 		this.event.subscribe(this.colorv.submitted, (v) => color.set(v));
-		this.event.subscribe(this.colorv.submitted, (v) => {
-			print("Setting color", v);
-		});
 	}
 }
