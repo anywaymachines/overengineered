@@ -3,7 +3,7 @@ import { RobloxUnit } from "shared/RobloxUnit";
 
 export namespace GameDefinitions {
 	export const APRIL_FOOLS = false;
-	export const VERSION = "BETA v1.0.4";
+	export const VERSION = "BETA v1.0.5";
 
 	export const GROUP = 1088368;
 	export const RANKS = {
