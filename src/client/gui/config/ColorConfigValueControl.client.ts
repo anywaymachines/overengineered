@@ -11,9 +11,9 @@ class ValueControl extends ConfigValueControl<ColorChooserDefinition, Type> {
 		super(configValueTemplateStorage.color(), definition.displayName);
 
 		const control = this.add(new ColorChooser(this.gui.Control));
-		control.set(this.sameOrUndefined(configs) ?? Color3.fromRGB(255, 255, 255));
+		control.value.set(this.sameOrUndefined(configs) ?? Color3.fromRGB(255, 255, 255));
 
-		this.event.subscribe(control.submitted, (value) => {
+		this.event.subscribe(control.value.submitted, (value) => {
 			const prev = configs;
 			this._submitted.Fire((configs = this.map(configs, () => value)), prev);
 		});

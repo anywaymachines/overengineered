@@ -1,3 +1,5 @@
+import { ClientComponent } from "client/component/ClientComponent";
+import { LocalPlayer } from "client/controller/LocalPlayer";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
@@ -7,7 +9,6 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector";
 import { ToolBase } from "client/tools/ToolBase";
 import { BlockManager } from "shared/building/BlockManager";
-import { SharedBuilding } from "shared/building/SharedBuilding";
 import { TransformService } from "shared/component/TransformService";
 import { ObservableValue } from "shared/event/ObservableValue";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
@@ -49,17 +50,15 @@ namespace Scene {
 				// to not paint a block
 				task.wait();
 
-				this.tool.enable();
+				this.tool.controller.enable();
 			};
 			const disable = () => {
-				this.tool.disable();
+				this.tool.controller.disable();
 			};
 
 			const materialColorEditor = this.add(new MaterialColorEditControl(this.gui.Bottom));
-			materialColorEditor.material.set(tool.selectedMaterial.get());
-			materialColorEditor.color.set(tool.selectedColor.get());
-			materialColorEditor.material.submitted.Connect((v) => tool.selectedMaterial.set(v));
-			materialColorEditor.color.submitted.Connect((v) => tool.selectedColor.set(v));
+			materialColorEditor.autoSubscribe(tool.selectedMaterial, tool.selectedColor);
+
 			materialColorEditor.materialPipette.onStart.Connect(disable);
 			materialColorEditor.materialPipette.onEnd.Connect(enable);
 			materialColorEditor.colorPipette.onStart.Connect(disable);
@@ -99,11 +98,48 @@ namespace Scene {
 	}
 }
 
+class Controller extends ClientComponent {
+	constructor(tool: PaintTool) {
+		super();
+
+		const fireSelected = (blocks: readonly BlockModel[]) => {
+			if (!blocks || blocks.size() === 0) return;
+
+			tool.paint(blocks);
+		};
+		const stuff = this.parent(new MultiBlockSelector(tool.mode.targetPlot));
+		stuff.submit.Connect(fireSelected);
+
+		this.event.subInput((ih) => {
+			ih.onMouse3Down(() => {
+				if (Gui.isCursorOnVisibleGui()) return;
+
+				const [material, color] = this.pick();
+				if (!material || !color) return;
+
+				tool.selectedMaterial.set(material);
+				tool.selectedColor.set(color);
+			}, false);
+		});
+	}
+
+	private pick() {
+		const target = LocalPlayer.mouse.Target;
+		if (!target) return $tuple();
+
+		const block = BlockManager.getBlockDataByPart(target);
+		if (!block) return $tuple();
+
+		return $tuple(block.material, block.color);
+	}
+}
+
 export class PaintTool extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
 	readonly enableMaterial = new ObservableValue(true);
 	readonly enableColor = new ObservableValue(true);
+	readonly controller;
 
 	constructor(mode: BuildingMode) {
 		super(mode);
@@ -111,40 +147,7 @@ export class PaintTool extends ToolBase {
 		this.parentGui(
 			new Scene.PaintToolScene(ToolBase.getToolGui<"Paint", Scene.PaintToolSceneDefinition>().Paint, this),
 		);
-
-		const fireSelected = (blocks: readonly BlockModel[]) => {
-			if (!blocks || blocks.size() === 0) return;
-
-			this.paint(blocks);
-		};
-		const stuff = this.parent(new MultiBlockSelector(mode.targetPlot));
-		stuff.submit.Connect(fireSelected);
-
-		this.event.subInput((ih) => {
-			ih.onMouse3Down(() => {
-				if (Gui.isCursorOnVisibleGui()) return;
-				this.pick();
-			}, false);
-		});
-	}
-
-	private pick() {
-		const target = this.mouse.Target;
-		if (!target) return;
-
-		const block = BlockManager.getBlockDataByPart(target);
-		if (!block) return;
-
-		this.selectedMaterial.set(block.material);
-		this.selectedColor.set(block.color);
-	}
-
-	private paintClientSide(block: BlockModel) {
-		SharedBuilding.paint(
-			[block],
-			this.enableColor.get() ? this.selectedColor.get() : undefined,
-			this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
-		);
+		this.controller = this.parent(new Controller(this));
 	}
 
 	paintEverything(enableColor?: boolean, enableMaterial?: boolean) {

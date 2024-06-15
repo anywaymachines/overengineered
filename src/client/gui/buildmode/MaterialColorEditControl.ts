@@ -5,9 +5,11 @@ import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { MaterialChooser } from "client/gui/MaterialChooser";
 import { TransformService } from "shared/component/TransformService";
+import { SubmittableValue } from "shared/event/SubmittableValue";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 import type { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import type { MaterialChooserDefinition } from "client/gui/MaterialChooser";
+import type { ObservableValue } from "shared/event/ObservableValue";
 
 export type MaterialColorEditControlDefinition = GuiObject & {
 	readonly Color: GuiObject & {
@@ -35,20 +37,24 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 	readonly materialPipette;
 	readonly colorPipette;
 
-	readonly material;
-	readonly color;
+	readonly materialv;
+	readonly colorv;
 
 	constructor(gui: MaterialColorEditControlDefinition, defaultVisibility = false) {
 		super(gui);
 
-		const material = this.add(new MaterialChooser(gui.Material.Content));
-		this.material = material;
-		const color = this.add(new ColorChooser(gui.Color.Content));
-		this.color = color;
+		const materialv = SubmittableValue.from<Enum.Material>(Enum.Material.Plastic);
+		this.materialv = materialv.asHalfReadonly();
+
+		const colorv = SubmittableValue.from<Color3>(Color3.fromRGB(255, 255, 255));
+		this.colorv = colorv.asHalfReadonly();
+
+		const material = this.add(new MaterialChooser(gui.Material.Content, materialv));
+		const color = this.add(new ColorChooser(gui.Color.Content, colorv));
 
 		const materialbtn = this.add(new TextButtonControl(this.gui.Material.Header));
 		this.event.subscribeObservable(
-			material.value,
+			material.value.value,
 			(value) => {
 				const imgl = this.gui.Material.Content.FindFirstChild(value.Name) as ImageLabel & {
 					readonly TextLabel: TextLabel;
@@ -60,9 +66,13 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 		);
 
 		const colorbtn = this.add(new TextButtonControl(this.gui.Color.Header));
-		this.event.subscribeObservable(color.value, (value) => colorbtn.text.set("#" + value.ToHex().upper()), true);
 		this.event.subscribeObservable(
-			color.value,
+			color.value.value,
+			(value) => colorbtn.text.set("#" + value.ToHex().upper()),
+			true,
+		);
+		this.event.subscribeObservable(
+			color.value.value,
 			(value) => {
 				this.gui.Color.Header.Pipette.BackgroundColor3 = value;
 
@@ -122,8 +132,21 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 		initVisibilityAnimation(colorbtn, gui.Color);
 
 		this.materialPipette = this.add(
-			BlockPipetteButton.forMaterial(this.gui.Material.Header.Pipette, (m) => material.value.set(m)),
+			BlockPipetteButton.forMaterial(this.gui.Material.Header.Pipette, (m) => materialv.submit(m)),
 		);
-		this.colorPipette = this.add(BlockPipetteButton.forColor(this.gui.Color.Header.Pipette, (c) => color.set(c)));
+		this.colorPipette = this.add(
+			BlockPipetteButton.forColor(this.gui.Color.Header.Pipette, (c) => colorv.submit(c)),
+		);
+	}
+
+	autoSubscribe(material: ObservableValue<Enum.Material>, color: ObservableValue<Color3>) {
+		this.event.subscribeObservable(material, (m) => this.materialv.set(m), true, true);
+		this.event.subscribe(this.materialv.submitted, (v) => material.set(v));
+
+		this.event.subscribeObservable(color, (m) => this.colorv.set(m), true, true);
+		this.event.subscribe(this.colorv.submitted, (v) => color.set(v));
+		this.event.subscribe(this.colorv.submitted, (v) => {
+			print("Setting color", v);
+		});
 	}
 }

@@ -2,8 +2,7 @@ import { MarketplaceService, Players } from "@rbxts/services";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { GameDefinitions } from "shared/data/GameDefinitions";
-import { ObservableValue } from "shared/event/ObservableValue";
-import { ArgsSignal } from "shared/event/Signal";
+import { SubmittableValue } from "shared/event/SubmittableValue";
 
 class MaterialButton extends ButtonControl {
 	constructor(gui: GuiButton, set: (material: Enum.Material) => void, gamePass?: number) {
@@ -53,34 +52,19 @@ export type MaterialChooserDefinition = GuiObject & {
 };
 /** Material chooser part */
 export class MaterialChooser extends Control<MaterialChooserDefinition> {
-	readonly submitted;
-	readonly value = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
+	readonly value;
 
-	constructor(gui: MaterialChooserDefinition) {
+	constructor(gui: MaterialChooserDefinition, value?: SubmittableValue<Enum.Material>) {
 		super(gui);
 
-		const submitted = new ArgsSignal<[material: Enum.Material]>();
-		this.submitted = submitted.asReadonly();
+		value ??= SubmittableValue.from<Enum.Material>(Enum.Material.Plastic);
+		this.value = value.asHalfReadonly();
 
 		for (const instance of this.gui.GetChildren(undefined)) {
 			if (!instance.IsA("ImageButton")) continue;
 
 			const gamepassid = instance.Name === "Neon" ? GameDefinitions.GAMEPASSES.NeonMaterial : undefined;
-
-			this.add(
-				new MaterialButton(
-					instance,
-					(material) => {
-						this.value.set(material);
-						submitted.Fire(material);
-					},
-					gamepassid,
-				),
-			);
+			this.add(new MaterialButton(instance, (material) => value.submit(material), gamepassid));
 		}
-	}
-
-	set(material: Enum.Material) {
-		this.value.set(material);
 	}
 }

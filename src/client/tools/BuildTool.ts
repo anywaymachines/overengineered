@@ -21,6 +21,7 @@ import { BlockMirrorer } from "client/tools/additional/BlockMirrorer";
 import { ToolBase } from "client/tools/ToolBase";
 import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
+import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { TransformService } from "shared/component/TransformService";
@@ -258,16 +259,13 @@ namespace Scene {
 					// to not place a block
 					task.wait();
 
-					this.tool.enable();
+					this.tool.controller.enable();
 				};
 				const disable = () => {
-					this.tool.disable();
+					this.tool.controller.disable();
 				};
 				const materialColorEditor = this.add(new MaterialColorEditControl(this.gui.Bottom));
-				materialColorEditor.material.set(tool.selectedMaterial.get());
-				materialColorEditor.color.set(tool.selectedColor.get());
-				materialColorEditor.material.submitted.Connect((v) => tool.selectedMaterial.set(v));
-				materialColorEditor.color.submitted.Connect((v) => tool.selectedColor.set(v));
+				materialColorEditor.autoSubscribe(tool.selectedMaterial, tool.selectedColor);
 
 				materialColorEditor.materialPipette.onStart.Connect(disable);
 				materialColorEditor.materialPipette.onEnd.Connect(enable);
@@ -1097,6 +1095,7 @@ export class BuildTool extends ToolBase {
 	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
 	readonly currentMode = new ComponentChild<IController>(this, true);
 	readonly blockRotation = new ObservableValue<CFrame>(CFrame.identity);
+	readonly controller;
 
 	constructor(
 		@inject readonly mode: BuildingMode,
@@ -1109,13 +1108,16 @@ export class BuildTool extends ToolBase {
 			new Scene.BuildToolScene(ToolBase.getToolGui<"Build", Scene.BuildToolSceneDefinition>().Build, this),
 		);
 
+		this.controller = this.parent(new Component());
+		this.controller.onEnable(() => this.currentMode.set(SinglePlaceController.create(this, di)));
+		this.controller.onDisable(() => this.currentMode.set(undefined));
+
 		this.currentMode.childSet.Connect((mode) => {
-			if (!this.isEnabled()) return;
+			if (!this.isEnabled() || !this.controller.isEnabled()) return;
 			if (mode) return;
 
 			this.currentMode.set(SinglePlaceController.create(this, di));
 		});
-		this.onEnable(() => this.currentMode.set(SinglePlaceController.create(this, di)));
 
 		MultiPlaceController.subscribe(this, this.currentMode, di);
 	}

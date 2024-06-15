@@ -449,10 +449,7 @@ namespace Controllers {
 			const ui = tool.gui.instance.Paint.Clone();
 			ui.Parent = tool.gui.instance.Paint.Parent;
 			const materialColorEditor = this.parentGui(new MaterialColorEditControl(ui, true));
-			materialColorEditor.material.set(Paint.material.get());
-			materialColorEditor.color.set(Paint.color.get());
-			materialColorEditor.material.submitted.Connect((v) => Paint.material.set(v));
-			materialColorEditor.color.submitted.Connect((v) => Paint.color.set(v));
+			materialColorEditor.autoSubscribe(Paint.material, Paint.color);
 
 			this.event.subscribeObservable(
 				Paint.material,

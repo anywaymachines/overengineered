@@ -14,7 +14,7 @@ export abstract class ToolBase extends ClientComponent {
 
 	protected readonly gameUI;
 	protected readonly mouse: Mouse;
-	protected readonly mode: BuildingMode;
+	readonly mode: BuildingMode;
 	protected readonly tooltipHolder: TooltipsHolder;
 
 	constructor(mode: BuildingMode) {
