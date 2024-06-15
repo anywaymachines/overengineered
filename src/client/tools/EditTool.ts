@@ -661,6 +661,7 @@ export class EditTool extends ToolBase {
 		});
 
 		ClientBuilding.deleteOperation.execute(this.targetPlot.get(), selected);
+		task.wait();
 		ClientBuilding.placeOperation.execute(this.targetPlot.get(), mirrored);
 	}
 
