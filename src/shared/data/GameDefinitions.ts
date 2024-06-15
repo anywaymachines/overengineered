@@ -3,7 +3,6 @@ import { RobloxUnit } from "shared/RobloxUnit";
 
 export namespace GameDefinitions {
 	export const APRIL_FOOLS = false;
-	export const VERSION = "BETA v1.0.5";
 
 	export const GROUP = 1088368;
 	export const RANKS = {
@@ -89,19 +88,14 @@ export namespace GameDefinitions {
 	}
 
 	export function getEnvironmentInfo(): readonly string[] {
-		const compileTime = DateTime.fromUnixTimestamp($compileTime()).FormatUniversalTime(
-			"DD MMM YYYY (HH:mm)",
-			"en-us",
-		);
 		const ret = [];
 
 		ret.push(
-			`Environment: ${GameDefinitions.isTestPlace() ? "⚠️ Testing" : "✅ Production"} in ${RunService.IsStudio() ? "studio" : "player"}`,
+			`Environment: ${isTestPlace() ? "⚠️ Testing" : "✅ Production"} in ${RunService.IsStudio() ? "studio" : "player"}`,
 		);
-		ret.push(`Version: ${GameDefinitions.VERSION}`);
 		ret.push(`User: ${Players.LocalPlayer.UserId} @${Players.LocalPlayer.Name} ${Players.LocalPlayer.DisplayName}`);
-		ret.push(`Build: ${RunService.IsStudio() ? "🔒 Internal" : game.PlaceVersion} [ ${compileTime} ]`);
-		ret.push(`Server: ${RunService.IsStudio() ? "🔒 Local" : game.JobId}`);
+		ret.push(`Build: ${RunService.IsStudio() ? "🔒 Studio" : game.PlaceVersion}`);
+		ret.push(`Server: ${RunService.IsStudio() ? "🔒 Studio" : game.JobId}`);
 		ret.push(`Debris: ${Workspace.HasTag("PrivateServer") ? "🔓 Everlasting" : "🔒 Default"}`);
 
 		return ret;
