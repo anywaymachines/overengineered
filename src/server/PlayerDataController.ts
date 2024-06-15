@@ -1,8 +1,8 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import { Backend } from "server/Backend";
-import { registerOnRemoteFunction } from "server/network/event/RemoteHandler";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { HostedService } from "shared/GameHost";
+import { CustomRemotes } from "shared/Remotes";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { PlayerData } from "server/database/PlayerDatabase";
 
@@ -11,8 +11,8 @@ export class PlayerDataController extends HostedService {
 	constructor(@inject private readonly players: PlayerDatabase) {
 		super();
 
-		registerOnRemoteFunction("Player", "UpdateSettings", this.updateSetting.bind(this));
-		registerOnRemoteFunction("Player", "FetchData", this.fetchSettings.bind(this));
+		this.event.subscribe(CustomRemotes.player.updateSettings.invoked, this.updateSetting.bind(this));
+		CustomRemotes.player.fetchData.subscribe(this.fetchSettings.bind(this));
 
 		Workspace.AddTag("data_loadable");
 	}
@@ -37,7 +37,7 @@ export class PlayerDataController extends HostedService {
 			success: true,
 		};
 	}
-	private fetchSettings(player: Player): PlayerDataResponse {
+	private fetchSettings(player: Player): Response<PlayerDataResponse> {
 		const data = this.players.get(player.UserId) ?? {};
 
 		const universeId = GameDefinitions.isTestPlace()
@@ -64,6 +64,7 @@ export class PlayerDataController extends HostedService {
 		}
 
 		return {
+			success: true,
 			purchasedSlots: data.purchasedSlots,
 			settings: data.settings,
 			slots: data.slots,

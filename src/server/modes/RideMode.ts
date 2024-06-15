@@ -1,8 +1,8 @@
 import { Players } from "@rbxts/services";
-import { registerOnRemoteEvent } from "server/network/event/RemoteHandler";
 import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
+import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
@@ -30,7 +30,7 @@ export class RideMode implements PlayModeBase {
 			}
 		});
 
-		registerOnRemoteEvent("Ride", "Sit", this.sit.bind(this));
+		CustomRemotes.modes.ride.teleportOnSeat.invoked.Connect(this.sit.bind(this));
 	}
 	private sit(player: Player) {
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;

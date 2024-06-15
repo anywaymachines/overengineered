@@ -1,5 +1,10 @@
-import { Definitions, Middleware } from "@rbxts/net";
-import { C2S2CRemoteFunction } from "shared/event2/PERemoteEvent";
+import { Definitions } from "@rbxts/net";
+import {
+	C2S2CRemoteFunction,
+	C2SRemoteEvent,
+	PERemoteEventMiddlewares,
+	S2C2SRemoteFunction,
+} from "shared/event2/PERemoteEvent";
 import type { BlockId } from "shared/BlockDataRegistry";
 import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
@@ -99,24 +104,23 @@ export const CustomRemotes = {
 		),
 		save: new C2S2CRemoteFunction<[data: PlayerSaveSlotRequest], SaveSlotResponse>("rs_save"),
 	},
+	player: {
+		updateSettings: new C2SRemoteEvent<[key: keyof PlayerConfig, value: PlayerConfig[keyof PlayerConfig]]>(
+			"pl_updsettings",
+		),
+		fetchData: new C2S2CRemoteFunction<[], Response<PlayerDataResponse>>("pl_fetchdata"),
+	},
+	modes: {
+		set: new C2S2CRemoteFunction<[mode: PlayModes]>("md_set").addMiddleware(
+			PERemoteEventMiddlewares.rateLimiter(30, 60),
+		),
+		setOnClient: new S2C2SRemoteFunction<[mode: PlayModes | undefined]>("md_setc"),
+		ride: {
+			teleportOnSeat: new C2SRemoteEvent("mdr_seat"),
+		},
+	},
 } as const;
 export const Remotes = Definitions.Create({
-	Player: Definitions.Namespace({
-		UpdateSettings:
-			Definitions.ServerAsyncFunction<
-				<TKey extends keyof PlayerConfig>(key: TKey, value: PlayerConfig[TKey]) => Response
-			>(),
-		FetchData: Definitions.ServerAsyncFunction<() => PlayerDataResponse>(),
-	}),
-	Ride: Definitions.Namespace({
-		SetPlayMode: Definitions.ServerAsyncFunction<(mode: PlayModes) => Response>([
-			Middleware.RateLimit({
-				MaxRequestsPerMinute: 30,
-			}),
-		]),
-		SetPlayModeOnClient: Definitions.ClientAsyncFunction<(mode: PlayModes | undefined) => Response>(),
-		Sit: Definitions.ClientToServerEvent<[]>(),
-	}),
 	Admin: Definitions.Namespace({
 		SendMessage: Definitions.BidirectionalEvent<
 			[text: string, color?: Color3, duration?: number],

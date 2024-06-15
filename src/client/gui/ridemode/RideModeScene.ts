@@ -13,7 +13,7 @@ import { requestMode } from "client/modes/PlayModeRequest";
 import { RocketEngineLogic } from "shared/block/logic/RocketEngineLogic";
 import { EventHandler } from "shared/event/EventHandler";
 import { Signal } from "shared/event/Signal";
-import { Remotes } from "shared/Remotes";
+import { CustomRemotes } from "shared/Remotes";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { Machine } from "client/blocks/Machine";
@@ -45,17 +45,9 @@ export class ActionBarControl extends Control<ActionBarControlDefinition> {
 			}
 		});
 
-		this.event.subscribe(stopButton.activated, async () => {
-			await requestMode("build");
-		});
-
-		this.event.subscribe(sitButton.activated, async () => {
-			Remotes.Client.GetNamespace("Ride").Get("Sit").SendToServer();
-		});
-
-		this.event.subscribe(controlSettingsButton.activated, async () => {
-			controls.toggleSettingsMode();
-		});
+		this.event.subscribe(stopButton.activated, () => requestMode("build"));
+		this.event.subscribe(sitButton.activated, () => CustomRemotes.modes.ride.teleportOnSeat.send());
+		this.event.subscribe(controlSettingsButton.activated, () => controls.toggleSettingsMode());
 
 		this.event.subscribe(controlResetButton.activated, async () => {
 			ConfirmPopup.showPopup(

@@ -30,8 +30,8 @@ export namespace PlayerDataInitializer {
 	async function fetchPlayerData(): Promise<PD> {
 		waitForLoadableData();
 
-		Remotes.Client.GetNamespace("Player").Get("FetchData").SetCallTimeout(1);
-		const d = await Remotes.Client.GetNamespace("Player").Get("FetchData").CallServerAsync();
+		const d = CustomRemotes.player.fetchData.send();
+		if (!d.success) throw d.message;
 
 		const data: PD = {
 			purchasedSlots: d.purchasedSlots ?? 0,
@@ -77,7 +77,7 @@ export class PlayerDataStorage {
 
 	async sendPlayerConfigValue<TKey extends keyof PlayerConfig>(key: TKey, value: PlayerConfig[TKey] & defined) {
 		$log(`Setting player config value ${key} to ${JSON.serialize(value)}`);
-		await Remotes.Client.GetNamespace("Player").Get("UpdateSettings").CallServerAsync(key, value);
+		CustomRemotes.player.updateSettings.send(key, value);
 
 		this._data.set({
 			...this.data.get(),

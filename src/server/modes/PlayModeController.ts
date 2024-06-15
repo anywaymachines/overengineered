@@ -1,10 +1,9 @@
 import { Players } from "@rbxts/services";
 import { BuildMode } from "server/modes/BuildMode";
 import { RideMode } from "server/modes/RideMode";
-import { registerOnRemoteFunction } from "server/network/event/RemoteHandler";
-import { PlayerWatcher } from "shared/PlayerWatcher";
 import { HostedService } from "shared/GameHost";
-import { Remotes } from "shared/Remotes";
+import { PlayerWatcher } from "shared/PlayerWatcher";
+import { CustomRemotes } from "shared/Remotes";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 
@@ -27,18 +26,10 @@ export class PlayModeController extends HostedService {
 			build,
 		} as const satisfies Record<PlayModes, PlayModeBase>;
 
-		registerOnRemoteFunction("Ride", "SetPlayMode", this.changeModeForPlayer.bind(this));
+		CustomRemotes.modes.set.subscribe(this.changeModeForPlayer.bind(this));
+		Players.PlayerRemoving.Connect((plr) => delete this.playerModes[plr.UserId]);
 
-		Players.PlayerRemoving.Connect((plr) => {
-			delete this.playerModes[plr.UserId];
-		});
-
-		const setBuildMode = async (plr: Player, character: Model) => {
-			// on spawn
-			const response = await this.changeModeForPlayer(plr, "build");
-			if (!response.success) $err(response.message);
-
-			// on death
+		const initCharacterDeath = async (plr: Player, character: Model) => {
 			(character.WaitForChild("Humanoid") as Humanoid).Died.Once(async () => {
 				const prev = this.getPlayerMode(plr);
 				if (prev !== "build" && prev !== undefined) return;
@@ -49,9 +40,9 @@ export class PlayModeController extends HostedService {
 		};
 		PlayerWatcher.onJoin((plr) => {
 			const char = plr.Character;
-			if (char) setBuildMode(plr, char);
+			if (char) initCharacterDeath(plr, char);
 
-			plr.CharacterAdded.Connect((char) => setBuildMode(plr, char));
+			plr.CharacterAdded.Connect((char) => initCharacterDeath(plr, char));
 		});
 	}
 
@@ -59,7 +50,7 @@ export class PlayModeController extends HostedService {
 		return this.playerModes[player.UserId];
 	}
 
-	async changeModeForPlayer(player: Player, mode: PlayModes | undefined): Promise<Response> {
+	changeModeForPlayer(player: Player, mode: PlayModes | undefined): Response {
 		if (mode !== undefined && !PlayerUtils.isAlive(player)) {
 			return { success: false, message: "Player is not alive" };
 		}
@@ -91,7 +82,8 @@ export class PlayModeController extends HostedService {
 					return { success: true };
 				}
 
-				await Remotes.Server.GetNamespace("Ride").Get("SetPlayModeOnClient").CallPlayerAsync(player, mode);
+				const result = CustomRemotes.modes.setOnClient.send(player, mode);
+				if (!result.success) throw result.message;
 				break;
 			} catch (err) {
 				//

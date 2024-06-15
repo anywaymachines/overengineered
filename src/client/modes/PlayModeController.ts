@@ -3,10 +3,11 @@ import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Signals } from "client/event/Signals";
 import { Popup } from "client/gui/Popup";
 import { BuildingMode } from "client/modes/build/BuildingMode";
+import { requestMode } from "client/modes/PlayModeRequest";
 import { RideMode } from "client/modes/ride/RideMode";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { HostedService } from "shared/GameHost";
-import { Remotes } from "shared/Remotes";
+import { CustomRemotes } from "shared/Remotes";
 
 @injectable
 export class PlayModeController extends HostedService {
@@ -24,12 +25,14 @@ export class PlayModeController extends HostedService {
 		GuiService.SetGameplayPausedNotificationEnabled(false);
 		StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 
-		Remotes.Client.GetNamespace("Ride")
-			.Get("SetPlayModeOnClient")
-			.SetCallback((mode) => {
-				this.playmode.set(mode);
-				return { success: true };
-			});
+		CustomRemotes.modes.setOnClient.subscribe((mode) => {
+			if (mode) {
+				Signals.LOCAL_PLAY_MODE_CHANGED.Fire(mode);
+			}
+
+			this.playmode.set(mode);
+			return { success: true };
+		});
 
 		this.modes = {
 			build,
@@ -60,6 +63,11 @@ export class PlayModeController extends HostedService {
 		this.setMode(this.playmode.get(), undefined);
 
 		this.event.subscribe(Signals.LOCAL_PLAY_MODE_CHANGED, (mode) => this.callImmediateSetMode(mode));
+
+		this.onEnable(() => {
+			spawn(() => requestMode("build"));
+			Signals.PLAYER.SPAWN.Connect(() => spawn(() => requestMode("build")));
+		});
 	}
 
 	private callImmediateSetMode(mode: PlayModes) {

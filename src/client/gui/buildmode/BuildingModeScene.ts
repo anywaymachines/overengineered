@@ -39,10 +39,7 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 			true,
 		);
 
-		this.event.subscribe(runButton.activated, async () => {
-			await requestMode("ride");
-		});
-
+		this.event.subscribe(runButton.activated, () => requestMode("ride"));
 		this.event.subscribe(saveButton.activated, () => di.resolve<SavePopup>().show());
 		this.event.subscribe(settingsButton.activated, () => di.resolve<SettingsPopup>().show());
 	}
