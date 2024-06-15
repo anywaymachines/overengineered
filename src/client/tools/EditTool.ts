@@ -225,16 +225,17 @@ namespace Scene {
 	}
 }
 
-const placeToBlocksRequests = (blocks: readonly BlockModel[]): readonly PlaceBlockRequestWithUuid[] => {
-	return blocks.map((block): PlaceBlockRequestWithUuid => {
-		const data = BlockManager.getBlockDataByBlockModel(block);
+const placeToBlockRequest = (block: BlockModel): PlaceBlockRequestWithUuid => {
+	const data = BlockManager.getBlockDataByBlockModel(block);
 
-		return {
-			...data,
-			location: data.instance.GetPivot(),
-			["instance" as never]: undefined,
-		};
-	});
+	return {
+		...data,
+		location: data.instance.GetPivot(),
+		["instance" as never]: undefined,
+	};
+};
+const placeToBlocksRequests = (blocks: readonly BlockModel[]): readonly PlaceBlockRequestWithUuid[] => {
+	return blocks.map(placeToBlockRequest);
 };
 
 type PlaceBlockRequestWithUuid = PlaceBlockRequest & { readonly uuid: BlockUuid };
@@ -639,7 +640,7 @@ export class EditTool extends ToolBase {
 		this.selected.setRange([]);
 
 		const center = new CFrame(AABB.fromModels(selected).getCenter());
-		const mirrored = selected.map((s): ClientBuilding.EditBlockInfo => {
+		const mirrored = selected.map((s): PlaceBlockRequest => {
 			const mirrored = BuildingManager.getMirroredBlocks(
 				center,
 				{ id: BlockManager.manager.id.get(s), pos: s.GetPivot() },
@@ -653,13 +654,14 @@ export class EditTool extends ToolBase {
 			);
 
 			return {
-				instance: s,
-				origPosition: s.GetPivot(),
-				newPosition: mirrored[0].pos,
+				...placeToBlockRequest(s),
+				location: mirrored[0].pos,
+				id: mirrored[0].id,
 			};
 		});
 
-		ClientBuilding.editOperation.execute(this.targetPlot.get(), mirrored);
+		ClientBuilding.deleteOperation.execute(this.targetPlot.get(), selected);
+		ClientBuilding.placeOperation.execute(this.targetPlot.get(), mirrored);
 	}
 
 	getDisplayName(): string {
