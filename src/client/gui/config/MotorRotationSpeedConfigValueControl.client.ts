@@ -39,10 +39,10 @@ class ValueControl extends ConfigValueControl<GuiObject, Type> {
 			speed: {
 				displayName: "Max. speed",
 				type: "clampedNumber",
-				min: 0,
-				max: 50,
+				min: definition.default,
+				max: definition.maxSpeed,
 				step: 0.01,
-				default: 15 as number,
+				default: definition.default,
 				config: 0 as number,
 			},
 			switchmode: {

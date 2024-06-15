@@ -19,7 +19,7 @@ import { SlotsMeta } from "shared/SlotsMeta";
 import type { Machine } from "client/blocks/Machine";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
-import type { PlayerDataStoragee } from "client/PlayerDataStorage";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 export type ActionBarControlDefinition = GuiObject & {
 	readonly Stop: GuiButton;
@@ -92,7 +92,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 
 	constructor(
 		gui: RideModeControlsDefinition,
-		private readonly playerData: PlayerDataStoragee,
+		private readonly playerData: PlayerDataStorage,
 	) {
 		super(gui);
 
@@ -320,7 +320,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 	private readonly infoTemplate;
 	private readonly infoTextTemplate;
 
-	constructor(gui: RideModeSceneDefinition, playerData: PlayerDataStoragee) {
+	constructor(gui: RideModeSceneDefinition, playerData: PlayerDataStorage) {
 		super(gui);
 
 		this.controls = new RideModeControls(this.gui.Controls, playerData);

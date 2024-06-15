@@ -3,12 +3,12 @@ import { Component } from "shared/component/Component";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 import { HostedService } from "shared/GameHost";
 import { PlayerWatcher } from "shared/PlayerWatcher";
-import type { PlayerDataStoragee } from "client/PlayerDataStorage";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 @injectable
 export class BeaconController extends HostedService {
-	constructor(@inject plot: SharedPlot, @inject playerData: PlayerDataStoragee) {
+	constructor(@inject plot: SharedPlot, @inject playerData: PlayerDataStorage) {
 		super();
 
 		const plotBeacon = this.initializePlotBeacon(plot);

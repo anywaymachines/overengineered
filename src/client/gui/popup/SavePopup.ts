@@ -11,7 +11,7 @@ import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
 import { Serializer } from "shared/Serializer";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
-import type { PlayerDataStoragee } from "client/PlayerDataStorage";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 const NOT_EDITABLE_IMAGE = "rbxassetid://15428855911";
 const EDITABLE_IMAGE = "rbxassetid://17320900740";
@@ -46,7 +46,7 @@ class SaveItem extends Control<SlotRecordDefinition> {
 
 	constructor(
 		gui: SlotRecordDefinition,
-		playerData: PlayerDataStoragee,
+		playerData: PlayerDataStorage,
 		meta: SlotMeta,
 		from: SlotSource,
 		wasSelected: boolean,
@@ -180,7 +180,7 @@ class SaveSlots extends Control<SaveSlotsDefinition> {
 
 	private readonly slots;
 
-	constructor(gui: SaveSlotsDefinition, playerData: PlayerDataStoragee) {
+	constructor(gui: SaveSlotsDefinition, playerData: PlayerDataStorage) {
 		super(gui);
 
 		const alreadySelected = SaveSlots.staticSelected;
@@ -268,7 +268,7 @@ export class SavePopup extends Popup<SlotsPopupDefinition> {
 		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
 	}
 
-	constructor(gui: SlotsPopupDefinition, @inject playerData: PlayerDataStoragee) {
+	constructor(gui: SlotsPopupDefinition, @inject playerData: PlayerDataStorage) {
 		super(gui);
 
 		const slots = this.add(new SaveSlots(this.gui.Content, playerData));

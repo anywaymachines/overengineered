@@ -3,7 +3,7 @@ import { Gui } from "client/gui/Gui";
 import { MultiPlayerConfigControl } from "client/gui/playerConfig/MultiConfigControl";
 import { Popup } from "client/gui/Popup";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
-import type { PlayerDataStoragee } from "client/PlayerDataStorage";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
 	readonly HeadingLabel: TextLabel;
@@ -31,7 +31,7 @@ export class SettingsPopup extends Popup<SettingsPopupDefinition> {
 
 	private readonly config;
 
-	constructor(gui: SettingsPopupDefinition, @inject playerData: PlayerDataStoragee, @inject di: DIContainer) {
+	constructor(gui: SettingsPopupDefinition, @inject playerData: PlayerDataStorage, @inject di: DIContainer) {
 		super(gui);
 
 		this.config = this.add(

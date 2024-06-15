@@ -179,7 +179,7 @@ const motorblock = {
 				speed: 15 as number,
 				switchmode: false as boolean,
 			},
-			maxSpeed: 50 as number,
+			maxSpeed: 150 as number,
 		},
 	},
 	output: {},

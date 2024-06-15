@@ -1,7 +1,7 @@
 import { StarterGui, Workspace } from "@rbxts/services";
 import { MusicPlaylist } from "client/controller/sound/MusicPlaylist";
 import { HostedService } from "shared/GameHost";
-import type { PlayerDataStoragee } from "client/PlayerDataStorage";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 @injectable
 export class MusicController extends HostedService {
@@ -20,7 +20,7 @@ export class MusicController extends HostedService {
 		15,
 	);
 
-	constructor(@inject playerData: PlayerDataStoragee) {
+	constructor(@inject playerData: PlayerDataStorage) {
 		super();
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => {

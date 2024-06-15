@@ -4,7 +4,7 @@ import { Gui } from "client/gui/Gui";
 import { RideModeScene } from "client/gui/ridemode/RideModeScene";
 import { PlayMode } from "client/modes/PlayMode";
 import type { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
-import type { PlayerDataStoragee } from "client/PlayerDataStorage";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 @injectable
@@ -14,7 +14,7 @@ export class RideMode extends PlayMode {
 
 	constructor(
 		@inject private readonly plot: SharedPlot,
-		@inject playerData: PlayerDataStoragee,
+		@inject playerData: PlayerDataStorage,
 		@inject private readonly di: DIContainer,
 	) {
 		super();

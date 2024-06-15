@@ -1,10 +1,10 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import { HostedService } from "shared/GameHost";
-import type { PlayerDataStoragee } from "client/PlayerDataStorage";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 @injectable
 export class CameraController extends HostedService {
-	constructor(@inject playerData: PlayerDataStoragee) {
+	constructor(@inject playerData: PlayerDataStorage) {
 		super();
 
 		this.event.subscribeObservable(

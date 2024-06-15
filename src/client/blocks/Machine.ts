@@ -5,7 +5,7 @@ import { SharedMachine } from "shared/block/SharedMachine";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { Config } from "shared/config/Config";
 import type { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
-import type { PlayerDataStoragee } from "client/PlayerDataStorage";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import type { ImpactController } from "shared/block/impact/ImpactController";
@@ -19,7 +19,7 @@ export class Machine extends SharedMachine {
 
 	constructor(
 		@inject blockRegistry: BlockRegistry,
-		@inject private readonly playerData: PlayerDataStoragee,
+		@inject private readonly playerData: PlayerDataStorage,
 	) {
 		super(blockRegistry);
 		this.add(this.logicInputs);

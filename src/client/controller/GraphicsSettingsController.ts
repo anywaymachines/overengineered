@@ -1,12 +1,12 @@
 import { Players } from "@rbxts/services";
 import { HostedService } from "shared/GameHost";
 import { PartUtils } from "shared/utils/PartUtils";
-import type { PlayerDataStoragee } from "client/PlayerDataStorage";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { SharedPlots } from "shared/building/SharedPlots";
 
 @injectable
 export class GraphicsSettingsController extends HostedService {
-	constructor(@inject plots: SharedPlots, @inject playerData: PlayerDataStoragee) {
+	constructor(@inject plots: SharedPlots, @inject playerData: PlayerDataStorage) {
 		super();
 
 		const graphics = playerData.config.createBased((x) => x.graphics);

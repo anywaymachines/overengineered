@@ -6,7 +6,7 @@ import { TriangleChunkRenderer } from "client/terrain/TriangleChunkRenderer";
 import { WaterTerrainChunkRenderer } from "client/terrain/WaterTerrainChunkRenderer";
 import { rootComponents } from "client/test/RootComponents";
 import { HostedService } from "shared/GameHost";
-import type { PlayerDataStoragee } from "client/PlayerDataStorage";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { ChunkRenderer } from "client/terrain/ChunkLoader";
 
 const multirender = (): ChunkRenderer<Instance> => {
@@ -45,7 +45,7 @@ const multirender = (): ChunkRenderer<Instance> => {
 
 @injectable
 export class TerrainController extends HostedService {
-	constructor(@inject playerData: PlayerDataStoragee) {
+	constructor(@inject playerData: PlayerDataStorage) {
 		super();
 
 		let current: ChunkLoader | undefined;

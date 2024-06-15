@@ -23,12 +23,12 @@ import { TutorialBasics } from "client/tutorial/TutorialBasics";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { HostedService } from "shared/GameHost";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
-import type { PlayerDataStoragee } from "client/PlayerDataStorage";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 namespace Startup {
 	@injectable
 	class RunTutorialIfNoSlots extends HostedService {
-		constructor(@inject tutorial: Tutorial, @inject playerData: PlayerDataStoragee) {
+		constructor(@inject tutorial: Tutorial, @inject playerData: PlayerDataStorage) {
 			super();
 
 			this.onEnable(() => {
