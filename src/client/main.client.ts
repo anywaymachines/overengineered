@@ -31,7 +31,7 @@ import { InputTypeChangeEvent } from "client/event/InputTypeChangeEvent";
 import { Gui } from "client/gui/Gui";
 import { LogControl } from "client/gui/static/LogControl";
 import { RemoteEvents } from "shared/RemoteEvents";
-import { RunService } from "@rbxts/services";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 
 LoadingController.show("Loading the game");
 
@@ -46,7 +46,11 @@ ServerRestartController.initialize();
 
 SoundController.initialize();
 
-Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
+const updated = DateTime.fromUnixTimestamp($compileTime()).FormatUniversalTime("DDMMYY_HHmm", "en-us");
+Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text =
+	GameDefinitions.PRODUCTION_PLACE_ID === game.PlaceId
+		? GameDefinitions.VERSION
+		: `v${game.PlaceVersion} | ${updated}`;
 
 LoadingController.hide();
 $log("Client loaded.");
