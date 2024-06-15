@@ -222,7 +222,9 @@ export namespace BuildingManager {
 				);
 			}
 		}
-		ret.delete(origPos);
+		if (ret.size() !== 1) {
+			ret.delete(origPos);
+		}
 
 		return ret.values();
 	}
