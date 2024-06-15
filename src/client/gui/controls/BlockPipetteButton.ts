@@ -49,7 +49,7 @@ export class BlockPipetteButton extends ButtonControl {
 				stop = undefined;
 			};
 
-			eh.subscribe(UserInputService.InputBegan, (input, gameProcessed) => {
+			eh.subscribe(UserInputService.InputEnded, (input, gameProcessed) => {
 				if (gameProcessed) return;
 				if (input.UserInputType !== Enum.UserInputType.MouseButton1) return;
 
