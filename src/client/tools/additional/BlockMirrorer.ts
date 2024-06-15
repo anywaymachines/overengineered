@@ -60,7 +60,7 @@ export class BlockMirrorer extends Component {
 				{ id: block.id, pos: block.model.GetPivot() },
 				mode,
 				this.blockRegistry,
-			);
+			).filter((m) => m.pos.Position !== block.model.GetPivot().Position);
 
 			let tracked = this.tracking.get(block.model);
 			if (mirrored.size() === 0) {
