@@ -13,6 +13,7 @@ import { MultiBlockHighlightedSelector } from "client/tools/highlighters/MultiBl
 import { SelectedBlocksHighlighter } from "client/tools/highlighters/SelectedBlocksHighlighter";
 import { ToolBase } from "client/tools/ToolBase";
 import { BlockManager } from "shared/building/BlockManager";
+import { BuildingManager } from "shared/building/BuildingManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ComponentDisabler } from "shared/component/ComponentDisabler";
@@ -21,6 +22,7 @@ import { Element } from "shared/Element";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { ObservableValue } from "shared/event/ObservableValue";
+import { AABB } from "shared/fixes/AABB";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
@@ -81,6 +83,11 @@ namespace Scene {
 			readonly DeleteButton: GuiButton;
 			readonly PaintButton: GuiButton;
 		};
+		readonly Bottom2: GuiObject & {
+			readonly MirrorXButton: GuiButton;
+			readonly MirrorYButton: GuiButton;
+			readonly MirrorZButton: GuiButton;
+		};
 	}
 
 	export class EditToolScene extends Control<EditToolSceneDefinition> {
@@ -120,6 +127,15 @@ namespace Scene {
 			const paste = this.add(new ButtonControl(this.gui.Bottom.PasteButton, () => tool.toggleMode("Paste")));
 			const paint = this.add(new ButtonControl(this.gui.Bottom.PaintButton, () => tool.toggleMode("Paint")));
 			const del = this.add(new ButtonControl(this.gui.Bottom.DeleteButton, () => tool.deleteSelectedBlocks()));
+			const mirx = this.add(
+				new ButtonControl(this.gui.Bottom2.MirrorXButton, () => tool.mirrorSelectedBlocks("x")),
+			);
+			const miry = this.add(
+				new ButtonControl(this.gui.Bottom2.MirrorYButton, () => tool.mirrorSelectedBlocks("y")),
+			);
+			const mirz = this.add(
+				new ButtonControl(this.gui.Bottom2.MirrorZButton, () => tool.mirrorSelectedBlocks("z")),
+			);
 
 			const multiValueSetter = <T>(instance: T, func: (value: boolean) => void) => {
 				const values: boolean[] = [];
@@ -134,23 +150,19 @@ namespace Scene {
 			};
 			type mvs = ReturnType<typeof multiValueSetter<Control>>;
 
-			const movemvs = multiValueSetter(move, (v) => move.setInteractable(v));
-			const rotatemvs = multiValueSetter(rotate, (v) => rotate.setInteractable(v));
-			const copymvs = multiValueSetter(copy, (v) => copy.setInteractable(v));
-			const pastemvs = multiValueSetter(paste, (v) => paste.setInteractable(v));
-			const paintmvs = multiValueSetter(paint, (v) => paint.setInteractable(v));
-			const delmvs = multiValueSetter(del, (v) => del.setInteractable(v));
-
 			const buttons: Readonly<Record<EditToolButtons, mvs>> = {
 				// edit tool modes
-				Move: movemvs,
-				Rotate: rotatemvs,
-				Paste: pastemvs,
-				Paint: paintmvs,
+				Move: multiValueSetter(move, (v) => move.setInteractable(v)),
+				Rotate: multiValueSetter(rotate, (v) => rotate.setInteractable(v)),
+				Paste: multiValueSetter(paste, (v) => paste.setInteractable(v)),
+				Paint: multiValueSetter(paint, (v) => paint.setInteractable(v)),
 
 				// other buttons
-				Copy: copymvs,
-				Delete: delmvs,
+				Copy: multiValueSetter(copy, (v) => copy.setInteractable(v)),
+				Delete: multiValueSetter(del, (v) => del.setInteractable(v)),
+				MirrorX: multiValueSetter(mirx, (v) => mirx.setInteractable(v)),
+				MirrorY: multiValueSetter(miry, (v) => miry.setInteractable(v)),
+				MirrorZ: multiValueSetter(mirz, (v) => mirz.setInteractable(v)),
 			};
 			this.event.subscribeObservable(
 				tool.enabledModes.enabled,
@@ -508,7 +520,7 @@ const canBeSelected = (tool: EditTool, mode: EditToolButtons): boolean => {
 };
 
 export type EditToolMode = "Move" | "Paste" | "Rotate" | "Paint";
-export type EditToolButtons = EditToolMode | "Copy" | "Delete";
+export type EditToolButtons = EditToolMode | "Copy" | "Delete" | "MirrorX" | "MirrorY" | "MirrorZ";
 
 @injectable
 export class EditTool extends ToolBase {
@@ -519,6 +531,9 @@ export class EditTool extends ToolBase {
 		"Paste",
 		"Paint",
 		"Delete",
+		"MirrorX",
+		"MirrorY",
+		"MirrorZ",
 	]);
 
 	private readonly _selectedMode = new ObservableValue<EditToolMode | undefined>(undefined);
@@ -531,6 +546,7 @@ export class EditTool extends ToolBase {
 
 	constructor(
 		@inject readonly mode: BuildingMode,
+		@inject private readonly blockRegistry: BlockRegistry,
 		@inject di: DIContainer,
 	) {
 		super(mode);
@@ -617,6 +633,33 @@ export class EditTool extends ToolBase {
 		this.selected.setRange([]);
 
 		await ClientBuilding.deleteOperation.execute(this.targetPlot.get(), selected);
+	}
+	mirrorSelectedBlocks(axis: "x" | "y" | "z") {
+		const selected = [...this.selected.get()];
+		this.selected.setRange([]);
+
+		const center = new CFrame(AABB.fromModels(selected).getCenter());
+		const mirrored = selected.map((s): ClientBuilding.EditBlockInfo => {
+			const mirrored = BuildingManager.getMirroredBlocks(
+				center,
+				{ id: BlockManager.manager.id.get(s), pos: s.GetPivot() },
+				{
+					x: axis === "x" ? 0 : undefined,
+					y: axis === "y" ? 0 : undefined,
+					z: axis === "z" ? 0 : undefined,
+				},
+				this.blockRegistry,
+				false,
+			);
+
+			return {
+				instance: s,
+				origPosition: s.GetPivot(),
+				newPosition: mirrored[0].pos,
+			};
+		});
+
+		ClientBuilding.editOperation.execute(this.targetPlot.get(), mirrored);
 	}
 
 	getDisplayName(): string {

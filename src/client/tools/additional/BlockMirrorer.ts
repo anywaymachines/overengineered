@@ -56,7 +56,7 @@ export class BlockMirrorer extends Component {
 
 		for (const block of blocks) {
 			const mirrored = BuildingManager.getMirroredBlocks(
-				plot,
+				plot.BuildingArea.GetPivot(),
 				{ id: block.id, pos: block.model.GetPivot() },
 				mode,
 				this.blockRegistry,

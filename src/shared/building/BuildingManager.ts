@@ -114,10 +114,11 @@ export namespace BuildingManager {
 		readonly pos: CFrame;
 	};
 	export function getMirroredBlocks(
-		plot: PlotModel,
+		center: CFrame,
 		origBlock: MirroredBlock,
 		mode: MirrorMode,
 		blockRegistry: BlockRegistry,
+		filterSamePositions = false,
 	): readonly MirroredBlock[] {
 		const method = blockRegistry.blocks.get(origBlock.id)?.mirrorBehaviour ?? "normal";
 		const [xAxis, yAxis, zAxis] = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis];
@@ -199,8 +200,6 @@ export namespace BuildingManager {
 			};
 		};
 
-		const plotframe = plot.BuildingArea.GetPivot();
-
 		const axes: ["x" | "y" | "z", CFrame][] = [];
 		if (mode.y !== undefined) {
 			axes.push(["y", CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(new Vector3(0, mode.y, 0))]);
@@ -216,8 +215,11 @@ export namespace BuildingManager {
 		const ret = new Map<Vector3, MirroredBlock>([[origPos, origBlock]]);
 		for (const [axe, axis] of axes) {
 			for (const [, frame] of [...ret]) {
-				const reflected = reflect(frame, axe, plotframe.ToWorldSpace(axis));
-				ret.set(VectorUtils.roundVector3(reflected.pos.Position), reflected);
+				const reflected = reflect(frame, axe, center.ToWorldSpace(axis));
+				ret.set(
+					filterSamePositions ? VectorUtils.roundVector3(reflected.pos.Position) : reflected.pos.Position,
+					reflected,
+				);
 			}
 		}
 		ret.delete(origPos);
