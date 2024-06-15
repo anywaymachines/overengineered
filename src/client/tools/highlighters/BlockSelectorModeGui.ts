@@ -23,15 +23,15 @@ export class BlockSelectorModeGui extends Control {
 				const single = this.add(new TextButtonControl(gui.SingleSelection, () => mode.set("single")));
 				const assembly = this.add(new TextButtonControl(gui.AssemblySelection, () => mode.set("assembly")));
 				const machine = this.add(new TextButtonControl(gui.MachineSelection, () => mode.set("machine")));
+				const buttons: { readonly [k in HoveredBlocksSelectorMode]: TextButtonControl } = {
+					single,
+					assembly,
+					machine,
+				};
 
 				this.event.subscribeObservable(
 					mode,
 					(active) => {
-						const buttons: { readonly [k in HoveredBlocksSelectorMode]: TextButtonControl } = {
-							single,
-							assembly,
-							machine,
-						};
 						for (const [name, button] of pairs(buttons)) {
 							TransformService.run(button.instance, (builder, instance) =>
 								builder
@@ -54,7 +54,7 @@ export class BlockSelectorModeGui extends Control {
 						builder.transform("AnchorPoint", new Vector2(buttonsAreActive ? 1 : 0, 0.5), animationProps),
 					);
 
-					for (const control of [single, assembly]) {
+					for (const [, control] of pairs(buttons)) {
 						const button = control.instance;
 
 						button.AutoButtonColor = button.Active = buttonsAreActive;
