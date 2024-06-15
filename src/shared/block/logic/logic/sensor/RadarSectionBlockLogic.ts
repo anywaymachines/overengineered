@@ -9,13 +9,12 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 	private readonly allTouchedBlocks: Set<BasePart> = new Set<BasePart>();
 
 	private getDistanceTo(part: BasePart) {
-		if (!this.closestDetectedPart) return -1;
+		//if (!this.closestDetectedPart) return -1; //it was here for a reason... Can't remember why tho
 		if (!part.IsDescendantOf(Workspace)) return;
-		return this.instance.GetPivot().Position.sub(part.Position).Magnitude;
+		return RobloxUnit.Studs_To_Meters(this.instance.GetPivot().Position.sub(part.Position).Magnitude);
 	}
 
 	private getClosestPart() {
-		const pos = this.block.instance.GetPivot().Position;
 		let smallestDistance: number | undefined;
 		let closestPart: BasePart | undefined;
 		for (const bp of this.allTouchedBlocks) {
@@ -35,28 +34,21 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		super.tick(tick);
 
 		if (this.closestDetectedPart !== undefined)
-			this.output.distance.set(RobloxUnit.Studs_To_Meters(this.getDistanceTo(this.closestDetectedPart) ?? -1));
+			this.output.distance.set(this.getDistanceTo(this.closestDetectedPart) ?? -1);
 	}
 
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.radarsection);
 
-		const maxDist = RobloxUnit.Meters_To_Studs(blockConfigRegistry.radarsection.input.maxDistance.max);
+		const view = this.instance.WaitForChild("RadarView");
+		const maxDist = blockConfigRegistry.radarsection.input.maxDistance.max;
 		const halvedMaxDist = maxDist / 2;
 
-		const view = this.instance.WaitForChild("RadarView");
-		const doNotReactToUnion = this.instance.WaitForChild("Union");
 		if (!view) return;
 		if (!view.IsA("BasePart")) return;
 
-		view.Size = new Vector3(
-			this.input.detectionSize.get(),
-			RobloxUnit.Meters_To_Studs(this.input.maxDistance.get()),
-			this.input.detectionSize.get(),
-		);
-
 		const updateDistance = (detectionSize: number) => {
-			const md = RobloxUnit.Meters_To_Studs(this.input.maxDistance.get());
+			const md = this.input.maxDistance.get();
 			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (md + halvedMaxDist)));
 			view.Size = new Vector3(ds, view.Size.Y, ds);
 		};
@@ -68,8 +60,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		this.event.subscribeObservable(this.input.detectionSize, updateDistance);
 
 		this.event.subscribeObservable(this.input.maxDistance, (maxDistance) => {
-			const halfDistance = RobloxUnit.Meters_To_Studs(maxDistance) / 2;
-			view.Size = new Vector3(view.Size.X, halfDistance, view.Size.Z);
+			view.Size = new Vector3(view.Size.X, RobloxUnit.Meters_To_Studs(maxDistance), view.Size.Z);
 			updateDistance(this.input.detectionSize.get());
 		});
 
@@ -91,11 +82,11 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 
 		this.event.subscribe(view.Touched, (part) => {
 			if (part.CollisionGroup !== "Blocks") return;
-			if (part === doNotReactToUnion) return;
 			if (part.HasTag("RADARVIEW")) return;
 			if (part.IsDescendantOf(this.instance)) return;
 
 			const d1 = this.getDistanceTo(part);
+			print(d1, this.input.minimalDistance.get());
 			if (d1 !== undefined && d1 < this.input.minimalDistance.get()) return;
 			this.allTouchedBlocks.add(part);
 			if (!this.closestDetectedPart) return (this.closestDetectedPart = part);

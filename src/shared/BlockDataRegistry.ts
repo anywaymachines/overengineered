@@ -45,6 +45,10 @@ const logic = {
 			description: "Returns a previous value plus step value.",
 			autoWeldShape: "cube",
 		},
+		impulsegenerator: {
+			name: "Impulse Generator",
+			description: "A signal generator. Generates meander (a fancy way of saying square-shaped signal).",
+		},
 		delayblock: {
 			name: "Delay Block",
 			description: "Returns same value you gave it but with delay",

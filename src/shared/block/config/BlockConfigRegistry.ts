@@ -1163,6 +1163,37 @@ const counter = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const impulsegenerator = {
+	input: {
+		delay: {
+			displayName: "Delay (ticks)",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+		isInverted: {
+			displayName: "Invert",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+		},
+		isSinglePulse: {
+			displayName: "Single Pulse",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+		},
+	},
+	output: {
+		value: {
+			displayName: "Output",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const radiotransmitter = {
 	input: {
 		value: connectors.any("Input", "1"),
@@ -1235,7 +1266,7 @@ const radarsection = {
 			config: 0 as number,
 			min: 0,
 			max: 5000,
-			step: 0,
+			step: 0.1,
 		},
 	},
 	output: {
@@ -1312,6 +1343,7 @@ export const blockConfigRegistry = {
 
 	delayblock: delayBlock,
 
+	impulsegenerator,
 	counter,
 	logicmemory,
 	stackmemory,

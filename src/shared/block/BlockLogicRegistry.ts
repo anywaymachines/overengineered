@@ -16,6 +16,7 @@ import { StackMemoryBlockLogic } from "shared/block/logic/logic/memory/StackMemo
 import { BufferBlockLogic } from "shared/block/logic/logic/other/BufferBlockLogic";
 import { CounterBlockLogic } from "shared/block/logic/logic/other/CounterBlockLogic";
 import { DelayBlockLogic } from "shared/block/logic/logic/other/DelayBlockLogic";
+import { ImpulseGeneratorBlockLogic } from "shared/block/logic/logic/other/ImpulseGeneratorBlockLogic";
 import { AltimeterBlockLogic } from "shared/block/logic/logic/sensor/AltimeterBlockLogic";
 import { AngleSensorBlockLogic } from "shared/block/logic/logic/sensor/AngleSensorBlockLogic";
 import { GravitySensorBlockLogic } from "shared/block/logic/logic/sensor/GravitySensorBlockLogic";
@@ -99,6 +100,7 @@ const logicRegistry = {
 	readonlymemory: ReadOnlyMemoryBlockLogic,
 
 	buffer: BufferBlockLogic,
+	impulsegenerator: ImpulseGeneratorBlockLogic,
 
 	bytemaker: ByteMakerBlockLogic,
 	bytesplitter: ByteSplitterBlockLogic,
