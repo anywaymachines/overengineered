@@ -111,7 +111,7 @@ const getMouseTargetBlockPositionV2 = (
 	const globalMouseHitPos = mouseHit.PointToWorldSpace(Vector3.zero);
 	const normal = target.CFrame.Rotation.VectorToWorldSpace(Vector3.FromNormalId(mouseSurface));
 
-	DebugLog.category("BuildTool");
+	DebugLog.startCategory("BuildTool");
 	DebugLog.named("Target", target);
 	DebugLog.named("Hit", mouseHit);
 	DebugLog.named("Normal", `${mouseSurface} ${normal}`);

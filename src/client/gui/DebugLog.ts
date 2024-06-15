@@ -5,6 +5,7 @@ import { Gui } from "client/gui/Gui";
 import { ComponentChildren } from "shared/component/ComponentChildren";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
 import { Element } from "shared/Element";
+import { Objects } from "shared/fixes/objects";
 
 class CategoryControl extends Control {
 	readonly unnamed = new ComponentChildren<LabelControl>(this);
@@ -67,7 +68,15 @@ export namespace DebugLog {
 		return new CategoryControl(gui);
 	}
 
-	export function category(name: defined, disable = false) {
+	export function category(name: defined, props: object & Record<string, unknown>, disabled = false) {
+		if (disabled) return;
+
+		startCategory(name, disabled);
+		multiNamed(props);
+		endCategory();
+	}
+
+	export function startCategory(name: defined, disable = false) {
 		if (disabled) return;
 
 		if (disable) {
@@ -104,6 +113,13 @@ export namespace DebugLog {
 		return c;
 	}
 
+	export function multiNamed(props: object & Record<string, unknown>) {
+		if (disabled) return;
+
+		for (const [name, value] of pairs(props)) {
+			named(name, value);
+		}
+	}
 	export function named(name: defined, text: defined) {
 		if (disabled) return;
 
@@ -116,7 +132,18 @@ export namespace DebugLog {
 			category.named.add(name, control);
 		}
 
-		control.instance.Text = `${text} [${name}]`;
+		const pretty = (value: unknown): string => {
+			if (typeIs(value, "string")) return value;
+
+			if (typeIs(value, "table")) {
+				return `{ ${Objects.entriesArray(value)
+					.map((e) => `${e[0]}: ${pretty(e[1])}`)
+					.join()} }`;
+			}
+
+			return tostring(value);
+		};
+		control.instance.Text = `${pretty(text)} [${name}]`;
 	}
 	export function log(text: string) {
 		if (disabled) return;
@@ -131,3 +158,4 @@ export namespace DebugLog {
 		task.delay(1, () => control.destroy());
 	}
 }
+

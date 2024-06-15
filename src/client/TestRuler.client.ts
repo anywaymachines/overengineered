@@ -158,7 +158,7 @@ const t2 = (basePart: BasePart) => {
 			return sideDirection.Dot(lookAt.LookVector);
 		};
 
-		DebugLog.category("Dot products");
+		DebugLog.startCategory("Dot products");
 		DebugLog.named(axis.Name, getDotProduct(1));
 		DebugLog.named(axis.Name, getDotProduct(-1));
 		DebugLog.endCategory();
@@ -194,7 +194,7 @@ const t2 = (basePart: BasePart) => {
 			while (true as boolean) {
 				task.wait();
 
-				DebugLog.category("RULER TEST", true);
+				DebugLog.startCategory("RULER TEST", true);
 				const visible = getVisibleSide(basePart, axis, size);
 				DebugLog.named(axis.Name, visible);
 				DebugLog.endCategory();
