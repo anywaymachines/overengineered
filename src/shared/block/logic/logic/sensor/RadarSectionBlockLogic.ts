@@ -86,7 +86,6 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 			if (part.IsDescendantOf(this.instance)) return;
 
 			const d1 = this.getDistanceTo(part);
-			print(d1, this.input.minimalDistance.get());
 			if (d1 !== undefined && d1 < this.input.minimalDistance.get()) return;
 			this.allTouchedBlocks.add(part);
 			if (!this.closestDetectedPart) return (this.closestDetectedPart = part);
