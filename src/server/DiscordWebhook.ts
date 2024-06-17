@@ -12,6 +12,10 @@ type Author = {
 	icon_url?: string;
 };
 
+type Footer = {
+	text: string;
+};
+
 type Embed = {
 	title?: string;
 	description?: string;
@@ -20,11 +24,12 @@ type Embed = {
 	author?: Author;
 	timestamp?: string;
 	fields?: readonly Field[];
+	footer?: Footer;
 };
 
 type Message = {
 	content?: string;
-	embeds: readonly Embed[];
+	embeds?: readonly Embed[];
 	username?: string;
 };
 
@@ -33,17 +38,6 @@ export namespace DiscordWebhook {
 		"https://webhook.lewisakura.moe/api/webhooks/1197990614671822999/kTKPwZN1p9sJQYLw7L4-jO3Au2LH6ffXxtJjNoLTZljuScGTpaVr9-hgVmGoq08IcfAV";
 
 	export function sendMessage(message: Message) {
-		message = {
-			...message,
-			embeds: message.embeds.map((e) => ({
-				...e,
-				author: e.author ?? {
-					name: "Click to join",
-					url: `https://www.roblox.com/games/start?placeId=16302670534&launchData=${game.PlaceId}/${game.JobId}`,
-				},
-			})),
-		};
-
 		request(HttpService.JSONEncode(message));
 	}
 
