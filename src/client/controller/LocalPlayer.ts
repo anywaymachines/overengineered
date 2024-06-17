@@ -6,6 +6,7 @@ import type { PlayerModule } from "client/types/PlayerModule";
 
 export namespace LocalPlayer {
 	export const mouse = Players.LocalPlayer.GetMouse();
+	export const player = Players.LocalPlayer;
 	export const character = new ObservableValue<Model | undefined>(undefined);
 	export const humanoid = new ObservableValue<Humanoid | undefined>(undefined);
 	export const rootPart = new ObservableValue<BasePart | undefined>(undefined);

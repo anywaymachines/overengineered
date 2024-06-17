@@ -22,4 +22,21 @@ export namespace PlayerWatcher {
 	export function onQuit(func: (player: Player) => void) {
 		return Players.PlayerRemoving.Connect(func);
 	}
+
+	/** Susbcribes on a player join event, and immediately runs on for existing player */
+	export function onCharacterAdded(func: (character: Model, player: Player) => void) {
+		return onJoin((player) => {
+			player.CharacterAdded.Connect((char) => func(char, player));
+			if (player.Character) {
+				func(player.Character, player);
+			}
+		});
+	}
+
+	/** Susbcribes on a player join event, and immediately runs on for existing player */
+	export function onHumanoidAdded(func: (humanoid: Humanoid, character: Model, player: Player) => void) {
+		return onCharacterAdded((character, player) =>
+			func(character.WaitForChild("Humanoid") as Humanoid, character, player),
+		);
+	}
 }

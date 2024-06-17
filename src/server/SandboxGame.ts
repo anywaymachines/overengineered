@@ -12,6 +12,7 @@ import { PlayModeController as PlayModeController } from "server/modes/PlayModeC
 import { UnreliableRemoteController } from "server/network/event/UnreliableRemoteHandler";
 import { PlayerDataController } from "server/PlayerDataController";
 import { ServerPlots } from "server/plots/ServerPlots";
+import { RagdollController } from "server/RagdollController";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
@@ -40,6 +41,7 @@ export namespace SandboxGame {
 		builder.services.registerService(ServerBuildingRequestController);
 		builder.services.registerService(ServerBlockLogicController);
 		builder.services.registerService(UnreliableRemoteController);
+		RagdollController.initialize(builder, (o) => o.ragdollWhenSpeedQuicklyChanges(40));
 
 		BadgeController.initializeIfProd(builder);
 	}

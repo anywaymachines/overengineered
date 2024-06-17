@@ -9,6 +9,7 @@ import { GraphicsSettingsController } from "client/controller/GraphicsSettingsCo
 import { LoadingController } from "client/controller/LoadingController";
 import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { OtherPlayersController } from "client/controller/OtherPlayersController";
+import { RagdollController } from "client/controller/RagdollController";
 import { MusicController } from "client/controller/sound/MusicController";
 import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
@@ -65,6 +66,7 @@ export namespace SandboxGame {
 		LocalPlayerController.initializeSprintLogic(builder, RunService.IsStudio() ? 200 : 60);
 		LocalPlayerController.initializeCameraMaxZoomDistance(builder, 512);
 		OtherPlayersController.initializeMassless(builder);
+		builder.services.registerService(RagdollController);
 
 		LoadingController.show("Waiting for server");
 		while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {

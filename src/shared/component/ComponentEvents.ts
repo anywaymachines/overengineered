@@ -57,6 +57,11 @@ export class ComponentEvents {
 		if (this.state.isDestroyed()) return;
 		this.sub(this.events, [signal, callback]);
 	}
+	/** Register an event */
+	subscribeRegistration(func: () => { Disconnect(): void }): void {
+		if (this.state.isDestroyed()) return;
+		this.onEnable(() => this.eventHandler.register(func()));
+	}
 
 	/** Register an event and immediately call the callback function */
 	subscribeImmediately<TArgs extends unknown[]>(signal: ReadonlyArgsSignal<TArgs>, callback: () => void): void {
