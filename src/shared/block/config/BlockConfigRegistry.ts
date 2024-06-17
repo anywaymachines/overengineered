@@ -450,7 +450,7 @@ const rope = {
 		length: {
 			displayName: "Length",
 			type: "clampedNumber",
-			min: 2,
+			min: 1,
 			max: 50,
 			step: 0.01,
 			default: 15 as number,
