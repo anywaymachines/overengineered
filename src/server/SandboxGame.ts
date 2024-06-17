@@ -41,7 +41,7 @@ export namespace SandboxGame {
 		builder.services.registerService(ServerBuildingRequestController);
 		builder.services.registerService(ServerBlockLogicController);
 		builder.services.registerService(UnreliableRemoteController);
-		RagdollController.initialize(builder, (o) => o.ragdollWhenSpeedQuicklyChanges(40));
+		builder.services.registerService(RagdollController);
 
 		BadgeController.initializeIfProd(builder);
 	}

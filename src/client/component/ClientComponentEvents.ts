@@ -6,16 +6,20 @@ import type { EventHandler } from "shared/event/EventHandler";
 export class ClientComponentEvents extends ComponentEvents {
 	readonly inputHandler = new InputHandler();
 
-	constructor(state: IComponent) {
+	constructor(state: IComponent | (IReadonlyDestroyableComponent & IReadonlyEnableableComponent)) {
 		super(state);
 
-		state.onDisable(() => this.inputHandler.unsubscribeAll());
+		if ("onDisable" in state) {
+			state.onDisable(() => this.inputHandler.unsubscribeAll());
+		}
 		state.onDestroy(() => this.inputHandler.destroy());
 
-		this.subscribeObservable(InputController.inputType, () => {
-			state.disable();
-			state.enable();
-		});
+		if ("disable" in state) {
+			this.subscribeObservable(InputController.inputType, () => {
+				state.disable();
+				state.enable();
+			});
+		}
 	}
 
 	/** Register an event that fires on enable and input type change */

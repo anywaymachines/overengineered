@@ -1,3 +1,5 @@
+import { Debris } from "@rbxts/services";
+import { Instances } from "shared/fixes/Instances";
 import { HostedService } from "shared/GameHost";
 import { PlayerWatcher } from "shared/PlayerWatcher";
 import { SharedRagdoll } from "shared/SharedRagdoll";
@@ -206,121 +208,154 @@ namespace RagdollModule {
 	}
 }
 
-const setPlayerRagdoll = (humanoid: Humanoid, enabled: boolean) =>
+function setPlayerRagdoll(humanoid: Humanoid, enabled: boolean) {
 	humanoid.SetAttribute(SharedRagdoll.ragdollAttributeName, enabled);
+}
 
-class RagdollWhenSpeedQuicklyChanges extends HostedService {
-	constructor(difference: number) {
-		super();
+function initSounds(): RBXScriptConnection {
+	const impacts = Instances.assets.WaitForChild("Effects").WaitForChild("RagdollImpact");
+
+	function init(humanoid: Humanoid, character: Model) {
+		function canHit(part: BasePart, hit: BasePart) {
+			if (!part?.Parent || !hit?.Parent) return false;
+			if (!hit.CanCollide) return false;
+			if (hit.IsDescendantOf(character)) return false;
+			if (hit.Parent?.FindFirstChildOfClass("Humanoid")) return false;
+
+			return true;
+		}
+
+		let debounce = true;
+		const debounceTime = 0.25;
+		for (const part of character.GetChildren()) {
+			if (!part.IsA("BasePart")) continue;
+
+			part.Touched.Connect((hit) => {
+				if (!debounce) return;
+				if (!humanoid.GetAttribute(SharedRagdoll.ragdollAttributeName)) return;
+				if (part.AssemblyLinearVelocity.Magnitude < 5) return;
+				if (!canHit(part, hit)) return;
+
+				debounce = false;
+
+				const volume = math.min(part.AssemblyLinearVelocity.Magnitude / 50, 5);
+				const impact = impacts.GetChildren()[math.random(0, impacts.GetChildren().size() - 1)].Clone() as Sound;
+				impact.Parent = part;
+				impact.Volume = volume;
+				impact.Play();
+
+				Debris.AddItem(impact, 5);
+				task.delay(debounceTime, () => (debounce = true));
+			});
+		}
+	}
+
+	return PlayerWatcher.onHumanoidAdded(init);
+}
+function initRagdollMain(): RBXScriptConnection {
+	return PlayerWatcher.onHumanoidAdded((humanoid, character, player) => {
+		humanoid.BreakJointsOnDeath = false;
+
+		RagdollModule.createJoints(character);
+		humanoid.SetAttribute(SharedRagdoll.ragdollAttributeName, false);
+
+		humanoid
+			.GetAttributeChangedSignal(SharedRagdoll.ragdollAttributeName)
+			.Connect(() =>
+				RagdollModule.toggleJoints(character, !humanoid.GetAttribute(SharedRagdoll.ragdollAttributeName)),
+			);
+
+		humanoid.Seated.Connect((active) => {
+			if (!active) return;
+			setPlayerRagdoll(humanoid, false);
+		});
+		humanoid.Ragdoll.Connect((active) => {
+			if (!active) return;
+			setPlayerRagdoll(humanoid, true);
+		});
 
 		const funcs = new Map<Player, () => void>();
+		const difference = 40;
 
-		this.event.subscribeRegistration(() =>
-			PlayerWatcher.onHumanoidAdded((humanoid, _, player) => {
-				let prevSpeed: number | undefined;
+		if (true as boolean) {
+			let prevSpeed: number | undefined;
+			let stopped = false;
+			const stop = () => (stopped = true);
+			funcs.set(player, stop);
+			humanoid.Died.Once(stop);
 
-				const stop = this.event.loop(0, () => {
-					if (!humanoid.RootPart) return;
-					if (humanoid.Sit) return;
+			task.spawn(() => {
+				while (true as boolean) {
+					task.wait();
+
+					if (stopped) break;
+					if (!humanoid.RootPart) continue;
+					if (humanoid.Sit) continue;
+					if (humanoid.GetAttribute(SharedRagdoll.ragdollAttributeName)) continue;
+
+					const state = humanoid.GetState();
+					if (state === Enum.HumanoidStateType.Physics || state === Enum.HumanoidStateType.GettingUp) {
+						prevSpeed = undefined;
+						continue;
+					}
 
 					const newspeed = humanoid.RootPart.AssemblyLinearVelocity.Magnitude;
 					if (prevSpeed === undefined) {
 						prevSpeed = newspeed;
-						return;
+						continue;
 					}
 
 					const diff = math.abs(newspeed - prevSpeed);
 					prevSpeed = newspeed;
 
-					if (diff < difference) return;
+					if (diff < difference) continue;
 
 					setPlayerRagdoll(humanoid, true);
-				});
+				}
+			});
+		} else {
+			humanoid.FreeFalling.Connect(() => {
+				task.spawn(() => {
+					while (task.wait()) {
+						if (humanoid.RootPart) {
+							if (!humanoid.Sit && humanoid.RootPart.AssemblyLinearVelocity.Magnitude > 75) {
+								setPlayerRagdoll(humanoid, true);
+							}
+						} else {
+							break;
+						}
 
-				funcs.set(player, stop);
-				humanoid.Died.Once(stop);
-			}),
-		);
-	}
-}
-
-class RagdollWhenFasterThan extends HostedService {
-	constructor(speed: number) {
-		super();
-
-		this.event.subscribeRegistration(() =>
-			PlayerWatcher.onHumanoidAdded((humanoid) => {
-				humanoid.FreeFalling.Connect(() => {
-					if (
-						!humanoid.RootPart ||
-						humanoid.Sit ||
-						humanoid.RootPart.Velocity.Magnitude < speed ||
-						humanoid.GetState() !== Enum.HumanoidStateType.Freefall
-					) {
-						return;
+						if (
+							humanoid.GetAttribute(SharedRagdoll.ragdollAttributeName) ||
+							humanoid.GetState() !== Enum.HumanoidStateType.Freefall
+						) {
+							break;
+						}
 					}
-
-					setPlayerRagdoll(humanoid, true);
 				});
-			}),
-		);
-	}
+			});
+		}
+
+		humanoid.Died.Connect(() => {
+			humanoid.AutoRotate = false;
+			setPlayerRagdoll(humanoid, true);
+			humanoid.UnequipTools();
+		});
+	});
 }
-const createRagdollSettings = (host: GameHostBuilder) => {
-	return {
-		ragdollWhenSpeedQuicklyChanges(difference: number) {
-			host.services.registerService(RagdollWhenSpeedQuicklyChanges).withArgs([difference]);
-			return this;
-		},
-		ragdollWhenSpeedIsMoreThan(speed: number) {
-			host.services.registerService(RagdollWhenFasterThan).withArgs([speed]);
-			return this;
-		},
-	} as const;
-};
 
 export class RagdollController extends HostedService {
-	static initialize(host: GameHostBuilder, setup: (o: ReturnType<typeof createRagdollSettings>) => void): void {
-		host.services.registerService(this);
-		setup(createRagdollSettings(host));
-	}
-
 	constructor() {
 		super();
 
-		this.event.subscribeRegistration(() =>
-			PlayerWatcher.onHumanoidAdded((humanoid, character) => {
-				humanoid.BreakJointsOnDeath = false;
-				humanoid.RequiresNeck = false;
+		this.event.subscribeRegistration(initSounds);
+		this.event.subscribe(SharedRagdoll.event.invoked, (player, ragdoll) => {
+			const humanoid = player.Character?.FindFirstChild("Humanoid") as Humanoid | undefined;
+			if (!humanoid || humanoid.Sit) return;
 
-				humanoid.GetAttributeChangedSignal(SharedRagdoll.ragdollAttributeName).Connect(() => {
-					RagdollModule.toggleJoints(
-						character,
-						humanoid.GetAttribute(SharedRagdoll.ragdollAttributeName) !== true,
-					);
+			setPlayerRagdoll(humanoid, ragdoll);
+		});
 
-					if (humanoid.GetState() === Enum.HumanoidStateType.Dead) {
-						return;
-					}
-
-					task.spawn(() => {
-						task.wait(2);
-						while (character.PrimaryPart!.AssemblyLinearVelocity.Magnitude > 10) {
-							task.wait();
-						}
-
-						setPlayerRagdoll(humanoid, false);
-					});
-				});
-
-				RagdollModule.createJoints(character);
-				setPlayerRagdoll(humanoid, false);
-
-				humanoid.Died.Connect(() => {
-					humanoid.AutoRotate = false;
-					setPlayerRagdoll(humanoid, true);
-				});
-			}),
-		);
+		this.event.subscribeRegistration(initRagdollMain);
 	}
 }
