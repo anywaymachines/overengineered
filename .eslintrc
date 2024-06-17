@@ -28,6 +28,7 @@
 	"rules": {
 		"no-inner-declarations": 0,
 		"roblox-ts/no-array-pairs": [ "off" ],
+		"roblox-ts/lua-truthiness": [ "off" ],
 		"import/order": [
 			"warn",
 			{
