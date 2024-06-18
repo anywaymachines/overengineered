@@ -61,7 +61,7 @@ namespace LoggingMetrics {
 						text:
 							`🔨 Build ${game.PlaceVersion}` +
 							(game.PrivateServerOwnerId !== 0 ? ", Private Server" : "") +
-							`. (${game.JobId.sub(game.JobId.size() - 4)})`,
+							` (${game.JobId.sub(game.JobId.size() - 4)})`,
 					},
 				},
 			],
