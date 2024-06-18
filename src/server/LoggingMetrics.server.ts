@@ -19,7 +19,6 @@ namespace LoggingMetrics {
 							? ` to [**@${recipient!.Name}**](https://www.roblox.com/users/${recipient!.UserId}/profile)`
 							: ""),
 				);
-				sendMetrics();
 			});
 		});
 		Players.PlayerRemoving.Connect((plr) =>
