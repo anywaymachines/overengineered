@@ -58,7 +58,7 @@ export class ComponentEvents {
 		this.sub(this.events, [signal, callback]);
 	}
 	/** Register an event */
-	subscribeRegistration(func: () => { Disconnect(): void }): void {
+	subscribeRegistration(func: () => SignalConnection): void {
 		if (this.state.isDestroyed()) return;
 		this.onEnable(() => this.eventHandler.register(func()));
 	}
@@ -177,19 +177,20 @@ export class ComponentEvents {
 	/** Create an infinite loop that would only loop when this event holder is enabled
 	 * @returns Function that stops the loop
 	 */
-	loop(interval: number, func: () => void) {
+	loop(interval: number, func: (dt: number) => void) {
 		let stop = false;
 
-		spawn(() => {
+		task.spawn(() => {
+			let dt = 0;
 			while (true as boolean) {
 				if (this.state.isDestroyed()) return;
 				if (stop) return;
 
 				if (this.state.isEnabled()) {
-					func();
+					func(dt);
 				}
 
-				task.wait(interval);
+				dt = task.wait(interval);
 			}
 		});
 

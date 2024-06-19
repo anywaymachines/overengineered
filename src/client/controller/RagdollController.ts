@@ -1,6 +1,7 @@
 import { ContextActionService } from "@rbxts/services";
 import { LocalPlayer } from "client/controller/LocalPlayer";
-import { ArgsSignal } from "shared/event/Signal";
+import { Component } from "shared/component/Component";
+import { ComponentEvents } from "shared/component/ComponentEvents";
 import { Keys } from "shared/fixes/Keys";
 import { HostedService } from "shared/GameHost";
 import { SharedRagdoll } from "shared/SharedRagdoll";
@@ -8,51 +9,42 @@ import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 const { isPlayerRagdolling } = SharedRagdoll;
-function initAutoRagdoll(humanoid: Humanoid, enabled: ReadonlyObservableValue<boolean>): SignalConnection {
+function initAutoRagdoll(event: ComponentEvents, humanoid: Humanoid, enabled: ReadonlyObservableValue<boolean>) {
 	const difference = 50;
-
 	let prevSpeed: number | undefined;
-	let stopped = false;
 
-	task.spawn(() => {
-		while (true as boolean) {
-			task.wait();
+	event.loop(0, () => {
+		if (!enabled.get()) return;
+		if (!humanoid.RootPart) return;
+		if (humanoid.Sit) return;
+		if (isPlayerRagdolling(humanoid)) return;
 
-			if (stopped) break;
-			if (!enabled.get()) continue;
-			if (!humanoid.RootPart) continue;
-			if (humanoid.Sit) continue;
-			if (isPlayerRagdolling(humanoid)) continue;
-
-			const state = humanoid.GetState();
-			if (
-				state === Enum.HumanoidStateType.Physics ||
-				state === Enum.HumanoidStateType.GettingUp ||
-				state === Enum.HumanoidStateType.Jumping
-			) {
-				prevSpeed = undefined;
-				continue;
-			}
-
-			const newspeed = humanoid.RootPart.AssemblyLinearVelocity.Magnitude;
-			if (prevSpeed === undefined) {
-				prevSpeed = newspeed;
-				continue;
-			}
-
-			const diff = math.abs(newspeed - prevSpeed);
-			prevSpeed = newspeed;
-
-			if (diff < difference) continue;
-
-			$log("Ragdolled with a diff of", diff);
-			SharedRagdoll.event.send(true);
+		const state = humanoid.GetState();
+		if (
+			state === Enum.HumanoidStateType.Physics ||
+			state === Enum.HumanoidStateType.GettingUp ||
+			state === Enum.HumanoidStateType.Jumping
+		) {
+			prevSpeed = undefined;
+			return;
 		}
-	});
 
-	return humanoid.Died.Once(() => (stopped = true));
+		const newspeed = humanoid.RootPart.AssemblyLinearVelocity.Magnitude;
+		if (prevSpeed === undefined) {
+			prevSpeed = newspeed;
+			return;
+		}
+
+		const diff = math.abs(newspeed - prevSpeed);
+		prevSpeed = newspeed;
+
+		if (diff < difference) return;
+
+		$log("Ragdolled with a diff of", diff);
+		SharedRagdoll.event.send(true);
+	});
 }
-function initRagdollUp(humanoid: Humanoid, autoRecovery: ReadonlyObservableValue<boolean>): SignalConnection {
+function initRagdollUp(event: ComponentEvents, humanoid: Humanoid, autoRecovery: ReadonlyObservableValue<boolean>) {
 	const player = LocalPlayer.player;
 
 	while (!player.Character?.FindFirstChild("ConstraintsFolder")) {
@@ -60,64 +52,68 @@ function initRagdollUp(humanoid: Humanoid, autoRecovery: ReadonlyObservableValue
 	}
 
 	const getUpTime = 4;
-
 	const actionName = "ragdoll_autoRecovery";
-	return SharedRagdoll.subscribeToPlayerRagdollChange(humanoid, () => {
-		if (isPlayerRagdolling(humanoid)) {
-			humanoid.SetStateEnabled("GettingUp", false);
-			humanoid.SetStateEnabled("Swimming", false);
-			humanoid.SetStateEnabled("Seated", false);
-			humanoid.ChangeState("Physics");
+	event.subscribeRegistration(() =>
+		SharedRagdoll.subscribeToPlayerRagdollChange(humanoid, () => {
+			if (isPlayerRagdolling(humanoid)) {
+				humanoid.SetStateEnabled("GettingUp", false);
+				humanoid.SetStateEnabled("Swimming", false);
+				humanoid.SetStateEnabled("Seated", false);
+				humanoid.ChangeState("Physics");
 
-			if (humanoid.GetState() !== Enum.HumanoidStateType.Dead && humanoid.Health > 0) {
-				task.spawn(() => {
-					task.wait(getUpTime);
+				if (humanoid.GetState() !== Enum.HumanoidStateType.Dead && humanoid.Health > 0) {
+					task.spawn(() => {
+						task.wait(getUpTime);
 
-					while (task.wait()) {
-						if (humanoid.Health <= 0) break;
-						if (!humanoid.RootPart) break;
-						if (!isPlayerRagdolling(humanoid)) break;
+						while (task.wait()) {
+							if (humanoid.Health <= 0) break;
+							if (!humanoid.RootPart) break;
+							if (!isPlayerRagdolling(humanoid)) break;
 
-						if (!autoRecovery.get()) {
-							ContextActionService.BindActionAtPriority(
-								actionName,
-								() => {
-									task.spawn(() => SharedRagdoll.event.send(false));
+							if (!autoRecovery.get()) {
+								ContextActionService.BindActionAtPriority(
+									actionName,
+									() => {
+										task.spawn(() => SharedRagdoll.event.send(false));
 
-									ContextActionService.UnbindAction(actionName);
-									return Enum.ContextActionResult.Pass;
-								},
-								false,
-								2000 + 1,
-								...Enum.PlayerActions.GetEnumItems(),
-							);
+										ContextActionService.UnbindAction(actionName);
+										return Enum.ContextActionResult.Pass;
+									},
+									false,
+									2000 + 1,
+									...Enum.PlayerActions.GetEnumItems(),
+								);
 
-							break;
+								break;
+							}
+
+							if (humanoid.RootPart.AssemblyLinearVelocity.Magnitude < 10) {
+								SharedRagdoll.event.send(false);
+								break;
+							}
 						}
+					});
+				}
+			} else {
+				humanoid.ChangeState("GettingUp");
+				humanoid.SetStateEnabled("GettingUp", true);
+				humanoid.SetStateEnabled("Swimming", true);
+				humanoid.SetStateEnabled("Seated", true);
 
-						if (humanoid.RootPart.AssemblyLinearVelocity.Magnitude < 10) {
-							SharedRagdoll.event.send(false);
-							break;
-						}
-					}
-				});
+				const character = player.Character;
+				if (character) {
+					character.PivotTo(character.GetPivot().add(new Vector3(0, 2, 0)));
+				}
 			}
-		} else {
-			humanoid.ChangeState("GettingUp");
-			humanoid.SetStateEnabled("GettingUp", true);
-			humanoid.SetStateEnabled("Swimming", true);
-			humanoid.SetStateEnabled("Seated", true);
 
-			const character = player.Character;
-			if (character) {
-				character.PivotTo(character.GetPivot().add(new Vector3(0, 2, 0)));
-			}
-		}
-
-		humanoid.AutoRotate = !isPlayerRagdolling(humanoid);
-	});
+			humanoid.AutoRotate = !isPlayerRagdolling(humanoid);
+		}),
+	);
 }
-function initRagdollKey(key: ReadonlyObservableValue<{ triggerByKey: boolean; triggerKey: KeyCode }>) {
+function initRagdollKey(
+	event: ComponentEvents,
+	key: ReadonlyObservableValue<{ triggerByKey: boolean; triggerKey: KeyCode }>,
+) {
 	const actionName = "ragdoll";
 
 	function bind(key: KeyCode, func: () => void) {
@@ -139,23 +135,26 @@ function initRagdollKey(key: ReadonlyObservableValue<{ triggerByKey: boolean; tr
 	}
 
 	let can = true;
+	event.subscribeObservable(
+		key,
+		({ triggerKey, triggerByKey }) => {
+			unbind();
+			if (!triggerByKey) return;
 
-	return key.subscribe(({ triggerKey, triggerByKey }) => {
-		unbind();
-		if (!triggerByKey) return;
+			bind(triggerKey, () => {
+				if (!can) return;
 
-		bind(triggerKey, () => {
-			if (!can) return;
+				const humanoid = LocalPlayer.humanoid.get();
+				if (!humanoid || humanoid.Sit) return;
 
-			const humanoid = LocalPlayer.humanoid.get();
-			if (!humanoid || humanoid.Sit) return;
-
-			const ragdolling = isPlayerRagdolling(humanoid);
-			can = false;
-			task.delay(1, () => (can = true));
-			task.spawn(() => SharedRagdoll.event.send(!ragdolling));
-		});
-	}, true);
+				const ragdolling = isPlayerRagdolling(humanoid);
+				can = false;
+				task.delay(1, () => (can = true));
+				task.spawn(() => SharedRagdoll.event.send(!ragdolling));
+			});
+		},
+		true,
+	);
 }
 
 @injectable
@@ -163,23 +162,41 @@ export class RagdollController extends HostedService {
 	constructor(@inject playerDataStorage: PlayerDataStorage) {
 		super();
 
-		this.event.subscribeRegistration(() => initRagdollKey(playerDataStorage.config.createBased((c) => c.ragdoll)));
+		initRagdollKey(
+			this.event,
+			playerDataStorage.config.createBased((c) => c.ragdoll),
+		);
 		this.event.subscribeObservable(
 			LocalPlayer.humanoid,
 			(humanoid) => {
 				if (!humanoid) return;
 
-				const reg = ArgsSignal.multiConnection(
+				task.delay(1, () => {
+					const character = LocalPlayer.character.get();
+					if (!character) return;
+
+					const component = new Component();
+					const event = new ComponentEvents(component);
+
 					initRagdollUp(
+						event,
 						humanoid,
 						playerDataStorage.config.createBased((c) => c.ragdoll.autoRecovery),
-					),
+					);
 					initAutoRagdoll(
+						event,
 						humanoid,
 						playerDataStorage.config.createBased((c) => c.ragdoll.autoFall),
-					),
-				);
-				humanoid.Died.Once(() => reg.Disconnect());
+					);
+
+					humanoid.Died.Once(() => component.disable());
+					event.subscribe(character.GetPropertyChangedSignal("Parent"), () => {
+						if (character.Parent) return;
+						component.destroy();
+					});
+
+					component.enable();
+				});
 			},
 			true,
 		);
