@@ -35,6 +35,9 @@ export class BuildingPlot extends Component {
 		this.onDestroy(() => buildingWelder.deleteWelds(this));
 	}
 
+	unparent(): void {
+		this.instance.Parent = undefined;
+	}
 	cloneBlocks(): readonly BlockModel[] {
 		return this.instance.Clone().GetChildren() as BlockModel[];
 	}

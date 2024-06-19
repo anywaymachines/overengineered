@@ -59,7 +59,8 @@ class ServerPlotController extends HostedService {
 			this.plot.whitelistedPlayers.set([5243461283]);
 			this.plot.blacklistedPlayers.set(undefined);
 
-			this.blocks.destroy();
+			this.blocks.unparent();
+			task.delay(1, () => this.blocks.destroy());
 		});
 	}
 }
@@ -117,6 +118,15 @@ export class ServerPlots extends HostedService {
 			},
 			true,
 		);
+
+		game.BindToClose(() => {
+			$log("Game quit, destroying controllers...");
+
+			for (const controller of this.controllers.get()) {
+				$log("Destroying", controller.player.Name);
+				controller.destroy();
+			}
+		});
 	}
 
 	tryGetControllerByPlayer(player: Player): ServerPlotController | undefined {
