@@ -1,5 +1,5 @@
+import { MultiConfigControl } from "client/gui/BlockConfigControls";
 import { Colors } from "client/gui/Colors";
-import { MultiConfigControl } from "client/gui/config/MultiConfigControl";
 import { Control } from "client/gui/Control";
 import { Element } from "shared/Element";
 import { Objects } from "shared/fixes/objects";

@@ -1,5 +1,5 @@
 import { InputController } from "client/controller/InputController";
-import { MultiConfigControl } from "client/gui/config/MultiConfigControl";
+import { MultiConfigControl } from "client/gui/BlockConfigControls";
 import { Control } from "client/gui/Control";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { LogControl } from "client/gui/static/LogControl";

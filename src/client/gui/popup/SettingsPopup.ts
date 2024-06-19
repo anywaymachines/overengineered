@@ -1,6 +1,6 @@
 import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
-import { MultiPlayerConfigControl } from "client/gui/playerConfig/MultiConfigControl";
+import { MultiPlayerConfigControl } from "client/gui/PlayerConfigControls";
 import { Popup } from "client/gui/Popup";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";

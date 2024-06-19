@@ -1,7 +1,7 @@
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
 
 interface PlayerConfigVersion<TCurrent> {
-	version: number;
+	readonly version: number;
 }
 interface UpdatablePlayerConfigVersion<TCurrent, TPrev> extends PlayerConfigVersion<TCurrent> {
 	update(prev: Partial<TPrev>): Partial<TCurrent>;
