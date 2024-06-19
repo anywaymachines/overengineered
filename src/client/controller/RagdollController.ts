@@ -1,5 +1,6 @@
 import { ContextActionService } from "@rbxts/services";
 import { LocalPlayer } from "client/controller/LocalPlayer";
+import { ArgsSignal } from "shared/event/Signal";
 import { Keys } from "shared/fixes/Keys";
 import { HostedService } from "shared/GameHost";
 import { SharedRagdoll } from "shared/SharedRagdoll";
@@ -8,7 +9,7 @@ import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 const { isPlayerRagdolling } = SharedRagdoll;
 function initAutoRagdoll(humanoid: Humanoid, enabled: ReadonlyObservableValue<boolean>): SignalConnection {
-	const difference = 40;
+	const difference = 50;
 
 	let prevSpeed: number | undefined;
 	let stopped = false;
@@ -16,9 +17,9 @@ function initAutoRagdoll(humanoid: Humanoid, enabled: ReadonlyObservableValue<bo
 	task.spawn(() => {
 		while (true as boolean) {
 			task.wait();
-			if (!enabled.get()) continue;
 
 			if (stopped) break;
+			if (!enabled.get()) continue;
 			if (!humanoid.RootPart) continue;
 			if (humanoid.Sit) continue;
 			if (isPlayerRagdolling(humanoid)) continue;
@@ -44,7 +45,7 @@ function initAutoRagdoll(humanoid: Humanoid, enabled: ReadonlyObservableValue<bo
 
 			if (diff < difference) continue;
 
-			SharedRagdoll.setPlayerRagdoll(humanoid, true);
+			$log("Ragdolled with a diff of", diff);
 			SharedRagdoll.event.send(true);
 		}
 	});
@@ -116,61 +117,69 @@ function initRagdollUp(humanoid: Humanoid, autoRecovery: ReadonlyObservableValue
 		humanoid.AutoRotate = !isPlayerRagdolling(humanoid);
 	});
 }
+function initRagdollKey(key: ReadonlyObservableValue<{ triggerByKey: boolean; triggerKey: KeyCode }>) {
+	const actionName = "ragdoll";
+
+	function bind(key: KeyCode, func: () => void) {
+		ContextActionService.BindAction(
+			actionName,
+			(name, state, input) => {
+				if (actionName !== name) return;
+				if (state !== Enum.UserInputState.Begin) return;
+				if (input.KeyCode.Name !== key) return;
+
+				func();
+			},
+			false,
+			Keys[key],
+		);
+	}
+	function unbind() {
+		ContextActionService.UnbindAction(actionName);
+	}
+
+	let can = true;
+
+	return key.subscribe(({ triggerKey, triggerByKey }) => {
+		unbind();
+		if (!triggerByKey) return;
+
+		bind(triggerKey, () => {
+			if (!can) return;
+
+			const humanoid = LocalPlayer.humanoid.get();
+			if (!humanoid || humanoid.Sit) return;
+
+			const ragdolling = isPlayerRagdolling(humanoid);
+			can = false;
+			task.delay(1, () => (can = true));
+			task.spawn(() => SharedRagdoll.event.send(!ragdolling));
+		});
+	}, true);
+}
 
 @injectable
 export class RagdollController extends HostedService {
 	constructor(@inject playerDataStorage: PlayerDataStorage) {
 		super();
 
-		const actionName = "ragdoll";
-		function bind(key: KeyCode, func: () => void) {
-			ContextActionService.BindAction(
-				actionName,
-				(name, state, input) => {
-					if (actionName !== name) return;
-					if (state !== Enum.UserInputState.Begin) return;
-					if (input.KeyCode.Name !== key) return;
-
-					func();
-				},
-				false,
-				Keys[key],
-			);
-		}
-		function unbind() {
-			ContextActionService.UnbindAction(actionName);
-		}
-
-		this.event.subscribeObservable(
-			playerDataStorage.config.createBased((c) => c.ragdoll),
-			({ triggerKey, triggerByKey }) => {
-				unbind();
-				if (!triggerByKey) return;
-
-				bind(triggerKey, () => {
-					const humanoid = LocalPlayer.humanoid.get();
-					if (!humanoid || humanoid.Sit) return;
-
-					const ragdolling = isPlayerRagdolling(humanoid);
-					SharedRagdoll.setPlayerRagdoll(humanoid, !ragdolling);
-					task.spawn(() => SharedRagdoll.event.send(!ragdolling));
-				});
-			},
-			true,
-		);
-
+		this.event.subscribeRegistration(() => initRagdollKey(playerDataStorage.config.createBased((c) => c.ragdoll)));
 		this.event.subscribeObservable(
 			LocalPlayer.humanoid,
 			(humanoid) => {
 				if (!humanoid) return;
-				initRagdollUp(
-					humanoid,
-					playerDataStorage.config.createBased((c) => c.ragdoll.autoRecovery),
+
+				const reg = ArgsSignal.multiConnection(
+					initRagdollUp(
+						humanoid,
+						playerDataStorage.config.createBased((c) => c.ragdoll.autoRecovery),
+					),
+					initAutoRagdoll(
+						humanoid,
+						playerDataStorage.config.createBased((c) => c.ragdoll.autoFall),
+					),
 				);
-				initAutoRagdoll(
-					humanoid,
-					playerDataStorage.config.createBased((c) => c.ragdoll.autoFall),
-				);
+				humanoid.Died.Once(() => reg.Disconnect());
 			},
 			true,
 		);

@@ -8,6 +8,7 @@ export namespace SharedRagdoll {
 		return humanoid.GetAttributeChangedSignal(ragdollAttributeName).Connect(func);
 	}
 
+	/** @server */
 	export function setPlayerRagdoll(humanoid: Humanoid, ragdolling: boolean): void {
 		humanoid.SetAttribute(ragdollAttributeName, ragdolling);
 	}

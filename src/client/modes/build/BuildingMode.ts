@@ -96,7 +96,6 @@ export class BuildingMode extends PlayMode {
 			const humanoid = LocalPlayer.humanoid.get();
 			if (!humanoid) return;
 
-			SharedRagdoll.setPlayerRagdoll(humanoid, false);
 			task.spawn(() => SharedRagdoll.event.send(false));
 
 			const pos = plot.getSpawnPosition();
