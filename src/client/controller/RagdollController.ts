@@ -24,7 +24,11 @@ function initAutoRagdoll(humanoid: Humanoid, enabled: ReadonlyObservableValue<bo
 			if (isPlayerRagdolling(humanoid)) continue;
 
 			const state = humanoid.GetState();
-			if (state === Enum.HumanoidStateType.Physics || state === Enum.HumanoidStateType.GettingUp) {
+			if (
+				state === Enum.HumanoidStateType.Physics ||
+				state === Enum.HumanoidStateType.GettingUp ||
+				state === Enum.HumanoidStateType.Jumping
+			) {
 				prevSpeed = undefined;
 				continue;
 			}
