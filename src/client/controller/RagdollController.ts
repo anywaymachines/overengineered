@@ -3,6 +3,7 @@ import { LocalPlayer } from "client/controller/LocalPlayer";
 import { HostedService } from "shared/GameHost";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 
+const { isPlayerRagdolling } = SharedRagdoll;
 function initRagdollUp(humanoid: Humanoid): RBXScriptConnection {
 	const player = LocalPlayer.player;
 
@@ -11,8 +12,8 @@ function initRagdollUp(humanoid: Humanoid): RBXScriptConnection {
 	}
 
 	const getUpTime = 4;
-	return humanoid.GetAttributeChangedSignal(SharedRagdoll.ragdollAttributeName).Connect(() => {
-		if (humanoid.GetAttribute(SharedRagdoll.ragdollAttributeName)) {
+	return SharedRagdoll.subscribeToPlayerRagdollChange(humanoid, () => {
+		if (isPlayerRagdolling(humanoid)) {
 			humanoid.SetStateEnabled("GettingUp", false);
 			humanoid.SetStateEnabled("Swimming", false);
 			humanoid.SetStateEnabled("Seated", false);
@@ -25,7 +26,7 @@ function initRagdollUp(humanoid: Humanoid): RBXScriptConnection {
 					while (task.wait()) {
 						if (humanoid.Health <= 0) break;
 						if (!humanoid.RootPart) break;
-						if (!humanoid.GetAttribute(SharedRagdoll.ragdollAttributeName)) break;
+						if (!isPlayerRagdolling(humanoid)) break;
 
 						if (humanoid.RootPart.AssemblyLinearVelocity.Magnitude < 10) {
 							SharedRagdoll.event.send(false);
@@ -46,7 +47,7 @@ function initRagdollUp(humanoid: Humanoid): RBXScriptConnection {
 			}
 		}
 
-		humanoid.AutoRotate = !humanoid.GetAttribute(SharedRagdoll.ragdollAttributeName);
+		humanoid.AutoRotate = !isPlayerRagdolling(humanoid);
 	});
 }
 
@@ -60,7 +61,7 @@ export class RagdollController extends HostedService {
 				const humanoid = LocalPlayer.humanoid.get();
 				if (!humanoid || humanoid.Sit) return;
 
-				task.spawn(() => SharedRagdoll.event.send(!humanoid.GetAttribute(SharedRagdoll.ragdollAttributeName)));
+				task.spawn(() => SharedRagdoll.event.send(!isPlayerRagdolling(humanoid)));
 			}),
 		);
 

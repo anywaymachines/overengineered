@@ -208,9 +208,7 @@ namespace RagdollModule {
 	}
 }
 
-function setPlayerRagdoll(humanoid: Humanoid, enabled: boolean) {
-	humanoid.SetAttribute(SharedRagdoll.ragdollAttributeName, enabled);
-}
+const { isPlayerRagdolling, setPlayerRagdoll } = SharedRagdoll;
 
 function initSounds(): RBXScriptConnection {
 	const impacts = Instances.assets.WaitForChild("Effects").WaitForChild("RagdollImpact");
@@ -232,7 +230,7 @@ function initSounds(): RBXScriptConnection {
 
 			part.Touched.Connect((hit) => {
 				if (!debounce) return;
-				if (!humanoid.GetAttribute(SharedRagdoll.ragdollAttributeName)) return;
+				if (!isPlayerRagdolling(humanoid)) return;
 				if (part.AssemblyLinearVelocity.Magnitude < 5) return;
 				if (!canHit(part, hit)) return;
 
@@ -257,13 +255,11 @@ function initRagdollMain(): RBXScriptConnection {
 		humanoid.BreakJointsOnDeath = false;
 
 		RagdollModule.createJoints(character);
-		humanoid.SetAttribute(SharedRagdoll.ragdollAttributeName, false);
+		setPlayerRagdoll(humanoid, false);
 
-		humanoid
-			.GetAttributeChangedSignal(SharedRagdoll.ragdollAttributeName)
-			.Connect(() =>
-				RagdollModule.toggleJoints(character, !humanoid.GetAttribute(SharedRagdoll.ragdollAttributeName)),
-			);
+		SharedRagdoll.subscribeToPlayerRagdollChange(humanoid, () =>
+			RagdollModule.toggleJoints(character, !isPlayerRagdolling(humanoid)),
+		);
 
 		humanoid.Seated.Connect((active) => {
 			if (!active) return;
@@ -291,7 +287,7 @@ function initRagdollMain(): RBXScriptConnection {
 					if (stopped) break;
 					if (!humanoid.RootPart) continue;
 					if (humanoid.Sit) continue;
-					if (humanoid.GetAttribute(SharedRagdoll.ragdollAttributeName)) continue;
+					if (isPlayerRagdolling(humanoid)) continue;
 
 					const state = humanoid.GetState();
 					if (state === Enum.HumanoidStateType.Physics || state === Enum.HumanoidStateType.GettingUp) {
@@ -325,10 +321,7 @@ function initRagdollMain(): RBXScriptConnection {
 							break;
 						}
 
-						if (
-							humanoid.GetAttribute(SharedRagdoll.ragdollAttributeName) ||
-							humanoid.GetState() !== Enum.HumanoidStateType.Freefall
-						) {
+						if (isPlayerRagdolling(humanoid) || humanoid.GetState() !== Enum.HumanoidStateType.Freefall) {
 							break;
 						}
 					}
