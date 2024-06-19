@@ -26,6 +26,9 @@ declare global {
 	type TutorialConfiguration = {
 		readonly basics: boolean;
 	};
+	type RagdollConfiguration = {
+		readonly auto: boolean;
+	};
 
 	namespace PlayerConfigTypes {
 		export type Bool = ConfigType<"bool", boolean>;
@@ -44,6 +47,7 @@ declare global {
 		export type Graphics = ConfigType<"graphics", GraphicsConfiguration>;
 		export type Terrain = ConfigType<"terrain", TerrainConfiguration>;
 		export type Tutorial = ConfigType<"tutorial", TutorialConfiguration>;
+		export type Ragdoll = ConfigType<"ragdoll", RagdollConfiguration>;
 
 		export interface Types {
 			readonly bool: Bool;
@@ -56,6 +60,7 @@ declare global {
 			readonly graphics: Graphics;
 			readonly terrain: Terrain;
 			readonly tutorial: Tutorial;
+			readonly ragdoll: Ragdoll;
 		}
 
 		export type Definitions = ConfigTypesToDefinition<keyof Types, Types>;
@@ -135,6 +140,13 @@ export const PlayerConfigDefinition = {
 		type: "tutorial",
 		config: {
 			basics: false as boolean,
+		},
+	},
+	ragdoll: {
+		displayName: "Ragdoll",
+		type: "ragdoll",
+		config: {
+			auto: true,
 		},
 	},
 } as const satisfies ConfigTypesToDefinition<keyof PlayerConfigTypes.Types, PlayerConfigTypes.Types>;

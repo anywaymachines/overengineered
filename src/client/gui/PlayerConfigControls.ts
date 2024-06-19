@@ -364,6 +364,34 @@ namespace ControlsSource {
 			basics.text.set("Start basics tutorial");
 		}
 	}
+
+	@injectable
+	export class ragdoll extends ConfigValueControl<GuiObject> {
+		readonly submitted = new Signal<(config: PlayerConfigTypes.Ragdoll["config"]) => void>();
+
+		constructor(
+			config: PlayerConfigTypes.Ragdoll["config"],
+			definition: ConfigTypeToDefinition<PlayerConfigTypes.Ragdoll>,
+			@inject di: DIContainer,
+		) {
+			super(templates.multi(), definition.displayName);
+
+			const def = {
+				auto: {
+					displayName: "Automatic",
+					type: "bool",
+					config: definition.config.auto,
+				},
+			} as const satisfies PlayerConfigTypes.Definitions;
+			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
+
+			const control = this.add(new MultiPlayerConfigControl<typeof def>(this.gui.Control, di));
+			control.set(config, def);
+			this.event.subscribe(control.configUpdated, (key, value) => {
+				this.submitted.Fire((config = { ...config, [key]: value }));
+			});
+		}
+	}
 }
 const Controls = {
 	...ControlsSource,
@@ -386,7 +414,7 @@ export class MultiPlayerConfigControl<
 	TDef extends PlayerConfigTypes.Definitions,
 > extends Control<ConfigControlDefinition> {
 	readonly configUpdated = new Signal<
-		(key: keyof TDef, value: PlayerConfigTypes.Types[keyof PlayerConfigTypes.Types]["config"]) => void
+		(key: keyof TDef, value: PlayerConfigTypes.Types[TDef[keyof TDef]["type"]]["config"]) => void
 	>();
 
 	private settedElements = new Map<keyof TDef, ConfigControl<keyof PlayerConfigTypes.Types>>();

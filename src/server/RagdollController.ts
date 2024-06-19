@@ -269,66 +269,6 @@ function initRagdollMain(): RBXScriptConnection {
 			if (!active) return;
 			setPlayerRagdoll(humanoid, true);
 		});
-
-		const funcs = new Map<Player, () => void>();
-		const difference = 40;
-
-		if (true as boolean) {
-			let prevSpeed: number | undefined;
-			let stopped = false;
-			const stop = () => (stopped = true);
-			funcs.set(player, stop);
-			humanoid.Died.Once(stop);
-
-			task.spawn(() => {
-				while (true as boolean) {
-					task.wait();
-
-					if (stopped) break;
-					if (!humanoid.RootPart) continue;
-					if (humanoid.Sit) continue;
-					if (isPlayerRagdolling(humanoid)) continue;
-
-					const state = humanoid.GetState();
-					if (state === Enum.HumanoidStateType.Physics || state === Enum.HumanoidStateType.GettingUp) {
-						prevSpeed = undefined;
-						continue;
-					}
-
-					const newspeed = humanoid.RootPart.AssemblyLinearVelocity.Magnitude;
-					if (prevSpeed === undefined) {
-						prevSpeed = newspeed;
-						continue;
-					}
-
-					const diff = math.abs(newspeed - prevSpeed);
-					prevSpeed = newspeed;
-
-					if (diff < difference) continue;
-
-					setPlayerRagdoll(humanoid, true);
-				}
-			});
-		} else {
-			humanoid.FreeFalling.Connect(() => {
-				task.spawn(() => {
-					while (task.wait()) {
-						if (humanoid.RootPart) {
-							if (!humanoid.Sit && humanoid.RootPart.AssemblyLinearVelocity.Magnitude > 75) {
-								setPlayerRagdoll(humanoid, true);
-							}
-						} else {
-							break;
-						}
-
-						if (isPlayerRagdolling(humanoid) || humanoid.GetState() !== Enum.HumanoidStateType.Freefall) {
-							break;
-						}
-					}
-				});
-			});
-		}
-
 		humanoid.Died.Connect(() => {
 			humanoid.AutoRotate = false;
 			setPlayerRagdoll(humanoid, true);

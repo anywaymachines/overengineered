@@ -2,8 +2,50 @@ import { ClientComponentEvents } from "client/component/ClientComponentEvents";
 import { LocalPlayer } from "client/controller/LocalPlayer";
 import { HostedService } from "shared/GameHost";
 import { SharedRagdoll } from "shared/SharedRagdoll";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 const { isPlayerRagdolling } = SharedRagdoll;
+function initAutoRagdoll(humanoid: Humanoid, enabled: ReadonlyObservableValue<boolean>): RBXScriptConnection {
+	const difference = 40;
+
+	let prevSpeed: number | undefined;
+	let stopped = false;
+
+	task.spawn(() => {
+		while (true as boolean) {
+			task.wait();
+			if (!enabled.get()) continue;
+
+			if (stopped) break;
+			if (!humanoid.RootPart) continue;
+			if (humanoid.Sit) continue;
+			if (isPlayerRagdolling(humanoid)) continue;
+
+			const state = humanoid.GetState();
+			if (state === Enum.HumanoidStateType.Physics || state === Enum.HumanoidStateType.GettingUp) {
+				prevSpeed = undefined;
+				continue;
+			}
+
+			const newspeed = humanoid.RootPart.AssemblyLinearVelocity.Magnitude;
+			if (prevSpeed === undefined) {
+				prevSpeed = newspeed;
+				continue;
+			}
+
+			const diff = math.abs(newspeed - prevSpeed);
+			prevSpeed = newspeed;
+
+			if (diff < difference) continue;
+
+			SharedRagdoll.setPlayerRagdoll(humanoid, true);
+			SharedRagdoll.event.send(true);
+		}
+	});
+
+	return humanoid.Died.Once(() => (stopped = true));
+}
 function initRagdollUp(humanoid: Humanoid): RBXScriptConnection {
 	const player = LocalPlayer.player;
 
@@ -51,8 +93,9 @@ function initRagdollUp(humanoid: Humanoid): RBXScriptConnection {
 	});
 }
 
+@injectable
 export class RagdollController extends HostedService {
-	constructor() {
+	constructor(@inject playerDataStorage: PlayerDataStorage) {
 		super();
 
 		const event = new ClientComponentEvents(this);
@@ -70,6 +113,10 @@ export class RagdollController extends HostedService {
 			(humanoid) => {
 				if (!humanoid) return;
 				initRagdollUp(humanoid);
+				initAutoRagdoll(
+					humanoid,
+					playerDataStorage.config.createBased((c) => c.ragdoll.auto),
+				);
 			},
 			true,
 		);
