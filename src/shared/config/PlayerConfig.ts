@@ -28,10 +28,13 @@ declare global {
 	};
 	type RagdollConfiguration = {
 		readonly auto: boolean;
+		readonly byKey: boolean;
+		readonly key: KeyCode;
 	};
 
 	namespace PlayerConfigTypes {
 		export type Bool = ConfigType<"bool", boolean>;
+		export type Key = ConfigType<"key", KeyCode>;
 		export type Number = ConfigType<"number", number>;
 		export type Dropdown<T extends string = string> = ConfigType<"dropdown", T> & {
 			readonly items: readonly T[];
@@ -52,6 +55,7 @@ declare global {
 		export interface Types {
 			readonly bool: Bool;
 			readonly number: Number;
+			readonly key: Key;
 			readonly dropdown: Dropdown;
 			readonly clampedNumber: ClampedNumber;
 			readonly dayCycle: DayCycle;
@@ -147,6 +151,8 @@ export const PlayerConfigDefinition = {
 		type: "ragdoll",
 		config: {
 			auto: true,
+			byKey: false,
+			key: "R",
 		},
 	},
 } as const satisfies ConfigTypesToDefinition<keyof PlayerConfigTypes.Types, PlayerConfigTypes.Types>;

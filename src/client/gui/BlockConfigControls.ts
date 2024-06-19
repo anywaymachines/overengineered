@@ -5,7 +5,7 @@ import { ByteEditor } from "client/gui/controls/ByteEditorControl";
 import { CheckBoxControl } from "client/gui/controls/CheckBoxControl";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { DropdownList } from "client/gui/controls/DropdownList";
-import { KeyChooserControl } from "client/gui/controls/KeyChooserControl";
+import { KeyOrStringChooserControl } from "client/gui/controls/KeyOrStringChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { TextBoxControl } from "client/gui/controls/TextBoxControl";
@@ -21,7 +21,7 @@ import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 import type { ByteEditorDefinition } from "client/gui/controls/ByteEditorControl";
 import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
-import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
+import type { KeyOrStringChooserControlDefinition } from "client/gui/controls/KeyOrStringChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import type { TextBoxControlDefinition } from "client/gui/controls/TextBoxControl";
@@ -77,7 +77,7 @@ const templateFolder = Gui.getGameUI<{
 		readonly Config: {
 			readonly ConnectedTemplate: ConfigPartDefinition<GuiButton>;
 			readonly CheckboxTemplate: ConfigPartDefinition<CheckBoxControlDefinition>;
-			readonly KeyTemplate: ConfigPartDefinition<KeyChooserControlDefinition>;
+			readonly KeyTemplate: ConfigPartDefinition<KeyOrStringChooserControlDefinition>;
 			readonly SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 			readonly NumberTemplate: ConfigPartDefinition<NumberTextBoxControlDefinition>;
 			readonly StringTemplate: ConfigPartDefinition<TextBoxControlDefinition>;
@@ -295,13 +295,13 @@ namespace ControlsSource {
 			});
 		}
 	}
-	export class key extends ConfigValueControl<KeyChooserControlDefinition, BlockConfigTypes.Key> {
+	export class key extends ConfigValueControl<KeyOrStringChooserControlDefinition, BlockConfigTypes.Key> {
 		readonly values = new ObservableValue<Readonly<Record<BlockUuid, string>>>({});
 
 		constructor({ configs, definition }: ConfigValueControlParams<BlockConfigTypes.Key>) {
 			super(templates.key(), definition.displayName);
 
-			const control = this.add(new KeyChooserControl<true>(this.gui.Control));
+			const control = this.add(new KeyOrStringChooserControl<true>(this.gui.Control));
 			this.values.set(configs);
 			this.event.subscribeObservable(this.values, (values) =>
 				control.value.set(this.sameOrUndefined((configs = values))),

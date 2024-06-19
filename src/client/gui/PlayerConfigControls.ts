@@ -1,6 +1,7 @@
 import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { DropdownList } from "client/gui/controls/DropdownList";
+import { KeyChooserControl } from "client/gui/controls/KeyChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
@@ -10,6 +11,7 @@ import { Signal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
+import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
@@ -35,6 +37,7 @@ const templatesFolder = Gui.getGameUI<{
 			readonly SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 			readonly MultiTemplate: ConfigPartDefinition<GuiObject>;
 			readonly DropdownTemplate: ConfigPartDefinition<DropdownListDefinition>;
+			readonly KeyTemplate: ConfigPartDefinition<KeyChooserControlDefinition>;
 		};
 	};
 }>().Templates.PlayerConfig;
@@ -44,6 +47,7 @@ const templates = {
 	slider: Control.asTemplateWithMemoryLeak(templatesFolder.SliderTemplate, false),
 	multi: Control.asTemplateWithMemoryLeak(templatesFolder.MultiTemplate, false),
 	dropdown: Control.asTemplateWithMemoryLeak(templatesFolder.DropdownTemplate, false),
+	key: Control.asTemplateWithMemoryLeak(templatesFolder.KeyTemplate, false),
 } as const;
 
 namespace ControlsSource {
@@ -259,6 +263,22 @@ namespace ControlsSource {
 		}
 	}
 
+	export class key extends ConfigValueControl<KeyChooserControlDefinition> {
+		readonly submitted = new Signal<(config: PlayerConfigTypes.Key["config"]) => void>();
+
+		constructor(
+			config: PlayerConfigTypes.Key["config"],
+			definition: ConfigTypeToDefinition<PlayerConfigTypes.Key>,
+		) {
+			super(templates.key(), definition.displayName);
+
+			const control = this.add(new KeyChooserControl(this.gui.Control));
+			control.value.set(config);
+
+			this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
+		}
+	}
+
 	export class _number extends ConfigValueControl<NumberTextBoxControlDefinition> {
 		readonly submitted = new Signal<(config: PlayerConfigTypes.Number["config"]) => void>();
 
@@ -382,6 +402,16 @@ namespace ControlsSource {
 					type: "bool",
 					config: definition.config.auto,
 				},
+				byKey: {
+					displayName: "On keypress",
+					type: "bool",
+					config: definition.config.byKey,
+				},
+				key: {
+					displayName: "Key",
+					type: "key",
+					config: definition.config.key,
+				},
 			} as const satisfies PlayerConfigTypes.Definitions;
 			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
@@ -390,6 +420,13 @@ namespace ControlsSource {
 			this.event.subscribe(control.configUpdated, (key, value) => {
 				this.submitted.Fire((config = { ...config, [key]: value }));
 			});
+
+			const byKeyControl = control.get("byKey");
+			const keyControl = control.get("key");
+
+			const setImprovedControlsEnabled = (byKey: boolean) => keyControl.setVisible(byKey);
+			this.event.subscribe(byKeyControl.submitted, setImprovedControlsEnabled);
+			setImprovedControlsEnabled(config.byKey);
 		}
 	}
 }

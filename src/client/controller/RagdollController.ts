@@ -1,5 +1,6 @@
-import { ClientComponentEvents } from "client/component/ClientComponentEvents";
+import { ContextActionService } from "@rbxts/services";
 import { LocalPlayer } from "client/controller/LocalPlayer";
+import { Keys } from "shared/fixes/Keys";
 import { HostedService } from "shared/GameHost";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
@@ -98,14 +99,41 @@ export class RagdollController extends HostedService {
 	constructor(@inject playerDataStorage: PlayerDataStorage) {
 		super();
 
-		const event = new ClientComponentEvents(this);
-		event.subInput((ih) =>
-			ih.onKeyDown("R", () => {
-				const humanoid = LocalPlayer.humanoid.get();
-				if (!humanoid || humanoid.Sit) return;
+		const actionName = "ragdoll";
+		function bind(key: KeyCode, func: () => void) {
+			ContextActionService.BindAction(
+				actionName,
+				(name, state, input) => {
+					if (actionName !== name) return;
+					if (state !== Enum.UserInputState.Begin) return;
+					if (input.KeyCode.Name !== key) return;
 
-				task.spawn(() => SharedRagdoll.event.send(!isPlayerRagdolling(humanoid)));
-			}),
+					func();
+				},
+				false,
+				Keys[key],
+			);
+		}
+		function unbind() {
+			ContextActionService.UnbindAction(actionName);
+		}
+
+		this.event.subscribeObservable(
+			playerDataStorage.config.createBased((c) => c.ragdoll),
+			({ key, byKey }) => {
+				unbind();
+				if (!byKey) return;
+
+				bind(key, () => {
+					const humanoid = LocalPlayer.humanoid.get();
+					if (!humanoid || humanoid.Sit) return;
+
+					const ragdolling = isPlayerRagdolling(humanoid);
+					SharedRagdoll.setPlayerRagdoll(humanoid, !ragdolling);
+					task.spawn(() => SharedRagdoll.event.send(!ragdolling));
+				});
+			},
+			true,
 		);
 
 		this.event.subscribeObservable(
