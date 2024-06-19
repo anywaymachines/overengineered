@@ -450,7 +450,7 @@ const v12: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 			if ((block.id as string) === "ultrasonicsensor") {
 				return {
 					...block,
-					id: "lidarsensor",
+					id: "lidarsensor" as BlockId,
 				};
 			}
 

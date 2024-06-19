@@ -362,12 +362,6 @@ const logic = {
 			description: "Returns true when the chosen button is pressed",
 			autoWeldShape: "cube",
 		},
-		lidarsensor: {
-			name: "Lidar Sensor",
-			description: "Returns the distance to the object it's looking at",
-			autoWeldShape: "cube",
-			mirrorBehaviour: "normal",
-		},
 		ownerlocator: {
 			name: "Owner Locator",
 			description: "Maks, delete this ####",
