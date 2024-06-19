@@ -27,9 +27,10 @@ declare global {
 		readonly basics: boolean;
 	};
 	type RagdollConfiguration = {
-		readonly auto: boolean;
-		readonly byKey: boolean;
-		readonly key: KeyCode;
+		readonly autoFall: boolean;
+		readonly triggerByKey: boolean;
+		readonly triggerKey: KeyCode;
+		readonly autoRecovery: boolean;
 	};
 
 	namespace PlayerConfigTypes {
@@ -150,9 +151,10 @@ export const PlayerConfigDefinition = {
 		displayName: "Ragdoll",
 		type: "ragdoll",
 		config: {
-			auto: true,
-			byKey: false,
-			key: "R",
+			autoFall: true,
+			triggerByKey: false,
+			triggerKey: "R",
+			autoRecovery: true,
 		},
 	},
 } as const satisfies ConfigTypesToDefinition<keyof PlayerConfigTypes.Types, PlayerConfigTypes.Types>;

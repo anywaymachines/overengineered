@@ -397,20 +397,25 @@ namespace ControlsSource {
 			super(templates.multi(), definition.displayName);
 
 			const def = {
-				auto: {
-					displayName: "Automatic",
+				autoFall: {
+					displayName: "Automatic triggering",
 					type: "bool",
-					config: definition.config.auto,
+					config: definition.config.autoFall,
 				},
-				byKey: {
-					displayName: "On keypress",
+				triggerByKey: {
+					displayName: "Trigger on keypress",
 					type: "bool",
-					config: definition.config.byKey,
+					config: definition.config.triggerByKey,
 				},
-				key: {
-					displayName: "Key",
+				triggerKey: {
+					displayName: "Trigger key",
 					type: "key",
-					config: definition.config.key,
+					config: definition.config.triggerKey,
+				},
+				autoRecovery: {
+					displayName: "Automatic recovery",
+					type: "bool",
+					config: definition.config.autoRecovery,
 				},
 			} as const satisfies PlayerConfigTypes.Definitions;
 			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
@@ -421,12 +426,12 @@ namespace ControlsSource {
 				this.submitted.Fire((config = { ...config, [key]: value }));
 			});
 
-			const byKeyControl = control.get("byKey");
-			const keyControl = control.get("key");
+			const byKeyControl = control.get("triggerByKey");
+			const keyControl = control.get("triggerKey");
 
 			const setImprovedControlsEnabled = (byKey: boolean) => keyControl.setVisible(byKey);
 			this.event.subscribe(byKeyControl.submitted, setImprovedControlsEnabled);
-			setImprovedControlsEnabled(config.byKey);
+			setImprovedControlsEnabled(config.triggerByKey);
 		}
 	}
 }

@@ -1,5 +1,15 @@
+declare global {
+	interface SignalConnection {
+		Disconnect(): void;
+	}
+
+	interface ReadonlyArgsSignal<TArgs extends unknown[]> {
+		Connect(callback: (...args: TArgs) => void): SignalConnection;
+	}
+}
+
 export interface ReadonlyArgsSignal<TArgs extends unknown[]> {
-	Connect(callback: (...args: TArgs) => void): { Disconnect(): void };
+	Connect(callback: (...args: TArgs) => void): SignalConnection;
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface ReadonlySignal<T extends (...args: any) => void = () => void>
@@ -7,11 +17,21 @@ export interface ReadonlySignal<T extends (...args: any) => void = () => void>
 
 /** A signal that you can subscribe to, unsibscribe from and fire */
 export class ArgsSignal<TArgs extends unknown[]> implements ReadonlyArgsSignal<TArgs> {
+	static multiConnection(...connections: SignalConnection[]): SignalConnection {
+		return {
+			Disconnect() {
+				for (const connection of connections) {
+					connection.Disconnect();
+				}
+			},
+		};
+	}
+
 	private destroyed = false;
 	private subscribed?: Set<unknown>; // unknown instead of T to workaround the type system
 	private inSelf = 0;
 
-	Connect(callback: (...args: TArgs) => void): { Disconnect(): void } {
+	Connect(callback: (...args: TArgs) => void): SignalConnection {
 		if (this.destroyed) return { Disconnect() {} };
 
 		this.subscribed ??= new Set();

@@ -7,7 +7,7 @@ import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 const { isPlayerRagdolling } = SharedRagdoll;
-function initAutoRagdoll(humanoid: Humanoid, enabled: ReadonlyObservableValue<boolean>): RBXScriptConnection {
+function initAutoRagdoll(humanoid: Humanoid, enabled: ReadonlyObservableValue<boolean>): SignalConnection {
 	const difference = 40;
 
 	let prevSpeed: number | undefined;
@@ -47,7 +47,7 @@ function initAutoRagdoll(humanoid: Humanoid, enabled: ReadonlyObservableValue<bo
 
 	return humanoid.Died.Once(() => (stopped = true));
 }
-function initRagdollUp(humanoid: Humanoid): RBXScriptConnection {
+function initRagdollUp(humanoid: Humanoid, autoRecovery: ReadonlyObservableValue<boolean>): SignalConnection {
 	const player = LocalPlayer.player;
 
 	while (!player.Character?.FindFirstChild("ConstraintsFolder")) {
@@ -55,6 +55,8 @@ function initRagdollUp(humanoid: Humanoid): RBXScriptConnection {
 	}
 
 	const getUpTime = 4;
+
+	const actionName = "ragdoll_autoRecovery";
 	return SharedRagdoll.subscribeToPlayerRagdollChange(humanoid, () => {
 		if (isPlayerRagdolling(humanoid)) {
 			humanoid.SetStateEnabled("GettingUp", false);
@@ -70,6 +72,23 @@ function initRagdollUp(humanoid: Humanoid): RBXScriptConnection {
 						if (humanoid.Health <= 0) break;
 						if (!humanoid.RootPart) break;
 						if (!isPlayerRagdolling(humanoid)) break;
+
+						if (!autoRecovery.get()) {
+							ContextActionService.BindActionAtPriority(
+								actionName,
+								() => {
+									task.spawn(() => SharedRagdoll.event.send(false));
+
+									ContextActionService.UnbindAction(actionName);
+									return Enum.ContextActionResult.Pass;
+								},
+								false,
+								2000 + 1,
+								...Enum.PlayerActions.GetEnumItems(),
+							);
+
+							break;
+						}
 
 						if (humanoid.RootPart.AssemblyLinearVelocity.Magnitude < 10) {
 							SharedRagdoll.event.send(false);
@@ -120,11 +139,11 @@ export class RagdollController extends HostedService {
 
 		this.event.subscribeObservable(
 			playerDataStorage.config.createBased((c) => c.ragdoll),
-			({ key, byKey }) => {
+			({ triggerKey, triggerByKey }) => {
 				unbind();
-				if (!byKey) return;
+				if (!triggerByKey) return;
 
-				bind(key, () => {
+				bind(triggerKey, () => {
 					const humanoid = LocalPlayer.humanoid.get();
 					if (!humanoid || humanoid.Sit) return;
 
@@ -140,10 +159,13 @@ export class RagdollController extends HostedService {
 			LocalPlayer.humanoid,
 			(humanoid) => {
 				if (!humanoid) return;
-				initRagdollUp(humanoid);
+				initRagdollUp(
+					humanoid,
+					playerDataStorage.config.createBased((c) => c.ragdoll.autoRecovery),
+				);
 				initAutoRagdoll(
 					humanoid,
-					playerDataStorage.config.createBased((c) => c.ragdoll.auto),
+					playerDataStorage.config.createBased((c) => c.ragdoll.autoFall),
 				);
 			},
 			true,
