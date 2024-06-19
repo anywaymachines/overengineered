@@ -7,6 +7,7 @@ import { PlayMode } from "client/modes/PlayMode";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { ToolController } from "client/tools/ToolController";
 import { ObservableValue } from "shared/event/ObservableValue";
+import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { BuildingModeSceneDefinition } from "client/gui/buildmode/BuildingModeScene";
 import type { TouchActionControllerGuiDefinition } from "client/gui/TouchActionControllerGui";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -91,6 +92,12 @@ export class BuildingMode extends PlayMode {
 		const forcetp = () => {
 			const rootPart = LocalPlayer.rootPart.get();
 			if (!rootPart) return;
+
+			const humanoid = LocalPlayer.humanoid.get();
+			if (!humanoid) return;
+
+			SharedRagdoll.setPlayerRagdoll(humanoid, false);
+			task.spawn(() => SharedRagdoll.event.send(false));
 
 			const pos = plot.getSpawnPosition();
 			rootPart.CFrame = new CFrame(pos);
