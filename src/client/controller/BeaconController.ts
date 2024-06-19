@@ -1,3 +1,4 @@
+import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Beacon } from "client/gui/Beacon";
 import { Component } from "shared/component/Component";
 import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren";
@@ -52,6 +53,7 @@ export class BeaconController extends HostedService {
 		};
 
 		const initPlayer = (player: Player) => {
+			if (player === LocalPlayer.player) return;
 			if (player.Character) createPlayerBeacon(player);
 
 			player.CharacterAdded.Connect(() => createPlayerBeacon(player));
