@@ -41,3 +41,5 @@ SoundController.initialize();
 
 LoadingController.hide();
 $log("Client loaded.");
+
+// WeaponProjectile.spawn.send({ position: new Vector3(0, 1, 2) });

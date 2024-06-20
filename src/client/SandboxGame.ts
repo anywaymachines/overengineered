@@ -15,6 +15,7 @@ import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
 import { SavePopup } from "client/gui/popup/SavePopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
+import { WikiPopup } from "client/gui/popup/WikiPopup";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";
 import { PlayerDataInitializer } from "client/PlayerDataStorage";
@@ -100,6 +101,7 @@ export namespace SandboxGame {
 		ChatController.initializeAdminPrefix();
 		SettingsPopup.addAsService(builder);
 		SavePopup.addAsService(builder);
+		WikiPopup.addAsService(builder);
 
 		Startup.initializeBasicsTutorial(builder);
 		Startup.initializeTestRunner(builder);

@@ -11,10 +11,12 @@ export type DropdownDefinition = GuiObject & {
 };
 export class Dropdown<T extends DropdownDefinition = DropdownDefinition> extends Control<T> {
 	readonly isOpen;
+	readonly contents;
 
 	constructor(gui: T, defaultVisibility = false) {
 		super(gui);
 
+		this.contents = this.add(new Control(gui.Content));
 		this.isOpen = new ObservableValue(defaultVisibility);
 
 		const initVisibilityAnimation = (button: ButtonControl, gui: DropdownDefinition) => {
