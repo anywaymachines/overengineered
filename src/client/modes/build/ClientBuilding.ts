@@ -2,7 +2,7 @@ import { LoadingController } from "client/controller/LoadingController";
 import { ActionController } from "client/modes/build/ActionController";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import { Operation } from "shared/Operation";
+import { Operation, Operation2 } from "shared/Operation";
 import { CustomRemotes } from "shared/Remotes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -13,7 +13,7 @@ export namespace ClientBuilding {
 	export const placeOperation = new Operation(placeBlocks);
 	export const deleteOperation = new Operation(deleteBlocks);
 	export const editOperation = new Operation(editBlocks);
-	export const paintOperation = new Operation(paintBlocks);
+	export const paintOperation = new Operation2(paintBlocks);
 	export const updateConfigOperation = new Operation(updateConfig);
 	export const resetConfigOperation = new Operation(resetConfig);
 	export const logicConnectOperation = new Operation(logicConnect);
@@ -207,13 +207,17 @@ export namespace ClientBuilding {
 		plot.changed.Fire();
 		return result;
 	}
-	function paintBlocks(
-		plot: SharedPlot,
-		_blocks: readonly BlockModel[] | "all",
-		material: Enum.Material | undefined,
-		color: Color3 | undefined,
-		_original?: ReadonlyMap<BlockModel, { readonly material: Enum.Material; readonly color: Color3 }>,
-	) {
+
+	type PaintBlocksArgs = {
+		readonly plot: SharedPlot;
+		readonly blocks: readonly BlockModel[] | "all";
+		readonly material: Enum.Material | undefined;
+		readonly color: Color3 | undefined;
+		readonly original?: ReadonlyMap<BlockModel, { readonly material: Enum.Material; readonly color: Color3 }>;
+	};
+	function paintBlocks({ plot, blocks: _blocks, material, color, original: _original }: PaintBlocksArgs) {
+		$trace("Executing painting operation", { plot, _blocks, material, color, _original });
+
 		const origData = _original
 			? new ReadonlyMap(_original.map((block, value) => [BlockManager.manager.uuid.get(block), value] as const))
 			: new ReadonlyMap(
@@ -347,4 +351,3 @@ export namespace ClientBuilding {
 		);
 	}
 }
-

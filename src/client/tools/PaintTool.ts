@@ -151,24 +151,24 @@ export class PaintTool extends ToolBase {
 	}
 
 	paintEverything(enableColor?: boolean, enableMaterial?: boolean) {
-		return ClientBuilding.paintOperation.execute(
-			this.targetPlot.get(),
-			"all",
-			enableMaterial ?? this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
-			enableColor ?? this.enableColor.get() ? this.selectedColor.get() : undefined,
-		);
+		return ClientBuilding.paintOperation.execute({
+			plot: this.targetPlot.get(),
+			blocks: "all",
+			material: enableMaterial ?? this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
+			color: enableColor ?? this.enableColor.get() ? this.selectedColor.get() : undefined,
+		});
 	}
 	paint(
 		blocks: readonly BlockModel[],
 		original?: ReadonlyMap<BlockModel, { readonly material: Enum.Material; readonly color: Color3 }>,
 	) {
-		return ClientBuilding.paintOperation.execute(
-			this.targetPlot.get(),
+		return ClientBuilding.paintOperation.execute({
+			plot: this.targetPlot.get(),
 			blocks,
-			this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
-			this.enableColor.get() ? this.selectedColor.get() : undefined,
+			material: this.enableMaterial.get() ? this.selectedMaterial.get() : undefined,
+			color: this.enableColor.get() ? this.selectedColor.get() : undefined,
 			original,
-		);
+		});
 	}
 
 	getDisplayName(): string {

@@ -71,6 +71,7 @@ export class ServerBuildingRequestController extends HostedService {
 				const handler = children.get(player);
 				if (!handler) return PlayerWatcher.errDestroyed;
 
+				$trace("Executing remote", getfunc(handler.operations), "with args", ...args);
 				return getfunc(handler.operations).execute(...args);
 			});
 		};

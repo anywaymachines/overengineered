@@ -486,13 +486,13 @@ namespace Controllers {
 			this.onDestroy(() => {
 				if (this.canceled) return;
 
-				const response = ClientBuilding.paintOperation.execute(
+				const response = ClientBuilding.paintOperation.execute({
 					plot,
 					blocks,
-					Paint.material.get(),
-					Paint.color.get(),
-					this.origData,
-				);
+					material: Paint.material.get(),
+					color: Paint.color.get(),
+					original: this.origData,
+				});
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
 					this.cancel();
