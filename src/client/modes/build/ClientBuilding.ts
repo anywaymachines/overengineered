@@ -2,7 +2,7 @@ import { LoadingController } from "client/controller/LoadingController";
 import { ActionController } from "client/modes/build/ActionController";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import { Operation2 } from "shared/Operation";
+import { Operation } from "shared/Operation";
 import { CustomRemotes } from "shared/Remotes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -10,14 +10,14 @@ const building = CustomRemotes.building;
 
 /** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
 export namespace ClientBuilding {
-	export const placeOperation = new Operation2(placeBlocks);
-	export const deleteOperation = new Operation2(deleteBlocks);
-	export const editOperation = new Operation2(editBlocks);
-	export const paintOperation = new Operation2(paintBlocks);
-	export const updateConfigOperation = new Operation2(updateConfig);
-	export const resetConfigOperation = new Operation2(resetConfig);
-	export const logicConnectOperation = new Operation2(logicConnect);
-	export const logicDisconnectOperation = new Operation2(logicDisconnect);
+	export const placeOperation = new Operation(placeBlocks);
+	export const deleteOperation = new Operation(deleteBlocks);
+	export const editOperation = new Operation(editBlocks);
+	export const paintOperation = new Operation(paintBlocks);
+	export const updateConfigOperation = new Operation(updateConfig);
+	export const resetConfigOperation = new Operation(resetConfig);
+	export const logicConnectOperation = new Operation(logicConnect);
+	export const logicDisconnectOperation = new Operation(logicDisconnect);
 
 	type PlaceBlocksArgs = {
 		readonly plot: SharedPlot;

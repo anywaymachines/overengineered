@@ -4,7 +4,7 @@ import { BlockManager } from "shared/building/BlockManager";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { HostedService } from "shared/GameHost";
-import { Operation2 } from "shared/Operation";
+import { Operation } from "shared/Operation";
 import { PlayerWatcher } from "shared/PlayerWatcher";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { SlotDatabase } from "server/database/SlotDatabase";
@@ -30,18 +30,18 @@ const areAllBlocksOnPlot = (blocks: readonly BlockModel[], plot: PlotModel): boo
 @injectable
 export class ServerBuildingRequestHandler extends HostedService {
 	readonly operations = {
-		placeBlocks: new Operation2(this.placeBlocks.bind(this)),
-		deleteBlocks: new Operation2(this.deleteBlocks.bind(this)),
-		editBlocks: new Operation2(this.editBlocks.bind(this)),
-		logicConnect: new Operation2(this.logicConnect.bind(this)),
-		logicDisconnect: new Operation2(this.logicDisconnect.bind(this)),
-		paintBlocks: new Operation2(this.paintBlocks.bind(this)),
-		updateConfig: new Operation2(this.updateConfig.bind(this)),
-		resetConfig: new Operation2(this.resetConfig.bind(this)),
-		saveSlot: new Operation2(this.saveSlot.bind(this)),
-		loadSlot: new Operation2(this.loadSlot.bind(this)),
-		loadImportedSlot: new Operation2(this.loadImportedSlot.bind(this)),
-		loadSlotAsAdmin: new Operation2(this.loadSlotAsAdmin.bind(this)),
+		placeBlocks: new Operation(this.placeBlocks.bind(this)),
+		deleteBlocks: new Operation(this.deleteBlocks.bind(this)),
+		editBlocks: new Operation(this.editBlocks.bind(this)),
+		logicConnect: new Operation(this.logicConnect.bind(this)),
+		logicDisconnect: new Operation(this.logicDisconnect.bind(this)),
+		paintBlocks: new Operation(this.paintBlocks.bind(this)),
+		updateConfig: new Operation(this.updateConfig.bind(this)),
+		resetConfig: new Operation(this.resetConfig.bind(this)),
+		saveSlot: new Operation(this.saveSlot.bind(this)),
+		loadSlot: new Operation(this.loadSlot.bind(this)),
+		loadImportedSlot: new Operation(this.loadImportedSlot.bind(this)),
+		loadSlotAsAdmin: new Operation(this.loadSlotAsAdmin.bind(this)),
 	} as const;
 
 	readonly player: Player;
