@@ -43,7 +43,7 @@ export const LoadSlotTest = {
 
 		userid.value.set(1745850275); // BlackWater
 		loadbtn.activated.Connect(() =>
-			CustomRemotes.slots.loadAsAdmin.send(userid.value.get(), slotid.value.get(), imported),
+			CustomRemotes.slots.loadAsAdmin.send({ userid: userid.value.get(), index: slotid.value.get(), imported }),
 		);
 
 		return loadControl;

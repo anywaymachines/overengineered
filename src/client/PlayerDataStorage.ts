@@ -122,7 +122,7 @@ export class PlayerDataStorage {
 		LoadingController.show("Loading a slot");
 
 		try {
-			const response = CustomRemotes.slots[isImported ? "loadImported" : "load"].send(index);
+			const response = CustomRemotes.slots[isImported ? "loadImported" : "load"].send({ index });
 			if (response.success && !response.isEmpty) {
 				this.loadedSlot.set(index);
 			}

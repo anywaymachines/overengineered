@@ -9,7 +9,7 @@ import type { PlayModeController } from "server/modes/PlayModeController";
 import type { ServerPlots } from "server/plots/ServerPlots";
 import type { DIContainer } from "shared/DI";
 import type { C2S2CRemoteFunction } from "shared/event2/PERemoteEvent";
-import type { Operation } from "shared/Operation";
+import type { Operation2 } from "shared/Operation";
 
 @injectable
 export class ServerBuildingRequestController extends HostedService {
@@ -63,9 +63,9 @@ export class ServerBuildingRequestController extends HostedService {
 			true,
 		);
 
-		const subFunc = <TArgs extends unknown[], TRet extends {}>(
-			remote: C2S2CRemoteFunction<TArgs, Response<TRet>>,
-			getfunc: (handler: ServerBuildingRequestHandler["operations"]) => Operation<TArgs, TRet>,
+		const subFunc = <TArg extends object & { readonly [k in string]: unknown }, TRet extends {}>(
+			remote: C2S2CRemoteFunction<[arg: TArg], Response<TRet>>,
+			getfunc: (handler: ServerBuildingRequestHandler["operations"]) => Operation2<TArg, TRet>,
 		) => {
 			remote.subscribe((player, ...args) => {
 				const handler = children.get(player);

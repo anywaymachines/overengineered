@@ -12,7 +12,7 @@ declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel | undefined }>;
 	type MultiBuildResponse = Response<{ readonly models: readonly BlockModel[] }>;
 
-	interface PlaceBlockRequest {
+	type PlaceBlockRequest = {
 		readonly id: BlockId;
 		readonly color: Color3;
 		readonly material: Enum.Material;
@@ -20,54 +20,54 @@ declare global {
 		readonly uuid?: BlockUuid;
 		readonly config?: PlacedBlockConfig;
 		readonly connections?: PlacedBlockLogicConnections;
-	}
-	interface PlaceBlocksRequest {
+	};
+	type PlaceBlocksRequest = {
 		readonly plot: PlotModel;
 		readonly blocks: readonly PlaceBlockRequest[];
-	}
-	interface DeleteBlocksRequest {
+	};
+	type DeleteBlocksRequest = {
 		readonly plot: PlotModel;
 		readonly blocks: readonly BlockModel[] | "all";
-	}
-	interface EditBlocksRequest {
+	};
+	type EditBlocksRequest = {
 		readonly plot: PlotModel;
 		readonly blocks: readonly {
 			readonly instance: BlockModel;
 			readonly position: CFrame | undefined;
 		}[];
-	}
+	};
 
-	interface LogicConnectRequest {
+	type LogicConnectRequest = {
 		readonly plot: PlotModel;
 		readonly outputBlock: BlockModel;
 		readonly outputConnection: BlockConnectionName;
 		readonly inputBlock: BlockModel;
 		readonly inputConnection: BlockConnectionName;
-	}
-	interface LogicDisconnectRequest {
+	};
+	type LogicDisconnectRequest = {
 		readonly plot: PlotModel;
 		readonly inputBlock: BlockModel;
 		readonly inputConnection: BlockConnectionName;
-	}
+	};
 
-	interface PaintBlocksRequest {
+	type PaintBlocksRequest = {
 		readonly plot: PlotModel;
 		readonly blocks: readonly BlockModel[] | "all";
 		readonly color?: Color3;
 		readonly material?: Enum.Material;
-	}
-	interface ConfigUpdateRequest {
+	};
+	type ConfigUpdateRequest = {
 		readonly plot: PlotModel;
 		readonly configs: readonly {
 			readonly block: BlockModel;
 			readonly key: string;
 			readonly value: string;
 		}[];
-	}
-	interface ConfigResetRequest {
+	};
+	type ConfigResetRequest = {
 		readonly plot: PlotModel;
 		readonly blocks: readonly BlockModel[];
-	}
+	};
 
 	type PlayerSaveSlotRequest = {
 		readonly index: number;
@@ -75,6 +75,13 @@ declare global {
 		readonly color?: SerializedColor;
 		readonly touchControls?: TouchControlInfo;
 		readonly save: boolean;
+	};
+	type PlayerLoadSlotRequest = {
+		readonly index: number;
+	};
+	type PlayerLoadAdminSlotRequest = PlayerLoadSlotRequest & {
+		readonly userid: number;
+		readonly imported: boolean;
 	};
 
 	type GameInfoBlock = {
@@ -97,11 +104,9 @@ export const CustomRemotes = {
 		resetConfig: new C2S2CRemoteFunction<[data: ConfigResetRequest]>("rb_resetcfg"),
 	},
 	slots: {
-		load: new C2S2CRemoteFunction<[index: number], LoadSlotResponse>("rs_load"),
-		loadImported: new C2S2CRemoteFunction<[index: number], LoadSlotResponse>("rs_loadi"),
-		loadAsAdmin: new C2S2CRemoteFunction<[userid: number, index: number, imported: boolean], LoadSlotResponse>(
-			"rs_loadadm",
-		),
+		load: new C2S2CRemoteFunction<[data: PlayerLoadSlotRequest], LoadSlotResponse>("rs_load"),
+		loadImported: new C2S2CRemoteFunction<[data: PlayerLoadSlotRequest], LoadSlotResponse>("rs_loadi"),
+		loadAsAdmin: new C2S2CRemoteFunction<[data: PlayerLoadAdminSlotRequest], LoadSlotResponse>("rs_loadadm"),
 		save: new C2S2CRemoteFunction<[data: PlayerSaveSlotRequest], SaveSlotResponse>("rs_save"),
 	},
 	player: {
