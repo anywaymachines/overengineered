@@ -1,7 +1,10 @@
 import { RunService } from "@rbxts/services";
+import { ComponentDisabler } from "shared/component/ComponentDisabler";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { Objects } from "shared/fixes/objects";
 
 declare global {
+	function $trace(...args: unknown[]): void;
 	function $log(...args: unknown[]): void;
 	function $err(...args: unknown[]): void;
 	function $warn(...args: unknown[]): void;
@@ -17,7 +20,11 @@ type LogLevel = {
 	readonly print: (...args: unknown[]) => void;
 };
 
-const levels = {
+const lvls = {
+	trace: {
+		name: "TRC",
+		print,
+	},
 	info: {
 		name: "INF",
 		print,
@@ -41,9 +48,15 @@ const levels = {
 			}
 		},
 	},
-} satisfies Record<string, LogLevel>;
+} as const satisfies Record<string, LogLevel>;
 
 export namespace Logger {
+	export const levels = lvls;
+	export const enabledLevels = new ComponentDisabler(Objects.values(levels));
+	if (!RunService.IsStudio()) {
+		enabledLevels.setDisabled(levels.trace);
+	}
+
 	const scopeStack: string[] = [];
 
 	function init() {
@@ -70,15 +83,17 @@ export namespace Logger {
 		return `[${scopeStack.map((s) => `${s}`).join(" > ")}]`;
 	}
 
-	// TODO: delete this because when would it be false?
-	function isActive() {
-		return true;
+	function isActive(level: (typeof levels)[keyof typeof levels]) {
+		return enabledLevels.isEnabled(level);
 	}
-	export function log(level: LogLevel, ...args: unknown[]) {
-		if (!isActive()) return;
+	export function log(level: (typeof levels)[keyof typeof levels], ...args: unknown[]) {
+		if (!isActive(level)) return;
 		level.print(`[${level.name}]${context} ${stackToName()}`, ...args);
 	}
 
+	export function trace(...args: unknown[]) {
+		log(levels.trace, ...args);
+	}
 	export function info(...args: unknown[]) {
 		log(levels.info, ...args);
 	}
@@ -97,6 +112,10 @@ export namespace Logger {
 		return args;
 	}
 
+	/** @deprecated For internal usage */
+	export function _trace(additional: string, ...args: unknown[]) {
+		trace(...addAdditional(additional, ...args));
+	}
 	/** @deprecated For internal usage */
 	export function _info(additional: string, ...args: unknown[]) {
 		info(...addAdditional(additional, ...args));

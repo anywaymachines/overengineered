@@ -91,6 +91,9 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 
 		const visit = (node: ts.Node): ts.Node => {
 			if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
+				if (node.expression.text === "$trace") {
+					return constructLog(node, "trace");
+				}
 				if (node.expression.text === "$log") {
 					return constructLog(node, "info");
 				}
