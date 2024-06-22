@@ -1,10 +1,10 @@
-import { blockConfigRegistryClient } from "client/blocks/config/BlockConfigRegistryClient";
+import { blockConfigRegistryClient } from "client/blocks/BlockLogicValues";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { SharedMachine } from "shared/block/SharedMachine";
 import { ContainerComponent } from "shared/component/ContainerComponent";
 import { Config } from "shared/config/Config";
-import type { ConfigLogicValueBase } from "client/blocks/config/ConfigLogicValueBase";
+import type { ConfigLogicValueBase } from "client/blocks/BlockLogicValues";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
