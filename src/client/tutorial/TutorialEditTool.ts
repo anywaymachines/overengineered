@@ -18,7 +18,7 @@ export class TutorialEditTool {
 			const eventHandler = new EventHandler();
 
 			eventHandler.register(
-				ClientBuilding.editOperation.addMiddleware((plot, blocks) => {
+				ClientBuilding.editOperation.addMiddleware(({ plot, blocks }) => {
 					if (blocks.size() !== plot.getBlocks().size()) {
 						return { success: false, message: "Select the full plot before moving!" };
 					}

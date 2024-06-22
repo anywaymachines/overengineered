@@ -17,7 +17,7 @@ export class TutorialConfigTool {
 
 	constructor(@inject private readonly tutorial: Tutorial) {
 		this.eventHandler.register(
-			ClientBuilding.resetConfigOperation.addMiddleware((plot, _blocks, args2) => {
+			ClientBuilding.resetConfigOperation.addMiddleware(() => {
 				if (this.get().blocksToConfigure.size() > 0) {
 					return { success: false, message: "Config reset is disabled during tutorial" };
 				}
@@ -89,7 +89,7 @@ export class TutorialConfigTool {
 				}),
 			);*/
 
-			eventHandler.subscribe(ClientBuilding.updateConfigOperation.executed, (plot) => {
+			eventHandler.subscribe(ClientBuilding.updateConfigOperation.executed, ({ plot }) => {
 				const configs = new Map(
 					plot.getBlocks().map((block) => [block, BlockManager.manager.config.get(block)] as const),
 				);

@@ -2,7 +2,7 @@ import { LoadingController } from "client/controller/LoadingController";
 import { ActionController } from "client/modes/build/ActionController";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import { Operation, Operation2 } from "shared/Operation";
+import { Operation2 } from "shared/Operation";
 import { CustomRemotes } from "shared/Remotes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -10,16 +10,20 @@ const building = CustomRemotes.building;
 
 /** Methods to send building requests to the server, with undo/redo support. No validation is performed. */
 export namespace ClientBuilding {
-	export const placeOperation = new Operation(placeBlocks);
-	export const deleteOperation = new Operation(deleteBlocks);
-	export const editOperation = new Operation(editBlocks);
+	export const placeOperation = new Operation2(placeBlocks);
+	export const deleteOperation = new Operation2(deleteBlocks);
+	export const editOperation = new Operation2(editBlocks);
 	export const paintOperation = new Operation2(paintBlocks);
-	export const updateConfigOperation = new Operation(updateConfig);
-	export const resetConfigOperation = new Operation(resetConfig);
-	export const logicConnectOperation = new Operation(logicConnect);
-	export const logicDisconnectOperation = new Operation(logicDisconnect);
+	export const updateConfigOperation = new Operation2(updateConfig);
+	export const resetConfigOperation = new Operation2(resetConfig);
+	export const logicConnectOperation = new Operation2(logicConnect);
+	export const logicDisconnectOperation = new Operation2(logicDisconnect);
 
-	function placeBlocks(plot: SharedPlot, blocks: readonly Omit<PlaceBlockRequest, "uuid">[]) {
+	type PlaceBlocksArgs = {
+		readonly plot: SharedPlot;
+		readonly blocks: readonly Omit<PlaceBlockRequest, "uuid">[];
+	};
+	function placeBlocks({ plot, blocks }: PlaceBlocksArgs) {
 		let placed: readonly BlockUuid[];
 		const result = ActionController.instance.execute(
 			"Place blocks",
@@ -65,7 +69,12 @@ export namespace ClientBuilding {
 		plot.changed.Fire();
 		return result;
 	}
-	function deleteBlocks(plot: SharedPlot, _blocks: readonly BlockModel[] | "all") {
+
+	type DeleteBlocksArgs = {
+		readonly plot: SharedPlot;
+		readonly blocks: readonly BlockModel[] | "all";
+	};
+	function deleteBlocks({ plot, blocks: _blocks }: DeleteBlocksArgs) {
 		const uuids = _blocks === "all" ? "all" : _blocks.map(BlockManager.manager.uuid.get);
 		const blockCount = uuids === "all" ? plot.getBlocks().size() : uuids.size();
 
@@ -170,7 +179,11 @@ export namespace ClientBuilding {
 	};
 	export type EditBlockInfo = EditBlockInfoBase & { readonly instance: BlockModel };
 	type EditBlockRequestInfo = EditBlocksRequest["blocks"][number];
-	function editBlocks(plot: SharedPlot, _blocks: readonly EditBlockInfo[]) {
+	type EditBlocksArgs = {
+		readonly plot: SharedPlot;
+		readonly blocks: readonly EditBlockInfo[];
+	};
+	function editBlocks({ plot, blocks: _blocks }: EditBlocksArgs) {
 		const blocks = _blocks.map((b): EditBlockInfoBase & { readonly uuid: BlockUuid } => ({
 			uuid: BlockManager.manager.uuid.get(b.instance),
 			newPosition: b.newPosition,
@@ -289,20 +302,37 @@ export namespace ClientBuilding {
 		plot.changed.Fire();
 		return result;
 	}
-	function updateConfig(plot: SharedPlot, configs: ConfigUpdateRequest["configs"]) {
+
+	type UpdateConfigArgs = {
+		readonly plot: SharedPlot;
+		readonly configs: ConfigUpdateRequest["configs"];
+	};
+	function updateConfig({ plot, configs }: UpdateConfigArgs) {
 		return building.updateConfig.send({ plot: plot.instance, configs });
 	}
-	function resetConfig(plot: SharedPlot, _blocks: readonly BlockModel[]) {
+
+	type ResetConfigArgs = {
+		readonly plot: SharedPlot;
+		readonly blocks: readonly BlockModel[];
+	};
+	function resetConfig({ plot, blocks: _blocks }: ResetConfigArgs) {
 		return building.resetConfig.send({ plot: plot.instance, blocks: _blocks });
 	}
 
-	function logicConnect(
-		plot: SharedPlot,
-		_inputBlock: BlockModel,
-		inputConnection: BlockConnectionName,
-		_outputBlock: BlockModel,
-		outputConnection: BlockConnectionName,
-	) {
+	type LogicConnectArgs = {
+		readonly plot: SharedPlot;
+		readonly inputBlock: BlockModel;
+		readonly inputConnection: BlockConnectionName;
+		readonly outputBlock: BlockModel;
+		readonly outputConnection: BlockConnectionName;
+	};
+	function logicConnect({
+		plot,
+		inputBlock: _inputBlock,
+		inputConnection,
+		outputBlock: _outputBlock,
+		outputConnection,
+	}: LogicConnectArgs) {
 		const inputBlock = BlockManager.manager.uuid.get(_inputBlock);
 		const outputBlock = BlockManager.manager.uuid.get(_outputBlock);
 
@@ -326,7 +356,13 @@ export namespace ClientBuilding {
 			},
 		);
 	}
-	function logicDisconnect(plot: SharedPlot, _inputBlock: BlockModel, inputConnection: BlockConnectionName) {
+
+	type LogicDisconnectArgs = {
+		readonly plot: SharedPlot;
+		readonly inputBlock: BlockModel;
+		readonly inputConnection: BlockConnectionName;
+	};
+	function logicDisconnect({ plot, inputBlock: _inputBlock, inputConnection }: LogicDisconnectArgs) {
 		const inputBlock = BlockManager.manager.uuid.get(_inputBlock);
 		const output = BlockManager.manager.connections.get(_inputBlock)[inputConnection];
 

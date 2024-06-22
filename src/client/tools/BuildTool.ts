@@ -547,7 +547,7 @@ namespace SinglePlaceController {
 				blocks.map((b) => [VectorUtils.roundVectorToNearestHalf(b.location.Position), b] as const),
 			).map((_, b) => b);
 
-			const response = await ClientBuilding.placeOperation.execute(this.plot.get(), blocks);
+			const response = await ClientBuilding.placeOperation.execute({ plot: this.plot.get(), blocks });
 			processPlaceResponse(response);
 			if (response.success) {
 				this.updateBlockPosition();
@@ -911,9 +911,9 @@ namespace MultiPlaceController {
 				locations.map((b) => [VectorUtils.roundVectorToNearestHalf(b.pos.Position), b] as const),
 			).map((_, b) => b);
 
-			const response = await ClientBuilding.placeOperation.execute(
-				this.plot,
-				locations.map(
+			const response = await ClientBuilding.placeOperation.execute({
+				plot: this.plot,
+				blocks: locations.map(
 					(loc): PlaceBlockRequest => ({
 						id: loc.id,
 						color: this.selectedColor,
@@ -924,7 +924,7 @@ namespace MultiPlaceController {
 						connections: undefined,
 					}),
 				),
-			);
+			});
 			processPlaceResponse(response);
 
 			return response;

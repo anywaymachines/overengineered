@@ -134,7 +134,7 @@ export class DeleteTool extends ToolBase {
 			return;
 		}
 
-		const response = await ClientBuilding.deleteOperation.execute(this.targetPlot.get(), blocks);
+		const response = await ClientBuilding.deleteOperation.execute({ plot: this.targetPlot.get(), blocks });
 		if (response.success) {
 			task.wait();
 

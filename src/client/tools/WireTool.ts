@@ -481,13 +481,13 @@ namespace Controllers {
 
 		from.marker.connect(to.marker);
 		task.spawn(async () => {
-			const result = await ClientBuilding.logicConnectOperation.execute(
-				from.plot,
-				to.data.blockData.instance,
-				to.data.id,
-				from.data.blockData.instance,
-				from.data.id,
-			);
+			const result = await ClientBuilding.logicConnectOperation.execute({
+				plot: from.plot,
+				inputBlock: to.data.blockData.instance,
+				inputConnection: to.data.id,
+				outputBlock: from.data.blockData.instance,
+				outputConnection: from.data.id,
+			});
 
 			if (!result.success) {
 				LogControl.instance.addLine(result.message, Colors.red);
@@ -498,11 +498,11 @@ namespace Controllers {
 		marker.marker.disconnect();
 
 		task.spawn(async () => {
-			const result = await ClientBuilding.logicDisconnectOperation.execute(
-				marker.plot,
-				marker.data.blockData.instance,
-				marker.data.id,
-			);
+			const result = await ClientBuilding.logicDisconnectOperation.execute({
+				plot: marker.plot,
+				inputBlock: marker.data.blockData.instance,
+				inputConnection: marker.data.id,
+			});
 
 			if (!result.success) {
 				LogControl.instance.addLine(result.message, Colors.red);
@@ -716,9 +716,12 @@ export class WireTool extends ToolBase {
 			ih.onKeyUp("F", () => Visual.showConnectedMarkers(this.markers.getAll()));
 		});
 
-		this.event.subscribe(ClientBuilding.logicDisconnectOperation.executed, (plot, _inputBlock, inputConnection) => {
-			//
-		});
+		this.event.subscribe(
+			ClientBuilding.logicDisconnectOperation.executed,
+			({ plot, inputBlock, inputConnection }) => {
+				//
+			},
+		);
 	}
 
 	stopDragging() {

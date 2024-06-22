@@ -50,10 +50,10 @@ namespace Scene {
 			this.gui.Bottom.ResetButton.Activated.Connect(async () => {
 				$log(`Resetting (${selected.get().size()}) block config values`);
 
-				const response = await ClientBuilding.resetConfigOperation.execute(
-					tool.targetPlot.get(),
-					selected.getArr(),
-				);
+				const response = await ClientBuilding.resetConfigOperation.execute({
+					plot: tool.targetPlot.get(),
+					blocks: selected.getArr(),
+				});
 
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
@@ -140,9 +140,9 @@ namespace Scene {
 					`Sending (${selected.size()}) block config values for ${Objects.keys(values).join()} .${key} ${JSON.serialize(Objects.values(values))}`,
 				);
 
-				const response = await ClientBuilding.updateConfigOperation.execute(
-					this.tool.targetPlot.get(),
-					selected.map(
+				const response = await ClientBuilding.updateConfigOperation.execute({
+					plot: this.tool.targetPlot.get(),
+					configs: selected.map(
 						(b) =>
 							({
 								block: b,
@@ -150,7 +150,7 @@ namespace Scene {
 								value: JSON.serialize(values[BlockManager.manager.uuid.get(b)]),
 							}) satisfies ConfigUpdateRequest["configs"][number],
 					),
-				);
+				});
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
 					this.updateConfigs([...selected]);

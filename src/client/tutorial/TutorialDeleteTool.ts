@@ -47,7 +47,7 @@ export class TutorialDeleteTool {
 			const eventHandler = new EventHandler();
 
 			eventHandler.register(
-				ClientBuilding.deleteOperation.addMiddleware((plot, blocks) => {
+				ClientBuilding.deleteOperation.addMiddleware(({ plot, blocks }) => {
 					if (blocks === "all") {
 						return { success: false, message: "Do not delete everything" };
 					}
@@ -70,7 +70,7 @@ export class TutorialDeleteTool {
 				}),
 			);
 
-			eventHandler.subscribe(ClientBuilding.deleteOperation.executed, (plot, blocks) => {
+			eventHandler.subscribe(ClientBuilding.deleteOperation.executed, ({ plot, blocks }) => {
 				for (const blockToPlace of this.tutorialBlocksToRemove ?? []) {
 					if (
 						BuildingManager.getBlockByPosition(

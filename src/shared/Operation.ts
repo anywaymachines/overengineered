@@ -43,11 +43,11 @@ export class Operation<TArgs extends unknown[], TResult extends {} = {}> {
 export class Operation2<TArg extends object & { readonly [k in string]: unknown }, TResult extends {} = {}> {
 	private readonly _executed = new Signal<(...args: [arg: TArg, result: TResult]) => void>();
 	readonly executed = this._executed.asReadonly();
-	private readonly middlewares: ((...args: [arg: TArg, editableArg: Writable<TArg>]) => Response)[] = [];
+	private readonly middlewares: ((arg: Writable<TArg>) => Response)[] = [];
 
 	constructor(private readonly func: (arg: TArg) => Response<TResult>) {}
 
-	addMiddleware(middleware: (...args: [arg: TArg, editableArg: Writable<TArg>]) => Response): { Disconnect(): void } {
+	addMiddleware(middleware: (arg: Writable<TArg>) => Response): { Disconnect(): void } {
 		this.middlewares.push(middleware);
 
 		const list = this.middlewares;
@@ -65,7 +65,7 @@ export class Operation2<TArg extends object & { readonly [k in string]: unknown 
 
 		$trace(`Executing operation ${this}`, arg);
 		for (const middleware of this.middlewares) {
-			const response = middleware(arg, arg);
+			const response = middleware(arg);
 			if (!response.success) {
 				return response;
 			}

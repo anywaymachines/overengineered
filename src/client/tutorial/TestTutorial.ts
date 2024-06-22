@@ -8,7 +8,7 @@ export async function TestTutorial(tutorial: Tutorial) {
 	const allTools = toolController.allTools;
 	const toolEnabler = toolController.enabledTools;
 
-	await ClientBuilding.deleteOperation.execute(tutorial.plot, "all");
+	await ClientBuilding.deleteOperation.execute({ plot: tutorial.plot, blocks: "all" });
 	tutorial.buildingMode.gui.actionbar.enabledButtons.enableOnly("settings");
 
 	// Main

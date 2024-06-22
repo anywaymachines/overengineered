@@ -312,7 +312,7 @@ namespace Controllers {
 					return;
 				}
 
-				const response = ClientBuilding.editOperation.execute(plot, update);
+				const response = ClientBuilding.editOperation.execute({ plot, blocks: update });
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
 					this.cancel();
@@ -373,13 +373,13 @@ namespace Controllers {
 				}
 				const updateMap = update.mapToMap((u) => $tuple(BlockManager.manager.uuid.get(u.instance), u));
 
-				const response = ClientBuilding.placeOperation.execute(
+				const response = ClientBuilding.placeOperation.execute({
 					plot,
-					blocks.map((b) => ({
+					blocks: blocks.map((b) => ({
 						...b,
 						location: updateMap.get(b.uuid)?.newPosition ?? b.location,
 					})),
-				);
+				});
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
 					this.cancel();
@@ -420,7 +420,7 @@ namespace Controllers {
 					return;
 				}
 
-				const response = ClientBuilding.editOperation.execute(plot, update);
+				const response = ClientBuilding.editOperation.execute({ plot, blocks: update });
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
 					this.cancel();
@@ -633,7 +633,7 @@ export class EditTool extends ToolBase {
 		const selected = [...this.selected.get()];
 		this.selected.setRange([]);
 
-		await ClientBuilding.deleteOperation.execute(this.targetPlot.get(), selected);
+		await ClientBuilding.deleteOperation.execute({ plot: this.targetPlot.get(), blocks: selected });
 	}
 	mirrorSelectedBlocks(axis: "x" | "y" | "z") {
 		const selected = [...this.selected.get()];
@@ -660,9 +660,9 @@ export class EditTool extends ToolBase {
 			};
 		});
 
-		ClientBuilding.deleteOperation.execute(this.targetPlot.get(), selected);
+		ClientBuilding.deleteOperation.execute({ plot: this.targetPlot.get(), blocks: selected });
 		task.wait();
-		ClientBuilding.placeOperation.execute(this.targetPlot.get(), mirrored);
+		ClientBuilding.placeOperation.execute({ plot: this.targetPlot.get(), blocks: mirrored });
 	}
 
 	getDisplayName(): string {

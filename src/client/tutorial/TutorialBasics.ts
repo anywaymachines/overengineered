@@ -11,7 +11,7 @@ export async function TutorialBasics(tutorial: Tutorial) {
 	toolEnabler.disableAll();
 	ActionController.instance.disable();
 
-	await ClientBuilding.deleteOperation.execute(tutorial.plot, "all");
+	await ClientBuilding.deleteOperation.execute({ plot: tutorial.plot, blocks: "all" });
 	tutorial.buildingMode.gui.actionbar.enabledButtons.enableOnly("settings");
 
 	tutorial.Control.displayStep(

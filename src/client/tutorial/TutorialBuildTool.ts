@@ -48,7 +48,9 @@ export class TutorialBuildTool {
 			const eventHandler = new EventHandler();
 
 			eventHandler.register(
-				ClientBuilding.placeOperation.addMiddleware((plot, blocks, edit) => {
+				ClientBuilding.placeOperation.addMiddleware((args) => {
+					const { blocks, plot } = args;
+
 					const block = blocks
 						.map((block) => {
 							const btp = this.tutorialBlocksToPlace.find(
@@ -69,7 +71,7 @@ export class TutorialBuildTool {
 						return { success: false, message: "Invalid placement" };
 					}
 
-					edit[1] = [
+					args.blocks = [
 						{
 							...block[0],
 							location: plot.instance.BuildingArea.CFrame.ToWorldSpace(block[1].cframe),
@@ -79,7 +81,7 @@ export class TutorialBuildTool {
 				}),
 			);
 
-			ClientBuilding.placeOperation.executed.Connect((plot, blocks) => {
+			ClientBuilding.placeOperation.executed.Connect(({ plot, blocks }) => {
 				for (const blockToPlace of this.tutorialBlocksToPlace ?? []) {
 					if (
 						!BuildingManager.getBlockByPosition(

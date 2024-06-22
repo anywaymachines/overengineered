@@ -16,7 +16,7 @@ export class ClientBuildingValidationController extends HostedService {
 		super();
 
 		this.event.eventHandler.register(
-			ClientBuilding.placeOperation.addMiddleware((plot, blocks) => {
+			ClientBuilding.placeOperation.addMiddleware(({ plot, blocks }) => {
 				if (!PlayerUtils.isAlive(Players.LocalPlayer)) {
 					return errorResponse("Player is dead");
 				}
