@@ -4,8 +4,8 @@ import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 let globalScale: ReadonlyObservableValue<number>;
 export class ScaledScreenGui<T extends ScreenGui> extends InstanceComponent<T> {
 	static initializeGlobalScale(scale: ReadonlyObservableValue<number>) {
-		// scale.subscribe((scale) => globalScale.set(scale));
 		globalScale = scale;
+		globalScale.subscribe((scale) => $trace("GUI scaling set to", scale));
 	}
 
 	private readonly uiscale: UIScale;
@@ -26,7 +26,6 @@ export class ScaledScreenGui<T extends ScreenGui> extends InstanceComponent<T> {
 			const mult = globalScale.get();
 
 			uiscale.Scale = math.min((asize.Y / 1080) * mult, 9999999);
-			$log(`GUI scaling set to ${uiscale.Scale}`);
 		};
 
 		this.event.subscribeObservable(
