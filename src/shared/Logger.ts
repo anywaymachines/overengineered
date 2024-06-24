@@ -40,7 +40,7 @@ const lvls = {
 				warn(
 					asMap(args)
 						.map((i, v) => (v === undefined ? "nil" : tostring(v)))
-						.join(", "),
+						.join("\t"),
 					1,
 				);
 			} catch {
