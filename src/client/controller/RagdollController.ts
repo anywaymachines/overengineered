@@ -10,7 +10,6 @@ import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 const { isPlayerRagdolling } = SharedRagdoll;
 function initAutoRagdoll(event: ComponentEvents, humanoid: Humanoid, enabled: ReadonlyObservableValue<boolean>) {
-	const difference = 50;
 	let prevSpeed: number | undefined;
 
 	event.loop(0, () => {
@@ -38,6 +37,7 @@ function initAutoRagdoll(event: ComponentEvents, humanoid: Humanoid, enabled: Re
 		const diff = math.abs(newspeed - prevSpeed);
 		prevSpeed = newspeed;
 
+		const difference = state === Enum.HumanoidStateType.Landed ? 100 : 50;
 		if (diff < difference) return;
 
 		$log("Ragdolled with a diff of", diff);
