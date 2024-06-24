@@ -40,7 +40,7 @@ function initAutoRagdoll(event: ComponentEvents, humanoid: Humanoid, enabled: Re
 		const difference = state === Enum.HumanoidStateType.Landed ? 100 : 50;
 		if (diff < difference) return;
 
-		$log("Ragdolled with a diff of", diff);
+		$trace("Ragdolled with a diff of", diff);
 		SharedRagdoll.event.send(true);
 	});
 }
