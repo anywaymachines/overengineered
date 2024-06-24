@@ -413,7 +413,14 @@ export class TransformBuilder<T extends object> {
 
 //
 
-export class TransformContainer<T extends object> extends ContainerComponent<TransformRunner> {
+export type RunningTransform = {
+	cancel(): void;
+	finish(): void;
+};
+export class TransformContainer<T extends object>
+	extends ContainerComponent<TransformRunner>
+	implements RunningTransform
+{
 	private readonly instance;
 
 	constructor(instance: T) {

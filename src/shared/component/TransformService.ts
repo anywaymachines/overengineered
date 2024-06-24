@@ -1,7 +1,11 @@
-import { ObjectOverlayStorage } from "shared/component/ObjectOverlayStorage";
 import { TransformContainer } from "shared/component/Transform";
 import { Objects } from "shared/fixes/objects";
-import type { TransformBuilder, TransformProps, TweenableProperties } from "shared/component/Transform";
+import type {
+	RunningTransform,
+	TransformBuilder,
+	TransformProps,
+	TweenableProperties,
+} from "shared/component/Transform";
 
 type State<T extends object> = { readonly [k in TweenableProperties<T>]?: T[k] };
 export namespace TransformService {
@@ -13,7 +17,7 @@ export namespace TransformService {
 	export function run<T extends object>(
 		instance: T,
 		setup: (transform: TransformBuilder<T>, instance: T) => void,
-	): void {
+	): RunningTransform {
 		transforms.get(instance)?.finish();
 
 		const container = new TransformContainer(instance);
@@ -26,6 +30,8 @@ export namespace TransformService {
 			});
 		});
 		container.enable();
+
+		return container;
 	}
 	export function finish(instance: object) {
 		transforms.get(instance)?.finish();
@@ -133,15 +139,5 @@ export namespace TransformService {
 				state(value);
 			}
 		};
-	}
-
-	export function overlay<T extends object, TInstance extends T>(
-		instance: TInstance,
-		defaultValues: T,
-		props: TransformProps,
-	) {
-		return new ObjectOverlayStorage(defaultValues, (vis) =>
-			TransformService.run(instance, (tr) => tr.transformMulti(vis, props)),
-		);
 	}
 }

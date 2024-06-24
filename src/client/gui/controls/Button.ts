@@ -1,5 +1,6 @@
 import { SoundController } from "client/controller/SoundController";
 import { Control } from "client/gui/Control";
+import { ObjectOverlayStorage } from "shared/component/ObjectOverlayStorage";
 import { TransformService } from "shared/component/TransformService";
 import { Element } from "shared/Element";
 import { Signal } from "shared/event/Signal";
@@ -8,7 +9,7 @@ import type { ElementProperties } from "shared/Element";
 export type ButtonDefinition = GuiButton;
 export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extends Control<T> {
 	readonly activated = new Signal();
-	private animateInteractability?: (interactable: boolean) => void;
+	private readonly visibilityOverlay = new ObjectOverlayStorage({ transparency: 0 });
 
 	constructor(gui: T, activated?: () => void) {
 		super(gui);
@@ -23,18 +24,28 @@ export class ButtonControl<T extends ButtonDefinition = ButtonDefinition> extend
 		if (activated) {
 			this.activated.Connect(activated);
 		}
+
+		this.visibilityOverlay.value.subscribe(({ transparency }) => {
+			TransformService.run(gui as GuiObject, (tr) => {
+				if (gui.Transparency === 1 && transparency !== 1) {
+					tr.func(() => (this.gui.Visible = true)).then();
+				}
+
+				tr.transform("Transparency", transparency, TransformService.commonProps.quadOut02);
+
+				if (transparency === 1) {
+					tr.then().func(() => (this.gui.Visible = false));
+				}
+			});
+		});
 	}
 
 	setInteractable(interactable: boolean) {
-		this.animateInteractability ??= TransformService.boolStateMachine(
-			this.instance as GuiButton,
-			TransformService.commonProps.quadOut02,
-			{ Transparency: this.instance.Transparency },
-			{ Transparency: 0.6 },
-		);
-
 		this.gui.Interactable = interactable;
-		this.animateInteractability(interactable);
+		this.visibilityOverlay.get(0).transparency = interactable ? undefined : 0.6;
+	}
+	protected setInstanceVisibilityFunction(visible: boolean): void {
+		this.visibilityOverlay.get(-1).transparency = visible ? undefined : 1;
 	}
 }
 

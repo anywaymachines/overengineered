@@ -13,7 +13,6 @@ import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { DebugLog } from "client/gui/DebugLog";
 import { Gui } from "client/gui/Gui";
-import { GuiAnimator } from "client/gui/GuiAnimator";
 import { LogControl } from "client/gui/static/LogControl";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BlockGhoster } from "client/tools/additional/BlockGhoster";
@@ -24,6 +23,7 @@ import { BuildingManager } from "shared/building/BuildingManager";
 import { Component } from "shared/component/Component";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { InstanceComponent } from "shared/component/InstanceComponent";
+import { ObjectOverlayStorage } from "shared/component/ObjectOverlayStorage";
 import { TransformService } from "shared/component/TransformService";
 import { Element } from "shared/Element";
 import { ObservableValue } from "shared/event/ObservableValue";
@@ -38,6 +38,7 @@ import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { SharedPlot } from "shared/building/SharedPlot";
+import type { ReadonlyObservableValue } from "shared/event/ObservableValue";
 
 const allowedColor = Colors.blue;
 const forbiddenColor = Colors.red;
@@ -147,6 +148,134 @@ const processPlaceResponse = (response: Response) => {
 };
 
 namespace Scene {
+	type BlockInfoDefinition = GuiObject & {
+		readonly ViewportFrame: ViewportFrame;
+		readonly DescriptionLabel: TextLabel;
+		readonly NameLabel: TextLabel;
+	};
+	class BlockInfo extends Control<BlockInfoDefinition> {
+		constructor(gui: BlockInfoDefinition, selectedBlock: ReadonlyObservableValue<RegistryBlock | undefined>) {
+			super(gui);
+
+			const preview = this.add(new BlockPreviewControl(this.gui.ViewportFrame));
+			this.event.subscribeObservable(
+				selectedBlock,
+				(block) => {
+					this.gui.Visible = block !== undefined;
+					preview.set(block?.model);
+
+					if (block) {
+						this.gui.NameLabel.Text = block.displayName;
+						this.gui.DescriptionLabel.Text = block.info;
+					} else {
+						this.gui.NameLabel.Text = "";
+						this.gui.DescriptionLabel.Text = "";
+					}
+
+					TransformService.run(this.gui, (tr) =>
+						tr
+							.moveRelative(new UDim2(0, 0, 0, -10), {
+								...TransformService.commonProps.quadOut02,
+								duration: 0.1,
+							})
+							.then()
+							.moveRelative(new UDim2(0, 0, 0, 10), {
+								...TransformService.commonProps.quadOut02,
+								duration: 0.1,
+							}),
+					);
+				},
+				true,
+			);
+		}
+
+		private readonly visibilityStateMachine = TransformService.multi(
+			TransformService.boolStateMachine(
+				this.gui.NameLabel,
+				TransformService.commonProps.quadOut02,
+				{ AnchorPoint: this.gui.NameLabel.AnchorPoint, Position: this.gui.NameLabel.Position },
+				{
+					AnchorPoint: new Vector2(1, this.gui.NameLabel.AnchorPoint.Y),
+					Position: new UDim2(new UDim(), this.gui.NameLabel.Position.Y),
+				},
+			),
+			TransformService.boolStateMachine(
+				this.gui.DescriptionLabel,
+				TransformService.commonProps.quadOut02,
+				{
+					AnchorPoint: this.gui.DescriptionLabel.AnchorPoint,
+					Position: this.gui.DescriptionLabel.Position,
+				},
+				{
+					AnchorPoint: new Vector2(1, this.gui.DescriptionLabel.AnchorPoint.Y),
+					Position: new UDim2(new UDim(), this.gui.DescriptionLabel.Position.Y),
+				},
+				(tr) => tr.wait(0.05).then(),
+			),
+			TransformService.boolStateMachine(
+				this.gui.ViewportFrame,
+				TransformService.commonProps.quadOut02,
+				{
+					AnchorPoint: this.gui.ViewportFrame.AnchorPoint,
+					Position: this.gui.ViewportFrame.Position,
+				},
+				{
+					AnchorPoint: new Vector2(1, this.gui.ViewportFrame.AnchorPoint.Y),
+					Position: new UDim2(new UDim(), this.gui.ViewportFrame.Position.Y),
+				},
+				(tr) => tr.wait(0.1).then(),
+			),
+		);
+		protected setInstanceVisibilityFunction(visible: boolean): void {
+			this.visibilityStateMachine(visible);
+		}
+	}
+
+	type TouchButtonsDefinition = GuiObject & {
+		readonly PlaceButton: GuiButton;
+		readonly MultiPlaceButton: GuiButton;
+		readonly RotateRButton: GuiButton;
+		readonly RotateTButton: GuiButton;
+		readonly RotateYButton: GuiButton;
+	};
+	class TouchButtons extends Control<TouchButtonsDefinition> {
+		private readonly visibilityOverlay = new ObjectOverlayStorage({ visible: false });
+
+		constructor(gui: TouchButtonsDefinition, selectedBlock: ReadonlyObservableValue<RegistryBlock | undefined>) {
+			super(gui);
+
+			const visibilityState = TransformService.boolStateMachine(
+				this.gui,
+				TransformService.commonProps.quadOut02,
+				{ AnchorPoint: this.gui.AnchorPoint, Position: this.gui.Position },
+				{
+					AnchorPoint: new Vector2(0, this.gui.AnchorPoint.Y),
+					Position: new UDim2(new UDim(1, 0), this.gui.Position.Y),
+				},
+				(tr, enabled) => (enabled ? tr.func(() => (this.gui.Visible = true)) : 0),
+				(tr, enabled) => (enabled ? 0 : tr.func(() => (this.gui.Visible = false))),
+			);
+			this.visibilityOverlay.value.changed.Connect(({ visible }) => visibilityState(visible));
+
+			const updateTouchControls = () => {
+				const visible = InputController.inputType.get() === "Touch" && selectedBlock.get() !== undefined;
+				this.visibilityOverlay.get(-1).visible = visible ? undefined : false;
+			};
+
+			this.event.onPrepare(() => {
+				this.visibilityOverlay.get(-1).visible = false;
+				TransformService.finish(this.gui);
+
+				updateTouchControls();
+			});
+			this.event.subscribeObservable(selectedBlock, updateTouchControls);
+		}
+
+		protected setInstanceVisibilityFunction(visible: boolean): void {
+			this.visibilityOverlay.get(0).visible = visible;
+		}
+	}
+
 	export type BuildToolSceneDefinition = GuiObject & {
 		readonly ActionBar: GuiObject & {
 			readonly Buttons: GuiObject & {
@@ -165,25 +294,16 @@ namespace Scene {
 				};
 			};
 		};
-		readonly Info: Frame & {
-			readonly ViewportFrame: ViewportFrame;
-			readonly DescriptionLabel: TextLabel;
-			readonly NameLabel: TextLabel;
-		};
+		readonly Info: BlockInfoDefinition;
 		readonly Inventory: BlockSelectionControlDefinition;
-		readonly Touch: Frame & {
-			readonly PlaceButton: GuiButton;
-			readonly MultiPlaceButton: GuiButton;
-			readonly RotateRButton: GuiButton;
-			readonly RotateTButton: GuiButton;
-			readonly RotateYButton: GuiButton;
-		};
+		readonly Touch: TouchButtonsDefinition;
 	};
-
 	export class BuildToolScene extends Control<BuildToolSceneDefinition> {
 		readonly tool;
 		readonly blockSelector;
-		private readonly blockInfoPreviewControl: BlockPreviewControl;
+		private readonly materialColorSelector;
+		private readonly blockInfo;
+		private readonly touchButtons;
 
 		constructor(gui: BuildToolSceneDefinition, tool: BuildTool) {
 			super(gui);
@@ -192,6 +312,9 @@ namespace Scene {
 			this.blockSelector = tool.di.resolveForeignClass(BlockSelectionControl, [gui.Inventory]);
 			this.blockSelector.show();
 			this.add(this.blockSelector);
+
+			this.blockInfo = this.add(new BlockInfo(gui.Info, this.blockSelector.selectedBlock));
+			this.touchButtons = this.add(new TouchButtons(gui.Touch, this.blockSelector.selectedBlock));
 
 			const mirrorEditor = this.add(new MirrorEditorControl(this.gui.Mirror.Content, tool.targetPlot.get()));
 			this.event.subscribeObservable(tool.mirrorMode, (val) => mirrorEditor.value.set(val), true);
@@ -232,24 +355,11 @@ namespace Scene {
 			}
 			this.add(new Settings(gui.Settings.Content));*/
 
-			this.blockInfoPreviewControl = this.add(new BlockPreviewControl(this.gui.Info.ViewportFrame));
 			this.event.subscribeObservable(
 				this.blockSelector.selectedBlock,
 				(block) => {
-					this.gui.Info.Visible = block !== undefined;
-					this.blockInfoPreviewControl.set(block?.model);
 					this.tool.selectedBlock.set(block);
 					this.tool.blockRotation.set(CFrame.identity);
-
-					if (block) {
-						this.gui.Info.NameLabel.Text = block.displayName;
-						this.gui.Info.DescriptionLabel.Text = block.info;
-
-						GuiAnimator.transition(this.gui.Info, 0.2, "right");
-					} else {
-						this.gui.Info.NameLabel.Text = "";
-						this.gui.Info.DescriptionLabel.Text = "";
-					}
 				},
 				true,
 			);
@@ -265,6 +375,7 @@ namespace Scene {
 					this.tool.controller.disable();
 				};
 				const materialColorEditor = this.add(new MaterialColorEditControl(this.gui.Bottom));
+				this.materialColorSelector = materialColorEditor;
 				materialColorEditor.autoSubscribe(tool.selectedMaterial, tool.selectedColor);
 
 				materialColorEditor.materialPipette.onStart.Connect(disable);
@@ -275,15 +386,6 @@ namespace Scene {
 				this.blockSelector.pipette.onEnd.Connect(enable);
 			}
 
-			const updateTouchControls = () => {
-				const visible =
-					InputController.inputType.get() === "Touch" && this.blockSelector.selectedBlock.get() !== undefined;
-				this.gui.Touch.Visible = visible;
-
-				if (visible) {
-					GuiAnimator.transition(this.gui.Touch, 0.2, "left");
-				}
-			};
 			const updateSelectedBlock = () => {
 				const block = tool.selectedBlock.get();
 				if (!block) {
@@ -303,10 +405,7 @@ namespace Scene {
 				this.blockSelector.selectedBlock.set(block);
 			};
 
-			this.event.onPrepare(updateTouchControls);
-			this.event.subscribeObservable(tool.selectedBlock, updateTouchControls);
 			this.event.subscribeObservable(tool.selectedBlock, updateSelectedBlock);
-			updateTouchControls();
 		}
 
 		protected prepareTouch(): void {
@@ -330,16 +429,11 @@ namespace Scene {
 			TransformService.boolStateMachine(
 				this.gui.Inventory,
 				TransformService.commonProps.quadOut02,
-				{ AnchorPoint: this.gui.Inventory.AnchorPoint },
-				{ AnchorPoint: new Vector2(1.2, this.gui.Inventory.AnchorPoint.Y) },
-			),
-			TransformService.boolStateMachine(
-				this.gui.Bottom,
-				TransformService.commonProps.quadOut02,
-				{ Position: this.gui.Bottom.Position },
-				{ Position: this.gui.Bottom.Position.add(new UDim2(0, 0, 0, 40)) },
-				(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),
-				(tr, enabled) => (enabled ? 0 : tr.func(() => super.setInstanceVisibilityFunction(false))),
+				{ AnchorPoint: this.gui.Inventory.AnchorPoint, Position: this.gui.Inventory.Position },
+				{
+					AnchorPoint: new Vector2(1, this.gui.Inventory.AnchorPoint.Y),
+					Position: new UDim2(new UDim(), this.gui.Inventory.Position.Y),
+				},
 			),
 			TransformService.boolStateMachine(
 				this.gui.ActionBar,
@@ -351,6 +445,9 @@ namespace Scene {
 			),
 		);
 		protected setInstanceVisibilityFunction(visible: boolean): void {
+			this.materialColorSelector.setVisible(visible);
+			this.blockInfo.setVisible(visible);
+			this.touchButtons.setVisible(visible);
 			this.visibilityStateMachine(visible);
 		}
 	}

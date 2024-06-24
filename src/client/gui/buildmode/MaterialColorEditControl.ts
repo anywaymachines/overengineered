@@ -4,6 +4,7 @@ import { Control } from "client/gui/Control";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { MaterialChooser } from "client/gui/MaterialChooser";
+import { ObjectOverlayStorage } from "shared/component/ObjectOverlayStorage";
 import { TransformService } from "shared/component/TransformService";
 import { SubmittableValue } from "shared/event/SubmittableValue";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
@@ -39,6 +40,8 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 
 	readonly materialv;
 	readonly colorv;
+
+	private readonly heightOverlays;
 
 	constructor(gui: MaterialColorEditControlDefinition, defaultVisibility = false) {
 		super(gui);
@@ -87,49 +90,69 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 			true,
 		);
 
-		const initVisibilityAnimation = (
-			button: ButtonControl,
-			gui: GuiObject & { readonly Header: { readonly Arrow: GuiObject } },
-		) => {
-			const materialVisibleTransform = TransformService.multi(
-				TransformService.boolStateMachine(
-					gui,
-					TransformService.commonProps.quadOut02,
-					{ Size: gui.Size },
-					{ Size: new UDim2(gui.Size.X, new UDim(0, 40)) },
-				),
-				TransformService.boolStateMachine(
-					gui.Header.Arrow,
-					TransformService.commonProps.quadOut02,
-					{ Rotation: 180 },
-					{ Rotation: 0 },
-				),
-			);
+		type HeightOverlayState = "opened" | "closed" | "hidden";
+		this.heightOverlays = asObject(
+			(["Color", "Material"] as const).mapToMap((k) =>
+				$tuple(k, {
+					overlay: new ObjectOverlayStorage({ state: "opened" as HeightOverlayState }),
+					heights: {
+						opened: gui[k].Size.Y,
+						closed: gui[k].Header.Size.Y,
+						hidden: new UDim(),
+					} as const satisfies { [k in HeightOverlayState]: UDim },
+				}),
+			),
+		);
+		const initVisibilityAnimation = (button: ButtonControl, name: keyof typeof this.heightOverlays) => {
+			const setOverlayVisibility = (visible: boolean) =>
+				(this.heightOverlays[name].overlay.get(0).state = visible ? undefined : "closed");
 
-			{
-				materialVisibleTransform(false);
-				TransformService.finish(gui);
-				TransformService.finish(gui.Header.Arrow);
-			}
-
+			const gui = this.gui[name];
 			let isvisible = false;
-			let wasvisible = defaultVisibility;
-			this.event.subscribe(button.activated, () => materialVisibleTransform((isvisible = !isvisible)));
+			this.event.subscribe(button.activated, () => setOverlayVisibility((isvisible = !isvisible)));
 
-			this.onDisable(() => {
-				wasvisible = isvisible;
-				isvisible = false;
-				materialVisibleTransform(false);
+			const defaultArrowSize = gui.Header.Arrow.Size;
+			this.heightOverlays[name].overlay.value.subscribe(({ state }) => {
+				TransformService.run(gui.Header.Arrow, (tr) => {
+					if (state !== "hidden") {
+						tr.transform(
+							"Rotation",
+							state === "closed" ? 180 : 0,
+							TransformService.commonProps.quadOut02,
+						).transform("Size", defaultArrowSize, TransformService.commonProps.quadOut02);
+					} else {
+						tr.transform("Rotation", 360, TransformService.commonProps.quadOut02).transform(
+							"Size",
+							new UDim2(),
+							TransformService.commonProps.quadOut02,
+						);
+					}
+				});
+
+				TransformService.run(gui, (tr) => {
+					if (state !== "hidden") {
+						tr.func(() => (this.gui.Visible = true)).then();
+					}
+
+					tr.transform(
+						"Size",
+						new UDim2(gui.Size.X, this.heightOverlays[name].heights[state]),
+						TransformService.commonProps.quadOut02,
+					);
+
+					if (state === "hidden") {
+						tr.then().func(() => (this.gui.Visible = false));
+					}
+				});
 			});
-			this.onEnable(() => {
-				if (wasvisible) {
-					isvisible = true;
-					materialVisibleTransform(true);
-				}
-			});
+
+			this.heightOverlays[name].overlay.get(-1).state = "hidden";
+			setOverlayVisibility((isvisible = defaultVisibility));
+			TransformService.finish(gui);
+			TransformService.finish(gui.Header.Arrow);
 		};
-		initVisibilityAnimation(materialbtn, gui.Material);
-		initVisibilityAnimation(colorbtn, gui.Color);
+		initVisibilityAnimation(materialbtn, "Material");
+		initVisibilityAnimation(colorbtn, "Color");
 
 		this.materialPipette = this.add(
 			BlockPipetteButton.forMaterial(this.gui.Material.Header.Pipette, (m) => materialv.submit(m)),
@@ -145,5 +168,11 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 
 		this.event.subscribeObservable(color, (m) => this.colorv.set(m), true, true);
 		this.event.subscribe(this.colorv.submitted, (v) => color.set(v));
+	}
+
+	protected setInstanceVisibilityFunction(visible: boolean): void {
+		for (const [, overlay] of pairs(this.heightOverlays)) {
+			overlay.overlay.get(-1).state = visible ? undefined : "hidden";
+		}
 	}
 }

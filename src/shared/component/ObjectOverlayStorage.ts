@@ -1,18 +1,21 @@
-import { Signal } from "shared/event/Signal";
+import { ObservableValue } from "shared/event/ObservableValue";
 
 export class ObjectOverlayStorage<T extends object> {
-	private readonly _updated = new Signal<(value: T) => void>();
-	readonly updated = this._updated.asReadonly();
+	private readonly _value;
+	readonly value;
 
 	private readonly order: number[] = [];
 	private readonly overlays: Record<number, readonly [meta: Partial<T>, backend: Partial<T>]> = {};
 
-	constructor(defaultValues: T, changed?: (value: T) => void) {
+	constructor(defaultValues: T, changed?: (value: T, prev: T) => void) {
 		this.order.push(9999999999);
 		this.overlays[9999999999] = [defaultValues, defaultValues];
 
+		this._value = new ObservableValue(defaultValues);
+		this.value = this._value.asReadonly();
+
 		if (changed) {
-			this.updated.Connect(changed);
+			this.value.subscribe(changed);
 		}
 	}
 
@@ -44,7 +47,7 @@ export class ObjectOverlayStorage<T extends object> {
 			__index: (_, key) => rawget(backend, key),
 			__newindex: (_, key, value) => {
 				rawset(backend, key, value);
-				this._updated.Fire(this.getValues());
+				this._value.set(this.getValues());
 			},
 		};
 
