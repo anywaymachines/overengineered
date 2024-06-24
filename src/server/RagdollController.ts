@@ -79,7 +79,6 @@ namespace RagdollModule {
 
 		const humanoid = character.WaitForChild("Humanoid") as Humanoid;
 		humanoid.BreakJointsOnDeath = false;
-		humanoid.RequiresNeck = false;
 
 		if (humanoid.RigType === Enum.HumanoidRigType.R6) {
 			for (const [, joint] of pairs(character.GetDescendants())) {
