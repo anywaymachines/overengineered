@@ -442,6 +442,7 @@ namespace Controllers {
 			{ readonly material: Enum.Material; readonly color: Color3 }
 		>;
 		private canceled = false;
+		private readonly materialColorEditor;
 
 		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
 			super();
@@ -462,7 +463,10 @@ namespace Controllers {
 			const ui = tool.gui.instance.Paint.Clone();
 			ui.Parent = tool.gui.instance.Paint.Parent;
 			const materialColorEditor = this.parentGui(new MaterialColorEditControl(ui, true));
+			this.materialColorEditor = materialColorEditor;
 			materialColorEditor.autoSubscribe(Paint.material, Paint.color);
+			this.onEnable(() => materialColorEditor.setVisible(true));
+			this.onDisable(() => materialColorEditor.setVisible(false));
 
 			this.event.subscribeObservable(
 				Paint.material,

@@ -38,6 +38,7 @@ namespace Scene {
 
 	export class PaintToolScene extends Control<PaintToolSceneDefinition> {
 		readonly tool;
+		private readonly materialColorEditor;
 
 		constructor(gui: PaintToolSceneDefinition, tool: PaintTool) {
 			super(gui);
@@ -57,6 +58,7 @@ namespace Scene {
 			};
 
 			const materialColorEditor = this.add(new MaterialColorEditControl(this.gui.Bottom));
+			this.materialColorEditor = materialColorEditor;
 			materialColorEditor.autoSubscribe(tool.selectedMaterial, tool.selectedColor);
 
 			materialColorEditor.materialPipette.onStart.Connect(disable);
@@ -82,17 +84,12 @@ namespace Scene {
 				TransformService.commonProps.quadOut02,
 				{ AnchorPoint: this.gui.Top.AnchorPoint },
 				{ AnchorPoint: new Vector2(0.5, 1) },
-			),
-			TransformService.boolStateMachine(
-				this.gui.Bottom,
-				TransformService.commonProps.quadOut02,
-				{ Position: this.gui.Bottom.Position },
-				{ Position: this.gui.Bottom.Position.add(new UDim2(0, 0, 0, 40)) },
 				(tr, enabled) => (enabled ? tr.func(() => super.setInstanceVisibilityFunction(true)) : 0),
 				(tr, enabled) => (enabled ? 0 : tr.func(() => super.setInstanceVisibilityFunction(false))),
 			),
 		);
 		protected setInstanceVisibilityFunction(visible: boolean): void {
+			this.materialColorEditor.setVisible(visible);
 			this.visibilityStateMachine(visible);
 		}
 	}
