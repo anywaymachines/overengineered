@@ -45,12 +45,18 @@ declare global {
 		readonly title: string;
 		readonly tags: ReadonlySet<WikiTag>;
 		readonly content: readonly WikiEntryContent[];
+		readonly parent?: string;
 	};
 
 	type WikiEntryContentString = string;
 	type WikiEntryContentBlockRender = {
 		readonly type: "blockPreview";
 		readonly id: BlockId;
+	};
+	type WikiEntryContentReference = {
+		readonly type: "ref";
+		readonly id: WikiEntry["id"];
+		readonly customText?: string;
 	};
 	type WikiEntryContentH1 = {
 		readonly type: "h1";
@@ -63,6 +69,7 @@ declare global {
 	type WikiEntryContent =
 		| WikiEntryContentString
 		| WikiEntryContentBlockRender
+		| WikiEntryContentReference
 		| WikiEntryContentH1
 		| WikiEntryContentH2;
 }
@@ -81,12 +88,12 @@ export namespace Wikis {
 			id,
 			title: block.name,
 			content: [
-				`<font size="70">${block.name}</font>`,
 				block.description,
 				{ type: "blockPreview", id },
 				"", // padding
 				...(wiki.content.size() === 0 ? blockDefaultContent : wiki.content),
 			],
+			parent: "blocks",
 		};
 	}
 }

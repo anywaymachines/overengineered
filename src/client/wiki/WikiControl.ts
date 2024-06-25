@@ -1,7 +1,10 @@
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
+import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
+import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { Dropdown } from "client/gui/controls/Dropdown";
+import { TransformService } from "shared/component/TransformService";
 import { Element } from "shared/Element";
 import { ArgsSignal } from "shared/event/Signal";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
@@ -25,14 +28,36 @@ export class WikiCategoriesControl extends Control<WikiCategoriesControlDefiniti
 		super(gui);
 
 		this.itemTemplate = this.asTemplate(gui.ScrollingFrame.Template, true);
-		this.list = this.add(new Control(gui.ScrollingFrame));
+		this.list = this.add(new DictionaryControl<ScrollingFrame, string>(gui.ScrollingFrame));
 	}
 
-	addItems(items: readonly { readonly id: string; readonly title: string }[]) {
+	addItems(items: readonly { readonly id: string; readonly title: string; readonly parent?: string }[]) {
 		for (const { id, title } of items) {
-			const control = this.list.add(new TextButtonControl(this.itemTemplate(), () => this._clicked.Fire(id)));
+			const control = this.list.keyedChildren.add(
+				id,
+				new TextButtonControl(this.itemTemplate(), () => this._clicked.Fire(id)),
+			);
 			control.text.set(title);
 		}
+	}
+
+	select(id: string) {
+		const child = this.list.keyedChildren.get(id);
+		if (!child) return;
+
+		const pos = child.instance.AbsolutePosition.sub(
+			this.list.instance.AbsolutePosition.sub(this.list.instance.CanvasPosition),
+		);
+		this.list.instance.CanvasPosition = pos;
+
+		child.transform((tr) =>
+			tr.flash(
+				tr.instance.BackgroundColor3.Lerp(Colors.white, 0.2),
+				"BackgroundColor3",
+				TransformService.commonProps.quadOut02,
+			),
+		);
+		this._clicked.Fire(id);
 	}
 }
 
@@ -45,6 +70,7 @@ export type WikiContentControlDefinition = GuiObject & {
 		};
 		readonly StringTemplate: TextLabel;
 		readonly BlockPreviewTemplate: ViewportFrame;
+		readonly RefTemplate: TextButtonDefinition;
 	};
 };
 
@@ -56,11 +82,15 @@ type ContentContext = {
 
 @injectable
 export class WikiContentControl extends Control<WikiContentControlDefinition> {
+	private readonly _requestedTeleport = new ArgsSignal<[id: WikiEntry["id"]]>();
+	readonly requestedTeleport = this._requestedTeleport.asReadonly();
+
 	private readonly contents;
 	private readonly contentsItemTemplate;
 	private readonly contentsTemplate;
 	private readonly stringTemplate;
 	private readonly blockPreviewTemplate;
+	private readonly refTemplate;
 
 	constructor(
 		gui: WikiContentControlDefinition,
@@ -73,6 +103,7 @@ export class WikiContentControl extends Control<WikiContentControlDefinition> {
 		this.contentsTemplate = this.asTemplate(gui.ScrollingFrame.ContentsTemplate, true);
 		this.stringTemplate = this.asTemplate(gui.ScrollingFrame.StringTemplate, true);
 		this.blockPreviewTemplate = this.asTemplate(gui.ScrollingFrame.BlockPreviewTemplate, true);
+		this.refTemplate = this.asTemplate(gui.ScrollingFrame.RefTemplate, true);
 	}
 
 	private createContentsEntry(h1s: readonly h1[]): Control {
@@ -123,6 +154,13 @@ export class WikiContentControl extends Control<WikiContentControlDefinition> {
 					this.blockRegistry.blocks.get(entry.id)!.model,
 				);
 			}
+			if (entry.type === "ref") {
+				const gui = this.refTemplate();
+				const control = new TextButtonControl(gui, () => this._requestedTeleport.Fire(entry.id));
+				control.text.set(entry.customText ?? entry.id);
+
+				return control;
+			}
 			if (entry.type === "h1") {
 				context.h1s.push({ name: entry.name, h2s: [] });
 				return this.contentFromEntry(
@@ -151,7 +189,8 @@ export class WikiContentControl extends Control<WikiContentControlDefinition> {
 	set(entry: WikiEntry) {
 		this.contents.clear();
 
-		for (const content of this.contentFromEntries(entry.content)) {
+		const contents = [`<font size="70">${entry.title}</font>`, ...entry.content];
+		for (const content of this.contentFromEntries(contents)) {
 			this.contents.add(content);
 		}
 	}

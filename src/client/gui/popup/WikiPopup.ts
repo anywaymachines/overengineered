@@ -77,6 +77,7 @@ export class WikiPopup extends Popup<WikiPopupDefinition> {
 
 		const sidebar = this.add(new WikiCategoriesControl(gui.Content.Categories));
 		const content = this.add(new WikiContentControl(gui.Content.Content, blockRegistry));
+		content.requestedTeleport.Connect((id) => sidebar.select(id));
 		content.set({ id: "", title: "", tags: new ReadonlySet(), content: [] });
 
 		const wikis = asObject(WikiStorage.getAll().mapToMap((w) => $tuple(w.id, w)));
@@ -86,5 +87,7 @@ export class WikiPopup extends Popup<WikiPopupDefinition> {
 				.sort((l, r) => l.id < r.id),
 		);
 		this.event.subscribe(sidebar.clicked, (id) => content.set(wikis[id]));
+
+		this.onEnable(() => sidebar.select("blocks"));
 	}
 }

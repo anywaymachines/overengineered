@@ -38,4 +38,21 @@ const filledWiki = {
 	),
 	...wiki,
 };
-export const _Wikis: readonly WikiEntry[] = asMap(filledWiki).map(Wikis.block);
+export const _Wikis: readonly WikiEntry[] = [
+	{
+		id: "blocks",
+		title: "Blocks",
+		tags: new Set(["block"]),
+		content: [
+			`
+Block is a block what can be placed and unplaced and moved
+There's a lot of blocks yk
+For example:
+			`,
+			{ type: "ref", id: "block" },
+			{ type: "ref", id: "halfblock" },
+			{ type: "ref", id: "ceil" },
+		],
+	},
+	...asMap(filledWiki).map(Wikis.block),
+];

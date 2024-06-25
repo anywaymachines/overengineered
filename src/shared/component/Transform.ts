@@ -392,7 +392,8 @@ export class TransformBuilder<T extends object> {
 		property: TKey,
 		props?: TransformProps,
 	) {
-		return this.transform(property, value, { style: "Quad", direction: "Out", ...props }) //
+		return this.transform(property, value, { style: "Quad", direction: "Out", ...props })
+			.then()
 			.transform(property, this.instance[property]!, {
 				duration: 0.4,
 				style: "Quad",
