@@ -16,8 +16,8 @@
   "devDependencies": {
     "@rbxts/compiler-types": "github:i3ym/roblox-ts-compiler-types-pe",
     "@rbxts/types": "github:i3ym/roblox-ts-types-pe",
-    "@typescript-eslint/eslint-plugin": "^7.13.0",
-    "@typescript-eslint/parser": "^7.13.0",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/parser": "^7.14.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
@@ -27,7 +27,7 @@
     "eslint-plugin-unused-imports": "^3.2.0",
     "prettier": "^3.3.2",
     "roblox-ts": "github:i3ym/roblox-ts-pe",
-    "typescript": "^5.4.5"
+    "typescript": "=5.4.5"
   },
   "dependencies": {
     "@rbxts/crypto": "^1.2.1",
