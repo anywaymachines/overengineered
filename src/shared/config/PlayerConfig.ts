@@ -153,7 +153,7 @@ export const PlayerConfigDefinition = {
 		config: {
 			autoFall: true,
 			triggerByKey: false,
-			triggerKey: "R",
+			triggerKey: "X",
 			autoRecovery: true,
 		},
 	},
