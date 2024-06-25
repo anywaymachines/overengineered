@@ -598,6 +598,7 @@ export class EditTool extends ToolBase {
 		});
 
 		this.event.onKeyDown("F", () => this.toggleMode("Move"));
+		this.event.onKeyDown("R", () => this.toggleMode("Rotate"));
 		this.event.onKeyDown("ButtonX", () => this.toggleMode("Move"));
 	}
 
