@@ -695,22 +695,22 @@ const registry = {
 	wing1x1: {
 		name: "Wing 1x1",
 		description: "A part with advanced aerodynamic properties",
-		mirrorBehaviour: "none",
+		mirrorBehaviour: "wedgeWing",
 	},
 	wing1x2: {
 		name: "Wing 1x2",
 		description: "A part with advanced aerodynamic properties but a bit longer",
-		mirrorBehaviour: "none",
+		mirrorBehaviour: "wedgeWing",
 	},
 	wing1x3: {
 		name: "Wing 1x3",
 		description: "A part with advanced aerodynamic properties but two bits longer",
-		mirrorBehaviour: "none",
+		mirrorBehaviour: "wedgeWing",
 	},
 	wing1x4: {
 		name: "Wing 1x4",
 		description: "A part with advanced aerodynamic properties but the joke is overused",
-		mirrorBehaviour: "none",
+		mirrorBehaviour: "wedgeWing",
 	},
 	wingrounding: {
 		name: "Wing Rounding",

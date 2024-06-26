@@ -66,7 +66,12 @@ export namespace TestRunner {
 		};
 		const testFrom = (name: string, tests: ((di?: ReadonlyDIContainer) => Control) | TestFramework.Tests) => {
 			if (typeIs(tests, "function")) {
-				return [name, tests(di) as Control] as const;
+				const test = tests(di);
+				if (test instanceof Control) {
+					return [name, test] as const;
+				}
+
+				return wrapNonVisual(name, test);
 			}
 
 			return wrapNonVisual(name, tests);

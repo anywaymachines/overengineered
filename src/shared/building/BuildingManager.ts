@@ -120,82 +120,53 @@ export namespace BuildingManager {
 		blockRegistry: BlockRegistry,
 		filterSamePositions = false,
 	): readonly MirroredBlock[] {
-		const method = blockRegistry.blocks.get(origBlock.id)?.mirrorBehaviour ?? "normal";
-		const [xAxis, yAxis, zAxis] = [Vector3.xAxis, Vector3.yAxis, Vector3.zAxis];
-
 		const reflect = (block: MirroredBlock, mode: "x" | "y" | "z", mirrorCFrame: CFrame): MirroredBlock => {
-			let cframe = block.pos;
-			const pos = cframe.Position;
+			function rotate(cframe: CFrame): CFrame {
+				function normalRotation(cframe: CFrame) {
+					const [X, Y, Z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = mirrorCFrame
+						.ToObjectSpace(cframe)
+						.GetComponents();
 
-			function normalRotation() {
-				const [X, Y, Z, R00, R01, R02, R10, R11, R12, R20, R21, R22] = mirrorCFrame
-					.ToObjectSpace(cframe)
-					.GetComponents();
-
-				const reflection = new CFrame(X, Y, -Z, -R00, R01, R02, -R10, R11, R12, R20, -R21, -R22);
-				const reflectedCFrame = mirrorCFrame.ToWorldSpace(reflection);
-				cframe = reflectedCFrame.Rotation;
-			}
-
-			// apply rotation only
-			switch (method) {
-				case "none":
-					break;
-				case "offset90":
-					cframe = cframe.mul(CFrame.fromEulerAnglesYXZ(0, math.pi / 2, 0));
-					normalRotation();
-					break;
-				case "offset180":
-					cframe = cframe.mul(CFrame.fromEulerAnglesYXZ(0, math.pi, 0));
-					normalRotation();
-					break;
-				case "offset270":
-					cframe = cframe.mul(CFrame.fromEulerAnglesYXZ(0, math.pi * 1.5, 0));
-					normalRotation();
-					break;
-				case "normal": {
-					normalRotation();
-					break;
+					const reflection = new CFrame(X, Y, -Z, -R00, R01, R02, -R10, R11, R12, R20, -R21, -R22);
+					const reflectedCFrame = mirrorCFrame.ToWorldSpace(reflection);
+					return reflectedCFrame.Rotation;
 				}
-				case "wedgeWing": {
-					const round = (vec: Vector3) =>
-						new Vector3(math.round(vec.X), math.round(vec.Y), math.round(vec.Z));
-					const [xvec, yvec, zvec] = [
-						round(cframe.RightVector),
-						round(cframe.UpVector),
-						round(cframe.LookVector),
-					];
 
-					// Y targets Y
-					if (yvec.Y !== 0) {
-						if (mode === "x") cframe = CFrame.fromAxisAngle(xAxis, math.pi).mul(cframe);
-						if (mode === "y") break;
-						if (mode === "z") cframe = CFrame.fromAxisAngle(zAxis, math.pi).mul(cframe);
-						break;
+				const method = blockRegistry.blocks.get(origBlock.id)?.mirrorBehaviour ?? "normal";
+				switch (method) {
+					case "none":
+						return cframe;
+					case "offset90":
+						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, math.pi / 2, 0)));
+					case "offset180":
+						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, math.pi, 0)));
+					case "offset270":
+						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, math.pi * 1.5, 0)));
+					case "normal": {
+						return normalRotation(cframe);
 					}
+					case "wedgeWing": {
+						const [x, y, z, x0, x1, x2, y0, y1, y2, z0, z1, z2] = cframe.GetComponents();
+						if (mode === "x") {
+							return new CFrame(x, y, z, x0, -x1, x2, y0, -y1, y2, -z0, z1, -z2);
+						} else if (mode === "y") {
+							return new CFrame(x, y, z, x0, -x1, x2, -y0, y1, -y2, z0, -z1, z2);
+						} else if (mode === "z") {
+							return new CFrame(x, y, z, -x0, x1, -x2, y0, -y1, y2, z0, -z1, z2);
+						}
 
-					// Y targets X
-					if (yvec.X !== 0) {
-						if (mode === "x") cframe = CFrame.fromAxisAngle(yAxis, math.pi).mul(cframe);
-						if (mode === "y") cframe = CFrame.fromAxisAngle(zAxis, math.pi).mul(cframe);
-						if (mode === "z") break;
-						break;
+						throw "Unknown mode";
 					}
-
-					// Y targets Z
-					if (mode === "x") break;
-					if (mode === "y") cframe = CFrame.fromAxisAngle(xAxis, math.pi).mul(cframe);
-					if (mode === "z") cframe = CFrame.fromAxisAngle(yAxis, math.pi).mul(cframe);
-					break;
 				}
 			}
 
-			// apply position \/
-			const rpos = mirrorCFrame.PointToObjectSpace(pos);
+			const rotated = rotate(block.pos);
+			const pos = mirrorCFrame.PointToObjectSpace(block.pos.Position);
+
 			return {
 				id: (blockRegistry.blocks.get(block.id)?.mirrorReplacementId as BlockId | undefined) ?? block.id,
-				pos: new CFrame(mirrorCFrame.ToWorldSpace(new CFrame(rpos.X, rpos.Y, -rpos.Z)).Position).mul(
-					cframe.Rotation,
+				pos: new CFrame(mirrorCFrame.ToWorldSpace(new CFrame(pos.X, pos.Y, -pos.Z)).Position).mul(
+					rotated.Rotation,
 				),
 			};
 		};
