@@ -1,7 +1,7 @@
 import { ComponentEvents } from "shared/component/ComponentEvents";
 import { DIContainer } from "shared/DI";
 import { SlimSignal } from "shared/event/SlimSignal";
-import type { DIRegistrationContext } from "shared/DI";
+import type { DISingletonClassRegistrationContext } from "shared/DI";
 
 declare global {
 	interface IHostedService extends IEnableableComponent, IDestroyableComponent {}
@@ -10,7 +10,7 @@ declare global {
 		registerService<T extends abstract new (...args: never) => IHostedService>(
 			service: T,
 			name?: string,
-		): DIRegistrationContext<T>;
+		): DISingletonClassRegistrationContext<T>;
 	}
 	type GameHostBuilder = HostBuilder;
 	interface GameHost {
@@ -79,7 +79,7 @@ type HostedServiceCtor = abstract new (...args: never) => IHostedService;
 class DIContainerBuilder extends DIContainer implements GameHostBuilderDIContainer {
 	readonly services: HostedServiceCtor[] = [];
 
-	registerService<T extends HostedServiceCtor>(service: T, name?: string): DIRegistrationContext<T> {
+	registerService<T extends HostedServiceCtor>(service: T, name?: string): DISingletonClassRegistrationContext<T> {
 		const ret = this.registerSingletonClass(service, name);
 		this.services.push(service);
 

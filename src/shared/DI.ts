@@ -42,24 +42,36 @@ const getSymbol = <T extends object>(obj: T): string => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const instantiateClass = <T, TCtor extends abstract new (...args: TArgs) => T, TArgs extends readonly unknown[]>(
+const instantiateClass = <TCtor extends abstract new (...args: TArgs) => unknown, TArgs extends readonly unknown[]>(
 	clazz: TCtor,
 	args: TArgs | undefined,
 	container: DIContainer,
-): T => {
-	const isDeps = (clazz: unknown): clazz is DepsCreatable<T, TArgs> =>
+): ConstructorResult<TCtor> => {
+	const isDeps = (clazz: unknown): clazz is DepsCreatable<ConstructorResult<TCtor>, TArgs> =>
 		typeIs(clazz, "table") && "_depsCreate" in clazz;
 
 	if (isDeps(clazz)) {
 		return clazz._depsCreate(...[...(args ?? ([] as unknown as TArgs)), container]);
 	}
 
-	return new (clazz as unknown as new (...args: TArgs) => T)(...(args ?? ([] as unknown as TArgs)));
+	return new (clazz as unknown as new (...args: TArgs) => ConstructorResult<TCtor>)(
+		...(args ?? ([] as unknown as TArgs)),
+	);
 };
 
-export type DIRegistrationContext<T extends abstract new (...args: never) => unknown> = {
-	withArgs(args: Partial<[...ConstructorParameters<T>]>): DIRegistrationContext<T>;
+type ConstructorResult<T extends abstract new (...args: never) => unknown> = T extends abstract new (
+	...args: never
+) => infer TRes
+	? TRes & defined
+	: never;
+
+export type DIRegistrationContext<T> = {
+	onInit<TThis>(this: TThis, func: (value: T) => void): TThis;
 };
+export type DISingletonClassRegistrationContext<T extends abstract new (...args: never) => unknown> =
+	DIRegistrationContext<ConstructorResult<T>> & {
+		withArgs<TThis>(this: TThis, args: Partial<[...ConstructorParameters<T>]>): TThis;
+	};
 type D = DIContainer;
 export class DIContainer {
 	private readonly registrations = new Map<string, IRegistration<unknown>>();
@@ -78,37 +90,31 @@ export class DIContainer {
 	registerSingletonClass<T extends abstract new (...args: any) => unknown>(
 		clazz: T,
 		name?: string,
-	): DIRegistrationContext<T> {
+	): DISingletonClassRegistrationContext<T> {
 		name ??= getSymbol(clazz);
-		this.assertNotNull(clazz, name);
-		if (this.registrations.get(name)) {
-			throw `Dependency ${name} is already registered`;
-		}
 
 		let savedArgs: Partial<[...ConstructorParameters<T>]> | undefined = undefined;
-
-		let created: unknown | undefined;
-		this.registrations.set(name, {
-			get: () => (created ??= instantiateClass(clazz, savedArgs, this)),
-		});
+		const reg = this.registerSingletonFunc(() => instantiateClass(clazz, savedArgs, this), name);
 
 		return {
-			withArgs(args: Partial<[...ConstructorParameters<T>]>) {
+			onInit(func) {
+				reg.onInit(func);
+				return this;
+			},
+			withArgs(args) {
 				savedArgs = args;
 				return this;
 			},
 		};
 	}
-	registerSingleton<T extends defined>(value: T, name?: string): void {
+	registerSingleton<T extends defined>(value: T, name?: string): DIRegistrationContext<T> {
 		name ??= getSymbol(value);
-		this.assertNotNull(value, name);
-		if (this.registrations.get(name)) {
-			throw `Dependency ${name} is already registered`;
-		}
-
-		this.registrations.set(name, { get: () => value });
+		return this.registerSingletonFunc(() => value, name);
 	}
-	registerSingletonFunc<T extends defined>(func: (ctx: ReadonlyDIContainer) => T, name?: string): void {
+	registerSingletonFunc<T extends defined>(
+		func: (ctx: ReadonlyDIContainer) => T,
+		name?: string,
+	): DIRegistrationContext<T> {
 		name ??= getSymbol(func);
 		this.assertNotNull(func, name);
 		if (this.registrations.get(name)) {
@@ -116,7 +122,27 @@ export class DIContainer {
 		}
 
 		let created: T | undefined;
-		this.registrations.set(name, { get: () => (created ??= func(this)) });
+		const onInit: ((value: T) => void)[] = [];
+
+		this.registrations.set(name, {
+			get: () => {
+				if (created) return created;
+
+				created = func(this);
+				for (const func of onInit) {
+					func(created);
+				}
+
+				return created;
+			},
+		});
+
+		return {
+			onInit(func) {
+				onInit.push(func);
+				return this;
+			},
+		};
 	}
 
 	registerTransientFunc<T extends defined>(func: (ctx: DIContainer) => T, name?: string): void {
