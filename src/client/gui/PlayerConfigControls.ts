@@ -113,7 +113,7 @@ namespace ControlsSource {
 
 			const def = {
 				improved: {
-					displayName: "Enable",
+					displayName: "Improved",
 					type: "bool",
 					config: definition.config.improved,
 				},
