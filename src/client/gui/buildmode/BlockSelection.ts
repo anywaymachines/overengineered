@@ -143,7 +143,9 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			if (
 				block.category === this.selectedCategory.get()[this.selectedCategory.get().size() - 1] ||
 				(this.gui.SearchTextBox.Text !== "" &&
-					this.translate(block.displayName).lower().find(this.gui.SearchTextBox.Text.lower())[0])
+					this.translate(block.displayName)
+						.fullLower()
+						.find(this.gui.SearchTextBox.Text.fullLower(), undefined, true)[0])
 			) {
 				const button = createBlockButton(block, () => {
 					if (this.gui.SearchTextBox.Text !== "") {
