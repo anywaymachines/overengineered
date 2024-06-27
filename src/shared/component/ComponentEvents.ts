@@ -2,6 +2,7 @@ import { EventHandler } from "shared/event/EventHandler";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { JSON } from "shared/fixes/Json";
 import type { CollectionChangedArgs, ReadonlyObservableCollection } from "shared/event/ObservableCollection";
+import type { ReadonlyObservableMap } from "shared/event/ObservableMap";
 import type { ReadonlyObservableValue, ReadonlySubscribeObservableValue } from "shared/event/ObservableValue";
 import type { ReadonlyArgsSignal, ReadonlySignal } from "shared/event/Signal";
 
@@ -113,6 +114,24 @@ export class ComponentEvents {
 			executeOnEnable,
 			executeImmediately,
 		);
+	}
+
+	/** Subscribe to an observable map changed event */
+	subscribeMap<K extends defined, V extends defined>(
+		observable: ReadonlyObservableMap<K, V>,
+		callback: (key: K, value: V | undefined) => void,
+		executeOnEnable = false,
+		executeImmediately = false,
+	): void {
+		this.subscribe(observable.changed, callback);
+
+		if (executeOnEnable) {
+			this.onEnable(() => {
+				for (const [k, v] of observable.getAll()) {
+					callback(k, v);
+				}
+			}, executeImmediately);
+		}
 	}
 
 	/** Create an `ReadonlyObservableValue` from an `Instance` property */

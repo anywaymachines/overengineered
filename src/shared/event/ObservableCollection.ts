@@ -1,5 +1,4 @@
-import { Signal } from "shared/event/Signal";
-import type { ReadonlySignal } from "shared/event/Signal";
+import { ArgsSignal } from "shared/event/Signal";
 
 export type CollectionChangedArgs<T> =
 	| { readonly kind: "add"; readonly added: readonly T[] }
@@ -7,7 +6,7 @@ export type CollectionChangedArgs<T> =
 	| { readonly kind: "clear" };
 
 export interface ReadonlyObservableCollection<T extends defined> {
-	readonly changed: ReadonlySignal<(collectionChangedType: CollectionChangedArgs<T>) => void>;
+	readonly changed: ReadonlyArgsSignal<[collectionChangedType: CollectionChangedArgs<T>]>;
 
 	size(): number;
 	getArr(): readonly T[];
@@ -20,7 +19,7 @@ export interface ReadonlyObservableCollectionSet<T extends defined> extends Read
 }
 
 abstract class ObservableCollectionBase<T extends defined> implements ReadonlyObservableCollection<T> {
-	protected readonly _changed = new Signal<(collectionChangedType: CollectionChangedArgs<T>) => void>();
+	protected readonly _changed = new ArgsSignal<[collectionChangedType: CollectionChangedArgs<T>]>();
 	readonly changed = this._changed.asReadonly();
 
 	abstract size(): number;
