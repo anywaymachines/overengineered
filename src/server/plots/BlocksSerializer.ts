@@ -1,3 +1,4 @@
+import { HttpService } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
@@ -938,7 +939,7 @@ const v21: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 };
 
 // fix some block models
-const v22: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v21> = {
+const v22: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v21> = {
 	version: 22,
 
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
@@ -947,7 +948,7 @@ const v22: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 				return {
 					...block,
 					loc: Serializer.CFrameSerializer.serialize(
-						Serializer.CFrameSerializer.deserialize(block.loc).mul(CFrame.Angles(0, 0, -90)),
+						Serializer.CFrameSerializer.deserialize(block.loc).mul(CFrame.Angles(0, 0, math.rad(-90))),
 					),
 				};
 			}
@@ -958,6 +959,42 @@ const v22: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 		return {
 			version: this.version,
 			blocks: prev.blocks.map(update),
+		};
+	},
+};
+
+// update wheel models
+const v23: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v22> = {
+	version: 23,
+
+	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		const update = (block: SerializedBlockV3): readonly SerializedBlockV3[] => {
+			if (block.id === "wheel" || block.id === "smallwheel") {
+				return [
+					{
+						...block,
+						id: block.id === "wheel" ? "bigwheel" : "wheel",
+					},
+					{
+						id: "shaft",
+						loc: Serializer.CFrameSerializer.serialize(
+							Serializer.CFrameSerializer.deserialize(block.loc).mul(CFrame.Angles(math.rad(-90), 0, 0)),
+						),
+						col: block.col,
+						mat: block.mat,
+						config: undefined,
+						connections: undefined,
+						uuid: HttpService.GenerateGUID(false) as BlockUuid,
+					},
+				];
+			}
+
+			return [block];
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.flatmap(update),
 		};
 	},
 
@@ -975,7 +1012,10 @@ const v22: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 
 //
 
-const versions = [v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const;
+const versions = [
+	...([v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const),
+	...([v23] as const),
+] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
 const getVersion = (version: number) => versions.find((v) => v.version === version);

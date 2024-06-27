@@ -692,6 +692,10 @@ const registry = {
 		name: "Wheel",
 		description: "A ginormous wheel",
 	},
+	bigwheel: {
+		name: "Big wheel",
+		description: "Wheel. Big one.",
+	},
 	wing1x1: {
 		name: "Wing 1x1",
 		description: "A part with advanced aerodynamic properties",
