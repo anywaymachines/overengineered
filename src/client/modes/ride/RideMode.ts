@@ -3,6 +3,7 @@ import { SoundController } from "client/controller/SoundController";
 import { Gui } from "client/gui/Gui";
 import { RideModeScene } from "client/gui/ridemode/RideModeScene";
 import { PlayMode } from "client/modes/PlayMode";
+import { CustomRemotes } from "shared/Remotes";
 import type { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -24,6 +25,13 @@ export class RideMode extends PlayMode {
 			playerData,
 		);
 		this.parentGui(this.rideModeScene);
+
+		CustomRemotes.modes.set.sent.Connect((mode) => {
+			if (mode === "ride") return;
+			if (!this.currentMachine) return;
+
+			this.currentMachine.getImpactController()?.disable();
+		});
 	}
 
 	getName(): PlayModes {

@@ -270,8 +270,13 @@ export class S2C2SRemoteFunction<TArg, TResp extends Response = Response> extend
 export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extends PERemoveEvent<
 	CustomRemoteEventBase<{ id: string; result: TResp }, { id: string; arg: TArg }>
 > {
+	private readonly _sent = new ArgsSignal<[arg: TArg]>();
+	/** @client */
+	readonly sent = this._sent.asReadonly();
+
 	/** @server */
 	private invoked?: (player: Player, arg: TArg) => TResp;
+
 	private readonly waiting = new Map<string, (ret: TResp) => void>();
 	private readonly middlewares: WaiterMiddleware[] = [];
 
@@ -317,6 +322,7 @@ export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extend
 		const waiter = createWaiter<TResp>(this.middlewares);
 		if ("success" in waiter) return waiter;
 
+		this._sent.Fire(arg!);
 		const id = HttpService.GenerateGUID();
 		this.event.FireServer({ id, arg: arg! });
 
