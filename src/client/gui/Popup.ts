@@ -25,7 +25,7 @@ export class Popup<T extends GuiObject = GuiObject> extends Control<T> {
 		this.parentScreen = new ScaledScreenGui(
 			Element.create(
 				"ScreenGui",
-				{ Name: tostring(this), Parent: Popup.popupsScreenGui, IgnoreGuiInset: true },
+				{ Name: `popup_${gui.Name}`, Parent: Popup.popupsScreenGui, IgnoreGuiInset: true },
 				{
 					bg: Element.create("Frame", {
 						Active: true,
