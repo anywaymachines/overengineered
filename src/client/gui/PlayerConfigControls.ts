@@ -308,7 +308,7 @@ namespace ControlsSource {
 
 			const items: { readonly [k in typeof config.kind]: true } = {
 				Flat: true,
-				Terrain: true,
+				Classic: true,
 				Triangle: true,
 				Water: true,
 			};
