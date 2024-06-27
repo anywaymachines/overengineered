@@ -355,7 +355,7 @@ namespace ControlsSource {
 
 			const setImprovedControlsEnabled = (kind: string & typeof config.kind) => {
 				resolutionControl.setVisible(kind === "Triangle");
-				foliageControl.setVisible(kind === "Terrain");
+				foliageControl.setVisible(kind === "Classic");
 			};
 			this.event.subscribe(kindControl.submitted, setImprovedControlsEnabled);
 			setImprovedControlsEnabled(config.kind);

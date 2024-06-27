@@ -63,7 +63,7 @@ export class TerrainController extends HostedService {
 							terrain.loadDistance,
 						);
 						break;
-					case "Terrain":
+					case "Classic":
 						chunkLoader = new ChunkLoader(
 							TerrainChunkRenderer(DefaultChunkGenerator, terrain.foliage),
 							terrain.loadDistance,

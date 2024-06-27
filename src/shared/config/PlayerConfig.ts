@@ -18,7 +18,7 @@ declare global {
 		readonly othersEffects: boolean;
 	};
 	type TerrainConfiguration = {
-		readonly kind: "Terrain" | "Triangle" | "Flat" | "Water";
+		readonly kind: "Classic" | "Triangle" | "Flat" | "Water";
 		readonly resolution: number;
 		readonly foliage: boolean;
 		readonly loadDistance: number;
@@ -134,7 +134,7 @@ export const PlayerConfigDefinition = {
 		displayName: "Terrain",
 		type: "terrain",
 		config: {
-			kind: "Terrain" as TerrainConfiguration["kind"],
+			kind: "Classic" as TerrainConfiguration["kind"],
 			resolution: 8 as number,
 			foliage: true as boolean,
 			loadDistance: 24 as number,
