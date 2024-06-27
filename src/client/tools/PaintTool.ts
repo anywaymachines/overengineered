@@ -169,7 +169,7 @@ export class PaintTool extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Paint";
+		return "Painting";
 	}
 	getImageID(): string {
 		return "http://www.roblox.com/asset/?id=15895846447";

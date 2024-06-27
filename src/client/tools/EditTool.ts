@@ -675,7 +675,7 @@ export class EditTool extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Edit";
+		return "Editing";
 	}
 
 	getImageID(): string {

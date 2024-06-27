@@ -143,7 +143,7 @@ export class DeleteTool extends ToolBase {
 		}
 	}
 	getDisplayName(): string {
-		return "Delete";
+		return "Deleting";
 	}
 
 	getImageID(): string {

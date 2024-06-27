@@ -783,7 +783,7 @@ export class WireTool extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Wire";
+		return "Wiring";
 	}
 
 	getImageID(): string {

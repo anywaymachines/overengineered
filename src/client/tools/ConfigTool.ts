@@ -257,7 +257,7 @@ export class ConfigTool extends ToolBase {
 	}
 
 	getDisplayName(): string {
-		return "Configure";
+		return "Configuring";
 	}
 
 	getImageID(): string {
