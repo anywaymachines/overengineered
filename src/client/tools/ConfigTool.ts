@@ -24,7 +24,10 @@ namespace Scene {
 	export type ConfigToolSceneDefinition = GuiObject & {
 		readonly ParamsSelection: Frame & {
 			readonly Buttons: GuiObject;
-			readonly HeaderLabel: TextLabel;
+			readonly Heading: GuiObject & {
+				readonly NameLabel: TextLabel;
+				readonly AmountLabel: TextLabel;
+			};
 		};
 		readonly Bottom: {
 			readonly DeselectButton: TextButton;
@@ -92,7 +95,8 @@ namespace Scene {
 			this.gui.Visible = Objects.size(onedef) !== 0;
 			if (!this.gui.Visible) return;
 
-			this.gui.ParamsSelection.HeaderLabel.Text = `${block.displayName.upper()} x${selected.size()}`;
+			this.gui.ParamsSelection.Heading.NameLabel.Text = block.displayName.upper();
+			this.gui.ParamsSelection.Heading.AmountLabel.Text = `x${selected.size()}`;
 
 			const configs = selected.map((selected) => {
 				const blockmodel = selected;
