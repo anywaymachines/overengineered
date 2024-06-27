@@ -25,6 +25,7 @@ export class Beacon extends InstanceComponent<PVInstance> {
 			gui.ZIndex = -1;
 		});
 
+		this.billboard.Visible = false;
 		this.billboard.Position = new UDim2(0, 1, 0, 1);
 		this.billboard.Parent = Gui.getUnscaledGameUI();
 		this.billboard.Title.Text = name;
