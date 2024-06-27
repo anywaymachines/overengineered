@@ -1,15 +1,18 @@
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
-import { SpreadingFireController } from "server/SpreadingFireController";
 import { BlockManager } from "shared/building/BlockManager";
-import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
-import { EffectBase } from "shared/effects/EffectBase";
 import { HostedService } from "shared/GameHost";
 import { RemoteEvents } from "shared/RemoteEvents";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
+import type { SpreadingFireController } from "server/SpreadingFireController";
+import type { ImpactSoundEffect } from "shared/effects/ImpactSoundEffect";
 
 @injectable
 export class UnreliableRemoteController extends HostedService {
-	constructor(@inject players: PlayerDatabase) {
+	constructor(
+		@inject players: PlayerDatabase,
+		@inject impactSoundEffect: ImpactSoundEffect,
+		@inject spreadingFire: SpreadingFireController,
+	) {
 		super();
 
 		// PhysicsService.RegisterCollisionGroup("Wreckage");
@@ -23,7 +26,7 @@ export class UnreliableRemoteController extends HostedService {
 				// part.CollisionGroup = "Wreckage";
 
 				// Play sounds
-				RemoteEvents.Effects.ImpactSound.send(player ? [player] : "everyone", { part, index: undefined });
+				impactSoundEffect.send(part, { part, index: undefined });
 			});
 		};
 
@@ -31,13 +34,9 @@ export class UnreliableRemoteController extends HostedService {
 			parts.forEach((part) => {
 				if (!BlockManager.isActiveBlockPart(part)) return;
 
-				SpreadingFireController.burn(part);
+				spreadingFire.burn(part);
 			});
 		};
-
-		EffectBase.staticMustSendToPlayer = (player) =>
-			players.get(player.UserId).settings?.graphics?.othersEffects ??
-			PlayerConfigDefinition.graphics.config.othersEffects;
 
 		this.event.subscribe(RemoteEvents.ImpactBreak.invoked, impactBreakEvent);
 		this.event.subscribe(RemoteEvents.Burn.invoked, (_, parts) => burnEvent(parts));

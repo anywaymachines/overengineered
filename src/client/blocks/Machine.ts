@@ -20,8 +20,9 @@ export class Machine extends SharedMachine {
 	constructor(
 		@inject blockRegistry: BlockRegistry,
 		@inject private readonly playerData: PlayerDataStorage,
+		@inject di: DIContainer,
 	) {
-		super(blockRegistry);
+		super(blockRegistry, di);
 		this.add(this.logicInputs);
 	}
 

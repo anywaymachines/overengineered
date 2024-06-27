@@ -19,7 +19,10 @@ export class SharedMachine extends ContainerComponent {
 	readonly occupiedByLocalPlayer = new ObservableValue(true);
 	private readonly childMap = new Map<BlockUuid, ConfigurableBlockLogic<BlockConfigTypes.BothDefinitions>>();
 
-	constructor(@inject private readonly blockRegistry: BlockRegistry) {
+	constructor(
+		@inject private readonly blockRegistry: BlockRegistry,
+		@inject private readonly di: DIContainer,
+	) {
 		super();
 
 		this.children.onAdded.Connect((child) => {
@@ -61,7 +64,7 @@ export class SharedMachine extends ContainerComponent {
 				continue;
 			}
 
-			const logic = new ctor(block);
+			const logic = this.di.resolveForeignClass(ctor, [block]);
 			this.add(logic);
 		}
 
@@ -78,7 +81,7 @@ export class SharedMachine extends ContainerComponent {
 		}
 	}
 	protected createImpactControllerIfNeeded(blocks: readonly PlacedBlockData[]): ImpactController | undefined {
-		return new ImpactController(blocks);
+		return this.di.resolveForeignClass(ImpactController, [blocks]);
 	}
 
 	initializeSpeedLimiter() {

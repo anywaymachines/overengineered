@@ -118,7 +118,7 @@ namespace ControlsSource {
 					config: definition.config.improved,
 				},
 				strictFollow: {
-					displayName: "Strict Follow",
+					displayName: "Strict Following",
 					type: "bool",
 					config: definition.config.strictFollow,
 				},
@@ -381,7 +381,7 @@ namespace ControlsSource {
 					() => TutorialBasics(tutorial),
 				),
 			);
-			basics.text.set("Start basics tutorial");
+			basics.text.set("Basics tutorial");
 		}
 	}
 

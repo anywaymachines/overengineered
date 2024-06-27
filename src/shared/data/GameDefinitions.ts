@@ -1,4 +1,4 @@
-import { Players, RunService, Workspace } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import { RobloxUnit } from "shared/RobloxUnit";
 
 export namespace GameDefinitions {
@@ -96,7 +96,6 @@ export namespace GameDefinitions {
 		ret.push(`User: ${Players.LocalPlayer.UserId} @${Players.LocalPlayer.Name} ${Players.LocalPlayer.DisplayName}`);
 		ret.push(`Build: ${RunService.IsStudio() ? "🔒 Studio" : game.PlaceVersion}`);
 		ret.push(`Server: ${RunService.IsStudio() ? "🔒 Studio" : game.JobId}`);
-		ret.push(`Debris: ${Workspace.HasTag("PrivateServer") ? "🔓 Everlasting" : "🔒 Default"}`);
 
 		return ret;
 	}

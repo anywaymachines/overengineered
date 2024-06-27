@@ -11,6 +11,10 @@ declare global {
 			service: T,
 			name?: string,
 		): DISingletonClassRegistrationContext<T>;
+		registerSingletonClass<T extends abstract new (...args: never) => unknown>(
+			clazz: T,
+			name?: string,
+		): DIHostedSingletonClassRegistrationContext<T>;
 	}
 	type GameHostBuilder = HostBuilder;
 	interface GameHost {
@@ -75,15 +79,38 @@ export class HostedService implements IHostedService {
 	}
 }
 
+export type DIHostedSingletonClassRegistrationContext<T extends abstract new (...args: never) => unknown> =
+	DISingletonClassRegistrationContext<T> & {
+		autoInit<TThis>(this: TThis): TThis;
+	};
+
 type HostedServiceCtor = abstract new (...args: never) => IHostedService;
 class DIContainerBuilder extends DIContainer implements GameHostBuilderDIContainer {
 	readonly services: HostedServiceCtor[] = [];
+	readonly init: (() => void)[] = [];
 
 	registerService<T extends HostedServiceCtor>(service: T, name?: string): DISingletonClassRegistrationContext<T> {
 		const ret = this.registerSingletonClass(service, name);
 		this.services.push(service);
 
 		return ret;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	registerSingletonClass<T extends abstract new (...args: any) => unknown>(
+		clazz: T,
+		name?: string,
+	): DIHostedSingletonClassRegistrationContext<T> {
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const selv = this;
+
+		return {
+			...super.registerSingletonClass(clazz, name),
+			autoInit() {
+				selv.init.push(() => selv.resolveByClass(clazz));
+				return this;
+			},
+		};
 	}
 }
 
@@ -93,6 +120,9 @@ class HostBuilder implements GameHostBuilder {
 
 	build(): GameHost {
 		const host = new Host(this._services);
+		for (const init of this._services.init) {
+			init();
+		}
 		for (const service of this._services.services) {
 			host.parent(host.services.resolveByClass(service));
 		}

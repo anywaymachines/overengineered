@@ -1,13 +1,14 @@
 import { Signal } from "shared/event/Signal";
 
-export class Operation<TArg extends object & { readonly [k in string]: unknown }, TResult extends {} = {}> {
+type MiddlewareResponse<TArg> = Response | Response<{ readonly arg: TArg }>;
+export class Operation<TArg, TResult extends {} = {}> {
 	private readonly _executed = new Signal<(...args: [arg: TArg, result: TResult]) => void>();
 	readonly executed = this._executed.asReadonly();
-	private readonly middlewares: ((arg: Writable<TArg>) => Response)[] = [];
+	private readonly middlewares: ((arg: TArg) => MiddlewareResponse<TArg>)[] = [];
 
 	constructor(private readonly func: (arg: TArg) => Response<TResult>) {}
 
-	addMiddleware(middleware: (arg: Writable<TArg>) => Response): { Disconnect(): void } {
+	addMiddleware(middleware: (arg: TArg) => MiddlewareResponse<TArg>): { Disconnect(): void } {
 		this.middlewares.push(middleware);
 
 		const list = this.middlewares;
@@ -21,13 +22,15 @@ export class Operation<TArg extends object & { readonly [k in string]: unknown }
 		};
 	}
 	execute(arg: TArg): Response<TResult> {
-		arg = { ...arg };
-
 		$trace(`Executing operation ${this}`, arg);
 		for (const middleware of this.middlewares) {
 			const response = middleware(arg);
 			if (!response.success) {
 				return response;
+			}
+
+			if ("arg" in response) {
+				arg = response.arg;
 			}
 		}
 

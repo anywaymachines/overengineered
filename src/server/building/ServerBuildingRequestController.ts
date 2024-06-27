@@ -8,7 +8,7 @@ import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { PlayModeController } from "server/modes/PlayModeController";
 import type { ServerPlots } from "server/plots/ServerPlots";
 import type { DIContainer } from "shared/DI";
-import type { C2S2CRemoteFunction } from "shared/event2/PERemoteEvent";
+import type { C2S2CRemoteFunction } from "shared/event/PERemoteEvent";
 import type { Operation } from "shared/Operation";
 
 @injectable
@@ -63,16 +63,16 @@ export class ServerBuildingRequestController extends HostedService {
 			true,
 		);
 
-		const subFunc = <TArg extends object & { readonly [k in string]: unknown }, TRet extends {}>(
-			remote: C2S2CRemoteFunction<[arg: TArg], Response<TRet>>,
+		const subFunc = <TArg, TRet extends {}>(
+			remote: C2S2CRemoteFunction<TArg, Response<TRet>>,
 			getfunc: (handler: ServerBuildingRequestHandler["operations"]) => Operation<TArg, TRet>,
 		) => {
-			remote.subscribe((player, ...args) => {
+			remote.subscribe((player, arg) => {
 				const handler = children.get(player);
 				if (!handler) return PlayerWatcher.errDestroyed;
 
-				$trace("Executing remote", getfunc(handler.operations), "with args", ...args);
-				return getfunc(handler.operations).execute(...args);
+				$trace("Executing remote", getfunc(handler.operations), "with arg", arg);
+				return getfunc(handler.operations).execute(arg);
 			});
 		};
 

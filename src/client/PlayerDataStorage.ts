@@ -77,7 +77,7 @@ export class PlayerDataStorage {
 
 	async sendPlayerConfigValue<TKey extends keyof PlayerConfig>(key: TKey, value: PlayerConfig[TKey] & defined) {
 		$log(`Setting player config value ${key} to ${JSON.serialize(value)}`);
-		CustomRemotes.player.updateSettings.send(key, value);
+		CustomRemotes.player.updateSettings.send({ key, value });
 
 		this._data.set({
 			...this.data.get(),

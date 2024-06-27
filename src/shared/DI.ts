@@ -16,8 +16,9 @@ declare global {
 	type WriteonlyDIContainer = Pick<DIContainer, `register${string}` & keyof DIContainer>;
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	function injectable(selv: { readonly prototype: unknown; new (...args: any): unknown }): void;
-	function inject(selv: { readonly prototype: unknown }, paramName: string | undefined, paramIndex: number): void;
+	function injectable(...args: unknown[]): void;
+	function inject(...args: unknown[]): void;
+	function tryInject(...args: unknown[]): void;
 }
 
 type DepsCreatable<TSelf, TArgs extends readonly unknown[]> = {

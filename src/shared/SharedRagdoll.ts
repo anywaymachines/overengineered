@@ -1,7 +1,7 @@
-import { C2SRemoteEvent } from "shared/event2/PERemoteEvent";
+import { C2SRemoteEvent } from "shared/event/PERemoteEvent";
 
 export namespace SharedRagdoll {
-	export const event = new C2SRemoteEvent<[ragdoll: boolean]>("ragdoll_trigger");
+	export const event = new C2SRemoteEvent<boolean>("ragdoll_trigger");
 	const ragdollAttributeName = "Radgoll";
 
 	export function subscribeToPlayerRagdollChange(humanoid: Humanoid, func: () => void): RBXScriptConnection {

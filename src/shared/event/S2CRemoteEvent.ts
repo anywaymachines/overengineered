@@ -1,4 +1,5 @@
 import { Players, RunService } from "@rbxts/services";
+import { ArgMiddleware } from "shared/ArgMiddleware";
 import { RemoteEventBase } from "shared/event/RemoteEventBase";
 import { Signal } from "shared/event/Signal";
 import type { CreatableRemoteEvents } from "shared/event/RemoteEventBase";
@@ -18,6 +19,12 @@ type CustomRemoteEvent<T extends Callback> = Instance & {
  * On server, sends it to all specified clients.
  */
 export abstract class S2CRemoteEvent<T> extends RemoteEventBase<TweenInfo, CustomRemoteEvent<(arg: T) => void>> {
+	readonly sendArgMiddleware = new ArgMiddleware<{
+		//readonly networkOwner: Player | undefined;
+		readonly players: readonly Player[];
+		readonly arg: T;
+	}>();
+
 	constructor(name: string, eventType: CreatableRemoteEvents = "UnreliableRemoteEvent") {
 		super(name, eventType);
 
@@ -35,17 +42,14 @@ export abstract class S2CRemoteEvent<T> extends RemoteEventBase<TweenInfo, Custo
 
 	protected abstract justRun(arg: T): void;
 
-	sendToNetworkOwnerOrEveryone(part: BasePart | undefined, arg: T) {
-		if (!part) return;
-
-		const owner = RunService.IsServer() ? part.GetNetworkOwner() : Players.LocalPlayer;
-		this.send(owner ? [owner] : "everyone", arg);
+	sendWithNetworkOwner(part: Instance, arg: T) {
+		//
 	}
+	send(arg: T) {
+		const _args = this.sendArgMiddleware.execute({ players: Players.GetPlayers(), arg });
+		arg = _args.arg;
+		const players = _args.players;
 
-	protected mustSendToPlayer(player: Player): boolean {
-		return false;
-	}
-	send(players: readonly Player[] | "everyone", arg: T) {
 		if (RunService.IsClient()) {
 			this.justRun(arg);
 			this.event.FireServer(arg, players);
@@ -59,7 +63,7 @@ export abstract class S2CRemoteEvent<T> extends RemoteEventBase<TweenInfo, Custo
 	private sendToPlayers(player: Player | undefined, players: readonly Player[] | "everyone", arg: T) {
 		for (const plr of Players.GetPlayers()) {
 			if (plr === player) continue;
-			if (players !== "everyone" && !players.includes(plr) && !this.mustSendToPlayer(plr)) continue;
+			if (players !== "everyone" && !players.includes(plr)) continue;
 
 			this.event.FireClient(plr, arg);
 		}

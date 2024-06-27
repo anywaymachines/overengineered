@@ -28,6 +28,7 @@ import { TutorialBasics } from "client/tutorial/TutorialBasics";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { HostedService } from "shared/GameHost";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
+import { RemoteEvents } from "shared/RemoteEvents";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 namespace Startup {
@@ -70,6 +71,7 @@ export namespace SandboxGame {
 		LocalPlayerController.initializeCameraMaxZoomDistance(builder, 512);
 		OtherPlayersController.initializeMassless(builder);
 		builder.services.registerService(RagdollController);
+		RemoteEvents.initializeVisualEffects(builder);
 
 		LoadingController.show("Waiting for server");
 		while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {

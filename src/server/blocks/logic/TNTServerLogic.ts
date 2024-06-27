@@ -1,16 +1,21 @@
 import { Workspace } from "@rbxts/services";
 import { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
-import { SpreadingFireController } from "server/SpreadingFireController";
 import { BlockManager } from "shared/building/BlockManager";
-import { RemoteEvents } from "shared/RemoteEvents";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { PlayModeController } from "server/modes/PlayModeController";
+import type { SpreadingFireController } from "server/SpreadingFireController";
 import type { TNTBlockLogic } from "shared/block/logic/TNTBlockLogic";
+import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
 
 @injectable
 export class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBlockLogic> {
-	constructor(logic: typeof TNTBlockLogic, @inject playModeController: PlayModeController) {
+	constructor(
+		logic: typeof TNTBlockLogic,
+		@inject playModeController: PlayModeController,
+		@inject private readonly explosionEffect: ExplosionEffect,
+		@inject private readonly spreadingFire: SpreadingFireController,
+	) {
 		super(logic, playModeController);
 
 		logic.events.explode.invoked.Connect((player, { block, isFlammable, pressure, radius }) => {
@@ -29,7 +34,7 @@ export class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBlockLogic> 
 			const flameHitParts = Workspace.GetPartBoundsInRadius(block.GetPivot().Position, radius * 1.5);
 
 			flameHitParts.forEach((part) => {
-				if (math.random(1, 3) === 1) SpreadingFireController.burn(part);
+				if (math.random(1, 3) === 1) this.spreadingFire.burn(part);
 			});
 		}
 
@@ -55,9 +60,6 @@ export class TNTServerBlockLogic extends ServerBlockLogic<typeof TNTBlockLogic> 
 		});
 
 		// Explosion sound
-		RemoteEvents.Effects.Explosion.sendToNetworkOwnerOrEveryone(block.PrimaryPart!, {
-			part: block.PrimaryPart!,
-			index: undefined,
-		});
+		this.explosionEffect.send(block.PrimaryPart!, { part: block.PrimaryPart!, index: undefined });
 	}
 }

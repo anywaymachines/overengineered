@@ -1,16 +1,20 @@
 import { MessagingService, Players, RunService, Workspace } from "@rbxts/services";
 import { registerOnRemoteEvent } from "server/network/event/RemoteHandler";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
-import { SpreadingFireController } from "server/SpreadingFireController";
 import { BlockManager } from "shared/building/BlockManager";
 import { HostedService } from "shared/GameHost";
-import { RemoteEvents } from "shared/RemoteEvents";
 import { Remotes } from "shared/Remotes";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import { PartUtils } from "shared/utils/PartUtils";
+import type { SpreadingFireController } from "server/SpreadingFireController";
+import type { ExplosionEffect } from "shared/effects/ExplosionEffect";
 
+@injectable
 export class ServerRestartController extends HostedService {
-	constructor() {
+	constructor(
+		@inject private readonly explosionEffect: ExplosionEffect,
+		@inject private readonly spreadingFire: SpreadingFireController,
+	) {
 		super();
 
 		this.onEnable(() => {
@@ -106,7 +110,7 @@ export class ServerRestartController extends HostedService {
 				const flameHitParts = Workspace.GetPartBoundsInRadius(part.Position, radius * 1.5);
 
 				flameHitParts.forEach((part) => {
-					if (math.random(1, 3) === 1) SpreadingFireController.burn(part);
+					if (math.random(1, 3) === 1) this.spreadingFire.burn(part);
 				});
 			}
 
@@ -132,10 +136,7 @@ export class ServerRestartController extends HostedService {
 			});
 
 			// Explosion sound
-			RemoteEvents.Effects.Explosion.send("everyone", {
-				part: part,
-				index: undefined,
-			});
+			this.explosionEffect.send(part, { part: part, index: undefined });
 		};
 	}
 }

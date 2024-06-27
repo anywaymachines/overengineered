@@ -3,14 +3,17 @@ import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { LocalInstanceData } from "shared/LocalInstanceData";
-import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomDebrisService } from "shared/service/CustomDebrisService";
+import type { FireEffect } from "shared/effects/FireEffect";
 
 const overlapParams = new OverlapParams();
 overlapParams.CollisionGroup = "Blocks";
 
-export namespace SpreadingFireController {
-	function isPartBurnable(part: BasePart) {
+@injectable
+export class SpreadingFireController {
+	constructor(@inject private readonly fireEffect: FireEffect) {}
+
+	private isPartBurnable(part: BasePart) {
 		if (
 			!BlockManager.isActiveBlockPart(part) ||
 			LocalInstanceData.HasLocalTag(part, "Burn") ||
@@ -23,8 +26,8 @@ export namespace SpreadingFireController {
 		return true;
 	}
 
-	export function burn(part: BasePart) {
-		if (!isPartBurnable(part)) {
+	burn(part: BasePart) {
+		if (!this.isPartBurnable(part)) {
 			return;
 		}
 
@@ -39,7 +42,7 @@ export namespace SpreadingFireController {
 		const duration = math.random(15, 30);
 
 		// Apply fire effect
-		RemoteEvents.Effects.Fire.sendToNetworkOwnerOrEveryone(part, { part, duration });
+		this.fireEffect.send(part, { part, duration });
 
 		task.delay(duration, () => {
 			if (!part.Parent) return;
@@ -51,9 +54,7 @@ export namespace SpreadingFireController {
 
 			// Burn closest parts
 			const closestParts = Workspace.GetPartBoundsInRadius(part.Position, 3.5, overlapParams);
-			closestParts.forEach((part) => {
-				burn(part);
-			});
+			closestParts.forEach((part) => this.burn(part));
 		});
 	}
 }

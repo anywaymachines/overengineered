@@ -1,10 +1,11 @@
 import { Workspace } from "@rbxts/services";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import { RemoteEvents } from "shared/RemoteEvents";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { Sound } from "shared/Sound";
 import type { PlacedBlockData } from "shared/building/BlockManager";
+import type { ParticleEffect } from "shared/effects/ParticleEffect";
+import type { SoundEffect } from "shared/effects/SoundEffect";
 
 type RocketEngine = BlockModel & {
 	readonly EffectEmitter: Part & {
@@ -16,6 +17,7 @@ type RocketEngine = BlockModel & {
 	};
 	readonly ColBox: Part;
 };
+@injectable
 export class RocketEngineLogic extends ConfigurableBlockLogic<
 	typeof blockConfigRegistry.smallrocketengine,
 	RocketEngine
@@ -36,7 +38,11 @@ export class RocketEngineLogic extends ConfigurableBlockLogic<
 
 	private thrust = 0;
 
-	constructor(block: PlacedBlockData) {
+	constructor(
+		block: PlacedBlockData,
+		@inject private readonly soundEffect: SoundEffect,
+		@inject private readonly particleEffect: ParticleEffect,
+	) {
 		super(block, blockConfigRegistry.smallrocketengine);
 
 		this.onDescendantDestroyed(() => {
@@ -120,14 +126,14 @@ export class RocketEngineLogic extends ConfigurableBlockLogic<
 		this.sound.Volume = newVolume;
 
 		if (volumeHasDifference) {
-			RemoteEvents.Effects.Sound.sendToNetworkOwnerOrEveryone(this.instance.PrimaryPart, {
+			this.soundEffect.send(this.instance.PrimaryPart!, {
 				sound: this.sound,
 				isPlaying: this.sound.Playing,
 				volume: this.sound.Volume,
 			});
 		}
 		if (particleEmmiterHasDifference) {
-			RemoteEvents.Effects.Particle.sendToNetworkOwnerOrEveryone(this.instance.PrimaryPart, {
+			this.particleEffect.send(this.instance.PrimaryPart!, {
 				particle: this.particleEmitter,
 				isEnabled: this.particleEmitter.Enabled,
 				acceleration: this.particleEmitter.Acceleration,

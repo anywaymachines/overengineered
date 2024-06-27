@@ -213,50 +213,196 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 			type decl = {
 				readonly name: ts.Identifier;
 				readonly type: ts.TypeReferenceNode;
+				readonly nullable: boolean;
 			}
-			let added: decl[] = [];
+			let ctorAdded: decl[] = [];
+			let propAdded: decl[] = [];
 			let classsymb: ts.Symbol | undefined = undefined;
 			let constr: ts.ConstructorDeclaration | undefined = undefined;
 
-			for (const ctor of clazz.members) {
-				if (ts.isConstructorDeclaration(ctor)) {
-					constr = ctor;
+			if (!clazz.modifiers?.find(m => m.kind === ts.SyntaxKind.AbstractKeyword)) {
+				for (const node of clazz.members) {
+					if (ts.isConstructorDeclaration(node)) {
+						constr = node;
 
-					for (const parameter of ctor.parameters) {
-						if (!parameter.modifiers || parameter.modifiers.length === 0) {
-							if (added && added.length !== 0) {
-								throw 'Can not have @inject declarations before non-inject ones';
+						for (const parameter of node.parameters) {
+							if (!parameter.modifiers || parameter.modifiers.length === 0) {
+								if (ctorAdded && ctorAdded.length !== 0) {
+									throw 'Can not have @inject declarations before non-inject ones';
+								}
+
+								continue;
 							}
 
-							continue;
-						}
+							for (const decorator of parameter.modifiers) {
+								if (!ts.isDecorator(decorator)) continue;
+								if (!ts.isIdentifier(decorator.expression)) continue;
+								if (decorator.expression.text !== 'inject' && decorator.expression.text !== 'tryInject') continue;
+								if (!ts.isIdentifier(parameter.name)) continue;
+								if (!parameter.type || !ts.isTypeReferenceNode(parameter.type)) continue;
+								if (!ts.isIdentifier(parameter.type.typeName)) continue;
 
-						for (const decorator of parameter.modifiers) {
-							if (!ts.isDecorator(decorator)) continue;
-							if (!ts.isIdentifier(decorator.expression)) continue;
-							if (decorator.expression.text !== 'inject') continue;
-							if (!ts.isIdentifier(parameter.name)) continue;
-							if (!parameter.type || !ts.isTypeReferenceNode(parameter.type)) continue;
-							if (!ts.isIdentifier(parameter.type.typeName)) continue;
+								classsymb ??= program.getTypeChecker().getSymbolAtLocation(clazz.name);
+								if (!classsymb) {
+									throw `Could not find symbol for class ${clazz.name.text}`;
+								}
 
-							classsymb ??= program.getTypeChecker().getSymbolAtLocation(clazz.name);
-							if (!classsymb) {
-								throw `Could not find symbol for class ${clazz.name.text}`;
+								ctorAdded ??= [];
+								identifierByTypeNode(parameter.type);
+								ctorAdded.push({
+									name: parameter.name,
+									type: parameter.type,
+									nullable: decorator.expression.text === 'tryInject',
+								});
 							}
-
-							added ??= [];
-							identifierByTypeNode(parameter.type);
-							added.push({
-								name: parameter.name,
-								type: parameter.type,
-							});
 						}
 					}
 				}
 			}
+			for (const node of clazz.members) {
+				if (ts.isPropertyDeclaration(node)) {
+					const parameter = node;
+					if (!parameter.modifiers) continue;
 
-			if (added.find(a => !identifierByTypeNode(a.type)))
-				return clazz;
+					for (const decorator of parameter.modifiers) {
+						if (!ts.isDecorator(decorator)) continue;
+						if (!ts.isIdentifier(decorator.expression)) continue;
+						if (decorator.expression.text !== 'inject' && decorator.expression.text !== 'tryInject') continue;
+						if (!ts.isIdentifier(parameter.name)) continue;
+						if (!parameter.type || !ts.isTypeReferenceNode(parameter.type)) continue;
+						if (!ts.isIdentifier(parameter.type.typeName)) continue;
+
+						classsymb ??= program.getTypeChecker().getSymbolAtLocation(clazz.name);
+						if (!classsymb) {
+							throw `Could not find symbol for class ${clazz.name.text}`;
+						}
+
+						propAdded ??= [];
+						identifierByTypeNode(parameter.type);
+						propAdded.push({
+							name: parameter.name,
+							type: parameter.type,
+							nullable: decorator.expression.text === 'tryInject',
+						});
+					}
+				}
+			}
+
+			const methods: ts.MethodDeclaration[] = [];
+			if (ctorAdded.length !== 0 && !ctorAdded.find(a => !identifierByTypeNode(a.type))) {
+				const method: ts.MethodDeclaration = factory.createMethodDeclaration(
+					[factory.createToken(ts.SyntaxKind.StaticKeyword)],
+					undefined,
+					factory.createIdentifier("_depsCreate"),
+					undefined,
+					undefined,
+					[
+						...(constr?.parameters.filter(p => !ctorAdded.find(a => a.name.text === (p.name as ts.Identifier).text)) ?? [])
+							.map(p => ts.factory.createParameterDeclaration(
+								p.modifiers?.filter(m => m.kind !== ts.SyntaxKind.PrivateKeyword && m.kind !== ts.SyntaxKind.ReadonlyKeyword),
+								p.dotDotDotToken,
+								p.name,
+								p.questionToken,
+								p.type,
+								p.initializer,
+							)),
+						factory.createParameterDeclaration(
+							undefined,
+							undefined,
+							factory.createIdentifier("deps"),
+							undefined,
+							factory.createTypeReferenceNode(
+								factory.createIdentifier("DIContainer"),
+								undefined,
+							),
+							undefined,
+						),
+					],
+					undefined,
+					factory.createBlock(
+						[
+							factory.createReturnStatement(
+								factory.createNewExpression(
+									clazz.name,
+									undefined,
+									[
+										...(constr?.parameters.filter(p => !ctorAdded.find(a => a.name.text === (p.name as ts.Identifier).text)).map(p => p.name as ts.Identifier) ?? []),
+										...ctorAdded.map(a =>
+											factory.createCallExpression(
+												factory.createPropertyAccessExpression(
+													factory.createIdentifier("deps"),
+													factory.createIdentifier(a.nullable ? "tryResolve" : "resolve"),
+												),
+												[a.type],
+												[factory.createStringLiteral(identifierByTypeNode(a.type)!)],
+											),
+										),
+									],
+								),
+							),
+						],
+						true,
+					),
+				)
+				methods.push(method);
+			}
+			if (propAdded.length !== 0 && !propAdded.find(a => !identifierByTypeNode(a.type))) {
+				const method: ts.MethodDeclaration = factory.createMethodDeclaration(
+					undefined,
+					undefined,
+					factory.createIdentifier("_inject"),
+					undefined,
+					undefined,
+					[
+						...(constr?.parameters.filter(p => !propAdded.find(a => a.name.text === (p.name as ts.Identifier).text)) ?? [])
+							.map(p => ts.factory.createParameterDeclaration(
+								p.modifiers?.filter(m => m.kind !== ts.SyntaxKind.PrivateKeyword && m.kind !== ts.SyntaxKind.ReadonlyKeyword),
+								p.dotDotDotToken,
+								p.name,
+								p.questionToken,
+								p.type,
+								p.initializer,
+							)),
+						factory.createParameterDeclaration(
+							undefined,
+							undefined,
+							factory.createIdentifier("deps"),
+							undefined,
+							factory.createTypeReferenceNode(
+								factory.createIdentifier("DIContainer"),
+								undefined,
+							),
+							undefined,
+						),
+					],
+					undefined,
+					factory.createBlock(
+						[
+							...propAdded.map(p => {
+								return factory.createExpressionStatement(
+									factory.createBinaryExpression(
+										factory.createPropertyAccessExpression(
+											factory.createThis(),
+											p.name,
+										),
+										factory.createToken(ts.SyntaxKind.EqualsToken),
+										factory.createCallExpression(
+											factory.createPropertyAccessExpression(
+												factory.createIdentifier("deps"),
+												factory.createIdentifier(p.nullable ? "tryResolve" : "resolve"),
+											),
+											[p.type],
+											[factory.createStringLiteral(identifierByTypeNode(p.type)!)],
+										),
+									),
+								)
+							}),
+						],
+						true,
+					),
+				)
+				methods.push(method);
+			}
 
 			return ts.factory.createClassDeclaration(
 				clazz.modifiers?.filter(m => !(ts.isDecorator(m) && ts.isIdentifier(m.expression) && m.expression.text === 'injectable')),
@@ -264,75 +410,33 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 				clazz.typeParameters,
 				clazz.heritageClauses,
 				[
-					factory.createMethodDeclaration(
-						[factory.createToken(ts.SyntaxKind.StaticKeyword)],
-						undefined,
-						factory.createIdentifier("_depsCreate"),
-						undefined,
-						undefined,
-						[
-							...(constr?.parameters.filter(p => !added.find(a => a.name.text === (p.name as ts.Identifier).text)) ?? [])
-								.map(p => ts.factory.createParameterDeclaration(
-									p.modifiers?.filter(m => m.kind !== ts.SyntaxKind.PrivateKeyword && m.kind !== ts.SyntaxKind.ReadonlyKeyword),
+					...methods,
+					...clazz.members.map(m => {
+						if (ts.isConstructorDeclaration(m)) {
+							return ts.factory.createConstructorDeclaration(
+								m.modifiers,
+								m.parameters.map(p => ts.factory.createParameterDeclaration(
+									p.modifiers?.filter(m => !(ts.isDecorator(m) && ts.isIdentifier(m.expression) && (m.expression.text === 'inject' || m.expression.text === 'tryInject'))),
 									p.dotDotDotToken,
 									p.name,
 									p.questionToken,
 									p.type,
 									p.initializer,
 								)),
-							factory.createParameterDeclaration(
-								undefined,
-								undefined,
-								factory.createIdentifier("deps"),
-								undefined,
-								factory.createTypeReferenceNode(
-									factory.createIdentifier("DIContainer"),
-									undefined,
-								),
-								undefined,
-							),
-						],
-						undefined,
-						factory.createBlock(
-							[
-								factory.createReturnStatement(
-									factory.createNewExpression(
-										clazz.name,
-										undefined,
-										[
-											...(constr?.parameters.filter(p => !added.find(a => a.name.text === (p.name as ts.Identifier).text)).map(p => p.name as ts.Identifier) ?? []),
-											...added.map(a =>
-												factory.createCallExpression(
-													factory.createPropertyAccessExpression(
-														factory.createIdentifier("deps"),
-														factory.createIdentifier("resolve"),
-													),
-													[a.type],
-													[factory.createStringLiteral(identifierByTypeNode(a.type)!)],
-												),
-											),
-										],
-									),
-								),
-							],
-							true,
-						),
-					),
-					...clazz.members.map(m => {
-						if (!ts.isConstructorDeclaration(m)) return m;
+								m.body,
+							);
+						}
+						if (ts.isPropertyDeclaration(m)) {
+							return ts.factory.createPropertyDeclaration(
+								m.modifiers?.filter(m => !(ts.isDecorator(m) && ts.isIdentifier(m.expression) && (m.expression.text === 'inject' || m.expression.text === 'tryInject'))),
+								m.name,
+								m.questionToken ?? m.exclamationToken,
+								m.type,
+								m.initializer,
+							);
+						}
 
-						return ts.factory.createConstructorDeclaration(
-							m.modifiers,
-							m.parameters.map(p => ts.factory.createParameterDeclaration(
-								p.modifiers?.filter(m => !(ts.isDecorator(m) && ts.isIdentifier(m.expression) && m.expression.text === 'inject')),
-								p.dotDotDotToken,
-								p.name,
-								p.questionToken,
-								p.type,
-								p.initializer,
-							)),
-							m.body,
-						)
+						return m;
 					}),
 				],
 			);

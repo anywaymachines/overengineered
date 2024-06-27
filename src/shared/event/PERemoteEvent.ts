@@ -3,18 +3,18 @@ import { ArgsSignal } from "shared/event/Signal";
 
 export type CreatableRemoteEvents = "UnreliableRemoteEvent" | "RemoteEvent";
 
-export type CustomRemoteEventBase<TArgsToClient extends unknown[], TArgsToServer extends unknown[]> = Instance & {
+export type CustomRemoteEventBase<TArgToClient, TArgToServer> = Instance & {
 	/** @server */
-	readonly OnServerEvent: RBXScriptSignal<(player: Player, ...args: TArgsToServer) => void>;
+	readonly OnServerEvent: RBXScriptSignal<(player: Player, arg: TArgToServer) => void>;
 	/** @client */
-	readonly OnClientEvent: RBXScriptSignal<(...args: TArgsToClient) => void>;
+	readonly OnClientEvent: RBXScriptSignal<(arg: TArgToClient) => void>;
 
 	/** @client */
-	FireServer(...args: TArgsToServer): void;
+	FireServer(arg: TArgToServer): void;
 	/** @server */
-	FireClient(player: Player, ...args: TArgsToClient): void;
+	FireClient(player: Player, arg: TArgToClient): void;
 };
-export type CustomRemoteEvent<TArgs extends unknown[]> = CustomRemoteEventBase<TArgs, TArgs>;
+export type CustomRemoteEvent<TArg> = CustomRemoteEventBase<TArg, TArg>;
 
 abstract class PERemoveEvent<TEvent extends Instance> {
 	protected readonly event: TEvent;
@@ -34,59 +34,63 @@ abstract class PERemoveEvent<TEvent extends Instance> {
 	}
 }
 
-export class BidirectionalRemoteEvent<TArgs extends unknown[] = []> extends PERemoveEvent<CustomRemoteEvent<TArgs>> {
+export class BidirectionalRemoteEvent<TArg = undefined> extends PERemoveEvent<CustomRemoteEvent<TArg>> {
 	readonly s2c;
 	readonly c2s;
 
 	constructor(name: string, eventType: CreatableRemoteEvents = "RemoteEvent") {
 		super(name, eventType);
 
-		this.s2c = new S2CRemoteEvent<TArgs>(name + "_s2c", eventType);
-		this.c2s = new C2SRemoteEvent<TArgs>(name + "_c2s", eventType);
+		this.s2c = new S2CRemoteEvent<TArg>(name + "_s2c", eventType);
+		this.c2s = new C2SRemoteEvent<TArg>(name + "_c2s", eventType);
 	}
 }
 
-export class C2SRemoteEvent<TArgs extends unknown[] = []> extends PERemoveEvent<CustomRemoteEvent<TArgs>> {
+export class C2SRemoteEvent<TArg = undefined> extends PERemoveEvent<CustomRemoteEvent<TArg>> {
 	/** @server */
-	readonly invoked = new ArgsSignal<[player: Player, ...args: TArgs]>();
+	readonly invoked = new ArgsSignal<[player: Player, arg: TArg]>();
 
 	constructor(name: string, eventType: CreatableRemoteEvents = "RemoteEvent") {
 		super(name, eventType);
 
 		if (RunService.IsServer()) {
-			this.event.OnServerEvent.Connect((player, ...args) => this.invoked.Fire(player, ...args));
+			this.event.OnServerEvent.Connect((player, arg) => this.invoked.Fire(player, arg));
 		}
 	}
 
 	/** @client */
-	send(...args: TArgs) {
-		this.event.FireServer(...args);
+	send(this: C2SRemoteEvent<undefined>): void;
+	send(arg: TArg): void;
+	send(arg?: TArg) {
+		this.event.FireServer(arg!);
 	}
 }
 
-export class S2CRemoteEvent<TArgs extends unknown[] = []> extends PERemoveEvent<CustomRemoteEvent<TArgs>> {
+export class S2CRemoteEvent<TArg = undefined> extends PERemoveEvent<CustomRemoteEvent<TArg>> {
 	/** @client */
-	readonly invoked = new ArgsSignal<TArgs>();
+	readonly invoked = new ArgsSignal<[arg: TArg]>();
 
 	constructor(name: string, eventType: CreatableRemoteEvents = "RemoteEvent") {
 		super(name, eventType);
 
 		if (RunService.IsClient()) {
-			this.event.OnClientEvent.Connect((...args) => this.invoked.Fire(...args));
+			this.event.OnClientEvent.Connect((arg) => this.invoked.Fire(arg));
 		}
 	}
 
 	/** @server */
-	send(players: Player | readonly Player[] | "everyone", ...args: TArgs) {
+	send(this: S2CRemoteEvent<undefined>, players: Player | readonly Player[] | "everyone", arg?: TArg): void;
+	send(players: Player | readonly Player[] | "everyone", arg: TArg): void;
+	send(players: Player | readonly Player[] | "everyone", arg?: TArg) {
 		if (typeIs(players, "Instance")) {
-			this.event.FireClient(players, ...args);
+			this.event.FireClient(players, arg!);
 		} else if (players === "everyone") {
 			for (const player of Players.GetPlayers()) {
-				this.event.FireClient(player, ...args);
+				this.event.FireClient(player, arg!);
 			}
 		} else {
 			for (const player of players) {
-				this.event.FireClient(player, ...args);
+				this.event.FireClient(player, arg!);
 			}
 		}
 	}
@@ -183,11 +187,14 @@ const createWaiter = <TRet extends Response>(middlewares: readonly WaiterMiddlew
 	};
 };
 
-export class S2C2SRemoteFunction<TArgs extends unknown[], TResp extends Response = Response> extends PERemoveEvent<
-	CustomRemoteEventBase<[id: string, ...args: TArgs], [id: string, ret: TResp | ErrorResponse]>
+export class S2C2SRemoteFunction<TArg, TResp extends Response = Response> extends PERemoveEvent<
+	CustomRemoteEventBase<
+		{ readonly id: string; readonly arg: TArg },
+		{ readonly id: string; readonly result: TResp | ErrorResponse }
+	>
 > {
 	/** @client */
-	private invoked?: (...args: TArgs) => TResp;
+	private invoked?: (arg: TArg) => TResp;
 	private readonly waiting = new Map<string, { player: Player; retfunc: (ret: TResp | ErrorResponse) => void }>();
 	private readonly middlewares: WaiterMiddleware[] = [];
 
@@ -195,21 +202,24 @@ export class S2C2SRemoteFunction<TArgs extends unknown[], TResp extends Response
 		super(name, eventType);
 
 		if (RunService.IsClient()) {
-			this.event.OnClientEvent.Connect((id, ...args) => {
+			this.event.OnClientEvent.Connect(({ id, arg }) => {
 				if (!this.invoked) {
-					this.event.FireServer(id, {
-						success: false,
-						message: `Event ${name} was not subscribed to`,
+					this.event.FireServer({
+						id,
+						result: {
+							success: false,
+							message: `Event ${name} was not subscribed to`,
+						},
 					});
 
 					throw `Event ${name} was not subscribed to`;
 				}
 
-				const result = this.invoked(...args);
-				this.event.FireServer(id, result);
+				const result = this.invoked(arg);
+				this.event.FireServer({ id, result });
 			});
 		} else if (RunService.IsServer()) {
-			this.event.OnServerEvent.Connect((player, id, ret) => {
+			this.event.OnServerEvent.Connect((player, { id, result: ret }) => {
 				const waiter = this.waiting.get(id);
 				if (!waiter) return;
 
@@ -236,12 +246,14 @@ export class S2C2SRemoteFunction<TArgs extends unknown[], TResp extends Response
 	}
 
 	/** @server */
-	send(player: Player, ...args: TArgs): ErrorResponse | TResp {
+	send(this: S2C2SRemoteFunction<undefined>, player: Player, arg?: TArg): ErrorResponse | TResp;
+	send(player: Player, arg: TArg): ErrorResponse | TResp;
+	send(player: Player, arg?: TArg): ErrorResponse | TResp {
 		const waiter = createWaiter<TResp | ErrorResponse>(this.middlewares);
 		if ("success" in waiter) return waiter;
 
 		const id = HttpService.GenerateGUID();
-		this.event.FireClient(player, id, ...args);
+		this.event.FireClient(player, { id, arg: arg! });
 
 		const { ret, wait } = waiter;
 		this.waiting.set(id, { player, retfunc: ret });
@@ -255,11 +267,11 @@ export class S2C2SRemoteFunction<TArgs extends unknown[], TResp extends Response
 	}
 }
 
-export class C2S2CRemoteFunction<TArgs extends unknown[], TResp extends Response = Response> extends PERemoveEvent<
-	CustomRemoteEventBase<[id: string, ret: TResp], [id: string, ...args: TArgs]>
+export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extends PERemoveEvent<
+	CustomRemoteEventBase<{ id: string; result: TResp }, { id: string; arg: TArg }>
 > {
 	/** @server */
-	private invoked?: (player: Player, ...args: TArgs) => TResp;
+	private invoked?: (player: Player, arg: TArg) => TResp;
 	private readonly waiting = new Map<string, (ret: TResp) => void>();
 	private readonly middlewares: WaiterMiddleware[] = [];
 
@@ -267,14 +279,14 @@ export class C2S2CRemoteFunction<TArgs extends unknown[], TResp extends Response
 		super(name, eventType);
 
 		if (RunService.IsServer()) {
-			this.event.OnServerEvent.Connect((player, id, ...args) => {
+			this.event.OnServerEvent.Connect((player, { id, arg }) => {
 				if (!this.invoked) throw `Event ${name} was not subscribed to`;
 
-				const result = this.invoked(player, ...args);
-				this.event.FireClient(player, id, result);
+				const result = this.invoked(player, arg);
+				this.event.FireClient(player, { id, result });
 			});
 		} else if (RunService.IsClient()) {
-			this.event.OnClientEvent.Connect((id, ret) => {
+			this.event.OnClientEvent.Connect(({ id, result: ret }) => {
 				const waiter = this.waiting.get(id);
 				if (waiter) {
 					this.waiting.delete(id);
@@ -296,12 +308,17 @@ export class C2S2CRemoteFunction<TArgs extends unknown[], TResp extends Response
 	}
 
 	/** @client */
-	send(...args: TArgs): ErrorResponse | TResp {
+	send<TResponse extends Response>(
+		this: C2S2CRemoteFunction<undefined, TResponse>,
+		arg?: TArg,
+	): ErrorResponse | TResp;
+	send(arg: TArg): ErrorResponse | TResp;
+	send(arg?: TArg): ErrorResponse | TResp {
 		const waiter = createWaiter<TResp>(this.middlewares);
 		if ("success" in waiter) return waiter;
 
 		const id = HttpService.GenerateGUID();
-		this.event.FireServer(id, ...args);
+		this.event.FireServer({ id, arg: arg! });
 
 		const { ret, wait } = waiter;
 		this.waiting.set(id, ret);

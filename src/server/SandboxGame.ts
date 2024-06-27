@@ -13,8 +13,10 @@ import { UnreliableRemoteController } from "server/network/event/UnreliableRemot
 import { PlayerDataController } from "server/PlayerDataController";
 import { ServerPlots } from "server/plots/ServerPlots";
 import { RagdollController } from "server/RagdollController";
+import { SpreadingFireController } from "server/SpreadingFireController";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
+import { RemoteEvents } from "shared/RemoteEvents";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 export namespace SandboxGame {
@@ -28,6 +30,9 @@ export namespace SandboxGame {
 		builder.services.registerSingletonClass(PlayerDatabase);
 		builder.services.registerSingletonClass(SlotDatabase);
 		builder.services.registerService(PlayerDataController);
+
+		builder.services.registerSingletonClass(SpreadingFireController);
+		RemoteEvents.initializeVisualEffects(builder);
 
 		builder.services.registerSingletonFunc(() => SharedPlots.initialize());
 

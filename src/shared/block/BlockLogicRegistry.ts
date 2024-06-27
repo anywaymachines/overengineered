@@ -43,7 +43,8 @@ import type { BlockId } from "shared/BlockDataRegistry";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 
 declare global {
-	type LogicCtor = new (block: PlacedBlockData) => BlockLogic;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	type LogicCtor = new (block: PlacedBlockData, ...args: any) => BlockLogic;
 }
 
 const logicRegistry = {

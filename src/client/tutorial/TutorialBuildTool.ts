@@ -2,7 +2,6 @@ import { Workspace } from "@rbxts/services";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { EventHandler } from "shared/event/EventHandler";
-import { successResponse } from "shared/types/network/Responses";
 import { PartUtils } from "shared/utils/PartUtils";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { Tutorial } from "client/tutorial/Tutorial";
@@ -71,13 +70,18 @@ export class TutorialBuildTool {
 						return { success: false, message: "Invalid placement" };
 					}
 
-					args.blocks = [
-						{
-							...block[0],
-							location: plot.instance.BuildingArea.CFrame.ToWorldSpace(block[1].cframe),
+					return {
+						success: true,
+						arg: {
+							...args,
+							blocks: [
+								{
+									...block[0],
+									location: plot.instance.BuildingArea.CFrame.ToWorldSpace(block[1].cframe),
+								},
+							],
 						},
-					];
-					return successResponse;
+					};
 				}),
 			);
 

@@ -4,7 +4,7 @@ import {
 	C2SRemoteEvent,
 	PERemoteEventMiddlewares,
 	S2C2SRemoteFunction,
-} from "shared/event2/PERemoteEvent";
+} from "shared/event/PERemoteEvent";
 import type { BlockId } from "shared/BlockDataRegistry";
 import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
@@ -69,6 +69,10 @@ declare global {
 		readonly blocks: readonly BlockModel[];
 	};
 
+	type PlayerUpdateSettingsRequest = {
+		readonly key: keyof PlayerConfig;
+		readonly value: PlayerConfig[keyof PlayerConfig];
+	};
 	type PlayerSaveSlotRequest = {
 		readonly index: number;
 		readonly name?: string;
@@ -94,32 +98,28 @@ declare global {
 
 export const CustomRemotes = {
 	building: {
-		placeBlocks: new C2S2CRemoteFunction<[data: PlaceBlocksRequest], MultiBuildResponse>("rb_place"),
-		deleteBlocks: new C2S2CRemoteFunction<[data: DeleteBlocksRequest]>("rb_delete"),
-		editBlocks: new C2S2CRemoteFunction<[data: EditBlocksRequest]>("rb_edit"),
-		logicConnect: new C2S2CRemoteFunction<[data: LogicConnectRequest]>("rb_lconnect"),
-		logicDisconnect: new C2S2CRemoteFunction<[data: LogicDisconnectRequest]>("rb_ldisconnect"),
-		paintBlocks: new C2S2CRemoteFunction<[data: PaintBlocksRequest]>("rb_paint"),
-		updateConfig: new C2S2CRemoteFunction<[data: ConfigUpdateRequest]>("rb_updatecfg"),
-		resetConfig: new C2S2CRemoteFunction<[data: ConfigResetRequest]>("rb_resetcfg"),
+		placeBlocks: new C2S2CRemoteFunction<PlaceBlocksRequest, MultiBuildResponse>("rb_place"),
+		deleteBlocks: new C2S2CRemoteFunction<DeleteBlocksRequest>("rb_delete"),
+		editBlocks: new C2S2CRemoteFunction<EditBlocksRequest>("rb_edit"),
+		logicConnect: new C2S2CRemoteFunction<LogicConnectRequest>("rb_lconnect"),
+		logicDisconnect: new C2S2CRemoteFunction<LogicDisconnectRequest>("rb_ldisconnect"),
+		paintBlocks: new C2S2CRemoteFunction<PaintBlocksRequest>("rb_paint"),
+		updateConfig: new C2S2CRemoteFunction<ConfigUpdateRequest>("rb_updatecfg"),
+		resetConfig: new C2S2CRemoteFunction<ConfigResetRequest>("rb_resetcfg"),
 	},
 	slots: {
-		load: new C2S2CRemoteFunction<[data: PlayerLoadSlotRequest], LoadSlotResponse>("rs_load"),
-		loadImported: new C2S2CRemoteFunction<[data: PlayerLoadSlotRequest], LoadSlotResponse>("rs_loadi"),
-		loadAsAdmin: new C2S2CRemoteFunction<[data: PlayerLoadAdminSlotRequest], LoadSlotResponse>("rs_loadadm"),
-		save: new C2S2CRemoteFunction<[data: PlayerSaveSlotRequest], SaveSlotResponse>("rs_save"),
+		load: new C2S2CRemoteFunction<PlayerLoadSlotRequest, LoadSlotResponse>("rs_load"),
+		loadImported: new C2S2CRemoteFunction<PlayerLoadSlotRequest, LoadSlotResponse>("rs_loadi"),
+		loadAsAdmin: new C2S2CRemoteFunction<PlayerLoadAdminSlotRequest, LoadSlotResponse>("rs_loadadm"),
+		save: new C2S2CRemoteFunction<PlayerSaveSlotRequest, SaveSlotResponse>("rs_save"),
 	},
 	player: {
-		updateSettings: new C2SRemoteEvent<[key: keyof PlayerConfig, value: PlayerConfig[keyof PlayerConfig]]>(
-			"pl_updsettings",
-		),
-		fetchData: new C2S2CRemoteFunction<[], Response<PlayerDataResponse>>("pl_fetchdata"),
+		updateSettings: new C2SRemoteEvent<PlayerUpdateSettingsRequest>("pl_updsettings"),
+		fetchData: new C2S2CRemoteFunction<undefined, Response<PlayerDataResponse>>("pl_fetchdata"),
 	},
 	modes: {
-		set: new C2S2CRemoteFunction<[mode: PlayModes]>("md_set").addMiddleware(
-			PERemoteEventMiddlewares.rateLimiter(30, 60),
-		),
-		setOnClient: new S2C2SRemoteFunction<[mode: PlayModes | undefined]>("md_setc"),
+		set: new C2S2CRemoteFunction<PlayModes>("md_set").addMiddleware(PERemoteEventMiddlewares.rateLimiter(30, 60)),
+		setOnClient: new S2C2SRemoteFunction<PlayModes | undefined>("md_setc"),
 		ride: {
 			teleportOnSeat: new C2SRemoteEvent("mdr_seat"),
 		},

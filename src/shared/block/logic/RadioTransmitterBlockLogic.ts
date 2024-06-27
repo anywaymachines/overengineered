@@ -1,10 +1,10 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RadioRecieverBlockLogic } from "shared/block/logic/RadioRecieverBlockLogic";
-import { AutoS2CRemoteEvent } from "shared/event/S2CRemoteEvent";
+import { S2CRemoteEvent } from "shared/event/PERemoteEvent";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 
-const sendEvent = new AutoS2CRemoteEvent<{
+const sendEvent = new S2CRemoteEvent<{
 	readonly frequency: number;
 	readonly value: (
 		| BlockConfigTypes.Bool
@@ -41,10 +41,7 @@ export class RadioTransmitterBlockLogic extends ConfigurableBlockLogic<typeof bl
 		});
 
 		this.event.subscribeObservable(this.input.value, (data) => {
-			sendEvent.send("everyone", {
-				frequency: this.input.frequency.get(),
-				value: data,
-			});
+			sendEvent.send("everyone", { frequency: this.input.frequency.get(), value: data });
 		});
 	}
 }

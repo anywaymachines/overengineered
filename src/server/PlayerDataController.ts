@@ -17,11 +17,7 @@ export class PlayerDataController extends HostedService {
 		Workspace.AddTag("data_loadable");
 	}
 
-	private updateSetting<TKey extends keyof PlayerConfig>(
-		player: Player,
-		key: TKey,
-		value: PlayerConfig[TKey],
-	): Response {
+	private updateSetting(player: Player, { key, value }: PlayerUpdateSettingsRequest): Response {
 		const playerData = this.players.get(player.UserId);
 
 		const newPlayerData: PlayerData = {

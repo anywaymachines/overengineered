@@ -6,6 +6,7 @@ import { RemoteEvents } from "shared/RemoteEvents";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 import type { PlacedBlockData } from "shared/building/BlockManager";
+import type { SparksEffect } from "shared/effects/SparksEffect";
 
 const overlapParams = new OverlapParams();
 overlapParams.CollisionGroup = "Blocks";
@@ -20,6 +21,7 @@ const materialStrongness: { readonly [k in Enum.Material["Name"]]: number } = Ob
 	}),
 );
 
+@injectable
 export class ImpactController extends Component {
 	private readonly events: RBXScriptConnection[] = [];
 
@@ -46,7 +48,10 @@ export class ImpactController extends Component {
 		return true;
 	}
 
-	constructor(blocks: readonly PlacedBlockData[]) {
+	constructor(
+		blocks: readonly PlacedBlockData[],
+		@inject private readonly sparksEffect: SparksEffect,
+	) {
 		super();
 
 		task.delay(0.1, () => {
@@ -79,12 +84,12 @@ export class ImpactController extends Component {
 
 	subscribeOnBasePart(part: BasePart) {
 		// Optimization (do nothing for non-connected blocks)
-		if (part.AssemblyMass === part.Mass) {
+		if (part.GetJoints().size() === 0) {
 			return;
 		}
 
 		let partPower =
-			part.IsA("Part") && part.Shape === Enum.PartType.Cylinder
+			(part.IsA("Part") && part.Shape === Enum.PartType.Cylinder) || part.HasTag("ImpactStrong")
 				? this.cylindricalBlocksStrength
 				: this.blocksStrength;
 
@@ -157,7 +162,7 @@ export class ImpactController extends Component {
 					event.Disconnect();
 				}
 			} else if (magnitudeDiff + allowedDifference * 0.2 > allowedDifference) {
-				RemoteEvents.Effects.Sparks.sendToNetworkOwnerOrEveryone(part, { part });
+				this.sparksEffect.send(part, { part });
 			}
 		});
 
