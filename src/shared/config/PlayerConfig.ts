@@ -78,7 +78,7 @@ declare global {
 
 export const PlayerConfigDefinition = {
 	betterCamera: {
-		displayName: "Better camera",
+		displayName: "Camera",
 		type: "camera",
 		config: {
 			improved: true as boolean,
