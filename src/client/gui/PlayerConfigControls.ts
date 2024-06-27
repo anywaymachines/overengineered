@@ -243,12 +243,12 @@ namespace ControlsSource {
 					config: definition.config.localShadows,
 				},
 				othersShadows: {
-					displayName: "Others shadows",
+					displayName: "Other's shadows",
 					type: "bool",
 					config: definition.config.othersShadows,
 				},
 				othersEffects: {
-					displayName: "Others effects and sounds",
+					displayName: "Other's effects and sounds",
 					type: "bool",
 					config: definition.config.othersEffects,
 				},
