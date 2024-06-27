@@ -27,6 +27,7 @@ import { PartUtils } from "shared/utils/PartUtils";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { Keybinds } from "client/Keybinds";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BlockSelectorModeGuiDefinition } from "client/tools/highlighters/BlockSelectorModeGui";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
@@ -552,6 +553,7 @@ export class EditTool extends ToolBase {
 	constructor(
 		@inject readonly mode: BuildingMode,
 		@inject private readonly blockRegistry: BlockRegistry,
+		@inject keybinds: Keybinds,
 		@inject di: DIContainer,
 	) {
 		super(mode);
@@ -597,9 +599,11 @@ export class EditTool extends ToolBase {
 			);
 		});
 
-		this.event.onKeyDown("F", () => this.toggleMode("Move"));
-		this.event.onKeyDown("R", () => this.toggleMode("Rotate"));
-		this.event.onKeyDown("ButtonX", () => this.toggleMode("Move"));
+		const move = keybinds.register("edit_move", "Edit tool > Move", ["F", "ButtonX"]);
+		this.event.subscribeRegistration(() => move.onDown(() => this.toggleMode("Move")));
+
+		const rotate = keybinds.register("edit_rotate", "Edit tool > Rotate", ["R"]);
+		this.event.subscribeRegistration(() => rotate.onDown(() => this.toggleMode("Rotate")));
 	}
 
 	cancelCurrentMode() {

@@ -13,9 +13,11 @@ import { RagdollController } from "client/controller/RagdollController";
 import { MusicController } from "client/controller/sound/MusicController";
 import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
+import { ControlsPopup } from "client/gui/popup/ControlsPopup";
 import { SavePopup } from "client/gui/popup/SavePopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
+import { Keybinds } from "client/Keybinds";
 import { ClientBuildingValidationController } from "client/modes/build/ClientBuildingValidationController";
 import { PlayModeController } from "client/modes/PlayModeController";
 import { PlayerDataInitializer } from "client/PlayerDataStorage";
@@ -74,6 +76,7 @@ export namespace SandboxGame {
 			task.wait();
 		}
 
+		builder.services.registerSingletonClass(Keybinds);
 		builder.services.registerSingletonFunc(() => SharedPlots.initialize());
 
 		LoadingController.show("Waiting for plot");
@@ -101,6 +104,7 @@ export namespace SandboxGame {
 		ChatController.initializeAdminPrefix();
 		SettingsPopup.addAsService(builder);
 		SavePopup.addAsService(builder);
+		ControlsPopup.addAsService(builder);
 		WikiPopup.addAsService(builder);
 
 		Startup.initializeBasicsTutorial(builder);
