@@ -516,9 +516,28 @@ namespace ControlsSource {
 				updateControl();
 			});
 
+			const names: { readonly [k in keyof BlockConfigTypes.Types]: string } = {
+				bool: "Bit",
+				vector3: "Vector3",
+				number: "Number",
+				clampedNumber: "Number",
+				string: "Text",
+				color: "Color",
+				byte: "Byte",
+				bytearray: "Byte array",
+				key: "Key",
+				multikey: "Multi key",
+				keybool: "Controlled key",
+				controllableNumber: "Controlled number",
+				motorRotationSpeed: "Motor speed",
+				servoMotorAngle: "Servo angle",
+				thrust: "Thrust strength",
+				or: "Multi",
+			};
+
 			dropdown.addItem("unset");
 			for (const [, type] of pairs(definition.types)) {
-				dropdown.addItem(type.type);
+				dropdown.addItem(type.type, names[type.type]);
 			}
 
 			dropdown.selectedItem.set(currentType);
