@@ -101,7 +101,7 @@ function initRagdollUp(event: ComponentEvents, humanoid: Humanoid, autoRecovery:
 				humanoid.SetStateEnabled("Seated", true);
 
 				const character = player.Character;
-				if (character) {
+				if (character && !(character.WaitForChild("Humanoid") as Humanoid).Sit) {
 					character.PivotTo(character.GetPivot().add(new Vector3(0, 2, 0)));
 				}
 			}
