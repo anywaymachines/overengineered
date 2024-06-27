@@ -358,7 +358,7 @@ const logic = {
 			autoWeldShape: "cube",
 		},
 		keysensor: {
-			name: "Key Sensor",
+			name: "Keyboard Sensor",
 			description: "Returns true when the chosen button is pressed",
 			autoWeldShape: "cube",
 		},
@@ -647,7 +647,7 @@ const registry = {
 		limit: 200,
 	},
 	vehicleseat: {
-		name: "Vehicle Seat",
+		name: "Driver Seat",
 		description: "A seat for your vehicle. Allows you to control your contraption",
 		required: true,
 		limit: 1,
