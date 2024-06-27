@@ -37,9 +37,6 @@ export class ImpactController extends Component {
 		if (
 			!part.CanTouch ||
 			!part.CanCollide ||
-			!part.CanQuery ||
-			part.Massless ||
-			part.Transparency === 1 ||
 			part.IsA("VehicleSeat") ||
 			math.max(part.Size.X, part.Size.Y, part.Size.Z) < 0.5
 		) {
@@ -88,10 +85,15 @@ export class ImpactController extends Component {
 			return;
 		}
 
-		let partPower =
-			(part.IsA("Part") && part.Shape === Enum.PartType.Cylinder) || part.HasTag("ImpactStrong")
-				? this.cylindricalBlocksStrength
-				: this.blocksStrength;
+		let partPower: number;
+		if ((part.IsA("Part") && part.Shape === Enum.PartType.Cylinder) || part.HasTag("ImpactStrong")) {
+			const extentsSize = part.ExtentsSize;
+			partPower =
+				this.cylindricalBlocksStrength * math.max(1, (extentsSize.X * extentsSize.Y * extentsSize.Z) / 16);
+			// TODO: 2π r h + 2π r²
+		} else {
+			partPower = this.blocksStrength;
+		}
 
 		// Material protection
 		partPower *= materialStrongness[part.Material.Name];
