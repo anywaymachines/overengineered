@@ -51,11 +51,14 @@ export class BlockPreviewControl extends Control<ViewportFrame> {
 		this.gui.ClearAllChildren();
 
 		if (block) {
-			this.block = block.Clone();
-			this.block.Parent = this.gui;
+			const size = block.GetExtentsSize();
+			const pivot = new CFrame(new Vector3(0, 0.2, -2 - math.max(size.X, size.Y, size.Z))).mul(
+				this.block?.GetPivot()?.Rotation ?? CFrame.identity,
+			);
 
-			const size = this.block.GetExtentsSize();
-			this.block.PivotTo(new CFrame(new Vector3(0, 0.2, -2 - math.max(size.X, size.Y, size.Z))));
+			this.block = block.Clone();
+			this.block.PivotTo(pivot);
+			this.block.Parent = this.gui;
 		}
 	}
 }

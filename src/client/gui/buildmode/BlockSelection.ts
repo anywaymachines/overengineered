@@ -1,4 +1,4 @@
-import { GuiService, Players } from "@rbxts/services";
+import { ContentProvider, GuiService, Players } from "@rbxts/services";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
@@ -9,12 +9,23 @@ import { ObservableValue } from "shared/event/ObservableValue";
 import { Localization } from "shared/Localization";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 
-type CategoryControlDefinition = TextButton;
+type CategoryControlDefinition = GuiButton & {
+	readonly ViewportFrame: ViewportFrame;
+	readonly TextLabel: TextLabel;
+};
 class CategoryControl extends TextButtonControl<CategoryControlDefinition> {
-	constructor(template: CategoryControlDefinition, text: string) {
+	constructor(template: CategoryControlDefinition, text: string, blocks: readonly BlockModel[]) {
 		super(template);
-
 		this.text.set(text);
+
+		if (blocks.size() !== 0) {
+			const preview = this.add(new BlockPreviewControl(template.ViewportFrame));
+			let blockIndex = 0;
+
+			const update = () => preview.set(blocks[blockIndex++ % blocks.size()]);
+			this.onEnable(update);
+			this.event.loop(1, update);
+		}
 	}
 }
 
@@ -34,27 +45,37 @@ class BlockControl extends TextButtonControl<BlockControlDefinition> {
 export type BlockSelectionControlDefinition = GuiObject & {
 	readonly SearchTextBox: TextBox;
 	readonly NoResultsLabel: TextLabel;
-	readonly PathTextLabel: TextLabel;
-	readonly ScrollingFrame: ScrollingFrame & {
-		readonly BlockButtonTemplate: BlockControlDefinition;
-		readonly CategoryButtonTemplate: CategoryControlDefinition;
+	readonly Content: {
+		readonly ScrollingFrame: ScrollingFrame & {
+			readonly BackButtonTemplate: CategoryControlDefinition;
+			readonly BlockButtonTemplate: BlockControlDefinition;
+			readonly CategoryButtonTemplate: CategoryControlDefinition;
+		};
 	};
 	readonly Header: {
 		readonly Pipette: GuiButton;
+	};
+	readonly Breadcrumbs: GuiObject & {
+		readonly Content: ScrollingFrame & {
+			readonly PathTemplate: TextButton;
+		};
 	};
 };
 
 /** Block chooser control */
 @injectable
 export class BlockSelectionControl extends Control<BlockSelectionControlDefinition> {
+	private readonly backTemplate;
 	private readonly blockTemplate;
 	private readonly categoryTemplate;
+	private readonly breadcrumbTemplate;
 	private readonly list;
 
 	readonly selectedCategory = new ObservableValue<readonly CategoryName[]>([]);
 	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
 
 	readonly pipette;
+	private readonly breadcrumbs;
 
 	constructor(
 		template: BlockSelectionControlDefinition,
@@ -62,11 +83,17 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 	) {
 		super(template);
 
-		this.list = this.add(new Control<ScrollingFrame, BlockControl | CategoryControl>(this.gui.ScrollingFrame));
+		this.list = this.add(
+			new Control<ScrollingFrame, BlockControl | CategoryControl>(this.gui.Content.ScrollingFrame),
+		);
+
+		this.breadcrumbs = this.add(new Control<ScrollingFrame, TextButtonControl>(this.gui.Breadcrumbs.Content));
+		this.breadcrumbTemplate = this.asTemplate(this.gui.Breadcrumbs.Content.PathTemplate);
 
 		// Prepare templates
-		this.blockTemplate = this.asTemplate(this.gui.ScrollingFrame.BlockButtonTemplate);
-		this.categoryTemplate = this.asTemplate(this.gui.ScrollingFrame.CategoryButtonTemplate);
+		this.backTemplate = this.asTemplate(this.gui.Content.ScrollingFrame.BackButtonTemplate);
+		this.blockTemplate = this.asTemplate(this.gui.Content.ScrollingFrame.BlockButtonTemplate);
+		this.categoryTemplate = this.asTemplate(this.gui.Content.ScrollingFrame.CategoryButtonTemplate);
 
 		this.event.subscribeObservable(this.selectedCategory, (category) => this.create(category, true), true);
 
@@ -90,8 +117,22 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 	private create(selected: readonly CategoryName[], animated: boolean) {
 		let idx = 0;
 
-		const createCategoryButton = (text: string, activated: () => void) => {
-			const control = new CategoryControl(this.categoryTemplate(), text);
+		const createBackButton = (activated: () => void) => {
+			const control = new TextButtonControl(this.backTemplate(), activated);
+			this.list.add(control);
+
+			control.instance.LayoutOrder = idx++;
+			return control;
+		};
+		const createCategoryButton = (category: CategoryName, activated: () => void) => {
+			const blocks = [category, ...(this.blockRegistry.getCategoryChildren(category) ?? [])]
+				.flatmap((c) => this.blockRegistry.blocksByCategory.get(c) ?? [])
+				?.map((b) => b.model)
+				.sort((l, r) => tostring(l) > tostring(r));
+
+			task.spawn(() => ContentProvider.PreloadAsync(blocks));
+
+			const control = new CategoryControl(this.categoryTemplate(), category, blocks);
 			control.activated.Connect(activated);
 			this.list.add(control);
 
@@ -108,23 +149,41 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		};
 
 		this.list.clear();
-		this.gui.PathTextLabel.Text = selected.join(" > ");
+
+		const addSlashBreadcrumb = () => {
+			const control = this.breadcrumbs.add(new TextButtonControl(this.breadcrumbTemplate()));
+			control.text.set("/");
+			control.instance.Interactable = false;
+		};
+
+		this.breadcrumbs.clear();
+		addSlashBreadcrumb();
+		for (let i = 0; i < selected.size(); i++) {
+			const path = this.blockRegistry.getCategoryPath(selected[i]) ?? [];
+			const control = this.breadcrumbs.add(
+				new TextButtonControl(this.breadcrumbTemplate(), () => this.selectedCategory.set(path)),
+			);
+			control.text.set(selected[i]);
+
+			if (i < selected.size() - 1) {
+				addSlashBreadcrumb();
+			}
+		}
+		this.breadcrumbs.instance.CanvasPosition = new Vector2(this.breadcrumbs.instance.AbsoluteCanvasSize.X, 0);
 
 		// Back button
 		if (selected.size() !== 0) {
-			createCategoryButton("←", () => {
+			createBackButton(() => {
 				this.gui.SearchTextBox.Text = "";
-
 				this.selectedCategory.set(selected.filter((_, i) => i !== selected.size() - 1));
-				this.selectedBlock.set(undefined);
 			});
 		}
 
 		if (this.gui.SearchTextBox.Text === "") {
 			// Category buttons
-			for (const [_, category] of pairs(
-				selected.reduce((acc, val) => acc[val].sub, this.blockRegistry.categories),
-			)) {
+			for (const category of asMap(selected.reduce((acc, val) => acc[val].sub, this.blockRegistry.categories))
+				.values()
+				.sort((l, r) => l.name < r.name)) {
 				createCategoryButton(category.name, () => this.selectedCategory.set([...selected, category.name]));
 			}
 		}
@@ -181,7 +240,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		GuiService.SelectedObject = isSelected ? this.list.getChildren()[0].instance : undefined;
 
 		if (animated && this.gui.SearchTextBox.Text === "") {
-			GuiAnimator.transition(this.gui.ScrollingFrame, 0.2, "up", 10);
+			GuiAnimator.transition(this.gui.Content.ScrollingFrame, 0.2, "up", 10);
 			GuiAnimator.transition(this.gui.NoResultsLabel, 0.2, "down", 10);
 		}
 	}
