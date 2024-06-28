@@ -410,14 +410,12 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 
 		{
-			init("Position", "%s m", this.infoTextTemplate(), 0, 1, 1, (control) => {
+			init("Position", "%s", this.infoTextTemplate(), 0, 1, 1, (control) => {
 				const rootPart = LocalPlayer.rootPart.get();
 				if (!rootPart) return;
 
 				control.text.value.set(
-					math.floor(RobloxUnit.Studs_To_Meters(rootPart.Position.X)) +
-						" m " +
-						math.floor(RobloxUnit.Studs_To_Meters(rootPart.Position.Z)),
+					`${math.floor(RobloxUnit.Studs_To_Meters(rootPart.Position.X))} ${math.floor(RobloxUnit.Studs_To_Meters(rootPart.Position.Z))}`,
 				);
 			});
 		}
