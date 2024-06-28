@@ -190,13 +190,16 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 		// Block buttons
 		let prev: BlockControl | CategoryControl | undefined;
+
+		const lowerSearch = this.gui.SearchTextBox.Text.fullLower();
 		for (const block of this.blockRegistry.sorted) {
 			if (
 				block.category === this.selectedCategory.get()[this.selectedCategory.get().size() - 1] ||
 				(this.gui.SearchTextBox.Text !== "" &&
-					Localization.translateForPlayer(Players.LocalPlayer, block.displayName)
-						.fullLower()
-						.find(this.gui.SearchTextBox.Text.fullLower(), undefined, true)[0])
+					(block.displayName.fullLower().find(lowerSearch)[0] ||
+						Localization.translateForPlayer(Players.LocalPlayer, block.displayName)
+							.fullLower()
+							.find(lowerSearch, undefined, true)[0]))
 			) {
 				const button = createBlockButton(block, () => {
 					if (this.gui.SearchTextBox.Text !== "") {
