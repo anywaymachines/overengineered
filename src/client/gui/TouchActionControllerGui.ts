@@ -29,7 +29,7 @@ export class TouchActionControllerGui extends Control<TouchActionControllerGuiDe
 		const grid = this.add(
 			new ButtonControl(gui.Grid, () => {
 				gridEnabled.set(!gridEnabled.get());
-				LogControl.instance.addLine(gridEnabled.get() ? "Grid disabled!" : "Grid enabled!");
+				LogControl.instance.addLine(gridEnabled.get() ? "Grid enabled!" : "Grid disabled!");
 			}),
 		);
 		const animateGridEnabled = TransformService.boolStateMachine(
