@@ -322,7 +322,7 @@ export async function TutorialBasics(tutorial: Tutorial) {
 	TasksControl.instance.addTask("Place all highlighted blocks");
 
 	tutorial.buildTool.addBlockToPlace({
-		id: "smallwheel",
+		id: "wheel",
 		cframe: new CFrame(
 			0,
 			5.5,
@@ -340,7 +340,7 @@ export async function TutorialBasics(tutorial: Tutorial) {
 	});
 
 	tutorial.buildTool.addBlockToPlace({
-		id: "smallwheel",
+		id: "wheel",
 		cframe: new CFrame(
 			18,
 			5.5,
@@ -358,7 +358,7 @@ export async function TutorialBasics(tutorial: Tutorial) {
 	});
 
 	tutorial.buildTool.addBlockToPlace({
-		id: "smallwheel",
+		id: "wheel",
 		cframe: new CFrame(
 			18,
 			5.5,
@@ -376,7 +376,7 @@ export async function TutorialBasics(tutorial: Tutorial) {
 	});
 
 	tutorial.buildTool.addBlockToPlace({
-		id: "smallwheel",
+		id: "wheel",
 		cframe: new CFrame(
 			0,
 			5.5,

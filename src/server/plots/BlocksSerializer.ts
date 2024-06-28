@@ -1,4 +1,3 @@
-import { HttpService } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
@@ -968,33 +967,20 @@ const v23: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 	version: 23,
 
 	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
-		const update = (block: SerializedBlockV3): readonly SerializedBlockV3[] => {
-			if (block.id === "wheel" || block.id === "smallwheel") {
-				return [
-					{
-						...block,
-						id: block.id === "wheel" ? "bigwheel" : "wheel",
-					},
-					{
-						id: "shaft",
-						loc: Serializer.CFrameSerializer.serialize(
-							Serializer.CFrameSerializer.deserialize(block.loc).mul(CFrame.Angles(math.rad(-90), 0, 0)),
-						),
-						col: block.col,
-						mat: block.mat,
-						config: undefined,
-						connections: undefined,
-						uuid: HttpService.GenerateGUID(false) as BlockUuid,
-					},
-				];
+		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
+			if (block.id === "wheel") {
+				return { ...block, id: "bigwheel" };
+			}
+			if (block.id === ("smallwheel" as BlockId)) {
+				return { ...block, id: "wheel" };
 			}
 
-			return [block];
+			return block;
 		};
 
 		return {
 			version: this.version,
-			blocks: prev.blocks.flatmap(update),
+			blocks: prev.blocks.map(update),
 		};
 	},
 

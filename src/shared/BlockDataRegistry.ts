@@ -597,10 +597,6 @@ const registry = {
 		description: "Smaller brother of a rocket engine",
 		mirrorBehaviour: "offset180",
 	},
-	smallwheel: {
-		name: "Small Wheel",
-		description: "smol whel",
-	},
 	speedometer: {
 		name: "Speedometer",
 		description: "Returns the current velocity",
@@ -690,11 +686,23 @@ const registry = {
 	},
 	wheel: {
 		name: "Wheel",
-		description: "A ginormous wheel",
+		description: "circle",
 	},
 	bigwheel: {
 		name: "Big wheel",
 		description: "Wheel. Big one.",
+	},
+	smalloldwheel: {
+		name: "Small old wheel",
+		description: "smol ol whel",
+	},
+	oldwheel: {
+		name: "Old wheel",
+		description: "A ginormous old wheel",
+	},
+	bigoldwheel: {
+		name: "Big old wheel",
+		description: "Old wheel. Big one.",
 	},
 	wing1x1: {
 		name: "Wing 1x1",
