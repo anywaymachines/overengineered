@@ -3,10 +3,6 @@ import { ActionController } from "client/modes/build/ActionController";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { Tutorial } from "client/tutorial/Tutorial";
 
-/**
- * Rewrite required
- * @deprecated
- */
 export async function TutorialBasics(tutorial: Tutorial) {
 	tutorial.Control.startTutorial("BASICS", tutorial.Cancellable);
 	const toolController = tutorial.buildingMode.toolController;
