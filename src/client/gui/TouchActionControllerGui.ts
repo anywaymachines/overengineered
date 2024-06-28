@@ -1,5 +1,6 @@
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
+import { LogControl } from "client/gui/static/LogControl";
 import { ActionController } from "client/modes/build/ActionController";
 import { TransformService } from "shared/component/TransformService";
 import type { ObservableValue } from "shared/event/ObservableValue";
@@ -25,7 +26,12 @@ export class TouchActionControllerGui extends Control<TouchActionControllerGuiDe
 			redo.setInteractable(hasRedo);
 		});
 
-		const grid = this.add(new ButtonControl(gui.Grid, () => gridEnabled.set(!gridEnabled.get())));
+		const grid = this.add(
+			new ButtonControl(gui.Grid, () => {
+				gridEnabled.set(!gridEnabled.get());
+				LogControl.instance.addLine(gridEnabled.get() ? "Grid disabled!" : "Grid enabled!");
+			}),
+		);
 		const animateGridEnabled = TransformService.boolStateMachine(
 			grid.instance,
 			TransformService.commonProps.quadOut02,
