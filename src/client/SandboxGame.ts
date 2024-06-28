@@ -24,7 +24,6 @@ import { PlayerDataInitializer } from "client/PlayerDataStorage";
 import { TerrainController } from "client/terrain/TerrainController";
 import { TestRunner } from "client/test/TestRunner";
 import { Tutorial } from "client/tutorial/Tutorial";
-import { TutorialBasics } from "client/tutorial/TutorialBasics";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { HostedService } from "shared/GameHost";
 import { BlocksInitializer } from "shared/init/BlocksInitializer";
@@ -37,11 +36,12 @@ namespace Startup {
 		constructor(@inject tutorial: Tutorial, @inject playerData: PlayerDataStorage) {
 			super();
 
-			this.onEnable(() => {
-				if (!playerData.slots.get().any((t) => t.blocks !== 0)) {
-					TutorialBasics(tutorial);
-				}
-			});
+			// TODO: Rewrite required
+			// this.onEnable(() => {
+			// 	if (!playerData.slots.get().any((t) => t.blocks !== 0)) {
+			// 		TutorialBasics(tutorial);
+			// 	}
+			// });
 		}
 	}
 	@injectable

@@ -1,15 +1,12 @@
 import { Control } from "client/gui/Control";
-import { TextButtonControl } from "client/gui/controls/Button";
 import { DropdownList } from "client/gui/controls/DropdownList";
 import { KeyChooserControl } from "client/gui/controls/KeyChooserControl";
 import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Gui } from "client/gui/Gui";
-import { TutorialBasics } from "client/tutorial/TutorialBasics";
 import { Signal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
-import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
@@ -375,13 +372,14 @@ namespace ControlsSource {
 
 			const list = this.add(new Control(this.gui.Control));
 
-			const basics = list.add(
-				new TextButtonControl(
-					Gui.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
-					() => TutorialBasics(tutorial),
-				),
-			);
-			basics.text.set("Basics tutorial");
+			// TODO: Rewrite required
+			// const basics = list.add(
+			// 	new TextButtonControl(
+			// 		Gui.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
+			// 		() => TutorialBasics(tutorial),
+			// 	),
+			// );
+			// basics.text.set("Basics tutorial");
 		}
 	}
 
