@@ -231,7 +231,7 @@ namespace Types {
 						if (!config.switchmode) {
 							this.value.set(config.speed);
 						} else {
-							this.value.set(this.value.get() === config.speed ? 0 : config.speed);
+							this.value.set(math.abs(this.value.get() - config.speed) < 0.01 ? 0 : config.speed);
 						}
 					},
 					keyUp: () => {
@@ -247,7 +247,7 @@ namespace Types {
 						if (!config.switchmode) {
 							this.value.set(-config.speed);
 						} else {
-							this.value.set(this.value.get() === -config.speed ? 0 : -config.speed);
+							this.value.set(math.abs(this.value.get() - -config.speed) < 0.01 ? 0 : -config.speed);
 						}
 					},
 					keyUp: () => {
