@@ -1,7 +1,8 @@
-import { LocalizationService, Players, RunService } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import { Control } from "client/gui/Control";
 import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
+import { Localization } from "shared/Localization";
 
 export type TutorialControlDefinition = Frame & {
 	Header: TextLabel & {
@@ -29,15 +30,6 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 		GuiAnimator.hide(this.gui, 0.2, "down");
 	}
 
-	private translate(text: string) {
-		try {
-			const translator = LocalizationService.GetTranslatorForLocaleAsync(Players.LocalPlayer.LocaleId);
-			return translator.Translate(game, text);
-		} catch {
-			return text;
-		}
-	}
-
 	isActive() {
 		return this.gui.Visible;
 	}
@@ -54,7 +46,7 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 		this.gui.Header.Cancel.Visible = false;
 		this.gui.Header.Next.Visible = false;
 
-		const translatedText = this.translate(text);
+		const translatedText = Localization.translateForPlayer(Players.LocalPlayer, text);
 
 		// Animated text for tutorial
 		for (const symbol of translatedText) {

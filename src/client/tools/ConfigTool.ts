@@ -1,3 +1,4 @@
+import { Players } from "@rbxts/services";
 import { InputController } from "client/controller/InputController";
 import { MultiConfigControl } from "client/gui/BlockConfigControls";
 import { Control } from "client/gui/Control";
@@ -14,6 +15,7 @@ import { Config } from "shared/config/Config";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
+import { Localization } from "shared/Localization";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
@@ -95,7 +97,10 @@ namespace Scene {
 			this.gui.Visible = Objects.size(onedef) !== 0;
 			if (!this.gui.Visible) return;
 
-			this.gui.ParamsSelection.Heading.NameLabel.Text = block.displayName.upper();
+			this.gui.ParamsSelection.Heading.NameLabel.Text = Localization.translateForPlayer(
+				Players.LocalPlayer,
+				block.displayName,
+			).fullUpper();
 			this.gui.ParamsSelection.Heading.AmountLabel.Text = `x${selected.size()}`;
 
 			const configs = selected.map((selected) => {

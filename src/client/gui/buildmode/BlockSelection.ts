@@ -1,4 +1,4 @@
-import { GuiService, LocalizationService, Players } from "@rbxts/services";
+import { GuiService, Players } from "@rbxts/services";
 import { BlockPreviewControl } from "client/gui/buildmode/BlockPreviewControl";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
@@ -6,6 +6,7 @@ import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { ObservableValue } from "shared/event/ObservableValue";
+import { Localization } from "shared/Localization";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 type CategoryControlDefinition = TextButton;
@@ -86,15 +87,6 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		});
 	}
 
-	private translate(text: string) {
-		try {
-			const translator = LocalizationService.GetTranslatorForLocaleAsync(Players.LocalPlayer.LocaleId);
-			return translator.Translate(game, text);
-		} catch {
-			return text;
-		}
-	}
-
 	private create(selected: readonly CategoryName[], animated: boolean) {
 		let idx = 0;
 
@@ -143,7 +135,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			if (
 				block.category === this.selectedCategory.get()[this.selectedCategory.get().size() - 1] ||
 				(this.gui.SearchTextBox.Text !== "" &&
-					this.translate(block.displayName)
+					Localization.translateForPlayer(Players.LocalPlayer, block.displayName)
 						.fullLower()
 						.find(this.gui.SearchTextBox.Text.fullLower(), undefined, true)[0])
 			) {
