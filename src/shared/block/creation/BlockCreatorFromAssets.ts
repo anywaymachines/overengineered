@@ -11,27 +11,33 @@ export namespace BlockCreatorFromAssets {
 			.GetChildren() as unknown as readonly Folder[];
 
 		for (const child of placeable) {
-			readCategory(data, child, data.categories);
+			readCategory(data, child, data.categories, []);
 		}
 	}
 
-	function readCategory(data: BlocksInitializeData, folder: Folder, prev: BlocksInitializeData["categories"]) {
+	function readCategory(
+		data: BlocksInitializeData,
+		folder: Folder,
+		prev: BlocksInitializeData["categories"],
+		path: CategoryPath,
+	) {
 		const name = folder.Name as CategoryName;
-		prev[name] = { name: name, sub: {} };
+		path = [...path, name];
+		prev[name] = { path, name: name, sub: {} };
 
 		for (const child of folder.GetChildren()) {
 			if (child.IsA("Folder")) {
-				readCategory(data, child, prev[name].sub);
+				readCategory(data, child, prev[name].sub, path);
 			} else if (child.IsA("Model")) {
-				readBlock(data, child as BlockModel, name);
+				readBlock(data, child as BlockModel, path);
 			}
 		}
 	}
-	function readBlock(data: BlocksInitializeData, block: Model, categoryName: string) {
+	function readBlock(data: BlocksInitializeData, block: BlockModel, category: CategoryPath) {
 		BlockGenerator.Assertions.checkAll(block);
 
 		const id = block.Name.lower() as BlockId;
-		const regblock = BlockGenerator.construct(id, block as BlockModel, categoryName as CategoryName);
+		const regblock = BlockGenerator.construct(id, block, category);
 		data.blocks.set(regblock.id, regblock);
 	}
 }

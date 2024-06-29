@@ -3,11 +3,17 @@ import { AutoOperationsCreator } from "shared/block/creation/AutoOperationsCreat
 import { BlockCreatorFromAssets } from "shared/block/creation/BlockCreatorFromAssets";
 import { GeneratedBlocksCreator } from "shared/block/creation/GeneratedBlockCreator";
 
-type Category = {
+declare global {
+	type CategoryName = string & { readonly ___nominal: "CategoryName" };
+	type CategoryPath = readonly CategoryName[];
+}
+
+export type Category = {
+	readonly path: CategoryPath;
 	readonly name: CategoryName;
 	readonly sub: Categories;
 };
-type Categories = Readonly<Record<CategoryName, Category>>;
+export type Categories = Readonly<Record<CategoryName, Category>>;
 
 export type BlocksInitializeData = {
 	readonly blocks: Map<string, RegistryBlock>;

@@ -71,7 +71,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 	private readonly breadcrumbTemplate;
 	private readonly list;
 
-	readonly selectedCategory = new ObservableValue<readonly CategoryName[]>([]);
+	readonly selectedCategory = new ObservableValue<CategoryPath>([]);
 	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
 
 	readonly pipette;
@@ -100,7 +100,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		this.pipette = this.add(
 			BlockPipetteButton.forBlockId(this.gui.Header.Pipette, (id) => {
 				this.selectedBlock.set(blockRegistry.blocks.get(id));
-				this.selectedCategory.set(blockRegistry.getCategoryPath(this.selectedBlock.get()!.category) ?? []);
+				this.selectedCategory.set(this.selectedBlock.get()!.category);
 			}),
 		);
 
@@ -114,7 +114,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		});
 	}
 
-	private create(selected: readonly CategoryName[], animated: boolean) {
+	private create(selected: CategoryPath, animated: boolean) {
 		let idx = 0;
 
 		const createBackButton = (activated: () => void) => {
@@ -124,15 +124,15 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			control.instance.LayoutOrder = idx++;
 			return control;
 		};
-		const createCategoryButton = (category: CategoryName, activated: () => void) => {
-			const blocks = [category, ...(this.blockRegistry.getCategoryChildren(category) ?? [])]
-				.flatmap((c) => this.blockRegistry.blocksByCategory.get(c) ?? [])
-				?.map((b) => b.model)
+		const createCategoryButton = (category: CategoryPath, activated: () => void) => {
+			const blocks = this.blockRegistry
+				.getBlocksByCategoryRecursive(category)
+				.map((b) => b.model)
 				.sort((l, r) => tostring(l) > tostring(r));
 
 			task.spawn(() => ContentProvider.PreloadAsync(blocks));
 
-			const control = new CategoryControl(this.categoryTemplate(), category, blocks);
+			const control = new CategoryControl(this.categoryTemplate(), category[category.size() - 1], blocks);
 			control.activated.Connect(activated);
 			this.list.add(control);
 
@@ -159,7 +159,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		this.breadcrumbs.clear();
 		addSlashBreadcrumb();
 		for (let i = 0; i < selected.size(); i++) {
-			const path = this.blockRegistry.getCategoryPath(selected[i]) ?? [];
+			const path: CategoryPath = selected.move(0, i, 0, []);
 			const control = this.breadcrumbs.add(
 				new TextButtonControl(this.breadcrumbTemplate(), () => this.selectedCategory.set(path)),
 			);
@@ -181,10 +181,12 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 		if (this.gui.SearchTextBox.Text === "") {
 			// Category buttons
-			for (const category of asMap(selected.reduce((acc, val) => acc[val].sub, this.blockRegistry.categories))
+			for (const category of asMap(
+				this.blockRegistry.getCategoryByPath(selected)?.sub ?? this.blockRegistry.categories,
+			)
 				.values()
 				.sort((l, r) => l.name < r.name)) {
-				createCategoryButton(category.name, () => this.selectedCategory.set([...selected, category.name]));
+				createCategoryButton(category.path, () => this.selectedCategory.set([...selected, category.name]));
 			}
 		}
 
@@ -192,47 +194,48 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		let prev: BlockControl | CategoryControl | undefined;
 
 		const lowerSearch = this.gui.SearchTextBox.Text.fullLower();
-		for (const block of this.blockRegistry.sorted) {
-			if (
-				block.category === this.selectedCategory.get()[this.selectedCategory.get().size() - 1] ||
-				(this.gui.SearchTextBox.Text !== "" &&
-					(block.displayName.fullLower().find(lowerSearch)[0] ||
-						Localization.translateForPlayer(Players.LocalPlayer, block.displayName)
-							.fullLower()
-							.find(lowerSearch, undefined, true)[0]))
-			) {
-				const button = createBlockButton(block, () => {
-					if (this.gui.SearchTextBox.Text !== "") {
-						this.gui.SearchTextBox.Text = "";
-						this.selectedCategory.set(this.blockRegistry.getCategoryPath(block.category) ?? []);
-					}
-					this.selectedBlock.set(block);
-				});
+		const blocks =
+			this.gui.SearchTextBox.Text === ""
+				? this.blockRegistry.getBlocksByCategory(this.selectedCategory.get())
+				: this.blockRegistry.sorted.filter(
+						(block) =>
+							block.displayName.fullLower().find(lowerSearch)[0] !== undefined ||
+							Localization.translateForPlayer(Players.LocalPlayer, block.displayName)
+								.fullLower()
+								.find(lowerSearch, undefined, true)[0] !== undefined,
+					);
 
-				if (prev) {
-					button.instance.NextSelectionUp = prev.instance;
-					prev.instance.NextSelectionDown = button.instance;
+		for (const block of blocks) {
+			const button = createBlockButton(block, () => {
+				if (this.gui.SearchTextBox.Text !== "") {
+					this.gui.SearchTextBox.Text = "";
+					this.selectedCategory.set(block.category);
 				}
+				this.selectedBlock.set(block);
+			});
 
-				button.event.subscribe(button.activated, () => {
-					// Gamepad selection improvements
-					GuiService.SelectedObject = undefined;
-				});
-
-				button.event.subscribeObservable(
-					this.selectedBlock,
-					(newblock) => {
-						button.instance.BackgroundColor3 =
-							newblock === block ? Colors.accentDark : Colors.staticBackground;
-
-						// Gamepad selection improvements
-						button.instance.SelectionOrder = newblock === block ? 0 : 1;
-					},
-					true,
-				);
-
-				prev = button;
+			if (prev) {
+				button.instance.NextSelectionUp = prev.instance;
+				prev.instance.NextSelectionDown = button.instance;
 			}
+
+			button.event.subscribe(button.activated, () => {
+				// Gamepad selection improvements
+				GuiService.SelectedObject = undefined;
+			});
+
+			button.event.subscribeObservable(
+				this.selectedBlock,
+				(newblock) => {
+					button.instance.BackgroundColor3 = newblock === block ? Colors.accentDark : Colors.staticBackground;
+
+					// Gamepad selection improvements
+					button.instance.SelectionOrder = newblock === block ? 0 : 1;
+				},
+				true,
+			);
+
+			prev = button;
 		}
 
 		// No results label for searching menu

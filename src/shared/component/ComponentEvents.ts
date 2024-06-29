@@ -193,10 +193,8 @@ export class ComponentEvents {
 		return observable;
 	}
 
-	/** Create an infinite loop that would only loop when this event holder is enabled
-	 * @returns Function that stops the loop
-	 */
-	loop(interval: number, func: (dt: number) => void) {
+	/** Create an infinite loop that would only loop when this event holder is enabled */
+	loop(interval: number, func: (dt: number) => void): SignalConnection {
 		let stop = false;
 
 		task.spawn(() => {
@@ -213,6 +211,10 @@ export class ComponentEvents {
 			}
 		});
 
-		return () => (stop = true);
+		return {
+			Disconnect() {
+				stop = true;
+			},
+		};
 	}
 }

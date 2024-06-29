@@ -393,13 +393,11 @@ namespace Scene {
 					return;
 				}
 
-				const targetCategory = tool.blockRegistry.getCategoryPath(block.category) ?? [];
-
 				if (
 					this.blockSelector.selectedCategory.get()[this.blockSelector.selectedCategory.get().size() - 1] !==
-					targetCategory[targetCategory.size() - 1]
+					block.category[block.category.size() - 1]
 				) {
-					this.blockSelector.selectedCategory.set(targetCategory);
+					this.blockSelector.selectedCategory.set(block.category);
 				}
 
 				this.blockSelector.selectedBlock.set(block);

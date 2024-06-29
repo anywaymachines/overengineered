@@ -11,7 +11,7 @@ import type { BlocksInitializeData } from "shared/init/BlocksInitializer";
 
 interface CreateInfo<TFunc> {
 	readonly modelTextOverride: string;
-	readonly category: readonly string[];
+	readonly category: CategoryPath;
 	readonly prefab: BlockGenerator.PrefabName;
 	readonly func: TFunc;
 	readonly required?: boolean;
@@ -628,13 +628,13 @@ const multiifunc =
 
 const prefabs = BlockGenerator.prefabNames;
 const categories = {
-	math: ["Logic", "Math"],
-	byte: ["Logic", "Math", "Byte"],
-	converterByte: ["Logic", "Converter", "Byte"],
-	converterVector: ["Logic", "Converter", "Vector"],
-	other: ["Logic", "Other"],
-	bool: ["Logic", "Gate"],
-} as const satisfies { [k in string]: readonly string[] };
+	math: ["Logic", "Math"] as unknown as CategoryPath,
+	byte: ["Logic", "Math", "Byte"] as unknown as CategoryPath,
+	converterByte: ["Logic", "Converter", "Byte"] as unknown as CategoryPath,
+	converterVector: ["Logic", "Converter", "Vector"] as unknown as CategoryPath,
+	other: ["Logic", "Other"] as unknown as CategoryPath,
+	bool: ["Logic", "Gate"] as unknown as CategoryPath,
+} as const satisfies { [k in string]: CategoryPath };
 
 const operations = {
 	const: {

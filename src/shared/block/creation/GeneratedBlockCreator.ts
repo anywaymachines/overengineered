@@ -6,7 +6,7 @@ import type { BlocksInitializeData } from "shared/init/BlocksInitializer";
 
 interface CreateInfo {
 	readonly modelTextOverride: string;
-	readonly category: readonly string[];
+	readonly category: CategoryPath;
 	readonly prefab: BlockGenerator.PrefabName;
 	// readonly logic?: LogicCtor;
 	// readonly config?: BlockConfigTypes.BothDefinitions;
@@ -16,8 +16,8 @@ interface CreateInfo {
 
 const prefabs = BlockGenerator.prefabNames;
 const categories = {
-	other: ["Logic", "Other"],
-} as const satisfies { [k in string]: readonly string[] };
+	other: ["Logic", "Other"] as unknown as CategoryPath,
+} as const satisfies { [k in string]: CategoryPath };
 
 const blocks = {
 	counter: {

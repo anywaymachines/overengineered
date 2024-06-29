@@ -7,7 +7,7 @@ import { AABB } from "shared/fixes/AABB";
 import { Instances } from "shared/fixes/Instances";
 import type { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
-import type { BlocksInitializeData } from "shared/init/BlocksInitializer";
+import type { BlocksInitializeData, Categories, Category } from "shared/init/BlocksInitializer";
 
 if (RunService.IsServer()) {
 	Element.create("Folder", { Name: "PlaceableAutomatic", Parent: Instances.assets });
@@ -165,7 +165,7 @@ export namespace BlockGenerator {
 	type BlockAutoCreationData = {
 		readonly id: BlockId;
 		readonly modelTextOverride: string;
-		readonly category: readonly string[];
+		readonly category: CategoryPath;
 		readonly prefab: PrefabName;
 		readonly logic: LogicCtor;
 		readonly config: BlockConfigTypes.BothDefinitions;
@@ -180,22 +180,22 @@ export namespace BlockGenerator {
 		const model = cloneBlockModel(id, data.prefab, data.modelTextOverride);
 		Assertions.checkAll(model);
 
-		const regblock = construct(id, model, data.category[data.category.size() - 1] as CategoryName);
+		const regblock = construct(id, model, data.category);
 		info.blocks.set(regblock.id, regblock);
 
 		// automatically create categories
 		//some magic idk DO NOT TOUCH
 		{
-			let cat: (typeof info.categories)[CategoryName] | undefined = undefined;
+			let cat: Category | undefined = undefined;
+			let path: CategoryPath = [];
 			for (const c of data.category) {
-				const se = (cat?.sub ?? info.categories) as Writable<typeof info.categories>;
-				if (!se[c as CategoryName]) {
-					se[c as CategoryName] = { name: c as CategoryName, sub: {} };
-				}
+				path = [...path, c];
 
-				const newcat = se[c as CategoryName];
+				const se = (cat?.sub ?? info.categories) as Writable<Categories>;
+				const newcat = (se[c] ??= { path, name: c, sub: {} });
+
 				if (cat) {
-					(cat.sub as Writable<typeof cat.sub>)[c as CategoryName] = newcat;
+					(cat.sub as Writable<Categories>)[c] = newcat;
 				}
 
 				cat = newcat;
@@ -205,7 +205,7 @@ export namespace BlockGenerator {
 		registerLogic(id, data.logic, data.config);
 	}
 
-	export function construct(id: BlockId, model: BlockModel, category: CategoryName): RegistryBlock {
+	export function construct(id: BlockId, model: BlockModel, category: CategoryPath): RegistryBlock {
 		if (!(id in BlockDataRegistry)) {
 			throw `Block ${id} was not found in the data registry`;
 		}
