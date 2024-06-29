@@ -10,7 +10,7 @@ export const requestMode = (mode: PlayModes) => {
 	try {
 		const response = CustomRemotes.modes.set.send(mode);
 		if (!response.success) {
-			$err(response.message);
+			$warn(response.message);
 			LogControl.instance.addLine(response.message!, Colors.red);
 			SoundController.getSounds().Build.BlockPlaceError.Play();
 
