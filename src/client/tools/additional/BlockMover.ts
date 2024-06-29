@@ -7,6 +7,7 @@ import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { BlockEditorBase } from "client/tools/additional/BlockEditorBase";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { AABB } from "shared/fixes/AABB";
+import { BB } from "shared/fixes/BB";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -39,22 +40,70 @@ class DesktopMove extends MoveBase {
 			return number - (((number + step / 2) % step) - step / 2);
 		};
 		const limitMovement = (
-			regionSize: Vector3,
+			region: BB,
 			regionPos: Vector3,
 			direction: Vector3,
 			distance: number,
-			bounds: AABB,
+			bounds: BB,
 		): number => {
-			const axes = direction.X !== 0 ? "X" : direction.Y !== 0 ? "Y" : "Z";
-			const sign = math.sign(direction[axes]);
+			if (true as boolean) return distance;
 
-			const blockOffsetMin = regionPos[axes] - regionSize[axes] / 2;
-			const blockOffsetMax = regionPos[axes] + regionSize[axes] / 2;
-			let boundsmin = (bounds.getMin()[axes] - blockOffsetMin) * sign;
-			let boundsmax = (bounds.getMax()[axes] - blockOffsetMax) * sign;
-			[boundsmin, boundsmax] = [math.min(boundsmin, boundsmax), math.max(boundsmin, boundsmax)];
+			function calculateDistanceToBounds(
+				movingAABBCenter: Vector3,
+				movingAABBSize: Vector3,
+				boundsCenter: Vector3,
+				boundsSize: Vector3,
+				direction: Vector3,
+			): number {
+				// Calculate half-extents of both AABBs
+				const movingAABBHalfExtents = movingAABBSize.div(2);
+				const boundsHalfExtents = boundsSize.div(2);
 
-			return math.clamp(distance, boundsmin, boundsmax);
+				// Project both AABBs onto the direction vector
+				const movingAABBMin = direction.Dot(movingAABBCenter.sub(movingAABBHalfExtents));
+				const movingAABBMax = direction.Dot(movingAABBCenter.add(movingAABBHalfExtents));
+				const boundsMin = direction.Dot(boundsCenter.sub(boundsHalfExtents));
+				const boundsMax = direction.Dot(boundsCenter.add(boundsHalfExtents));
+
+				print({
+					movingAABBMin,
+					movingAABBMax,
+					boundsMin,
+					boundsMax,
+				});
+
+				// Calculate the distance between the two projected intervals
+				return math.max(boundsMin - movingAABBMax, movingAABBMin - boundsMax, 0);
+			}
+
+			const localToBoundsDirection = bounds.center.VectorToObjectSpace(
+				region.center.VectorToWorldSpace(direction),
+			);
+			const localToBoundsRegion = region.withCenter((c) => bounds.center.ToObjectSpace(c));
+
+			const targetSize = direction.apply(math.sign).mul(bounds.originalSize);
+			const diff = bounds.center.Position.sub(targetSize).apply(math.abs);
+			print({ targetSize, diff });
+
+			const localToBoundsSizeHalf = localToBoundsRegion.getRotatedSize().div(2);
+			const xyz = region.center.add(
+				new Vector3(
+					math.sign(localToBoundsDirection.X) * localToBoundsSizeHalf.X,
+					math.sign(localToBoundsDirection.Y) * localToBoundsSizeHalf.Y,
+					math.sign(localToBoundsDirection.Z) * localToBoundsSizeHalf.Z,
+				),
+			);
+
+			return math.min(
+				distance,
+				calculateDistanceToBounds(
+					localToBoundsRegion.center.Position,
+					localToBoundsRegion.getRotatedSize(),
+					bounds.center.Position,
+					bounds.originalSize,
+					localToBoundsDirection,
+				),
+			);
 		};
 
 		const initHandles = (instance: Handles) => {
@@ -75,32 +124,24 @@ class DesktopMove extends MoveBase {
 			});
 
 			this.event.subscribe(instance.MouseDrag, (face, distance) => {
-				distance = limitMovement(
-					aabb.getSize(),
-					startpos,
-					Vector3.FromNormalId(face),
-					distance,
-					this.plotBounds,
-				);
+				const globalDirection = boundingBox.center.Rotation.mul(Vector3.FromNormalId(face));
+
+				distance = limitMovement(boundingBox, startpos, globalDirection, distance, this.plotBoundsb);
 				if (this.mode.gridEnabled.get()) {
 					distance = roundByStep(distance);
 				}
 
-				this.difference = startDifference.add(Vector3.FromNormalId(face).mul(distance));
-				if (!this.plotBounds.contains(aabb.withCenter(fullStartPos.add(this.difference)))) {
-					return;
-				}
-
-				moveHandles.PivotTo(new CFrame(fullStartPos.add(this.difference)));
+				this.difference = startDifference.add(globalDirection.mul(distance));
+				moveHandles.PivotTo(boundingBox.center.Rotation.add(fullStartPos.add(this.difference)));
 				this.moveBlocksTo(this.difference);
 			});
 		};
 
-		const aabb = AABB.fromModels(this.blocks);
+		const boundingBox = BB.fromModels(this.blocks);
 
 		const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
-		moveHandles.Size = aabb.getSize().add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
-		moveHandles.PivotTo(new CFrame(aabb.getCenter()));
+		moveHandles.PivotTo(boundingBox.center);
+		moveHandles.Size = boundingBox.originalSize.add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
 		moveHandles.Parent = Gui.getPlayerGui();
 
 		const fullStartPos: Vector3 = moveHandles.GetPivot().Position;

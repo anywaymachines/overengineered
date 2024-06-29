@@ -3,6 +3,7 @@ import { BlockManager } from "shared/building/BlockManager";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { Signal } from "shared/event/Signal";
 import { AABB } from "shared/fixes/AABB";
+import { BB } from "shared/fixes/BB";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class SharedPlot extends InstanceComponent<PlotModel> {
@@ -18,7 +19,8 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	readonly ownerId;
 	readonly whitelistedPlayers;
 	readonly blacklistedPlayers;
-	readonly bounds;
+	readonly bounds: AABB;
+	readonly boundsb: BB;
 
 	constructor(instance: PlotModel) {
 		super(instance);
@@ -35,6 +37,7 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 		this.blacklistedPlayers = this.event.observableFromAttributeJson<readonly number[]>(instance, "blacklisted");
 		this.whitelistedPlayers.set([5243461283]);
 		this.bounds = SharedPlot.getPlotBuildingRegion(instance);
+		this.boundsb = new BB(new CFrame(this.bounds.getCenter()), this.bounds.getSize());
 	}
 
 	getCenter() {

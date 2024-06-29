@@ -9,7 +9,9 @@ interface MinMaxData {
 	readonly max: Vector3;
 }
 
-/** Lazily initialized immutable {@link https://wikipedia.org/wiki/AABB Axis-Aligned Bounding Box} */
+/** Lazily initialized immutable {@link https://wikipedia.org/wiki/AABB Axis-Aligned Bounding Box}
+ * @deprecated Use {@link BB} instead
+ */
 export class AABB {
 	/** Get the {@link AABB} of a part */
 	static fromPart(block: BasePart, cframe?: CFrame): AABB {

@@ -3,13 +3,12 @@ import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Component } from "shared/component/Component";
 import { ComponentInstance } from "shared/component/ComponentInstance";
-import { AABB } from "shared/fixes/AABB";
+import { BB } from "shared/fixes/BB";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import type { BuildingWelder } from "server/building/BuildingWelder";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { PlacedBlockData, PlacedBlockLogicConnections } from "shared/building/BlockManager";
-import type { SharedPlot } from "shared/building/SharedPlot";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
@@ -17,20 +16,15 @@ const success: SuccessResponse = { success: true };
 /** Building on a plot. */
 @injectable
 export class BuildingPlot extends Component {
-	private readonly localAABB: AABB;
-
 	constructor(
 		private readonly instance: Instance,
-		/** @deprecated TOBEREMOVED */
-		private readonly plot: SharedPlot,
 		readonly center: CFrame,
-		readonly size: Vector3,
+		readonly boundingBox: BB,
 		@inject private readonly blockRegistry: BlockRegistry,
 		@inject private readonly buildingWelder: BuildingWelder,
 	) {
 		super();
 		ComponentInstance.init(this, instance);
-		this.localAABB = AABB.fromCenterSize(Vector3.zero, size);
 
 		this.onDestroy(() => buildingWelder.deleteWelds(this));
 	}
@@ -42,10 +36,7 @@ export class BuildingPlot extends Component {
 		return this.instance.Clone().GetChildren() as BlockModel[];
 	}
 	isInside(block: BlockModel): boolean {
-		const [pos, size] = block.GetBoundingBox();
-		const localPos = this.center.ToObjectSpace(pos);
-
-		return this.localAABB.contains(AABB.fromCenterSize(localPos.Position, size).withCenter(localPos));
+		return this.boundingBox.isBBInside(BB.fromModel(block));
 	}
 
 	getBlockDatas(): readonly PlacedBlockData[] {
@@ -150,72 +141,16 @@ export class BuildingPlot extends Component {
 
 		return success;
 	}
-	move(blocks: readonly BlockModel[] | "all", diff: Vector3): Response {
-		if (blocks !== "all" && blocks.size() === 0) {
-			return success;
-		}
-
-		blocks = blocks === "all" ? this.getBlocks() : blocks;
-		let blocksRegion = AABB.fromModels(blocks);
-		blocksRegion = blocksRegion.withCenter(blocksRegion.getCenter().add(diff));
-
-		if (!this.plot.isInside(blocksRegion)) {
-			return err("Invalid movement");
-		}
-
-		for (const block of blocks) {
-			block.PivotTo(block.GetPivot().add(diff));
-			this.buildingWelder.moveCollisions(this, block, block.GetPivot());
-
-			if (math.random(3) === 1) {
-				task.wait();
-			}
-		}
-
-		return success;
-	}
-	rotate(blocks: readonly BlockModel[] | "all", pivot: Vector3, diff: CFrame): Response {
-		if (blocks !== "all" && blocks.size() === 0) {
-			return success;
-		}
-
-		const mul = (source: CFrame) => {
-			const pvt = new CFrame(pivot);
-			const loc = pvt.ToObjectSpace(source);
-			return pvt.mul(diff).ToWorldSpace(loc);
-		};
-
-		blocks = blocks === "all" ? this.getBlocks() : blocks;
-		let blocksRegion = AABB.fromModels(blocks);
-		blocksRegion = blocksRegion.withCenter(mul(new CFrame(blocksRegion.getCenter())));
-
-		if (!this.plot.isInside(blocksRegion)) {
-			return err("Invalid rotation");
-		}
-
-		for (const block of blocks) {
-			block.PivotTo(mul(block.GetPivot()));
-
-			// TODO:: not unweld moved blocks between them
-			this.buildingWelder.moveCollisions(this, block, block.GetPivot());
-
-			if (math.random(3) === 1) {
-				task.wait();
-			}
-		}
-
-		return success;
-	}
 	edit(blocks: EditBlocksRequest["blocks"]): Response {
 		if (blocks.size() === 0) {
 			return success;
 		}
 
 		for (const { instance, position } of blocks) {
-			let aabb = AABB.fromModel(instance);
-			if (position) aabb = aabb.withCenter(position);
+			let bb = BB.fromModel(instance);
+			if (position) bb = bb.withCenter(position);
 
-			if (!this.plot.isInside(aabb)) {
+			if (!this.boundingBox.isBBInside(bb)) {
 				return err("Invalid edit");
 			}
 		}

@@ -45,9 +45,8 @@ class ServerPlotController extends HostedService {
 
 		this.blocks = di.resolveForeignClass(BuildingPlot, [
 			initializeBlocksFolder(plot),
-			plot,
-			plot.instance.BuildingArea.ExtentsCFrame,
-			plot.instance.BuildingArea.ExtentsSize,
+			plot.instance.BuildingArea.GetPivot(),
+			plot.boundsb,
 		]);
 
 		this.event.subscribe(Players.PlayerRemoving, (player) => {
