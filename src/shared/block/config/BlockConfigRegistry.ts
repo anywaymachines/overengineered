@@ -435,9 +435,9 @@ const heliumblock = {
 		density: {
 			displayName: "Density",
 			type: "clampedNumber",
-			default: 1 as number,
-			config: 1 as number,
-			min: 0.55,
+			default: 0.17 as number,
+			config: 0.17 as number,
+			min: 0.05,
 			max: 2,
 			step: 0.01,
 		},

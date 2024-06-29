@@ -1,7 +1,6 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import { GameDefinitions } from "shared/data/GameDefinitions";
-import { GameEnvironment } from "shared/data/GameEnvironment";
+import { Physics } from "shared/Physics";
 import { RobloxUnit } from "shared/RobloxUnit";
 import type { BlockLogicData } from "shared/block/BlockLogic";
 
@@ -23,13 +22,10 @@ export class GravitySensorBlockLogic extends ConfigurableBlockLogic<typeof block
 			return;
 		}
 
-		const gravity = math.max(
-			GameEnvironment.EarthGravity -
-				(this.block.instance.PrimaryPart.Position.Y - GameDefinitions.HEIGHT_OFFSET) *
-					(GameEnvironment.EarthGravity / GameEnvironment.ZeroGravityHeight),
-			0,
+		this.output.result.set(
+			RobloxUnit.Studs_To_Meters(
+				Physics.GetGravityOnHeight(Physics.LocalHeight.fromGlobal(this.block.instance.PrimaryPart.Position.Y)),
+			),
 		);
-
-		this.output.result.set(RobloxUnit.Studs_To_Meters(gravity));
 	}
 }

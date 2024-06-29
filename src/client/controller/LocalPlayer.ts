@@ -2,7 +2,9 @@ import { Players } from "@rbxts/services";
 import { Signals } from "client/event/Signals";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
+import { Physics } from "shared/Physics";
 import type { PlayerModule } from "client/types/PlayerModule";
+import type { LocalHeight } from "shared/Physics";
 
 export namespace LocalPlayer {
 	export const mouse = Players.LocalPlayer.GetMouse();
@@ -22,9 +24,9 @@ export namespace LocalPlayer {
 		playerSpawned();
 	}
 
-	/** Current player height in studs, relative to {@link GameDefinitions.HEIGHT_OFFSET} */
-	export function getPlayerRelativeHeight() {
-		return (rootPart.get()?.Position?.Y ?? GameDefinitions.HEIGHT_OFFSET) - GameDefinitions.HEIGHT_OFFSET;
+	/** Current player height in studs */
+	export function getPlayerRelativeHeight(): LocalHeight {
+		return Physics.LocalHeight.fromGlobal(rootPart.get()?.Position?.Y ?? GameDefinitions.HEIGHT_OFFSET);
 	}
 
 	function playerSpawned() {

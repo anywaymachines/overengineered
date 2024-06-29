@@ -1,7 +1,7 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { LocalPlayer } from "client/controller/LocalPlayer";
-import { GameEnvironment } from "shared/data/GameEnvironment";
 import { HostedService } from "shared/GameHost";
+import { Physics } from "shared/Physics";
 
 export class GameEnvironmentController extends HostedService {
 	constructor() {
@@ -10,15 +10,8 @@ export class GameEnvironmentController extends HostedService {
 		this.event.subscribe(RunService.Heartbeat, () => {
 			const playerHeight = LocalPlayer.getPlayerRelativeHeight();
 
-			Workspace.AirDensity = math.max(
-				GameEnvironment.EarthAirDensity -
-					playerHeight * (GameEnvironment.EarthAirDensity / GameEnvironment.ZeroAirHeight),
-			);
-			Workspace.Gravity = math.max(
-				GameEnvironment.EarthGravity -
-					playerHeight * (GameEnvironment.EarthGravity / GameEnvironment.ZeroGravityHeight),
-				0,
-			);
+			Workspace.AirDensity = Physics.GetAirDensityOnHeight(playerHeight);
+			Workspace.Gravity = Physics.GetGravityOnHeight(playerHeight);
 		});
 	}
 }
