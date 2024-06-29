@@ -41,13 +41,16 @@ export namespace BuildingManager {
 
 				const assemblyConnected = part.GetConnectedParts(false);
 				for (const cpart of assemblyConnected) {
-					if (visited.has(cpart)) {
-						continue;
-					}
+					if (cpart.Name === "HumanoidRootPart") continue;
+					if (visited.has(cpart)) continue;
 
 					visited.add(cpart);
 
-					const connected = BlockManager.getBlockDataByPart(cpart)!.instance;
+					const connected = BlockManager.getBlockDataByPart(cpart)?.instance;
+					if (!connected) {
+						throw `CPart ${part.Name} is not a block`;
+					}
+
 					result.add(connected);
 					find(result, visited, connected);
 				}
