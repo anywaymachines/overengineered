@@ -133,7 +133,7 @@ export class ImpactController extends Component {
 				// Pseudo-explode
 				const partsInRadius = Workspace.GetPartBoundsInRadius(
 					part.Position,
-					1 + magnitudeDiff / (allowedDifference * 10),
+					math.min(1 + magnitudeDiff / (allowedDifference * 10), 7500),
 					overlapParams,
 				);
 
