@@ -1,6 +1,7 @@
 import { Workspace } from "@rbxts/services";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { GameEnvironment } from "shared/data/GameEnvironment";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 
@@ -33,7 +34,9 @@ export class HeliumBlockLogic extends ConfigurableBlockLogic<typeof blockConfigR
 					this.part.Mass *
 					1.2 *
 					this.input.density.get() *
-					(1 - this.instance.GetPivot().Y / GameEnvironment.ZeroGravityHeight),
+					(1 -
+						(this.instance.GetPivot().Y + GameDefinitions.HEIGHT_OFFSET) /
+							GameEnvironment.ZeroGravityHeight),
 			),
 			0,
 		);
