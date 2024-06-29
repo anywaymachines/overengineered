@@ -1,18 +1,9 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import { AutoC2SRemoteEvent } from "shared/event/C2SRemoteEvent";
+import { RemoteEvents } from "shared/RemoteEvents";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.tnt> {
-	static readonly events = {
-		explode: new AutoC2SRemoteEvent<{
-			readonly block: BlockModel;
-			readonly radius: number;
-			readonly pressure: number;
-			readonly isFlammable: boolean;
-		}>("tnt_explode", "UnreliableRemoteEvent"),
-	} as const;
-
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.tnt);
 
@@ -38,8 +29,10 @@ export class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegi
 	}
 
 	private explode() {
-		TNTBlockLogic.events.explode.send({
-			block: this.instance,
+		if (!this.instance.PrimaryPart) return;
+
+		RemoteEvents.Explode.send({
+			part: this.instance.PrimaryPart,
 			radius: this.input.radius.get(),
 			pressure: this.input.pressure.get(),
 			isFlammable: this.input.flammable.get(),

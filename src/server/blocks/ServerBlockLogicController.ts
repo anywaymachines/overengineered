@@ -5,7 +5,6 @@ import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic
 import { PistonBlockServerLogic } from "server/blocks/logic/PistonBlockServerLogic";
 import { ScreenServerLogic } from "server/blocks/logic/ScreenServerLogic";
 import { SevenSegmentDisplayServerLogic } from "server/blocks/logic/SevenSegmentDisplayServerLogic";
-import { TNTServerBlockLogic } from "server/blocks/logic/TNTServerLogic";
 import { BlockLogicRegistry } from "shared/block/BlockLogicRegistry";
 import { HostedService } from "shared/GameHost";
 import type { ServerBlockLogic } from "server/blocks/ServerBlockLogic";
@@ -23,9 +22,6 @@ export class ServerBlockLogicController extends HostedService {
 		container = container.beginScope();
 
 		const serverBlockLogicRegistry: ServerBlockLogicRegistry = {
-			tnt: TNTServerBlockLogic,
-			cylindricaltnt: TNTServerBlockLogic,
-			sphericaltnt: TNTServerBlockLogic,
 			disconnectblock: DisconnectBlockServerLogic,
 			lamp: LampServerLogic,
 			leddisplay: LEDDisplayServerLogic,
