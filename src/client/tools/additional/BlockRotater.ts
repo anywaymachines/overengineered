@@ -20,12 +20,8 @@ abstract class RotaterBase extends BlockEditorBase {
 	protected isValid: boolean = true;
 	readonly step = new NumberObservableValue<number>(0, 90, 180, 1);
 
-	constructor(
-		protected readonly mode: BuildingMode,
-		plot: SharedPlot,
-		blocks: readonly BlockModel[],
-	) {
-		super(plot, blocks);
+	constructor(mode: BuildingMode, plot: SharedPlot, blocks: readonly BlockModel[]) {
+		super(mode, plot, blocks);
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
 	}
 

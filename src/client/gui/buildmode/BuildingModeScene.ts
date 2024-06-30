@@ -88,7 +88,7 @@ export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 		super(gui);
 
 		this.add(ActionController.instance);
-		this.add(new TouchActionControllerGui(gui.Action, mode.gridEnabled));
+		this.add(new TouchActionControllerGui(gui.Action, mode.gridEnabled, mode.editMode));
 
 		this.actionbar = this.add(new ActionBarControl(gui.ActionBar, di));
 		const updateActionBarVisibility = () =>

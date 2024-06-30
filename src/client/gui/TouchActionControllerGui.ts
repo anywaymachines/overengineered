@@ -1,17 +1,23 @@
 import { Control } from "client/gui/Control";
-import { ButtonControl } from "client/gui/controls/Button";
+import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
 import { LogControl } from "client/gui/static/LogControl";
 import { ActionController } from "client/modes/build/ActionController";
 import { TransformService } from "shared/component/TransformService";
+import type { EditMode } from "client/modes/build/BuildingMode";
 import type { ObservableValue } from "shared/event/ObservableValue";
 
 export type TouchActionControllerGuiDefinition = GuiObject & {
 	readonly Undo: GuiButton;
 	readonly Redo: GuiButton;
 	readonly Grid: GuiButton;
+	readonly Global: TextButton;
 };
 export class TouchActionControllerGui extends Control<TouchActionControllerGuiDefinition> {
-	constructor(gui: TouchActionControllerGuiDefinition, gridEnabled: ObservableValue<boolean>) {
+	constructor(
+		gui: TouchActionControllerGuiDefinition,
+		gridEnabled: ObservableValue<boolean>,
+		editMode: ObservableValue<EditMode>,
+	) {
 		super(gui);
 
 		const undo = this.add(new ButtonControl(gui.Undo, () => ActionController.instance.undo()));
@@ -39,5 +45,12 @@ export class TouchActionControllerGui extends Control<TouchActionControllerGuiDe
 			{ Transparency: 0.6 },
 		);
 		this.event.subscribeObservable(gridEnabled, animateGridEnabled, true);
+
+		const global = this.add(
+			new TextButtonControl(gui.Global, () => {
+				editMode.set(editMode.get() === "global" ? "local" : "global");
+			}),
+		);
+		this.event.subscribeObservable(editMode, (mode) => global.text.set(mode === "global" ? "G" : "L"), true);
 	}
 }

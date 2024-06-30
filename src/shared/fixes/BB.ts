@@ -11,37 +11,46 @@ const rotateSize = (size: Vector3, rotation: CFrame) => {
 /** Immutable bounding box */
 export class BB {
 	/** Get the {@link BB} of a {@link BasePart} */
-	static fromPart(part: BasePart, cframe?: CFrame): BB {
+	static fromPart(part: BasePart): BB {
 		const [center, size] = [part.ExtentsCFrame, part.ExtentsSize];
-		return new BB(cframe ?? center, size);
+		return new BB(center, size);
 	}
 	/** Get the {@link BB} of a {@link Model} */
-	static fromModel(model: Model, cframe?: CFrame): BB {
+	static fromModel(model: Model): BB {
 		const [center, size] = model.GetBoundingBox();
-		return new BB(cframe ?? center, size);
+		return new BB(center, size);
 	}
 	/** Get the {@link BB} of a multiple {@link Model} */
-	static fromModels(models: readonly Model[]): BB {
-		return this.fromBBs(models.map((m) => this.fromModel(m)));
+	static fromModels(models: readonly Model[], origin?: CFrame): BB {
+		return this.fromBBs(
+			models.map((m) => this.fromModel(m)),
+			origin,
+		);
 	}
 	/** Get the {@link BB} of a multiple {@link BB} */
-	static fromBBs(regions: readonly BB[]): BB {
+	static fromBBs(regions: readonly BB[], origin?: CFrame): BB {
 		if (regions.size() === 0) {
 			throw "Not enough models";
 		}
 
-		const origin = regions[regions.size() - 1].center;
+		origin ??= regions[regions.size() - 1].center;
 		regions = regions.map((r) => r.withCenter((c) => origin.ToObjectSpace(c)));
 
-		let localToOriginMin = Vector3.zero;
-		let localToOriginMax = Vector3.zero;
+		let localToOriginMin: Vector3 | undefined;
+		let localToOriginMax: Vector3 | undefined;
 
 		for (const localToOriginRegion of regions) {
 			const rotatedSizeHalf = localToOriginRegion.getRotatedSize().div(2);
 
-			localToOriginMin = localToOriginMin.min(localToOriginRegion.center.Position.sub(rotatedSizeHalf));
-			localToOriginMax = localToOriginMax.max(localToOriginRegion.center.Position.add(rotatedSizeHalf));
+			const min = localToOriginRegion.center.Position.sub(rotatedSizeHalf);
+			localToOriginMin = (localToOriginMin ?? min).min(min);
+
+			const max = localToOriginRegion.center.Position.add(rotatedSizeHalf);
+			localToOriginMax = (localToOriginMax ?? max).max(max);
 		}
+
+		assert(localToOriginMin);
+		assert(localToOriginMax);
 
 		return new BB(
 			origin.ToWorldSpace(new CFrame(localToOriginMin.add(localToOriginMax).div(2))),

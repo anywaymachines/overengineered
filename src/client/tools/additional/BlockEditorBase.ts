@@ -1,5 +1,6 @@
 import { ClientComponent } from "client/component/ClientComponent";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { AABB } from "shared/fixes/AABB";
@@ -17,7 +18,11 @@ export abstract class BlockEditorBase extends ClientComponent {
 	protected readonly plotBounds: AABB;
 	protected readonly plotBoundsb: BB;
 
-	constructor(plot: SharedPlot, blocks: readonly BlockModel[]) {
+	constructor(
+		protected readonly mode: BuildingMode,
+		plot: SharedPlot,
+		blocks: readonly BlockModel[],
+	) {
 		super();
 
 		this.plot = plot;

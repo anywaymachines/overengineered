@@ -18,12 +18,8 @@ abstract class MoveBase extends BlockEditorBase {
 	protected difference: Vector3 = Vector3.zero;
 	readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 
-	constructor(
-		protected readonly mode: BuildingMode,
-		plot: SharedPlot,
-		blocks: readonly BlockModel[],
-	) {
-		super(plot, blocks);
+	constructor(mode: BuildingMode, plot: SharedPlot, blocks: readonly BlockModel[]) {
+		super(mode, plot, blocks);
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
 	}
 
@@ -137,7 +133,10 @@ class DesktopMove extends MoveBase {
 			});
 		};
 
-		const boundingBox = BB.fromModels(this.blocks);
+		const boundingBox = BB.fromModels(
+			this.blocks,
+			this.mode.editMode.get() === "global" ? CFrame.identity : undefined,
+		);
 
 		const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
 		moveHandles.PivotTo(boundingBox.center);

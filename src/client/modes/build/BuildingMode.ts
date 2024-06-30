@@ -18,6 +18,8 @@ declare global {
 	};
 }
 
+export type EditMode = "global" | "local";
+
 @injectable
 export class BuildingMode extends PlayMode {
 	readonly mirrorMode = new ObservableValue<MirrorMode>({});
@@ -26,6 +28,7 @@ export class BuildingMode extends PlayMode {
 	readonly toolController;
 	readonly gui;
 	readonly gridEnabled = new ObservableValue(true);
+	readonly editMode = new ObservableValue<EditMode>("global");
 
 	constructor(@inject di: DIContainer, @inject plot: SharedPlot) {
 		super();
