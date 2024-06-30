@@ -584,6 +584,10 @@ const registry = {
 		name: "Servo",
 		description: "A configurable motor. Rotates to desired angle",
 	},
+	sidewaysservo: {
+		name: "Sideways servo",
+		description: "Servo but sideways and with some degree of freedom",
+	},
 	shaft: {
 		name: "Shaft",
 		description: "A long thin pipe",

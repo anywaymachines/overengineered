@@ -62,6 +62,7 @@ const logicRegistry = {
 	motorblock: MotorBlockLogic,
 	bracedshaft: BracedShaftBlockLogic,
 	servomotorblock: ServoMotorBlockLogic,
+	sidewaysservo: ServoMotorBlockLogic,
 	rope: RopeLogic,
 	heliumblock: HeliumBlockLogic,
 	tnt: TNTBlockLogic,

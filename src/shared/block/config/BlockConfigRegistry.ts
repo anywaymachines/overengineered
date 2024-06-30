@@ -499,6 +499,17 @@ const servomotorblock = {
 	},
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
+const sidewaysservo = {
+	...servomotorblock,
+	input: {
+		...servomotorblock.input,
+		angle: {
+			...servomotorblock.input.angle,
+			minAngle: -90,
+			maxAngle: 90,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
 
 const magnet = {
 	input: {
@@ -1303,6 +1314,7 @@ export const blockConfigRegistry = {
 	rocketengine: rocketengine,
 	rope,
 	servomotorblock,
+	sidewaysservo,
 	tnt,
 	cylindricaltnt: tnt,
 	sphericaltnt: tnt,
