@@ -584,11 +584,11 @@ namespace ControlsSource {
 					angle: {
 						displayName: "Angle",
 						type: "clampedNumber",
-						default: -180 as number,
-						min: -180,
-						max: 180,
+						default: (definition.minAngle + definition.maxAngle) / 2,
+						min: definition.minAngle,
+						max: definition.maxAngle,
 						step: 0.01,
-						config: -180 as number,
+						config: (definition.minAngle + definition.maxAngle) / 2,
 					},
 				};
 

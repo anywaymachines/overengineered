@@ -33,7 +33,7 @@ const BlockConfigValueRegistry = {
 		new NumberBlockLogicValue(definition.default, definition.min, definition.max, definition.step),
 	thrust: () => new NumberBlockLogicValue(0, 0, 100, 0.001),
 	motorRotationSpeed: (def) => new NumberBlockLogicValue(0, -def.maxSpeed, def.maxSpeed, 0.001),
-	servoMotorAngle: () => new NumberBlockLogicValue(0, -180, 180, 0.001),
+	servoMotorAngle: (def) => new NumberBlockLogicValue(def.default, def.minAngle, def.maxAngle, 0.001),
 	or: createObservable,
 	controllableNumber: (definition) =>
 		new NumberBlockLogicValue(definition.config.value, definition.min, definition.max, definition.step),

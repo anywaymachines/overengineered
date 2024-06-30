@@ -84,7 +84,10 @@ declare namespace BlockConfigTypes {
 			readonly switchmode: boolean;
 			readonly angle: number;
 		}
-	>;
+	> & {
+		readonly minAngle: number;
+		readonly maxAngle: number;
+	};
 	export type Thrust = BlockConfigType<
 		"thrust",
 		number,

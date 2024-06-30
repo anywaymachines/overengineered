@@ -273,6 +273,8 @@ export const _Tests = () => {
 						switchmode: false,
 					},
 					default: 0,
+					minAngle: -180,
+					maxAngle: 180,
 				},
 				servoMotorAngleMixed: {
 					displayName: "ServoMotorAngle mixED",
@@ -283,6 +285,8 @@ export const _Tests = () => {
 						switchmode: false,
 					},
 					default: 0,
+					minAngle: -180,
+					maxAngle: 180,
 				},
 			},
 			controllableNumber: {

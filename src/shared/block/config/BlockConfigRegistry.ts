@@ -483,6 +483,8 @@ const servomotorblock = {
 				switchmode: false as boolean,
 				angle: 45 as number,
 			},
+			minAngle: -180,
+			maxAngle: 180,
 		},
 		stiffness: {
 			displayName: "Stiffness",
