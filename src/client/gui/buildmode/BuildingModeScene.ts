@@ -2,12 +2,15 @@ import { LoadingController } from "client/controller/LoadingController";
 import { ToolbarControl } from "client/gui/buildmode/ToolbarControl";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
+import { TouchActionControllerGui } from "client/gui/TouchActionControllerGui";
 import { ActionController } from "client/modes/build/ActionController";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { ComponentDisabler } from "shared/component/ComponentDisabler";
 import type { ToolbarControlDefinition } from "client/gui/buildmode/ToolbarControl";
 import type { SavePopup } from "client/gui/popup/SavePopup";
 import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
+import type { TouchActionControllerGuiDefinition } from "client/gui/TouchActionControllerGui";
+import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ToolController } from "client/tools/ToolController";
 import type { TransformProps } from "shared/component/Transform";
 
@@ -74,16 +77,18 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 }
 
 export type BuildingModeSceneDefinition = GuiObject & {
+	readonly Action: TouchActionControllerGuiDefinition;
 	readonly ActionBar: ActionBarControlDefinition;
 	readonly Hotbar: ToolbarControlDefinition;
 };
 export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 	readonly actionbar;
 
-	constructor(gui: BuildingModeSceneDefinition, tools: ToolController, di: DIContainer) {
+	constructor(gui: BuildingModeSceneDefinition, mode: BuildingMode, tools: ToolController, di: DIContainer) {
 		super(gui);
 
 		this.add(ActionController.instance);
+		this.add(new TouchActionControllerGui(gui.Action, mode.gridEnabled));
 
 		this.actionbar = this.add(new ActionBarControl(gui.ActionBar, di));
 		const updateActionBarVisibility = () =>
