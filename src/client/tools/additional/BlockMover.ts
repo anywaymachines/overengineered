@@ -6,7 +6,6 @@ import { Gui } from "client/gui/Gui";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { BlockEditorBase } from "client/tools/additional/BlockEditorBase";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
-import { AABB } from "shared/fixes/AABB";
 import { BB } from "shared/fixes/BB";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
@@ -27,6 +26,20 @@ abstract class MoveBase extends BlockEditorBase {
 		for (const { instance, origPosition } of this.original) {
 			instance.PivotTo(origPosition.add(difference));
 		}
+	}
+
+	protected createMoveHandles() {
+		const boundingBox = BB.fromModels(
+			this.blocks,
+			this.mode.editMode.get() === "global" ? CFrame.identity : undefined,
+		);
+
+		const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
+		moveHandles.PivotTo(boundingBox.center);
+		moveHandles.Size = boundingBox.originalSize.add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
+		moveHandles.Parent = Gui.getPlayerGui();
+
+		return $tuple(moveHandles, boundingBox);
 	}
 }
 class DesktopMove extends MoveBase {
@@ -104,16 +117,7 @@ class DesktopMove extends MoveBase {
 			});
 		};
 
-		const boundingBox = BB.fromModels(
-			this.blocks,
-			this.mode.editMode.get() === "global" ? CFrame.identity : undefined,
-		);
-
-		const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
-		moveHandles.PivotTo(boundingBox.center);
-		moveHandles.Size = boundingBox.originalSize.add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
-		moveHandles.Parent = Gui.getPlayerGui();
-
+		const [moveHandles, boundingBox] = this.createMoveHandles();
 		const fullStartPos: Vector3 = moveHandles.GetPivot().Position;
 		initHandles(moveHandles.XHandles);
 		initHandles(moveHandles.YHandles);
@@ -138,20 +142,32 @@ class GamepadMove extends MoveBase {
 
 		const initHandles = (instance: MoveHandles) => {
 			const tryAddDiff = (diff: Vector3) => {
-				if (!this.plotBounds.contains(aabb.withCenter(fullStartPos.add(diff).add(this.difference)))) {
+				if (
+					!this.plotBoundsb.isBBInside(
+						boundingBox.withCenter((c) => c.Rotation.add(fullStartPos.add(diff).add(this.difference))),
+					)
+				) {
 					return;
 				}
 
 				this.difference = this.difference.add(diff);
-				moveHandles.PivotTo(new CFrame(fullStartPos.add(this.difference)));
+				moveHandles.PivotTo(boundingBox.center.Rotation.add(fullStartPos.add(this.difference)));
 				this.moveBlocksTo(this.difference);
 			};
 
 			this.event.subInput((ih) => {
-				ih.onKeyDown("DPadUp", () => tryAddDiff(new Vector3(0, this.step.get(), 0)));
-				ih.onKeyDown("DPadDown", () => tryAddDiff(new Vector3(0, -this.step.get(), 0)));
-				ih.onKeyDown("DPadRight", () => tryAddDiff(getMoveDirection(true).mul(this.step.get())));
-				ih.onKeyDown("DPadLeft", () => tryAddDiff(getMoveDirection(false).mul(this.step.get())));
+				ih.onKeyDown("DPadUp", () =>
+					tryAddDiff(boundingBox.center.VectorToWorldSpace(new Vector3(0, this.step.get(), 0))),
+				);
+				ih.onKeyDown("DPadDown", () =>
+					tryAddDiff(boundingBox.center.VectorToWorldSpace(new Vector3(0, -this.step.get(), 0))),
+				);
+				ih.onKeyDown("DPadRight", () =>
+					tryAddDiff(boundingBox.center.VectorToWorldSpace(getMoveDirection(true).mul(this.step.get()))),
+				);
+				ih.onKeyDown("DPadLeft", () =>
+					tryAddDiff(boundingBox.center.VectorToWorldSpace(getMoveDirection(false).mul(this.step.get()))),
+				);
 			});
 
 			const getMoveDirection = (positive: boolean) => {
@@ -181,13 +197,7 @@ class GamepadMove extends MoveBase {
 			this.onEnable(updateCamera);
 		};
 
-		const aabb = AABB.fromModels(this.blocks);
-
-		const moveHandles = ReplicatedStorage.Assets.MoveHandles.Clone();
-		moveHandles.Size = aabb.getSize().add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
-		moveHandles.PivotTo(new CFrame(aabb.getCenter()));
-		moveHandles.Parent = Gui.getPlayerGui();
-
+		const [moveHandles, boundingBox] = this.createMoveHandles();
 		const fullStartPos: Vector3 = moveHandles.GetPivot().Position;
 		initHandles(moveHandles);
 
