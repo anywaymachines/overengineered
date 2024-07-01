@@ -48,7 +48,7 @@ class DesktopMove extends MoveBase {
 			const step = this.step.get();
 			return number - (((number + step / 2) % step) - step / 2);
 		};
-		const limitMovement = (region: BB, direction: Vector3, distance: number, bounds: BB): number => {
+		const limitMovement = (region: BB, direction: Vector3, distance: number, bounds: BB) => {
 			const localToBoundsRegion = region.withCenter((c) => bounds.center.ToObjectSpace(c));
 
 			const boundsMin = bounds.center.Position.sub(
@@ -74,11 +74,12 @@ class DesktopMove extends MoveBase {
 				(boundsMax.Z - region.center.Z) / direction.Z,
 			);
 
-			return math.clamp(
-				distance,
-				closestToZero(closestToZero(sizeMinX, sizeMinY), sizeMinZ),
-				closestToZero(closestToZero(sizeMaxX, sizeMaxY), sizeMaxZ),
-			);
+			const min = closestToZero(closestToZero(sizeMinX, sizeMinY), sizeMinZ);
+			const max = closestToZero(closestToZero(sizeMaxX, sizeMaxY), sizeMaxZ);
+
+			if (distance < min) return $tuple(min, true);
+			if (distance > max) return $tuple(max, true);
+			return $tuple(distance, false);
 		};
 
 		const initHandles = (instance: Handles) => {
@@ -101,14 +102,27 @@ class DesktopMove extends MoveBase {
 			this.event.subscribe(instance.MouseDrag, (face, distance) => {
 				const globalDirection = boundingBox.center.Rotation.mul(Vector3.FromNormalId(face));
 
-				distance = limitMovement(
+				let wasClamped: boolean;
+				[distance, wasClamped] = limitMovement(
 					boundingBox.withCenter((c) => c.Rotation.add(startpos)),
 					globalDirection,
 					distance,
 					this.plotBoundsb,
 				);
 				if (this.mode.gridEnabled.get()) {
-					distance = roundByStep(distance);
+					const roundedDistance = roundByStep(distance);
+
+					if (
+						this.plotBoundsb.isBBInside(
+							boundingBox.withCenter((c) =>
+								c.Rotation.add(
+									fullStartPos.add(startDifference.add(globalDirection.mul(roundedDistance))),
+								),
+							),
+						)
+					) {
+						distance = roundedDistance;
+					}
 				}
 
 				this.difference = startDifference.add(globalDirection.mul(distance));
