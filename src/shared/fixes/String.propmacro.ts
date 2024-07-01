@@ -1,3 +1,4 @@
+import { Objects } from "shared/fixes/objects";
 import { utf8_lc_uc, utf8_uc_lc } from "shared/fixes/utf8data";
 
 // function to force hoisting of the macros, because it does not but still tries to use them
@@ -32,3 +33,17 @@ export const StringMacros: PropertyMacros<String> = {
 		return ret;
 	},
 };
+
+export namespace Strings {
+	export function pretty(value: unknown): string {
+		if (typeIs(value, "string")) return value;
+
+		if (typeIs(value, "table")) {
+			return `{ ${Objects.entriesArray(value)
+				.map((e) => `${e[0]}: ${pretty(e[1])}`)
+				.join()} }`;
+		}
+
+		return tostring(value);
+	}
+}
