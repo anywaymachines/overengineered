@@ -35,70 +35,36 @@ class DesktopMove extends MoveBase {
 			const step = this.step.get();
 			return number - (((number + step / 2) % step) - step / 2);
 		};
-		const limitMovement = (
-			region: BB,
-			regionPos: Vector3,
-			direction: Vector3,
-			distance: number,
-			bounds: BB,
-		): number => {
-			if (true as boolean) return distance;
-
-			function calculateDistanceToBounds(
-				movingAABBCenter: Vector3,
-				movingAABBSize: Vector3,
-				boundsCenter: Vector3,
-				boundsSize: Vector3,
-				direction: Vector3,
-			): number {
-				// Calculate half-extents of both AABBs
-				const movingAABBHalfExtents = movingAABBSize.div(2);
-				const boundsHalfExtents = boundsSize.div(2);
-
-				// Project both AABBs onto the direction vector
-				const movingAABBMin = direction.Dot(movingAABBCenter.sub(movingAABBHalfExtents));
-				const movingAABBMax = direction.Dot(movingAABBCenter.add(movingAABBHalfExtents));
-				const boundsMin = direction.Dot(boundsCenter.sub(boundsHalfExtents));
-				const boundsMax = direction.Dot(boundsCenter.add(boundsHalfExtents));
-
-				print({
-					movingAABBMin,
-					movingAABBMax,
-					boundsMin,
-					boundsMax,
-				});
-
-				// Calculate the distance between the two projected intervals
-				return math.max(boundsMin - movingAABBMax, movingAABBMin - boundsMax, 0);
-			}
-
-			const localToBoundsDirection = bounds.center.VectorToObjectSpace(
-				region.center.VectorToWorldSpace(direction),
-			);
+		const limitMovement = (region: BB, direction: Vector3, distance: number, bounds: BB): number => {
 			const localToBoundsRegion = region.withCenter((c) => bounds.center.ToObjectSpace(c));
 
-			const targetSize = direction.apply(math.sign).mul(bounds.originalSize);
-			const diff = bounds.center.Position.sub(targetSize).apply(math.abs);
-			print({ targetSize, diff });
-
-			const localToBoundsSizeHalf = localToBoundsRegion.getRotatedSize().div(2);
-			const xyz = region.center.add(
-				new Vector3(
-					math.sign(localToBoundsDirection.X) * localToBoundsSizeHalf.X,
-					math.sign(localToBoundsDirection.Y) * localToBoundsSizeHalf.Y,
-					math.sign(localToBoundsDirection.Z) * localToBoundsSizeHalf.Z,
-				),
+			const boundsMin = bounds.center.Position.sub(
+				bounds.originalSize.sub(localToBoundsRegion.getRotatedSize()).div(2),
+			);
+			const boundsMax = bounds.center.Position.add(
+				bounds.originalSize.sub(localToBoundsRegion.getRotatedSize()).div(2),
 			);
 
-			return math.min(
+			const minmax = (v1: number, v2: number) => $tuple(math.min(v1, v2), math.max(v1, v2));
+			const closestToZero = (v1: number, v2: number) => (math.abs(v1) < math.abs(v2) ? v1 : v2);
+
+			const [sizeMinX, sizeMaxX] = minmax(
+				(boundsMin.X - region.center.X) / direction.X,
+				(boundsMax.X - region.center.X) / direction.X,
+			);
+			const [sizeMinY, sizeMaxY] = minmax(
+				(boundsMin.Y - region.center.Y) / direction.Y,
+				(boundsMax.Y - region.center.Y) / direction.Y,
+			);
+			const [sizeMinZ, sizeMaxZ] = minmax(
+				(boundsMin.Z - region.center.Z) / direction.Z,
+				(boundsMax.Z - region.center.Z) / direction.Z,
+			);
+
+			return math.clamp(
 				distance,
-				calculateDistanceToBounds(
-					localToBoundsRegion.center.Position,
-					localToBoundsRegion.getRotatedSize(),
-					bounds.center.Position,
-					bounds.originalSize,
-					localToBoundsDirection,
-				),
+				closestToZero(closestToZero(sizeMinX, sizeMinY), sizeMinZ),
+				closestToZero(closestToZero(sizeMaxX, sizeMaxY), sizeMaxZ),
 			);
 		};
 
@@ -122,7 +88,12 @@ class DesktopMove extends MoveBase {
 			this.event.subscribe(instance.MouseDrag, (face, distance) => {
 				const globalDirection = boundingBox.center.Rotation.mul(Vector3.FromNormalId(face));
 
-				distance = limitMovement(boundingBox, startpos, globalDirection, distance, this.plotBoundsb);
+				distance = limitMovement(
+					boundingBox.withCenter((c) => c.Rotation.add(startpos)),
+					globalDirection,
+					distance,
+					this.plotBoundsb,
+				);
 				if (this.mode.gridEnabled.get()) {
 					distance = roundByStep(distance);
 				}
