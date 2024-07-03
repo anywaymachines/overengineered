@@ -6,7 +6,7 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
-import { CustomRemotes, Remotes } from "shared/Remotes";
+import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 
 type NonNullableFields<T> = {
@@ -19,7 +19,6 @@ type PD = NonNullableFields<PlayerDataResponse> & {
 export namespace PlayerDataInitializer {
 	export function initialize(host: GameHostBuilder): void {
 		host.services.registerSingletonFunc(() => new PlayerDataStorage(Objects.awaitThrow(fetchPlayerData())));
-		host.services.registerSingletonFunc(() => new GameDataStorage(Objects.awaitThrow(fetchGameData())));
 	}
 
 	function waitForLoadableData(): void {
@@ -44,14 +43,6 @@ export namespace PlayerDataInitializer {
 		};
 
 		$log("Configuration loaded: " + HttpService.JSONEncode(data.settings));
-		return data;
-	}
-	async function fetchGameData(): Promise<GameInfo> {
-		waitForLoadableData();
-
-		const data = await Remotes.Client.GetNamespace("Game").Get("GameInfo").CallServerAsync();
-		$log(`Loaded ${Objects.size(data.blocks)} block infos`);
-
 		return data;
 	}
 }
@@ -131,12 +122,5 @@ export class PlayerDataStorage {
 		} finally {
 			LoadingController.hide();
 		}
-	}
-}
-export class GameDataStorage {
-	readonly data;
-
-	constructor(data: GameInfo) {
-		this.data = new ObservableValue(data).asReadonly();
 	}
 }

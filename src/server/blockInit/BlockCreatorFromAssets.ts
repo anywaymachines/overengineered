@@ -1,7 +1,8 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { BlockGenerator } from "shared/block/creation/BlockGenerator";
+import { BlockGenerator } from "server/blockInit/BlockGenerator";
+import { Objects } from "shared/fixes/objects";
+import type { BlocksInitializeData } from "server/blockInit/BlocksInitializer";
 import type { BlockId } from "shared/BlockDataRegistry";
-import type { BlocksInitializeData } from "shared/init/BlocksInitializer";
 
 /** Reads blocks and categories from {@link ReplicatedStorage.Assets.Placeable} */
 export namespace BlockCreatorFromAssets {
@@ -10,9 +11,7 @@ export namespace BlockCreatorFromAssets {
 			.WaitForChild("Placeable")
 			.GetChildren() as unknown as readonly Folder[];
 
-		for (const child of placeable) {
-			readCategory(data, child, data.categories, []);
-		}
+		Objects.multiAwait(placeable.map((child) => () => readCategory(data, child, data.categories, [])));
 	}
 
 	function readCategory(

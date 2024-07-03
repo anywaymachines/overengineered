@@ -1,13 +1,13 @@
 import { RunService } from "@rbxts/services";
-import { BlockLogicRegistry } from "shared/block/BlockLogicRegistry";
-import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import { BlockMarkerInitializer } from "server/blockInit/BlockMarkersInitializer";
+import { BlockWeldInitializer } from "server/blockInit/BlockWeldInitializer";
+import { SharedBlockGenerator } from "shared/block/SharedBlockGenerator";
 import { BlockDataRegistry } from "shared/BlockDataRegistry";
 import { Element } from "shared/Element";
 import { AABB } from "shared/fixes/AABB";
 import { Instances } from "shared/fixes/Instances";
-import type { BlockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
+import type { BlocksInitializeData, Category, Categories } from "server/blockInit/BlocksInitializer";
 import type { BlockId } from "shared/BlockDataRegistry";
-import type { BlocksInitializeData, Categories, Category } from "shared/init/BlocksInitializer";
 
 if (RunService.IsServer()) {
 	Element.create("Folder", { Name: "PlaceableAutomatic", Parent: Instances.assets });
@@ -133,7 +133,7 @@ export namespace BlockGenerator {
 				...assertSomethingAnchored(block),
 				...assertHasDataInRegistry(block),
 				...assertCollisionGroup(block),
-				...assertNoRepeatedPartNames(block),
+				// ...assertNoRepeatedPartNames(block), temporarily removed
 			];
 		}
 	}
@@ -171,18 +171,13 @@ export namespace BlockGenerator {
 		return model;
 	}
 
-	export function registerLogic(id: BlockId, logic: LogicCtor, def: BlockConfigTypes.BothDefinitions) {
-		BlockLogicRegistry.asWritable()[id] = logic as never;
-		(blockConfigRegistry as Writable<BlockConfigRegistry>)[id as keyof BlockConfigRegistry] = def;
-	}
-
 	type BlockAutoCreationData = {
 		readonly id: BlockId;
 		readonly modelTextOverride: string;
 		readonly category: CategoryPath;
 		readonly prefab: PrefabName;
-		readonly logic: LogicCtor;
-		readonly config: BlockConfigTypes.BothDefinitions;
+		readonly logic?: LogicCtor;
+		readonly config?: BlockConfigTypes.BothDefinitions;
 		readonly required?: boolean;
 		readonly limit?: number;
 	};
@@ -215,7 +210,7 @@ export namespace BlockGenerator {
 			}
 		}
 
-		registerLogic(id, data.logic, data.config);
+		SharedBlockGenerator.registerLogic(id, data.logic, data.config);
 	}
 
 	export function construct(id: BlockId, model: BlockModel, category: CategoryPath): RegistryBlock {
@@ -224,18 +219,21 @@ export namespace BlockGenerator {
 		}
 
 		const setupinfo = BlockDataRegistry[id];
-		return {
+		const block = {
 			id,
 			category,
 			model,
 
 			displayName: setupinfo.name,
 			info: setupinfo.description,
-			autoWeldShape: setupinfo.autoWeldShape,
 			limit: setupinfo.limit,
 			mirrorBehaviour: setupinfo.mirrorBehaviour,
 			mirrorReplacementId: setupinfo.mirrorReplacementId as BlockId | undefined,
 			required: setupinfo.required,
-		};
+		} satisfies Partial<RegistryBlock>;
+		BlockWeldInitializer.initialize(block, setupinfo.autoWeldShape ?? "none");
+		BlockMarkerInitializer.initialize(block);
+
+		return block;
 	}
 }

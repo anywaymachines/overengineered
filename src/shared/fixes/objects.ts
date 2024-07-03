@@ -57,4 +57,8 @@ export namespace Objects {
 
 		return ret;
 	}
+	/** Wrap all the provided functions in promises, immediately run them all and wait for completion */
+	export function multiAwait(funcs: (() => void)[]): void {
+		awaitThrow(Promise.all(funcs.map(Promise.try)));
+	}
 }

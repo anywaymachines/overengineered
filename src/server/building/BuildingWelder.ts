@@ -1,182 +1,25 @@
-import { RunService, ServerStorage, Workspace } from "@rbxts/services";
+import { ServerStorage } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
 import { Element } from "shared/Element";
 import { HostedService } from "shared/GameHost";
 import type { BuildingPlot } from "server/plots/BuildingPlot";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 
-type CollidersModel = Model & { readonly ___nominal: "CollidersModel" };
-
 @injectable
 export class BuildingWelder extends HostedService {
-	private readonly weldColliders = new Map<string, CollidersModel>();
 	private readonly plotColliders = new Map<BuildingPlot, WorldModel>();
 
-	constructor(@inject blockRegistry: BlockRegistry) {
+	constructor(@inject private readonly blockRegistry: BlockRegistry) {
 		super();
 
 		this.onEnable(() => {
-			this.initPartBlockCollisions(blockRegistry.sorted);
 			this.onDestroy(() => {
-				for (const [, collider] of this.weldColliders) {
-					collider.Destroy();
-				}
-				this.weldColliders.clear();
-
 				for (const [, collider] of this.plotColliders) {
 					collider.Destroy();
 				}
 				this.plotColliders.clear();
 			});
 		});
-	}
-
-	private initPartBlockCollisions(blocks: readonly RegistryBlock[]) {
-		const weldFolderName = "WeldRegions";
-		const offset = 0.2;
-		const region = (center: Vector3, size: Vector3) => {
-			return new Region3(center.sub(size.div(2)), center.add(size.div(2)));
-		};
-
-		const createAutomatic = (block: RegistryBlock): readonly Region3[] | undefined => {
-			const autoShape = block.autoWeldShape ?? "none";
-			if (
-				(block.model.GetChildren().size() === 1 &&
-					block.model.PrimaryPart!.IsA("Part") &&
-					block.model.PrimaryPart!.Shape === Enum.PartType.Block) ||
-				autoShape === "cube"
-			) {
-				const part = block.model.FindFirstChildWhichIsA("Part");
-				if (!part) return;
-
-				if (part.Shape === Enum.PartType.Block) {
-					const blockpos = part.Position;
-					const size = (
-						block.model.GetChildren().filter((c) => c.IsA("BasePart")) as unknown as readonly BasePart[]
-					)
-						.map((c) => c.Size)
-						.reduce((acc, val) => (acc.Magnitude > val.Magnitude ? acc : val), Vector3.zero);
-
-					return [
-						region(
-							blockpos.add(new Vector3(-size.X / 2, 0, 0)),
-							new Vector3(offset, size.Y - offset, size.Z - offset),
-						),
-						region(
-							blockpos.add(new Vector3(size.X / 2, 0, 0)),
-							new Vector3(offset, size.Y - offset, size.Z - offset),
-						),
-
-						region(
-							blockpos.add(new Vector3(0, -size.Y / 2, 0)),
-							new Vector3(size.X - offset, offset, size.Z - offset),
-						),
-						region(
-							blockpos.add(new Vector3(0, size.Y / 2, 0)),
-							new Vector3(size.X - offset, offset, size.Z - offset),
-						),
-
-						region(
-							blockpos.add(new Vector3(0, 0, -size.Z / 2)),
-							new Vector3(size.X - offset, size.Y - offset, offset),
-						),
-						region(
-							blockpos.add(new Vector3(0, 0, size.Z / 2)),
-							new Vector3(size.X - offset, size.Y - offset, offset),
-						),
-					];
-				}
-			}
-		};
-
-		const setColliderProperties = (collider: BasePart) => {
-			collider.Transparency = 1;
-			collider.Material = Enum.Material.Plastic;
-			collider.Anchored = true;
-			collider.Massless = true;
-			collider.CollisionGroup = "BlockCollider";
-			collider.CanCollide = true;
-			collider.CanTouch = false;
-			collider.EnableFluidForces = false;
-		};
-
-		const initialize = (regblock: RegistryBlock) => {
-			const block = regblock.model;
-			block.PrimaryPart!.Anchored = true;
-
-			const weldParent = Element.create("Model") as CollidersModel;
-			weldParent.WorldPivot = block.GetPivot();
-			this.weldColliders.set(regblock.id, weldParent);
-
-			if (block.FindFirstChild(weldFolderName)) {
-				const colliders = block.FindFirstChild(weldFolderName)?.GetChildren() as unknown as readonly BasePart[];
-				if (colliders.size() === 0) return;
-
-				for (const [key, group] of colliders.groupBy(
-					(g) => (g.GetAttribute("target") as string | undefined) ?? "",
-				)) {
-					if (group.size() < 2) {
-						for (const collider of group) {
-							const newcollider = collider.Clone();
-							setColliderProperties(newcollider);
-							newcollider.Parent = weldParent;
-						}
-						continue;
-					}
-
-					const union = group[0].UnionAsync(
-						group.filter((_, i) => i !== 0),
-						// Default in studio for loading performance
-						RunService.IsStudio()
-							? Enum.CollisionFidelity.Default
-							: Enum.CollisionFidelity.PreciseConvexDecomposition,
-					);
-					setColliderProperties(union);
-					if (key !== "") {
-						(block as unknown as Record<string, BasePart>)[key].Anchored = true;
-						union.SetAttribute("target", key);
-					}
-
-					union.Parent = weldParent;
-
-					for (const collider of group) {
-						collider.Destroy();
-					}
-				}
-
-				block.FindFirstChild(weldFolderName)?.Destroy();
-				return;
-			}
-
-			const regions = createAutomatic(regblock);
-			if (!regions || regions.size() === 0) return;
-
-			const parts: BasePart[] = [];
-			for (const region of regions) {
-				const part = Element.create("Part", { Parent: Workspace, Size: region.Size });
-				part.PivotTo(region.CFrame);
-				parts.push(part);
-			}
-
-			const union = parts[0].UnionAsync(
-				parts.filter((_, i) => i !== 0),
-				Enum.CollisionFidelity.PreciseConvexDecomposition,
-			);
-
-			for (const part of parts) {
-				part.Destroy();
-			}
-
-			setColliderProperties(union);
-			union.Parent = weldParent;
-
-			$log(`Adding automatic weld region to ${block.Name}`);
-		};
-
-		const [success, err] = Promise.all(blocks.map((b) => Promise.try(() => initialize(b)))).await();
-		if (!success) throw err;
-
-		$log("Block welding initialized");
 	}
 
 	private getPlotColliders(plot: BuildingPlot): WorldModel {
@@ -196,7 +39,7 @@ export class BuildingWelder extends HostedService {
 	}
 
 	weldOnPlot(plot: BuildingPlot, block: BlockModel) {
-		const collider = this.weldColliders.get(BlockManager.manager.id.get(block))?.Clone();
+		const collider = this.blockRegistry.blocks.get(BlockManager.manager.id.get(block)!)!.weldColliders?.Clone();
 		if (!collider) return;
 
 		collider.Name = BlockManager.manager.uuid.get(block);
@@ -206,7 +49,7 @@ export class BuildingWelder extends HostedService {
 		this.weld(plot, collider);
 	}
 
-	private weld(plot: BuildingPlot, colliders: CollidersModel) {
+	private weld(plot: BuildingPlot, colliders: Model) {
 		const getTarget = (collider: BasePart): BasePart | undefined => {
 			const targetBlock = plot.getBlock(collider.Parent!.Name as BlockUuid);
 			let part: BasePart | undefined;
@@ -248,7 +91,7 @@ export class BuildingWelder extends HostedService {
 
 	moveCollisions(plot: BuildingPlot, block: BlockModel, newpivot: CFrame) {
 		const child = this.getPlotColliders(plot).FindFirstChild(BlockManager.manager.uuid.get(block)) as
-			| CollidersModel
+			| Model
 			| undefined;
 		if (!child) throw "what";
 

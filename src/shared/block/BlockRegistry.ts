@@ -1,5 +1,5 @@
-import type { AutoWeldColliderBlockShape, BlockMirrorBehaviour } from "shared/BlockDataRegistry";
-import type { Categories, Category } from "shared/init/BlocksInitializer";
+import type { Categories, Category } from "server/blockInit/BlocksInitializer";
+import type { BlockMirrorBehaviour } from "shared/BlockDataRegistry";
 
 declare global {
 	type RegistryBlock = {
@@ -10,9 +10,13 @@ declare global {
 		readonly category: CategoryPath;
 		readonly required: boolean | undefined;
 		readonly limit: number | undefined;
-		readonly autoWeldShape: AutoWeldColliderBlockShape | undefined;
 		readonly mirrorBehaviour: BlockMirrorBehaviour | undefined;
 		readonly mirrorReplacementId: BlockId | undefined;
+
+		readonly markerPositions: { readonly [name in BlockConnectionName]?: Vector3 };
+
+		/** @server */
+		readonly weldColliders: Model | undefined;
 	};
 }
 

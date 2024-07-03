@@ -25,10 +25,12 @@ import { TerrainController } from "client/terrain/TerrainController";
 import { TestRunner } from "client/test/TestRunner";
 import { Tutorial } from "client/tutorial/Tutorial";
 import { TutorialBasics } from "client/tutorial/TutorialBasics";
+import { AutoLogicCreator } from "shared/block/AutoLogicCreator";
+import { BlockRegistry } from "shared/block/BlockRegistry";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { HostedService } from "shared/GameHost";
-import { BlocksInitializer } from "shared/init/BlocksInitializer";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { CustomRemotes } from "shared/Remotes";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 namespace Startup {
@@ -86,7 +88,15 @@ export namespace SandboxGame {
 			ctx.resolve<SharedPlots>().waitForPlot(Players.LocalPlayer.UserId),
 		);
 
-		builder.services.registerSingleton(BlocksInitializer.create());
+		builder.services.registerSingletonFunc((): BlockRegistry => {
+			const gameInfo = CustomRemotes.getGameInfo.send();
+			if (!gameInfo.success) {
+				throw gameInfo.message;
+			}
+
+			AutoLogicCreator.create();
+			return new BlockRegistry(gameInfo.blocks, gameInfo.categories);
+		});
 		PlayModeController.initialize(builder);
 		ClientBuildingValidationController.initialize(builder);
 		Tutorial.initialize(builder);

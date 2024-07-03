@@ -1,21 +1,15 @@
 import { RunService } from "@rbxts/services";
 import { connectors } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import { BlockGenerator } from "shared/block/creation/BlockGenerator";
+import { SharedBlockGenerator } from "shared/block/SharedBlockGenerator";
 import { Objects } from "shared/fixes/objects";
 import { RemoteEvents } from "shared/RemoteEvents";
 import type { BlockLogic } from "shared/block/BlockLogic";
 import type { BlockId } from "shared/BlockDataRegistry";
 import type { PlacedBlockData } from "shared/building/BlockManager";
-import type { BlocksInitializeData } from "shared/init/BlocksInitializer";
 
-interface CreateInfo<TFunc> {
-	readonly modelTextOverride: string;
-	readonly category: CategoryPath;
-	readonly prefab: BlockGenerator.PrefabName;
-	readonly func: TFunc;
-	readonly required?: boolean;
-	readonly limit?: number;
+interface CreateInfo<TKey extends keyof typeof logicReg> {
+	readonly func: Parameters<(typeof logicReg)[TKey]>[0];
 }
 
 const defcs = {
@@ -626,158 +620,86 @@ const multiifunc =
 	(left, right, arg) =>
 		multiif(arg, left, right, checks);
 
-const prefabs = BlockGenerator.prefabNames;
-const categories = {
-	math: ["Logic", "Math"] as unknown as CategoryPath,
-	byte: ["Logic", "Math", "Byte"] as unknown as CategoryPath,
-	converterByte: ["Logic", "Converter", "Byte"] as unknown as CategoryPath,
-	converterVector: ["Logic", "Converter", "Vector"] as unknown as CategoryPath,
-	other: ["Logic", "Other"] as unknown as CategoryPath,
-	bool: ["Logic", "Gate"] as unknown as CategoryPath,
-} as const satisfies { [k in string]: CategoryPath };
-
 const operations = {
 	const: {
-		Constant: {
-			modelTextOverride: "CONST",
-			category: categories.other,
-			prefab: prefabs.const,
+		constant: {
 			func: (value) => value,
 		},
 	},
+
 	constnumber: {
-		PI: {
-			modelTextOverride: "π",
-			category: categories.other,
-			prefab: prefabs.const,
+		pi: {
 			func: () => math.pi,
 		},
-		E: {
-			modelTextOverride: "e",
-			category: categories.other,
-			prefab: prefabs.const,
+		e: {
 			func: () => 2.718281828459,
 		},
 	},
 	math1number: {
-		SQRT: {
-			modelTextOverride: "SQRT",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		sqrt: {
 			func: (value) => math.sqrt(value),
 		},
 
-		TAN: {
-			modelTextOverride: "TAN",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		tan: {
 			func: (value) => math.tan(value),
 		},
-		ATAN: {
-			modelTextOverride: "ATAN",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		atan: {
 			func: (value) => math.atan(value),
 		},
 
-		SIN: {
-			modelTextOverride: "SIN",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		sin: {
 			func: (value) => math.sin(value),
 		},
-		ASIN: {
-			modelTextOverride: "ASIN",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		asin: {
 			func: (value) => math.asin(value),
 		},
 
-		COS: {
-			modelTextOverride: "COS",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		cos: {
 			func: (value) => math.cos(value),
 		},
-		ACOS: {
-			modelTextOverride: "ACOS",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		acos: {
 			func: (value) => math.acos(value),
 		},
 
-		LOG: {
-			modelTextOverride: "LOG",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		log: {
 			func: (value) => math.log(value),
 		},
-		LOG10: {
-			modelTextOverride: "LOG10",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		log10: {
 			func: (value) => math.log10(value),
 		},
-		LOGE: {
-			modelTextOverride: "LOG(E)",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		loge: {
 			func: (value) => math.log(value, 2.718281828459),
 		},
 
-		DEG: {
-			modelTextOverride: "DEG",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		deg: {
 			func: (value) => math.deg(value),
 		},
-		RAD: {
-			modelTextOverride: "RAD",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		rad: {
 			func: (value) => math.rad(value),
 		},
 
-		SIGN: {
-			modelTextOverride: "SIGN",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		sign: {
 			func: (value) => math.sign(value),
 		},
 
-		FLOOR: {
-			modelTextOverride: "FLOOR",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		floor: {
 			func: (value) => math.floor(value),
 		},
 
-		CEIL: {
-			modelTextOverride: "CEIL",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		ceil: {
 			func: (value) => math.ceil(value),
 		},
 
-		ROUND: {
-			modelTextOverride: "ROUND",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		round: {
 			func: (value) => math.round(value),
 		},
 
-		ABS: {
-			modelTextOverride: "ABS",
-			category: categories.math,
-			prefab: prefabs.smallGeneric,
+		abs: {
 			func: (value) => math.abs(value),
 		},
 	},
 	rand: {
-		RAND: {
-			modelTextOverride: "RAND",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		rand: {
 			func: (min, max, logic) => {
 				if (max <= min) {
 					RemoteEvents.Burn.send([logic.instance.PrimaryPart!]);
@@ -790,117 +712,72 @@ const operations = {
 		},
 	},
 	clamp: {
-		CLAMP: {
-			modelTextOverride: "CLAMP",
-			category: categories.math,
-			prefab: prefabs.tripleGeneric,
+		clamp: {
 			func: (value, min, max) => math.clamp(value, min, max),
 		},
 	},
 	pow: {
-		POW: {
-			modelTextOverride: "POW",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		pow: {
 			func: (value, power) => math.pow(value, power),
 		},
 	},
 	nsqrt: {
-		NSQRT: {
-			modelTextOverride: "NSQRT",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		nsqrt: {
 			func: (value, root) => value ** (1 / root),
 		},
 	},
 	atan2: {
-		ATAN2: {
-			modelTextOverride: "ATAN2",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		atan2: {
 			func: (y, x) => math.atan2(y, x),
 		},
 	},
 	math2number: {
-		MOD: {
-			modelTextOverride: "MOD",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		mod: {
 			func: (value1, value2) => value1 % value2,
 		},
 	},
 	numberOrBool2bool: {
-		EQUALS: {
-			modelTextOverride: "=",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		equals: {
 			func: (value1, value2) => value1 === value2,
 		},
 	},
 	number2bool: {
-		NOTEQUALS: {
-			modelTextOverride: "≠",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		notequals: {
 			func: (value1, value2) => value1 === value2,
 		},
-		GREATERTHAN: {
-			modelTextOverride: ">",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		greaterthan: {
 			func: (value1, value2) => value1 > value2,
 		},
-		GREATERTHANOREQUALS: {
-			modelTextOverride: "≥",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		greaterthanorequals: {
 			func: (value1, value2) => value1 >= value2,
 		},
-		LESSTHAN: {
-			modelTextOverride: "<",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		lessthan: {
 			func: (value1, value2) => value1 < value2,
 		},
-		LESSTHANOREQUALS: {
-			modelTextOverride: "≤",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		lessthanorequals: {
 			func: (value1, value2) => value1 <= value2,
 		},
 	},
 	math2numberVector3: {
-		ADD: {
-			modelTextOverride: "ADD",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		add: {
 			func: multiifunc({
 				number: (left, right) => left + right,
 				Vector3: (left, right) => left.add(right),
 			}),
 		},
-		SUB: {
-			modelTextOverride: "SUB",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		sub: {
 			func: multiifunc({
 				number: (left, right) => left - right,
 				Vector3: (left, right) => left.sub(right),
 			}),
 		},
-		MUL: {
-			modelTextOverride: "MUL",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		mul: {
 			func: multiifunc({
 				number: (left, right) => left * right,
 				Vector3: (left, right) => left.mul(right),
 			}),
 		},
-		DIV: {
-			modelTextOverride: "DIV",
-			category: categories.math,
-			prefab: prefabs.doubleGeneric,
+		div: {
 			func: multiifunc({
 				number: (left, right, logic) => {
 					if (right === 0) {
@@ -922,189 +799,115 @@ const operations = {
 		},
 	},
 	byte1byte: {
-		byteNOT: {
-			modelTextOverride: "BNOT",
-			category: categories.byte,
-			prefab: prefabs.doubleByte,
+		bytenot: {
 			func: (num) => ~num & 0xff,
 		},
-		byteNEG: {
-			modelTextOverride: "BNEG",
-			category: categories.byte,
-			prefab: prefabs.smallByte,
+		byteneg: {
 			func: (num) => -num & 0xff,
 		},
 	},
 	byte2byte: {
-		byteXOR: {
-			modelTextOverride: "BXOR",
-			category: categories.byte,
-			prefab: prefabs.doubleByte,
+		bytexor: {
 			func: (a, b) => a ^ b,
 		},
-		byteXNOR: {
-			modelTextOverride: "BXNOR",
-			category: categories.byte,
-			prefab: prefabs.doubleByte,
+		bytexnor: {
 			func: (a, b) => ~(a ^ b) & 0xff,
 		},
-		byteAND: {
-			modelTextOverride: "BAND",
-			category: categories.byte,
-			prefab: prefabs.doubleByte,
+		byteand: {
 			func: (a, b) => a & b,
 		},
-		byteNAND: {
-			modelTextOverride: "BNAND",
-			category: categories.byte,
-			prefab: prefabs.doubleByte,
+		bytenand: {
 			func: (a, b) => ~(a & b) & 0xff,
 		},
-		byteOR: {
-			modelTextOverride: "BOR",
-			category: categories.byte,
-			prefab: prefabs.doubleByte,
+		byteor: {
 			func: (a, b) => a | b,
 		},
-		byteNOR: {
-			modelTextOverride: "BNOR",
-			category: categories.byte,
-			prefab: prefabs.doubleByte,
+		bytenor: {
 			func: (a, b) => ~(a | b) & 0xff,
 		},
-		byteRotateRight: {
-			modelTextOverride: "ROT. RIGHT",
-			category: categories.byte,
-			prefab: prefabs.doubleByte,
+		byterotateright: {
 			func: (num, shift) => ((num >>> shift) | (num << (8 - shift))) & 0xff,
 		},
-		byteRotateLeft: {
-			modelTextOverride: "ROT. LEFT",
-			category: categories.byte,
-			prefab: prefabs.doubleByte,
+		byterotateleft: {
 			func: (num, shift) => ((num << shift) | (num >>> (8 - shift))) & 0xff,
 		},
-		byteShiftRight: {
-			modelTextOverride: "Shift RIGHT",
-			category: categories.byte,
-			prefab: prefabs.doubleByte,
+		byteshiftright: {
 			func: (num, shift) => (num >> shift) & 0xff,
 		},
-		byteShiftLEFT: {
-			modelTextOverride: "Shift LEFT",
-			category: categories.byte,
-			prefab: prefabs.doubleByte,
+		byteshiftleft: {
 			func: (num, shift) => (num << shift) & 0xff,
 		},
-		byteArithmeticShiftRight: {
-			modelTextOverride: "Arithmetic Shift RIGHT",
-			category: categories.byte,
-			prefab: prefabs.doubleByte,
+		bytearithmeticshiftright: {
 			func: (num, shift) => (num >> shift) | ((num & 0x80) !== 0 ? 0xff << (8 - shift) : 0),
 		},
 	},
 	bool2bool: {
-		XOR: {
-			modelTextOverride: "XOR",
-			category: categories.bool,
-			prefab: prefabs.doubleGeneric,
+		xor: {
 			func: (x, y) => x !== y,
 		},
-		XNOR: {
-			modelTextOverride: "XNOR",
-			category: categories.bool,
-			prefab: prefabs.doubleGeneric,
+		xnor: {
 			func: (x, y) => !(x !== y),
 		},
-		AND: {
-			modelTextOverride: "AND",
-			category: categories.bool,
-			prefab: prefabs.doubleGeneric,
+		and: {
 			func: (x, y) => x && y,
 		},
-		NAND: {
-			modelTextOverride: "NAND",
-			category: categories.bool,
-			prefab: prefabs.doubleGeneric,
+		nand: {
 			func: (x, y) => !(x && y),
 		},
-		OR: {
-			modelTextOverride: "OR",
-			category: categories.bool,
-			prefab: prefabs.doubleGeneric,
+		or: {
 			func: (x, y) => x || y,
 		},
-		NOR: {
-			modelTextOverride: "NOR",
-			category: categories.bool,
-			prefab: prefabs.doubleGeneric,
+		nor: {
 			func: (x, y) => !(x || y),
 		},
 	},
 	bool1bool: {
-		NOT: {
-			modelTextOverride: "NOT",
-			category: categories.bool,
-			prefab: prefabs.smallGeneric,
+		not: {
 			func: (x) => !x,
 		},
 	},
 	numberToByte: {
-		NumberToByte: {
-			modelTextOverride: "TO BYTE",
-			category: categories.converterByte,
-			prefab: prefabs.smallGeneric,
+		numbertobyte: {
 			func: (value) => math.clamp(value, 0, 255),
 		},
 	},
 	byteToNumber: {
-		ByteToNumber: {
-			modelTextOverride: "TO NUMBER",
-			category: categories.converterByte,
-			prefab: prefabs.smallByte,
+		bytetonumber: {
 			func: (value) => value,
 		},
 	},
 	number3tovector3: {
-		Vec3Combiner: {
-			modelTextOverride: "VEC3 COMB",
-			category: categories.converterVector,
-			prefab: prefabs.tripleGeneric,
+		vec3combiner: {
 			func: (n1, n2, n3) => new Vector3(n1, n2, n3),
 		},
 	},
 	vector3tonumber3: {
-		Vec3Splitter: {
-			modelTextOverride: "VEC3 SPLIT",
-			category: categories.converterVector,
-			prefab: prefabs.tripleGeneric,
+		vec3splitter: {
 			func: (vector3) => [vector3.X, vector3.Y, vector3.Z],
 		},
 	},
 	multiplexer: {
-		Multiplexer: {
-			modelTextOverride: "MUX",
-			category: categories.converterVector,
-			prefab: prefabs.tripleGeneric,
+		multiplexer: {
 			func: (value, truevalue, falsevalue) => (value ? truevalue : falsevalue),
 		},
 	},
 } as const satisfies NonGenericOperations;
 
 type NonGenericOperations = {
-	readonly [k in keyof typeof logicReg]: Record<string, CreateInfo<Parameters<(typeof logicReg)[k]>[0]>>;
+	readonly [k in keyof typeof logicReg]: {
+		readonly [id in BlockId]?: CreateInfo<k>;
+	};
 };
 
-export namespace AutoOperationsCreator {
-	export function create(info: BlocksInitializeData) {
+export namespace AutoLogicCreator {
+	export function create() {
 		for (const [optype, ops] of pairs(operations as NonGenericOperations)) {
 			for (const [name, data] of pairs(ops)) {
-				BlockGenerator.create(info, {
-					id: name.lower() as BlockId,
-					...data,
-					logic: logicReg[optype](data.func as never),
-					config: defs[optype],
-				});
+				SharedBlockGenerator.registerLogic(
+					name.lower() as BlockId,
+					logicReg[optype](data.func as never),
+					defs[optype],
+				);
 			}
 		}
 	}

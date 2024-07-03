@@ -5,6 +5,7 @@ import {
 	PERemoteEventMiddlewares,
 	S2C2SRemoteFunction,
 } from "shared/event/PERemoteEvent";
+import type { Categories } from "server/blockInit/BlocksInitializer";
 import type { BlockId } from "shared/BlockDataRegistry";
 import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
@@ -88,11 +89,9 @@ declare global {
 		readonly imported: boolean;
 	};
 
-	type GameInfoBlock = {
-		readonly markerPositions: { readonly [name in BlockConnectionName]?: Vector3 };
-	};
 	type GameInfo = {
-		readonly blocks: { readonly [k in BlockId]?: GameInfoBlock };
+		readonly blocks: readonly RegistryBlock[];
+		readonly categories: Categories;
 	};
 }
 
@@ -124,6 +123,7 @@ export const CustomRemotes = {
 			teleportOnSeat: new C2SRemoteEvent("mdr_seat"),
 		},
 	},
+	getGameInfo: new C2S2CRemoteFunction<undefined, Response<GameInfo>>("getgameinfo"),
 } as const;
 export const Remotes = Definitions.Create({
 	Admin: Definitions.Namespace({
@@ -134,7 +134,4 @@ export const Remotes = Definitions.Create({
 		Restart: Definitions.ClientToServerEvent<[]>(),
 	}),
 	ServerRestartProgress: Definitions.ServerToClientEvent<[atmosphereColor: number]>(),
-	Game: Definitions.Namespace({
-		GameInfo: Definitions.ServerAsyncFunction<() => GameInfo>(),
-	}),
 });

@@ -1,9 +1,9 @@
 import { RunService } from "@rbxts/services";
+import { AutoBlockModelCreator } from "server/blockInit/AutoBlockModelCreator";
+import { BlockCreatorFromAssets } from "server/blockInit/BlockCreatorFromAssets";
+import { BlockGenerator } from "server/blockInit/BlockGenerator";
 import { BlockRegistry } from "shared/block/BlockRegistry";
-import { AutoOperationsCreator } from "shared/block/creation/AutoOperationsCreator";
-import { BlockCreatorFromAssets } from "shared/block/creation/BlockCreatorFromAssets";
-import { BlockGenerator } from "shared/block/creation/BlockGenerator";
-import { GeneratedBlocksCreator } from "shared/block/creation/GeneratedBlockCreator";
+import { Objects } from "shared/fixes/objects";
 
 declare global {
 	type CategoryName = string & { readonly ___nominal: "CategoryName" };
@@ -31,14 +31,8 @@ export namespace BlocksInitializer {
 			categories: {},
 		};
 
-		const initializers = [
-			BlockCreatorFromAssets.readFromAssets,
-			AutoOperationsCreator.create,
-			GeneratedBlocksCreator.create,
-		];
-		for (const initializer of initializers) {
-			initializer(initData);
-		}
+		const initializers = [BlockCreatorFromAssets.readFromAssets, AutoBlockModelCreator.create];
+		Objects.multiAwait(initializers.map((i) => () => i(initData)));
 
 		if (RunService.IsStudio() && RunService.IsServer()) {
 			const errors: { readonly id: string; readonly errors: readonly string[] }[] = [];

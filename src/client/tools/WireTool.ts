@@ -21,7 +21,7 @@ import { ObservableValue } from "shared/event/ObservableValue";
 import { ReplicatedAssets } from "shared/ReplicatedAssets";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
-import type { GameDataStorage } from "client/PlayerDataStorage";
+import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BlockConfigRegistryNonGeneric } from "shared/block/config/BlockConfigRegistry";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -675,8 +675,7 @@ export class WireTool extends ToolBase {
 
 	constructor(
 		mode: BuildingMode,
-		@inject
-		private readonly gameData: GameDataStorage,
+		@inject private readonly blockRegistry: BlockRegistry,
 	) {
 		super(mode);
 
@@ -750,7 +749,7 @@ export class WireTool extends ToolBase {
 				}
 
 				const blockid = (marker.data.blockData as PlacedBlockData).id;
-				const positions = this.gameData.data.get().blocks[blockid]?.markerPositions;
+				const positions = this.blockRegistry.blocks.get(blockid)?.markerPositions;
 				let markerpos = positions?.[marker.data.id];
 				if (!markerpos) {
 					if (marker instanceof BlockWireManager.Markers.Input) {
