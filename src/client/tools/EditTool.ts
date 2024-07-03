@@ -22,7 +22,7 @@ import { Element } from "shared/Element";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { ObservableValue } from "shared/event/ObservableValue";
-import { AABB } from "shared/fixes/AABB";
+import { BB } from "shared/fixes/BB";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
@@ -648,7 +648,10 @@ export class EditTool extends ToolBase {
 		const selected = [...this.selected.get()];
 		this.selected.setRange([]);
 
-		const center = new CFrame(AABB.fromModels(selected).getCenter());
+		const center = BB.fromModels(
+			selected,
+			this.mode.editMode.get() === "local" ? undefined : CFrame.identity,
+		).center;
 		const mirrored = selected.map((s): PlaceBlockRequest => {
 			const mirrored = BuildingManager.getMirroredBlocks(
 				center,
