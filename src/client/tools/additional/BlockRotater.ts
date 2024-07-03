@@ -86,7 +86,7 @@ class DesktopRotater extends RotaterBase {
 				}
 
 				this.difference = startDifference.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle));
-				this.isValid = this.plotBoundsb.isBBInside(
+				this.isValid = this.plotBounds.isBBInside(
 					boundingBox.withCenter((c) => fullStartPos.mul(this.difference)),
 				);
 				if (!this.isValid) {
@@ -130,7 +130,7 @@ class GamepadRotater extends RotaterBase {
 				relativeAngle = math.rad(relativeAngle);
 
 				this.difference = this.difference.mul(CFrame.fromAxisAngle(axis, relativeAngle));
-				this.isValid = this.plotBoundsb.isBBInside(boundingBox.withCenter(fullStartPos.mul(this.difference)));
+				this.isValid = this.plotBounds.isBBInside(boundingBox.withCenter(fullStartPos.mul(this.difference)));
 				if (!this.isValid) {
 					(moveHandles.WaitForChild("SelectionBox") as SelectionBox).Color3 = Colors.red;
 				} else {

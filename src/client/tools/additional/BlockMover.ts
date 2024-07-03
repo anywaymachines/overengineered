@@ -107,13 +107,13 @@ class DesktopMove extends MoveBase {
 					boundingBox.withCenter((c) => c.Rotation.add(startpos)),
 					globalDirection,
 					distance,
-					this.plotBoundsb,
+					this.plotBounds,
 				);
 				if (this.mode.gridEnabled.get()) {
 					const roundedDistance = roundByStep(distance);
 
 					if (
-						this.plotBoundsb.isBBInside(
+						this.plotBounds.isBBInside(
 							boundingBox.withCenter((c) =>
 								c.Rotation.add(
 									fullStartPos.add(startDifference.add(globalDirection.mul(roundedDistance))),
@@ -157,7 +157,7 @@ class GamepadMove extends MoveBase {
 		const initHandles = (instance: MoveHandles) => {
 			const tryAddDiff = (diff: Vector3) => {
 				if (
-					!this.plotBoundsb.isBBInside(
+					!this.plotBounds.isBBInside(
 						boundingBox.withCenter((c) => c.Rotation.add(fullStartPos.add(diff).add(this.difference))),
 					)
 				) {

@@ -3,7 +3,6 @@ import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { SharedPlot } from "shared/building/SharedPlot";
-import type { AABB } from "shared/fixes/AABB";
 import type { BB } from "shared/fixes/BB";
 
 type BlockEditInfo = {
@@ -15,9 +14,7 @@ export abstract class BlockEditorBase extends ClientComponent {
 	protected readonly plot: SharedPlot;
 	protected readonly blocks: readonly BlockModel[];
 	protected readonly original: readonly BlockEditInfo[];
-	/** @deprecated Use {@link plotBoundsb} */
-	protected readonly plotBounds: AABB;
-	protected readonly plotBoundsb: BB;
+	protected readonly plotBounds: BB;
 
 	constructor(
 		protected readonly mode: BuildingMode,
@@ -28,8 +25,7 @@ export abstract class BlockEditorBase extends ClientComponent {
 
 		this.plot = plot;
 		this.blocks = blocks;
-		this.plotBounds = plot.bounds;
-		this.plotBoundsb = plot.boundsb;
+		this.plotBounds = plot.boundsb;
 		this.original = blocks.map((p): BlockEditInfo => ({ instance: p, origPosition: p.GetPivot() }));
 
 		const handles = this.initializeHandles();
