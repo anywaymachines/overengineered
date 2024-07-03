@@ -34,8 +34,6 @@ export namespace BlockCreatorFromAssets {
 		}
 	}
 	function readBlock(data: BlocksInitializeData, block: BlockModel, category: CategoryPath) {
-		BlockGenerator.Assertions.checkAll(block);
-
 		const id = block.Name.lower() as BlockId;
 		const regblock = BlockGenerator.construct(id, block, category);
 		data.blocks.set(regblock.id, regblock);

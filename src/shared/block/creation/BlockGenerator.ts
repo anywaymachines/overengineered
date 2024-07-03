@@ -17,21 +17,19 @@ export namespace BlockGenerator {
 	export namespace Assertions {
 		type AssertedModel = Model & { PrimaryPart: BasePart };
 
-		function assertPrimaryPartSet(block: Model): asserts block is AssertedModel {
-			if (!block.PrimaryPart) {
-				throw `PrimaryPart in Block '${block.Name}' is not set!`;
-			}
+		function isPrimaryPartSet(block: Model): block is AssertedModel {
+			return block.PrimaryPart !== undefined;
 		}
-		function assertColboxIsPrimaryPartIfExists(block: AssertedModel) {
+		function* assertColboxIsPrimaryPartIfExists(block: AssertedModel) {
 			for (const child of block.GetDescendants()) {
 				if (child.Name.lower() === "colbox") {
 					if (block.PrimaryPart !== child) {
-						throw `Colbox in Block '${block.Name}' is not a primary part!`;
+						yield `Colbox in Block '${block.Name}' is not a primary part!`;
 					}
 				}
 			}
 		}
-		function assertColboxWeldedIfExists(block: AssertedModel) {
+		function* assertColboxWeldedIfExists(block: AssertedModel) {
 			if (block.PrimaryPart.Name.lower() !== "colbox") return;
 
 			for (const weld of block.GetDescendants()) {
@@ -45,35 +43,60 @@ export namespace BlockGenerator {
 				}
 			}
 
-			throw `Colbox in Block '${block.Name}' is not welded to anything!`;
+			yield `Colbox in Block '${block.Name}' is not welded to anything!`;
 		}
-		function assertValidVelds(block: AssertedModel) {
+		function* assertValidVelds(block: AssertedModel) {
 			for (const weld of block.GetDescendants()) {
 				if (!weld.IsA("WeldConstraint")) continue;
 
 				if (!weld.Part0 || !weld.Part1) {
-					throw `Partial weld found in block ${block.Name} in weld parent ${weld.Parent}`;
+					yield `Partial weld found in block ${block.Name} in weld parent ${weld.Parent}`;
+					continue;
 				}
 				if (!weld.Part0.IsDescendantOf(block) || !weld.Part1.IsDescendantOf(block)) {
-					throw `Outer weld reference found in block ${block.Name} in weld parent ${weld.Parent}`;
+					yield `Outer weld reference found in block ${block.Name} in weld parent ${weld.Parent}`;
+					continue;
 				}
 			}
 		}
-		function assertSomethingAnchored(block: AssertedModel) {
+		function* assertSomethingAnchored(block: AssertedModel) {
 			for (const part of block.GetDescendants()) {
 				if (part.IsA("BasePart") && part.Anchored) {
 					return;
 				}
 			}
 
-			throw `No parts in block '${block.Name}' are anchored!`;
+			yield `No parts in block '${block.Name}' are anchored!`;
 		}
-		function assertHasDataInRegistry(block: Model) {
+		function* assertHasDataInRegistry(block: Model) {
 			if (!BlockDataRegistry[block.Name.lower() as BlockId]) {
-				throw `No registry data found for block ${block.Name}`;
+				yield `No registry data found for block ${block.Name}`;
 			}
 		}
-		function assertSize(block: AssertedModel) {
+		function* assertCollisionGroup(block: Model) {
+			for (const child of block.GetDescendants()) {
+				if (child.Parent?.Name === "WeldRegions") continue;
+				if (!child.IsA("BasePart")) continue;
+				if (!child.CanCollide) continue;
+
+				if (child.CollisionGroup !== "Blocks") {
+					yield `Block ${block.Name} part ${child.Name} has a wrong collision group ${child.CollisionGroup}!`;
+				}
+			}
+		}
+		function* assertNoRepeatedPartNames(block: Model) {
+			const names = new Set<string>();
+			for (const item of block.GetDescendants()) {
+				if (!item.IsA("BasePart")) continue;
+
+				if (names.has(item.Name)) {
+					yield `Block ${block.Name} has duplicate child name ${item.Name}`;
+				}
+
+				names.add(item.Name);
+			}
+		}
+		function checkSize(block: AssertedModel) {
 			const check = (num: number, axis: "X" | "Y" | "Z") => {
 				if (num % 1 === 0) return;
 
@@ -96,31 +119,22 @@ export namespace BlockGenerator {
 			check(size.Y, "Y");
 			check(size.Z, "Z");
 		}
-		function assertCollisionGroup(block: Model) {
-			for (const child of block.GetDescendants()) {
-				if (child.Parent?.Name === "WeldRegions") continue;
-				if (!child.IsA("BasePart")) continue;
-				if (!child.CanCollide) continue;
 
-				if (child.CollisionGroup !== "Blocks") {
-					throw `Block ${block.Name} part ${child.Name} has a wrong collision group ${child.CollisionGroup}!`;
-				}
+		export function getAllErrors(block: Model): readonly string[] {
+			if (!isPrimaryPartSet(block)) {
+				return [`PrimaryPart in Block '${block.Name}' is not set!`];
 			}
-		}
+			checkSize(block);
 
-		export function checkAll(block: Model) {
-			if (!RunService.IsStudio() || !RunService.IsServer()) {
-				return;
-			}
-
-			assertPrimaryPartSet(block);
-			assertColboxIsPrimaryPartIfExists(block);
-			assertColboxWeldedIfExists(block);
-			assertValidVelds(block);
-			assertSomethingAnchored(block);
-			assertHasDataInRegistry(block);
-			assertSize(block);
-			assertCollisionGroup(block);
+			return [
+				...assertColboxIsPrimaryPartIfExists(block),
+				...assertColboxWeldedIfExists(block),
+				...assertValidVelds(block),
+				...assertSomethingAnchored(block),
+				...assertHasDataInRegistry(block),
+				...assertCollisionGroup(block),
+				...assertNoRepeatedPartNames(block),
+			];
 		}
 	}
 
@@ -178,7 +192,6 @@ export namespace BlockGenerator {
 		$log(`Creating block ${id}`);
 
 		const model = cloneBlockModel(id, data.prefab, data.modelTextOverride);
-		Assertions.checkAll(model);
 
 		const regblock = construct(id, model, data.category);
 		info.blocks.set(regblock.id, regblock);
