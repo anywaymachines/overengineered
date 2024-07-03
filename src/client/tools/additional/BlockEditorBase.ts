@@ -15,6 +15,7 @@ export abstract class BlockEditorBase extends ClientComponent {
 	protected readonly plot: SharedPlot;
 	protected readonly blocks: readonly BlockModel[];
 	protected readonly original: readonly BlockEditInfo[];
+	/** @deprecated Use {@link plotBoundsb} */
 	protected readonly plotBounds: AABB;
 	protected readonly plotBoundsb: BB;
 

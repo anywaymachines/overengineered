@@ -7,7 +7,7 @@ import { Gui } from "client/gui/Gui";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { BlockEditorBase } from "client/tools/additional/BlockEditorBase";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
-import { AABB } from "shared/fixes/AABB";
+import { BB } from "shared/fixes/BB";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -37,6 +37,20 @@ abstract class RotaterBase extends BlockEditorBase {
 
 	protected abstract initializeHandles(): Instance;
 	protected abstract getTooltips(): InputTooltips;
+
+	protected createMoveHandles() {
+		const boundingBox = BB.fromModels(
+			this.blocks,
+			this.mode.editMode.get() === "global" ? CFrame.identity : undefined,
+		);
+
+		const moveHandles = ReplicatedStorage.Assets.RotateHandles.Clone();
+		moveHandles.PivotTo(boundingBox.center);
+		moveHandles.Center.Size = moveHandles.Size = boundingBox.originalSize.add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
+		moveHandles.Parent = Gui.getPlayerGui();
+
+		return $tuple(moveHandles, boundingBox);
+	}
 }
 class DesktopRotater extends RotaterBase {
 	protected initializeHandles() {
@@ -72,7 +86,9 @@ class DesktopRotater extends RotaterBase {
 				}
 
 				this.difference = startDifference.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle));
-				this.isValid = this.plotBounds.contains(aabb.withCenter(fullStartPos.mul(this.difference)));
+				this.isValid = this.plotBoundsb.isBBInside(
+					boundingBox.withCenter((c) => fullStartPos.mul(this.difference)),
+				);
 				if (!this.isValid) {
 					(moveHandles.WaitForChild("SelectionBox") as SelectionBox).Color3 = Colors.red;
 				} else {
@@ -87,14 +103,7 @@ class DesktopRotater extends RotaterBase {
 			});
 		};
 
-		const aabb = AABB.fromModels(this.blocks);
-
-		const moveHandles = ReplicatedStorage.Assets.RotateHandles.Clone();
-		moveHandles.Size = aabb.getSize().add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
-		moveHandles.Center.Size = moveHandles.Size;
-		moveHandles.PivotTo(new CFrame(aabb.getCenter()));
-		moveHandles.Parent = Gui.getPlayerGui();
-
+		const [moveHandles, boundingBox] = this.createMoveHandles();
 		const fullStartPos = moveHandles.GetPivot();
 		this.pivot = fullStartPos.Position;
 		initHandles(moveHandles.ArcHandles);
@@ -121,7 +130,7 @@ class GamepadRotater extends RotaterBase {
 				relativeAngle = math.rad(relativeAngle);
 
 				this.difference = this.difference.mul(CFrame.fromAxisAngle(axis, relativeAngle));
-				this.isValid = this.plotBounds.contains(aabb.withCenter(fullStartPos.mul(this.difference)));
+				this.isValid = this.plotBoundsb.isBBInside(boundingBox.withCenter(fullStartPos.mul(this.difference)));
 				if (!this.isValid) {
 					(moveHandles.WaitForChild("SelectionBox") as SelectionBox).Color3 = Colors.red;
 				} else {
@@ -164,14 +173,7 @@ class GamepadRotater extends RotaterBase {
 			this.onEnable(updateCamera);
 		};
 
-		const aabb = AABB.fromModels(this.blocks);
-
-		const moveHandles = ReplicatedStorage.Assets.RotateHandles.Clone();
-		moveHandles.Size = aabb.getSize().add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
-		moveHandles.Center.Size = moveHandles.Size;
-		moveHandles.PivotTo(new CFrame(aabb.getCenter()));
-		moveHandles.Parent = Gui.getPlayerGui();
-
+		const [moveHandles, boundingBox] = this.createMoveHandles();
 		const fullStartPos = moveHandles.GetPivot();
 		this.pivot = fullStartPos.Position;
 		initHandles();
