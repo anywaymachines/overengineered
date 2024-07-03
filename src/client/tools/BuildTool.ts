@@ -28,6 +28,7 @@ import { TransformService } from "shared/component/TransformService";
 import { Element } from "shared/Element";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
+import { BB } from "shared/fixes/BB";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BlockSelectionControlDefinition } from "client/gui/buildmode/BlockSelection";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
@@ -567,9 +568,10 @@ namespace SinglePlaceController {
 			const plot = this.plot.get();
 			const getAreAllGhostsInsidePlot = () =>
 				asMap(this.blockMirrorer.getMirroredModels()).all((k, ghosts) =>
-					ghosts.all((ghost) => plot.isModelInside(ghost)),
+					ghosts.all((ghost) => plot.bounds.isBBInside(BB.fromModel(ghost))),
 				);
-			const areAllBlocksInsidePlot = plot.isModelInside(this.mainGhost) && getAreAllGhostsInsidePlot();
+			const areAllBlocksInsidePlot =
+				plot.bounds.isBBInside(BB.fromModel(this.mainGhost)) && getAreAllGhostsInsidePlot();
 
 			if (areAllBlocksInsidePlot) {
 				this.updateMirrorGhostBlocksPosition();
@@ -877,11 +879,10 @@ namespace MultiPlaceController {
 				pos = this.getPositionOnBuildingPlane(this.pressPosition, cameraPostion, clickDirection);
 			}
 
-			const plotRegion = this.plot.bounds;
-			pos = plotRegion.clampVector(pos);
+			const plotBounds = this.plot.bounds;
 			const positionsData = this.calculateGhostBlockPositions(this.selectedBlock.model, this.pressPosition, pos);
 			if (!positionsData) return;
-			if (!plotRegion.contains(this.pressPosition)) return;
+			if (!plotBounds.isPointInside(this.pressPosition)) return;
 			if (this.oldPositions?.positions === positionsData.positions) return;
 
 			const oldPositions = this.oldPositions?.positions ?? new Set();

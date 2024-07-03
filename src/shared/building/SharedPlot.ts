@@ -2,9 +2,18 @@ import { RunService, Workspace } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { Signal } from "shared/event/Signal";
-import { AABB } from "shared/fixes/AABB";
 import { BB } from "shared/fixes/BB";
 import type { PlacedBlockData } from "shared/building/BlockManager";
+
+const getPlotBuildingRegion = (plot: PlotModel): BB => {
+	const heightLimit = 400;
+	const buildingPlane = plot.BuildingArea;
+
+	return new BB(
+		buildingPlane.GetPivot().add(new Vector3(0, heightLimit / 2, 0)),
+		buildingPlane.Size.add(new Vector3(0, heightLimit, 0)),
+	);
+};
 
 export class SharedPlot extends InstanceComponent<PlotModel> {
 	/** @client */
@@ -19,8 +28,7 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	readonly ownerId;
 	readonly whitelistedPlayers;
 	readonly blacklistedPlayers;
-	readonly bounds: AABB;
-	readonly boundsb: BB;
+	readonly bounds: BB;
 
 	constructor(instance: PlotModel) {
 		super(instance);
@@ -36,31 +44,11 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 		this.whitelistedPlayers = this.event.observableFromAttributeJson<readonly number[]>(instance, "whitelisted");
 		this.blacklistedPlayers = this.event.observableFromAttributeJson<readonly number[]>(instance, "blacklisted");
 		this.whitelistedPlayers.set([5243461283]);
-		this.bounds = SharedPlot.getPlotBuildingRegion(instance);
-		this.boundsb = new BB(new CFrame(this.bounds.getCenter()), this.bounds.getSize());
+		this.bounds = getPlotBuildingRegion(instance);
 	}
 
 	getCenter() {
 		return this.instance.BuildingArea.GetPivot();
-	}
-
-	/** Returns the {@link AABB} of the plot construction area */
-	private static getPlotBuildingRegion(plot: PlotModel): AABB {
-		const heightLimit = 400;
-		const buildingPlane = plot.BuildingArea;
-
-		return AABB.fromMinMax(
-			new Vector3(
-				buildingPlane.Position.X - buildingPlane.Size.X / 2,
-				buildingPlane.Position.Y + buildingPlane.Size.Y / 2,
-				buildingPlane.Position.Z - buildingPlane.Size.Z / 2,
-			),
-			new Vector3(
-				buildingPlane.Position.X + buildingPlane.Size.X / 2,
-				buildingPlane.Position.Y + heightLimit - buildingPlane.Size.Y / 2,
-				buildingPlane.Position.Z + buildingPlane.Size.Z / 2,
-			),
-		).withSize((s) => new Vector3(s.X + 0.02, s.Y + 0.02, s.Z + 0.02));
 	}
 
 	/** @deprecated TOBEDELETED */
@@ -75,11 +63,6 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	getBlock(uuid: BlockUuid): BlockModel {
 		return (this.instance.Blocks as unknown as Record<BlockUuid, BlockModel>)[uuid];
 	}
-	/** @deprecated TOBEDELETED */
-	tryGetBlock(uuid: BlockUuid): BlockModel | undefined {
-		return this.instance.Blocks.FindFirstChild(uuid) as BlockModel | undefined;
-	}
-
 	getSpawnPosition() {
 		return this.instance.BuildingArea.GetPivot().Position.add(
 			new Vector3(this.instance.BuildingArea.ExtentsSize.X / 2 + 2, 10, 0),
@@ -117,21 +100,5 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	/** Is player allowed to build on this plot */
 	isBuildingAllowed(player: Player): boolean {
 		return this.ownerId.get() === player.UserId || this.whitelistedPlayers.get()?.includes(player.UserId) === true;
-	}
-
-	/** Is an instance a descendant of this */
-	isFromThisPlot(instance: Instance): boolean {
-		return instance.IsDescendantOf(this.instance);
-	}
-
-	/** Is model fully inside this plot */
-	isModelInside(model: Model, pivot?: CFrame): boolean {
-		const modelRegion = AABB.fromModel(model, pivot);
-		return this.bounds.contains(modelRegion);
-	}
-
-	/** Is AABB fully inside this plot */
-	isInside(aabb: AABB): boolean {
-		return this.bounds.contains(aabb);
 	}
 }

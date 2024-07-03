@@ -63,7 +63,7 @@ export class MultiBlockSelector extends ClientComponent {
 				return false;
 			}
 
-			if (!plot.get().isFromThisPlot(block)) {
+			if (!plot.get().hasBlock(block)) {
 				return false;
 			}
 

@@ -25,7 +25,7 @@ export abstract class BlockEditorBase extends ClientComponent {
 
 		this.plot = plot;
 		this.blocks = blocks;
-		this.plotBounds = plot.boundsb;
+		this.plotBounds = plot.bounds;
 		this.original = blocks.map((p): BlockEditInfo => ({ instance: p, origPosition: p.GetPivot() }));
 
 		const handles = this.initializeHandles();

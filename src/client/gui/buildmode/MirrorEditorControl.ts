@@ -87,17 +87,17 @@ export class MirrorEditorControl extends Control<MirrorEditorControlDefinition> 
 		this.x = this.add(
 			new MirrorEditorSingleControl(
 				this.gui.X,
-				math.round(-plotRegion.getSize().Z / 2),
-				math.round(plotRegion.getSize().Z / 2),
+				math.round(-plotRegion.originalSize.Z / 2),
+				math.round(plotRegion.originalSize.Z / 2),
 				0,
 			),
 		);
-		this.y = this.add(new MirrorEditorSingleControl(this.gui.Y, 2, math.floor(plotRegion.getSize().Y), 4));
+		this.y = this.add(new MirrorEditorSingleControl(this.gui.Y, 2, math.floor(plotRegion.originalSize.Y), 4));
 		this.z = this.add(
 			new MirrorEditorSingleControl(
 				this.gui.Z,
-				math.round(-plotRegion.getSize().X / 2),
-				math.round(plotRegion.getSize().X / 2),
+				math.round(-plotRegion.originalSize.X / 2),
+				math.round(plotRegion.originalSize.X / 2),
 				0,
 			),
 		);

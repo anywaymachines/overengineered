@@ -1,5 +1,6 @@
 import { Players } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
+import { BB } from "shared/fixes/BB";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
@@ -96,7 +97,7 @@ export namespace BuildingManager {
 			return false;
 		}
 
-		if (!plot.isModelInside(block.model, pivot)) {
+		if (!plot.bounds.isBBInside(BB.fromModel(block.model).withCenter(pivot))) {
 			return false;
 		}
 

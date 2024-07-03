@@ -50,13 +50,14 @@ export class MirrorVisualizer extends ClientComponent {
 		if (mode.y !== undefined)
 			axes.push([
 				CFrame.fromAxisAngle(Vector3.xAxis, math.pi / 2).add(new Vector3(0, mode.y, 0)),
-				plot.bounds.getSize().X,
+				plot.bounds.originalSize.X,
 			]);
-		if (mode.x !== undefined) axes.push([CFrame.identity.add(new Vector3(0, 0, mode.x)), plot.bounds.getSize().X]);
+		if (mode.x !== undefined)
+			axes.push([CFrame.identity.add(new Vector3(0, 0, mode.x)), plot.bounds.originalSize.X]);
 		if (mode.z !== undefined)
 			axes.push([
 				CFrame.fromAxisAngle(Vector3.yAxis, math.pi / 2).add(new Vector3(mode.z, 0, 0)),
-				plot.bounds.getSize().Z,
+				plot.bounds.originalSize.Z,
 			]);
 
 		for (const [cframe, size] of axes) {
