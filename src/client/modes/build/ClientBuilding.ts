@@ -271,13 +271,11 @@ export namespace ClientBuilding {
 					for (const [color, uuids] of colorgroup) {
 						const blocks = uuids.map((uuid) => plot.getBlock(uuid));
 
-						const result = LoadingController.run("Painting blocks", () => {
-							return building.paintBlocks.send({
-								plot: plot.instance,
-								material,
-								color: Color3.fromHex(color),
-								blocks,
-							});
+						const result = building.paintBlocks.send({
+							plot: plot.instance,
+							material,
+							color: Color3.fromHex(color),
+							blocks,
 						});
 
 						if (!result.success) {
@@ -289,13 +287,11 @@ export namespace ClientBuilding {
 				return { success: true };
 			},
 			() =>
-				LoadingController.run("Painting blocks", () => {
-					return building.paintBlocks.send({
-						plot: plot.instance,
-						material,
-						color,
-						blocks: getBlocks(),
-					});
+				building.paintBlocks.send({
+					plot: plot.instance,
+					material,
+					color,
+					blocks: getBlocks(),
 				}),
 		);
 
