@@ -179,17 +179,6 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			});
 		}
 
-		if (this.gui.SearchTextBox.Text === "") {
-			// Category buttons
-			for (const category of asMap(
-				this.blockRegistry.getCategoryByPath(selected)?.sub ?? this.blockRegistry.categories,
-			)
-				.values()
-				.sort((l, r) => l.name < r.name)) {
-				createCategoryButton(category.path, () => this.selectedCategory.set([...selected, category.name]));
-			}
-		}
-
 		// Block buttons
 		let prev: BlockControl | CategoryControl | undefined;
 
@@ -237,6 +226,17 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			);
 
 			prev = button;
+		}
+
+		if (this.gui.SearchTextBox.Text === "") {
+			// Category buttons
+			for (const category of asMap(
+				this.blockRegistry.getCategoryByPath(selected)?.sub ?? this.blockRegistry.categories,
+			)
+				.values()
+				.sort((l, r) => l.name < r.name)) {
+				createCategoryButton(category.path, () => this.selectedCategory.set([...selected, category.name]));
+			}
 		}
 
 		// No results label for searching menu
