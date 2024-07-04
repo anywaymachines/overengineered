@@ -207,14 +207,22 @@ export namespace ClientBuilding {
 
 		const result = ActionController.instance.execute(
 			"Edit blocks",
-			() =>
-				LoadingController.run("Editing blocks", () =>
-					building.editBlocks.send({ plot: plot.instance, blocks: getOrigBlocks() }),
-				),
-			() =>
-				LoadingController.run("Editing blocks", () =>
-					building.editBlocks.send({ plot: plot.instance, blocks: getBlocks() }),
-				),
+			() => {
+				const execute = () => building.editBlocks.send({ plot: plot.instance, blocks: getOrigBlocks() });
+
+				if (blocks.size() > 10) {
+					return LoadingController.run("Editing blocks", execute);
+				}
+				return execute();
+			},
+			() => {
+				const execute = () => building.editBlocks.send({ plot: plot.instance, blocks: getBlocks() });
+
+				if (blocks.size() > 10) {
+					return LoadingController.run("Editing blocks", execute);
+				}
+				return execute();
+			},
 		);
 
 		plot.changed.Fire();
