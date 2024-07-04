@@ -1,5 +1,3 @@
-import { Objects } from "shared/fixes/objects";
-
 export type AutoWeldColliderBlockShape = "none" | "cube";
 export type BlockMirrorBehaviour = "offset90" | "offset180" | "offset270" | "normal" | "none" | "wedgeWing";
 
@@ -398,6 +396,12 @@ const registry = {
 		name: "Block",
 		description: "Makes you question why every engineering game has it",
 		mirrorBehaviour: "none",
+	},
+	truss: {
+		name: "Truss",
+		description: "This is a truss structure. You can climb it, and it's also cool.",
+		mirrorBehaviour: "none",
+		autoWeldShape: "cube",
 	},
 	ball: {
 		name: "Ball",
@@ -832,9 +836,7 @@ declare global {
 	type BlockId = string & keyof typeof registry;
 }
 export type BlockId = string & keyof typeof registry;
-export const BlockIds = Objects.keys(registry);
 
-const writableRegistry: Writable<typeof BlockDataRegistry> = registry;
-for (const [key, info] of pairs(writableRegistry)) {
-	writableRegistry[key] = process(info);
+for (const [key, info] of pairs(registry)) {
+	(registry as Writable<GenericBlockDataRegistry>)[key] = process(info);
 }
