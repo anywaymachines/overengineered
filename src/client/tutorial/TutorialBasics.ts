@@ -4,7 +4,8 @@ import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import type { Tutorial } from "client/tutorial/Tutorial";
 
 export async function TutorialBasics(tutorial: Tutorial) {
-	tutorial.Control.startTutorial("BASICS", tutorial.Cancellable);
+	if (!tutorial.Control.startTutorial("BASICS", tutorial.Cancellable)) return;
+
 	const toolController = tutorial.buildingMode.toolController;
 	const allTools = toolController.allTools;
 	const toolEnabler = toolController.enabledTools;

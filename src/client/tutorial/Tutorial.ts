@@ -17,7 +17,6 @@ export class Tutorial {
 
 	readonly Control = new TutorialControl();
 	readonly Cancellable = true;
-	private isActive = false;
 
 	readonly buildTool: TutorialBuildTool;
 	readonly deleteTool: TutorialDeleteTool;
@@ -69,6 +68,5 @@ export class Tutorial {
 		ActionController.instance.enable();
 
 		this.Control.finish();
-		this.isActive = false;
 	}
 }
