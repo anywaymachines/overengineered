@@ -427,6 +427,10 @@ namespace Controllers {
 					this.cancel();
 				}
 
+				if (tool.isEnabled()) {
+					tool.selected.setRange(blocks);
+				}
+
 				return response.success;
 			});
 		}
