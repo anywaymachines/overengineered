@@ -1,9 +1,10 @@
-import { HttpService, Players, ReplicatedStorage, RunService } from "@rbxts/services";
+import { Players, ReplicatedStorage, RunService } from "@rbxts/services";
 import { ArgsSignal } from "shared/event/Signal";
 
-export type CreatableRemoteEvents = "UnreliableRemoteEvent" | "RemoteEvent";
+type CreatableRemoteEvents = "UnreliableRemoteEvent" | "RemoteEvent";
+type CreatableRemoteFunctions = "RemoteFunction";
 
-export type CustomRemoteEventBase<TArgToClient, TArgToServer> = Instance & {
+type CustomRemoteEventBase<TArgToClient, TArgToServer> = Instance & {
 	/** @server */
 	readonly OnServerEvent: RBXScriptSignal<(player: Player, arg: TArgToServer) => void>;
 	/** @client */
@@ -14,12 +15,23 @@ export type CustomRemoteEventBase<TArgToClient, TArgToServer> = Instance & {
 	/** @server */
 	FireClient(player: Player, arg: TArgToClient): void;
 };
-export type CustomRemoteEvent<TArg> = CustomRemoteEventBase<TArg, TArg>;
+type CustomRemoteFunctionBase<TArgToClient, TArgToServer, TRet = void> = Instance & {
+	/** @server */
+	OnServerInvoke?: (player: Player, arg: TArgToServer) => TRet;
+	/** @client */
+	OnClientInvoke?: (arg: TArgToClient) => TRet;
+
+	/** @client */
+	InvokeServer(arg: TArgToServer): TRet;
+	/** @server */
+	InvokeClient(player: Player, arg: TArgToClient): TRet;
+};
+type CustomRemoteEvent<TArg> = CustomRemoteEventBase<TArg, TArg>;
 
 abstract class PERemoveEvent<TEvent extends Instance> {
 	protected readonly event: TEvent;
 
-	constructor(name: string, eventType: CreatableRemoteEvents = "RemoteEvent") {
+	protected constructor(name: string, eventType: CreatableRemoteEvents | CreatableRemoteFunctions) {
 		if (RunService.IsServer()) {
 			if (ReplicatedStorage.FindFirstChild(name)) {
 				throw `${eventType} ${name} already exists.`;
@@ -188,49 +200,23 @@ const createWaiter = <TRet extends Response>(middlewares: readonly WaiterMiddlew
 };
 
 export class S2C2SRemoteFunction<TArg, TResp extends Response = Response> extends PERemoveEvent<
-	CustomRemoteEventBase<
-		{ readonly id: string; readonly arg: TArg },
-		{ readonly id: string; readonly result: TResp | ErrorResponse }
-	>
+	CustomRemoteFunctionBase<TArg, TArg, TResp | ErrorResponse>
 > {
 	/** @client */
 	private invoked?: (arg: TArg) => TResp;
-	private readonly waiting = new Map<string, { player: Player; retfunc: (ret: TResp | ErrorResponse) => void }>();
 	private readonly middlewares: WaiterMiddleware[] = [];
 
-	constructor(name: string, eventType: CreatableRemoteEvents = "RemoteEvent") {
-		super(name, eventType);
+	constructor(name: string) {
+		super(name, "RemoteFunction");
 
 		if (RunService.IsClient()) {
-			this.event.OnClientEvent.Connect(({ id, arg }) => {
+			this.event.OnClientInvoke = (arg) => {
 				if (!this.invoked) {
-					this.event.FireServer({
-						id,
-						result: {
-							success: false,
-							message: `Event ${name} was not subscribed to`,
-						},
-					});
-
-					throw `Event ${name} was not subscribed to`;
+					return { success: false, message: `Event ${name} was not subscribed to` };
 				}
 
-				const result = this.invoked(arg);
-				this.event.FireServer({ id, result });
-			});
-		} else if (RunService.IsServer()) {
-			this.event.OnServerEvent.Connect((player, { id, result: ret }) => {
-				const waiter = this.waiting.get(id);
-				if (!waiter) return;
-
-				if (waiter.player !== player) {
-					player.Kick("ban forever");
-					return;
-				}
-
-				this.waiting.delete(id);
-				waiter.retfunc(ret);
-			});
+				return this.invoked(arg);
+			};
 		}
 	}
 
@@ -251,15 +237,14 @@ export class S2C2SRemoteFunction<TArg, TResp extends Response = Response> extend
 	send(player: Player, arg?: TArg): ErrorResponse | TResp {
 		const waiter = createWaiter<TResp | ErrorResponse>(this.middlewares);
 		if ("success" in waiter) return waiter;
-
-		const id = HttpService.GenerateGUID();
-		this.event.FireClient(player, { id, arg: arg! });
-
 		const { ret, wait } = waiter;
-		this.waiting.set(id, { player, retfunc: ret });
+
+		const promise = Promise.try(() => this.event.InvokeClient(player, arg!));
+		promise.andThen(ret);
 
 		const result = wait();
 		if (isCanceled(result)) {
+			promise.cancel();
 			return errCanceled;
 		}
 
@@ -268,7 +253,7 @@ export class S2C2SRemoteFunction<TArg, TResp extends Response = Response> extend
 }
 
 export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extends PERemoveEvent<
-	CustomRemoteEventBase<{ id: string; result: TResp }, { id: string; arg: TArg }>
+	CustomRemoteFunctionBase<TArg, TArg, TResp | ErrorResponse>
 > {
 	private readonly _sent = new ArgsSignal<[arg: TArg]>();
 	/** @client */
@@ -277,27 +262,19 @@ export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extend
 	/** @server */
 	private invoked?: (player: Player, arg: TArg) => TResp;
 
-	private readonly waiting = new Map<string, (ret: TResp) => void>();
 	private readonly middlewares: WaiterMiddleware[] = [];
 
-	constructor(name: string, eventType: CreatableRemoteEvents = "RemoteEvent") {
-		super(name, eventType);
+	constructor(name: string) {
+		super(name, "RemoteFunction");
 
 		if (RunService.IsServer()) {
-			this.event.OnServerEvent.Connect((player, { id, arg }) => {
-				if (!this.invoked) throw `Event ${name} was not subscribed to`;
-
-				const result = this.invoked(player, arg);
-				this.event.FireClient(player, { id, result });
-			});
-		} else if (RunService.IsClient()) {
-			this.event.OnClientEvent.Connect(({ id, result: ret }) => {
-				const waiter = this.waiting.get(id);
-				if (waiter) {
-					this.waiting.delete(id);
-					waiter(ret);
+			this.event.OnServerInvoke = (player, arg) => {
+				if (!this.invoked) {
+					return { success: false, message: `Event ${name} was not subscribed to` };
 				}
-			});
+
+				return this.invoked(player, arg);
+			};
 		}
 	}
 
@@ -319,18 +296,16 @@ export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extend
 	): ErrorResponse | TResp;
 	send(arg: TArg): ErrorResponse | TResp;
 	send(arg?: TArg): ErrorResponse | TResp {
-		const waiter = createWaiter<TResp>(this.middlewares);
+		const waiter = createWaiter<TResp | ErrorResponse>(this.middlewares);
 		if ("success" in waiter) return waiter;
-
-		this._sent.Fire(arg!);
-		const id = HttpService.GenerateGUID();
-		this.event.FireServer({ id, arg: arg! });
-
 		const { ret, wait } = waiter;
-		this.waiting.set(id, ret);
+
+		const promise = Promise.try(() => this.event.InvokeServer(arg!));
+		promise.andThen(ret);
 
 		const result = wait();
 		if (isCanceled(result)) {
+			promise.cancel();
 			return errCanceled;
 		}
 
