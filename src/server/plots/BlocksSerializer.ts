@@ -34,7 +34,7 @@ const read = {
 		plot: BuildingPlot,
 		serialize: (block: BlockModel, index: number, buildingCenter: CFrame) => T,
 	): readonly T[] => {
-		const buildingCenter = plot.center;
+		const buildingCenter = plot.origin;
 		return plot.getBlocks().map((block, i) => serialize(block, i, buildingCenter));
 	},
 
@@ -57,7 +57,7 @@ const place = {
 		data: readonly T[],
 		place: (plot: BuildingPlot, blockData: T, buildingCenter: CFrame) => void,
 	) => {
-		const buildingCenter = plot.center;
+		const buildingCenter = plot.origin;
 		data.forEach((blockData) => place(plot, blockData, buildingCenter));
 	},
 

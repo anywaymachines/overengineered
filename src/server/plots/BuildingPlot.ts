@@ -20,7 +20,7 @@ export class BuildingPlot extends Component {
 
 	constructor(
 		private readonly instance: Instance,
-		readonly center: CFrame,
+		readonly origin: CFrame,
 		readonly boundingBox: BB,
 		@inject private readonly blockRegistry: BlockRegistry,
 	) {
