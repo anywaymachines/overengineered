@@ -233,6 +233,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 					button.instance.SelectionOrder = newblock === block ? 0 : 1;
 				},
 				true,
+				true,
 			);
 
 			prev = button;
