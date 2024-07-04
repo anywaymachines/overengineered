@@ -19,6 +19,7 @@ const categories = {
 	converterVector: ["Logic", "Converter", "Vector"] as unknown as CategoryPath,
 	other: ["Logic", "Other"] as unknown as CategoryPath,
 	bool: ["Logic", "Gate"] as unknown as CategoryPath,
+	memory: ["Logic", "Memory"] as unknown as CategoryPath,
 } as const satisfies { [k in string]: CategoryPath };
 
 const operations = {
@@ -370,7 +371,7 @@ const operations = {
 	},
 	logicmemory: {
 		modelTextOverride: "MEMORY",
-		category: categories.other,
+		category: categories.memory,
 		prefab: prefabs.doubleGeneric,
 	},
 } as const satisfies NonGenericOperations;
