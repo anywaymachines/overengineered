@@ -53,7 +53,7 @@ const lvls = {
 export namespace Logger {
 	export const levels = lvls;
 	export const enabledLevels = new ComponentDisabler(Objects.values(levels));
-	if (!RunService.IsStudio()) {
+	if ((true as boolean) || !RunService.IsStudio()) {
 		enabledLevels.setDisabled(levels.trace);
 	}
 
