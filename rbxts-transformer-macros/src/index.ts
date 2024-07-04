@@ -312,7 +312,7 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 							factory.createIdentifier("deps"),
 							undefined,
 							factory.createTypeReferenceNode(
-								factory.createIdentifier("DIContainer"),
+								factory.createIdentifier("ReadonlyDIContainer"),
 								undefined,
 							),
 							undefined,
@@ -354,22 +354,13 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 					undefined,
 					undefined,
 					[
-						...(constr?.parameters.filter(p => !propAdded.find(a => a.name.text === (p.name as ts.Identifier).text)) ?? [])
-							.map(p => ts.factory.createParameterDeclaration(
-								p.modifiers?.filter(m => m.kind !== ts.SyntaxKind.PrivateKeyword && m.kind !== ts.SyntaxKind.ReadonlyKeyword),
-								p.dotDotDotToken,
-								p.name,
-								p.questionToken,
-								p.type,
-								p.initializer,
-							)),
 						factory.createParameterDeclaration(
 							undefined,
 							undefined,
 							factory.createIdentifier("deps"),
 							undefined,
 							factory.createTypeReferenceNode(
-								factory.createIdentifier("DIContainer"),
+								factory.createIdentifier("ReadonlyDIContainer"),
 								undefined,
 							),
 							undefined,
@@ -382,7 +373,10 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 								return factory.createExpressionStatement(
 									factory.createBinaryExpression(
 										factory.createPropertyAccessExpression(
-											factory.createThis(),
+											factory.createAsExpression(
+												factory.createThis(),
+												factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
+											),											  
 											p.name,
 										),
 										factory.createToken(ts.SyntaxKind.EqualsToken),

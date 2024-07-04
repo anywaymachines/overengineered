@@ -1,57 +1,47 @@
 import { ServerStorage } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
-import { Element } from "shared/Element";
-import { HostedService } from "shared/GameHost";
+import { Component } from "shared/component/Component";
+import { ComponentInstance } from "shared/component/ComponentInstance";
 import type { BuildingPlot } from "server/plots/BuildingPlot";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 
-@injectable
-export class BuildingWelder extends HostedService {
-	private readonly plotColliders = new Map<BuildingPlot, WorldModel>();
+export class PlotWelder extends Component {
+	readonly collidersParent: WorldModel;
 
-	constructor(@inject private readonly blockRegistry: BlockRegistry) {
+	constructor(
+		private readonly plot: BuildingPlot,
+		private readonly blockRegistry: BlockRegistry,
+	) {
 		super();
 
-		this.onEnable(() => {
-			this.onDestroy(() => {
-				for (const [, collider] of this.plotColliders) {
-					collider.Destroy();
-				}
-				this.plotColliders.clear();
-			});
-		});
+		this.collidersParent = new Instance("WorldModel");
+		this.collidersParent.Name = "PlotCollision";
+		this.collidersParent.Parent = ServerStorage;
+
+		ComponentInstance.init(this, this.collidersParent);
 	}
 
-	private getPlotColliders(plot: BuildingPlot): WorldModel {
-		let colliderModel = this.plotColliders.get(plot);
-		if (colliderModel) return colliderModel;
-
-		colliderModel = Element.create("WorldModel", { Parent: ServerStorage, Name: "PlotCollision" });
-		this.plotColliders.set(plot, colliderModel);
-		return colliderModel;
+	deleteWelds() {
+		this.collidersParent.ClearAllChildren();
+	}
+	deleteWeld(block: BlockModel) {
+		this.collidersParent.FindFirstChild(BlockManager.manager.uuid.get(block))?.Destroy();
 	}
 
-	deleteWelds(plot: BuildingPlot) {
-		this.getPlotColliders(plot).ClearAllChildren();
-	}
-	deleteWeld(plot: BuildingPlot, block: BlockModel) {
-		this.getPlotColliders(plot).FindFirstChild(BlockManager.manager.uuid.get(block))?.Destroy();
-	}
-
-	weldOnPlot(plot: BuildingPlot, block: BlockModel) {
+	weldOnPlot(block: BlockModel) {
 		const collider = this.blockRegistry.blocks.get(BlockManager.manager.id.get(block)!)!.weldColliders?.Clone();
 		if (!collider) return;
 
 		collider.Name = BlockManager.manager.uuid.get(block);
 		collider.PivotTo(block.GetPivot());
-		collider.Parent = this.getPlotColliders(plot);
+		collider.Parent = this.collidersParent;
 
-		this.weld(plot, collider);
+		this.weld(collider);
 	}
 
-	private weld(plot: BuildingPlot, colliders: Model) {
+	private weld(colliders: Model) {
 		const getTarget = (collider: BasePart): BasePart | undefined => {
-			const targetBlock = plot.getBlock(collider.Parent!.Name as BlockUuid);
+			const targetBlock = this.plot.getBlock(collider.Parent!.Name as BlockUuid);
 			let part: BasePart | undefined;
 
 			const targetstr = collider.GetAttribute("target") as string | undefined;
@@ -89,15 +79,13 @@ export class BuildingWelder extends HostedService {
 		}
 	}
 
-	moveCollisions(plot: BuildingPlot, block: BlockModel, newpivot: CFrame) {
-		const child = this.getPlotColliders(plot).FindFirstChild(BlockManager.manager.uuid.get(block)) as
-			| Model
-			| undefined;
+	moveCollisions(block: BlockModel, newpivot: CFrame) {
+		const child = this.collidersParent.FindFirstChild(BlockManager.manager.uuid.get(block)) as Model | undefined;
 		if (!child) throw "what";
 
 		this.unweldFromOtherBlocks(block);
 		child.PivotTo(newpivot);
-		this.weld(plot, child);
+		this.weld(child);
 	}
 
 	makeJoints(part0: BasePart, part1: BasePart) {

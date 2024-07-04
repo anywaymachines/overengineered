@@ -1,4 +1,5 @@
 import { HttpService } from "@rbxts/services";
+import { PlotWelder } from "server/building/PlotWelder";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Component } from "shared/component/Component";
@@ -6,7 +7,6 @@ import { ComponentInstance } from "shared/component/ComponentInstance";
 import { BB } from "shared/fixes/BB";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
-import type { BuildingWelder } from "server/building/BuildingWelder";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { PlacedBlockData, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
@@ -16,24 +16,25 @@ const success: SuccessResponse = { success: true };
 /** Building on a plot. */
 @injectable
 export class BuildingPlot extends Component {
+	private readonly welder: PlotWelder;
+
 	constructor(
 		private readonly instance: Instance,
 		readonly center: CFrame,
 		readonly boundingBox: BB,
 		@inject private readonly blockRegistry: BlockRegistry,
-		@inject private readonly buildingWelder: BuildingWelder,
 	) {
 		super();
 		ComponentInstance.init(this, instance);
 
-		this.onDestroy(() => buildingWelder.deleteWelds(this));
+		this.welder = new PlotWelder(this, blockRegistry);
 	}
 
 	unparent(): void {
 		this.instance.Parent = undefined;
 	}
-	cloneBlocks(): readonly BlockModel[] {
-		return this.instance.Clone().GetChildren() as BlockModel[];
+	cloneBlocks(): Instance {
+		return this.instance.Clone();
 	}
 	isInside(block: BlockModel): boolean {
 		return this.boundingBox.isBBInside(BB.fromModel(block));
@@ -54,7 +55,7 @@ export class BuildingPlot extends Component {
 
 	clearBlocks(): void {
 		this.instance.ClearAllChildren();
-		this.buildingWelder.deleteWelds(this);
+		this.welder.deleteWelds();
 	}
 
 	/** @deprecated Used only for a specific case, do not use & do not remove */
@@ -95,7 +96,7 @@ export class BuildingPlot extends Component {
 		}
 
 		model.Parent = this.instance;
-		this.buildingWelder.weldOnPlot(this, model);
+		this.welder.weldOnPlot(model);
 
 		return { success: true, model: model };
 	}
@@ -113,7 +114,7 @@ export class BuildingPlot extends Component {
 				}
 			}
 
-			this.buildingWelder.deleteWelds(this);
+			this.welder.deleteWelds();
 		} else {
 			const connections = SharedBuilding.getBlocksConnectedByLogicToMulti(
 				this.getBlockDatas(),
@@ -129,8 +130,8 @@ export class BuildingPlot extends Component {
 			}
 
 			for (const block of blocks) {
-				this.buildingWelder.unweld(block);
-				this.buildingWelder.deleteWeld(this, block);
+				this.welder.unweld(block);
+				this.welder.deleteWeld(block);
 
 				block.Destroy();
 				if (math.random(3) === 1) {
@@ -157,7 +158,7 @@ export class BuildingPlot extends Component {
 
 		for (const { instance, position } of blocks) {
 			if (position) instance.PivotTo(position);
-			this.buildingWelder.moveCollisions(this, instance, instance.GetPivot());
+			this.welder.moveCollisions(instance, instance.GetPivot());
 
 			if (math.random(3) === 1) {
 				task.wait();

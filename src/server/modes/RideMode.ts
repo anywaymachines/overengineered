@@ -11,7 +11,7 @@ import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 @injectable
 export class RideMode implements PlayModeBase {
-	private readonly cache = new Map<Player, readonly BlockModel[]>();
+	private readonly cache = new Map<Player, Instance>();
 
 	constructor(
 		@inject private readonly serverPlots: ServerPlots,
@@ -22,10 +22,7 @@ export class RideMode implements PlayModeBase {
 			const blocks = this.cache.get(player);
 
 			if (blocks) {
-				for (const block of blocks) {
-					block.Destroy();
-				}
-
+				blocks.Destroy();
 				this.cache.delete(player);
 			}
 		});
@@ -135,7 +132,7 @@ export class RideMode implements PlayModeBase {
 		const cache = this.cache.get(player);
 		if (cache) {
 			const time = os.clock();
-			for (const child of cache) {
+			for (const child of cache.GetChildren() as BlockModel[]) {
 				controller.blocks.justPlaceExisting(child);
 
 				if (math.random(3) === 1) {

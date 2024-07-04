@@ -6,7 +6,7 @@ import type { CreatableRemoteEvents } from "shared/event/RemoteEventBase";
 
 @injectable
 export abstract class EffectBase<T> {
-	@inject
+	@tryInject
 	private playerDatabase?: PlayerDatabase;
 
 	private readonly event;

@@ -1,5 +1,5 @@
 type IRegistration<T> = {
-	readonly get: () => T;
+	get(di: ReadonlyDIContainer): T;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,7 +23,7 @@ declare global {
 
 type DepsCreatable<TSelf, TArgs extends readonly unknown[]> = {
 	readonly prototype: unknown;
-	_depsCreate(...args: [...TArgs, deps: DIContainer]): TSelf;
+	_depsCreate(...args: [...TArgs, deps: ReadonlyDIContainer]): TSelf;
 };
 
 const getSymbol = <T extends object>(obj: T): string => {
@@ -46,18 +46,28 @@ const getSymbol = <T extends object>(obj: T): string => {
 const instantiateClass = <TCtor extends abstract new (...args: TArgs) => unknown, TArgs extends readonly unknown[]>(
 	clazz: TCtor,
 	args: TArgs | undefined,
-	container: DIContainer,
+	container: ReadonlyDIContainer,
 ): ConstructorResult<TCtor> => {
 	const isDeps = (clazz: unknown): clazz is DepsCreatable<ConstructorResult<TCtor>, TArgs> =>
 		typeIs(clazz, "table") && "_depsCreate" in clazz;
+	const isInject = (
+		instance: ConstructorResult<TCtor>,
+	): instance is typeof instance & { _inject(di: DIContainer): void } => "_inject" in instance;
 
-	if (isDeps(clazz)) {
-		return clazz._depsCreate(...[...(args ?? ([] as unknown as TArgs)), container]);
+	const instance = isDeps(clazz)
+		? clazz._depsCreate(...[...(args ?? ([] as unknown as TArgs)), container])
+		: new (clazz as unknown as new (...args: TArgs) => ConstructorResult<TCtor>)(
+				...(args ?? ([] as unknown as TArgs)),
+			);
+
+	if (isInject(instance)) {
+		const scope = container.beginScope();
+		scope.registerSingleton(instance, getSymbol(clazz));
+
+		instance._inject(scope);
 	}
 
-	return new (clazz as unknown as new (...args: TArgs) => ConstructorResult<TCtor>)(
-		...(args ?? ([] as unknown as TArgs)),
-	);
+	return instance;
 };
 
 type ConstructorResult<T extends abstract new (...args: never) => unknown> = T extends abstract new (
@@ -75,7 +85,7 @@ export type DISingletonClassRegistrationContext<T extends abstract new (...args:
 	};
 type D = DIContainer;
 export class DIContainer {
-	private readonly registrations = new Map<string, IRegistration<unknown>>();
+	readonly registrations = new Map<string, IRegistration<unknown>>();
 
 	constructor() {
 		this.registerSingleton(this);
@@ -95,7 +105,7 @@ export class DIContainer {
 		name ??= getSymbol(clazz);
 
 		let savedArgs: Partial<[...ConstructorParameters<T>]> | undefined = undefined;
-		const reg = this.registerSingletonFunc(() => instantiateClass(clazz, savedArgs, this), name);
+		const reg = this.registerSingletonFunc((di) => instantiateClass(clazz, savedArgs, di), name);
 
 		return {
 			onInit(func) {
@@ -126,10 +136,10 @@ export class DIContainer {
 		const onInit: ((value: T) => void)[] = [];
 
 		this.registrations.set(name, {
-			get: () => {
+			get(ctx) {
 				if (created) return created;
 
-				created = func(this);
+				created = func(ctx);
 				for (const func of onInit) {
 					func(created);
 				}
@@ -146,31 +156,35 @@ export class DIContainer {
 		};
 	}
 
-	registerTransientFunc<T extends defined>(func: (ctx: DIContainer) => T, name?: string): void {
+	registerTransientFunc<T extends defined>(func: (ctx: ReadonlyDIContainer) => T, name?: string): void {
 		this.assertNotNull(func, name);
 		if (this.registrations.get(name)) {
 			throw `Dependency ${name} is already registered`;
 		}
 
-		this.registrations.set(name, { get: () => func(this) });
+		this.registrations.set(name, {
+			get(ctx) {
+				return func(ctx);
+			},
+		});
 	}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	/*registerTransientClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string): void {
+	registerTransientClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string): void {
 		name ??= getSymbol(clazz);
 		this.assertNotNull(clazz, name);
 		if (this.registrations.get(name)) {
 			throw `Dependency ${name} is already registered`;
 		}
 
-		const args: [] | undefined = undefined;
-
 		this.registrations.set(name, {
-			get: () => instantiateClass(clazz, args, this),
+			get(di) {
+				return instantiateClass(clazz, [], di);
+			},
 		});
-	}*/
+	}
 
 	tryResolve<T extends defined>(name: string): T | undefined {
-		return this.registrations.get(name)?.get() as T;
+		return this.registrations.get(name)?.get(this) as T;
 	}
 	resolve<T extends defined>(name?: string): T {
 		assert(name);
@@ -179,25 +193,11 @@ export class DIContainer {
 			throw `Dependency ${name} is not registered`;
 		}
 
-		return registration.get() as T;
+		return registration.get(this) as T;
 	}
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	resolveByClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string) {
-		return this.resolveClass<T>(name ?? getSymbol(clazz));
-	}
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	resolveClass<T extends abstract new (...args: never) => unknown>(
-		name?: string,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	): T extends abstract new (...args: never) => infer R ? R : never {
-		assert(name);
-		const registration = this.registrations.get(name);
-		if (!registration) {
-			throw `Dependency ${name} is not registered`;
-		}
-
-		return registration.get() as never;
+	resolveByClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string): ConstructorResult<T> {
+		return this.resolve<ConstructorResult<T>>(name ?? getSymbol(clazz));
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -210,10 +210,10 @@ export class DIContainer {
 	}
 
 	beginScope(): DIContainer {
-		return new IDIContainerScope(this);
+		return new DIContainerScope(this);
 	}
 }
-export class IDIContainerScope extends DIContainer {
+class DIContainerScope extends DIContainer {
 	constructor(private readonly parent: DIContainer) {
 		super();
 	}
@@ -222,6 +222,6 @@ export class IDIContainerScope extends DIContainer {
 		return super.tryResolve<T>(name) ?? this.parent.tryResolve<T>(name);
 	}
 	resolve<T extends defined>(name: string): T {
-		return this.tryResolve(name) ?? super.resolve(name);
+		return super.tryResolve<T>(name) ?? this.parent.resolve<T>(name);
 	}
 }

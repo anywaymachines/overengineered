@@ -3,7 +3,6 @@ import { BadgeController } from "server/BadgeController";
 import { BaseGame } from "server/BaseGame";
 import { BlocksInitializer } from "server/blockInit/BlocksInitializer";
 import { ServerBlockLogicController } from "server/blocks/ServerBlockLogicController";
-import { BuildingWelder } from "server/building/BuildingWelder";
 import { GameInfoController } from "server/building/GameInfoController";
 import { ServerBuildingRequestController } from "server/building/ServerBuildingRequestController";
 import { PlayerDatabase } from "server/database/PlayerDatabase";
@@ -41,7 +40,6 @@ export namespace SandboxGame {
 
 			return registry;
 		});
-		builder.services.registerService(BuildingWelder);
 
 		builder.services.registerService(GameInfoController);
 		builder.services.registerService(ServerPlots);
