@@ -49,13 +49,17 @@ export namespace BlockGenerator {
 			for (const weld of block.GetDescendants()) {
 				if (!weld.IsA("WeldConstraint")) continue;
 
+				if (!weld.Enabled) {
+					yield `Disabled weld found in block ${block.Name} in weld parent ${weld.Parent}`;
+				}
 				if (!weld.Part0 || !weld.Part1) {
 					yield `Partial weld found in block ${block.Name} in weld parent ${weld.Parent}`;
-					continue;
 				}
-				if (!weld.Part0.IsDescendantOf(block) || !weld.Part1.IsDescendantOf(block)) {
+				if (
+					(weld.Part0 && !weld.Part0.IsDescendantOf(block)) ||
+					(weld.Part1 && !weld.Part1.IsDescendantOf(block))
+				) {
 					yield `Outer weld reference found in block ${block.Name} in weld parent ${weld.Parent}`;
-					continue;
 				}
 			}
 		}
