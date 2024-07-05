@@ -384,6 +384,10 @@ namespace Controllers {
 				if (!response.success) {
 					LogControl.instance.addLine(response.message, Colors.red);
 					this.cancel();
+				} else {
+					if (tool.isEnabled()) {
+						tool.selected.setRange(response.models);
+					}
 				}
 
 				return response.success;
