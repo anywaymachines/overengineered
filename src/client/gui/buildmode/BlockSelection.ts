@@ -4,6 +4,7 @@ import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { BlockPipetteButton } from "client/gui/controls/BlockPipetteButton";
 import { TextButtonControl } from "client/gui/controls/Button";
+import { Gui } from "client/gui/Gui";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Localization } from "shared/Localization";
@@ -73,6 +74,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 	readonly selectedCategory = new ObservableValue<CategoryPath>([]);
 	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
+	readonly targetBlock = new ObservableValue<BlockId | undefined>(undefined);
 
 	readonly pipette;
 	private readonly breadcrumbs;
@@ -114,16 +116,39 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		});
 	}
 
-	private create(selected: CategoryPath, animated: boolean) {
+	private create(selectedCategory: CategoryPath, animated: boolean) {
 		let idx = 0;
 
 		const createBackButton = (activated: () => void) => {
 			const control = new TextButtonControl(this.backTemplate(), activated);
 			this.list.add(control);
 
+			// Highlight if needed
+			if (this.targetBlock.get()) {
+				const drawHighlight = () => {
+					Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance;
+				};
+
+				const targetCategory = this.blockRegistry.blocks.get(this.targetBlock.get()!)!.category;
+
+				if (targetCategory.size() < selectedCategory.size()) {
+					drawHighlight();
+				}
+
+				for (let i = 0; i < targetCategory.size(); i++) {
+					if (!selectedCategory[i]) break;
+
+					if (selectedCategory[i] !== targetCategory[i]) {
+						drawHighlight();
+						break;
+					}
+				}
+			}
+
 			control.instance.LayoutOrder = idx++;
 			return control;
 		};
+
 		const createCategoryButton = (category: CategoryPath, activated: () => void) => {
 			const blocks = this.blockRegistry
 				.getBlocksByCategoryRecursive(category)
@@ -136,9 +161,23 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			control.activated.Connect(activated);
 			this.list.add(control);
 
+			// Highlight if needed
+			if (this.targetBlock.get()) {
+				const targetCategory = this.blockRegistry.blocks.get(this.targetBlock.get()!)!.category;
+
+				if (
+					selectedCategory.size() < targetCategory.size() &&
+					selectedCategory[selectedCategory.size() - 1] === targetCategory[selectedCategory.size() - 1] &&
+					category[category.size() - 1] === targetCategory[targetCategory.size() - 1]
+				) {
+					Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance;
+				}
+			}
+
 			control.instance.LayoutOrder = idx++;
 			return control;
 		};
+
 		const createBlockButton = (block: RegistryBlock, activated: () => void) => {
 			const control = new BlockControl(this.blockTemplate(), block);
 			control.activated.Connect(activated);
@@ -158,24 +197,24 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 		this.breadcrumbs.clear();
 		addSlashBreadcrumb();
-		for (let i = 0; i < selected.size(); i++) {
-			const path: CategoryPath = selected.move(0, i, 0, []);
+		for (let i = 0; i < selectedCategory.size(); i++) {
+			const path: CategoryPath = selectedCategory.move(0, i, 0, []);
 			const control = this.breadcrumbs.add(
 				new TextButtonControl(this.breadcrumbTemplate(), () => this.selectedCategory.set(path)),
 			);
-			control.text.set(selected[i]);
+			control.text.set(selectedCategory[i]);
 
-			if (i < selected.size() - 1) {
+			if (i < selectedCategory.size() - 1) {
 				addSlashBreadcrumb();
 			}
 		}
 		this.breadcrumbs.instance.CanvasPosition = new Vector2(this.breadcrumbs.instance.AbsoluteCanvasSize.X, 0);
 
 		// Back button
-		if (selected.size() !== 0) {
+		if (selectedCategory.size() !== 0) {
 			createBackButton(() => {
 				this.gui.SearchTextBox.Text = "";
-				this.selectedCategory.set(selected.filter((_, i) => i !== selected.size() - 1));
+				this.selectedCategory.set(selectedCategory.filter((_, i) => i !== selectedCategory.size() - 1));
 			});
 		}
 
@@ -218,6 +257,13 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 				(newblock) => {
 					button.instance.BackgroundColor3 = newblock === block ? Colors.accentDark : Colors.staticBackground;
 
+					if (block.id === this.targetBlock.get() && newblock?.id !== this.targetBlock.get()) {
+						button.instance.FindFirstChild("Highlight")?.Destroy();
+						Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = button.instance;
+					} else {
+						button.instance.FindFirstChild("Highlight")?.Destroy();
+					}
+
 					// Gamepad selection improvements
 					button.instance.SelectionOrder = newblock === block ? 0 : 1;
 				},
@@ -231,11 +277,13 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		if (this.gui.SearchTextBox.Text === "") {
 			// Category buttons
 			for (const category of asMap(
-				this.blockRegistry.getCategoryByPath(selected)?.sub ?? this.blockRegistry.categories,
+				this.blockRegistry.getCategoryByPath(selectedCategory)?.sub ?? this.blockRegistry.categories,
 			)
 				.values()
 				.sort((l, r) => l.name < r.name)) {
-				createCategoryButton(category.path, () => this.selectedCategory.set([...selected, category.name]));
+				createCategoryButton(category.path, () =>
+					this.selectedCategory.set([...selectedCategory, category.name]),
+				);
 			}
 		}
 
