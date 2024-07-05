@@ -333,12 +333,14 @@ namespace Controllers {
 	@injectable
 	export class Paste extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
+		private readonly blocksRequests;
 		private readonly blocks;
 		private readonly editor;
+		private submitted = false;
 
 		constructor(
-			tool: EditTool,
-			plot: SharedPlot,
+			private readonly tool: EditTool,
+			private readonly plot: SharedPlot,
 			selected: readonly BlockModel[],
 			@inject blockRegistry: BlockRegistry,
 		) {
@@ -352,6 +354,7 @@ namespace Controllers {
 			this.onDestroy(() => ghostParent.Destroy());
 
 			const blocks = reGenerateUuids(plot, tool.copied.get());
+			this.blocksRequests = blocks;
 			this.blocks = blocks.map((block) => {
 				const b = blockRegistry.blocks.get(block.id)!.model.Clone();
 				BlockManager.manager.uuid.set(b, block.uuid);
@@ -365,36 +368,49 @@ namespace Controllers {
 			this.editor = this.parent(BlockMover.create(tool.mode, plot, this.blocks));
 			this.step.autoSet(this.editor.step);
 
-			this.onDestroy(() => {
-				const update = this.editor.getUpdate();
+			this.onDestroy(() => this.submit(true));
+		}
+
+		private submit(skipIfSame = true) {
+			if (this.submitted) return;
+			this.submitted = true;
+
+			const update = this.editor.getUpdate();
+
+			if (skipIfSame) {
 				for (const block of update) {
 					if (block.newPosition && block.newPosition !== block.origPosition) continue;
 
 					return;
 				}
-				const updateMap = update.mapToMap((u) => $tuple(BlockManager.manager.uuid.get(u.instance), u));
+			}
 
-				const response = ClientBuilding.placeOperation.execute({
-					plot,
-					blocks: blocks.map((b) => ({
-						...b,
-						location: updateMap.get(b.uuid)?.newPosition ?? b.location,
-					})),
-				});
-				if (!response.success) {
-					LogControl.instance.addLine(response.message, Colors.red);
-					this.cancel();
-				} else {
-					if (tool.isEnabled()) {
-						tool.selected.setRange(response.models);
-					}
-				}
+			const updateMap = update.mapToMap((u) => $tuple(BlockManager.manager.uuid.get(u.instance), u));
 
-				return response.success;
+			const response = ClientBuilding.placeOperation.execute({
+				plot: this.plot,
+				blocks: this.blocksRequests.map((b) => ({
+					...b,
+					location: updateMap.get(b.uuid)?.newPosition ?? b.location,
+				})),
 			});
+			if (!response.success) {
+				LogControl.instance.addLine(response.message, Colors.red);
+				this.cancel();
+			} else {
+				if (this.tool.isEnabled()) {
+					this.tool.selected.setRange(response.models);
+				}
+			}
+
+			return response.success;
 		}
 
+		deselected() {
+			this.submit(false);
+		}
 		cancel() {
+			this.submitted = true;
 			this.editor.cancel();
 			for (const block of this.blocks) {
 				block.Destroy();
@@ -554,7 +570,10 @@ export class EditTool extends ToolBase {
 	readonly selectedMode = this._selectedMode.asReadonly();
 	readonly selected = new ObservableCollectionSet<BlockModel>();
 	readonly copied = new ObservableValue<readonly PlaceBlockRequestWithUuid[]>([]);
-	private readonly controller = new ComponentChild<IComponent & { cancel(): void }>(this, true);
+	private readonly controller = new ComponentChild<IComponent & { cancel(): void } & ({} | { deselected(): void })>(
+		this,
+		true,
+	);
 	private readonly selector;
 	readonly gui;
 
@@ -593,6 +612,11 @@ export class EditTool extends ToolBase {
 		this.event.subscribeObservable(this.targetPlot, () => this._selectedMode.set(undefined), true);
 		this.event.subscribeObservable(this.selectedMode, (mode) => {
 			if (!mode) {
+				const controller = this.controller.get();
+				if (controller && "deselected" in controller) {
+					controller.deselected();
+				}
+
 				this.controller.clear();
 				return;
 			}
