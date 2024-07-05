@@ -293,6 +293,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		// Gamepad selection improvements
 		const isSelected = GuiService.SelectedObject !== undefined;
 		GuiService.SelectedObject = isSelected ? this.list.getChildren()[0].instance : undefined;
+		this.list.instance.CanvasPosition = Vector2.zero;
 
 		if (animated && this.gui.SearchTextBox.Text === "") {
 			GuiAnimator.transition(this.gui.Content.ScrollingFrame, 0.2, "up", 10);
