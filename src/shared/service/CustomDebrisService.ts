@@ -10,16 +10,22 @@ const storage: Map<Instance, number> = new Map<Instance, number>();
 
 if (active) {
 	task.spawn(() => {
-		while (true as boolean) {
-			storage.forEach((value, key) => {
-				if (os.clock() >= value) {
-					key.Destroy();
-				}
+		const toBeDeleted: Instance[] = [];
 
-				if (!key) {
-					storage.delete(key);
-				}
-			});
+		while (true as boolean) {
+			const time = os.clock();
+
+			for (const [instance, deltime] of storage) {
+				if (time < deltime) continue;
+
+				instance.Destroy();
+				toBeDeleted.push(instance);
+			}
+
+			for (const instance of toBeDeleted) {
+				storage.delete(instance);
+			}
+			toBeDeleted.clear();
 
 			task.wait(1);
 		}
