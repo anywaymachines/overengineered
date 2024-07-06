@@ -198,10 +198,13 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 		const identifierByTypeNode = (typeNode: ts.TypeNode) =>
 			identifierByType(typeChecker.getTypeFromTypeNode(typeNode));
 		const identifierByType = (type: ts.Type) => {
-			if (!type?.symbol?.valueDeclaration) return;
+			const declaration =
+				type.symbol?.valueDeclaration
+				?? type.aliasSymbol?.declarations?.[0];
+			if (!declaration) return;
 
-			const pth = path.relative("src", type.symbol.valueDeclaration.getSourceFile().fileName).replaceAll("\\", "/");
-			return pth + "$" + type.symbol.name;
+			const pth = path.relative("src", declaration.getSourceFile().fileName).replaceAll("\\", "/");
+			return pth + "$" + (type.aliasSymbol?.name ?? type.symbol.name);
 		};
 
 		const modifyParameters = (clazz: ts.ClassDeclaration): ts.ClassDeclaration => {
@@ -448,6 +451,10 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 				const signature = typeChecker.getResolvedSignature(node);
 				if (!signature) return;
 
+				if (node.arguments.length >= (signature.declaration?.parameters.length ?? 99999)) {
+					return;
+				}
+
 				const type =
 					node.expression.name.text.includes('Func')
 					? typeChecker.getReturnTypeOfSignature(typeChecker.getSignaturesOfType(typeChecker.getTypeOfSymbolAtLocation(signature.getParameters()[0], node), ts.SignatureKind.Call)[0])
@@ -467,6 +474,13 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 			}
 			if (node.expression.name.text.startsWith('resolve')) {
 				if (!node.typeArguments || node.typeArguments.length === 0) return;
+
+				const signature = typeChecker.getResolvedSignature(node);
+				if (!signature) return;
+
+				if (node.arguments.length >= (signature.declaration?.parameters.length ?? 99999)) {
+					return;
+				}
 				
 				const type = typeChecker.getTypeFromTypeNode(node.typeArguments[0]);
 				const identifier = identifierByType(type);
