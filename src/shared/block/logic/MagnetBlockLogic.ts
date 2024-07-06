@@ -30,6 +30,8 @@ const calculateForce = (block1: MagnetBlockLogic, block2: MagnetBlockLogic): Vec
 };
 
 RunService.PostSimulation.Connect((dt) => {
+	if (magnets.size() === 0) return;
+
 	forcesApplied.clear();
 
 	// Getting AssemblyRootPart is slow and it's happening several times per magnet, so we cache it
