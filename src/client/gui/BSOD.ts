@@ -1,6 +1,5 @@
 import { Players, StarterGui, UserInputService } from "@rbxts/services";
 import { Gui } from "client/gui/Gui";
-import { ScaledScreenGui } from "client/gui/ScaledScreenGui";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 
@@ -63,7 +62,6 @@ Error: ${text}
 		}
 		UserInputService.MouseIconEnabled = false;
 
-		new ScaledScreenGui(instance).enable();
 		new BsodControl(instance).show(text);
 
 		for (const screen of Gui.getPlayerGui().GetChildren()) {
