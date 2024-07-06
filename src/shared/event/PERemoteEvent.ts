@@ -296,6 +296,8 @@ export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extend
 	): ErrorResponse | TResp;
 	send(arg: TArg): ErrorResponse | TResp;
 	send(arg?: TArg): ErrorResponse | TResp {
+		this._sent.Fire(arg!);
+
 		const waiter = createWaiter<TResp | ErrorResponse>(this.middlewares);
 		if ("success" in waiter) return waiter;
 		const { ret, wait } = waiter;
