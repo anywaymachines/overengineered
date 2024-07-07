@@ -1,5 +1,4 @@
 import { HttpService } from "@rbxts/services";
-import { PlotWelder } from "server/building/PlotWelder";
 import { BlockManager } from "shared/building/BlockManager";
 import { SharedBuilding } from "shared/building/SharedBuilding";
 import { Component } from "shared/component/Component";
@@ -7,32 +6,43 @@ import { ComponentInstance } from "shared/component/ComponentInstance";
 import { BB } from "shared/fixes/BB";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
+import { Operation } from "shared/Operation";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 import type { PlacedBlockData, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
 
+export type ReadonlyPlot = {
+	readonly origin: CFrame;
+	readonly boundingBox: BB;
+
+	cloneBlocks(): Instance;
+	isInside(block: BlockModel): boolean;
+
+	getBlocks(): readonly BlockModel[];
+	getBlockDatas(): readonly PlacedBlockData[];
+	getBlock(uuid: BlockUuid): BlockModel;
+	tryGetBlock(uuid: BlockUuid): BlockModel | undefined;
+};
+
 /** Building on a plot. */
 @injectable
 export class BuildingPlot extends Component {
-	private readonly welder: PlotWelder;
+	readonly placeOperation = new Operation(this.place.bind(this));
+	readonly deleteOperation = new Operation(this.delete.bind(this));
+	readonly editOperation = new Operation(this.edit.bind(this));
 
 	constructor(
-		private readonly instance: Instance,
+		private readonly instance: Folder,
 		readonly origin: CFrame,
 		readonly boundingBox: BB,
 		@inject private readonly blockRegistry: BlockRegistry,
 	) {
 		super();
 		ComponentInstance.init(this, instance);
-
-		this.welder = new PlotWelder(this, blockRegistry);
 	}
 
-	unparent(): void {
-		this.instance.Parent = undefined;
-	}
 	cloneBlocks(): Instance {
 		return this.instance.Clone();
 	}
@@ -40,11 +50,11 @@ export class BuildingPlot extends Component {
 		return this.boundingBox.isBBInside(BB.fromModel(block));
 	}
 
-	getBlockDatas(): readonly PlacedBlockData[] {
-		return this.getBlocks().map(BlockManager.getBlockDataByBlockModel);
-	}
 	getBlocks(): readonly BlockModel[] {
 		return this.instance.GetChildren() as unknown as readonly BlockModel[];
+	}
+	getBlockDatas(): readonly PlacedBlockData[] {
+		return this.getBlocks().map(BlockManager.getBlockDataByBlockModel);
 	}
 	getBlock(uuid: BlockUuid): BlockModel {
 		return (this.instance as unknown as Record<BlockUuid, BlockModel>)[uuid];
@@ -53,16 +63,15 @@ export class BuildingPlot extends Component {
 		return this.instance.FindFirstChild(uuid) as BlockModel | undefined;
 	}
 
-	clearBlocks(): void {
-		this.instance.ClearAllChildren();
-		this.welder.deleteWelds();
+	unparent(): void {
+		this.instance.Parent = undefined;
 	}
 
 	/** @deprecated Used only for a specific case, do not use & do not remove */
 	justPlaceExisting(block: BlockModel): void {
 		block.Parent = this.instance;
 	}
-	place(data: PlaceBlockRequest): BuildResponse {
+	private place(data: PlaceBlockRequest): BuildResponse {
 		const block = this.blockRegistry.blocks.get(data.id);
 		if (!block) {
 			return { success: false, message: `Unknown block id ${data.id}` };
@@ -96,11 +105,9 @@ export class BuildingPlot extends Component {
 		}
 
 		model.Parent = this.instance;
-		this.welder.weldOnPlot(model);
-
 		return { success: true, model: model };
 	}
-	delete(blocks: readonly BlockModel[] | "all"): Response {
+	private delete(blocks: readonly BlockModel[] | "all"): Response {
 		if (blocks !== "all" && blocks.size() === 0) {
 			return success;
 		}
@@ -113,8 +120,6 @@ export class BuildingPlot extends Component {
 					task.wait();
 				}
 			}
-
-			this.welder.deleteWelds();
 		} else {
 			const connections = SharedBuilding.getBlocksConnectedByLogicToMulti(
 				this.getBlockDatas(),
@@ -130,9 +135,6 @@ export class BuildingPlot extends Component {
 			}
 
 			for (const block of blocks) {
-				this.welder.unweld(block);
-				this.welder.deleteWeld(block);
-
 				block.Destroy();
 				if (math.random(3) === 1) {
 					task.wait();
@@ -142,7 +144,7 @@ export class BuildingPlot extends Component {
 
 		return success;
 	}
-	edit(blocks: EditBlocksRequest["blocks"]): Response {
+	private edit(blocks: EditBlocksRequest["blocks"]): Response {
 		if (blocks.size() === 0) {
 			return success;
 		}
@@ -158,7 +160,6 @@ export class BuildingPlot extends Component {
 
 		for (const { instance, position } of blocks) {
 			if (position) instance.PivotTo(position);
-			this.welder.moveCollisions(instance, instance.GetPivot());
 
 			if (math.random(3) === 1) {
 				task.wait();

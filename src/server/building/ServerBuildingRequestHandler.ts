@@ -1,6 +1,6 @@
 import { Backend } from "server/Backend";
-import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { BlockManager } from "shared/building/BlockManager";
+import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { BuildingManager } from "shared/building/BuildingManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { HostedService } from "shared/GameHost";
@@ -108,7 +108,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 
 		const placed: BlockModel[] = [];
 		for (const block of blocks) {
-			const placedBlock = plotc.blocks.place(block);
+			const placedBlock = plotc.blocks.placeOperation.execute(block);
 			if (!placedBlock.success) {
 				return placedBlock;
 			}
@@ -129,7 +129,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 			return errBuildingNotPermitted;
 		}
 
-		return this.controller.blocks.delete(request.blocks);
+		return this.controller.blocks.deleteOperation.execute(request.blocks);
 	}
 	private editBlocks(request: EditBlocksRequest): Response {
 		if (!this.plots.isBuildingAllowed(request.plot, this.player)) {
@@ -141,7 +141,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 			}
 		}
 
-		return this.controller.blocks.edit(request.blocks);
+		return this.controller.blocks.editOperation.execute(request.blocks);
 	}
 
 	private logicConnect(request: LogicConnectRequest): Response {
@@ -255,7 +255,7 @@ export class ServerBuildingRequestHandler extends HostedService {
 			blocks = this.slots.getBlocks(userid, index);
 		}
 
-		this.controller.blocks.delete("all");
+		this.controller.blocks.deleteOperation.execute("all");
 		if (blocks === undefined || blocks.size() === 0) {
 			return { success: true, isEmpty: true };
 		}

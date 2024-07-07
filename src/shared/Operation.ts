@@ -8,7 +8,7 @@ export class Operation<TArg, TResult extends {} = {}> {
 
 	constructor(private readonly func: (arg: TArg) => Response<TResult>) {}
 
-	addMiddleware(middleware: (arg: TArg) => MiddlewareResponse<TArg>): { Disconnect(): void } {
+	addMiddleware(middleware: (arg: TArg) => MiddlewareResponse<TArg>): SignalConnection {
 		this.middlewares.push(middleware);
 
 		const list = this.middlewares;

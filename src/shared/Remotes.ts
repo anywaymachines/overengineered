@@ -10,7 +10,7 @@ import type { BlockId } from "shared/BlockDataRegistry";
 import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 declare global {
-	type BuildResponse = Response<{ readonly model: BlockModel | undefined }>;
+	type BuildResponse = Response<{ readonly model: BlockModel }>;
 	type MultiBuildResponse = Response<{ readonly models: readonly BlockModel[] }>;
 
 	type PlaceBlockRequest = {

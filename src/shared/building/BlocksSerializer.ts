@@ -2,10 +2,10 @@ import { BlockManager } from "shared/building/BlockManager";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Serializer } from "shared/Serializer";
-import type { BuildingPlot } from "server/plots/BuildingPlot";
 import type { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
 import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
+import type { BuildingPlot, ReadonlyPlot } from "shared/building/BuildingPlot";
 
 type SerializedBlocks<TBlocks extends SerializedBlockBase> = {
 	readonly version: number;
@@ -29,26 +29,52 @@ interface SerializedBlockV3 extends SerializedBlockV2 {
 	readonly connections: PlacedBlockLogicConnections | undefined;
 }
 
+export type LatestSerializedBlock = SerializedBlockV3;
+export type LatestSerializedBlocks = SerializedBlocks<LatestSerializedBlock>;
+
+namespace Filter {
+	const white = Serializer.Color3Serializer.serialize(Color3.fromRGB(255, 255, 255));
+	const plastic = Enum.Material.Plastic.Value;
+
+	export function deleteDefaultValues(block: Writable<SerializedBlockV3>) {
+		if (block.col === white) {
+			delete block.col;
+		}
+		if (block.mat === plastic) {
+			delete block.mat;
+		}
+		if (block.config && Objects.size(block.config) === 0) {
+			delete block.config;
+		}
+		if (block.connections && Objects.size(block.connections) === 0) {
+			delete block.connections;
+		}
+	}
+}
+
 const read = {
 	blocksFromPlot: <T extends SerializedBlockBase>(
-		plot: BuildingPlot,
+		plot: ReadonlyPlot,
 		serialize: (block: BlockModel, index: number, buildingCenter: CFrame) => T,
 	): readonly T[] => {
-		const buildingCenter = plot.origin;
-		return plot.getBlocks().map((block, i) => serialize(block, i, buildingCenter));
+		return plot.getBlocks().map((block, i) => serialize(block, i, plot.origin));
 	},
 
 	blockV3: (block: BlockModel, index: number, buildingCenter: CFrame): SerializedBlockV3 => {
-		return {
+		const obj = {
 			loc: Serializer.CFrameSerializer.serialize(buildingCenter.ToObjectSpace(block.GetPivot())),
 
 			id: BlockManager.manager.id.get(block),
+			uuid: BlockManager.manager.uuid.get(block),
 			col: Serializer.Color3Serializer.serialize(BlockManager.manager.color.get(block)),
 			mat: Serializer.EnumMaterialSerializer.serialize(BlockManager.manager.material.get(block)),
-			uuid: BlockManager.manager.uuid.get(block),
 			connections: BlockManager.manager.connections.get(block),
 			config: BlockManager.manager.config.get(block),
-		};
+		} satisfies LatestSerializedBlock;
+
+		Filter.deleteDefaultValues(obj);
+
+		return obj;
 	},
 } as const;
 const place = {
@@ -79,7 +105,7 @@ const place = {
 			connections: blockData.connections,
 		};
 
-		const response = plot.place(deserializedData);
+		const response = plot.placeOperation.execute(deserializedData);
 		if (!response.success) {
 			$err(`Could not place block ${blockData.id}: ${response.message}`);
 			return;
@@ -94,13 +120,13 @@ interface UpgradableBlocksSerializer<
 	TBlocks extends SerializedBlocks<SerializedBlockBase>,
 	TPrev extends BlockSerializer<SerializedBlocks<SerializedBlockBase>>,
 > extends BlockSerializer<TBlocks> {
-	upgradeFrom(data: string, prev: TPrev extends BlockSerializer<infer T> ? T : never): TBlocks;
+	upgradeFrom(prev: TPrev extends BlockSerializer<infer T> ? T : never): TBlocks;
 }
 interface CurrentUpgradableBlocksSerializer<
 	TBlocks extends SerializedBlocks<SerializedBlockBase>,
 	TPrev extends BlockSerializer<SerializedBlocks<SerializedBlockBase>>,
 > extends UpgradableBlocksSerializer<TBlocks, TPrev> {
-	read(plot: BuildingPlot): TBlocks;
+	read(plot: ReadonlyPlot): TBlocks;
 	place(data: TBlocks, plot: BuildingPlot): number;
 }
 
@@ -114,7 +140,7 @@ const v4: BlockSerializer<SerializedBlocks<SerializedBlockV0>> = {
 const v5: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV2>, typeof v4> = {
 	version: 5,
 
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV0>): SerializedBlocks<SerializedBlockV2> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV0>): SerializedBlocks<SerializedBlockV2> {
 		return {
 			version: this.version,
 			blocks: prev.blocks.map(
@@ -131,7 +157,7 @@ const v5: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV2>, typeof
 const v6: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v5> = {
 	version: 6,
 
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV2>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV2>): SerializedBlocks<SerializedBlockV3> {
 		return {
 			version: this.version,
 			blocks: prev.blocks.map(
@@ -148,7 +174,7 @@ const v6: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 const v7: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v6> = {
 	version: 7,
 
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		return {
 			version: this.version,
 			blocks: prev.blocks.map(
@@ -172,7 +198,7 @@ const v7: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 const v8: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v7> = {
 	version: 8,
 
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		type reg = typeof blockConfigRegistry;
 		type partial<T extends object> = {
 			readonly [k in keyof T]?: T[k] extends object ? partial<T[k]> : T[k];
@@ -323,7 +349,7 @@ const v8: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 const v9: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v8> = {
 	version: 9,
 
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		type reg = typeof blockConfigRegistry;
 		type partial<T extends object> = {
 			readonly [k in keyof T]?: T[k] extends object ? partial<T[k]> : T[k];
@@ -410,7 +436,7 @@ const v9: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof
 // fix blocks not aligned with the grid (disabled due to v11 doing the same again)
 const v10: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v9> = {
 	version: 10,
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		return prev;
 	},
 };
@@ -418,7 +444,7 @@ const v10: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 // fix blocks not aligned with the grid
 const v11: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v10> = {
 	version: 11,
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			const cf = Serializer.CFrameSerializer.deserialize(block.loc);
 			const pos = cf.Position;
@@ -445,7 +471,7 @@ const v11: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 // rename ultrasonic to lidar
 const v12: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v11> = {
 	version: 12,
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			if ((block.id as string) === "ultrasonicsensor") {
 				return {
@@ -467,7 +493,7 @@ const v12: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 // rotate roundwedgeout to 0, -90, 0
 const v13: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v12> = {
 	version: 13,
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			if ((block.id as string) === "roundwedgeout") {
 				return {
@@ -505,7 +531,7 @@ const v13: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 // rotate innercorner -> innerwedge, rotate
 const v14: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v13> = {
 	version: 14,
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			if ((block.id as string) === "innerwedge") {
 				return {
@@ -527,7 +553,7 @@ const v14: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 // update constant from number to or
 const v15: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v14> = {
 	version: 15,
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			if (block.id === ("constant" as BlockId)) {
 				return {
@@ -554,7 +580,7 @@ const v15: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 // update ADD SUB DIV MIL from number to number | vector3
 const v16: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v15> = {
 	version: 16,
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			if (
 				block.id === ("operationadd" as BlockId) ||
@@ -588,7 +614,7 @@ const v16: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 const v17: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v16> = {
 	version: 17,
 
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		return {
 			version: this.version,
 			blocks: prev.blocks as never,
@@ -600,7 +626,7 @@ const v17: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 const v18: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v17> = {
 	version: 18,
 
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		return {
 			version: this.version,
 			blocks: prev.blocks,
@@ -612,7 +638,7 @@ const v18: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 const v19: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v18> = {
 	version: 19,
 
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			if (block.id === "halfblock") {
 				return {
@@ -686,7 +712,7 @@ const v19: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 const v20: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v19> = {
 	version: 20,
 
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const fixedTripleGeneric = (block: SerializedBlockV3): SerializedBlockV3 => {
 			const fixTripleGenericOffset = (cframe: CFrame) =>
 				cframe.add(cframe.VectorToWorldSpace(new Vector3(-0.5, -0.5, 0)));
@@ -906,7 +932,7 @@ const v20: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 const v21: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v20> = {
 	version: 21,
 
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			if (block.id === "laser") {
 				return {
@@ -941,7 +967,7 @@ const v21: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 const v22: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v21> = {
 	version: 22,
 
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			if (block.id === "halfball") {
 				return {
@@ -963,10 +989,10 @@ const v22: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 };
 
 // update wheel models
-const v23: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v22> = {
+const v23: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v22> = {
 	version: 23,
 
-	upgradeFrom(data: string, prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			if (block.id === "wheel") {
 				return { ...block, id: "bigwheel" };
@@ -983,8 +1009,30 @@ const v23: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 			blocks: prev.blocks.map(update),
 		};
 	},
+};
 
-	read(plot: BuildingPlot): SerializedBlocks<SerializedBlockV3> {
+// filter out unnesessary stuff
+const v24: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v23> = {
+	version: 24,
+
+	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
+		const white = Serializer.Color3Serializer.serialize(Color3.fromRGB(255, 255, 255));
+		const plastic = Enum.Material.Plastic.Value;
+
+		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
+			const ret = { ...block };
+			Filter.deleteDefaultValues(ret);
+
+			return ret;
+		};
+
+		return {
+			version: this.version,
+			blocks: prev.blocks.map(update),
+		};
+	},
+
+	read(plot: ReadonlyPlot): SerializedBlocks<SerializedBlockV3> {
 		return {
 			version: this.version,
 			blocks: read.blocksFromPlot(plot, read.blockV3),
@@ -995,12 +1043,11 @@ const v23: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 		return data.blocks.size();
 	},
 };
-
 //
 
 const versions = [
 	...([v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22] as const),
-	...([v23] as const),
+	...([v23, v24] as const),
 ] as const;
 const current = versions[versions.size() - 1] as typeof versions extends readonly [...unknown[], infer T] ? T : never;
 
@@ -1008,24 +1055,30 @@ const getVersion = (version: number) => versions.find((v) => v.version === versi
 
 /** Methods to save and load buildings */
 export namespace BlocksSerializer {
-	export function serialize(plot: BuildingPlot): string {
-		return JSON.serialize(current.read(plot) as never);
+	export function serializeToObject(plot: ReadonlyPlot): LatestSerializedBlocks {
+		return current.read(plot);
 	}
-	export function deserialize(data: string, plot: BuildingPlot): number {
-		let deserialized = JSON.deserialize(data) as SerializedBlocks<SerializedBlockBase>;
-		$log(`Loaded a slot using savev${deserialized.version}`);
+	export function serialize(plot: ReadonlyPlot): string {
+		return JSON.serialize(serializeToObject(plot));
+	}
 
-		const version = deserialized.version;
+	export function deserializeFromObject(data: SerializedBlocks<SerializedBlockBase>, plot: BuildingPlot): number {
+		$log(`Loaded a slot using savev${data.version}`);
+
+		const version = data.version;
 		for (let i = version + 1; i <= current.version; i++) {
 			const version = getVersion(i);
 			if (!version) continue;
 			if (!("upgradeFrom" in version)) continue;
 
-			deserialized = version.upgradeFrom(data, deserialized as never);
+			data = version.upgradeFrom(data as never);
 			$log(`Upgrading a slot to savev${version.version}`);
 		}
 
-		current.place(deserialized as SerializedBlocks<SerializedBlockV3>, plot);
-		return deserialized.blocks.size();
+		current.place(data as SerializedBlocks<SerializedBlockV3>, plot);
+		return data.blocks.size();
+	}
+	export function deserialize(data: string, plot: BuildingPlot): number {
+		return deserializeFromObject(JSON.deserialize(data) as SerializedBlocks<SerializedBlockBase>, plot);
 	}
 }

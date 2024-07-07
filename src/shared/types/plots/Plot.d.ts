@@ -10,7 +10,7 @@ type PlotModel = Folder & {
 };
 
 type PlotBlocks = Folder & {
-	readonly Parent: PlotModel;
+	Parent: PlotModel | undefined;
 
 	// using a dummy parameter to force use this function instead of the default one
 	/** @deprecated TOBEDELETED */

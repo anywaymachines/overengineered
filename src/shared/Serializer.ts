@@ -5,6 +5,10 @@ export namespace Serializer {
 		}
 
 		export function deserialize(serializedCFrame: SerializedCFrame): CFrame {
+			if (typeIs(serializedCFrame, "CFrame")) {
+				return serializedCFrame;
+			}
+
 			return new CFrame(serializedCFrame[0], serializedCFrame[1], serializedCFrame[2]).mul(
 				CFrame.fromEulerAnglesXYZ(serializedCFrame[3][0], serializedCFrame[3][1], serializedCFrame[3][2]),
 			);

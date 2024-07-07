@@ -1,6 +1,7 @@
 import { Players } from "@rbxts/services";
-import { BuildingPlot } from "server/plots/BuildingPlot";
 import { PlotsFloatingImageController } from "server/plots/PlotsFloatingImageController";
+import { BuildingPlot } from "shared/building/BuildingPlot";
+import { AutoPlotWelder } from "shared/building/PlotWelder";
 import { Element } from "shared/Element";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { HostedService } from "shared/GameHost";
@@ -34,10 +35,10 @@ class ServerPlotController extends HostedService {
 		plot.ownerId.set(player.UserId);
 		player.RespawnLocation = plot.instance.WaitForChild("SpawnLocation") as SpawnLocation;
 
-		const initializeBlocksFolder = (plot: SharedPlot) => {
+		const initializeBlocksFolder = (plot: SharedPlot): PlotBlocks => {
 			plot.instance.FindFirstChild("Blocks")?.Destroy();
 
-			const blocks = Element.create("Folder", { Name: "Blocks" });
+			const blocks = Element.create("Folder", { Name: "Blocks" }) as PlotBlocks;
 			blocks.Parent = plot.instance;
 
 			return blocks;
@@ -45,9 +46,10 @@ class ServerPlotController extends HostedService {
 
 		this.blocks = di.resolveForeignClass(BuildingPlot, [
 			initializeBlocksFolder(plot),
-			plot.instance.BuildingArea.GetPivot(),
+			plot.getCenter(),
 			plot.bounds,
 		]);
+		this.parent(di.resolveForeignClass(AutoPlotWelder, [this.blocks]));
 
 		this.event.subscribe(Players.PlayerRemoving, (player) => {
 			if (player !== this.player) return;

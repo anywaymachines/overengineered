@@ -1,10 +1,10 @@
 import { DataStoreService, Players } from "@rbxts/services";
 import { Db } from "server/database/Database";
-import { BlocksSerializer } from "server/plots/BlocksSerializer";
+import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
-import type { BuildingPlot } from "server/plots/BuildingPlot";
+import type { BuildingPlot } from "shared/building/BuildingPlot";
 
 @injectable
 export class SlotDatabase {

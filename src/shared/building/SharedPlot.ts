@@ -59,9 +59,11 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	getBlocks(): readonly BlockModel[] {
 		return this.instance.Blocks.GetChildren(undefined);
 	}
-	/** @deprecated TOBEDELETED */
 	getBlock(uuid: BlockUuid): BlockModel {
 		return (this.instance.Blocks as unknown as Record<BlockUuid, BlockModel>)[uuid];
+	}
+	tryGetBlock(uuid: BlockUuid): BlockModel | undefined {
+		return this.instance.Blocks.FindFirstChild(uuid) as BlockModel | undefined;
 	}
 	getSpawnPosition() {
 		return this.instance.BuildingArea.GetPivot().Position.add(

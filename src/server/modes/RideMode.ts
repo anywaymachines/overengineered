@@ -1,7 +1,7 @@
 import { Players } from "@rbxts/services";
-import { BlocksSerializer } from "server/plots/BlocksSerializer";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
+import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
 import type { SlotDatabase } from "server/database/SlotDatabase";
@@ -142,7 +142,7 @@ export class RideMode implements PlayModeBase {
 
 			print(`Loaded the cached save in ${os.clock() - time}`);
 		} else {
-			controller.blocks.clearBlocks();
+			controller.blocks.deleteOperation.execute("all");
 
 			const blocksToLoad = this.slots.getBlocks(player.UserId, SlotsMeta.autosaveSlotIndex);
 			if (blocksToLoad !== undefined) {

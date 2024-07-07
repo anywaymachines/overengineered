@@ -1,3 +1,4 @@
+import { Workspace } from "@rbxts/services";
 import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Beacon } from "client/gui/Beacon";
 import { Component } from "shared/component/Component";
@@ -5,11 +6,11 @@ import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren"
 import { HostedService } from "shared/GameHost";
 import { PlayerWatcher } from "shared/PlayerWatcher";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
-import type { SharedPlot } from "shared/building/SharedPlot";
+import type { ReadonlyPlot } from "shared/building/BuildingPlot";
 
 @injectable
 export class BeaconController extends HostedService {
-	constructor(@inject plot: SharedPlot, @inject playerData: PlayerDataStorage) {
+	constructor(@inject plot: ReadonlyPlot, @inject playerData: PlayerDataStorage) {
 		super();
 
 		const plotBeacon = this.initializePlotBeacon(plot);
@@ -28,8 +29,16 @@ export class BeaconController extends HostedService {
 		);
 	}
 
-	private initializePlotBeacon(plot: SharedPlot): Beacon {
-		return this.parent(new Beacon(plot.instance.BuildingArea, "Plot"));
+	private initializePlotBeacon(plot: ReadonlyPlot): Beacon {
+		const part = new Instance("Part");
+		part.Name = "LocalPlotBeacon";
+		part.Anchored = true;
+		part.Transparency = 1;
+		part.CanQuery = part.CanTouch = part.CanCollide = false;
+		part.PivotTo(plot.origin);
+		part.Parent = Workspace;
+
+		return this.parent(new Beacon(part, "Plot"));
 	}
 
 	private initializePlayerBeacons(): Component {

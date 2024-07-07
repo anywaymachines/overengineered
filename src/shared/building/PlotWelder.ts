@@ -1,11 +1,38 @@
-import { ServerStorage } from "@rbxts/services";
+import { RunService, ServerStorage, Workspace } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
 import { Component } from "shared/component/Component";
 import { ComponentInstance } from "shared/component/ComponentInstance";
-import type { BuildingPlot } from "server/plots/BuildingPlot";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
+import type { BuildingPlot } from "shared/building/BuildingPlot";
 
-export class PlotWelder extends Component {
+/** {@link PlotWelder} that automatically subscribes to {@link BuildingPlot} block changing */
+@injectable
+export class AutoPlotWelder extends Component {
+	constructor(plot: BuildingPlot, @inject blockRegistry: BlockRegistry) {
+		super();
+
+		const welder = this.parent(new PlotWelder(plot, blockRegistry));
+
+		this.event.subscribe(plot.placeOperation.executed, (arg, result) => welder.weldOnPlot(result.model));
+		this.event.subscribe(plot.deleteOperation.executed, (arg, result) => {
+			if (arg === "all") {
+				welder.deleteWelds();
+			} else {
+				for (const block of arg) {
+					welder.unweld(block);
+					welder.deleteWeld(block);
+				}
+			}
+		});
+		this.event.subscribe(plot.editOperation.executed, (arg, result) => {
+			for (const edit of arg) {
+				welder.moveCollisions(edit.instance, edit.instance.GetPivot());
+			}
+		});
+	}
+}
+
+class PlotWelder extends Component {
 	readonly collidersParent: WorldModel;
 
 	constructor(
@@ -16,7 +43,7 @@ export class PlotWelder extends Component {
 
 		this.collidersParent = new Instance("WorldModel");
 		this.collidersParent.Name = "PlotCollision";
-		this.collidersParent.Parent = ServerStorage;
+		this.collidersParent.Parent = RunService.IsClient() ? Workspace : ServerStorage;
 
 		ComponentInstance.init(this, this.collidersParent);
 	}

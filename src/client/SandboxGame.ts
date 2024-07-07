@@ -27,11 +27,14 @@ import { Tutorial } from "client/tutorial/Tutorial";
 import { TutorialBasics } from "client/tutorial/TutorialBasics";
 import { AutoLogicCreator } from "shared/block/AutoLogicCreator";
 import { BlockRegistry } from "shared/block/BlockRegistry";
+import { BuildingPlot } from "shared/building/BuildingPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { HostedService } from "shared/GameHost";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { ReadonlyPlot } from "shared/building/BuildingPlot";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 namespace Startup {
 	@injectable
@@ -87,6 +90,10 @@ export namespace SandboxGame {
 		builder.services.registerSingletonFunc((ctx) =>
 			ctx.resolve<SharedPlots>().waitForPlot(Players.LocalPlayer.UserId),
 		);
+		builder.services.registerSingletonFunc((ctx): ReadonlyPlot => {
+			const plot = ctx.resolve<SharedPlot>();
+			return new BuildingPlot(plot.instance.Blocks, plot.getCenter(), plot.bounds, ctx.resolve<BlockRegistry>());
+		});
 
 		builder.services.registerSingletonFunc((): BlockRegistry => {
 			const gameInfo = CustomRemotes.getGameInfo.send();
