@@ -5,7 +5,8 @@ import { Serializer } from "shared/Serializer";
 import type { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import type { BlockId } from "shared/BlockDataRegistry";
 import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
-import type { BuildingPlot, ReadonlyPlot } from "shared/building/BuildingPlot";
+import type { BuildingPlot } from "shared/building/BuildingPlot";
+import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
 type SerializedBlocks<TBlocks extends SerializedBlockBase> = {
 	readonly version: number;
@@ -13,13 +14,12 @@ type SerializedBlocks<TBlocks extends SerializedBlockBase> = {
 };
 
 interface SerializedBlockBase {
-	readonly id: string;
+	readonly id: BlockId;
 }
 interface SerializedBlockV0 extends SerializedBlockBase {
-	readonly id: BlockId;
-	readonly loc: SerializedCFrame;
-	readonly mat: SerializedEnum | undefined;
-	readonly col: SerializedColor | undefined;
+	readonly location: CFrame;
+	readonly material: Enum.Material | undefined;
+	readonly color: Color3 | undefined;
 	readonly config: PlacedBlockConfig | undefined;
 }
 interface SerializedBlockV2 extends SerializedBlockV0 {
@@ -33,15 +33,15 @@ export type LatestSerializedBlock = SerializedBlockV3;
 export type LatestSerializedBlocks = SerializedBlocks<LatestSerializedBlock>;
 
 namespace Filter {
-	const white = Serializer.Color3Serializer.serialize(Color3.fromRGB(255, 255, 255));
-	const plastic = Enum.Material.Plastic.Value;
+	const white = Color3.fromRGB(255, 255, 255);
+	const plastic = Enum.Material.Plastic;
 
-	export function deleteDefaultValues(block: Writable<SerializedBlockV3>) {
-		if (block.col === white) {
-			delete block.col;
+	export function deleteDefaultValues(block: Writable<LatestSerializedBlock>) {
+		if (block.color === white) {
+			delete block.color;
 		}
-		if (block.mat === plastic) {
-			delete block.mat;
+		if (block.material === plastic) {
+			delete block.material;
 		}
 		if (block.config && Objects.size(block.config) === 0) {
 			delete block.config;
@@ -60,46 +60,34 @@ const read = {
 		return plot.getBlocks().map((block, i) => serialize(block, i, plot.origin));
 	},
 
-	blockV3: (block: BlockModel, index: number, buildingCenter: CFrame): SerializedBlockV3 => {
-		const obj = {
-			loc: Serializer.CFrameSerializer.serialize(buildingCenter.ToObjectSpace(block.GetPivot())),
+	blockV3: (block: BlockModel, index: number, buildingCenter: CFrame): LatestSerializedBlock => {
+		const data: LatestSerializedBlock = {
+			...BlockManager.getBlockDataByBlockModel(block),
+			location: buildingCenter.ToObjectSpace(block.GetPivot()),
+			["instance" as never]: undefined,
+		};
+		Filter.deleteDefaultValues(data);
 
-			id: BlockManager.manager.id.get(block),
-			uuid: BlockManager.manager.uuid.get(block),
-			col: Serializer.Color3Serializer.serialize(BlockManager.manager.color.get(block)),
-			mat: Serializer.EnumMaterialSerializer.serialize(BlockManager.manager.material.get(block)),
-			connections: BlockManager.manager.connections.get(block),
-			config: BlockManager.manager.config.get(block),
-		} satisfies LatestSerializedBlock;
-
-		Filter.deleteDefaultValues(obj);
-
-		return obj;
+		return data;
 	},
 } as const;
 const place = {
-	blocksOnPlot: <T extends SerializedBlockBase>(
+	blocksOnPlot: (
 		plot: BuildingPlot,
-		data: readonly T[],
-		place: (plot: BuildingPlot, blockData: T, buildingCenter: CFrame) => void,
+		data: readonly LatestSerializedBlock[],
+		place: (plot: BuildingPlot, blockData: LatestSerializedBlock, buildingCenter: CFrame) => void,
 	) => {
 		const buildingCenter = plot.origin;
 		data.forEach((blockData) => place(plot, blockData, buildingCenter));
 	},
 
-	blockOnPlotV3: (plot: BuildingPlot, blockData: SerializedBlockV3, buildingCenter: CFrame) => {
+	blockOnPlotV3: (plot: BuildingPlot, blockData: LatestSerializedBlock, buildingCenter: CFrame) => {
 		const deserializedData: PlaceBlockRequest = {
 			id: blockData.id,
-			location: buildingCenter.ToWorldSpace(Serializer.CFrameSerializer.deserialize(blockData.loc)),
+			location: buildingCenter.ToWorldSpace(blockData.location),
 
-			color:
-				blockData.col === undefined
-					? Color3.fromRGB(255, 255, 255)
-					: Serializer.Color3Serializer.deserialize(blockData.col),
-			material:
-				blockData.mat === undefined
-					? Enum.Material.Plastic
-					: Serializer.EnumMaterialSerializer.deserialize(blockData.mat),
+			color: blockData.color ?? Color3.fromRGB(255, 255, 255),
+			material: blockData.material ?? Enum.Material.Plastic,
 			config: blockData.config,
 			uuid: blockData.uuid,
 			connections: blockData.connections,
@@ -121,13 +109,6 @@ interface UpgradableBlocksSerializer<
 	TPrev extends BlockSerializer<SerializedBlocks<SerializedBlockBase>>,
 > extends BlockSerializer<TBlocks> {
 	upgradeFrom(prev: TPrev extends BlockSerializer<infer T> ? T : never): TBlocks;
-}
-interface CurrentUpgradableBlocksSerializer<
-	TBlocks extends SerializedBlocks<SerializedBlockBase>,
-	TPrev extends BlockSerializer<SerializedBlocks<SerializedBlockBase>>,
-> extends UpgradableBlocksSerializer<TBlocks, TPrev> {
-	read(plot: ReadonlyPlot): TBlocks;
-	place(data: TBlocks, plot: BuildingPlot): number;
 }
 
 //
@@ -446,18 +427,17 @@ const v11: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 	version: 11,
 	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
-			const cf = Serializer.CFrameSerializer.deserialize(block.loc);
-			const pos = cf.Position;
+			const pos = block.location.Position;
 			const fixedpos = new Vector3(
 				math.round(pos.X * 2) / 2,
 				math.round(pos.Y * 2) / 2,
 				math.round(pos.Z * 2) / 2,
 			);
-			const newcf = cf.Rotation.add(fixedpos);
+			const newcf = block.location.Rotation.add(fixedpos);
 
 			return {
 				...block,
-				loc: Serializer.CFrameSerializer.serialize(newcf),
+				location: newcf,
 			};
 		};
 
@@ -499,22 +479,14 @@ const v13: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 				return {
 					...block,
 					id: "convexprism" as never,
-					loc: Serializer.CFrameSerializer.serialize(
-						Serializer.CFrameSerializer.deserialize(block.loc).mul(
-							CFrame.fromEulerAnglesXYZ(0, math.rad(-90), 0),
-						),
-					),
+					location: block.location.mul(CFrame.fromEulerAnglesXYZ(0, math.rad(-90), 0)),
 				};
 			}
 			if ((block.id as string) === "roundwedgein") {
 				return {
 					...block,
 					id: "concaveprism" as never,
-					loc: Serializer.CFrameSerializer.serialize(
-						Serializer.CFrameSerializer.deserialize(block.loc).mul(
-							CFrame.fromEulerAnglesXYZ(0, math.rad(-90), 0),
-						),
-					),
+					location: block.location.mul(CFrame.fromEulerAnglesXYZ(0, math.rad(-90), 0)),
 				};
 			}
 
@@ -643,17 +615,13 @@ const v19: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 			if (block.id === "halfblock") {
 				return {
 					...block,
-					loc: Serializer.CFrameSerializer.serialize(
-						Serializer.CFrameSerializer.deserialize(block.loc).ToWorldSpace(new CFrame(0, -0.5, 0)),
-					),
+					location: block.location.ToWorldSpace(new CFrame(0, -0.5, 0)),
 				};
 			}
 			if (block.id === "halfball") {
 				return {
 					...block,
-					loc: Serializer.CFrameSerializer.serialize(
-						Serializer.CFrameSerializer.deserialize(block.loc).ToWorldSpace(new CFrame(-0.5, 0, 0)),
-					),
+					location: block.location.ToWorldSpace(new CFrame(-0.5, 0, 0)),
 				};
 			}
 			if (
@@ -664,9 +632,7 @@ const v19: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 			) {
 				return {
 					...block,
-					loc: Serializer.CFrameSerializer.serialize(
-						Serializer.CFrameSerializer.deserialize(block.loc).ToWorldSpace(new CFrame(0, -0.5, 0)),
-					),
+					location: block.location.ToWorldSpace(new CFrame(0, -0.5, 0)),
 				};
 			}
 			if (
@@ -677,9 +643,7 @@ const v19: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 			) {
 				return {
 					...block,
-					loc: Serializer.CFrameSerializer.serialize(
-						Serializer.CFrameSerializer.deserialize(block.loc).ToWorldSpace(new CFrame(0, 0, -0.5)),
-					),
+					location: block.location.ToWorldSpace(new CFrame(0, 0, -0.5)),
 				};
 			}
 			if (
@@ -690,11 +654,7 @@ const v19: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 			) {
 				return {
 					...block,
-					loc: Serializer.CFrameSerializer.serialize(
-						Serializer.CFrameSerializer.deserialize(block.loc).ToWorldSpace(
-							CFrame.Angles(0, -90, 0).add(new Vector3(0, 0, 0.5)),
-						),
-					),
+					location: block.location.ToWorldSpace(CFrame.Angles(0, -90, 0).add(new Vector3(0, 0, 0.5))),
 				};
 			}
 
@@ -718,9 +678,7 @@ const v20: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 				cframe.add(cframe.VectorToWorldSpace(new Vector3(-0.5, -0.5, 0)));
 			return {
 				...block,
-				loc: Serializer.CFrameSerializer.serialize(
-					fixTripleGenericOffset(Serializer.CFrameSerializer.deserialize(block.loc)),
-				),
+				location: fixTripleGenericOffset(block.location),
 			};
 		};
 		const fixedDoubleGeneric = (block: SerializedBlockV3): SerializedBlockV3 => {
@@ -728,9 +686,7 @@ const v20: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 				cframe.add(cframe.VectorToWorldSpace(new Vector3(0, -0.5, 0)));
 			return {
 				...block,
-				loc: Serializer.CFrameSerializer.serialize(
-					fixDoubleGenericOffset(Serializer.CFrameSerializer.deserialize(block.loc)),
-				),
+				location: fixDoubleGenericOffset(block.location),
 			};
 		};
 		const fixedSingleGeneric = fixedTripleGeneric;
@@ -861,9 +817,7 @@ const v20: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 				block = {
 					...block,
 					id: "laser",
-					loc: Serializer.CFrameSerializer.serialize(
-						Serializer.CFrameSerializer.deserialize(block.loc).mul(CFrame.Angles(-math.pi / 2, 0, 0)),
-					),
+					location: block.location.mul(CFrame.Angles(-math.pi / 2, 0, 0)),
 					config: {
 						maxDistance: block.config?.max_distance ?? undefined!,
 						max_distance: undefined!,
@@ -880,11 +834,7 @@ const v20: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 			if (block.id === "ownerlocator") {
 				block = {
 					...block,
-					loc: Serializer.CFrameSerializer.serialize(
-						Serializer.CFrameSerializer.deserialize(block.loc).mul(
-							CFrame.Angles(0, -math.pi / 2, -math.pi / 2),
-						),
-					),
+					location: block.location.mul(CFrame.Angles(0, -math.pi / 2, -math.pi / 2)),
 				};
 			}
 
@@ -972,9 +922,7 @@ const v22: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 			if (block.id === "halfball") {
 				return {
 					...block,
-					loc: Serializer.CFrameSerializer.serialize(
-						Serializer.CFrameSerializer.deserialize(block.loc).mul(CFrame.Angles(0, 0, math.rad(-90))),
-					),
+					location: block.location.mul(CFrame.Angles(0, 0, math.rad(-90))),
 				};
 			}
 
@@ -1012,13 +960,10 @@ const v23: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeo
 };
 
 // filter out unnesessary stuff
-const v24: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v23> = {
+const v24: UpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>, typeof v23> = {
 	version: 24,
 
 	upgradeFrom(prev: SerializedBlocks<SerializedBlockV3>): SerializedBlocks<SerializedBlockV3> {
-		const white = Serializer.Color3Serializer.serialize(Color3.fromRGB(255, 255, 255));
-		const plastic = Enum.Material.Plastic.Value;
-
 		const update = (block: SerializedBlockV3): SerializedBlockV3 => {
 			const ret = { ...block };
 			Filter.deleteDefaultValues(ret);
@@ -1031,18 +976,8 @@ const v24: CurrentUpgradableBlocksSerializer<SerializedBlocks<SerializedBlockV3>
 			blocks: prev.blocks.map(update),
 		};
 	},
-
-	read(plot: ReadonlyPlot): SerializedBlocks<SerializedBlockV3> {
-		return {
-			version: this.version,
-			blocks: read.blocksFromPlot(plot, read.blockV3),
-		};
-	},
-	place(data: SerializedBlocks<SerializedBlockV3>, plot: BuildingPlot): number {
-		place.blocksOnPlot(plot, data.blocks, place.blockOnPlotV3);
-		return data.blocks.size();
-	},
 };
+
 //
 
 const versions = [
@@ -1055,11 +990,34 @@ const getVersion = (version: number) => versions.find((v) => v.version === versi
 
 /** Methods to save and load buildings */
 export namespace BlocksSerializer {
-	export function serializeToObject(plot: ReadonlyPlot): LatestSerializedBlocks {
-		return current.read(plot);
+	type JsonBlock = ReplaceWith<
+		Omit<LatestSerializedBlock, "location" | "color" | "material">,
+		{
+			readonly loc: SerializedCFrame;
+			readonly mat: SerializedEnum | undefined;
+			readonly col: SerializedColor | undefined;
+		}
+	>;
+
+	export function serializeToObject(plot: ReadonlyPlot): SerializedBlocks<LatestSerializedBlock> {
+		return { version: current.version, blocks: read.blocksFromPlot(plot, read.blockV3) };
 	}
 	export function serialize(plot: ReadonlyPlot): string {
-		return JSON.serialize(serializeToObject(plot));
+		const fix = (block: LatestSerializedBlock): JsonBlock => {
+			return {
+				id: block.id,
+				uuid: block.uuid,
+				config: block.config,
+				connections: block.connections,
+
+				loc: Serializer.CFrameSerializer.serialize(block.location),
+				col: block.color && Serializer.Color3Serializer.serialize(block.color),
+				mat: block.material && Serializer.EnumMaterialSerializer.serialize(block.material),
+			};
+		};
+
+		const serialized = serializeToObject(plot);
+		return JSON.serialize({ ...serialized, blocks: serialized.blocks.map(fix) });
 	}
 
 	export function deserializeFromObject(data: SerializedBlocks<SerializedBlockBase>, plot: BuildingPlot): number {
@@ -1075,10 +1033,24 @@ export namespace BlocksSerializer {
 			$log(`Upgrading a slot to savev${version.version}`);
 		}
 
-		current.place(data as SerializedBlocks<SerializedBlockV3>, plot);
+		place.blocksOnPlot(plot, data.blocks as readonly LatestSerializedBlock[], place.blockOnPlotV3);
 		return data.blocks.size();
 	}
 	export function deserialize(data: string, plot: BuildingPlot): number {
-		return deserializeFromObject(JSON.deserialize(data) as SerializedBlocks<SerializedBlockBase>, plot);
+		const fix = (block: JsonBlock): LatestSerializedBlock => {
+			return {
+				id: block.id,
+				uuid: block.uuid,
+				config: block.config,
+				connections: block.connections,
+
+				location: Serializer.CFrameSerializer.deserialize(block.loc),
+				color: block.col ? Serializer.Color3Serializer.deserialize(block.col) : undefined,
+				material: block.mat ? Serializer.EnumMaterialSerializer.deserialize(block.mat) : undefined,
+			};
+		};
+
+		const deserialized = JSON.deserialize(data) as SerializedBlocks<JsonBlock>;
+		return deserializeFromObject({ ...deserialized, blocks: deserialized.blocks.map(fix) }, plot);
 	}
 }
