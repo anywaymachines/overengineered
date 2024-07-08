@@ -37,8 +37,8 @@ export namespace GameDefinitions {
 	export const INTERNAL_UNIVERSE_ID = 5244408961;
 
 	// Building
-	export const FREE_SLOTS = 15;
-	export const ADMIN_SLOTS = 50;
+	export const FREE_SLOTS = 20;
+	export const ADMIN_SLOTS = 65 - FREE_SLOTS;
 
 	export const MAX_LINEAR_SPEED = RobloxUnit.Meters_To_Studs(1000);
 	export const MAX_ANGULAR_SPEED = 40;
