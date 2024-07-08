@@ -74,7 +74,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 	readonly selectedCategory = new ObservableValue<CategoryPath>([]);
 	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
-	readonly targetBlock = new ObservableValue<BlockId | undefined>(undefined);
+	readonly targetBlocks = new ObservableValue<readonly BlockId[] | undefined>(undefined);
 
 	readonly pipette;
 	private readonly breadcrumbs;
@@ -106,6 +106,8 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			}),
 		);
 
+		this.event.subscribeObservable(this.targetBlocks, () => this.create(this.selectedCategory.get(), false));
+
 		// might be useful
 		// const searchText = this.event.observableFromGuiParam(this.gui.SearchTextBox, "Text");
 		this.event.subscribe(this.gui.SearchTextBox.GetPropertyChangedSignal("Text"), () => {
@@ -124,23 +126,26 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			this.list.add(control);
 
 			// Highlight if needed
-			if (this.targetBlock.get()) {
+			const targetBlocks = this.targetBlocks.get();
+			if (targetBlocks) {
 				const drawHighlight = () => {
 					Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance;
 				};
 
-				const targetCategory = this.blockRegistry.blocks.get(this.targetBlock.get()!)!.category;
+				for (const targetBlock of targetBlocks) {
+					const targetCategory = this.blockRegistry.blocks.get(targetBlock)!.category;
 
-				if (targetCategory.size() < selectedCategory.size()) {
-					drawHighlight();
-				}
-
-				for (let i = 0; i < targetCategory.size(); i++) {
-					if (!selectedCategory[i]) break;
-
-					if (selectedCategory[i] !== targetCategory[i]) {
+					if (targetCategory.size() < selectedCategory.size()) {
 						drawHighlight();
-						break;
+					}
+
+					for (let i = 0; i < targetCategory.size(); i++) {
+						if (!selectedCategory[i]) break;
+
+						if (selectedCategory[i] !== targetCategory[i]) {
+							drawHighlight();
+							break;
+						}
 					}
 				}
 			}
@@ -162,15 +167,18 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			this.list.add(control);
 
 			// Highlight if needed
-			if (this.targetBlock.get()) {
-				const targetCategory = this.blockRegistry.blocks.get(this.targetBlock.get()!)!.category;
+			const targetBlocks = this.targetBlocks.get();
+			if (targetBlocks) {
+				for (const targetBlock of targetBlocks) {
+					const targetCategory = this.blockRegistry.blocks.get(targetBlock)!.category;
 
-				if (
-					selectedCategory.size() < targetCategory.size() &&
-					selectedCategory[selectedCategory.size() - 1] === targetCategory[selectedCategory.size() - 1] &&
-					category[category.size() - 1] === targetCategory[targetCategory.size() - 1]
-				) {
-					Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance;
+					if (
+						selectedCategory.size() < targetCategory.size() &&
+						selectedCategory[selectedCategory.size() - 1] === targetCategory[selectedCategory.size() - 1] &&
+						category[category.size() - 1] === targetCategory[targetCategory.size() - 1]
+					) {
+						Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance;
+					}
 				}
 			}
 
@@ -257,7 +265,13 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 				(newblock) => {
 					button.instance.BackgroundColor3 = newblock === block ? Colors.accentDark : Colors.staticBackground;
 
-					if (block.id === this.targetBlock.get() && newblock?.id !== this.targetBlock.get()) {
+					const targetBlocks = this.targetBlocks.get();
+					if (
+						targetBlocks &&
+						targetBlocks.includes(block.id) &&
+						newblock &&
+						!targetBlocks.includes(newblock.id)
+					) {
 						button.instance.FindFirstChild("Highlight")?.Destroy();
 						Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = button.instance;
 					} else {
