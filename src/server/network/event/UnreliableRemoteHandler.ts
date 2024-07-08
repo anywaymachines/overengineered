@@ -27,7 +27,7 @@ export class UnreliableRemoteController extends HostedService {
 			parts.forEach((part) => {
 				if (!BlockManager.isActiveBlockPart(part)) return;
 
-				const oldJoints = part.GetJoints();
+				// const oldJoints = part.GetJoints();
 				ServerPartUtils.BreakJoints(part);
 
 				// part.CollisionGroup = "Wreckage";
