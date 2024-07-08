@@ -6,21 +6,13 @@ import {
 	S2C2SRemoteFunction,
 } from "shared/event/PERemoteEvent";
 import type { Categories } from "server/blockInit/BlocksInitializer";
-import type { BlockId } from "shared/BlockDataRegistry";
-import type { PlacedBlockConfig, PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 declare global {
 	type BuildResponse = Response<{ readonly model: BlockModel }>;
 	type MultiBuildResponse = Response<{ readonly models: readonly BlockModel[] }>;
 
-	type PlaceBlockRequest = {
-		readonly id: BlockId;
-		readonly color: Color3;
-		readonly material: Enum.Material;
+	type PlaceBlockRequest = MakePartial<BlockDataBase, "uuid" | "config" | "connections"> & {
 		readonly location: CFrame;
-		readonly uuid?: BlockUuid;
-		readonly config?: PlacedBlockConfig;
-		readonly connections?: PlacedBlockLogicConnections;
 	};
 	type PlaceBlocksRequest = {
 		readonly plot: PlotModel;

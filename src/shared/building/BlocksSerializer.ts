@@ -18,15 +18,15 @@ interface SerializedBlockBase {
 }
 interface SerializedBlockV0 extends SerializedBlockBase {
 	readonly location: CFrame;
-	readonly material: Enum.Material | undefined;
-	readonly color: Color3 | undefined;
-	readonly config: PlacedBlockConfig | undefined;
+	readonly material?: Enum.Material | undefined;
+	readonly color?: Color3 | undefined;
+	readonly config?: PlacedBlockConfig | undefined;
 }
 interface SerializedBlockV2 extends SerializedBlockV0 {
 	readonly uuid: BlockUuid;
 }
 interface SerializedBlockV3 extends SerializedBlockV2 {
-	readonly connections: PlacedBlockLogicConnections | undefined;
+	readonly connections?: PlacedBlockLogicConnections | undefined;
 }
 
 export type LatestSerializedBlock = SerializedBlockV3;

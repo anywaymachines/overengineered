@@ -368,7 +368,7 @@ export namespace ClientBuilding {
 	};
 	function logicDisconnect({ plot, inputBlock: _inputBlock, inputConnection }: LogicDisconnectArgs) {
 		const inputBlock = BlockManager.manager.uuid.get(_inputBlock);
-		const output = BlockManager.manager.connections.get(_inputBlock)[inputConnection];
+		const output = BlockManager.manager.connections.get(_inputBlock)![inputConnection];
 
 		return ActionController.instance.execute(
 			"Disconnect logic",

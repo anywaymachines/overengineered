@@ -91,7 +91,9 @@ export namespace BlockWireManager {
 					let narrow = false;
 					let dataTypes: readonly DataType[];
 					if (config.type === "or") {
-						const existingcfg = (block.config as Record<string, typeof config.config & defined>)[key];
+						const existingcfg = (
+							block.config as Record<string, typeof config.config & defined> | undefined
+						)?.[key];
 
 						if (existingcfg === undefined || existingcfg.type === "unset") {
 							dataTypes = asMap(config.types).map((k) => groups[k]);

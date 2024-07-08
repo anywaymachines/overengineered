@@ -9,10 +9,8 @@ export type BlockLogicData<
 	BlockDataBase,
 	{
 		readonly instance: TBlock;
-		readonly config: Partial<ConfigDefinitionsToConfig<keyof TDef, TDef>> | undefined;
-		readonly connections:
-			| Readonly<Partial<Record<keyof TDef & BlockConnectionName, PlacedBlockDataConnection>>>
-			| undefined;
+		readonly config?: Partial<ConfigDefinitionsToConfig<keyof TDef, TDef>>;
+		readonly connections?: Readonly<Partial<Record<keyof TDef & BlockConnectionName, PlacedBlockDataConnection>>>;
 	}
 >;
 

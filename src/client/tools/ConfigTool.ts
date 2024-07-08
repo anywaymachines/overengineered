@@ -116,11 +116,12 @@ namespace Scene {
 					BlockManager.manager.config.get(blockmodel) as Record<string, number>,
 					defs,
 				);
+				const connections = BlockManager.manager.connections.get(blockmodel);
 				return {
 					blockmodel,
 					uuid: BlockManager.manager.uuid.get(blockmodel),
 					config,
-					connections: Objects.keys(BlockManager.manager.connections.get(blockmodel)),
+					connections: connections ? Objects.keys(connections) : [],
 				} as const;
 			});
 
@@ -205,7 +206,6 @@ export class ConfigTool extends ToolBase {
 			}
 
 			const config = blockConfigRegistry[BlockManager.manager.id.get(block) as keyof typeof blockConfigRegistry];
-			print(config);
 			if (!config) return false;
 
 			if (!asMap((config as BlockConfigTypes.BothDefinitions).input).findValue((k, v) => !v.configHidden)) {

@@ -263,7 +263,7 @@ declare global {
 		mapToMap<TKey extends defined, TValue>(
 			this: ReadonlyArray<defined>,
 			func: (item: T) => LuaTuple<[key: TKey, value: TValue]>,
-		): Map<TKey, TValue>;
+		): Map<TKey, TValue & defined>;
 		flatmap<TOut extends defined>(this: ReadonlyArray<defined>, func: (item: T) => readonly TOut[]): TOut[];
 		mapToSet<TOut extends defined>(this: ReadonlyArray<defined>, func: (item: T) => TOut): Set<TOut>;
 		groupBy<TKey extends defined>(this: ReadonlyArray<defined>, keyfunc: (value: T) => TKey): Map<TKey, T[]>;
@@ -278,10 +278,12 @@ export const ArrayMacros: PropertyMacros<ReadonlyArray<defined>> = {
 	mapToMap: <T extends defined, TKey extends defined, TValue>(
 		array: readonly T[],
 		func: (item: T) => LuaTuple<[key: TKey, value: TValue]>,
-	): Map<TKey, TValue> => {
-		const result = new Map<TKey, TValue>();
+	): Map<TKey, TValue & defined> => {
+		const result = new Map<TKey, TValue & defined>();
 		for (const item of array) {
 			const [k, v] = func(item);
+			if (!v) continue;
+
 			result.set(k, v);
 		}
 

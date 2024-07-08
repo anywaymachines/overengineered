@@ -23,8 +23,8 @@ declare global {
 		readonly uuid: BlockUuid;
 		readonly color: Color3;
 		readonly material: Enum.Material;
-		readonly config: PlacedBlockConfig;
-		readonly connections: PlacedBlockLogicConnections;
+		readonly config: PlacedBlockConfig | undefined;
+		readonly connections: PlacedBlockLogicConnections | undefined;
 	};
 }
 
@@ -37,7 +37,7 @@ declare global {
 
 interface Manager<T> {
 	readonly set: (block: BlockModel, value: T) => void;
-	readonly get: (block: BlockModel) => T & defined;
+	readonly get: (block: BlockModel) => T;
 }
 
 /** Methods for reading information about a block */
@@ -105,7 +105,7 @@ export namespace BlockManager {
 				block.SetAttribute("config", value ? JSON.serialize(value) : undefined),
 			get: (block) => {
 				const attribute = block.GetAttribute("config") as string | undefined;
-				if (attribute === undefined) return {};
+				if (attribute === undefined) return undefined;
 
 				return JSON.deserialize<PlacedBlockConfig>(attribute);
 			},
@@ -115,7 +115,7 @@ export namespace BlockManager {
 				block.SetAttribute("connections", value !== undefined ? JSON.serialize(value) : undefined),
 			get: (block) => {
 				const attribute = block.GetAttribute("connections") as string | undefined;
-				if (attribute === undefined) return {};
+				if (attribute === undefined) return undefined;
 
 				return JSON.deserialize<PlacedBlockLogicConnections>(attribute);
 			},

@@ -775,7 +775,7 @@ export class MultiConfigControl<
 				if (block) {
 					connectedControl.travelToConnectedPressed.Connect(() =>
 						this._travelToConnectedPressed.Fire(
-							BlockManager.manager.connections.get(block!)?.[id as BlockConnectionName].blockUuid,
+							BlockManager.manager.connections.get(block!)![id as BlockConnectionName].blockUuid,
 						),
 					);
 				} else {
