@@ -226,9 +226,17 @@ export class S2C2SRemoteFunction<TArg, TResp extends Response = Response> extend
 	}
 
 	/** @client */
-	subscribe(func: typeof this.invoked & defined) {
+	subscribe(func: typeof this.invoked & defined): SignalConnection {
 		if (this.invoked) throw "what";
 		this.invoked = func;
+
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const selv = this;
+		return {
+			Disconnect() {
+				selv.invoked = undefined;
+			},
+		};
 	}
 
 	/** @server */
@@ -284,9 +292,17 @@ export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extend
 	}
 
 	/** @server */
-	subscribe(func: typeof this.invoked & defined) {
+	subscribe(func: typeof this.invoked & defined): SignalConnection {
 		if (this.invoked) throw "what";
 		this.invoked = func;
+
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const selv = this;
+		return {
+			Disconnect() {
+				selv.invoked = undefined;
+			},
+		};
 	}
 
 	/** @client */

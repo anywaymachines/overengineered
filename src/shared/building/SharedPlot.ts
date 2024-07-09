@@ -30,6 +30,9 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	readonly blacklistedPlayers;
 	readonly bounds: BB;
 
+	readonly origin: CFrame;
+	readonly boundingBox: BB;
+
 	constructor(instance: PlotModel) {
 		super(instance);
 
@@ -45,6 +48,8 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 		this.blacklistedPlayers = this.event.observableFromAttributeJson<readonly number[]>(instance, "blacklisted");
 		this.whitelistedPlayers.set([5243461283]);
 		this.bounds = getPlotBuildingRegion(instance);
+		this.origin = this.getCenter();
+		this.boundingBox = this.bounds;
 	}
 
 	getCenter() {

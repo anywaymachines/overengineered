@@ -75,23 +75,13 @@ const place = {
 	blocksOnPlot: (
 		plot: BuildingPlot,
 		data: readonly LatestSerializedBlock[],
-		place: (plot: BuildingPlot, blockData: LatestSerializedBlock, buildingCenter: CFrame) => void,
+		place: (plot: BuildingPlot, blockData: LatestSerializedBlock) => void,
 	) => {
-		const buildingCenter = plot.origin;
-		data.forEach((blockData) => place(plot, blockData, buildingCenter));
+		data.forEach((blockData) => place(plot, blockData));
 	},
 
-	blockOnPlotV3: (plot: BuildingPlot, blockData: LatestSerializedBlock, buildingCenter: CFrame) => {
-		const deserializedData: PlaceBlockRequest = {
-			id: blockData.id,
-			location: buildingCenter.ToWorldSpace(blockData.location),
-
-			color: blockData.color ?? Color3.fromRGB(255, 255, 255),
-			material: blockData.material ?? Enum.Material.Plastic,
-			config: blockData.config,
-			uuid: blockData.uuid,
-			connections: blockData.connections,
-		};
+	blockOnPlotV3: (plot: BuildingPlot, blockData: LatestSerializedBlock) => {
+		const deserializedData = BlocksSerializer.serializedBlockToPlaceRequest(blockData, plot.origin);
 
 		const response = plot.placeOperation.execute(deserializedData);
 		if (!response.success) {
@@ -1052,5 +1042,21 @@ export namespace BlocksSerializer {
 
 		const deserialized = JSON.deserialize(data) as SerializedBlocks<JsonBlock>;
 		return deserializeFromObject({ ...deserialized, blocks: deserialized.blocks.map(fix) }, plot);
+	}
+
+	export function serializedBlockToPlaceRequest(
+		blockData: LatestSerializedBlock,
+		buildingCenter: CFrame,
+	): PlaceBlockRequest {
+		return {
+			id: blockData.id,
+			location: buildingCenter.ToWorldSpace(blockData.location),
+
+			color: blockData.color ?? Color3.fromRGB(255, 255, 255),
+			material: blockData.material ?? Enum.Material.Plastic,
+			config: blockData.config,
+			uuid: blockData.uuid,
+			connections: blockData.connections,
+		};
 	}
 }

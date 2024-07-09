@@ -1192,6 +1192,7 @@ export class BuildTool extends ToolBase {
 	readonly currentMode = new ComponentChild<IController>(this, true);
 	readonly blockRotation = new ObservableValue<CFrame>(CFrame.identity);
 	readonly controller;
+	readonly gui;
 
 	constructor(
 		@inject readonly mode: BuildingMode,
@@ -1200,7 +1201,7 @@ export class BuildTool extends ToolBase {
 	) {
 		super(mode);
 
-		this.parentGui(
+		this.gui = this.parentGui(
 			new Scene.BuildToolScene(ToolBase.getToolGui<"Build", Scene.BuildToolSceneDefinition>().Build, this),
 		);
 

@@ -90,9 +90,9 @@ export class TutorialConfigTool {
 			);*/
 
 			eventHandler.subscribe(ClientBuilding.updateConfigOperation.executed, ({ plot }) => {
-				const configs = new Map(
-					plot.getBlocks().map((block) => [block, BlockManager.manager.config.get(block)] as const),
-				);
+				const configs = plot
+					.getBlocks()
+					.mapToMap((block) => $tuple(block, BlockManager.manager.config.get(block)));
 				const positions = this.get().blocksToConfigure.map((value) => VectorUtils.roundVector3(value.position));
 				const configs_filtered = configs.filter((value) =>
 					positions.includes(

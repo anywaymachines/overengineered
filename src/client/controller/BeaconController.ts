@@ -6,7 +6,7 @@ import { ComponentKeyedChildren } from "shared/component/ComponentKeyedChildren"
 import { HostedService } from "shared/GameHost";
 import { PlayerWatcher } from "shared/PlayerWatcher";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
-import type { ReadonlyPlot } from "shared/building/BuildingPlot";
+import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
 @injectable
 export class BeaconController extends HostedService {

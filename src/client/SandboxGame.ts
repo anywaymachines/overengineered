@@ -22,18 +22,16 @@ import { ClientBuildingValidationController } from "client/modes/build/ClientBui
 import { PlayModeController } from "client/modes/PlayModeController";
 import { PlayerDataInitializer } from "client/PlayerDataStorage";
 import { TerrainController } from "client/terrain/TerrainController";
-import { TestRunner } from "client/test/TestRunner";
 import { Tutorial } from "client/tutorial/Tutorial";
 import { TutorialBasics } from "client/tutorial/TutorialBasics";
 import { AutoLogicCreator } from "shared/block/AutoLogicCreator";
 import { BlockRegistry } from "shared/block/BlockRegistry";
-import { BuildingPlot } from "shared/building/BuildingPlot";
+import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { HostedService } from "shared/GameHost";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
-import type { ReadonlyPlot } from "shared/building/BuildingPlot";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 namespace Startup {
@@ -49,20 +47,9 @@ namespace Startup {
 			});
 		}
 	}
-	@injectable
-	class RunTestRunner extends HostedService {
-		constructor(@inject di: DIContainer) {
-			super();
-			this.onEnable(() => TestRunner.create(di));
-		}
-	}
 
 	export function initializeBasicsTutorial(builder: GameHostBuilder) {
 		builder.services.registerService(RunTutorialIfNoSlots);
-	}
-	export function initializeTestRunner(builder: GameHostBuilder) {
-		const testsEnabled = RunService.IsStudio(); // && Players.LocalPlayer.Name === "i3ymm";
-		if (testsEnabled) builder.services.registerService(RunTestRunner);
 	}
 }
 
@@ -92,7 +79,7 @@ export namespace SandboxGame {
 		);
 		builder.services.registerSingletonFunc((ctx): ReadonlyPlot => {
 			const plot = ctx.resolve<SharedPlot>();
-			return new BuildingPlot(plot.instance.Blocks, plot.getCenter(), plot.bounds, ctx.resolve<BlockRegistry>());
+			return new ReadonlyPlot(plot.instance.Blocks, plot.getCenter(), plot.bounds);
 		});
 
 		builder.services.registerSingletonFunc((): BlockRegistry => {
@@ -127,7 +114,6 @@ export namespace SandboxGame {
 		WikiPopup.addAsService(builder);
 
 		Startup.initializeBasicsTutorial(builder);
-		Startup.initializeTestRunner(builder);
 
 		LoadingController.show("Initializing something");
 	}

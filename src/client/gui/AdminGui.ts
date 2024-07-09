@@ -6,12 +6,17 @@ import { TextButtonControl } from "client/gui/controls/Button";
 import { TabControl } from "client/gui/controls/TabControl";
 import { Gui } from "client/gui/Gui";
 import { ServerRestartController } from "client/ServerRestartController";
+import { TestRunner } from "client/test/TestRunner";
 import { LoadSlotTest } from "client/test/visual/LoadSlotTest";
+import { TutorialCreator } from "client/tutorial/creator/TutorialCreator";
+import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Element } from "shared/Element";
 import { HostedService } from "shared/GameHost";
+import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
+@injectable
 export class AdminGui extends HostedService {
 	static initializeIfAdminOrStudio(host: GameHostBuilder) {
 		const enabled = RunService.IsStudio() || GameDefinitions.isAdmin(Players.LocalPlayer);
@@ -20,7 +25,7 @@ export class AdminGui extends HostedService {
 		host.services.registerService(this);
 	}
 
-	constructor() {
+	constructor(@inject di: DIContainer) {
 		super();
 
 		let destroy: (() => void) | undefined;
@@ -34,7 +39,7 @@ export class AdminGui extends HostedService {
 
 			const wrapNonVisual = (
 				name: string,
-				tests: Readonly<Record<string, () => void>>,
+				tests: Readonly<Record<string, (di: DIContainer) => void>>,
 			): readonly [name: string, test: Control] => {
 				const frame = Element.create(
 					"Frame",
@@ -56,7 +61,7 @@ export class AdminGui extends HostedService {
 						AutomaticSize: Enum.AutomaticSize.XY,
 						TextSize: 16,
 					});
-					button.activated.Connect(test);
+					button.activated.Connect(() => test(di));
 
 					control.add(button);
 				}
@@ -72,7 +77,14 @@ export class AdminGui extends HostedService {
 				["Load", LoadSlotTest.create(false)],
 				["Load REMOTE", LoadSlotTest.create(true)],
 				["Global message", AdminMessageController.createControl()],
+				wrapNonVisual("Tutorial creator", {
+					startTest: (di) => TestTutorial.start(di),
+					setBefore: (di) => TutorialCreator.setBefore(di.resolve<ReadonlyPlot>()),
+					printDiff: (di) => print(TutorialCreator.serializeDiffToTsCode(di.resolve<ReadonlyPlot>())),
+					print: (di) => print(TutorialCreator.serializePlotToTsCode(di.resolve<ReadonlyPlot>())),
+				}),
 				wrapNonVisual("Restart", { restart: ServerRestartController.sendToServer }),
+				wrapNonVisual("TESTS", { open: TestRunner.create }),
 			];
 			for (const [name, content] of tests) {
 				content.hide();

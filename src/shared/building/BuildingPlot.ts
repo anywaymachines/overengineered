@@ -1,46 +1,31 @@
 import { HttpService } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
+import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedBuilding } from "shared/building/SharedBuilding";
-import { Component } from "shared/component/Component";
-import { ComponentInstance } from "shared/component/ComponentInstance";
 import { BB } from "shared/fixes/BB";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Operation } from "shared/Operation";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
-import type { PlacedBlockData, PlacedBlockLogicConnections } from "shared/building/BlockManager";
+import type { PlacedBlockLogicConnections } from "shared/building/BlockManager";
 
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
 
-export type ReadonlyPlot = {
-	readonly origin: CFrame;
-	readonly boundingBox: BB;
-
-	cloneBlocks(): Instance;
-	isInside(block: BlockModel): boolean;
-
-	getBlocks(): readonly BlockModel[];
-	getBlockDatas(): readonly PlacedBlockData[];
-	getBlock(uuid: BlockUuid): BlockModel;
-	tryGetBlock(uuid: BlockUuid): BlockModel | undefined;
-};
-
 /** Building on a plot. */
 @injectable
-export class BuildingPlot extends Component {
+export class BuildingPlot extends ReadonlyPlot {
 	readonly placeOperation = new Operation(this.place.bind(this));
 	readonly deleteOperation = new Operation(this.delete.bind(this));
 	readonly editOperation = new Operation(this.edit.bind(this));
 
 	constructor(
-		private readonly instance: Folder,
-		readonly origin: CFrame,
-		readonly boundingBox: BB,
+		instance: Folder,
+		origin: CFrame,
+		boundingBox: BB,
 		@inject private readonly blockRegistry: BlockRegistry,
 	) {
-		super();
-		ComponentInstance.init(this, instance);
+		super(instance, origin, boundingBox);
 	}
 
 	cloneBlocks(): Instance {
@@ -50,21 +35,11 @@ export class BuildingPlot extends Component {
 		return this.boundingBox.isBBInside(BB.fromModel(block));
 	}
 
-	getBlocks(): readonly BlockModel[] {
-		return this.instance.GetChildren() as unknown as readonly BlockModel[];
-	}
-	getBlockDatas(): readonly PlacedBlockData[] {
-		return this.getBlocks().map(BlockManager.getBlockDataByBlockModel);
-	}
-	getBlock(uuid: BlockUuid): BlockModel {
-		return (this.instance as unknown as Record<BlockUuid, BlockModel>)[uuid];
-	}
-	tryGetBlock(uuid: BlockUuid): BlockModel | undefined {
-		return this.instance.FindFirstChild(uuid) as BlockModel | undefined;
-	}
-
 	unparent(): void {
 		this.instance.Parent = undefined;
+	}
+	destroy(): void {
+		this.instance.Destroy();
 	}
 
 	/** @deprecated Used only for a specific case, do not use & do not remove */
@@ -238,7 +213,7 @@ export class BuildingPlot extends Component {
 
 		for (const config of configs) {
 			const currentData = BlockManager.manager.config.get(config.block);
-			const newData = withValues(currentData, { [config.key]: JSON.deserialize(config.value) });
+			const newData = withValues(currentData ?? {}, { [config.key]: JSON.deserialize(config.value) });
 
 			BlockManager.manager.config.set(config.block, newData);
 		}

@@ -17,6 +17,13 @@ export interface ReadonlySignal<T extends (...args: any) => void = () => void>
 
 /** A signal that you can subscribe to, unsibscribe from and fire */
 export class ArgsSignal<TArgs extends unknown[]> implements ReadonlyArgsSignal<TArgs> {
+	static connection(func: () => void): SignalConnection {
+		return {
+			Disconnect() {
+				func();
+			},
+		};
+	}
 	static multiConnection(...connections: SignalConnection[]): SignalConnection {
 		return {
 			Disconnect() {
