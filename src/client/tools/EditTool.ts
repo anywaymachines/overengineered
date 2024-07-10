@@ -272,7 +272,7 @@ const reGenerateUuids = (
 		);
 
 		for (const [key, connection] of [...asMap(connections)]) {
-			if (!plotBlocks.has(connection.blockUuid)) {
+			if (!plotBlocks.has(connection.blockUuid) && !uuidmap.has(connection.blockUuid)) {
 				$log(
 					`Deleting nonexistent connection ${olduuid} ${key} -> ${connection.blockUuid} ${connection.connectionName}`,
 				);
