@@ -1,8 +1,10 @@
 export namespace Config {
 	export function addDefaults<TKeys extends keyof TDef & string, TDef extends UnknownConfigDefinitions>(
-		config: Partial<ConfigDefinitionsToConfig<TKeys, TDef>>,
+		config: Partial<ConfigDefinitionsToConfig<TKeys, TDef>> | undefined,
 		definition: TDef,
 	): ConfigDefinitionsToConfig<TKeys, TDef> {
+		config ??= {};
+
 		for (const [key, def] of pairs(definition)) {
 			if (typeIs(config[key], "table") || typeIs(def.config, "table")) {
 				if (

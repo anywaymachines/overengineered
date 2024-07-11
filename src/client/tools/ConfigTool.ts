@@ -113,7 +113,7 @@ namespace Scene {
 				if (!defs) return undefined!;
 
 				const config = Config.addDefaults(
-					BlockManager.manager.config.get(blockmodel) as Record<string, number>,
+					BlockManager.manager.config.get(blockmodel) as Record<string, number> | undefined,
 					defs,
 				);
 				const connections = BlockManager.manager.connections.get(blockmodel);
