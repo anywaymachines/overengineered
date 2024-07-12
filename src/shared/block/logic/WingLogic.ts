@@ -24,6 +24,12 @@ export class WingLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry
 		this.event.onEnable(() => this.initializeForces());
 	}
 
+	private findWingSurface(wingSurface: BasePart) {
+		const Z = wingSurface.Size.X * wingSurface.Size.Z;
+		const X = Z * 0.05;
+		return wingSurface.IsA("WedgePart") ? new Vector3(Z, X, X).mul(0.5) : new Vector3(X, Z, X);
+	}
+
 	private initializeForces() {
 		// Enable fluidforces for roblox engineers
 		if (RunService.IsStudio() || GameDefinitions.isRobloxEngineer(Players.LocalPlayer)) {
@@ -33,28 +39,24 @@ export class WingLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry
 
 		if (this.input.enabled.get() === false) return;
 
-		this.wingSurface.EnableFluidForces = false;
+		// Create force constraints
+		const attachment = new Instance("Attachment", this.wingSurface);
+		const vectorForce = new Instance("VectorForce", this.wingSurface);
+		vectorForce.RelativeTo = Enum.ActuatorRelativeTo.Attachment0;
+		vectorForce.Attachment0 = attachment;
 
-		const findWingSurface = (wingSurface: BasePart): Vector3 => {
-			const Z = wingSurface.Size.X * wingSurface.Size.Z;
-			const X = Z * 0.05;
-			return wingSurface.IsA("WedgePart") ? new Vector3(Z, X, X).mul(0.5) : new Vector3(X, Z, X);
-		};
-		const surface = findWingSurface(this.wingSurface);
-		const vectorForce = this.wingSurface.FindFirstChild("VectorForce") as VectorForce;
-
+		// Set up wing material properties
 		const density = math.max(0.7, new PhysicalProperties(this.block.material).Density / 2);
 		this.wingSurface.CustomPhysicalProperties = new PhysicalProperties(density, 0.3, 0.5, 1, 1);
 
-		if (!vectorForce) return;
+		const surface = this.findWingSurface(this.wingSurface);
 		this.event.subscribe(RunService.Heartbeat, () => {
 			const force = surface
 				.mul(
 					this.wingSurface.CFrame.PointToObjectSpace(
 						this.wingSurface.Position.add(this.wingSurface.Velocity.add(Workspace.GlobalWind)),
-					).mul(-1),
+					).mul(-21),
 				)
-				.mul(21)
 				.add(vectorForce.Force)
 				.div(2)
 				.mul(
@@ -69,11 +71,6 @@ export class WingLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry
 						1,
 					),
 				);
-
-			// - ((0 - -16000 + 10000) / (-16000 - 10000))
-			// (10000 - -16000) / (-16000 - 10000)
-			// 1 - height / max height
-
 			vectorForce.Force = force;
 		});
 	}
