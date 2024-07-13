@@ -44,15 +44,19 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		super(block, blockConfigRegistry.radarsection);
 
 		const view = this.instance.WaitForChild("RadarView");
+		const metalPlate = this.instance.WaitForChild("MetalPlate");
 		const maxDist = blockConfigRegistry.radarsection.input.maxDistance.max;
 		const halvedMaxDist = maxDist / 2;
 
 		if (!view) return;
 		if (!view.IsA("BasePart")) return;
 
+		if (!metalPlate) return;
+		if (!metalPlate.IsA("BasePart")) return;
+
 		const updateDistance = (detectionSize: number) => {
 			const md = this.input.maxDistance.get();
-			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (md + halvedMaxDist))) * 6;
+			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (md + halvedMaxDist))) * 5;
 			view.Size = new Vector3(ds, view.Size.Y, ds);
 		};
 
@@ -63,7 +67,10 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		this.event.subscribeObservable(this.input.detectionSize, updateDistance);
 
 		this.event.subscribeObservable(this.input.maxDistance, (maxDistance) => {
-			view.Size = new Vector3(view.Size.X, RobloxUnit.Meters_To_Studs(maxDistance), view.Size.Z);
+			const sizeStuds = RobloxUnit.Meters_To_Studs(maxDistance);
+			const pivo = metalPlate.GetPivot();
+			view.Position = pivo.PointToWorldSpace(Vector3.xAxis.mul(sizeStuds / 2 + 0.5));
+			view.Size = new Vector3(view.Size.X, sizeStuds, view.Size.Z);
 			updateDistance(this.input.detectionSize.get());
 		});
 		/*

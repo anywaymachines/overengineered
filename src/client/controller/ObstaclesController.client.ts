@@ -5,6 +5,8 @@ import { CustomDebrisService } from "shared/service/CustomDebrisService";
 
 const initKillPlane = (instance: BasePart, onTouch?: (part: BasePart) => void) => {
 	instance.Touched.Connect((part) => {
+		if (part.HasTag("OBSTACLEPROOF")) return;
+
 		let parent: Instance = part;
 		while (true as boolean) {
 			if (parent.FindFirstChild("Humanoid")) {
@@ -35,6 +37,8 @@ for (const lava of CollectionService.GetTagged("Lava")) {
 	if (!lava.IsA("BasePart")) continue;
 
 	initKillPlane(lava, (part) => {
+		if (part.HasTag("LAVAPROOF")) return;
+
 		RemoteEvents.Burn.send([part]);
 		part.AssemblyLinearVelocity = part.AssemblyLinearVelocity.add(
 			new Vector3(math.random() * 18 - 6, 25, math.random() * 18 - 6),
