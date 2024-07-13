@@ -1,4 +1,4 @@
-import { Players, ReplicatedStorage, StarterGui, Workspace } from "@rbxts/services";
+import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Signals } from "client/event/Signals";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -53,6 +53,7 @@ export namespace SoundController {
 
 	function applyUnderwaterEffect(sound: Sound) {
 		const effect = ReplicatedStorage.Assets.Effects.Sounds.Effects.Underwater.Clone();
+		effect.Parent = sound;
 		underwaterEffectsCache.push(effect);
 	}
 
@@ -65,7 +66,8 @@ export namespace SoundController {
 
 	function cameraMoved() {
 		// Underwater effect
-		const isUnderwaterCheck = Workspace.CurrentCamera!.CFrame.Y <= TerrainDataInfo.waterLevel - 5;
+		// TODO: Attach player data storage to check can terrain contain water or not
+		const isUnderwaterCheck = Workspace.CurrentCamera!.CFrame.Y <= TerrainDataInfo.waterLevel + 5;
 		if (isUnderwaterCheck !== isUnderwater) {
 			isUnderwater = isUnderwaterCheck;
 
@@ -73,9 +75,13 @@ export namespace SoundController {
 				PartUtils.applyToAllDescendantsOfType("Sound", Workspace, (sound) => {
 					applyUnderwaterEffect(sound);
 				});
-				PartUtils.applyToAllDescendantsOfType("Sound", StarterGui, (sound) => {
-					applyUnderwaterEffect(sound);
-				});
+				PartUtils.applyToAllDescendantsOfType(
+					"Sound",
+					(Players.LocalPlayer as unknown as { PlayerGui: PlayerGui }).PlayerGui,
+					(sound) => {
+						applyUnderwaterEffect(sound);
+					},
+				);
 			} else {
 				cleanupUnderwaterEffect();
 			}
@@ -85,7 +91,7 @@ export namespace SoundController {
 
 		// Region effect
 		getSounds().Env.Ground.Volume =
-			(1 - (Workspace.CurrentCamera!.CFrame.Y - GameDefinitions.HEIGHT_OFFSET) / groundEffectMaxHeight) * 0.049;
+			(1 - (Workspace.CurrentCamera!.CFrame.Y - GameDefinitions.HEIGHT_OFFSET) / groundEffectMaxHeight) * 0.06;
 	}
 
 	export function getSounds(): Sounds {
