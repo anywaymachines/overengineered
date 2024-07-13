@@ -1,6 +1,8 @@
-import { ReplicatedStorage, StarterGui, Workspace } from "@rbxts/services";
+import { Players, ReplicatedStorage, StarterGui, Workspace } from "@rbxts/services";
 import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Signals } from "client/event/Signals";
+import { GameDefinitions } from "shared/data/GameDefinitions";
+import { RobloxUnit } from "shared/RobloxUnit";
 import { Sound } from "shared/Sound";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { PartUtils } from "shared/utils/PartUtils";
@@ -12,6 +14,9 @@ type Sounds = {
 		readonly BlockRotate: Sound;
 		readonly BlockDelete: Sound;
 	};
+	readonly Env: {
+		readonly Ground: Sound;
+	};
 	readonly Start: Sound;
 	readonly Click: Sound;
 	readonly Warning: Sound;
@@ -22,65 +27,80 @@ type Sounds = {
 
 /** A class for controlling sounds and their effects */
 export namespace SoundController {
-	let underwater = false;
+	let isUnderwater = false;
+
+	const groundEffectMaxHeight = RobloxUnit.Meters_To_Studs(500);
+	const underwaterEffectsCache: EqualizerSoundEffect[] = [];
 
 	export function initialize() {
-		Signals.CAMERA.MOVED.Connect(() => {
-			const newState = Workspace.CurrentCamera!.CFrame.Y <= TerrainDataInfo.waterLevel - 5;
-			if (newState === underwater) return;
-
-			underwater = newState;
-			updateAllSounds();
-		});
+		// Events
+		Signals.CAMERA.MOVED.Connect(cameraMoved);
 
 		Workspace.DescendantAdded.Connect((descendant) => {
-			if (!underwater) {
-				return;
-			}
 			if (!descendant.IsA("Sound")) {
 				return;
 			}
-			updateSound(descendant);
+
+			soundAdded(descendant);
 		});
-
-		/** Preload all sound assets */
-		const sounds = ReplicatedStorage.Assets.GetDescendants().filter((value) => value.IsA("Sound")) as Sound[];
-		const list: string[] = [];
-
-		sounds.forEach((sound) => {
-			list.push(sound.SoundId);
-		});
-
-		// ContentProvider.PreloadAsync(list);
 	}
 
-	function updateSound(sound: Sound) {
-		const underwaterEffect = sound.FindFirstChild(ReplicatedStorage.Assets.Effects.Sounds.Effects.Underwater.Name);
-		if (underwater && !underwaterEffect) {
-			ReplicatedStorage.Assets.Effects.Sounds.Effects.Underwater.Clone().Parent = sound;
-		} else if (!underwater && underwaterEffect) {
-			underwaterEffect.Destroy();
+	function soundAdded(descendant: Sound) {
+		if (!isUnderwater) return;
+
+		applyUnderwaterEffect(descendant);
+	}
+
+	function applyUnderwaterEffect(sound: Sound) {
+		const effect = ReplicatedStorage.Assets.Effects.Sounds.Effects.Underwater.Clone();
+		underwaterEffectsCache.push(effect);
+	}
+
+	function cleanupUnderwaterEffect() {
+		for (const instance of underwaterEffectsCache) {
+			instance?.Destroy();
 		}
+		underwaterEffectsCache.clear();
 	}
 
-	function updateAllSounds() {
-		PartUtils.applyToAllDescendantsOfType("Sound", StarterGui, (sound) => {
-			updateSound(sound);
-		});
-		PartUtils.applyToAllDescendantsOfType("Sound", Workspace, (sound) => {
-			updateSound(sound);
-		});
+	function cameraMoved() {
+		// Underwater effect
+		const isUnderwaterCheck = Workspace.CurrentCamera!.CFrame.Y <= TerrainDataInfo.waterLevel - 5;
+		if (isUnderwaterCheck !== isUnderwater) {
+			isUnderwater = isUnderwaterCheck;
+
+			if (isUnderwater) {
+				PartUtils.applyToAllDescendantsOfType("Sound", Workspace, (sound) => {
+					applyUnderwaterEffect(sound);
+				});
+				PartUtils.applyToAllDescendantsOfType("Sound", StarterGui, (sound) => {
+					applyUnderwaterEffect(sound);
+				});
+			} else {
+				cleanupUnderwaterEffect();
+			}
+
+			return;
+		}
+
+		// Region effect
+		getSounds().Env.Ground.Volume =
+			(1 - (Workspace.CurrentCamera!.CFrame.Y - GameDefinitions.HEIGHT_OFFSET) / groundEffectMaxHeight) * 0.049;
 	}
 
 	export function getSounds(): Sounds {
-		return (StarterGui as unknown as { GameUI: { Sounds: Sounds } }).GameUI.Sounds;
-	}
-
-	export function randomSoundSpeed(): number {
-		return math.random(8, 12) / 10;
+		return (
+			(Players.LocalPlayer as unknown as { PlayerGui: PlayerGui }).PlayerGui as unknown as {
+				GameUI: { Sounds: Sounds };
+			}
+		).GameUI.Sounds;
 	}
 
 	export function getWorldVolume(volume: number) {
 		return Sound.getWorldVolume(LocalPlayer.getPlayerRelativeHeight()) * volume;
+	}
+
+	export function randomSoundSpeed(): number {
+		return math.random(8, 12) / 10;
 	}
 }
