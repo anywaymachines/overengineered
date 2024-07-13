@@ -2,23 +2,26 @@ import { Workspace } from "@rbxts/services";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RobloxUnit } from "shared/RobloxUnit";
+import { VectorUtils } from "shared/utils/VectorUtils";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.radarsection> {
 	private closestDetectedPart: BasePart | undefined = undefined;
 	private readonly allTouchedBlocks: Set<BasePart> = new Set<BasePart>();
-
+	//private justMoved = false;
 	private getDistanceTo(part: BasePart) {
 		//if (!this.closestDetectedPart) return -1; //it was here for a reason... Can't remember why tho
 		if (!part.IsDescendantOf(Workspace)) return;
-		return RobloxUnit.Studs_To_Meters(this.instance.GetPivot().Position.sub(part.Position).Magnitude);
+		return VectorUtils.apply(this.instance.GetPivot().Position.sub(part.Position), (v) =>
+			RobloxUnit.Studs_To_Meters(v),
+		);
 	}
 
-	private getClosestPart() {
+	private findClosestPart() {
 		let smallestDistance: number | undefined;
 		let closestPart: BasePart | undefined;
 		for (const bp of this.allTouchedBlocks) {
-			const d = this.getDistanceTo(bp);
+			const d = this.getDistanceTo(bp)?.Magnitude;
 			if (d === undefined) {
 				this.allTouchedBlocks.delete(bp);
 				continue;
@@ -34,7 +37,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		super.tick(tick);
 
 		if (this.closestDetectedPart !== undefined)
-			this.output.distance.set(this.getDistanceTo(this.closestDetectedPart) ?? -1);
+			this.output.distance.set(this.getDistanceTo(this.closestDetectedPart) ?? Vector3.zero);
 	}
 
 	constructor(block: PlacedBlockData) {
@@ -49,7 +52,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 
 		const updateDistance = (detectionSize: number) => {
 			const md = this.input.maxDistance.get();
-			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (md + halvedMaxDist)));
+			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (md + halvedMaxDist))) * 6;
 			view.Size = new Vector3(ds, view.Size.Y, ds);
 		};
 
@@ -63,7 +66,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 			view.Size = new Vector3(view.Size.X, RobloxUnit.Meters_To_Studs(maxDistance), view.Size.Z);
 			updateDistance(this.input.detectionSize.get());
 		});
-
+		/*
 		this.event.subscribeObservable(this.input.angleOffset, (angle, prev) => {
 			const maxAngle = 45;
 			prev = new Vector3(
@@ -78,28 +81,32 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 			);
 
 			view.Rotation = view.Rotation.sub(prev).add(angle);
+			this.justMoved = true;
 		});
-
+		*/
 		this.event.subscribe(view.Touched, (part) => {
 			if (part.CollisionGroup !== "Blocks") return;
 			if (part.HasTag("RADARVIEW")) return;
 			if (part.IsDescendantOf(this.instance)) return;
 
-			const d1 = this.getDistanceTo(part);
+			const d1 = this.getDistanceTo(part)?.Magnitude;
 			if (d1 !== undefined && d1 < this.input.minimalDistance.get()) return;
 			this.allTouchedBlocks.add(part);
-			if (!this.closestDetectedPart) return (this.closestDetectedPart = part);
-			const d2 = this.getDistanceTo(this.closestDetectedPart);
+			if (this.closestDetectedPart === undefined) return (this.closestDetectedPart = part);
+			if (this.closestDetectedPart === part) return;
+			const d2 = this.getDistanceTo(this.closestDetectedPart)?.Magnitude;
 			if (d1 === undefined) return;
 			if (d2 === undefined) return (this.closestDetectedPart = part);
 			if (d1 > d2) return;
 			this.closestDetectedPart = part;
+			//print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", d1);
 		});
 
 		this.event.subscribe(view.TouchEnded, (part) => {
 			this.allTouchedBlocks.delete(part);
 			if (part !== this.closestDetectedPart) return;
-			if ((this.closestDetectedPart = this.getClosestPart()) === undefined) this.output.distance.set(-1);
+			if ((this.closestDetectedPart = this.findClosestPart()) === undefined)
+				this.output.distance.set(Vector3.zero);
 		});
 
 		this.onDescendantDestroyed(() => {

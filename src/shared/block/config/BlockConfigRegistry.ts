@@ -1284,10 +1284,10 @@ const radarsection = {
 	},
 	output: {
 		distance: {
-			displayName: "Distance",
-			type: "number",
-			default: -1 as number,
-			config: -1 as number,
+			displayName: "Offset",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
 		},
 	},
 } as const satisfies BlockConfigBothDefinitions;
