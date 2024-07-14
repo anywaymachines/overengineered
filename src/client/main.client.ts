@@ -1,7 +1,6 @@
-import { RunService } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { LoadingController } from "client/controller/LoadingController";
-import { SoundController } from "client/controller/SoundController";
 import { WindController } from "client/controller/WindController";
 import { InputTypeChangeEvent } from "client/event/InputTypeChangeEvent";
 import { BSOD } from "client/gui/BSOD";
@@ -11,6 +10,7 @@ import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
 import { Game } from "shared/GameHost";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { PlasmaProjectile } from "shared/weapons/PlasmaProjectileLogic";
 
 LoadingController.show("Initializing");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
@@ -40,4 +40,13 @@ ServerRestartController.initialize();
 LoadingController.hide();
 $log("Client loaded.");
 
-// WeaponProjectile.spawn.send({ position: new Vector3(0, 1, 2) });
+//testing
+if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter") {
+	task.delay(5, () => {
+		PlasmaProjectile.spawn.send({
+			startPosition: new Vector3(359, -16380.998, 331.998),
+			baseVelocity: new Vector3(0, 0, 1),
+			baseDamage: 0,
+		});
+	});
+}

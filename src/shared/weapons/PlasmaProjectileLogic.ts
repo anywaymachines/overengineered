@@ -14,7 +14,7 @@ export class PlasmaProjectile extends WeaponProjectile {
 		readonly baseDamage: number;
 	}>("plasma_spawn", "RemoteEvent");
 	constructor(startPosition: Vector3, baseVelocity: Vector3, baseDamage: number) {
-		super(startPosition, "PLASMA", WeaponProjectile.PLASMA_PROJECTILE, baseVelocity, baseDamage, 50);
+		super(startPosition, "PLASMA", WeaponProjectile.PLASMA_PROJECTILE, baseVelocity, baseDamage, 5);
 		this.vectorForce = this.projectilePart.WaitForChild("VectorForce") as VectorForce;
 		this.updateLifetimeModifier(1);
 	}
@@ -74,7 +74,7 @@ export class PlasmaProjectile extends WeaponProjectile {
 }
 
 PlasmaProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage }) => {
-	task.delay(2, () => {
+	task.delay(5, () => {
 		print("Projectile spawned");
 		const proj = new PlasmaProjectile(startPosition, baseVelocity, baseDamage);
 	});

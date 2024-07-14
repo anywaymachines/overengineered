@@ -18,9 +18,8 @@ export type projectileModifier = {
 	explosiveDamage?: modifierValue; //<-- area modifier
 };
 
-const PLASMA_PROJECTILE = Instances.assets
-	.WaitForChild("WeaponProjectiles")
-	.WaitForChild("PlasmaProjectile") as BasePart;
+const PLASMA_BALL = Instances.assets.WaitForChild("WeaponProjectiles").WaitForChild("PlasmaProjectile") as BasePart;
+const BULLET = Instances.assets.WaitForChild("WeaponProjectiles").WaitForChild("BulletProjectile") as BasePart;
 
 const projectileFolder = new Instance("Folder", Workspace);
 projectileFolder.Name = "Projectiles";
@@ -45,9 +44,9 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	modifiedVelocity: Vector3;
 	static readonly damagedParts: Map<BasePart, number> = new Map();
 	readonly projectilePart: BasePart;
-	static readonly PLASMA_PROJECTILE: BasePart = PLASMA_PROJECTILE;
+	static readonly PLASMA_PROJECTILE: BasePart = PLASMA_BALL;
 	static readonly LASER_PROJECTILE: BasePart;
-	static readonly KINETIC_PROJECTILE: BasePart = PLASMA_PROJECTILE;
+	static readonly BULLET_PROJECTILE: BasePart = BULLET;
 
 	constructor(
 		readonly startPosition: Vector3,
