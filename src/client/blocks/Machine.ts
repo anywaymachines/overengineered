@@ -41,7 +41,6 @@ export class Machine extends SharedMachine {
 	initializeControls() {
 		for (const logic of this.getChildren()) {
 			if (!(logic instanceof ConfigurableBlockLogic)) continue;
-			if (!logic.block.config) continue;
 
 			const configDef = (blockConfigRegistry as BlockConfigRegistry)[
 				logic.block.id as keyof typeof blockConfigRegistry
