@@ -62,6 +62,7 @@ export const _Tests = (di: DIContainer) => {
 					.with((b) =>
 						b.activated.Connect(() =>
 							SelectButtonPopup.showPopup(
+								true,
 								(btn) => b.text.set(btn),
 								() => b.text.set("CANCEL"),
 							),

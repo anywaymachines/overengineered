@@ -1,6 +1,8 @@
 import { ContextActionService } from "@rbxts/services";
+import { InputController } from "client/controller/InputController";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
+import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
 
@@ -21,35 +23,45 @@ export class KeyChooserControl<TAllowNull extends boolean = false> extends Contr
 		this.value.subscribe((value) => (this.gui.Text = value ?? ""));
 		this.event.onPrepare(() => (this.gui.BackgroundColor3 = this.color));
 
-		this.onPrepare((inputType) => (this.gui.Active = inputType !== "Touch"));
-
 		this.gui.Activated.Connect(() => {
-			this.gui.BackgroundColor3 = this.activeColor;
-
-			const actionName = "peKeySelection";
-			ContextActionService.BindActionAtPriority(
-				actionName,
-				(name, state, input) => {
-					if (actionName === name) {
-						if (input.KeyCode === Enum.KeyCode.Escape || input.KeyCode === Enum.KeyCode.Unknown) {
-							return Enum.ContextActionResult.Sink;
-						}
-
-						ContextActionService.UnbindAction(actionName);
-
+			if (InputController.inputType.get() === "Touch") {
+				SelectButtonPopup.showPopup(
+					false,
+					(key) => {
 						const prev = this.value.get();
-						this.value.set(input.KeyCode.Name);
-						this.submitted.Fire(input.KeyCode.Name, prev);
-						this.gui.BackgroundColor3 = this.color;
-					}
-				},
-				true,
-				2000 + 1,
-				Enum.UserInputType.Keyboard,
-				Enum.UserInputType.Gamepad1,
-			);
+						this.value.set(key);
+						this.submitted.Fire(key, prev);
+					},
+					() => {},
+				);
+			} else {
+				this.gui.BackgroundColor3 = this.activeColor;
 
-			this.onDisable(() => ContextActionService.UnbindAction(actionName));
+				const actionName = "peKeySelection";
+				ContextActionService.BindActionAtPriority(
+					actionName,
+					(name, state, input) => {
+						if (actionName === name) {
+							if (input.KeyCode === Enum.KeyCode.Escape || input.KeyCode === Enum.KeyCode.Unknown) {
+								return Enum.ContextActionResult.Sink;
+							}
+
+							ContextActionService.UnbindAction(actionName);
+
+							const prev = this.value.get();
+							this.value.set(input.KeyCode.Name);
+							this.submitted.Fire(input.KeyCode.Name, prev);
+							this.gui.BackgroundColor3 = this.color;
+						}
+					},
+					false,
+					2000 + 1,
+					Enum.UserInputType.Keyboard,
+					Enum.UserInputType.Gamepad1,
+				);
+
+				this.onDisable(() => ContextActionService.UnbindAction(actionName));
+			}
 		});
 	}
 }

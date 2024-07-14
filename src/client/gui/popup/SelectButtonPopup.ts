@@ -23,34 +23,48 @@ export type SelectButtonPopupDefinition = GuiObject & {
 	};
 };
 
-export class SelectButtonPopup extends Popup<SelectButtonPopupDefinition> {
+export class SelectButtonPopup<const TAllowCustomString extends boolean> extends Popup<SelectButtonPopupDefinition> {
 	private readonly buttonPressed = new Signal<(key: KeyCode) => void>();
 	private readonly cancelButton;
 	private readonly closeButton;
 
-	static showPopup(confirmFunc: (key: string) => void, cancelFunc: () => void) {
+	static showPopup<const TAllowCustomString extends boolean>(
+		allowCustomString: TAllowCustomString,
+		confirmFunc: (key: TAllowCustomString extends true ? string : KeyCode) => void,
+		cancelFunc: () => void,
+	) {
 		const popup = new SelectButtonPopup(
 			Gui.getGameUI<{
 				Popup: { MobileSelectButton: SelectButtonPopupDefinition };
 			}>().Popup.MobileSelectButton.Clone(),
+			allowCustomString,
 			confirmFunc,
 			cancelFunc,
 		);
 
 		popup.show();
 	}
-	constructor(gui: SelectButtonPopupDefinition, confirmFunc: (key: string) => void, cancelFunc: () => void) {
+	constructor(
+		gui: SelectButtonPopupDefinition,
+		allowCustomString: TAllowCustomString,
+		confirmFunc: (key: TAllowCustomString extends true ? string : KeyCode) => void,
+		cancelFunc: () => void,
+	) {
 		super(gui);
 		this.cancelButton = this.add(new ButtonControl(gui.Buttons.CancelButton));
 		this.closeButton = this.add(new ButtonControl(gui.Head.CloseButton));
 
 		const customTextBox = this.add(new TextBoxControl(gui.Content.CustomTextBox));
-		this.add(
-			new ButtonControl(gui.Content.AcceptButton, () => {
+		const acceptButton = this.add(new ButtonControl(gui.Content.AcceptButton));
+		if (allowCustomString) {
+			acceptButton.activated.Connect(() => {
 				this.hide();
-				confirmFunc(customTextBox.text.get());
-			}),
-		);
+				confirmFunc(customTextBox.text.get() as KeyCode);
+			});
+		} else {
+			customTextBox.instance.Interactable = false;
+			acceptButton.setInteractable(false);
+		}
 
 		const list = new Control(gui.Content.ScrollingFrame);
 		this.add(list);

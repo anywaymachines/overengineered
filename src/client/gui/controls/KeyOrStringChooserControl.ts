@@ -28,6 +28,7 @@ export class KeyOrStringChooserControl<
 		this.gui.Activated.Connect(() => {
 			if (InputController.inputType.get() === "Touch") {
 				SelectButtonPopup.showPopup(
+					true,
 					(key) => {
 						const prev = this.value.get();
 						this.value.set(key);
