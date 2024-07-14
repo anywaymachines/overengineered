@@ -12,7 +12,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 	private getDistanceTo(part: BasePart) {
 		//if (!this.closestDetectedPart) return -1; //it was here for a reason... Can't remember why tho
 		if (!part.IsDescendantOf(Workspace)) return;
-		return VectorUtils.apply(this.instance.GetPivot().Position.sub(part.Position), (v) =>
+		return VectorUtils.apply(part.Position.sub(this.instance.GetPivot().Position), (v) =>
 			RobloxUnit.Studs_To_Meters(v),
 		);
 	}
@@ -106,7 +106,6 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 			if (d2 === undefined) return (this.closestDetectedPart = part);
 			if (d1 > d2) return;
 			this.closestDetectedPart = part;
-			//print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", d1);
 		});
 
 		this.event.subscribe(view.TouchEnded, (part) => {
