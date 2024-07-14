@@ -11,6 +11,7 @@ import { LocalPlayerController } from "client/controller/LocalPlayerController";
 import { OtherPlayersController } from "client/controller/OtherPlayersController";
 import { RagdollController } from "client/controller/RagdollController";
 import { MusicController } from "client/controller/sound/MusicController";
+import { SoundController } from "client/controller/SoundController";
 import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
@@ -96,6 +97,7 @@ export namespace SandboxGame {
 		Tutorial.initialize(builder);
 
 		builder.services.registerService(GameEnvironmentController);
+		SoundController.initializeAll(builder);
 		builder.services.registerService(DistanceHideController);
 		AdminGui.initializeIfAdminOrStudio(builder);
 

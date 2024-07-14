@@ -37,8 +37,6 @@ RemoteEvents.initialize();
 AdminMessageController.initialize();
 ServerRestartController.initialize();
 
-SoundController.initialize();
-
 LoadingController.hide();
 $log("Client loaded.");
 
