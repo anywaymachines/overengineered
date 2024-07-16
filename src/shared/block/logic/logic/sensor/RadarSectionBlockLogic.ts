@@ -10,11 +10,17 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 	private readonly allTouchedBlocks: Set<BasePart> = new Set<BasePart>();
 	//private justMoved = false;
 	private getDistanceTo(part: BasePart) {
-		//if (!this.closestDetectedPart) return -1; //it was here for a reason... Can't remember why tho
 		if (!part.IsDescendantOf(Workspace)) return;
-		return VectorUtils.apply(part.Position.sub(this.instance.GetPivot().Position), (v) =>
-			RobloxUnit.Studs_To_Meters(v),
-		);
+		const pivo1 = this.instance.GetPivot();
+		const pivo2 = part.GetPivot();
+		//const distance = .Position.sub(pivo.Position);
+		//const length = distance.Magnitude;
+		//const magic = distance.mul(pivo.XVector);
+		//print(pivo.XVector);
+		const magic = pivo1.ToObjectSpace(pivo2); //ААААААААААААААААА БЛЯЯЯЯЯТЬ
+		//print(magic.Position);
+		//print(vector);
+		return VectorUtils.apply(magic.Position, (v) => RobloxUnit.Studs_To_Meters(v));
 	}
 
 	private findClosestPart() {
