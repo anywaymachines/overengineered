@@ -25,8 +25,14 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 				continue;
 			}
 
-			if (smallestDistance === undefined || (d < smallestDistance && d > this.input.minimalDistance.get()))
+			if (smallestDistance === undefined) {
 				[smallestDistance, closestPart] = [d, bp];
+				continue;
+			}
+
+			if (d > smallestDistance) continue;
+			if (d < this.input.minimalDistance.get()) continue;
+			[smallestDistance, closestPart] = [d, bp];
 		}
 		return closestPart;
 	}
@@ -102,9 +108,9 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 			if (part.CollisionGroup !== "Blocks") return;
 			//if (part.HasTag("RADARVIEW")) return;
 			if (part.IsDescendantOf(this.instance)) return;
+			if (this.getDistanceTo(part).Magnitude < this.input.minimalDistance.get()) return;
 			this.allTouchedBlocks.add(part);
 			if (this.closestDetectedPart === undefined) return (this.closestDetectedPart = part);
-			print(this.isCloser(part));
 			if (!this.isCloser(part)) return;
 			this.closestDetectedPart = part;
 		});
