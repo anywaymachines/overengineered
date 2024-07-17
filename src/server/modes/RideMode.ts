@@ -1,4 +1,4 @@
-import { Players } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
@@ -132,12 +132,21 @@ export class RideMode implements PlayModeBase {
 		const cache = this.cache.get(player);
 		if (cache) {
 			const time = os.clock();
-			for (const child of cache.GetChildren() as BlockModel[]) {
-				controller.blocks.justPlaceExisting(child);
 
-				if (math.random(3) === 1) {
-					task.wait();
+			let index = 0;
+			const cacheChildren = cache.GetChildren() as BlockModel[];
+			const loader = RunService.Heartbeat.Connect((_) => {
+				if (index > cacheChildren.size() - 1) return;
+
+				controller.blocks.justPlaceExisting(cacheChildren[index]);
+				index++;
+			});
+
+			while (index < cacheChildren.size() - 1) {
+				if (index > cacheChildren.size() - 1) {
+					loader.Disconnect();
 				}
+				task.wait();
 			}
 
 			print(`Loaded the cached save in ${os.clock() - time}`);
