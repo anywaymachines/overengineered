@@ -71,6 +71,7 @@ export class WingLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry
 						1,
 					),
 				);
+			vectorForce.Enabled = force.Magnitude > Workspace.Gravity * this.wingSurface.Mass;
 			vectorForce.Force = force;
 		});
 	}
