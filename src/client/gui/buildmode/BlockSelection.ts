@@ -74,7 +74,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 
 	readonly selectedCategory = new ObservableValue<CategoryPath>([]);
 	readonly selectedBlock = new ObservableValue<RegistryBlock | undefined>(undefined);
-	readonly targetBlocks = new ObservableValue<readonly BlockId[] | undefined>(undefined);
+	readonly highlightedBlocks = new ObservableValue<readonly BlockId[] | undefined>(undefined);
 
 	readonly pipette;
 	private readonly breadcrumbs;
@@ -106,7 +106,7 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 			}),
 		);
 
-		this.event.subscribeObservable(this.targetBlocks, () => this.create(this.selectedCategory.get(), false));
+		this.event.subscribeObservable(this.highlightedBlocks, () => this.create(this.selectedCategory.get(), false));
 
 		// might be useful
 		// const searchText = this.event.observableFromGuiParam(this.gui.SearchTextBox, "Text");
@@ -119,31 +119,30 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 	}
 
 	private create(selectedCategory: CategoryPath, animated: boolean) {
+		const highlightButton = (control: Control) =>
+			(Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance);
+
 		let idx = 0;
 
 		const createBackButton = (activated: () => void) => {
 			const control = new TextButtonControl(this.backTemplate(), activated);
 			this.list.add(control);
 
-			// Highlight if needed
-			const targetBlocks = this.targetBlocks.get();
-			if (targetBlocks) {
-				const drawHighlight = () => {
-					Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance;
-				};
-
-				for (const targetBlock of targetBlocks) {
+			const highlightedBlocks = this.highlightedBlocks.get();
+			if (highlightedBlocks) {
+				for (const targetBlock of highlightedBlocks) {
 					const targetCategory = this.blockRegistry.blocks.get(targetBlock)!.category;
 
 					if (targetCategory.size() < selectedCategory.size()) {
-						drawHighlight();
+						highlightButton(control);
+						break;
 					}
 
 					for (let i = 0; i < targetCategory.size(); i++) {
 						if (!selectedCategory[i]) break;
 
 						if (selectedCategory[i] !== targetCategory[i]) {
-							drawHighlight();
+							highlightButton(control);
 							break;
 						}
 					}
@@ -157,29 +156,18 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 		const createCategoryButton = (category: CategoryPath, activated: () => void) => {
 			const blocks = this.blockRegistry
 				.getBlocksByCategoryRecursive(category)
-				.map((b) => b.model)
-				.sort((l, r) => tostring(l) > tostring(r));
+				.sort((l, r) => l.model.Name > r.model.Name);
+			const models = blocks.map((b) => b.model);
 
-			task.spawn(() => ContentProvider.PreloadAsync(blocks));
+			task.spawn(() => ContentProvider.PreloadAsync(models));
 
-			const control = new CategoryControl(this.categoryTemplate(), category[category.size() - 1], blocks);
+			const control = new CategoryControl(this.categoryTemplate(), category[category.size() - 1], models);
 			control.activated.Connect(activated);
 			this.list.add(control);
 
-			// Highlight if needed
-			const targetBlocks = this.targetBlocks.get();
-			if (targetBlocks) {
-				for (const targetBlock of targetBlocks) {
-					const targetCategory = this.blockRegistry.blocks.get(targetBlock)!.category;
-
-					if (
-						selectedCategory.size() < targetCategory.size() &&
-						selectedCategory[selectedCategory.size() - 1] === targetCategory[selectedCategory.size() - 1] &&
-						category[category.size() - 1] === targetCategory[targetCategory.size() - 1]
-					) {
-						Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = control.instance;
-					}
-				}
+			const targetBlocks = this.highlightedBlocks.get();
+			if (targetBlocks && blocks.any((b) => targetBlocks.includes(b.id))) {
+				highlightButton(control);
 			}
 
 			control.instance.LayoutOrder = idx++;
@@ -265,17 +253,10 @@ export class BlockSelectionControl extends Control<BlockSelectionControlDefiniti
 				(newblock) => {
 					button.instance.BackgroundColor3 = newblock === block ? Colors.accentDark : Colors.staticBackground;
 
-					const targetBlocks = this.targetBlocks.get();
-					if (
-						targetBlocks &&
-						targetBlocks.includes(block.id) &&
-						newblock &&
-						!targetBlocks.includes(newblock.id)
-					) {
-						button.instance.FindFirstChild("Highlight")?.Destroy();
-						Gui.getTemplates<{ Highlight: GuiObject }>().Highlight.Clone().Parent = button.instance;
-					} else {
-						button.instance.FindFirstChild("Highlight")?.Destroy();
+					button.instance.FindFirstChild("Highlight")?.Destroy();
+					const targetBlocks = this.highlightedBlocks.get();
+					if (targetBlocks && newblock !== block && targetBlocks.includes(block.id)) {
+						highlightButton(button);
 					}
 
 					// Gamepad selection improvements

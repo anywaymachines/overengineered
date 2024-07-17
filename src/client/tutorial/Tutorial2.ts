@@ -11,6 +11,7 @@ import { BuildingPlot } from "shared/building/BuildingPlot";
 import { Component } from "shared/component/Component";
 import { ComponentInstance } from "shared/component/ComponentInstance";
 import { ArgsSignal, Signal } from "shared/event/Signal";
+import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
 import { Localization } from "shared/Localization";
 import { CustomRemotes } from "shared/Remotes";
@@ -63,10 +64,7 @@ class TutorialPlot extends Component {
 			selectionBox.LineThickness = 0.05;
 			selectionBox.Parent = block;
 
-			//const highlight = new Instance("Highlight");
-			//highlight.FillColor = Colors.red;
-			//highlight.Parent = block;
-			//highlights.push(highlight);
+			highlights.push(selectionBox);
 		}
 
 		return {
@@ -248,6 +246,10 @@ namespace Steps {
 			return { success: true, arg: { ...args, blocks: bs } };
 		});
 		const c2 = ClientBuilding.placeOperation.executed.Connect(({ plot }) => {
+			buildTool.gui.blockSelector.highlightedBlocks.set([
+				...blocksToPlace.blocks.filter((b) => !plot.tryGetBlock(b.uuid)).mapToSet((b) => b.id),
+			]);
+
 			for (const blockToPlace of blocksToPlace.blocks) {
 				const placed = plot.tryGetBlock(blockToPlace.uuid);
 				if (!placed) return;
@@ -256,10 +258,10 @@ namespace Steps {
 			resolve();
 		});
 
-		buildTool.gui.blockSelector.targetBlocks.set([...blocksToPlace.blocks.mapToSet((b) => b.id)]);
+		buildTool.gui.blockSelector.highlightedBlocks.set([...blocksToPlace.blocks.mapToSet((b) => b.id)]);
 		const c3: SignalConnection = {
 			Disconnect() {
-				buildTool.gui.blockSelector.targetBlocks.set([]);
+				buildTool.gui.blockSelector.highlightedBlocks.set([]);
 			},
 		};
 
@@ -306,6 +308,81 @@ namespace Steps {
 			},
 		};
 	}
+
+	export type BlockToConfigure = {
+		readonly uuid: BlockUuid;
+		readonly key: string;
+		readonly value: unknown;
+		// readonly properties: object & { readonly [k in string]: unknown };
+	};
+	export function waitForConfigure(
+		blocksToConfigure: readonly BlockToConfigure[],
+		plot: SharedPlot,
+		resolve: Resolver,
+	): Reg {
+		const sameProperties = (object: object, properties: object): boolean => {
+			for (const [k] of pairs(properties)) {
+				if (!(k in object)) {
+					return false;
+				}
+				if (typeOf(object[k]) !== typeOf(properties[k])) {
+					return false;
+				}
+
+				if (typeIs(object[k], "table")) {
+					if (!sameProperties(object[k], properties[k])) {
+						return false;
+					}
+
+					continue;
+				}
+
+				if (object[k] !== properties[k]) {
+					return false;
+				}
+			}
+
+			return true;
+		};
+
+		const c1 = ClientBuilding.updateConfigOperation.addMiddleware((args) => {
+			return { success: true, arg: args };
+		});
+		const c2 = ClientBuilding.updateConfigOperation.executed.Connect(({ plot }) => {
+			for (const { uuid, key, value } of blocksToConfigure) {
+				const block = plot.tryGetBlock(uuid);
+				if (!block) return;
+
+				const config = BlockManager.manager.config.get(block) ?? {};
+				if (!(key in config)) {
+					return;
+				}
+				if (!typeIs(value, "table")) {
+					if (config[key] !== value) {
+						return false;
+					}
+				} else if (!sameProperties(config[key], value)) {
+					return;
+				}
+			}
+
+			resolve();
+		});
+
+		return {
+			connection: Signal.multiConnection(c1, c2),
+			autoComplete: () => {
+				ClientBuilding.updateConfigOperation.execute({
+					plot: plot,
+					configs: blocksToConfigure.map(({ uuid, key, value }): ConfigUpdateRequest["configs"][number] => ({
+						block: plot.getBlock(uuid),
+						key,
+						value: JSON.serialize(value),
+					})),
+				});
+			},
+		};
+	}
 }
 
 export type TutorialPartRegistration = {
@@ -332,7 +409,8 @@ export class Tutorial extends Component {
 		this.ui = this.parentGui(new TutorialControl(title));
 		this.ui.onCancel.Connect(() => this.destroy());
 
-		this.uiTasks = this.parentGui(new TutorialTasksControl());
+		this.uiTasks = this.parent(new TutorialTasksControl());
+		this.uiTasks.hide();
 
 		this.ghostPlot = di.resolveForeignClass(TutorialPlot, [plot]);
 
@@ -350,6 +428,7 @@ export class Tutorial extends Component {
 	}
 
 	tasksPart(...tasks: readonly string[]): TutorialPartRegistration {
+		this.uiTasks.show();
 		this.uiTasks.setTasks(tasks);
 
 		return {
@@ -366,8 +445,8 @@ export class Tutorial extends Component {
 	private clearBlocks(): void {
 		this.ghostPlot.clearBlocks();
 	}
-	private highlightBlocks(uuids: readonly string[]): void {
-		this.ghostPlot.highlight(uuids as readonly BlockUuid[]);
+	private highlightBlocks(uuids: readonly string[]): SignalConnection {
+		return this.ghostPlot.highlight(uuids as readonly BlockUuid[]);
 	}
 
 	partNextButton(): TutorialPartRegistration {
@@ -391,12 +470,26 @@ export class Tutorial extends Component {
 		} as const;
 	}
 	partDelete(uuids: readonly string[]): TutorialPartRegistration {
-		this.highlightBlocks(uuids);
+		const hc = this.highlightBlocks(uuids);
 		const exec = Steps.execute(Steps.waitForDelete, uuids as readonly BlockUuid[], this.sharedPlot);
 
 		return {
 			...exec,
 			connection: Signal.multiConnection(
+				hc,
+				exec.connection,
+				Signal.connection(() => this.clearBlocks()),
+			),
+		};
+	}
+	partConfigure(blocks: readonly Steps.BlockToConfigure[]): TutorialPartRegistration {
+		const hc = this.highlightBlocks(blocks.map((b) => b.uuid));
+		const exec = Steps.execute(Steps.waitForConfigure, blocks, this.sharedPlot);
+
+		return {
+			...exec,
+			connection: Signal.multiConnection(
+				hc,
 				exec.connection,
 				Signal.connection(() => this.clearBlocks()),
 			),

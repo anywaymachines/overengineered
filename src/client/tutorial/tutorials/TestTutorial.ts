@@ -1,3 +1,4 @@
+import { InputController } from "client/controller/InputController";
 import { Tutorial } from "client/tutorial/Tutorial2";
 import type { TutorialPartRegistration } from "client/tutorial/Tutorial2";
 import type { LatestSerializedBlock, LatestSerializedBlocks } from "shared/building/BlocksSerializer";
@@ -49,6 +50,7 @@ const diffs = {
 		{ uuid: "b8", type: "removed" },
 		{ block: { uuid: "bbb1", location: new CFrame(29, 5.5, 10), id: "block" }, type: "added" },
 	],
+	d5cfgtest: [{ uuid: "s1", key: "angle", value: { rotation: { add: "W", sub: "S" } }, type: "configChanged" }],
 } satisfies { readonly [k in string]: readonly BuildingDiffChange[] };
 
 const diffprocess = (
@@ -69,18 +71,15 @@ const diffprocess = (
 	): TutorialPartRegistration | undefined => {
 		if (istype(changeType, "added", change)) {
 			return tutorial.partBuild({ version: saveVersion, blocks: change.map((c) => toBlock(c.block)) });
+			// TODO: changes
 		}
 		if (istype(changeType, "removed", change)) {
 			return tutorial.partDelete(change.map((c) => c.uuid));
 		}
-
-		if (istype(changeType, "changed", change)) {
-			for (const [key, c] of change.groupBy((c) => c.key)) {
-				if (key === "id") continue;
-				if (key === "uuid") continue;
-
-				// TODO:
-			}
+		if (istype(changeType, "configChanged", change)) {
+			return tutorial.partConfigure(
+				change.map(({ uuid, key, value }) => ({ uuid: uuid as BlockUuid, key, value })),
+			);
 		}
 	};
 
@@ -138,6 +137,14 @@ export namespace TestTutorial {
 		toolController.enabledTools.enableOnly(toolController.allTools.buildTool);
 		tutorial.waitPart(
 			processDiffArr(tutorial, diffs.d2placeServos),
+			tutorial.tasksPart(
+				`Hint: You can press ${(() => {
+					const it = InputController.inputType.get();
+					if (it === "Desktop") return "the middle mouse button";
+					if (it === "Touch") return "the pipette button on the inventory";
+					return "idk something gamepad button";
+				})()} to copy the block`,
+			),
 			tutorial.partText("Now place the rotators for rotatoring."),
 		);
 
@@ -151,6 +158,21 @@ export namespace TestTutorial {
 		tutorial.waitPart(
 			processDiffArr(tutorial, diffs.d4prtest),
 			tutorial.partText("Now delete and place for TESTING mega TESTING."),
+		);
+
+		toolController.enabledTools.enableOnly(toolController.allTools.configTool);
+		tutorial.waitPart(
+			processDiffArr(tutorial, diffs.d5cfgtest),
+			tutorial.tasksPart(
+				"Select 4 config tool",
+				"Select the blockl",
+				"Select +",
+				"select W",
+				"             select -",
+				"select S",
+				"profit",
+			),
+			tutorial.partText("Now change the motor config to +W -S !!!!!!!!!!important"),
 		);
 
 		toolController.enabledTools.disableAll();
