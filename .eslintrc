@@ -72,6 +72,14 @@
 			{
 				"accessibility": "no-public"
 			}
-		]
+		], "require-jsdoc": [ "off", {
+				"require": {
+					"FunctionDeclaration": true,
+					"MethodDefinition": true,
+					"ClassDeclaration": true,
+					"ArrowFunctionExpression": false,
+					"FunctionExpression": false
+				}
+			} ]
 	}
 }
