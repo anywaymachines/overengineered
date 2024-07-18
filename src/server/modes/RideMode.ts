@@ -129,6 +129,7 @@ export class RideMode implements PlayModeBase {
 				controller.blocks.justPlaceExisting(child),
 			);
 
+			cache.Destroy();
 			print(`Loaded the cached save in ${os.clock() - time}`);
 		} else {
 			controller.blocks.deleteOperation.execute("all");
