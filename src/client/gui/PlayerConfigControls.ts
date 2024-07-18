@@ -7,6 +7,7 @@ import { SliderControl } from "client/gui/controls/SliderControl";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Gui } from "client/gui/Gui";
 import { TutorialBasics } from "client/tutorial/TutorialBasics";
+import { TestTutorial as TestTutorial2 } from "client/tutorial/tutorials/TestTutorial";
 import { Signal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
@@ -370,6 +371,7 @@ namespace ControlsSource {
 			config: PlayerConfigTypes.Tutorial["config"],
 			definition: ConfigTypeToDefinition<PlayerConfigTypes.Tutorial>,
 			@inject tutorial: Tutorial,
+			@inject di: DIContainer,
 		) {
 			super(templates.multi(), definition.displayName);
 
@@ -382,6 +384,14 @@ namespace ControlsSource {
 				),
 			);
 			basics.text.set("Basics tutorial");
+
+			const basics2 = list.add(
+				new TextButtonControl(
+					Gui.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
+					() => TestTutorial2.start(di),
+				),
+			);
+			basics2.text.set("Basics tutorial 2 test");
 		}
 	}
 

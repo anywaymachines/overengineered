@@ -173,8 +173,6 @@ namespace Steps {
 	export function waitForText(ui: TutorialControl, text: string, resolve: Resolver): Reg {
 		const gui = ui.instance;
 		gui.TextLabel.Text = "";
-		gui.Header.Cancel.Visible = false;
-		gui.Header.Next.Visible = false;
 
 		const translatedText = Localization.translateForPlayer(Players.LocalPlayer, text);
 		const thr = task.spawn(() => {
