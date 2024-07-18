@@ -1,4 +1,5 @@
 import { InputController } from "client/controller/InputController";
+import { ActionController } from "client/modes/build/ActionController";
 import { Tutorial } from "client/tutorial/Tutorial2";
 import type { TutorialPartRegistration } from "client/tutorial/Tutorial2";
 import type { LatestSerializedBlock, LatestSerializedBlocks } from "shared/building/BlocksSerializer";
@@ -103,20 +104,23 @@ export namespace TestTutorial {
 		const toolController = tutorial.buildingMode.toolController;
 		const editTool = toolController.allTools.editTool;
 
+		ActionController.instance.disable();
 		toolController.enabledTools.disableAll();
 		tutorial.onDestroy(() => {
+			ActionController.instance.enable();
 			toolController.enabledTools.enableAll();
 			editTool.enabledModes.enableAll();
 		});
 
 		tutorial.waitPart(
-			tutorial.partText("Welcome to Plane Engineers!\nThis tutorial will teach you the basics of the game."),
 			tutorial.partNextButton(),
+			tutorial.partText("Welcome to Plane Engineers!\nThis tutorial will teach you the basics of the game."),
 		);
 
 		toolController.enabledTools.enableOnly(toolController.allTools.buildTool);
 		tutorial.waitPart(
 			processDiffArr(tutorial, diffs.d0buildFrame),
+			tutorial.partText("First, let's build the frame for our car."),
 			tutorial.tasksPart(
 				"Select one",
 				"Select 'blocks'",
@@ -124,8 +128,8 @@ export namespace TestTutorial {
 				"BLOCK IS COMING",
 				"             HIDE",
 				"",
+				"hint: hold shift to build multiple",
 			),
-			tutorial.partText("First, let's build the frame for our car."),
 		);
 
 		toolController.enabledTools.enableOnly(toolController.allTools.deleteTool);
@@ -137,6 +141,7 @@ export namespace TestTutorial {
 		toolController.enabledTools.enableOnly(toolController.allTools.buildTool);
 		tutorial.waitPart(
 			processDiffArr(tutorial, diffs.d2placeServos),
+			tutorial.partText("Now place the rotators for rotatoring."),
 			tutorial.tasksPart(
 				`Hint: You can press ${(() => {
 					const it = InputController.inputType.get();
@@ -145,7 +150,6 @@ export namespace TestTutorial {
 					return "idk something gamepad button";
 				})()} to copy the block`,
 			),
-			tutorial.partText("Now place the rotators for rotatoring."),
 		);
 
 		toolController.enabledTools.enableOnly(toolController.allTools.buildTool);
@@ -163,6 +167,7 @@ export namespace TestTutorial {
 		toolController.enabledTools.enableOnly(toolController.allTools.configTool);
 		tutorial.waitPart(
 			processDiffArr(tutorial, diffs.d5cfgtest),
+			tutorial.partText("Now change the motor config to +W -S !!!!!!!!!!important"),
 			tutorial.tasksPart(
 				"Select 4 config tool",
 				"Select the blockl",
@@ -172,13 +177,14 @@ export namespace TestTutorial {
 				"select S",
 				"profit",
 			),
-			tutorial.partText("Now change the motor config to +W -S !!!!!!!!!!important"),
 		);
 
 		toolController.enabledTools.disableAll();
 		tutorial.waitPart(
-			tutorial.partText("You are now the maks gaming of plane engineers."),
 			tutorial.partNextButton(),
+			tutorial.partText("You are now the maks gaming of plane engineers."),
+			tutorial.tasksPart("Important tip: This is a car"),
+			// TODO: launch it in this step or something
 		);
 
 		tutorial.destroy();
