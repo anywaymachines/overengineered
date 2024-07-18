@@ -1,7 +1,7 @@
 import { BadgeService } from "@rbxts/services";
-import { PlayerWatcher } from "shared/PlayerWatcher";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { HostedService } from "shared/GameHost";
+import { PlayerWatcher } from "shared/PlayerWatcher";
 
 export class BadgeController extends HostedService {
 	static initializeIfProd(host: GameHostBuilder) {

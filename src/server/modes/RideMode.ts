@@ -1,9 +1,10 @@
-import { Players, RunService } from "@rbxts/services";
+import { Players } from "@rbxts/services";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { CustomRemotes } from "shared/Remotes";
 import { SlotsMeta } from "shared/SlotsMeta";
+import { Throttler } from "shared/Throttler";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 import type { ServerPlots } from "server/plots/ServerPlots";
@@ -119,35 +120,14 @@ export class RideMode implements PlayModeBase {
 		const controller = this.serverPlots.tryGetControllerByPlayer(player);
 		if (!controller) throw "what";
 
-		const plot = this.serverPlots.plots.getPlotComponentByOwnerID(player.UserId);
-		const blocks = plot.instance.Blocks;
-
-		for (const block of controller.blocks.getBlocks()) {
-			block.Destroy();
-			if (math.random(6) === 1) {
-				task.wait();
-			}
-		}
+		Throttler.forEach(6, controller.blocks.getBlocks(), (b) => b.Destroy());
 
 		const cache = this.cache.get(player);
 		if (cache) {
 			const time = os.clock();
-
-			let index = 0;
-			const cacheChildren = cache.GetChildren() as BlockModel[];
-			const loader = RunService.Heartbeat.Connect((_) => {
-				if (index > cacheChildren.size() - 1) return;
-
-				controller.blocks.justPlaceExisting(cacheChildren[index]);
-				index++;
-			});
-
-			while (index < cacheChildren.size() - 1) {
-				if (index > cacheChildren.size() - 1) {
-					loader.Disconnect();
-				}
-				task.wait();
-			}
+			Throttler.forEach(3, cache.GetChildren() as BlockModel[], (child) =>
+				controller.blocks.justPlaceExisting(child),
+			);
 
 			print(`Loaded the cached save in ${os.clock() - time}`);
 		} else {
