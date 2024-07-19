@@ -9,6 +9,8 @@ import { ServerRestartController } from "client/ServerRestartController";
 import { TestRunner } from "client/test/TestRunner";
 import { LoadSlotTest } from "client/test/visual/LoadSlotTest";
 import { TutorialCreator } from "client/tutorial/creator/TutorialCreator";
+import { Tutorial } from "client/tutorial/Tutorial2";
+import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
 import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
@@ -78,7 +80,8 @@ export class AdminGui extends HostedService {
 				["Load REMOTE", LoadSlotTest.create(true)],
 				["Global message", AdminMessageController.createControl()],
 				wrapNonVisual("Tutorial creator", {
-					startTest: (di) => TestTutorial.start(di),
+					startTest: (di) => Tutorial.runTutorialFromClass(di, TestTutorial),
+					startBasicsCar: (di) => Tutorial.runTutorialFromClass(di, BasicCarTutorial),
 					setBefore: (di) => TutorialCreator.setBefore(di.resolve<ReadonlyPlot>()),
 					printDiff: (di) => print(TutorialCreator.serializeDiffToTsCode(di.resolve<ReadonlyPlot>())),
 					print: (di) => print(TutorialCreator.serializePlotToTsCode(di.resolve<ReadonlyPlot>())),

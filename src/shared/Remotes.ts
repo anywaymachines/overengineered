@@ -22,12 +22,13 @@ declare global {
 		readonly plot: PlotModel;
 		readonly blocks: readonly BlockModel[] | "all";
 	};
+	type EditBlockRequest = {
+		readonly instance: BlockModel;
+		readonly position: CFrame | undefined;
+	};
 	type EditBlocksRequest = {
 		readonly plot: PlotModel;
-		readonly blocks: readonly {
-			readonly instance: BlockModel;
-			readonly position: CFrame | undefined;
-		}[];
+		readonly blocks: readonly EditBlockRequest[];
 	};
 
 	type LogicConnectRequest = {

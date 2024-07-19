@@ -53,14 +53,7 @@ namespace Filter {
 }
 
 const read = {
-	blocksFromPlot: <T extends SerializedBlockBase>(
-		plot: ReadonlyPlot,
-		serialize: (block: BlockModel, index: number, buildingCenter: CFrame) => T,
-	): readonly T[] => {
-		return plot.getBlocks().map((block, i) => serialize(block, i, plot.origin));
-	},
-
-	blockV3: (block: BlockModel, index: number, buildingCenter: CFrame): LatestSerializedBlock => {
+	blockV3: (block: BlockModel, buildingCenter: CFrame): LatestSerializedBlock => {
 		const data: LatestSerializedBlock = {
 			...BlockManager.getBlockDataByBlockModel(block),
 			location: buildingCenter.ToObjectSpace(block.GetPivot()),
@@ -989,8 +982,16 @@ export namespace BlocksSerializer {
 		}
 	>;
 
+	export const latestVersion = current.version;
+
+	export function serializeBlockToObject(plot: ReadonlyPlot, block: BlockModel): LatestSerializedBlock {
+		return read.blockV3(block, plot.origin);
+	}
 	export function serializeToObject(plot: ReadonlyPlot): SerializedBlocks<LatestSerializedBlock> {
-		return { version: current.version, blocks: read.blocksFromPlot(plot, read.blockV3) };
+		return {
+			version: current.version,
+			blocks: plot.getBlocks().map((block) => serializeBlockToObject(plot, block)),
+		};
 	}
 	export function serialize(plot: ReadonlyPlot): string {
 		const fix = (block: LatestSerializedBlock): JsonBlock => {

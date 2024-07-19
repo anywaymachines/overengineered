@@ -16,8 +16,18 @@ type ConfigChangedChange = {
 	readonly key: string;
 	readonly value: object | Partial<BlockConfigTypes.Types[keyof BlockConfigTypes.Types]["config"]> | undefined;
 };
+type MovedChange = {
+	readonly type: "moved";
+	readonly uuid: DiffBlock["uuid"];
+	readonly to: Vector3;
+};
+type RotatedChange = {
+	readonly type: "rotated";
+	readonly uuid: DiffBlock["uuid"];
+	readonly toRotation: CFrame;
+};
 
-export type BuildingDiffChange = RemovedChange | AddedChange | ConfigChangedChange;
+export type BuildingDiffChange = RemovedChange | AddedChange | ConfigChangedChange | MovedChange | RotatedChange;
 
 export namespace BuildingDiffer {
 	function deepEquals(left: object, right: object): boolean {
@@ -38,7 +48,7 @@ export namespace BuildingDiffer {
 
 		return true;
 	}
-	export function valueEquals(left: unknown, right: unknown): boolean {
+	function valueEquals(left: unknown, right: unknown): boolean {
 		if (typeOf(left) !== typeOf(right)) {
 			return false;
 		}
@@ -61,6 +71,21 @@ export namespace BuildingDiffer {
 			if (!after) {
 				changes.push({ type: "removed", uuid: before.uuid });
 				continue;
+			}
+
+			{
+				const posbefore = before.location;
+				const posafter = after.location;
+
+				if (posbefore !== posafter) {
+					if (posbefore.Position !== posafter.Position) {
+						changes.push({ type: "moved", uuid, to: posafter.Position });
+					}
+
+					if (posbefore.Rotation !== posafter.Rotation) {
+						changes.push({ type: "rotated", uuid, toRotation: posafter.Rotation });
+					}
+				}
 			}
 
 			{

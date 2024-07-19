@@ -1,5 +1,6 @@
-import { Workspace, Players, RunService } from "@rbxts/services";
+import { Workspace, Players, RunService, LocalizationService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
+import { BSOD } from "client/gui/BSOD";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
@@ -20,7 +21,8 @@ import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { BuildTool } from "client/tools/BuildTool";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
-import type { LatestSerializedBlocks } from "shared/building/BlocksSerializer";
+import type { LatestSerializedBlock, LatestSerializedBlocks } from "shared/building/BlocksSerializer";
+import type { BuildingDiffChange, DiffBlock } from "shared/building/BuildingDiffer";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -209,24 +211,30 @@ namespace Steps {
 
 		return { connection: Signal.multiConnection(c1, c2) };
 	}
-	export function waitForBuild(
-		blocksToPlace: LatestSerializedBlocks,
-		buildTool: BuildTool,
-		plot: SharedPlot,
-		resolve: Resolver,
-	): Reg {
-		const c1 = ClientBuilding.placeOperation.addMiddleware((args) => {
+
+	export namespace Build {
+		const subscribedBlocks = new Set<LatestSerializedBlocks>();
+		const middleware = ClientBuilding.placeOperation.addMiddleware((args) => {
+			if (subscribedBlocks.size() === 0) {
+				return { success: true };
+			}
+
 			const empty = {};
 			const bs = args.blocks
 				.map((block): PlaceBlockRequest | {} => {
-					const btp = blocksToPlace.blocks.find(
-						(value) =>
-							value.id === block.id &&
-							VectorUtils.roundVector3(value.location.Position) ===
-								VectorUtils.roundVector3(
-									args.plot.instance.BuildingArea.CFrame.ToObjectSpace(block!.location).Position,
-								),
-					);
+					let btp: LatestSerializedBlock | undefined;
+					for (const b of subscribedBlocks) {
+						btp = b.blocks.find(
+							(value) =>
+								value.id === block.id &&
+								VectorUtils.roundVector3(value.location.Position) ===
+									VectorUtils.roundVector3(
+										args.plot.instance.BuildingArea.CFrame.ToObjectSpace(block!.location).Position,
+									),
+						);
+
+						if (btp) break;
+					}
 					if (!btp) return empty;
 
 					return {
@@ -243,75 +251,98 @@ namespace Steps {
 
 			return { success: true, arg: { ...args, blocks: bs } };
 		});
-		const c2 = ClientBuilding.placeOperation.executed.Connect(({ plot }) => {
-			buildTool.gui.blockSelector.highlightedBlocks.set([
-				...blocksToPlace.blocks.filter((b) => !plot.tryGetBlock(b.uuid)).mapToSet((b) => b.id),
-			]);
 
-			for (const blockToPlace of blocksToPlace.blocks) {
-				const placed = plot.tryGetBlock(blockToPlace.uuid);
-				if (!placed) return;
+		export function wait(
+			blocksToPlace: LatestSerializedBlocks,
+			buildTool: BuildTool,
+			plot: SharedPlot,
+			resolve: Resolver,
+		): Reg {
+			subscribedBlocks.add(blocksToPlace);
+			const c1 = Signal.connection(() => subscribedBlocks.delete(blocksToPlace));
+
+			const c2 = ClientBuilding.placeOperation.executed.Connect(({ plot }) => {
+				buildTool.gui.blockSelector.highlightedBlocks.set([
+					...blocksToPlace.blocks.filter((b) => !plot.tryGetBlock(b.uuid)).mapToSet((b) => b.id),
+				]);
+
+				for (const blockToPlace of blocksToPlace.blocks) {
+					const placed = plot.tryGetBlock(blockToPlace.uuid);
+					if (!placed) return;
+				}
+
+				resolve();
+			});
+
+			buildTool.gui.blockSelector.highlightedBlocks.set([...blocksToPlace.blocks.mapToSet((b) => b.id)]);
+			const c3 = Signal.connection(() => buildTool.gui.blockSelector.highlightedBlocks.set([]));
+
+			return {
+				connection: Signal.multiConnection(c1, c2, c3),
+				autoComplete: () => {
+					ClientBuilding.placeOperation.execute({
+						plot: plot,
+						blocks: blocksToPlace.blocks
+							.filter((b) => !plot.tryGetBlock(b.uuid))
+							.map((b) => BlocksSerializer.serializedBlockToPlaceRequest(b, plot.origin)),
+					});
+				},
+			};
+		}
+	}
+	export namespace Delete {
+		const subscribedBlocks = new Set<ReadonlySet<BlockUuid>>();
+		const middleware = ClientBuilding.deleteOperation.addMiddleware((args) => {
+			if (subscribedBlocks.size() === 0) {
+				return { success: true };
 			}
 
-			resolve();
-		});
-
-		buildTool.gui.blockSelector.highlightedBlocks.set([...blocksToPlace.blocks.mapToSet((b) => b.id)]);
-		const c3: SignalConnection = {
-			Disconnect() {
-				buildTool.gui.blockSelector.highlightedBlocks.set([]);
-			},
-		};
-
-		return {
-			connection: Signal.multiConnection(c1, c2, c3),
-			autoComplete: () => {
-				ClientBuilding.placeOperation.execute({
-					plot: plot,
-					blocks: blocksToPlace.blocks
-						.filter((b) => !plot.tryGetBlock(b.uuid))
-						.map((b) => BlocksSerializer.serializedBlockToPlaceRequest(b, plot.origin)),
-				});
-			},
-		};
-	}
-	export function waitForDelete(uuidsToDelete: readonly BlockUuid[], plot: SharedPlot, resolve: Resolver): Reg {
-		const c1 = ClientBuilding.deleteOperation.addMiddleware((args) => {
 			const blocks = args.blocks === "all" ? args.plot.getBlocks() : args.blocks;
 			for (const block of blocks) {
-				const btp = uuidsToDelete.find((uuid) => uuid === BlockManager.manager.uuid.get(block));
-				if (!btp) return { success: false, message: "Invalid placement" };
+				const blockUuid = BlockManager.manager.uuid.get(block);
+
+				for (const uuidsToDelete of subscribedBlocks) {
+					const btp = uuidsToDelete.has(blockUuid);
+					if (btp) {
+						return { success: true };
+					}
+				}
 			}
 
-			return { success: true, arg: args };
-		});
-		const c2 = ClientBuilding.deleteOperation.executed.Connect(({ plot }) => {
-			for (const uuidToDelete of uuidsToDelete) {
-				const placed = plot.tryGetBlock(uuidToDelete);
-				if (placed) return;
-			}
-
-			resolve();
+			return { success: false, message: "Invalid deletion" };
 		});
 
-		return {
-			connection: Signal.multiConnection(c1, c2),
-			autoComplete: () => {
-				ClientBuilding.deleteOperation.execute({
-					plot: plot,
-					blocks: uuidsToDelete
-						.filter((uuid) => plot.tryGetBlock(uuid) !== undefined)
-						.map((uuid) => plot.getBlock(uuid)),
-				});
-			},
-		};
+		export function wait(uuidsToDelete: ReadonlySet<BlockUuid>, plot: SharedPlot, resolve: Resolver) {
+			subscribedBlocks.add(uuidsToDelete);
+			const c1 = Signal.connection(() => subscribedBlocks.delete(uuidsToDelete));
+
+			const c2 = ClientBuilding.deleteOperation.executed.Connect(({ plot }) => {
+				for (const uuidToDelete of uuidsToDelete) {
+					const placed = plot.tryGetBlock(uuidToDelete);
+					if (placed) return;
+				}
+
+				resolve();
+			});
+
+			return {
+				connection: Signal.multiConnection(c1, c2),
+				autoComplete: () => {
+					ClientBuilding.deleteOperation.execute({
+						plot: plot,
+						blocks: uuidsToDelete
+							.filter((uuid) => plot.tryGetBlock(uuid) !== undefined)
+							.map((uuid) => plot.getBlock(uuid)),
+					});
+				},
+			};
+		}
 	}
 
 	export type BlockToConfigure = {
 		readonly uuid: BlockUuid;
 		readonly key: string;
 		readonly value: unknown;
-		// readonly properties: object & { readonly [k in string]: unknown };
 	};
 	export function waitForConfigure(
 		blocksToConfigure: readonly BlockToConfigure[],
@@ -381,19 +412,176 @@ namespace Steps {
 			},
 		};
 	}
+
+	export namespace Edit {
+		const { addFunc, connection } = ClientBuilding.editOperation.createMiddlewareCombiner();
+
+		export type BlockToMove = {
+			readonly uuid: BlockUuid;
+			readonly to: Vector3;
+		};
+		export function move(blocksToMove: readonly BlockToMove[], plot: SharedPlot, resolve: Resolver): Reg {
+			const c1 = addFunc((arg) => {
+				for (const { instance, newPosition } of arg.blocks) {
+					if (!newPosition) {
+						return { success: false, message: "Invalid movement" };
+					}
+
+					const uuid = BlockManager.manager.uuid.get(instance);
+					for (const should of blocksToMove) {
+						if (should.uuid !== uuid) continue;
+
+						if (
+							VectorUtils.roundVector3(plot.origin.ToObjectSpace(newPosition).Position) !==
+							VectorUtils.roundVector3(should.to)
+						) {
+							return { success: false, message: "Invalid movement" };
+						}
+					}
+				}
+
+				return { success: true };
+			});
+			const c2 = ClientBuilding.editOperation.executed.Connect(({ plot }) => {
+				for (const { uuid, to } of blocksToMove) {
+					const block = plot.tryGetBlock(uuid);
+					if (!block) return;
+
+					if (
+						VectorUtils.roundVector3(plot.origin.ToObjectSpace(block.GetPivot()).Position) !==
+						VectorUtils.roundVector3(to)
+					) {
+						return false;
+					}
+				}
+
+				resolve();
+			});
+
+			return {
+				connection: Signal.multiConnection(c1, c2),
+				autoComplete: () => {
+					ClientBuilding.editOperation.execute({
+						plot: plot,
+						blocks: blocksToMove.map((b): ClientBuilding.EditBlockInfo => {
+							const block = plot.getBlock(b.uuid);
+							const pivot = block.GetPivot();
+
+							return {
+								instance: block,
+								origPosition: pivot,
+								newPosition: pivot.Rotation.add(plot.origin.PointToWorldSpace(b.to)),
+							};
+						}),
+					});
+				},
+			};
+		}
+
+		export type BlockToRotate = {
+			readonly uuid: BlockUuid;
+			readonly toRotation: CFrame;
+		};
+		export function rotate(blocksToRotate: readonly BlockToRotate[], plot: SharedPlot, resolve: Resolver): Reg {
+			const c1 = addFunc((arg) => {
+				return { success: true };
+			});
+			const c2 = ClientBuilding.editOperation.executed.Connect(({ plot }) => {
+				for (const { uuid, toRotation } of blocksToRotate) {
+					const block = plot.tryGetBlock(uuid);
+					if (!block) return;
+
+					if (!VectorUtils.areCFrameEqual(block.GetPivot().Rotation, toRotation)) {
+						return false;
+					}
+				}
+
+				resolve();
+			});
+
+			return {
+				connection: Signal.multiConnection(c1, c2),
+				autoComplete: () => {
+					ClientBuilding.editOperation.execute({
+						plot: plot,
+						blocks: blocksToRotate.map((b): ClientBuilding.EditBlockInfo => {
+							const block = plot.getBlock(b.uuid);
+							const pivot = block.GetPivot();
+
+							return {
+								instance: block,
+								origPosition: pivot,
+								newPosition: plot.origin.ToWorldSpace(b.toRotation).add(pivot.Position),
+							};
+						}),
+					});
+				},
+			};
+		}
+	}
 }
 
-export type TutorialPartRegistration = {
+type TutorialPartRegistration = {
 	readonly connection: SignalConnection;
 	readonly wait: () => void;
 	readonly autoComplete?: () => void;
 };
 
+export type TutorialDiffList = {
+	readonly saveVersion: number;
+	readonly diffs: { readonly [k in string]: readonly BuildingDiffChange[] };
+};
+
+/** Process the block diff, running the build/delete/configure/etc parts */
+const processTutorialDiff = (
+	tutorial: Tutorial,
+	diffs: readonly BuildingDiffChange[],
+	saveVersion: number,
+): TutorialPartRegistration => {
+	const istype = <const TType extends BuildingDiffChange["type"], T>(
+		actualType: BuildingDiffChange["type"],
+		wantedType: TType,
+		changes: BuildingDiffChange[],
+	): changes is Extract<BuildingDiffChange, { type: TType }>[] => actualType === wantedType;
+	const toBlock = (block: DiffBlock): LatestSerializedBlock => block as LatestSerializedBlock;
+
+	const get = (changeType: BuildingDiffChange["type"], change: BuildingDiffChange[]): TutorialPartRegistration => {
+		if (istype(changeType, "added", change)) {
+			return tutorial.partBuild({ version: saveVersion, blocks: change.map((c) => toBlock(c.block)) });
+			// TODO: changes
+		}
+		if (istype(changeType, "removed", change)) {
+			return tutorial.partDelete(change.map((c) => c.uuid));
+		}
+		if (istype(changeType, "configChanged", change)) {
+			return tutorial.partConfigure(
+				change.map(({ uuid, key, value }) => ({ uuid: uuid as BlockUuid, key, value })),
+			);
+		}
+		if (istype(changeType, "moved", change)) {
+			return tutorial.partMove(change.map(({ uuid, to }) => ({ uuid: uuid as BlockUuid, to })));
+		}
+		if (istype(changeType, "rotated", change)) {
+			return tutorial.partRotate(change.map(({ uuid, toRotation }) => ({ uuid: uuid as BlockUuid, toRotation })));
+		}
+
+		return {
+			connection: Signal.connection(() => {}),
+			wait: () => {},
+		};
+	};
+
+	const parts = diffs.groupBy((d) => d.type).map((changeType, change) => () => get(changeType, change));
+	return tutorial.combinePartsSequential(...parts);
+};
+
+/** Controlling the tutorial */
 @injectable
 export class Tutorial extends Component {
 	private readonly ghostPlot;
 	private readonly ui;
 	private readonly uiTasks;
+	private readonly translator;
 
 	constructor(
 		title: string,
@@ -403,6 +591,12 @@ export class Tutorial extends Component {
 		@inject di: DIContainer,
 	) {
 		super();
+
+		try {
+			this.translator = LocalizationService.GetTranslatorForPlayerAsync(Players.LocalPlayer);
+		} catch {
+			this.translator = LocalizationService.GetTranslatorForPlayer(Players.LocalPlayer);
+		}
 
 		this.ui = this.parentGui(new TutorialControl(title));
 		this.ui.onCancel.Connect(() => this.destroy());
@@ -425,6 +619,11 @@ export class Tutorial extends Component {
 		});
 	}
 
+	/** Same as {@link tasksPart} but auto-translates the strings */
+	translatedTasksPart(...tasks: readonly (readonly string[])[]): TutorialPartRegistration {
+		return this.tasksPart(...tasks.map((tasks) => this.translate(...tasks)));
+	}
+	/** Show tasks on the "tasks" gui */
 	tasksPart(...tasks: readonly string[]): TutorialPartRegistration {
 		this.uiTasks.show();
 		this.uiTasks.setTasks(tasks);
@@ -434,26 +633,27 @@ export class Tutorial extends Component {
 			connection: Signal.connection(() => this.uiTasks.hide()),
 		};
 	}
+	/** Show text on the main gui */
 	partText(text: string): TutorialPartRegistration {
 		return Steps.execute(Steps.waitForText, this.ui, text);
 	}
-	private showBlocks(blocks: LatestSerializedBlocks): void {
+	private showBlocks(blocks: LatestSerializedBlocks): SignalConnection {
 		this.ghostPlot.build(blocks);
-	}
-	private clearBlocks(): void {
-		this.ghostPlot.clearBlocks();
+		return Signal.connection(() => this.ghostPlot.clearBlocks());
 	}
 	private highlightBlocks(uuids: readonly string[]): SignalConnection {
 		return this.ghostPlot.highlight(uuids as readonly BlockUuid[]);
 	}
 
+	/** Wait for the "next" button click */
 	partNextButton(): TutorialPartRegistration {
 		return Steps.execute(Steps.waitForNext, this.ui);
 	}
+	/** Wait for blocks building */
 	partBuild(blocks: LatestSerializedBlocks): TutorialPartRegistration {
-		this.showBlocks(blocks);
+		const hc = this.showBlocks(blocks);
 		const exec = Steps.execute(
-			Steps.waitForBuild,
+			Steps.Build.wait,
 			blocks,
 			this.buildingMode.toolController.allTools.buildTool,
 			this.sharedPlot,
@@ -461,51 +661,103 @@ export class Tutorial extends Component {
 
 		return {
 			...exec,
-			connection: Signal.multiConnection(
-				exec.connection,
-				Signal.connection(() => this.clearBlocks()),
-			),
+			connection: Signal.multiConnection(exec.connection, hc),
 		} as const;
 	}
+	/** Wait for blocks deletion */
 	partDelete(uuids: readonly string[]): TutorialPartRegistration {
 		const hc = this.highlightBlocks(uuids);
-		const exec = Steps.execute(Steps.waitForDelete, uuids as readonly BlockUuid[], this.sharedPlot);
+		const exec = Steps.execute(Steps.Delete.wait, new ReadonlySet(uuids as readonly BlockUuid[]), this.sharedPlot);
 
 		return {
 			...exec,
-			connection: Signal.multiConnection(
-				hc,
-				exec.connection,
-				Signal.connection(() => this.clearBlocks()),
-			),
+			connection: Signal.multiConnection(exec.connection, hc),
 		};
 	}
+	/** Wait for blocks moving */
+	partMove(blocks: readonly Steps.Edit.BlockToMove[]): TutorialPartRegistration {
+		const hc1 = this.showBlocks({
+			version: BlocksSerializer.latestVersion,
+			blocks: blocks.map((b) => {
+				const block = this.plot.getBlock(b.uuid);
+				const serialized = BlocksSerializer.serializeBlockToObject(this.plot, block);
+
+				return {
+					...serialized,
+					location: serialized.location.Rotation.add(b.to),
+				};
+			}),
+		});
+		const hc2 = this.highlightBlocks(blocks.map((b) => b.uuid));
+
+		const exec = Steps.execute(Steps.Edit.move, blocks, this.sharedPlot);
+
+		return {
+			...exec,
+			connection: Signal.multiConnection(hc1, hc2, exec.connection),
+		};
+	}
+	/** Wait for blocks rotating */
+	partRotate(blocks: readonly Steps.Edit.BlockToRotate[]): TutorialPartRegistration {
+		const hc1 = this.showBlocks({
+			version: BlocksSerializer.latestVersion,
+			blocks: blocks.map((b) => {
+				const block = this.plot.getBlock(b.uuid);
+				const serialized = BlocksSerializer.serializeBlockToObject(this.plot, block);
+
+				return {
+					...serialized,
+					location: b.toRotation.add(serialized.location.Position),
+				};
+			}),
+		});
+		const hc2 = this.highlightBlocks(blocks.map((b) => b.uuid));
+
+		const exec = Steps.execute(Steps.Edit.rotate, blocks, this.sharedPlot);
+
+		return {
+			...exec,
+			connection: Signal.multiConnection(hc1, hc2, exec.connection),
+		};
+	}
+	/** Wait for blocks configuring */
 	partConfigure(blocks: readonly Steps.BlockToConfigure[]): TutorialPartRegistration {
 		const hc = this.highlightBlocks(blocks.map((b) => b.uuid));
 		const exec = Steps.execute(Steps.waitForConfigure, blocks, this.sharedPlot);
 
 		return {
 			...exec,
-			connection: Signal.multiConnection(
-				hc,
-				exec.connection,
-				Signal.connection(() => this.clearBlocks()),
-			),
+			connection: Signal.multiConnection(hc, exec.connection),
 		};
 	}
 
-	combineParts(...regs: readonly TutorialPartRegistration[]): TutorialPartRegistration {
+	/** Combine parts into one that runs all provided ones simultaneously */
+	combinePartsParallel(...regs: readonly TutorialPartRegistration[]): TutorialPartRegistration {
 		return {
 			connection: Signal.connection(() => regs.forEach((p) => p.connection.Disconnect())),
 			wait: () => Objects.multiAwait(regs.map((p) => p.wait)),
 			autoComplete: () => regs.forEach((p) => p?.autoComplete?.()),
 		};
 	}
+	/** Combine parts into one that runs all provided ones sequentially */
+	combinePartsSequential(...funcs: readonly (() => TutorialPartRegistration)[]) {
+		funcs = funcs.map((func) => {
+			let cache: ReturnType<typeof func> | undefined;
+			return () => (cache ??= func());
+		});
+
+		return {
+			connection: Signal.connection(() => funcs.forEach((func) => func().connection.Disconnect())),
+			wait: () => funcs.forEach((func) => func().wait()),
+			autoComplete: () => funcs.forEach((func) => func()?.autoComplete?.()),
+		};
+	}
+	/** Wait for the provided parts, starting all simultaneously */
 	waitPart(...regs: readonly TutorialPartRegistration[]): void {
 		let skipped = false;
 		let completed = false;
 
-		const reg = this.combineParts(...regs);
+		const reg = this.combinePartsParallel(...regs);
 
 		let connection: SignalConnection | undefined = Signal.multiConnection(
 			reg.connection,
@@ -532,5 +784,32 @@ export class Tutorial extends Component {
 
 		connection.Disconnect();
 		connection = undefined;
+	}
+
+	/** Process the block diff, running the build/delete/configure/etc parts */
+	processDiff(diffs: readonly BuildingDiffChange[], saveVersion: number): TutorialPartRegistration {
+		return processTutorialDiff(this, diffs, saveVersion);
+	}
+
+	/** Translate the provided strings, joining them into one without a delimiter */
+	translate(...strings: string[]): string {
+		return strings.map((str) => this.translator.Translate(game, str)).join("");
+	}
+
+	/** Resolve and run the tutorial from the provided class */
+	static runTutorialFromClass(
+		di: DIContainer,
+		clazz: {
+			readonly name: string;
+			new (tutorial: Tutorial, ...args: unknown[]): unknown;
+		},
+	) {
+		try {
+			const tutorial = di.resolveForeignClass(Tutorial, [clazz.name]);
+			new clazz(tutorial);
+		} catch (err) {
+			BSOD.showWithDefaultText(err, "Tutorial has caused a crash");
+			throw err;
+		}
 	}
 }

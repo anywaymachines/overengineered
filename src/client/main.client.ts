@@ -19,7 +19,7 @@ const builder = Game.createHost();
 try {
 	SandboxGame.initialize(builder);
 } catch (err) {
-	BSOD.showWithDefaultText(tostring(err ?? ""));
+	BSOD.showWithDefaultText(err, "The game has failed to load.");
 	throw err;
 }
 

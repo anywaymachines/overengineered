@@ -38,9 +38,9 @@ export namespace BSOD {
 		}
 	}
 
-	export function showWithDefaultText(text: string) {
+	export function showWithDefaultText(errobj: unknown, header: string) {
 		const str = `
-An error has occurred: The game has failed to load.
+An error has occurred: ${header}
 
 Screenshot this screen and send it to the developers in the official community server.
 
@@ -49,7 +49,7 @@ Press Alt+F4 to restart Roblox. If you do this, you will not lose any unsaved in
 
 Player: ${Players.LocalPlayer.UserId} ${Players.LocalPlayer.Name}
 ${GameDefinitions.getEnvironmentInfo().join("\n")}
-Error: ${text}
+Error: ${errobj ?? "[unknown error]"}
 `.gsub("^%s*(.-)%s*$", "%1")[0];
 
 		show(str);

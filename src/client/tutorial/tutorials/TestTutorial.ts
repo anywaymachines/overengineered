@@ -1,14 +1,7 @@
 import { InputController } from "client/controller/InputController";
 import { ActionController } from "client/modes/build/ActionController";
-import { Tutorial } from "client/tutorial/Tutorial2";
-import type { TutorialPartRegistration } from "client/tutorial/Tutorial2";
-import type { LatestSerializedBlock, LatestSerializedBlocks } from "shared/building/BlocksSerializer";
-import type { BuildingDiffChange, DiffBlock } from "shared/building/BuildingDiffer";
-
-type lsb = ReplaceWith<
-	LatestSerializedBlocks,
-	{ readonly blocks: ReplaceWith<LatestSerializedBlock, { readonly uuid: string }>[] }
->;
+import type { Tutorial } from "client/tutorial/Tutorial2";
+import type { BuildingDiffChange } from "shared/building/BuildingDiffer";
 
 const saveVersion = 23;
 const diffs = {
@@ -54,52 +47,11 @@ const diffs = {
 	d5cfgtest: [{ uuid: "s1", key: "angle", value: { rotation: { add: "W", sub: "S" } }, type: "configChanged" }],
 } satisfies { readonly [k in string]: readonly BuildingDiffChange[] };
 
-const diffprocess = (
-	tutorial: Tutorial,
-	diffs: readonly BuildingDiffChange[],
-	saveVersion: number,
-): TutorialPartRegistration => {
-	const istype = <const TType extends BuildingDiffChange["type"], T>(
-		actualType: BuildingDiffChange["type"],
-		wantedType: TType,
-		changes: BuildingDiffChange[],
-	): changes is Extract<BuildingDiffChange, { type: TType }>[] => actualType === wantedType;
-	const toBlock = (block: DiffBlock): LatestSerializedBlock => block as LatestSerializedBlock;
+@injectable
+export class TestTutorial {
+	static readonly name = "Test tutorial";
 
-	const get = (
-		changeType: BuildingDiffChange["type"],
-		change: BuildingDiffChange[],
-	): TutorialPartRegistration | undefined => {
-		if (istype(changeType, "added", change)) {
-			return tutorial.partBuild({ version: saveVersion, blocks: change.map((c) => toBlock(c.block)) });
-			// TODO: changes
-		}
-		if (istype(changeType, "removed", change)) {
-			return tutorial.partDelete(change.map((c) => c.uuid));
-		}
-		if (istype(changeType, "configChanged", change)) {
-			return tutorial.partConfigure(
-				change.map(({ uuid, key, value }) => ({ uuid: uuid as BlockUuid, key, value })),
-			);
-		}
-	};
-
-	const parts: TutorialPartRegistration[] = [];
-	for (const [changeType, change] of diffs.groupBy((d) => d.type)) {
-		const exec = get(changeType, change);
-		if (!exec) continue;
-
-		parts.push(exec);
-	}
-
-	return tutorial.combineParts(...parts);
-};
-const processDiffArr = (tutorial: Tutorial, diff: readonly BuildingDiffChange[]): TutorialPartRegistration =>
-	diffprocess(tutorial, diff, saveVersion);
-
-export namespace TestTutorial {
-	export function start(di: DIContainer) {
-		const tutorial = di.resolveForeignClass(Tutorial, ["Test tutorial"]);
+	constructor(tutorial: Tutorial) {
 		tutorial.enable();
 		const toolController = tutorial.buildingMode.toolController;
 		const editTool = toolController.allTools.editTool;
@@ -119,7 +71,7 @@ export namespace TestTutorial {
 
 		toolController.enabledTools.enableOnly(toolController.allTools.buildTool);
 		tutorial.waitPart(
-			processDiffArr(tutorial, diffs.d0buildFrame),
+			tutorial.processDiff(diffs.d0buildFrame, saveVersion),
 			tutorial.partText("First, let's build the frame for our car."),
 			tutorial.tasksPart(
 				"Select one",
@@ -134,13 +86,13 @@ export namespace TestTutorial {
 
 		toolController.enabledTools.enableOnly(toolController.allTools.deleteTool);
 		tutorial.waitPart(
-			processDiffArr(tutorial, diffs.d1deleteBlock),
+			tutorial.processDiff(diffs.d1deleteBlock, saveVersion),
 			tutorial.partText("Whoops, we placed one block too many. Delete it."),
 		);
 
 		toolController.enabledTools.enableOnly(toolController.allTools.buildTool);
 		tutorial.waitPart(
-			processDiffArr(tutorial, diffs.d2placeServos),
+			tutorial.processDiff(diffs.d2placeServos, saveVersion),
 			tutorial.partText("Now place the rotators for rotatoring."),
 			tutorial.tasksPart(
 				`Hint: You can press ${(() => {
@@ -154,19 +106,19 @@ export namespace TestTutorial {
 
 		toolController.enabledTools.enableOnly(toolController.allTools.buildTool);
 		tutorial.waitPart(
-			processDiffArr(tutorial, diffs.d3placeSeat),
+			tutorial.processDiff(diffs.d3placeSeat, saveVersion),
 			tutorial.partText("seat place or vehicl no work"),
 		);
 
 		toolController.enabledTools.enableOnly(toolController.allTools.buildTool, toolController.allTools.deleteTool);
 		tutorial.waitPart(
-			processDiffArr(tutorial, diffs.d4prtest),
+			tutorial.processDiff(diffs.d4prtest, saveVersion),
 			tutorial.partText("Now delete and place for TESTING mega TESTING."),
 		);
 
 		toolController.enabledTools.enableOnly(toolController.allTools.configTool);
 		tutorial.waitPart(
-			processDiffArr(tutorial, diffs.d5cfgtest),
+			tutorial.processDiff(diffs.d5cfgtest, saveVersion),
 			tutorial.partText("Now change the motor config to +W -S !!!!!!!!!!important"),
 			tutorial.tasksPart(
 				"Select 4 config tool",

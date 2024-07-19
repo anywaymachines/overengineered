@@ -6,8 +6,9 @@ import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Gui } from "client/gui/Gui";
+import { Tutorial as Tutorial2 } from "client/tutorial/Tutorial2";
 import { TutorialBasics } from "client/tutorial/TutorialBasics";
-import { TestTutorial as TestTutorial2 } from "client/tutorial/tutorials/TestTutorial";
+import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
 import { Signal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
@@ -388,10 +389,10 @@ namespace ControlsSource {
 			const basics2 = list.add(
 				new TextButtonControl(
 					Gui.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
-					() => TestTutorial2.start(di),
+					() => Tutorial2.runTutorialFromClass(di, BasicCarTutorial),
 				),
 			);
-			basics2.text.set("Basics tutorial 2 test");
+			basics2.text.set("Basics car tutorial 2 test");
 		}
 	}
 

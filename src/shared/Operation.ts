@@ -1,26 +1,49 @@
 import { Signal } from "shared/event/Signal";
 
-type MiddlewareResponse<TArg> = Response | Response<{ readonly arg: TArg }>;
+type MiddlewareResponse<TArg> = Response<{ readonly arg?: TArg }>;
 export class Operation<TArg, TResult extends {} = {}> {
 	private readonly _executed = new Signal<(...args: [arg: TArg, result: TResult]) => void>();
 	readonly executed = this._executed.asReadonly();
-	private readonly middlewares: ((arg: TArg) => MiddlewareResponse<TArg>)[] = [];
+	private readonly middlewares = new Set<(arg: TArg) => MiddlewareResponse<TArg>>();
 
 	constructor(private readonly func: (arg: TArg) => Response<TResult>) {}
 
 	addMiddleware(middleware: (arg: TArg) => MiddlewareResponse<TArg>): SignalConnection {
-		this.middlewares.push(middleware);
-
-		const list = this.middlewares;
-		return {
-			Disconnect() {
-				const index = list.indexOf(middleware);
-				if (index !== -1) {
-					list.remove(index);
-				}
-			},
-		};
+		this.middlewares.add(middleware);
+		return Signal.connection(() => this.middlewares.delete(middleware));
 	}
+	/** Returns a middleware with a set, where if any of its functions return success, the whole middleware returns success. */
+	createMiddlewareCombiner() {
+		const funcs = new Set<(arg: TArg) => MiddlewareResponse<TArg>>();
+
+		return {
+			addFunc: (func: (arg: TArg) => MiddlewareResponse<TArg>): SignalConnection => {
+				funcs.add(func);
+				return Signal.connection(() => funcs.delete(func));
+			},
+			connection: Signal.multiConnection(
+				Signal.connection(() => funcs.clear()),
+				this.addMiddleware((arg): MiddlewareResponse<TArg> => {
+					if (funcs.size() === 0) {
+						return { success: true };
+					}
+
+					let err: ErrorResponse | undefined;
+					for (const func of funcs) {
+						const result = func(arg);
+						if (result.success) {
+							return result;
+						}
+
+						err = result;
+					}
+
+					return err ?? { success: false, message: "Unknown error" };
+				}),
+			),
+		} as const;
+	}
+
 	execute(arg: TArg): Response<TResult> {
 		$trace(`Executing operation ${this}`, arg);
 		for (const middleware of this.middlewares) {
@@ -29,7 +52,7 @@ export class Operation<TArg, TResult extends {} = {}> {
 				return response;
 			}
 
-			if ("arg" in response) {
+			if (response.arg) {
 				arg = response.arg;
 			}
 		}
