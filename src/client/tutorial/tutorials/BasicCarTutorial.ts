@@ -19,9 +19,12 @@ export class BasicCarTutorial implements TutorialDescriber {
 				t.funcPart(() => {
 					ActionController.instance.disable();
 					toolController.enabledTools.disableAll();
+					this.buildingMode.gui.actionbar.enabledButtons.enableOnly("settings");
+
 					t.onDestroy(() => {
 						ActionController.instance.enable();
 						toolController.enabledTools.enableAll();
+						this.buildingMode.gui.actionbar.enabledButtons.enableAll();
 						editTool.enabledModes.enableAll();
 					});
 				}),
