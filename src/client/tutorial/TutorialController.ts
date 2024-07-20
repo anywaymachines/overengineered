@@ -7,6 +7,7 @@ import { Gui } from "client/gui/Gui";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
+import { BuildingDiffer } from "shared/building/BuildingDiffer";
 import { BuildingPlot } from "shared/building/BuildingPlot";
 import { Component } from "shared/component/Component";
 import { ComponentInstance } from "shared/component/ComponentInstance";
@@ -355,14 +356,14 @@ namespace Steps {
 				if (!block) return;
 
 				const config = BlockManager.manager.config.get(block) ?? {};
-				if (!(key in config)) {
+				if (!(key in config) || !config[key]) {
 					return;
 				}
 				if (!typeIs(value, "table")) {
 					if (config[key] !== value) {
 						return false;
 					}
-				} else if (!sameProperties(config[key], value)) {
+				} else if (!sameProperties(config[key] as object, value)) {
 					return;
 				}
 			}
@@ -525,8 +526,18 @@ const processTutorialDiff = (
 
 	const get = (changeType: BuildingDiffChange["type"], change: BuildingDiffChange[]): TutorialPartRegistration => {
 		if (istype(changeType, "added", change)) {
-			return tutorial.partBuild({ version: saveVersion, blocks: change.map((c) => toBlock(c.block)) });
-			// TODO: changes
+			// diff of everything after placement (config, connections, etc)
+			const otherDiffs = BuildingDiffer.diff(
+				change.map((c) => ({ id: c.block.id, location: c.block.location, uuid: c.block.uuid })),
+				change.map((c) => c.block),
+			);
+
+			const parts = [
+				() => tutorial.partBuild({ version: saveVersion, blocks: change.map((c) => toBlock(c.block)) }),
+				() => processTutorialDiff(tutorial, otherDiffs, saveVersion),
+			];
+
+			return tutorial.combinePartsSequential(...parts);
 		}
 		if (istype(changeType, "removed", change)) {
 			return tutorial.partDelete(change.map((c) => c.uuid));

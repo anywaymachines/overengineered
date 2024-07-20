@@ -14,7 +14,7 @@ type ConfigChangedChange = {
 	readonly type: "configChanged";
 	readonly uuid: DiffBlock["uuid"];
 	readonly key: string;
-	readonly value: object | Partial<BlockConfigTypes.Types[keyof BlockConfigTypes.Types]["config"]> | undefined;
+	readonly value: unknown;
 };
 type MovedChange = {
 	readonly type: "moved";

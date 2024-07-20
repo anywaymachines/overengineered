@@ -14,7 +14,7 @@ export type PlacedBlockDataConnection = {
 };
 
 export type PlacedBlockConfig = {
-	readonly [k in string]: defined;
+	readonly [k in string]: unknown;
 };
 
 declare global {
