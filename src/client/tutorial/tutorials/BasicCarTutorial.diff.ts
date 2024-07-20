@@ -1,4 +1,4 @@
-import type { TutorialDiffList } from "client/tutorial/Tutorial2";
+import type { TutorialDiffList } from "client/tutorial/TutorialController";
 
 export const BasicCarTutorialDiffs = {
 	saveVersion: 24,

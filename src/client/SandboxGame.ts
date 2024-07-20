@@ -23,36 +23,18 @@ import { ClientBuildingValidationController } from "client/modes/build/ClientBui
 import { PlayModeController } from "client/modes/PlayModeController";
 import { PlayerDataInitializer } from "client/PlayerDataStorage";
 import { TerrainController } from "client/terrain/TerrainController";
-import { Tutorial } from "client/tutorial/Tutorial";
-import { TutorialBasics } from "client/tutorial/TutorialBasics";
+import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
+import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
+import { TutorialServiceInitializer } from "client/tutorial/TutorialService";
 import { AutoLogicCreator } from "shared/block/AutoLogicCreator";
 import { BlockRegistry } from "shared/block/BlockRegistry";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedPlots } from "shared/building/SharedPlots";
-import { HostedService } from "shared/GameHost";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomRemotes } from "shared/Remotes";
-import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { TutorialDescriber } from "client/tutorial/TutorialController";
 import type { SharedPlot } from "shared/building/SharedPlot";
-
-namespace Startup {
-	@injectable
-	class RunTutorialIfNoSlots extends HostedService {
-		constructor(@inject tutorial: Tutorial, @inject playerData: PlayerDataStorage) {
-			super();
-
-			this.onEnable(() => {
-				if (!playerData.slots.get().any((t) => t.blocks !== 0)) {
-					TutorialBasics(tutorial);
-				}
-			});
-		}
-	}
-
-	export function initializeBasicsTutorial(builder: GameHostBuilder) {
-		builder.services.registerService(RunTutorialIfNoSlots);
-	}
-}
 
 export namespace SandboxGame {
 	export function initialize(builder: GameHostBuilder) {
@@ -94,7 +76,6 @@ export namespace SandboxGame {
 		});
 		PlayModeController.initialize(builder);
 		ClientBuildingValidationController.initialize(builder);
-		Tutorial.initialize(builder);
 
 		builder.services.registerService(GameEnvironmentController);
 		SoundController.initializeAll(builder);
@@ -115,7 +96,17 @@ export namespace SandboxGame {
 		ControlsPopup.addAsService(builder);
 		WikiPopup.addAsService(builder);
 
-		Startup.initializeBasicsTutorial(builder);
+		{
+			const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [BasicCarTutorial];
+			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
+				tutorials.push(TestTutorial);
+			}
+
+			TutorialServiceInitializer.initialize(builder, {
+				tutorials,
+				tutorialToRunWhenNoSlots: BasicCarTutorial,
+			});
+		}
 
 		LoadingController.show("Initializing something");
 	}

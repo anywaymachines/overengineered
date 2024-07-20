@@ -77,11 +77,16 @@ type ConstructorResult<T extends abstract new (...args: never) => unknown> = T e
 	: never;
 
 export type DIRegistrationContext<T> = {
-	onInit<TThis>(this: TThis, func: (value: T) => void): TThis;
+	onInit<TThis>(this: TThis, func: (value: T, di: DIContainer) => void): TThis;
 };
 export type DISingletonClassRegistrationContext<T extends abstract new (...args: never) => unknown> =
 	DIRegistrationContext<ConstructorResult<T>> & {
-		withArgs<TThis>(this: TThis, args: Partial<[...ConstructorParameters<T>]>): TThis;
+		withArgs<TThis>(
+			this: TThis,
+			args:
+				| ((di: ReadonlyDIContainer) => Partial<[...ConstructorParameters<T>]>)
+				| Partial<[...ConstructorParameters<T>]>,
+		): TThis;
 	};
 type D = DIContainer;
 export class DIContainer {
@@ -104,8 +109,14 @@ export class DIContainer {
 	): DISingletonClassRegistrationContext<T> {
 		name ??= getSymbol(clazz);
 
-		let savedArgs: Partial<[...ConstructorParameters<T>]> | undefined = undefined;
-		const reg = this.registerSingletonFunc((di) => instantiateClass(clazz, savedArgs, di), name);
+		let savedArgs:
+			| Partial<[...ConstructorParameters<T>]>
+			| ((di: ReadonlyDIContainer) => Partial<[...ConstructorParameters<T>]>)
+			| undefined = undefined;
+		const reg = this.registerSingletonFunc((di) => {
+			const args = typeIs(savedArgs, "function") ? savedArgs(di) : savedArgs;
+			return instantiateClass(clazz, args, di);
+		}, name);
 
 		return {
 			onInit(func) {
@@ -133,7 +144,8 @@ export class DIContainer {
 		}
 
 		let created: T | undefined;
-		const onInit: ((value: T) => void)[] = [];
+		const onInit: ((value: T, di: DIContainer) => void)[] = [];
+		const selv = this;
 
 		this.registrations.set(name, {
 			get(ctx) {
@@ -141,7 +153,7 @@ export class DIContainer {
 
 				created = func(ctx);
 				for (const func of onInit) {
-					func(created);
+					func(created, selv);
 				}
 
 				return created;

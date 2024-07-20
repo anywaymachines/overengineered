@@ -8,14 +8,12 @@ import { Gui } from "client/gui/Gui";
 import { ServerRestartController } from "client/ServerRestartController";
 import { TestRunner } from "client/test/TestRunner";
 import { LoadSlotTest } from "client/test/visual/LoadSlotTest";
-import { TutorialCreator } from "client/tutorial/creator/TutorialCreator";
-import { Tutorial } from "client/tutorial/Tutorial2";
-import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
-import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
+import { TutorialCreator } from "client/tutorial/TutorialCreator";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Element } from "shared/Element";
 import { HostedService } from "shared/GameHost";
+import type { TutorialsService } from "client/tutorial/TutorialService";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
 @injectable
@@ -80,8 +78,14 @@ export class AdminGui extends HostedService {
 				["Load REMOTE", LoadSlotTest.create(true)],
 				["Global message", AdminMessageController.createControl()],
 				wrapNonVisual("Tutorial creator", {
-					startTest: (di) => Tutorial.runTutorialFromClass(di, TestTutorial),
-					startBasicsCar: (di) => Tutorial.runTutorialFromClass(di, BasicCarTutorial),
+					...asObject(
+						di
+							.resolve<TutorialsService>()
+							.allTutorials.mapToMap((t) =>
+								$tuple(`run '${t.name}'`, () => di.resolve<TutorialsService>().run(t)),
+							),
+					),
+
 					setBefore: (di) => TutorialCreator.setBefore(di.resolve<ReadonlyPlot>()),
 					printDiff: (di) => print(TutorialCreator.serializeDiffToTsCode(di.resolve<ReadonlyPlot>())),
 					print: (di) => print(TutorialCreator.serializePlotToTsCode(di.resolve<ReadonlyPlot>())),

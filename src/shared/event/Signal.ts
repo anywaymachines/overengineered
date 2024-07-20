@@ -64,7 +64,14 @@ export class ArgsSignal<TArgs extends unknown[]> implements ReadonlyArgsSignal<T
 				try {
 					(sub as (...args: TArgs) => void)(...args);
 				} catch (err) {
-					print(err, debug.traceback());
+					warn(
+						`Exception in signal ${this} handling ${sub} with arguments`,
+						args,
+						":\n",
+						err,
+						"\nat",
+						debug.traceback(),
+					);
 					throw err;
 				}
 			}

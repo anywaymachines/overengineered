@@ -19,7 +19,7 @@ import { Localization } from "shared/Localization";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
 import type { MultiBlockSelectorConfiguration } from "client/tools/highlighters/MultiBlockSelector";
-import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
+//import type { TutorialConfigBlockHighlight } from "client/tutorial/TutorialConfigTool";
 import type { BlockRegistry } from "shared/block/BlockRegistry";
 
 namespace Scene {
@@ -170,6 +170,7 @@ namespace Scene {
 	}
 }
 
+type TutorialConfigBlockHighlight = { position: Vector3 }; // TODO: config tool tutorial something delete this or not
 @injectable
 export class ConfigTool extends ToolBase {
 	readonly blocksToConfigure: TutorialConfigBlockHighlight[] = [];

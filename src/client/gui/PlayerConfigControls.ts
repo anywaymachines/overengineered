@@ -6,9 +6,6 @@ import { NumberTextBoxControl } from "client/gui/controls/NumberTextBoxControl";
 import { SliderControl } from "client/gui/controls/SliderControl";
 import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Gui } from "client/gui/Gui";
-import { Tutorial as Tutorial2 } from "client/tutorial/Tutorial2";
-import { TutorialBasics } from "client/tutorial/TutorialBasics";
-import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
 import { Signal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
@@ -17,7 +14,7 @@ import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooser
 import type { NumberTextBoxControlDefinition } from "client/gui/controls/NumberTextBoxControl";
 import type { SliderControlDefinition } from "client/gui/controls/SliderControl";
 import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
-import type { Tutorial } from "client/tutorial/Tutorial";
+import type { TutorialsService } from "client/tutorial/TutorialService";
 import type { ReadonlyArgsSignal } from "shared/event/Signal";
 
 type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
@@ -371,28 +368,19 @@ namespace ControlsSource {
 		constructor(
 			config: PlayerConfigTypes.Tutorial["config"],
 			definition: ConfigTypeToDefinition<PlayerConfigTypes.Tutorial>,
-			@inject tutorial: Tutorial,
-			@inject di: DIContainer,
+			@inject tutorials: TutorialsService,
 		) {
 			super(templates.multi(), definition.displayName);
 
 			const list = this.add(new Control(this.gui.Control));
-
-			const basics = list.add(
-				new TextButtonControl(
-					Gui.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
-					() => TutorialBasics(tutorial),
-				),
-			);
-			basics.text.set("Basics tutorial");
-
-			const basics2 = list.add(
-				new TextButtonControl(
-					Gui.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
-					() => Tutorial2.runTutorialFromClass(di, BasicCarTutorial),
-				),
-			);
-			basics2.text.set("Basics car tutorial 2 test");
+			for (const tutorial of tutorials.allTutorials) {
+				list.add(
+					new TextButtonControl(
+						Gui.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
+						() => tutorials.run(tutorial),
+					).with((b) => b.text.set(`Tutorial: ${tutorial.name}`)),
+				);
+			}
 		}
 	}
 

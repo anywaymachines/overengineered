@@ -1,6 +1,5 @@
-import { Workspace, Players, RunService, LocalizationService } from "@rbxts/services";
+import { Workspace, Players } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
-import { BSOD } from "client/gui/BSOD";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
@@ -172,33 +171,6 @@ namespace Steps {
 		return { connection, wait, autoComplete };
 	}
 
-	export function waitForText(ui: TutorialControl, text: string, resolve: Resolver): Reg {
-		const gui = ui.instance;
-		gui.TextLabel.Text = "";
-
-		const translatedText = Localization.translateForPlayer(Players.LocalPlayer, text);
-		const thr = task.spawn(() => {
-			// Animated text
-			for (const symbol of translatedText) {
-				gui.TextLabel.Text = gui.TextLabel.Text + symbol;
-				task.wait(RunService.IsStudio() ? 0 : 0.05);
-			}
-
-			resolve();
-		});
-
-		return {
-			connection: Signal.connection(() => {
-				gui.Header.Cancel.Visible = true;
-				gui.TextLabel.Text = translatedText;
-			}),
-			autoComplete: () => {
-				task.cancel(thr);
-				gui.Header.Cancel.Visible = true;
-				gui.TextLabel.Text = translatedText;
-			},
-		};
-	}
 	export function waitForNext(ui: TutorialControl, resolve: Resolver): Reg {
 		ui.instance.Header.Next.Visible = true;
 		ui.instance.Header.Skip.Visible = false;
@@ -521,7 +493,13 @@ namespace Steps {
 	}
 }
 
-type TutorialPartRegistration = {
+export type TutorialRunnerPartList = readonly (() => readonly TutorialPartRegistration[])[];
+export type TutorialDescriber = {
+	readonly name: string;
+	create(t: TutorialController): TutorialRunnerPartList;
+};
+
+export type TutorialPartRegistration = {
 	readonly connection: SignalConnection;
 	readonly wait: () => void;
 	readonly autoComplete?: () => void;
@@ -534,7 +512,7 @@ export type TutorialDiffList = {
 
 /** Process the block diff, running the build/delete/configure/etc parts */
 const processTutorialDiff = (
-	tutorial: Tutorial,
+	tutorial: TutorialController,
 	diffs: readonly BuildingDiffChange[],
 	saveVersion: number,
 ): TutorialPartRegistration => {
@@ -575,13 +553,12 @@ const processTutorialDiff = (
 	return tutorial.combinePartsSequential(...parts);
 };
 
-/** Controlling the tutorial */
+/** Controlling a single tutorial */
 @injectable
-export class Tutorial extends Component {
+export class TutorialController extends Component {
 	private readonly ghostPlot;
 	private readonly ui;
 	private readonly uiTasks;
-	private readonly translator;
 
 	constructor(
 		title: string,
@@ -591,12 +568,6 @@ export class Tutorial extends Component {
 		@inject di: DIContainer,
 	) {
 		super();
-
-		try {
-			this.translator = LocalizationService.GetTranslatorForPlayerAsync(Players.LocalPlayer);
-		} catch {
-			this.translator = LocalizationService.GetTranslatorForPlayer(Players.LocalPlayer);
-		}
 
 		this.ui = this.parentGui(new TutorialControl(title));
 		this.ui.onCancel.Connect(() => this.destroy());
@@ -621,7 +592,7 @@ export class Tutorial extends Component {
 
 	/** Same as {@link tasksPart} but auto-translates the strings */
 	translatedTasksPart(...tasks: readonly (readonly string[])[]): TutorialPartRegistration {
-		return this.tasksPart(...tasks.map((tasks) => this.translate(...tasks)));
+		return this.tasksPart(...tasks.map((tasks) => Localization.translateForPlayer(Players.LocalPlayer, ...tasks)));
 	}
 	/** Show tasks on the "tasks" gui */
 	tasksPart(...tasks: readonly string[]): TutorialPartRegistration {
@@ -634,9 +605,29 @@ export class Tutorial extends Component {
 		};
 	}
 	/** Show text on the main gui */
-	partText(text: string): TutorialPartRegistration {
-		return Steps.execute(Steps.waitForText, this.ui, text);
+	partText(...text: readonly string[]): TutorialPartRegistration {
+		const gui = this.ui.instance;
+		gui.TextLabel.Text = "";
+
+		const translatedText = Localization.translateForPlayer(Players.LocalPlayer, ...text);
+		const thr = task.spawn(() => {
+			// Animated text
+			for (const symbol of translatedText) {
+				gui.TextLabel.Text += symbol;
+				task.wait(0.05);
+			}
+		});
+
+		return {
+			connection: Signal.connection(() => {
+				task.cancel(thr);
+				gui.Header.Cancel.Visible = true;
+				gui.TextLabel.Text = translatedText;
+			}),
+			wait: () => {},
+		};
 	}
+
 	private showBlocks(blocks: LatestSerializedBlocks): SignalConnection {
 		this.ghostPlot.build(blocks);
 		return Signal.connection(() => this.ghostPlot.clearBlocks());
@@ -645,10 +636,20 @@ export class Tutorial extends Component {
 		return this.ghostPlot.highlight(uuids as readonly BlockUuid[]);
 	}
 
+	/** Execute a function as a part */
+	funcPart(func: (tutorial: TutorialController) => void): TutorialPartRegistration {
+		func(this);
+
+		return {
+			connection: Signal.connection(() => {}),
+			wait: () => {},
+		};
+	}
 	/** Wait for the "next" button click */
 	partNextButton(): TutorialPartRegistration {
 		return Steps.execute(Steps.waitForNext, this.ui);
 	}
+
 	/** Wait for blocks building */
 	partBuild(blocks: LatestSerializedBlocks): TutorialPartRegistration {
 		const hc = this.showBlocks(blocks);
@@ -752,7 +753,8 @@ export class Tutorial extends Component {
 			autoComplete: () => funcs.forEach((func) => func()?.autoComplete?.()),
 		};
 	}
-	/** Wait for the provided parts, starting all simultaneously */
+
+	/** Wait for the provided parts, starting all simultaneously. Supports skipping. */
 	waitPart(...regs: readonly TutorialPartRegistration[]): void {
 		let skipped = false;
 		let completed = false;
@@ -773,6 +775,7 @@ export class Tutorial extends Component {
 		});
 		while (!completed) {
 			if (skipped) {
+				print("Skipping a part");
 				task.cancel(thr);
 				reg.autoComplete?.();
 
@@ -789,27 +792,5 @@ export class Tutorial extends Component {
 	/** Process the block diff, running the build/delete/configure/etc parts */
 	processDiff(diffs: readonly BuildingDiffChange[], saveVersion: number): TutorialPartRegistration {
 		return processTutorialDiff(this, diffs, saveVersion);
-	}
-
-	/** Translate the provided strings, joining them into one without a delimiter */
-	translate(...strings: string[]): string {
-		return strings.map((str) => this.translator.Translate(game, str)).join("");
-	}
-
-	/** Resolve and run the tutorial from the provided class */
-	static runTutorialFromClass(
-		di: DIContainer,
-		clazz: {
-			readonly name: string;
-			new (tutorial: Tutorial, ...args: unknown[]): unknown;
-		},
-	) {
-		try {
-			const tutorial = di.resolveForeignClass(Tutorial, [clazz.name]);
-			new clazz(tutorial);
-		} catch (err) {
-			BSOD.showWithDefaultText(err, "Tutorial has caused a crash");
-			throw err;
-		}
 	}
 }

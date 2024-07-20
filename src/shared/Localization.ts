@@ -6,12 +6,12 @@ export namespace Localization {
 	@argument player Player object
 	@argument text Text to translate
 	*/
-	export function translateForPlayer(player: Player, text: string) {
+	export function translateForPlayer(player: Player, ...text: readonly string[]): string {
 		try {
 			const translator = LocalizationService.GetTranslatorForLocaleAsync(player.LocaleId);
-			return translator.Translate(game, text);
+			return text.map((text) => translator.Translate(game, text)).join("");
 		} catch {
-			return text;
+			return text.join("");
 		}
 	}
 }
