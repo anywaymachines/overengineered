@@ -776,6 +776,18 @@ const keysensor = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const mousesensor = {
+	input: {},
+	output: {
+		position: {
+			displayName: "Position",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const wing = {
 	input: {
 		enabled: {
@@ -1349,6 +1361,7 @@ export const blockConfigRegistry = {
 	masssensor,
 	anglesensor,
 	keysensor,
+	mousesensor,
 	altimeter,
 	radiotransmitter,
 	radioreciever,

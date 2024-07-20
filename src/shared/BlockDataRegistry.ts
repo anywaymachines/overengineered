@@ -361,6 +361,10 @@ const logic = {
 			name: "Owner Locator",
 			description: "Maks, delete this ####",
 		},
+		mousesensor: {
+			name: "Mouse Sensor",
+			description: "Returns the cursor position, relative to the screen",
+		},
 		radarsection: {
 			name: "Radar Section",
 			description: "Returns the closest object that got into the block's sight",

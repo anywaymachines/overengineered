@@ -22,6 +22,7 @@ import { AngleSensorBlockLogic } from "shared/block/logic/logic/sensor/AngleSens
 import { GravitySensorBlockLogic } from "shared/block/logic/logic/sensor/GravitySensorBlockLogic";
 import { KeySensorBlockLogic } from "shared/block/logic/logic/sensor/KeySensorBlockLogic";
 import { MassSensorBlockLogic } from "shared/block/logic/logic/sensor/MassSensorBlockLogic";
+import { MouseSensorBlockLogic } from "shared/block/logic/logic/sensor/MouseSensorBlockLogic";
 import { OwnerLocatorBlockLogic } from "shared/block/logic/logic/sensor/OwnerLocatorBlockLogic";
 import { RadarSectionBlockLogic } from "shared/block/logic/logic/sensor/RadarSectionBlockLogic";
 import { SpeedometerBlockLogic } from "shared/block/logic/logic/sensor/SpeedometerBlockLogic";
@@ -93,6 +94,7 @@ const logicRegistry = {
 	speedometer: SpeedometerBlockLogic,
 	anglesensor: AngleSensorBlockLogic,
 	keysensor: KeySensorBlockLogic,
+	mousesensor: MouseSensorBlockLogic,
 	altimeter: AltimeterBlockLogic,
 	radarsection: RadarSectionBlockLogic,
 
