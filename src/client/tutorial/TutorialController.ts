@@ -113,27 +113,40 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 }
 
 export type TutorialTasksDefinition = Frame & {
-	readonly TaskList: TextLabel & {
-		readonly Task: Frame & {
-			readonly NumLabel: TextLabel;
-			readonly TextLabel: TextLabel;
+	readonly Content: GuiObject & {
+		readonly TaskList: TextLabel & {
+			readonly Task: Frame & {
+				readonly NumLabel: TextLabel;
+				readonly TextLabel: TextLabel;
+			};
+		};
+		readonly HintList: TextLabel & {
+			readonly Hint: Frame & {
+				readonly TextLabel: TextLabel;
+			};
 		};
 	};
 };
 export class TutorialTasksControl extends Control<TutorialTasksDefinition> {
 	private readonly taskTemplate;
-	private readonly list;
+	private readonly taskList;
+
+	private readonly hintTemplate;
+	private readonly hintList;
 
 	constructor() {
 		super(Gui.getGameUI<{ Tasks: TutorialTasksDefinition }>().Tasks.Clone());
 		this.gui.Parent = Gui.getGameUI();
 
-		this.taskTemplate = this.asTemplate(this.gui.TaskList.Task);
-		this.list = this.add(new Control(this.gui.TaskList));
+		this.taskTemplate = this.asTemplate(this.gui.Content.TaskList.Task);
+		this.taskList = this.add(new Control(this.gui.Content.TaskList));
+
+		this.hintTemplate = this.asTemplate(this.gui.Content.HintList.Hint);
+		this.hintList = this.add(new Control(this.gui.Content.HintList));
 	}
 
 	setTasks(tasks: readonly string[]) {
-		this.list.clear();
+		this.taskList.clear();
 
 		let i = 0;
 		for (const task of tasks) {
@@ -141,7 +154,136 @@ export class TutorialTasksControl extends Control<TutorialTasksDefinition> {
 			gui.NumLabel.Text = tostring(++i);
 			gui.TextLabel.Text = task;
 
-			this.list.add(new Control(gui));
+			this.taskList.add(new Control(gui));
+		}
+	}
+	setHints(hints: readonly string[]) {
+		this.hintList.clear();
+		this.hintList.setVisible(hints.size() !== 0);
+
+		for (const hint of hints) {
+			const gui = this.hintTemplate();
+			gui.TextLabel.Text = hint;
+
+			this.hintList.add(new Control(gui));
+		}
+	}
+}
+
+type Reg = {
+	readonly connection: SignalConnection;
+	readonly autoComplete?: () => void;
+};
+type Resolver = () => void;
+
+/** @deprecated TODO: delete if forgotten */
+namespace Steps2 {
+	export class Build extends Component {
+		private readonly subscribedBlocks = new Set<LatestSerializedBlocks>();
+
+		constructor() {
+			super();
+
+			const combiner = ClientBuilding.placeOperation.createMiddlewareCombiner();
+
+			this.event.subscribeRegistration(() =>
+				ClientBuilding.placeOperation.addMiddleware((args) => {
+					if (this.subscribedBlocks.size() === 0) {
+						return { success: true };
+					}
+
+					const empty = {};
+					const bs = args.blocks
+						.map((block): PlaceBlockRequest | {} => {
+							let btp: LatestSerializedBlock | undefined;
+							for (const b of this.subscribedBlocks) {
+								btp = b.blocks.find(
+									(value) =>
+										value.id === block.id &&
+										VectorUtils.roundVector3(value.location.Position) ===
+											VectorUtils.roundVector3(
+												args.plot.instance.BuildingArea.CFrame.ToObjectSpace(block!.location)
+													.Position,
+											),
+								);
+
+								if (btp) break;
+							}
+							if (!btp) return empty;
+
+							return {
+								...block,
+								location: args.plot.instance.BuildingArea.CFrame.ToWorldSpace(btp.location),
+								uuid: btp.uuid,
+							};
+						})
+						.filter((c) => c !== empty) as PlaceBlockRequest[];
+
+					if (bs.size() !== args.blocks.size()) {
+						return { success: false, message: "Invalid placement" };
+					}
+
+					return { success: true, arg: { ...args, blocks: bs } };
+				}),
+			);
+		}
+
+		private updateTasks(tutorial: TutorialController, plot: SharedPlot) {
+			const allBlocksCount = this.subscribedBlocks.flatmap((x) => x.blocks).size();
+			const builtBlocksCount = this.subscribedBlocks
+				.flatmap((x) => x.blocks)
+				.filter((b) => !plot.tryGetBlock(b.uuid))
+				.size();
+			tutorial.setTasks(`Build blocks (${builtBlocksCount}/${allBlocksCount})`);
+		}
+
+		wait(
+			tutorial: TutorialController,
+			blocksToPlace: LatestSerializedBlocks,
+			buildTool: BuildTool,
+			plot: SharedPlot,
+			resolve: Resolver,
+		): Reg {
+			this.subscribedBlocks.add(blocksToPlace);
+			const c1 = Signal.connection(() => this.subscribedBlocks.delete(blocksToPlace));
+
+			const updateTasks = () => {
+				const allBlocksCount = blocksToPlace.blocks.size();
+				const builtBlocksCount = blocksToPlace.blocks.filter((b) => !plot.tryGetBlock(b.uuid)).size();
+				tutorial.setTasks(`Build blocks (${builtBlocksCount}/${allBlocksCount})`);
+			};
+
+			const c2 = ClientBuilding.placeOperation.executed.Connect(({ plot }) => {
+				buildTool.gui.blockSelector.highlightedBlocks.set([
+					...blocksToPlace.blocks.filter((b) => !plot.tryGetBlock(b.uuid)).mapToSet((b) => b.id),
+				]);
+				updateTasks();
+
+				for (const blockToPlace of blocksToPlace.blocks) {
+					const placed = plot.tryGetBlock(blockToPlace.uuid);
+					if (!placed) return;
+				}
+
+				resolve();
+			});
+
+			buildTool.gui.blockSelector.highlightedBlocks.set([...blocksToPlace.blocks.mapToSet((b) => b.id)]);
+			const c3 = Signal.connection(() => buildTool.gui.blockSelector.highlightedBlocks.set([]));
+
+			updateTasks();
+			const c4 = Signal.connection(() => tutorial.setTasks());
+
+			return {
+				connection: Signal.multiConnection(c1, c2, c3, c4),
+				autoComplete: () => {
+					ClientBuilding.placeOperation.execute({
+						plot: plot,
+						blocks: blocksToPlace.blocks
+							.filter((b) => !plot.tryGetBlock(b.uuid))
+							.map((b) => BlocksSerializer.serializedBlockToPlaceRequest(b, plot.origin)),
+					});
+				},
+			};
 		}
 	}
 }
@@ -187,6 +329,7 @@ namespace Steps {
 
 	export namespace Build {
 		const subscribedBlocks = new Set<LatestSerializedBlocks>();
+
 		const middleware = ClientBuilding.placeOperation.addMiddleware((args) => {
 			if (subscribedBlocks.size() === 0) {
 				return { success: true };
@@ -226,11 +369,21 @@ namespace Steps {
 		});
 
 		export function wait(
+			tutorial: TutorialController,
 			blocksToPlace: LatestSerializedBlocks,
 			buildTool: BuildTool,
 			plot: SharedPlot,
 			resolve: Resolver,
 		): Reg {
+			const updateTasks = () => {
+				const allBlocksCount = subscribedBlocks.flatmap((x) => x.blocks).size();
+				const builtBlocksCount = subscribedBlocks
+					.flatmap((x) => x.blocks)
+					.filter((b) => !plot.tryGetBlock(b.uuid))
+					.size();
+				tutorial.setTasks(`Build blocks (${builtBlocksCount}/${allBlocksCount})`);
+			};
+
 			subscribedBlocks.add(blocksToPlace);
 			const c1 = Signal.connection(() => subscribedBlocks.delete(blocksToPlace));
 
@@ -238,6 +391,7 @@ namespace Steps {
 				buildTool.gui.blockSelector.highlightedBlocks.set([
 					...blocksToPlace.blocks.filter((b) => !plot.tryGetBlock(b.uuid)).mapToSet((b) => b.id),
 				]);
+				updateTasks();
 
 				for (const blockToPlace of blocksToPlace.blocks) {
 					const placed = plot.tryGetBlock(blockToPlace.uuid);
@@ -250,8 +404,11 @@ namespace Steps {
 			buildTool.gui.blockSelector.highlightedBlocks.set([...blocksToPlace.blocks.mapToSet((b) => b.id)]);
 			const c3 = Signal.connection(() => buildTool.gui.blockSelector.highlightedBlocks.set([]));
 
+			updateTasks();
+			const c4 = Signal.connection(() => tutorial.setTasks());
+
 			return {
-				connection: Signal.multiConnection(c1, c2, c3),
+				connection: Signal.multiConnection(c1, c2, c3, c4),
 				autoComplete: () => {
 					ClientBuilding.placeOperation.execute({
 						plot: plot,
@@ -285,9 +442,23 @@ namespace Steps {
 			return { success: false, message: "Invalid deletion" };
 		});
 
-		export function wait(uuidsToDelete: ReadonlySet<BlockUuid>, plot: SharedPlot, resolve: Resolver) {
+		export function wait(
+			tutorial: TutorialController,
+			uuidsToDelete: ReadonlySet<BlockUuid>,
+			plot: SharedPlot,
+			resolve: Resolver,
+		) {
 			subscribedBlocks.add(uuidsToDelete);
 			const c1 = Signal.connection(() => subscribedBlocks.delete(uuidsToDelete));
+
+			const updateTasks = () => {
+				const allBlocksCount = subscribedBlocks.flatmap((b) => [...b]).size();
+				const builtBlocksCount = subscribedBlocks
+					.flatmap((b) => [...b])
+					.filter((b) => !plot.tryGetBlock(b))
+					.size();
+				tutorial.setTasks(`Delete blocks (${builtBlocksCount}/${allBlocksCount})`);
+			};
 
 			const c2 = ClientBuilding.deleteOperation.executed.Connect(({ plot }) => {
 				for (const uuidToDelete of uuidsToDelete) {
@@ -298,8 +469,11 @@ namespace Steps {
 				resolve();
 			});
 
+			updateTasks();
+			const c3 = Signal.connection(() => tutorial.setTasks());
+
 			return {
-				connection: Signal.multiConnection(c1, c2),
+				connection: Signal.multiConnection(c1, c2, c3),
 				autoComplete: () => {
 					ClientBuilding.deleteOperation.execute({
 						plot: plot,
@@ -584,7 +758,7 @@ export class TutorialController extends Component {
 		this.ui.onCancel.Connect(() => this.destroy());
 
 		this.uiTasks = this.parent(new TutorialTasksControl());
-		this.uiTasks.hide();
+		this.uiTasks.instance.Visible = true;
 
 		this.ghostPlot = di.resolveForeignClass(TutorialPlot, [plot]);
 
@@ -601,18 +775,22 @@ export class TutorialController extends Component {
 		});
 	}
 
-	/** Same as {@link tasksPart} but auto-translates the strings */
-	translatedTasksPart(...tasks: readonly (readonly string[])[]): TutorialPartRegistration {
-		return this.tasksPart(...tasks.map((tasks) => Localization.translateForPlayer(Players.LocalPlayer, ...tasks)));
-	}
-	/** Show tasks on the "tasks" gui */
-	tasksPart(...tasks: readonly string[]): TutorialPartRegistration {
-		this.uiTasks.show();
+	/** Set tasks on the "tasks" gui; For tutorial tools usage only. */
+	setTasks(...tasks: readonly string[]): void {
 		this.uiTasks.setTasks(tasks);
+	}
+
+	/** Same as {@link hintsPart} but auto-translates the strings */
+	translatedTasksPart(...tasks: readonly (readonly string[])[]): TutorialPartRegistration {
+		return this.hintsPart(...tasks.map((tasks) => Localization.translateForPlayer(Players.LocalPlayer, ...tasks)));
+	}
+	/** Show hints on the "hints" gui */
+	hintsPart(...tasks: readonly string[]): TutorialPartRegistration {
+		this.uiTasks.setHints(tasks);
 
 		return {
 			wait: () => {},
-			connection: Signal.connection(() => this.uiTasks.hide()),
+			connection: Signal.connection(() => this.uiTasks.setHints([])),
 		};
 	}
 	/** Show text on the main gui */
@@ -666,6 +844,7 @@ export class TutorialController extends Component {
 		const hc = this.showBlocks(blocks);
 		const exec = Steps.execute(
 			Steps.Build.wait,
+			this,
 			blocks,
 			this.buildingMode.toolController.allTools.buildTool,
 			this.sharedPlot,
@@ -679,7 +858,12 @@ export class TutorialController extends Component {
 	/** Wait for blocks deletion */
 	partDelete(uuids: readonly string[]): TutorialPartRegistration {
 		const hc = this.highlightBlocks(uuids);
-		const exec = Steps.execute(Steps.Delete.wait, new ReadonlySet(uuids as readonly BlockUuid[]), this.sharedPlot);
+		const exec = Steps.execute(
+			Steps.Delete.wait,
+			this,
+			new ReadonlySet(uuids as readonly BlockUuid[]),
+			this.sharedPlot,
+		);
 
 		return {
 			...exec,

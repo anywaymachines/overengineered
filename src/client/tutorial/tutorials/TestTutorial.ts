@@ -37,7 +37,7 @@ export class TestTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
 				t.processDiff(diffs.d0buildFrame, saveVersion),
 				t.partText("First, let's build the frame for our car."),
-				t.tasksPart(
+				t.hintsPart(
 					"Select one",
 					"Select 'blocks'",
 					"Select BLOCK",
@@ -58,7 +58,7 @@ export class TestTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
 				t.processDiff(diffs.d2placeServos, saveVersion),
 				t.partText("Now place the rotators for rotatoring."),
-				t.tasksPart(
+				t.hintsPart(
 					`Hint: You can press ${(() => {
 						const it = InputController.inputType.get();
 						if (it === "Desktop") return "the middle mouse button";
@@ -89,7 +89,7 @@ export class TestTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
 				t.processDiff(diffs.d5cfgtest, saveVersion),
 				t.partText("Now change the motor config to +W -S !!!!!!!!!!important"),
-				t.tasksPart(
+				t.hintsPart(
 					"Select 4 config tool",
 					"Select the blockl",
 					"Select +",
@@ -104,7 +104,7 @@ export class TestTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.disableAll()),
 				t.partNextButton(),
 				t.partText("You are now the maks gaming of plane engineers."),
-				t.tasksPart("Important tip: This is a car"),
+				t.hintsPart("Important tip: This is a car"),
 			],
 		];
 	}
