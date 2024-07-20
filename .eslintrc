@@ -72,6 +72,11 @@
 			{
 				"accessibility": "no-public"
 			}
+		], "@typescript-eslint/no-explicit-any": [
+			"error",
+			{
+				"ignoreRestArgs": true
+			}
 		], "require-jsdoc": [ "off", {
 				"require": {
 					"FunctionDeclaration": true,
