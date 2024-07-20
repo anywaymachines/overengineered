@@ -48,7 +48,6 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		super.tick(tick);
 
 		if (this.closestDetectedPart === undefined) return;
-		//if (this.allTouchedBlocks.size() === 0) return; //same check?
 		if (this.closestDetectedPart?.Parent === undefined) this.closestDetectedPart = this.findClosestPart();
 		this.output.distance.set(this.getDistanceTo(this.closestDetectedPart!) ?? Vector3.zero);
 	}
@@ -69,7 +68,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 
 		const updateDistance = (detectionSize: number) => {
 			const md = this.input.maxDistance.get();
-			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (md + halvedMaxDist))) * 5;
+			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (md + halvedMaxDist))) * 10;
 			view.Size = new Vector3(ds, view.Size.Y, ds);
 		};
 
@@ -106,7 +105,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		*/
 		this.event.subscribe(view.Touched, (part) => {
 			if (part.CollisionGroup !== "Blocks") return;
-			//if (part.HasTag("RADARVIEW")) return;
+			if (part.HasTag("RADARVIEW")) return;
 			if (part.IsDescendantOf(this.instance)) return;
 			if (this.getDistanceTo(part).Magnitude < this.input.minimalDistance.get()) return;
 			this.allTouchedBlocks.add(part);
