@@ -77,7 +77,8 @@
 			{
 				"ignoreRestArgs": true
 			}
-		], "require-jsdoc": [ "off", {
+		], "@typescript-eslint/no-this-alias": [ "off", { } ],
+		"require-jsdoc": [ "off", {
 				"require": {
 					"FunctionDeclaration": true,
 					"MethodDefinition": true,
