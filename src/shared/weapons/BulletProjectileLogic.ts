@@ -8,7 +8,7 @@ export class BulletProjectile extends WeaponProjectile {
 		readonly baseDamage: number;
 	}>("bullet_spawn", "RemoteEvent");
 	constructor(startPosition: Vector3, baseVelocity: Vector3, baseDamage: number) {
-		super(startPosition, "KINETIC", WeaponProjectile.PLASMA_PROJECTILE, baseVelocity, baseDamage);
+		super(startPosition, "KINETIC", WeaponProjectile.BULLET_PROJECTILE, baseVelocity, baseDamage);
 	}
 
 	onHit(part: BasePart, point: Vector3): void {
@@ -30,8 +30,6 @@ export class BulletProjectile extends WeaponProjectile {
 	}
 }
 BulletProjectile.spawn.invoked.Connect((player, { startPosition, baseVelocity, baseDamage }) => {
-	task.delay(5, () => {
-		print("Projectile spawned");
-		const proj = new BulletProjectile(startPosition, baseVelocity, baseDamage);
-	});
+	print("Bullet spawned");
+	new BulletProjectile(startPosition, baseVelocity, baseDamage);
 });

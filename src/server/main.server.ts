@@ -11,6 +11,7 @@ import { RemoteEvents } from "shared/RemoteEvents";
 import { SandboxGame } from "server/SandboxGame";
 import { Game } from "shared/GameHost";
 import { PlasmaProjectile } from "shared/weapons/PlasmaProjectileLogic";
+import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 
 const builder = Game.createHost();
 SandboxGame.initialize(builder);
@@ -25,3 +26,4 @@ $log("Server loaded.");
 Workspace.AddTag("GameLoaded");
 
 PlasmaProjectile; // initializing the remote events
+BulletProjectile;

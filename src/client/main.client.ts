@@ -10,7 +10,7 @@ import { SandboxGame } from "client/SandboxGame";
 import { ServerRestartController } from "client/ServerRestartController";
 import { Game } from "shared/GameHost";
 import { RemoteEvents } from "shared/RemoteEvents";
-import { PlasmaProjectile } from "shared/weapons/PlasmaProjectileLogic";
+import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 
 LoadingController.show("Initializing");
 Gui.getGameUI<{ VERSION: TextLabel }>().VERSION.Text = `v${RunService.IsStudio() ? "studio" : game.PlaceVersion}`;
@@ -42,11 +42,16 @@ $log("Client loaded.");
 
 //testing
 if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter") {
-	task.delay(5, () => {
-		PlasmaProjectile.spawn.send({
-			startPosition: new Vector3(359, -16380.998, 331.998),
-			baseVelocity: new Vector3(0, 0, 1),
+	while (true as boolean) {
+		BulletProjectile.spawn.send({
+			startPosition: new Vector3(359, -16360, 330),
+			baseVelocity: new Vector3(
+				0 + (math.random() - 0.5) * 10,
+				20 + (math.random() - 0.5) * 10,
+				5000 + (math.random() - 0.5) * 10,
+			),
 			baseDamage: 0,
 		});
-	});
+		task.wait(0.3);
+	}
 }
