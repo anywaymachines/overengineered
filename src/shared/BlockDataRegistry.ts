@@ -348,22 +348,18 @@ const logic = {
 		altimeter: {
 			name: "Altimeter",
 			description: "Returns current height",
-			autoWeldShape: "cube",
 		},
 		anglesensor: {
 			name: "Angle Sensor",
 			description: "Returns it's angle",
-			autoWeldShape: "cube",
 		},
 		keysensor: {
 			name: "Keyboard Sensor",
 			description: "Returns true when the chosen button is pressed",
-			autoWeldShape: "cube",
 		},
 		ownerlocator: {
 			name: "Owner Locator",
 			description: "Maks, delete this ####",
-			autoWeldShape: "cube",
 		},
 		radarsection: {
 			name: "Radar Section",
