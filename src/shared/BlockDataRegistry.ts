@@ -536,6 +536,10 @@ const registry = {
 		name: "Hinge",
 		description: "A simple hinge. Allows things to rotate in one plane",
 	},
+	smallhingeblock: {
+		name: "Small hinge",
+		description: "Smaller hinge. La rotación compacta",
+	},
 	innercorner: {
 		name: "Inner Corner",
 		description: "An inner corner. Some long time ago it was called an Inner Wedge.. Those were the times!",
