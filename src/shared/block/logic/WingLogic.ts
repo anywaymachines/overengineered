@@ -54,7 +54,7 @@ export class WingLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry
 			const force = surface
 				.mul(
 					this.wingSurface.CFrame.PointToObjectSpace(
-						this.wingSurface.Position.add(this.wingSurface.Velocity.add(Workspace.GlobalWind)),
+						this.wingSurface.Position.add(this.wingSurface.Velocity),
 					).mul(-21),
 				)
 				.add(vectorForce.Force)
