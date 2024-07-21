@@ -63,8 +63,7 @@ export namespace PartUtils {
 	export function BreakJoints(part: BasePart) {
 		const joints = part.GetJoints();
 		joints.forEach((constraint) => {
-			// constraint.Destroy();
-			constraint.Enabled = false;
+			constraint.Destroy();
 		});
 	}
 }
