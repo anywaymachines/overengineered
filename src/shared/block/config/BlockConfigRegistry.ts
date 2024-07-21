@@ -323,6 +323,43 @@ const bytemaker = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const vec3objectworldtransformer = {
+	input: {
+		toobject: {
+			displayName: "To object?",
+			type: "bool",
+			config: true as boolean,
+			default: true as boolean,
+		},
+		originpos: {
+			displayName: "Origin position",
+			type: "vector3",
+			config: Vector3.zero,
+			default: Vector3.zero,
+		},
+		originrot: {
+			displayName: "Origin rotation",
+			type: "vector3",
+			config: Vector3.zero,
+			default: Vector3.zero,
+		},
+		position: {
+			displayName: "Position",
+			type: "vector3",
+			config: Vector3.zero,
+			default: Vector3.zero,
+		},
+	},
+	output: {
+		position: {
+			displayName: "Result",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const rocketengine = {
 	input: {
 		thrust: {
@@ -1378,6 +1415,7 @@ export const blockConfigRegistry = {
 
 	bytemaker,
 	bytesplitter,
+	vec3objectworldtransformer,
 
 	wing1x1: wing,
 	wing1x2: wing,

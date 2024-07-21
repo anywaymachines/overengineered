@@ -353,6 +353,12 @@ const operations = {
 		prefab: prefabs.tripleGeneric,
 	},
 
+	vec3objectworldtransformer: {
+		modelTextOverride: "VEC3 OBJ/WLD",
+		category: categories.converterVector,
+		prefab: prefabs.doubleGeneric,
+	},
+
 	multiplexer: {
 		modelTextOverride: "MUX",
 		category: categories.converterVector,

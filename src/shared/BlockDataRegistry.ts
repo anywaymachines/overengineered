@@ -308,12 +308,14 @@ const logic = {
 		vec3combiner: {
 			name: "Vector3 Combiner",
 			description: "Returns a vector combined from input values",
-			autoWeldShape: "cube",
 		},
 		vec3splitter: {
 			name: "Vector3 Splitter",
 			description: "Returns splitted input vector",
-			autoWeldShape: "cube",
+		},
+		vec3objectworldtransformer: {
+			name: "Vector3 Object/World Transformer",
+			description: "Converts a vector into the world/object coordinate space of the other vector",
 		},
 	},
 	number: {

@@ -4,6 +4,7 @@ import { DisconnectBlockLogic } from "shared/block/logic/DisconnectBlockLogic";
 import { HeliumBlockLogic } from "shared/block/logic/HeliumBlockLogic";
 import { ByteMakerBlockLogic } from "shared/block/logic/logic/converter/byte/ByteMakerBlockLogic";
 import { ByteSplitterBlockLogic } from "shared/block/logic/logic/converter/byte/ByteSplitterBlockLogic";
+import { Vector3ObjectWorldTransformerBlockLogic } from "shared/block/logic/logic/converter/byte/Vector3ObjectWorldTransformer";
 import { LampBlockLogic } from "shared/block/logic/logic/display/LampBlockLogic";
 import { LaserBlockLogic } from "shared/block/logic/logic/display/LaserBlockLogic";
 import { LEDDisplayBlockLogic } from "shared/block/logic/logic/display/LEDDisplayBlockLogic";
@@ -110,6 +111,7 @@ const logicRegistry = {
 
 	bytemaker: ByteMakerBlockLogic,
 	bytesplitter: ByteSplitterBlockLogic,
+	vec3objectworldtransformer: Vector3ObjectWorldTransformerBlockLogic,
 } as const satisfies { readonly [k in BlockId]?: unknown };
 
 export type KnownBlockLogic = typeof logicRegistry;
