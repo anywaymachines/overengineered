@@ -1,7 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
 import { AdminMessageController } from "client/AdminMessageController";
 import { LoadingController } from "client/controller/LoadingController";
-import { WindController } from "client/controller/WindController";
 import { InputTypeChangeEvent } from "client/event/InputTypeChangeEvent";
 import { BSOD } from "client/gui/BSOD";
 import { Gui } from "client/gui/Gui";
@@ -30,7 +29,6 @@ host.run();
 LoadingController.show("Loading the rest");
 
 LogControl.instance.show();
-WindController.initialize();
 
 InputTypeChangeEvent.subscribe();
 RemoteEvents.initialize();
