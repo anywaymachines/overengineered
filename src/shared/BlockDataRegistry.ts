@@ -361,6 +361,10 @@ const logic = {
 			name: "Owner Locator",
 			description: "Maks, delete this ####",
 		},
+		ownercameralocator: {
+			name: "Owner Camera Locator",
+			description: "Returns owner camera position and direction",
+		},
 		mousesensor: {
 			name: "Mouse Sensor",
 			description: "Returns the cursor position, relative to the screen",

@@ -1000,6 +1000,30 @@ const ownerlocator = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const ownercameralocator = {
+	input: {},
+	output: {
+		position: {
+			displayName: "Position",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+		direction: {
+			displayName: "Direction",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+		up: {
+			displayName: "Up vector",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const altimeter = {
 	input: {},
 	output: {
@@ -1357,6 +1381,7 @@ export const blockConfigRegistry = {
 	laser,
 
 	ownerlocator,
+	ownercameralocator,
 	speedometer,
 	masssensor,
 	anglesensor,

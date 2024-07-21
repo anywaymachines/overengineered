@@ -23,6 +23,7 @@ import { GravitySensorBlockLogic } from "shared/block/logic/logic/sensor/Gravity
 import { KeySensorBlockLogic } from "shared/block/logic/logic/sensor/KeySensorBlockLogic";
 import { MassSensorBlockLogic } from "shared/block/logic/logic/sensor/MassSensorBlockLogic";
 import { MouseSensorBlockLogic } from "shared/block/logic/logic/sensor/MouseSensorBlockLogic";
+import { OwnerCameraLocatorBlockLogic } from "shared/block/logic/logic/sensor/OwnerCameraLocatorBlockLogic";
 import { OwnerLocatorBlockLogic } from "shared/block/logic/logic/sensor/OwnerLocatorBlockLogic";
 import { RadarSectionBlockLogic } from "shared/block/logic/logic/sensor/RadarSectionBlockLogic";
 import { SpeedometerBlockLogic } from "shared/block/logic/logic/sensor/SpeedometerBlockLogic";
@@ -88,6 +89,7 @@ const logicRegistry = {
 	radiotransmitter: RadioTransmitterBlockLogic,
 
 	ownerlocator: OwnerLocatorBlockLogic,
+	ownercameralocator: OwnerCameraLocatorBlockLogic,
 	masssensor: MassSensorBlockLogic,
 	gravitysensor: GravitySensorBlockLogic,
 
