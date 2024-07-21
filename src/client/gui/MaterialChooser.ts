@@ -3,6 +3,7 @@ import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { SubmittableValue } from "shared/event/SubmittableValue";
+import { Marketplace } from "shared/Marketplace";
 
 class MaterialButton extends ButtonControl {
 	constructor(gui: GuiButton, set: (material: Enum.Material) => void, gamePass?: number) {
@@ -21,12 +22,11 @@ class MaterialButton extends ButtonControl {
 			const lockFrame = gui.FindFirstChild("Lock") as Frame;
 			const priceLabel = lockFrame.FindFirstChild("TextLabel") as TextLabel;
 
-			if (MarketplaceService.UserOwnsGamePassAsync(Players.LocalPlayer.UserId, gamePass)) {
+			if (Marketplace.Gamepass.has(Players.LocalPlayer, gamePass)) {
 				bought = true;
 				lockFrame.Visible = false;
 			} else {
-				const price = MarketplaceService.GetProductInfo(gamePass, Enum.InfoType.GamePass).PriceInRobux ?? "N/A";
-				priceLabel.Text = `${price} R$`;
+				priceLabel.Text = Marketplace.Gamepass.getPrice(gamePass);
 				lockFrame.Visible = true;
 
 				MarketplaceService.PromptGamePassPurchaseFinished.Connect((player, gamePassId, wasPurchased) => {
