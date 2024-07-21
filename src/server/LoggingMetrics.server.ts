@@ -38,6 +38,8 @@ namespace LoggingMetrics {
 			addLine(`\n**SERVER CLOSED**`);
 			sendMetrics();
 		});
+
+		addLine("**SERVER STARTED**\n")
 	}
 
 	export function addLine(text: string) {
