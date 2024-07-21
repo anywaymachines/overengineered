@@ -1,43 +1,57 @@
+/**
+ * A service that is responsible for managing local instance tags without replicating them
+ */
 export namespace LocalInstanceData {
-	const instanceTags = new Map<Instance, string[]>();
+	const instanceTags = new Map<Instance, Set<string>>();
 
-	function PrepareCleanupLogic(instance: Instance) {
-		// Cleanup
+	/** A function that adds a new tag to an instance
+	 * @param instance Instance
+	 * @param tag Tag
+	 */
+	export function AddLocalTag(instance: Instance, tag: string) {
+		const currentTags = instanceTags.has(instance) ? instanceTags.get(instance)! : new Set<string>()
+		currentTags.add(tag);
+		instanceTags.set(instance, currentTags);
+
+		// Cleanup logic
 		instance.Destroying.Once(() => instanceTags.delete(instance));
 		instance.GetPropertyChangedSignal("Parent").Connect(() => {
-			if (!instance) {
+			if (!instance.Parent) {
 				instanceTags.delete(instance);
 			}
 		});
 	}
 
-	export function AddLocalTag(instance: Instance, tag: string) {
-		const currentTags = instanceTags.has(instance) ? instanceTags.get(instance)! : [];
-		currentTags.push(tag);
-		instanceTags.set(instance, currentTags);
-
-		PrepareCleanupLogic(instance);
-	}
-
+	/** A function that cheecks is tag exists in instance
+	 * @param instance Instance
+	 * @param tag Tag
+	 */
 	export function HasLocalTag(instance: Instance, tag: string) {
 		if (!instanceTags.has(instance)) return false;
 
 		const currentTags = instanceTags.get(instance)!;
-		return currentTags.includes(tag);
+		return currentTags.has(tag);
 	}
 
+	/** A function that removes a tag from instance
+	 * @param instance Instance
+	 * @param tag Tag
+	 */
 	export function RemoveLocalTag(instance: Instance, tag: string) {
 		if (!instanceTags.has(instance)) return;
 
 		const currentTags = instanceTags.get(instance)!;
-		currentTags.remove(currentTags.indexOf(tag));
+		currentTags.delete(tag);
 		instanceTags.set(instance, currentTags);
 	}
 
+	/** A function that reurns all tags in instance
+	 * @param instance Instance
+	 */
 	export function GetAllLocalTags(instance: Instance) {
 		if (!instanceTags.has(instance)) return [];
 
 		const currentTags = instanceTags.get(instance)!;
-		return currentTags;
+		return currentTags.map((item) => item);
 	}
 }
