@@ -45,7 +45,7 @@ export namespace LocalInstanceData {
 		instanceTags.set(instance, currentTags);
 	}
 
-	/** A function that reurns all tags in instance
+	/** A function that returns all tags in instance
 	 * @param instance Instance
 	 */
 	export function GetAllLocalTags(instance: Instance) {
