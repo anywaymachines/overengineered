@@ -785,6 +785,12 @@ const mousesensor = {
 			default: Vector3.zero,
 			config: Vector3.zero,
 		},
+		angle: {
+			displayName: "Angle",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
