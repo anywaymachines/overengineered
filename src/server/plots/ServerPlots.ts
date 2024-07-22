@@ -49,6 +49,8 @@ class ServerPlotController extends HostedService {
 			plot.getCenter(),
 			plot.bounds,
 		]);
+		this.blocks.initializeDelay(3, 6, 3);
+
 		this.parent(di.resolveForeignClass(AutoPlotWelder, [this.blocks]));
 
 		this.event.subscribe(Players.PlayerRemoving, (player) => {

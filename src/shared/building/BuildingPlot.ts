@@ -2,6 +2,7 @@ import { HttpService } from "@rbxts/services";
 import { BlockManager } from "shared/building/BlockManager";
 import { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 import { SharedBuilding } from "shared/building/SharedBuilding";
+import { ArgsSignal } from "shared/event/Signal";
 import { BB } from "shared/fixes/BB";
 import { JSON } from "shared/fixes/Json";
 import { Objects } from "shared/fixes/objects";
@@ -12,12 +13,25 @@ import type { PlacedBlockLogicConnections } from "shared/building/BlockManager";
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
 
+type PlotConfig = {
+	readonly buildDelay?: number;
+};
+
 /** Building on a plot. */
 @injectable
 export class BuildingPlot extends ReadonlyPlot {
 	readonly placeOperation = new Operation(this.place.bind(this));
 	readonly deleteOperation = new Operation(this.delete.bind(this));
 	readonly editOperation = new Operation(this.edit.bind(this));
+
+	private readonly _blockPlaced = new ArgsSignal<[block: BlockModel]>();
+	readonly blockPlaced = this._blockPlaced.asReadonly();
+
+	private readonly _blockDestroyed = new ArgsSignal<[block: BlockModel]>();
+	readonly blockDestroyed = this._blockDestroyed.asReadonly();
+
+	private readonly _blockEdited = new ArgsSignal<[req: EditBlockRequest]>();
+	readonly blockEdited = this._blockEdited.asReadonly();
 
 	constructor(
 		instance: Folder,
@@ -26,6 +40,20 @@ export class BuildingPlot extends ReadonlyPlot {
 		@inject private readonly blockRegistry: BlockRegistry,
 	) {
 		super(instance, origin, boundingBox);
+	}
+
+	initializeDelay(placeDelay: number, deleteDelay: number, editDelay: number) {
+		const addDelay = (signal: ReadonlyArgsSignal<[]>, chance: number) => {
+			signal.Connect(() => {
+				if (math.random(chance) === 1) {
+					task.wait();
+				}
+			});
+		};
+
+		addDelay(this.blockPlaced, placeDelay);
+		addDelay(this.blockDestroyed, deleteDelay);
+		addDelay(this.blockEdited, editDelay);
 	}
 
 	cloneBlocks(): Instance {
@@ -54,7 +82,7 @@ export class BuildingPlot extends ReadonlyPlot {
 
 		const uuid = data.uuid ?? (HttpService.GenerateGUID(false) as BlockUuid);
 		if (this.tryGetBlock(uuid)) {
-			throw "Block with this uuid already exists";
+			throw `Block with uuid ${uuid} already exists`;
 		}
 
 		// Create a new instance of the building model
@@ -75,11 +103,9 @@ export class BuildingPlot extends ReadonlyPlot {
 		model.Name = uuid;
 
 		SharedBuilding.paint([model], data.color, data.material, true);
-		if (math.random(3) === 1) {
-			task.wait();
-		}
-
 		model.Parent = this.instance;
+
+		this._blockPlaced.Fire(model);
 		return { success: true, model: model };
 	}
 	private delete(blocks: readonly BlockModel[] | "all"): Response {
@@ -91,9 +117,7 @@ export class BuildingPlot extends ReadonlyPlot {
 			blocks = this.getBlocks();
 			for (const block of blocks) {
 				block.Destroy();
-				if (math.random(6) === 1) {
-					task.wait();
-				}
+				this._blockDestroyed.Fire(block);
 			}
 		} else {
 			const connections = SharedBuilding.getBlocksConnectedByLogicToMulti(
@@ -111,9 +135,7 @@ export class BuildingPlot extends ReadonlyPlot {
 
 			for (const block of blocks) {
 				block.Destroy();
-				if (math.random(3) === 1) {
-					task.wait();
-				}
+				this._blockDestroyed.Fire(block);
 			}
 		}
 
@@ -133,12 +155,11 @@ export class BuildingPlot extends ReadonlyPlot {
 			}
 		}
 
-		for (const { instance, position } of blocks) {
+		for (const req of blocks) {
+			const { instance, position } = req;
 			if (position) instance.PivotTo(position);
 
-			if (math.random(3) === 1) {
-				task.wait();
-			}
+			this._blockEdited.Fire(req);
 		}
 
 		return success;
