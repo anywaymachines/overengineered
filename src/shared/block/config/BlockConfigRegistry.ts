@@ -1194,6 +1194,12 @@ const counter = {
 			default: 0 as number,
 			config: 0 as number,
 		},
+		step: {
+			displayName: "Step value",
+			type: "number",
+			default: 1 as number,
+			config: 1 as number,
+		},
 		triggerStep: {
 			displayName: "Step",
 			type: "bool",
@@ -1201,11 +1207,12 @@ const counter = {
 			config: false as boolean,
 			configHidden: true,
 		},
-		step: {
-			displayName: "Step value",
-			type: "number",
-			default: 1 as number,
-			config: 1 as number,
+		triggerValue: {
+			displayName: "Write",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+			configHidden: true,
 		},
 	},
 	output: {

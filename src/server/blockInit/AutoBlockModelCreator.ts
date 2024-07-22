@@ -362,7 +362,7 @@ const operations = {
 	counter: {
 		modelTextOverride: "COUNTER",
 		category: categories.other,
-		prefab: prefabs.tripleGeneric,
+		prefab: prefabs.x4Generic,
 	},
 	delayblock: {
 		modelTextOverride: "DELAY",

@@ -154,6 +154,7 @@ export namespace BlockGenerator {
 		smallGeneric: "GenericLogicBlockPrefab",
 		doubleGeneric: "DoubleGenericLogicBlockPrefab",
 		tripleGeneric: "TripleGenericLogicBlockPrefab",
+		x4Generic: "x4GenericLogicBlockPrefab",
 		smallByte: "ByteLogicBlockPrefab",
 		doubleByte: "DoubleByteLogicBlockPrefab",
 	} as const satisfies { [k in string]: `${string}BlockPrefab` };

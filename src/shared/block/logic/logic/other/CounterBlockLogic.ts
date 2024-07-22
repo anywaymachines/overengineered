@@ -9,7 +9,7 @@ export class CounterBlockLogic extends ConfigurableBlockLogic<typeof blockConfig
 		super(block, blockConfigRegistry.counter);
 
 		this.input.triggerStep.subscribe((v) => (v ? this.triggerStep() : undefined));
-		this.input.value.subscribe((v) => this.rewriteValue(v));
+		this.input.triggerValue.subscribe((v) => (v ? this.rewriteValue(this.input.value.get()) : undefined));
 	}
 
 	private triggerStep() {
