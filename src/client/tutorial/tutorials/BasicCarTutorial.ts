@@ -45,9 +45,9 @@ export class BasicCarTutorial implements TutorialDescriber {
 				t.processDiff(diffs.c1frame, saveVersion),
 				t.partText("First, let's build the frame for our car."),
 				t.translatedTasksPart(
-					["Select the {build tool:translate}"],
-					[`Select "{Blocks:translate}"`],
-					[`Select "{Block:translate}"`],
+					["Select the build tool"],
+					[`Select "Blocks"`],
+					[`Select "Block"`],
 					["Place all the highlighted blocks"],
 					[""],
 					["Hint: Hold shift to build multiple blocks"],
@@ -58,7 +58,7 @@ export class BasicCarTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.deleteTool)),
 				t.processDiff(diffs.c2delete, saveVersion),
 				t.partText("Whoops, we placed one block too many. Delete it."),
-				t.translatedTasksPart(["Select the {delete tool:translate}"]),
+				t.translatedTasksPart(["Select the delete tool"]),
 			],
 
 			() => [
@@ -72,8 +72,8 @@ export class BasicCarTutorial implements TutorialDescriber {
 				),
 				t.partText("Next, you need to install servomotors. They need for the car to turn."),
 				t.translatedTasksPart(
-					["Select the {build tool:translate}"],
-					[`Select "{Servo:translate}"`],
+					["Select the build tool"],
+					[`Select "Servo"`],
 					["Place all the highlighted blocks"],
 				),
 			],
@@ -86,9 +86,9 @@ export class BasicCarTutorial implements TutorialDescriber {
 				t.processDiff(diffs.c4moveup, saveVersion),
 				t.partText("Now we need to lift the car, so it will be easier for us to install the wheels and motors"),
 				t.translatedTasksPart([
-					"Select the {edit tool:translate}",
-					`Press "{Select plot:translate}"`,
-					`Press "{Move:translate}"`,
+					"Select the edit tool",
+					`Press "Select plot"`,
+					`Press "Move"`,
 					"Move the whole building up 4 times (2 blocks)",
 				]),
 			],
@@ -108,7 +108,7 @@ export class BasicCarTutorial implements TutorialDescriber {
 			() => [
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.buildTool)),
 				t.processDiff(diffs.c7seat, saveVersion),
-				t.partText("Now, the main peace - the {vehicle seat:translate}."),
+				t.partText("Now, the main peace - the vehicle seat."),
 			],
 
 			() => [
