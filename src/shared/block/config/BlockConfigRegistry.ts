@@ -662,8 +662,8 @@ const leddisplay = {
 		color: {
 			displayName: "Color",
 			type: "vector3",
-			default: Vector3.zero,
-			config: Vector3.zero,
+			default: new Vector3(0, 0, 1),
+			config: new Vector3(0, 0, 1),
 			configHidden: true,
 		},
 		update: {
