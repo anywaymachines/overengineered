@@ -35,9 +35,13 @@ class TutorialsService extends HostedService {
 			for (const func of parts) {
 				try {
 					const parts = func();
-					controller.waitPart(...parts);
+					const result = controller.waitPart(...parts);
+
+					if (result === "canceled") {
+						break;
+					}
 				} catch (err) {
-					$warn(`Exception while running the tutorial "${tutorial.name}":`, err);
+					$warn(`Exception while running the tutorial "${tutorial.name}":`, err, "\n", debug.traceback());
 					NotificationPopup.showPopup("There was an error running the tutorial.", "It has been canceled.");
 
 					controller.destroy();

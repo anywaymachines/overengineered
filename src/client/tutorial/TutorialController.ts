@@ -379,7 +379,7 @@ namespace Steps {
 				const allBlocksCount = subscribedBlocks.flatmap((x) => x.blocks).size();
 				const builtBlocksCount = subscribedBlocks
 					.flatmap((x) => x.blocks)
-					.filter((b) => !plot.tryGetBlock(b.uuid))
+					.filter((b) => plot.tryGetBlock(b.uuid) !== undefined)
 					.size();
 				tutorial.setTasks(`Build blocks (${builtBlocksCount}/${allBlocksCount})`);
 			};
@@ -453,11 +453,11 @@ namespace Steps {
 
 			const updateTasks = () => {
 				const allBlocksCount = subscribedBlocks.flatmap((b) => [...b]).size();
-				const builtBlocksCount = subscribedBlocks
+				const deletedBlocksCount = subscribedBlocks
 					.flatmap((b) => [...b])
 					.filter((b) => !plot.tryGetBlock(b))
 					.size();
-				tutorial.setTasks(`Delete blocks (${builtBlocksCount}/${allBlocksCount})`);
+				tutorial.setTasks(`Delete blocks (${deletedBlocksCount}/${allBlocksCount})`);
 			};
 
 			const c2 = ClientBuilding.deleteOperation.executed.Connect(({ plot }) => {
@@ -755,7 +755,6 @@ export class TutorialController extends Component {
 		super();
 
 		this.ui = this.parentGui(new TutorialControl(title));
-		this.ui.onCancel.Connect(() => this.destroy());
 
 		this.uiTasks = this.parent(new TutorialTasksControl());
 		this.uiTasks.instance.Visible = true;
@@ -810,8 +809,12 @@ export class TutorialController extends Component {
 		return {
 			connection: Signal.connection(() => {
 				task.cancel(thr);
-				gui.Header.Cancel.Visible = true;
-				gui.TextLabel.Text = translatedText;
+
+				if (gui.FindFirstChild("Header") && gui.FindFirstChild("TextLabel")) {
+					// if not destroyed
+					gui.Header.Cancel.Visible = true;
+					gui.TextLabel.Text = translatedText;
+				}
 			}),
 			wait: () => {},
 		};
@@ -950,9 +953,10 @@ export class TutorialController extends Component {
 	}
 
 	/** Wait for the provided parts, starting all simultaneously. Supports skipping. */
-	waitPart(...regs: readonly TutorialPartRegistration[]): void {
+	waitPart(...regs: readonly TutorialPartRegistration[]): void | "canceled" {
 		let skipped = false;
 		let completed = false;
+		let canceled = false;
 
 		const reg = this.combinePartsParallel(...regs);
 
@@ -960,6 +964,7 @@ export class TutorialController extends Component {
 			reg.connection,
 			Signal.connection(() => (completed = true)),
 			this.ui.skipPressed.Connect(() => (skipped = true)),
+			this.ui.onCancel.Connect(() => (canceled = true)),
 		);
 
 		this.eventHandler.register(Signal.connection(() => connection?.Disconnect()));
@@ -969,6 +974,13 @@ export class TutorialController extends Component {
 			completed = true;
 		});
 		while (!completed) {
+			if (canceled) {
+				print("Cancelling the tutorial");
+				task.cancel(thr);
+
+				break;
+			}
+
 			if (skipped) {
 				print("Skipping a part");
 				task.cancel(thr);
@@ -982,6 +994,10 @@ export class TutorialController extends Component {
 
 		connection.Disconnect();
 		connection = undefined;
+
+		if (canceled) {
+			return "canceled";
+		}
 	}
 
 	/** Process the block diff, running the build/delete/configure/etc parts */
