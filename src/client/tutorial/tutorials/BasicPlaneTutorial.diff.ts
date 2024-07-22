@@ -8,19 +8,29 @@ export const BasicPlaneTutorialDiff = {
 				block: {
 					uuid: "2ac95286-92d0-4909-b24b-58d3510ae8b7",
 					location: new CFrame(8, 1.5, 2, -1, 0, 0, 0, 0, 1, 0, 1, 0),
-					config: { angle: { rotation: { sub: "D", add: "A" }, angle: 45 } },
 					id: "servomotorblock",
 				},
 				type: "added",
 			},
 			{
+				type: "configChanged",
+				uuid: "2ac95286-92d0-4909-b24b-58d3510ae8b7",
+				key: "angle",
+				value: { rotation: { sub: "D", add: "A" } },
+			},
+			{
 				block: {
 					uuid: "e5e69915-da12-4693-a453-892fee1ec28f",
 					location: new CFrame(0, 1.5, -2, 1, 0, 0, 0, 0, 1, 0, -1, 0),
-					config: { angle: { rotation: { sub: "W", add: "S" }, angle: 15 } },
 					id: "servomotorblock",
 				},
 				type: "added",
+			},
+			{
+				type: "configChanged",
+				uuid: "e5e69915-da12-4693-a453-892fee1ec28f",
+				key: "angle",
+				value: { rotation: { sub: "W", add: "S" }, angle: 15 },
 			},
 			{
 				block: { uuid: "b3356701-44e2-4dce-93e0-725ab7ec4252", location: new CFrame(8, 1.5, 0), id: "block" },
@@ -46,7 +56,6 @@ export const BasicPlaneTutorialDiff = {
 				block: {
 					uuid: "cbbe56b1-9c6b-4914-9333-7bf6dc9e4501",
 					location: new CFrame(11, 1.5, 0),
-					config: { thrust: { thrust: { sub: "F", add: "R" } } },
 					id: "smallrocketengine",
 				},
 				type: "added",
@@ -55,7 +64,6 @@ export const BasicPlaneTutorialDiff = {
 				block: {
 					uuid: "1167dbb7-ade4-4b41-bbcb-63d3d25bceb1",
 					location: new CFrame(8, 1.5, -2, 1, 0, 0, 0, 0, 1, 0, -1, 0),
-					config: { angle: { rotation: { sub: "D", add: "A" } } },
 					id: "servomotorblock",
 				},
 				type: "added",
@@ -64,10 +72,27 @@ export const BasicPlaneTutorialDiff = {
 				block: {
 					uuid: "cb3f633e-33bc-466d-a9c6-b9af2fcecacb",
 					location: new CFrame(8, 3.5, 0),
-					config: { angle: { rotation: { sub: "A", add: "D" } } },
 					id: "servomotorblock",
 				},
 				type: "added",
+			},
+			{
+				uuid: "cbbe56b1-9c6b-4914-9333-7bf6dc9e4501",
+				key: "thrust",
+				value: { thrust: { sub: "F", add: "R" } },
+				type: "configChanged",
+			},
+			{
+				uuid: "1167dbb7-ade4-4b41-bbcb-63d3d25bceb1",
+				key: "angle",
+				value: { rotation: { sub: "D", add: "A" } },
+				type: "configChanged",
+			},
+			{
+				uuid: "cb3f633e-33bc-466d-a9c6-b9af2fcecacb",
+				key: "angle",
+				value: { rotation: { sub: "A", add: "D" } },
+				type: "configChanged",
 			},
 			{
 				block: {
@@ -101,10 +126,15 @@ export const BasicPlaneTutorialDiff = {
 				block: {
 					uuid: "272ba2eb-43c2-4d6e-be23-68c0abe4bcd6",
 					location: new CFrame(0, 1.5, 2, -1, 0, 0, 0, 0, 1, 0, 1, 0),
-					config: { angle: { rotation: { sub: "S", add: "W" }, angle: 15 } },
 					id: "servomotorblock",
 				},
 				type: "added",
+			},
+			{
+				uuid: "272ba2eb-43c2-4d6e-be23-68c0abe4bcd6",
+				key: "angle",
+				value: { rotation: { sub: "S", add: "W" }, angle: 15 },
+				type: "configChanged",
 			},
 			{
 				block: {

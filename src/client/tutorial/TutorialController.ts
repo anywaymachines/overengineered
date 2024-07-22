@@ -7,7 +7,6 @@ import { Gui } from "client/gui/Gui";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
-import { BuildingDiffer } from "shared/building/BuildingDiffer";
 import { BuildingPlot } from "shared/building/BuildingPlot";
 import { Component } from "shared/component/Component";
 import { ComponentInstance } from "shared/component/ComponentInstance";
@@ -700,18 +699,7 @@ const processTutorialDiff = (
 
 	const get = (changeType: BuildingDiffChange["type"], change: BuildingDiffChange[]): TutorialPartRegistration => {
 		if (istype(changeType, "added", change)) {
-			// diff of everything after placement (config, connections, etc)
-			const otherDiffs = BuildingDiffer.diff(
-				change.map((c) => ({ id: c.block.id, location: c.block.location, uuid: c.block.uuid })),
-				change.map((c) => c.block),
-			);
-
-			const parts = [
-				() => tutorial.partBuild({ version: saveVersion, blocks: change.map((c) => toBlock(c.block)) }),
-				() => processTutorialDiff(tutorial, otherDiffs, saveVersion),
-			];
-
-			return tutorial.combinePartsSequential(...parts);
+			return tutorial.partBuild({ version: saveVersion, blocks: change.map((c) => toBlock(c.block)) });
 		}
 		if (istype(changeType, "removed", change)) {
 			return tutorial.partDelete(change.map((c) => c.uuid));
@@ -940,19 +928,27 @@ export class TutorialController extends Component {
 	}
 	/** Combine parts into one that runs all provided ones sequentially */
 	combinePartsSequential(...funcs: readonly (() => TutorialPartRegistration)[]) {
+		const loaded: TutorialPartRegistration[] = [];
 		funcs = funcs.map((func) => {
 			let cache: ReturnType<typeof func> | undefined;
-			return () => (cache ??= func());
+			return () => {
+				if (cache) return cache;
+
+				cache = func();
+				loaded.push(cache);
+
+				return cache;
+			};
 		});
 
 		return {
-			connection: Signal.connection(() => funcs.forEach((func) => func().connection.Disconnect())),
+			connection: Signal.connection(() => loaded.forEach((reg) => reg.connection.Disconnect())),
 			wait: () => funcs.forEach((func) => func().wait()),
 			autoComplete: () => funcs.forEach((func) => func()?.autoComplete?.()),
 		};
 	}
 
-	/** Wait for the provided parts, starting all simultaneously. Supports skipping. */
+	/** Wait for the provided parts, starting all simultaneously. Supports skipping and cancelling. */
 	waitPart(...regs: readonly TutorialPartRegistration[]): void | "canceled" {
 		let skipped = false;
 		let completed = false;

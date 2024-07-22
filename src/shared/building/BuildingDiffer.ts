@@ -8,7 +8,11 @@ type RemovedChange = {
 };
 type AddedChange = {
 	readonly type: "added";
-	readonly block: DiffBlock;
+	readonly block: {
+		readonly id: BlockId;
+		readonly uuid: DiffBlock["uuid"];
+		readonly location: CFrame;
+	};
 };
 type ConfigChangedChange = {
 	readonly type: "configChanged";
@@ -116,7 +120,13 @@ export namespace BuildingDiffer {
 		for (const [uuid, after] of afterMap) {
 			const before = beforeMap.get(uuid);
 			if (!before) {
-				changes.push({ type: "added", block: after });
+				const block = { id: after.id, location: after.location, uuid: after.uuid };
+				changes.push({ type: "added", block });
+
+				for (const change of diff([block], [after])) {
+					changes.push(change);
+				}
+
 				continue;
 			}
 		}
