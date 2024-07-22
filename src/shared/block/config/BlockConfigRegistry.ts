@@ -1323,6 +1323,7 @@ const radiotransmitter = {
 			min: 434,
 			max: 1500,
 			step: 0.1,
+			configHidden: true,
 		},
 	},
 	output: {},
