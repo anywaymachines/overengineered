@@ -1,4 +1,4 @@
-import { Workspace, Players } from "@rbxts/services";
+import { Workspace, Players, RunService } from "@rbxts/services";
 import { LoadingController } from "client/controller/LoadingController";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
@@ -795,7 +795,7 @@ export class TutorialController extends Component {
 			// Animated text
 			for (const symbol of translatedText) {
 				gui.TextLabel.Text += symbol;
-				task.wait(0.05);
+				task.wait(RunService.IsStudio() ? 0 : 0.05);
 			}
 		});
 
