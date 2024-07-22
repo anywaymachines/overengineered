@@ -115,7 +115,13 @@ export class BasicCarTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
 				t.processDiff(diffs.c8cfgmotorsright, saveVersion),
 				t.partText(
-					"It's time to adjust the controls, let's start with the rotary mechanism. Configure the right side motors first",
+					"It's time to adjust the controls, let's start with the rotary mechanism. Configure the right side motors first.",
+				),
+				t.hintsPart(
+					"Select the config tool",
+					"Select right side motors",
+					"Set Rotation+ to key W",
+					"Set Rotation- to key S",
 				),
 			],
 
@@ -123,15 +129,32 @@ export class BasicCarTutorial implements TutorialDescriber {
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
 				t.processDiff(diffs.c9cfgmotorsleft, saveVersion),
 				t.partText(
-					"Great! Now configure the left side motors of your car. It's like the right side, but inversed",
+					"Great! Now configure the left side motors of your car. Configure them like the right side, but inversed",
+				),
+				t.hintsPart(
+					"Select the config tool",
+					"Select left side motors",
+					"Set Rotation+ to key S",
+					"Set Rotation- to key W",
+				),
+			],
+
+			() => [
+				t.funcPart(() => toolController.enabledTools.disableAll()),
+				t.partText(
+					"Great, the motors are tuned! After the tutorial, try to set the speed higher so that your car is not slow",
 				),
 			],
 
 			() => [
 				t.funcPart(() => toolController.enabledTools.enableOnly(toolController.allTools.configTool)),
 				t.processDiff(diffs.c10cfgservo, saveVersion),
-				t.partText(
-					"Great, the motors are tuned! After the tutorial, try to set the speed higher so that your car is not slow",
+				t.partText("Time to configure servomotors. This is necessary for the car to be able to turn"),
+				t.hintsPart(
+					"Select the config tool",
+					"Select left side motors",
+					"Set Rotation+ to key D",
+					"Set Rotation- to key A",
 				),
 			],
 
