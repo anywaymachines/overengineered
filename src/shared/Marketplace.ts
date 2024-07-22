@@ -25,10 +25,8 @@ export namespace Marketplace {
 			let err: string | undefined;
 			for (let i = 0; i < 3; i++) {
 				try {
-					return (
-						`${MarketplaceService.GetProductInfo(gamepassId, Enum.InfoType.GamePass).PriceInRobux} R$` ??
-						"Off-sale"
-					);
+					const data = MarketplaceService.GetProductInfo(gamepassId, Enum.InfoType.GamePass).PriceInRobux;
+					return data ? `${data} R$` : "Off-sale";
 				} catch (error) {
 					// eslint-disable-next-line no-ex-assign
 					error = err;
