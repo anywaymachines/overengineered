@@ -47,6 +47,10 @@ const logic = {
 			name: "Impulse Generator",
 			description: "A signal generator. Generates meander (a fancy way of saying square-shaped signal).",
 		},
+		singleimpulse: {
+			name: "Single Impulse",
+			description: "Converts a bit into a pulse",
+		},
 		delayblock: {
 			name: "Delay Block",
 			description: "Returns same value you gave it but with delay",

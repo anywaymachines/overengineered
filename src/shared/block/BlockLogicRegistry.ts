@@ -18,6 +18,7 @@ import { BufferBlockLogic } from "shared/block/logic/logic/other/BufferBlockLogi
 import { CounterBlockLogic } from "shared/block/logic/logic/other/CounterBlockLogic";
 import { DelayBlockLogic } from "shared/block/logic/logic/other/DelayBlockLogic";
 import { ImpulseGeneratorBlockLogic } from "shared/block/logic/logic/other/ImpulseGeneratorBlockLogic";
+import { SingleImpulseBlockLogic } from "shared/block/logic/logic/other/SingleImpulseBlockLogic";
 import { AltimeterBlockLogic } from "shared/block/logic/logic/sensor/AltimeterBlockLogic";
 import { AngleSensorBlockLogic } from "shared/block/logic/logic/sensor/AngleSensorBlockLogic";
 import { GravitySensorBlockLogic } from "shared/block/logic/logic/sensor/GravitySensorBlockLogic";
@@ -112,6 +113,7 @@ const logicRegistry = {
 	bytemaker: ByteMakerBlockLogic,
 	bytesplitter: ByteSplitterBlockLogic,
 	vec3objectworldtransformer: Vector3ObjectWorldTransformerBlockLogic,
+	singleimpulse: SingleImpulseBlockLogic,
 } as const satisfies { readonly [k in BlockId]?: unknown };
 
 export type KnownBlockLogic = typeof logicRegistry;

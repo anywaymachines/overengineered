@@ -637,6 +637,25 @@ const lamp = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
+const singleimpulse = {
+	input: {
+		impulse: {
+			displayName: "Impulse",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+		},
+	},
+	output: {
+		value: {
+			displayName: "Output",
+			type: "bool",
+			default: false as boolean,
+			config: false as boolean,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const leddisplay = {
 	input: {
 		posx: {
@@ -1457,6 +1476,8 @@ export const blockConfigRegistry = {
 
 	vec3splitter,
 	vec3combiner,
+
+	singleimpulse,
 } as const satisfies { [k in BlockId]?: BlockConfigBothDefinitions };
 
 type BlockConfigDefinitions = ConfigTypesToDefinition<keyof BlockConfigTypes.Types, BlockConfigTypes.Types>;

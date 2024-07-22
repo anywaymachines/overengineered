@@ -380,6 +380,12 @@ const operations = {
 		category: categories.memory,
 		prefab: prefabs.doubleGeneric,
 	},
+
+	singleimpulse: {
+		modelTextOverride: "SINGLE IMPULSE",
+		category: categories.other,
+		prefab: prefabs.smallGeneric,
+	},
 } as const satisfies NonGenericOperations;
 export type AutoCreatedOperations = typeof operations;
 
