@@ -82,6 +82,49 @@ const defcs = {
 			...(additional ?? {}),
 		};
 	},
+	numberOrByteOrBool(
+		name: string,
+		group?: string,
+		additional?: Partial<
+			ConfigTypeToDefinition<
+				BlockConfigTypes.Or<[BlockConfigTypes.Number, BlockConfigTypes.Bool, BlockConfigTypes.Byte]>
+			>
+		>,
+	): ConfigTypeToDefinition<
+		BlockConfigTypes.Or<[BlockConfigTypes.Number, BlockConfigTypes.Bool, BlockConfigTypes.Byte]>
+	> {
+		return {
+			displayName: name,
+			type: "or",
+			default: 0 as number,
+			config: {
+				type: "unset",
+				value: 0,
+			},
+			group,
+			types: {
+				number: {
+					displayName: "Number",
+					type: "number",
+					default: 0 as number,
+					config: 0 as number,
+				},
+				bool: {
+					displayName: "Bool",
+					type: "bool",
+					default: false as boolean,
+					config: false as boolean,
+				},
+				byte: {
+					displayName: "Byte",
+					type: "byte",
+					default: 0 as number,
+					config: 0 as number,
+				},
+			},
+			...(additional ?? {}),
+		};
+	},
 	numberOrVector(
 		name: string,
 		group?: string,
@@ -241,6 +284,15 @@ const defs = {
 		input: {
 			value1: defcs.numberOrBool("Value 1"),
 			value2: defcs.numberOrBool("Value 2"),
+		},
+		output: {
+			result: defcs.bool("Result"),
+		},
+	},
+	numberOrByteOrBool2bool: {
+		input: {
+			value1: defcs.numberOrByteOrBool("Value 1"),
+			value2: defcs.numberOrByteOrBool("Value 2"),
 		},
 		output: {
 			result: defcs.bool("Result"),
@@ -411,6 +463,18 @@ const logicReg = {
 	},
 	numberOrBool2bool: (func: <T extends number | boolean>(left: T, right: T, logic: BlockLogic) => boolean) => {
 		return class Logic extends ConfigurableBlockLogic<typeof defs.numberOrBool2bool> {
+			constructor(block: PlacedBlockData) {
+				super(block, defs.numberOrBool2bool);
+
+				const update = () =>
+					this.output.result.set(func(this.input.value1.get(), this.input.value2.get(), this));
+				this.input.value1.subscribe(update);
+				this.input.value2.subscribe(update);
+			}
+		};
+	},
+	numberOrByteOrBool2bool: (func: <T extends number | boolean>(left: T, right: T, logic: BlockLogic) => boolean) => {
+		return class Logic extends ConfigurableBlockLogic<typeof defs.numberOrByteOrBool2bool> {
 			constructor(block: PlacedBlockData) {
 				super(block, defs.numberOrBool2bool);
 
@@ -736,7 +800,8 @@ const operations = {
 			func: (value1, value2) => value1 % value2,
 		},
 	},
-	numberOrBool2bool: {
+	numberOrBool2bool: {},
+	numberOrByteOrBool2bool: {
 		equals: {
 			func: (value1, value2) => value1 === value2,
 		},
