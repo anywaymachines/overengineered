@@ -9,16 +9,14 @@ export class CounterBlockLogic extends ConfigurableBlockLogic<typeof blockConfig
 		super(block, blockConfigRegistry.counter);
 
 		this.input.triggerStep.subscribe((v) => (v ? this.triggerStep() : undefined));
-		this.input.triggerValue.subscribe((v) => (v ? this.rewriteValue(this.input.value.get()) : undefined));
 	}
 
 	private triggerStep() {
-		this.currentValue += this.input.step.get();
-		this.output.value.set(this.currentValue);
-	}
-
-	private rewriteValue(val: number) {
-		this.currentValue = val;
+		if (this.input.triggerValue.get()) {
+			this.currentValue = this.input.value.get();
+		} else {
+			this.currentValue += this.input.step.get();
+		}
 		this.output.value.set(this.currentValue);
 	}
 }
