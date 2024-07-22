@@ -11,7 +11,7 @@ const getPlotBuildingRegion = (plot: PlotModel): BB => {
 
 	return new BB(
 		buildingPlane.GetPivot().add(new Vector3(0, heightLimit / 2, 0)),
-		buildingPlane.Size.add(new Vector3(0, heightLimit, 0)),
+		buildingPlane.Size.add(new Vector3(0, heightLimit, 0)).add(new Vector3(0.2, 0.2, 0.2)),
 	);
 };
 
