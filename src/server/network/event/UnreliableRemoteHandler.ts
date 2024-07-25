@@ -1,8 +1,9 @@
-import { Workspace } from "@rbxts/services";
+import { Players, Workspace } from "@rbxts/services";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
 import { HostedService } from "shared/GameHost";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { CustomRemotes } from "shared/Remotes";
 import { PartUtils } from "shared/utils/PartUtils";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { SpreadingFireController } from "server/SpreadingFireController";
@@ -28,6 +29,8 @@ export class UnreliableRemoteController extends HostedService {
 				if (!BlockManager.isActiveBlockPart(part)) return;
 
 				// const oldJoints = part.GetJoints();
+				const players = Players.GetPlayers().filter((p) => p !== player);
+				CustomRemotes.physics.normalizeRootparts.send(players, { parts: [part] });
 				ServerPartUtils.BreakJoints(part);
 
 				// part.CollisionGroup = "Wreckage";
@@ -101,6 +104,8 @@ export class UnreliableRemoteController extends HostedService {
 				}
 
 				if (math.random(1, 2) === 1) {
+					const players = Players.GetPlayers().filter((p) => p !== player);
+					CustomRemotes.physics.normalizeRootparts.send(players, { parts: [part] });
 					ServerPartUtils.BreakJoints(part);
 				}
 

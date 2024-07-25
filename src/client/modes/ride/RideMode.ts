@@ -32,6 +32,29 @@ export class RideMode extends PlayMode {
 
 			this.currentMachine.getImpactController()?.disable();
 		});
+
+		CustomRemotes.physics.normalizeRootparts.invoked.Connect((data) => {
+			for (const part of data.parts) {
+				const attachment = new Instance("Attachment", part);
+
+				const alignPosition = new Instance("AlignPosition");
+				alignPosition.Mode = Enum.PositionAlignmentMode.OneAttachment;
+				alignPosition.Attachment0 = attachment;
+				alignPosition.MaxForce = math.huge;
+				alignPosition.MaxVelocity = math.huge;
+				alignPosition.Responsiveness = 200;
+
+				const alignOrientation = new Instance("AlignOrientation");
+				alignOrientation.Mode = Enum.OrientationAlignmentMode.OneAttachment;
+				alignOrientation.Attachment0 = attachment;
+				alignOrientation.MaxAngularVelocity = math.huge;
+				alignOrientation.MaxTorque = math.huge;
+				alignOrientation.Responsiveness = 200;
+
+				alignPosition.Parent = part;
+				alignOrientation.Parent = part;
+			}
+		});
 	}
 
 	getName(): PlayModes {

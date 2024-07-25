@@ -1,8 +1,9 @@
-import { Workspace } from "@rbxts/services";
+import { Players, Workspace } from "@rbxts/services";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { LocalInstanceData } from "shared/LocalInstanceData";
+import { CustomRemotes } from "shared/Remotes";
 import { CustomDebrisService } from "shared/service/CustomDebrisService";
 import type { FireEffect } from "shared/effects/FireEffect";
 
@@ -49,6 +50,8 @@ export class SpreadingFireController {
 
 			// Break joints with a chance
 			if (math.random(1, 4) === 1) {
+				const players = Players.GetPlayers().filter((p) => p !== part.GetNetworkOwner());
+				CustomRemotes.physics.normalizeRootparts.send(players, { parts: [part] });
 				ServerPartUtils.BreakJoints(part);
 			}
 

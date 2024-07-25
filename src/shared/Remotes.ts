@@ -4,6 +4,7 @@ import {
 	C2SRemoteEvent,
 	PERemoteEventMiddlewares,
 	S2C2SRemoteFunction,
+	S2CRemoteEvent,
 } from "shared/event/PERemoteEvent";
 import type { Categories } from "server/blockInit/BlocksInitializer";
 
@@ -49,6 +50,9 @@ declare global {
 		readonly blocks: readonly BlockModel[] | "all";
 		readonly color?: Color3;
 		readonly material?: Enum.Material;
+	};
+	type NormalizeRootpartsRequest = {
+		readonly parts: BasePart[];
 	};
 	type ConfigUpdateRequest = {
 		readonly plot: PlotModel;
@@ -98,6 +102,9 @@ export const CustomRemotes = {
 		paintBlocks: new C2S2CRemoteFunction<PaintBlocksRequest>("rb_paint"),
 		updateConfig: new C2S2CRemoteFunction<ConfigUpdateRequest>("rb_updatecfg"),
 		resetConfig: new C2S2CRemoteFunction<ConfigResetRequest>("rb_resetcfg"),
+	},
+	physics: {
+		normalizeRootparts: new S2CRemoteEvent<NormalizeRootpartsRequest>("ph_normalize_rootparts"),
 	},
 	slots: {
 		load: new C2S2CRemoteFunction<PlayerLoadSlotRequest, LoadSlotResponse>("rs_load"),

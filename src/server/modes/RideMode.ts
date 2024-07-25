@@ -58,6 +58,20 @@ export class RideMode implements PlayModeBase {
 		}
 	}
 
+	private initializePhysics(owner: Player, blocks: readonly BlockModel[]) {
+		const data = blocks.flatmap((value) => value.GetChildren());
+
+		const rootParts: BasePart[] = [];
+		for (const instance of data) {
+			if (instance.IsA("BasePart") && instance.AssemblyRootPart === instance) {
+				rootParts.push(instance);
+			}
+		}
+
+		const players = Players.GetPlayers().filter((p) => p !== owner);
+		CustomRemotes.physics.normalizeRootparts.send(players, { parts: rootParts });
+	}
+
 	private rideStart(player: Player): Response {
 		const controller = this.serverPlots.tryGetControllerByPlayer(player);
 		if (!controller) throw "what";
@@ -113,6 +127,8 @@ export class RideMode implements PlayModeBase {
 				ServerPartUtils.switchDescendantsAnchor(block, true);
 			}
 		}
+
+		this.initializePhysics(player, controller.blocks.getBlocks());
 
 		return { success: true };
 	}
