@@ -106,7 +106,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		this.event.subscribe(view.Touched, (part) => {
 			if (part.CollisionGroup !== "Blocks") return;
 			if (part.HasTag("RADARVIEW")) return;
-			if (part.IsDescendantOf(this.instance)) return;
+			//if (part.IsDescendantOf(this.instance)) return; //removed check because never going to happen
 			if (this.getDistanceTo(part).Magnitude < this.input.minimalDistance.get()) return;
 			this.allTouchedBlocks.add(part);
 			if (this.closestDetectedPart === undefined) return (this.closestDetectedPart = part);
