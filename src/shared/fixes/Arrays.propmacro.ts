@@ -133,6 +133,10 @@ declare global {
 
 		filter(this: ReadonlyMap<K, V>, func: (key: K, value: V) => boolean): Map<K, V>;
 		map<TOut extends defined>(this: ReadonlyMap<K, V>, func: (key: K, value: V) => TOut): TOut[];
+		mapToMap<TK extends defined, TOut extends defined>(
+			this: ReadonlyMap<K, V>,
+			func: (key: K, value: V) => LuaTuple<[TK, TOut]>,
+		): Map<TK, TOut>;
 		flatmap<TOut extends defined>(this: ReadonlyMap<K, V>, func: (key: K, value: V) => readonly TOut[]): TOut[];
 		find(this: ReadonlyMap<K, V>, func: (key: K, value: V) => boolean): readonly [key: K, value: V] | undefined;
 		findKey(this: ReadonlyMap<K, V>, func: (key: K, value: V) => boolean): K | undefined;
@@ -193,6 +197,18 @@ export const MapMacros: PropertyMacros<ReadonlyMap<defined, defined>> = {
 		const result: TOut[] = [];
 		for (const [key, value] of map) {
 			result.push(func(key, value));
+		}
+
+		return result;
+	},
+	mapToMap: <K extends defined, V extends defined, TK extends defined, TOut extends defined>(
+		map: ReadonlyMap<K, V>,
+		func: (key: K, value: V) => LuaTuple<[TK, TOut]>,
+	): Map<TK, TOut> => {
+		const result = new Map<TK, TOut>();
+		for (const [key, value] of map) {
+			const [k, v] = func(key, value);
+			result.set(k, v);
 		}
 
 		return result;
