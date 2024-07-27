@@ -91,12 +91,8 @@ class ComponentBase {
 
 /** Base of any component. Handles events and signals which can be enabled or disabled. */
 export class Component extends ComponentBase implements IComponent, IDebuggableComponent {
-	protected readonly event = new ComponentEvents(this);
+	readonly event = new ComponentEvents(this);
 	protected readonly eventHandler = this.event.eventHandler;
-
-	constructor() {
-		super();
-	}
 
 	/**
 	 * Return a function that returns a copy of the provided Instance. Destroys the Instance if specified.
