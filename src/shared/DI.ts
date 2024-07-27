@@ -94,6 +94,7 @@ export class DIContainer {
 
 	constructor() {
 		this.registerSingleton(this);
+		this.registerSingleton<ReadonlyDIContainer>(this);
 	}
 
 	private assertNotNull<T>(value: T, name: string | undefined): asserts name is string {
