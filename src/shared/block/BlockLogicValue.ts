@@ -4,7 +4,7 @@ export interface ReadonlyBlockLogicValue<T> {
 	readonly changed: Signal<(value: T, prev: T) => void>;
 
 	get(): T;
-	subscribe(func: (value: T, prev: T) => void): void;
+	subscribe(func: (value: T, prev: T) => void): SignalConnection;
 }
 export interface IBlockLogicValue<T> extends ReadonlyBlockLogicValue<T> {
 	set(value: T): void;
@@ -36,8 +36,8 @@ export class BlockLogicValue<T extends defined> implements IBlockLogicValue<T> {
 		this.connections.push(value);
 	}
 
-	subscribe(func: (value: T, prev: T) => void): void {
-		this.changed.Connect(func);
+	subscribe(func: (value: T, prev: T) => void): SignalConnection {
+		return this.changed.Connect(func);
 	}
 
 	tick(tick: number): void {

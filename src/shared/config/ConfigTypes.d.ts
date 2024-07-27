@@ -6,10 +6,8 @@ type ConfigType<TName extends string, TValue> = {
 
 //
 
-type UnknownConfigType = ConfigType<string, unknown>;
-type UnknownConfigTypes<TKeys extends string | number | symbol = string> = Readonly<
-	Record<TKeys, ConfigType<string, unknown>>
->;
+type UnknownConfigType = { readonly config: unknown };
+type UnknownConfigTypes<TKeys extends string | number | symbol = string> = Readonly<Record<TKeys, UnknownConfigType>>;
 type UnknownConfigDefinition = ConfigTypeToDefinition<UnknownConfigType>;
 type UnknownConfigDefinitions<TKeys extends string | number | symbol = string> = ConfigTypesToDefinition<
 	TKeys,

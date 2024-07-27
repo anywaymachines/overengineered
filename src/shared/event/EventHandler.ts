@@ -2,7 +2,7 @@ import type { ReadonlyArgsSignal } from "shared/event/Signal";
 
 /** Killable EventHandler for roblox connections */
 export class EventHandler {
-	private readonly events: { Disconnect(): void }[] = [];
+	private readonly events: SignalConnection[] = [];
 
 	/** Register an event
 	 * @param signal A signal. Example: `UserInputService.InputChanged`
@@ -24,7 +24,7 @@ export class EventHandler {
 	}
 
 	/** Register a disconnectable object */
-	register(disconnectable: { Disconnect(): void }) {
+	register(disconnectable: SignalConnection) {
 		this.events.push(disconnectable);
 	}
 

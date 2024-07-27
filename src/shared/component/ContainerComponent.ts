@@ -1,8 +1,17 @@
 import { Component } from "shared/component/Component";
 import { ComponentChildren } from "shared/component/ComponentChildren";
 
+declare global {
+	type IReadonlyContainerComponent<TChild extends IComponent = IComponent> = {
+		getChildren: () => readonly TChild[];
+	};
+}
+
 /** Component with children */
-export class ContainerComponent<TChild extends IComponent = IComponent> extends Component {
+export class ContainerComponent<TChild extends IComponent = IComponent>
+	extends Component
+	implements IReadonlyContainerComponent<TChild>
+{
 	readonly children: ComponentChildren<TChild> = new ComponentChildren(this);
 
 	/** Returns a list of added children */
