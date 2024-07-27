@@ -46,10 +46,10 @@ if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter") {
 			baseVelocity: new Vector3(
 				0 + (math.random() - 0.5) * 10,
 				20 + (math.random() - 0.5) * 10,
-				5000 + (math.random() - 0.5) * 10,
+				-(500 + (math.random() - 0.5) * 10),
 			),
 			baseDamage: 0,
 		});
-		task.wait(0.3);
+		task.wait(0.1);
 	}
 }

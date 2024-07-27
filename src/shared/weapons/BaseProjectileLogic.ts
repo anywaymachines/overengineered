@@ -58,12 +58,11 @@ export class WeaponProjectile extends InstanceComponent<BasePart> {
 	) {
 		const newModel = projectilePart.Clone();
 		newModel.Position = startPosition;
-		newModel.Transparency = 0;
 		newModel.CanCollide = false;
 		newModel.CanTouch = true;
 		newModel.Massless = true;
-		newModel.CollisionGroup = "Projectile";
-		newModel.EnableFluidForces = false;
+		//newModel.CollisionGroup = "Projectile";
+		//newModel.EnableFluidForces = false;
 		newModel.AssemblyLinearVelocity = baseVelocity;
 		newModel.Parent = projectileFolder;
 		//transform projectile and shit
