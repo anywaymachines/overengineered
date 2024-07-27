@@ -22,6 +22,7 @@ export class RandomAccessMemoryBlockLogic extends ConfigurableBlockLogic<
 		};
 
 		const writeValue = () => {
+			if (!this.input.write.get()) return;
 			if (!isReady()) return;
 			this.internalMemory[this.input.address.get()] = this.input.value.get();
 			this.output.size.set(this.internalMemory.size());
@@ -33,13 +34,11 @@ export class RandomAccessMemoryBlockLogic extends ConfigurableBlockLogic<
 			this.output.size.set(this.internalMemory.size());
 		};
 
-		this.input.value.subscribe(() => {
-			if (this.input.write.get()) writeValue();
-			if (this.input.read.get()) readValue();
-		});
+		this.input.value.subscribe(writeValue);
+		this.input.value.subscribe(() => (this.input.read.get() ? readValue() : ""));
+		this.input.read.subscribe((v) => (v ? readValue() : ""));
+		this.input.address.subscribe(readValue);
 	}
 
-	private burn() {
-		RemoteEvents.Burn.send([this.instance.PrimaryPart!]);
-	}
+	private burn = () => RemoteEvents.Burn.send([this.instance.PrimaryPart!]);
 }
