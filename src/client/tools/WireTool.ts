@@ -674,7 +674,7 @@ export class WireTool extends ToolBase {
 	private readonly controllerContainer = new ComponentChild<Controllers.IController>(this, true);
 
 	constructor(
-		mode: BuildingMode,
+		@inject mode: BuildingMode,
 		@inject private readonly blockRegistry: BlockRegistry,
 	) {
 		super(mode);

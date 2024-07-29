@@ -85,18 +85,19 @@ namespace Scene {
 	}
 }
 
+@injectable
 export class DeleteTool extends ToolBase {
 	readonly onClearAllRequested = new Signal<() => void>();
 	readonly highlightedBlocks = new ObservableCollectionSet<BlockModel>();
 
-	constructor(mode: BuildingMode) {
+	constructor(@inject mode: BuildingMode, @inject di: DIContainer) {
 		super(mode);
 
 		this.parentGui(
 			new Scene.DeleteToolScene(ToolBase.getToolGui<"Delete", Scene.DeleteToolSceneDefinition>().Delete, this),
 		);
 
-		this.parent(new SelectedBlocksHighlighter(this.highlightedBlocks));
+		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.highlightedBlocks]));
 
 		const fireSelected = async (blocks: readonly BlockModel[]) => {
 			if (!blocks || blocks.size() === 0) return;

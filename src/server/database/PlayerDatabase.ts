@@ -1,6 +1,7 @@
-import { DataStoreService, HttpService, Players } from "@rbxts/services";
+import { DataStoreService, Players } from "@rbxts/services";
 import { Db } from "server/database/Database";
 import { PlayerConfigUpdater } from "server/PlayerConfigVersioning";
+import { JSON } from "shared/fixes/Json";
 
 export type PlayerData = {
 	readonly purchasedSlots?: number;
@@ -23,9 +24,9 @@ export class PlayerDatabase {
 		this.db = new Db<PlayerData>(
 			this.datastore,
 			() => ({}),
-			(data) => HttpService.JSONEncode(data),
+			(data) => JSON.serialize(data),
 			(data) => {
-				const pdata = HttpService.JSONDecode(data) as PlayerData;
+				const pdata = JSON.deserialize<PlayerData>(data);
 				return {
 					...pdata,
 					settings: pdata.settings === undefined ? undefined : PlayerConfigUpdater.update(pdata.settings),

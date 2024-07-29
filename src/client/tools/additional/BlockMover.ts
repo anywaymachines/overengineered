@@ -9,15 +9,22 @@ import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { BB } from "shared/fixes/BB";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
+@injectable
 abstract class MoveBase extends BlockEditorBase {
 	protected readonly tooltipHolder = this.parent(TooltipsHolder.createComponent("Moving"));
 
 	protected difference: Vector3 = Vector3.zero;
 	readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 
-	constructor(mode: BuildingMode, plot: SharedPlot, blocks: readonly BlockModel[]) {
+	constructor(
+		mode: BuildingMode,
+		plot: SharedPlot,
+		blocks: readonly BlockModel[],
+		@inject private readonly playerDataStorage: PlayerDataStorage,
+	) {
 		super(mode, plot, blocks);
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
 	}
@@ -38,6 +45,21 @@ abstract class MoveBase extends BlockEditorBase {
 		moveHandles.PivotTo(boundingBox.center);
 		moveHandles.Size = boundingBox.originalSize.add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
 		moveHandles.Parent = Gui.getPlayerGui();
+
+		this.event.subscribeObservable(
+			this.playerDataStorage.config.createBased((c) => c.visuals.multiSelection),
+			(visuals) => {
+				const sb = moveHandles.SelectionBox;
+
+				sb.Color3 = visuals.borderColor;
+				sb.Transparency = visuals.borderTransparency;
+				sb.LineThickness = visuals.borderThickness;
+
+				sb.SurfaceColor3 = visuals.surfaceColor;
+				sb.SurfaceTransparency = visuals.surfaceTransparency;
+			},
+			true,
+		);
 
 		return $tuple(moveHandles, boundingBox);
 	}
@@ -233,11 +255,16 @@ class GamepadMove extends MoveBase {
 }
 
 export namespace BlockMover {
-	export function create(mode: BuildingMode, plot: SharedPlot, blocks: readonly BlockModel[]) {
+	export function create(
+		mode: BuildingMode,
+		plot: SharedPlot,
+		blocks: readonly BlockModel[],
+		di: ReadonlyDIContainer,
+	) {
 		return ClientComponentChild.createOnceBasedOnInputType<MoveBase>({
-			Desktop: () => new DesktopMove(mode, plot, blocks),
-			Touch: () => new TouchMove(mode, plot, blocks),
-			Gamepad: () => new GamepadMove(mode, plot, blocks),
+			Desktop: () => di.resolveForeignClass(DesktopMove, [mode, plot, blocks]),
+			Touch: () => di.resolveForeignClass(TouchMove, [mode, plot, blocks]),
+			Gamepad: () => di.resolveForeignClass(GamepadMove, [mode, plot, blocks]),
 		});
 	}
 }

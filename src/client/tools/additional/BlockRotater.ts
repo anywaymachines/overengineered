@@ -10,8 +10,10 @@ import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { BB } from "shared/fixes/BB";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
 import type { BuildingMode } from "client/modes/build/BuildingMode";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
+@injectable
 abstract class RotaterBase extends BlockEditorBase {
 	protected readonly tooltipHolder = this.parent(TooltipsHolder.createComponent("Rotating"));
 
@@ -20,7 +22,12 @@ abstract class RotaterBase extends BlockEditorBase {
 	protected isValid: boolean = true;
 	readonly step = new NumberObservableValue<number>(0, 90, 180, 1);
 
-	constructor(mode: BuildingMode, plot: SharedPlot, blocks: readonly BlockModel[]) {
+	constructor(
+		mode: BuildingMode,
+		plot: SharedPlot,
+		blocks: readonly BlockModel[],
+		@inject private readonly playerDataStorage: PlayerDataStorage,
+	) {
 		super(mode, plot, blocks);
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
 	}
@@ -48,6 +55,21 @@ abstract class RotaterBase extends BlockEditorBase {
 		moveHandles.PivotTo(boundingBox.center);
 		moveHandles.Center.Size = moveHandles.Size = boundingBox.originalSize.add(new Vector3(0.001, 0.001, 0.001)); // + 0.001 to avoid z-fighting
 		moveHandles.Parent = Gui.getPlayerGui();
+
+		this.event.subscribeObservable(
+			this.playerDataStorage.config.createBased((c) => c.visuals.multiSelection),
+			(visuals) => {
+				const sb = moveHandles.SelectionBox;
+
+				sb.Color3 = visuals.borderColor;
+				sb.Transparency = visuals.borderTransparency;
+				sb.LineThickness = visuals.borderThickness;
+
+				sb.SurfaceColor3 = visuals.surfaceColor;
+				sb.SurfaceTransparency = visuals.surfaceTransparency;
+			},
+			true,
+		);
 
 		return $tuple(moveHandles, boundingBox);
 	}
@@ -196,11 +218,16 @@ class GamepadRotater extends RotaterBase {
 }
 
 export namespace BlockRotater {
-	export function create(mode: BuildingMode, plot: SharedPlot, blocks: readonly BlockModel[]) {
+	export function create(
+		mode: BuildingMode,
+		plot: SharedPlot,
+		blocks: readonly BlockModel[],
+		di: ReadonlyDIContainer,
+	) {
 		return ClientComponentChild.createOnceBasedOnInputType<RotaterBase>({
-			Desktop: () => new DesktopRotater(mode, plot, blocks),
-			Touch: () => new TouchRotater(mode, plot, blocks),
-			Gamepad: () => new GamepadRotater(mode, plot, blocks),
+			Desktop: () => di.resolveForeignClass(DesktopRotater, [mode, plot, blocks]),
+			Touch: () => di.resolveForeignClass(TouchRotater, [mode, plot, blocks]),
+			Gamepad: () => di.resolveForeignClass(GamepadRotater, [mode, plot, blocks]),
 		});
 	}
 }

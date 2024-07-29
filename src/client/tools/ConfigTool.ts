@@ -180,13 +180,14 @@ export class ConfigTool extends ToolBase {
 	constructor(
 		@inject mode: BuildingMode,
 		@inject readonly blockRegistry: BlockRegistry,
+		@inject di: DIContainer,
 	) {
 		super(mode);
 		this.gui = this.parentGui(
 			new Scene.ConfigToolScene(ToolBase.getToolGui<"Config", Scene.ConfigToolSceneDefinition>().Config, this),
 		);
 
-		this.parent(new SelectedBlocksHighlighter(this.selected));
+		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.selected]));
 
 		const canBeSelected = (block: BlockModel): boolean => {
 			if (this.blocksToConfigure.size() > 0) {

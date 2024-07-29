@@ -17,6 +17,19 @@ declare global {
 		readonly othersShadows: boolean;
 		readonly othersEffects: boolean;
 	};
+
+	type VisualsSelectionBox = {
+		readonly borderColor: Color3;
+		readonly borderTransparency: number;
+		readonly borderThickness: number;
+		readonly surfaceColor: Color3;
+		readonly surfaceTransparency: number;
+	};
+	type VisualsConfiguration = {
+		readonly selection: VisualsSelectionBox;
+		readonly multiSelection: VisualsSelectionBox;
+	};
+
 	type TerrainConfiguration = {
 		readonly kind: "Classic" | "Triangle" | "Flat" | "Water";
 		readonly resolution: number;
@@ -37,6 +50,7 @@ declare global {
 		export type Bool = ConfigType<"bool", boolean>;
 		export type Key = ConfigType<"key", KeyCode>;
 		export type Number = ConfigType<"number", number>;
+		export type Color = ConfigType<"color", Color3>;
 		export type Dropdown<T extends string = string> = ConfigType<"dropdown", T> & {
 			readonly items: readonly T[];
 		};
@@ -49,6 +63,7 @@ declare global {
 		export type Beacons = ConfigType<"beacons", BeaconsConfiguration>;
 		export type Camera = ConfigType<"camera", CameraConfiguration>;
 		export type Graphics = ConfigType<"graphics", GraphicsConfiguration>;
+		export type Visuals = ConfigType<"visuals", VisualsConfiguration>;
 		export type Terrain = ConfigType<"terrain", TerrainConfiguration>;
 		export type Tutorial = ConfigType<"tutorial", TutorialConfiguration>;
 		export type Ragdoll = ConfigType<"ragdoll", RagdollConfiguration>;
@@ -56,6 +71,7 @@ declare global {
 		export interface Types {
 			readonly bool: Bool;
 			readonly number: Number;
+			readonly color: Color;
 			readonly key: Key;
 			readonly dropdown: Dropdown;
 			readonly clampedNumber: ClampedNumber;
@@ -63,6 +79,7 @@ declare global {
 			readonly beacons: Beacons;
 			readonly camera: Camera;
 			readonly graphics: Graphics;
+			readonly visuals: Visuals;
 			readonly terrain: Terrain;
 			readonly tutorial: Tutorial;
 			readonly ragdoll: Ragdoll;
@@ -155,6 +172,26 @@ export const PlayerConfigDefinition = {
 			triggerByKey: false,
 			triggerKey: "X",
 			autoRecovery: true,
+		},
+	},
+	visuals: {
+		displayName: "Visuals",
+		type: "visuals",
+		config: {
+			selection: {
+				borderColor: Color3.fromRGB(13, 105, 172),
+				borderTransparency: 0,
+				borderThickness: 0.05,
+				surfaceColor: Color3.fromRGB(13, 105, 172),
+				surfaceTransparency: 1,
+			},
+			multiSelection: {
+				borderColor: Color3.fromRGB(0, 127, 255),
+				borderTransparency: 0,
+				borderThickness: 0.05,
+				surfaceColor: Color3.fromRGB(0, 127, 255),
+				surfaceTransparency: 1,
+			},
 		},
 	},
 } as const satisfies ConfigTypesToDefinition<keyof PlayerConfigTypes.Types, PlayerConfigTypes.Types>;

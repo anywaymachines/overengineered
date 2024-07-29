@@ -209,7 +209,28 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 
 		const modifyParameters = (clazz: ts.ClassDeclaration): ts.ClassDeclaration => {
 			if (!clazz.name) return clazz;
-			if (!clazz.modifiers?.find(m => ts.isDecorator(m) && ts.isIdentifier(m.expression) && m.expression.text === 'injectable')) {
+
+			const classParentOf = (clazz: ts.ClassDeclaration): ts.ClassDeclaration | undefined => {	
+				const extend = clazz.heritageClauses?.find(c => c.token === ts.SyntaxKind.ExtendsKeyword)?.types[0].expression;
+				if (!extend) return;
+
+				const t = typeChecker.getSymbolAtLocation(extend)?.declarations?.[0];
+				if (!t || !ts.isClassDeclaration(t)) return;
+
+				return t;
+			}
+			const isClassInjectable = (clazz: ts.ClassDeclaration): boolean => {
+				if (clazz.modifiers?.find(m => ts.isDecorator(m) && ts.isIdentifier(m.expression) && m.expression.text === 'injectable')) {
+					return true;
+				}
+				
+				const parent = classParentOf(clazz);
+				if (!parent) return false;
+
+				return isClassInjectable(parent);
+			};
+
+			if (!isClassInjectable(clazz)) {
 				return clazz;
 			}
 
@@ -224,40 +245,47 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 			let constr: ts.ConstructorDeclaration | undefined = undefined;
 
 			if (!clazz.modifiers?.find(m => m.kind === ts.SyntaxKind.AbstractKeyword)) {
-				for (const node of clazz.members) {
-					if (ts.isConstructorDeclaration(node)) {
-						constr = node;
+				const getCtor = (clazz: ts.ClassDeclaration): ts.ConstructorDeclaration | undefined => {
+					const ctor = clazz.members.find(ts.isConstructorDeclaration);
+					if (ctor) return ctor;
 
-						for (const parameter of node.parameters) {
-							if (!parameter.modifiers || parameter.modifiers.length === 0) {
-								if (ctorAdded && ctorAdded.length !== 0) {
-									throw 'Can not have @inject declarations before non-inject ones';
-								}
+					const parent = classParentOf(clazz);
+					if (!parent) return;
 
-								continue;
+					return getCtor(parent);
+				};
+
+				constr = getCtor(clazz);
+				if (constr) {
+					for (const parameter of constr.parameters) {
+						if (!parameter.modifiers || parameter.modifiers.length === 0) {
+							if (ctorAdded && ctorAdded.length !== 0) {
+								throw 'Can not have @inject declarations before non-inject ones';
 							}
 
-							for (const decorator of parameter.modifiers) {
-								if (!ts.isDecorator(decorator)) continue;
-								if (!ts.isIdentifier(decorator.expression)) continue;
-								if (decorator.expression.text !== 'inject' && decorator.expression.text !== 'tryInject') continue;
-								if (!ts.isIdentifier(parameter.name)) continue;
-								if (!parameter.type || !ts.isTypeReferenceNode(parameter.type)) continue;
-								if (!ts.isIdentifier(parameter.type.typeName)) continue;
+							continue;
+						}
 
-								classsymb ??= program.getTypeChecker().getSymbolAtLocation(clazz.name);
-								if (!classsymb) {
-									throw `Could not find symbol for class ${clazz.name.text}`;
-								}
+						for (const decorator of parameter.modifiers) {
+							if (!ts.isDecorator(decorator)) continue;
+							if (!ts.isIdentifier(decorator.expression)) continue;
+							if (decorator.expression.text !== 'inject' && decorator.expression.text !== 'tryInject') continue;
+							if (!ts.isIdentifier(parameter.name)) continue;
+							if (!parameter.type || !ts.isTypeReferenceNode(parameter.type)) continue;
+							if (!ts.isIdentifier(parameter.type.typeName)) continue;
 
-								ctorAdded ??= [];
-								identifierByTypeNode(parameter.type);
-								ctorAdded.push({
-									name: parameter.name,
-									type: parameter.type,
-									nullable: decorator.expression.text === 'tryInject',
-								});
+							classsymb ??= program.getTypeChecker().getSymbolAtLocation(clazz.name);
+							if (!classsymb) {
+								throw `Could not find symbol for class ${clazz.name.text}`;
 							}
+
+							ctorAdded ??= [];
+							identifierByTypeNode(parameter.type);
+							ctorAdded.push({
+								name: parameter.name,
+								type: parameter.type,
+								nullable: decorator.expression.text === 'tryInject',
+							});
 						}
 					}
 				}

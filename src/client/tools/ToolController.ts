@@ -106,10 +106,10 @@ export class ToolController extends ClientComponent {
 		const tools = [
 			["buildTool", di.resolveForeignClass(BuildTool)],
 			["editTool", di.resolveForeignClass(EditTool)],
-			["deleteTool", new DeleteTool(mode)],
+			["deleteTool", di.resolveForeignClass(DeleteTool)],
 			["configTool", di.resolveForeignClass(ConfigTool)],
-			["paintTool", new PaintTool(mode)],
-			["wireTool", di.resolveForeignClass(WireTool, [mode])],
+			["paintTool", di.resolveForeignClass(PaintTool)],
+			["wireTool", di.resolveForeignClass(WireTool)],
 		] as const;
 
 		this.allTools = Objects.fromEntries(tools);

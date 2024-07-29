@@ -1,3 +1,4 @@
+import { ColorChooser } from "client/gui/ColorChooser";
 import { Control } from "client/gui/Control";
 import { TextButtonControl } from "client/gui/controls/Button";
 import { DropdownList } from "client/gui/controls/DropdownList";
@@ -8,6 +9,7 @@ import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Gui } from "client/gui/Gui";
 import { Signal } from "shared/event/Signal";
 import { Objects } from "shared/fixes/objects";
+import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
 import type { KeyChooserControlDefinition } from "client/gui/controls/KeyChooserControl";
@@ -32,6 +34,7 @@ const templatesFolder = Gui.getGameUI<{
 	readonly Templates: {
 		readonly PlayerConfig: {
 			readonly ToggleTemplate: ConfigPartDefinition<ToggleControlDefinition>;
+			readonly ColorTemplate: ConfigPartDefinition<ColorChooserDefinition>;
 			readonly NumberTemplate: ConfigPartDefinition<NumberTextBoxControlDefinition>;
 			readonly SliderTemplate: ConfigPartDefinition<SliderControlDefinition>;
 			readonly MultiTemplate: ConfigPartDefinition<GuiObject>;
@@ -42,6 +45,7 @@ const templatesFolder = Gui.getGameUI<{
 }>().Templates.PlayerConfig;
 const templates = {
 	toggle: Control.asTemplateWithMemoryLeak(templatesFolder.ToggleTemplate, false),
+	color: Control.asTemplateWithMemoryLeak(templatesFolder.ColorTemplate, false),
 	number: Control.asTemplateWithMemoryLeak(templatesFolder.NumberTemplate, false),
 	slider: Control.asTemplateWithMemoryLeak(templatesFolder.SliderTemplate, false),
 	multi: Control.asTemplateWithMemoryLeak(templatesFolder.MultiTemplate, false),
@@ -63,6 +67,22 @@ namespace ControlsSource {
 			control.value.set(config);
 
 			this.event.subscribe(control.submitted, (value) => this.submitted.Fire(value));
+		}
+	}
+
+	export class color extends ConfigValueControl<ColorChooserDefinition> {
+		readonly submitted = new Signal<(config: PlayerConfigTypes.Color["config"]) => void>();
+
+		constructor(
+			config: PlayerConfigTypes.Color["config"],
+			definition: ConfigTypeToDefinition<PlayerConfigTypes.Color>,
+		) {
+			super(templates.color(), definition.displayName);
+
+			const control = this.add(new ColorChooser(this.gui.Control));
+			control.value.set(config);
+
+			this.event.subscribe(control.value.submitted, (value) => this.submitted.Fire(value));
 		}
 	}
 
@@ -259,6 +279,88 @@ namespace ControlsSource {
 			this.event.subscribe(control.configUpdated, (key, value) => {
 				this.submitted.Fire((config = { ...config, [key]: value }));
 			});
+		}
+	}
+
+	@injectable
+	export class visuals extends ConfigValueControl<GuiObject> {
+		readonly submitted = new Signal<(config: PlayerConfigTypes.Visuals["config"]) => void>();
+
+		constructor(
+			config: PlayerConfigTypes.Visuals["config"],
+			definition: ConfigTypeToDefinition<PlayerConfigTypes.Visuals>,
+			@inject di: DIContainer,
+		) {
+			super(templates.multi(), definition.displayName);
+
+			const selectionDef = {
+				borderColor: {
+					displayName: "Border color",
+					type: "color",
+					config: definition.config.selection.borderColor,
+				},
+				borderTransparency: {
+					displayName: "Border transparency",
+					type: "clampedNumber",
+					config: definition.config.selection.borderTransparency,
+					min: 0,
+					max: 1,
+					step: 0.01,
+				},
+				borderThickness: {
+					displayName: "Border thickness",
+					type: "clampedNumber",
+					config: definition.config.selection.borderThickness,
+					min: 0.01,
+					max: 1,
+					step: 0.01,
+				},
+				surfaceColor: {
+					displayName: "Surface color",
+					type: "color",
+					config: definition.config.selection.surfaceColor,
+				},
+				surfaceTransparency: {
+					displayName: "Surface transparency",
+					type: "clampedNumber",
+					config: definition.config.selection.surfaceTransparency,
+					min: 0,
+					max: 1,
+					step: 0.01,
+				},
+			} as const satisfies PlayerConfigTypes.Definitions;
+			const _compilecheck1: ConfigDefinitionsToConfig<keyof typeof selectionDef, typeof selectionDef> =
+				config.selection;
+
+			const parent = this.add(new Control(this.gui.Control));
+
+			// single block selection
+			{
+				const control = templates.multi();
+				control.HeadingLabel.Text = "Single block selection";
+				control.Parent = parent.instance;
+
+				const selectionControl = parent.add(new MultiPlayerConfigControl(control.Control, di));
+				selectionControl.set(config.selection, selectionDef);
+				this.event.subscribe(selectionControl.configUpdated, (key, value) => {
+					this.submitted.Fire((config = { ...config, selection: { ...config.selection, [key]: value } }));
+				});
+			}
+
+			// multi block selection
+			{
+				const control = templates.multi();
+				control.HeadingLabel.Text = "Multi block selection";
+				control.Parent = parent.instance;
+
+				const selectionControl = parent.add(new MultiPlayerConfigControl(control.Control, di));
+				selectionControl.set(config.multiSelection, selectionDef);
+				this.event.subscribe(selectionControl.configUpdated, (key, value) => {
+					this.submitted.Fire(
+						(config = { ...config, multiSelection: { ...config.multiSelection, [key]: value } }),
+					);
+				});
+			}
 		}
 	}
 

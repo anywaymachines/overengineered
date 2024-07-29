@@ -1,12 +1,16 @@
 import { ClientComponent } from "client/component/ClientComponent";
-import { Element } from "shared/Element";
+import type { PlayerDataStorage } from "client/PlayerDataStorage";
 import type { ReadonlyObservableCollectionSet } from "shared/event/ObservableCollection";
 
+@injectable
 export class SelectedBlocksHighlighter extends ClientComponent {
 	private readonly selectionBoxName = "selectionBox";
 	private readonly selections = new Map<BlockModel, SelectionBox>();
 
-	constructor(selected: ReadonlyObservableCollectionSet<BlockModel>) {
+	constructor(
+		selected: ReadonlyObservableCollectionSet<BlockModel>,
+		@inject private readonly playerDataStorage: PlayerDataStorage,
+	) {
 		super();
 
 		this.onDisable(() => this.clearAllSelections());
@@ -48,13 +52,17 @@ export class SelectedBlocksHighlighter extends ClientComponent {
 			return;
 		}
 
-		const selection = Element.create("SelectionBox", {
-			Name: this.selectionBoxName,
-			LineThickness: 0.05,
-			Color3: Color3.fromRGB(0, 255 / 2, 255),
-			Adornee: block,
-			Parent: block,
-		});
+		const config = this.playerDataStorage.config.get().visuals.selection;
+		const selection = new Instance("SelectionBox");
+		selection.Name = this.selectionBoxName;
+		selection.LineThickness = config.borderThickness;
+		selection.Transparency = config.borderTransparency;
+		selection.Color3 = config.borderColor;
+		selection.SurfaceColor3 = config.surfaceColor;
+		selection.SurfaceTransparency = config.surfaceTransparency;
+		selection.Adornee = block;
+		selection.Parent = block;
+
 		this.selections.set(block, selection);
 	}
 }

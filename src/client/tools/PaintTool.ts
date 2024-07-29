@@ -131,6 +131,7 @@ class Controller extends ClientComponent {
 	}
 }
 
+@injectable
 export class PaintTool extends ToolBase {
 	readonly selectedMaterial = new ObservableValue<Enum.Material>(Enum.Material.Plastic);
 	readonly selectedColor = new ObservableValue<Color3>(Color3.fromRGB(255, 255, 255));
@@ -138,7 +139,7 @@ export class PaintTool extends ToolBase {
 	readonly enableColor = new ObservableValue(true);
 	readonly controller;
 
-	constructor(mode: BuildingMode) {
+	constructor(@inject mode: BuildingMode) {
 		super(mode);
 
 		this.parentGui(

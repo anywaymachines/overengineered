@@ -295,14 +295,15 @@ const reGenerateUuids = (
 };
 
 namespace Controllers {
+	@injectable
 	export class Move extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
 		private readonly editor;
 
-		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
+		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: ReadonlyDIContainer) {
 			super();
 
-			this.editor = this.parent(BlockMover.create(tool.mode, plot, blocks));
+			this.editor = this.parent(BlockMover.create(tool.mode, plot, blocks, di));
 			this.step.autoSet(this.editor.step);
 
 			this.onDestroy(() => {
@@ -343,6 +344,7 @@ namespace Controllers {
 			private readonly plot: SharedPlot,
 			selected: readonly BlockModel[],
 			@inject blockRegistry: BlockRegistry,
+			@inject di: ReadonlyDIContainer,
 		) {
 			super();
 
@@ -365,7 +367,7 @@ namespace Controllers {
 				return b;
 			});
 
-			this.editor = this.parent(BlockMover.create(tool.mode, plot, this.blocks));
+			this.editor = this.parent(BlockMover.create(tool.mode, plot, this.blocks, di));
 			this.step.autoSet(this.editor.step);
 
 			this.onDestroy(() => this.submit(true));
@@ -417,14 +419,15 @@ namespace Controllers {
 			}
 		}
 	}
+	@injectable
 	export class Rotate extends ClientComponent {
 		readonly step = new NumberObservableValue<number>(0, 90, 180, 90);
 		private readonly editor;
 
-		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[]) {
+		constructor(tool: EditTool, plot: SharedPlot, blocks: readonly BlockModel[], @inject di: ReadonlyDIContainer) {
 			super();
 
-			this.editor = this.parent(BlockRotater.create(tool.mode, plot, blocks));
+			this.editor = this.parent(BlockRotater.create(tool.mode, plot, blocks, di));
 			this.step.autoSet(this.editor.step);
 
 			this.onDestroy(() => {
@@ -588,7 +591,7 @@ export class EditTool extends ToolBase {
 		this.gui = this.parentGui(
 			new Scene.EditToolScene(ToolBase.getToolGui<"Edit", Scene.EditToolSceneDefinition>().Edit, this),
 		);
-		this.parent(new SelectedBlocksHighlighter(this.selected));
+		this.parent(di.resolveForeignClass(SelectedBlocksHighlighter, [this.selected]));
 
 		{
 			this.selector = this.parent(
