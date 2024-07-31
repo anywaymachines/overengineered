@@ -1,8 +1,10 @@
-import { Signal } from "shared/event/Signal";
+import { ArgsSignal, Signal } from "shared/event/Signal";
 
 type MiddlewareResponse<TArg> = Response<{ readonly arg?: TArg }>;
 export class Operation<TArg, TResult extends {} = {}> {
-	private readonly _executed = new Signal<(...args: [arg: TArg, result: TResult]) => void>();
+	private readonly _executing = new ArgsSignal<[arg: TArg]>();
+	readonly executing = this._executing.asReadonly();
+	private readonly _executed = new ArgsSignal<[arg: TArg, result: TResult]>();
 	readonly executed = this._executed.asReadonly();
 	private readonly middlewares = new Set<(arg: TArg) => MiddlewareResponse<TArg>>();
 
@@ -56,6 +58,8 @@ export class Operation<TArg, TResult extends {} = {}> {
 				arg = response.arg;
 			}
 		}
+
+		this._executing.Fire(arg);
 
 		const response = this.func(arg);
 		if (!response.success) {

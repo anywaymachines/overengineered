@@ -5,6 +5,7 @@ import { Signals } from "client/event/Signals";
 import { Gui } from "client/gui/Gui";
 import { TooltipsHolder } from "client/gui/static/TooltipsControl";
 import { BlockEditorBase } from "client/tools/additional/BlockEditorBase";
+import { PlotWelder } from "shared/building/PlotWelder";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { BB } from "shared/fixes/BB";
 import type { InputTooltips } from "client/gui/static/TooltipsControl";
@@ -27,6 +28,21 @@ abstract class MoveBase extends BlockEditorBase {
 	) {
 		super(mode, plot, blocks);
 		this.onPrepare(() => this.tooltipHolder.set(this.getTooltips()));
+
+		// disable welds until movement end to prevent unanchored connected parts from moving with the selected blocks
+		const welds = blocks.map((b) => PlotWelder.getWeldsToOtherBlocks(b));
+		for (const weldz of welds) {
+			for (const weld of weldz) {
+				weld.Enabled = false;
+			}
+		}
+		this.onDisable(() => {
+			for (const weldz of welds) {
+				for (const weld of weldz) {
+					weld.Enabled = true;
+				}
+			}
+		});
 	}
 
 	protected moveBlocksTo(difference: Vector3) {

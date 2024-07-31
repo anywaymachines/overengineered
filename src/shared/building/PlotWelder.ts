@@ -24,7 +24,13 @@ export class AutoPlotWelder extends Component {
 				}
 			}
 		});
-		this.event.subscribe(plot.editOperation.executed, (arg, result) => {
+
+		this.event.subscribe(plot.editOperation.executing, (arg) => {
+			for (const edit of arg) {
+				welder.unweldFromOtherBlocks(edit.instance);
+			}
+		});
+		this.event.subscribe(plot.editOperation.executed, (arg) => {
 			for (const edit of arg) {
 				welder.moveCollisions(edit.instance, edit.instance.GetPivot());
 			}
@@ -32,12 +38,13 @@ export class AutoPlotWelder extends Component {
 	}
 }
 
-class PlotWelder extends Component {
+@injectable
+export class PlotWelder extends Component {
 	readonly collidersParent: WorldModel;
 
 	constructor(
 		private readonly plot: BuildingPlot,
-		private readonly blockRegistry: BlockRegistry,
+		@inject private readonly blockRegistry: BlockRegistry,
 	) {
 		super();
 
@@ -152,44 +159,23 @@ class PlotWelder extends Component {
 		return connected;
 	}
 
-	unweldFromOtherBlocks(model: BlockModel): Set<BasePart> {
-		const connected = new Set<BasePart>();
+	static getWeldsToOtherBlocks(model: BlockModel): Set<Constraint | JointInstance> {
+		const result = new Set<Constraint | JointInstance>();
 
 		const modelParts = model.GetChildren().filter((value) => value.IsA("BasePart") && value.CanCollide);
 		for (let i = 0; i < modelParts.size(); i++) {
 			const modelPart = modelParts[i] as BasePart;
 			const welds = modelPart.GetJoints();
-			welds.forEach((element) => {
-				if (element.IsA("Constraint")) {
-					if (
-						(element.Attachment0?.Parent?.IsDescendantOf(model) ?? true) &&
-						(element.Attachment1?.Parent?.IsDescendantOf(model) ?? true)
-					) {
-						return;
-					}
-
-					if (element.Attachment0?.Parent?.IsA("BasePart")) {
-						connected.add(element.Attachment0.Parent);
-					}
-					if (element.Attachment1?.Parent?.IsA("BasePart")) {
-						connected.add(element.Attachment1.Parent);
-					}
-				} else {
-					if (
-						(element.Part0?.IsDescendantOf(model) ?? true) &&
-						(element.Part1?.IsDescendantOf(model) ?? true)
-					) {
-						return;
-					}
-
-					if (element.Part0) connected.add(element.Part0);
-					if (element.Part1) connected.add(element.Part1);
-				}
-
-				element.Destroy();
-			});
+			for (const weld of welds) {
+				result.add(weld);
+			}
 		}
 
-		return connected;
+		return result;
+	}
+	unweldFromOtherBlocks(model: BlockModel): void {
+		for (const weld of PlotWelder.getWeldsToOtherBlocks(model)) {
+			weld.Destroy();
+		}
 	}
 }

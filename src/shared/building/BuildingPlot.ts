@@ -13,10 +13,6 @@ import type { PlacedBlockLogicConnections } from "shared/building/BlockManager";
 const err = (message: string): ErrorResponse => ({ success: false, message });
 const success: SuccessResponse = { success: true };
 
-type PlotConfig = {
-	readonly buildDelay?: number;
-};
-
 /** Building on a plot. */
 @injectable
 export class BuildingPlot extends ReadonlyPlot {
