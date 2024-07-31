@@ -12,9 +12,11 @@ import { SandboxGame } from "server/SandboxGame";
 import { Game } from "shared/GameHost";
 import { PlasmaProjectile } from "shared/weapons/PlasmaProjectileLogic";
 import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
+import { OutsideControl } from "server/OutsideControl";
 
 const builder = Game.createHost();
 SandboxGame.initialize(builder);
+OutsideControl.initialize();
 
 const host = builder.build();
 host.run();
