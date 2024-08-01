@@ -167,6 +167,19 @@ export class PlotWelder extends Component {
 			const modelPart = modelParts[i] as BasePart;
 			const welds = modelPart.GetJoints();
 			for (const weld of welds) {
+				if (weld.IsA("Constraint")) {
+					if (
+						(weld.Attachment0?.Parent?.IsDescendantOf(model) ?? true) &&
+						(weld.Attachment1?.Parent?.IsDescendantOf(model) ?? true)
+					) {
+						continue;
+					}
+				} else {
+					if ((weld.Part0?.IsDescendantOf(model) ?? true) && (weld.Part1?.IsDescendantOf(model) ?? true)) {
+						continue;
+					}
+				}
+
 				result.add(weld);
 			}
 		}
