@@ -259,7 +259,7 @@ export namespace BlockWireManager {
 				this.narrowDownTypesSelfAndOther();
 			}
 			onDisconnected(marker: Input) {
-				if (this.connected.has(marker)) {
+				if (!this.connected.has(marker)) {
 					return;
 				}
 
