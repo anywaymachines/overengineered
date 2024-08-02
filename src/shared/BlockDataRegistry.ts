@@ -380,6 +380,10 @@ const logic = {
 			description: "Returns the closest object that got into the block's sight",
 			limit: 400,
 		},
+		tpscounter: {
+			name: "TPS Counter",
+			description: "Returns the Ticks per Second number",
+		},
 	},
 } satisfies Record<string, GenericBlockDataRegistry>;
 

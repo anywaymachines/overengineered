@@ -29,6 +29,7 @@ import { OwnerCameraLocatorBlockLogic } from "shared/block/logic/logic/sensor/Ow
 import { OwnerLocatorBlockLogic } from "shared/block/logic/logic/sensor/OwnerLocatorBlockLogic";
 import { RadarSectionBlockLogic } from "shared/block/logic/logic/sensor/RadarSectionBlockLogic";
 import { SpeedometerBlockLogic } from "shared/block/logic/logic/sensor/SpeedometerBlockLogic";
+import { TpsCounterBlockLogic } from "shared/block/logic/logic/sensor/TpsCounterBlockLogic";
 import { MagnetBlockLogic } from "shared/block/logic/MagnetBlockLogic";
 import { MotorBlockLogic } from "shared/block/logic/MotorBlockLogic";
 import { PassengerSeatBlockLogic } from "shared/block/logic/PassengerSeatBlockLogic";
@@ -94,6 +95,7 @@ const logicRegistry = {
 	ownercameralocator: OwnerCameraLocatorBlockLogic,
 	masssensor: MassSensorBlockLogic,
 	gravitysensor: GravitySensorBlockLogic,
+	tpscounter: TpsCounterBlockLogic,
 
 	speedometer: SpeedometerBlockLogic,
 	anglesensor: AngleSensorBlockLogic,

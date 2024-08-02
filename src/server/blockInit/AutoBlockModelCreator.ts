@@ -386,6 +386,11 @@ const operations = {
 		category: categories.other,
 		prefab: prefabs.smallGeneric,
 	},
+	tpscounter: {
+		modelTextOverride: "TPS",
+		category: categories.other,
+		prefab: prefabs.const,
+	},
 } as const satisfies NonGenericOperations;
 export type AutoCreatedOperations = typeof operations;
 

@@ -862,6 +862,18 @@ const mousesensor = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const tpscounter = {
+	input: {},
+	output: {
+		fps: {
+			displayName: "TPS",
+			type: "number",
+			default: 60 as number,
+			config: 60 as number,
+		},
+	},
+} as const satisfies BlockConfigBothDefinitions;
+
 const wing = {
 	input: {
 		enabled: {
@@ -1470,6 +1482,7 @@ export const blockConfigRegistry = {
 	anglesensor,
 	keysensor,
 	mousesensor,
+	tpscounter: tpscounter,
 	altimeter,
 	radiotransmitter,
 	radioreciever,
