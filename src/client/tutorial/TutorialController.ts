@@ -615,6 +615,8 @@ export class TutorialController extends Component {
 	private readonly ui;
 	private readonly uiTasks;
 
+	canCancel = true;
+
 	constructor(
 		title: string,
 		@inject private readonly sharedPlot: SharedPlot,
@@ -671,6 +673,7 @@ export class TutorialController extends Component {
 	partText(...text: readonly string[]): TutorialPartRegistration {
 		const gui = this.ui.instance;
 		gui.TextLabel.Text = "";
+		gui.Header.Cancel.Visible = this.canCancel;
 
 		const translatedText = Localization.translateForPlayer(Players.LocalPlayer, ...text);
 		const thr = task.spawn(() => {
@@ -687,7 +690,7 @@ export class TutorialController extends Component {
 
 				if (gui.FindFirstChild("Header") && gui.FindFirstChild("TextLabel")) {
 					// if not destroyed
-					gui.Header.Cancel.Visible = true;
+					gui.Header.Cancel.Visible = this.canCancel;
 					gui.TextLabel.Text = translatedText;
 				}
 			}),

@@ -18,13 +18,16 @@ class TutorialsService extends HostedService {
 	}
 
 	/** Run the provided tutorial. Yields until the tutorial end. */
-	run(tutorial: TutorialDescriber): void {
+	run(tutorial: TutorialDescriber, config?: { readonly allowClosing: boolean }): void {
 		if (this.runningTutorial) {
 			$log("Another tutorial is already running");
 			return;
 		}
 
 		const controller = this.di.resolveForeignClass(TutorialController, [tutorial.name]);
+		if (config) {
+			controller.canCancel = config.allowClosing;
+		}
 
 		try {
 			this.runningTutorial = tutorial;
@@ -80,7 +83,7 @@ export namespace TutorialServiceInitializer {
 
 				service.onEnable(() => {
 					if (playerData.slots.get().any((t) => t.blocks !== 0)) return;
-					service.run(di.resolveForeignClass(config.tutorialToRunWhenNoSlots!));
+					service.run(di.resolveForeignClass(config.tutorialToRunWhenNoSlots!), { allowClosing: false });
 				});
 			});
 		}

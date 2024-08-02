@@ -24,6 +24,7 @@ import { PlayModeController } from "client/modes/PlayModeController";
 import { PlayerDataInitializer } from "client/PlayerDataStorage";
 import { TerrainController } from "client/terrain/TerrainController";
 import { BasicCarTutorial } from "client/tutorial/tutorials/BasicCarTutorial";
+import { BasicPlaneTutorial } from "client/tutorial/tutorials/BasicPlaneTutorial";
 import { TestTutorial } from "client/tutorial/tutorials/TestTutorial";
 import { TutorialServiceInitializer } from "client/tutorial/TutorialService";
 import { AutoLogicCreator } from "shared/block/AutoLogicCreator";
@@ -97,14 +98,14 @@ export namespace SandboxGame {
 		WikiPopup.addAsService(builder);
 
 		{
-			const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [BasicCarTutorial];
+			const tutorials: (new (...args: any[]) => TutorialDescriber)[] = [BasicCarTutorial, BasicPlaneTutorial];
 			if (GameDefinitions.isAdmin(Players.LocalPlayer)) {
 				tutorials.push(TestTutorial);
 			}
 
 			TutorialServiceInitializer.initialize(builder, {
 				tutorials,
-				tutorialToRunWhenNoSlots: BasicCarTutorial,
+				tutorialToRunWhenNoSlots: BasicPlaneTutorial,
 			});
 		}
 
