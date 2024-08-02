@@ -108,9 +108,7 @@ class DesktopRotater extends RotaterBase {
 				}
 
 				this.difference = startDifference.mul(CFrame.fromAxisAngle(Vector3.FromAxis(axis), relativeAngle));
-				this.isValid = this.plotBounds.isBBInside(
-					boundingBox.withCenter((c) => fullStartPos.mul(this.difference)),
-				);
+				this.isValid = this.blocks.all((b) => this.plotBounds.isBBInside(BB.fromModel(b)));
 				if (!this.isValid) {
 					(moveHandles.WaitForChild("SelectionBox") as SelectionBox).Color3 = Colors.red;
 				} else {
