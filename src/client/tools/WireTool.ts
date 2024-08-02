@@ -140,12 +140,18 @@ namespace Markers {
 		}
 
 		private initTooltips() {
-			const tooltipParent = new ComponentChild<Control<TextLabel>>(this, true);
+			const tooltipParent = new ComponentChild<
+				Control<GuiObject & { WireInfoLabel: TextLabel; TypeTextLabel: TextLabel }>
+			>(this, true);
 			const createTooltip = () => {
-				const control = new Control(
-					ReplicatedAssets.get<{ Wires: { WireInfoLabel: TextLabel } }>().Wires.WireInfoLabel.Clone(),
-				);
-				control.instance.Text = this.data.name;
+				const wireInfoSource = ReplicatedAssets.get<{
+					Wires: { WireInfo: GuiObject & { WireInfoLabel: TextLabel; TypeTextLabel: TextLabel } };
+				}>().Wires.WireInfo;
+				const control = new Control(wireInfoSource.Clone());
+
+				control.instance.WireInfoLabel.Text = this.data.name;
+				control.instance.TypeTextLabel.Text = this.availableTypes.get().join("/");
+
 				control.instance.Parent = this.instance;
 				control.instance.AnchorPoint = new Vector2(0.5, 0.98); // can't set Y to 1 because then it doesn't render
 				control.instance.Position = new UDim2(0.5, 0, 0, 0);
