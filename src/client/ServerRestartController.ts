@@ -23,7 +23,7 @@ export namespace ServerRestartController {
 	// empty method to trigger subscription
 	export function initialize() {}
 
-	export function sendToServer() {
-		Remotes.Client.GetNamespace("Admin").Get("Restart").SendToServer();
+	export function sendToServer(restart = true) {
+		Remotes.Client.GetNamespace("Admin").Get("Restart").SendToServer(restart);
 	}
 }

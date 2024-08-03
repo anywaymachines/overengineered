@@ -19,17 +19,21 @@ export class ServerRestartController extends HostedService {
 
 		this.onEnable(() => {
 			task.spawn(() => {
-				this.event.eventHandler.register(MessagingService.SubscribeAsync("Restart", () => this.restart(true)));
+				this.event.eventHandler.register(
+					MessagingService.SubscribeAsync("Restart", (restart) =>
+						this.restart(true, restart.Data as boolean),
+					),
+				);
 			});
 
-			registerOnRemoteEvent("Admin", "Restart", () => this.restart(false));
+			registerOnRemoteEvent("Admin", "Restart", (player, restart) => this.restart(false, restart));
 		});
 	}
 
-	restart(networkReceived: boolean) {
+	restart(networkReceived: boolean, restart: boolean) {
 		if (!networkReceived && !RunService.IsStudio()) {
 			task.spawn(() => {
-				MessagingService.PublishAsync("Restart", undefined);
+				MessagingService.PublishAsync("Restart", restart);
 			});
 		}
 

@@ -90,7 +90,10 @@ export class AdminGui extends HostedService {
 					printDiff: (di) => print(TutorialCreator.serializeDiffToTsCode(di.resolve<ReadonlyPlot>())),
 					print: (di) => print(TutorialCreator.serializePlotToTsCode(di.resolve<ReadonlyPlot>())),
 				}),
-				wrapNonVisual("Restart", { restart: ServerRestartController.sendToServer }),
+				wrapNonVisual("Restart", {
+					startMeteors: () => ServerRestartController.sendToServer(false),
+					restart: () => ServerRestartController.sendToServer(true),
+				}),
 				wrapNonVisual("TESTS", { open: TestRunner.create }),
 			];
 			for (const [name, content] of tests) {
