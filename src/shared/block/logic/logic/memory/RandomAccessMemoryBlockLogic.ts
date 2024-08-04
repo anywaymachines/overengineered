@@ -11,34 +11,32 @@ export class RandomAccessMemoryBlockLogic extends ConfigurableBlockLogic<
 
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.randomaccessmemory);
-
-		const isReady = () => {
-			if (!this.input.enabled.get()) return false;
-			if (this.input.address.get() >= this.size || this.input.address.get() < 0) {
-				this.burn();
-				return false;
-			}
-			return true;
-		};
-
-		const writeValue = () => {
-			if (!this.input.write.get()) return;
-			if (!isReady()) return;
-			this.internalMemory[this.input.address.get()] = this.input.value.get();
-			this.output.size.set(this.internalMemory.size());
-		};
-
-		const readValue = () => {
-			if (!isReady()) return;
-			this.output.result.set(this.internalMemory[this.input.address.get()]);
-			this.output.size.set(this.internalMemory.size());
-		};
-
-		this.input.value.subscribe(writeValue);
-		this.input.value.subscribe(() => (this.input.read.get() ? readValue() : ""));
-		this.input.read.subscribe((v) => (v ? readValue() : ""));
-		this.input.address.subscribe(readValue);
+		this.input.value.subscribe(this.writeValue);
 	}
 
-	private burn = () => RemoteEvents.Burn.send([this.instance.PrimaryPart!]);
+	isReady() {
+		if (this.input.address.get() > this.size || this.input.address.get() < 0) {
+			RemoteEvents.Burn.send([this.instance.PrimaryPart!]);
+			return false;
+		}
+		return true;
+	}
+
+	writeValue() {
+		if (!this.isReady()) return;
+		if (!this.input.write.get()) return;
+		this.internalMemory[this.input.address.get()] = this.input.value.get();
+		this.output.size.set(this.internalMemory.size());
+	}
+
+	readValue() {
+		if (!this.isReady()) return;
+		this.output.result.set(this.internalMemory[this.input.address.get()]);
+		this.output.size.set(this.internalMemory.size());
+	}
+
+	tick(tick: number): void {
+		if (this.input.read.get()) this.readValue();
+		super.tick(tick);
+	}
 }

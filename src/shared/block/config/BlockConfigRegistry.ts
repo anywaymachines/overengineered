@@ -1183,12 +1183,6 @@ const randomaccessmemory = {
 			config: false as boolean,
 			configHidden: true,
 		},
-		enabled: {
-			displayName: "Enable",
-			type: "bool",
-			default: false as boolean,
-			config: false as boolean,
-		},
 		address: {
 			displayName: "Address",
 			type: "number",
