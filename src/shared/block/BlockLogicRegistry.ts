@@ -42,6 +42,7 @@ import { ServoMotorBlockLogic } from "shared/block/logic/ServoMotorBlockLogic";
 import { SuspensionLogic } from "shared/block/logic/SuspensionLogic";
 import { TNTBlockLogic } from "shared/block/logic/TNTBlockLogic";
 import { VehicleSeatBlockLogic } from "shared/block/logic/VehicleSeatBlockLogic";
+import { WheelBlockLogic } from "shared/block/logic/WheelBlockLogic";
 import { WingLogic } from "shared/block/logic/WingLogic";
 import type { BlockLogic } from "shared/block/BlockLogic";
 import type { BlockId } from "shared/BlockDataRegistry";
@@ -75,6 +76,12 @@ const logicRegistry = {
 	sphericaltnt: TNTBlockLogic,
 	suspensionblock: SuspensionLogic,
 	magnet: MagnetBlockLogic,
+
+	wheel: WheelBlockLogic,
+	bigwheel: WheelBlockLogic,
+	smalloldwheel: WheelBlockLogic,
+	oldwheel: WheelBlockLogic,
+	bigoldwheel: WheelBlockLogic,
 
 	piston: PistonLogic,
 	ballast: BallastBlockLogic,

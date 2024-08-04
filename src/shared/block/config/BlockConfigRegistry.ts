@@ -185,6 +185,30 @@ const motorblock = {
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
 
+const wheelblock = {
+	input: {
+		friction: {
+			displayName: "Tire friction",
+			type: "clampedNumber",
+			default: 50 as number,
+			config: 50 as number,
+			max: 100,
+			min: 0.1,
+			step: 0.1,
+		},
+		elasticity: {
+			displayName: "Tire elasticity",
+			type: "clampedNumber",
+			default: 50 as number,
+			config: 50 as number,
+			max: 100,
+			min: 0.1,
+			step: 0.1,
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
 const bracedshaft = {
 	input: {
 		angle: {
@@ -1432,6 +1456,12 @@ const delayBlock = {
 } as const satisfies BlockConfigBothDefinitions;
 
 export const blockConfigRegistry = {
+	wheel: wheelblock,
+	bigwheel: wheelblock,
+	smalloldwheel: wheelblock,
+	oldwheel: wheelblock,
+	bigoldwheel: wheelblock,
+	/// ...
 	disconnectblock,
 	motorblock,
 	smallrocketengine: rocketengine,
