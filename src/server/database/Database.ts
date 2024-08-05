@@ -5,6 +5,7 @@ import { Throttler } from "shared/Throttler";
 export abstract class DbBase<T> {
 	private readonly datastore;
 	private readonly cache: Record<string, { changed: boolean; value: T }> = {};
+	private readonly currentlyLoading: Record<string, Promise<T>> = {};
 
 	constructor(datastore: DataStore | undefined) {
 		this.datastore = datastore;
@@ -21,8 +22,28 @@ export abstract class DbBase<T> {
 	protected abstract deserialize(data: string): T;
 	protected abstract serialize(data: T): string | undefined;
 
-	get(key: string) {
-		return (this.cache[key] ??= this.load(key)).value;
+	get(key: string): T {
+		if (key in this.cache) {
+			return this.cache[key].value;
+		}
+
+		if (key in this.currentlyLoading) {
+			return Objects.awaitThrow(this.currentlyLoading[key]);
+		}
+
+		let res: (value: T) => void = undefined!;
+		const promise = new Promise<T>((resolve) => (res = resolve));
+		this.currentlyLoading[key] = promise;
+
+		try {
+			const loaded = this.load(key);
+			this.cache[key] = loaded;
+			res(loaded.value);
+
+			return loaded.value;
+		} finally {
+			delete this.currentlyLoading[key];
+		}
 	}
 
 	set(key: string, value: T) {
