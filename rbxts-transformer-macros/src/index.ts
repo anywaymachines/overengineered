@@ -12,14 +12,13 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 				return node;
 
 			const functionDeclarations: ts.FunctionDeclaration[] = [];
-			const namespaceDeclarations: ts.ModuleDeclaration[] = [];
 			const anyDeclarations: ts.Statement[] = [];
 
 			for (const child of node.body.statements) {
 				if (ts.isFunctionDeclaration(child)) {
 					functionDeclarations.push(child);
 				} else if (ts.isModuleDeclaration(child)) {
-					namespaceDeclarations.push(fixNamespace(child));
+					anyDeclarations.push(fixNamespace(child));
 				} else {
 					anyDeclarations.push(child);
 				}
@@ -31,7 +30,6 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 				ts.factory.createModuleBlock([
 					...functionDeclarations,
 					...anyDeclarations,
-					...namespaceDeclarations,
 				]),
 				node.flags,
 			);
