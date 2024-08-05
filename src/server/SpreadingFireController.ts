@@ -47,6 +47,7 @@ export class SpreadingFireController {
 
 		task.delay(duration, () => {
 			if (!part.Parent) return;
+			if (!part.CanSetNetworkOwnership()[0]) return;
 
 			// Break joints with a chance
 			if (math.random(1, 4) === 1) {
