@@ -27,7 +27,7 @@ export namespace Throttler {
 		try {
 			return { success: true, message: func() };
 		} catch (e) {
-			if (times <= 0) {
+			if (times <= 1) {
 				return { success: false, error_message: e };
 			}
 
