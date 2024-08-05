@@ -1,5 +1,6 @@
 import { Element } from "shared/Element";
 import { Objects } from "shared/fixes/objects";
+import { Throttler } from "shared/Throttler";
 
 export abstract class DbBase<T> {
 	private readonly datastore;
@@ -32,7 +33,11 @@ export abstract class DbBase<T> {
 	private load(key: string) {
 		if (!this.datastore) return { changed: false, value: this.createDefault() };
 
-		const [response] = this.datastore.GetAsync<string>(key, this.getOptions);
+		const response = Throttler.retryOnFail<string | undefined>(10, 1, () => {
+			const [response] = this.datastore!.GetAsync<string>(key, this.getOptions);
+			return response;
+		});
+
 		if (response !== undefined) {
 			return (this.cache[key] = { changed: false, value: this.deserialize(response) });
 		}
@@ -64,7 +69,13 @@ export abstract class DbBase<T> {
 		// delay between saves?
 		value.changed = false;
 		if (!this.datastore) return;
-		this.datastore.SetAsync(key, this.serialize(value.value));
+
+		const success = Throttler.retryOnFail(10, 1, () => {
+			this.datastore!.SetAsync(key, this.serialize(value.value));
+		});
+		if (!success) {
+			$err("Saving failed");
+		}
 	}
 
 	saveChanged() {
@@ -74,7 +85,13 @@ export abstract class DbBase<T> {
 			// delay between saves?
 			value.changed = false;
 			if (!this.datastore) return;
-			this.datastore.SetAsync(key, this.serialize(value.value));
+
+			const success = Throttler.retryOnFail(10, 1, () => {
+				this.datastore!.SetAsync(key, this.serialize(value.value));
+			});
+			if (!success) {
+				$err("Saving failed");
+			}
 		}
 	}
 }
