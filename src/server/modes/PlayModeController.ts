@@ -4,6 +4,7 @@ import { RideMode } from "server/modes/RideMode";
 import { HostedService } from "shared/GameHost";
 import { PlayerWatcher } from "shared/PlayerWatcher";
 import { CustomRemotes } from "shared/Remotes";
+import { Throttler } from "shared/Throttler";
 import { PlayerUtils } from "shared/utils/PlayerUtils";
 import type { PlayModeBase } from "server/modes/PlayModeBase";
 
@@ -76,18 +77,31 @@ export class PlayModeController extends HostedService {
 		$log(`${player.Name}'s mode: '${this.playerModes[player.UserId]}' => '${mode}'`);
 		this.playerModes[player.UserId] = mode;
 
-		for (let i = 0; i < 3; i++) {
-			try {
-				if (!Players.GetPlayers().includes(player)) {
-					return { success: true };
-				}
+		// for (let i = 0; i < 3; i++) {
+		// 	try {
+		// 		if (!Players.GetPlayers().includes(player)) {
+		// 			return { success: true };
+		// 		}
 
-				const result = CustomRemotes.modes.setOnClient.send(player, mode);
-				if (!result.success) throw result.message;
-				break;
-			} catch (err) {
-				//
-			}
+		// 		const result = CustomRemotes.modes.setOnClient.send(player, mode);
+		// 		if (!result.success) throw result.message;
+		// 		break;
+		// 	} catch (err) {
+		// 		//
+		// 	}
+		// }
+
+		if (!Players.GetPlayers().includes(player)) {
+			return { success: true };
+		}
+
+		const req = Throttler.retryOnFail(3, 1, () => {
+			const result = CustomRemotes.modes.setOnClient.send(player, mode);
+			if (!result.success) throw result.message;
+		});
+
+		if (!req.success) {
+			$warn(req.error_message);
 		}
 
 		return { success: true };

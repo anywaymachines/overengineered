@@ -1,5 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
 import { RobloxUnit } from "shared/RobloxUnit";
+import { Throttler } from "shared/Throttler";
 
 export namespace GameDefinitions {
 	export const APRIL_FOOLS = false;
@@ -44,21 +45,16 @@ export namespace GameDefinitions {
 	export const MAX_ANGULAR_SPEED = 40;
 	export const HEIGHT_OFFSET = -16384;
 
-	export function isAdmin(player: Player) {
+	export function isAdmin(player: Player): boolean {
 		if (player.Name === "i3ymm" || player.Name === "3QAXM" || player.Name === "samlovebutter") return true;
 
-		let err: string | undefined;
-		for (let i = 0; i < 3; i++) {
-			try {
-				return player.GetRankInGroup(GROUP) > 250;
-			} catch (error) {
-				// eslint-disable-next-line no-ex-assign
-				error = err;
-				task.wait(1 + i);
-			}
+		const req = Throttler.retryOnFail<boolean>(3, 1, () => player.GetRankInGroup(GROUP) > 250);
+
+		if (!req.success) {
+			warn(req.error_message);
 		}
 
-		return false;
+		return req.success ? req.message : false;
 	}
 
 	export function isTestPlace() {
@@ -66,18 +62,13 @@ export namespace GameDefinitions {
 	}
 
 	export function isRobloxEngineer(player: Player) {
-		let err: string | undefined;
-		for (let i = 0; i < 3; i++) {
-			try {
-				return player.IsInGroup(1200769);
-			} catch (error) {
-				// eslint-disable-next-line no-ex-assign
-				error = err;
-				task.wait(1 + i);
-			}
+		const req = Throttler.retryOnFail<boolean>(3, 1, () => player.IsInGroup(1200769));
+
+		if (!req.success) {
+			warn(req.error_message);
 		}
 
-		return false;
+		return req.success ? req.message : false;
 	}
 
 	export function getMaxSlots(player: Player, additional: number) {
