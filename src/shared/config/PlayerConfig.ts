@@ -35,6 +35,7 @@ declare global {
 		readonly resolution: number;
 		readonly foliage: boolean;
 		readonly loadDistance: number;
+		readonly water: boolean;
 	};
 	type TutorialConfiguration = {
 		readonly basics: boolean;
@@ -155,6 +156,7 @@ export const PlayerConfigDefinition = {
 			resolution: 8 as number,
 			foliage: true as boolean,
 			loadDistance: 24 as number,
+			water: false as boolean,
 		},
 	},
 	tutorial: {

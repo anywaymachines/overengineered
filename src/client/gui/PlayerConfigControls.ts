@@ -431,15 +431,20 @@ namespace ControlsSource {
 				foliage: {
 					displayName: "Foliage",
 					type: "bool",
-					config: true as boolean,
+					config: definition.config.foliage,
 				},
 				loadDistance: {
 					displayName: "Load distance",
 					type: "clampedNumber",
-					config: 24 as number,
+					config: definition.config.loadDistance,
 					min: 1,
 					max: 96,
 					step: 1,
+				},
+				water: {
+					displayName: "Enable water",
+					type: "bool",
+					config: definition.config.water,
 				},
 			} as const satisfies PlayerConfigTypes.Definitions;
 			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
@@ -453,9 +458,11 @@ namespace ControlsSource {
 			const resolutionControl = control.get("resolution");
 			const foliageControl = control.get("foliage");
 			const kindControl = control.get("kind") as dropdown<typeof config.kind>;
+			const waterControl = control.get("water");
 
 			const setImprovedControlsEnabled = (kind: string & typeof config.kind) => {
 				resolutionControl.setVisible(kind === "Triangle");
+				waterControl.setVisible(kind === "Triangle");
 				foliageControl.setVisible(kind === "Classic");
 			};
 			this.event.subscribe(kindControl.submitted, setImprovedControlsEnabled);
