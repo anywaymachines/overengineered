@@ -19,14 +19,18 @@ export namespace Throttler {
 		}
 	}
 
-	export function retryOnFail<T>(times: number, delay: number, func: () => T): T | undefined {
-		if (times <= 0) {
-			return undefined;
-		}
-
+	export function retryOnFail<T>(
+		times: number,
+		delay: number,
+		func: () => T,
+	): { success: true; message: T } | { success: false; error_message: unknown } {
 		try {
-			return func();
-		} catch {
+			return { success: true, message: func() };
+		} catch (e) {
+			if (times <= 0) {
+				return { success: false, error_message: e };
+			}
+
 			task.wait(delay);
 			return retryOnFail(times - 1, delay, func);
 		}

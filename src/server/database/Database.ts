@@ -33,13 +33,18 @@ export abstract class DbBase<T> {
 	private load(key: string) {
 		if (!this.datastore) return { changed: false, value: this.createDefault() };
 
-		const response = Throttler.retryOnFail<string | undefined>(10, 1, () => {
-			const [response] = this.datastore!.GetAsync<string>(key, this.getOptions);
-			return response;
-		});
+		const req = Throttler.retryOnFail<string | undefined>(
+			10,
+			1,
+			() => this.datastore!.GetAsync<string>(key, this.getOptions)[0],
+		);
 
-		if (response !== undefined) {
-			return (this.cache[key] = { changed: false, value: this.deserialize(response) });
+		if (req.success) {
+			if (req.message !== undefined) {
+				return (this.cache[key] = { changed: false, value: this.deserialize(req.message) });
+			}
+		} else {
+			$err(req.error_message);
 		}
 
 		return { changed: false, value: this.createDefault() };
@@ -70,11 +75,9 @@ export abstract class DbBase<T> {
 		value.changed = false;
 		if (!this.datastore) return;
 
-		const success = Throttler.retryOnFail(10, 1, () => {
-			this.datastore!.SetAsync(key, this.serialize(value.value));
-		});
-		if (!success) {
-			$err("Saving failed");
+		const req = Throttler.retryOnFail(10, 1, () => this.datastore!.SetAsync(key, this.serialize(value.value)));
+		if (!req.success) {
+			$err(req.error_message);
 		}
 	}
 
@@ -86,11 +89,9 @@ export abstract class DbBase<T> {
 			value.changed = false;
 			if (!this.datastore) return;
 
-			const success = Throttler.retryOnFail(10, 1, () => {
-				this.datastore!.SetAsync(key, this.serialize(value.value));
-			});
-			if (!success) {
-				$err("Saving failed");
+			const req = Throttler.retryOnFail(10, 1, () => this.datastore!.SetAsync(key, this.serialize(value.value)));
+			if (!req.success) {
+				$err(req.error_message);
 			}
 		}
 	}
