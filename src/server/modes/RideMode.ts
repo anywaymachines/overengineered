@@ -33,6 +33,7 @@ export class RideMode implements PlayModeBase {
 	private sit(player: Player) {
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
 		if (hrp.Sit) return;
+		if (hrp.Health <= 0) return;
 
 		const plot = this.serverPlots.plots.getPlotByOwnerID(player.UserId);
 		const blocks = this.serverPlots.plots.getPlotComponent(plot).getBlocks();
