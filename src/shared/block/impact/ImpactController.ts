@@ -31,7 +31,7 @@ export class ImpactController extends Component {
 	private readonly blocksStrength = 70;
 	private readonly cylindricalBlocksStrength = 1500;
 	private readonly waterDiffMultiplier = 4.5;
-	private readonly playerCharacterDiffMultiplier = 4;
+	private readonly playerCharacterDiffMultiplier = 16;
 
 	static isImpactAllowed(part: BasePart) {
 		if (
