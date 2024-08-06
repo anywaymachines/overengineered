@@ -1,10 +1,10 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
-import { AutoS2CRemoteEvent } from "shared/event/S2CRemoteEvent";
+import { C2CRemoteEvent } from "shared/event/PERemoteEvent";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 
 export class RadioTransmitterBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.radiotransmitter> {
-	static readonly sendEvent = new AutoS2CRemoteEvent<{
+	static readonly sendEvent = new C2CRemoteEvent<{
 		readonly frequency: number;
 		readonly value: (
 			| BlockConfigTypes.Bool
@@ -13,7 +13,7 @@ export class RadioTransmitterBlockLogic extends ConfigurableBlockLogic<typeof bl
 			| BlockConfigTypes.String
 			| BlockConfigTypes.Byte
 		)["config"];
-	}>("radio_transmitter_send");
+	}>("radio_transmitter_send", "UnreliableRemoteEvent");
 
 	private readonly colorFade = Color3.fromRGB(0, 0, 0);
 	private readonly originalColor;

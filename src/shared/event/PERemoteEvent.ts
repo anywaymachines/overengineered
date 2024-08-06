@@ -328,3 +328,42 @@ export class C2S2CRemoteFunction<TArg, TResp extends Response = Response> extend
 		return result;
 	}
 }
+
+/** Remote event which:
+ * On client, runs the callback and sends the event to everyone except himself
+ * On server, sends the event to all players.
+ */
+export class C2CRemoteEvent<TArg = undefined> extends PERemoveEvent<CustomRemoteEventBase<TArg, TArg>> {
+	/** @client */
+	readonly invoked = new ArgsSignal<[arg: TArg]>();
+
+	constructor(name: string, eventType: CreatableRemoteEvents) {
+		super(name, eventType);
+
+		if (RunService.IsServer()) {
+			this.event.OnServerEvent.Connect((sender, arg) => {
+				for (const player of Players.GetPlayers()) {
+					if (player === sender) return;
+					this.event.FireClient(player, arg);
+				}
+			});
+		} else if (RunService.IsClient()) {
+			this.event.OnClientEvent.Connect((arg) => {
+				this.invoked.Fire(arg);
+			});
+		}
+	}
+
+	send(this: C2CRemoteEvent<undefined>): void;
+	send(arg: TArg): void;
+	send(arg?: TArg) {
+		if (RunService.IsServer()) {
+			for (const player of Players.GetPlayers()) {
+				this.event.FireClient(player, arg!);
+			}
+		} else if (RunService.IsClient()) {
+			this.invoked.Fire(arg!);
+			this.event.FireServer(arg!);
+		}
+	}
+}
