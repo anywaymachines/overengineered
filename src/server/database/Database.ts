@@ -103,17 +103,8 @@ export abstract class DbBase<T> {
 	}
 
 	saveChanged() {
-		for (const [key, value] of pairs(this.cache)) {
-			if (!value.changed) continue;
-
-			// delay between saves?
-			value.changed = false;
-			if (!this.datastore) return;
-
-			const req = Throttler.retryOnFail(10, 1, () => this.datastore!.SetAsync(key, this.serialize(value.value)));
-			if (!req.success) {
-				$err(req.error_message);
-			}
+		for (const [key] of pairs(this.cache)) {
+			this.save(key);
 		}
 	}
 }

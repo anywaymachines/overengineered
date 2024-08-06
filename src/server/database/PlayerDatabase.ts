@@ -43,6 +43,7 @@ export class PlayerDatabase {
 
 			const key = tostring(plr.UserId);
 			this.db.save(key);
+			this.db.free(key);
 		});
 	}
 
