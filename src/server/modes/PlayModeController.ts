@@ -35,8 +35,7 @@ export class PlayModeController extends HostedService {
 				const prev = this.getPlayerMode(plr);
 				if (prev !== "build" && prev !== undefined) return;
 
-				const response = await this.changeModeForPlayer(plr, undefined);
-				if (!response.success) $err(response.message);
+				this.changeModeForPlayer(plr, undefined);
 			});
 		};
 		PlayerWatcher.onJoin((plr) => {
