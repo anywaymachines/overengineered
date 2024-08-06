@@ -1,16 +1,19 @@
+import { ClientMachine } from "client/blocks/ClientMachine";
 import { Machine } from "client/blocks/Machine";
 import { SoundController } from "client/controller/SoundController";
 import { Gui } from "client/gui/Gui";
 import { RideModeScene } from "client/gui/ridemode/RideModeScene";
 import { PlayMode } from "client/modes/PlayMode";
 import { CustomRemotes } from "shared/Remotes";
+import { Switches } from "shared/Switches";
 import type { RideModeSceneDefinition } from "client/gui/ridemode/RideModeScene";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
+import type { PlacedBlockData2 } from "shared/blockLogic/BlockLogic";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
 @injectable
 export class RideMode extends PlayMode {
-	private currentMachine?: Machine;
+	private currentMachine?: Machine | ClientMachine;
 	private readonly rideModeScene;
 
 	constructor(
@@ -75,8 +78,13 @@ export class RideMode extends PlayMode {
 		if (prev === undefined) {
 			//
 		} else if (prev === "build") {
-			this.currentMachine = this.di.resolveForeignClass(Machine);
-			this.currentMachine.init(this.plot.getBlockDatas());
+			if (Switches.isNewBlockLogic.get()) {
+				this.currentMachine = this.di.resolveForeignClass(ClientMachine);
+				this.currentMachine.init(this.plot.getBlockDatas() as PlacedBlockData2[]);
+			} else {
+				this.currentMachine = this.di.resolveForeignClass(Machine);
+				this.currentMachine.init(this.plot.getBlockDatas());
+			}
 
 			SoundController.getSounds().Start.Play();
 			this.rideModeScene.start(this.currentMachine);
