@@ -1,5 +1,7 @@
 import { HttpService, Workspace } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
+import { InputController } from "client/controller/InputController";
+import { LoadingController } from "client/controller/LoadingController";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
@@ -639,6 +641,19 @@ export class EditTool extends ToolBase {
 
 		const rotate = keybinds.register("edit_rotate", "Edit tool > Rotate", ["R"]);
 		this.event.subscribeRegistration(() => rotate.onDown(() => this.toggleMode("Rotate")));
+
+		this.event.onKeyDown("C", () => {
+			if (!InputController.isCtrlPressed()) return;
+			if (LoadingController.isLoading.get()) return;
+
+			this.copySelectedBlocks();
+		});
+		this.event.onKeyDown("V", () => {
+			if (!InputController.isCtrlPressed()) return;
+			if (LoadingController.isLoading.get()) return;
+
+			this.toggleMode("Paste");
+		});
 	}
 
 	cancelCurrentMode() {
@@ -722,7 +737,12 @@ export class EditTool extends ToolBase {
 
 	protected getTooltips(): InputTooltips {
 		return {
-			Desktop: [{ keys: ["F"], text: "Move" }],
+			Desktop: [
+				{ keys: ["F"], text: "Move" },
+				{ keys: ["R"], text: "Rotate" },
+				{ keys: ["LeftControl", "C"], text: "Copy" },
+				{ keys: ["LeftControl", "V"], text: "Paste" },
+			],
 			Gamepad: [{ keys: ["ButtonX"], text: "Move" }],
 		};
 	}
