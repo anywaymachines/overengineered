@@ -31,7 +31,7 @@ export class RideMode implements PlayModeBase {
 		CustomRemotes.modes.ride.teleportOnSeat.invoked.Connect(this.sit.bind(this));
 	}
 	private sit(player: Player) {
-		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
+		const hrp = player.Character!.WaitForChild("Humanoid") as Humanoid;
 		if (hrp.Sit) return;
 		if (hrp.Health <= 0) return;
 
@@ -110,7 +110,7 @@ export class RideMode implements PlayModeBase {
 		}
 
 		if (vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
-			hrp.Sit = false;
+			vehicleSeat.Occupant!.Sit = false;
 			vehicleSeat.Sit(hrp);
 		}
 
