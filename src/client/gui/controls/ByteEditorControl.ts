@@ -5,7 +5,8 @@ import { Colors } from "shared/Colors";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { Signal } from "shared/event/Signal";
 
-export type ByteEditorDefinition = GuiObject & {
+export type ByteEditorDefinition = GuiObject & Partial<ByteEditorDefinitionParts>;
+export type ByteEditorDefinitionParts = {
 	readonly Buttons: Frame & {
 		readonly b1: TextButton;
 		readonly b2: TextButton;
@@ -25,10 +26,15 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 
 	private readonly buttons;
 
-	constructor(gui: ByteEditorDefinition) {
+	constructor(gui: ByteEditorDefinition, parts?: ByteEditorDefinitionParts) {
 		super(gui);
 
-		this.buttons = (gui.Buttons.GetChildren().filter((value) => value.IsA("TextButton")) as TextButton[]).sort(
+		parts = {
+			Buttons: parts?.Buttons ?? Control.waitForChild(gui, "Buttons"),
+			TextBox: parts?.TextBox ?? Control.waitForChild(gui, "TextBox"),
+		};
+
+		this.buttons = (parts.Buttons.GetChildren().filter((value) => value.IsA("TextButton")) as TextButton[]).sort(
 			(a, b) => a.LayoutOrder > b.LayoutOrder,
 		);
 		for (const button of this.buttons) {
@@ -37,11 +43,11 @@ export class ByteEditor extends Control<ByteEditorDefinition> {
 
 		// Value update
 		this.value.subscribe((value, prev) => {
-			this.gui.TextBox.Text = `${value}`;
+			parts.TextBox.Text = `${value}`;
 			this.updateButtons();
 		}, true);
 
-		const tb = this.add(new NumberTextBoxControl(gui.TextBox, 0, 255, 1));
+		const tb = this.add(new NumberTextBoxControl(parts.TextBox, 0, 255, 1));
 		tb.value.set(this.value.get());
 		this.event.subscribeObservable(this.value, (value) => tb.value.set(value), true);
 		this.event.subscribe(tb.submitted, (value) => this.value.set(value));

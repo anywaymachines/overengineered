@@ -12,7 +12,6 @@ export class ComponentChild<T extends Constraint = Constraint>
 {
 	readonly childSet = new SlimSignal<(child: T | undefined) => void>();
 
-	private readonly state: IReadonlyComponent;
 	private child?: T;
 
 	/** Subscribe a child to a parent state. */
@@ -23,16 +22,19 @@ export class ComponentChild<T extends Constraint = Constraint>
 
 		if (state.isEnabled()) child.enable();
 	}
-	constructor(state: IReadonlyComponent, clearOnDisable = false) {
-		this.state = state;
-
+	constructor(
+		private readonly state: (IReadonlyEnableableComponent & IReadonlyDestroyableComponent) | IReadonlyComponent,
+		clearOnDisable = false,
+	) {
 		state.onEnable(() => this.child?.enable());
 		state.onDestroy(() => this.clear());
 
-		if (!clearOnDisable) {
-			state.onDisable(() => this.child?.disable());
-		} else {
-			state.onDisable(() => this.clear());
+		if ("onDisable" in state) {
+			if (!clearOnDisable) {
+				state.onDisable(() => this.child?.disable());
+			} else {
+				state.onDisable(() => this.clear());
+			}
 		}
 	}
 

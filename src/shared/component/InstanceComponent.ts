@@ -30,6 +30,18 @@ export class InstanceComponent<
 	): gui is T & { [key in TKey]: (typeof gui)[TKey] & defined } {
 		return gui.FindFirstChild(name) !== undefined;
 	}
+	protected static findFirstChild<T extends Instance, TKey extends keyof T & string>(
+		gui: T,
+		name: TKey,
+	): T[TKey] | undefined {
+		return gui.FindFirstChild(name) as T[TKey] | undefined;
+	}
+	protected static waitForChild<T extends Instance, TKey extends keyof T & string>(
+		gui: T,
+		name: TKey,
+	): T[TKey] & defined {
+		return gui.WaitForChild(name) as defined as T[TKey] & defined;
+	}
 
 	/** Get an attribute value on the Instance */
 	getAttribute<T extends AttributeValue>(name: string) {

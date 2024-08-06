@@ -13,6 +13,7 @@ import { InstanceComponent } from "shared/component/InstanceComponent";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Element } from "shared/Element";
 import { HostedService } from "shared/GameHost";
+import { Switches } from "shared/Switches";
 import type { TutorialsService } from "client/tutorial/TutorialService";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
@@ -39,7 +40,7 @@ export class AdminGui extends HostedService {
 
 			const wrapNonVisual = (
 				name: string,
-				tests: Readonly<Record<string, (di: DIContainer) => void>>,
+				tests: Readonly<Record<string, (di: DIContainer, button: TextButtonControl) => void>>,
 			): readonly [name: string, test: Control] => {
 				const frame = Element.create(
 					"Frame",
@@ -61,7 +62,7 @@ export class AdminGui extends HostedService {
 						AutomaticSize: Enum.AutomaticSize.XY,
 						TextSize: 16,
 					});
-					button.activated.Connect(() => test(di));
+					button.activated.Connect(() => test(di, button));
 
 					control.add(button);
 				}
@@ -95,6 +96,17 @@ export class AdminGui extends HostedService {
 					restart: () => ServerRestartController.sendToServer(true),
 				}),
 				wrapNonVisual("TESTS", { open: TestRunner.create }),
+				wrapNonVisual(
+					"Switches",
+					asObject(
+						asMap(Switches).mapToMap((k, v) =>
+							$tuple(k + " " + (v.get() ? "+" : "-"), (di: DIContainer, btn: TextButtonControl) => {
+								v.set(!v.get());
+								btn.text.set(k + " " + (v.get() ? "+" : "-"));
+							}),
+						),
+					),
+				),
 			];
 			for (const [name, content] of tests) {
 				content.hide();

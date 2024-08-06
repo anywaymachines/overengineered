@@ -231,7 +231,7 @@ namespace ControlsSource {
 		) {
 			super(templates.dropdown(), definition.displayName);
 
-			const control = this.add(new DropdownList<T>(this.gui.Control, "down"));
+			const control = this.add(new DropdownList<T>(this.gui.Control));
 			for (const item of definition.items) {
 				control.addItem(item);
 			}

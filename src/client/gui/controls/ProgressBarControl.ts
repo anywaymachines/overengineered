@@ -2,10 +2,11 @@ import { Control } from "client/gui/Control";
 import { GuiAnimator } from "client/gui/GuiAnimator";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 
-export type ProgressBarControlDefinition = GuiObject & {
-	Filled?: GuiObject;
-	Text?: TextLabel;
-	Knob?: GuiObject;
+export type ProgressBarControlDefinition = GuiObject & ProgressBarControlDefinitionParts;
+export type ProgressBarControlDefinitionParts = {
+	readonly Filled?: GuiObject;
+	readonly Text?: TextLabel;
+	readonly Knob?: GuiObject;
 };
 
 /** Control that represents a number as a progress bar. */
@@ -13,8 +14,23 @@ export class ProgressBarControl extends Control<ProgressBarControlDefinition> {
 	readonly value;
 	readonly vertical;
 
-	constructor(gui: ProgressBarControlDefinition, min: number, max: number, step: number) {
+	private readonly parts: ProgressBarControlDefinitionParts;
+
+	constructor(
+		gui: ProgressBarControlDefinition,
+		min: number,
+		max: number,
+		step: number,
+		parts?: ProgressBarControlDefinitionParts,
+	) {
 		super(gui);
+
+		this.parts = {
+			Filled: parts?.Filled ?? Control.findFirstChild(gui, "Filled"),
+			Knob: parts?.Knob ?? Control.findFirstChild(gui, "Knob"),
+			Text: parts?.Text ?? Control.findFirstChild(gui, "Text"),
+		};
+
 		this.value = new NumberObservableValue(min, min, max, step);
 		this.vertical = this.getAttribute<boolean>("Vertical") === true;
 
@@ -22,15 +38,15 @@ export class ProgressBarControl extends Control<ProgressBarControlDefinition> {
 	}
 
 	private subscribeVisual() {
-		if (Control.exists(this.gui, "Text")) {
-			const text = this.gui.Text;
+		if (this.parts.Text) {
+			const text = this.parts.Text;
 			this.event.subscribeObservable(this.value, (value) => (text.Text = tostring(value)), true);
 		}
 
-		if (Control.exists(this.gui, "Knob")) {
+		if (this.parts.Knob) {
 			GuiAnimator.value(
 				this.event,
-				this.gui.Knob as GuiObject,
+				this.parts.Knob,
 				this.value,
 				(value) => {
 					const pos = (value - this.value.min) / this.value.getRange();
@@ -42,10 +58,10 @@ export class ProgressBarControl extends Control<ProgressBarControlDefinition> {
 			);
 		}
 
-		if (Control.exists(this.gui, "Filled")) {
+		if (this.parts.Filled) {
 			GuiAnimator.value(
 				this.event,
-				this.gui.Filled as GuiObject,
+				this.parts.Filled,
 				this.value,
 				(value) => {
 					const pos = (value - this.value.min) / this.value.getRange();

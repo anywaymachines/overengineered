@@ -89,9 +89,6 @@ interface ReplicatedStorage {
 					readonly Filled: Frame;
 				};
 			};
-			WireInfo: BillboardGui & {
-				TextLabel: TextLabel;
-			};
 		};
 	};
 }

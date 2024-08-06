@@ -64,7 +64,13 @@ export class C2SRemoteEvent<TArg = undefined> extends PERemoveEvent<CustomRemote
 		super(name, eventType);
 
 		if (RunService.IsServer()) {
-			this.event.OnServerEvent.Connect((player, arg) => this.invoked.Fire(player, arg));
+			this.event.OnServerEvent.Connect((player, arg) => {
+				try {
+					this.invoked.Fire(player, arg);
+				} catch (err) {
+					throw `Error while calling a C2S event ${name} with argument '${arg}': ${err}`;
+				}
+			});
 		}
 	}
 

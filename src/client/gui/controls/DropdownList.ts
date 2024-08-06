@@ -19,7 +19,7 @@ export class DropdownList<TValue extends string = string> extends Control<Dropdo
 	private readonly contents;
 	private readonly names = new Map<TValue, string>();
 
-	constructor(gui: DropdownListDefinition, direction: "up" | "down" | "left" | "right") {
+	constructor(gui: DropdownListDefinition) {
 		super(gui);
 
 		this.itemTemplate = this.asTemplate(this.gui.Content.Template);

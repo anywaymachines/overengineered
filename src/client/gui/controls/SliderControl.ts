@@ -5,10 +5,14 @@ import { ProgressBarControl } from "client/gui/controls/ProgressBarControl";
 import { EventHandler } from "shared/event/EventHandler";
 import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { Signal } from "shared/event/Signal";
-import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
+import type {
+	ProgressBarControlDefinition,
+	ProgressBarControlDefinitionParts,
+} from "client/gui/controls/ProgressBarControl";
 
 type ToNum<TAllowNull extends boolean> = TAllowNull extends false ? number : number | undefined;
-export type SliderControlDefinition = ProgressBarControlDefinition & {
+export type SliderControlDefinition = ProgressBarControlDefinition & SliderControlDefinitionParts;
+export type SliderControlDefinitionParts = ProgressBarControlDefinitionParts & {
 	readonly TextBox?: TextBox;
 };
 
@@ -21,11 +25,25 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 	readonly value;
 
 	private readonly progressBar;
+	private readonly parts: SliderControlDefinitionParts;
 
-	constructor(gui: SliderControlDefinition, min: number, max: number, step: number) {
+	constructor(
+		gui: SliderControlDefinition,
+		min: number,
+		max: number,
+		step: number,
+		parts?: SliderControlDefinitionParts,
+	) {
 		super(gui);
 
-		this.progressBar = new ProgressBarControl(this.gui, min, max, step);
+		this.parts = {
+			Filled: parts?.Filled ?? Control.findFirstChild(gui, "Filled"),
+			Knob: parts?.Knob ?? Control.findFirstChild(gui, "Knob"),
+			Text: parts?.Text ?? Control.findFirstChild(gui, "Text"),
+			TextBox: parts?.TextBox ?? Control.findFirstChild(gui, "TextBox"),
+		};
+
+		this.progressBar = new ProgressBarControl(this.gui, min, max, step, this.parts);
 		this.progressBar.instance.Active = true;
 		this.add(this.progressBar);
 
@@ -34,8 +52,8 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 
 		this.subscribeMovement();
 
-		if (Control.exists(this.gui, "TextBox")) {
-			const num = new NumberTextBoxControl<TAllowNull>(this.gui.TextBox, min, max, step);
+		if (this.parts.TextBox) {
+			const num = new NumberTextBoxControl<TAllowNull>(this.parts.TextBox, min, max, step);
 			num.value.bindTo(this.value);
 			this.event.subscribe(num.submitted, (value) => this._submitted.Fire(value));
 			this.add(num);
@@ -105,10 +123,10 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 			});
 		};
 
-		if (Control.exists(this.gui, "Knob")) {
-			this.gui.Knob.SelectionGroup = true;
-			this.gui.Knob.SelectionBehaviorLeft = Enum.SelectionBehavior.Stop;
-			this.gui.Knob.SelectionBehaviorRight = Enum.SelectionBehavior.Stop;
+		if (this.parts.Knob) {
+			this.parts.Knob.SelectionGroup = true;
+			this.parts.Knob.SelectionBehaviorLeft = Enum.SelectionBehavior.Stop;
+			this.parts.Knob.SelectionBehaviorRight = Enum.SelectionBehavior.Stop;
 		}
 
 		const moveGamepad = (posx: boolean) => {
@@ -117,8 +135,8 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 			this._moved.Fire(value);
 		};
 
-		if (Control.exists(this.gui, "Knob")) {
-			this.event.subscribe(this.gui.Knob.SelectionGained, () => {
+		if (this.parts.Knob) {
+			this.event.subscribe(this.parts.Knob.SelectionGained, () => {
 				eh.subscribe(UserInputService.InputBegan, (input) => {
 					if (!st) return;
 
@@ -149,12 +167,12 @@ export class SliderControl<TAllowNull extends boolean = false> extends Control<S
 				st = true;
 			});
 
-			this.event.subscribe(this.gui.Knob.SelectionLost, unsub);
-			sub(this.gui.Knob.InputBegan);
+			this.event.subscribe(this.parts.Knob.SelectionLost, unsub);
+			sub(this.parts.Knob.InputBegan);
 		}
 
-		if (Control.exists(this.gui, "Filled")) {
-			sub(this.gui.Filled.InputBegan);
+		if (this.parts.Filled) {
+			sub(this.parts.Filled.InputBegan);
 		}
 
 		sub(this.gui.InputBegan);

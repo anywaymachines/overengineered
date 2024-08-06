@@ -16,6 +16,7 @@ import { Signal } from "shared/event/Signal";
 import { CustomRemotes } from "shared/Remotes";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { SlotsMeta } from "shared/SlotsMeta";
+import type { ClientMachine } from "client/blocks/ClientMachine";
 import type { Machine } from "client/blocks/Machine";
 import type { TextButtonDefinition } from "client/gui/controls/Button";
 import type { ProgressBarControlDefinition } from "client/gui/controls/ProgressBarControl";
@@ -230,7 +231,7 @@ export class RideModeControls extends DictionaryControl<RideModeControlsDefiniti
 		};
 	}
 
-	start(machine: Machine) {
+	start(machine: Machine | ClientMachine) {
 		this.clear();
 		machine.onDestroy(() => this.clear());
 		machine.occupiedByLocalPlayer.subscribe((occupied) => {
@@ -331,7 +332,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		this.infoTextTemplate = this.asTemplate(this.gui.Info.TextTemplate);
 	}
 
-	private addMeters(machine: Machine) {
+	private addMeters(machine: IReadonlyContainerComponent) {
 		this.info.clear();
 
 		const init = (
@@ -440,7 +441,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 		}
 	}
 
-	start(machine: Machine) {
+	start(machine: Machine | ClientMachine) {
 		if (InputController.inputType.get() === "Touch") {
 			this.controls.start(machine);
 		}

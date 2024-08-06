@@ -493,7 +493,7 @@ namespace ControlsSource {
 			updateControl();
 
 			const dropdown = this.add(
-				new DropdownList<keyof typeof definition.types | "unset">(this.gui.Control.Dropdown, "down"),
+				new DropdownList<keyof typeof definition.types | "unset">(this.gui.Control.Dropdown),
 			);
 			this.event.subscribeObservable(dropdown.selectedItem, (typeid) => {
 				// eslint-disable-next-line roblox-ts/lua-truthiness

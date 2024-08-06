@@ -14,13 +14,13 @@ export class ComponentChildren<T extends Constraint = Constraint> implements Rea
 	readonly onRemoved = new SlimSignal<(child: T) => void>();
 	readonly onClear = new SlimSignal();
 
-	private readonly state: IComponent;
 	private children?: T[];
 	private clearing = false;
 
-	constructor(state: IComponent, clearOnDisable = false) {
-		this.state = state;
-
+	constructor(
+		private readonly state: (IReadonlyEnableableComponent & IReadonlyDestroyableComponent) | IReadonlyComponent,
+		clearOnDisable = false,
+	) {
 		state.onEnable(() => {
 			if (!this.children) return;
 
@@ -30,16 +30,18 @@ export class ComponentChildren<T extends Constraint = Constraint> implements Rea
 		});
 		state.onDestroy(() => this.clear());
 
-		if (!clearOnDisable) {
-			state.onDisable(() => {
-				if (!this.children) return;
+		if ("onDisable" in state) {
+			if (!clearOnDisable) {
+				state.onDisable(() => {
+					if (!this.children) return;
 
-				for (const child of this.children) {
-					child.disable();
-				}
-			});
-		} else {
-			state.onDisable(() => this.clear());
+					for (const child of this.children) {
+						child.disable();
+					}
+				});
+			} else {
+				state.onDisable(() => this.clear());
+			}
 		}
 	}
 

@@ -155,7 +155,6 @@ const disconnectblock = {
 			config: {
 				key: "F" as KeyCode,
 				switch: false as boolean,
-				touchName: "Disconnect" as string,
 				reversed: false as boolean,
 			},
 			canBeSwitch: false,
@@ -590,7 +589,6 @@ const magnet = {
 			config: {
 				key: "G" as KeyCode,
 				switch: false as boolean,
-				touchName: "Invert polarity" as string,
 				reversed: false as boolean,
 			},
 			canBeSwitch: true,
@@ -609,7 +607,6 @@ const tnt = {
 			config: {
 				key: "B" as KeyCode,
 				switch: false as boolean,
-				touchName: "Explode" as string,
 				reversed: false as boolean,
 			},
 			canBeSwitch: false,
@@ -839,7 +836,6 @@ const keysensor = {
 			config: {
 				key: "F" as KeyCode,
 				switch: false as boolean,
-				touchName: "Key" as string,
 				reversed: false,
 			},
 			canBeSwitch: true,
