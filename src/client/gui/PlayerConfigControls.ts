@@ -446,6 +446,16 @@ namespace ControlsSource {
 					type: "bool",
 					config: definition.config.water,
 				},
+				snowOnly: {
+					displayName: "Snow only",
+					type: "bool",
+					config: definition.config.snowOnly,
+				},
+				triangleAddSandBelowSeaLevel: {
+					displayName: "Add sand below sea level",
+					type: "bool",
+					config: definition.config.triangleAddSandBelowSeaLevel,
+				},
 			} as const satisfies PlayerConfigTypes.Definitions;
 			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 
@@ -459,11 +469,15 @@ namespace ControlsSource {
 			const foliageControl = control.get("foliage");
 			const kindControl = control.get("kind") as dropdown<typeof config.kind>;
 			const waterControl = control.get("water");
+			const snowOnly = control.get("snowOnly");
+			const triangleAddSandBelowSeaLevel = control.get("triangleAddSandBelowSeaLevel");
 
 			const setImprovedControlsEnabled = (kind: string & typeof config.kind) => {
 				resolutionControl.setVisible(kind === "Triangle");
+				triangleAddSandBelowSeaLevel.setVisible(kind === "Triangle");
 				waterControl.setVisible(kind === "Triangle");
 				foliageControl.setVisible(kind === "Classic");
+				snowOnly.setVisible(kind !== "Water");
 			};
 			this.event.subscribe(kindControl.submitted, setImprovedControlsEnabled);
 			setImprovedControlsEnabled(config.kind);

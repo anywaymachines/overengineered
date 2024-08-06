@@ -21,11 +21,16 @@ export class TerrainController extends HostedService {
 			(terrain) => {
 				loaders.clear();
 
+				const config = {
+					snowOnly: terrain.snowOnly,
+					addSandBelowSeaLevel: terrain.triangleAddSandBelowSeaLevel,
+				};
+
 				switch (terrain.kind) {
 					case "Triangle":
 						loaders.add(
 							new ChunkLoader(
-								TriangleChunkRenderer(DefaultChunkGenerator, terrain.resolution),
+								TriangleChunkRenderer(DefaultChunkGenerator, terrain.resolution, config),
 								terrain.loadDistance,
 							),
 						);
@@ -38,13 +43,15 @@ export class TerrainController extends HostedService {
 					case "Classic":
 						loaders.add(
 							new ChunkLoader(
-								TerrainChunkRenderer(DefaultChunkGenerator, terrain.foliage),
+								TerrainChunkRenderer(DefaultChunkGenerator, terrain.foliage, config),
 								terrain.loadDistance,
 							),
 						);
 						break;
 					case "Flat":
-						loaders.add(new ChunkLoader(FlatTerrainRenderer(0.5 - 0.01), terrain.loadDistance));
+						loaders.add(
+							new ChunkLoader(FlatTerrainRenderer(0.5 - 0.01, 1024, config), terrain.loadDistance),
+						);
 						break;
 					case "Water":
 						loaders.add(new ChunkLoader(WaterTerrainChunkRenderer(), terrain.loadDistance));

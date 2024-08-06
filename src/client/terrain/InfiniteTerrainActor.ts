@@ -18,7 +18,7 @@ let generator: ChunkGenerator = undefined!;
 
 const infterrainActor = {
 	Load: new Instance("BindableEvent") as BindableEvent<
-		(chunkX: number, chunkZ: number, loadFoliage: boolean) => void
+		(chunkX: number, chunkZ: number, loadFoliage: boolean, config?: config) => void
 	>,
 	Loaded: new Instance("BindableEvent") as BindableEvent<(chunkX: number, chunkZ: number) => void>,
 	Unload: new Instance("BindableEvent") as BindableEvent<(chunkX: number, chunkZ: number) => void>,
@@ -30,7 +30,10 @@ const infterrainActor = {
 } as const;
 
 const terrain = Workspace.Terrain;
-infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, loadFoliage: boolean) => {
+type config = {
+	readonly snowOnly: boolean;
+};
+infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, loadFoliage: boolean, config?: config) => {
 	const startX = chunkX * chunkSize;
 	const startZ = chunkZ * chunkSize;
 	const endX = startX + chunkSize - 1;
@@ -103,6 +106,9 @@ infterrainActor.Load.Event.ConnectParallel((chunkX: number, chunkZ: number, load
 					material = materialEnums[materialData[1]];
 					break;
 				}
+			}
+			if (config?.snowOnly) {
+				material = Enum.Material.Snow;
 			}
 
 			if (!aprilFools && loadFoliage) {

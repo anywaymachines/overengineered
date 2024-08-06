@@ -3,10 +3,15 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Element } from "shared/Element";
 import type { ChunkGenerator, ChunkRenderer } from "client/terrain/ChunkLoader";
 
+type config = {
+	readonly addSandBelowSeaLevel: boolean;
+	readonly snowOnly: boolean;
+};
 const parent = Element.create("Folder", { Name: "Triterra", Parent: Workspace.WaitForChild("Obstacles") });
 export const TriangleChunkRenderer = (
 	generator: ChunkGenerator,
 	chunkResolution: number = 8,
+	config?: config,
 ): ChunkRenderer<Instance> => {
 	const chunkSize = 128 * 4;
 	const squareSize = chunkSize / chunkResolution;
@@ -83,20 +88,40 @@ export const TriangleChunkRenderer = (
 		const maxHeight = math.max(xpzp, xpzn, xnzp, xnzn) - GameDefinitions.HEIGHT_OFFSET;
 		const heightDiff = maxHeight - minHeight;
 
-		if (heightDiff > 80 / math.sqrt(chunkResolution / 8)) {
+		if (config?.snowOnly) {
 			for (const wedge of [w11, w12, w21, w22]) {
-				wedge.Material = Enum.Material.Basalt;
-				wedge.Color = new Color3(0.2, 0.2, 0.2);
-			}
-		} else if (maxHeight > 250) {
-			for (const wedge of [w11, w12, w21, w22]) {
-				wedge.Material = Enum.Material.Ice;
-				wedge.Color = new Color3(1, 1, 1);
+				wedge.Material = Enum.Material.Snow;
+				wedge.Color = math.random() > 0.9999 ? new Color3(0.8, 0.8, 0.4) : new Color3(0.8, 0.8, 0.8);
 			}
 		} else {
-			for (const wedge of [w11, w12, w21, w22]) {
-				wedge.Material = Enum.Material.Grass;
-				wedge.Color = Color3.fromRGB(102, 130, 84);
+			if (heightDiff > 80 / math.sqrt(chunkResolution / 8)) {
+				for (const wedge of [w11, w12, w21, w22]) {
+					wedge.Material = Enum.Material.Basalt;
+					wedge.Color = new Color3(0.2, 0.2, 0.2);
+				}
+			} else if (maxHeight > 250) {
+				for (const wedge of [w11, w12, w21, w22]) {
+					wedge.Material = Enum.Material.Ice;
+					wedge.Color = new Color3(1, 1, 1);
+				}
+			} else {
+				if (
+					config?.addSandBelowSeaLevel &&
+					(w11.Position.Y < GameDefinitions.HEIGHT_OFFSET ||
+						w12.Position.Y < GameDefinitions.HEIGHT_OFFSET ||
+						w21.Position.Y < GameDefinitions.HEIGHT_OFFSET ||
+						w22.Position.Y < GameDefinitions.HEIGHT_OFFSET)
+				) {
+					for (const wedge of [w11, w12, w21, w22]) {
+						wedge.Material = Enum.Material.Sand;
+						wedge.Color = Color3.fromRGB(246, 215, 176);
+					}
+				} else {
+					for (const wedge of [w11, w12, w21, w22]) {
+						wedge.Material = Enum.Material.Grass;
+						wedge.Color = Color3.fromRGB(102, 130, 84);
+					}
+				}
 			}
 		}
 

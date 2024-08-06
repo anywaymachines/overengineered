@@ -5,7 +5,14 @@ import type { ChunkRenderer } from "client/terrain/ChunkLoader";
 
 const parent = Element.create("Folder", { Name: "Flaterra", Parent: Workspace.WaitForChild("Obstacles") });
 
-export const FlatTerrainRenderer = (height: number, chunkSize: number = 1024): ChunkRenderer<Instance> => ({
+type config = {
+	readonly snowOnly: boolean;
+};
+export const FlatTerrainRenderer = (
+	height: number,
+	chunkSize: number = 1024,
+	config?: config,
+): ChunkRenderer<Instance> => ({
 	chunkSize,
 	loadDistanceMultiplier: 4,
 
@@ -25,8 +32,13 @@ export const FlatTerrainRenderer = (height: number, chunkSize: number = 1024): C
 		);
 		part.Size = new Vector3(this.chunkSize, 2, this.chunkSize);
 
-		part.Material = Enum.Material.Sand;
-		part.Color = Color3.fromRGB(246, 215, 176);
+		if (config?.snowOnly) {
+			part.Material = Enum.Material.Snow;
+			part.Color = math.random() > 0.9999 ? new Color3(0.8, 0.8, 0.4) : new Color3(0.8, 0.8, 0.8);
+		} else {
+			part.Material = Enum.Material.Sand;
+			part.Color = Color3.fromRGB(246, 215, 176);
+		}
 
 		part.Parent = parent;
 		return part;

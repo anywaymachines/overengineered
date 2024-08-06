@@ -7,7 +7,14 @@ if (GameDefinitions.APRIL_FOOLS) {
 	Workspace.Terrain.SetMaterialColor(Enum.Material.Basalt, new Color3(0.4, 0.2, 0.2));
 }
 
-export const TerrainChunkRenderer = (generator: ChunkGenerator, foliage: boolean): ChunkRenderer<true> => {
+type config = {
+	readonly snowOnly: boolean;
+};
+export const TerrainChunkRenderer = (
+	generator: ChunkGenerator,
+	foliage: boolean,
+	config?: config,
+): ChunkRenderer<true> => {
 	const chunkSize = 16;
 	const actorAmount = 8;
 
@@ -87,7 +94,7 @@ export const TerrainChunkRenderer = (generator: ChunkGenerator, foliage: boolean
 
 		renderChunk(chunkX: number, chunkZ: number): true {
 			actorSemaphore.wait();
-			findAvailableActor().Load.Fire(chunkX, chunkZ, foliage);
+			findAvailableActor().Load.Fire(chunkX, chunkZ, foliage, config);
 
 			return true;
 		},

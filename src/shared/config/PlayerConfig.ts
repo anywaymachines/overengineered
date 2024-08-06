@@ -36,6 +36,8 @@ declare global {
 		readonly foliage: boolean;
 		readonly loadDistance: number;
 		readonly water: boolean;
+		readonly snowOnly: boolean;
+		readonly triangleAddSandBelowSeaLevel: boolean;
 	};
 	type TutorialConfiguration = {
 		readonly basics: boolean;
@@ -157,6 +159,8 @@ export const PlayerConfigDefinition = {
 			foliage: true as boolean,
 			loadDistance: 24 as number,
 			water: false as boolean,
+			snowOnly: false as boolean,
+			triangleAddSandBelowSeaLevel: false as boolean,
 		},
 	},
 	tutorial: {
