@@ -642,6 +642,12 @@ export class EditTool extends ToolBase {
 		const rotate = keybinds.register("edit_rotate", "Edit tool > Rotate", ["R"]);
 		this.event.subscribeRegistration(() => rotate.onDown(() => this.toggleMode("Rotate")));
 
+		const del = keybinds.register("edit_delete", "Edit tool > Delete", ["T"]);
+		this.event.subscribeRegistration(() => del.onDown(() => this.deleteSelectedBlocks()));
+
+		const paint = keybinds.register("edit_paint", "Edit tool > Paint", ["G"]);
+		this.event.subscribeRegistration(() => paint.onDown(() => this.toggleMode("Paint")));
+
 		this.event.onKeyDown("C", () => {
 			if (!InputController.isCtrlPressed()) return;
 			if (LoadingController.isLoading.get()) return;
@@ -688,11 +694,11 @@ export class EditTool extends ToolBase {
 	copySelectedBlocks() {
 		this.copied.set(placeToBlocksRequests([...this.selected.get()]));
 	}
-	async deleteSelectedBlocks() {
+	deleteSelectedBlocks() {
 		const selected = [...this.selected.get()];
 		this.selected.setRange([]);
 
-		await ClientBuilding.deleteOperation.execute({ plot: this.targetPlot.get(), blocks: selected });
+		ClientBuilding.deleteOperation.execute({ plot: this.targetPlot.get(), blocks: selected });
 	}
 	mirrorSelectedBlocks(axis: "x" | "y" | "z") {
 		const selected = [...this.selected.get()];
@@ -740,6 +746,8 @@ export class EditTool extends ToolBase {
 			Desktop: [
 				{ keys: ["F"], text: "Move" },
 				{ keys: ["R"], text: "Rotate" },
+				{ keys: ["T"], text: "Delete" },
+				{ keys: ["G"], text: "Paint" },
 				{ keys: ["LeftControl", "C"], text: "Copy" },
 				{ keys: ["LeftControl", "V"], text: "Paste" },
 			],
