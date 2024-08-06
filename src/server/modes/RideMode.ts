@@ -31,7 +31,8 @@ export class RideMode implements PlayModeBase {
 		CustomRemotes.modes.ride.teleportOnSeat.invoked.Connect(this.sit.bind(this));
 	}
 	private sit(player: Player) {
-		const hrp = player.Character!.WaitForChild("Humanoid") as Humanoid;
+		const hrp = player.Character?.FindFirstChild("Humanoid") as Humanoid | undefined;
+		if (!hrp) return;
 		if (hrp.Sit) return;
 		if (hrp.Health <= 0) return;
 
@@ -104,15 +105,13 @@ export class RideMode implements PlayModeBase {
 			(model) => BlockManager.manager.id.get(model) === "vehicleseat",
 		) as Model;
 		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
+
 		if (vehicleSeat.Occupant && vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
 			vehicleSeat.Occupant.Sit = false;
 			task.wait(0.5);
 		}
 
-		if (vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
-			vehicleSeat.Occupant!.Sit = false;
-			vehicleSeat.Sit(hrp);
-		}
+		vehicleSeat.Sit(hrp);
 
 		for (const block of blocksChildren) {
 			ServerPartUtils.switchDescendantsAnchor(block, false);
