@@ -43,7 +43,6 @@ export namespace BlockWireManager {
 		string: "string",
 		color: "color",
 		key: "key",
-		multikey: "key",
 		controllableNumber: "number",
 		byte: "byte",
 		bytearray: "bytearray",

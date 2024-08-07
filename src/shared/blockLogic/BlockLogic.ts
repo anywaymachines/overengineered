@@ -80,7 +80,6 @@ const BlockConfigValueRegistry: BlockConfigValueRegistry = {
 	bool: createObservable,
 	vector3: createObservable,
 	key: createObservable,
-	multikey: createObservable,
 	keybool: createObservable,
 	number: createObservable,
 	string: createObservable,
