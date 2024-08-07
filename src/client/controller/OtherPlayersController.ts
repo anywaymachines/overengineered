@@ -11,25 +11,23 @@ class MakeMassless extends HostedService {
 			function updateCharacter(plr: Player) {
 				PartUtils.applyToAllDescendantsOfType("BasePart", plr.Character!, (instance) => {
 					instance.Massless = true;
-					instance.EnableFluidForces = false;
-
-					instance.CanCollide = false;
-					instance.CanQuery = false;
-					instance.CanTouch = false;
 				});
 			}
 
 			if (plr === Players.LocalPlayer) return;
 
 			plr.CharacterAdded.Connect(() => {
-				plr.CharacterAppearanceLoaded.Wait();
+				if (!plr.HasAppearanceLoaded) plr.CharacterAppearanceLoaded.Wait();
 				updateCharacter(plr);
 			});
 
 			if (plr.Character) updateCharacter(plr);
 		}
 
-		this.onEnable(() => PlayerWatcher.onJoin(preparePlayer));
+		this.onEnable(() => {
+			PlayerWatcher.onJoin(preparePlayer);
+			Players.GetPlayers().forEach((value) => preparePlayer(value));
+		});
 	}
 }
 

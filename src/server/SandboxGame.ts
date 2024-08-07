@@ -10,6 +10,7 @@ import { SlotDatabase } from "server/database/SlotDatabase";
 import { PlayModeController as PlayModeController } from "server/modes/PlayModeController";
 import { UnreliableRemoteController } from "server/network/event/UnreliableRemoteHandler";
 import { PlayerDataController } from "server/PlayerDataController";
+import { PlayersCollision } from "server/PlayersCollision";
 import { ServerPlots } from "server/plots/ServerPlots";
 import { RagdollController } from "server/RagdollController";
 import { SpreadingFireController } from "server/SpreadingFireController";
@@ -48,6 +49,7 @@ export namespace SandboxGame {
 		builder.services.registerService(ServerBlockLogicController);
 		builder.services.registerService(UnreliableRemoteController);
 		builder.services.registerService(RagdollController);
+		builder.services.registerService(PlayersCollision);
 
 		BadgeController.initializeIfProd(builder);
 	}
