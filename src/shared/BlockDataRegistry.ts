@@ -394,6 +394,18 @@ const registry = {
 		name: "Piston",
 		description: "No Pi jokes here. It just moves stuff..",
 	},
+	cannonbarrel100mm: {
+		name: "100mm Cannon Barrel",
+		description: "N/A",
+	},
+	cannonbarrel150mm: {
+		name: "150mm Cannon Barrel",
+		description: "N/A",
+	},
+	cannonbarrel200mm: {
+		name: "200mm Cannon Barrel",
+		description: "N/A",
+	},
 	ballast: {
 		name: "Ballast",
 		description: "(Un)managable weight of existence. Now in compact form!",
