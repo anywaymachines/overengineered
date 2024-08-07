@@ -134,6 +134,14 @@ const test2 = () => {
 			displayName: "Vector3 Mixed",
 			types: { vector3: {} },
 		},
+		color: {
+			displayName: "Color",
+			types: { color: {} },
+		},
+		colorMixed: {
+			displayName: "Color Mixed",
+			types: { color: {} },
+		},
 	} as const satisfies VisualBlockConfigDefinitions;
 
 	type cfg = {
@@ -180,6 +188,8 @@ const test2 = () => {
 		},
 		vector3: { type: "vector3", config: new Vector3(1, 2, 3) },
 		vector3Mixed: { type: "vector3", config: new Vector3(1, 2, 3) },
+		color: { type: "color", config: new Color3(1, 0, 1) },
+		colorMixed: { type: "color", config: new Color3(1, 0, 1) },
 	};
 	const b2: cfg[string] = {
 		...b1,
@@ -193,6 +203,7 @@ const test2 = () => {
 		keyMixed: { type: "key", config: "R" },
 		keyBool: { type: "keybool", config: { key: "F", reversed: false, switch: false } },
 		vector3Mixed: { type: "vector3", config: new Vector3(4, 2, 3) },
+		colorMixed: { type: "color", config: new Color3(1, 0, 0) },
 	};
 
 	// multiconfig

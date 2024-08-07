@@ -1,3 +1,4 @@
+import { ColorChooser } from "client/gui/ColorChooser";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
@@ -13,6 +14,8 @@ import { MemoryEditorPopup } from "client/gui/popup/MemoryEditorPopup";
 import { BlockWireManager } from "shared/blockLogic/BlockWireManager";
 import { ComponentChild } from "shared/component/ComponentChild";
 import { ObservableValue } from "shared/event/ObservableValue";
+import { ArgsSignal } from "shared/event/Signal";
+import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 import type { ByteEditorDefinition } from "client/gui/controls/ByteEditorControl";
 import type { CheckBoxControlDefinition } from "client/gui/controls/CheckBoxControl";
 import type { DropdownListDefinition } from "client/gui/controls/DropdownList";
@@ -97,6 +100,7 @@ namespace Controls {
 		readonly Byte: ConfigValueDefinition<ByteControlDefinition>;
 		readonly ByteArray: ConfigValueDefinition<GuiButton>;
 		readonly Key: ConfigValueDefinition<KeyOrStringChooserControlDefinition>;
+		readonly Color: ConfigValueDefinition<ColorChooserDefinition>;
 		readonly Multi: ConfigValueDefinition<GuiObject>;
 	};
 	type templates = {
@@ -112,11 +116,12 @@ namespace Controls {
 		Byte: Control.asTemplateWithMemoryLeak(template.Content.Byte, true),
 		ByteArray: Control.asTemplateWithMemoryLeak(template.Content.ByteArray, true),
 		Key: Control.asTemplateWithMemoryLeak(template.Content.Key, true),
+		Color: Control.asTemplateWithMemoryLeak(template.Content.Color, true),
 		Multi: Control.asTemplateWithMemoryLeak(template.Content.Multi, true),
 	};
 
 	namespace Controls {
-		const addSingleTypeWrapper = <T extends Control>(parent: Base<GuiObject>, control: T) => {
+		const addSingleTypeWrapper = <T extends Base<GuiObject>>(parent: Base<GuiObject>, control: T) => {
 			const wrapper = new ConfigValueWrapper(template.Clone());
 			wrapper.dropdown.hide();
 			wrapper.content.set(control);
@@ -141,10 +146,13 @@ namespace Controls {
 			const [wrapper] = addSingleTypeWrapper(parent, control);
 			wrapper.typeColor.set(BlockWireManager.typeGroups[BlockWireManager.groups[key]].color);
 
-			return $tuple(wrapper, control);
+			return $tuple(wrapper, control as Base<GuiObject> & Submittable<TKey>);
 		};
 
-		class Base<T extends GuiObject> extends Control<ConfigValueDefinition<T>> {
+		type Submittable<TKey extends Keys> = {
+			readonly submitted: ReadonlyArgsSignal<[value: ConfigParts<TKey>]>;
+		};
+		abstract class Base<T extends GuiObject> extends Control<ConfigValueDefinition<T>> {
 			readonly control: T;
 
 			constructor(gui: ConfigValueDefinition<T>) {
@@ -159,19 +167,27 @@ namespace Controls {
 			}
 		}
 		export class bool extends Base<CheckBoxControlDefinition> {
+			readonly submitted = new ArgsSignal<[value: ConfigParts<"bool">]>();
+
 			constructor(templates: templates, definition: MiniTypes["bool"], config: ConfigParts<"bool">) {
 				super(templates.Checkbox());
 
 				const control = this.add(new CheckBoxControl(this.control));
 				control.value.set(sameOrUndefined(config));
+
+				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
 			}
 		}
 		export class _number extends Base<NumberTextBoxControlDefinition> {
+			readonly submitted = new ArgsSignal<[value: ConfigParts<"number">]>();
+
 			constructor(templates: templates, definition: MiniTypes["number"], config: ConfigParts<"number">) {
 				super(templates.Number());
 
 				const control = this.add(new NumberTextBoxControl<true>(this.control));
 				control.value.set(sameOrUndefined(config));
+
+				control.submitted.Connect((v) => this.submitted.Fire((config = map(config, (_) => v))));
 			}
 		}
 		export class _string extends Base<TextBoxControlDefinition> {
@@ -249,6 +265,14 @@ namespace Controls {
 				}
 			}
 		}
+		export class color extends Base<ColorChooserDefinition> {
+			constructor(templates: templates, definition: MiniTypes["color"], config: ConfigParts<"color">) {
+				super(templates.Color());
+
+				const control = this.add(new ColorChooser(this.control));
+				control.value.set(sameOrUndefined(config) ?? Colors.white);
+			}
+		}
 
 		export class keybool extends Base<GuiObject> {
 			constructor(templates: templates, definition: MiniTypes["keybool"], config: ConfigParts<"keybool">) {
@@ -284,30 +308,44 @@ namespace Controls {
 			}
 		}
 		export class vector3 extends Base<GuiObject> {
+			readonly submitted = new ArgsSignal<[value: ConfigParts<"vector3">]>();
+
 			constructor(templates: templates, definition: MiniTypes["vector3"], config: ConfigParts<"vector3">) {
 				super(templates.Multi());
 
-				addSingleTypeWrapperAuto(
+				const [, cx] = addSingleTypeWrapperAuto(
 					this,
 					"number",
 					"X",
 					{},
 					map(config, (c) => c.X),
 				);
-				addSingleTypeWrapperAuto(
+				const [, cy] = addSingleTypeWrapperAuto(
 					this,
 					"number",
 					"Y",
 					{},
 					map(config, (c) => c.Y),
 				);
-				addSingleTypeWrapperAuto(
+				const [, cz] = addSingleTypeWrapperAuto(
 					this,
 					"number",
 					"Z",
 					{},
 					map(config, (c) => c.Z),
 				);
+
+				const vec = (parts: OfBlocks<number>, axis: "X" | "Y" | "Z") => {
+					if (axis === "X") return map(config, (c, uuid) => new Vector3(parts[uuid], c.Y, c.Z));
+					if (axis === "Y") return map(config, (c, uuid) => new Vector3(c.X, parts[uuid], c.Z));
+					if (axis === "Z") return map(config, (c, uuid) => new Vector3(c.X, c.Y, parts[uuid]));
+
+					throw "what";
+				};
+
+				cx.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "X"))));
+				cy.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Y"))));
+				cz.submitted.Connect((n) => this.submitted.Fire((config = vec(n, "Z"))));
 			}
 		}
 		export class motorRotationSpeed extends Base<GuiObject> {
@@ -460,27 +498,28 @@ namespace Controls {
 			// 	});
 			// }
 		}
+
+		export type controls = {
+			readonly [k in Keys]?: new (
+				templates: templates,
+				definition: MiniTypes[k],
+				config: ConfigParts<k>,
+			) => Base<GuiObject>;
+		};
+		export type genericControls = {
+			readonly [k in Keys]?: new (
+				templates: templates,
+				definition: MiniTypes[Keys],
+				config: ConfigParts<Keys>,
+			) => Base<GuiObject>;
+		};
 	}
 
-	type controls = {
-		readonly [k in Keys]?: new (
-			templates: templates,
-			definition: MiniTypes[k],
-			config: ConfigParts<k>,
-		) => Control<ConfigValueDefinition<GuiObject>>;
-	};
-	type genericControls = {
-		readonly [k in Keys]?: new (
-			templates: templates,
-			definition: MiniTypes[Keys],
-			config: ConfigParts<Keys>,
-		) => Control<ConfigValueDefinition<GuiObject>>;
-	};
 	export const controls = {
 		...Controls,
 		number: Controls._number,
 		string: Controls._string,
-	} satisfies controls as genericControls;
+	} satisfies Controls.controls as Controls.genericControls;
 }
 
 type ConfigValueDefinition<T> = GuiObject & {
@@ -516,6 +555,8 @@ class ConfigValueWrapper extends Control<ConfigValueWrapperDefinition> {
 }
 
 class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
+	readonly submitted = new ArgsSignal<[config: TypedConfigPart]>();
+
 	constructor(gui: ConfigValueWrapperDefinition, definition: VisualBlockConfigDefinition, configs: BlocksConfigPart) {
 		super(gui);
 
@@ -576,6 +617,12 @@ class ConfigAutoValueWrapper extends Control<ConfigValueWrapperDefinition> {
 				}
 
 				cfgcontrol.instance.HeadingLabel.Text = definition.displayName;
+
+				if ("submitted" in cfgcontrol) {
+					type t = { readonly submitted?: ArgsSignal<[value: ConfigPart<Keys>]> };
+					(cfgcontrol as t).submitted?.Connect((v) => this.submitted.Fire({ type: selectedType, config: v }));
+				}
+
 				control.content.set(cfgcontrol);
 			},
 			true,
