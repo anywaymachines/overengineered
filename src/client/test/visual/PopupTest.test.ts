@@ -4,6 +4,7 @@ import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { SelectButtonPopup } from "client/gui/popup/SelectButtonPopup";
 import { Element } from "shared/Element";
 import type { ControlsPopup } from "client/gui/popup/ControlsPopup";
+import type { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
 import type { SavePopup } from "client/gui/popup/SavePopup";
 import type { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import type { WikiPopup } from "client/gui/popup/WikiPopup";
@@ -92,6 +93,12 @@ export const _Tests = (di: DIContainer) => {
 					Size: new UDim2(0, 200, 0, 30),
 				})
 					.with((b) => b.activated.Connect(() => di.resolve<ControlsPopup>().show()))
+					.with((b) => b.enable()).instance,
+				b8: TextButtonControl.create({
+					Text: "New Settings",
+					Size: new UDim2(0, 200, 0, 30),
+				})
+					.with((b) => b.activated.Connect(() => di.resolve<NewSettingsPopup>().show()))
 					.with((b) => b.enable()).instance,
 			},
 		),

@@ -15,6 +15,7 @@ import { SoundController } from "client/controller/SoundController";
 import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
+import { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
 import { SavePopup } from "client/gui/popup/SavePopup";
 import { SettingsPopup } from "client/gui/popup/SettingsPopup";
 import { WikiPopup } from "client/gui/popup/WikiPopup";
@@ -93,6 +94,7 @@ export namespace SandboxGame {
 
 		ChatController.initializeAdminPrefix();
 		SettingsPopup.addAsService(builder);
+		NewSettingsPopup.addAsService(builder);
 		SavePopup.addAsService(builder);
 		ControlsPopup.addAsService(builder);
 		WikiPopup.addAsService(builder);
