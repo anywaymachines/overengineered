@@ -19,18 +19,20 @@ type ActionBarControlDefinition = GuiObject & {
 		Run: GuiButton;
 		Save: GuiButton;
 		Settings: GuiButton;
+		Home: GuiButton;
 	};
 };
 class ActionBarControl extends Control<ActionBarControlDefinition> {
-	readonly allButtons = ["run", "save", "settings"] as const;
+	readonly allButtons = ["run", "save", "settings", "home"] as const;
 	readonly enabledButtons = new ComponentDisabler(this.allButtons);
 
-	constructor(gui: ActionBarControlDefinition, di: DIContainer) {
+	constructor(gui: ActionBarControlDefinition, scene: BuildingModeScene, di: DIContainer) {
 		super(gui);
 
 		const runButton = this.add(new ButtonControl(this.gui.Buttons.Run));
 		const saveButton = this.add(new ButtonControl(this.gui.Buttons.Save));
 		const settingsButton = this.add(new ButtonControl(this.gui.Buttons.Settings));
+		const homeButton = this.add(new ButtonControl(this.gui.Buttons.Home));
 
 		this.event.subscribeObservable(
 			this.enabledButtons.enabled,
@@ -38,6 +40,7 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 				runButton.setVisible(enabled.includes("run"));
 				saveButton.setVisible(enabled.includes("save"));
 				settingsButton.setVisible(enabled.includes("settings"));
+				homeButton.setVisible(enabled.includes("home"));
 			},
 			true,
 		);
@@ -45,6 +48,7 @@ class ActionBarControl extends Control<ActionBarControlDefinition> {
 		this.event.subscribe(runButton.activated, () => requestMode("ride"));
 		this.event.subscribe(saveButton.activated, () => di.resolve<SavePopup>().show());
 		this.event.subscribe(settingsButton.activated, () => di.resolve<SettingsPopup>().show());
+		this.event.subscribe(homeButton.activated, () => scene.mode.teleportToPlot());
 	}
 
 	show(): void {
@@ -84,13 +88,18 @@ export type BuildingModeSceneDefinition = GuiObject & {
 export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 	readonly actionbar;
 
-	constructor(gui: BuildingModeSceneDefinition, mode: BuildingMode, tools: ToolController, di: DIContainer) {
+	constructor(
+		gui: BuildingModeSceneDefinition,
+		readonly mode: BuildingMode,
+		tools: ToolController,
+		di: DIContainer,
+	) {
 		super(gui);
 
 		this.add(ActionController.instance);
 		this.add(new TouchActionControllerGui(gui.Action, mode.gridEnabled, mode.editMode));
 
-		this.actionbar = this.add(new ActionBarControl(gui.ActionBar, di));
+		this.actionbar = this.add(new ActionBarControl(gui.ActionBar, this, di));
 		const updateActionBarVisibility = () =>
 			this.actionbar.setVisible(!tools.selectedTool.get() && !LoadingController.isLoading.get());
 

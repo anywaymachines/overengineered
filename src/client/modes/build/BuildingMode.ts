@@ -7,6 +7,7 @@ import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { ToolController } from "client/tools/ToolController";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { SharedRagdoll } from "shared/SharedRagdoll";
+import type { RagdollController } from "client/controller/RagdollController";
 import type { BuildingModeSceneDefinition } from "client/gui/buildmode/BuildingModeScene";
 import type { SharedPlot } from "shared/building/SharedPlot";
 
@@ -30,7 +31,11 @@ export class BuildingMode extends PlayMode {
 	readonly gridEnabled = new ObservableValue(true);
 	readonly editMode = new ObservableValue<EditMode>("global");
 
-	constructor(@inject di: DIContainer, @inject plot: SharedPlot) {
+	constructor(
+		@inject di: DIContainer,
+		@inject plot: SharedPlot,
+		@inject private readonly ragdollController: RagdollController,
+	) {
 		super();
 
 		di = di.beginScope();
@@ -68,6 +73,23 @@ export class BuildingMode extends PlayMode {
 		return "build";
 	}
 
+	teleportToPlot() {
+		const rootPart = LocalPlayer.rootPart.get();
+		if (!rootPart) return;
+
+		const humanoid = LocalPlayer.humanoid.get();
+		if (!humanoid) return;
+
+		if (SharedRagdoll.isPlayerRagdolling(humanoid)) {
+			task.spawn(() => SharedRagdoll.event.send(false));
+		}
+
+		const pos = this.targetPlot.get().getSpawnPosition();
+		rootPart.CFrame = new CFrame(pos);
+		// rootPart.AssemblyLinearVelocity = Vector3.zero;
+		// rootPart.AssemblyAngularVelocity = Vector3.zero;
+	}
+
 	onSwitchToNext(mode: PlayModes | undefined) {}
 	onSwitchFromPrev(prev: PlayModes | undefined) {
 		const plot = this.targetPlot.get();
@@ -81,26 +103,11 @@ export class BuildingMode extends PlayMode {
 				return;
 			}
 
-			forcetp();
-		};
-
-		const forcetp = () => {
-			const rootPart = LocalPlayer.rootPart.get();
-			if (!rootPart) return;
-
-			const humanoid = LocalPlayer.humanoid.get();
-			if (!humanoid) return;
-
-			task.spawn(() => SharedRagdoll.event.send(false));
-
-			const pos = plot.getSpawnPosition();
-			rootPart.CFrame = new CFrame(pos);
-			rootPart.AssemblyLinearVelocity = Vector3.zero;
-			rootPart.AssemblyAngularVelocity = Vector3.zero;
+			this.teleportToPlot();
 		};
 
 		if (!prev) {
-			task.delay(0.1, forcetp);
+			task.delay(0.1, () => this.teleportToPlot());
 		} else {
 			task.delay(0.1, tp);
 		}
