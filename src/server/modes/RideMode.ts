@@ -39,8 +39,11 @@ export class RideMode implements PlayModeBase {
 		const plot = this.serverPlots.plots.getPlotByOwnerID(player.UserId);
 		const blocks = this.serverPlots.plots.getPlotComponent(plot).getBlocks();
 
-		const vehicleSeatModel = blocks.find((model) => BlockManager.manager.id.get(model) === "vehicleseat") as Model;
-		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
+		const vehicleSeat = blocks
+			.find((model) => BlockManager.manager.id.get(model) === "vehicleseat")
+			?.FindFirstChild("VehicleSeat") as VehicleSeat | undefined;
+		if (!vehicleSeat) return;
+
 		if (vehicleSeat.Occupant && vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
 			vehicleSeat.Occupant.Sit = false;
 			task.wait(0.5);
@@ -101,17 +104,17 @@ export class RideMode implements PlayModeBase {
 		);
 
 		const hrp = player.Character?.WaitForChild("Humanoid") as Humanoid;
-		const vehicleSeatModel = blocksChildren.find(
-			(model) => BlockManager.manager.id.get(model) === "vehicleseat",
-		) as Model;
-		const vehicleSeat = vehicleSeatModel.FindFirstChild("VehicleSeat") as VehicleSeat;
+		const vehicleSeat = blocksChildren
+			.find((model) => BlockManager.manager.id.get(model) === "vehicleseat")
+			?.FindFirstChild("VehicleSeat") as VehicleSeat | undefined;
+		if (vehicleSeat) {
+			if (vehicleSeat.Occupant && vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
+				vehicleSeat.Occupant.Sit = false;
+				task.wait(0.5);
+			}
 
-		if (vehicleSeat.Occupant && vehicleSeat.Occupant !== player.Character?.FindFirstChild("Humanoid")) {
-			vehicleSeat.Occupant.Sit = false;
-			task.wait(0.5);
+			vehicleSeat.Sit(hrp);
 		}
-
-		vehicleSeat.Sit(hrp);
 
 		for (const block of blocksChildren) {
 			ServerPartUtils.switchDescendantsAnchor(block, false);

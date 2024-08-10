@@ -11,6 +11,7 @@ import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { TouchModeButtonControl } from "client/gui/ridemode/TouchModeButtonControl";
 import { requestMode } from "client/modes/PlayModeRequest";
 import { RocketEngineLogic } from "shared/block/logic/RocketEngineLogic";
+import { VehicleSeatBlockLogic } from "shared/block/logic/VehicleSeatBlockLogic";
 import { EventHandler } from "shared/event/EventHandler";
 import { Signal } from "shared/event/Signal";
 import { CustomRemotes } from "shared/Remotes";
@@ -29,11 +30,14 @@ export type ActionBarControlDefinition = GuiObject & {
 	readonly ControlReset: GuiButton;
 };
 export class ActionBarControl extends Control<ActionBarControlDefinition> {
+	readonly sitButton;
+
 	constructor(gui: ActionBarControlDefinition, controls: RideModeControls) {
 		super(gui);
 
 		const stopButton = this.add(new ButtonControl(this.gui.Stop));
 		const sitButton = this.add(new ButtonControl(this.gui.Sit));
+		this.sitButton = sitButton;
 		const controlSettingsButton = this.add(new ButtonControl(this.gui.ControlSettings));
 		const controlResetButton = this.add(new ButtonControl(this.gui.ControlReset));
 		controlResetButton.hide();
@@ -334,6 +338,7 @@ export class RideModeScene extends Control<RideModeSceneDefinition> {
 
 	private addMeters(machine: IReadonlyContainerComponent) {
 		this.info.clear();
+		this.actionbar.sitButton.setVisible(machine.getChildren().any((b) => b instanceof VehicleSeatBlockLogic));
 
 		const init = (
 			title: string,

@@ -683,7 +683,6 @@ const registry = {
 	vehicleseat: {
 		name: "Driver Seat",
 		description: "A seat for your vehicle. Allows you to control your contraption",
-		required: true,
 		limit: 1,
 	},
 	wedge1x1: {

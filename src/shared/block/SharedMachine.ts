@@ -93,7 +93,7 @@ export class SharedMachine extends ContainerComponent {
 		const seat = this.getChildren().find((c) => c instanceof VehicleSeatBlockLogic) as
 			| VehicleSeatBlockLogic
 			| undefined;
-		if (!seat) throw "No vehicle seat";
+		if (!seat) return;
 
 		this.event.subscribe(RunService.Heartbeat, () => {
 			// Angular speed limit
