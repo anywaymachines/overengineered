@@ -146,6 +146,14 @@ namespace ControlsSource {
 					type: "bool",
 					config: definition.config.playerCentered,
 				},
+				fov: {
+					displayName: "Field Of View",
+					type: "clampedNumber",
+					config: definition.config.fov,
+					min: 1,
+					max: 120,
+					step: 0.01,
+				},
 			} as const satisfies PlayerConfigTypes.Definitions;
 			const _compilecheck: ConfigDefinitionsToConfig<keyof typeof def, typeof def> = config;
 

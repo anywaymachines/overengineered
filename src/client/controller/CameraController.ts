@@ -7,6 +7,11 @@ export class CameraController extends HostedService {
 	constructor(@inject playerData: PlayerDataStorage) {
 		super();
 
+		this.event.readonlyObservableFromInstanceParam(Workspace, "CurrentCamera").subscribe((camera) => {
+			if (camera) {
+				camera.FieldOfView = playerData.config.get().betterCamera.fov;
+			}
+		}, true);
 		this.event.subscribeObservable(
 			playerData.config.createBased((x) => x.betterCamera),
 			(betterCamera) => {
@@ -14,6 +19,10 @@ export class CameraController extends HostedService {
 				Workspace.SetAttribute("camera_improved", betterCamera?.improved === true);
 				Workspace.SetAttribute("camera_playerCentered", betterCamera?.playerCentered === true);
 				Workspace.SetAttribute("camera_strictFollow", betterCamera?.strictFollow === true);
+
+				if (Workspace.CurrentCamera) {
+					Workspace.CurrentCamera.FieldOfView = betterCamera.fov;
+				}
 			},
 			true,
 		);
