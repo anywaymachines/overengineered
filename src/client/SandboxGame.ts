@@ -12,8 +12,10 @@ import { OtherPlayersController } from "client/controller/OtherPlayersController
 import { RagdollController } from "client/controller/RagdollController";
 import { MusicController } from "client/controller/sound/MusicController";
 import { SoundController } from "client/controller/SoundController";
+import { ActionsGui } from "client/gui/ActionsGui";
 import { AdminGui } from "client/gui/AdminGui";
 import { GuiAutoScaleController } from "client/gui/GuiAutoScaleController";
+import { HideInterfaceController } from "client/gui/HideInterfaceController";
 import { ControlsPopup } from "client/gui/popup/ControlsPopup";
 import { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
 import { SavePopup } from "client/gui/popup/SavePopup";
@@ -91,6 +93,8 @@ export namespace SandboxGame {
 		builder.services.registerService(TerrainController);
 		builder.services.registerService(MusicController);
 		builder.services.registerService(GuiAutoScaleController);
+		builder.services.registerService(HideInterfaceController);
+		ActionsGui.initialize(builder);
 
 		ChatController.initializeAdminPrefix();
 		SettingsPopup.addAsService(builder);

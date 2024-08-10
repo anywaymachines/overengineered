@@ -32,8 +32,7 @@ export class ScaledScreenGui<T extends ScreenGui> extends InstanceComponent<T> {
 			this.event.readonlyObservableFromInstanceParam(gui as ScreenGui, "AbsoluteSize"),
 			update,
 		);
-		this.event.subscribeObservable(globalScale, update);
-		update();
+		this.event.subscribeObservable(globalScale, update, true);
 	}
 
 	getScale() {
