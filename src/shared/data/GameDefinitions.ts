@@ -57,6 +57,18 @@ export namespace GameDefinitions {
 		return req.success ? req.message : false;
 	}
 
+	export function isTester(player: Player): boolean {
+		if (player.Name === "i3ymm" || player.Name === "3QAXM" || player.Name === "samlovebutter") return true;
+
+		const req = Throttler.retryOnFail<boolean>(3, 1, () => player.GetRankInGroup(GROUP) >= 3);
+
+		if (!req.success) {
+			warn(req.error_message);
+		}
+
+		return req.success ? req.message : false;
+	}
+
 	export function isTestPlace() {
 		return game.PlaceId !== PRODUCTION_PLACE_ID;
 	}
