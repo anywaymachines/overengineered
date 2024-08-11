@@ -6,7 +6,7 @@ if (!game.GetService("RunService").IsStudio()) {
 	}
 }
 
-import { Workspace } from "@rbxts/services";
+import { Players, Workspace } from "@rbxts/services";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { SandboxGame } from "server/SandboxGame";
 import { Game } from "shared/GameHost";
@@ -29,3 +29,9 @@ Workspace.AddTag("GameLoaded");
 
 PlasmaProjectile; // initializing the remote events
 BulletProjectile;
+
+Players.PlayerAdded.Connect((plr) => {
+	if (plr.AccountAge < 3) {
+		plr.Kick("Your account is too young, due to security reasons you must wait 10 days before you can play.");
+	}
+});
