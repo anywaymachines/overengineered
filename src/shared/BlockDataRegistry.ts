@@ -591,6 +591,7 @@ const registry = {
 	motorblock: {
 		name: "Motor",
 		description: "Rotates attached blocks",
+		limit: 100,
 	},
 	passengerseat: {
 		name: "Passenger Seat",
@@ -613,6 +614,7 @@ const registry = {
 		name: "Rocket Engine",
 		description: "Engines your rocket into the space and onto the ground",
 		mirrorBehaviour: "offset180",
+		limit: 30,
 	},
 	rope: {
 		name: "Rope",
@@ -621,10 +623,12 @@ const registry = {
 	servomotorblock: {
 		name: "Servo",
 		description: "A configurable motor. Rotates to desired angle",
+		limit: 100,
 	},
 	sidewaysservo: {
 		name: "Sideways servo",
 		description: "Servo but sideways and with some degree of freedom",
+		limit: 100,
 	},
 	shaft: {
 		name: "Shaft",
@@ -638,6 +642,7 @@ const registry = {
 		name: "Small Rocket Engine",
 		description: "Smaller brother of a rocket engine",
 		mirrorBehaviour: "offset180",
+		limit: 30,
 	},
 	speedometer: {
 		name: "Speedometer",
@@ -672,17 +677,17 @@ const registry = {
 	tnt: {
 		name: "TNT",
 		description: "A box of explosives. DO NOT HIT!",
-		limit: 200,
+		limit: 100,
 	},
 	cylindricaltnt: {
 		name: "Cylindrical TNT",
 		description: "Not a boxed version",
-		limit: 200,
+		limit: 100,
 	},
 	sphericaltnt: {
 		name: "Spherical TNT",
 		description: "Catch this anarchid-man!",
-		limit: 200,
+		limit: 100,
 	},
 	vehicleseat: {
 		name: "Driver Seat",

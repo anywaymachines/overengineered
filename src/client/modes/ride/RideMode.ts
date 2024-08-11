@@ -36,23 +36,27 @@ export class RideMode extends PlayMode {
 			this.currentMachine.getImpactController()?.disable();
 		});
 
+		const alignPositionInstance = new Instance("AlignPosition");
+		alignPositionInstance.Mode = Enum.PositionAlignmentMode.OneAttachment;
+		alignPositionInstance.MaxForce = math.huge;
+		alignPositionInstance.MaxVelocity = math.huge;
+		alignPositionInstance.Responsiveness = 200;
+
+		const alignOrientationInstance = new Instance("AlignOrientation");
+		alignOrientationInstance.Mode = Enum.OrientationAlignmentMode.OneAttachment;
+		alignOrientationInstance.MaxAngularVelocity = math.huge;
+		alignOrientationInstance.MaxTorque = math.huge;
+		alignOrientationInstance.Responsiveness = 200;
+
 		CustomRemotes.physics.normalizeRootparts.invoked.Connect((data) => {
 			for (const part of data.parts) {
 				const attachment = new Instance("Attachment", part);
 
-				const alignPosition = new Instance("AlignPosition");
-				alignPosition.Mode = Enum.PositionAlignmentMode.OneAttachment;
-				alignPosition.Attachment0 = attachment;
-				alignPosition.MaxForce = math.huge;
-				alignPosition.MaxVelocity = math.huge;
-				alignPosition.Responsiveness = 200;
+				const alignPosition = alignPositionInstance.Clone();
+				const alignOrientation = alignOrientationInstance.Clone();
 
-				const alignOrientation = new Instance("AlignOrientation");
-				alignOrientation.Mode = Enum.OrientationAlignmentMode.OneAttachment;
+				alignPosition.Attachment0 = attachment;
 				alignOrientation.Attachment0 = attachment;
-				alignOrientation.MaxAngularVelocity = math.huge;
-				alignOrientation.MaxTorque = math.huge;
-				alignOrientation.Responsiveness = 200;
 
 				alignPosition.Parent = part;
 				alignOrientation.Parent = part;

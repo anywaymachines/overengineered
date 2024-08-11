@@ -1,4 +1,3 @@
-import { RunService } from "@rbxts/services";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RemoteEvents } from "shared/RemoteEvents";
@@ -31,13 +30,22 @@ export class MotorBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRe
 
 			this.disable();
 		});
+	}
 
-		this.event.subscribe(RunService.Heartbeat, () => {
-			if (this.block.instance.Attach.Position.sub(this.block.instance.Base.Position).Magnitude > 3) {
-				RemoteEvents.ImpactBreak.send([this.block.instance.Base]);
+	tick(tick: number): void {
+		super.tick(tick);
 
-				this.disable();
-			}
-		});
+		const base = this.block.instance.FindFirstChild("Base") as BasePart | undefined;
+		const attach = this.block.instance.FindFirstChild("Attach") as BasePart | undefined;
+		if (!attach || !base) {
+			this.disable();
+			return;
+		}
+
+		if (attach.Position.sub(base.Position).Magnitude > 3) {
+			RemoteEvents.ImpactBreak.send([base]);
+
+			this.disable();
+		}
 	}
 }

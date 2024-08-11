@@ -1,10 +1,10 @@
-import { Debris, ReplicatedStorage } from "@rbxts/services";
+import { Debris, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { EffectBase } from "shared/effects/EffectBase";
 
 ReplicatedStorage.WaitForChild("Assets");
 
 type Args = {
-	readonly part: BasePart;
+	readonly blocks: readonly BasePart[];
 	readonly index?: number;
 };
 export class ImpactSoundEffect extends EffectBase<Args> {
@@ -21,18 +21,22 @@ export class ImpactSoundEffect extends EffectBase<Args> {
 		super("impact_sound_effect");
 	}
 
-	justRun({ part, index }: Args): void {
-		if (!part) return;
+	justRun({ blocks, index }: Args): void {
+		if (!blocks || blocks.size() === 0) return;
 
-		const soundsFolder = this.materialSounds[part.Material.Name] ?? this.materialSounds["Default"];
-		const soundIndex = index ?? math.random(0, soundsFolder.size() - 1);
-		const sound = soundsFolder[soundIndex].Clone() as Sound;
+		for (const part of blocks) {
+			if (!part.IsDescendantOf(Workspace)) continue;
 
-		sound.RollOffMaxDistance = 1000;
-		sound.Volume = 0.5;
-		sound.Parent = part;
-		sound.Play();
+			const soundsFolder = this.materialSounds[part.Material.Name] ?? this.materialSounds["Default"];
+			const soundIndex = index ?? math.random(0, soundsFolder.size() - 1);
+			const sound = soundsFolder[soundIndex].Clone() as Sound;
 
-		Debris.AddItem(sound, sound.TimeLength);
+			sound.RollOffMaxDistance = 1000;
+			sound.Volume = 0.5;
+			sound.Parent = part;
+			sound.Play();
+
+			Debris.AddItem(sound, sound.TimeLength);
+		}
 	}
 }

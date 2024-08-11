@@ -17,7 +17,6 @@ class MakeMassless extends HostedService {
 			if (plr === Players.LocalPlayer) return;
 
 			plr.CharacterAdded.Connect(() => {
-				if (!plr.HasAppearanceLoaded) plr.CharacterAppearanceLoaded.Wait();
 				updateCharacter(plr);
 			});
 

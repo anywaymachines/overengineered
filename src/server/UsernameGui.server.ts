@@ -3,8 +3,6 @@ import { GameDefinitions } from "shared/data/GameDefinitions";
 
 Players.PlayerAdded.Connect((player) => {
 	player.CharacterAdded.Connect((character) => {
-		if (!player.HasAppearanceLoaded) player.CharacterAppearanceLoaded.Wait();
-
 		task.wait(0.1);
 
 		const head = character.WaitForChild("Head") as BasePart;

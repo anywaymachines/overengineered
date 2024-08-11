@@ -1,4 +1,4 @@
-import { Players, Workspace } from "@rbxts/services";
+import { Players, RunService, Workspace } from "@rbxts/services";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
 import { HostedService } from "shared/GameHost";
@@ -21,42 +21,44 @@ export class UnreliableRemoteController extends HostedService {
 	) {
 		super();
 
+		const breakQueue: Map<Player, BasePart[]> = new Map();
+
 		// PhysicsService.RegisterCollisionGroup("Wreckage");
+		// PhysicsService.CollisionGroupSetCollidable("Wreckage", "PlayerCharacters", false);
 		// PhysicsService.CollisionGroupSetCollidable("Wreckage", "Wreckage", false);
 
 		const impactBreakEvent = (player: Player | undefined, parts: BasePart[]) => {
+			if (!player) throw "ban forever fix this idk";
+
+			const newData = breakQueue.get(player) ?? [];
+			breakQueue.set(player, newData);
+
 			parts.forEach((part) => {
 				if (!BlockManager.isActiveBlockPart(part)) return;
 
-				// const oldJoints = part.GetJoints();
-				const players = Players.GetPlayers().filter((p) => p !== player);
-				CustomRemotes.physics.normalizeRootparts.send(players, { parts: [part] });
-				ServerPartUtils.BreakJoints(part);
-
-				// part.CollisionGroup = "Wreckage";
-
-				// Play sounds
-				impactSoundEffect.send(part, { part, index: undefined });
-
-				// for (const joint of oldJoints) {
-				// 	if (!joint.IsA("WeldConstraint")) continue;
-				// 	if (math.random(1, 15) !== 1) continue;
-
-				// 	const attachment0 = new Instance("Attachment", joint.Part0);
-				// 	const attachment1 = new Instance("Attachment", joint.Part1);
-
-				// 	const worldAttachmentPos = joint.Part0!.Position.Lerp(joint.Part1!.Position, 0.5);
-				// 	attachment0.Position = joint.Part0!.CFrame.PointToObjectSpace(worldAttachmentPos);
-				// 	attachment1.Position = joint.Part1!.CFrame.PointToObjectSpace(worldAttachmentPos);
-
-				// 	const rope = new Instance("RopeConstraint", joint.Part0);
-				// 	rope.Length = 0.1;
-				// 	rope.Attachment0 = attachment0;
-				// 	rope.Attachment1 = attachment1;
-				// 	rope.Restitution = 0;
-				// }
+				newData.push(part);
 			});
 		};
+
+		this.event.subscribe(RunService.Heartbeat, (dT) => {
+			if (breakQueue.size() > 0) {
+				const copy = [...breakQueue];
+				breakQueue.clear();
+
+				task.spawn(() => {
+					for (const [player, blocks] of copy) {
+						const players = Players.GetPlayers().filter((p) => p !== player);
+						CustomRemotes.physics.normalizeRootparts.send(players, { parts: blocks });
+						impactSoundEffect.send(blocks[0], { blocks, index: undefined });
+
+						for (const part of blocks) {
+							ServerPartUtils.BreakJoints(part);
+							// part.CollisionGroup = "Wreckage";
+						}
+					}
+				});
+			}
+		});
 
 		const burnEvent = (parts: BasePart[]) => {
 			parts.forEach((part) => {
