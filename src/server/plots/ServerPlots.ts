@@ -6,6 +6,7 @@ import { Element } from "shared/Element";
 import { ObservableCollectionSet } from "shared/event/ObservableCollection";
 import { HostedService } from "shared/GameHost";
 import { PlayerWatcher } from "shared/PlayerWatcher";
+import { CustomRemotes } from "shared/Remotes";
 import type { SharedPlot } from "shared/building/SharedPlot";
 import type { SharedPlots } from "shared/building/SharedPlots";
 
@@ -121,6 +122,24 @@ export class ServerPlots extends HostedService {
 			},
 			true,
 		);
+
+		CustomRemotes.gui.settings.updateBlacklist.invoked.Connect((player, arg) => {
+			const plot = this.tryGetControllerByPlayer(player);
+			if (!plot) throw "what";
+
+			plot.plot.blacklistedPlayers.set(arg);
+		});
+
+		CustomRemotes.gui.settings.getBlacklist.subscribe((player) => {
+			const plot = this.tryGetControllerByPlayer(player);
+
+			if (!plot) return { success: false, message: "Plot not found" };
+
+			return {
+				success: true,
+				players: plot.plot.blacklistedPlayers.get() ?? [],
+			};
+		});
 
 		game.BindToClose(() => {
 			$log("Game quit, destroying controllers...");

@@ -32,6 +32,10 @@ declare global {
 		readonly blocks: readonly EditBlockRequest[];
 	};
 
+	type GuiSettingsPermissionsGetBlacklist = {
+		readonly players: readonly number[];
+	};
+
 	type LogicConnectRequest = {
 		readonly plot: PlotModel;
 		readonly outputBlock: BlockModel;
@@ -115,6 +119,14 @@ export const CustomRemotes = {
 	player: {
 		updateSettings: new C2SRemoteEvent<PlayerUpdateSettingsRequest>("pl_updsettings"),
 		fetchData: new C2S2CRemoteFunction<undefined, Response<PlayerDataResponse>>("pl_fetchdata"),
+	},
+	gui: {
+		settings: {
+			updateBlacklist: new C2SRemoteEvent<readonly number[]>("gui_settings_updateblacklist"),
+			getBlacklist: new C2S2CRemoteFunction<undefined, Response<GuiSettingsPermissionsGetBlacklist>>(
+				"gui_settings_getblacklist",
+			),
+		},
 	},
 	modes: {
 		set: new C2S2CRemoteFunction<PlayModes>("md_set").addMiddleware(PERemoteEventMiddlewares.rateLimiter(30, 60)),

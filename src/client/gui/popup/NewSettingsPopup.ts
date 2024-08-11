@@ -2,6 +2,7 @@ import { ButtonControl } from "client/gui/controls/Button";
 import { PlayerSelectorColumnControl } from "client/gui/controls/PlayerSelectorListControl";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
+import { CustomRemotes } from "shared/Remotes";
 import type { PlayerSelectorColumnControlDefinition } from "client/gui/controls/PlayerSelectorListControl";
 
 export type NewSettingsPopupDefinition = GuiObject & {
@@ -33,8 +34,17 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 
 		this.setScene(startingScene ?? "Permissions");
 
-		this.add(new PlayerSelectorColumnControl(this.gui.Content.Permissions.Blacklist, []));
+		const blacklistedPlayers = CustomRemotes.gui.settings.getBlacklist.send(undefined);
+		const blacklist = new PlayerSelectorColumnControl(
+			this.gui.Content.Permissions.Blacklist,
+			blacklistedPlayers.success ? blacklistedPlayers.players : [],
+		);
 
+		blacklist.submitted.Connect((players) => {
+			CustomRemotes.gui.settings.updateBlacklist.send(players);
+		});
+
+		this.add(blacklist);
 		this.add(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
 	}
 

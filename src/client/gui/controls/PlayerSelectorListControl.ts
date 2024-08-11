@@ -76,24 +76,12 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 		for (const player of Players.GetPlayers()) {
 			this.addPlayer(player);
 		}
-		const pl: FakePlayer[] = [
-			{ Name: "456asdasdas", UserId: 645 },
-			{ Name: "456asdasdas", UserId: 6454 },
-			{ Name: "456asdasdas", UserId: 6451 },
-			{ Name: "456asdasdas", UserId: 6452 },
-			{ Name: "456asdasdas", UserId: 645494565 },
-			{ Name: "456asdasdas", UserId: 6458 },
-			{ Name: "456asdasdas", UserId: 65445 },
-			{ Name: "456asdasdas", UserId: 6454 },
-			{ Name: "456asdasdas", UserId: 64215 },
-			{ Name: "456asdasdas", UserId: 64585 },
-			{ Name: "456asdasdas", UserId: 64125 },
-		];
+		const pl: Player[] = [];
 		for (const player of pl) {
 			this.addPlayer(player);
 		}
 	}
-	private addPlayer(player: FakePlayer) {
+	private addPlayer(player: Player) {
 		if (player === Players.LocalPlayer) return;
 		// if (!RunService.IsStudio() && GameDefinitions.isAdmin(player)) return;
 
@@ -141,7 +129,7 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 			});
 		}
 	}
-	private removePlayer(player: FakePlayer) {
+	private removePlayer(player: Player) {
 		const control = this.leftControl.keyedChildren.get(player) ?? this.rightControl.keyedChildren.get(player);
 		if (!control) return;
 
