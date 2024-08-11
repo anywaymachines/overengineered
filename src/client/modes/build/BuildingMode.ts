@@ -86,8 +86,8 @@ export class BuildingMode extends PlayMode {
 
 		const pos = this.targetPlot.get().getSpawnPosition();
 		rootPart.CFrame = new CFrame(pos);
-		// rootPart.AssemblyLinearVelocity = Vector3.zero;
-		// rootPart.AssemblyAngularVelocity = Vector3.zero;
+		rootPart.AssemblyLinearVelocity = Vector3.zero;
+		rootPart.AssemblyAngularVelocity = Vector3.zero;
 	}
 
 	onSwitchToNext(mode: PlayModes | undefined) {}
