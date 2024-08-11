@@ -11,15 +11,14 @@ export class RandomAccessMemoryBlockLogic extends ConfigurableBlockLogic<
 
 	constructor(block: PlacedBlockData) {
 		super(block, blockConfigRegistry.randomaccessmemory);
-		this.input.value.subscribe(this.writeValue);
+		this.input.value.subscribe(() => this.writeValue());
 	}
 
 	isReady() {
-		if (this.input.address.get() > this.size || this.input.address.get() < 0) {
-			RemoteEvents.Burn.send([this.instance.PrimaryPart!]);
-			return false;
-		}
-		return true;
+		const index = this.input.address.get();
+		const isInRange = index <= this.size && index >= 0;
+		if (!isInRange) RemoteEvents.Burn.send([this.instance.PrimaryPart!]);
+		return isInRange;
 	}
 
 	writeValue() {
