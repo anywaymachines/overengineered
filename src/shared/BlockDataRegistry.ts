@@ -406,6 +406,10 @@ const registry = {
 		name: "200mm Cannon Barrel",
 		description: "N/A",
 	},
+	plasmacoilaccelerator: {
+		name: "Plasma Accelerator",
+		description: "N/A",
+	},
 	ballast: {
 		name: "Ballast",
 		description: "(Un)managable weight of existence. Now in compact form!",
