@@ -1,3 +1,4 @@
+import { AES, Base64 } from "@rbxts/crypto";
 import { Players, ReplicatedStorage, RunService } from "@rbxts/services";
 import { ArgsSignal } from "shared/event/Signal";
 
@@ -38,10 +39,26 @@ abstract class PERemoveEvent<TEvent extends Instance> {
 			}
 
 			this.event = new Instance(eventType) as unknown as TEvent;
-			this.event.Name = name;
+			this.event.Name = Base64.Encode(
+				AES.Encrypt(
+					name,
+					(RunService.IsStudio() ? "0" : RunService.IsStudio() ? "0" : game.JobId)
+						.rep(math.ceil(128 / (RunService.IsStudio() ? "0" : game.JobId).size()))
+						.sub(0, 128),
+				),
+			);
 			this.event.Parent = ReplicatedStorage;
 		} else {
-			this.event = ReplicatedStorage.WaitForChild(name) as TEvent;
+			this.event = ReplicatedStorage.WaitForChild(
+				Base64.Encode(
+					AES.Encrypt(
+						name,
+						(RunService.IsStudio() ? "0" : game.JobId)
+							.rep(math.ceil(128 / (RunService.IsStudio() ? "0" : game.JobId).size()))
+							.sub(0, 128),
+					),
+				),
+			) as TEvent;
 		}
 	}
 }
