@@ -8,6 +8,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 	private triggerDistanceListUpdate: boolean = false;
 	private closestDetectedPart: BasePart | undefined = undefined;
 	private readonly allTouchedBlocks: Set<BasePart> = new Set<BasePart>();
+
 	private getDistanceTo = (part: BasePart) => {
 		if (this.instance === undefined) return Vector3.zero;
 		if (part === undefined) return Vector3.zero;
@@ -19,12 +20,8 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 	private findClosestPart() {
 		let smallestDistance: number | undefined;
 		let closestPart: BasePart | undefined;
+		const minDist = this.input.minimalDistance.get();
 		for (const bp of this.allTouchedBlocks) {
-			if (bp === undefined) {
-				this.allTouchedBlocks.delete(bp);
-				continue;
-			}
-
 			const d = this.getDistanceTo(bp).Magnitude;
 
 			if (smallestDistance === undefined) {
@@ -32,27 +29,20 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 				continue;
 			}
 
-			if (d > smallestDistance) continue;
-			if (d < this.input.minimalDistance.get()) continue;
+			if (d > smallestDistance || d < minDist) continue;
 			[smallestDistance, closestPart] = [d, bp];
 		}
 		return closestPart;
 	}
 
-	private isCloser(part: BasePart) {
-		const d1 = this.getDistanceTo(part)?.Magnitude;
-		if (d1 < this.input.minimalDistance.get()) return false;
-		const d2 = this.getDistanceTo(this.closestDetectedPart!)?.Magnitude;
-		return d1 < d2;
-	}
-
 	tick(tick: number): void {
 		super.tick(tick);
 
-		if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate)
+		if (this.closestDetectedPart?.Parent === undefined || this.triggerDistanceListUpdate) {
+			this.triggerDistanceListUpdate = false;
 			this.closestDetectedPart = this.findClosestPart();
+		}
 
-		this.triggerDistanceListUpdate = false;
 		this.output.distance.set(
 			this.closestDetectedPart ? this.getDistanceTo(this.closestDetectedPart) : Vector3.zero,
 		);
@@ -98,19 +88,17 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 			if (this.getDistanceTo(part).Magnitude < this.input.minimalDistance.get()) return;
 			this.allTouchedBlocks.add(part);
 			if (this.closestDetectedPart === undefined) return (this.closestDetectedPart = part);
-			if (!this.isCloser(part)) return;
-			this.closestDetectedPart = part;
+			this.triggerDistanceListUpdate = true;
 		});
 
 		this.event.subscribe(view.TouchEnded, (part) => {
 			this.allTouchedBlocks.delete(part);
-			this.triggerDistanceListUpdate = true;
-			//if (part !== this.closestDetectedPart) return;
-			//this.closestDetectedPart = this.findClosestPart();
+			this.triggerDistanceListUpdate = part === this.closestDetectedPart;
 		});
 
 		this.onDescendantDestroyed(() => {
 			if (view) view.Transparency = 1;
+			this.allTouchedBlocks.clear();
 			this.disable();
 		});
 	}
