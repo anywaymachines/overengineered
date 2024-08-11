@@ -23,7 +23,7 @@ export class BadgeController extends HostedService {
 		this.event.subscribeCollectionAdded(PlayerWatcher.players, (player) => {
 			player.CharacterAdded.Once(() => {
 				try {
-					if ([2, 3].includes(player.GetRankInGroup(GameDefinitions.GROUP))) {
+					if (player.GetRankInGroup(GameDefinitions.GROUP) === 2) {
 						if (BadgeService.UserHasBadgeAsync(player.UserId, this.badges.PRE_BETA_2024)) return;
 
 						BadgeService.AwardBadge(player.UserId, this.badges.PRE_BETA_2024);
