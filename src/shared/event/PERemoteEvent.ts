@@ -42,8 +42,16 @@ abstract class PERemoveEvent<TEvent extends Instance> {
 			this.event.Name = Base64.Encode(
 				AES.Encrypt(
 					name,
-					(RunService.IsStudio() ? "0" : game.JobId)
-						.rep(math.ceil(128 / (RunService.IsStudio() ? "0" : game.JobId).size()))
+					(RunService.IsStudio() ? "0" : `${game.PlaceVersion}-${game.PlaceId}-${game.CreatorId}`)
+						.rep(
+							math.ceil(
+								128 /
+									(RunService.IsStudio()
+										? "0"
+										: `${game.PlaceVersion}-${game.PlaceId}-${game.CreatorId}`
+									).size(),
+							),
+						)
 						.sub(0, 128),
 				),
 			);
@@ -53,8 +61,16 @@ abstract class PERemoveEvent<TEvent extends Instance> {
 				Base64.Encode(
 					AES.Encrypt(
 						name,
-						(RunService.IsStudio() ? "0" : game.JobId)
-							.rep(math.ceil(128 / (RunService.IsStudio() ? "0" : game.JobId).size()))
+						(RunService.IsStudio() ? "0" : `${game.PlaceVersion}-${game.PlaceId}-${game.CreatorId}`)
+							.rep(
+								math.ceil(
+									128 /
+										(RunService.IsStudio()
+											? "0"
+											: `${game.PlaceVersion}-${game.PlaceId}-${game.CreatorId}`
+										).size(),
+								),
+							)
 							.sub(0, 128),
 					),
 				),
