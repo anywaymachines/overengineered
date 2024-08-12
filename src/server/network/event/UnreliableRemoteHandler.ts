@@ -1,5 +1,6 @@
 import { Players, RunService, Workspace } from "@rbxts/services";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
+import { ServerPlayers } from "server/ServerPlayers";
 import { BlockManager } from "shared/building/BlockManager";
 import { HostedService } from "shared/GameHost";
 import { RemoteEvents } from "shared/RemoteEvents";
@@ -47,7 +48,7 @@ export class UnreliableRemoteController extends HostedService {
 
 				task.spawn(() => {
 					for (const [player, blocks] of copy) {
-						const players = Players.GetPlayers().filter((p) => p !== player);
+						const players = ServerPlayers.GetLoadedPlayers().filter((p) => p !== player);
 						CustomRemotes.physics.normalizeRootparts.send(players, { parts: blocks });
 						impactSoundEffect.send(blocks[0], { blocks, index: undefined });
 

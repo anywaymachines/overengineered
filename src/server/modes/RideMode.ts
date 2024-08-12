@@ -1,5 +1,6 @@
 import { Players } from "@rbxts/services";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
+import { ServerPlayers } from "server/ServerPlayers";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
 import { CustomRemotes } from "shared/Remotes";
@@ -73,7 +74,7 @@ export class RideMode implements PlayModeBase {
 			}
 		}
 
-		const players = Players.GetPlayers().filter((p) => p !== owner);
+		const players = ServerPlayers.GetLoadedPlayers().filter((p) => p !== owner);
 		CustomRemotes.physics.normalizeRootparts.send(players, { parts: rootParts });
 	}
 

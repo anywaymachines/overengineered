@@ -117,6 +117,7 @@ export const CustomRemotes = {
 		save: new C2S2CRemoteFunction<PlayerSaveSlotRequest, SaveSlotResponse>("rs_save"),
 	},
 	player: {
+		loaded: new C2SRemoteEvent<undefined>("client_initialized"),
 		updateSettings: new C2SRemoteEvent<PlayerUpdateSettingsRequest>("pl_updsettings"),
 		fetchData: new C2S2CRemoteFunction<undefined, Response<PlayerDataResponse>>("pl_fetchdata"),
 	},

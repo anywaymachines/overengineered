@@ -10,6 +10,7 @@ import { ServerRestartController } from "client/ServerRestartController";
 import { Objects } from "shared/fixes/objects";
 import { Game } from "shared/GameHost";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { CustomRemotes } from "shared/Remotes";
 import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 
 LoadingController.show("Initializing");
@@ -54,6 +55,7 @@ AdminMessageController.initialize();
 ServerRestartController.initialize();
 
 LoadingController.hide();
+CustomRemotes.player.loaded.send();
 $log("Client loaded.");
 
 //testing
