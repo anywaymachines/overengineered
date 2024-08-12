@@ -92,6 +92,9 @@ const create = (program: ts.Program, context: ts.TransformationContext) => {
 				if (node.expression.text === "$trace") {
 					return constructLog(node, "trace");
 				}
+				if (node.expression.text === "$debug") {
+					return constructLog(node, "debug");
+				}
 				if (node.expression.text === "$log") {
 					return constructLog(node, "info");
 				}

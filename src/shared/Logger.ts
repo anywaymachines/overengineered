@@ -5,6 +5,7 @@ import { Objects } from "shared/fixes/objects";
 
 declare global {
 	function $trace(...args: unknown[]): void;
+	function $debug(...args: unknown[]): void;
 	function $log(...args: unknown[]): void;
 	function $err(...args: unknown[]): void;
 	function $warn(...args: unknown[]): void;
@@ -23,6 +24,10 @@ type LogLevel = {
 const lvls = {
 	trace: {
 		name: "TRC",
+		print,
+	},
+	debug: {
+		name: "DBG",
 		print,
 	},
 	info: {
@@ -55,6 +60,9 @@ export namespace Logger {
 	export const enabledLevels = new ComponentDisabler(Objects.values(levels));
 	if ((true as boolean) || !RunService.IsStudio()) {
 		enabledLevels.setDisabled(levels.trace);
+	}
+	if (!RunService.IsStudio()) {
+		enabledLevels.setDisabled(levels.debug);
 	}
 
 	const scopeStack: string[] = [];
@@ -94,6 +102,9 @@ export namespace Logger {
 	export function trace(...args: unknown[]) {
 		log(levels.trace, ...args);
 	}
+	export function debug(...args: unknown[]) {
+		log(levels.debug, ...args);
+	}
 	export function info(...args: unknown[]) {
 		log(levels.info, ...args);
 	}
@@ -115,6 +126,10 @@ export namespace Logger {
 	/** @deprecated For internal usage */
 	export function _trace(additional: string, ...args: unknown[]) {
 		trace(...addAdditional(additional, ...args));
+	}
+	/** @deprecated For internal usage */
+	export function _debug(additional: string, ...args: unknown[]) {
+		debug(...addAdditional(additional, ...args));
 	}
 	/** @deprecated For internal usage */
 	export function _info(additional: string, ...args: unknown[]) {
