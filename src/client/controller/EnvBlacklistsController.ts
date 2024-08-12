@@ -12,11 +12,17 @@ export class EnvBlacklistsController extends Component {
 			if (data.isBanned && !this.blacklistInstances.has(data.plot)) {
 				const shadowPart = new Instance("Part");
 				shadowPart.Anchored = true;
+				shadowPart.CastShadow = false;
 				shadowPart.Size = new Vector3(data.plot.Size.X, 200, data.plot.Size.Z);
 				shadowPart.Position = data.plot.Position.add(new Vector3(0, 100, 0));
 				shadowPart.Color = new Color3(0.15, 0.15, 0.15);
-				shadowPart.Parent = Workspace;
+				shadowPart.Parent = Workspace.FindFirstChild("Obstacles");
+
 				this.blacklistInstances.set(data.plot, shadowPart);
+
+				// shadowPart.Touched.Connect((hit) => {
+				// 	// TODO: Teleport away blocks of player and player
+				// });
 			} else if (!data.isBanned && this.blacklistInstances.has(data.plot)) {
 				const shadowPart = this.blacklistInstances.get(data.plot)!;
 				this.blacklistInstances.delete(data.plot);
