@@ -6,7 +6,7 @@ export namespace Instances {
 	export function waitForChild<T = Instance>(object: Instance, ...path: string[]): T {
 		let ret: Instance = object;
 		for (const part of path) {
-			ret = object.WaitForChild(part);
+			ret = ret.WaitForChild(part);
 		}
 
 		return ret as T;
