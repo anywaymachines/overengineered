@@ -50,11 +50,11 @@ export namespace _Tests {
 			});
 
 			test("should set enabled and disabled items", () => {
-				disabler.setEnabled("item1", "item2");
+				disabler.enableOnly("item1", "item2");
 				expect(disabler.enabled.get()).toEqual(["item1", "item2"]);
 				expect(disabler.disabled.get()).toEqual(["item3"]);
 
-				disabler.setDisabled("item1", "item2");
+				disabler.enableOnly("item1", "item2");
 				expect(disabler.enabled.get()).toEqual(["item3"]);
 				expect(disabler.disabled.get()).toEqual(["item1", "item2"]);
 			});

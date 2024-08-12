@@ -136,6 +136,9 @@ export const CustomRemotes = {
 			teleportOnSeat: new C2SRemoteEvent("mdr_seat"),
 		},
 	},
+	admin: {
+		setSwitch: new C2S2CRemoteFunction<{ readonly name: string; readonly value: boolean }>("adm_setsw"),
+	},
 	getGameInfo: new C2S2CRemoteFunction<undefined, Response<GameInfo>>("getgameinfo"),
 } as const;
 export const Remotes = Definitions.Create({

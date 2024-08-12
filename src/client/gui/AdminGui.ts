@@ -99,7 +99,7 @@ export class AdminGui extends HostedService {
 				wrapNonVisual(
 					"Switches",
 					asObject(
-						asMap(Switches).mapToMap((k, v) =>
+						Switches.registered.mapToMap((k, v) =>
 							$tuple(k + " " + (v.get() ? "+" : "-"), (di: DIContainer, btn: TextButtonControl) => {
 								v.set(!v.get());
 								btn.text.set(k + " " + (v.get() ? "+" : "-"));

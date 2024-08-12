@@ -22,6 +22,12 @@ export class ComponentDisabler<TItem extends defined> {
 		return !this.isEnabled(item);
 	}
 
+	/** Enable/disable items */
+	set(enabled: boolean, ...items: readonly TItem[]) {
+		if (enabled) this.enable(...items);
+		else this.disable(...items);
+	}
+
 	enableAll() {
 		this._enabled.set(this.allItems);
 	}
@@ -43,10 +49,10 @@ export class ComponentDisabler<TItem extends defined> {
 		this.setDisabled(...items);
 	}
 
-	setEnabled(...items: readonly TItem[]) {
-		this._enabled.set(items);
+	private setEnabled(...items: readonly TItem[]) {
+		this._enabled.set([...new Set(items)]);
 	}
-	setDisabled(...items: readonly TItem[]) {
+	private setDisabled(...items: readonly TItem[]) {
 		this._enabled.set(this.allItems.filter((item) => !items.includes(item)));
 	}
 }

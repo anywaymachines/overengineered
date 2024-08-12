@@ -1,7 +1,9 @@
 import { RunService } from "@rbxts/services";
 import { ComponentDisabler } from "shared/component/ComponentDisabler";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import { ObservableValue } from "shared/event/ObservableValue";
 import { Objects } from "shared/fixes/objects";
+import { Switches } from "shared/Switches";
 
 declare global {
 	function $trace(...args: unknown[]): void;
@@ -58,11 +60,15 @@ const lvls = {
 export namespace Logger {
 	export const levels = lvls;
 	export const enabledLevels = new ComponentDisabler(Objects.values(levels));
-	if ((true as boolean) || !RunService.IsStudio()) {
-		enabledLevels.setDisabled(levels.trace);
-	}
-	if (!RunService.IsStudio()) {
-		enabledLevels.setDisabled(levels.debug);
+
+	{
+		const logDebug = new ObservableValue(RunService.IsStudio());
+		logDebug.subscribe((enabled) => enabledLevels.set(enabled, levels.debug), true);
+		Switches.register("logDebug", logDebug);
+
+		const logTrace = new ObservableValue(false);
+		logTrace.subscribe((enabled) => enabledLevels.set(enabled, levels.trace), true);
+		Switches.register("logTrace", logTrace);
 	}
 
 	const scopeStack: string[] = [];
