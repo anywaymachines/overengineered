@@ -2,9 +2,15 @@ import { Element } from "shared/Element";
 import { Objects } from "shared/fixes/objects";
 import { Throttler } from "shared/Throttler";
 
+type DbStoredValue<T> = {
+	value: T;
+	changed: boolean;
+	lastAccessedTime: number;
+	lastSaveTime: number;
+};
 export abstract class DbBase<T> {
 	private readonly datastore;
-	private readonly cache: Record<string, { changed: boolean; value: T }> = {};
+	private readonly cache: { [k in string]: DbStoredValue<T> } = {};
 	private readonly currentlyLoading: Record<string, Promise<T>> = {};
 
 	constructor(datastore: DataStore | undefined) {
@@ -16,6 +22,35 @@ export abstract class DbBase<T> {
 			this.saveChanged();
 			this.freeAll();
 		});
+
+		task.spawn(() => {
+			const freeTimeoutSec = 5 * 60;
+			const saveTimeoutSec = 9 * 60;
+			$debug(`Initializing db ${this} cache auto-freeing after ${freeTimeoutSec} sec of inactivity`);
+			$debug(`Initializing db ${this} cache auto-saving with the interval of ${saveTimeoutSec} sec`);
+
+			while (true as boolean) {
+				task.wait(1);
+
+				const freeTimeCutoff = os.time() - freeTimeoutSec;
+				const saveTimeCutoff = os.time() - saveTimeoutSec;
+
+				for (const [key, item] of [...asMap(this.cache)]) {
+					if (item.lastAccessedTime < freeTimeCutoff) {
+						$debug(`Freeing db ${this} key ${key} after ${freeTimeoutSec} sec of inactivity`);
+
+						this.save(key);
+						this.free(key);
+						continue;
+					}
+
+					if (item.lastSaveTime < saveTimeCutoff) {
+						$debug(`Auto-saving db ${this} key ${key} after ${saveTimeoutSec} sec`);
+						this.save(key);
+					}
+				}
+			}
+		});
 	}
 
 	protected abstract createDefault(): T;
@@ -24,7 +59,10 @@ export abstract class DbBase<T> {
 
 	get(key: string): T {
 		if (key in this.cache) {
-			return this.cache[key].value;
+			const value = this.cache[key];
+			value.lastAccessedTime = os.time();
+
+			return value.value;
 		}
 
 		if (key in this.currentlyLoading) {
@@ -47,12 +85,26 @@ export abstract class DbBase<T> {
 	}
 
 	set(key: string, value: T) {
-		this.cache[key] = { changed: true, value };
+		const time = os.time();
+		this.cache[key] = {
+			changed: true,
+			lastAccessedTime: time,
+			value,
+			lastSaveTime: time,
+		};
 	}
 
 	private readonly getOptions = Element.create("DataStoreGetOptions", { UseCache: false });
-	private load(key: string) {
-		if (!this.datastore) return { changed: false, value: this.createDefault() };
+	private load(key: string): DbStoredValue<T> {
+		if (!this.datastore) {
+			const time = os.time();
+			return {
+				value: this.createDefault(),
+				changed: false,
+				lastAccessedTime: time,
+				lastSaveTime: time,
+			};
+		}
 
 		const req = Throttler.retryOnFail<string | undefined>(
 			10,
@@ -62,13 +114,25 @@ export abstract class DbBase<T> {
 
 		if (req.success) {
 			if (req.message !== undefined) {
-				return (this.cache[key] = { changed: false, value: this.deserialize(req.message) });
+				const time = os.time();
+				return (this.cache[key] = {
+					value: this.deserialize(req.message),
+					changed: false,
+					lastAccessedTime: time,
+					lastSaveTime: time,
+				});
 			}
 		} else {
 			$err(req.error_message);
 		}
 
-		return { changed: false, value: this.createDefault() };
+		const time = os.time();
+		return {
+			value: this.createDefault(),
+			changed: false,
+			lastAccessedTime: time,
+			lastSaveTime: time,
+		};
 	}
 
 	loadedUnsavedEntries() {
@@ -90,7 +154,10 @@ export abstract class DbBase<T> {
 	/** Saves an entry if it's not changed */
 	save(key: string) {
 		const value = this.cache[key];
-		if (!value || !value.changed) return;
+		if (!value) return;
+
+		value.lastSaveTime = os.time();
+		if (!value.changed) return;
 
 		// delay between saves?
 		value.changed = false;
