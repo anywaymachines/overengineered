@@ -58,6 +58,10 @@ declare global {
 	type NormalizeRootpartsRequest = {
 		readonly parts: BasePart[];
 	};
+	type EnvironmentBlacklistRequest = {
+		readonly isBanned: boolean;
+		readonly plot: BasePart;
+	};
 	type ConfigUpdateRequest = {
 		readonly plot: PlotModel;
 		readonly configs: readonly {
@@ -120,6 +124,9 @@ export const CustomRemotes = {
 		loaded: new C2SRemoteEvent<undefined>("client_initialized"),
 		updateSettings: new C2SRemoteEvent<PlayerUpdateSettingsRequest>("pl_updsettings"),
 		fetchData: new C2S2CRemoteFunction<undefined, Response<PlayerDataResponse>>("pl_fetchdata"),
+	},
+	environment: {
+		blacklistUpdate: new S2CRemoteEvent<EnvironmentBlacklistRequest>("env_blacklist_update"),
 	},
 	gui: {
 		settings: {
