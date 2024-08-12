@@ -200,7 +200,9 @@ export class SharedMachine extends ContainerComponent {
 		this.event.subscribe(RunService.Heartbeat, () => {
 			for (const group of order) {
 				for (const block of group) {
-					block.tick(tick);
+					if (block.isEnabled()) {
+						block.tick(tick);
+					}
 				}
 			}
 
