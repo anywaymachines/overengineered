@@ -15,14 +15,37 @@ export type NewSettingsPopupDefinition = GuiObject & {
 	};
 };
 
+type ToggleRow = Frame & {
+	readonly Toggle: TextButton & {
+		readonly Circle: TextButton;
+	};
+};
+
+type SliderRow = Frame & {
+	readonly SliderControl: Frame & {
+		readonly Filled: Frame;
+		readonly Knob: Frame;
+	};
+	readonly ManualControl: TextBox;
+};
+
 export type NewSettingsScenes = {
 	readonly Main: Frame & {};
 	readonly Permissions: Frame & {
 		readonly Blacklist: PlayerSelectorColumnControlDefinition;
-		readonly IsolationMode: Frame & {
-			readonly Toggle: TextButton & {
-				readonly Circle: TextButton;
-			};
+		readonly IsolationMode: ToggleRow;
+	};
+	readonly Graphics: Frame & {
+		readonly Effects: Frame & {
+			readonly LocalShadows: ToggleRow;
+			readonly OthersShadows: ToggleRow;
+			readonly OthersEffects: ToggleRow;
+		};
+		readonly Camera: Frame & {
+			readonly Improved: ToggleRow;
+			readonly PlayerCentered: ToggleRow;
+			readonly Strict: ToggleRow;
+			readonly FieldOfView: SliderRow;
 		};
 	};
 };
@@ -31,6 +54,8 @@ type Scenes = keyof NewSettingsScenes;
 
 @injectable
 export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
+	private readonly plot;
+
 	static addAsService(host: GameHostBuilder) {
 		const gui = Gui.getGameUI<{ Popup: { Crossplatform: { Settings: NewSettingsPopupDefinition } } }>().Popup
 			.Crossplatform.Settings;
@@ -39,30 +64,51 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 
 	constructor(gui: NewSettingsPopupDefinition, @inject plot: SharedPlot) {
 		super(gui);
+
+		this.plot = plot;
+
 		this.setScene("Main");
+	}
 
-		const blacklistedPlayers = plot.blacklistedPlayers.get() ?? [];
-		const blacklist = new PlayerSelectorColumnControl(this.gui.Content.Permissions.Blacklist, blacklistedPlayers);
-		const isolationMode = new ToggleControl(this.gui.Content.Permissions.IsolationMode.Toggle);
-		isolationMode.value.set(plot.isolationMode.get() ?? false);
+	loadScene(scene: Scenes) {
+		this.clear();
+		this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
 
-		blacklist.submitted.Connect((players) => {
-			CustomRemotes.gui.settings.permissions.updateBlacklist.send(players);
-		});
+		if (scene === "Main") {
+			// TODO: make this scene
+		}
 
-		isolationMode.value.changed.Connect((value) => {
-			if (value) {
-				blacklist.hide();
-			} else {
-				blacklist.show();
-			}
+		if (scene === "Permissions") {
+			const blacklistedPlayers = this.plot.blacklistedPlayers.get() ?? [];
+			const blacklist = new PlayerSelectorColumnControl(
+				this.gui.Content.Permissions.Blacklist,
+				blacklistedPlayers,
+			);
+			const isolationMode = new ToggleControl(this.gui.Content.Permissions.IsolationMode.Toggle);
+			isolationMode.value.set(this.plot.isolationMode.get() ?? false);
 
-			CustomRemotes.gui.settings.permissions.isolationMode.send(value);
-		});
+			blacklist.submitted.Connect((players) => {
+				CustomRemotes.gui.settings.permissions.updateBlacklist.send(players);
+			});
 
-		this.add(blacklist);
-		this.add(isolationMode);
-		this.add(new ButtonControl(gui.Heading.CloseButton, () => this.hide()));
+			isolationMode.value.changed.Connect((value) => {
+				if (value) {
+					blacklist.hide();
+				} else {
+					blacklist.show();
+				}
+
+				CustomRemotes.gui.settings.permissions.isolationMode.send(value);
+			});
+
+			this.add(blacklist);
+			this.add(isolationMode);
+			return;
+		}
+
+		if (scene === "Graphics") {
+			// TODO: make this scene
+		}
 	}
 
 	setScene(scene: Scenes) {
@@ -73,5 +119,7 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 		}
 
 		this.gui.Content[scene].Visible = true;
+
+		this.loadScene(scene);
 	}
 }
