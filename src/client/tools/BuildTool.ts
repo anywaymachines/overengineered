@@ -25,10 +25,12 @@ import { ComponentChild } from "shared/component/ComponentChild";
 import { InstanceComponent } from "shared/component/InstanceComponent";
 import { ObjectOverlayStorage } from "shared/component/ObjectOverlayStorage";
 import { TransformService } from "shared/component/TransformService";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { Element } from "shared/Element";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { AABB } from "shared/fixes/AABB";
 import { BB } from "shared/fixes/BB";
+import { Marketplace } from "shared/Marketplace";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { BlockSelectionControlDefinition } from "client/gui/buildmode/BlockSelection";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
@@ -1261,7 +1263,16 @@ export class BuildTool extends ToolBase {
 		const block = this.blockRegistry.blocks.get(id)!;
 
 		this.selectedBlock.set(block);
-		this.selectedMaterial.set(BlockManager.manager.material.get(model));
+
+		let material = BlockManager.manager.material.get(model);
+		if (
+			material === Enum.Material.Neon &&
+			!Marketplace.Gamepass.has(Players.LocalPlayer, GameDefinitions.GAMEPASSES.NeonMaterial)
+		) {
+			material = Enum.Material.Plastic;
+		}
+		this.selectedMaterial.set(material);
+
 		this.selectedColor.set(BlockManager.manager.color.get(model));
 
 		if (!target.IsDescendantOf(this.targetPlot.get().instance)) {

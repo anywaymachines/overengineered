@@ -1,3 +1,4 @@
+import { Players } from "@rbxts/services";
 import { ColorChooser } from "client/gui/ColorChooser";
 import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
@@ -6,7 +7,9 @@ import { TextButtonControl } from "client/gui/controls/Button";
 import { MaterialChooser } from "client/gui/MaterialChooser";
 import { ObjectOverlayStorage } from "shared/component/ObjectOverlayStorage";
 import { TransformService } from "shared/component/TransformService";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { SubmittableValue } from "shared/event/SubmittableValue";
+import { Marketplace } from "shared/Marketplace";
 import type { ColorChooserDefinition } from "client/gui/ColorChooser";
 import type { ButtonControl, TextButtonDefinition } from "client/gui/controls/Button";
 import type { MaterialChooserDefinition } from "client/gui/MaterialChooser";
@@ -155,7 +158,16 @@ export class MaterialColorEditControl extends Control<MaterialColorEditControlDe
 		initVisibilityAnimation(colorbtn, "Color");
 
 		this.materialPipette = this.add(
-			BlockPipetteButton.forMaterial(this.gui.Material.Header.Pipette, (m) => materialv.submit(m)),
+			BlockPipetteButton.forMaterial(this.gui.Material.Header.Pipette, (m) => {
+				if (
+					m === Enum.Material.Neon &&
+					!Marketplace.Gamepass.has(Players.LocalPlayer, GameDefinitions.GAMEPASSES.NeonMaterial)
+				) {
+					m = Enum.Material.Plastic;
+				}
+
+				materialv.submit(m);
+			}),
 		);
 		this.colorPipette = this.add(
 			BlockPipetteButton.forColor(this.gui.Color.Header.Pipette, (c) => colorv.submit(c)),

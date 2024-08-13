@@ -1,3 +1,4 @@
+import { Players } from "@rbxts/services";
 import { ClientComponent } from "client/component/ClientComponent";
 import { LocalPlayer } from "client/controller/LocalPlayer";
 import { MaterialColorEditControl } from "client/gui/buildmode/MaterialColorEditControl";
@@ -10,7 +11,9 @@ import { MultiBlockSelector } from "client/tools/highlighters/MultiBlockSelector
 import { ToolBase } from "client/tools/ToolBase";
 import { BlockManager } from "shared/building/BlockManager";
 import { TransformService } from "shared/component/TransformService";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ObservableValue } from "shared/event/ObservableValue";
+import { Marketplace } from "shared/Marketplace";
 import type { MaterialColorEditControlDefinition } from "client/gui/buildmode/MaterialColorEditControl";
 import type { ButtonDefinition } from "client/gui/controls/Button";
 import type { ToggleControlDefinition } from "client/gui/controls/ToggleControl";
@@ -111,10 +114,18 @@ class Controller extends ClientComponent {
 			ih.onMouse3Down(() => {
 				if (Gui.isCursorOnVisibleGui()) return;
 
-				const [material, color] = this.pick();
+				// eslint-disable-next-line prefer-const
+				let [material, color] = this.pick();
 				if (!material || !color) return;
 
+				if (
+					material === Enum.Material.Neon &&
+					!Marketplace.Gamepass.has(Players.LocalPlayer, GameDefinitions.GAMEPASSES.NeonMaterial)
+				) {
+					material = Enum.Material.Plastic;
+				}
 				tool.selectedMaterial.set(material);
+
 				tool.selectedColor.set(color);
 			}, false);
 		});
