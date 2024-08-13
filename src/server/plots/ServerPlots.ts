@@ -62,6 +62,7 @@ class ServerPlotController extends HostedService {
 			this.plot.ownerId.set(undefined);
 			this.plot.whitelistedPlayers.set([5243461283]);
 			this.plot.blacklistedPlayers.set(undefined);
+			this.plot.isolationMode.set(undefined);
 
 			this.blocks.unparent();
 			task.delay(1, () => this.blocks.destroy());
@@ -123,11 +124,18 @@ export class ServerPlots extends HostedService {
 			true,
 		);
 
-		this.event.subscribe(CustomRemotes.gui.settings.updateBlacklist.invoked, (player, newBlacklist) => {
+		this.event.subscribe(CustomRemotes.gui.settings.permissions.updateBlacklist.invoked, (player, newBlacklist) => {
 			const plot = this.tryGetControllerByPlayer(player);
 			if (!plot) throw "what";
 
 			plot.plot.blacklistedPlayers.set(newBlacklist);
+		});
+
+		this.event.subscribe(CustomRemotes.gui.settings.permissions.isolationMode.invoked, (player, state) => {
+			const plot = this.tryGetControllerByPlayer(player);
+			if (!plot) throw "what";
+
+			plot.plot.isolationMode.set(state);
 		});
 
 		game.BindToClose(() => {

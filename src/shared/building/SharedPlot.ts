@@ -28,6 +28,7 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	readonly ownerId;
 	readonly whitelistedPlayers;
 	readonly blacklistedPlayers;
+	readonly isolationMode;
 	readonly bounds: BB;
 
 	readonly origin: CFrame;
@@ -46,8 +47,10 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 		this.ownerId = this.event.observableFromAttribute<number>(instance, "ownerid");
 		this.whitelistedPlayers = this.event.observableFromAttributeJson<readonly number[]>(instance, "whitelisted");
 		this.blacklistedPlayers = this.event.observableFromAttributeJson<readonly number[]>(instance, "blacklisted");
+		this.isolationMode = this.event.observableFromAttribute<boolean>(instance, "isolation");
 		this.whitelistedPlayers.set([5243461283]);
 		this.blacklistedPlayers.set(undefined);
+		this.isolationMode.set(undefined);
 		this.bounds = getPlotBuildingRegion(instance);
 		this.origin = this.getCenter();
 		this.boundingBox = this.bounds;
@@ -108,5 +111,9 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 	/** Is player allowed to build on this plot */
 	isBuildingAllowed(player: Player): boolean {
 		return this.ownerId.get() === player.UserId || this.whitelistedPlayers.get()?.includes(player.UserId) === true;
+	}
+
+	isBlacklisted(player: Player): boolean {
+		return this.isolationMode.get() === true || this.blacklistedPlayers.get()?.includes(player.UserId) === true;
 	}
 }

@@ -62,23 +62,15 @@ export class EnvBlacklistsController extends Component {
 				(blacklist) => {
 					if (!blacklist) return;
 
-					update(plot.instance.BuildingArea, blacklist.includes(Players.LocalPlayer.UserId));
+					update(plot.instance.BuildingArea, plot.isBlacklisted(Players.LocalPlayer));
+				},
+				true,
+			);
 
-					// const oldBlacklist = plot.plot.blacklistedPlayers.get() ?? [];
-					// const diff = [
-					// 	...oldBlacklist.filter((value) => !newBlacklist.includes(value)),
-					// 	...newBlacklist.filter((value) => !oldBlacklist.includes(value)),
-					// ];
-
-					// for (const userId of diff) {
-					// 	const plr = Players.GetPlayerByUserId(userId);
-					// 	if (!plr) continue;
-
-					// 	CustomRemotes.environment.blacklistUpdate.send(plr, {
-					// 		isBanned: newBlacklist.includes(userId),
-					// 		plot: plot.plot.instance.BuildingArea,
-					// 	});
-					// }
+			this.event.subscribeObservable(
+				plot.isolationMode,
+				(value) => {
+					update(plot.instance.BuildingArea, plot.isBlacklisted(Players.LocalPlayer));
 				},
 				true,
 			);

@@ -127,7 +127,10 @@ export const CustomRemotes = {
 	},
 	gui: {
 		settings: {
-			updateBlacklist: new C2SRemoteEvent<readonly number[]>("gui_settings_updateblacklist"),
+			permissions: {
+				isolationMode: new C2SRemoteEvent<boolean>("gui_settings_isolation"),
+				updateBlacklist: new C2SRemoteEvent<readonly number[]>("gui_settings_updateblacklist"),
+			},
 		},
 	},
 	modes: {

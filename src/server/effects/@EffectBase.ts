@@ -31,7 +31,7 @@ abstract class ServerEffectBase<T> {
 
 		if (owner) {
 			const plot = this.plots.getPlotComponentByOwnerID(player.UserId);
-			if (plot.blacklistedPlayers.get()?.includes(owner.UserId)) {
+			if (plot.isBlacklisted(owner)) {
 				return false;
 			}
 		}
