@@ -1,8 +1,11 @@
-import { ButtonControl } from "client/gui/controls/Button";
+import { Colors } from "client/gui/Colors";
+import { ButtonControl, TextButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
 import { MultiPlayerConfigControl } from "client/gui/PlayerConfigControls";
 import { Popup } from "client/gui/Popup";
 import { PlayerConfigDefinition } from "shared/config/PlayerConfig";
+import type { TextButtonDefinition } from "client/gui/controls/Button";
+import type { NewSettingsPopup } from "client/gui/popup/NewSettingsPopup";
 import type { PlayerDataStorage } from "client/PlayerDataStorage";
 
 export type ConfigPartDefinition<T extends GuiObject> = GuiObject & {
@@ -47,7 +50,25 @@ export class SettingsPopup extends Popup<SettingsPopupDefinition> {
 
 		this.event.subscribeObservable(
 			playerData.config,
-			(config) => this.config.set(config, PlayerConfigDefinition),
+			(config) => {
+				this.config.set(config, PlayerConfigDefinition);
+
+				const btn = this.config.add(
+					new TextButtonControl(
+						Gui.getGameUI<{ Templates: { Button: TextButtonDefinition } }>().Templates.Button.Clone(),
+						() => {
+							const popup = di.resolve<NewSettingsPopup>();
+							popup.setScene("Permissions");
+							popup.show();
+							this.hide();
+						},
+					),
+				);
+				btn.instance.LayoutOrder = 0;
+				btn.instance.BackgroundColor3 = Colors.accentDark;
+				btn.instance.Size = new UDim2(new UDim(1, 0), btn.instance.Size.Y);
+				btn.text.set("Permissions");
+			},
 			true,
 		);
 	}

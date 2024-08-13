@@ -50,7 +50,10 @@ export class BidirectionalRemoteEvent<TArg = undefined> {
 	readonly s2c;
 	readonly c2s;
 
-	constructor(name: string, eventType: CreatableRemoteEvents = "RemoteEvent") {
+	constructor(
+		readonly name: string,
+		eventType: CreatableRemoteEvents = "RemoteEvent",
+	) {
 		this.s2c = new S2CRemoteEvent<TArg>(name + "_s2c", eventType);
 		this.c2s = new C2SRemoteEvent<TArg>(name + "_c2s", eventType);
 	}

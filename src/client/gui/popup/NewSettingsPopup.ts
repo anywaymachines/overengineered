@@ -4,6 +4,7 @@ import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerSelectorColumnControlDefinition } from "client/gui/controls/PlayerSelectorListControl";
+import type { SharedPlot } from "shared/building/SharedPlot";
 
 export type NewSettingsPopupDefinition = GuiObject & {
 	readonly Content: ScrollingFrame & NewSettingsScenes;
@@ -22,6 +23,7 @@ export type NewSettingsScenes = {
 
 type Scenes = keyof NewSettingsScenes;
 
+@injectable
 export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 	static addAsService(host: GameHostBuilder) {
 		const gui = Gui.getGameUI<{ Popup: { Crossplatform: { Settings: NewSettingsPopupDefinition } } }>().Popup
@@ -29,16 +31,12 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
 	}
 
-	constructor(gui: NewSettingsPopupDefinition, startingScene?: Scenes) {
+	constructor(gui: NewSettingsPopupDefinition, @inject plot: SharedPlot) {
 		super(gui);
+		this.setScene("Main");
 
-		this.setScene(startingScene ?? "Permissions");
-
-		const blacklistedPlayers = CustomRemotes.gui.settings.getBlacklist.send(undefined);
-		const blacklist = new PlayerSelectorColumnControl(
-			this.gui.Content.Permissions.Blacklist,
-			blacklistedPlayers.success ? blacklistedPlayers.players : [],
-		);
+		const blacklistedPlayers = plot.blacklistedPlayers.get() ?? [];
+		const blacklist = new PlayerSelectorColumnControl(this.gui.Content.Permissions.Blacklist, blacklistedPlayers);
 
 		blacklist.submitted.Connect((players) => {
 			CustomRemotes.gui.settings.updateBlacklist.send(players);

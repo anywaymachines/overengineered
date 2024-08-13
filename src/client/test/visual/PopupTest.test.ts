@@ -98,7 +98,13 @@ export const _Tests = (di: DIContainer) => {
 					Text: "New Settings",
 					Size: new UDim2(0, 200, 0, 30),
 				})
-					.with((b) => b.activated.Connect(() => di.resolve<NewSettingsPopup>().show()))
+					.with((b) =>
+						b.activated.Connect(() => {
+							const popup = di.resolve<NewSettingsPopup>();
+							popup.setScene("Permissions");
+							popup.show();
+						}),
+					)
 					.with((b) => b.enable()).instance,
 			},
 		),

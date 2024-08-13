@@ -1,8 +1,9 @@
-import { Players } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { DictionaryControl } from "client/gui/controls/DictionaryControl";
 import { TransformService } from "shared/component/TransformService";
+import { GameDefinitions } from "shared/data/GameDefinitions";
 import { ArgsSignal } from "shared/event/Signal";
 
 type FakePlayer = {
@@ -81,9 +82,9 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 			this.addPlayer(player);
 		}
 	}
-	private addPlayer(player: Player) {
+	private addPlayer(player: FakePlayer | Player) {
 		if (player === Players.LocalPlayer) return;
-		// if (!RunService.IsStudio() && GameDefinitions.isAdmin(player)) return;
+		if (!RunService.IsStudio() && typeIs(player, "Instance") && GameDefinitions.isAdmin(player)) return;
 
 		const control = new PlayerContainer(this.playerTemplate(), player);
 
@@ -98,15 +99,17 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 					.then()
 					.func(() => (instance.Visible = true))
 					.transform("BackgroundTransparency", 0, TransformService.commonProps.quadOut02)
-					.moveRelative(new UDim2(0, 50, 0, 0), TransformService.commonProps.quadOut02),
+					.moveRelative(new UDim2(0, 50, 0, 0), TransformService.commonProps.quadOut02)
+					.then()
+					.func(() => {
+						control.clicked.Connect(() => {
+							this.addedPlayers.add(player.UserId);
+							this.removePlayer(player);
+							this.addPlayer(player);
+							this.submitted.Fire([...this.addedPlayers]);
+						});
+					}),
 			);
-
-			control.clicked.Connect(() => {
-				this.addedPlayers.add(player.UserId);
-				this.removePlayer(player);
-				this.addPlayer(player);
-				this.submitted.Fire([...this.addedPlayers]);
-			});
 		} else {
 			this.rightControl.keyedChildren.add(player, control);
 			TransformService.run(control.instance.TextButton, (tr, instance) =>
@@ -118,20 +121,25 @@ export class PlayerSelectorColumnControl extends Control<PlayerSelectorColumnCon
 					.then()
 					.func(() => (instance.Visible = true))
 					.transform("BackgroundTransparency", 0, TransformService.commonProps.quadOut02)
-					.moveRelative(new UDim2(0, -50, 0, 0), TransformService.commonProps.quadOut02),
+					.moveRelative(new UDim2(0, -50, 0, 0), TransformService.commonProps.quadOut02)
+					.then()
+					.func(() => {
+						control.clicked.Connect(() => {
+							this.addedPlayers.delete(player.UserId);
+							this.removePlayer(player);
+							this.addPlayer(player);
+							this.submitted.Fire([...this.addedPlayers]);
+						});
+					}),
 			);
-
-			control.clicked.Connect(() => {
-				this.addedPlayers.delete(player.UserId);
-				this.removePlayer(player);
-				this.addPlayer(player);
-				this.submitted.Fire([...this.addedPlayers]);
-			});
 		}
 	}
-	private removePlayer(player: Player) {
+	private removePlayer(player: FakePlayer) {
 		const control = this.leftControl.keyedChildren.get(player) ?? this.rightControl.keyedChildren.get(player);
 		if (!control) return;
+
+		control.disable();
+		control.instance.Interactable = false;
 
 		if (this.leftControl.keyedChildren.get(player)) {
 			TransformService.run(control.instance.TextButton.TitleLabel, (tr) =>

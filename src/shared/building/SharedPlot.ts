@@ -47,6 +47,7 @@ export class SharedPlot extends InstanceComponent<PlotModel> {
 		this.whitelistedPlayers = this.event.observableFromAttributeJson<readonly number[]>(instance, "whitelisted");
 		this.blacklistedPlayers = this.event.observableFromAttributeJson<readonly number[]>(instance, "blacklisted");
 		this.whitelistedPlayers.set([5243461283]);
+		this.blacklistedPlayers.set(undefined);
 		this.bounds = getPlotBuildingRegion(instance);
 		this.origin = this.getCenter();
 		this.boundingBox = this.bounds;

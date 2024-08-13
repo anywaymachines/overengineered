@@ -125,15 +125,9 @@ export const CustomRemotes = {
 		updateSettings: new C2SRemoteEvent<PlayerUpdateSettingsRequest>("pl_updsettings"),
 		fetchData: new C2S2CRemoteFunction<undefined, Response<PlayerDataResponse>>("pl_fetchdata"),
 	},
-	environment: {
-		blacklistUpdate: new S2CRemoteEvent<EnvironmentBlacklistRequest>("env_blacklist_update"),
-	},
 	gui: {
 		settings: {
 			updateBlacklist: new C2SRemoteEvent<readonly number[]>("gui_settings_updateblacklist"),
-			getBlacklist: new C2S2CRemoteFunction<undefined, Response<GuiSettingsPermissionsGetBlacklist>>(
-				"gui_settings_getblacklist",
-			),
 		},
 	},
 	modes: {

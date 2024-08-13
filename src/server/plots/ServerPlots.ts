@@ -1,6 +1,5 @@
 import { Players } from "@rbxts/services";
 import { PlotsFloatingImageController } from "server/plots/PlotsFloatingImageController";
-import { ServerPlayers } from "server/ServerPlayers";
 import { BuildingPlot } from "shared/building/BuildingPlot";
 import { AutoPlotWelder } from "shared/building/PlotWelder";
 import { Element } from "shared/Element";
@@ -124,52 +123,11 @@ export class ServerPlots extends HostedService {
 			true,
 		);
 
-		ServerPlayers.PlayerLoaded.Connect((newPlayer) => {
-			for (const player of ServerPlayers.GetLoadedPlayers()) {
-				const controller = this.tryGetControllerByPlayer(player);
-				if (!controller) continue;
-
-				if (controller.plot.blacklistedPlayers.get()?.includes(newPlayer.UserId)) {
-					CustomRemotes.environment.blacklistUpdate.send(newPlayer, {
-						isBanned: true,
-						plot: controller.plot.instance.BuildingArea,
-					});
-				}
-			}
-		});
-
-		CustomRemotes.gui.settings.updateBlacklist.invoked.Connect((player, newBlacklist) => {
+		this.event.subscribe(CustomRemotes.gui.settings.updateBlacklist.invoked, (player, newBlacklist) => {
 			const plot = this.tryGetControllerByPlayer(player);
 			if (!plot) throw "what";
 
-			const oldBlacklist = plot.plot.blacklistedPlayers.get() ?? [];
-			const diff = [
-				...oldBlacklist.filter((value) => !newBlacklist.includes(value)),
-				...newBlacklist.filter((value) => !oldBlacklist.includes(value)),
-			];
-
-			for (const userId of diff) {
-				const plr = Players.GetPlayerByUserId(userId);
-				if (!plr) continue;
-
-				CustomRemotes.environment.blacklistUpdate.send(plr, {
-					isBanned: newBlacklist.includes(userId),
-					plot: plot.plot.instance.BuildingArea,
-				});
-			}
-
 			plot.plot.blacklistedPlayers.set(newBlacklist);
-		});
-
-		CustomRemotes.gui.settings.getBlacklist.subscribe((player) => {
-			const plot = this.tryGetControllerByPlayer(player);
-
-			if (!plot) return { success: false, message: "Plot not found" };
-
-			return {
-				success: true,
-				players: plot.plot.blacklistedPlayers.get() ?? [],
-			};
 		});
 
 		game.BindToClose(() => {

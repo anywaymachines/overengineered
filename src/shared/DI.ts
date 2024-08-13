@@ -208,17 +208,14 @@ export class DIContainer {
 
 		return registration.get(this) as T;
 	}
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	resolveByClass<T extends abstract new (...args: any) => unknown>(clazz: T, name?: string): ConstructorResult<T> {
+	resolveByClass<T extends abstract new (...args: any[]) => unknown>(clazz: T, name?: string): ConstructorResult<T> {
 		return this.resolve<ConstructorResult<T>>(name ?? getSymbol(clazz));
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	resolveForeignClass<T extends abstract new (...args: any) => unknown>(
+	resolveForeignClass<T extends abstract new (...args: any[]) => unknown>(
 		clazz: T,
 		args?: Partial<readonly [...ConstructorParameters<T>]>,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	): T extends abstract new (...args: any) => infer R ? R : never {
+	): T extends abstract new (...args: any[]) => infer R ? R : never {
 		return instantiateClass(clazz as never, args, this);
 	}
 
