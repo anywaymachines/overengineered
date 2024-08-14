@@ -1,12 +1,9 @@
-import { PhysicsService } from "@rbxts/services";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 
-PhysicsService.RegisterCollisionGroup("Radar");
-PhysicsService.CollisionGroupSetCollidable("Radar", "Default", false);
 export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.radarsection> {
 	private triggerDistanceListUpdate: boolean = false;
 	private closestDetectedPart: BasePart | undefined = undefined;

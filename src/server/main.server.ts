@@ -6,13 +6,17 @@ if (!game.GetService("RunService").IsStudio()) {
 	}
 }
 
-import { Players, RunService, Workspace } from "@rbxts/services";
+import { PhysicsService, Players, RunService, Workspace } from "@rbxts/services";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { SandboxGame } from "server/SandboxGame";
 import { Game } from "shared/GameHost";
 import { PlasmaProjectile } from "shared/weapons/PlasmaProjectileLogic";
 import { BulletProjectile } from "shared/weapons/BulletProjectileLogic";
 import { OutsideControl } from "server/OutsideControl";
+
+// TODO: Move somewhere (SERVER SIDE)
+PhysicsService.RegisterCollisionGroup("Radar");
+PhysicsService.CollisionGroupSetCollidable("Radar", "Default", false);
 
 const builder = Game.createHost();
 SandboxGame.initialize(builder);
