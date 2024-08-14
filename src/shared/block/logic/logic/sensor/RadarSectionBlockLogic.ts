@@ -1,9 +1,12 @@
+import { PhysicsService } from "@rbxts/services";
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RobloxUnit } from "shared/RobloxUnit";
 import { VectorUtils } from "shared/utils/VectorUtils";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 
+PhysicsService.RegisterCollisionGroup("Radar");
+PhysicsService.CollisionGroupSetCollidable("Radar", "Default", false);
 export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegistry.radarsection> {
 	private triggerDistanceListUpdate: boolean = false;
 	private closestDetectedPart: BasePart | undefined = undefined;
@@ -59,6 +62,8 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		if (!view) return;
 		if (!view.IsA("BasePart")) return;
 
+		view.CollisionGroup = "Radar";
+
 		if (!metalPlate) return;
 		if (!metalPlate.IsA("BasePart")) return;
 
@@ -83,8 +88,6 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		});
 
 		this.event.subscribe(view.Touched, (part) => {
-			if (part.IsA("Terrain")) return;
-
 			if (part.CollisionGroup !== "Blocks") return;
 			if (part.HasTag("RADARVIEW")) return;
 			if (this.getDistanceTo(part).Magnitude < this.input.minimalDistance.get()) return;
@@ -94,8 +97,6 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 		});
 
 		this.event.subscribe(view.TouchEnded, (part) => {
-			if (part.IsA("Terrain")) return;
-
 			this.allTouchedBlocks.delete(part);
 			this.triggerDistanceListUpdate = part === this.closestDetectedPart;
 		});
