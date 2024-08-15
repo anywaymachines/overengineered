@@ -1,6 +1,7 @@
 import { blockConfigRegistry } from "shared/block/config/BlockConfigRegistry";
 import { ConfigurableBlockLogic } from "shared/block/ConfigurableBlockLogic";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { RobloxUnit } from "shared/RobloxUnit";
 import type { PlacedBlockData } from "shared/building/BlockManager";
 
 type ServoMotor = BlockModel & {
@@ -49,7 +50,7 @@ export class ServoMotorBlockLogic extends ConfigurableBlockLogic<
 		this.event.subscribeObservable(
 			this.input.max_torque,
 			(value) => {
-				this.hingeConstraint.ServoMaxTorque = value * 1_000_000;
+				this.hingeConstraint.ServoMaxTorque = RobloxUnit.RowtonStuds_To_NewtonMeters(value * 1_000_000);
 			},
 			true,
 		);
