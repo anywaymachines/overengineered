@@ -565,6 +565,15 @@ const servomotorblock = {
 			config: 45 as number,
 			connectorHidden: true,
 		},
+		max_torque: {
+			displayName: "Max Torque",
+			type: "clampedNumber",
+			default: 30 as number,
+			config: 30 as number,
+			max: 1000,
+			min: 0,
+			step: 0.1,
+		},
 	},
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;

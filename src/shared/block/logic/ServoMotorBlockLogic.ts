@@ -46,6 +46,13 @@ export class ServoMotorBlockLogic extends ConfigurableBlockLogic<
 			},
 			true,
 		);
+		this.event.subscribeObservable(
+			this.input.max_torque,
+			(value) => {
+				this.hingeConstraint.ServoMaxTorque = value * 1_000_000;
+			},
+			true,
+		);
 
 		// Stop on motor corruption
 		this.onDescendantDestroyed(() => {
