@@ -28,6 +28,10 @@ export namespace RobloxUnit {
 		return Force / 0.163;
 	}
 
+	export function Newton_To_Rowton(Force: number) {
+		return Force * 0.163;
+	}
+
 	/** Torque.Torque */
 	export function RowtonStuds_To_NewtonMeters(RowtonStuds: number) {
 		return RowtonStuds / 0.581;

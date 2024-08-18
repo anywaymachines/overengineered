@@ -29,8 +29,8 @@ export class RocketEngineLogic extends ConfigurableBlockLogic<
 	private readonly sound;
 
 	// Math
-	private readonly multiplier;
-	private readonly power = 30_000;
+	private readonly basePower = RobloxUnit.Newton_To_Rowton(600_000);
+	private readonly maxPower;
 
 	// Const
 	private readonly maxSoundVolume = 0.5;
@@ -45,29 +45,28 @@ export class RocketEngineLogic extends ConfigurableBlockLogic<
 	) {
 		super(block, blockConfigRegistry.smallrocketengine);
 
-		this.onDescendantDestroyed(() => {
-			this.thrust = 0;
-			this.update();
-			this.disable();
-		});
-
 		// Instances
-		const effectEmitter = this.instance.EffectEmitter;
+		const colbox = this.instance.ColBox;
 		this.engine = this.instance.Engine;
 		this.vectorForce = this.engine.VectorForce;
 		this.sound = this.engine.Sound;
-		this.particleEmitter = effectEmitter.Fire;
+		this.particleEmitter = this.instance.EffectEmitter.Fire;
 
 		// Math
-		const colbox = this.instance.ColBox;
-		this.multiplier = (colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16;
+		let multiplier = math.round((colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16);
 
-		if (this.multiplier !== 1) {
-			this.multiplier *= 2;
+		// i dont remember why
+		if (multiplier !== 1) {
+			multiplier *= 2;
 		}
 
 		// The strength depends on the material
-		this.multiplier *= math.max(1, new PhysicalProperties(this.block.material).Density / 2);
+		multiplier *= math.max(1, math.round(new PhysicalProperties(this.block.material).Density / 2));
+
+		// Max power
+		this.maxPower = this.basePower * multiplier;
+		print(this.basePower, multiplier, this.maxPower);
+		this.output.maxpower.set(this.maxPower);
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), () => this.update());
 		this.event.subscribeObservable(
@@ -78,51 +77,46 @@ export class RocketEngineLogic extends ConfigurableBlockLogic<
 			},
 			true,
 		);
-
-		// Max power
-		this.output.maxpower.set(
-			RobloxUnit.Rowton_To_Newton((this.power * this.multiplier * this.input.strength.get()) / 100),
-		);
+		this.onDescendantDestroyed(() => {
+			this.thrust = 0;
+			this.update();
+			this.disable();
+		});
 	}
 
 	private update() {
-		const torque = this.thrust;
+		const thrustPercent = this.thrust / 100;
+		const strengthPercent = this.input.strength.get() / 100;
 
 		// Force
 		this.vectorForce.Force = new Vector3(
-			(((this.power * this.multiplier * torque * -1) / 100) * this.input.strength.get()) / 100,
-			0,
-			0,
+			RobloxUnit.Newton_To_Rowton(this.maxPower * thrustPercent * strengthPercent),
 		);
 
 		// Particles
-		const newParticleEmitterState = torque !== 0;
+		const visualize = thrustPercent !== 0;
 		const newParticleEmitterAcceleration = new Vector3(
-			((this.maxParticlesAcceleration / 100) * torque * this.input.strength.get()) / 100,
+			this.maxParticlesAcceleration * thrustPercent * strengthPercent,
 			0,
 			0,
 		);
 		const particleEmmiterHasDifference =
-			this.particleEmitter.Enabled !== newParticleEmitterState ||
+			this.particleEmitter.Enabled !== visualize ||
 			math.abs(this.particleEmitter.Acceleration.X - newParticleEmitterAcceleration.X) > 1;
 
-		this.particleEmitter.Enabled = newParticleEmitterState;
+		this.particleEmitter.Enabled = visualize;
 		this.particleEmitter.Acceleration = new Vector3(
-			((this.maxParticlesAcceleration / 100) * torque * this.input.strength.get()) / 100,
+			this.maxParticlesAcceleration * thrustPercent * strengthPercent,
 			0,
 			0,
 		);
 
 		// Sound
-		const newSoundState = torque !== 0;
 		const newVolume =
-			(Sound.getWorldVolume(this.instance.GetPivot().Y) *
-				((this.maxSoundVolume / 100) * torque * this.input.strength.get())) /
-			100;
+			Sound.getWorldVolume(this.instance.GetPivot().Y) * (this.maxSoundVolume * thrustPercent * strengthPercent);
 
-		const volumeHasDifference =
-			newSoundState !== this.sound.Playing || math.abs(this.sound.Volume - newVolume) > 0.005;
-		this.sound.Playing = newSoundState;
+		const volumeHasDifference = visualize !== this.sound.Playing || math.abs(this.sound.Volume - newVolume) > 0.005;
+		this.sound.Playing = visualize;
 		this.sound.Volume = newVolume;
 
 		if (volumeHasDifference) {
