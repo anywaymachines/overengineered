@@ -805,11 +805,11 @@ const operations = {
 		equals: {
 			func: (value1, value2) => value1 === value2,
 		},
+		notequals: {
+			func: (value1, value2) => value1 !== value2,
+		},
 	},
 	number2bool: {
-		notequals: {
-			func: (value1, value2) => value1 === value2,
-		},
 		greaterthan: {
 			func: (value1, value2) => value1 > value2,
 		},
