@@ -18,7 +18,7 @@ abstract class MoveBase extends BlockEditorBase {
 	protected readonly tooltipHolder = this.parent(TooltipsHolder.createComponent("Moving"));
 
 	protected difference: Vector3 = Vector3.zero;
-	readonly step = new NumberObservableValue<number>(1, 1, 256, 1);
+	readonly step = new NumberObservableValue<number>(1, 0.01, 256, 0.01);
 
 	constructor(
 		mode: BuildingMode,
@@ -84,6 +84,8 @@ class DesktopMove extends MoveBase {
 	protected initializeHandles() {
 		const roundByStep = (number: number) => {
 			const step = this.step.get();
+			if (step === 0) return number;
+
 			return number - (((number + step / 2) % step) - step / 2);
 		};
 		const limitMovement = (region: BB, direction: Vector3, distance: number, bounds: BB) => {

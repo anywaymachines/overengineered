@@ -11,11 +11,19 @@ export class NumberTextBoxControl<TAllowNull extends boolean = false> extends Co
 	readonly value;
 
 	constructor(gui: NumberTextBoxControlDefinition);
+	constructor(gui: NumberTextBoxControlDefinition, value: ObservableValue<number>);
 	constructor(gui: NumberTextBoxControlDefinition, min: number, max: number, step: number);
-	constructor(gui: NumberTextBoxControlDefinition, min?: number, max?: number, step?: number) {
+	constructor(
+		gui: NumberTextBoxControlDefinition,
+		min?: number | ObservableValue<number>,
+		max?: number,
+		step?: number,
+	) {
 		super(gui);
 
-		if (min !== undefined && max !== undefined && step !== undefined) {
+		if (min && typeIs(min, "table")) {
+			this.value = min;
+		} else if (min !== undefined && max !== undefined && step !== undefined) {
 			this.value = new NumberObservableValue<ToNum<TAllowNull>>(0, min, max, step);
 		} else {
 			this.value = new ObservableValue<ToNum<TAllowNull>>(0);

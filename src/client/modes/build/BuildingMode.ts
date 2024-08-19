@@ -5,6 +5,7 @@ import { Gui } from "client/gui/Gui";
 import { PlayMode } from "client/modes/PlayMode";
 import { BlockSelect } from "client/tools/highlighters/BlockSelect";
 import { ToolController } from "client/tools/ToolController";
+import { NumberObservableValue } from "shared/event/NumberObservableValue";
 import { ObservableValue } from "shared/event/ObservableValue";
 import { SharedRagdoll } from "shared/SharedRagdoll";
 import type { RagdollController } from "client/controller/RagdollController";
@@ -29,6 +30,8 @@ export class BuildingMode extends PlayMode {
 	readonly toolController;
 	readonly gui;
 	readonly gridEnabled = new ObservableValue(true);
+	readonly moveGrid = new NumberObservableValue<number>(1, 0, 256, 0.01);
+	readonly rotateGrid = new NumberObservableValue<number>(90, 0, 360, 0.01);
 	readonly editMode = new ObservableValue<EditMode>("global");
 
 	constructor(
