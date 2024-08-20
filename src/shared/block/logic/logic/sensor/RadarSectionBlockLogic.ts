@@ -71,6 +71,7 @@ export class RadarSectionBlockLogic extends ConfigurableBlockLogic<typeof blockC
 			const md = this.input.maxDistance.get();
 			const ds = detectionSize * (detectionSize - math.sqrt(halvedMaxDist / (md + halvedMaxDist))) * 10;
 			view.Size = new Vector3(ds, view.Size.Y, ds);
+			this.triggerDistanceListUpdate = true;
 		};
 
 		this.event.subscribeObservable(this.input.visibility, (state) => {

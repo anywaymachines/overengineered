@@ -20,7 +20,7 @@ abstract class RotaterBase extends BlockEditorBase {
 	protected difference: CFrame = CFrame.identity;
 	protected pivot: Vector3 = Vector3.zero;
 	protected isValid: boolean = true;
-	readonly step = new NumberObservableValue<number>(0, 90, 180, 1);
+	readonly step = new NumberObservableValue<number>(90, 0, 360, 0.01);
 
 	constructor(
 		mode: BuildingMode,
@@ -78,6 +78,8 @@ class DesktopRotater extends RotaterBase {
 	protected initializeHandles() {
 		const roundByStep = (number: number) => {
 			const step = this.step.get();
+			if (step === 0) return number;
+
 			return number - (((number + step / 2) % step) - step / 2);
 		};
 

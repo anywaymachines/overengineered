@@ -98,7 +98,13 @@ export class BuildingModeScene extends Control<BuildingModeSceneDefinition> {
 
 		this.add(ActionController.instance);
 		const touchGui = this.add(
-			di.resolveForeignClass(TouchActionControllerGui, [gui.Action, mode.gridEnabled, mode.editMode]),
+			new TouchActionControllerGui(
+				gui.Action,
+				mode.editMode,
+				mode.moveGrid,
+				mode.rotateGrid,
+				mode.toolController.allTools.editTool,
+			),
 		);
 
 		const updateTouchGuiVisibility = () => touchGui.setVisible(!LoadingController.isLoading.get());
