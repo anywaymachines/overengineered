@@ -4,6 +4,7 @@ import { Colors } from "client/gui/Colors";
 import { Control } from "client/gui/Control";
 import { ButtonControl } from "client/gui/controls/Button";
 import { Gui } from "client/gui/Gui";
+import { ConfirmPopup } from "client/gui/popup/ConfirmPopup";
 import { ClientBuilding } from "client/modes/build/ClientBuilding";
 import { BlockManager } from "shared/building/BlockManager";
 import { BlocksSerializer } from "shared/building/BlocksSerializer";
@@ -107,7 +108,18 @@ export class TutorialControl extends Control<TutorialControlDefinition> {
 
 		this.add(new ButtonControl(this.gui.Header.Cancel, () => this._onCancel.Fire()));
 		this.add(new ButtonControl(this.gui.Header.Next, () => this._nextPressed.Fire()));
-		this.add(new ButtonControl(this.gui.Header.Skip, () => this._skipPressed.Fire()));
+		this.add(
+			new ButtonControl(this.gui.Header.Skip, () => {
+				ConfirmPopup.showPopup(
+					"Are you sure you want to skip this step?",
+					"This way you will learn this lesson worse!",
+					() => {
+						this._skipPressed.Fire();
+					},
+					() => {},
+				);
+			}),
+		);
 	}
 }
 
