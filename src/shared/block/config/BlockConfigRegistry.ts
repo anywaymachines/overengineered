@@ -970,7 +970,7 @@ const laser = {
 			config: 200 as number,
 			default: 200 as number,
 			min: 0.1,
-			max: 200,
+			max: 600,
 			step: 0.1,
 		},
 		rayTransparency: {
