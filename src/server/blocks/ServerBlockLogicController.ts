@@ -24,6 +24,7 @@ export class ServerBlockLogicController extends HostedService {
 		const serverBlockLogicRegistry: ServerBlockLogicRegistry = {
 			disconnectblock: DisconnectBlockServerLogic,
 			lamp: LampServerLogic,
+			smalllamp: LampServerLogic,
 			leddisplay: LEDDisplayServerLogic,
 			screen: ScreenServerLogic,
 			piston: PistonBlockServerLogic,
