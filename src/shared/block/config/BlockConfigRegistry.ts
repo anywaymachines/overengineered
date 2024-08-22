@@ -1320,7 +1320,8 @@ const counter = {
 			configHidden: true,
 		},
 		triggerValue: {
-			displayName: "Write",
+			//a.k.a. rewrite value
+			displayName: "Rewrite",
 			type: "bool",
 			default: false as boolean,
 			config: false as boolean,
