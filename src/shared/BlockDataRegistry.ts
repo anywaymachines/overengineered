@@ -339,6 +339,11 @@ const logic = {
 			description: "A simple lamp. Turns on when true is passed and turns off when false is passed",
 			autoWeldShape: "cube",
 		},
+		smalllamp: {
+			name: "Small Lamp",
+			description: "A simple lamp. Same as regular one but small!",
+			autoWeldShape: "cube",
+		},
 		screen: {
 			name: "Screen",
 			description: "Display all your data for everyone to see!",
