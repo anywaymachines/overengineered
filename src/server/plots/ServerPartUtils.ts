@@ -11,6 +11,7 @@ export namespace ServerPartUtils {
 
 	export function switchDescendantsNetworkOwner(model: Instance, owner: Player | undefined) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
+			if (!part.CanSetNetworkOwnership()[0]) return;
 			part.SetNetworkOwner(owner);
 		});
 	}
