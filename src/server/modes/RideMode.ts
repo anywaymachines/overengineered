@@ -114,7 +114,9 @@ export class RideMode implements PlayModeBase {
 				task.wait(0.5);
 			}
 
-			vehicleSeat.Sit(hrp);
+			if (hrp.Health > 0) {
+				vehicleSeat.Sit(hrp);
+			}
 		}
 
 		for (const block of blocksChildren) {
