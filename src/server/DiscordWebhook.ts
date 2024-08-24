@@ -46,7 +46,7 @@ export namespace DiscordWebhook {
 			try {
 				HttpService.PostAsync(webhook, data);
 			} catch (error) {
-				$warn("Discord logging failed", error);
+				$log("Discord logging failed", error);
 			}
 		});
 	}
