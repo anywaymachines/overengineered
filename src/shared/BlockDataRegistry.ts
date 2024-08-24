@@ -622,7 +622,13 @@ const registry = {
 		name: "Rocket Engine",
 		description: "Engines your rocket into the space and onto the ground",
 		mirrorBehaviour: "offset180",
-		limit: 30,
+		limit: 50,
+	},
+	smallrocketengine: {
+		name: "Small Rocket Engine",
+		description: "Smaller brother of a rocket engine",
+		mirrorBehaviour: "offset180",
+		limit: 50,
 	},
 	rope: {
 		name: "Rope",
@@ -645,12 +651,6 @@ const registry = {
 	smallgear: {
 		name: "Small Gear",
 		description: "A cog for your machinery. Does it even work?",
-	},
-	smallrocketengine: {
-		name: "Small Rocket Engine",
-		description: "Smaller brother of a rocket engine",
-		mirrorBehaviour: "offset180",
-		limit: 30,
 	},
 	speedometer: {
 		name: "Speedometer",
