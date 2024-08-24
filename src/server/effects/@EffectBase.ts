@@ -47,7 +47,7 @@ abstract class ServerEffectBase<T> {
 	}
 
 	send(ownerPart: BasePart, arg: T): void {
-		if (!ownerPart) return;
+		if (!ownerPart || !ownerPart.CanSetNetworkOwnership()[0]) return;
 
 		const owner = ownerPart.GetNetworkOwner();
 		const players = ServerPlayers.GetLoadedPlayers().filter((player) => this.filterPlayer(owner, player));
