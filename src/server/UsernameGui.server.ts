@@ -15,12 +15,7 @@ Players.PlayerAdded.Connect((player) => {
 		gui.Parent = head;
 		gui.PlayerToHideFrom = player;
 
-		let rank = 0;
-		try {
-			rank = player.GetRankInGroup(GameDefinitions.GROUP);
-		} catch {
-			$err("Unable to get player rank");
-		}
+		const rank = GameDefinitions.getRank(player);
 		const rankData = GameDefinitions.RANKS[rank];
 		if (rankData) {
 			gui.RankLabel.Text = rankData.name;

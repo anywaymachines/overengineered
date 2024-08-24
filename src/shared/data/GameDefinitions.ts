@@ -57,6 +57,16 @@ export namespace GameDefinitions {
 		return req.success ? req.message : false;
 	}
 
+	export function getRank(player: Player): number {
+		const req = Throttler.retryOnFail<number>(3, 1, () => player.GetRankInGroup(GROUP));
+
+		if (!req.success) {
+			warn(req.error_message);
+		}
+
+		return req.success ? req.message : 0;
+	}
+
 	export function isTester(player: Player): boolean {
 		if (player.Name === "i3ymm" || player.Name === "3QAXM" || player.Name === "samlovebutter") return true;
 

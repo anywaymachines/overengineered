@@ -33,13 +33,7 @@ class PlotFloatingImageController extends Component {
 			gui.Parent = plot.instance;
 			gui.Adornee = plot.instance.FindFirstChild("BuildingArea") as BasePart;
 
-			let rank = 0;
-			try {
-				rank = player.GetRankInGroup(GameDefinitions.GROUP);
-			} catch {
-				$err("Unable to get player rank");
-			}
-
+			const rank = GameDefinitions.getRank(player);
 			const rankData = GameDefinitions.RANKS[rank];
 			if (rankData) {
 				gui.RankLabel.Text = rankData.name;
