@@ -338,6 +338,7 @@ const logic = {
 			name: "Lamp",
 			description: "A simple lamp. Turns on when true is passed and turns off when false is passed",
 			autoWeldShape: "cube",
+			limit: 150,
 		},
 		smalllamp: {
 			name: "Small Lamp",
