@@ -344,6 +344,7 @@ const logic = {
 			name: "Small Lamp",
 			description: "A simple lamp. Same as regular one but small!",
 			autoWeldShape: "cube",
+			limit: 150,
 		},
 		screen: {
 			name: "Screen",
