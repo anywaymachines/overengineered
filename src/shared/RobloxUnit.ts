@@ -14,13 +14,9 @@ export namespace RobloxUnit {
 
 	/** Magnitude => meter/second */
 	export function getSpeedFromMagnitude(magnitude: number, unit: "MetersPerSecond" | "Knots" = "MetersPerSecond") {
-		if (unit === "MetersPerSecond") {
-			return magnitude / 3.57;
-		} else if (unit === "Knots") {
-			return (magnitude / 3.57) * 1.944;
-		} else {
-			return magnitude;
-		}
+		if (unit === "MetersPerSecond") return magnitude / 3.57;
+		if (unit === "Knots") return (magnitude / 3.57) * 1.944;
+		return magnitude;
 	}
 
 	/** VectorForce.Force */
