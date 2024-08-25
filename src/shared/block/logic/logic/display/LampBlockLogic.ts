@@ -23,7 +23,7 @@ export class LampBlockLogic extends ConfigurableBlockLogic<typeof blockConfigReg
 				block: this.instance,
 				state: this.input.enabled.get() === true, // to account the other types
 				color: this.block.color,
-				brightness: this.input.brightness.get() * 0.4, //a.k.a. /100*40
+				brightness: this.input.brightness.get() * 0.2, //a.k.a. /100*40 and 30% off
 				range: this.input.lightRrange.get() * 0.6, //a.k.a. /100*60
 			});
 		};
