@@ -754,11 +754,6 @@ const registry = {
 		name: "Big wheel",
 		description: "Wheel. Big one.",
 	},
-	/* prepare for replacement to commit later
-	bigwheel: {
-		name: "Big wheel",
-		description: "Wheel. Big one.",
-	},
 	smalloldwheel: {
 		name: "Small old wheel",
 		description: "smol ol whel",
@@ -766,15 +761,6 @@ const registry = {
 	oldwheel: {
 		name: "Old wheel",
 		description: "An old fashioned wheel",
-	},
-	*/
-	smalloldwheel: {
-		name: "Small old wheel",
-		description: "smol ol whel",
-	},
-	oldwheel: {
-		name: "Old wheel",
-		description: "A ginormous old wheel",
 	},
 	bigoldwheel: {
 		name: "Big old wheel",
