@@ -36,6 +36,7 @@ import { PassengerSeatBlockLogic } from "shared/block/logic/PassengerSeatBlockLo
 import { PistonLogic } from "shared/block/logic/PistonBlockLogic";
 import { RadioRecieverBlockLogic } from "shared/block/logic/RadioRecieverBlockLogic";
 import { RadioTransmitterBlockLogic } from "shared/block/logic/RadioTransmitterBlockLogic";
+import { RCSEngineLogic } from "shared/block/logic/RCSEngineLogic";
 import { RocketEngineLogic } from "shared/block/logic/RocketEngineLogic";
 import { RopeLogic } from "shared/block/logic/RopeLogic";
 import { ServoMotorBlockLogic } from "shared/block/logic/ServoMotorBlockLogic";
@@ -65,6 +66,7 @@ const logicRegistry = {
 
 	smallrocketengine: RocketEngineLogic,
 	rocketengine: RocketEngineLogic,
+	rcsengine: RCSEngineLogic,
 	motorblock: MotorBlockLogic,
 	bracedshaft: BracedShaftBlockLogic,
 	servomotorblock: ServoMotorBlockLogic,

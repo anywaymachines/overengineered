@@ -59,7 +59,7 @@ CustomRemotes.player.loaded.send();
 $log("Client loaded.");
 
 //testing
-if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter") {
+if (RunService.IsStudio() && Players.LocalPlayer.Name === "samlovebutter" && (false as boolean)) {
 	while (true as boolean) {
 		BulletProjectile.spawn.send({
 			startPosition: new Vector3(359, -16360, 330),

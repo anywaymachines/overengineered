@@ -427,6 +427,18 @@ const rocketengine = {
 	},
 } as const satisfies BlockConfigBothDefinitions;
 
+const rcsengine = {
+	input: {
+		direction: {
+			displayName: "Direction (%)",
+			type: "vector3",
+			default: Vector3.zero,
+			config: Vector3.zero,
+		},
+	},
+	output: {},
+} as const satisfies BlockConfigBothDefinitions;
+
 const piston = {
 	input: {
 		extend: {
@@ -1498,6 +1510,7 @@ export const blockConfigRegistry = {
 	motorblock,
 	smallrocketengine: rocketengine,
 	rocketengine: rocketengine,
+	rcsengine: rcsengine,
 	rope,
 	servomotorblock,
 	sidewaysservo,
