@@ -135,7 +135,7 @@ export class RCSEngineLogic extends ConfigurableBlockLogic<typeof blockConfigReg
 		//this.output.maxpower.set(this.maxPower);
 
 		const setEngineThrust = (engine: singleEngineConfiguration, thrustPercentage: number) => {
-			if (!engine.particleEmitter?.Fire) return;
+			if (!engine.particleEmitter.Fire) return;
 			// Force
 			engine.vectorForce.Force = new Vector3(RobloxUnit.Newton_To_Rowton(this.maxPower * thrustPercentage));
 
@@ -179,10 +179,10 @@ export class RCSEngineLogic extends ConfigurableBlockLogic<typeof blockConfigReg
 		};
 
 		const update = () => {
+			if (!this.isEnabled()) return;
 			const thrustPercent = VectorUtils.apply(this.thrust, (v) => math.clamp(v, -100, 100) / 100);
 			//const strengthPercent = 1; //this.input.strength.get() / 100;
-
-			setEngineThrust(this.engineData[0], math.abs(thrustPercent.Y));
+			setEngineThrust(this.engineData[0], math.max(0, thrustPercent.Y));
 
 			setEngineThrust(this.engineData[1], math.abs(math.max(0, thrustPercent.X)));
 			setEngineThrust(this.engineData[2], math.abs(math.min(0, thrustPercent.X)));
