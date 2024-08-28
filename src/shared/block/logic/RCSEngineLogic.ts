@@ -97,7 +97,7 @@ export class RCSEngineLogic extends ConfigurableBlockLogic<typeof blockConfigReg
 	];
 
 	// Math
-	private readonly basePower = RobloxUnit.Newton_To_Rowton(100_000);
+	private readonly basePower = RobloxUnit.Newton_To_Rowton(35_000);
 	private readonly maxPower;
 
 	// Const
@@ -166,7 +166,7 @@ export class RCSEngineLogic extends ConfigurableBlockLogic<typeof blockConfigReg
 				this.soundEffect.send(this.instance.PrimaryPart!, {
 					sound: engine.soundEmitter,
 					isPlaying: engine.soundEmitter.Playing,
-					volume: engine.soundEmitter.Volume,
+					volume: engine.soundEmitter.Volume / 2,
 				});
 			}
 			if (particleEmmiterHasDifference) {
