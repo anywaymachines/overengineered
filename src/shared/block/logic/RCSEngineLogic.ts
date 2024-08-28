@@ -200,6 +200,17 @@ export class RCSEngineLogic extends ConfigurableBlockLogic<typeof blockConfigReg
 			},
 			true,
 		);
+
+		this.input.trailLength.subscribe((v) => {
+			const val = new NumberRange(v * 0.15);
+			for (const engine of this.engineData) engine.particleEmitter.Fire.Lifetime = val;
+		});
+
+		this.input.trailColor.subscribe((v) => {
+			const val = new ColorSequence(v);
+			for (const engine of this.engineData) engine.particleEmitter.Fire.Color = val;
+		});
+
 		this.onDescendantDestroyed(() => {
 			update();
 			this.disable();

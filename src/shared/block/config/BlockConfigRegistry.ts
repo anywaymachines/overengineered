@@ -435,6 +435,21 @@ const rcsengine = {
 			default: Vector3.zero,
 			config: Vector3.zero,
 		},
+		trailLength: {
+			displayName: "Trail length",
+			type: "clampedNumber",
+			min: 1,
+			max: 5,
+			step: 0.1,
+			default: 1,
+			config: 1,
+		},
+		trailColor: {
+			displayName: "Trail color",
+			type: "color",
+			default: Color3.fromRGB(255, 255, 255),
+			config: Color3.fromRGB(255, 255, 255),
+		},
 	},
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
