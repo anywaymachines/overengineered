@@ -449,6 +449,7 @@ const rcsengine = {
 			type: "color",
 			default: Color3.fromRGB(255, 255, 255),
 			config: Color3.fromRGB(255, 255, 255),
+			connectorHidden: true,
 		},
 	},
 	output: {},
