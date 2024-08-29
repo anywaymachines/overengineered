@@ -155,7 +155,7 @@ export class RCSEngineLogic extends ConfigurableBlockLogic<typeof blockConfigReg
 
 			// Sound
 			const newVolume =
-				Sound.getWorldVolume(this.instance.GetPivot().Y) * (this.maxSoundVolume * thrustPercentage);
+				Sound.getWorldVolume(this.instance.GetPivot().Y) * (this.maxSoundVolume * math.abs(thrustPercentage));
 
 			const volumeHasDifference =
 				visualize !== engine.soundEmitter.Playing || math.abs(engine.soundEmitter.Volume - newVolume) > 0.005;
@@ -182,13 +182,13 @@ export class RCSEngineLogic extends ConfigurableBlockLogic<typeof blockConfigReg
 		const update = () => {
 			if (!this.isEnabled()) return;
 			const thrustPercent = VectorUtils.apply(this.thrust, (v) => math.clamp(v, -100, 100) / 100);
-			setEngineThrust(this.engineData[0], math.max(0, thrustPercent.Y));
+			setEngineThrust(this.engineData[0], -math.max(thrustPercent.Y, 0));
 
-			setEngineThrust(this.engineData[1], math.abs(math.max(0, thrustPercent.X)));
-			setEngineThrust(this.engineData[2], math.abs(math.min(0, thrustPercent.X)));
+			setEngineThrust(this.engineData[1], -math.abs(math.max(thrustPercent.X, 0)));
+			setEngineThrust(this.engineData[2], -math.abs(math.min(thrustPercent.X, 0)));
 
-			setEngineThrust(this.engineData[3], math.abs(math.max(0, thrustPercent.Z)));
-			setEngineThrust(this.engineData[4], math.abs(math.min(0, thrustPercent.Z)));
+			setEngineThrust(this.engineData[4], -math.abs(math.max(thrustPercent.Z, 0)));
+			setEngineThrust(this.engineData[3], -math.abs(math.min(thrustPercent.Z, 0)));
 		};
 
 		this.event.subscribe(Workspace.GetPropertyChangedSignal("Gravity"), update);
