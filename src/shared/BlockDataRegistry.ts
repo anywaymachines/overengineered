@@ -431,6 +431,10 @@ const registry = {
 		name: "Ball in Socket",
 		description: "Ball socket for your mechanical ingenuities",
 	},
+	ballinsocketangled: {
+		name: "Ball in Socket (Angled)",
+		description: "Angled ball socket for your mechanical ingenuities",
+	},
 	block: {
 		name: "Block",
 		description: "Makes you question why every engineering game has it",
@@ -439,6 +443,13 @@ const registry = {
 	truss: {
 		name: "Truss",
 		description: "This is a truss structure. You can climb it, and it's also cool.",
+		mirrorBehaviour: "none",
+		autoWeldShape: "cube",
+	},
+	trussunsupported: {
+		name: "Truss (Unsupported)",
+		description:
+			"This is a unsupported truss structure. You can climb it, and it's also less cool, that ~supported~ one",
 		mirrorBehaviour: "none",
 		autoWeldShape: "cube",
 	},
@@ -542,6 +553,10 @@ const registry = {
 	driveshaft: {
 		name: "Driveshaft",
 		description: "A shaft that drives",
+	},
+	driveshaftangled: {
+		name: "Driveshaft (Angled)",
+		description: "An angled shaft that drives",
 	},
 	bearingshaft: {
 		name: "Bearing Shaft",
@@ -681,8 +696,23 @@ const registry = {
 		description: "Sus pension spring",
 	},
 	tetrahedron: {
-		name: "Tetrahedron",
-		description: "MAKS STOP NAMING BLOCKS LIKE THAT",
+		name: "Tetrahedron 1x1",
+		description: "The simplest polyhedron, the faces of which are four triangles",
+		mirrorBehaviour: "offset90",
+	},
+	tetrahedron2x1: {
+		name: "Tetrahedron 2x1",
+		description: "The simplest polyhedron, whose faces are four triangles, but slightly longer",
+		mirrorBehaviour: "offset90",
+	},
+	tetrahedron3x1: {
+		name: "Tetrahedron 3x1",
+		description: "The simplest polyhedron, whose faces are four triangles, but much longer",
+		mirrorBehaviour: "offset90",
+	},
+	tetrahedron4x1: {
+		name: "Tetrahedron 3x1",
+		description: "The simplest polyhedron, whose faces are four triangles, but VERY longer",
 		mirrorBehaviour: "offset90",
 	},
 	tetraround: {
