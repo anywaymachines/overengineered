@@ -5,13 +5,14 @@ type Args = {
 	readonly particle: ParticleEmitter;
 	readonly isEnabled: boolean;
 	readonly acceleration: Vector3;
+	readonly color?: Color3;
 };
 export class ParticleEffect extends EffectBase<Args> {
 	constructor() {
 		super("particle_effect");
 	}
 
-	justRun({ particle, isEnabled, acceleration }: Args): void {
+	justRun({ particle, isEnabled, acceleration, color }: Args): void {
 		if (!particle || !particle.Parent) return;
 
 		const part = particle.Parent;
@@ -19,5 +20,6 @@ export class ParticleEffect extends EffectBase<Args> {
 
 		particle.Enabled = isEnabled;
 		particle.Acceleration = acceleration;
+		if (color) particle.Color = new ColorSequence(color);
 	}
 }

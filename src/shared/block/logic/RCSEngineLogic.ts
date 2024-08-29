@@ -174,6 +174,7 @@ export class RCSEngineLogic extends ConfigurableBlockLogic<typeof blockConfigReg
 					particle: engine.particleEmitter?.Fire,
 					isEnabled: engine.particleEmitter?.Fire.Enabled,
 					acceleration: engine.particleEmitter?.Fire.Acceleration,
+					color: this.input.trailColor.get(),
 				});
 			}
 		};
@@ -181,7 +182,6 @@ export class RCSEngineLogic extends ConfigurableBlockLogic<typeof blockConfigReg
 		const update = () => {
 			if (!this.isEnabled()) return;
 			const thrustPercent = VectorUtils.apply(this.thrust, (v) => math.clamp(v, -100, 100) / 100);
-			//const strengthPercent = 1; //this.input.strength.get() / 100;
 			setEngineThrust(this.engineData[0], math.max(0, thrustPercent.Y));
 
 			setEngineThrust(this.engineData[1], math.abs(math.max(0, thrustPercent.X)));

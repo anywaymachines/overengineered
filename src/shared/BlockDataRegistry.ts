@@ -712,7 +712,7 @@ const registry = {
 	},
 	tetrahedron4x1: {
 		name: "Tetrahedron 3x1",
-		description: "The simplest polyhedron, whose faces are four triangles, but VERY longer",
+		description: "The simplest polyhedron, whose faces are four triangles, but unfathomably longer",
 		mirrorBehaviour: "offset90",
 	},
 	tetraround: {
