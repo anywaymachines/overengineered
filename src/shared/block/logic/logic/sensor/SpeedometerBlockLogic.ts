@@ -35,12 +35,6 @@ export class SpeedometerBlockLogic extends ConfigurableBlockLogic<typeof blockCo
 		);
 
 		const angularVelocity = this.block.instance.PrimaryPart!.AssemblyAngularVelocity;
-		this.output.angular.set(
-			new Vector3(
-				RobloxUnit.Studs_To_Meters(angularVelocity.X),
-				RobloxUnit.Studs_To_Meters(angularVelocity.Y),
-				RobloxUnit.Studs_To_Meters(angularVelocity.Z),
-			),
-		);
+		this.output.angular.set(new Vector3(angularVelocity.X, angularVelocity.Y, angularVelocity.Z));
 	}
 }
