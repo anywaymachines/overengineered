@@ -3,6 +3,7 @@ import { PlayerSelectorColumnControl } from "client/gui/controls/PlayerSelectorL
 import { ToggleControl } from "client/gui/controls/ToggleControl";
 import { Gui } from "client/gui/Gui";
 import { Popup } from "client/gui/Popup";
+import { InstanceComponent } from "shared/component/InstanceComponent";
 import { CustomRemotes } from "shared/Remotes";
 import type { PlayerSelectorColumnControlDefinition } from "client/gui/controls/PlayerSelectorListControl";
 import type { SharedPlot } from "shared/building/SharedPlot";
@@ -54,28 +55,32 @@ type Scenes = keyof NewSettingsScenes;
 
 @injectable
 export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
-	private readonly plot;
-
 	static addAsService(host: GameHostBuilder) {
 		const gui = Gui.getGameUI<{ Popup: { Crossplatform: { Settings: NewSettingsPopupDefinition } } }>().Popup
 			.Crossplatform.Settings;
 		host.services.registerTransientFunc((ctx) => ctx.resolveForeignClass(this, [gui.Clone()]));
 	}
 
-	constructor(gui: NewSettingsPopupDefinition, @inject plot: SharedPlot) {
+	private readonly sceneParent;
+
+	constructor(
+		gui: NewSettingsPopupDefinition,
+		@inject private readonly plot: SharedPlot,
+	) {
 		super(gui);
 
-		this.plot = plot;
+		this.sceneParent = this.add(new InstanceComponent(this.gui));
 
+		this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
 		this.setScene("Main");
 	}
 
 	loadScene(scene: Scenes) {
-		this.clear();
-		this.add(new ButtonControl(this.gui.Heading.CloseButton, () => this.hide()));
+		this.sceneParent.clear();
 
 		if (scene === "Main") {
 			// TODO: make this scene
+			return;
 		}
 
 		if (scene === "Permissions") {
@@ -92,22 +97,18 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 			});
 
 			isolationMode.value.changed.Connect((value) => {
-				if (value) {
-					blacklist.hide();
-				} else {
-					blacklist.show();
-				}
-
+				blacklist.setVisible(!value);
 				CustomRemotes.gui.settings.permissions.isolationMode.send(value);
 			});
 
-			this.add(blacklist);
-			this.add(isolationMode);
+			this.sceneParent.add(blacklist);
+			this.sceneParent.add(isolationMode);
 			return;
 		}
 
 		if (scene === "Graphics") {
 			// TODO: make this scene
+			return;
 		}
 	}
 
