@@ -711,7 +711,7 @@ const registry = {
 		mirrorBehaviour: "offset90",
 	},
 	tetrahedron4x1: {
-		name: "Tetrahedron 3x1",
+		name: "Tetrahedron 4x1",
 		description: "The simplest polyhedron, whose faces are four triangles, but unfathomably longer",
 		mirrorBehaviour: "offset90",
 	},
