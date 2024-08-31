@@ -554,10 +554,10 @@ const registry = {
 		name: "Driveshaft",
 		description: "A shaft that drives",
 	},
-	driveshaftangled: {
-		name: "Driveshaft (Angled)",
-		description: "An angled shaft that drives",
-	},
+	// driveshaftangled: {
+	// 	name: "Driveshaft (Angled)",
+	// 	description: "An angled shaft that drives",
+	// },
 	bearingshaft: {
 		name: "Bearing Shaft",
 		description: "A shaft that bears",
