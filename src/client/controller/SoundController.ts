@@ -1,9 +1,7 @@
 import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import { LocalPlayer } from "client/controller/LocalPlayer";
 import { Signals } from "client/event/Signals";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { HostedService } from "shared/GameHost";
-import { RobloxUnit } from "shared/RobloxUnit";
 import { Sound } from "shared/Sound";
 import { TerrainDataInfo } from "shared/TerrainDataInfo";
 import { PartUtils } from "shared/utils/PartUtils";
@@ -15,9 +13,6 @@ type Sounds = {
 		readonly BlockPlaceError: Sound;
 		readonly BlockRotate: Sound;
 		readonly BlockDelete: Sound;
-	};
-	readonly Env: {
-		readonly Ground: Sound;
 	};
 	readonly Start: Sound;
 	readonly Click: Sound;
@@ -86,32 +81,13 @@ class UnderwaterSoundEffect extends HostedService {
 	}
 }
 
-class DecreaseVolumeWithAltitude extends HostedService {
-	constructor() {
-		super();
-
-		const groundEffectMaxHeight = RobloxUnit.Meters_To_Studs(500);
-
-		const cameraMoved = () => {
-			SoundController.getSounds().Env.Ground.Volume =
-				(1 - (Workspace.CurrentCamera!.CFrame.Y - GameDefinitions.HEIGHT_OFFSET) / groundEffectMaxHeight) *
-				0.06;
-		};
-		Signals.CAMERA.MOVED.Connect(cameraMoved);
-	}
-}
-
 /** A class for controlling sounds and their effects */
 export namespace SoundController {
 	export function initializeAll(host: GameHostBuilder) {
 		initializeUnderwaterEffect(host);
-		initializeVolumeAltitudeDecrease(host);
 	}
 	export function initializeUnderwaterEffect(host: GameHostBuilder) {
 		host.services.registerService(UnderwaterSoundEffect);
-	}
-	export function initializeVolumeAltitudeDecrease(host: GameHostBuilder) {
-		host.services.registerService(DecreaseVolumeWithAltitude);
 	}
 
 	export function subscribeSoundAdded(func: (sound: Sound) => void): SignalConnection {
