@@ -161,6 +161,9 @@ export namespace BuildingManager {
 
 						throw "Unknown mode";
 					}
+					case "tetra": {
+						return normalRotation(cframe.mul(CFrame.fromEulerAnglesYXZ(0, 0, math.pi * 1.5)));
+					}
 				}
 			}
 

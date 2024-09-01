@@ -1,5 +1,5 @@
 export type AutoWeldColliderBlockShape = "none" | "cube";
-export type BlockMirrorBehaviour = "offset90" | "offset180" | "offset270" | "normal" | "none" | "wedgeWing";
+export type BlockMirrorBehaviour = "offset90" | "offset180" | "offset270" | "normal" | "none" | "wedgeWing" | "tetra";
 
 interface BlockSetupInformation {
 	readonly name: string;
@@ -703,17 +703,17 @@ const registry = {
 	tetrahedron2x1: {
 		name: "Tetrahedron 2x1",
 		description: "The simplest polyhedron, whose faces are four triangles, but slightly longer",
-		mirrorBehaviour: "offset90",
+		mirrorBehaviour: "tetra",
 	},
 	tetrahedron3x1: {
 		name: "Tetrahedron 3x1",
 		description: "The simplest polyhedron, whose faces are four triangles, but much longer",
-		mirrorBehaviour: "offset90",
+		mirrorBehaviour: "tetra",
 	},
 	tetrahedron4x1: {
 		name: "Tetrahedron 4x1",
 		description: "The simplest polyhedron, whose faces are four triangles, but unfathomably longer",
-		mirrorBehaviour: "offset90",
+		mirrorBehaviour: "tetra",
 	},
 	tetraround: {
 		name: "Tetra Round",
