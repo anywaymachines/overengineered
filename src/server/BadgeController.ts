@@ -5,32 +5,35 @@ import { PlayerWatcher } from "shared/PlayerWatcher";
 
 export class BadgeController extends HostedService {
 	static initializeIfProd(host: GameHostBuilder) {
-		if (game.PlaceId !== GameDefinitions.PRODUCTION_PLACE_ID) {
-			return;
-		}
+		if (game.PlaceId !== GameDefinitions.PRODUCTION_PLACE_ID) return;
 
 		host.services.registerService(this);
 	}
 
 	private readonly badges = {
-		PRE_BETA_2024: 2652394288127295,
+		PRE_BETA: 2652394288127295,
+		BETA: 660085287868968,
 	} as const;
 
 	constructor() {
 		super();
 
-		// PRE_BETA_2024
 		this.event.subscribeCollectionAdded(PlayerWatcher.players, (player) => {
 			player.CharacterAdded.Once(() => {
 				try {
-					if (player.GetRankInGroup(GameDefinitions.GROUP) === 2) {
-						if (BadgeService.UserHasBadgeAsync(player.UserId, this.badges.PRE_BETA_2024)) return;
+					// BETA badge
+					if (!BadgeService.UserHasBadgeAsync(player.UserId, this.badges.BETA)) {
+						BadgeService.AwardBadge(player.UserId, this.badges.BETA);
+					}
 
-						BadgeService.AwardBadge(player.UserId, this.badges.PRE_BETA_2024);
-						$log(`Awarded PRE_BETA_2024 to ${player.Name}`);
+					// PRE-Beta badge
+					if (GameDefinitions.getRank(player) === 2) {
+						if (!BadgeService.UserHasBadgeAsync(player.UserId, this.badges.PRE_BETA)) {
+							BadgeService.AwardBadge(player.UserId, this.badges.PRE_BETA);
+						}
 					}
 				} catch {
-					$log(`Failed to give PRE_BETA_2024 to ${player.Name}`);
+					$log(`Failed to give badge to ${player.Name}`);
 				}
 			});
 		});
