@@ -96,10 +96,10 @@ export class NewSettingsPopup extends Popup<NewSettingsPopupDefinition> {
 				CustomRemotes.gui.settings.permissions.updateBlacklist.send(players);
 			});
 
-			isolationMode.value.changed.Connect((value) => {
+			isolationMode.value.subscribe((value) => {
 				blacklist.setVisible(!value);
 				CustomRemotes.gui.settings.permissions.isolationMode.send(value);
-			});
+			}, true);
 
 			this.sceneParent.add(blacklist);
 			this.sceneParent.add(isolationMode);
