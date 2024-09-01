@@ -1,4 +1,5 @@
 import { MessagingService, Players, RunService, Workspace } from "@rbxts/services";
+import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
 import { registerOnRemoteEvent } from "server/network/event/RemoteHandler";
 import { ServerPartUtils } from "server/plots/ServerPartUtils";
 import { BlockManager } from "shared/building/BlockManager";
@@ -26,7 +27,13 @@ export class ServerRestartController extends HostedService {
 				);
 			});
 
-			registerOnRemoteEvent("Admin", "Restart", (player, restart) => this.restart(false, restart));
+			registerOnRemoteEvent("Admin", "Restart", (player, restart) => {
+				if (isNotAdmin_AutoBanned(player, "restart")) {
+					return;
+				}
+
+				this.restart(false, restart);
+			});
 		});
 	}
 

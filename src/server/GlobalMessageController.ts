@@ -1,6 +1,6 @@
 import { MessagingService, RunService } from "@rbxts/services";
+import { isNotAdmin_AutoBanned } from "server/BanAdminExploiter";
 import { registerOnRemoteEvent } from "server/network/event/RemoteHandler";
-import { GameDefinitions } from "shared/data/GameDefinitions";
 import { HostedService } from "shared/GameHost";
 import { Remotes } from "shared/Remotes";
 
@@ -27,7 +27,9 @@ export class GlobalMessageController extends HostedService {
 	}
 
 	private sendMessageAsAdmin(player: Player, text: string, color?: Color3, duration?: number) {
-		if (!GameDefinitions.isAdmin(player)) return;
+		if (isNotAdmin_AutoBanned(player, "globalMessage")) {
+			return;
+		}
 
 		task.spawn(() => {
 			MessagingService.PublishAsync("global_message", {
