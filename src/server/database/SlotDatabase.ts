@@ -22,7 +22,7 @@ export class SlotDatabase {
 		this.blocksdb = new Db<string | undefined>(
 			this.datastore,
 			() => undefined,
-			(data) => data,
+			(data) => data ?? "",
 			(data) => data,
 		);
 
