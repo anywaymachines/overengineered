@@ -95,7 +95,7 @@ export class UnreliableRemoteController extends HostedService {
 				const flameHitParts = Workspace.GetPartBoundsInRadius(part.Position, radius * 1.5);
 
 				flameHitParts.forEach((part) => {
-					if (math.random(1, 3) === 1) {
+					if (math.random(1, 8) === 1) {
 						spreadingFire.burn(part);
 					}
 				});
