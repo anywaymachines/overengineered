@@ -9,6 +9,7 @@ export class TNTBlockLogic extends ConfigurableBlockLogic<typeof blockConfigRegi
 
 		this.event.subscribe(this.instance.PrimaryPart!.Touched, (part) => {
 			if (!this.input.impact.get()) return;
+			if (part.CollisionGroup !== "Blocks" && part.CollisionGroup !== "Default") return;
 
 			const velocity1 = this.instance.PrimaryPart!.AssemblyLinearVelocity.Magnitude;
 			const velocity2 = part.AssemblyLinearVelocity.Magnitude;
