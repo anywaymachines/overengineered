@@ -1,6 +1,8 @@
-import { Players, RunService } from "@rbxts/services";
+import { Base64 } from "@rbxts/crypto";
+import { HttpService, Players, RunService } from "@rbxts/services";
 import { DiscordWebhook } from "server/DiscordWebhook";
 import { GameDefinitions } from "shared/data/GameDefinitions";
+import type { BootFlag } from "server/BootFlagsController";
 
 namespace LoggingMetrics {
 	const storage: string[] = [];
@@ -39,7 +41,7 @@ namespace LoggingMetrics {
 			sendMetrics();
 		});
 
-		addLine("**SERVER STARTED**\n")
+		addLine("**SERVER STARTED**\n");
 	}
 
 	export function addLine(text: string) {
@@ -56,7 +58,7 @@ namespace LoggingMetrics {
 				{
 					description: content,
 					title: GameDefinitions.isTestPlace() ? "⚠️ Internal" : "✅ Production",
-					url: `https://www.roblox.com/games/start?placeId=16302670534&launchData=${game.PlaceId}/${game.JobId}`,
+					url: `https://www.roblox.com/games/start?placeId=${game.PlaceId}&launchData=${Base64.Encode(HttpService.JSONEncode({ task: 0, jobId: game.JobId } as BootFlag))}`,
 					color: 0,
 					timestamp: DateTime.now().ToIsoDate(),
 					footer: {
