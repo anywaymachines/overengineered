@@ -15,6 +15,7 @@ export class SuspensionLogic extends ConfigurableBlockLogic<typeof blockConfigRe
 		super(block, blockConfigRegistry.suspensionblock);
 		this.springConstraint = this.instance.SpringSide.Spring;
 
+		this.springConstraint.MaxForce = this.input.max_force.get();
 		this.springConstraint.Damping = this.input.damping.get();
 		this.springConstraint.Stiffness = this.input.stiffness.get();
 		this.event.subscribeObservable(this.input.free_length, (v) => (this.springConstraint.FreeLength = v), true);

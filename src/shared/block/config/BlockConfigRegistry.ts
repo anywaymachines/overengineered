@@ -831,6 +831,15 @@ const suspensionblock = {
 			step: 0.01,
 			config: 4.5 as number,
 		},
+		max_force: {
+			displayName: "Force",
+			type: "clampedNumber",
+			min: 1,
+			max: 800000,
+			step: 0.1,
+			default: 1000 as number,
+			config: 1000 as number,
+		},
 	},
 	output: {},
 } as const satisfies BlockConfigBothDefinitions;
