@@ -438,7 +438,7 @@ const registry = {
 	block: {
 		name: "Block",
 		description: "Makes you question why every engineering game has it",
-		mirrorBehaviour: "none",
+		mirrorBehaviour: "offset90",
 	},
 	truss: {
 		name: "Truss",
