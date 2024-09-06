@@ -101,7 +101,7 @@ export class RCSEngineLogic extends ConfigurableBlockLogic<typeof blockConfigReg
 	private readonly maxPower;
 
 	// Const
-	private readonly maxSoundVolume = 0.5;
+	private readonly maxSoundVolume = 0.25;
 	private readonly maxParticlesAcceleration = 120;
 
 	private thrust: Vector3 = Vector3.zero;
@@ -113,26 +113,17 @@ export class RCSEngineLogic extends ConfigurableBlockLogic<typeof blockConfigReg
 	) {
 		super(block, blockConfigRegistry.rcsengine);
 
-		// Instances
-		const colbox = this.instance.ColBox;
-
 		for (const d of this.engineData) {
 			d.vectorForce = d.engine.VectorForce;
 			d.soundEmitter = d.engine.Sound;
 		}
 
-		// Math
-		let multiplier = math.round((colbox.Size.X * colbox.Size.Y * colbox.Size.Z) / 16);
-
-		// i dont remember why
-		if (multiplier !== 1) multiplier *= 2;
-
 		// The strength depends on the material
-		multiplier *= math.max(1, math.round(new PhysicalProperties(this.block.material).Density / 2));
+		const multiplier = math.max(1, math.round(new PhysicalProperties(this.block.material).Density / 2));
 
 		// Max power
 		this.maxPower = this.basePower * multiplier;
-		//this.output.maxpower.set(this.maxPower);
+		this.output.maxpower.set(this.maxPower);
 
 		const setEngineThrust = (engine: singleEngineConfiguration, thrustPercentage: number) => {
 			if (!engine.particleEmitter.Fire) return;

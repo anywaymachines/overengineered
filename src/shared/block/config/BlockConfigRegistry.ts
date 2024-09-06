@@ -452,7 +452,14 @@ const rcsengine = {
 			connectorHidden: true,
 		},
 	},
-	output: {},
+	output: {
+		maxpower: {
+			displayName: "Max Power (Newtons)",
+			type: "number",
+			default: 0 as number,
+			config: 0 as number,
+		},
+	},
 } as const satisfies BlockConfigBothDefinitions;
 
 const piston = {
