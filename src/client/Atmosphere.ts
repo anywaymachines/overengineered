@@ -23,7 +23,7 @@ export namespace Atmosphere {
 		Workspace.Atmosphere.Surface.Size = new Vector3(32, 32, 32);
 
 		// Rotation animation
-		RunService.RenderStepped.Connect((dT) => {
+		RunService.Heartbeat.Connect((dT) => {
 			const playerPosition = LocalPlayer.character.get()?.GetPivot().Position;
 
 			// Position and rotation animation
@@ -37,7 +37,7 @@ export namespace Atmosphere {
 			);
 
 			const darknessReachPercent = math.clamp(
-				((playerPosition?.Y ?? 0) - GameDefinitions.HEIGHT_OFFSET) / (GameEnvironment.ZeroGravityHeight * 1.2),
+				((playerPosition?.Y ?? 0) - GameDefinitions.HEIGHT_OFFSET) / GameEnvironment.ZeroGravityHeight,
 				0,
 				1,
 			);
@@ -52,28 +52,20 @@ export namespace Atmosphere {
 			Lighting.Atmosphere.Density = (1 - zeroAirReachPercent) * normalAtmosphereDensity;
 
 			// Skybox replacements
-			if (darknessReachPercent >= 1) {
+			if (darknessReachPercent >= 1 && Lighting.Sky.SkyboxBk !== darknessSkyboxID) {
 				Lighting.Sky.SkyboxBk = darknessSkyboxID;
 				Lighting.Sky.SkyboxDn = darknessSkyboxID;
 				Lighting.Sky.SkyboxFt = darknessSkyboxID;
 				Lighting.Sky.SkyboxLf = darknessSkyboxID;
 				Lighting.Sky.SkyboxRt = darknessSkyboxID;
 				Lighting.Sky.SkyboxUp = darknessSkyboxID;
-			} else {
+			} else if (darknessReachPercent < 1 && Lighting.Sky.SkyboxBk !== normalSkyboxData.SkyboxBk) {
 				Lighting.Sky.SkyboxBk = normalSkyboxData.SkyboxBk;
 				Lighting.Sky.SkyboxDn = normalSkyboxData.SkyboxDn;
 				Lighting.Sky.SkyboxFt = normalSkyboxData.SkyboxFt;
 				Lighting.Sky.SkyboxLf = normalSkyboxData.SkyboxLf;
 				Lighting.Sky.SkyboxRt = normalSkyboxData.SkyboxRt;
 				Lighting.Sky.SkyboxUp = normalSkyboxData.SkyboxUp;
-			}
-
-			if (darknessReachPercent > 0.6) {
-				const maxHaze = 3;
-				const haze = maxHaze * math.pow((darknessReachPercent - 0.6) / (1 - 0.6), 2);
-				Lighting.Atmosphere.Haze = math.min(maxHaze, haze);
-			} else {
-				Lighting.Atmosphere.Haze = 0;
 			}
 		});
 	}
