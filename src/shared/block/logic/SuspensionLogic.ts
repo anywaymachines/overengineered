@@ -22,4 +22,4 @@ export class SuspensionLogic extends ConfigurableBlockLogic<typeof blockConfigRe
 			this.springConstraint.Stiffness = this.input.stiffness.get();
 		});
 	}
-}
+} 
