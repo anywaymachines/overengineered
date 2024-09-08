@@ -683,6 +683,10 @@ const registry = {
 		name: "Mass Sensor",
 		description: "Returns the current contraption/assembly mass",
 	},
+	firesensor: {
+		name: "Fire Sensor",
+		description: "Returns true if fire got detected",
+	},
 	gravitysensor: {
 		name: "Gravity Sensor",
 		description: "Returns the current gravity acceleration in m/s²",

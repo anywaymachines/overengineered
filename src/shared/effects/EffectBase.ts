@@ -3,7 +3,7 @@ import { SharedImpl } from "shared/SharedImpl";
 import type { CreatableRemoteEvents } from "shared/event/RemoteEventBase";
 
 abstract class _EffectBase<T> {
-	protected readonly event;
+	readonly event;
 
 	constructor(name: string, eventType: CreatableRemoteEvents = "UnreliableRemoteEvent") {
 		this.event = new BidirectionalRemoteEvent<T>(name, eventType);

@@ -21,6 +21,7 @@ import { ImpulseGeneratorBlockLogic } from "shared/block/logic/logic/other/Impul
 import { SingleImpulseBlockLogic } from "shared/block/logic/logic/other/SingleImpulseBlockLogic";
 import { AltimeterBlockLogic } from "shared/block/logic/logic/sensor/AltimeterBlockLogic";
 import { AngleSensorBlockLogic } from "shared/block/logic/logic/sensor/AngleSensorBlockLogic";
+import { FireSensorBlockLogic } from "shared/block/logic/logic/sensor/FireSensorBlockLogic";
 import { GravitySensorBlockLogic } from "shared/block/logic/logic/sensor/GravitySensorBlockLogic";
 import { KeySensorBlockLogic } from "shared/block/logic/logic/sensor/KeySensorBlockLogic";
 import { MassSensorBlockLogic } from "shared/block/logic/logic/sensor/MassSensorBlockLogic";
@@ -104,6 +105,7 @@ const logicRegistry = {
 	ownerlocator: OwnerLocatorBlockLogic,
 	ownercameralocator: OwnerCameraLocatorBlockLogic,
 	masssensor: MassSensorBlockLogic,
+	firesensor: FireSensorBlockLogic,
 	gravitysensor: GravitySensorBlockLogic,
 	tpscounter: TpsCounterBlockLogic,
 
