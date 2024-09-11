@@ -57,10 +57,13 @@ namespace LoggingMetrics {
 			embeds: [
 				{
 					description: content,
-					title: GameDefinitions.isTestPlace() ? "⚠️ Internal" : "✅ Production",
-					url: `https://www.roblox.com/games/start?placeId=${game.PlaceId}&launchData=${Base64.Encode(HttpService.JSONEncode({ task: 0, jobId: game.JobId } as BootFlag))}`,
+					title: GameDefinitions.isTestPlace() ? "⚠️ Internal" : undefined,
 					color: 0,
 					timestamp: DateTime.now().ToIsoDate(),
+					author: {
+						name: "JOIN",
+						url: `https://www.roblox.com/games/start?placeId=${game.PlaceId}&launchData=${Base64.Encode(HttpService.JSONEncode({ task: 0, jobId: game.JobId } as BootFlag))}`,
+					},
 					footer: {
 						text:
 							`🔨 Build ${game.PlaceVersion}` +
