@@ -16,7 +16,7 @@ export namespace ChatController {
 						- no i dont think so
 					*/
 					props.PrefixText =
-						`<font color='#ff5555'>[${player.Name === "3QAXM" ? "Founder" : "Developer"}]</font>` +
+						`<font color='#ff5555'>[${player.Name === "3QAXM" ? "Founder" : "Developer"}]</font> ` +
 						message.PrefixText;
 
 					props.Text = `<b>` + message.Text + `</b>`;
