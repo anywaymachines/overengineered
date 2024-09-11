@@ -87,6 +87,11 @@ export class BuildingMode extends PlayMode {
 			task.spawn(() => SharedRagdoll.event.send(false));
 		}
 
+		if (humanoid.Sit) {
+			humanoid.Sit = false;
+			task.wait();
+		}
+
 		const pos = this.targetPlot.get().getSpawnPosition();
 		rootPart.CFrame = new CFrame(pos);
 		rootPart.AssemblyLinearVelocity = Vector3.zero;
