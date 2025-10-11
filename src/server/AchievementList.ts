@@ -806,6 +806,54 @@ class AchievementFindUFO extends AchievementFindGetNearObject {
 	}
 }
 
+// I would not be surprised if the name gets changed (I couldent think of anything else that fits)
+@injectable
+class BonkBonkByeBye extends Achievement {
+	constructor(@inject player: Player) {
+		super(player, {
+			id: "MAXWELL_BONK",
+			name: "Bonk bonk bye bye!",
+			description: "Knock Maxwell off Big John, how rude >:(",
+			// add an image if you want
+			// imageID: "0",
+			hidden: true,
+		});
+
+		// Maxwell not important enough for a capital name???
+		const maxwell = ws.Map["Main Island"].Fun.Destructibles.FindFirstChild("maxwell") as MeshPart;
+		if (!maxwell) return;
+
+		// keep track of the last player that touched maxwell
+		let maxtag = maxwell.FindFirstChild("MaxwellPlayerTag") as IntValue;
+		if (!maxtag) {
+			// create it
+			maxtag = new Instance("IntValue", maxwell);
+		}
+
+		maxwell.Touched.Connect((hitPart)=>{
+			const character = hitPart.FindFirstAncestorWhichIsA("Model");
+			if (!character) return;
+			const plr = Players.GetPlayerFromCharacter(character);
+			// check if player exists
+			if (plr && plr.UserId === player.UserId) {
+				maxtag.Value = plr.UserId;
+			}
+		})
+
+		this.event.subscribe(RunService.Heartbeat, ()=>{
+			if (!maxwell) return;
+			print(maxtag.Value)
+
+			// this is how the game triggers *the screaming*
+			// (slightly increased to make sure its falling)
+			if (maxwell.AssemblyLinearVelocity.Magnitude > 20) {
+				if (maxtag.Value !== player.UserId) return;
+				this.set({ completed: true });
+			}
+		})
+	}
+}
+
 @injectable
 class AchievementBreakSomething extends Achievement {
 	constructor(@inject player: Player) {
@@ -884,6 +932,7 @@ export const allAchievements: readonly ConstructorOf<Achievement>[] = [
 	AchievementBreakSomething,
 	AchievementFindBanana,
 	AchievementFindUFO,
+	BonkBonkByeBye,
 
 	AchievementCentrifuge30seconds,
 	AchievementCentrifuge20seconds,
