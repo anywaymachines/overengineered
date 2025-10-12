@@ -149,12 +149,19 @@ function getPercent2Studs(percent: number, totalLength: number) {
 
 // base slider class (NO DEFINITION)
 abstract class SliderBlockLogic_Base extends InstanceBlockLogic<typeof sliderDefinition, SliderBlockModel> {
+	// it doesnt work without it like this
+	protected readonly default_length: number = 3;
+	protected readonly isCentered: boolean = true;
+
 	constructor(def: typeof sliderDefinition, block: InstanceBlockLogicArgs) {
 		super(def, block);
 
 		// base definitions here because we do things this way
-		const default_length: number = 3;
-		const isCentered = true;
+		// - these wont get updated when making the classes being used
+		// - using this.___ is needed again so it updates
+		// - the const's wont update and wont work with the system im usin
+		// const default_length: number = 3;
+		// const isCentered = true;
 		const slider = this.instance.TrackBase.PrismaticConstraint;
 
 		const blockScale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
@@ -166,8 +173,8 @@ abstract class SliderBlockLogic_Base extends InstanceBlockLogic<typeof sliderDef
 
 		this.onk(["targetPos"], ({ targetPos }) => {
 			// calculate the position based on percent
-			let pos = getPercent2Studs(targetPos, default_length * blockScale.Z);
-			if (!isCentered) {
+			let pos = getPercent2Studs(targetPos, this.default_length * blockScale.Z);
+			if (!this.isCentered) {
 				pos = math.max(pos, 0);
 			}
 			slider.TargetPosition = pos;
@@ -186,9 +193,9 @@ abstract class SliderBlockLogic_Base extends InstanceBlockLogic<typeof sliderDef
 		});
 
 		this.onFirstInputs(() => {
-			const limit = default_length * blockScale.Z;
-			slider.LowerLimit = isCentered ? -limit : 0;
-			slider.UpperLimit = isCentered ? limit : limit * 2;
+			const limit = this.default_length * blockScale.Z;
+			slider.LowerLimit = this.isCentered ? -limit : 0;
+			slider.UpperLimit = this.isCentered ? limit : limit * 2;
 		});
 	}
 }
@@ -207,6 +214,8 @@ export class Limit_SliderBlockLogic extends SliderBlockLogic {
 
 // make on edge
 export class Edge_Limit_SliderBlockLogic extends SliderBlockLogic_Base {
+	// these are the settings for the classes
+	// its better than copying/pasting the same classes multiple times
 	protected readonly default_length = sliderWidth - 1; // takes the full range
 	protected readonly isCentered = false;
 	constructor(block: InstanceBlockLogicArgs) {
