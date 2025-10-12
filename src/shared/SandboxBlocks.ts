@@ -31,7 +31,7 @@ import { StringOperationBlocks } from "shared/blocks/blocks/grouped/StringOperat
 import { TNTBlocks } from "shared/blocks/blocks/grouped/TNTBlocks";
 import { WheelBlocks } from "shared/blocks/blocks/grouped/WheelBlocks";
 import { WingBlocks } from "shared/blocks/blocks/grouped/WingsBlocks";
-import { LinearSliderBlocks } from "./blocks/blocks/grouped/LinearSliders";
+import { LinearSliderBlocks } from "shared/blocks/blocks/grouped/LinearSliders";
 import { GuiButtonBlock } from "shared/blocks/blocks/gui/GuiButtonBlock";
 import { GuiImageBlock } from "shared/blocks/blocks/gui/GuiImageBlock";
 import { GuiStatBlock } from "shared/blocks/blocks/gui/GuiStatBlock";
