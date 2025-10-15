@@ -6,6 +6,7 @@ import { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockConfigDefinitions } from "shared/blocks/BlockConfigDefinitions";
 import { BlockCreation } from "shared/blocks/BlockCreation";
+import { BlockManager } from "shared/building/BlockManager";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -85,6 +86,11 @@ class Logic extends InstanceBlockLogic<typeof definition, ScreenBlock> {
 
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
+
+		const defaultPixelDensity = 80;
+		const blockScale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
+		this.instance.Part.SurfaceGui.PixelsPerStud =
+			defaultPixelDensity / math.min(1, math.sqrt(blockScale.X * blockScale.Z));
 
 		this.on(({ data, textColor }) => {
 			events.update.sendOrBurn({ block: this.instance, color: textColor, data }, this);
