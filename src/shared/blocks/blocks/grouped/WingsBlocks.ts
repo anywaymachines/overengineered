@@ -40,8 +40,6 @@ type WingBlock = BlockModel & {
 const FORCE_MULTIPLIER = -20.5; // F = -ρ * A * v * CL, ~~ -(5 * 5.3 * 4)
 const HEIGHT_FACTOR_EXPONENT = 2; // for h = 1 - (y/H)^exp
 const MIN_HORIZONTAL_SPEED = 30; // Minimum horizontal speed for full lift (studs/sec) - lower for easier gliding
-const MIN_SPEED = 0.1; // optimization n shit
-const MIN_LIFT = 100;
 
 export type { Logic as WingsBlockLogic };
 @injectable
@@ -98,7 +96,6 @@ class Logic extends InstanceBlockLogic<typeof definition, WingBlock> {
 				// Step 1: Calculate effective velocity including rotation
 				// Linear velocity component
 				const linearVelocity = wing.AssemblyLinearVelocity;
-				if (RunService.IsStudio()) vectorForce.Visible = true;
 
 				// Angular velocity contribution: v = ω × r (cross product)
 				// where r is the vector from center of mass to wing position
@@ -124,7 +121,7 @@ class Logic extends InstanceBlockLogic<typeof definition, WingBlock> {
 				// Step 4: Reduce horizontal drag to prevent speed loss during gliding
 				// Only apply force multiplier to vertical component (Y) for lift
 				// Reduce horizontal components (X, Z) to minimize drag
-				const HORIZONTAL_DRAG_REDUCTION = 0.05; // Reduce horizontal drag by 95%
+				const HORIZONTAL_DRAG_REDUCTION = 0.01; // Reduce horizontal drag by 99%
 				const adjustedVelocity = new Vector3(
 					relativeVelocity.X * HORIZONTAL_DRAG_REDUCTION,
 					relativeVelocity.Y, // Full vertical component for lift
@@ -135,19 +132,18 @@ class Logic extends InstanceBlockLogic<typeof definition, WingBlock> {
 				const velocityForce = adjustedVelocity.mul(FORCE_MULTIPLIER);
 
 				// Step 6: Calculate lift force based on effective surface
-				const liftForce = effectiveSurface.mul(velocityForce);
+				let liftForce = effectiveSurface.mul(velocityForce);
 
-				let intermediate = new Vector3();
-				if (linearVelocity.Magnitude > MIN_SPEED) {
+				if (linearVelocity.Magnitude > 1e-6) {
 					const airflowDir = linearVelocity.Unit.mul(-1); // opposite motion
 					const dot = airflowDir.Dot(wing.CFrame.UpVector);
 					const aoa = math.asin(math.clamp(dot, -1, 1));
 					const test = airflowDir.mul(math.abs(aoa) * effectiveVelocity.Magnitude);
-					intermediate = liftForce.add(test);
+					liftForce = liftForce.add(test);
 				}
 
 				// Step 7: Scale lift by speed factor (less lift at low speeds)
-				const scaledLiftForce = liftForce.add(intermediate).mul(speedFactor);
+				const scaledLiftForce = liftForce.mul(speedFactor);
 
 				// Step 8: Average with previous force for stability
 				const averagedForce = scaledLiftForce.add(vectorForce.Force).div(2);
