@@ -6,6 +6,7 @@ import { BallastBlock } from "shared/blocks/blocks/BallastBlock";
 import { BeaconBlock } from "shared/blocks/blocks/BeaconBlock";
 import { BearingShaftBlock } from "shared/blocks/blocks/BearingShaftBlock";
 import { BracedShaftBlock } from "shared/blocks/blocks/BracedShaftBlock";
+import { BreakSensorBlock } from "shared/blocks/blocks/BreakSensor";
 import { ButtonBlock } from "shared/blocks/blocks/ButtonBlock";
 import { CameraBlock } from "shared/blocks/blocks/CameraBlock";
 import { ControllerBlock } from "shared/blocks/blocks/ControllerBlock";
@@ -197,6 +198,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		AngleSensorBlock,
 		GPSSensorBlock,
 		FireSensorBlock,
+		BreakSensorBlock,
 		OwnerLocatorBlock,
 		OwnerCameraLocatorBlock,
 		GravitySensorBlock,
