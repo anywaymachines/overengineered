@@ -1,5 +1,7 @@
-// import { RunService } from "@rbxts/services";
+import { RunService } from "@rbxts/services";
+import { t } from "engine/shared/t";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
+import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { BlockManager } from "shared/building/BlockManager";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -8,6 +10,7 @@ import type { BlockBuildersWithoutIdAndDefaults } from "shared/blocks/Block";
 type SliderBlockModel = BlockModel & {
 	TrackBase: BasePart & {
 		PrismaticConstraint: PrismaticConstraint;
+		Weld: Weld;
 	};
 
 	// plate one has it named differently
@@ -116,6 +119,7 @@ const sliderDefinition = {
 		},
 		cframe: {
 			displayName: "Infinite Torque",
+			tooltip: "The power is infinite!",
 			types: {
 				bool: {
 					config: false,
@@ -162,7 +166,7 @@ function getPercent2Studs(percent: number, totalLength: number) {
 
 // fake like reality
 class FakePrismatic {
-	private weld: Weld;
+	private block: Instance;
 	private originFrame: CFrame;
 	private currentOffset: number;
 	private targetOffset: number;
@@ -171,25 +175,27 @@ class FakePrismatic {
 	private powered: number; // number to not deal with boolean datatype
 	private maxLimit: number;
 	private minLimit: number;
+	private event: typeof SliderBlockLogic_Base.events.update;
 
 	constructor(
-		weld: Weld,
+		block: Instance,
 		originFrame: CFrame,
 		speed = 5,
 		responsiveness = 0.1,
 		minLimit = -1,
 		maxLimit = 1,
-		powered = 1,
+		update_event: typeof SliderBlockLogic_Base.events.update,
 	) {
-		this.weld = weld;
+		this.block = block;
 		this.originFrame = originFrame;
 		this.currentOffset = 0;
 		this.targetOffset = 0;
 		this.speed = speed;
 		this.responsiveness = responsiveness / 100;
-		this.powered = powered;
 		this.maxLimit = maxLimit;
 		this.minLimit = minLimit;
+		this.powered = 1;
+		this.event = update_event;
 	}
 
 	// set details
@@ -212,12 +218,39 @@ class FakePrismatic {
 		this.currentOffset = math.clamp(this.currentOffset + clampedStep, this.minLimit, this.maxLimit);
 
 		// update weld
-		this.weld.C1 = new CFrame(0, 0, this.currentOffset).mul(this.originFrame);
+		const block = this.block as SliderBlockModel;
+		const c = new CFrame(0, 0, this.currentOffset).mul(this.originFrame);
+		this.event.send({
+			block,
+			frame: c,
+		});
 	}
 }
 
+const updateType = t.intersection(
+	t.interface({
+		block: t.instance("Model").as<SliderBlockModel>(),
+		frame: t.cframe,
+	}),
+);
+type updateType = t.Infer<typeof updateType>;
+
+const update = ({ block, frame }: updateType) => {
+	if (!block) return;
+
+	const weld = block.TrackBase.Weld;
+	if (!weld.Enabled) {
+		weld.Enabled = true;
+	}
+	weld.C1 = frame;
+};
+
 // base slider class (NO DEFINITION)
 abstract class SliderBlockLogic_Base extends InstanceBlockLogic<typeof sliderDefinition, SliderBlockModel> {
+	static readonly events = {
+		update: new BlockSynchronizer("slider_cframe_update", updateType, update, "RemoteEvent"),
+	} as const;
+
 	constructor(
 		def: typeof sliderDefinition,
 		block: InstanceBlockLogicArgs,
@@ -231,8 +264,8 @@ abstract class SliderBlockLogic_Base extends InstanceBlockLogic<typeof sliderDef
 		const sliderPart =
 			(this.instance.FindFirstChild("TrackSlider") as BasePart) ||
 			(this.instance.FindFirstChild("TrackTop") as BasePart);
-		let cframeWeld: Weld | undefined;
 		let fakePrismatic: FakePrismatic | undefined;
+		let preSim: RBXScriptConnection | undefined;
 
 		const blockScale = BlockManager.manager.scale.get(this.instance) ?? Vector3.one;
 		const scale = blockScale.X * blockScale.Y * blockScale.Z;
@@ -247,8 +280,8 @@ abstract class SliderBlockLogic_Base extends InstanceBlockLogic<typeof sliderDef
 
 		this.onk(["max_force"], ({ max_force }) => {
 			// cframe doesnt have force
-			// if (fakePrismatic !== undefined) return;
-			slider.ServoMaxForce = max_force * 1_000 * math.max(0.95, scale);
+			if (fakePrismatic !== undefined) return;
+			slider.ServoMaxForce = max_force * 10_000 * math.max(0.95, scale);
 		});
 
 		// non cframe stuff
@@ -291,28 +324,36 @@ abstract class SliderBlockLogic_Base extends InstanceBlockLogic<typeof sliderDef
 			slider.LowerLimit = lowerLimit;
 			slider.UpperLimit = upperLimit;
 
-			/*if (cframe) {
+			if (cframe) {
 				slider.Enabled = false;
 
-				// makea da weld
-				cframeWeld = new Instance("Weld");
-
 				const originFrame = sliderPart.CFrame.ToObjectSpace(trackBase.CFrame);
-				cframeWeld.C0 = new CFrame();
-				cframeWeld.C1 = originFrame;
 
-				fakePrismatic = new FakePrismatic(cframeWeld, originFrame, speed, stiffness, lowerLimit, upperLimit);
-
-				cframeWeld.Part0 = trackBase;
-				cframeWeld.Part1 = sliderPart;
-				cframeWeld.Parent = trackBase;
+				fakePrismatic = new FakePrismatic(
+					this.instance,
+					originFrame,
+					speed,
+					stiffness,
+					lowerLimit,
+					upperLimit,
+					SliderBlockLogic_Base.events.update,
+				);
 
 				// needed as slider moves between inputs
-				RunService.PreSimulation.Connect((delta) => {
+				preSim = RunService.PreSimulation.Connect((delta) => {
 					fakePrismatic?.tick(delta);
 				});
-			}*/
+			}
 		});
+
+		const disableSelf = () => {
+			// remove event on destroy
+			if (preSim !== undefined) {
+				preSim.Disconnect();
+			}
+		};
+		this.onDisable(disableSelf);
+		this.onDestroy(disableSelf);
 	}
 }
 
@@ -359,6 +400,9 @@ class Edge_Limit_SliderBlockLogic_Wide extends SliderBlockLogic_Base {
 const search = {
 	partialAliases: ["rail", "track"],
 };
+const default_items = {
+	definition: sliderDefinition,
+};
 const list: BlockBuildersWithoutIdAndDefaults = {
 	// the id VVV
 	// TSliderDualPlate
@@ -366,7 +410,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Linear Rail Slider",
 		description: "It slides along, waiting to be destroyed like my sanity.", // gotta make sure it fits with the theme of depres.. warm happiness!
 		search,
-		logic: { definition: sliderDefinition, ctor: SliderBlockLogic },
+		logic: { ctor: SliderBlockLogic, ...default_items },
 	},
 	// TSliderFull
 	// above but with a guide
@@ -374,7 +418,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Linear Guide-Rail Slider",
 		description: "A 'Linear Rail Slider' but a different model.",
 		search,
-		logic: { definition: sliderDefinition, ctor: SliderBlockLogic },
+		logic: { ctor: SliderBlockLogic, ...default_items },
 	},
 
 	// TSliderCenter
@@ -383,7 +427,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Linear Carriage Slider (Centered)",
 		description: "Slides linearly with a carriage in the center.",
 		search,
-		logic: { definition: sliderDefinition, ctor: Limit_SliderBlockLogic },
+		logic: { ctor: Limit_SliderBlockLogic, ...default_items },
 	},
 	// TSliderEdge
 	// above but the carriage is at the end
@@ -391,7 +435,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Linear Carriage Slider (Edge)",
 		description: "Slides linearly with a carriage at the edge.",
 		search,
-		logic: { definition: sliderDefinition_edge, ctor: Edge_Limit_SliderBlockLogic },
+		logic: { ctor: Edge_Limit_SliderBlockLogic, ...default_items },
 	},
 
 	// TSliderCenterWide
@@ -400,7 +444,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Linear Wide Carriage Slider (Centered)",
 		description: "Slides linearly with a carriage in the center. But its a wide carriage.",
 		search,
-		logic: { definition: sliderDefinition, ctor: Limit_SliderBlockLogic_Wide },
+		logic: { ctor: Limit_SliderBlockLogic_Wide, ...default_items },
 	},
 	// TSliderEdgeWide
 	// TSliderEdge but with a wide carriage
@@ -408,7 +452,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Linear Wide Carriage Slider (Edge)",
 		description: "Slides linearly with a carriage at the edge. But its a wide carriage.",
 		search,
-		logic: { definition: sliderDefinition_edge, ctor: Edge_Limit_SliderBlockLogic_Wide },
+		logic: { ctor: Edge_Limit_SliderBlockLogic_Wide, ...default_items },
 	},
 };
 export const LinearSliderBlocks = BlockCreation.arrayFromObject(list);
