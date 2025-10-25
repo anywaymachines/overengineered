@@ -22,6 +22,7 @@ import { BasicLogicGateBlocks } from "shared/blocks/blocks/grouped/BasicLogicGat
 import { BasicOperationBlocks } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
 import { BuildingBlocks } from "shared/blocks/blocks/grouped/BuildingBlocks";
 import { HingeBlocks } from "shared/blocks/blocks/grouped/HingeBlocks";
+import { TurnTables } from "shared/blocks/blocks/grouped/TurnTables";
 import { LampBlocks } from "shared/blocks/blocks/grouped/LampBlocks";
 import { LinearSliderBlocks } from "shared/blocks/blocks/grouped/LinearSliders";
 import { MechanicalBlocks } from "shared/blocks/blocks/grouped/MechanicalBlocks";
@@ -144,6 +145,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		...HingeBlocks,
 		...StringOperationBlocks,
 		...LinearSliderBlocks,
+		...TurnTables,
 
 		PistonBlock,
 		MotorBlock,
