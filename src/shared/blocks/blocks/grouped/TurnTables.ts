@@ -326,7 +326,7 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 	},
 	turntablemotor: {
 		displayName: "Turn Table Motor",
-		description: "Like  the 'Turn Table Hinge', but now it spins me right round, baby, right round",
+		description: "Like the 'Turn Table Hinge', but now it spins me right round, baby, right round",
 
 		logic: { definition: motorDefinition, ctor: TurnTableMotorLogic },
 		search: { partialAliases: [...defAlias, "motor"] },
