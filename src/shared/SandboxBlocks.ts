@@ -22,7 +22,6 @@ import { BasicLogicGateBlocks } from "shared/blocks/blocks/grouped/BasicLogicGat
 import { BasicOperationBlocks } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
 import { BuildingBlocks } from "shared/blocks/blocks/grouped/BuildingBlocks";
 import { HingeBlocks } from "shared/blocks/blocks/grouped/HingeBlocks";
-import { TurnTables } from "shared/blocks/blocks/grouped/TurnTables";
 import { LampBlocks } from "shared/blocks/blocks/grouped/LampBlocks";
 import { LinearSliderBlocks } from "shared/blocks/blocks/grouped/LinearSliders";
 import { MechanicalBlocks } from "shared/blocks/blocks/grouped/MechanicalBlocks";
@@ -30,6 +29,7 @@ import { PropellantBlocks } from "shared/blocks/blocks/grouped/PropellantBlocks"
 import { ServoMotorBlocks } from "shared/blocks/blocks/grouped/ServoMotorBlocks";
 import { StringOperationBlocks } from "shared/blocks/blocks/grouped/StringOperationBlocks";
 import { TNTBlocks } from "shared/blocks/blocks/grouped/TNTBlocks";
+import { TurnTables } from "shared/blocks/blocks/grouped/TurnTables";
 import { WheelBlocks } from "shared/blocks/blocks/grouped/WheelBlocks";
 import { WingBlocks } from "shared/blocks/blocks/grouped/WingsBlocks";
 import { GuiButtonBlock } from "shared/blocks/blocks/gui/GuiButtonBlock";
