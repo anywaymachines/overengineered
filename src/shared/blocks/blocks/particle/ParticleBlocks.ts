@@ -159,7 +159,9 @@ namespace ParticleEmitter {
 				),
 			);
 
-			this.onDisable(() => (this.instance.Body.ParticleEmitter.Enabled ??= false));
+			this.onDisable(() => {
+				Logic.events.enable.sendOrBurn({ block: this.instance, enabled: false }, this);
+			});
 		}
 	}
 

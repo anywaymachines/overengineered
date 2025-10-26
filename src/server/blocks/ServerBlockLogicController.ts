@@ -7,7 +7,6 @@ import { CameraBlockServerLogic } from "server/blocks/logic/CameraBlockServerLog
 import { DisconnectBlockServerLogic } from "server/blocks/logic/DisconnectBlockServerLogic";
 import { LEDDisplayServerLogic } from "server/blocks/logic/LEDDisplayServerLogic";
 import { ParticleServerLogic } from "server/blocks/logic/ParticleBlockServerLogic";
-import { PistonBlockServerLogic } from "server/blocks/logic/PistonBlockServerLogic";
 import { PropellantBlockServerLogic } from "server/blocks/logic/PropellantBlocksServerLogic";
 import { ScreenServerLogic } from "server/blocks/logic/ScreenServerLogic";
 import { SevenSegmentDisplayServerLogic } from "server/blocks/logic/SevenSegmentDisplayServerLogic";
@@ -62,7 +61,6 @@ export class ServerBlockLogicController extends HostedService {
 			button: ButtonServerLogic,
 			speaker: SpeakerServerLogic,
 			particleemitter: ParticleServerLogic,
-			piston: PistonBlockServerLogic,
 			sevensegmentdisplay: SevenSegmentDisplayServerLogic,
 			bracedshaft: BracedShaftServerLogic,
 			beacon: BeaconServerLogic,

@@ -6,6 +6,7 @@ import {
 	S2C2SRemoteFunction,
 	S2CRemoteEvent,
 } from "engine/shared/event/PERemoteEvent";
+import type { damageType } from "engine/shared/BlockDamageController";
 import type { baseAchievementStats } from "server/Achievement";
 import type { PlayerFeature } from "server/database/PlayerDatabase";
 import type { AchievementData } from "shared/AchievementData";
@@ -160,6 +161,11 @@ export const CustomRemotes = {
 			"chat_ach_unlock",
 			"RemoteEvent",
 		),
+	},
+
+	damageSystem: {
+		healthInit: new S2CRemoteEvent<{ block: BlockModel; health: number }[]>("block_damage_init", "RemoteEvent"),
+		damageBlock: new C2S2CRemoteFunction<{ block: BlockModel; damage: damageType }>("block_damage"),
 	},
 
 	physics: {

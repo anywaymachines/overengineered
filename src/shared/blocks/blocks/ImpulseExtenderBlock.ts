@@ -23,6 +23,16 @@ const definition = {
 				},
 			},
 		},
+		tickBased: {
+			displayName: "Delaying in ticks",
+			tooltip: "Controls whether the duration is measued in ticks (true) or seconds (false)",
+			types: {
+				bool: {
+					config: true,
+				},
+			},
+			connectorHidden: true,
+		},
 	},
 	output: {
 		result: {
@@ -38,12 +48,20 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		super(definition, block);
 
 		let lenLeft = 0;
+		let goalTime = DateTime.now().UnixTimestampMillis / 1000;
 		const len = this.initializeInputCache("length");
 		const state = this.initializeInputCache("input");
+		const tickBased = this.initializeInputCache("tickBased");
 
 		this.onTicc(() => {
-			if (state.tryGet()) lenLeft = math.max(1, len.tryGet() ?? 0);
-			this.output.result.set("bool", --lenLeft > 0);
+			if (state.tryGet()) {
+				lenLeft = math.max(1, len.tryGet() ?? 0);
+				if (!tickBased.get()) {
+					goalTime = DateTime.now().UnixTimestampMillis / 1000 + len.get();
+				}
+			}
+			const aboveTime = goalTime - DateTime.now().UnixTimestampMillis / 1000 > 0;
+			this.output.result.set("bool", --lenLeft > 0 || aboveTime);
 		});
 	}
 }
@@ -52,7 +70,7 @@ export const ImpulseExtenderBlock = {
 	...BlockCreation.defaults,
 	id: "impulseextender",
 	displayName: "Impulse Extender",
-	description: "Extends pulse to specified amount of ticks.",
+	description: "Extends pulse to specified amount of ticks or seconds.",
 
 	modelSource: {
 		model: BlockCreation.Model.fAutoCreated("GenericLogicBlockPrefab", "ImpExt"),

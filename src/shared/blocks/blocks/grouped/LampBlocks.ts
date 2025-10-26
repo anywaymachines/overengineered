@@ -21,7 +21,7 @@ const definition = {
 			tooltip: "Enable to make brightness affect the color of the block",
 			types: {
 				bool: {
-					config: true,
+					config: false,
 				},
 			},
 		},
@@ -89,9 +89,6 @@ type lampBlock = BlockModel & {
 	};
 };
 
-const whiteColor = Color3.fromRGB(255, 255, 255);
-const blackColor = Color3.fromRGB(0, 0, 0);
-
 const update = ({ block, state, color, brightness, range, brightnessAffectsColor }: UpdateData) => {
 	const part = block.FindFirstChild("GlowingPart") as typeof block.GlowingPart;
 	if (!part) return;
@@ -100,8 +97,8 @@ const update = ({ block, state, color, brightness, range, brightnessAffectsColor
 	if (!light) return;
 
 	if (state) {
-		let commonColor = color ?? whiteColor;
-		if (brightnessAffectsColor) commonColor = blackColor.Lerp(commonColor, math.clamp(brightness + 0.2, 0, 1));
+		let commonColor = color ?? Colors.white;
+		if (brightnessAffectsColor) commonColor = Colors.black.Lerp(commonColor, math.clamp(brightness + 0.2, 0, 1));
 
 		light.Range = range;
 		part.Color = commonColor;
@@ -178,7 +175,7 @@ class Logic extends InstanceBlockLogic<typeof definition, lampBlock> {
 }
 
 //
-const search = { partialAliases: ["light"] };
+const search = { partialAliases: ["light", "glow", "moth"] };
 const logic: BlockLogicInfo = { definition, ctor: Logic, events };
 const list: BlockBuildersWithoutIdAndDefaults = {
 	lamp: {
@@ -192,6 +189,30 @@ const list: BlockBuildersWithoutIdAndDefaults = {
 		displayName: "Small Lamp",
 		description: "A simple lamp but even simpler!",
 		weldRegionsSource: BlockCreation.WeldRegions.fAutomatic("cube"),
+		logic,
+		search,
+	},
+	cylinderlamp: {
+		displayName: "Cylinder Lamp",
+		description: "Uranium.",
+		logic,
+		search,
+	},
+	hollowcylinderlamp: {
+		displayName: "Hollow Cylinder Lamp",
+		description: "Nighty night.",
+		logic,
+		search,
+	},
+	balllamp: {
+		displayName: "Ball Lamp",
+		description: "Glowy ball",
+		logic,
+		search,
+	},
+	halfballlamp: {
+		displayName: "Half Ball Lamp",
+		description: "Glowy ball, but cut in half.",
 		logic,
 		search,
 	},

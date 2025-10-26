@@ -586,7 +586,7 @@ namespace Mux {
 
 namespace Demux {
 	const definitionDemuxSmall = {
-		inputOrder: ["value", "input"],
+		inputOrder: ["value", "input", "defval"],
 		outputOrder: ["falsevalue", "truevalue"],
 		input: {
 			value: {
@@ -607,6 +607,13 @@ namespace Demux {
 			input: {
 				displayName: "Input",
 				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+
+			defval: {
+				displayName: "Default",
+				types: BlockConfigDefinitions.any,
+				group: "1",
 			},
 		},
 		output: {
@@ -633,7 +640,7 @@ namespace Demux {
 	}
 
 	const definitionDemuxBig = {
-		inputOrder: ["value", "input"],
+		inputOrder: ["value", "input", "defval"],
 		outputOrder: ["value1", "value2", "value3", "value4", "value5", "value6", "value7", "value8"],
 		input: {
 			value: {
@@ -654,6 +661,13 @@ namespace Demux {
 			input: {
 				displayName: "Input",
 				types: BlockConfigDefinitions.any,
+				group: "1",
+			},
+
+			defval: {
+				displayName: "Default",
+				types: BlockConfigDefinitions.any,
+				group: "1",
 			},
 		},
 		output: demuxBigOutputs,
@@ -719,6 +733,7 @@ namespace Demux {
 				index: number,
 				value: unknown,
 				outputType: BlockLogicTypes.IdListOfType<typeof BlockConfigDefinitions.any>,
+				defval?: unknown,
 			) => {
 				const len = outputs.size();
 				if (len === 0) return;
@@ -728,34 +743,41 @@ namespace Demux {
 				for (let i = 0; i !== len; i++) {
 					const out = outputs[i];
 					if (i !== index || value === undefined) {
-						out.unset();
+						if (defval) {
+							out.set(outputType, defval as typeof outputType);
+						} else {
+							out.unset();
+						}
 						continue;
 					}
 					out.set(outputType, value as typeof outputType);
 				}
 			};
 
-			this.onkRecalcInputsAny(["value", "input"], ({ value, valueType, valueChanged, input, inputType }) => {
-				if (value === undefined) return;
-				if (valueType === "bool") value = value ? 1 : 0;
-				else value = math.floor(value as number);
+			this.onkRecalcInputsAny(
+				["value", "input", "defval"],
+				({ value, valueType, valueChanged, input, inputType, defval }) => {
+					if (value === undefined) return;
+					if (valueType === "bool") value = value ? 1 : 0;
+					else value = math.floor(value as number);
 
-				if (!muxLamps.isEmpty() && valueChanged) {
-					events.update.sendOrBurn(
-						{
-							sender: Players.LocalPlayer,
-							block: this.instance!,
-							lamps: muxLamps,
-							index: value as number,
-							color: activeColor,
-							locallyEnabled: playerSettings?.config.get().graphics.logicEffects ?? true,
-						},
-						this,
-					);
-				}
+					if (!muxLamps.isEmpty() && valueChanged) {
+						events.update.sendOrBurn(
+							{
+								sender: Players.LocalPlayer,
+								block: this.instance!,
+								lamps: muxLamps,
+								index: value as number,
+								color: activeColor,
+								locallyEnabled: playerSettings?.config.get().graphics.logicEffects ?? true,
+							},
+							this,
+						);
+					}
 
-				demuxValue(value, input, inputType!);
-			});
+					demuxValue(value, input, inputType!, defval);
+				},
+			);
 		}
 	}
 
@@ -777,7 +799,8 @@ namespace Demux {
 			...BlockCreation.defaults,
 			id: "demultiplexer",
 			displayName: "Demultiplexer",
-			description: "Outputs values depending on 'State/Index' input",
+			description:
+				"Selects output depending on 'State/Index' input, non-indexed outputs are set to default or AVAILATER if unset",
 			search: {
 				aliases: ["mux", "demux"],
 			},
@@ -788,7 +811,8 @@ namespace Demux {
 			...BlockCreation.defaults,
 			id: "bigdemultiplexer",
 			displayName: "Demultiplexer x8",
-			description: "Outputs values depending on 'State/Index' input",
+			description:
+				"Selects output depending on 'State/Index' input, non-indexed outputs are set to default or AVAILATER if unset",
 			search: {
 				aliases: ["mux", "demux"],
 			},
