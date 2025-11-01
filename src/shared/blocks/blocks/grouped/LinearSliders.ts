@@ -248,7 +248,7 @@ const update = ({ block, frame }: updateType) => {
 // base slider class (NO DEFINITION)
 abstract class SliderBlockLogic_Base extends InstanceBlockLogic<typeof sliderDefinition, SliderBlockModel> {
 	static readonly events = {
-		update: new BlockSynchronizer("slider_cframe_update", updateType, update, "RemoteEvent"),
+		update: new BlockSynchronizer("slider_cframe_update", updateType, update),
 	} as const;
 
 	constructor(
