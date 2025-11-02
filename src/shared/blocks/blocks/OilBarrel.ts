@@ -10,7 +10,7 @@ const definition = {
 			displayName: "Explode",
 			types: {
 				bool: {
-					config: true,
+					config: false,
 				},
 			},
 			connectorHidden: true,
@@ -72,7 +72,7 @@ class Logic extends InstanceBlockLogic<typeof definition, TNTBlock> {
 			const velocity1 = mainPart.AssemblyLinearVelocity.Magnitude;
 			const velocity2 = part.AssemblyLinearVelocity.Magnitude;
 
-			if (velocity1 > (velocity2 + 1) * 10) explodeTNT();
+			if (velocity1 > (velocity2 + 1) * 3.5) explodeTNT();
 		});
 	}
 }
@@ -81,7 +81,7 @@ export const OilBarrel = {
 	...BlockCreation.defaults,
 	id: "oilbarrel",
 	displayName: "Oil barrel",
-	description: "I will approve you as an 🦅 if you don't hit it hard or make it explode!",
+	description: "Easily explode on impact i guess. Who knows?🦅",
 	search: {
 		partialAliases: ["oil", "america", "🦅", "barrel", "explosive"],
 	},
