@@ -859,7 +859,7 @@
         <float name="TopParamB">0.5</float>
         <token name="TopSurface">0</token>
         <token name="TopSurfaceInput">0</token>
-        <float name="Transparency">0</float>
+        <float name="Transparency">1</float>
         <Vector3 name="UnscaledCofm">
           <X>0.000004803139</X>
           <Y>0.0000015632562</Y>
