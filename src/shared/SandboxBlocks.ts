@@ -79,6 +79,7 @@ import { ScreenBlock } from "shared/blocks/blocks/ScreenBlock";
 import { SevenSegmentDisplayBlock } from "shared/blocks/blocks/SevenSegmentDisplayBlock";
 import { SingleImpulseBlock } from "shared/blocks/blocks/SingleImpulseBlock";
 import { SizeBlock } from "shared/blocks/blocks/SizeBlock";
+import { SolarFoil } from "shared/blocks/blocks/SolarFoil"; //hello
 import { SoundEffectBlockCreator } from "shared/blocks/blocks/sound/SoundEffectBlockCreator";
 import { SoundFromIdBlock } from "shared/blocks/blocks/sound/SoundFromIdBlock";
 import { SoundLengthBlock } from "shared/blocks/blocks/sound/SoundLengthBlock";
@@ -105,6 +106,7 @@ import { PlasmaGunBarrelBlock } from "shared/blocks/blocks/Weaponry/Plasma/Plasm
 import { PlasmaGunBlock } from "shared/blocks/blocks/Weaponry/Plasma/PlasmaGunBlock";
 import { PlasmaSeparatorMuzzleBlock } from "shared/blocks/blocks/Weaponry/Plasma/PlasmaSeparatorMuzzleBlock";
 import { PlasmaShotgunMuzzleBlock } from "shared/blocks/blocks/Weaponry/Plasma/PlasmaShotgunMuzzleBlock";
+
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -237,6 +239,8 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		GyroscopeBlock,
 		...JetEngineBlocks,
 		...GraviEngineBlocks,
+
+		SolarFoil,
 	];
 
 	if (GameDefinitions.isTesting) {
