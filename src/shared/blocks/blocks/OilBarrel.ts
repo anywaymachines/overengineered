@@ -83,7 +83,7 @@ export const OilBarrel = {
 	displayName: "Oil barrel",
 	description: "I will approve you as an 🦅 if you don't hit it hard or make it explode!",
 	search: {
-		partialAliases: ["Oil", "America", "🦅", "Barrel", "Explosive"],
+		partialAliases: ["oil", "america", "🦅", "barrel", "explosive"],
 	},
 
 	logic: { definition, ctor: Logic },
