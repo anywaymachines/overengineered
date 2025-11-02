@@ -466,7 +466,7 @@
     </Item>
     <Item class="UnionOperation" referent="8">
       <Properties>
-        <string name="Name">Belt</string>
+        <string name="Name">Belt2</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
         <bool name="Anchored">true</bool>
         <ContentId name="AssetId">
@@ -606,7 +606,7 @@
     </Item>
     <Item class="UnionOperation" referent="6">
       <Properties>
-        <string name="Name">Belt</string>
+        <string name="Name">Belt1</string>
         <SharedString name="AeroMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
         <bool name="Anchored">true</bool>
         <ContentId name="AssetId">
