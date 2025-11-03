@@ -110,7 +110,7 @@ class Logic extends InstanceBlockLogic<typeof definition, WingBlock> {
 
 				// Angular velocity contribution: v = ω × r (cross product)
 				// where r is the vector from center of mass to wing position
-				const angularVelocity = wing.AssemblyAngularVelocity;
+				const angularVelocity = Vector3.zero;
 				const relativePosition = wing.Position.sub(wing.AssemblyCenterOfMass);
 				const rotationalVelocity = angularVelocity.Cross(relativePosition);
 
@@ -162,7 +162,7 @@ class Logic extends InstanceBlockLogic<typeof definition, WingBlock> {
 				);
 
 				// Step 10: Apply final force
-				const finalForce = averagedForce.mul(heightFactor);
+				const finalForce = averagedForce.mul(heightFactor).mul(0.1);
 
 				vectorForce.Enabled = finalForce.Magnitude > Workspace.Gravity * wing.Mass;
 				vectorForce.Force = finalForce;
@@ -179,10 +179,14 @@ export const SolarFoil = {
 	...BlockCreation.defaults,
 	id: "solarfoil",
 	displayName: "Solar foil",
-	description: "Generates movement force in sunlight outside the atmosphere and await death like my sanity.",
+	description: "Generates movement force in sunlight outside the atmosphere and spin *forever like my sanity.",
 	search: {
 		partialAliases: ["sun", "solar", "force"],
 	},
 
 	logic: { definition, ctor: Logic },
+	modelSource: {
+		model: BlockCreation.Model.fAutoCreated("GenericLogicBlockPrefab", "Edge Detector"),
+		category: () => BlockCreation.Categories.other,
+	},
 } as const satisfies BlockBuilder;
