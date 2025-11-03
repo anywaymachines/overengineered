@@ -162,7 +162,7 @@ class Logic extends InstanceBlockLogic<typeof definition, WingBlock> {
 				);
 
 				// Step 10: Apply final force
-				const finalForce = averagedForce.mul(heightFactor);
+				const finalForce = averagedForce.mul(heightFactor).mul(0.1);
 
 				vectorForce.Enabled = finalForce.Magnitude > Workspace.Gravity * wing.Mass;
 				vectorForce.Force = finalForce;
