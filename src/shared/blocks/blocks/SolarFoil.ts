@@ -185,8 +185,4 @@ export const SolarFoil = {
 	},
 
 	logic: { definition, ctor: Logic },
-	modelSource: {
-		model: BlockCreation.Model.fAutoCreated("GenericLogicBlockPrefab", "Edge Detector"),
-		category: () => BlockCreation.Categories.other,
-	},
 } as const satisfies BlockBuilder;
