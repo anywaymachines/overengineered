@@ -239,7 +239,6 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		...JetEngineBlocks,
 		...GraviEngineBlocks,
 
-		OilBarrel,
 		SolarFoil,
 	];
 
