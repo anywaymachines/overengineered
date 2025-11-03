@@ -23,7 +23,7 @@ const MIN_HORIZONTAL_SPEED = 30; // Minimum horizontal speed for full lift (stud
 const definition = {
 	input: {
 		enabled: {
-			displayName: "Strength",
+			displayName: "Enabled",
 			types: {
 				bool: {
 					config: true,
