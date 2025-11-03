@@ -40,10 +40,10 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.event.subscribe(RunService.PostSimulation, () => {
 			const objSpace = initialRotation.ToObjectSpace(this.instance.GetPivot().Rotation);
 			const [axis, angle] = objSpace.ToAxisAngle();
-			this.output.Front.set("number", -math.clamp(axis.Z, -1, 0));
-			this.output.Back.set("number", math.clamp(axis.Z, 0, 1));
-			this.output.Left.set("number", -math.clamp(axis.X, -1, 0));
-			this.output.Right.set("number", math.clamp(axis.X, 0, 1));
+			this.output.Front.set("number", -math.clamp(axis.X, -1, 0));
+			this.output.Back.set("number", math.clamp(axis.X, 0, 1));
+			this.output.Left.set("number", -math.clamp(axis.Z, -1, 0));
+			this.output.Right.set("number", math.clamp(axis.Z, 0, 1));
 		});
 	}
 }
