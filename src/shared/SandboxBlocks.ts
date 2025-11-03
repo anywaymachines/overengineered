@@ -6,6 +6,7 @@ import { BallastBlock } from "shared/blocks/blocks/BallastBlock";
 import { BeaconBlock } from "shared/blocks/blocks/BeaconBlock";
 import { BearingShaftBlock } from "shared/blocks/blocks/BearingShaftBlock";
 import { BracedShaftBlock } from "shared/blocks/blocks/BracedShaftBlock";
+import { BubbleLevelBlock } from "shared/blocks/blocks/BubbleLevel";
 import { ButtonBlock } from "shared/blocks/blocks/ButtonBlock";
 import { CameraBlock } from "shared/blocks/blocks/CameraBlock";
 import { ChatSensorBlock } from "shared/blocks/blocks/ChatSensorBlock";
@@ -240,6 +241,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		...GraviEngineBlocks,
 
 		SolarFoil,
+		BubbleLevelBlock,
 	];
 
 	if (GameDefinitions.isTesting) {
