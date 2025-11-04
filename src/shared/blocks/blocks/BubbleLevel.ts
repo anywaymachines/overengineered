@@ -39,7 +39,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		this.event.subscribe(RunService.PostSimulation, () => {
 			const upCf = CFrame.fromAxisAngle(this.instance.GetPivot().UpVector, 0);
 			const objSpace = upCfInit.ToObjectSpace(upCf);
-
+			print(objSpace);
 			this.output.Front.set("number", -math.clamp(objSpace.UpVector.X, -1, 0));
 			this.output.Back.set("number", math.clamp(objSpace.UpVector.X, 0, 1));
 			this.output.Left.set("number", math.clamp(objSpace.UpVector.Z, 0, 1));
