@@ -44,19 +44,25 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			const Down = pivot.UpVector.mul(-1);
 			const Left = pivot.RightVector.mul(-1);
 			const Right = pivot.RightVector;
+			const Front = pivot.LookVector;
+			const Back = pivot.LookVector.mul(-1);
 			// Now use dot to calculate this stuff i think so (my sanity is spinning around)
 			const DotDown = Down.Dot(upCfInit);
 			const DotUp = Up.Dot(upCfInit);
 			const DotLeft = Left.Dot(upCfInit);
 			const DotRight = Right.Dot(upCfInit);
+			const DotFront = Front.Dot(upCfInit);
+			const DotBack = Back.Dot(upCfInit);
 
 			const downClamp = clampEm(DotDown);
 			const upClamp = clampEm(DotUp);
 			const leftClamp = clampEm(DotLeft);
 			const rightClamp = clampEm(DotRight);
+			const frontClamp = clampEm(DotFront);
+			const backClamp = clampEm(DotBack);
 
-			this.output.Front.set("number", upClamp);
-			this.output.Back.set("number", downClamp);
+			this.output.Front.set("number", frontClamp);
+			this.output.Back.set("number", backClamp);
 			this.output.Left.set("number", leftClamp);
 			this.output.Right.set("number", rightClamp);
 		});
