@@ -7,7 +7,24 @@ import type { BlockBuilder } from "shared/blocks/Block";
 const clampEm = (num: number): number => math.clamp(num, 0, 1);
 
 const definition = {
-	input: {},
+	input: {
+		Multi: {
+			displayName: "Multiplier",
+			tooltip: "1 or 100 recommended. Extra compact for engine uses!",
+			unit: "Number",
+			types: {
+				number: {
+					config: 100,
+					clamp: {
+						showAsSlider: false,
+						min: 0,
+						max: 100,
+					},
+				},
+			},
+			connectorHidden: true,
+		},
+	},
 	output: {
 		Front: {
 			displayName: "Front",
@@ -37,6 +54,9 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 		const upCfInit = this.instance.GetPivot().UpVector;
+		let Multiplier = 100;
+
+		this.onk(["Multi"], ({ Multi }) => (Multiplier = Multi));
 
 		this.event.subscribe(RunService.PostSimulation, () => {
 			const pivot = this.instance.GetPivot();
