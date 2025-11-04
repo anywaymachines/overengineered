@@ -4,6 +4,8 @@ import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
+const clampEm = (num: number): number => math.clamp(num, 0, 1);
+
 const definition = {
 	input: {},
 	output: {
@@ -34,16 +36,29 @@ export type { Logic as BubbleLevelBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
-		const upCfInit = CFrame.lookAlong(Vector3.zero, this.instance.GetPivot().UpVector);
+		const upCfInit = this.instance.GetPivot().UpVector;
 
 		this.event.subscribe(RunService.PostSimulation, () => {
-			const upCf = CFrame.lookAlong(Vector3.zero, this.instance.GetPivot().UpVector);
-			const objSpace = upCfInit.ToObjectSpace(upCf);
-			print(objSpace);
-			this.output.Front.set("number", -math.clamp(objSpace.UpVector.X, -1, 0));
-			this.output.Back.set("number", math.clamp(objSpace.UpVector.X, 0, 1));
-			this.output.Left.set("number", math.clamp(objSpace.UpVector.Z, 0, 1));
-			this.output.Right.set("number", -math.clamp(objSpace.UpVector.Z, -1, 0));
+			const pivot = this.instance.GetPivot();
+			const Up = pivot.UpVector;
+			const Down = pivot.UpVector.mul(-1);
+			const Left = pivot.RightVector.mul(-1);
+			const Right = pivot.RightVector;
+			// Now use dot to calculate this stuff i think so (my sanity is spinning around)
+			const DotDown = Down.Dot(upCfInit);
+			const DotUp = Up.Dot(upCfInit);
+			const DotLeft = Left.Dot(upCfInit);
+			const DotRight = Right.Dot(upCfInit);
+
+			const downClamp = clampEm(DotDown);
+			const upClamp = clampEm(DotUp);
+			const leftClamp = clampEm(DotLeft);
+			const rightClamp = clampEm(DotRight);
+
+			this.output.Front.set("number", upClamp);
+			this.output.Back.set("number", downClamp);
+			this.output.Left.set("number", leftClamp);
+			this.output.Right.set("number", rightClamp);
 		});
 	}
 }
