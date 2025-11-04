@@ -54,12 +54,12 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			const DotFront = Front.Dot(upCfInit);
 			const DotBack = Back.Dot(upCfInit);
 
-			const downClamp = clampEm(DotDown);
-			const upClamp = clampEm(DotUp);
-			const leftClamp = clampEm(DotLeft);
-			const rightClamp = clampEm(DotRight);
-			const frontClamp = clampEm(DotFront);
-			const backClamp = clampEm(DotBack);
+			const downClamp = clampEm(-DotDown);
+			const upClamp = clampEm(-DotUp);
+			const leftClamp = clampEm(-DotLeft);
+			const rightClamp = clampEm(-DotRight);
+			const frontClamp = clampEm(-DotFront);
+			const backClamp = clampEm(-DotBack);
 
 			this.output.Front.set("number", frontClamp);
 			this.output.Back.set("number", backClamp);
