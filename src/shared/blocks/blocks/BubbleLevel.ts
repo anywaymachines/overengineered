@@ -34,10 +34,10 @@ export type { Logic as BubbleLevelBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
-		const upCfInit = CFrame.fromAxisAngle(this.instance.GetPivot().UpVector, 0);
+		const upCfInit = CFrame.lookAlong(Vector3.zero, this.instance.GetPivot().UpVector);
 
 		this.event.subscribe(RunService.PostSimulation, () => {
-			const upCf = CFrame.fromAxisAngle(this.instance.GetPivot().UpVector, 0);
+			const upCf = CFrame.lookAlong(Vector3.zero, this.instance.GetPivot().UpVector);
 			const objSpace = upCfInit.ToObjectSpace(upCf);
 			print(objSpace);
 			this.output.Front.set("number", -math.clamp(objSpace.UpVector.X, -1, 0));
