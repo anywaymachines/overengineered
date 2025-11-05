@@ -1,4 +1,4 @@
-import { DataStoreService, ServerScriptService, Workspace } from "@rbxts/services";
+import { DataStoreService, ServerScriptService } from "@rbxts/services";
 
 import { DataStoreDatabaseBackend } from "engine/server/backend/DataStoreDatabaseBackend";
 import { InMemoryDatabaseBackend } from "engine/server/backend/InMemoryDatabaseBackend";
@@ -26,10 +26,6 @@ import type { EffectCreator } from "shared/effects/EffectBase";
 
 export namespace SandboxGame {
 	export function initialize(builder: GameHostBuilder) {
-		if (game.PrivateServerOwnerId !== 0) {
-			Workspace.AddTag("PrivateServer");
-		}
-
 		// private anywaymachines services
 		const awm = ServerScriptService.FindFirstChild("anywaymachines")?.FindFirstChild("SandboxGame") as
 			| ModuleScript

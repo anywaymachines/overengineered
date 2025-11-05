@@ -52,7 +52,7 @@ export class BlockDamageController extends HostedService {
 		if (RunService.IsServer()) {
 			CustomRemotes.damageSystem.damageBlock.received.Connect((player, { block, damage }) => {
 				this.applyDamage(block, damage);
-				// mb just do something with the player
+				// mb just do something with the player here
 			});
 		}
 	}

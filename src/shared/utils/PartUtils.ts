@@ -1,3 +1,5 @@
+import { TagUtils } from "shared/utils/TagUtils";
+
 export namespace PartUtils {
 	export function ghostModel(model: Model, color: Color3): void {
 		function fix(part: BasePart): void {
@@ -13,7 +15,7 @@ export namespace PartUtils {
 				part.UsePartColor = true;
 			}
 
-			if (!part.HasTag("TRANSPARENT")) {
+			if (!part.HasTag(TagUtils.allTags.TRANSPARENT_MATERIAL)) {
 				part.Transparency = 0.5;
 			}
 		}
@@ -24,8 +26,8 @@ export namespace PartUtils {
 
 	export function switchDescendantsMaterial(model: Instance, material: Enum.Material): void {
 		applyToAllDescendantsOfType("BasePart", model, (part) => {
-			if (part.HasTag("STATIC_MATERIAL")) return;
-			if (part.HasTag("TRANSPARENT")) return;
+			if (part.HasTag(TagUtils.allTags.STATIC_MATERIAL)) return;
+			if (part.HasTag(TagUtils.allTags.TRANSPARENT_MATERIAL)) return;
 
 			part.Material = material;
 		});
@@ -33,7 +35,7 @@ export namespace PartUtils {
 
 	export function switchDescendantsColor(model: Instance, color: Color3): void {
 		applyToAllDescendantsOfType("BasePart", model, (part) => {
-			if (part.HasTag("STATIC_COLOR")) return;
+			if (part.HasTag(TagUtils.allTags.STATIC_COLOR)) return;
 
 			part.Color = color;
 		});
@@ -41,7 +43,7 @@ export namespace PartUtils {
 
 	export function switchDescendantsTransparency(model: Instance, transparency: number): void {
 		applyToAllDescendantsOfType("BasePart", model, (part) => {
-			if (part.HasTag("TRANSPARENT")) return;
+			if (part.HasTag(TagUtils.allTags.TRANSPARENT_MATERIAL)) return;
 			part.Transparency = transparency;
 		});
 	}

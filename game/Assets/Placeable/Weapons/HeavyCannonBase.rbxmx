@@ -143,6 +143,7 @@
           <Z>2</Z>
         </Vector3>
         <float name="SmoothingAngle">0</float>
+        <NetAssetRef name="SolidMeshHolder">rxNJufX5oaagQE3qNtzJSQ==</NetAssetRef>
         <int64 name="SourceAssetId">-1</int64>
         <BinaryString name="Tags">U1RBVElDX01BVEVSSUFM</BinaryString>
         <float name="TopParamA">-0.5</float>
@@ -309,6 +310,7 @@
           <Z>0.50000024</Z>
         </Vector3>
         <float name="SmoothingAngle">0</float>
+        <NetAssetRef name="SolidMeshHolder">rxNJufX5oaagQE3qNtzJSQ==</NetAssetRef>
         <int64 name="SourceAssetId">-1</int64>
         <BinaryString name="Tags">U1RBVElDX0NPTE9SAFNUQVRJQ19NQVRFUklBTA==</BinaryString>
         <float name="TopParamA">-0.5</float>
@@ -457,6 +459,7 @@
             <Z>0.7</Z>
           </Vector3>
           <float name="SmoothingAngle">0</float>
+          <NetAssetRef name="SolidMeshHolder">rxNJufX5oaagQE3qNtzJSQ==</NetAssetRef>
           <int64 name="SourceAssetId">-1</int64>
           <BinaryString name="Tags">U1RBVElDX0NPTE9S</BinaryString>
           <float name="TopParamA">-0.5</float>
@@ -596,6 +599,7 @@
             <Z>0.8</Z>
           </Vector3>
           <float name="SmoothingAngle">0</float>
+          <NetAssetRef name="SolidMeshHolder">rxNJufX5oaagQE3qNtzJSQ==</NetAssetRef>
           <int64 name="SourceAssetId">-1</int64>
           <BinaryString name="Tags">U1RBVElDX0NPTE9S</BinaryString>
           <float name="TopParamA">-0.5</float>

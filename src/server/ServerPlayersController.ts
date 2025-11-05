@@ -11,6 +11,7 @@ import { asPlayerId } from "server/PlayerId";
 import { ServerPlayerController } from "server/ServerPlayerController";
 import { ServerPlayerDataRemotesController } from "server/ServerPlayerDataRemotesController";
 import { CustomRemotes } from "shared/Remotes";
+import { TagUtils } from "shared/utils/TagUtils";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
 import type { SlotDatabase } from "server/database/SlotDatabase";
 import type { SharedPlots } from "shared/building/SharedPlots";
@@ -93,7 +94,7 @@ export class ServerPlayersController extends HostedService {
 
 					const controller = scope.resolveForeignClass(ServerPlayerController, [player, plot]);
 					controllers.add(player.UserId, controller);
-					player.AddTag("Loaded");
+					player.AddTag(TagUtils.allTags.PLAYER_LOADED);
 
 					return { success: true, controller };
 				});

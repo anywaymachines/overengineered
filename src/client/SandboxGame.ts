@@ -47,6 +47,7 @@ import { CustomRemotes } from "shared/Remotes";
 import { PlayerDataRemotes } from "shared/remotes/PlayerDataRemotes";
 import { CreateSandboxBlocks } from "shared/SandboxBlocks";
 import { SlotsMeta } from "shared/SlotsMeta";
+import { TagUtils } from "shared/utils/TagUtils";
 import { WeaponModuleSystem } from "shared/weaponProjectiles/WeaponModuleSystem";
 import type { TutorialDescriber } from "client/tutorial/TutorialController";
 import type { GameHostBuilder } from "engine/shared/GameHostBuilder";
@@ -60,7 +61,7 @@ export namespace SandboxGame {
 		});
 
 		LoadingController.run("Waiting for server", () => {
-			while (!(Workspace.HasTag("GameLoaded") as boolean | undefined)) {
+			while (!(Workspace.HasTag(TagUtils.allTags.GAME_LOADED) as boolean | undefined)) {
 				task.wait();
 			}
 		});

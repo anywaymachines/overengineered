@@ -15,6 +15,7 @@ import { BuildingPlot } from "shared/building/BuildingPlot";
 import { AutoPlotWelder } from "shared/building/PlotWelder";
 import { gameInfo } from "shared/GameInfo";
 import { RemoteEvents } from "shared/RemoteEvents";
+import { TagUtils } from "shared/utils/TagUtils";
 import { BulletProjectile } from "shared/weaponProjectiles/BulletProjectileLogic";
 import { LaserProjectile } from "shared/weaponProjectiles/LaserProjectileLogic";
 import { PlasmaProjectile } from "shared/weaponProjectiles/PlasmaProjectileLogic";
@@ -67,7 +68,7 @@ RemoteEvents.initialize();
 LaunchDataController.initialize();
 
 $log("Server loaded.");
-Workspace.AddTag("GameLoaded");
+Workspace.AddTag(TagUtils.allTags.GAME_LOADED);
 
 PlasmaProjectile; // initializing the remote events
 BulletProjectile;

@@ -1,10 +1,11 @@
 import { LocalPlayer } from "engine/client/LocalPlayer";
 import { RemoteEvents } from "shared/RemoteEvents";
 import { CustomDebrisService } from "shared/service/CustomDebrisService";
+import { TagUtils } from "shared/utils/TagUtils";
 
 export const initKillPlane = (instance: BasePart, onTouch?: (part: BasePart) => void): SignalConnection => {
 	return instance.Touched.Connect((part) => {
-		if (part.HasTag("OBSTACLEPROOF")) return;
+		if (part.HasTag(TagUtils.allTags.OBSTACLEPROOF_MATERIAL)) return;
 
 		let parent: Instance = part;
 		while (true as boolean) {
@@ -31,7 +32,7 @@ export const initKillPlane = (instance: BasePart, onTouch?: (part: BasePart) => 
 };
 export const initLavaKillPlane = (instance: BasePart, onTouch?: (part: BasePart) => void): SignalConnection => {
 	return initKillPlane(instance, (part) => {
-		if (part.HasTag("LAVAPROOF")) return;
+		if (part.HasTag(TagUtils.allTags.LAVAPROOF_MATERIAL)) return;
 
 		RemoteEvents.Burn.send([part]);
 		part.AssemblyLinearVelocity = part.AssemblyLinearVelocity.add(

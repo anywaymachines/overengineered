@@ -5,6 +5,7 @@ import { BlockSynchronizer } from "shared/blockLogic/BlockSynchronizer";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { CustomRemotes } from "shared/Remotes";
+import { TagUtils } from "shared/utils/TagUtils";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -189,7 +190,7 @@ class Logic extends InstanceBlockLogic<typeof definition, radarBlock> {
 			// ...or does it?
 			// Hey, VSausage. Michael here.
 			// Can the radar detect non-colboxes?
-			if (part.HasTag("RADARVIEW")) return;
+			if (part.HasTag(TagUtils.allTags.SPECIAL_RADARVIEW)) return;
 
 			//just to NOT detect own blocks
 			if (!selfDetect.get() && ownDetectablesSet.has(part)) return;

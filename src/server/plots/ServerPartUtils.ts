@@ -1,11 +1,12 @@
 import { CustomDebrisService } from "shared/service/CustomDebrisService";
 import { PartUtils } from "shared/utils/PartUtils";
+import { TagUtils } from "shared/utils/TagUtils";
 
 /** Methods to edit block part information */
 export namespace ServerPartUtils {
 	export function switchDescendantsAnchor(model: Instance, isAnchored: boolean) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", model, (part) => {
-			if (part.HasTag("ANCHORED")) return;
+			if (part.HasTag(TagUtils.allTags.ANCHORED)) return;
 			part.Anchored = isAnchored;
 		});
 	}

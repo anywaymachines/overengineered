@@ -2,6 +2,7 @@ import { Instances } from "engine/shared/fixes/Instances";
 import { BlockManager } from "shared/building/BlockManager";
 import { MaterialData } from "shared/data/MaterialData";
 import { PartUtils } from "shared/utils/PartUtils";
+import { TagUtils } from "shared/utils/TagUtils";
 import type { BlockLogicTypes } from "shared/blockLogic/BlockLogicTypes";
 import type { ReadonlyPlot } from "shared/building/ReadonlyPlot";
 
@@ -131,7 +132,7 @@ export namespace SharedBuilding {
 
 	export function recollide(block: BlockModel, enabled: boolean) {
 		PartUtils.applyToAllDescendantsOfType("BasePart", block, (p) => {
-			if (p.HasTag("NONCOLLIDABLE")) return;
+			if (p.HasTag(TagUtils.allTags.BLOCK_NONCOLLIDABLE)) return;
 			p.CanCollide = enabled;
 		});
 	}

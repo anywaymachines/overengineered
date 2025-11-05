@@ -76,7 +76,7 @@ type JetModel = BlockModel & {
 		readonly Shut: Sound;
 		readonly HingeConstraint: HingeConstraint;
 	};
-	readonly TurbineBody: Instance & {
+	readonly TurbineBody: (UnionOperation | Part | MeshPart) & {
 		readonly VectorForce: VectorForce;
 		readonly BladeLocation: Attachment;
 	};
@@ -197,8 +197,9 @@ class Logic extends InstanceBlockLogic<typeof definition, JetModel> {
 
 		let rotationAccumulator = 0;
 		this.event.subscribe(RunService.RenderStepped, (dt) => {
-			rotationAccumulator += math.deg((thrust.get() ?? 0) * dt);
-			shaft.Orientation = new Vector3(0, 0, rotationAccumulator).add(body.BladeLocation.WorldOrientation);
+			rotationAccumulator += math.deg((thrust.get() ?? 0) * dt) % 360;
+			const orn = body.BladeLocation.Orientation;
+			body.BladeLocation.Orientation = new Vector3(orn.X, orn.Y, rotationAccumulator);
 		});
 
 		this.onDisable(() => {

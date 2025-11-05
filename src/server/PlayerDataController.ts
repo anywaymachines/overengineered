@@ -1,4 +1,3 @@
-import { Workspace } from "@rbxts/services";
 import { Component } from "engine/shared/component/Component";
 import { Objects } from "engine/shared/fixes/Objects";
 import type { PlayerDatabase } from "server/database/PlayerDatabase";
@@ -17,8 +16,6 @@ export class PlayerDataController extends Component {
 		this.event.subscribe(playerRemotes.updateSettings.invoked, (p, arg) => this.updateSetting(arg));
 		this.event.subscribe(playerRemotes.updateData.invoked, (p, arg) => this.updateData(arg));
 		playerRemotes.fetchData.subscribe(() => this.fetchSettings());
-
-		Workspace.AddTag("data_loadable");
 	}
 
 	private updateSetting(config: PlayerUpdateSettingsRequest): Response {

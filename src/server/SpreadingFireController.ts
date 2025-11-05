@@ -5,6 +5,7 @@ import { BlockManager } from "shared/building/BlockManager";
 import { GameDefinitions } from "shared/data/GameDefinitions";
 import { CustomRemotes } from "shared/Remotes";
 import { CustomDebrisService } from "shared/service/CustomDebrisService";
+import { TagUtils } from "shared/utils/TagUtils";
 import type { ServerPlayersController } from "server/ServerPlayersController";
 import type { FireEffect } from "shared/effects/FireEffect";
 
@@ -22,7 +23,7 @@ export class SpreadingFireController {
 		if (
 			!BlockManager.isActiveBlockPart(part) ||
 			LocalInstanceData.HasLocalTag(part, "Burn") ||
-			part.HasTag("Fireproof") ||
+			part.HasTag(TagUtils.allTags.FIREPROOF_MATERIAL) ||
 			(math.random(1, 8) !== 1 && part.Position.Y < 1 + GameDefinitions.HEIGHT_OFFSET)
 		) {
 			return false;

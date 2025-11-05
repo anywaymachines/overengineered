@@ -3,6 +3,7 @@ import { BidirectionalRemoteEvent } from "engine/shared/event/PERemoteEvent";
 import { ArgsSignal } from "engine/shared/event/Signal";
 import { t } from "engine/shared/t";
 import { CustomRemotes } from "shared/Remotes";
+import { TagUtils } from "shared/utils/TagUtils";
 import type { CreatableRemoteEvents } from "engine/shared/event/PERemoteEvent";
 import type { BlockLogic, BlockLogicBothDefinitions } from "shared/blockLogic/BlockLogic";
 
@@ -83,7 +84,7 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 				for (const player of Players.GetPlayers()) {
 					if (player === invoker) {
 						if (!this.sendBackToOwner) continue;
-						if (!player.HasTag("Loaded")) {
+						if (!player.HasTag(TagUtils.allTags.PLAYER_LOADED)) {
 							continue;
 						}
 
@@ -202,7 +203,7 @@ export class BlockSynchronizer<TArg extends { readonly block: BlockModel; reqid?
 			}
 
 			for (const player of Players.GetPlayers()) {
-				if (!player.HasTag("Loaded")) {
+				if (!player.HasTag(TagUtils.allTags.PLAYER_LOADED)) {
 					continue;
 				}
 

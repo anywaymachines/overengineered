@@ -3,6 +3,7 @@ import { InstanceBlockLogic as InstanceBlockLogic } from "shared/blockLogic/Bloc
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import { SharedPlots } from "shared/building/SharedPlots";
 import { CustomRemotes } from "shared/Remotes";
+import { TagUtils } from "shared/utils/TagUtils";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 
@@ -81,7 +82,7 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 			const arr = detectedSet.toArray();
 
 			for (let i = 0; i < outputs.size(); i++) {
-				const pp = (arr[i].Parent as Model)?.PrimaryPart;
+				const pp = (arr[i]?.Parent as Model)?.PrimaryPart;
 				if (!pp) continue;
 
 				outputs[i].set("vector3", i > len ? Vector3.zero : getPosition(pp, isRelative.get()));
@@ -91,12 +92,12 @@ class Logic extends InstanceBlockLogic<typeof definition> {
 		});
 
 		this.event.subscribe(block.instance.PrimaryPart!.Touched, (part) => {
-			if (!part.HasTag("RADARVIEW")) return;
+			if (!part.HasTag(TagUtils.allTags.SPECIAL_RADARVIEW)) return;
 			detectedSet.add(part);
 		});
 
 		this.event.subscribe(block.instance.PrimaryPart!.TouchEnded, (part) => {
-			if (!part.HasTag("RADARVIEW")) return;
+			if (!part.HasTag(TagUtils.allTags.SPECIAL_RADARVIEW)) return;
 			detectedSet.delete(part);
 		});
 	}

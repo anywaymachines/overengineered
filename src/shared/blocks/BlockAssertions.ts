@@ -1,4 +1,5 @@
 import { Objects } from "engine/shared/fixes/Objects";
+import { TagUtils } from "shared/utils/TagUtils";
 import type { BlockLogicFullBothDefinitions } from "shared/blockLogic/BlockLogic";
 
 export namespace BlockAssertions {
@@ -79,7 +80,7 @@ export namespace BlockAssertions {
 				if (child.Parent?.Name === "WeldRegions") continue;
 
 				if (child.IsA("Part")) {
-					if (child.HasTag("UNSCALABLE")) continue;
+					if (child.HasTag(TagUtils.allTags.BLOCK_UNSCALABLE)) continue;
 
 					if (child.Shape === Enum.PartType.Ball || child.Shape === Enum.PartType.Cylinder) {
 						yield `Block ${block.Name} part ${child.Name} shape is ${tostring(child.Shape).sub("Enum.PartType.".size() + 1)} which does not scale good. Replace with union or a mesh.`;

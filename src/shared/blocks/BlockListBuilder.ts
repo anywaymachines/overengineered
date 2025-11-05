@@ -1,6 +1,7 @@
 import { RunService } from "@rbxts/services";
 import { C2S2CRemoteFunction } from "engine/shared/event/PERemoteEvent";
 import { BlockAssertions } from "shared/blocks/BlockAssertions";
+import { TagUtils } from "shared/utils/TagUtils";
 import type { BlockBuilder } from "shared/blocks/Block";
 
 export namespace BlockListBuilder {
@@ -94,11 +95,11 @@ export namespace BlockListBuilder {
 					if (!part.IsA("BasePart")) continue;
 
 					if (part.Transparency === 1) {
-						part.AddTag("TRANSPARENT");
+						part.AddTag(TagUtils.allTags.TRANSPARENT_MATERIAL);
 					}
 
 					if (!part.CanCollide) {
-						part.AddTag("NONCOLLIDABLE");
+						part.AddTag(TagUtils.allTags.BLOCK_NONCOLLIDABLE);
 					}
 				}
 			}
