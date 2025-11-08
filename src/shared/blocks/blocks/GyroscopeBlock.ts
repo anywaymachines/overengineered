@@ -16,9 +16,9 @@ const definition = {
 		"gyroMode",
 		"targetAngle",
 		"enabled",
-		"angleXEnabled",
-		"angleYEnabled",
-		"angleZEnabled",
+		"angleXUpdate",
+		"angleYUpdate",
+		"angleZUpdate",
 		"torque",
 		"responsiveness",
 	],
@@ -33,16 +33,19 @@ const definition = {
 			},
 		},
 		// disables/enables each axis
-		angleXEnabled: {
-			displayName: "Enable Angle X",
+		angleXUpdate: {
+			displayName: "Update Angle X",
+			tooltip: "If the X Axis should update its angle.",
 			...defaultEnableAngleBool,
 		},
-		angleYEnabled: {
-			displayName: "Enable Angle Y",
+		angleYUpdate: {
+			displayName: "Update Angle Y",
+			tooltip: "If the Y Axis should update its angle.",
 			...defaultEnableAngleBool,
 		},
-		angleZEnabled: {
-			displayName: "Enable Angle Z",
+		angleZUpdate: {
+			displayName: "Update Angle Z",
+			tooltip: "If the Z Axis should update its angle.",
 			...defaultEnableAngleBool,
 		},
 		// this disables it entirely
@@ -133,10 +136,9 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 		const targetAngle = this.initializeInputCache("targetAngle");
 		const enabled = this.initializeInputCache("enabled");
 		const gMode = this.initializeInputCache("gyroMode");
-		const enableX = this.initializeInputCache("angleXEnabled");
-		const enableY = this.initializeInputCache("angleYEnabled");
-		const enableZ = this.initializeInputCache("angleZEnabled");
-		const resp = this.initializeInputCache("responsiveness");
+		const updateX = this.initializeInputCache("angleXUpdate");
+		const updateY = this.initializeInputCache("angleYUpdate");
+		const updateZ = this.initializeInputCache("angleZUpdate");
 		const torq = this.initializeInputCache("torque");
 
 		const inst = this.instance;
@@ -158,7 +160,7 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 		const isNaN = (val: number) => val !== val;
 		const CFrameToAngle = (cf: CFrame) => new Vector3(...cf.ToEulerAnglesXYZ()).apply((v) => math.deg(v));
 		const convertToEnabledAxis = (inp: Vector3) =>
-			new Vector3(enableX.get() ? inp.X : 0, enableY.get() ? inp.Y : 0, enableZ.get() ? inp.Z : 0);
+			new Vector3(updateX.get() ? inp.X : 0, updateY.get() ? inp.Y : 0, updateZ.get() ? inp.Z : 0);
 
 		const unpackVector = (inp: Vector3): [number, number, number] => [inp.X, inp.Y, inp.Z];
 		const transformToCFrame = (inp: Vector3) => CFrame.fromOrientation(...unpackVector(convertToEnabledAxis(inp)));
@@ -198,16 +200,16 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 			const ta = targetAngle.get();
 			if (gMode.get() !== "localAngle") {
 				const resAngle = applyTargetAngle().add(magicOffset);
-				if (enableX.get()) Xring.Rotation = new Vector3(resAngle.X, 0, 0);
-				if (enableY.get()) Yring.Rotation = new Vector3(0, resAngle.Y, 0);
-				if (enableZ.get()) Zring.Rotation = new Vector3(0, 0, resAngle.Z);
+				if (updateX.get()) Xring.Rotation = new Vector3(resAngle.X, 0, 0);
+				if (updateY.get()) Yring.Rotation = new Vector3(0, resAngle.Y, 0);
+				if (updateZ.get()) Zring.Rotation = new Vector3(0, 0, resAngle.Z);
 				return;
 			}
 
 			const bcf = base.CFrame;
-			let res = bcf.RightVector.mul(enableX.get() ? ta.X : 0)
-				.add(bcf.UpVector.mul(enableY.get() ? ta.Y : 0))
-				.add(bcf.LookVector.mul(enableZ.get() ? ta.Z : 0));
+			let res = bcf.RightVector.mul(updateX.get() ? ta.X : 0)
+				.add(bcf.UpVector.mul(updateY.get() ? ta.Y : 0))
+				.add(bcf.LookVector.mul(updateZ.get() ? ta.Z : 0));
 
 			// limit rotation by torque
 			if (res.Magnitude > torq.get()) res = res.mul(torq.get() / res.Magnitude);
