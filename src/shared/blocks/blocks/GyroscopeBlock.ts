@@ -16,9 +16,9 @@ const definition = {
 		"gyroMode",
 		"targetAngle",
 		"enabled",
-		"angleXUpdate",
-		"angleYUpdate",
-		"angleZUpdate",
+		"angleXEnabled",
+		"angleYEnabled",
+		"angleZEnabled",
 		"torque",
 		"responsiveness",
 	],
@@ -33,17 +33,17 @@ const definition = {
 			},
 		},
 		// disables/enables each axis
-		angleXUpdate: {
+		angleXEnabled: {
 			displayName: "Update Angle X",
 			tooltip: "If the X Axis should update its angle.",
 			...defaultEnableAngleBool,
 		},
-		angleYUpdate: {
+		angleYEnabled: {
 			displayName: "Update Angle Y",
 			tooltip: "If the Y Axis should update its angle.",
 			...defaultEnableAngleBool,
 		},
-		angleZUpdate: {
+		angleZEnabled: {
 			displayName: "Update Angle Z",
 			tooltip: "If the Z Axis should update its angle.",
 			...defaultEnableAngleBool,
@@ -136,9 +136,9 @@ class Logic extends InstanceBlockLogic<typeof definition, GyroBlockModel> {
 		const targetAngle = this.initializeInputCache("targetAngle");
 		const enabled = this.initializeInputCache("enabled");
 		const gMode = this.initializeInputCache("gyroMode");
-		const updateX = this.initializeInputCache("angleXUpdate");
-		const updateY = this.initializeInputCache("angleYUpdate");
-		const updateZ = this.initializeInputCache("angleZUpdate");
+		const updateX = this.initializeInputCache("angleXEnabled");
+		const updateY = this.initializeInputCache("angleYEnabled");
+		const updateZ = this.initializeInputCache("angleZEnabled");
 		const torq = this.initializeInputCache("torque");
 
 		const inst = this.instance;
