@@ -79,21 +79,40 @@ export type { Logic as solidPropellantLogic };
 class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 	private readonly vectorForce;
 	private readonly particleEmitter;
+	// these calmed em down and stop red lines at least
+	private power: number | undefined;
+	private fuel: number | undefined;
+	private disabled = false;
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 		const colbox = this.instance.ColBox;
 		this.vectorForce = this.instance.Base.Attachment.VectorForce;
 		this.particleEmitter = this.instance.EffectEmitter.Fire;
+		this.onk(["ignite"], ({ ignite }) => {
+			if (ignite && !this.disabled) {
+				this.disabled = true;
+				this.vectorForce.Force = new Vector3(0, this.power, 0);
+				this.vectorForce.Enabled = true;
+				this.particleEmitter.Enabled = true;
+				task.wait(this.fuel);
+				this.vectorForce.Force = Vector3.zero;
+				this.vectorForce.Enabled = false;
+				this.particleEmitter.Enabled = false;
+			}
+		});
 
-		this.onk(["ignite"], ({ ignite }) => {});
+		this.onkFirstInputs(["strength", "fuel"], ({ strength, fuel }) => {
+			this.power = strength;
+			this.fuel = fuel;
+		});
 	}
 }
 
-export const SizeBlock = {
+export const SolidRocketPropellant = {
 	...BlockCreation.defaults,
 	id: "SolidRocketPropellant",
 	displayName: "Solid propellant engine",
-	description: "Banana for scale.",
+	description: "This guy quits his job really soon!",
 	search: { partialAliases: ["rocket", "propellant", "solid", "🦅"] },
 	limit: 50,
 } as const satisfies BlockBuilder;
