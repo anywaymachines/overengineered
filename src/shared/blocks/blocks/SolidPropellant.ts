@@ -110,9 +110,10 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 
 export const SolidRocketPropellant = {
 	...BlockCreation.defaults,
-	id: "SolidRocketPropellant",
+	id: "solidRocketPropellant",
 	displayName: "Solid propellant engine",
 	description: "This guy quits his job really soon!",
 	search: { partialAliases: ["rocket", "propellant", "solid", "🦅"] },
+	logic: { definition, ctor: Logic },
 	limit: 50,
 } as const satisfies BlockBuilder;
