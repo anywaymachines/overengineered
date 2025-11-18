@@ -66,6 +66,7 @@ type PropellantModel = BlockModel & {
 	readonly Base: BasePart & {
 		readonly Attachment: Attachment;
 		readonly VectorForce: VectorForce;
+		readonly Sound: Sound;
 	};
 	readonly Fuel: BasePart;
 	readonly EffectEmitter: BasePart & {
@@ -78,6 +79,7 @@ export type { Logic as solidPropellantLogic };
 class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 	private readonly vectorForce;
 	private readonly particleEmitter;
+	private readonly sound;
 	// these calmed em down and stop red lines at least
 	private power: number | undefined;
 	private fuel: number | undefined;
@@ -87,22 +89,26 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 		const colbox = this.instance.ColBox;
 		this.vectorForce = this.instance.Base.VectorForce;
 		this.particleEmitter = this.instance.EffectEmitter.Fire;
+		this.sound = this.instance.Base.Sound;
 		this.onk(["ignite"], ({ ignite }) => {
 			if (ignite && !this.disabled) {
 				this.disabled = true;
 				this.vectorForce.Force = new Vector3(0, this.power, 0).mul(colbox.AssemblyMass).mul(5);
 				this.vectorForce.Enabled = true;
 				this.particleEmitter.Enabled = true;
+				this.sound.Playing = true;
 				task.wait(this.fuel);
 				this.vectorForce.Force = Vector3.zero;
 				this.vectorForce.Enabled = false;
 				this.particleEmitter.Enabled = false;
+				this.sound.Playing = false;
 			}
 		});
 
 		this.onkFirstInputs(["strength", "fuel"], ({ strength, fuel }) => {
 			this.power = strength;
 			this.fuel = fuel;
+			this.sound.Volume = strength * 0.01 * 1.5;
 		});
 	}
 }

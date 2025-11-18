@@ -1268,6 +1268,33 @@
           <bool name="Visible">false</bool>
         </Properties>
       </Item>
+      <Item class="Sound" referent="21">
+        <Properties>
+          <string name="Name">Sound</string>
+          <BinaryString name="AttributesSerialize"></BinaryString>
+          <Content name="AudioContent">
+            <uri>rbxassetid://4454997815</uri>
+          </Content>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <bool name="IsMutedForCapture">false</bool>
+          <NumberRange name="LoopRegion">0 60000 </NumberRange>
+          <bool name="Looped">true</bool>
+          <bool name="PlayOnRemove">false</bool>
+          <NumberRange name="PlaybackRegion">0.5 18 </NumberRange>
+          <bool name="PlaybackRegionsEnabled">false</bool>
+          <float name="PlaybackSpeed">1</float>
+          <bool name="Playing">false</bool>
+          <float name="xmlRead_MaxDistance_3">2000</float>
+          <float name="EmitterSize">40</float>
+          <token name="RollOffMode">3</token>
+          <bool name="DefinesCapabilities">false</bool>
+          <Ref name="SoundGroup">null</Ref>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <double name="TimePosition">0</double>
+          <float name="Volume">0</float>
+        </Properties>
+      </Item>
     </Item>
     <Item class="UnionOperation" referent="13">
       <Properties>
@@ -1409,7 +1436,7 @@
           <Z>0</Z>
         </Vector3>
       </Properties>
-      <Item class="Decal" referent="21">
+      <Item class="Decal" referent="22">
         <Properties>
           <string name="Name">Decal</string>
           <BinaryString name="AttributesSerialize"></BinaryString>
