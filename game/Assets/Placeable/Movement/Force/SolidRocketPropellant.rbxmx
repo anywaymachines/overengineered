@@ -317,7 +317,7 @@
           <BinaryString name="AttributesSerialize"></BinaryString>
           <CoordinateFrame name="CFrame0">
             <X>0</X>
-            <Y>-1</Y>
+            <Y>-0.5</Y>
             <Z>0</Z>
             <R00>1</R00>
             <R01>0</R01>
@@ -414,7 +414,7 @@
         <token name="BottomSurfaceInput">0</token>
         <CoordinateFrame name="CFrame">
           <X>104.5</X>
-          <Y>-16379.115</Y>
+          <Y>-16378.615</Y>
           <Z>77</Z>
           <R00>1</R00>
           <R01>0</R01>
@@ -829,7 +829,7 @@
         <float name="SmoothingAngle">0</float>
         <NetAssetRef name="SolidMeshHolder">rxNJufX5oaagQE3qNtzJSQ==</NetAssetRef>
         <int64 name="SourceAssetId">-1</int64>
-        <BinaryString name="Tags">U1RBVElDX0NPTE9S</BinaryString>
+        <BinaryString name="Tags">U1RBVElDX0NPTE9SAFNUQVRJQ19NQVRFUklBTA==</BinaryString>
         <float name="TopParamA">-0.5</float>
         <float name="TopParamB">0.5</float>
         <token name="TopSurface">0</token>
@@ -1165,7 +1165,7 @@
         <float name="SmoothingAngle">0</float>
         <NetAssetRef name="SolidMeshHolder">rxNJufX5oaagQE3qNtzJSQ==</NetAssetRef>
         <int64 name="SourceAssetId">-1</int64>
-        <BinaryString name="Tags"></BinaryString>
+        <BinaryString name="Tags">U1RBVElDX01BVEVSSUFM</BinaryString>
         <float name="TopParamA">-0.5</float>
         <float name="TopParamB">0.5</float>
         <token name="TopSurface">0</token>
@@ -1238,6 +1238,53 @@
             <Y>1</Y>
           </Vector2>
           <int name="ZIndex">1</int>
+        </Properties>
+      </Item>
+      <Item class="VectorForce" referent="18">
+        <Properties>
+          <string name="Name">VectorForce</string>
+          <bool name="ApplyAtCenterOfMass">false</bool>
+          <Ref name="Attachment0">19</Ref>
+          <Ref name="Attachment1">null</Ref>
+          <BinaryString name="AttributesSerialize"></BinaryString>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <int name="Color">23</int>
+          <bool name="Enabled">true</bool>
+          <Vector3 name="Force">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+          </Vector3>
+          <token name="RelativeTo">0</token>
+          <bool name="DefinesCapabilities">false</bool>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <bool name="Visible">false</bool>
+        </Properties>
+      </Item>
+      <Item class="Attachment" referent="19">
+        <Properties>
+          <string name="Name">Attachment</string>
+          <BinaryString name="AttributesSerialize"></BinaryString>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>-1.75</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+          <bool name="DefinesCapabilities">false</bool>
+          <int64 name="SourceAssetId">-1</int64>
+          <BinaryString name="Tags"></BinaryString>
+          <bool name="Visible">false</bool>
         </Properties>
       </Item>
     </Item>
