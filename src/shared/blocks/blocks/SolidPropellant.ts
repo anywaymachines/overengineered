@@ -63,7 +63,11 @@ const definition = {
 } satisfies BlockLogicFullBothDefinitions;
 
 type PropellantModel = BlockModel & {
-	readonly Base: BasePart;
+	readonly Base: BasePart & {
+		readonly Attachment: Attachment & {
+			readonly VectorForce: VectorForce;
+		};
+	};
 	readonly Fuel: BasePart;
 	readonly EffectEmitter: BasePart & {
 		readonly Fire: ParticleEmitter;
@@ -78,7 +82,7 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 		const colbox = this.instance.ColBox;
-		this.vectorForce = this.instance.Base.VectorForce;
+		this.vectorForce = this.instance.Base.Attachment.VectorForce;
 		this.particleEmitter = this.instance.EffectEmitter.Fire;
 
 		this.onk(["ignite"], ({ ignite }) => {});
