@@ -87,7 +87,7 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 
 export const SizeBlock = {
 	...BlockCreation.defaults,
-	id: "solidPropellant",
+	id: "SolidRocketPropellant",
 	displayName: "Solid propellant engine",
 	description: "Banana for scale.",
 	search: { partialAliases: ["rocket", "propellant", "solid", "🦅"] },
