@@ -1,3 +1,4 @@
+import { Workspace } from "@rbxts/services";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -90,7 +91,9 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 		this.onk(["ignite"], ({ ignite }) => {
 			if (ignite && !this.disabled) {
 				this.disabled = true;
-				this.vectorForce.Force = new Vector3(0, this.power, 0);
+				this.vectorForce.Force = new Vector3(0, this.power, 0)
+					.mul(colbox.AssemblyMass * Workspace.Gravity)
+					.mul(5);
 				this.vectorForce.Enabled = true;
 				this.particleEmitter.Enabled = true;
 				task.wait(this.fuel);
@@ -111,7 +114,7 @@ export const SolidRocketPropellant = {
 	...BlockCreation.defaults,
 	id: "solidrocketpropellant",
 	displayName: "Solid propellant engine",
-	description: "This guy quits his job really soon!",
+	description: "This guy quits his job really soon! (Exploded by a mistake in code, scared me out)",
 	search: { partialAliases: ["rocket", "propellant", "solid", "🦅"] },
 	logic: { definition, ctor: Logic },
 	limit: 50,
