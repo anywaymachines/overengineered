@@ -1,4 +1,3 @@
-import { Workspace } from "@rbxts/services";
 import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
@@ -91,9 +90,7 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 		this.onk(["ignite"], ({ ignite }) => {
 			if (ignite && !this.disabled) {
 				this.disabled = true;
-				this.vectorForce.Force = new Vector3(0, this.power, 0)
-					.mul(colbox.AssemblyMass * Workspace.Gravity)
-					.mul(5);
+				this.vectorForce.Force = new Vector3(0, this.power, 0).mul(colbox.AssemblyMass).mul(5);
 				this.vectorForce.Enabled = true;
 				this.particleEmitter.Enabled = true;
 				task.wait(this.fuel);
