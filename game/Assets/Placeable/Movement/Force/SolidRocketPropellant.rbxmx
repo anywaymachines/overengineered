@@ -1102,7 +1102,7 @@
         <PhysicalProperties name="CustomPhysicalProperties">
           <CustomPhysics>false</CustomPhysics>
         </PhysicalProperties>
-        <bool name="EnableFluidForces">true</bool>
+        <bool name="EnableFluidForces">false</bool>
         <token name="FluidFidelityInternal">0</token>
         <token name="FormFactor">3</token>
         <float name="FrontParamA">-0.5</float>
