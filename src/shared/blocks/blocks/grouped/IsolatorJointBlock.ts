@@ -78,7 +78,7 @@ class Logic extends InstanceBlockLogic<typeof definition, SuspensionModel> {
 	}
 }
 
-export const IsolatorBlock = {
+export const IsolatorJointBlock = {
 	...BlockCreation.defaults,
 	id: "isolatorjointblock",
 	displayName: "Isolator joint",
