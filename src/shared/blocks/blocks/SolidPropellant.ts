@@ -104,7 +104,7 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 					false,
 					0,
 				);
-				this.vectorForce.Force = new Vector3(0, this.power, 0).mul(colbox.AssemblyMass).mul(5);
+				this.vectorForce.Force = new Vector3(0, this.power, 0).mul(colbox.AssemblyMass).mul(7.5);
 				this.vectorForce.Enabled = true;
 				this.particleEmitter.Enabled = true;
 				this.sound.Playing = true;
