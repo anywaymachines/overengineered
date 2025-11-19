@@ -3,7 +3,6 @@ import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
 const tween = game.GetService("TweenService");
-const ti = new TweenInfo(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0);
 
 const definition = {
 	input: {
@@ -83,8 +82,8 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 	private readonly particleEmitter;
 	private readonly sound;
 	// these calmed em down and stop red lines at least
-	private power: number | undefined;
-	private fuel: number | undefined;
+	private power = 0;
+	private fuel = 15;
 	private disabled = false;
 	private fuelColor;
 	constructor(block: InstanceBlockLogicArgs) {
@@ -97,12 +96,20 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 		this.onk(["ignite"], ({ ignite }) => {
 			if (ignite && !this.disabled) {
 				this.disabled = true;
+				const ti = new TweenInfo(
+					math.clamp(this.fuel, 0.25, 0.5),
+					Enum.EasingStyle.Quad,
+					Enum.EasingDirection.Out,
+					0,
+					false,
+					0,
+				);
 				this.vectorForce.Force = new Vector3(0, this.power, 0).mul(colbox.AssemblyMass).mul(5);
 				this.vectorForce.Enabled = true;
 				this.particleEmitter.Enabled = true;
 				this.sound.Playing = true;
 				tween.Create(this.instance.Fuel, ti, { Color: Color3.fromRGB(255, 166, 0) }).Play();
-				task.delay(0.3, () => {
+				task.delay(math.clamp(this.fuel, 0.1, 0.3), () => {
 					this.instance.Fuel.Material = Enum.Material.Neon;
 				});
 				task.wait(this.fuel);
@@ -111,7 +118,7 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 						Color: this.fuelColor.Lerp(Color3.fromRGB(0, 0, 0), 0.5),
 					})
 					.Play();
-				task.delay(0.3, () => {
+				task.delay(math.clamp(this.fuel, 0.1, 0.3), () => {
 					this.instance.Fuel.Material = Enum.Material.Concrete;
 				});
 				this.vectorForce.Force = Vector3.zero;
