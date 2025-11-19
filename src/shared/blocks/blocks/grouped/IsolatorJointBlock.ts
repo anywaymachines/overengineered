@@ -54,25 +54,19 @@ export type { Logic as SuspensionBlockLogic };
 class Logic extends InstanceBlockLogic<typeof definition, SuspensionModel> {
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
-
 		const springSide = this.instance.SpringSide;
 		if (!springSide) return;
 		const spring = springSide.SpringConstraint;
 		const rope = springSide.RopeConstraint;
-
 		const blockScale = BlockManager.manager.scale.get(block.instance) ?? Vector3.one;
-		const scale = blockScale.X * blockScale.Y * blockScale.Z;
 		const xzScale = math.min(blockScale.X, blockScale.Z);
-
 		spring.Radius *= blockScale.findMin();
 		spring.Thickness *= blockScale.findMin();
-
 		const setSpringParameters = ({ restitution, free_length }: { restitution: number; free_length: number }) => {
 			if (!spring) return;
 			rope.Restitution = restitution;
 			rope.Length = math.clamp(free_length, 0, xzScale);
 		};
-
 		this.onkFirstInputs(["restitution", "free_length"], setSpringParameters);
 		this.on(setSpringParameters);
 	}
@@ -83,7 +77,6 @@ export const IsolatorJointBlock = {
 	id: "isolatorjointblock",
 	displayName: "Isolator joint",
 	description: "THERE IS AN EARTHQUAKE GOING ON HELP!!! jk. We have the isolator",
-
 	search: {
 		aliases: ["earthquake"],
 	},
