@@ -2,6 +2,8 @@ import { InstanceBlockLogic } from "shared/blockLogic/BlockLogic";
 import { BlockCreation } from "shared/blocks/BlockCreation";
 import type { BlockLogicFullBothDefinitions, InstanceBlockLogicArgs } from "shared/blockLogic/BlockLogic";
 import type { BlockBuilder } from "shared/blocks/Block";
+const tween = game.GetService("TweenService");
+const ti = new TweenInfo(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0);
 
 const definition = {
 	input: {
@@ -84,12 +86,14 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 	private power: number | undefined;
 	private fuel: number | undefined;
 	private disabled = false;
+	private fuelColor;
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 		const colbox = this.instance.ColBox;
 		this.vectorForce = this.instance.Base.VectorForce;
 		this.particleEmitter = this.instance.EffectEmitter.Fire;
 		this.sound = this.instance.Base.Sound;
+		this.fuelColor = this.instance.Fuel.Color;
 		this.onk(["ignite"], ({ ignite }) => {
 			if (ignite && !this.disabled) {
 				this.disabled = true;
@@ -97,7 +101,19 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 				this.vectorForce.Enabled = true;
 				this.particleEmitter.Enabled = true;
 				this.sound.Playing = true;
+				tween.Create(this.instance.Fuel, ti, { Color: Color3.fromRGB(255, 166, 0) }).Play();
+				task.delay(0.3, () => {
+					this.instance.Fuel.Material = Enum.Material.Neon;
+				});
 				task.wait(this.fuel);
+				tween
+					.Create(this.instance.Fuel, ti, {
+						Color: this.fuelColor.Lerp(Color3.fromRGB(0, 0, 0), 0.5),
+					})
+					.Play();
+				task.delay(0.3, () => {
+					this.instance.Fuel.Material = Enum.Material.Concrete;
+				});
 				this.vectorForce.Force = Vector3.zero;
 				this.vectorForce.Enabled = false;
 				this.particleEmitter.Enabled = false;
