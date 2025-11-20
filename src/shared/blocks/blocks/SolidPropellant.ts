@@ -60,7 +60,13 @@ const definition = {
 			connectorHidden: false,
 		},
 	},
-	output: {},
+	output: {
+		burning: {
+			displayName: "Burning",
+			unit: "Boolean",
+			types: ["bool"],
+		},
+	},
 } satisfies BlockLogicFullBothDefinitions;
 
 type PropellantModel = BlockModel & {
@@ -104,6 +110,7 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 				this.vectorForce.Enabled = true;
 				this.particleEmitter.Enabled = true;
 				this.sound.Playing = true;
+				this.output.burning.set("bool", true);
 				tween.Create(this.instance.Fuel, ti, { Color: Color3.fromRGB(255, 166, 0) }).Play();
 				task.delay(math.clamp(this.fuel, 0.1, 0.3), () => {
 					this.instance.Fuel.Material = Enum.Material.Neon;
@@ -121,6 +128,7 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 					this.vectorForce.Enabled = false;
 					this.particleEmitter.Enabled = false;
 					this.sound.Playing = false;
+					this.output.burning.set("bool", false);
 				});
 			}
 		});
