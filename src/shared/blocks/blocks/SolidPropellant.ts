@@ -108,19 +108,20 @@ class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
 				task.delay(math.clamp(this.fuel, 0.1, 0.3), () => {
 					this.instance.Fuel.Material = Enum.Material.Neon;
 				});
-				task.wait(this.fuel);
-				tween
-					.Create(this.instance.Fuel, ti, {
-						Color: this.fuelColor.Lerp(Color3.fromRGB(0, 0, 0), 0.5),
-					})
-					.Play();
-				task.delay(math.clamp(this.fuel, 0.1, 0.3), () => {
-					this.instance.Fuel.Material = Enum.Material.Concrete;
+				task.delay(this.fuel, () => {
+					tween
+						.Create(this.instance.Fuel, ti, {
+							Color: this.fuelColor.Lerp(Color3.fromRGB(0, 0, 0), 0.5),
+						})
+						.Play();
+					task.delay(math.clamp(this.fuel, 0.1, 0.3), () => {
+						this.instance.Fuel.Material = Enum.Material.Concrete;
+					});
+					this.vectorForce.Force = Vector3.zero;
+					this.vectorForce.Enabled = false;
+					this.particleEmitter.Enabled = false;
+					this.sound.Playing = false;
 				});
-				this.vectorForce.Force = Vector3.zero;
-				this.vectorForce.Enabled = false;
-				this.particleEmitter.Enabled = false;
-				this.sound.Playing = false;
 			}
 		});
 
