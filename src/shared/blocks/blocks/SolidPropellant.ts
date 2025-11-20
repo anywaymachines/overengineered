@@ -78,24 +78,21 @@ type PropellantModel = BlockModel & {
 
 export type { Logic as solidPropellantLogic };
 class Logic extends InstanceBlockLogic<typeof definition, PropellantModel> {
-	private readonly vectorForce;
-	private readonly particleEmitter;
-	private readonly sound;
+	private readonly vectorForce = this.instance.Base.VectorForce;
+	private readonly particleEmitter = this.instance.EffectEmitter.Fire;
+	private readonly sound = this.instance.Base.Sound;
 	// these calmed em down and stop red lines at least
 	private power = 0;
 	private fuel = 15;
-	private disabled = false;
-	private fuelColor;
+	//private disabled = false;
+	private fuelColor = this.instance.Fuel.Color;
 	constructor(block: InstanceBlockLogicArgs) {
 		super(definition, block);
 		const colbox = this.instance.ColBox;
-		this.vectorForce = this.instance.Base.VectorForce;
-		this.particleEmitter = this.instance.EffectEmitter.Fire;
-		this.sound = this.instance.Base.Sound;
-		this.fuelColor = this.instance.Fuel.Color;
+		let disabled = false;
 		this.onk(["ignite"], ({ ignite }) => {
-			if (ignite && !this.disabled) {
-				this.disabled = true;
+			if (ignite && !disabled) {
+				disabled = true;
 				const ti = new TweenInfo(
 					math.clamp(this.fuel, 0.25, 0.5),
 					Enum.EasingStyle.Quad,
