@@ -81,6 +81,7 @@ import { SelfVectorToTarget } from "shared/blocks/blocks/SelfVectorToTargetBlock
 import { SevenSegmentDisplayBlock } from "shared/blocks/blocks/SevenSegmentDisplayBlock";
 import { SingleImpulseBlock } from "shared/blocks/blocks/SingleImpulseBlock";
 import { SizeBlock } from "shared/blocks/blocks/SizeBlock";
+import { SolidRocketPropellant } from "shared/blocks/blocks/SolidPropellant";
 import { SoundEffectBlockCreator } from "shared/blocks/blocks/sound/SoundEffectBlockCreator";
 import { SoundFromIdBlock } from "shared/blocks/blocks/sound/SoundFromIdBlock";
 import { SoundLengthBlock } from "shared/blocks/blocks/sound/SoundLengthBlock";
@@ -243,6 +244,8 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		GyroscopeBlock,
 		...JetEngineBlocks,
 		...GraviEngineBlocks,
+
+		SolidRocketPropellant,
 	];
 
 	if (GameDefinitions.isTesting) {
