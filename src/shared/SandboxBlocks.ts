@@ -23,6 +23,7 @@ import { BasicLogicGateBlocks } from "shared/blocks/blocks/grouped/BasicLogicGat
 import { BasicOperationBlocks } from "shared/blocks/blocks/grouped/BasicOperationBlocks";
 import { BuildingBlocks } from "shared/blocks/blocks/grouped/BuildingBlocks";
 import { HingeBlocks } from "shared/blocks/blocks/grouped/HingeBlocks";
+import { IsolatorJointBlock } from "shared/blocks/blocks/grouped/IsolatorJointBlock";
 import { LampBlocks } from "shared/blocks/blocks/grouped/LampBlocks";
 import { LinearSliderBlocks } from "shared/blocks/blocks/grouped/LinearSliders";
 import { MechanicalBlocks } from "shared/blocks/blocks/grouped/MechanicalBlocks";
@@ -243,6 +244,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		GyroscopeBlock,
 		...JetEngineBlocks,
 		...GraviEngineBlocks,
+		IsolatorJointBlock,
 	];
 
 	if (GameDefinitions.isTesting) {
