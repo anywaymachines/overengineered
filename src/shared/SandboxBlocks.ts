@@ -13,6 +13,7 @@ import { ControllerBlock } from "shared/blocks/blocks/ControllerBlock";
 import { CounterBlock } from "shared/blocks/blocks/CounterBlock";
 import { DelayBlock } from "shared/blocks/blocks/DelayBlock";
 import { DisconnectBlock } from "shared/blocks/blocks/DisconnectBlock";
+import { DistantRadarSectionBlock } from "shared/blocks/blocks/DistantRadar";
 import { FallbackBlock } from "shared/blocks/blocks/FallbackBlock";
 import { FireSensorBlock } from "shared/blocks/blocks/FireSensorBlock";
 import { FunctionBlock } from "shared/blocks/blocks/FunctionBlock";
@@ -223,6 +224,7 @@ export const CreateSandboxBlocks = (di: DIContainer): BlockList => {
 		RadioReceiverBlock,
 		RadioTransmitterBlock,
 		...RadarBlocks,
+		DistantRadarSectionBlock,
 		RadarWarningReceiver,
 		SpeedometerBlock,
 		LaserBlock,
